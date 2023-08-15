@@ -26,11 +26,10 @@ import { MissingCredentialsCallout } from '../missing_credentials_callout';
 import { ChatHeader } from './chat_header';
 import { ChatPromptEditor } from './chat_prompt_editor';
 import { ChatTimeline } from './chat_timeline';
-import { KnowledgeBaseCallout } from './knowledge_base_callout';
 
 const containerClassName = css`
   max-height: 100%;
-  max-width: 100%;
+  max-width: 800px;
 `;
 
 const timelineClassName = css`
@@ -47,20 +46,23 @@ export function ChatBody({
   messages,
   connectors,
   knowledgeBase,
-  currentUser,
   connectorsManagementHref,
+  currentUser,
   onChatUpdate,
   onChatComplete,
+  onSaveTitle,
 }: {
   title: string;
   loading: boolean;
   messages: Message[];
   connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
-  currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   connectorsManagementHref: string;
+  conversationId?: string;
+  currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   onChatUpdate: (messages: Message[]) => void;
   onChatComplete: (messages: Message[]) => void;
+  onSaveTitle: (title: string) => void;
 }) {
   const chatService = useObservabilityAIAssistantChatService();
 
@@ -163,6 +165,7 @@ export function ChatBody({
               disabled={!connectors.selectedConnector}
               onSubmit={timeline.onSubmit}
             />
+            <EuiSpacer size="s" />
           </EuiPanel>
         </EuiFlexItem>
       </>
@@ -172,12 +175,13 @@ export function ChatBody({
   return (
     <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
       <EuiFlexItem grow={false}>
-        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-          <ChatHeader title={title} connectors={connectors} loading={loading} />
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <KnowledgeBaseCallout knowledgeBase={knowledgeBase} />
+        <ChatHeader
+          title={title}
+          connectors={connectors}
+          knowledgeBase={knowledgeBase}
+          loading={loading}
+          onSaveTitle={onSaveTitle}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiHorizontalRule margin="none" />

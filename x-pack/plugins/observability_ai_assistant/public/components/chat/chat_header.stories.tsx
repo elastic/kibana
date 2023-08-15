@@ -9,6 +9,7 @@ import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import { FindActionResult } from '@kbn/actions-plugin/server';
 import { EuiPanel } from '@elastic/eui';
 import { ChatHeader as Component } from './chat_header';
+import { AbortableAsyncState } from '../../hooks/use_abortable_async';
 
 const meta: ComponentMeta<typeof Component> = {
   component: Component,
@@ -28,6 +29,18 @@ export const ChatHeaderLoaded: ComponentStoryObj<typeof Component> = {
         { id: 'gpt-3.5-turbo', name: 'OpenAI GPT-3.5 Turbo' },
       ] as FindActionResult[],
       selectConnector: () => {},
+    },
+    knowledgeBase: {
+      status: {
+        loading: false,
+        value: {
+          ready: true,
+        },
+        refresh: () => {},
+      },
+      isInstalling: false,
+      installError: undefined,
+      install: async () => {},
     },
   },
   render: (props) => {
