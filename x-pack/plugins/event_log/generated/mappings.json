@@ -490,6 +490,50 @@
                                             }
                                         }
                                     }
+                                },
+                                "sentinelone": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "affected": {
+                                                            "type": "long"
+                                                        },
+                                                        "parentTaskId": {
+                                                            "type": "keyword"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "params": {
+                                            "properties": {
+                                                "subAction": {
+                                                    "type": "keyword"
+                                                },
+                                                "subActionParams": {
+                                                    "properties": {
+                                                        "computerName": {
+                                                            "type": "keyword"
+                                                        },
+                                                        "hostname": {
+                                                            "type": "keyword"
+                                                        },
+                                                        "processName": {
+                                                            "type": "keyword"
+                                                        },
+                                                        "alertIds": {
+                                                            "type": "keyword",
+                                                            "meta": {
+                                                                "isArray": "true"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }

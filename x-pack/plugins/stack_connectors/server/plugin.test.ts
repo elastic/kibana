@@ -138,7 +138,7 @@ describe('Stack Connectors Plugin', () => {
           name: 'Torq',
         })
       );
-      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(4);
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(5);
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -165,6 +165,13 @@ describe('Stack Connectors Plugin', () => {
         expect.objectContaining({
           id: '.d3security',
           name: 'D3 Security',
+        })
+      );
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        4,
+        expect.objectContaining({
+          id: '.sentinelone',
+          name: 'Sentinel One',
         })
       );
     });

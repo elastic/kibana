@@ -27,7 +27,7 @@ export const renderParameterTemplates = (
       params.subActionParams.processName,
     ]) ||
       map(context.alerts, 'process.name').filter((elm) => elm)) as string[];
-    console.error('params', processNames, context, params, variables);
+
     return {
       subAction: SUB_ACTION.KILL_PROCESS,
       subActionParams: {

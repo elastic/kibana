@@ -266,6 +266,47 @@ exports.EcsCustomPropertyMappings = {
                   },
                 },
               },
+              sentinelone: {
+                properties: {
+                  data: {
+                    properties: {
+                      data: {
+                        properties: {
+                          affected: {
+                            type: 'long',
+                          },
+                          parentTaskId: {
+                            type: 'keyword',
+                          },
+                        },
+                      },
+                    },
+                  },
+                  params: {
+                    properties: {
+                      subAction: {
+                        type: 'keyword',
+                      },
+                      subActionParams: {
+                        properties: {
+                          computerName: {
+                            type: 'keyword',
+                          },
+                          hostname: {
+                            type: 'keyword',
+                          },
+                          processName: {
+                            type: 'keyword',
+                          },
+                          alertIds: {
+                            type: 'keyword',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -303,4 +344,5 @@ exports.EcsEventLogMultiValuedProperties = [
   'rule.author',
   'kibana.space_ids',
   'kibana.alert.maintenance_window_ids',
+  'kibana.action.execution.sentinelone.params.subActionParams.alertIds',
 ];

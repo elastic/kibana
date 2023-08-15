@@ -61,26 +61,6 @@ export const buildResponseActionsQuery = (
           },
         },
       ],
-      runtime_mappings: {
-        'kibana.action.execution.sentinelone.params.subAction': {
-          type: 'keyword' as const,
-        },
-        'kibana.action.execution.sentinelone.params.subActionParams.alertIds': {
-          type: 'keyword' as const,
-        },
-        'kibana.action.execution.sentinelone.params.subActionParams.hostname': {
-          type: 'keyword' as const,
-        },
-        'kibana.action.execution.sentinelone.params.subActionParams.computerName': {
-          type: 'keyword' as const,
-        },
-        'kibana.action.execution.sentinelone.params.subActionParams.processName': {
-          type: 'keyword' as const,
-        },
-        'kibana.action.execution.sentinelone.data.data.parentTaskId': {
-          type: 'keyword' as const,
-        },
-      },
     },
   };
 

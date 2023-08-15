@@ -33,6 +33,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.index',
           '.pagerduty',
           '.swimlane',
+          '.sentinelone',
           '.server-log',
           '.slack',
           '.slack_api',

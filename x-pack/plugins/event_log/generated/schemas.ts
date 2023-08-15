@@ -208,7 +208,6 @@ export const EventSchema = schema.maybe(
               schema.object({
                 source: ecsString(),
                 uuid: ecsString(),
-                sentinelone: schema.maybe(schema.any()),
                 gen_ai: schema.maybe(
                   schema.object({
                     usage: schema.maybe(
@@ -216,6 +215,33 @@ export const EventSchema = schema.maybe(
                         prompt_tokens: ecsStringOrNumber(),
                         completion_tokens: ecsStringOrNumber(),
                         total_tokens: ecsStringOrNumber(),
+                      })
+                    ),
+                  })
+                ),
+                sentinelone: schema.maybe(
+                  schema.object({
+                    data: schema.maybe(
+                      schema.object({
+                        data: schema.maybe(
+                          schema.object({
+                            affected: ecsStringOrNumber(),
+                            parentTaskId: ecsString(),
+                          })
+                        ),
+                      })
+                    ),
+                    params: schema.maybe(
+                      schema.object({
+                        subAction: ecsString(),
+                        subActionParams: schema.maybe(
+                          schema.object({
+                            computerName: ecsString(),
+                            hostname: ecsString(),
+                            processName: ecsString(),
+                            alertIds: ecsStringMulti(),
+                          })
+                        ),
                       })
                     ),
                   })
