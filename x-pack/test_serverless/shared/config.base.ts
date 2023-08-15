@@ -65,30 +65,12 @@ export default async () => {
         // basic: { 'cloud-basic': { order: 0 } },
         '--xpack.cloud.id=ftr_fake_cloud_id',
         `--xpack.security.authc.providers=${JSON.stringify({
-          basic: { 'cloud-basic': { order: 0 } },
+          basic: { 'basic': { order: 0 } },
           saml: { 'cloud-saml-kibana': { order: 1, realm: 'cloud-saml-kibana' } },
         })}`,
         // This ensures we can attempt to access the disabled routes without getting a 401
         // `--xpack.security.authc.http.schemes=${JSON.stringify(['ApiKey', 'Basic', 'Bearer'])}`,
         '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
-
-        // //// LOGGERS
-        // '--logging.appenders.file.type=file',
-        // `--logging.appenders.file.fileName=/users/jeramysoucy/GitHub/kibana-1/logs/kibana.log`,
-        // '--logging.appenders.file.layout.type=json',
-
-        // `--logging.loggers=${JSON.stringify([
-        //   {
-        //     name: 'plugins.security',
-        //     level: 'debug',
-        //     appenders: ['file'],
-        //   },
-        //   {
-        //     name: 'http.server.response',
-        //     level: 'all',
-        //     appenders: ['file'],
-        //   },
-        // ])}`,
       ],
     },
 

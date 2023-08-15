@@ -6,41 +6,76 @@
  */
 
 import expect from 'expect';
+import { parse as parseCookie } from 'tough-cookie';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const security = getService('security');
 
-  describe.skip('security/user_profiles', function () {
+  describe('security/user_profiles', function () {
+    const testUserName = 'user_with_profile';
+
+    // ToDo: this test will need to change when we disable the login route
+    async function login() {
+      const response = await supertestWithoutAuth
+        .post('/internal/security/login')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .send({
+          providerType: 'basic',
+          providerName: 'basic',
+          currentURL: '/',
+          params: { username: testUserName, password: 'changeme' },
+        })
+        .expect(200);
+      return parseCookie(response.header['set-cookie'][0])!;
+    }
+
+    before(async () => {
+      await security.user.create(testUserName, {
+        password: 'changeme',
+        roles: [`viewer`],
+        full_name: 'User With Profile',
+        email: 'user_with_profile@get_current_test',
+      });
+    });
+
+    after(async () => {
+      await security.user.delete(testUserName);
+    });
+
     describe('route access', () => {
       describe('internal', () => {
         it('update', async () => {
-          const { body, status } = await supertest
+          const sessionCookie = await login();
+          const { status } = await supertestWithoutAuth
             .post(`/internal/security/user_profile/_data`)
             .set(svlCommonApi.getInternalRequestHeader())
+            .set('Cookie', sessionCookie.cookieString())
             .send({ key: 'value' });
           // Status should be 401, unauthorized
-          // expect(body).toEqual({});
           expect(status).not.toBe(404);
         });
 
         it('get current', async () => {
-          const { body, status } = await supertest
+          const sessionCookie = await login();
+          const { status } = await supertestWithoutAuth
             .get(`/internal/security/user_profile`)
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(svlCommonApi.getInternalRequestHeader())
+            .set('Cookie', sessionCookie.cookieString());
           // Status should be 401, unauthorized
-          // expect(body).toEqual({});
           expect(status).not.toBe(404);
         });
 
         it('bulk get', async () => {
-          const { body, status } = await supertest
+          const sessionCookie = await login();
+          const { status } = await supertestWithoutAuth
             .get(`/internal/security/user_profile`)
             .set(svlCommonApi.getInternalRequestHeader())
+            .set('Cookie', sessionCookie.cookieString())
             .send({ uids: ['12345678'] });
           // Status should be 401, unauthorized
-          // expect(body).toEqual({});
           expect(status).not.toBe(404);
         });
       });
