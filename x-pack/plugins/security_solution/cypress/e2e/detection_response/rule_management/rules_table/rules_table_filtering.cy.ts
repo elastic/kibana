@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expectManagementTableRules } from '../../../../tasks/alerts_detection_rules';
 import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../../../tasks/common';
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import {
@@ -14,8 +15,6 @@ import {
 } from '../../../../tasks/rule_filters';
 
 import { SECURITY_DETECTIONS_RULES_URL } from '../../../../urls/navigation';
-
-import { waitForRulesTableToBeLoaded } from '../../../../tasks/alerts_detection_rules';
 
 import { createRule, waitForRulesToFinishExecution } from '../../../../tasks/api_calls/rules';
 import {
@@ -81,7 +80,7 @@ describe('Rules table: filtering', () => {
 
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 
-      waitForRulesTableToBeLoaded();
+      expectManagementTableRules(['Successful rule', 'Warning rule', 'Failed rule']);
 
       // Initial table state - before filtering by status
       expectNumberOfRulesShownOnPage(3);

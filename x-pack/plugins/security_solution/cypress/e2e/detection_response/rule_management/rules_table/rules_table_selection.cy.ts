@@ -11,8 +11,8 @@ import {
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../../../../screens/alerts_detection_rules';
 import {
-  selectNumberOfRules,
-  unselectNumberOfRules,
+  selectRulesByName,
+  unselectRulesByName,
   waitForPrebuiltDetectionRulesToBeLoaded,
 } from '../../../../tasks/alerts_detection_rules';
 import {
@@ -46,13 +46,15 @@ describe('Rules table: selection', () => {
   });
 
   it('should correctly update the selection label when rules are individually selected and unselected', () => {
+    const ruleNames = ['Test rule 1', 'Test rule 2'] as const;
+
     waitForPrebuiltDetectionRulesToBeLoaded();
 
-    selectNumberOfRules(2);
+    selectRulesByName(ruleNames);
 
     cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', '2');
 
-    unselectNumberOfRules(2);
+    unselectRulesByName(ruleNames);
 
     cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', '0');
   });

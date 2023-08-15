@@ -30,9 +30,9 @@ import {
   pickSummaryOfAlertsOption,
 } from '../../../../../tasks/common/rule_actions';
 import {
-  waitForRulesTableToBeLoaded,
-  selectNumberOfRules,
   goToEditRuleActionsSettingsOf,
+  expectManagementTableRules,
+  selectAllRules,
 } from '../../../../../tasks/alerts_detection_rules';
 import {
   waitForBulkEditActionToFinish,
@@ -99,23 +99,20 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
       createRule(getNewRule({ name: ruleNameToAssert, rule_id: '1', max_signals: 500, actions }));
     });
 
-    createRule(getEqlRule({ rule_id: '2' }));
-    createRule(getMachineLearningRule({ rule_id: '3' }));
-    createRule(getNewThreatIndicatorRule({ rule_id: '4' }));
-    createRule(getNewThresholdRule({ rule_id: '5' }));
-    createRule(getNewTermsRule({ rule_id: '6' }));
-    createRule(getNewRule({ saved_id: 'mocked', rule_id: '7' }));
-
-    createSlackConnector();
+    createRule(getEqlRule({ rule_id: '2', name: 'New EQL Rule' }));
+    createRule(getMachineLearningRule({ rule_id: '3', name: 'New ML Rule Test' }));
+    createRule(getNewThreatIndicatorRule({ rule_id: '4', name: 'Threat Indicator Rule Test' }));
+    createRule(getNewThresholdRule({ rule_id: '5', name: 'Threshold Rule' }));
+    createRule(getNewTermsRule({ rule_id: '6', name: 'New Terms Rule' }));
+    createRule(getNewRule({ saved_id: 'mocked', rule_id: '7', name: 'New Rule Test' }));
   });
 
   context('Restricted action privileges', () => {
     it("User with no privileges can't add rule actions", () => {
       login(ROLES.hunter_no_actions);
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL, ROLES.hunter_no_actions);
-      waitForRulesTableToBeLoaded();
 
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
 
       openBulkActionsMenu();
 
@@ -126,7 +123,16 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
   context('All actions privileges', () => {
     beforeEach(() => {
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-      waitForRulesTableToBeLoaded();
+
+      expectManagementTableRules([
+        ruleNameToAssert,
+        'New EQL Rule',
+        'New ML Rule Test',
+        'Threat Indicator Rule Test',
+        'Threshold Rule',
+        'New Terms Rule',
+        'New Rule Test',
+      ]);
     });
 
     it('Add a rule action to rules (existing connector)', () => {
@@ -138,7 +144,7 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
       excessivelyInstallAllPrebuiltRules();
 
       // select both custom and prebuilt rules
-      selectNumberOfRules(expectedNumberOfRulesToBeEdited);
+      selectAllRules();
       openBulkEditRuleActionsForm();
 
       // ensure rule actions info callout displayed on the form
@@ -166,7 +172,7 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
       excessivelyInstallAllPrebuiltRules();
 
       // select both custom and prebuilt rules
-      selectNumberOfRules(expectedNumberOfRulesToBeEdited);
+      selectAllRules();
       openBulkEditRuleActionsForm();
 
       addSlackRuleAction(expectedSlackMessage);
@@ -200,7 +206,7 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
       const expectedEmail = 'test@example.com';
       const expectedSubject = 'Subject';
 
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
       openBulkEditRuleActionsForm();
 
       addEmailConnectorAndRuleAction(expectedEmail, expectedSubject);

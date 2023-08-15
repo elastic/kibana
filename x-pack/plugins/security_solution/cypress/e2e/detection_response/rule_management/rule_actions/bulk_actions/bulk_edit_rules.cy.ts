@@ -8,9 +8,10 @@
 import {
   MODAL_CONFIRMATION_BTN,
   MODAL_CONFIRMATION_BODY,
-  RULE_CHECKBOX,
   RULES_TAGS_POPOVER_BTN,
   MODAL_ERROR_BODY,
+  RULES_ROW,
+  RULE_NAME as RULE_NAME_SELECTOR,
 } from '../../../../../screens/alerts_detection_rules';
 
 import {
@@ -24,20 +25,19 @@ import {
 
 import { TIMELINE_TEMPLATE_DETAILS } from '../../../../../screens/rule_details';
 
-import { EUI_FILTER_SELECT_ITEM } from '../../../../../screens/common/controls';
+import { EUI_CHECKBOX, EUI_FILTER_SELECT_ITEM } from '../../../../../screens/common/controls';
 
 import {
-  waitForRulesTableToBeLoaded,
   selectAllRules,
   goToTheRuleDetailsOf,
-  selectNumberOfRules,
   testAllTagsBadges,
   testTagsBadge,
   testMultipleSelectedRulesLabel,
   filterByElasticRules,
   clickErrorToastBtn,
-  unselectRuleByName,
   cancelConfirmationModal,
+  selectAllRulesOnPage,
+  selectRulesByName,
 } from '../../../../../tasks/alerts_detection_rules';
 
 import {
@@ -96,7 +96,7 @@ import {
   getAvailablePrebuiltRulesCount,
   excessivelyInstallAllPrebuiltRules,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
-import { setRowsPerPageTo } from '../../../../../tasks/table_pagination';
+import { setRowsPerPageTo, sortFirstTableColumn } from '../../../../../tasks/table_pagination';
 
 const RULE_NAME = 'Custom rule for bulk actions';
 const EUI_SELECTABLE_LIST_ITEM_SR_TEXT = '. To check this option, press Enter.';
@@ -112,7 +112,6 @@ const expectedNumberOfMachineLearningRulesToBeEdited = 1;
  */
 const expectedNumberOfNotMLRules =
   expectedNumberOfCustomRulesToBeEdited - expectedNumberOfMachineLearningRulesToBeEdited;
-const numberOfRulesPerPage = 5;
 
 const defaultRuleData = {
   index: prePopulatedIndexPatterns,
@@ -125,6 +124,7 @@ describe('Detection rules, bulk edit', () => {
   before(() => {
     cleanKibana();
   });
+
   beforeEach(() => {
     login();
     // Make sure persisted rules table state is cleared
@@ -132,15 +132,25 @@ describe('Detection rules, bulk edit', () => {
     deleteAlertsAndRules();
     cy.task('esArchiverResetKibana');
     createRule(getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1' }));
-    createRule(getEqlRule({ ...defaultRuleData, rule_id: '2' }));
-    createRule(getMachineLearningRule({ tags: ['test-default-tag-1', 'test-default-tag-2'] }));
-    createRule(getNewThreatIndicatorRule({ ...defaultRuleData, rule_id: '4' }));
-    createRule(getNewThresholdRule({ ...defaultRuleData, rule_id: '5' }));
-    createRule(getNewTermsRule({ ...defaultRuleData, rule_id: '6' }));
+    createRule(getEqlRule({ ...defaultRuleData, rule_id: '2', name: 'New EQL Rule' }));
+    createRule(
+      getMachineLearningRule({
+        name: 'New ML Rule Test',
+        tags: ['test-default-tag-1', 'test-default-tag-2'],
+      })
+    );
+    createRule(
+      getNewThreatIndicatorRule({
+        ...defaultRuleData,
+
+        rule_id: '4',
+        name: 'Threat Indicator Rule Test',
+      })
+    );
+    createRule(getNewThresholdRule({ ...defaultRuleData, rule_id: '5', name: 'Threshold Rule' }));
+    createRule(getNewTermsRule({ ...defaultRuleData, rule_id: '6', name: 'New Terms Rule' }));
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-
-    waitForRulesTableToBeLoaded();
   });
 
   describe('Prerequisites', () => {
@@ -154,17 +164,17 @@ describe('Detection rules, bulk edit', () => {
     });
 
     it('Only prebuilt rules selected', () => {
-      const expectedNumberOfSelectedRules = 10;
-
       excessivelyInstallAllPrebuiltRules();
+
+      setRowsPerPageTo(10);
 
       // select Elastic(prebuilt) rules, check if we can't proceed further, as Elastic rules are not editable
       filterByElasticRules();
-      selectNumberOfRules(expectedNumberOfSelectedRules);
+      selectAllRulesOnPage();
       clickApplyTimelineTemplatesMenuItem();
 
       // check modal window for Elastic rule that can't be edited
-      checkPrebuiltRulesCannotBeModified(expectedNumberOfSelectedRules);
+      checkPrebuiltRulesCannotBeModified(10);
 
       // the confirm button closes modal
       cy.get(MODAL_CONFIRMATION_BTN).should('have.text', 'Close').click();
@@ -211,23 +221,29 @@ describe('Detection rules, bulk edit', () => {
     });
 
     it('should not lose rules selection after edit action', () => {
-      const rulesCount = 4;
+      const rulesToSelect = [RULE_NAME, 'New EQL Rule', 'New Terms Rule'] as const;
       // Switch to 5 rules per page, to have few pages in pagination(ideal way to test auto refresh and selection of few items)
-      setRowsPerPageTo(numberOfRulesPerPage);
-      selectNumberOfRules(rulesCount);
+      setRowsPerPageTo(5);
+      // and make sure we avoid flakiness as rules may be ordered arbitrary sorted by enabled column
+      sortFirstTableColumn();
+      selectRulesByName(rulesToSelect);
 
       // open add tags form and add 2 new tags
       openBulkEditAddTagsForm();
       typeTags(['new-tag-1']);
       submitBulkEditForm();
-      waitForBulkEditActionToFinish({ updatedCount: rulesCount });
+      waitForBulkEditActionToFinish({ updatedCount: rulesToSelect.length });
 
-      testMultipleSelectedRulesLabel(rulesCount);
-      // check if first four(rulesCount) rules still selected and tags are updated
-      for (let i = 0; i < rulesCount; i += 1) {
-        cy.get(RULE_CHECKBOX).eq(i).should('be.checked');
-        cy.get(RULES_TAGS_POPOVER_BTN)
-          .eq(i)
+      testMultipleSelectedRulesLabel(rulesToSelect.length);
+      // check if rulesToSelect rules still selected and tags are updated
+      for (const ruleName of rulesToSelect) {
+        cy.contains(RULE_NAME_SELECTOR, ruleName)
+          .parents(RULES_ROW)
+          .find(EUI_CHECKBOX)
+          .should('be.checked');
+        cy.contains(RULE_NAME_SELECTOR, ruleName)
+          .parents(RULES_ROW)
+          .find(RULES_TAGS_POPOVER_BTN)
           .each(($el) => {
             testTagsBadge($el, prePopulatedTags.concat(['new-tag-1']));
           });
@@ -237,7 +253,7 @@ describe('Detection rules, bulk edit', () => {
 
   describe('Tags actions', () => {
     it('Display list of tags in tags select', () => {
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
 
       openBulkEditAddTagsForm();
       openTagsSelect();
@@ -256,7 +272,7 @@ describe('Detection rules, bulk edit', () => {
       // check if only pre-populated tags exist in the tags filter
       checkTagsInTagsFilter(prePopulatedTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
 
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
 
       // open add tags form and add 2 new tags
       openBulkEditAddTagsForm();
@@ -279,7 +295,7 @@ describe('Detection rules, bulk edit', () => {
       // check if only pre-populated tags exist in the tags filter
       checkTagsInTagsFilter(prePopulatedTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
 
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
 
       // open add tags form and add 2 new tags
       openBulkEditAddTagsForm();
@@ -294,7 +310,7 @@ describe('Detection rules, bulk edit', () => {
       // check if only pre-populated tags exist in the tags filter
       checkTagsInTagsFilter(prePopulatedTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
 
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
 
       // open add tags form, check overwrite tags and warning message, type tags
       openBulkEditAddTagsForm();
@@ -323,7 +339,7 @@ describe('Detection rules, bulk edit', () => {
       // check if only pre-populated tags exist in the tags filter
       checkTagsInTagsFilter(prePopulatedTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
 
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
 
       // open add tags form, check overwrite tags, type tags
       openBulkEditDeleteTagsForm();
@@ -344,7 +360,7 @@ describe('Detection rules, bulk edit', () => {
       const indexPattersToBeAdded = ['index-to-add-1-*', 'index-to-add-2-*'];
       const resultingIndexPatterns = [...prePopulatedIndexPatterns, ...indexPattersToBeAdded];
 
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
       clickAddIndexPatternsMenuItem();
 
       // confirm editing custom rules, that are not Machine Learning
@@ -362,7 +378,7 @@ describe('Detection rules, bulk edit', () => {
     });
 
     it('Index pattern action applied to custom rules, including machine learning: user cancels action', () => {
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
       clickAddIndexPatternsMenuItem();
 
       // confirm editing custom rules, that are not Machine Learning
@@ -377,8 +393,14 @@ describe('Detection rules, bulk edit', () => {
       const resultingIndexPatterns = [...prePopulatedIndexPatterns, ...indexPattersToBeAdded];
 
       // select only rules that are not ML
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
-      unselectRuleByName(getMachineLearningRule().name);
+      selectRulesByName([
+        RULE_NAME,
+        'New EQL Rule',
+        'Threat Indicator Rule Test',
+        'Threat Indicator Rule Test',
+        'Threshold Rule',
+        'New Terms Rule',
+      ]);
 
       openBulkEditAddIndexPatternsForm();
       typeIndexPatterns(indexPattersToBeAdded);
@@ -395,8 +417,14 @@ describe('Detection rules, bulk edit', () => {
       const indexPattersToBeAdded = ['index-to-add-1-*', 'index-to-add-2-*'];
 
       // select only rules that are not ML
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
-      unselectRuleByName(getMachineLearningRule().name);
+      selectRulesByName([
+        RULE_NAME,
+        'New EQL Rule',
+        'Threat Indicator Rule Test',
+        'Threat Indicator Rule Test',
+        'Threshold Rule',
+        'New Terms Rule',
+      ]);
 
       openBulkEditAddIndexPatternsForm();
       typeIndexPatterns(indexPattersToBeAdded);
@@ -411,8 +439,14 @@ describe('Detection rules, bulk edit', () => {
       const indexPattersToWrite = ['index-to-write-1-*', 'index-to-write-2-*'];
 
       // select only rules that are not ML
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
-      unselectRuleByName(getMachineLearningRule().name);
+      selectRulesByName([
+        RULE_NAME,
+        'New EQL Rule',
+        'Threat Indicator Rule Test',
+        'Threat Indicator Rule Test',
+        'Threshold Rule',
+        'New Terms Rule',
+      ]);
 
       openBulkEditAddIndexPatternsForm();
 
@@ -438,8 +472,14 @@ describe('Detection rules, bulk edit', () => {
       const resultingIndexPatterns = prePopulatedIndexPatterns.slice(1);
 
       // select only not ML rules
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
-      unselectRuleByName(getMachineLearningRule().name);
+      selectRulesByName([
+        RULE_NAME,
+        'New EQL Rule',
+        'Threat Indicator Rule Test',
+        'Threat Indicator Rule Test',
+        'Threshold Rule',
+        'New Terms Rule',
+      ]);
 
       openBulkEditDeleteIndexPatternsForm();
       typeIndexPatterns(indexPatternsToDelete);
@@ -454,8 +494,14 @@ describe('Detection rules, bulk edit', () => {
 
     it('Delete all index patterns from custom rules', () => {
       // select only rules that are not ML
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
-      unselectRuleByName(getMachineLearningRule().name);
+      selectRulesByName([
+        RULE_NAME,
+        'New EQL Rule',
+        'Threat Indicator Rule Test',
+        'Threat Indicator Rule Test',
+        'Threshold Rule',
+        'New Terms Rule',
+      ]);
 
       openBulkEditDeleteIndexPatternsForm();
       typeIndexPatterns(prePopulatedIndexPatterns);
@@ -478,7 +524,7 @@ describe('Detection rules, bulk edit', () => {
     it('Apply timeline template to custom rules', () => {
       const timelineTemplateName = 'Generic Endpoint Timeline';
 
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
 
       // open Timeline template form, check warning, select timeline template
       clickApplyTimelineTemplatesMenuItem();
@@ -498,7 +544,7 @@ describe('Detection rules, bulk edit', () => {
     it('Reset timeline template to None for custom rules', () => {
       const noneTimelineTemplate = 'None';
 
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
 
       // open Timeline template form, submit form without picking timeline template as None is selected by default
       clickApplyTimelineTemplatesMenuItem();
@@ -514,7 +560,7 @@ describe('Detection rules, bulk edit', () => {
 
   describe('Schedule', () => {
     it('Default values are applied to bulk edit schedule fields', () => {
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
       clickUpdateScheduleMenuItem();
 
       assertUpdateScheduleWarningExists(expectedNumberOfCustomRulesToBeEdited);
@@ -526,7 +572,7 @@ describe('Detection rules, bulk edit', () => {
     });
 
     it('Updates schedule for custom rules', () => {
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
       clickUpdateScheduleMenuItem();
 
       assertUpdateScheduleWarningExists(expectedNumberOfCustomRulesToBeEdited);
@@ -549,7 +595,7 @@ describe('Detection rules, bulk edit', () => {
     });
 
     it('Validates invalid inputs when scheduling for custom rules', () => {
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
       clickUpdateScheduleMenuItem();
 
       // Validate invalid values are corrected to minimumValue - for 0 and negative values

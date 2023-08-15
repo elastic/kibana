@@ -16,7 +16,7 @@ import {
 } from '../../../../screens/alerts_detection_rules';
 import {
   enableRule,
-  waitForRulesTableToBeLoaded,
+  expectManagementTableRules,
   waitForRuleToUpdate,
 } from '../../../../tasks/alerts_detection_rules';
 import { login, visit } from '../../../../tasks/login';
@@ -41,10 +41,10 @@ describe('Rules table: sorting', () => {
   before(() => {
     cleanKibana();
     login();
-    createRule(getNewRule({ rule_id: '1' }));
-    createRule(getExistingRule({ rule_id: '2' }));
-    createRule(getNewOverrideRule({ rule_id: '3' }));
-    createRule(getNewThresholdRule({ rule_id: '4' }));
+    createRule(getNewRule({ rule_id: '1', name: 'A new rule' }));
+    createRule(getExistingRule({ rule_id: '2', name: 'Existing rule' }));
+    createRule(getNewOverrideRule({ rule_id: '3', name: 'Override Rule' }));
+    createRule(getNewThresholdRule({ rule_id: '4', name: 'Threshold Rule' }));
   });
 
   beforeEach(() => {
@@ -53,7 +53,8 @@ describe('Rules table: sorting', () => {
 
   it('Sorts by enabled rules', () => {
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
-    waitForRulesTableToBeLoaded();
+
+    expectManagementTableRules(['A new rule', 'Existing rule', 'Override Rule', 'Threshold Rule']);
 
     enableRule(SECOND_RULE);
     waitForRuleToUpdate();
@@ -74,7 +75,9 @@ describe('Rules table: sorting', () => {
     createRule(getNewRule({ name: 'Not same as first rule', rule_id: '6' }));
 
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
-    waitForRulesTableToBeLoaded();
+
+    expectManagementTableRules(['A new rule', 'Existing rule', 'Override Rule', 'Threshold Rule']);
+
     setRowsPerPageTo(5);
 
     cy.get(RULES_MANAGEMENT_TABLE).find(TABLE_FIRST_PAGE).should('have.attr', 'aria-current');

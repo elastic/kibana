@@ -60,9 +60,9 @@ import {
   duplicateFirstRule,
   duplicateRuleFromMenu,
   goToRuleDetails,
-  selectNumberOfRules,
   checkDuplicatedRule,
   expectNumberOfRules,
+  selectRulesByName,
 } from '../../../tasks/alerts_detection_rules';
 import { duplicateSelectedRulesWithExceptions } from '../../../tasks/rules_bulk_actions';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -541,7 +541,13 @@ describe('indicator match', () => {
       beforeEach(() => {
         login();
         deleteAlertsAndRules();
-        createRule(getNewThreatIndicatorRule({ rule_id: 'rule_testing', enabled: true }));
+        createRule(
+          getNewThreatIndicatorRule({
+            rule_id: 'rule_testing',
+            name: 'Threat Indicator Rule Test',
+            enabled: true,
+          })
+        );
         visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       });
 
@@ -553,7 +559,7 @@ describe('indicator match', () => {
       });
 
       it("Allows the rule to be duplicated from the table's bulk actions", () => {
-        selectNumberOfRules(1);
+        selectRulesByName(['Threat Indicator Rule Test']);
         duplicateSelectedRulesWithExceptions();
         checkDuplicatedRule();
       });

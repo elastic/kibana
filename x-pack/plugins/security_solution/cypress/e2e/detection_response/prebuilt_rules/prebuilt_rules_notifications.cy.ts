@@ -7,10 +7,7 @@
 
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import { ADD_ELASTIC_RULES_BTN, RULES_UPDATES_TAB } from '../../../screens/alerts_detection_rules';
-import {
-  deleteFirstRule,
-  waitForRulesTableToBeLoaded,
-} from '../../../tasks/alerts_detection_rules';
+import { deleteFirstRule } from '../../../tasks/alerts_detection_rules';
 import {
   installAllPrebuiltRulesRequest,
   createAndInstallMockedPrebuiltRules,
@@ -41,7 +38,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update Notifications'
   describe('No notifications', () => {
     it('should NOT display install or update notifications when no prebuilt assets and no rules are installed', () => {
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-      waitForRulesTableToBeLoaded();
       // TODO: test plan asserts "should NOT see a CTA to install prebuilt rules"
       // but current behavior is to always show the CTA, even with no prebuilt rule assets installed
       // Update that behaviour and then update this test.
@@ -51,7 +47,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update Notifications'
     it('should NOT display install or update notifications when latest rules are installed', () => {
       createAndInstallMockedPrebuiltRules({ rules: [RULE_1], installToKibana: true });
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-      waitForRulesTableToBeLoaded();
 
       /* Assert that there are no installation or update notifications */
       /* Add Elastic Rules button should not contain a number badge */
@@ -94,7 +89,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update Notifications'
 
           createAndInstallMockedPrebuiltRules({ rules: [RULE_2, RULE_3], installToKibana: false });
           visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-          waitForRulesTableToBeLoaded();
         });
       });
 
@@ -132,7 +126,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update Notifications'
           });
           createAndInstallMockedPrebuiltRules({ rules: [UPDATED_RULE], installToKibana: false });
           visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-          waitForRulesTableToBeLoaded();
+
           reload();
         });
       });
@@ -167,7 +161,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update Notifications'
             installToKibana: false,
           });
           visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-          waitForRulesTableToBeLoaded();
         });
       });
 

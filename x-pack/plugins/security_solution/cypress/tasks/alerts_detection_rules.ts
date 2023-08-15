@@ -11,7 +11,6 @@ import {
   CUSTOM_RULES_BTN,
   DELETE_RULE_ACTION_BTN,
   RULES_SELECTED_TAG,
-  RULES_TABLE_INITIAL_LOADING_INDICATOR,
   RULE_CHECKBOX,
   RULE_NAME,
   RULE_SWITCH,
@@ -56,6 +55,7 @@ import {
   ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN,
   CONFIRM_DELETE_RULE_BTN,
   AUTO_REFRESH_POPOVER_TRIGGER_BUTTON,
+  SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
@@ -197,21 +197,24 @@ export const openIntegrationsPopover = () => {
   cy.get(INTEGRATIONS_POPOVER).click();
 };
 
-/**
- * Selects the number of rules. Since there can be missing click handlers
- * when the page loads at first, we use a pipe and a trigger of click
- * on it and then check to ensure that it is checked before continuing
- * with the tests.
- * @param numberOfRules The number of rules to click/check
- */
-export const selectNumberOfRules = (numberOfRules: number) => {
-  for (let i = 0; i < numberOfRules; i++) {
-    cy.get(RULE_CHECKBOX).eq(i).check();
-    cy.get(RULE_CHECKBOX).eq(i).should('be.checked');
+export const selectRulesByName = (ruleNames: Readonly<[string, ...string[]]>) => {
+  for (const ruleName of ruleNames) {
+    selectRuleByName(ruleName);
   }
 };
 
-export const unselectRuleByName = (ruleName: string) => {
+const selectRuleByName = (ruleName: string) => {
+  cy.contains(RULE_NAME, ruleName).parents(RULES_ROW).find(EUI_CHECKBOX).check();
+  cy.contains(RULE_NAME, ruleName).parents(RULES_ROW).find(EUI_CHECKBOX).should('be.checked');
+};
+
+export const unselectRulesByName = (ruleNames: Readonly<[string, ...string[]]>) => {
+  for (const ruleName of ruleNames) {
+    unselectRuleByName(ruleName);
+  }
+};
+
+const unselectRuleByName = (ruleName: string) => {
   cy.contains(RULE_NAME, ruleName).parents(RULES_ROW).find(EUI_CHECKBOX).uncheck();
   cy.contains(RULE_NAME, ruleName).parents(RULES_ROW).find(EUI_CHECKBOX).should('not.be.checked');
 };
@@ -234,6 +237,12 @@ export const selectAllRules = () => {
   cy.log('Select all rules');
   cy.get(SELECT_ALL_RULES_BTN).contains('Select all').click();
   cy.get(SELECT_ALL_RULES_BTN).contains('Clear');
+};
+
+export const selectAllRulesOnPage = () => {
+  cy.log('Select all rules on the page');
+  cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
+  cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).should('be.checked');
 };
 
 export const clearAllRuleSelection = () => {
@@ -264,21 +273,6 @@ export const confirmRulesDelete = () => {
 export const waitForRulesTableToShow = () => {
   // Wait up to 5 minutes for the table to show up as in CI containers this can be very slow
   cy.get(RULES_MANAGEMENT_TABLE, { timeout: 300000 }).should('exist');
-};
-
-/**
- * Because the Rule Management page is relatively slow, in order to avoid timeouts and flakiness,
- * we almost always want to wait until the Rules table is "loaded" before we do anything with it.
- *
- * This task can be needed for some tests that e.g. check the table load/refetch/pagination logic.
- * It waits for the table's own loading indicator to show up and disappear.
- *
- * NOTE: Normally, we should not rely on loading indicators in tests, because due to their
- * dynamic nature it's possible to introduce race conditions and flakiness.
- */
-export const waitForRulesTableToBeLoaded = () => {
-  // Wait up to 5 minutes for the rules to load as in CI containers this can be very slow
-  cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR, { timeout: 300000 }).should('not.exist');
 };
 
 export const waitForRulesTableToBeRefreshed = () => {

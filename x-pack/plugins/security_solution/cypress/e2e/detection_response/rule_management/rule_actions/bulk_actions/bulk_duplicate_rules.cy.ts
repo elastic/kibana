@@ -6,10 +6,9 @@
  */
 
 import {
-  waitForRulesTableToBeLoaded,
   goToTheRuleDetailsOf,
-  selectNumberOfRules,
   expectManagementTableRules,
+  selectRulesByName,
 } from '../../../../../tasks/alerts_detection_rules';
 import {
   duplicateSelectedRulesWithoutExceptions,
@@ -101,18 +100,18 @@ describe('Detection rules, bulk duplicate', () => {
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 
-    waitForRulesTableToBeLoaded();
+    expectManagementTableRules([RULE_NAME]);
   });
 
   it('Duplicates rules', () => {
-    selectNumberOfRules(1);
+    selectRulesByName([RULE_NAME]);
     duplicateSelectedRulesWithoutExceptions();
     expectManagementTableRules([`${RULE_NAME} [Duplicate]`]);
   });
 
   describe('With exceptions', () => {
     it('Duplicates rules with expired exceptions', () => {
-      selectNumberOfRules(1);
+      selectRulesByName([RULE_NAME]);
       duplicateSelectedRulesWithExceptions();
       expectManagementTableRules([`${RULE_NAME} [Duplicate]`]);
       goToTheRuleDetailsOf(`${RULE_NAME} [Duplicate]`);
@@ -123,7 +122,7 @@ describe('Detection rules, bulk duplicate', () => {
     });
 
     it('Duplicates rules with exceptions, excluding expired exceptions', () => {
-      selectNumberOfRules(1);
+      selectRulesByName([RULE_NAME]);
       duplicateSelectedRulesWithNonExpiredExceptions();
       expectManagementTableRules([`${RULE_NAME} [Duplicate]`]);
       goToTheRuleDetailsOf(`${RULE_NAME} [Duplicate]`);

@@ -6,7 +6,6 @@
  */
 
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
-import { waitForRulesTableToBeLoaded } from '../../../tasks/alerts_detection_rules';
 import { createAndInstallMockedPrebuiltRules } from '../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../../tasks/common';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
@@ -43,9 +42,9 @@ describe('Detection rules, Prebuilt Rules Installation and Update - Error handli
       name: 'Test rule 2',
       rule_id: 'rule_2',
     });
+
     beforeEach(() => {
       createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2], installToKibana: false });
-      waitForRulesTableToBeLoaded();
     });
 
     it('installing prebuilt rules one by one', () => {
@@ -106,7 +105,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update - Error handli
         rules: [UPDATED_RULE_1, UPDATED_RULE_2],
         installToKibana: false,
       });
-      waitForRulesTableToBeLoaded();
       reload();
     });
 

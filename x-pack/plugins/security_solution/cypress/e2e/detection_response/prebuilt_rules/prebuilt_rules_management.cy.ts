@@ -21,7 +21,7 @@ import {
 import {
   deleteFirstRule,
   selectAllRules,
-  selectNumberOfRules,
+  selectRulesByName,
   waitForPrebuiltDetectionRulesToBeLoaded,
   waitForRuleToUpdate,
 } from '../../../tasks/alerts_detection_rules';
@@ -109,8 +109,7 @@ describe('Prebuilt rules', () => {
       });
 
       it('Does not allow to delete one rule when more than one is selected', () => {
-        const numberOfRulesToBeSelected = 2;
-        selectNumberOfRules(numberOfRulesToBeSelected);
+        selectAllRules();
 
         cy.get(COLLAPSED_ACTION_BTN).each((collapsedItemActionBtn) => {
           cy.wrap(collapsedItemActionBtn).should('have.attr', 'disabled');
@@ -151,16 +150,17 @@ describe('Prebuilt rules', () => {
 
       it('Deletes and recovers more than one rule', () => {
         getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
-          const numberOfRulesToBeSelected = 2;
-          const expectedNumberOfRulesAfterDeletion = availablePrebuiltRulesCount - 2;
+          const rulesToDelete = ['Test rule 1', 'Test rule 2'] as const;
+          const expectedNumberOfRulesAfterDeletion =
+            availablePrebuiltRulesCount - rulesToDelete.length;
           const expectedNumberOfRulesAfterRecovering = availablePrebuiltRulesCount;
 
-          selectNumberOfRules(numberOfRulesToBeSelected);
+          selectRulesByName(rulesToDelete);
           deleteSelectedRules();
 
           cy.get(ADD_ELASTIC_RULES_BTN).should(
             'have.text',
-            `Add Elastic rules${numberOfRulesToBeSelected}`
+            `Add Elastic rules${rulesToDelete.length}`
           );
           cy.get(ELASTIC_RULES_BTN).should(
             'have.text',

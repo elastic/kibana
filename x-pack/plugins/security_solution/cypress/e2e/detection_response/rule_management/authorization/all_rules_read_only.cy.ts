@@ -13,7 +13,6 @@ import {
   RULE_NAME,
 } from '../../../../screens/alerts_detection_rules';
 import { VALUE_LISTS_MODAL_ACTIVATOR } from '../../../../screens/lists';
-import { waitForRulesTableToBeLoaded } from '../../../../tasks/alerts_detection_rules';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../../tasks/common';
 import {
@@ -35,7 +34,7 @@ describe('All rules - read only', () => {
   beforeEach(() => {
     login(ROLES.reader);
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL, ROLES.reader);
-    waitForRulesTableToBeLoaded();
+
     cy.get(RULE_NAME).should('have.text', getNewRule().name);
   });
 
