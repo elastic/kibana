@@ -462,28 +462,35 @@ export const update = async (
   }
 };
 
-const trimCaseAttributes = (updateCaseAttributes: Omit<CasePatchRequest, 'id' | 'version' | 'owner' | 'assignees'>) => {
+const trimCaseAttributes = (
+  updateCaseAttributes: Omit<CasePatchRequest, 'id' | 'version' | 'owner' | 'assignees'>
+) => {
+  let trimmedAttributes = { ...updateCaseAttributes };
 
-  let trimmedAttributes = {...updateCaseAttributes};
-
-  if(updateCaseAttributes.title) {
-    trimmedAttributes = {...trimmedAttributes, title: updateCaseAttributes.title.trim()}
+  if (updateCaseAttributes.title) {
+    trimmedAttributes = { ...trimmedAttributes, title: updateCaseAttributes.title.trim() };
   }
 
-  if(updateCaseAttributes.description) {
-    trimmedAttributes = {...trimmedAttributes, description: updateCaseAttributes.description.trim()}
+  if (updateCaseAttributes.description) {
+    trimmedAttributes = {
+      ...trimmedAttributes,
+      description: updateCaseAttributes.description.trim(),
+    };
   }
 
-  if(updateCaseAttributes.category) {
-    trimmedAttributes = {...trimmedAttributes, category: updateCaseAttributes.category.trim()}
+  if (updateCaseAttributes.category) {
+    trimmedAttributes = { ...trimmedAttributes, category: updateCaseAttributes.category.trim() };
   }
 
-  if(updateCaseAttributes.tags) {
-    trimmedAttributes = {...trimmedAttributes, tags: updateCaseAttributes.tags.map((tag: string) => tag.trim())}
+  if (updateCaseAttributes.tags) {
+    trimmedAttributes = {
+      ...trimmedAttributes,
+      tags: updateCaseAttributes.tags.map((tag: string) => tag.trim()),
+    };
   }
 
   return trimmedAttributes;
-}
+};
 
 const createPatchCasesPayload = ({
   casesToUpdate,

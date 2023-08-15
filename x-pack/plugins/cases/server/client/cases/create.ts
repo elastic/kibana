@@ -61,7 +61,6 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
       licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
     }
 
-
     /**
      * Trim title, category, description and tags before saving to ES
      */
@@ -71,8 +70,8 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
       title: query.title.trim(),
       description: query.description.trim(),
       category: query.category?.trim() ?? null,
-      tags: query.tags?.map(tag => tag.trim()) ?? []
-    }
+      tags: query.tags?.map((tag) => tag.trim()) ?? [],
+    };
 
     const newCase = await caseService.postNewCase({
       attributes: transformNewCase({

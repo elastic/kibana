@@ -79,7 +79,7 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
   const onSubmitTags = useCallback(async () => {
     const { isValid, data: newData } = await submit();
     if (isValid && newData.tags) {
-      const trimmedTags = newData.tags.map((tag:string) => tag.trim());
+      const trimmedTags = newData.tags.map((tag: string) => tag.trim());
 
       onSubmit(trimmedTags);
       form.reset({ defaultValue: newData });

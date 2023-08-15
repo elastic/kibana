@@ -307,8 +307,9 @@ describe('Create case', () => {
     });
 
     it('should post a case on submit click with the trimmed value of title, description', async () => {
-      const titleWithSpace = 'This is a title with spaces                      ';
-      const descriptionWithSpace = 'This is a case description with empty spaces at the end!!                            ';
+      const titleWithSpace = 'This is a title with spaces       ';
+      const descriptionWithSpace =
+        'This is a case description with empty spaces at the end!!             ';
 
       useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
@@ -329,7 +330,9 @@ describe('Create case', () => {
       userEvent.clear(titleInput);
       userEvent.paste(titleInput, titleWithSpace);
 
-      const descInput = within(screen.getByTestId('caseDescription')).getByTestId('euiMarkdownEditorTextArea');
+      const descInput = within(screen.getByTestId('caseDescription')).getByTestId(
+        'euiMarkdownEditorTextArea'
+      );
       userEvent.clear(descInput);
       userEvent.type(descInput, descriptionWithSpace);
 
@@ -350,7 +353,7 @@ describe('Create case', () => {
 
     it('should post a case on submit click with the trimmed value of category and tags', async () => {
       const category = 'security        ';
-      const tags = ['coke     ', 'pepsi']
+      const tags = ['coke     ', 'pepsi'];
 
       useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
@@ -367,11 +370,13 @@ describe('Create case', () => {
       await waitForFormToRender(screen);
       await fillFormReactTestingLib({ renderer: screen });
 
-        const tagsInput = await within(screen.getByTestId('caseTags')).findByTestId('comboBoxInput');
-        userEvent.type(tagsInput, `${tags[0]}{enter}`);
-        userEvent.type(tagsInput, `${tags[1]}{enter}`);
+      const tagsInput = await within(screen.getByTestId('caseTags')).findByTestId('comboBoxInput');
+      userEvent.type(tagsInput, `${tags[0]}{enter}`);
+      userEvent.type(tagsInput, `${tags[1]}{enter}`);
 
-      const categoryInput = await within(screen.getByTestId('categories-list')).findByTestId('comboBoxInput');
+      const categoryInput = await within(screen.getByTestId('categories-list')).findByTestId(
+        'comboBoxInput'
+      );
       userEvent.type(categoryInput, category);
 
       userEvent.click(screen.getByTestId('create-case-submit'));
@@ -383,7 +388,7 @@ describe('Create case', () => {
       expect(postCase).toBeCalledWith({
         request: {
           ...sampleDataWithoutTags,
-          tags: ['coke','pepsi'],
+          tags: ['coke', 'pepsi'],
           category: 'security',
         },
       });

@@ -153,7 +153,7 @@ describe('create', () => {
     });
 
     it('should trim title', async () => {
-      await create({ ...theCase, title: 'title with spaces      '}, clientArgs);
+      await create({ ...theCase, title: 'title with spaces      ' }, clientArgs);
 
       expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -161,7 +161,7 @@ describe('create', () => {
             ...theCase,
             closed_by: null,
             closed_at: null,
-            title: 'title with spaces', 
+            title: 'title with spaces',
             created_at: expect.any(String),
             created_by: expect.any(Object),
             updated_at: null,
@@ -171,9 +171,10 @@ describe('create', () => {
             status: CaseStatuses.open,
             category: null,
           },
-          id: expect.any(String), 
-          refresh: false
-      }));
+          id: expect.any(String),
+          refresh: false,
+        })
+      );
     });
   });
 
@@ -214,7 +215,10 @@ describe('create', () => {
     });
 
     it('should trim description', async () => {
-      await create({ ...theCase, description: 'this is a description with spaces!!      '}, clientArgs);
+      await create(
+        { ...theCase, description: 'this is a description with spaces!!      ' },
+        clientArgs
+      );
 
       expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -222,7 +226,7 @@ describe('create', () => {
             ...theCase,
             closed_by: null,
             closed_at: null,
-            description: 'this is a description with spaces!!', 
+            description: 'this is a description with spaces!!',
             created_at: expect.any(String),
             created_by: expect.any(Object),
             updated_at: null,
@@ -232,9 +236,10 @@ describe('create', () => {
             status: CaseStatuses.open,
             category: null,
           },
-          id: expect.any(String), 
-          refresh: false
-      }));
+          id: expect.any(String),
+          refresh: false,
+        })
+      );
     });
   });
 
@@ -285,7 +290,7 @@ describe('create', () => {
     });
 
     it('should trim tags', async () => {
-      await create({ ...theCase, tags:['pepsi     ','coke']}, clientArgs);
+      await create({ ...theCase, tags: ['pepsi     ', 'coke'] }, clientArgs);
 
       expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -293,7 +298,7 @@ describe('create', () => {
             ...theCase,
             closed_by: null,
             closed_at: null,
-            tags: ['pepsi','coke'],
+            tags: ['pepsi', 'coke'],
             created_at: expect.any(String),
             created_by: expect.any(Object),
             updated_at: null,
@@ -303,9 +308,10 @@ describe('create', () => {
             status: CaseStatuses.open,
             category: null,
           },
-          id: expect.any(String), 
-          refresh: false
-      }));
+          id: expect.any(String),
+          refresh: false,
+        })
+      );
     });
   });
 
@@ -350,7 +356,7 @@ describe('create', () => {
           attributes: {
             ...theCase,
             closed_by: null,
-            closed_at: null, 
+            closed_at: null,
             category: 'reporting',
             created_at: expect.any(String),
             created_by: expect.any(Object),
@@ -360,9 +366,10 @@ describe('create', () => {
             duration: null,
             status: CaseStatuses.open,
           },
-          id: expect.any(String), 
-          refresh: false
-      }));
+          id: expect.any(String),
+          refresh: false,
+        })
+      );
     });
   });
 });

@@ -79,15 +79,15 @@ export const FormContext: React.FC<Props> = ({
     };
 
     if (userFormData.category) {
-      formData = { ...formData, category: userFormData.category.trim() }
+      formData = { ...formData, category: userFormData.category.trim() };
     }
 
     if (userFormData.tags) {
-      formData = { ...formData, tags: userFormData.tags.map((tag: string) => tag.trim()) }
+      formData = { ...formData, tags: userFormData.tags.map((tag: string) => tag.trim()) };
     }
-    
+
     return formData;
-  }
+  };
 
   const submitCase = useCallback(
     async (
@@ -159,7 +159,6 @@ export const FormContext: React.FC<Props> = ({
       onSuccess,
       createAttachments,
       pushCaseToExternalService,
-      // trimUserFormData,
     ]
   );
 
@@ -176,8 +175,8 @@ export const FormContext: React.FC<Props> = ({
     () =>
       children != null
         ? React.Children.map(children, (child: React.ReactElement) =>
-          React.cloneElement(child, { connectors, isLoadingConnectors })
-        )
+            React.cloneElement(child, { connectors, isLoadingConnectors })
+          )
         : null,
     [children, connectors, isLoadingConnectors]
   );

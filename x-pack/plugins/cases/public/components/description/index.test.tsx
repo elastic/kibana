@@ -105,7 +105,10 @@ describe('Description', () => {
     userEvent.click(screen.getByTestId('editable-save-markdown'));
 
     await waitFor(() => {
-      expect(onUpdateField).toHaveBeenCalledWith({ key: 'description', value: descriptionWithSpaces.trim() });
+      expect(onUpdateField).toHaveBeenCalledWith({
+        key: 'description',
+        value: descriptionWithSpaces.trim(),
+      });
     });
   });
 

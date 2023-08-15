@@ -407,7 +407,7 @@ describe('update', () => {
           ],
         },
         clientArgs
-      )
+      );
 
       expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -422,11 +422,12 @@ describe('update', () => {
                 category: 'security',
                 updated_at: expect.any(String),
                 updated_by: expect.any(Object),
-              }
-            }
+              },
+            },
           ],
           refresh: false,
-        }));
+        })
+      );
     });
   });
 
@@ -535,7 +536,7 @@ describe('update', () => {
           ],
         },
         clientArgs
-      )
+      );
 
       expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -550,11 +551,12 @@ describe('update', () => {
                 title: 'title with spaces',
                 updated_at: expect.any(String),
                 updated_by: expect.any(Object),
-              }
-            }
+              },
+            },
           ],
           refresh: false,
-        }));
+        })
+      );
     });
   });
 
@@ -666,7 +668,7 @@ describe('update', () => {
           ],
         },
         clientArgs
-      )
+      );
 
       expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -681,11 +683,12 @@ describe('update', () => {
                 description: 'This is a description with spaces!!',
                 updated_at: expect.any(String),
                 updated_by: expect.any(Object),
-              }
-            }
+              },
+            },
           ],
           refresh: false,
-        }));
+        })
+      );
     });
   });
 
@@ -839,7 +842,7 @@ describe('update', () => {
           ],
         },
         clientArgs
-      )
+      );
 
       expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -854,11 +857,12 @@ describe('update', () => {
                 tags: ['coke', 'pepsi'],
                 updated_at: expect.any(String),
                 updated_by: expect.any(Object),
-              }
-            }
+              },
+            },
           ],
           refresh: false,
-        }));
+        })
+      );
     });
   });
 
