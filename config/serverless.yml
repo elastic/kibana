@@ -43,7 +43,7 @@ dev_tools.deeplinks.navLinkStatus: visible
 management.deeplinks.navLinkStatus: visible
 
 # Other disabled plugins
-#xpack.canvas.enabled: false #only disabable in dev-mode
+xpack.canvas.enabled: false
 xpack.cloud_integrations.data_migration.enabled: false
 data.search.sessions.enabled: false
 advanced_settings.enabled: false
