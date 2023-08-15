@@ -604,10 +604,6 @@ describe('ruleType', () => {
       groupBy: 'all',
     };
 
-    afterAll(() => {
-      jest.resetAllMocks();
-    });
-
     it('validator succeeds with valid search source params', async () => {
       expect(ruleType.validate.params.validate(defaultParams)).toBeTruthy();
     });
@@ -760,10 +756,6 @@ describe('ruleType', () => {
       groupBy: 'all',
     };
 
-    afterAll(() => {
-      jest.resetAllMocks();
-    });
-
     it('validator succeeds with valid ESQL query params', async () => {
       expect(ruleType.validate.params.validate(defaultParams)).toBeTruthy();
     });
@@ -808,7 +800,7 @@ describe('ruleType', () => {
       );
 
       await invokeExecutor({ params, ruleServices });
-      expect(ruleServices.alertFactory.create).not.toHaveBeenCalled();
+      expect(ruleServices.alertsClient.report).not.toHaveBeenCalled();
     });
 
     it('rule executor schedule actions when condition met', async () => {
@@ -837,8 +829,27 @@ describe('ruleType', () => {
 
       await invokeExecutor({ params, ruleServices });
 
-      const instance: AlertInstanceMock = ruleServices.alertFactory.create.mock.results[0].value;
-      expect(instance.scheduleActions).toHaveBeenCalled();
+      expect(ruleServices.alertsClient.report).toHaveBeenCalledTimes(1);
+
+      expect(ruleServices.alertsClient.report).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actionGroup: 'query matched',
+          id: 'query matched',
+          payload: expect.objectContaining({
+            kibana: {
+              alert: {
+                url: expect.any(String),
+                reason: expect.any(String),
+                title: "rule 'rule-name' matched query",
+                evaluation: {
+                  conditions: 'Query matched documents',
+                  value: 3,
+                },
+              },
+            },
+          }),
+        })
+      );
     });
   });
 });
