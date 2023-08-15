@@ -217,7 +217,7 @@ export async function fetchMoreDocuments(
       moreRecords: [],
       interceptedWarnings: undefined,
     });
-    sendErrorMsg(dataSubjects.main$, error);
+    sendErrorTo(dataSubjects.main$)(error);
   }
 }
 
