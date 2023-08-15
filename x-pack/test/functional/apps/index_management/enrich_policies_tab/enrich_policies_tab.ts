@@ -73,6 +73,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await testSubjects.exists('enrichPoliciesLearnMoreLink')).to.be(true);
     });
 
+    it('shows the details flyout when clicking on a policy name', async () => {
+      // Open details flyout
+      await pageObjects.indexManagement.clickEnrichPolicyAt(0);
+      // Assert that flyout is opened
+      expect(await testSubjects.exists('policyDetailsFlyout')).to.be(true);
+      // Close flyout
+      await testSubjects.click('closeFlyoutButton');
+    });
+
     it('can execute a policy', async () => {
       await pageObjects.indexManagement.clickExecuteEnrichPolicyAt(0);
       await pageObjects.indexManagement.clickConfirmModalButton();

@@ -132,7 +132,12 @@ export const PolicyDetailsFlyout: FunctionComponent<Props> = ({ policy, onClose 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={onClose}
+              flush="left"
+              data-test-subj="closeFlyoutButton"
+            >
               {i18n.translate('xpack.idxMgmt.enrich_policies.detailsFlyout.closeButton', {
                 defaultMessage: 'Close',
               })}
