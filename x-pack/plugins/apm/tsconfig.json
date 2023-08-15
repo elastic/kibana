@@ -97,7 +97,6 @@
     "@kbn/unified-field-list",
     "@kbn/discover-plugin",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/apm-plugin"
   ],
   "exclude": ["target/**/*"]
 }
