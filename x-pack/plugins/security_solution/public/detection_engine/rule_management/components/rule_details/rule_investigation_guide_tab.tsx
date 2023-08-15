@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-
+import { css } from '@emotion/react';
 import { EuiSpacer } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 import type { InvestigationGuide } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes';
 
@@ -17,7 +18,11 @@ interface RuleInvestigationGuideTabProps {
 
 export const RuleInvestigationGuideTab = ({ note }: RuleInvestigationGuideTabProps) => {
   return (
-    <div>
+    <div
+      css={css`
+        padding: 0 ${euiThemeVars.euiSizeM};
+      `}
+    >
       <EuiSpacer size="m" />
       <MarkdownRenderer>{note}</MarkdownRenderer>
     </div>

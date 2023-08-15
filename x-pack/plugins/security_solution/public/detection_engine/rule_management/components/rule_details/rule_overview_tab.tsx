@@ -6,6 +6,8 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import {
   EuiTitle,
   EuiAccordion,
@@ -68,10 +70,10 @@ const ExpandableSection = ({ title, isOpen, toggle, children }: ExpandableSectio
     <EuiAccordion
       forceState={isOpen ? 'open' : 'closed'}
       onToggle={toggle}
-      paddingSize="l"
+      paddingSize="none"
       id={accordionId}
       buttonContent={
-        <EuiTitle size="m">
+        <EuiTitle size="s">
           <h3>{title}</h3>
         </EuiTitle>
       }
@@ -96,7 +98,11 @@ export const RuleOverviewTab = ({
   expandedOverviewSections,
   toggleOverviewSection,
 }: RuleOverviewTabProps) => (
-  <>
+  <div
+    css={css`
+      padding: 0 ${euiThemeVars.euiSizeM};
+    `}
+  >
     <EuiSpacer size="m" />
     <ExpandableSection
       title={i18n.ABOUT_SECTION_LABEL}
@@ -105,7 +111,7 @@ export const RuleOverviewTab = ({
     >
       <RuleAboutSection rule={rule} />
     </ExpandableSection>
-    <EuiHorizontalRule margin="l" />
+    <EuiHorizontalRule margin="m" />
     <ExpandableSection
       title={i18n.DEFINITION_SECTION_LABEL}
       isOpen={expandedOverviewSections.definition}
@@ -113,7 +119,7 @@ export const RuleOverviewTab = ({
     >
       <RuleDefinitionSection rule={rule} />
     </ExpandableSection>
-    <EuiHorizontalRule margin="l" />
+    <EuiHorizontalRule margin="m" />
     <ExpandableSection
       title={i18n.SCHEDULE_SECTION_LABEL}
       isOpen={expandedOverviewSections.schedule}
@@ -121,7 +127,7 @@ export const RuleOverviewTab = ({
     >
       <RuleScheduleSection rule={rule} />
     </ExpandableSection>
-    <EuiHorizontalRule margin="l" />
+    <EuiHorizontalRule margin="m" />
     {rule.setup && (
       <>
         <ExpandableSection
@@ -131,8 +137,9 @@ export const RuleOverviewTab = ({
         >
           <RuleSetupGuideSection setup={rule.setup} />
         </ExpandableSection>
-        <EuiHorizontalRule margin="l" />
+        <EuiHorizontalRule margin="m" />
       </>
     )}
-  </>
+  </div>
 );
+

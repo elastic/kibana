@@ -142,7 +142,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   const filteredRules = useFilterPrebuiltRulesToUpgrade({ filterOptions, rules });
 
   const { openFlyoutForRuleId, closeFlyout, flyoutRule } = useRuleDetailsFlyout(
-    filteredRules.map(({ rule }) => rule)
+    filteredRules.map((upgradeInfo) => upgradeInfo.target_rule)
   );
   const isFlyoutInstallButtonDisabled = Boolean(
     (flyoutRule?.rule_id && loadingRules.includes(flyoutRule.rule_id)) ||

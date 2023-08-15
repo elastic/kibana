@@ -44,7 +44,7 @@ interface DataViewProps {
   dataViewId: string;
 }
 
-const DataView = ({ dataViewId }: DataViewProps) => <EuiText>{dataViewId}</EuiText>;
+const DataView = ({ dataViewId }: DataViewProps) => <EuiText size="s">{dataViewId}</EuiText>;
 
 interface ThresholdProps {
   threshold: ThresholdType;
@@ -84,7 +84,9 @@ interface RuleTypeProps {
   type: Type;
 }
 
-const RuleType = ({ type }: RuleTypeProps) => <EuiText>{getRuleTypeDescription(type)}</EuiText>;
+const RuleType = ({ type }: RuleTypeProps) => (
+  <EuiText size="s">{getRuleTypeDescription(type)}</EuiText>
+);
 
 const StyledFieldTypeText = styled(EuiText)`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
@@ -123,7 +125,9 @@ interface TimelineTitleProps {
   timelineTitle: string;
 }
 
-const TimelineTitle = ({ timelineTitle }: TimelineTitleProps) => <EuiText>{timelineTitle}</EuiText>;
+const TimelineTitle = ({ timelineTitle }: TimelineTitleProps) => (
+  <EuiText size="s">{timelineTitle}</EuiText>
+);
 
 interface ThreatIndexProps {
   threatIndex: string[];
@@ -162,7 +166,7 @@ const ThreatMapping = ({ threatMapping }: ThreatMappingProps) => {
     ''
   );
 
-  return <EuiText>{description}</EuiText>;
+  return <EuiText size="s">{description}</EuiText>;
 };
 
 const prepareDefinitionSectionListItems = (
@@ -254,7 +258,6 @@ export const RuleDefinitionSection = ({ rule }: RuleDefinitionSectionProps) => {
 
   return (
     <div>
-      <EuiSpacer size="m" />
       <EuiDescriptionList type="column" listItems={definitionSectionListItems} />
     </div>
   );

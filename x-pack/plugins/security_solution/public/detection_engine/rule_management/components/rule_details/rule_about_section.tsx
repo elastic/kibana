@@ -56,7 +56,9 @@ interface DescriptionProps {
   description: string;
 }
 
-const Description = ({ description }: DescriptionProps) => <EuiText>{description}</EuiText>;
+const Description = ({ description }: DescriptionProps) => (
+  <EuiText size="s">{description}</EuiText>
+);
 
 interface AuthorProps {
   author: string[];
@@ -64,7 +66,7 @@ interface AuthorProps {
 
 const Author = ({ author }: AuthorProps) => <BadgeList badges={author} />;
 
-const BuildingBlock = () => <EuiText>{i18n.BUILDING_BLOCK_FIELD_DESCRIPTION}</EuiText>;
+const BuildingBlock = () => <EuiText size="s">{i18n.BUILDING_BLOCK_FIELD_DESCRIPTION}</EuiText>;
 
 interface SeverityMappingItemProps {
   severityMappingItem: SeverityMappingItemType;
@@ -104,7 +106,7 @@ interface RiskScoreProps {
   riskScore: number;
 }
 
-const RiskScore = ({ riskScore }: RiskScoreProps) => <EuiText>{riskScore}</EuiText>;
+const RiskScore = ({ riskScore }: RiskScoreProps) => <EuiText size="s">{riskScore}</EuiText>;
 
 interface RiskScoreMappingItemProps {
   riskScoreMappingItem: RiskScoreMappingItemType;
@@ -166,14 +168,14 @@ interface LicenseProps {
   license: string;
 }
 
-const License = ({ license }: LicenseProps) => <EuiText>{license}</EuiText>;
+const License = ({ license }: LicenseProps) => <EuiText size="s">{license}</EuiText>;
 
 interface RuleNameOverrideProps {
   ruleNameOverride: string;
 }
 
 const RuleNameOverride = ({ ruleNameOverride }: RuleNameOverrideProps) => (
-  <EuiText>{ruleNameOverride}</EuiText>
+  <EuiText size="s">{ruleNameOverride}</EuiText>
 );
 
 interface ThreatProps {
@@ -189,7 +191,7 @@ interface ThreatIndicatorPathProps {
 }
 
 const ThreatIndicatorPath = ({ threatIndicatorPath }: ThreatIndicatorPathProps) => (
-  <EuiText>{threatIndicatorPath}</EuiText>
+  <EuiText size="s">{threatIndicatorPath}</EuiText>
 );
 
 interface TimestampOverrideProps {
@@ -197,7 +199,7 @@ interface TimestampOverrideProps {
 }
 
 const TimestampOverride = ({ timestampOverride }: TimestampOverrideProps) => (
-  <EuiText>{timestampOverride}</EuiText>
+  <EuiText size="s">{timestampOverride}</EuiText>
 );
 
 interface TagsProps {
@@ -334,7 +336,6 @@ export const RuleAboutSection = ({ rule }: RuleAboutSectionProps) => {
 
   return (
     <div>
-      <EuiSpacer size="m" />
       {rule.description && (
         <EuiDescriptionList
           listItems={[

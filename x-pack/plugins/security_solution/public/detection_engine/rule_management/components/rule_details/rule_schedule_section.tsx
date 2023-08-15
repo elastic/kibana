@@ -15,7 +15,7 @@ interface IntervalProps {
   interval: string;
 }
 
-const Interval = ({ interval }: IntervalProps) => <EuiText>{interval}</EuiText>;
+const Interval = ({ interval }: IntervalProps) => <EuiText size="s">{interval}</EuiText>;
 
 interface FromProps {
   from: string;
@@ -23,7 +23,7 @@ interface FromProps {
 }
 
 const From = ({ from, interval }: FromProps) => (
-  <EuiText>{getHumanizedDuration(from, interval)}</EuiText>
+  <EuiText size="s">{getHumanizedDuration(from, interval)}</EuiText>
 );
 
 export interface RuleScheduleSectionProps {
@@ -49,7 +49,6 @@ export const RuleScheduleSection = ({ rule }: RuleScheduleSectionProps) => {
 
   return (
     <div>
-      <EuiSpacer size="m" />
       <EuiDescriptionList type="column" listItems={ruleSectionListItems} />
     </div>
   );

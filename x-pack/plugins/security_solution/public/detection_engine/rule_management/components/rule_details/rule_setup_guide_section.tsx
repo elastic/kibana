@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
 
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 
@@ -17,7 +16,6 @@ interface RuleSetupGuideSectionProps {
 export const RuleSetupGuideSection = ({ setup }: RuleSetupGuideSectionProps) => {
   return (
     <div>
-      <EuiSpacer size="m" />
       <MarkdownRenderer>{setup}</MarkdownRenderer>
     </div>
   );

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -38,7 +37,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
     .euiFlyoutBody__overflowContent {
       flex: 1;
       overflow: hidden;
-      padding: ${({ theme }) => `0 ${theme.eui.euiSizeM} ${theme.eui.euiSizeM}`};
+      padding: ${({ theme }) => `0 ${theme.eui.euiSizeL} ${theme.eui.euiSizeM}`};
     }
   }
 `;
@@ -129,18 +128,38 @@ export const RuleDetailsFlyout = ({
     }
   }, [overviewTab, investigationGuideTab, rule.note]);
 
+  const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
+  const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
+
+  useEffect(() => {
+    if (!tabs.find((tab) => tab.id === selectedTabId)) {
+      // Switch to first tab if currently selected tab is not available for this rule
+      setSelectedTabId(tabs[0].id);
+    }
+  }, [tabs, selectedTabId]);
+
+  const onTabClick = (tab: EuiTabbedContentTab) => {
+    setSelectedTabId(tab.id);
+  };
+
   return (
-    <EuiFlyout size="m" onClose={closeFlyout} ownFocus={false} key="prebuilt-rules-flyout">
+    <EuiFlyout
+      size="m"
+      onClose={closeFlyout}
+      ownFocus={false}
+      key="prebuilt-rules-flyout"
+      paddingSize="l"
+    >
       <EuiFlyoutHeader>
         <EuiTitle size="m" data-test-subj="rulesBulkEditFormTitle">
           <h2>{rule.name}</h2>
         </EuiTitle>
+        <EuiSpacer size="l" />
       </EuiFlyoutHeader>
       <StyledEuiFlyoutBody>
         <StyledFlexGroup direction="column" gutterSize="none">
           <StyledEuiFlexItem grow={true}>
-            <EuiSpacer size="s" />
-            <StyledEuiTabbedContent tabs={tabs} />
+            <StyledEuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
           </StyledEuiFlexItem>
         </StyledFlexGroup>
       </StyledEuiFlyoutBody>
