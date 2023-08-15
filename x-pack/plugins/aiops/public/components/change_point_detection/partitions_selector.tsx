@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { type FC, useState, useCallback, useMemo } from 'react';
+import React, { type FC, useState, useCallback, useMemo, useEffect } from 'react';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
-import useMount from 'react-use/lib/useMount';
 import { debounce } from 'lodash';
+import usePrevious from 'react-use/lib/usePrevious';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useCancellableSearch } from '../../hooks/use_cancellable_search';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -22,11 +22,31 @@ export interface PartitionsSelectorProps {
   onChange: (update: string[]) => void;
 }
 
-function getQueryPayload(indexPattern: string, fieldName: string, queryString: string = '') {
+function getQueryPayload(
+  indexPattern: string,
+  fieldName: string,
+  queryString: string = '',
+  selectedPartitions?: string[]
+) {
   return {
     params: {
       index: indexPattern,
       size: 0,
+      ...(selectedPartitions?.length
+        ? {
+            query: {
+              bool: {
+                must_not: [
+                  {
+                    terms: {
+                      [fieldName]: selectedPartitions,
+                    },
+                  },
+                ],
+              },
+            },
+          }
+        : {}),
       aggs: {
         aggResults: {
           filter: {
@@ -70,6 +90,7 @@ export const PartitionsSelector: FC<PartitionsSelectorProps> = ({
   const {
     notifications: { toasts },
   } = useAiopsAppContext();
+  const prevSplitField = usePrevious(splitField);
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { runRequest, cancelRequest } = useCancellableSearch();
@@ -79,7 +100,12 @@ export const PartitionsSelector: FC<PartitionsSelectorProps> = ({
       cancelRequest();
       setIsLoading(true);
       try {
-        const requestPayload = getQueryPayload(dataView.getIndexPattern(), splitField, searchValue);
+        const requestPayload = getQueryPayload(
+          dataView.getIndexPattern(),
+          splitField,
+          searchValue,
+          value
+        );
 
         const result = await runRequest<typeof requestPayload, { rawResponse: PartitionsResponse }>(
           requestPayload
@@ -105,12 +131,18 @@ export const PartitionsSelector: FC<PartitionsSelectorProps> = ({
       }
       setIsLoading(false);
     },
-    [cancelRequest, dataView, splitField, runRequest, toasts]
+    [cancelRequest, dataView, splitField, runRequest, toasts, value]
   );
 
-  useMount(() => {
-    fetchResults('');
-  });
+  useEffect(
+    function onSplitFieldChange() {
+      if (splitField !== prevSplitField) {
+        fetchResults('');
+        onChange([]);
+      }
+    },
+    [splitField, prevSplitField, fetchResults, onChange]
+  );
 
   const selectedOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
     return value.map((v) => ({ value: v, label: v }));
