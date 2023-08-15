@@ -200,6 +200,91 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe.only('proxy_id behaviour', () => {
+      const PROXY_ID = 'download-source-proxy-id';
+      before(async () => {
+        const existingProxy = await supertest
+          .get(`/api/fleet/proxies/${PROXY_ID}`)
+          .catch(() => null);
+
+        if (existingProxy) {
+          return;
+        }
+        await supertest
+          .post(`/api/fleet/proxies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            id: PROXY_ID,
+            name: 'Download source proxy test',
+            url: 'https://some.proxy:3232',
+          })
+          .expect(200);
+      });
+
+      it('should allow creating a new download source host with a proxy_id ', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'download source with valid proxy id',
+            host: 'http://test.fr:443',
+            proxy_id: PROXY_ID,
+            is_default: false,
+          })
+          .expect(200);
+
+        const { id: _, ...itemWithoutId } = postResponse.item;
+        expect(itemWithoutId).to.eql({
+          name: 'download source with valid proxy id',
+          host: 'http://test.fr:443',
+          proxy_id: PROXY_ID,
+          is_default: false,
+        });
+      });
+
+      it('should not allow creating a new download source host with an invalid proxy_id ', async function () {
+        await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My download source',
+            host: 'http://test.fr:443',
+            proxy_id: 'this-proxy-id-does-not-exist',
+            is_default: false,
+          })
+          .expect(400);
+      });
+
+      it('should allow proxy_id to be set to null', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Download source with null proxy id',
+            host: 'http://test.fr:443',
+            proxy_id: PROXY_ID,
+            is_default: false,
+          })
+          .expect(200);
+
+        const { id, ...itemWithoutId } = postResponse.item;
+        expect(itemWithoutId).to.eql({
+          name: 'Download source with null proxy id',
+          host: 'http://test.fr:443',
+          proxy_id: PROXY_ID,
+          is_default: false,
+        });
+
+        await supertest
+          .put(`/api/fleet/agent_download_sources/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            ...itemWithoutId,
+            proxy_id: null,
+          });
+      });
+    });
+
     describe('DELETE /agent_download_sources/{sourceId}', () => {
       let sourceId: string;
       let defaultDSIdToDelete: string;
