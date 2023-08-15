@@ -294,7 +294,7 @@ export function TrainedModelsTableProvider(
 
     public async assertTrainedModelsInferenceFlyoutPipelineConfigValues(
       inferenceConfig: any,
-      fieldMap: any,
+      fieldMap: any
     ) {
       await retry.tryForTime(5000, async () => {
         const actualInferenceConfig = await testSubjects.getVisibleText(
@@ -376,7 +376,7 @@ export function TrainedModelsTableProvider(
 
       await this.assertTrainedModelsInferenceFlyoutPipelineConfigValues(
         values.editedInferenceConfig,
-        values.editedFieldMap,
+        values.editedFieldMap
       );
       await this.assertTrainedModelsInferenceFlyoutAdditionalSettings(values.condition, values.tag);
     }
