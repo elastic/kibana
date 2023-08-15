@@ -122,6 +122,9 @@
               "examples": {
                 "createIndexConnectorRequest": {
                   "$ref": "#/components/examples/create_index_connector_request"
+                },
+                "createWebhookConnectorRequest": {
+                  "$ref": "#/components/examples/create_webhook_connector_request"
                 }
               }
             }
@@ -138,6 +141,9 @@
                 "examples": {
                   "createIndexConnectorResponse": {
                     "$ref": "#/components/examples/create_index_connector_response"
+                  },
+                  "createWebhookConnectorResponse": {
+                    "$ref": "#/components/examples/create_webhook_connector_response"
                   }
                 }
               }
@@ -4595,6 +4601,24 @@
           }
         }
       },
+      "create_webhook_connector_request": {
+        "summary": "Create a webhook connector with SSL authentication.",
+        "value": {
+          "name": "my-webhook-connector",
+          "connector_type_id": ".webhook",
+          "config": {
+            "method": "post",
+            "url": "https://example.com",
+            "authType": "webhook-authentication-ssl",
+            "certType": "ssl-crt-key"
+          },
+          "secrets": {
+            "crt": "QmFnIEF0dH...",
+            "key": "LS0tLS1CRUdJ...",
+            "password": "my-passphrase"
+          }
+        }
+      },
       "create_index_connector_response": {
         "summary": "A new index connector.",
         "value": {
@@ -4606,6 +4630,27 @@
             "refresh": false,
             "executionTimeField": null
           },
+          "is_preconfigured": false,
+          "is_deprecated": false,
+          "is_missing_secrets": false,
+          "is_system_action": false
+        }
+      },
+      "create_webhook_connector_response": {
+        "summary": "A new webhook connector.",
+        "value": {
+          "id": "900eb010-3b9d-11ee-a642-8ffbb94e38bd",
+          "name": "my-webhook-connector",
+          "config": {
+            "method": "post",
+            "url": "https://example.com",
+            "authType": "webhook-authentication-ssl",
+            "certType": "ssl-crt-key",
+            "verificationMode": "full",
+            "headers": null,
+            "hasAuth": true
+          },
+          "connector_type_id": ".webhook",
           "is_preconfigured": false,
           "is_deprecated": false,
           "is_missing_secrets": false,
