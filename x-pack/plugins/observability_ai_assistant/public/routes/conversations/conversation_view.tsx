@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React, { useMemo, useState } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { ChatBody } from '../../components/chat/chat_body';
 import { ConversationList } from '../../components/chat/conversation_list';
 import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
@@ -21,8 +22,8 @@ import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { useObservabilityAIAssistantParams } from '../../hooks/use_observability_ai_assistant_params';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
-import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
+import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 
 const containerClassName = css`
   max-width: 100%;
@@ -30,6 +31,12 @@ const containerClassName = css`
 
 const chatBodyContainerClassNameWithError = css`
   align-self: center;
+`;
+
+const conversationListContainerName = css`
+  min-width: 250px;
+  width: 250px;
+  border-right: solid 1px ${euiThemeVars.euiColorLightShade};
 `;
 
 export function ConversationView() {
@@ -120,8 +127,8 @@ export function ConversationView() {
   return (
     <>
       {confirmDeleteElement}
-      <EuiFlexGroup direction="row" className={containerClassName}>
-        <EuiFlexItem grow={false} style={{ minWidth: 250, width: 250 }}>
+      <EuiFlexGroup direction="row" className={containerClassName} gutterSize="none">
+        <EuiFlexItem grow={false} className={conversationListContainerName}>
           <ConversationList
             selected={conversationId ?? ''}
             loading={conversations.loading || isUpdatingList}

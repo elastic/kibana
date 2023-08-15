@@ -144,7 +144,7 @@ export function ChatBody({
       <>
         <EuiFlexItem grow className={timelineClassName}>
           <div ref={timelineContainerRef}>
-            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
+            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
               <ChatTimeline
                 items={timeline.items}
                 onEdit={timeline.onEdit}
@@ -159,13 +159,13 @@ export function ChatBody({
           <EuiHorizontalRule margin="none" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
+          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
             <ChatPromptEditor
               loading={isLoading}
               disabled={!connectors.selectedConnector}
               onSubmit={timeline.onSubmit}
             />
-            <EuiSpacer size="m" />
+            <EuiSpacer size="s" />
           </EuiPanel>
         </EuiFlexItem>
       </>

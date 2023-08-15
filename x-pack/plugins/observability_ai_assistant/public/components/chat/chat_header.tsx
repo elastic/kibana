@@ -46,22 +46,13 @@ export function ChatHeader({
 
   const theme = useEuiTheme();
 
-  // Component only works uncontrolled at the moment, so need to unmount and remount.
+  // Component only works uncontrolled at the moment, so need to unmount and remount on prop change.
   const shouldRender = useUnmountAndRemountWhenPropChanges(displayedTitle);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <EuiPanel
-      paddingSize="s"
-      hasBorder={false}
-      hasShadow={false}
-      borderRadius="none"
-      className={css`
-        padding-top: 16px;
-        padding-bottom: 16px;
-      `}
-    >
+    <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false} borderRadius="none">
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
           {loading ? <EuiLoadingSpinner size="xl" /> : <AssistantAvatar size="m" />}
