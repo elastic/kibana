@@ -24,7 +24,11 @@ import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../common/constan
 import { FullSizeCenteredPage } from './full_size_centered_page';
 import { useCspBenchmarkIntegrations } from '../pages/benchmarks/use_csp_benchmark_integrations';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
-import { NO_FINDINGS_STATUS_TEST_SUBJ } from './test_subjects';
+import {
+  CSPM_NOT_INSTALLED_ACTION_SUBJ,
+  KSPM_NOT_INSTALLED_ACTION_SUBJ,
+  NO_FINDINGS_STATUS_TEST_SUBJ,
+} from './test_subjects';
 import { CloudPosturePage, PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from './cloud_posture_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 import type { IndexDetails, PostureTypes } from '../../common/types';
@@ -220,7 +224,12 @@ const ConfigurationFindingsInstalledEmptyPrompt = ({
       actions={
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton color="primary" fill href={cspmIntegrationLink}>
+            <EuiButton
+              color="primary"
+              fill
+              href={cspmIntegrationLink}
+              data-test-subj={CSPM_NOT_INSTALLED_ACTION_SUBJ}
+            >
               <FormattedMessage
                 id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addCspmIntegrationButtonTitle"
                 defaultMessage="Add CSPM Integration"
@@ -228,7 +237,12 @@ const ConfigurationFindingsInstalledEmptyPrompt = ({
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton color="primary" fill href={kspmIntegrationLink}>
+            <EuiButton
+              color="primary"
+              fill
+              href={kspmIntegrationLink}
+              data-test-subj={KSPM_NOT_INSTALLED_ACTION_SUBJ}
+            >
               <FormattedMessage
                 id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addKspmIntegrationButtonTitle"
                 defaultMessage="Add KSPM Integration"

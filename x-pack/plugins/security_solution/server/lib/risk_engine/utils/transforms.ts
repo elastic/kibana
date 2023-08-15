@@ -4,11 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { ElasticsearchClient } from '@kbn/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   TransformGetTransformResponse,
+  TransformStartTransformResponse,
+  TransformPutTransformResponse,
   TransformGetTransformTransformSummary,
+  TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import {
@@ -66,4 +69,54 @@ export const removeLegacyTransforms = async ({
   );
 
   await Promise.allSettled(stopTransformRequests);
+};
+
+export const createTransform = async ({
+  esClient,
+  transform,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  transform: TransformPutTransformRequest;
+  logger: Logger;
+}): Promise<TransformPutTransformResponse | void> => {
+  try {
+    await esClient.transform.getTransform({
+      transform_id: transform.transform_id,
+    });
+
+    logger.info(`Transform ${transform.transform_id} already exists`);
+  } catch (existErr) {
+    const transformedError = transformError(existErr);
+    if (transformedError.statusCode === 404) {
+      return esClient.transform.putTransform(transform);
+    } else {
+      logger.error(
+        `Failed to check if transform ${transform.transform_id} exists before creation: ${transformedError.message}`
+      );
+      throw existErr;
+    }
+  }
+};
+
+export const startTransform = async ({
+  esClient,
+  transformId,
+}: {
+  esClient: ElasticsearchClient;
+  transformId: string;
+}): Promise<TransformStartTransformResponse | void> => {
+  const transformStats = await esClient.transform.getTransformStats({
+    transform_id: transformId,
+  });
+  if (transformStats.count <= 0) {
+    throw new Error(`Can't check ${transformId} status`);
+  }
+  if (
+    transformStats.transforms[0].state === 'indexing' ||
+    transformStats.transforms[0].state === 'started'
+  ) {
+    return;
+  }
+  return esClient.transform.startTransform({ transform_id: transformId });
 };
