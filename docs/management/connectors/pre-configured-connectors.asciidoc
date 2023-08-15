@@ -80,3 +80,34 @@ image::images/preconfigured-connectors-managing.png[Connectors managing tab with
 Clicking a preconfigured connector shows the description, but not the 
 configuration.
 
+[float]
+[[preconfigured-webhook-configuration]]
+=== Webhook preconfigured connector example
+
+The following example creates a <<webhook-action-type,webhook connector>> with basic authentication:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-webhook:
+    name: preconfigured-webhook-connector-type
+    actionTypeId: .webhook
+    config:
+      url: https://test.host <1>
+      method: post <2>
+      headers: <3>
+        testheader: testvalue
+      hasAuth: true <4>
+    secrets:
+      user: testuser <5>
+      password: passwordkeystorevalue <6>
+--
+
+<1> The web service request URL. If you are using the <<action-settings,`xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
+<2> The HTTP request method, either `post`(default) or `put`.
+<3> A set of key-value pairs sent as headers with the request.
+<4> If `true`, this connector will require values for `user` and `password` inside the secrets configuration. Defaults to `true`.
+<5> A valid user name. Required if `hasAuth` is set to `true`.
+<6> A valid password. Required if `hasAuth` is set to `true`. NOTE: This value should be stored in the <<creating-keystore,{kib} keystore>>.
+
+NOTE: SSL authentication is not supported in preconfigured webhook connectors.
