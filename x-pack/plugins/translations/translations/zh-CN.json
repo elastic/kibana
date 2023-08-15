@@ -33742,7 +33742,6 @@
     "xpack.securitySolution.navigation.findings": "结果",
     "xpack.securitySolution.navigation.gettingStarted": "开始使用",
     "xpack.securitySolution.navigation.hosts": "主机",
-    "xpack.securitySolution.navigation.investigate": "调查",
     "xpack.securitySolution.navigation.kubernetes": "Kubernetes",
     "xpack.securitySolution.navigation.mainLabel": "安全",
     "xpack.securitySolution.navigation.network": "网络",
