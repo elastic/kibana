@@ -202,7 +202,7 @@ export const RuleSchema = t.intersection([
     version: RuleVersion,
     execution_summary: RuleExecutionSummary,
     alert_suppression: AlertSuppression,
-    custom_highlighted_fields: RuleCustomHighlightedFieldArray,
+    investigation_fields: RuleCustomHighlightedFieldArray,
   }),
 ]);
 

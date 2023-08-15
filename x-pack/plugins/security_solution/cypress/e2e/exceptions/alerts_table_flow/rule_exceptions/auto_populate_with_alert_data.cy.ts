@@ -49,7 +49,7 @@ describe('Auto populate exception with Alert data', () => {
     cy.task('esArchiverResetKibana');
     cy.task('esArchiverLoad', 'endpoint');
     login();
-    createRule({ ...getEndpointRule(), custom_highlighted_fields: ['message'] });
+    createRule({ ...getEndpointRule(), investigation_fields: ['message'] });
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
     waitForAlertsToPopulate();

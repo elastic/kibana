@@ -427,16 +427,16 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('custom_highlighted_fields', () => {
-        it('should overwrite custom_highlighted_fields value on update - non additive', async () => {
+      describe('investigation_fields', () => {
+        it('should overwrite investigation_fields value on update - non additive', async () => {
           await createRule(supertest, log, {
             ...getSimpleRule('rule-1'),
-            custom_highlighted_fields: ['blob', 'boop'],
+            investigation_fields: ['blob', 'boop'],
           });
 
           const rulePatch = {
             rule_id: 'rule-1',
-            custom_highlighted_fields: ['foo', 'bar'],
+            investigation_fields: ['foo', 'bar'],
           };
 
           const { body } = await supertest
@@ -445,7 +445,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(rulePatch)
             .expect(200);
 
-          expect(body.custom_highlighted_fields).to.eql(['foo', 'bar']);
+          expect(body.investigation_fields).to.eql(['foo', 'bar']);
         });
       });
     });

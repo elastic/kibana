@@ -160,7 +160,7 @@ export const schema: FormSchema<AboutStepRule> = {
     ),
     labelAppend: OptionalFieldLabel,
   },
-  customHighlightedFields: {
+  investigationFields: {
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldCustomHighlightedFieldsLabel',

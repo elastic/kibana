@@ -67,7 +67,7 @@ import {
   CELL_EXPANSION_POPOVER,
   USER_DETAILS_LINK,
 } from '../screens/alerts_details';
-import { EXCEPTION_ITEM_NAME_INPUT, FIELD_INPUT } from '../screens/exceptions';
+import { FIELD_INPUT } from '../screens/exceptions';
 import {
   CONTROL_FRAME_TITLE,
   DETECTION_PAGE_FILTERS_LOADING,
@@ -88,13 +88,10 @@ import { openFilterGroupContextMenu } from './common/filter_group';
 
 export const addExceptionFromFirstAlert = () => {
   expandFirstAlertActions();
-  cy.get(TIMELINE_CONTEXT_MENU_BTN)
-  .first()
-  .should('be.visible');
   cy.get(ADD_EXCEPTION_BTN, { timeout: 10000 }).first().click();
   cy.get(LOADING_SPINNER).should('exist');
   cy.get(LOADING_SPINNER).should('not.exist');
-  cy.get(EXCEPTION_ITEM_NAME_INPUT).should('exist');
+  cy.get(FIELD_INPUT).should('exist');
 };
 
 export const openAddEndpointExceptionFromFirstAlert = () => {

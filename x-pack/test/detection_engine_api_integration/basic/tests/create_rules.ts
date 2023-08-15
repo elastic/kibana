@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
           author: [],
           created_by: 'elastic',
           description: 'Simple Rule Query',
-          custom_highlighted_fields: [],
+          investigation_fields: [],
           enabled: true,
           false_positives: [],
           from: 'now-6m',

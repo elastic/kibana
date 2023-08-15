@@ -89,7 +89,7 @@ export interface AboutStepRule {
   riskScore: AboutStepRiskScore;
   references: string[];
   falsePositives: string[];
-  customHighlightedFields: string[];
+  investigationFields: string[];
   license: string;
   ruleNameOverride: string;
   tags: string[];
@@ -239,7 +239,7 @@ export interface AboutStepRuleJson {
   timestamp_override?: TimestampOverride;
   timestamp_override_fallback_disabled?: boolean;
   note?: string;
-  custom_highlighted_fields?: string[];
+  investigation_fields?: string[];
 }
 
 export interface ScheduleStepRuleJson {

@@ -409,8 +409,8 @@ export const convertPatchAPIToInternalSchema = (
       description: nextParams.description ?? existingParams.description,
       ruleId: existingParams.ruleId,
       falsePositives: nextParams.false_positives ?? existingParams.falsePositives,
-      customHighlightedFields:
-        nextParams.custom_highlighted_fields ?? existingParams.customHighlightedFields,
+      investigationFields:
+        nextParams.investigation_fields ?? existingParams.investigationFields,
       from: nextParams.from ?? existingParams.from,
       immutable: existingParams.immutable,
       license: nextParams.license ?? existingParams.license,
@@ -472,7 +472,7 @@ export const convertCreateAPIToInternalSchema = (
       description: input.description,
       ruleId: newRuleId,
       falsePositives: input.false_positives ?? [],
-      customHighlightedFields: input.custom_highlighted_fields ?? [],
+      investigationFields: input.investigation_fields ?? [],
       from: input.from ?? 'now-6m',
       immutable,
       license: input.license,
@@ -622,7 +622,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     rule_name_override: params.ruleNameOverride,
     timestamp_override: params.timestampOverride,
     timestamp_override_fallback_disabled: params.timestampOverrideFallbackDisabled,
-    custom_highlighted_fields: params.customHighlightedFields,
+    investigation_fields: params.investigationFields,
     author: params.author,
     false_positives: params.falsePositives,
     from: params.from,

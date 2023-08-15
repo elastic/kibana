@@ -64,7 +64,7 @@ const getResponseBaseParams = (anchorDate: string = ANCHOR_DATE): SharedResponse
   timestamp_override: undefined,
   timestamp_override_fallback_disabled: undefined,
   namespace: undefined,
-  custom_highlighted_fields: undefined,
+  investigation_fields: undefined,
 });
 
 export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): QueryRule => ({
@@ -78,7 +78,7 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): QueryRule 
   saved_id: undefined,
   response_actions: undefined,
   alert_suppression: undefined,
-  custom_highlighted_fields: undefined,
+  investigation_fields: undefined,
 });
 
 export const getSavedQuerySchemaMock = (anchorDate: string = ANCHOR_DATE): SavedQueryRule => ({

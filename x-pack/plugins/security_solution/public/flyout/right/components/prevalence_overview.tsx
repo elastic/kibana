@@ -28,7 +28,7 @@ export const PrevalenceOverview: FC = () => {
     browserFields,
     dataFormattedForFieldBrowser,
     scopeId,
-    customHighlightedFields,
+    investigationFields,
   } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutContext();
 
@@ -48,7 +48,7 @@ export const PrevalenceOverview: FC = () => {
     eventId,
     browserFields,
     dataFormattedForFieldBrowser,
-    customHighlightedFields,
+    investigationFields,
     scopeId,
   });
 
