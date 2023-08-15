@@ -217,14 +217,6 @@ describe('UptimeEsClient', () => {
         stackVersion: '8.11.0',
       });
 
-      const mockSearchParams = {
-        body: {
-          query: {
-            match_all: {},
-          },
-        },
-      };
-
       await uptimeEsClient.search({
         body: {
           query: {
@@ -236,12 +228,38 @@ describe('UptimeEsClient', () => {
       expect(esClient.search).toHaveBeenCalledWith(
         {
           index: 'heartbeat-8*,heartbeat-7*',
-          ...mockSearchParams,
+          body: {
+            query: {
+              match_all: {},
+            },
+          },
+        },
+        { meta: true }
+      );
+
+      uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, {
+        stackVersion: '8.10.0',
+      });
+
+      await uptimeEsClient.search({
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+
+      expect(esClient.search).toHaveBeenLastCalledWith(
+        {
+          index: 'heartbeat-8*,heartbeat-7*',
+          body: {
+            query: {
+              match_all: {},
+            },
+          },
         },
         { meta: true }
       );
     });
   });
-
-  // Add more tests for other methods and edge cases
 });

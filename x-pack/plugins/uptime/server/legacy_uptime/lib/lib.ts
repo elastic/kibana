@@ -243,7 +243,7 @@ export const shouldAppendSyntheticsIndex = (stackVersion?: string) => {
   if (!stackVersion) {
     return false;
   }
-  return semver.lte(stackVersion, '8.10.0');
+  return semver.lt(stackVersion, '8.10.0');
 };
 
 export function createEsParams<T extends estypes.SearchRequest>(params: T): T {
