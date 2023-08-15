@@ -6,7 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { API_BASE_PATH } from '../../../common/constants';
+import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common/constants';
 
 type HttpResponse = Record<string, any> | any[];
 type HttpMethod = 'GET' | 'PUT' | 'DELETE' | 'POST';
@@ -130,7 +130,7 @@ const registerHttpRequestMockHelpers = (
     mockResponse('GET', '/api/ui_counters/_report', response, error);
 
   const setLoadEnrichPoliciesResponse = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('GET', `${API_BASE_PATH}/enrich_policies`, response, error);
+    mockResponse('GET', `${INTERNAL_API_BASE_PATH}/enrich_policies`, response, error);
 
   const setDeleteEnrichPolicyResponse = (
     policyName: string,
