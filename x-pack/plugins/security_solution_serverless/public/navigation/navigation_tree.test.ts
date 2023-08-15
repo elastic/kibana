@@ -119,18 +119,10 @@ describe('subscribeNavigationTree', () => {
     expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
         {
-          id: 'root',
-          title: 'Root',
-          path: ['root'],
-          breadcrumbStatus: 'hidden',
-          children: [
-            {
-              id: chromeNavLink1.id,
-              title: link1.title,
-              path: ['root', chromeNavLink1.id],
-              deepLink: chromeNavLink1,
-            },
-          ],
+          id: chromeNavLink1.id,
+          title: link1.title,
+          path: [chromeNavLink1.id],
+          deepLink: chromeNavLink1,
         },
       ],
     });
@@ -144,18 +136,10 @@ describe('subscribeNavigationTree', () => {
     expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
         {
-          id: 'root',
-          title: 'Root',
-          path: ['root'],
-          breadcrumbStatus: 'hidden',
-          children: [
-            {
-              id: chromeNavLink3.id,
-              title: chromeNavLink3.title,
-              path: ['root', chromeNavLink3.id],
-              deepLink: chromeNavLink3,
-            },
-          ],
+          id: chromeNavLink3.id,
+          title: chromeNavLink3.title,
+          path: [chromeNavLink3.id],
+          deepLink: chromeNavLink3,
         },
       ],
     });
@@ -169,24 +153,16 @@ describe('subscribeNavigationTree', () => {
     expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
         {
-          id: 'root',
-          title: 'Root',
-          path: ['root'],
-          breadcrumbStatus: 'hidden',
+          id: chromeNavLink1.id,
+          title: link1.title,
+          path: [chromeNavLink1.id],
+          deepLink: chromeNavLink1,
           children: [
             {
-              id: chromeNavLink1.id,
-              title: link1.title,
-              path: ['root', chromeNavLink1.id],
-              deepLink: chromeNavLink1,
-              children: [
-                {
-                  id: chromeNavLink2.id,
-                  title: link2.title,
-                  path: ['root', chromeNavLink1.id, chromeNavLink2.id],
-                  deepLink: chromeNavLink2,
-                },
-              ],
+              id: chromeNavLink2.id,
+              title: link2.title,
+              path: [chromeNavLink1.id, chromeNavLink2.id],
+              deepLink: chromeNavLink2,
             },
           ],
         },
@@ -207,40 +183,27 @@ describe('subscribeNavigationTree', () => {
     expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
         {
-          id: 'root',
-          title: 'Root',
-          path: ['root'],
-          breadcrumbStatus: 'hidden',
+          id: chromeNavLinkTest.id,
+          title: link1.title,
+          path: [chromeNavLinkTest.id],
+          deepLink: chromeNavLinkTest,
           children: [
             {
-              id: chromeNavLinkTest.id,
-              title: link1.title,
-              path: ['root', chromeNavLinkTest.id],
-              deepLink: chromeNavLinkTest,
+              id: chromeNavLinkMl1.id,
+              title: chromeNavLinkMl1.title,
+              path: [chromeNavLinkTest.id, chromeNavLinkMl1.id],
+              deepLink: chromeNavLinkMl1,
+            },
+            {
+              id: defaultNavCategory1.id,
+              title: defaultNavCategory1.title,
+              path: [chromeNavLinkTest.id, defaultNavCategory1.id],
               children: [
                 {
-                  id: chromeNavLinkMl1.id,
-                  title: chromeNavLinkMl1.title,
-                  path: ['root', chromeNavLinkTest.id, chromeNavLinkMl1.id],
-                  deepLink: chromeNavLinkMl1,
-                },
-                {
-                  id: defaultNavCategory1.id,
-                  title: defaultNavCategory1.title,
-                  path: ['root', chromeNavLinkTest.id, defaultNavCategory1.id],
-                  children: [
-                    {
-                      id: chromeNavLinkMl2.id,
-                      title: 'Overridden ML SubLink 2',
-                      path: [
-                        'root',
-                        chromeNavLinkTest.id,
-                        defaultNavCategory1.id,
-                        chromeNavLinkMl2.id,
-                      ],
-                      deepLink: chromeNavLinkMl2,
-                    },
-                  ],
+                  id: chromeNavLinkMl2.id,
+                  title: 'Overridden ML SubLink 2',
+                  path: [chromeNavLinkTest.id, defaultNavCategory1.id, chromeNavLinkMl2.id],
+                  deepLink: chromeNavLinkMl2,
                 },
               ],
             },
@@ -259,18 +222,10 @@ describe('subscribeNavigationTree', () => {
     expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
         {
-          id: 'root',
-          title: 'Root',
-          path: ['root'],
-          breadcrumbStatus: 'hidden',
-          children: [
-            {
-              id: chromeNavLink2.id,
-              title: link2.title,
-              path: ['root', chromeNavLink2.id],
-              deepLink: chromeNavLink2,
-            },
-          ],
+          id: chromeNavLink2.id,
+          title: link2.title,
+          path: [chromeNavLink2.id],
+          deepLink: chromeNavLink2,
         },
       ],
     });
@@ -292,25 +247,17 @@ describe('subscribeNavigationTree', () => {
     expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
         {
-          id: 'root',
-          title: 'Root',
-          path: ['root'],
+          id: chromeNavLinkTest.id,
+          title: link1.title,
+          path: [chromeNavLinkTest.id],
+          deepLink: chromeNavLinkTest,
           breadcrumbStatus: 'hidden',
-          children: [
-            {
-              id: chromeNavLinkTest.id,
-              title: link1.title,
-              path: ['root', chromeNavLinkTest.id],
-              deepLink: chromeNavLinkTest,
-              breadcrumbStatus: 'hidden',
-            },
-            {
-              id: chromeNavLink2.id,
-              title: link2.title,
-              path: ['root', chromeNavLink2.id],
-              deepLink: chromeNavLink2,
-            },
-          ],
+        },
+        {
+          id: chromeNavLink2.id,
+          title: link2.title,
+          path: [chromeNavLink2.id],
+          deepLink: chromeNavLink2,
         },
       ],
     });

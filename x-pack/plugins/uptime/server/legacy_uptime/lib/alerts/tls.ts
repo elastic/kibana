@@ -121,6 +121,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   name: tlsTranslations.alertFactoryName,
   validate: {
     params: schema.object({
+      stackVersion: schema.maybe(schema.string()),
       search: schema.maybe(schema.string()),
       certExpirationThreshold: schema.maybe(schema.number()),
       certAgeThreshold: schema.maybe(schema.number()),
@@ -168,7 +169,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
       savedObjectsClient,
       scopedClusterClient.asCurrentUser,
       {
-        isLegacyAlert: true,
+        stackVersion: params.stackVersion ?? '8.9.0',
       }
     );
 

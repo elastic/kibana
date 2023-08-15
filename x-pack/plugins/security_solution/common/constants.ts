@@ -20,6 +20,7 @@ export { SecurityPageName } from '@kbn/security-solution-navigation';
  */
 export const APP_ID = 'securitySolution' as const;
 export const APP_UI_ID = 'securitySolutionUI' as const;
+export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
 export const SERVER_APP_ID = 'siem' as const;
 export const APP_NAME = 'Security' as const;
@@ -496,6 +497,7 @@ export const ALERTS_TABLE_REGISTRY_CONFIG_IDS = {
   ALERTS_PAGE: `${APP_ID}-alerts-page`,
   RULE_DETAILS: `${APP_ID}-rule-details`,
   CASE: `${APP_ID}-case`,
+  RISK_INPUTS: `${APP_ID}-risk-inputs`,
 } as const;
 
 export const DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertTags' as const;
