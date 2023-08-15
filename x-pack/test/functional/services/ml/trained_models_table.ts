@@ -295,8 +295,6 @@ export function TrainedModelsTableProvider(
     public async assertTrainedModelsInferenceFlyoutPipelineConfigValues(
       inferenceConfig: any,
       fieldMap: any,
-      condition: string = '',
-      tag: string = ''
     ) {
       await retry.tryForTime(5000, async () => {
         const actualInferenceConfig = await testSubjects.getVisibleText(
@@ -311,8 +309,6 @@ export function TrainedModelsTableProvider(
         );
         expect(JSON.parse(actualFieldMap)).to.eql(fieldMap);
       });
-
-      await this.assertTrainedModelsInferenceFlyoutAdditionalSettings(condition, tag);
     }
 
     public async trainedModelsInferenceFlyoutSaveChanges() {
@@ -381,9 +377,8 @@ export function TrainedModelsTableProvider(
       await this.assertTrainedModelsInferenceFlyoutPipelineConfigValues(
         values.editedInferenceConfig,
         values.editedFieldMap,
-        values.condition,
-        values.tag
       );
+      await this.assertTrainedModelsInferenceFlyoutAdditionalSettings(values.condition, values.tag);
     }
 
     public async completeTrainedModelsInferenceFlyoutDetails(
