@@ -6,6 +6,10 @@
     "patterns": [
       "_security/api_key/_bulk_update"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-bulk-update-api-keys.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-bulk-update-api-keys.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }
