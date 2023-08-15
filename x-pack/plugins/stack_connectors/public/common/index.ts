@@ -9,3 +9,8 @@ import GenAiLogo from '../connector_types/gen_ai/logo';
 
 export { GEN_AI_CONNECTOR_ID, OpenAiProviderType } from '../../common/gen_ai/constants';
 export { GenAiLogo };
+
+import SentinelOneLogo from '../connector_types/sentinelone/logo';
+
+export { SENTINELONE_CONNECTOR_ID } from '../../common/sentinelone/constants';
+export { SentinelOneLogo };

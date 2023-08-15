@@ -23,13 +23,18 @@ export const renderParameterTemplates = (
   const alertIds = map(context.alerts, '_id');
 
   if (params?.subAction === SUB_ACTION.KILL_PROCESS) {
+    const processNames = ((params.subActionParams.processName && [
+      params.subActionParams.processName,
+    ]) ||
+      map(context.alerts, 'process.name').filter((elm) => elm)) as string[];
+    console.error('params', processNames, context, params, variables);
     return {
       subAction: SUB_ACTION.KILL_PROCESS,
       subActionParams: {
-        processName: context.alerts[0].process?.name,
+        processName: processNames.join(','),
         computerName: context.alerts[0].host?.name,
+        alertIds,
       },
-      alertIds,
     };
   }
 

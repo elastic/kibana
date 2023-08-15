@@ -42,14 +42,13 @@ export const buildResponseActionsQuery = (
         bool: {
           minimum_should_match: 1,
           should: [
-            // { term: { type: 'INPUT_ACTION' } },
             { terms: { alert_ids: alertIds } },
             {
               terms: { 'data.alert_id': alertIds },
             },
             {
               terms: {
-                'kibana.action.execution.sentinelone.params.subActionParams.alert_ids': alertIds,
+                'kibana.action.execution.sentinelone.params.subActionParams.alertIds': alertIds,
               },
             },
           ] as estypes.QueryDslQueryContainer[],
@@ -63,7 +62,22 @@ export const buildResponseActionsQuery = (
         },
       ],
       runtime_mappings: {
-        'kibana.action.execution.sentinelone.params.subActionParams.alert_ids': {
+        'kibana.action.execution.sentinelone.params.subAction': {
+          type: 'keyword' as const,
+        },
+        'kibana.action.execution.sentinelone.params.subActionParams.alertIds': {
+          type: 'keyword' as const,
+        },
+        'kibana.action.execution.sentinelone.params.subActionParams.hostname': {
+          type: 'keyword' as const,
+        },
+        'kibana.action.execution.sentinelone.params.subActionParams.computerName': {
+          type: 'keyword' as const,
+        },
+        'kibana.action.execution.sentinelone.params.subActionParams.processName': {
+          type: 'keyword' as const,
+        },
+        'kibana.action.execution.sentinelone.data.data.parentTaskId': {
           type: 'keyword' as const,
         },
       },

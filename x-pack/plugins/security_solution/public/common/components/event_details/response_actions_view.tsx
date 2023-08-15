@@ -28,6 +28,8 @@ const TabContentWrapper = styled.div`
   position: relative;
 `;
 
+const RESPONSE_ACTION_TYPES = ['.sentinelone'];
+
 export const useResponseActionsView = <T extends object = JSX.Element>({
   rawEventData,
   ecsData,
@@ -40,9 +42,12 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
     ? (expandDottedObject((rawEventData as RawEventData).fields) as ExpandedEventFieldsObject)
     : undefined;
 
-  // const responseActions =
-  //   expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
-  const shouldEarlyReturn = !rawEventData || !responseActionsEnabled; // || !responseActions?.length;
+  const responseActions =
+    !!expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions ||
+    !!(expandedEventFieldsObject?.kibana?.alert?.rule?.actions?.action_type_id || []).filter(
+      (actionTypeId) => RESPONSE_ACTION_TYPES.includes(actionTypeId)
+    );
+  const shouldEarlyReturn = !rawEventData || !responseActionsEnabled || !responseActions;
 
   const alertId = rawEventData?._id ?? '';
 

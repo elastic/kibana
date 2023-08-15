@@ -22,7 +22,6 @@ import type { Status } from '../../../../../../common/api/detection_engine';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
 import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
-import { SentinelFlyout } from './sentinel_flyout';
 
 interface FlyoutFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
@@ -139,12 +138,6 @@ export const FlyoutFooterComponent = React.memo(
       null | string
     >(null);
 
-    const [isSentinelFlyoutOpen, setSentinelFlyoutOpen] = useState<boolean>(false);
-
-    const handleSentinelClick = useCallback(() => setSentinelFlyoutOpen(true), []);
-
-    const handleCloseSentinelFlyout = useCallback(() => setSentinelFlyoutOpen(false), []);
-
     const closeOsqueryFlyout = useCallback(() => {
       setOsqueryFlyoutOpenWithAgentId(null);
     }, [setOsqueryFlyoutOpenWithAgentId]);
@@ -172,7 +165,6 @@ export const FlyoutFooterComponent = React.memo(
                   refetch={refetchAll}
                   scopeId={scopeId}
                   onOsqueryClick={setOsqueryFlyoutOpenWithAgentId}
-                  onSentinelClick={handleSentinelClick}
                 />
               )}
             </EuiFlexItem>
@@ -204,9 +196,6 @@ export const FlyoutFooterComponent = React.memo(
             onClose={closeOsqueryFlyout}
             ecsData={detailsEcsData}
           />
-        )}
-        {isSentinelFlyoutOpen && detailsEcsData != null && (
-          <SentinelFlyout ecsData={detailsEcsData} onClose={handleCloseSentinelFlyout} />
         )}
       </>
     );

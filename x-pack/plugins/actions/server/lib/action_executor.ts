@@ -314,10 +314,6 @@ export class ActionExecutor {
         }
         // end gen_ai extension
 
-        if (actionTypeId === '.sentinelone') {
-          console.error(params);
-        }
-
         // start sentinelone extension
         if (
           result.status === 'ok' &&

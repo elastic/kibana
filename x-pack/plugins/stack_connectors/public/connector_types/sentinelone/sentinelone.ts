@@ -44,7 +44,6 @@ export function getConnectorType(): ConnectorTypeModel<
     validateParams: async (
       actionParams: SentinelOneActionParams
     ): Promise<GenericValidationResult<ValidationErrors>> => {
-      console.error('xxx', actionParams);
       const translations = await import('./translations');
       const errors: ValidationErrors = {
         subAction: [],

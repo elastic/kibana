@@ -33,6 +33,7 @@ import {
   SentinelOneGetRemoteScriptStatusResponseSchema,
   SentinelOneGetAgentsParamsSchema,
   SentinelOneExecuteScriptResponseSchema,
+  SentinelOneKillProcessParamsSchema,
 } from '../../../common/sentinelone/schema';
 import { SUB_ACTION } from '../../../common/sentinelone/constants';
 
@@ -101,7 +102,7 @@ export class SentinelOneConnector extends SubActionConnector<
     this.registerSubAction({
       name: SUB_ACTION.KILL_PROCESS,
       method: 'killProcess',
-      schema: SentinelOneKillProcessResponseSchema,
+      schema: SentinelOneKillProcessParamsSchema,
     });
 
     this.registerSubAction({
@@ -128,7 +129,7 @@ export class SentinelOneConnector extends SubActionConnector<
     });
   }
 
-  public async killProcess({ processName, ...payload }: SentinelOneKillProcessParams) {
+  public async killProcess({ alertIds, processName, ...payload }: SentinelOneKillProcessParams) {
     const agentData = await this.getAgents(payload);
 
     const agentId = agentData.data[0]?.id;
@@ -139,7 +140,7 @@ export class SentinelOneConnector extends SubActionConnector<
 
     const terminateScriptResponse = await this.getRemoteScripts({
       query: 'terminate',
-      osTypes: [agentData?.data[0]?.osType],
+      osTypes: agentData?.data[0]?.osType,
     });
 
     if (!processName) {
@@ -165,7 +166,7 @@ export class SentinelOneConnector extends SubActionConnector<
     });
   }
 
-  public async isolateAgent(payload: SentinelOneIsolateAgentParams) {
+  public async isolateAgent({ alertIds, ...payload }: SentinelOneIsolateAgentParams) {
     const response = await this.getAgents(payload);
 
     if (response.data.length === 0) {
@@ -190,7 +191,7 @@ export class SentinelOneConnector extends SubActionConnector<
     });
   }
 
-  public async releaseAgent(payload: SentinelOneIsolateAgentParams) {
+  public async releaseAgent({ alertIds, ...payload }: SentinelOneIsolateAgentParams) {
     const response = await this.getAgents(payload);
 
     if (response.data.length === 0) {

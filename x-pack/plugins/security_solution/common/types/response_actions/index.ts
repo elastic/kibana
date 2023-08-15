@@ -25,6 +25,9 @@ export interface ExpandedEventFieldsObject {
   kibana: {
     alert?: {
       rule?: {
+        actions?: {
+          action_type_id: string[];
+        };
         parameters: RuleParameters;
         name: string[];
       };

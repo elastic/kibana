@@ -10,7 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../../../../../common/lib/kibana/kibana_react';
 
 export interface UseSubActionParams<P> {
-  connectorId: string;
+  connectorId?: string;
   subAction: string;
   subActionParams?: P;
   disabled?: boolean;
@@ -29,7 +29,7 @@ export const useSubAction = <P, R>({
     queryKey: ['useSubAction', connectorId, subAction, subActionParams],
     queryFn: ({ signal }) =>
       executeAction<R>({
-        id: connectorId,
+        id: connectorId as string,
         params: {
           subAction,
           subActionParams,

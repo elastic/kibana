@@ -159,7 +159,7 @@ export const SentinelOneIsolateAgentResponseSchema = schema.object({
 
 export const SentinelOneGetRemoteScriptsParamsSchema = schema.object({
   query: schema.nullable(schema.string()),
-  osTypes: schema.nullable(schema.arrayOf(schema.string())),
+  osTypes: schema.nullable(schema.string()),
 });
 
 export const AlertIds = schema.maybe(schema.arrayOf(schema.string()));
@@ -258,40 +258,39 @@ export const SentinelOneGetRemoteScriptStatusResponseSchema = schema.object({
     totalItems: schema.number(),
     nextCursor: schema.nullable(schema.string()),
   }),
-  errors: schema.arrayOf(schema.object({ type: schema.string() })),
+  errors: schema.nullable(schema.arrayOf(schema.object({ type: schema.string() }))),
   data: schema.arrayOf(
-    schema.object({
-      agentIsDecommissioned: schema.boolean(),
-      agentComputerName: schema.string(),
-      status: schema.string(),
-      groupName: schema.string(),
-      initiatedById: schema.string(),
-      parentTaskId: schema.string(),
-      updatedAt: schema.string(),
-      createdAt: schema.string(),
-      agentIsActive: schema.boolean(),
-      agentOsType: schema.string(),
-      agentMachineType: schema.string(),
-      id: schema.string(),
-      siteName: schema.string(),
-      detailedStatus: schema.string(),
-      siteId: schema.string(),
-      scriptResultsSignature: schema.nullable(schema.string()),
-      initiatedBy: schema.string(),
-      accountName: schema.string(),
-      groupId: schema.string(),
-      statusDescription: schema.object({
-        readOnly: schema.boolean(),
-        description: schema.string(),
-      }),
-      agentUuid: schema.string(),
-      accountId: schema.string(),
-      type: schema.string(),
-      scriptResultsPath: schema.string(),
-      scriptResultsBucket: schema.string(),
-      description: schema.string(),
-      agentId: schema.string(),
-    })
+    schema.object(
+      {
+        agentIsDecommissioned: schema.nullable(schema.boolean()),
+        agentComputerName: schema.nullable(schema.string()),
+        status: schema.nullable(schema.string()),
+        groupName: schema.nullable(schema.string()),
+        initiatedById: schema.nullable(schema.string()),
+        parentTaskId: schema.nullable(schema.string()),
+        updatedAt: schema.nullable(schema.string()),
+        createdAt: schema.nullable(schema.string()),
+        agentIsActive: schema.nullable(schema.boolean()),
+        agentOsType: schema.nullable(schema.string()),
+        agentMachineType: schema.nullable(schema.string()),
+        id: schema.nullable(schema.string()),
+        siteName: schema.nullable(schema.string()),
+        detailedStatus: schema.nullable(schema.string()),
+        siteId: schema.nullable(schema.string()),
+        scriptResultsSignature: schema.nullable(schema.nullable(schema.string())),
+        initiatedBy: schema.nullable(schema.string()),
+        accountName: schema.nullable(schema.string()),
+        groupId: schema.nullable(schema.string()),
+        agentUuid: schema.nullable(schema.string()),
+        accountId: schema.nullable(schema.string()),
+        type: schema.nullable(schema.string()),
+        scriptResultsPath: schema.nullable(schema.string()),
+        scriptResultsBucket: schema.nullable(schema.string()),
+        description: schema.nullable(schema.string()),
+        agentId: schema.nullable(schema.string()),
+      },
+      { unknowns: 'allow' }
+    )
   ),
 });
 
