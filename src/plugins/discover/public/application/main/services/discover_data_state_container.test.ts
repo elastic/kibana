@@ -41,6 +41,11 @@ describe('test getDataStateContainer', () => {
   });
   test('refetch$ triggers a search', async () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    jest.spyOn(stateContainer.searchSessionManager, 'getNextSearchSessionId');
+    jest.spyOn(stateContainer.searchSessionManager, 'getCurrentSearchSessionId');
+    expect(
+      stateContainer.searchSessionManager.getNextSearchSessionId as jest.Mock
+    ).not.toHaveBeenCalled();
 
     discoverServiceMock.data.query.timefilter.timefilter.getTime = jest.fn(() => {
       return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
@@ -59,6 +64,15 @@ describe('test getDataStateContainer', () => {
 
     expect(dataState.data$.totalHits$.value.result).toBe(0);
     expect(dataState.data$.documents$.value.result).toEqual([]);
+
+    // gets a new search session id
+    expect(
+      stateContainer.searchSessionManager.getNextSearchSessionId as jest.Mock
+    ).toHaveBeenCalled();
+    expect(
+      stateContainer.searchSessionManager.getCurrentSearchSessionId as jest.Mock
+    ).not.toHaveBeenCalled();
+
     unsubscribe();
   });
 
@@ -111,6 +125,11 @@ describe('test getDataStateContainer', () => {
       result: initialRecords,
     }) as DataDocuments$;
 
+    jest.spyOn(stateContainer.searchSessionManager, 'getCurrentSearchSessionId');
+    expect(
+      stateContainer.searchSessionManager.getCurrentSearchSessionId as jest.Mock
+    ).not.toHaveBeenCalled();
+
     const dataState = stateContainer.dataState;
 
     const unsubscribe = dataState.subscribe();
@@ -127,6 +146,10 @@ describe('test getDataStateContainer', () => {
 
       if (hasLoadingMoreStarted && value.fetchStatus === FetchStatus.COMPLETE) {
         expect(value.result).toEqual([...initialRecords, ...moreRecords]);
+        // it uses the same current search session id
+        expect(
+          stateContainer.searchSessionManager.getCurrentSearchSessionId as jest.Mock
+        ).toHaveBeenCalled();
 
         unsubscribe();
         done();

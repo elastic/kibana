@@ -208,7 +208,9 @@ export function getDataStateContainer({
         reset: val === 'reset',
         fetchMore: val === 'fetch_more',
       },
-      searchSessionId: searchSessionManager.getNextSearchSessionId(),
+      searchSessionId:
+        (val === 'fetch_more' && searchSessionManager.getCurrentSearchSessionId()) ||
+        searchSessionManager.getNextSearchSessionId(),
     })),
     share()
   );
