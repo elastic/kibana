@@ -207,7 +207,7 @@ The maximum {byte-units}[byte size] of a CSV file before being truncated. This s
 
 [NOTE]
 ============
-We recommend using CSV reports to export moderate amounts of data only. The feature enables analysis of data in external tools, but it's not intended for bulk export or to backup {es} data. If you are considering increasing `xpack.reporting.csv.maxSizeBytes` to larger than the default, please first consider creating smaller reports, or using {es} APIs directly.
+We recommend using CSV reports to export moderate amounts of data only. The feature enables analysis of data in external tools, but it's not intended for bulk export or to backup {es} data. If you need to export more than 250 MB of CSV, rather than increasing `xpack.reporting.csv.maxSizeBytes`, please use filters to create multiple smaller reports, or extract the data you need directly from {es}.
 
 The following deployment configurations may lead to failed report jobs or incomplete reports:
 
