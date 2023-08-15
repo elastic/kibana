@@ -10,7 +10,5 @@ import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { DetectionRuleCounter } from '../../../components/detection_rule_counter';
 
 export const FindingsDetectionRuleCounter = ({ finding }: { finding: CspFinding }) => {
-  // const tags = generateFindingsTags(finding);
-
   return <DetectionRuleCounter tags={finding.rule.tags} />;
 };

@@ -12,7 +12,6 @@ import {
   LATEST_FINDINGS_RETENTION_POLICY,
 } from '../../../../common/constants';
 import { createDetectionRule } from '../../../common/api/create_detection_rule';
-import { generateFindingsTags } from './generate_findings_tags';
 
 const DEFAULT_RULE_RISK_SCORE = 0;
 const DEFAULT_RULE_SEVERITY = 'low';
