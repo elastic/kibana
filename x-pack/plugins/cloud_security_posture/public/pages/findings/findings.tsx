@@ -6,12 +6,7 @@
  */
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import {
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Redirect, useHistory, useLocation, matchPath } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
@@ -109,10 +104,10 @@ export const Findings = () => {
               onClick={navigateToVulnerabilitiesTab}
               isSelected={isVulnerabilitiesTabSelected(location.pathname)}
             >
-                  <FormattedMessage
-                    id="xpack.csp.findings.tabs.vulnerabilities"
-                    defaultMessage="Vulnerabilities"
-                  />
+              <FormattedMessage
+                id="xpack.csp.findings.tabs.vulnerabilities"
+                defaultMessage="Vulnerabilities"
+              />
             </EuiTab>
             <EuiTab
               key="configurations"
