@@ -107,7 +107,7 @@ describe('group editor preview', () => {
   };
 
   const getLensAttributes = () => {
-    const serialized = screen.getByTestId('lensAttributes').textContent;
+    const serialized = screen.queryByTestId('lensAttributes')?.textContent;
     return serialized ? JSON.parse(serialized) : null;
   };
 
@@ -118,6 +118,23 @@ describe('group editor preview', () => {
     dataViews: [
       {
         id: 'some-id',
+        title: 'My Data View',
+        timeFieldName: '@timestamp',
+        fields: {
+          getByType: jest.fn<DataViewField[], []>(() => [
+            {
+              type: 'date',
+              name: '@timestamp',
+            } as DataViewField,
+            {
+              type: 'date',
+              name: 'other-time-field',
+            } as DataViewField,
+          ]),
+        } as unknown as IIndexPatternFieldList & { toSpec: () => DataViewFieldMap },
+      } as DataView,
+      {
+        id: 'a-different-id',
         title: 'My Data View',
         timeFieldName: '@timestamp',
         fields: {
@@ -207,7 +224,7 @@ describe('group editor preview', () => {
     expect(getEmbeddableSearchSessionId()).toBe('new-search-session-id');
   });
 
-  describe('lens attributes', () => {
+  describe('data views', () => {
     const assertDataView = (id: string, attributes: TypedLensByValueInput['attributes']) =>
       expect(attributes.references[0].id).toBe(id);
 
@@ -216,12 +233,12 @@ describe('group editor preview', () => {
 
       rerender(
         <I18nProvider>
-          <GroupPreview {...defaultProps} group={{ ...group, indexPatternId: 'new-id' }} />
+          <GroupPreview {...defaultProps} group={{ ...group, indexPatternId: 'a-different-id' }} />
         </I18nProvider>
       );
 
       await waitFor(() => {
-        assertDataView('new-id', getLensAttributes());
+        assertDataView('a-different-id', getLensAttributes());
       });
     });
 
@@ -254,6 +271,17 @@ describe('group editor preview', () => {
         expect(attributes.state.internalReferences).toHaveLength(1);
         expect(attributes.state.internalReferences![0].id).toBe(adHocDataView.id);
       });
+    });
+
+    it('handles missing data view', () => {
+      rerender(
+        <I18nProvider>
+          <GroupPreview {...defaultProps} group={{ ...group, indexPatternId: 'doesnt-exist' }} />
+        </I18nProvider>
+      );
+
+      expect(screen.getByRole('heading', { name: 'Select a valid data view' })).toBeInTheDocument();
+      expect(getLensAttributes()).toBeNull(); // chart shouldn't be rendered
     });
   });
 });

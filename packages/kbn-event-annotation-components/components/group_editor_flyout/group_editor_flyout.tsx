@@ -172,7 +172,7 @@ export const GroupEditorFlyout = ({
                       onClick={() => {
                         setHasAttemptedSave(true);
 
-                        if (isGroupValid(group)) {
+                        if (isGroupValid(group, dataViews)) {
                           onSave();
                         }
                       }}

@@ -33,7 +33,11 @@ import { AnnotationList } from './annotation_list';
 
 const isTitleValid = (title: string) => Boolean(title.length);
 
-export const isGroupValid = (group: EventAnnotationGroupConfig) => isTitleValid(group.title);
+const isDataViewValid = (dataView: DataView | undefined) => Boolean(dataView?.id);
+
+export const isGroupValid = (group: EventAnnotationGroupConfig, dataViews: DataView[]) =>
+  isTitleValid(group.title) &&
+  isDataViewValid(dataViews.find(({ id }) => id === group.indexPatternId));
 
 export const GroupEditorControls = ({
   group,
@@ -70,7 +74,7 @@ export const GroupEditorControls = ({
   );
 
   const currentDataView = useMemo(
-    () => dataViews.find((dataView) => dataView.id === group.indexPatternId) || dataViews[0],
+    () => dataViews.find((dataView) => dataView.id === group.indexPatternId),
     [dataViews, group.indexPatternId]
   );
 
@@ -151,14 +155,17 @@ export const GroupEditorControls = ({
           label={i18n.translate('eventAnnotationComponents.groupEditor.dataView', {
             defaultMessage: 'Data view',
           })}
+          isInvalid={!isDataViewValid(currentDataView)}
         >
           <EuiSelect
             data-test-subj="annotationDataViewSelection"
+            isInvalid={!isDataViewValid(currentDataView)}
             options={dataViews.map(({ id: value, title, name }) => ({
               value,
               text: name ?? title,
             }))}
-            value={group.indexPatternId}
+            value={isDataViewValid(currentDataView) ? group.indexPatternId : undefined}
+            hasNoInitialSelection={true}
             onChange={({ target: { value } }) => {
               const selectedDataView = dataViews.find(({ id }) => id === value);
 
@@ -189,7 +196,7 @@ export const GroupEditorControls = ({
         </EuiFormRow>
       </EuiForm>
     </>
-  ) : (
+  ) : currentDataView ? (
     <AnnotationEditorControls
       annotation={selectedAnnotation}
       onAnnotationChange={(changes) => setSelectedAnnotation({ ...selectedAnnotation, ...changes })}
@@ -198,5 +205,5 @@ export const GroupEditorControls = ({
       queryInputServices={queryInputServices}
       appName={EVENT_ANNOTATION_APP_NAME}
     />
-  );
+  ) : null;
 };

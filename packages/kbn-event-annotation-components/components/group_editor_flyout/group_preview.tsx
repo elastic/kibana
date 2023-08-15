@@ -7,6 +7,7 @@
  */
 
 import {
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -60,19 +61,19 @@ export const GroupPreview = ({
   );
 
   const currentDataView = useMemo(
-    () => dataViews.find((dataView) => dataView.id === group.indexPatternId) || dataViews[0],
+    () => dataViews.find((dataView) => dataView.id === group.indexPatternId),
     [dataViews, group.indexPatternId]
   );
 
   const timeFieldNames = useMemo(
-    () => currentDataView.fields.getByType('date').map((field) => field.name),
-    [currentDataView.fields]
+    () => currentDataView?.fields.getByType('date').map((field) => field.name) ?? [],
+    [currentDataView?.fields]
   );
 
   // We can assume that there is at least one time field because we don't allow annotation groups to be created without one
   const defaultTimeFieldName = useMemo(
-    () => currentDataView.timeFieldName ?? timeFieldNames[0],
-    [currentDataView.timeFieldName, timeFieldNames]
+    () => currentDataView?.timeFieldName ?? timeFieldNames[0],
+    [currentDataView?.timeFieldName, timeFieldNames]
   );
 
   const [currentTimeFieldName, setCurrentTimeFieldName] = useState<string>(defaultTimeFieldName);
@@ -97,7 +98,7 @@ export const GroupPreview = ({
             <EuiTitle size="s">
               <h4>
                 <FormattedMessage
-                  id="eventAnnotationComponents.groupEditor.preview"
+                  id="eventAnnotationComponents.groupPreview.preview"
                   defaultMessage="Preview"
                 />
               </h4>
@@ -146,29 +147,68 @@ export const GroupPreview = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <div
-          css={css`
-            & > div {
-              height: 400px;
-              width: 100%;
-            }
-          `}
-        >
-          <LensEmbeddableComponent
-            data-test-subj="chart"
-            id="annotation-library-preview"
-            timeRange={chartTimeRange}
-            attributes={lensAttributes}
-            onBrushEnd={({ range }) =>
-              setChartTimeRange({
-                from: new Date(range[0]).toISOString(),
-                to: new Date(range[1]).toISOString(),
-              })
-            }
-            searchSessionId={searchSessionId}
-          />
-        </div>
+      <EuiFlyoutBody
+        css={css`
+          .euiFlyoutBody__overflowContent {
+            height: 100%;
+          }
+        `}
+      >
+        {currentDataView ? (
+          <div
+            css={css`
+              & > div {
+                height: 400px;
+                width: 100%;
+              }
+            `}
+          >
+            <LensEmbeddableComponent
+              data-test-subj="chart"
+              id="annotation-library-preview"
+              timeRange={chartTimeRange}
+              attributes={lensAttributes}
+              onBrushEnd={({ range }) =>
+                setChartTimeRange({
+                  from: new Date(range[0]).toISOString(),
+                  to: new Date(range[1]).toISOString(),
+                })
+              }
+              searchSessionId={searchSessionId}
+            />
+          </div>
+        ) : (
+          <EuiFlexGroup
+            css={css`
+              height: 100%;
+            `}
+            direction="column"
+            justifyContent="center"
+          >
+            <EuiFlexItem>
+              <EuiEmptyPrompt
+                iconType="error"
+                color="danger"
+                title={
+                  <h2>
+                    <FormattedMessage
+                      id="eventAnnotationComponents.groupPreview.missingDataViewTitle"
+                      defaultMessage="Select a valid data view"
+                    />
+                  </h2>
+                }
+                body={
+                  <p>
+                    <FormattedMessage
+                      id="eventAnnotationComponents.groupPreview.missingDataViewDescription"
+                      defaultMessage="The currently selected data view no longer exists. Please select a valid data view in order to preview and use this annotation group."
+                    />
+                  </p>
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </EuiFlyoutBody>
     </>
   );

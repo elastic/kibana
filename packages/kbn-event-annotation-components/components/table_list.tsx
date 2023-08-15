@@ -46,7 +46,10 @@ const getCustomColumn = (dataViews: DataView[]) => {
       <div>
         {record.attributes.dataViewSpec
           ? record.attributes.dataViewSpec.name
-          : dataViewNameMap[record.attributes.indexPatternId]}
+          : dataViewNameMap[record.attributes.indexPatternId] ??
+            i18n.translate('eventAnnotationComponents.tableList.dataView.missing', {
+              defaultMessage: '(Missing)',
+            })}
       </div>
     ),
   };
