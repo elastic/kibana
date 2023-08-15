@@ -69,7 +69,7 @@ import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { Explore } from './explore';
-import type { AppLinkItems, NavigationLink } from './common/links';
+import type { AppLinksSwitcher, NavigationLink } from './common/links';
 import type { EntityAnalytics } from './entity_analytics';
 
 import type { TelemetryClientStart } from './common/lib/telemetry';
@@ -170,11 +170,11 @@ export type StartServices = CoreStart &
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
   upselling: UpsellingService;
+  setAppLinksSwitcher: (appLinksSwitcher: AppLinksSwitcher) => void;
 }
 
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
-  setExtraAppLinks: (extraAppLinks: AppLinkItems) => void;
   setExtraRoutes: (extraRoutes: RouteProps[]) => void;
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
   setGetStartedPage: (getStartedComponent: React.ComponentType) => void;

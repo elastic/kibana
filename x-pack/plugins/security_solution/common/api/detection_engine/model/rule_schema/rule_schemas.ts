@@ -221,7 +221,7 @@ export const KqlQueryLanguage = t.keyof({ kuery: null, lucene: null });
 export type EqlQueryLanguage = t.TypeOf<typeof EqlQueryLanguage>;
 export const EqlQueryLanguage = t.literal('eql');
 
-const eqlSchema = buildRuleSchemas({
+export const eqlSchema = buildRuleSchemas({
   required: {
     type: t.literal('eql'),
     language: EqlQueryLanguage,
@@ -256,7 +256,7 @@ export const EqlPatchParams = eqlSchema.patch;
 // -------------------------------------------------------------------------------------------------
 // Indicator Match rule schema
 
-const threatMatchSchema = buildRuleSchemas({
+export const threatMatchSchema = buildRuleSchemas({
   required: {
     type: t.literal('threat_match'),
     query: RuleQuery,
@@ -307,7 +307,7 @@ export const ThreatMatchPatchParams = threatMatchSchema.patch;
 // -------------------------------------------------------------------------------------------------
 // Custom Query rule schema
 
-const querySchema = buildRuleSchemas({
+export const querySchema = buildRuleSchemas({
   required: {
     type: t.literal('query'),
   },
@@ -343,7 +343,7 @@ export const QueryPatchParams = querySchema.patch;
 // -------------------------------------------------------------------------------------------------
 // Saved Query rule schema
 
-const savedQuerySchema = buildRuleSchemas({
+export const savedQuerySchema = buildRuleSchemas({
   required: {
     type: t.literal('saved_query'),
     saved_id,
@@ -387,7 +387,7 @@ export const SavedQueryPatchParams = savedQuerySchema.patch;
 // -------------------------------------------------------------------------------------------------
 // Threshold rule schema
 
-const thresholdSchema = buildRuleSchemas({
+export const thresholdSchema = buildRuleSchemas({
   required: {
     type: t.literal('threshold'),
     query: RuleQuery,
@@ -422,7 +422,7 @@ export const ThresholdPatchParams = thresholdSchema.patch;
 // -------------------------------------------------------------------------------------------------
 // Machine Learning rule schema
 
-const machineLearningSchema = buildRuleSchemas({
+export const machineLearningSchema = buildRuleSchemas({
   required: {
     type: t.literal('machine_learning'),
     anomaly_threshold,
@@ -462,7 +462,7 @@ export const MachineLearningPatchParams = machineLearningSchema.patch;
 // -------------------------------------------------------------------------------------------------
 // New Terms rule schema
 
-const newTermsSchema = buildRuleSchemas({
+export const newTermsSchema = buildRuleSchemas({
   required: {
     type: t.literal('new_terms'),
     query: RuleQuery,

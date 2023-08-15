@@ -18,6 +18,7 @@ import type {
   PostDeletePackagePoliciesResponse,
   PackagePolicy,
   NewPackagePolicy,
+  UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import type {
   TaskManagerSetupContract,
@@ -25,6 +26,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { isCspPackage } from '../common/utils/helpers';
 import { isSubscriptionAllowed } from '../common/utils/subscription';
+import { cleanupCredentials } from '../common/utils/helpers';
 import type {
   CspServerPluginSetup,
   CspServerPluginStart,
@@ -118,6 +120,34 @@ export class CspPlugin
             if (!isSingleEnabledInput(packagePolicy.inputs)) {
               throw new Error('Only one enabled input is allowed per policy');
             }
+          }
+
+          return packagePolicy;
+        }
+      );
+
+      plugins.fleet.registerExternalCallback(
+        'packagePolicyCreate',
+        async (
+          packagePolicy: NewPackagePolicy,
+          soClient: SavedObjectsClientContract
+        ): Promise<NewPackagePolicy> => {
+          if (isCspPackage(packagePolicy.package?.name)) {
+            return cleanupCredentials(packagePolicy);
+          }
+
+          return packagePolicy;
+        }
+      );
+
+      plugins.fleet.registerExternalCallback(
+        'packagePolicyUpdate',
+        async (
+          packagePolicy: UpdatePackagePolicy,
+          soClient: SavedObjectsClientContract
+        ): Promise<UpdatePackagePolicy> => {
+          if (isCspPackage(packagePolicy.package?.name)) {
+            return cleanupCredentials(packagePolicy);
           }
 
           return packagePolicy;

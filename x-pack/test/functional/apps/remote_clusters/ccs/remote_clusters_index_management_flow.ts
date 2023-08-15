@@ -87,7 +87,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
       it('Verify that the follower index is duplicating from the remote.', async () => {
-        await pageObjects.indexManagement.clickIndiceAt(0);
+        await pageObjects.indexManagement.clickIndexAt(0);
         await pageObjects.indexManagement.performIndexActionInDetailPanel('flush');
         await testSubjects.click('euiFlyoutCloseButton');
         await pageObjects.common.navigateToApp('indexManagement');
