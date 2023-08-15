@@ -8,14 +8,7 @@
 import React from 'react';
 import { isEmpty } from 'lodash/fp';
 import styled from 'styled-components';
-import {
-  EuiDescriptionList,
-  EuiSpacer,
-  EuiText,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiDescriptionList, EuiText, EuiFlexGrid, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import type {
   Type,
