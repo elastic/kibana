@@ -21,7 +21,7 @@ export default createTestConfig({
     require.resolve('./apm_api_integration/feature_flags.ts'),
   ],
   junit: {
-    reportName: 'Serverless Observability API Integration Tests',
+    reportName: 'Serverless Observability Feature Flags API Integration Tests',
   },
   suiteTags: { exclude: ['skipSvlOblt'] },
   services,

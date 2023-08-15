@@ -25,7 +25,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
-          ...options.kbnServerArgs,
+          ...(options.kbnServerArgs || []),
         ],
       },
       testFiles: options.testFiles,
