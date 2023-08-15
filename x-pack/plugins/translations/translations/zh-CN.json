@@ -11463,7 +11463,6 @@
     "xpack.csp.emptyState.title": "没有任何结果匹配您的搜索条件",
     "xpack.csp.expandColumnDescriptionLabel": "展开",
     "xpack.csp.expandColumnNameLabel": "展开",
-    "xpack.csp.findings.betaLabel": "此功能为公测版，可能会进行更改。设计和代码相对于正式发行版功能还不够成熟，将按原样提供，且不提供任何保证。公测版功能不受正式发行版功能的支持服务水平协议约束。",
     "xpack.csp.findings.distributionBar.totalFailedLabel": "失败的结果",
     "xpack.csp.findings.distributionBar.totalPassedLabel": "通过的结果",
     "xpack.csp.findings.errorCallout.pageSearchErrorTitle": "检索搜索结果时遇到问题",
