@@ -8,9 +8,9 @@
 import { EuiButton } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants';
 import fileSaver from 'file-saver';
 import React from 'react';
+import { INTERNAL_ROUTES } from '../../common/constants';
 import { JobSummary } from '../../common/types';
 
 interface Props {
@@ -23,13 +23,14 @@ export const DownloadButton = ({ http, job }: Props) => {
     <EuiButton
       size="s"
       data-test-subj="downloadCompletedReportButton"
-      onClick={() => http.fetch(
-        `${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${job.id}`, { version: '1' }
-        ).then((resp) => { 
-          const csvBlob = new Blob([resp as string], { type: 'text/csv' }); 
-          fileSaver.saveAs(csvBlob, `${job.title}.csv`); 
-          return; 
-        })
+      onClick={() =>
+        http
+          .fetch(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${job.id}`, { version: '1' })
+          .then((resp) => {
+            const csvBlob = new Blob([resp as string], { type: 'text/csv' });
+            fileSaver.saveAs(csvBlob, `${job.title}.csv`);
+            return;
+          })
       }
       target="_blank"
     >
