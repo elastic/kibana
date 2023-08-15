@@ -105,3 +105,67 @@ export const CoverageOverviewLegendRulesLabel = i18n.translate(
     defaultMessage: 'rules',
   }
 );
+
+export const CoverageOverviewEnabledRuleActivity = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.enabledRuleActivity',
+  {
+    defaultMessage: 'Enabled rules',
+  }
+);
+
+export const CoverageOverviewDisabledRuleActivity = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.disabledRuleActivity',
+  {
+    defaultMessage: 'Disabled rules',
+  }
+);
+
+export const CoverageOverviewElasticRuleSource = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.elasticRuleSource',
+  {
+    defaultMessage: 'Elastic rules',
+  }
+);
+
+export const CoverageOverviewCustomRuleSource = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.customRuleSource',
+  {
+    defaultMessage: 'Custom rules',
+  }
+);
+
+export const CoverageOverviewRuleActivityFilterLabel = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.ruleActivityFilterLabel',
+  {
+    defaultMessage: 'Installed rule status',
+  }
+);
+
+export const CoverageOverviewRuleSourceFilterLabel = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.ruleSourceFilterLabel',
+  {
+    defaultMessage: 'Installed rule type',
+  }
+);
+
+export const CoverageOverviewSearchBarPlaceholder = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.searchBarPlaceholder',
+  {
+    defaultMessage:
+      'Search for the tactic, technique (e.g.,"defence evasion" or "TA0005") or rule name, index pattern (e.g.,"filebeat-*")',
+  }
+);
+
+export const CoverageOverviewFilterPopoverTitle = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.filterPopoverTitle',
+  {
+    defaultMessage: 'Select to view on framework',
+  }
+);
+
+export const CoverageOverviewFilterPopoverClearAll = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.filterPopoverClearAll',
+  {
+    defaultMessage: 'Clear all',
+  }
+);

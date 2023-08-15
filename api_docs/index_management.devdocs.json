@@ -317,6 +317,20 @@
         "children": [
           {
             "parentPluginId": "indexManagement",
+            "id": "def-public.IndexManagementPluginSetup.apiService",
+            "type": "Object",
+            "tags": [],
+            "label": "apiService",
+            "description": [],
+            "signature": [
+              "PublicApiServiceSetup"
+            ],
+            "path": "x-pack/plugins/index_management/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-public.IndexManagementPluginSetup.extensionsService",
             "type": "Object",
             "tags": [],
@@ -750,7 +764,7 @@
         "label": "IndexManagementConfig",
         "description": [],
         "signature": [
-          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly enableIndexActions: boolean; }"
+          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly enableIndexActions: boolean; readonly enableLegacyTemplates: boolean; }"
         ],
         "path": "x-pack/plugins/index_management/server/config.ts",
         "deprecated": false,
@@ -2024,6 +2038,84 @@
       },
       {
         "parentPluginId": "indexManagement",
+        "id": "def-common.SerializedEnrichPolicy",
+        "type": "Interface",
+        "tags": [],
+        "label": "SerializedEnrichPolicy",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.SerializedEnrichPolicy.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"match\" | \"range\" | \"geo_match\""
+            ],
+            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.SerializedEnrichPolicy.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.SerializedEnrichPolicy.sourceIndices",
+            "type": "Array",
+            "tags": [],
+            "label": "sourceIndices",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.SerializedEnrichPolicy.matchField",
+            "type": "string",
+            "tags": [],
+            "label": "matchField",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.SerializedEnrichPolicy.enrichFields",
+            "type": "Array",
+            "tags": [],
+            "label": "enrichFields",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/enrich_policies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
         "id": "def-common.TemplateDeserialized",
         "type": "Interface",
         "tags": [],
@@ -2600,6 +2692,21 @@
           "\"green\" | \"yellow\" | \"red\""
         ],
         "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.INTERNAL_API_BASE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_API_BASE_PATH",
+        "description": [],
+        "signature": [
+          "\"/internal/index_management\""
+        ],
+        "path": "x-pack/plugins/index_management/common/constants/api_base_path.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
