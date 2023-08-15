@@ -997,6 +997,7 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 /x-pack/performance @elastic/appex-qa
 /packages/kbn-test/src/functional_test_runner @elastic/appex-qa
 /packages/kbn-performance-testing-dataset-extractor @elastic/appex-qa
+/x-pack/test_serverless/**/*config.base.ts @elastic/appex-qa
 
 # Core
 /config/ @elastic/kibana-core
