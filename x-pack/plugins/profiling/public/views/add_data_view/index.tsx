@@ -25,6 +25,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import major from 'semver/functions/major';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
@@ -32,7 +33,7 @@ import { AsyncStatus, useAsync } from '../../hooks/use_async';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 
-export enum NoDataTabs {
+export enum AddDataTabs {
   Kubernetes = 'kubernetes',
   Docker = 'docker',
   Binary = 'binary',
@@ -42,7 +43,7 @@ export enum NoDataTabs {
   Symbols = 'symbols',
 }
 
-export function NoDataView() {
+export function AddDataView() {
   const { query } = useProfilingParams('/add-data-instructions');
   const { selectedTab } = query;
   const profilingRouter = useProfilingRouter();
@@ -63,11 +64,12 @@ export function NoDataView() {
   const secretToken = data?.collector?.secretToken;
   const collectionAgentHost = data?.collector?.host;
   const symbolUrl = data?.symbolizer?.host;
-  const hostAgentVersion = 'v3';
+  const stackVersion = data?.stackVersion!;
+  const majorVersion = stackVersion ? major(stackVersion).toString() : undefined;
 
   const tabs = [
     {
-      key: NoDataTabs.Kubernetes,
+      key: AddDataTabs.Kubernetes,
       title: i18n.translate('xpack.profiling.tabs.kubernetesTitle', {
         defaultMessage: 'Kubernetes',
       }),
@@ -78,7 +80,7 @@ export function NoDataView() {
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              helm repo add optimyze https://optimyze.cloud/helm-charts
+              helm repo add elastic https://helm.elastic.co
             </EuiCodeBlock>
           ),
         },
@@ -91,8 +93,9 @@ export function NoDataView() {
               {`helm install --create-namespace -n=universal-profiling universal-profiling-agent \\
 --set "projectID=1,secretToken=${secretToken}" \\
 --set "collectionAgentHostPort=${collectionAgentHost}" \\
---set "version=${hostAgentVersion}" \\
-optimyze/pf-host-agent`}
+--set "version=${stackVersion}" \\
+--version=${stackVersion} \\
+elastic/pf-host-agent`}
             </EuiCodeBlock>
           ),
         },
@@ -116,7 +119,7 @@ optimyze/pf-host-agent`}
       ],
     },
     {
-      key: NoDataTabs.Docker,
+      key: AddDataTabs.Docker,
       title: i18n.translate('xpack.profiling.tabs.dockerTitle', {
         defaultMessage: 'Docker',
       }),
@@ -127,9 +130,9 @@ optimyze/pf-host-agent`}
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              {`docker run --name host-agent --privileged --pid=host -v /etc/machine-id:/etc/machine-id:ro \\
+              {`docker run --name pf-host-agent --privileged --pid=host -v /etc/machine-id:/etc/machine-id:ro \\
 -v /var/run/docker.sock:/var/run/docker.sock -v /sys/kernel/debug:/sys/kernel/debug:ro \\
-docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-host-agent \\
+docker.elastic.co/observability/profiling-agent:${stackVersion} /root/pf-host-agent \\
 -project-id=1 -secret-token=${secretToken} \\
 -collection-agent=${collectionAgentHost}`}
             </EuiCodeBlock>
@@ -138,19 +141,29 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
       ],
     },
     {
-      key: NoDataTabs.Binary,
+      key: AddDataTabs.Binary,
       title: i18n.translate('xpack.profiling.tabs.binaryTitle', {
         defaultMessage: 'Binary',
       }),
       steps: [
         {
           title: i18n.translate('xpack.profiling.tabs.binaryDownloadStep', {
-            defaultMessage: 'Download the latest binary:',
+            defaultMessage: 'Download the binary for the right architecture:',
           }),
           content: (
-            <EuiCodeBlock paddingSize="s" isCopyable>
-              {`wget -O pf-host-agent.tgz "https://ela.st/pf-host-agent-amd64-${hostAgentVersion}" && tar xzf pf-host-agent.tgz`}
-            </EuiCodeBlock>
+            <EuiText>
+              <b>For x86_64:</b>
+              <EuiSpacer size="s" />
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {`wget -O pf-host-agent.tgz "https://artifacts.elastic.co/downloads/prodfiler/pf-host-agent-${stackVersion}-linux-x86_64.tar.gz" && tar xzf pf-host-agent.tgz`}
+              </EuiCodeBlock>
+              <EuiSpacer size="m" />
+              <b>For ARM64:</b>
+              <EuiSpacer size="s" />
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {`wget -O pf-host-agent.tgz "https://artifacts.elastic.co/downloads/prodfiler/pf-host-agent-${stackVersion}-linux-arm64.tar.gz" && tar xzf pf-host-agent.tgz`}
+              </EuiCodeBlock>
+            </EuiText>
           ),
         },
         {
@@ -176,23 +189,22 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
       ],
     },
     {
-      key: NoDataTabs.Deb,
+      key: AddDataTabs.Deb,
       title: i18n.translate('xpack.profiling.tabs.debTitle', {
         defaultMessage: 'DEB Package',
       }),
       steps: [
         {
-          title: i18n.translate('xpack.profiling.tabs.debDownloadPackageStep', {
-            defaultMessage:
-              'Open the URL below and download the right DEB package for your CPU architecture:',
+          title: i18n.translate('xpack.profiling.tabs.debConfigureRepoStep', {
+            defaultMessage: 'Configure the apt repository (requires root privileges):',
           }),
           content: (
-            <EuiLink
-              target="_blank"
-              href={`https://ela.st/pf-host-agent-linux-${hostAgentVersion}`}
-            >
-              {`https://ela.st/pf-host-agent-linux-${hostAgentVersion}`}
-            </EuiLink>
+            <EuiCodeBlock paddingSize="s" isCopyable>
+              {`wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+sudo apt-get install apt-transport-https
+echo "deb https://artifacts.elastic.co/packages/${majorVersion}.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-${majorVersion}.x.list
+`}
+            </EuiCodeBlock>
           ),
         },
         {
@@ -201,7 +213,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              {`sudo dpkg -i pf-host-agent*.deb`}
+              {`sudo apt-get update && sudo apt-get install pf-host-agent`}
             </EuiCodeBlock>
           ),
         },
@@ -229,23 +241,29 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
       ],
     },
     {
-      key: NoDataTabs.RPM,
+      key: AddDataTabs.RPM,
       title: i18n.translate('xpack.profiling.tabs.rpmTitle', {
         defaultMessage: 'RPM Package',
       }),
       steps: [
         {
-          title: i18n.translate('xpack.profiling.tabs.rpmDownloadPackageStep', {
-            defaultMessage:
-              'Open the URL below and download the right RPM package for your CPU architecture:',
+          title: i18n.translate('xpack.profiling.tabs.rpmConfigureRepoStep', {
+            defaultMessage: 'Configure the yum repository (requires root privileges):',
           }),
           content: (
-            <EuiLink
-              target="_blank"
-              href={`https://ela.st/pf-host-agent-linux-${hostAgentVersion}`}
-            >
-              {`https://ela.st/pf-host-agent-linux-${hostAgentVersion}`}
-            </EuiLink>
+            <EuiCodeBlock paddingSize="s" isCopyable>
+              {`sudo rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
+cat <<EOF > /etc/yum.repos.d/elastic.repo
+[elastic-${majorVersion}.x]
+name=Elastic repository for ${majorVersion}.x packages
+baseurl=https://artifacts.elastic.co/packages/${majorVersion}.x/yum
+gpgcheck=1
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+enabled=1
+autorefresh=1
+type=rpm-md
+EOF`}
+            </EuiCodeBlock>
           ),
         },
         {
@@ -254,7 +272,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              {`sudo rpm -i pf-host-agent*.rpm`}
+              {`sudo yum install pf-host-agent`}
             </EuiCodeBlock>
           ),
         },
@@ -282,26 +300,26 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
       ],
     },
     {
-      key: NoDataTabs.ElasticAgentIntegration,
-      title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.title', {
+      key: AddDataTabs.ElasticAgentIntegration,
+      title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.title', {
         defaultMessage: 'Elastic Agent Integration',
       }),
       steps: [
         {
-          title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1', {
+          title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.step1', {
             defaultMessage: 'Copy credentials',
           }),
           content: (
             <>
               <EuiText>
-                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.hint', {
+                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.step1.hint', {
                   defaultMessage:
                     "You'll need these credentials to set up Universal Profiling. Please save them in a secure location, as they will be required in the subsequent step.",
                 })}
               </EuiText>
               <EuiSpacer />
               <EuiText style={{ fontWeight: 'bold' }} size="s">
-                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.secretToken', {
+                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.step1.secretToken', {
                   defaultMessage: 'Secret token:',
                 })}
               </EuiText>
@@ -311,7 +329,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
               <EuiSpacer size="s" />
               <EuiText style={{ fontWeight: 'bold' }} size="s">
                 {i18n.translate(
-                  'xpack.profiling.tabs.elasticAgentIntegrarion.step1.collectionAgentUrl',
+                  'xpack.profiling.tabs.elasticAgentIntegration.step1.collectionAgentUrl',
                   { defaultMessage: 'Universal Profiling Collector url:' }
                 )}
               </EuiText>
@@ -322,7 +340,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
           ),
         },
         {
-          title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step2', {
+          title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.step2', {
             defaultMessage: 'Fleet',
           }),
           content: (
@@ -333,7 +351,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
                 `/app/integrations/detail/profiler_agent-${data?.profilerAgent.version}/overview`
               )}`}
             >
-              {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step2.button', {
+              {i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.step2.button', {
                 defaultMessage: 'Manage Universal Profiling agent in Fleet',
               })}
             </EuiButton>
@@ -342,7 +360,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
       ],
     },
     {
-      key: NoDataTabs.Symbols,
+      key: AddDataTabs.Symbols,
       title: i18n.translate('xpack.profiling.tabs.symbols.title', {
         defaultMessage: 'Upload Symbols',
       }),
@@ -356,13 +374,13 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
               <b>For x86_64:</b>
               <EuiSpacer size="s" />
               <EuiCodeBlock paddingSize="s" isCopyable>
-                {`wget -O symbtool-amd64.tgz "https://ela.st/symbtool-linux-amd64" && tar xzf symbtool-amd64.tgz && cd symbtool-*-linux-x86_64`}
+                {`wget -O symbtool-amd64.tgz "https://artifacts.elastic.co/downloads/prodfiler/symbtool-${stackVersion}-linux-x86_64.tar.gz" && tar xzf symbtool-amd64.tgz && cd symbtool-*-linux-x86_64`}
               </EuiCodeBlock>
               <EuiSpacer size="m" />
               <b>For ARM64:</b>
               <EuiSpacer size="s" />
               <EuiCodeBlock paddingSize="s" isCopyable>
-                {`wget -O symbtool-arm64.tgz "https://ela.st/symbtool-linux-arm64" && tar xzf symbtool-arm64.tgz && cd symbtool-*-linux-arm64`}
+                {`wget -O symbtool-arm64.tgz "https://artifacts.elastic.co/downloads/prodfiler/pf-host-agent-${stackVersion}-linux-arm64.tar.gz" && tar xzf symbtool-arm64.tgz && cd symbtool-*-linux-arm64`}
               </EuiCodeBlock>
             </EuiText>
           ),
