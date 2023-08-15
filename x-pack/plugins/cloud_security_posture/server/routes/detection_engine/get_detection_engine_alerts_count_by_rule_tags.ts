@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -12,15 +13,7 @@ import { GET_DETECTION_RULE_ALERTS_STATUS_PATH } from '../../../common/constants
 import { CspRouter } from '../../types';
 
 export interface VulnerabilitiesStatisticsQueryResult {
-  open: {
-    doc_count: number;
-  };
-  acknowledged: {
-    doc_count: number;
-  };
-  closed: {
-    doc_count: number;
-  };
+  total: number;
 }
 
 const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts-default' as const;
@@ -29,7 +22,7 @@ export const getDetectionEngineAlertsCountByRuleTags = async (
   esClient: ElasticsearchClient,
   tags: string[]
 ) => {
-  return await esClient.search<unknown, any>({
+  return await esClient.search<unknown, SearchResponse>({
     size: 0,
     query: {
       bool: {
@@ -41,28 +34,19 @@ export const getDetectionEngineAlertsCountByRuleTags = async (
     },
     sort: '@timestamp:desc',
     index: DEFAULT_ALERTS_INDEX,
-    aggs: {
-      open: {
-        filter: { term: { 'kibana.alert.workflow_status': 'open' } },
-      },
-      acknowledged: {
-        filter: { term: { 'kibana.alert.workflow_status': 'acknowledged' } },
-      },
-      closed: {
-        filter: { term: { 'kibana.alert.workflow_status': 'closed' } },
-      },
-    },
   });
 };
 
 const getDetectionEngineAlertsStatus = async (esClient: ElasticsearchClient, tags: string[]) => {
   const alertsCountByTags = await getDetectionEngineAlertsCountByRuleTags(esClient, tags);
 
+  const total =
+    typeof alertsCountByTags.hits.total === 'number'
+      ? alertsCountByTags.hits.total
+      : alertsCountByTags.hits.total?.value;
+
   return {
-    total: alertsCountByTags.hits.total?.value,
-    open: alertsCountByTags.aggregations.open.doc_count,
-    acknowledged: alertsCountByTags.aggregations.acknowledged.doc_count,
-    closed: alertsCountByTags.aggregations.closed.doc_count,
+    total,
   };
 };
 export const defineGetDetectionEngineAlertsStatus = (router: CspRouter) =>

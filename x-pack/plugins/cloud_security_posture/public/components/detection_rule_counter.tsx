@@ -55,7 +55,7 @@ export const DetectionRuleCounter = ({ tags }: { tags: string[] }) => {
             <FormattedMessage
               id="xpack.csp.findingsFlyout.alerts.alertCount"
               defaultMessage="{alertCount, plural, one {# alert} other {# alerts}}"
-              values={{ alertCount: alertsData?.total }}
+              values={{ alertCount: alertsData?.total || '0' }}
             />
           </EuiLink>{' '}
           <FormattedMessage
@@ -66,7 +66,7 @@ export const DetectionRuleCounter = ({ tags }: { tags: string[] }) => {
             <FormattedMessage
               id="xpack.csp.findingsFlyout.alerts.ruleCount"
               defaultMessage="{ruleCount, plural, one {# rule} other {# rules}}"
-              values={{ ruleCount: data?.total }}
+              values={{ ruleCount: data?.total || '0' }}
             />
           </EuiLink>
         </>

@@ -117,6 +117,7 @@ export const TakeAction = ({ createRuleFn }: TakeActionProps) => {
               const ruleResponse = await createRuleFn(http);
               setIsLoading(false);
               showSuccessToast(ruleResponse);
+              // Triggering a refetch of rules and alerts to update the UI
               queryClient.invalidateQueries([DETECTION_ENGINE_RULES_KEY]);
               queryClient.invalidateQueries([DETECTION_ENGINE_ALERTS_KEY]);
             }}
