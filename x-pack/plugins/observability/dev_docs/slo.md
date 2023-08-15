@@ -378,7 +378,7 @@ curl --request POST \
 ### Custom Histogram
 
 <details>
-<summary>95.0% of transactions with latency < 300 over the last 7 days</summary>
+<summary>95.0% of transactions with latency between 0 and 300ms over the last 7 days</summary>
 
 ```
 curl --request POST \
