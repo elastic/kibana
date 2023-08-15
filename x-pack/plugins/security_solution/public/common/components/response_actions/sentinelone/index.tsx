@@ -17,16 +17,16 @@ const SentinelOneActionResultComponent = ({
   data,
 }: {
   timestamp?: string;
-  params: {
-    subAction: string;
-    subActionParams: {
+  params?: {
+    subAction?: string;
+    subActionParams?: {
       processName?: string;
       hostname?: string;
     };
   };
-  data: {
-    data: {
-      parentTaskId: string;
+  data?: {
+    data?: {
+      parentTaskId?: string;
     };
   };
 }) => {

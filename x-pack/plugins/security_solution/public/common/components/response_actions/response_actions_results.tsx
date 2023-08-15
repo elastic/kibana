@@ -63,8 +63,8 @@ export const ResponseActionsResults = React.memo(
           return (
             <SentinelOneActionResult
               timestamp={action?.['@timestamp']}
-              params={actionData.params}
-              data={actionData.data}
+              params={actionData?.params}
+              data={actionData?.data}
             />
           );
         }

@@ -168,7 +168,7 @@ describe('Stack Connectors Plugin', () => {
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
-        4,
+        5,
         expect.objectContaining({
           id: '.sentinelone',
           name: 'Sentinel One',
