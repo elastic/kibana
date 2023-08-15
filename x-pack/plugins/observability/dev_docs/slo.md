@@ -20,7 +20,7 @@ The **custom Metric** SLI requires an index pattern, an optional filter query, a
 
 The **custom Histogram** SLI requires an index pattern, an optional filter query, and an optional `timestampField`. `good` represents the numerator and `total` represents the denominator, and both require the following fields:
 
-* field - the field used to aggregate good/total events.
+* field - the histogram field used to aggregate good/total events.
 * aggregation - type of aggregation to use, limited to `value_count` or `range`.
 * from - if the `range` aggregation is used, this defines the starting value of the range.
 * to - if the `range` aggregation is used, this defines the ending value of the range.
