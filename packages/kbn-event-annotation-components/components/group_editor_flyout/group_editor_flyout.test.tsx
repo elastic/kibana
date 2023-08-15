@@ -16,7 +16,6 @@ import { GroupEditorControls } from './group_editor_controls';
 import { GroupEditorFlyout } from './group_editor_flyout';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { QueryInputServices } from '@kbn/visualization-ui-components';
-import { TimeRange } from '@kbn/es-query';
 import { EmbeddableComponent } from '@kbn/lens-plugin/public';
 
 const simulateButtonClick = (component: ShallowWrapper, selector: string) => {
@@ -29,7 +28,6 @@ const SELECTORS = {
   SAVE_BUTTON: '[data-test-subj="saveAnnotationGroup"]',
   CANCEL_BUTTON: '[data-test-subj="cancelGroupEdit"]',
   BACK_BUTTON: '[data-test-subj="backToGroupSettings"]',
-  CHART: '[data-test-subj="chart"]',
 };
 
 const assertGroupEditingState = (component: ShallowWrapper) => {
@@ -42,10 +40,6 @@ const assertAnnotationEditingState = (component: ShallowWrapper) => {
   expect(component.exists(SELECTORS.BACK_BUTTON)).toBeTruthy();
   expect(component.exists(SELECTORS.SAVE_BUTTON)).toBeFalsy();
   expect(component.exists(SELECTORS.CANCEL_BUTTON)).toBeFalsy();
-};
-
-const assertChartTimeRange = (component: ShallowWrapper, expectedTimeRange: TimeRange) => {
-  expect(component.find(SELECTORS.CHART).prop('timeRange')).toEqual(expectedTimeRange);
 };
 
 describe('group editor flyout', () => {
