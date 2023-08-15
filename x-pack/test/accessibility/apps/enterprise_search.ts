@@ -59,13 +59,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Content', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/content');
+        await common.navigateToApp('enterprise_search/content/search_indices');
       });
 
-      it('loads the indices empty state', async function () {
+      it('loads the indices page', async function () {
         await retry.waitFor(
-          'indices empty state visible',
-          async () => await testSubjects.exists('search-indices-empty-title')
+          'create index button visible',
+          async () => await testSubjects.exists('entSearchContent-searchIndices-createButton')
         );
         await a11y.testAppSnapshot();
       });
