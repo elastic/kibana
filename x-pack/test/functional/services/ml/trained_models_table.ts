@@ -273,7 +273,10 @@ export function TrainedModelsTableProvider(
       );
     }
 
-    public async assertTrainedModelsInferenceFlyoutAdditionalSettings(condition?: string, tag?: string) {
+    public async assertTrainedModelsInferenceFlyoutAdditionalSettings(
+      condition?: string,
+      tag?: string
+    ) {
       if (condition || tag) {
         await this.trainedModelsInferenceOpenAdditionalSettings();
         const actualCondition = await testSubjects.getAttribute(
