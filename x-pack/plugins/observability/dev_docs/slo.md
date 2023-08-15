@@ -403,7 +403,7 @@ curl --request POST \
             },
             "total": {
                 "aggregation": "value_count",
-                "field": "txn"
+                "field": "latency"
             }
         }
     },
