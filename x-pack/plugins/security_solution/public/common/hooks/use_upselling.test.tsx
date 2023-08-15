@@ -59,7 +59,7 @@ describe('use_upselling', () => {
 
   test('useUpsellingMessage returns messages', () => {
     const testMessage = 'test message';
-    mockUpselling.setPages({
+    mockUpselling.setMessages({
       investigation_guide: testMessage,
     });
 
