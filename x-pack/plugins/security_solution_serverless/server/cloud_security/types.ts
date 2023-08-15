@@ -34,12 +34,9 @@ export type PostureType =
 
 export type Tier = ProductTier | 'none';
 
-export type RegisteredProductTypes = SecurityProductType[];
-
 export interface CloudSecurityMeteringCallbackInput
   extends Omit<MeteringCallbackInput, 'cloudSetup' | 'abortController' | 'config'> {
   projectId: string;
   postureType: PostureType;
   tier: TiebreakerField;
-  registeredProductTypes: RegisteredProductTypes;
 }

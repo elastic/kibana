@@ -27,42 +27,37 @@ export const cloudSecurityMetringCallback = async ({
   lastSuccessfulReport,
   config,
 }: MeteringCallbackInput): Promise<UsageRecord[]> => {
-  const projectId = cloudSetup?.serverless?.projectId || 'missing project id';
+  const projectId = cloudSetup?.serverless?.projectId || 'missing_project_id';
 
   if (!cloudSetup?.serverless?.projectId) {
     logger.error('no project id found');
   }
 
   const tier: Tier = getProductTier(config);
-  const registeredProductTypes = config.productTypes;
 
   try {
-    const cloudSecurityUsageRecords: UsageRecord[] = [];
-
     const postureTypes: PostureType[] = [
       CSPM_POLICY_TEMPLATE,
       KSPM_POLICY_TEMPLATE,
       CNVM_POLICY_TEMPLATE,
     ];
 
-    for (const postureType of postureTypes) {
-      const usageRecord = await getCloudSecurityUsageRecord({
-        esClient,
-        projectId,
-        logger,
-        taskId,
-        lastSuccessfulReport,
-        postureType,
-        tier,
-        registeredProductTypes,
-      });
+    const cloudSecurityUsageRecords = await Promise.all(
+      postureTypes.map((postureType) =>
+        getCloudSecurityUsageRecord({
+          esClient,
+          projectId,
+          logger,
+          taskId,
+          lastSuccessfulReport,
+          postureType,
+          tier,
+        })
+      )
+    );
 
-      if (usageRecord) {
-        cloudSecurityUsageRecords.push(usageRecord);
-      }
-    }
-
-    return cloudSecurityUsageRecords;
+    // remove any potential undefined values from the array,
+    return cloudSecurityUsageRecords.filter(Boolean) as UsageRecord[];
   } catch (err) {
     logger.error(`Failed to fetch Cloud Security metering data ${err}`);
     return [];

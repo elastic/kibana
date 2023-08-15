@@ -50,7 +50,6 @@ export const getCloudSecurityUsageRecord = async ({
   taskId,
   postureType,
   tier,
-  registeredProductTypes,
 }: CloudSecurityMeteringCallbackInput): Promise<UsageRecord | undefined> => {
   try {
     if (!postureType) {
@@ -92,11 +91,9 @@ export const getCloudSecurityUsageRecord = async ({
       source: {
         id: taskId,
         instance_group_id: projectId,
-        metadata: { tier, product_lines: registeredProductTypes },
+        metadata: { tier },
       },
     };
-
-    console.log(JSON.stringify(usageRecord));
 
     logger.debug(`Fetched ${postureType} metring data`);
 

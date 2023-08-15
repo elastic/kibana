@@ -13,9 +13,9 @@ import {
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { CLOUD_SECURITY_TASK_TYPE, getProductTier } from './cloud_security_metering';
 import { getCloudSecurityUsageRecord } from './cloud_security_metering_task';
-import type { PostureType, RegisteredProductTypes } from './types';
-import { ProductLine, ProductTier } from '@kbn/security-solution-serverless/common/product';
-import { ServerlessSecurityConfig } from '../config';
+
+import type { ServerlessSecurityConfig } from '../config';
+import type { PostureType } from './types';
 
 const mockEsClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
@@ -41,9 +41,6 @@ describe('getCloudSecurityUsageRecord', () => {
     const postureType = CSPM_POLICY_TEMPLATE;
 
     const tier = 'essentials';
-    const registeredProductTypes: RegisteredProductTypes = [
-      { product_line: 'security' as ProductLine, product_tier: 'complete' as ProductTier },
-    ];
 
     const result = await getCloudSecurityUsageRecord({
       esClient: mockEsClient,
@@ -53,7 +50,6 @@ describe('getCloudSecurityUsageRecord', () => {
       lastSuccessfulReport: new Date(),
       postureType,
       tier,
-      registeredProductTypes,
     });
 
     expect(result).toBeUndefined();
@@ -63,7 +59,12 @@ describe('getCloudSecurityUsageRecord', () => {
     'should return usageRecords with correct values for cspm and kspm when Elasticsearch response has aggregations',
     async (postureType) => {
       // @ts-ignore
-      mockEsClient.search.mockResolvedValue({
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: { hits: [{ _id: 'someRecord', _index: 'mockIndex' }] }, // mocking for indexHasDataInDateRange
+      });
+
+      // @ts-ignore
+      mockEsClient.search.mockResolvedValueOnce({
         aggregations: {
           unique_assets: {
             value: 10,
@@ -78,9 +79,6 @@ describe('getCloudSecurityUsageRecord', () => {
       const taskId = chance.guid();
 
       const tier = 'essentials';
-      const registeredProductTypes: RegisteredProductTypes = [
-        { product_line: 'security' as ProductLine, product_tier: 'complete' as ProductTier },
-      ];
 
       const result = await getCloudSecurityUsageRecord({
         esClient: mockEsClient,
@@ -90,7 +88,6 @@ describe('getCloudSecurityUsageRecord', () => {
         lastSuccessfulReport: new Date(),
         postureType,
         tier,
-        registeredProductTypes,
       });
 
       expect(result).toEqual({
@@ -107,16 +104,6 @@ describe('getCloudSecurityUsageRecord', () => {
           id: taskId,
           instance_group_id: projectId,
           metadata: {
-            product_lines: [
-              {
-                product_line: 'security',
-                product_tier: 'complete',
-              },
-              {
-                product_line: 'endpoint',
-                product_tier: 'complete',
-              },
-            ],
             tier: 'essentials',
           },
         },
@@ -133,10 +120,6 @@ describe('getCloudSecurityUsageRecord', () => {
     const postureType = CSPM_POLICY_TEMPLATE;
 
     const tier = 'essentials';
-    const registeredProductTypes: RegisteredProductTypes = [
-      { product_line: 'security' as ProductLine, product_tier: 'complete' as ProductTier },
-      { product_line: 'endpoint' as ProductLine, product_tier: 'complete' as ProductTier },
-    ];
 
     const result = await getCloudSecurityUsageRecord({
       esClient: mockEsClient,
@@ -146,7 +129,6 @@ describe('getCloudSecurityUsageRecord', () => {
       lastSuccessfulReport: new Date(),
       postureType,
       tier,
-      registeredProductTypes,
     });
 
     expect(result).toBeUndefined();
@@ -161,10 +143,6 @@ describe('getCloudSecurityUsageRecord', () => {
     const postureType = CSPM_POLICY_TEMPLATE;
 
     const tier = 'essentials';
-    const registeredProductTypes: RegisteredProductTypes = [
-      { product_line: 'security' as ProductLine, product_tier: 'complete' as ProductTier },
-      { product_line: 'endpoint' as ProductLine, product_tier: 'complete' as ProductTier },
-    ];
 
     const result = await getCloudSecurityUsageRecord({
       esClient: mockEsClient,
@@ -174,7 +152,6 @@ describe('getCloudSecurityUsageRecord', () => {
       lastSuccessfulReport: new Date(),
       postureType,
       tier,
-      registeredProductTypes,
     });
 
     expect(result).toBeUndefined();
