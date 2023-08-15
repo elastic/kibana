@@ -16,6 +16,8 @@ export interface ChartComponentProps {
   annotation: ChangePointAnnotation;
 
   interval: string;
+
+  onLoading?: (isLoading: boolean) => void;
 }
 
 export interface ChartComponentPropsAll {
@@ -29,7 +31,7 @@ export interface ChartComponentPropsAll {
 }
 
 export const ChartComponent: FC<ChartComponentProps> = React.memo(
-  ({ annotation, fieldConfig, interval }) => {
+  ({ annotation, fieldConfig, interval, onLoading }) => {
     const {
       lens: { EmbeddableComponent },
     } = useAiopsAppContext();
@@ -55,6 +57,7 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(
           name: 'Change point detection',
         }}
         disableTriggers
+        onLoad={onLoading}
       />
     );
   }

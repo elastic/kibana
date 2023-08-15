@@ -1,0 +1,26 @@
+{
+    "author": "Elastic",
+    "name": "@kbn/security-solution-plugin",
+    "version": "1.0.0",
+    "private": true,
+    "license": "Elastic License 2.0",
+    "scripts": {
+      "cypress": "../../../node_modules/.bin/cypress",
+      "cypress:open:ess": "TZ=UTC node ../../plugins/security_solution/scripts/start_cypress_parallel open --spec './cypress/e2e/**/*.cy.ts' --config-file ../../test/security_solution_cypress/cypress/cypress.config.ts --ftr-config-file ../../test/security_solution_cypress/cli_config",
+      "cypress:run:ess": "yarn cypress:ess --config-file ../../test/security_solution_cypress/cypress/cypress_ci.config.ts --browser chrome --spec './cypress/e2e/{,!(investigations,explore)/**/}*.cy.ts'; status=$?; yarn junit:merge && exit $status",
+      "cypress:run:cases:ess": "yarn cypress:ess --config-file ../../test/security_solution_cypress/cypress/cypress_ci.config.ts --browser chrome --spec './cypress/e2e/explore/cases/*.cy.ts' --ftr-config-file ../../test/security_solution_cypress/cli_config; status=$?; yarn junit:merge && exit $status",
+      "cypress:ess": "TZ=UTC node ../../plugins/security_solution/scripts/start_cypress_parallel run --config-file ../../test/security_solution_cypress/cypress/cypress_ci.config.ts --ftr-config-file ../../test/security_solution_cypress/cli_config --reporter ../../../node_modules/cypress-multi-reporters --reporter-options configFile=./cypress/reporter_config.json",
+      "cypress:run:respops:ess": "yarn cypress:ess --config-file ../../test/security_solution_cypress/cypress/cypress_ci.config.ts --browser chrome --spec './cypress/e2e/(detection_alerts|detection_rules|exceptions)/*.cy.ts' --ftr-config-file ../../test/security_solution_cypress/cli_config; status=$?; yarn junit:merge && exit $status",
+      "cypress:investigations:run:ess": "yarn cypress:ess --config-file ../../test/security_solution_cypress/cypress/cypress_ci.config.ts --browser chrome --spec './cypress/e2e/investigations/**/*.cy.ts' --ftr-config-file ../../test/security_solution_cypress/cli_config; status=$?; yarn junit:merge && exit $status",
+      "cypress:explore:run:ess": "yarn cypress:ess --config-file ../../test/security_solution_cypress/cypress/cypress_ci.config.ts --browser chrome --spec './cypress/e2e/explore/**/*.cy.ts' --ftr-config-file ../../test/security_solution_cypress/cli_config; status=$?; yarn junit:merge && exit $status",
+      "cypress:changed-specs-only:ess": "yarn cypress:ess --changed-specs-only --env burn=2",
+      "junit:merge": "../../../node_modules/.bin/mochawesome-merge ../../../target/kibana-security-solution/cypress/results/mochawesome*.json > ../../../target/kibana-security-solution/cypress/results/output.json && ../../../node_modules/.bin/marge ../../../target/kibana-security-solution/cypress/results/output.json --reportDir ../../../target/kibana-security-solution/cypress/results && yarn junit:transform && mkdir -p ../../../target/junit && cp ../../../target/kibana-security-solution/cypress/results/*.xml ../../../target/junit/",
+      "junit:transform": "node ../../plugins/security_solution/scripts/junit_transformer --pathPattern '../../../target/kibana-security-solution/cypress/results/*.xml' --rootDirectory ../../../ --reportName 'Security Solution Cypress' --writeInPlace",
+      "cypress:serverless": "TZ=UTC node ../../plugins/security_solution/scripts/start_cypress_parallel --config-file ../../test/security_solution_cypress/cypress/cypress_ci_serverless.config.ts --ftr-config-file ../../test/security_solution_cypress/serverless_config --reporter ../../../node_modules/cypress-multi-reporters --reporter-options configFile=./cypress/reporter_config.json",
+      "cypress:open:serverless": "yarn cypress:serverless open --config-file ../../test/security_solution_cypress/cypress/cypress_serverless.config.ts --spec './cypress/e2e/**/*.cy.ts'",
+      "cypress:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/{,!(investigations,explore)/**/}*.cy.ts'; status=$?; yarn junit:merge && exit $status",
+      "cypress:investigations:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/investigations/**/*.cy.ts'; status=$?; yarn junit:merge && exit $status",
+      "cypress:explore:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/explore/**/*.cy.ts'; status=$?; yarn junit:merge && exit $status",
+      "cypress:changed-specs-only:serverless": "yarn cypress:serverless --changed-specs-only --env burn=2"
+    }
+  }

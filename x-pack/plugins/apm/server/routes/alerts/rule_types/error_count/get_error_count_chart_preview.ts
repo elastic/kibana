@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import {
+  getParsedFilterQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   ERROR_GROUP_ID,
@@ -38,6 +42,7 @@ export async function getTransactionErrorCountChartPreview({
     start,
     end,
     groupBy: groupByFields,
+    kqlFilter,
   } = alertParams;
 
   const allGroupByFields = getAllGroupByFields(
@@ -45,17 +50,24 @@ export async function getTransactionErrorCountChartPreview({
     groupByFields
   );
 
-  const query = {
-    bool: {
-      filter: [
+  const termFilterQuery = !kqlFilter
+    ? [
         ...termQuery(SERVICE_NAME, serviceName, {
           queryEmptyString: false,
         }),
         ...termQuery(ERROR_GROUP_ID, errorGroupingKey, {
           queryEmptyString: false,
         }),
-        ...rangeQuery(start, end),
         ...environmentQuery(environment),
+      ]
+    : [];
+
+  const query = {
+    bool: {
+      filter: [
+        ...termFilterQuery,
+        ...getParsedFilterQuery(kqlFilter),
+        ...rangeQuery(start, end),
         { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
       ],
     },

@@ -467,6 +467,56 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('description-unsaved-draft');
       });
 
+      it('should persist the draft of new comment while old comment is updated', async () => {
+        await cases.singleCase.addComment('my first comment');
+
+        let commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+
+        await commentArea.focus();
+        await commentArea.clearValue();
+        await commentArea.type('Test comment from automation');
+
+        await testSubjects.click('property-actions-user-action-ellipses');
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('property-actions-user-action-pencil');
+        await header.waitUntilLoadingHasFinished();
+
+        const editCommentTextArea = await find.byCssSelector(
+          '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
+        );
+
+        await header.waitUntilLoadingHasFinished();
+
+        await editCommentTextArea.focus();
+        await editCommentTextArea.type('Edited comment');
+
+        await testSubjects.click('editable-save-markdown');
+        await header.waitUntilLoadingHasFinished();
+
+        /**
+         * We need to wait for some time to
+         * give the localStorage a change to persist
+         * the comment. Otherwise, the test navigates to
+         * fast to the cases table and the comment is not
+         * persisted
+         */
+        await setTimeoutAsync(2000);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await browser.refresh();
+
+        await header.waitUntilLoadingHasFinished();
+
+        commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+
+        expect(await commentArea.getVisibleText()).to.be('Test comment from automation');
+      });
+
       /**
        * There is this bug https://github.com/elastic/kibana/issues/157280
        * where this test randomly reproduces thus making the test flaky.
