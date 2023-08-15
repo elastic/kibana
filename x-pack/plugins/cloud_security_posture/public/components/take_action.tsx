@@ -17,7 +17,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import type { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { RuleResponse } from '../common/types';
@@ -30,6 +30,47 @@ const RULE_PAGE_PATH = '/app/security/rules/id/';
 interface TakeActionProps {
   createRuleFn: (http: HttpSetup) => Promise<RuleResponse>;
 }
+
+export const showSuccessToast = (
+  notifications: NotificationsStart,
+  http: HttpSetup,
+  ruleResponse: RuleResponse
+) => {
+  return notifications.toasts.addSuccess({
+    toastLifeTimeMs: 10000,
+    color: 'success',
+    iconType: '',
+    text: toMountPoint(
+      <div>
+        <EuiText size="m">
+          <strong>{ruleResponse.name}</strong>
+          {` `}
+          <FormattedMessage
+            id="xpack.csp.flyout.ruleCreatedToastTitle"
+            defaultMessage="detection rule was created."
+          />
+        </EuiText>
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.csp.flyout.ruleCreatedToast"
+            defaultMessage="Add rule actions to get notified when alerts are generated."
+          />
+        </EuiText>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton size="s" href={http.basePath.prepend(RULE_PAGE_PATH + ruleResponse.id)}>
+              <FormattedMessage
+                id="xpack.csp.flyout.ruleCreatedToastViewRuleButton"
+                defaultMessage="View rule"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+    ),
+  });
+};
+
 /*
  * This component is used to create a detection rule from Flyout.
  * It accepts a createRuleFn parameter which is used to create a rule in a generic way.
@@ -47,42 +88,6 @@ export const TakeAction = ({ createRuleFn }: TakeActionProps) => {
   });
 
   const { http, notifications } = useKibana().services;
-
-  const showSuccessToast = (ruleResponse: RuleResponse) => {
-    return notifications.toasts.addSuccess({
-      toastLifeTimeMs: 10000,
-      color: 'success',
-      iconType: '',
-      text: toMountPoint(
-        <div>
-          <EuiText size="m">
-            <strong>{ruleResponse.name}</strong>
-            {` `}
-            <FormattedMessage
-              id="xpack.csp.flyout.ruleCreatedToastTitle"
-              defaultMessage="detection rule was created."
-            />
-          </EuiText>
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.csp.flyout.ruleCreatedToast"
-              defaultMessage="Add rule actions to get notified when alerts are generated."
-            />
-          </EuiText>
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButton size="s" href={http.basePath.prepend(RULE_PAGE_PATH + ruleResponse.id)}>
-                <FormattedMessage
-                  id="xpack.csp.flyout.ruleCreatedToastViewRuleButton"
-                  defaultMessage="View rule"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      ),
-    });
-  };
 
   const button = (
     <EuiButton
@@ -116,7 +121,7 @@ export const TakeAction = ({ createRuleFn }: TakeActionProps) => {
               setIsLoading(true);
               const ruleResponse = await createRuleFn(http);
               setIsLoading(false);
-              showSuccessToast(ruleResponse);
+              showSuccessToast(notifications, http, ruleResponse);
               // Triggering a refetch of rules and alerts to update the UI
               queryClient.invalidateQueries([DETECTION_ENGINE_RULES_KEY]);
               queryClient.invalidateQueries([DETECTION_ENGINE_ALERTS_KEY]);
