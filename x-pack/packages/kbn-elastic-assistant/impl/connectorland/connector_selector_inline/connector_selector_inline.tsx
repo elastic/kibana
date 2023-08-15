@@ -236,7 +236,6 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
             <EuiSuperSelect
               aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
               compressed={true}
-              data-test-subj="connectorSelectorSuperSelect"
               disabled={isDisabled}
               hasDividers={true}
               isLoading={isLoading}
@@ -252,6 +251,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
               <EuiButtonEmpty
                 className={placeholderButtonClassName}
                 color={'text'}
+                data-test-subj="connectorSelectorPlaceholderButton"
                 iconSide={'right'}
                 iconType="arrowDown"
                 isDisabled={isDisabled}
