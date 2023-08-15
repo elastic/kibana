@@ -33351,8 +33351,6 @@
     "xpack.securitySolution.flyout.documentDetails.severityTitle": "严重性",
     "xpack.securitySolution.flyout.documentDetails.share": "共享告警",
     "xpack.securitySolution.flyout.documentDetails.tableTab": "表",
-    "xpack.securitySolution.flyout.documentDetails.technicalPreviewMessage": "此功能处于技术预览状态，在未来版本中可能会更改或完全移除。Elastic 将尽最大努力来修复任何问题，但处于技术预览状态的功能不受正式 GA 功能支持 SLA 的约束。",
-    "xpack.securitySolution.flyout.documentDetails.technicalPreviewTitle": "技术预览",
     "xpack.securitySolution.flyout.documentDetails.threatIntelligenceButton": "威胁情报",
     "xpack.securitySolution.flyout.documentDetails.threatIntelligenceTitle": "威胁情报",
     "xpack.securitySolution.flyout.documentDetails.visualizationsTitle": "可视化",
