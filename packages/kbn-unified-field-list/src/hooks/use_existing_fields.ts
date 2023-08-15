@@ -214,7 +214,7 @@ export const useExistingFieldsFetcher = (
       reportPerformanceMetricEvent(params.services.core.analytics, {
         eventName: metricEventName,
         duration: window.performance.now() - startTime,
-        meta: { dataViewsCount: dataViews.length },
+        meta: { dataViewsCount: params.dataViews.length },
       });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
