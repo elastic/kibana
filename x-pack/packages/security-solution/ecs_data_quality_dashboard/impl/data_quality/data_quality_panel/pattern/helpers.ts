@@ -165,7 +165,10 @@ export const getSummaryTableItems = ({
     docsCount: getDocsCount({ stats, indexName }),
     incompatible: getIndexIncompatible({ indexName, results }),
     indexName,
-    ilmPhase: ilmExplain != null ? getIlmPhase(ilmExplain[indexName], isILMAvailable) : undefined,
+    ilmPhase:
+      isILMAvailable && ilmExplain != null
+        ? getIlmPhase(ilmExplain[indexName], isILMAvailable)
+        : undefined,
     pattern,
     patternDocsCount,
     sizeInBytes: getSizeInBytes({ stats, indexName }),

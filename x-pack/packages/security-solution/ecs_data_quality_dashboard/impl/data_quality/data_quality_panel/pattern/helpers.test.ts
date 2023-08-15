@@ -320,6 +320,50 @@ describe('helpers', () => {
       ]);
     });
 
+    test('it returns the expected summary table items when isILMAvailable is false', () => {
+      expect(
+        getSummaryTableItems({
+          ilmExplain: mockIlmExplain,
+          indexNames,
+          isILMAvailable: false,
+          pattern,
+          patternDocsCount,
+          results,
+          sortByColumn: defaultSort.sort.field,
+          sortByDirection: defaultSort.sort.direction,
+          stats: mockStats,
+        })
+      ).toEqual([
+        {
+          docsCount: 1630289,
+          ilmPhase: undefined,
+          incompatible: undefined,
+          indexName: '.ds-packetbeat-8.5.3-2023.02.04-000001',
+          pattern: 'auditbeat-*',
+          patternDocsCount: 4,
+          sizeInBytes: 733175040,
+        },
+        {
+          docsCount: 1628343,
+          ilmPhase: undefined,
+          incompatible: undefined,
+          indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
+          pattern: 'auditbeat-*',
+          patternDocsCount: 4,
+          sizeInBytes: 731583142,
+        },
+        {
+          docsCount: 4,
+          ilmPhase: undefined,
+          incompatible: 3,
+          indexName: 'auditbeat-custom-index-1',
+          pattern: 'auditbeat-*',
+          patternDocsCount: 4,
+          sizeInBytes: 28413,
+        },
+      ]);
+    });
+
     test('it returns the expected summary table items when `sortByDirection` is ascending', () => {
       expect(
         getSummaryTableItems({
@@ -423,6 +467,17 @@ describe('helpers', () => {
           ilmExplain: mockIlmExplain,
           indexNames: undefined,
           isILMAvailable,
+          stats: mockStats,
+        })
+      ).toBe(true);
+    });
+
+    test('returns true when `isILMAvailable` is false, and the required `stats` and `ilmExplain` are available', () => {
+      expect(
+        shouldCreateIndexNames({
+          ilmExplain: null,
+          indexNames: undefined,
+          isILMAvailable: false,
           stats: mockStats,
         })
       ).toBe(true);

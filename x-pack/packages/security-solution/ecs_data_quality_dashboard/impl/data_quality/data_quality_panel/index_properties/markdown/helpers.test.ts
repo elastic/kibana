@@ -428,6 +428,13 @@ describe('helpers', () => {
         '| Result | Index | Docs | Incompatible fields | ILM Phase | Size |\n|--------|-------|------|---------------------|-----------|------|'
       );
     });
+
+    test('it returns the expected header when isILMAvailable is false', () => {
+      const isILMAvailable = false;
+      expect(getSummaryTableMarkdownHeader(isILMAvailable)).toEqual(
+        '| Result | Index | Docs | Incompatible fields | Size |\n|--------|-------|------|---------------------|------|'
+      );
+    });
   });
 
   describe('getSummaryTableMarkdownRow', () => {
@@ -462,6 +469,22 @@ describe('helpers', () => {
         })
       ).toEqual('| -- | auditbeat-custom-index-1 | 4 (0.0%) | -- | -- | 27.7KB |\n');
     });
+
+    test('it returns the expected row when isILMAvailable is false', () => {
+      expect(
+        getSummaryTableMarkdownRow({
+          docsCount: 4,
+          formatBytes,
+          formatNumber,
+          incompatible: undefined, // <--
+          ilmPhase: undefined, // <--
+          indexName: 'auditbeat-custom-index-1',
+          isILMAvailable: false,
+          patternDocsCount: 57410,
+          sizeInBytes: 28413,
+        })
+      ).toEqual('| -- | auditbeat-custom-index-1 | 4 (0.0%) | -- | 27.7KB |\n');
+    });
   });
 
   describe('getSummaryTableMarkdownComment', () => {
@@ -480,6 +503,24 @@ describe('helpers', () => {
         })
       ).toEqual(
         '| Result | Index | Docs | Incompatible fields | ILM Phase | Size |\n|--------|-------|------|---------------------|-----------|------|\n| ❌ | auditbeat-custom-index-1 | 4 (0.0%) | 3 | `unmanaged` | 27.7KB |\n\n'
+      );
+    });
+
+    test('it returns the expected comment when isILMAvailable is false', () => {
+      expect(
+        getSummaryTableMarkdownComment({
+          docsCount: 4,
+          formatBytes,
+          formatNumber,
+          ilmPhase: 'unmanaged',
+          indexName: 'auditbeat-custom-index-1',
+          isILMAvailable: false,
+          partitionedFieldMetadata: mockPartitionedFieldMetadata,
+          patternDocsCount: 57410,
+          sizeInBytes: 28413,
+        })
+      ).toEqual(
+        '| Result | Index | Docs | Incompatible fields | Size |\n|--------|-------|------|---------------------|------|\n| ❌ | auditbeat-custom-index-1 | 4 (0.0%) | 3 | 27.7KB |\n\n'
       );
     });
   });

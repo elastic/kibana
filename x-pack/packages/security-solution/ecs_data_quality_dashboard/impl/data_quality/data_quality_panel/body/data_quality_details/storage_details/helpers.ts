@@ -119,7 +119,9 @@ export const getFlattenedBuckets = ({
         ...Object.entries(stats).reduce<FlattenedBucket[]>(
           (validStats, [indexName, indexStats]) => {
             const ilmPhase = getIlmPhase(ilmExplain?.[indexName], isILMAvailable);
-            const isSelectedPhase = ilmPhase != null && ilmPhasesMap[ilmPhase] != null;
+            const isSelectedPhase =
+              (isILMAvailable && ilmPhase != null && ilmPhasesMap[ilmPhase] != null) ||
+              !isILMAvailable;
 
             if (isSelectedPhase) {
               const incompatible =

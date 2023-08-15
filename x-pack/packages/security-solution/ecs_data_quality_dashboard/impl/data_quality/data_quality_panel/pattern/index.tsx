@@ -157,7 +157,7 @@ const PatternComponent: React.FC<Props> = ({
                 docsCount={getDocsCount({ stats, indexName })}
                 getGroupByFieldsOnClick={getGroupByFieldsOnClick}
                 ilmPhase={
-                  ilmExplain != null
+                  isILMAvailable && ilmExplain != null
                     ? getIlmPhase(ilmExplain?.[indexName], isILMAvailable)
                     : undefined
                 }
