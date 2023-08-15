@@ -57,7 +57,6 @@ export interface AppDependencies {
   docLinks: DocLinksStart;
   kibanaVersion: SemVer;
   theme$: Observable<CoreTheme>;
-  enableIndexActions: boolean;
   toasts: NotificationsSetup['toasts'];
 }
 
