@@ -206,7 +206,7 @@ describe('UptimeEsClient', () => {
         { meta: true }
       );
     });
-    it('does appends synthetics-* in index for stack version later than 8.10.0', async () => {
+    it('does not append synthetics-* to index for stack version 8.10.0 or later', async () => {
       savedObjectsClient.get = jest.fn().mockImplementation(() => {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(
           umDynamicSettings.name,
