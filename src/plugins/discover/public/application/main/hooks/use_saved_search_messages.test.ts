@@ -24,7 +24,7 @@ import {
   RecordRawType,
 } from '../services/discover_data_state_container';
 import { filter } from 'rxjs/operators';
-import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
+import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { searchResponseWarningsMock } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 
@@ -91,7 +91,7 @@ describe('test useSavedSearch message generators', () => {
     sendLoadingMoreMsg(documents$);
   });
   test('sendLoadingMoreFinishedMsg', (done) => {
-    const records = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
     const initialRecords = [records[0], records[1]];
     const moreRecords = [records[2], records[3]];
 
@@ -115,7 +115,7 @@ describe('test useSavedSearch message generators', () => {
     });
   });
   test('sendLoadingMoreFinishedMsg after an exception', (done) => {
-    const records = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
     const initialRecords = [records[0], records[1]];
 
     const documents$ = new BehaviorSubject<DataDocumentsMsg>({

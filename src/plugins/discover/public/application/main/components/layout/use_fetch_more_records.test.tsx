@@ -9,14 +9,14 @@
 import { BehaviorSubject } from 'rxjs';
 import { renderHook } from '@testing-library/react-hooks';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
+import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DataDocuments$, DataTotalHits$ } from '../../services/discover_data_state_container';
 import { FetchStatus } from '../../../types';
 
 describe('useFetchMoreRecords', () => {
-  const records = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
+  const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
 
   const getStateContainer = ({
     fetchStatus,
@@ -27,10 +27,6 @@ describe('useFetchMoreRecords', () => {
     loadedRecordsCount: number;
     totalRecordsCount: number;
   }) => {
-    const rows = records.slice(0, loadedRecordsCount);
-    if (rows.length) {
-      rows[rows.length - 1].raw.sort = [1000];
-    }
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     stateContainer.dataState.data$.documents$ = new BehaviorSubject({
       fetchStatus,
