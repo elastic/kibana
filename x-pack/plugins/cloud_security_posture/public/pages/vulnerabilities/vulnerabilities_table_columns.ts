@@ -18,7 +18,7 @@ export const vulnerabilitiesColumns = {
   severity: 'vulnerability.severity',
   package: 'vulnerability.package.name',
   version: 'vulnerability.package.version',
-  fix_version: 'vulnerability.package.fixed_version',
+  fixedVersion: 'vulnerability.package.fixed_version',
 };
 
 const defaultColumnProps = () => ({
@@ -104,7 +104,7 @@ export const getVulnerabilitiesColumnsGrid = (
   },
   {
     ...defaultColumnProps(),
-    id: vulnerabilitiesColumns.fix_version,
+    id: vulnerabilitiesColumns.fixedVersion,
     displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.fixVersion', {
       defaultMessage: 'Fix Version',
     }),

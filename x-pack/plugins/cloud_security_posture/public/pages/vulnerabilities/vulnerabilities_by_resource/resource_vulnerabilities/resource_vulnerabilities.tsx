@@ -237,7 +237,7 @@ const ResourceVulnerabilitiesDataGrid = ({
       if (columnId === vulnerabilitiesColumns.version) {
         return <>{vulnerabilityRow.vulnerability?.package?.version}</>;
       }
-      if (columnId === vulnerabilitiesColumns.fix_version) {
+      if (columnId === vulnerabilitiesColumns.fixedVersion) {
         return <>{vulnerabilityRow.vulnerability?.package?.fixed_version}</>;
       }
 
