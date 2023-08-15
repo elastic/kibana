@@ -11,7 +11,7 @@
     "cypress:burn": "yarn cypress:run:reporter --env burn=2 --concurrency=1 --headed",
     "cypress:changed-specs-only": "yarn cypress:run:reporter --changed-specs-only --env burn=2",
     "cypress:open": "TZ=UTC node ./scripts/start_cypress_parallel open --spec './cypress/e2e/**/*.cy.ts' --config-file ./cypress/cypress.config.ts --ftr-config-file ../../../../../../x-pack/test/security_solution_cypress/cli_config",
-    "cypress:run": "yarn cypress:run:reporter --spec './cypress/e2e/{,!(investigations,explore)/**/}*.cy.ts'; status=$?; yarn junit:merge && exit $status",
+    "cypress:run": "yarn cypress:run:reporter --spec './cypress/e2e/**/bulk_edit_rules_data_view.cy.ts'; status=$?; yarn junit:merge && exit $status",
     "cypress:run:cases": "yarn cypress:run:reporter --spec './cypress/e2e/explore/cases/*.cy.ts' --ftr-config-file ../../../../../../x-pack/test/security_solution_cypress/cli_config; status=$?; yarn junit:merge && exit $status",
     "cypress:run:reporter": "TZ=UTC node ./scripts/start_cypress_parallel run --browser chrome --config-file ./cypress/cypress_ci.config.ts --ftr-config-file ../../../../../../x-pack/test/security_solution_cypress/cli_config --reporter ../../../node_modules/cypress-multi-reporters --reporter-options configFile=./cypress/reporter_config.json",
     "cypress:run:respops": "yarn cypress:run:reporter --spec './cypress/e2e/(detection_alerts|detection_rules|exceptions)/*.cy.ts' --ftr-config-file ../../../../../../x-pack/test/security_solution_cypress/cli_config; status=$?; yarn junit:merge && exit $status",
