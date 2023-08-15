@@ -64,7 +64,7 @@ export interface RowCountInfo {
 /**
  * Type representing the pagination settings for an index.
  */
-export type IndexPagination = Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize'>;
+export type IndexPagination = Required<Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize'>>;
 
 /**
  * Type for callback function for changing items per page.
