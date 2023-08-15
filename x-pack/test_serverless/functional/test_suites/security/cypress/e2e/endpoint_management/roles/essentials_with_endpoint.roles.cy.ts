@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { login } from '../../../tasks/login';
 import {
   getNoPrivilegesPage,
@@ -24,6 +23,10 @@ import {
 } from '../../../screens';
 import { ServerlessRoleName } from '../../../../../../../shared/lib';
 import { ensurePolicyDetailsPageAuthzAccess } from '../../../screens/endpoint_management/policy_details';
+import {
+  CyIndexEndpointHosts,
+  indexEndpointHosts,
+} from '../../../tasks/endpoint_management/index_endpoint_hosts';
 
 describe(
   'Roles for Security Essential PLI with Endpoint Essentials addon',
@@ -41,17 +44,17 @@ describe(
     const allPages = getEndpointManagementPageList();
     const pageById = getEndpointManagementPageMap();
 
-    let loadedEndpoints: IndexedHostsAndAlertsResponse;
+    let loadedEndpoints: CyIndexEndpointHosts;
 
     before(() => {
-      cy.task('indexEndpointHosts', {}, { timeout: 240000 }).then((response) => {
+      indexEndpointHosts().then((response) => {
         loadedEndpoints = response;
       });
     });
 
     after(() => {
       if (loadedEndpoints) {
-        cy.task('deleteIndexedEndpointHosts', loadedEndpoints);
+        loadedEndpoints.cleanup();
       }
     });
 
@@ -99,7 +102,11 @@ describe(
 
       it('should have read access to Endpoint Policy Management', () => {
         ensurePolicyListPageAuthzAccess('read', true);
-        ensurePolicyDetailsPageAuthzAccess(loadedEndpoints.integrationPolicies[0].id, 'read', true);
+        ensurePolicyDetailsPageAuthzAccess(
+          loadedEndpoints.data.integrationPolicies[0].id,
+          'read',
+          true
+        );
       });
 
       for (const { title, id } of artifactPagesFullAccess) {
@@ -175,7 +182,11 @@ describe(
 
       it('should have access to policy management', () => {
         ensurePolicyListPageAuthzAccess('all', true);
-        ensurePolicyDetailsPageAuthzAccess(loadedEndpoints.integrationPolicies[0].id, 'all', true);
+        ensurePolicyDetailsPageAuthzAccess(
+          loadedEndpoints.data.integrationPolicies[0].id,
+          'all',
+          true
+        );
       });
 
       it(`should NOT have access to Host Isolation Exceptions`, () => {

@@ -11,8 +11,9 @@ import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
 import { TestProviders } from '../../../common/mock';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
-import { LeftPanelInsightsTabPath, LeftPanelKey } from '../../left';
+import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
+import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
 import {
   INSIGHTS_THREAT_INTELLIGENCE_CONTAINER_TEST_ID,
   INSIGHTS_THREAT_INTELLIGENCE_CONTENT_TEST_ID,
@@ -185,7 +186,7 @@ describe('<ThreatIntelligenceOverview />', () => {
     getByTestId(INSIGHTS_THREAT_INTELLIGENCE_TITLE_LINK_TEST_ID).click();
     expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
       id: LeftPanelKey,
-      path: LeftPanelInsightsTabPath,
+      path: { tab: LeftPanelInsightsTab, subTab: THREAT_INTELLIGENCE_TAB_ID },
       params: {
         id: panelContextValue.eventId,
         indexName: panelContextValue.indexName,
