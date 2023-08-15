@@ -71,7 +71,8 @@ export class ReportingNotifierStreamHandler {
               job,
               this.apiClient.getManagementLink,
               this.apiClient.getDownloadLink,
-              this.theme
+              this.theme,
+              this.http
             ),
             completedOptions
           );
@@ -81,7 +82,8 @@ export class ReportingNotifierStreamHandler {
               job,
               this.apiClient.getManagementLink,
               this.apiClient.getDownloadLink,
-              this.theme
+              this.theme,
+              this.http
             ),
             completedOptions
           );
@@ -91,7 +93,8 @@ export class ReportingNotifierStreamHandler {
               job,
               this.apiClient.getManagementLink,
               this.apiClient.getDownloadLink,
-              this.theme
+              this.theme,
+              this.http
             ),
             completedOptions
           );

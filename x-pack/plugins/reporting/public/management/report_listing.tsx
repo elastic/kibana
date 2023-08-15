@@ -397,7 +397,7 @@ class ReportListingUi extends Component<Props, State> {
             description: i18n.translate('xpack.reporting.listing.table.downloadReportDescription', {
               defaultMessage: 'Download this report in a new tab.',
             }),
-            onClick: (job) => this.props.apiClient.downloadReport(job.id),
+            onClick: (job) => { this.props.apiClient.downloadReport(job) },
             enabled: (job) => job.isDownloadReady,
           },
           {

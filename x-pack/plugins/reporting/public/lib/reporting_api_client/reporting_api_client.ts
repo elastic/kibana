@@ -49,7 +49,7 @@ interface IReportingAPI {
   getServerBasePath(): string; // Provides the raw server basePath to allow it to be stripped out from relativeUrls in job params
 
   // CRUD
-  downloadReport(jobId: string): void;
+  downloadReport(job: Job): void;
   deleteReport(jobId: string): Promise<void>;
   list(page: number, jobIds: string[]): Promise<Job[]>; // gets the first 10 report of the page
   total(): Promise<number>;
@@ -105,12 +105,14 @@ export class ReportingAPIClient implements IReportingAPI {
     return downloadLink;
   }
 
-  public downloadReport(jobId: string) {
-    this.http
-      .fetch(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${jobId}`, { version: '1' })
+
+  public downloadReport(job: Job) {
+    console.log({job})
+    return this.http
+      .fetch(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${job.id}`, { version: '1' })
       .then((resp) => {
         const csvBlob = new Blob([resp as string], { type: 'text/csv' });
-        fileSaver.saveAs(csvBlob, `${jobId}.csv`);
+        fileSaver.saveAs(csvBlob, `${job.title}.csv`);
         return;
       });
   }

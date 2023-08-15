@@ -7,7 +7,7 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { ThemeServiceStart, ToastInput } from '@kbn/core/public';
+import { CoreStart, ThemeServiceStart, ToastInput } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { JobId, JobSummary } from '../../common/types';
 import { DownloadButton } from './job_download_button';
@@ -17,7 +17,8 @@ export const getWarningToast = (
   job: JobSummary,
   getReportLink: () => string,
   getDownloadLink: (jobId: JobId) => string,
-  theme: ThemeServiceStart
+  theme: ThemeServiceStart,
+  http: Pick<CoreStart['http'], 'fetch'>,
 ): ToastInput => ({
   title: toMountPoint(
     <FormattedMessage
@@ -32,7 +33,7 @@ export const getWarningToast = (
       <p>
         <ReportLink getUrl={getReportLink} />
       </p>
-      <DownloadButton getUrl={getDownloadLink} job={job} />
+      <DownloadButton http={http} getUrl={getDownloadLink} job={job} />
     </>,
     { theme$: theme.theme$ }
   ),

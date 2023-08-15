@@ -16,6 +16,7 @@ import { JobSummary } from '../../common/types';
 interface Props {
   http: Pick<CoreStart['http'], 'fetch'>;
   job: JobSummary;
+  getUrl?: (jobId: string) => string
 }
 
 export const DownloadButton = ({ http, job }: Props) => {
