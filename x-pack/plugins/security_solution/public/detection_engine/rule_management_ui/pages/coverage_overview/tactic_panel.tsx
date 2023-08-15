@@ -13,7 +13,7 @@ import type { CoverageOverviewMitreTactic } from '../../../rule_management/model
 import { coverageOverviewPanelWidth } from './constants';
 import { getNumOfCoveredTechniques } from './helpers';
 import * as i18n from './translations';
-import { CoverageOverviewPanelMetadata } from './shared_components/panel_metadata';
+import { CoverageOverviewPanelRuleStats } from './shared_components/panel_rule_stats';
 
 export interface CoverageOverviewTacticPanelProps {
   tactic: CoverageOverviewMitreTactic;
@@ -68,7 +68,7 @@ const CoverageOverviewTacticPanelComponent = ({ tactic }: CoverageOverviewTactic
         max={tactic.techniques.length}
       />
       <EuiSpacer size="m" />
-      <CoverageOverviewPanelMetadata
+      <CoverageOverviewPanelRuleStats
         enabledRules={tactic.enabledRules.length}
         disabledRules={tactic.disabledRules.length}
       />
