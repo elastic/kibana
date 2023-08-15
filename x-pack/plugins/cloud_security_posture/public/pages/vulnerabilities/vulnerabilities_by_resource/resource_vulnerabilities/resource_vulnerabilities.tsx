@@ -146,6 +146,7 @@ const ResourceVulnerabilitiesDataGrid = ({
     if (!data?.page) {
       return [];
     }
+
     return getVulnerabilitiesGridCellActions({
       columnGridFn: getVulnerabilitiesColumnsGrid,
       columns: vulnerabilitiesColumns,
@@ -154,7 +155,11 @@ const ResourceVulnerabilitiesDataGrid = ({
       data: data.page,
       setUrlQuery,
       filters: urlQuery.filters,
-    }).filter((column) => column.id !== vulnerabilitiesColumns.resource);
+    }).filter(
+      (column) =>
+        column.id !== vulnerabilitiesColumns.resourceName &&
+        column.id !== vulnerabilitiesColumns.resourceId
+    );
   }, [data?.page, dataView, pageSize, setUrlQuery, urlQuery.filters]);
 
   const flyoutVulnerabilityIndex = urlQuery?.vulnerabilityIndex;
@@ -218,9 +223,6 @@ const ResourceVulnerabilitiesDataGrid = ({
             version={vulnerabilityRow.vulnerability.score.version}
           />
         );
-      }
-      if (columnId === vulnerabilitiesColumns.resource) {
-        return <>{vulnerabilityRow.resource?.name}</>;
       }
       if (columnId === vulnerabilitiesColumns.severity) {
         if (!vulnerabilityRow.vulnerability.severity) {

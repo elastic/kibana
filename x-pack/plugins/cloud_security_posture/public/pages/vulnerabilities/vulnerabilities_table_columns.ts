@@ -13,7 +13,8 @@ export const vulnerabilitiesColumns = {
   actions: 'actions',
   vulnerability: 'vulnerability.id',
   cvss: 'vulnerability.score.base',
-  resource: 'resource.name',
+  resourceName: 'resource.name',
+  resourceId: 'resource.id',
   severity: 'vulnerability.severity',
   package: 'vulnerability.package.name',
   version: 'vulnerability.package.version',
@@ -61,9 +62,17 @@ export const getVulnerabilitiesColumnsGrid = (
   },
   {
     ...defaultColumnProps(),
-    id: vulnerabilitiesColumns.resource,
-    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.resource', {
-      defaultMessage: 'Resource',
+    id: vulnerabilitiesColumns.resourceId,
+    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.resourceId', {
+      defaultMessage: 'Resource ID',
+    }),
+    cellActions,
+  },
+  {
+    ...defaultColumnProps(),
+    id: vulnerabilitiesColumns.resourceName,
+    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.resourceName', {
+      defaultMessage: 'Resource Name',
     }),
     cellActions,
   },

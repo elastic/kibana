@@ -254,8 +254,11 @@ const VulnerabilitiesDataGrid = ({
           />
         );
       }
-      if (columnId === vulnerabilitiesColumns.resource) {
+      if (columnId === vulnerabilitiesColumns.resourceName) {
         return <>{vulnerabilityRow.resource?.name}</>;
+      }
+      if (columnId === vulnerabilitiesColumns.resourceId) {
+        return <>{vulnerabilityRow.resource?.id}</>;
       }
       if (columnId === vulnerabilitiesColumns.severity) {
         if (!vulnerabilityRow.vulnerability.severity) {
