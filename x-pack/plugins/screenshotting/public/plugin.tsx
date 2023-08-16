@@ -21,26 +21,24 @@ interface SetupDeps {
 
 export class ScreenshottingPlugin implements Plugin<void, void, SetupDeps> {
   setup({ application }: CoreSetup, { screenshotMode }: SetupDeps) {
-    if (!screenshotMode.isScreenshotMode()) {
-      return;
-    }
-
-    application.register({
-      id: SCREENSHOTTING_APP_ID,
-      title: 'Screenshotting Expressions Renderer',
-      navLinkStatus: AppNavLinkStatus.hidden,
-      chromeless: true,
-
-      mount: async ({ element }: AppMountParameters) => {
-        ReactDOM.render(
-          <ScreenshotModeContext.Provider value={screenshotMode}>
+    if (screenshotMode.isScreenshotMode()) {
+      application.register({
+        id: SCREENSHOTTING_APP_ID,
+        title: 'Screenshotting Expressions Renderer',
+        navLinkStatus: AppNavLinkStatus.hidden,
+        chromeless: true,
+        
+        mount: async ({ element }: AppMountParameters) => {
+          ReactDOM.render(
+            <ScreenshotModeContext.Provider value={screenshotMode}>
             <App />
           </ScreenshotModeContext.Provider>,
           element
-        );
-        return () => ReactDOM.unmountComponentAtNode(element);
-      },
-    });
+          );
+          return () => ReactDOM.unmountComponentAtNode(element);
+        },
+      });
+    }
   }
 
   start() {}
