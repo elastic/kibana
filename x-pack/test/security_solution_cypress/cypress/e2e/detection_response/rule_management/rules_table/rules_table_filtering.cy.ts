@@ -56,6 +56,7 @@ describe('Rules table: filtering', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
           name: 'Successful rule',
           rule_id: 'successful_rule',
           index: ['test_index'],
+          enabled: false,
         })
       );
 
@@ -64,6 +65,7 @@ describe('Rules table: filtering', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
           name: 'Warning rule',
           rule_id: 'warning_rule',
           index: ['non_existent_index'],
+          enabled: false,
         })
       );
 
@@ -74,6 +76,7 @@ describe('Rules table: filtering', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
           index: ['test_index'],
           // Setting a crazy large "Additional look-back time" to force a failure
           from: 'now-9007199254746990s',
+          enabled: false,
         })
       );
 

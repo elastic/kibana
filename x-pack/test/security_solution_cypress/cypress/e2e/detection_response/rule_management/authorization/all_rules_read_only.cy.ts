@@ -29,7 +29,7 @@ import { SECURITY_DETECTIONS_RULES_URL } from '../../../../urls/navigation';
 describe('All rules - read only', { tags: tag.ESS }, () => {
   before(() => {
     cleanKibana();
-    createRule(getNewRule({ rule_id: '1' }));
+    createRule(getNewRule({ rule_id: '1', enabled: false }));
   });
 
   beforeEach(() => {
