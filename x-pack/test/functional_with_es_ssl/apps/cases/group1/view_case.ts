@@ -87,6 +87,36 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('editable-title-cancel-btn');
       });
 
+      it('shows error when description is empty strings, trims the description value on submit', async () => {
+        await testSubjects.click('description-edit-icon');
+
+        await header.waitUntilLoadingHasFinished();
+
+        const editCommentTextArea = await find.byCssSelector(
+          '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
+        );
+
+        await header.waitUntilLoadingHasFinished();
+
+        await editCommentTextArea.focus();
+        await editCommentTextArea.clearValue();
+        await editCommentTextArea.type('   ');
+
+        const error = await find.byCssSelector('.euiFormErrorText');
+        expect(await error.getVisibleText()).equal('A description is required.');
+
+        await editCommentTextArea.type('Description with space     ');
+
+        await testSubjects.click('editable-save-markdown');
+        await header.waitUntilLoadingHasFinished();
+
+        const desc = await find.byCssSelector(
+          '[data-test-subj="description"] [data-test-subj="scrollable-markdown"]'
+        );
+
+        expect(await desc.getVisibleText()).equal('Description with space');
+      });
+
       it('adds a comment to a case', async () => {
         const commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
