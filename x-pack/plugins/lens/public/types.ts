@@ -42,7 +42,7 @@ import { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import type { DraggingIdentifier, DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
-import type { DateRange, LayerType, SortingHint } from '../common/types';
+import type { DateRange, LayerType } from '../common/types';
 import type {
   LensSortActionData,
   LensResizeActionData,
