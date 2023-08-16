@@ -15,7 +15,11 @@ import { PAGE_TITLE } from '../../screens/common/page';
 import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../tasks/login';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createRule, deleteCustomRule } from '../../tasks/api_calls/rules';
-import { getCallOut, waitForCallOutToBeShown } from '../../tasks/common/callouts';
+import {
+  getCallOut,
+  NEED_ADMIN_FOR_UPDATE_CALLOUT,
+  waitForCallOutToBeShown,
+} from '../../tasks/common/callouts';
 
 const loadPageAsPlatformEngineerUser = (url: string) => {
   login(ROLES.soc_manager);
@@ -31,8 +35,6 @@ describe(
   'Detections > Need Admin Callouts indicating an admin is needed to migrate the alert data set',
   { tags: tag.ESS },
   () => {
-    const NEED_ADMIN_FOR_UPDATE_CALLOUT = 'need-admin-for-update-rules';
-
     before(() => {
       // First, we have to open the app on behalf of a privileged user in order to initialize it.
       // Otherwise the app will be disabled and show a "welcome"-like page.
