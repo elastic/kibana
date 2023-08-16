@@ -15,12 +15,20 @@ export default function ({ getService }: FtrProviderContext) {
   describe('security/views', function () {
     describe('route access', () => {
       describe('disabled', () => {
-        it('get login state', async () => {
-          const { body, status } = await supertest
-            .get('/internal/security/login_state')
-            .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
-        });
+        // ToDo: uncomment these when we disable login routes
+        // it('login', async () => {
+        //   const { body, status } = await supertest
+        //     .get('/login')
+        //     .set(svlCommonApi.getInternalRequestHeader());
+        //   svlCommonApi.assertApiNotFound(body, status);
+        // });
+
+        // it('get login state', async () => {
+        //   const { body, status } = await supertest
+        //     .get('/internal/security/login_state')
+        //     .set(svlCommonApi.getInternalRequestHeader());
+        //   svlCommonApi.assertApiNotFound(body, status);
+        // });
 
         it('access agreement', async () => {
           const { body, status } = await supertest
@@ -35,16 +43,23 @@ export default function ({ getService }: FtrProviderContext) {
             .set(svlCommonApi.getInternalRequestHeader());
           svlCommonApi.assertApiNotFound(body, status);
         });
-
-        it('login', async () => {
-          const { body, status } = await supertest
-            .get('/login')
-            .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
-        });
       });
 
       describe('public', () => {
+        it('login', async () => {
+          const { status } = await supertest
+            .get('/login')
+            .set(svlCommonApi.getInternalRequestHeader());
+           expect(status).toBe(302);
+        });
+
+        it('get login state', async () => {
+          const { status } = await supertest
+            .get('/internal/security/login_state')
+            .set(svlCommonApi.getInternalRequestHeader());
+           expect(status).toBe(200);
+        });
+
         it('capture URL', async () => {
           const { status } = await supertest
             .get('/internal/security/capture-url')

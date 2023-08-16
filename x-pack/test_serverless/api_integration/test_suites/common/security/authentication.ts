@@ -150,9 +150,25 @@ export default function ({ getService }: FtrProviderContext) {
 
         // ToDo: remove when we disable login
         it('login', async () => {
-          const { status } = await supertest
+          let body: any;
+          let status: number;
+
+          ({ body, status } = await supertest
             .post('/internal/security/login')
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(svlCommonApi.getCommonRequestHeader()));
+          // expect a rejection because we're not using the internal header
+          expect(body).toEqual({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: expect.stringContaining(
+              'method [post] exists but is not available with the current configuration'
+            ),
+          });
+          expect(status).toBe(400);
+
+          ({ body, status } = await supertest
+            .post('/internal/security/login')
+            .set(svlCommonApi.getInternalRequestHeader()));
           expect(status).not.toBe(404);
         });
       });

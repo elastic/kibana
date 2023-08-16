@@ -32,7 +32,7 @@ const sendApiLoginRequest = (
     url: url.toString(),
     body: {
       providerType: 'basic',
-      providerName: isLocalhost(url.hostname) ? 'basic' : 'cloud-basic',
+      providerName: 'cloud-basic',
       currentURL: '/',
       params: {
         username,

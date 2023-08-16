@@ -166,6 +166,9 @@ export class CoreAppsService {
           }),
           query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
         },
+        options: {
+          authRequired: 'optional',
+        },
       },
       async (context, req, res) => {
         const { query, params } = req;

@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set(svlCommonApi.getInternalRequestHeader())
         .send({
           providerType: 'basic',
-          providerName: 'basic',
+          providerName: 'cloud-basic',
           currentURL: '/',
           params: { username: kibanaTestUser.username, password: kibanaTestUser.password },
         })
