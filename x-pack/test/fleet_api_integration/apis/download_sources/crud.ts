@@ -307,7 +307,71 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             ...itemWithoutId,
             proxy_id: null,
-          });
+          })
+          .expect(200);
+
+        const { body: getResponse } = await supertest
+          .get(`/api/fleet/agent_download_sources/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send()
+          .expect(200);
+
+        expect(getResponse.item.proxy_id).to.eql(null);
+      });
+
+      it('setting proxy_id to null should remove the proxy from the agent policy', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'download source which proxy_id will be set to null',
+            host: 'http://test.fr:443',
+            proxy_id: PROXY_ID,
+            is_default: false,
+          })
+          .expect(200);
+
+        const { id: downloadSourceId, ...itemWithoutId } = postResponse.item;
+
+        const { body: postAgentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'agent policy with download source proxy_id which will be set to null',
+            namespace: 'default',
+            description: '',
+            is_default: false,
+            download_source_id: downloadSourceId,
+          })
+          .expect(200);
+
+        const { id: agentPolicyId } = postAgentPolicyResponse.item;
+
+        const { body: getAgentPolicyResponse } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicyId}/full`)
+          .set('kbn-xsrf', 'xxxx')
+          .send();
+
+        expect(getAgentPolicyResponse.item.agent.download.proxy_url).to.eql(
+          'https://some.source.proxy:3232'
+        );
+
+        const res = await supertest
+          .put(`/api/fleet/agent_download_sources/${downloadSourceId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            ...itemWithoutId,
+            proxy_id: null,
+          })
+          .expect(200);
+
+        const { body: getAgentPolicyNullResponse } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicyId}/full`)
+          .set('kbn-xsrf', 'xxxx')
+          .send()
+          .expect(200);
+
+        expect(getAgentPolicyNullResponse.item.agent.download.proxy_url).to.eql(undefined);
       });
     });
 

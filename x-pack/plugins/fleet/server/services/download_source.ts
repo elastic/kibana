@@ -103,7 +103,6 @@ class DownloadSourceService {
     return savedObjectToDownloadSource(newSo);
   }
 
-  // default should be only one
   public async update(
     soClient: SavedObjectsClientContract,
     id: string,
@@ -111,13 +110,13 @@ class DownloadSourceService {
   ) {
     const updateData: Partial<DownloadSourceSOAttributes> = newData;
 
-    if (newData.proxy_id) {
-      await this.throwIfProxyNotFound(soClient, newData.proxy_id);
+    if (updateData.proxy_id) {
+      await this.throwIfProxyNotFound(soClient, updateData.proxy_id);
     }
 
-    if (newData.name) {
+    if (updateData.name) {
       await this.requireUniqueName(soClient, {
-        name: newData.name,
+        name: updateData.name,
         id,
       });
     }
