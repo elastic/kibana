@@ -29,6 +29,10 @@ export interface UsePrevalenceParams {
    * Maintain backwards compatibility // TODO remove when possible
    */
   scopeId: string;
+  /**
+   * User defined fields to highlight (defined on rule)
+   */
+  investigationFields?: string[];
 }
 
 /**
@@ -41,6 +45,7 @@ export const usePrevalence = ({
   eventId,
   browserFields,
   dataFormattedForFieldBrowser,
+  investigationFields,
   scopeId,
 }: UsePrevalenceParams): ReactElement[] => {
   // retrieves the highlighted fields
@@ -49,11 +54,12 @@ export const usePrevalence = ({
       getSummaryRows({
         browserFields: browserFields || {},
         data: dataFormattedForFieldBrowser || [],
+        investigationFields: investigationFields || [],
         eventId,
         scopeId,
         isReadOnly: false,
       }),
-    [browserFields, dataFormattedForFieldBrowser, eventId, scopeId]
+    [browserFields, investigationFields, dataFormattedForFieldBrowser, eventId, scopeId]
   );
 
   return useMemo(
