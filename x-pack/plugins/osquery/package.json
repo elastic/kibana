@@ -5,8 +5,8 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
-    "cypress:open": "node ../security_solution/scripts/start_cypress_parallel open --config-file ../osquery/cypress.config.ts --ftr-config-file ../../../../../../x-pack/test/osquery_cypress/cli_config",
-    "cypress:run": "node ../security_solution/scripts/start_cypress_parallel run --config-file ../osquery/cypress.config.ts --ftr-config-file ../../../../../../x-pack/test/osquery_cypress/cli_config --concurrency 1",
+    "cypress:open": "node ../security_solution/scripts/start_cypress_parallel open --config-file ../osquery/cypress.config.ts --ftr-config-file ../../../x-pack/test/osquery_cypress/cli_config",
+    "cypress:run": "node ../security_solution/scripts/start_cypress_parallel run --config-file ../osquery/cypress.config.ts --ftr-config-file ../../../x-pack/test/osquery_cypress/cli_config --concurrency 1",
     "nyc": "../../../node_modules/.bin/nyc report --reporter=text-summary"
   }
 }

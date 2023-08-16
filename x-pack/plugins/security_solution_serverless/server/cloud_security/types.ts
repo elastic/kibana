@@ -10,11 +10,11 @@ import type {
   KSPM_POLICY_TEMPLATE,
   CNVM_POLICY_TEMPLATE,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import type { MeteringCallbackInput } from '../types';
+import type { MeteringCallbackInput, Tier } from '../types';
 
 export interface ResourceCountAggregation {
   min_timestamp: MinTimestamp;
-  unique_resources: {
+  unique_assets: {
     value: number;
   };
 }
@@ -33,4 +33,5 @@ export interface CloudSecurityMeteringCallbackInput
   extends Omit<MeteringCallbackInput, 'cloudSetup' | 'abortController' | 'config'> {
   projectId: string;
   postureType: PostureType;
+  tier: Tier;
 }

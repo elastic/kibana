@@ -9,11 +9,12 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
+import { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { ChartLoadingProgress, ChartPlaceholder } from './chart_placeholder';
 import { parseDateRange } from '../../utils/datemath';
-import { LensAttributes } from '../../common/visualizations';
 
 export type LensWrapperProps = Omit<
   TypedLensByValueInput,
@@ -30,10 +31,11 @@ export const LensWrapper = ({
   dateRange,
   filters,
   lastReloadRequestTime,
-  loading,
+  loading = false,
   query,
   ...props
 }: LensWrapperProps) => {
+  const { euiTheme } = useEuiTheme();
   const [intersectionObserverEntry, setIntersectionObserverEntry] =
     useState<IntersectionObserverEntry>();
   const [embeddableLoaded, setEmbeddableLoaded] = useState(false);
@@ -96,11 +98,25 @@ export const LensWrapper = ({
 
     return { from, to };
   }, [state.dateRange]);
-
   const isLoading = loading || !state.attributes;
 
   return (
-    <Container ref={ref}>
+    <div
+      css={css`
+        position: relative;
+        border-radius: ${euiTheme.size.s};
+        overflow: hidden;
+        height: 100%;
+        .echLegend .echLegendList {
+          display: flex;
+        }
+        .echMetric {
+          border-radius: ${euiTheme.border.radius.medium};
+          pointer-events: none;
+        }
+      `}
+      ref={ref}
+    >
       <>
         {isLoading && !embeddableLoaded ? (
           <ChartPlaceholder style={props.style} />
@@ -120,7 +136,7 @@ export const LensWrapper = ({
           </>
         )}
       </>
-    </Container>
+    </div>
   );
 };
 
@@ -142,13 +158,3 @@ const EmbeddableComponentMemo = React.memo(
     return <EmbeddableComponent {...props} attributes={attributes} />;
   }
 );
-
-const Container = euiStyled.div`
-  position: relative;
-  border-radius: ${({ theme }) => theme.eui.euiSizeS};
-  overflow: hidden;
-  height: 100%;
-  .echLegend .echLegendList {
-    display: flex;
-  }
-`;
