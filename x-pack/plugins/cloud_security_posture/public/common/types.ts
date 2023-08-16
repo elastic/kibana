@@ -37,12 +37,12 @@ export interface CspFindingsQueryData {
 
 export type Sort<T> = NonNullable<Criteria<T>['sort']>;
 
-type RuleSeverityMapping = {
+interface RuleSeverityMapping {
   field: string;
   value: string;
   operator: 'equals';
   severity: string;
-};
+}
 
 export interface RuleCreateProps {
   type: string;
