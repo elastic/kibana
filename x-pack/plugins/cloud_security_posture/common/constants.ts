@@ -136,3 +136,5 @@ export const AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP: AwsCredentialsTypeFieldMap = {
 
 export const SETUP_ACCESS_CLOUD_SHELL = 'google_cloud_shell';
 export const SETUP_ACCESS_MANUAL = 'manual';
+
+export const DETECTION_ENGINE_ALERTS_INDEX_DEFAULT = '.alerts-security.alerts-default';
