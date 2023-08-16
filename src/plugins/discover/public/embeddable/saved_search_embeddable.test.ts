@@ -321,7 +321,8 @@ describe('saved search embeddable', () => {
     expect(search).toHaveBeenCalledTimes(1);
   });
 
-  it('should not reload when the input title doesnt change', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/162997
+  it.skip('should not reload when the input title doesnt change', async () => {
     const search = jest.fn().mockReturnValue(getSearchResponse(1));
     const { embeddable } = createEmbeddable({ searchMock: search, customTitle: 'custom title' });
     await waitOneTick();

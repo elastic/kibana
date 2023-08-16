@@ -88,7 +88,12 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
   }
 
   public async runApi({ body }: GenAiRunActionParams): Promise<GenAiRunActionResponse> {
-    const sanitizedBody = sanitizeRequest(this.provider, this.url, body);
+    const sanitizedBody = sanitizeRequest(
+      this.provider,
+      this.url,
+      body,
+      ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
+    );
     const axiosOptions = getAxiosOptions(this.provider, this.key, false);
     const response = await this.request({
       url: this.url,
@@ -104,7 +109,13 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
     body,
     stream,
   }: GenAiStreamActionParams): Promise<GenAiRunActionResponse> {
-    const executeBody = getRequestWithStreamOption(this.provider, this.url, body, stream);
+    const executeBody = getRequestWithStreamOption(
+      this.provider,
+      this.url,
+      body,
+      stream,
+      ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
+    );
     const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
     const response = await this.request({
       url: this.url,

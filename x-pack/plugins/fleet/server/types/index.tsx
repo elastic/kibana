@@ -85,12 +85,16 @@ export type {
   ExperimentalDataStreamFeature,
   Secret,
   SecretElasticDoc,
+  SecretPath,
   VarSecretReference,
   PolicySecretReference,
+  DeletedSecretResponse,
+  DeletedSecretReference,
   PackageListItem,
   PackageList,
   InstallationInfo,
   ActionStatusOptions,
+  PackageSpecTags,
 } from '../../common/types';
 export { ElasticsearchAssetType, KibanaAssetType, KibanaSavedObjectType } from '../../common/types';
 export { dataTypes } from '../../common/constants';

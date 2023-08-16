@@ -18,8 +18,6 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
     const coreContext = await context.core;
     const { client: esClient } = coreContext.elasticsearch;
 
-    server.authSavedObjectsClient = coreContext.savedObjects.client;
-
     const uptimeEsClient = new UptimeEsClient(
       coreContext.savedObjects.client,
       esClient.asCurrentUser,
@@ -30,7 +28,6 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
       }
     );
 
-    server.uptimeEsClient = uptimeEsClient;
     const res = await uptimeRoute.handler({
       uptimeEsClient,
       savedObjectsClient: coreContext.savedObjects.client,

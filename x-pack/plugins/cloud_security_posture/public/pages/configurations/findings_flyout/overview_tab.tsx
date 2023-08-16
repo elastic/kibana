@@ -29,6 +29,7 @@ import { useLatestFindingsDataView } from '../../../common/api/use_latest_findin
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { CisKubernetesIcons, CspFlyoutMarkdown, CodeBlock } from './findings_flyout';
+import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
@@ -39,6 +40,12 @@ const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined)
       defaultMessage: 'Rule Name',
     }),
     description: data.rule.name,
+  },
+  {
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.alertsTitle', {
+      defaultMessage: 'Alerts',
+    }),
+    description: <FindingsDetectionRuleCounter finding={data} />,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleTagsTitle', {

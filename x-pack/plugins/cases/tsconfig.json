@@ -61,7 +61,6 @@
     "@kbn/shared-ux-file-upload",
     "@kbn/shared-ux-file-mocks",
     "@kbn/saved-objects-finder-plugin",
-    "@kbn/saved-objects-management-plugin",
     "@kbn/utility-types-jest",
     "@kbn/ui-actions-plugin",
     "@kbn/core-lifecycle-browser",
@@ -69,6 +68,8 @@
     "@kbn/core-theme-browser",
     "@kbn/serverless",
     "@kbn/core-http-server",
+    "@kbn/alerting-plugin",
+    "@kbn/content-management-plugin",
   ],
   "exclude": [
     "target/**/*",

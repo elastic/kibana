@@ -12,7 +12,7 @@ import type {
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
 } from '..';
-import type { PUSH_CASES_CAPABILITY } from '../constants';
+import type { CASES_CONNECTORS_CAPABILITY, PUSH_CASES_CAPABILITY } from '../constants';
 import type { SnakeToCamelCase } from '../types';
 import type {
   CaseSeverity,
@@ -35,8 +35,10 @@ import type {
   GetCaseUsersResponse,
   UserActionFindRequestTypes,
   UserActionFindResponse,
+  CaseMetricsFeature,
+  CasesMetricsResponse,
+  SingleCaseMetricsResponse,
 } from '../types/api';
-import type { CaseMetricsFeature, CasesMetricsResponse, SingleCaseMetricsResponse } from '../api';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
@@ -56,6 +58,9 @@ export interface CasesUiConfigType {
   files: {
     maxSize?: number;
     allowedMimeTypes: string[];
+  };
+  stack: {
+    enabled: boolean;
   };
 }
 
@@ -283,6 +288,7 @@ export interface CasesPermissions {
   update: boolean;
   delete: boolean;
   push: boolean;
+  connectors: boolean;
 }
 
 export interface CasesCapabilities {
@@ -291,4 +297,5 @@ export interface CasesCapabilities {
   [UPDATE_CASES_CAPABILITY]: boolean;
   [DELETE_CASES_CAPABILITY]: boolean;
   [PUSH_CASES_CAPABILITY]: boolean;
+  [CASES_CONNECTORS_CAPABILITY]: boolean;
 }

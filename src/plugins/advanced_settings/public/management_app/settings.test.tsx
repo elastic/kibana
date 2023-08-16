@@ -21,7 +21,7 @@ import {
   docLinksServiceMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
-import { ComponentRegistry } from '../component_registry';
+import { SectionRegistry } from '@kbn/management-settings-section-registry';
 import { Search } from './components/search';
 import { EuiTab } from '@elastic/eui';
 
@@ -257,7 +257,7 @@ describe('Settings', () => {
         toasts={notificationServiceMock.createStartContract().toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
         settingsService={mockConfig().core.settings}
-        componentRegistry={new ComponentRegistry().start}
+        sectionRegistry={new SectionRegistry().start}
         theme={themeServiceMock.createStartContract().theme$}
       />
     );
@@ -286,7 +286,7 @@ describe('Settings', () => {
         toasts={notificationServiceMock.createStartContract().toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
         settingsService={mockConfig().core.settings}
-        componentRegistry={new ComponentRegistry().start}
+        sectionRegistry={new SectionRegistry().start}
         theme={themeServiceMock.createStartContract().theme$}
       />
     );
@@ -312,7 +312,7 @@ describe('Settings', () => {
         toasts={notificationServiceMock.createStartContract().toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
         settingsService={mockConfig().core.settings}
-        componentRegistry={new ComponentRegistry().start}
+        sectionRegistry={new SectionRegistry().start}
         theme={themeServiceMock.createStartContract().theme$}
       />
     );
@@ -341,7 +341,7 @@ describe('Settings', () => {
         toasts={toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
         settingsService={mockConfig().core.settings}
-        componentRegistry={new ComponentRegistry().start}
+        sectionRegistry={new SectionRegistry().start}
         theme={themeServiceMock.createStartContract().theme$}
       />
     );
@@ -363,7 +363,7 @@ describe('Settings', () => {
         toasts={toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
         settingsService={mockConfig().core.settings}
-        componentRegistry={new ComponentRegistry().start}
+        sectionRegistry={new SectionRegistry().start}
         theme={themeServiceMock.createStartContract().theme$}
       />
     );

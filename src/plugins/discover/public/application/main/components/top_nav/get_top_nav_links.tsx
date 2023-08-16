@@ -49,8 +49,6 @@ export const getTopNavLinks = ({
     }),
     run: async (anchorElement: HTMLElement) => {
       openAlertsPopover({
-        I18nContext: services.core.i18n.Context,
-        theme$: services.core.theme.theme$,
         anchorElement,
         services,
         stateContainer: state,
@@ -107,8 +105,6 @@ export const getTopNavLinks = ({
     run: () =>
       showOpenSearchPanel({
         onOpenSavedSearch: state.actions.onOpenSavedSearch,
-        I18nContext: services.core.i18n.Context,
-        theme$: services.core.theme.theme$,
         services,
       }),
   };

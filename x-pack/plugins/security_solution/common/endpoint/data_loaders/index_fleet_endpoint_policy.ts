@@ -16,8 +16,9 @@ import type {
   DeleteAgentPolicyResponse,
   PostDeletePackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
-import { kibanaPackageJson } from '@kbn/repo-info';
 import { AGENT_POLICY_API_ROUTES, PACKAGE_POLICY_API_ROUTES } from '@kbn/fleet-plugin/common';
+import { memoize } from 'lodash';
+import { getEndpointPackageInfo } from '../utils/package';
 import type { PolicyData } from '../types';
 import { policyFactory as policyConfigFactory } from '../models/policy_config';
 import { wrapErrorAndRejectPromise } from './utils';
@@ -34,13 +35,16 @@ export interface IndexedFleetEndpointPolicyResponse {
 export const indexFleetEndpointPolicy = async (
   kbnClient: KbnClient,
   policyName: string,
-  endpointPackageVersion: string = kibanaPackageJson.version,
+  endpointPackageVersion?: string,
   agentPolicyName?: string
 ): Promise<IndexedFleetEndpointPolicyResponse> => {
   const response: IndexedFleetEndpointPolicyResponse = {
     integrationPolicies: [],
     agentPolicies: [],
   };
+
+  const packageVersion =
+    endpointPackageVersion ?? (await getDefaultEndpointPackageVersion(kbnClient));
 
   // Create Agent Policy first
   const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
@@ -89,7 +93,7 @@ export const indexFleetEndpointPolicy = async (
     package: {
       name: 'endpoint',
       title: 'Elastic Defend',
-      version: endpointPackageVersion,
+      version: packageVersion,
     },
   };
   const packagePolicy = (await kbnClient
@@ -162,3 +166,12 @@ export const deleteIndexedFleetEndpointPolicies = async (
 
   return response;
 };
+
+const getDefaultEndpointPackageVersion = memoize(
+  async (kbnClient: KbnClient) => {
+    return (await getEndpointPackageInfo(kbnClient)).version;
+  },
+  (kbnClient: KbnClient) => {
+    return kbnClient.resolveUrl('/');
+  }
+);

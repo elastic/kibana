@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CreateSLOInput, SLOWithSummaryResponse, UpdateSLOInput } from '@kbn/slo-schema';
+import { CreateSLOInput, SLOWithSummaryResponse, UpdateSLOInput } from '@kbn/slo-schema';
 import { toDuration } from '../../../utils/slo/duration';
 import { CreateSLOForm } from '../types';
 
@@ -34,6 +34,7 @@ export function transformSloResponseToCreateSloForm(
           timesliceWindow: String(toDuration(values.objective.timesliceWindow).value),
         }),
     },
+    groupBy: values.groupBy,
     tags: values.tags,
   };
 }
@@ -60,6 +61,7 @@ export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): C
         }),
     },
     tags: values.tags,
+    groupBy: values.groupBy,
   };
 }
 
@@ -85,6 +87,7 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
         }),
     },
     tags: values.tags,
+    groupBy: values.groupBy,
   };
 }
 
