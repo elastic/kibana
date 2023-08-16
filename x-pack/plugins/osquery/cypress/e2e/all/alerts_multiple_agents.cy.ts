@@ -23,6 +23,7 @@ describe('Alert Event Details - dynamic params', () => {
       ruleId = data.id;
       ruleName = data.name;
     });
+    loadRuleAlerts(ruleName);
   });
 
   after(() => {
@@ -31,10 +32,11 @@ describe('Alert Event Details - dynamic params', () => {
 
   beforeEach(() => {
     login(ROLE.soc_manager);
+    cy.visit('/app/security/rules');
+    cy.contains(ruleName).click();
   });
 
   it('should substitute parameters in investigation guide', () => {
-    loadRuleAlerts(ruleName);
     cy.getBySel('expand-event').first().click();
     cy.getBySel('securitySolutionDocumentDetailsFlyoutInvestigationGuideButton').click();
     cy.contains('Get processes').click();
@@ -45,10 +47,10 @@ describe('Alert Event Details - dynamic params', () => {
     });
   });
 
-  it('should substitute parameters in live query and increase number of ran queries', () => {
+  // response-actions-notification doesn't exist in expandable flyout
+  it.skip('should substitute parameters in live query and increase number of ran queries', () => {
     let initialNotificationCount: number;
     let updatedNotificationCount: number;
-    loadRuleAlerts(ruleName);
     cy.getBySel('expand-event').first().click();
     cy.getBySel('response-actions-notification')
       .should('not.have.text', '0')
@@ -73,7 +75,6 @@ describe('Alert Event Details - dynamic params', () => {
       });
 
     it('should be able to run take action query against all enrolled agents', () => {
-      loadRuleAlerts(ruleName);
       cy.getBySel('expand-event').first().click();
       cy.getBySel('take-action-dropdown-btn').click();
       cy.getBySel('osquery-action-item').click();

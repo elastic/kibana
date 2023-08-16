@@ -37,12 +37,12 @@ describe('Alert Event Details', () => {
 
   beforeEach(() => {
     login(ROLE.soc_manager);
+    cy.visit('/app/security/rules');
   });
 
   it('should be able to add investigation guides to response actions', () => {
     const investigationGuideNote =
       'You have queries in the investigation guide. Add them as response actions?';
-    cy.visit('/app/security/rules');
     cy.contains(ruleName).click();
     cy.getBySel('editRuleSettingsLink').click();
     cy.getBySel('globalLoadingIndicator').should('not.exist');
@@ -159,9 +159,7 @@ describe('Alert Event Details', () => {
     cy.getBySel('lnsWorkspace').should('exist');
     cy.getBySel('breadcrumbs').contains(lensRegex);
   });
-});
 
-describe('Timeline', () => {
   it('can add to timeline from response action results', () => {
     const timelineRegex = new RegExp(`Added ${UUID_REGEX} to timeline`);
     const filterRegex = new RegExp(`action_id: "${UUID_REGEX}"`);
