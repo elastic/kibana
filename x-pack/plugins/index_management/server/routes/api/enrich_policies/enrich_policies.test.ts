@@ -132,4 +132,49 @@ describe('Enrich policies API', () => {
       await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
     });
   });
+
+  describe('Create policy - POST /api/index_management/enrich_policies', () => {
+    const createPolicyMock = router.getMockESApiFn('enrich.putPolicy');
+
+    it('correctly creates a policy', async () => {
+      const mockRequest: RequestMock = {
+        method: 'post',
+        path: addBasePath('/enrich_policies'),
+        body: {
+          name: 'my-policy',
+          type: 'match',
+          matchField: 'my_field',
+          enrichFields: ['field_1', 'field_2'],
+          sourceIndex: ['index_1'],
+        },
+      };
+
+      createPolicyMock.mockResolvedValue({ status: { status: 'OK' } });
+
+      const res = await router.runRequest(mockRequest);
+
+      expect(res).toEqual({
+        body: { status: { status: 'OK' } },
+      });
+    });
+
+    it('should return an error if it fails', async () => {
+      const mockRequest: RequestMock = {
+        method: 'post',
+        path: addBasePath('/enrich_policies'),
+        body: {
+          name: 'my-policy',
+          type: 'match',
+          matchField: 'my_field',
+          enrichFields: ['field_1', 'field_2'],
+          sourceIndex: ['index_1'],
+        },
+      };
+
+      const error = new Error('Oh no!');
+      createPolicyMock.mockRejectedValue(error);
+
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
+    });
+  });
 });

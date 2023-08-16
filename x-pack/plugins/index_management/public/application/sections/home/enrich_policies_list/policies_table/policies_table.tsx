@@ -43,7 +43,12 @@ export const PoliciesTable: FunctionComponent<Props> = ({
           defaultMessage="Reload"
         />
       </EuiButton>,
-      <EuiButton key="createPolicy" fill iconType="plusInCircle">
+      <EuiButton
+        key="createPolicy"
+        fill
+        iconType="plusInCircle"
+        {...reactRouterNavigate(history, '/enrich_policies/create')}
+      >
         <FormattedMessage
           id="xpack.idxMgmt.enrichPolicies.table.createPolicyButton"
           defaultMessage="Create enrich policy"

@@ -25,6 +25,19 @@ const getPolicyType = (policy: EnrichSummary): EnrichPolicyType => {
   throw new Error('Unknown policy type');
 };
 
+export const serializeAsESPolicy = (policy: SerializedEnrichPolicy) => {
+  const policyType = policy.type as EnrichPolicyType;
+
+  return {
+    [policyType]: {
+      indices: policy.sourceIndices,
+      match_field: policy.matchField,
+      enrich_fields: policy.enrichFields,
+      query: policy.query,
+    },
+  };
+};
+
 export const serializeEnrichmentPolicies = (
   policies: EnrichSummary[]
 ): SerializedEnrichPolicy[] => {
@@ -47,6 +60,17 @@ const fetchAll = async (client: IScopedClusterClient) => {
   return serializeEnrichmentPolicies(res.policies);
 };
 
+const create = (
+  client: IScopedClusterClient,
+  policyName: string,
+  serializedPolicy: EnrichSummary['config']
+) => {
+  return client.asCurrentUser.enrich.putPolicy({
+    name: policyName,
+    ...serializedPolicy,
+  });
+};
+
 const execute = (client: IScopedClusterClient, policyName: string) => {
   return client.asCurrentUser.enrich.executePolicy({ name: policyName });
 };
@@ -57,6 +81,7 @@ const remove = (client: IScopedClusterClient, policyName: string) => {
 
 export const enrichPoliciesActions = {
   fetchAll,
+  create,
   execute,
   remove,
 };
