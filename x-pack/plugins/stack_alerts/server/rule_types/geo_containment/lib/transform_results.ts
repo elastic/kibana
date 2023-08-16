@@ -15,28 +15,16 @@ export function transformResults(
   dateField: string,
   geoField: string
 ): Map<string, GeoContainmentAlertInstanceState[]> {
-  const buckets = _.get(results, 'aggregations.shapes.buckets', {});
+  const buckets = results?.aggregations?.shapes?.buckets ?? {};
   const arrResults = _.flatMap(buckets, (bucket: unknown, bucketKey: string) => {
-    const subBuckets = _.get(bucket, 'entitySplit.buckets', []);
+    const subBuckets = bucket?.entitySplit?.buckets ?? [];
     return _.map(subBuckets, (subBucket) => {
-      const location = _.get(
-        subBucket,
-        `entityHits.hits.hits[0].fields["${geoField}"][0]`,
-        ''
-      );
-      const dateInShape = _.get(
-        subBucket,
-        `entityHits.hits.hits[0].fields["${dateField}"][0]`,
-        null
-      );
-      const docId = _.get(subBucket, `entityHits.hits.hits[0]._id`);
-      
       return {
-        location,
+        location: subBucket?.entityHits?.hits?.hits?.[0]?.fields?.[geoField]?.[0] ?? '',
         shapeLocationId: bucketKey,
         entityName: subBucket.key,
-        dateInShape,
-        docId,
+        dateInShape: subBucket?.entityHits?.hits?.hits?.[0]?.fields?.[dateField]?.[0] ?? null,
+        docId: subBucket?.entityHits?.hits?.hits?.[0]?._id,
       };
     });
   });
