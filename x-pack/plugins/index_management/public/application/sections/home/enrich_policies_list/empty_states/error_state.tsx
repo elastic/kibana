@@ -11,8 +11,13 @@ import { EuiButton, EuiPageTemplate, EuiSpacer, EuiText } from '@elastic/eui';
 import { useLoadEnrichPolicies } from '../../../../services/api';
 
 export const ErrorState = ({
+  error,
   resendRequest,
 }: {
+  error: {
+    error: string;
+    message?: string;
+  };
   resendRequest: ReturnType<typeof useLoadEnrichPolicies>['resendRequest'];
 }) => {
   return (
@@ -31,10 +36,7 @@ export const ErrorState = ({
       body={
         <>
           <EuiText color="subdued">
-            <FormattedMessage
-              id="xpack.idxMgmt.enrichPolicies.list.errorDescription"
-              defaultMessage="There was an error loading enrich policies."
-            />
+            <p className="eui-textBreakWord">{error?.message || error?.error}</p>
           </EuiText>
           <EuiSpacer />
           <EuiButton iconSide="right" onClick={resendRequest} iconType="refresh" color="danger">

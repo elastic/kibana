@@ -43,7 +43,7 @@ export const EnrichPoliciesList = () => {
   }
 
   if (error) {
-    return <ErrorState resendRequest={reloadPolicies} />;
+    return <ErrorState error={error} resendRequest={reloadPolicies} />;
   }
 
   return (
