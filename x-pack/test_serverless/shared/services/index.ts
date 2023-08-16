@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import { SamlToolsProvider } from './saml_tools';
-
-export const services = {
-  samlTools: SamlToolsProvider,
-};
+export const services = {};
