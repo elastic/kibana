@@ -12,6 +12,9 @@ export {
   asPercent,
   getDurationFormatter,
   asDuration,
+  asDynamicBytes,
+  asAbsoluteDateTime,
+  asInteger,
 } from './utils/formatters';
 export { getInspectResponse } from './utils/get_inspect_response';
 export { getAlertDetailsUrl, getAlertUrl } from './utils/alerting/alert_url';
@@ -37,6 +40,7 @@ export {
   apmEnableContinuousRollups,
   enableCriticalPath,
   syntheticsThrottlingEnabled,
+  apmEnableProfilingIntegration,
 } from './ui_settings_keys';
 
 export {
@@ -67,4 +71,6 @@ export const rulesLocatorID = 'RULES_LOCATOR';
 export const sloDetailsLocatorID = 'SLO_DETAILS_LOCATOR';
 export const sloEditLocatorID = 'SLO_EDIT_LOCATOR';
 
+import { paths } from './locators/paths';
+export const observabilityPaths = paths.observability;
 export type { AlertsLocatorParams } from './locators/alerts';
