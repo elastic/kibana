@@ -11,4 +11,4 @@ export {
   ComparatorFnNames,
   getHumanReadableComparator,
 } from './comparator';
-export { STACK_ALERTS_FEATURE_ID } from './constants';
+export { STACK_ALERTS_FEATURE_ID, ES_QUERY_ID } from './constants';

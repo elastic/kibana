@@ -26,12 +26,12 @@ import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/serve
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { ES_QUERY_ID } from '@kbn/stack-alerts-plugin/common';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
 import {
   SLO_BURN_RATE_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-  ES_QUERY_RULE_TYPE_ID,
 } from '../common/constants';
 import {
   kubernetesGuideConfig,
@@ -77,7 +77,7 @@ interface PluginStart {
 const sloRuleTypes = [
   SLO_BURN_RATE_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-  ES_QUERY_RULE_TYPE_ID,
+  ES_QUERY_ID,
 ];
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {

@@ -6,10 +6,8 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import {
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-  ES_QUERY_RULE_TYPE_ID,
-} from '@kbn/observability-plugin/common/constants';
+import { ES_QUERY_ID } from '@kbn/stack-alerts-plugin/common';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/observability-plugin/common/constants';
 import { syntheticsMonitorType, syntheticsParamType } from '../common/types/saved_objects';
 import { SYNTHETICS_RULE_TYPES } from '../common/constants/synthetics_alerts';
 import { privateLocationsSavedObjectName } from '../common/saved_objects/private_locations';
@@ -27,7 +25,7 @@ const UPTIME_RULE_TYPES = [
 const ruleTypes = [
   ...UPTIME_RULE_TYPES,
   ...SYNTHETICS_RULE_TYPES,
-  ES_QUERY_RULE_TYPE_ID,
+  ES_QUERY_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 ];
 

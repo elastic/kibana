@@ -825,5 +825,4 @@ export type RuleCreationValidConsumer =
   | typeof AlertConsumers.APM
   | typeof AlertConsumers.UPTIME
   | typeof AlertConsumers.SLO
-  | 'stackAlerts'
-  | 'discover';
+  | 'stackAlerts';

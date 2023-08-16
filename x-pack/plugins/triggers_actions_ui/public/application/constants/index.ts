@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
+import { ES_QUERY_ID } from '@kbn/stack-alerts-plugin/common';
 export {
   BASE_ALERTING_API_PATH,
   INTERNAL_BASE_ALERTING_API_PATH,
@@ -16,7 +16,6 @@ export { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '@kbn/action
 export type Section = 'connectors' | 'rules' | 'alerts' | 'logs';
 
 export const OBSERVABILITY_THRESHOLD_RULE_TYPE_ID = 'observability.rules.threshold';
-export const ES_QUERY_RULE_TYPE_ID = '.es-query';
 
 export const routeToHome = `/`;
 export const routeToConnectors = `/connectors`;
@@ -120,7 +119,4 @@ export const GLOBAL_CONNECTOR_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [
   ...CONNECTOR_LOCKED_COLUMNS,
 ];
 
-export const MULTI_CONSUMER_RULE_TYPE_IDS = [
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-  ES_QUERY_RULE_TYPE_ID,
-];
+export const MULTI_CONSUMER_RULE_TYPE_IDS = [OBSERVABILITY_THRESHOLD_RULE_TYPE_ID, ES_QUERY_ID];
