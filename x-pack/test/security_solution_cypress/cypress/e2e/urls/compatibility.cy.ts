@@ -43,7 +43,10 @@ describe('URL compatibility', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () 
   });
 
   it('Redirects to alerts from old siem Detections URL', () => {
+    // changing this
     visit(DETECTIONS);
+    cy.url().should('include', ALERTS_URL);
+    // running this twice to introduce an arbitrary change
     cy.url().should('include', ALERTS_URL);
   });
 
