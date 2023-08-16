@@ -132,7 +132,7 @@ describe('useTimeline', () => {
           canCopy: true,
           canEdit: false,
           canRegenerate: true,
-          canGiveFeedback: true,
+          canGiveFeedback: false,
         },
         role: MessageRole.Assistant,
         content: 'Goodbye',
@@ -254,7 +254,7 @@ describe('useTimeline', () => {
           loading: false,
           actions: {
             canRegenerate: true,
-            canGiveFeedback: true,
+            canGiveFeedback: false,
           },
         });
       });
@@ -376,10 +376,13 @@ describe('useTimeline', () => {
                   canCopy: true,
                   canEdit: false,
                   canRegenerate: true,
-                  canGiveFeedback: true,
+                  canGiveFeedback: false,
                 },
                 content: 'Regenerated',
+                currentUser: undefined,
+                function_call: undefined,
                 id: expect.any(String),
+                element: undefined,
                 loading: false,
                 title: '',
                 role: MessageRole.Assistant,
