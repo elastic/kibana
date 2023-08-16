@@ -42,7 +42,6 @@ import {
   RULES_TAGS_POPOVER_WRAPPER,
   INTEGRATIONS_POPOVER,
   SELECTED_RULES_NUMBER_LABEL,
-  REFRESH_SETTINGS_POPOVER,
   REFRESH_SETTINGS_SWITCH,
   ELASTIC_RULES_BTN,
   BULK_EXPORT_ACTION_BTN,
@@ -65,6 +64,7 @@ import {
   DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION,
   TOASTER_CLOSE_ICON,
   ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN,
+  AUTO_REFRESH_POPOVER_TRIGGER_BUTTON,
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
@@ -506,22 +506,45 @@ export const testMultipleSelectedRulesLabel = (rulesCount: number) => {
   cy.get(SELECTED_RULES_NUMBER_LABEL).should('have.text', `Selected ${rulesCount} rules`);
 };
 
-export const openRefreshSettingsPopover = () => {
-  cy.get(REFRESH_SETTINGS_POPOVER).click();
+const openRefreshSettingsPopover = () => {
+  cy.get(REFRESH_SETTINGS_SWITCH).should('not.exist');
+  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).click();
   cy.get(REFRESH_SETTINGS_SWITCH).should('be.visible');
 };
 
-export const checkAutoRefreshIsDisabled = () => {
-  cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'false');
+const closeRefreshSettingsPopover = () => {
+  cy.get(REFRESH_SETTINGS_SWITCH).should('be.visible');
+  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).click();
+  cy.get(REFRESH_SETTINGS_SWITCH).should('not.exist');
 };
 
-export const checkAutoRefreshIsEnabled = () => {
+export const expectAutoRefreshIsDisabled = () => {
+  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('be.enabled');
+  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('have.text', 'Off');
+  openRefreshSettingsPopover();
+  cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'false');
+  closeRefreshSettingsPopover();
+};
+
+export const expectAutoRefreshIsEnabled = () => {
+  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('be.enabled');
+  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('have.text', 'On');
+  openRefreshSettingsPopover();
   cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'true');
+  closeRefreshSettingsPopover();
+};
+
+// Expects the auto refresh to be deactivated which means it's disabled without an ability to enable it
+// so it's even impossible to open the popover
+export const expectAutoRefreshIsDeactivated = () => {
+  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('be.disabled');
+  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('have.text', 'Off');
 };
 
 export const disableAutoRefresh = () => {
+  openRefreshSettingsPopover();
   cy.get(REFRESH_SETTINGS_SWITCH).click();
-  checkAutoRefreshIsDisabled();
+  expectAutoRefreshIsDisabled();
 };
 
 export const mockGlobalClock = () => {
