@@ -169,7 +169,6 @@ export function DiscoverGridDocumentToolbarBtn({
           className={classNames({
             // eslint-disable-next-line @typescript-eslint/naming-convention
             euiDataGrid__controlBtn: true,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'euiDataGrid__controlBtn--active': isFilterActive,
           })}
         >

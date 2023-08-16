@@ -485,7 +485,6 @@ export default ({ getService }: FtrProviderContext) => {
         before(async () => {
           // make time column not shown by default
           await kibanaServer.uiSettings.update({
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'doc_table:hideTimeColumn': true,
           });
 

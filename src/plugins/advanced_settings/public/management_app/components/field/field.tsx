@@ -632,9 +632,7 @@ export class Field extends PureComponent<FieldProps> {
     const isInvalid = unsavedChanges?.isInvalid;
 
     const className = classNames('mgtAdvancedSettings__field', {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'mgtAdvancedSettings__field--unsaved': unsavedChanges,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'mgtAdvancedSettings__field--invalid': isInvalid,
     });
     const groupId = `${setting.name}-group`;
