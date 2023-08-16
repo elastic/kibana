@@ -4629,7 +4629,9 @@
           "ArrayC",
           "<",
           "StringC",
-          ">; }>]>; }> | undefined; handler: ({}: ",
+          ">; kqlFilter: ",
+          "StringC",
+          "; }>]>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "apm",
             "scope": "server",
@@ -4649,7 +4651,7 @@
             "section": "def-common.NonEmptyStringBrand",
             "text": "NonEmptyStringBrand"
           },
-          ">; } & { start: number; end: number; } & { interval: string; } & { groupBy?: string[] | undefined; }; }; }) => Promise<{ latencyChartPreview: ",
+          ">; } & { start: number; end: number; } & { interval: string; } & { groupBy?: string[] | undefined; kqlFilter?: string | undefined; }; }; }) => Promise<{ latencyChartPreview: ",
           "PreviewChartResponse",
           "; }>; } & ",
           "APMRouteCreateOptions",
@@ -4717,7 +4719,9 @@
           "ArrayC",
           "<",
           "StringC",
-          ">; }>]>; }> | undefined; handler: ({}: ",
+          ">; kqlFilter: ",
+          "StringC",
+          "; }>]>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "apm",
             "scope": "server",
@@ -4737,7 +4741,7 @@
             "section": "def-common.NonEmptyStringBrand",
             "text": "NonEmptyStringBrand"
           },
-          ">; } & { start: number; end: number; } & { interval: string; } & { groupBy?: string[] | undefined; }; }; }) => Promise<{ errorCountChartPreview: ",
+          ">; } & { start: number; end: number; } & { interval: string; } & { groupBy?: string[] | undefined; kqlFilter?: string | undefined; }; }; }) => Promise<{ errorCountChartPreview: ",
           "PreviewChartResponse",
           "; }>; } & ",
           "APMRouteCreateOptions",
@@ -4805,7 +4809,9 @@
           "ArrayC",
           "<",
           "StringC",
-          ">; }>]>; }> | undefined; handler: ({}: ",
+          ">; kqlFilter: ",
+          "StringC",
+          "; }>]>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "apm",
             "scope": "server",
@@ -4825,7 +4831,7 @@
             "section": "def-common.NonEmptyStringBrand",
             "text": "NonEmptyStringBrand"
           },
-          ">; } & { start: number; end: number; } & { interval: string; } & { groupBy?: string[] | undefined; }; }; }) => Promise<{ errorRateChartPreview: ",
+          ">; } & { start: number; end: number; } & { interval: string; } & { groupBy?: string[] | undefined; kqlFilter?: string | undefined; }; }; }) => Promise<{ errorRateChartPreview: ",
           "PreviewChartResponse",
           "; }>; } & ",
           "APMRouteCreateOptions",
