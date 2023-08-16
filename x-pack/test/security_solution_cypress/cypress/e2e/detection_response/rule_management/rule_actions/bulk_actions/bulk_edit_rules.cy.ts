@@ -10,9 +10,10 @@ import { tag } from '../../../../../tags';
 import {
   MODAL_CONFIRMATION_BTN,
   MODAL_CONFIRMATION_BODY,
-  RULE_CHECKBOX,
   RULES_TAGS_POPOVER_BTN,
   MODAL_ERROR_BODY,
+  RULE_NAME as RULE_NAME_SELECTOR,
+  RULES_ROW,
 } from '../../../../../screens/alerts_detection_rules';
 
 import {
@@ -26,19 +27,18 @@ import {
 
 import { TIMELINE_TEMPLATE_DETAILS } from '../../../../../screens/rule_details';
 
-import { EUI_FILTER_SELECT_ITEM } from '../../../../../screens/common/controls';
+import { EUI_CHECKBOX, EUI_FILTER_SELECT_ITEM } from '../../../../../screens/common/controls';
 
 import {
   selectAllRules,
   goToTheRuleDetailsOf,
-  selectNumberOfRules,
   testAllTagsBadges,
   testTagsBadge,
   testMultipleSelectedRulesLabel,
   filterByElasticRules,
   clickErrorToastBtn,
-  unselectRuleByName,
   cancelConfirmationModal,
+  selectRulesByName,
 } from '../../../../../tasks/alerts_detection_rules';
 
 import {
@@ -97,7 +97,7 @@ import {
   getAvailablePrebuiltRulesCount,
   excessivelyInstallAllPrebuiltRules,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
-import { setRowsPerPageTo } from '../../../../../tasks/table_pagination';
+import { setRowsPerPageTo, sortByTableColumn } from '../../../../../tasks/table_pagination';
 
 const RULE_NAME = 'Custom rule for bulk actions';
 const EUI_SELECTABLE_LIST_ITEM_SR_TEXT = '. To check this option, press Enter.';
@@ -132,12 +132,36 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
     resetRulesTableState();
     deleteAlertsAndRules();
     cy.task('esArchiverResetKibana');
-    createRule(getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1' }));
-    createRule(getEqlRule({ ...defaultRuleData, rule_id: '2' }));
-    createRule(getMachineLearningRule({ tags: ['test-default-tag-1', 'test-default-tag-2'] }));
-    createRule(getNewThreatIndicatorRule({ ...defaultRuleData, rule_id: '4' }));
-    createRule(getNewThresholdRule({ ...defaultRuleData, rule_id: '5' }));
-    createRule(getNewTermsRule({ ...defaultRuleData, rule_id: '6' }));
+    createRule(getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1', enabled: false }));
+    createRule(
+      getEqlRule({ ...defaultRuleData, rule_id: '2', name: 'New EQL Rule', enabled: false })
+    );
+    createRule(
+      getMachineLearningRule({
+        name: 'New ML Rule Test',
+        tags: ['test-default-tag-1', 'test-default-tag-2'],
+        enabled: false,
+      })
+    );
+    createRule(
+      getNewThreatIndicatorRule({
+        ...defaultRuleData,
+        rule_id: '4',
+        name: 'Threat Indicator Rule Test',
+        enabled: false,
+      })
+    );
+    createRule(
+      getNewThresholdRule({
+        ...defaultRuleData,
+        rule_id: '5',
+        name: 'Threshold Rule',
+        enabled: false,
+      })
+    );
+    createRule(
+      getNewTermsRule({ ...defaultRuleData, rule_id: '6', name: 'New Terms Rule', enabled: false })
+    );
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
   });
@@ -159,7 +183,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
 
       // select Elastic(prebuilt) rules, check if we can't proceed further, as Elastic rules are not editable
       filterByElasticRules();
-      selectNumberOfRules(expectedNumberOfSelectedRules);
+      selectAllRules();
       clickApplyTimelineTemplatesMenuItem();
 
       // check modal window for Elastic rule that can't be edited
@@ -210,23 +234,29 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
     });
 
     it('should not lose rules selection after edit action', () => {
-      const rulesCount = 4;
+      const rulesToUpdate = [RULE_NAME, 'New EQL Rule', 'New Terms Rule'] as const;
       // Switch to 5 rules per page, to have few pages in pagination(ideal way to test auto refresh and selection of few items)
       setRowsPerPageTo(numberOfRulesPerPage);
-      selectNumberOfRules(rulesCount);
+      // and make the rules order isn't changing (set sorting by rule name) over time if rules are run
+      sortByTableColumn('Rule');
+      selectRulesByName(rulesToUpdate);
 
       // open add tags form and add 2 new tags
       openBulkEditAddTagsForm();
       typeTags(['new-tag-1']);
       submitBulkEditForm();
-      waitForBulkEditActionToFinish({ updatedCount: rulesCount });
+      waitForBulkEditActionToFinish({ updatedCount: rulesToUpdate.length });
 
-      testMultipleSelectedRulesLabel(rulesCount);
+      testMultipleSelectedRulesLabel(rulesToUpdate.length);
       // check if first four(rulesCount) rules still selected and tags are updated
-      for (let i = 0; i < rulesCount; i += 1) {
-        cy.get(RULE_CHECKBOX).eq(i).should('be.checked');
-        cy.get(RULES_TAGS_POPOVER_BTN)
-          .eq(i)
+      for (const ruleName of rulesToUpdate) {
+        cy.contains(RULE_NAME_SELECTOR, ruleName)
+          .parents(RULES_ROW)
+          .find(EUI_CHECKBOX)
+          .should('be.checked');
+        cy.contains(RULE_NAME_SELECTOR, ruleName)
+          .parents(RULES_ROW)
+          .find(RULES_TAGS_POPOVER_BTN)
           .each(($el) => {
             testTagsBadge($el, prePopulatedTags.concat(['new-tag-1']));
           });
@@ -236,7 +266,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
 
   describe('Tags actions', () => {
     it('Display list of tags in tags select', () => {
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
 
       openBulkEditAddTagsForm();
       openTagsSelect();
@@ -255,7 +285,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
       // check if only pre-populated tags exist in the tags filter
       checkTagsInTagsFilter(prePopulatedTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
 
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
 
       // open add tags form and add 2 new tags
       openBulkEditAddTagsForm();
@@ -278,7 +308,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
       // check if only pre-populated tags exist in the tags filter
       checkTagsInTagsFilter(prePopulatedTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
 
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
 
       // open add tags form and add 2 new tags
       openBulkEditAddTagsForm();
@@ -293,7 +323,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
       // check if only pre-populated tags exist in the tags filter
       checkTagsInTagsFilter(prePopulatedTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
 
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
 
       // open add tags form, check overwrite tags and warning message, type tags
       openBulkEditAddTagsForm();
@@ -322,7 +352,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
       // check if only pre-populated tags exist in the tags filter
       checkTagsInTagsFilter(prePopulatedTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
 
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
 
       // open add tags form, check overwrite tags, type tags
       openBulkEditDeleteTagsForm();
@@ -343,7 +373,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
       const indexPattersToBeAdded = ['index-to-add-1-*', 'index-to-add-2-*'];
       const resultingIndexPatterns = [...prePopulatedIndexPatterns, ...indexPattersToBeAdded];
 
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
       clickAddIndexPatternsMenuItem();
 
       // confirm editing custom rules, that are not Machine Learning
@@ -361,7 +391,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
     });
 
     it('Index pattern action applied to custom rules, including machine learning: user cancels action', () => {
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
       clickAddIndexPatternsMenuItem();
 
       // confirm editing custom rules, that are not Machine Learning
@@ -376,8 +406,13 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
       const resultingIndexPatterns = [...prePopulatedIndexPatterns, ...indexPattersToBeAdded];
 
       // select only rules that are not ML
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
-      unselectRuleByName(getMachineLearningRule().name);
+      selectRulesByName([
+        RULE_NAME,
+        'New EQL Rule',
+        'Threat Indicator Rule Test',
+        'Threshold Rule',
+        'New Terms Rule',
+      ]);
 
       openBulkEditAddIndexPatternsForm();
       typeIndexPatterns(indexPattersToBeAdded);
@@ -394,8 +429,13 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
       const indexPattersToBeAdded = ['index-to-add-1-*', 'index-to-add-2-*'];
 
       // select only rules that are not ML
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
-      unselectRuleByName(getMachineLearningRule().name);
+      selectRulesByName([
+        RULE_NAME,
+        'New EQL Rule',
+        'Threat Indicator Rule Test',
+        'Threshold Rule',
+        'New Terms Rule',
+      ]);
 
       openBulkEditAddIndexPatternsForm();
       typeIndexPatterns(indexPattersToBeAdded);
@@ -410,8 +450,13 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
       const indexPattersToWrite = ['index-to-write-1-*', 'index-to-write-2-*'];
 
       // select only rules that are not ML
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
-      unselectRuleByName(getMachineLearningRule().name);
+      selectRulesByName([
+        RULE_NAME,
+        'New EQL Rule',
+        'Threat Indicator Rule Test',
+        'Threshold Rule',
+        'New Terms Rule',
+      ]);
 
       openBulkEditAddIndexPatternsForm();
 
@@ -437,8 +482,13 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
       const resultingIndexPatterns = prePopulatedIndexPatterns.slice(1);
 
       // select only not ML rules
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
-      unselectRuleByName(getMachineLearningRule().name);
+      selectRulesByName([
+        RULE_NAME,
+        'New EQL Rule',
+        'Threat Indicator Rule Test',
+        'Threshold Rule',
+        'New Terms Rule',
+      ]);
 
       openBulkEditDeleteIndexPatternsForm();
       typeIndexPatterns(indexPatternsToDelete);
@@ -453,8 +503,13 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
 
     it('Delete all index patterns from custom rules', () => {
       // select only rules that are not ML
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
-      unselectRuleByName(getMachineLearningRule().name);
+      selectRulesByName([
+        RULE_NAME,
+        'New EQL Rule',
+        'Threat Indicator Rule Test',
+        'Threshold Rule',
+        'New Terms Rule',
+      ]);
 
       openBulkEditDeleteIndexPatternsForm();
       typeIndexPatterns(prePopulatedIndexPatterns);
@@ -477,7 +532,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
     it('Apply timeline template to custom rules', () => {
       const timelineTemplateName = 'Generic Endpoint Timeline';
 
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
 
       // open Timeline template form, check warning, select timeline template
       clickApplyTimelineTemplatesMenuItem();
@@ -497,7 +552,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
     it('Reset timeline template to None for custom rules', () => {
       const noneTimelineTemplate = 'None';
 
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
 
       // open Timeline template form, submit form without picking timeline template as None is selected by default
       clickApplyTimelineTemplatesMenuItem();
@@ -513,7 +568,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
 
   describe('Schedule', () => {
     it('Default values are applied to bulk edit schedule fields', () => {
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
       clickUpdateScheduleMenuItem();
 
       assertUpdateScheduleWarningExists(expectedNumberOfCustomRulesToBeEdited);
@@ -525,7 +580,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
     });
 
     it('Updates schedule for custom rules', () => {
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
       clickUpdateScheduleMenuItem();
 
       assertUpdateScheduleWarningExists(expectedNumberOfCustomRulesToBeEdited);
@@ -548,7 +603,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
     });
 
     it('Validates invalid inputs when scheduling for custom rules', () => {
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
       clickUpdateScheduleMenuItem();
 
       // Validate invalid values are corrected to minimumValue - for 0 and negative values
