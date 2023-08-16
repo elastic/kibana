@@ -5,6 +5,7 @@
   },
   "exclude": [
     "cypress.config.ts",
+    "serverless_cypress.config.ts",
     "target/**/*",
   ],
   "include": [

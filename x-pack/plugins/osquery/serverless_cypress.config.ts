@@ -14,7 +14,7 @@ export default defineCypressConfig({
   execTimeout: 60000,
   pageLoadTimeout: 60000,
   responseTimeout: 60000,
-  screenshotsFolder: '../../../../../../target/kibana-security-solution/cypress/screenshots',
+  screenshotsFolder: '../../../target/kibana-osquery/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
   viewportHeight: 946,

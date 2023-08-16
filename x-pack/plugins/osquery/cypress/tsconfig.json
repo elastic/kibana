@@ -3,6 +3,7 @@
   "include": [
     "**/*",
     "../cypress.config.ts",
+    "../serverless_cypress.config.ts",
     "../../../test_serverless/shared/lib"
   ],
   "exclude": [
