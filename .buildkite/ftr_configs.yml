@@ -46,6 +46,7 @@ disabled:
   - x-pack/plugins/apm/ftr_e2e/ftr_config.ts
   - x-pack/test_serverless/functional/test_suites/observability/cypress/config_headless.ts
   - x-pack/test_serverless/functional/test_suites/observability/cypress/config_runner.ts
+  - x-pack/test/security_solution_cypress/serverless_config.ts
   - x-pack/plugins/profiling/e2e/ftr_config_open.ts
   - x-pack/plugins/profiling/e2e/ftr_config_runner.ts
   - x-pack/plugins/profiling/e2e/ftr_config.ts
