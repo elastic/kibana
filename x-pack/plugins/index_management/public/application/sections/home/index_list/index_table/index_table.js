@@ -52,40 +52,45 @@ import { NoMatch, DataHealth } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
 
 const getHeaders = ({ showIndexStats }) => {
-  const defaultHeaders = {
-    name: i18n.translate('xpack.idxMgmt.indexTable.headers.nameHeader', {
-      defaultMessage: 'Name',
-    }),
-    primary: i18n.translate('xpack.idxMgmt.indexTable.headers.primaryHeader', {
-      defaultMessage: 'Primaries',
-    }),
-    replica: i18n.translate('xpack.idxMgmt.indexTable.headers.replicaHeader', {
-      defaultMessage: 'Replicas',
-    }),
-    data_stream: i18n.translate('xpack.idxMgmt.indexTable.headers.dataStreamHeader', {
-      defaultMessage: 'Data stream',
-    }),
-  };
+  const headers = {};
+
+  headers.name = i18n.translate('xpack.idxMgmt.indexTable.headers.nameHeader', {
+    defaultMessage: 'Name',
+  });
 
   if (showIndexStats) {
-    return {
-      ...defaultHeaders,
-      health: i18n.translate('xpack.idxMgmt.indexTable.headers.healthHeader', {
-        defaultMessage: 'Health',
-      }),
-      status: i18n.translate('xpack.idxMgmt.indexTable.headers.statusHeader', {
-        defaultMessage: 'Status',
-      }),
-      documents: i18n.translate('xpack.idxMgmt.indexTable.headers.documentsHeader', {
-        defaultMessage: 'Docs count',
-      }),
-      size: i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
-        defaultMessage: 'Storage size',
-      }),
-    };
+    headers.health = i18n.translate('xpack.idxMgmt.indexTable.headers.healthHeader', {
+      defaultMessage: 'Health',
+    });
+
+    headers.status = i18n.translate('xpack.idxMgmt.indexTable.headers.statusHeader', {
+      defaultMessage: 'Status',
+    });
   }
 
-  return defaultHeaders;
+  headers.primary = i18n.translate('xpack.idxMgmt.indexTable.headers.primaryHeader', {
+    defaultMessage: 'Primaries',
+  });
+
+  headers.replica = i18n.translate('xpack.idxMgmt.indexTable.headers.replicaHeader', {
+    defaultMessage: 'Replicas',
+  });
+
+  if (showIndexStats) {
+    headers.documents = i18n.translate('xpack.idxMgmt.indexTable.headers.documentsHeader', {
+      defaultMessage: 'Docs count',
+    });
+
+    headers.size = i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
+      defaultMessage: 'Storage size',
+    });
+  }
+
+  headers.data_stream = i18n.translate('xpack.idxMgmt.indexTable.headers.dataStreamHeader', {
+    defaultMessage: 'Data stream',
+  });
+
+  return headers;
 };
 
 export class IndexTable extends Component {
