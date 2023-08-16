@@ -10,7 +10,7 @@ import { schema } from '../..';
 import { Type, TypeOptions } from '../types';
 
 /**
- * Helper to apply different validations depending on whether Kibana is running on Serverless or not.
+ * Helper to apply different validations depending on whether Kibana is running the Serverless or Fully Managed offering.
  *
  * @example Only allow the setting on Serverless
  * const config = schema.object({
@@ -22,7 +22,7 @@ import { Type, TypeOptions } from '../types';
  *   myProp: offeringBasedSchema({ fullyManaged: schema.boolean({ defaultValue: true }) }),
  * });
  *
- * @example Fixed value on self-managed, configurable on Serverless
+ * @example Fixed value on Fully Managed, configurable on Serverless
  * const config = schema.object({
  *   myProp: offeringBasedSchema({
  *     serverless: schema.boolean({ defaultValue: true }),
@@ -39,8 +39,8 @@ import { Type, TypeOptions } from '../types';
  *   }),
  * });
  *
- * @param opts.serverless The validation to apply when in serverless
- * @param opts.fullyManaged The validation to apply otherwise. If not provided, it doesn't allow the setting to be set.
+ * @param opts.serverless The validation to apply in the Serverless offering. If not provided, it doesn't allow the setting to be set in this offering.
+ * @param opts.fullyManaged The validation to apply in the Fully Managed offering. If not provided, it doesn't allow the setting to be set in this offering.
  * @param opts.options Any options to pass down in the types.
  */
 export function offeringBasedSchema<V>(opts: {
