@@ -50,14 +50,14 @@ export default function ({ getService }: FtrProviderContext) {
           const { status } = await supertest
             .get('/login')
             .set(svlCommonApi.getInternalRequestHeader());
-           expect(status).toBe(302);
+          expect(status).toBe(302);
         });
 
         it('get login state', async () => {
           const { status } = await supertest
             .get('/internal/security/login_state')
             .set(svlCommonApi.getInternalRequestHeader());
-           expect(status).toBe(200);
+          expect(status).toBe(200);
         });
 
         it('capture URL', async () => {
