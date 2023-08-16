@@ -46,6 +46,8 @@ export const DESCRIPTION_DETAILS_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutDescriptionDetails';
 export const REASON_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutReasonTitle';
 export const REASON_DETAILS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutReasonDetails';
+export const REASON_DETAILS_PREVIEW_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutReasonDetailsPreviewButton';
 export const MITRE_ATTACK_TITLE_TEST_ID = 'securitySolutionAlertDetailsFlyoutMitreAttackTitle';
 export const MITRE_ATTACK_DETAILS_TEST_ID = 'securitySolutionAlertDetailsFlyoutMitreAttackDetails';
 
