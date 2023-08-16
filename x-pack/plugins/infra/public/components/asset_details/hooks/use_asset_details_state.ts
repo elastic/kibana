@@ -22,6 +22,8 @@ export function useAssetDetailsState({ state }: UseAssetDetailsStateProps) {
   const { dateRange, dateRangeTs } = useDateRangeProviderContext();
   const { asset, assetType, onTabsStateChange, overrides, renderMode } = state;
 
+  // When the asset asset.name is known we can load the page faster
+  // Otherwise we need to use metadata response.
   const loading = !asset.name && !metadata?.name;
 
   return {

@@ -15,9 +15,9 @@ import {
   EuiTab,
   useEuiTheme,
   useEuiMinBreakpoint,
+  type EuiPageHeaderProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EuiPageHeaderProps } from '@elastic/eui';
 type Props = Pick<EuiPageHeaderProps, 'tabs' | 'title' | 'rightSideItems'>;
 
 export const FlyoutHeader = ({ title, tabs = [], rightSideItems = [] }: Props) => {
@@ -76,8 +76,10 @@ export const FlyoutHeader = ({ title, tabs = [], rightSideItems = [] }: Props) =
         `}
         size="s"
       >
-        {tabs.map(({ label, ...tab }) => (
-          <EuiTab {...tab}>{label}</EuiTab>
+        {tabs.map(({ label, ...tab }, index) => (
+          <EuiTab key={index} {...tab}>
+            {label}
+          </EuiTab>
         ))}
       </EuiTabs>
     </>

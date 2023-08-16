@@ -27,15 +27,18 @@ import type { PluginKibanaContextValue } from '../../../hooks/use_kibana';
 import { SourceProvider } from '../../../containers/metrics_source';
 import { getHttp } from './context/http';
 import { assetDetailsProps, getLogEntries } from './context/fixtures';
-import { AssetDetailsStateProvider } from '../hooks/use_asset_details_state';
-import { MetadataProvider } from '../hooks/use_metadata_provider';
-import { DateRangeProvider } from '../hooks/use_date_range_provider';
+import { ContextProviders } from '../context_providers';
 import { DataViewsProvider } from '../hooks/use_data_views_provider';
 
 const settings: Record<string, any> = {
   'dateFormat:scaled': [['', 'HH:mm:ss.SSS']],
 };
 const getSettings = (key: string): any => settings[key];
+
+const mockDataView = {
+  id: 'default',
+  getFieldByName: () => 'hostname' as unknown as DataViewField,
+} as unknown as DataView;
 
 export const DecorateWithKibanaContext: DecoratorFn = (story) => {
   const initialProcesses = useParameter<{ mock: string }>('apiResponse', {
@@ -64,11 +67,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
       },
     },
     dataViews: {
-      create: () =>
-        Promise.resolve({
-          id: 'default',
-          getFieldByName: () => 'hostname' as unknown as DataViewField,
-        } as unknown as DataView),
+      create: () => Promise.resolve(mockDataView),
     },
     locators: {
       nodeLogsLocator: {
@@ -134,10 +133,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
             }),
           getResolvedLogView: () =>
             Promise.resolve({
-              dataViewReference: {
-                id: 'default',
-                getFieldByName: () => 'hostname' as unknown as DataViewField,
-              } as unknown as DataView,
+              dataViewReference: mockDataView,
             } as any),
         },
       },
@@ -162,17 +158,16 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
 
 export const DecorateWithAssetDetailsStateContext: DecoratorFn = (story) => {
   return (
-    <DateRangeProvider
-      dateRange={{
-        from: '2023-04-09T11:07:49Z',
-        to: '2023-04-09T11:23:49Z',
+    <ContextProviders
+      props={{
+        ...assetDetailsProps,
+        dateRange: {
+          from: '2023-04-09T11:07:49Z',
+          to: '2023-04-09T11:23:49Z',
+        },
       }}
     >
-      <MetadataProvider asset={assetDetailsProps.asset} assetType={assetDetailsProps.assetType}>
-        <AssetDetailsStateProvider state={assetDetailsProps}>
-          <DataViewsProvider metricAlias="metrics-*">{story()}</DataViewsProvider>
-        </AssetDetailsStateProvider>
-      </MetadataProvider>
-    </DateRangeProvider>
+      <DataViewsProvider metricAlias="metrics-*">{story()}</DataViewsProvider>
+    </ContextProviders>
   );
 };

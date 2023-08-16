@@ -13,7 +13,7 @@ import { AssetDetailPage } from './asset_detail_page';
 import { MetricsTimeProvider } from './hooks/use_metrics_time';
 import { MetricDetailPage } from './metric_detail_page';
 
-export const NodeDetail = () => {
+export const MetricDetail = () => {
   const {
     params: { type: nodeType },
   } = useRouteMatch<{ type: InventoryItemType; node: string }>();
