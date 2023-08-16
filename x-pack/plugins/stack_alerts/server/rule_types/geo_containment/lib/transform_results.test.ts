@@ -12,7 +12,7 @@ import { transformResults } from './transform_results';
 describe('transformResults', () => {
   const dateField = '@timestamp';
   const geoField = 'location';
-  test('should correctly transform expected results', async () => {
+  test('should correctly transform expected results', () => {
     const transformedResults = transformResults(
       // @ts-ignore
       sampleAggsJsonResponse.body,
@@ -72,7 +72,7 @@ describe('transformResults', () => {
 
   const nestedDateField = 'time_data.@timestamp';
   const nestedGeoField = 'geo.coords.location';
-  test('should correctly transform expected results if fields are nested', async () => {
+  test('should correctly transform expected results if fields are nested', () => {
     const transformedResults = transformResults(
       // @ts-ignore
       sampleAggsJsonResponseWithNesting.body,

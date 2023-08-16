@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { GeoContainmentAlertInstanceState } from '../types';
 
 // Flatten agg results and get latest locations for each entity
 export function transformResults(
-  results: estypes.SearchResponse<unknown>,
+  results: SearchResponse<any>,
   dateField: string,
   geoField: string
 ): Map<string, GeoContainmentAlertInstanceState[]> {
   const resultsMap = new Map<string, GeoContainmentAlertInstanceState[]>();
   const boundarySplitBuckets = results?.aggregations?.shapes?.buckets ?? {};
   for (const boundaryId in boundarySplitBuckets) {
-    const entitySplitBuckets = boundarySplitBuckets[shapeLocationId]?.entitySplit?.buckets ?? [];
+    const entitySplitBuckets = boundarySplitBuckets[boundaryId]?.entitySplit?.buckets ?? [];
     for (let i=0; i<entitySplitBuckets.length; i++) {
       const entityName = entitySplitBuckets[i].key;
       const entityResults = resultsMap.get(entityName) ?? [];
