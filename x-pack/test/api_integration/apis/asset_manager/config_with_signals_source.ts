@@ -30,7 +30,6 @@ interface AssetManagerConfig {
     apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
   };
 }
-export const LOCKED_SOURCE = 'signals';
 
 export default async function createTestConfig({
   readConfigFile,
@@ -40,7 +39,7 @@ export default async function createTestConfig({
 
   return {
     ...baseIntegrationTestsConfig.getAll(),
-    testFiles: [require.resolve('.')],
+    testFiles: [require.resolve('./tests/with_signals_source')],
     services: {
       ...services,
       assetsSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
@@ -89,7 +88,7 @@ export default async function createTestConfig({
       serverArgs: [
         ...baseIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
         '--xpack.assetManager.alphaEnabled=true',
-        `--xpack.assetManager.lockedSource=${LOCKED_SOURCE}`,
+        `--xpack.assetManager.lockedSource=signals`,
       ],
     },
   };

@@ -67,6 +67,7 @@ disabled:
   - x-pack/test/plugin_api_perf/config.js
   - x-pack/test/screenshot_creation/config.ts
   - x-pack/test/fleet_packages/config.ts
+  - x-pack/test/api_integration/apis/asset_manager/config_with_assets_source.ts
 
   # Scalability testing config that we run in its own pipeline
   - x-pack/test/scalability/config.ts
@@ -172,7 +173,7 @@ enabled:
   - x-pack/test/api_integration/config_security_trial.ts
   - x-pack/test/api_integration/apis/aiops/config.ts
   - x-pack/test/api_integration/apis/asset_manager/config_when_disabled.ts
-  - x-pack/test/api_integration/apis/asset_manager/config.ts
+  - x-pack/test/api_integration/apis/asset_manager/config_with_signals_source.ts
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/cloud_security_posture/config.ts
   - x-pack/test/api_integration/apis/console/config.ts

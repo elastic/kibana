@@ -6,8 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { LOCKED_SOURCE } from '../config';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -21,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    (LOCKED_SOURCE === 'signals' ? describe.skip : describe)('assets index template', () => {
+    describe('assets index template', () => {
       it('should be installed', async () => {
         await esSupertest.get('/_index_template/assets').expect(200);
       });

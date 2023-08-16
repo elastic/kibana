@@ -9,7 +9,7 @@ import { pick } from 'lodash';
 
 import { Asset, AssetWithoutTimestamp } from '@kbn/assetManager-plugin/common/types_api';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { createSampleAssets, deleteSampleAssets, viewSampleAssetDocs } from '../helpers';
 import { ASSETS_ENDPOINT } from '../constants';
 
