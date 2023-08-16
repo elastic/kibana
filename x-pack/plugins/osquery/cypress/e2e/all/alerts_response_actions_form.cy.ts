@@ -23,7 +23,7 @@ import { ROLE, login } from '../../tasks/login';
 import { checkActionItemsInResults, inputQuery, typeInECSFieldInput } from '../../tasks/live_query';
 import { closeDateTabIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 
-describe('Alert Event Details - Response Actions Form', () => {
+describe('Alert Event Details - Response Actions Form', { browser: 'electron' }, () => {
   let multiQueryPackId: string;
   let multiQueryPackName: string;
   let ruleId: string;
