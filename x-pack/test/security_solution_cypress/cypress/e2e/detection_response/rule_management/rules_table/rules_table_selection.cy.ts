@@ -15,7 +15,7 @@ import {
 } from '../../../../screens/alerts_detection_rules';
 import {
   selectRulesByName,
-  unselectNumberOfRules,
+  unselectRulesByName,
   waitForPrebuiltDetectionRulesToBeLoaded,
 } from '../../../../tasks/alerts_detection_rules';
 import {
@@ -55,7 +55,7 @@ describe('Rules table: selection', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
     cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', '2');
 
-    unselectNumberOfRules(2);
+    unselectRulesByName(['Test rule 1', 'Test rule 2']);
 
     cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', '0');
   });
