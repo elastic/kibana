@@ -8,5 +8,5 @@
 import { SamlToolsProvider } from './saml_tools';
 
 export const services = {
-    samlTools: SamlToolsProvider,
+  samlTools: SamlToolsProvider,
 };

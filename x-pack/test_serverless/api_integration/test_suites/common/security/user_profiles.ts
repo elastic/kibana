@@ -6,8 +6,8 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
 import { kibanaTestUser } from '@kbn/test';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');

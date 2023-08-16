@@ -21,8 +21,14 @@ export default async () => {
   const kibanaPort = kbnTestConfig.getPort();
 
   // "Fake" SAML provider
-  const idpPath = resolve(__dirname, '../../test//security_api_integration/plugins/saml_provider/metadata.xml');
-  const samlIdPPlugin = resolve(__dirname, '../../test/security_api_integration/plugins/saml_provider');
+  const idpPath = resolve(
+    __dirname,
+    '../../test//security_api_integration/plugins/saml_provider/metadata.xml'
+  );
+  const samlIdPPlugin = resolve(
+    __dirname,
+    '../../test/security_api_integration/plugins/saml_provider'
+  );
 
   return {
     servers,
@@ -83,7 +89,7 @@ export default async () => {
         '--xpack.cloud.id=ftr_fake_cloud_id',
         '--xpack.security.authc.selector.enabled=false',
         `--xpack.security.authc.providers=${JSON.stringify({
-          basic: { 'basic': { order: 0 } },
+          basic: { basic: { order: 0 } },
           saml: { 'cloud-saml-kibana': { order: 1, realm: 'cloud-saml-kibana' } },
         })}`,
         '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
