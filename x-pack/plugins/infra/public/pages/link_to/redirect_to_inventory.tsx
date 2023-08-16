@@ -33,7 +33,7 @@ function parseQueryString(search: string): Record<string, string> {
 
   // Force all values into string. If they are empty don't create the keys
   for (const key in obj) {
-    if (Object.hasOwnProperty.call(obj, key)) {
+    if (Object.hasOwn(obj, key)) {
       if (!obj[key]) {
         delete obj[key];
       }

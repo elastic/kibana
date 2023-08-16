@@ -32,8 +32,8 @@ export const isGetDataFrameAnalyticsStatsResponseOk = (
   arg: any
 ): arg is GetDataFrameAnalyticsStatsResponseOk => {
   return (
-    {}.hasOwnProperty.call(arg, 'count') &&
-    {}.hasOwnProperty.call(arg, 'data_frame_analytics') &&
+    Object.hasOwn(arg, 'count') &&
+    Object.hasOwn(arg, 'data_frame_analytics') &&
     Array.isArray(arg.data_frame_analytics)
   );
 };

@@ -50,9 +50,9 @@ export function isDataFrameAnalyticsStats(arg: any): arg is DataFrameAnalyticsSt
   return (
     typeof arg === 'object' &&
     arg !== null &&
-    {}.hasOwnProperty.call(arg, 'state') &&
+    Object.hasOwn(arg, 'state') &&
     Object.values(DATA_FRAME_TASK_STATE).includes(arg.state) &&
-    {}.hasOwnProperty.call(arg, 'progress') &&
+    Object.hasOwn(arg, 'progress') &&
     Array.isArray(arg.progress)
   );
 }

@@ -86,7 +86,7 @@ type SearchResponseWithAggregations = Required<Pick<estypes.SearchResponse, 'agg
 export const isEsSearchResponseWithAggregations = (
   arg: unknown
 ): arg is SearchResponseWithAggregations => {
-  return isEsSearchResponse(arg) && {}.hasOwnProperty.call(arg, 'aggregations');
+  return isEsSearchResponse(arg) && Object.hasOwn(arg, 'aggregations');
 };
 
 export const isFieldHistogramsResponseSchema = (

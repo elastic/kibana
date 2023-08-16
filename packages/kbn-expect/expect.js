@@ -389,7 +389,7 @@ Assertion.prototype.length = function (n, msg) {
 Assertion.prototype.property = function (name, val) {
   if (this.flags.own) {
     this.assert(
-        Object.prototype.hasOwnProperty.call(this.obj, name)
+        Object.hasOwn(this.obj, name)
       , function(){ return 'expected ' + i(this.obj) + ' to have own property ' + i(name) }
       , function(){ return 'expected ' + i(this.obj) + ' to not have own property ' + i(name) });
     return this;
@@ -833,7 +833,7 @@ function keys (obj) {
   var keys = [];
 
   for (var i in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, i)) {
+    if (Object.hasOwn(obj, i)) {
       keys.push(i);
     }
   }

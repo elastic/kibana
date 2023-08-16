@@ -479,7 +479,7 @@ export const useField = <T, FormType = FormData, I = T>(
 
   const onChange: FieldHook<T, I>['onChange'] = useCallback(
     (event) => {
-      const newValue = {}.hasOwnProperty.call(event!.target, 'checked')
+      const newValue = Object.hasOwn(event!.target, 'checked')
         ? event.target.checked
         : event.target.value;
 
@@ -494,8 +494,7 @@ export const useField = <T, FormType = FormData, I = T>(
         const isSameErrorCode = errorCode && error.code === errorCode;
         const isSamevalidationType =
           error.validationType === validationType ||
-          (validationType === VALIDATION_TYPES.FIELD &&
-            !{}.hasOwnProperty.call(error, 'validationType'));
+          (validationType === VALIDATION_TYPES.FIELD && !Object.hasOwn(error, 'validationType'));
 
         if (isSameErrorCode || (typeof errorCode === 'undefined' && isSamevalidationType)) {
           return messages
