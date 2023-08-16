@@ -16,11 +16,11 @@ import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { SpaceResult, SpaceResultProcessing } from './space_result';
 import type { SpacesDataEntry } from '../../types';
 import type { ProcessedImportResponse } from '../lib';
 import { summarizeCopyResult } from '../lib';
 import type { CopyOptions, CopyToSpaceSavedObjectTarget, ImportRetry } from '../types';
-import { SpaceResult, SpaceResultProcessing } from './space_result';
 
 interface Props {
   savedObjectTarget: Required<CopyToSpaceSavedObjectTarget>;

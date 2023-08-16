@@ -8,7 +8,7 @@
 import type { AppFeatureKey } from '@kbn/security-solution-plugin/common';
 import { PLI_APP_FEATURES } from '../../../common/pli/pli_config';
 
-export const useProductTypeByPLI = (requiredPLI: AppFeatureKey): string | null => {
+export const getProductTypeByPLI = (requiredPLI: AppFeatureKey): string | null => {
   if (PLI_APP_FEATURES.security.essentials.includes(requiredPLI)) {
     return 'Security Essentials';
   }

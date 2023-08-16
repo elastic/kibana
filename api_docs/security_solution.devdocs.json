@@ -101,7 +101,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly discoverInTimeline: boolean; }"
+              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly discoverInTimeline: boolean; }"
             ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
@@ -411,7 +411,15 @@
             "description": [],
             "signature": [
               "Observable",
-              "<Map<\"entity_analytics_panel\", React.ComponentType<{}>>>"
+              "<Map<",
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.UpsellingSectionId",
+                "text": "UpsellingSectionId"
+              },
+              ", React.ComponentType<{}>>>"
             ],
             "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
             "deprecated": false,
@@ -442,6 +450,21 @@
           },
           {
             "parentPluginId": "securitySolution",
+            "id": "def-public.UpsellingService.messages$",
+            "type": "Object",
+            "tags": [],
+            "label": "messages$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<Map<\"investigation_guide\", string>>"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-public.UpsellingService.Unnamed",
             "type": "Function",
             "tags": [],
@@ -464,7 +487,15 @@
             "label": "registerSections",
             "description": [],
             "signature": [
-              "(sections: Partial<Record<\"entity_analytics_panel\", React.ComponentType<{}>>>) => void"
+              "(sections: Partial<Record<",
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.UpsellingSectionId",
+                "text": "UpsellingSectionId"
+              },
+              ", React.ComponentType<{}>>>) => void"
             ],
             "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
             "deprecated": false,
@@ -478,7 +509,15 @@
                 "label": "sections",
                 "description": [],
                 "signature": [
-                  "Partial<Record<\"entity_analytics_panel\", React.ComponentType<{}>>>"
+                  "Partial<Record<",
+                  {
+                    "pluginId": "securitySolution",
+                    "scope": "public",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-public.UpsellingSectionId",
+                    "text": "UpsellingSectionId"
+                  },
+                  ", React.ComponentType<{}>>>"
                 ],
                 "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
                 "deprecated": false,
@@ -527,6 +566,38 @@
                     "text": "SecurityPageName"
                   },
                   ", React.ComponentType<{}>>>"
+                ],
+                "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.UpsellingService.registerMessages",
+            "type": "Function",
+            "tags": [],
+            "label": "registerMessages",
+            "description": [],
+            "signature": [
+              "(messages: Partial<Record<\"investigation_guide\", string>>) => void"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.UpsellingService.registerMessages.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "messages",
+                "description": [],
+                "signature": [
+                  "Partial<Record<\"investigation_guide\", string>>"
                 ],
                 "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
                 "deprecated": false,
@@ -627,6 +698,46 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.UpsellingService.getSectionsValue",
+            "type": "Function",
+            "tags": [],
+            "label": "getSectionsValue",
+            "description": [],
+            "signature": [
+              "() => Map<",
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.UpsellingSectionId",
+                "text": "UpsellingSectionId"
+              },
+              ", React.ComponentType<{}>>"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.UpsellingService.getMessagesValue",
+            "type": "Function",
+            "tags": [],
+            "label": "getMessagesValue",
+            "description": [],
+            "signature": [
+              "() => Map<\"investigation_guide\", string>"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -720,7 +831,7 @@
               "\nExperimental flag needed to enable the link"
             ],
             "signature": [
-              "\"tGridEnabled\" | \"tGridEventRenderedViewEnabled\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"chartEmbeddablesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"alertsPreviewChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"insightsRelatedAlertsByProcessAncestry\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsEnabled\" | \"endpointResponseActionsEnabled\" | \"alertDetailsPageEnabled\" | \"responseActionUploadEnabled\" | \"alertsPageChartsEnabled\" | \"alertTypeEnabled\" | \"securityFlyoutEnabled\" | \"alertsPageFiltersEnabled\" | \"newUserDetailsFlyout\" | \"detectionsCoverageOverview\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"discoverInTimeline\" | undefined"
+              "\"tGridEnabled\" | \"tGridEventRenderedViewEnabled\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"chartEmbeddablesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"alertsPreviewChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"insightsRelatedAlertsByProcessAncestry\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsEnabled\" | \"endpointResponseActionsEnabled\" | \"alertDetailsPageEnabled\" | \"responseActionUploadEnabled\" | \"alertsPageChartsEnabled\" | \"alertTypeEnabled\" | \"alertsPageFiltersEnabled\" | \"newUserDetailsFlyout\" | \"detectionsCoverageOverview\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"discoverInTimeline\" | undefined"
             ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
@@ -800,7 +911,7 @@
               "\nExperimental flag needed to disable the link. Opposite of experimentalKey"
             ],
             "signature": [
-              "\"tGridEnabled\" | \"tGridEventRenderedViewEnabled\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"chartEmbeddablesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"alertsPreviewChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"insightsRelatedAlertsByProcessAncestry\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsEnabled\" | \"endpointResponseActionsEnabled\" | \"alertDetailsPageEnabled\" | \"responseActionUploadEnabled\" | \"alertsPageChartsEnabled\" | \"alertTypeEnabled\" | \"securityFlyoutEnabled\" | \"alertsPageFiltersEnabled\" | \"newUserDetailsFlyout\" | \"detectionsCoverageOverview\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"discoverInTimeline\" | undefined"
+              "\"tGridEnabled\" | \"tGridEventRenderedViewEnabled\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"chartEmbeddablesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"alertsPreviewChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"insightsRelatedAlertsByProcessAncestry\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsEnabled\" | \"endpointResponseActionsEnabled\" | \"alertDetailsPageEnabled\" | \"responseActionUploadEnabled\" | \"alertsPageChartsEnabled\" | \"alertTypeEnabled\" | \"alertsPageFiltersEnabled\" | \"newUserDetailsFlyout\" | \"detectionsCoverageOverview\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"discoverInTimeline\" | undefined"
             ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
@@ -1974,7 +2085,7 @@
         "label": "SectionUpsellings",
         "description": [],
         "signature": [
-          "{ entity_analytics_panel?: React.ComponentType<{}> | undefined; }"
+          "{ entity_analytics_panel?: React.ComponentType<{}> | undefined; endpointPolicyProtections?: React.ComponentType<{}> | undefined; osquery_automated_response_actions?: React.ComponentType<{}> | undefined; }"
         ],
         "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/types.ts",
         "deprecated": false,
@@ -1989,7 +2100,7 @@
         "label": "UpsellingSectionId",
         "description": [],
         "signature": [
-          "\"entity_analytics_panel\""
+          "\"entity_analytics_panel\" | \"endpointPolicyProtections\" | \"osquery_automated_response_actions\""
         ],
         "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/types.ts",
         "deprecated": false,
@@ -3219,7 +3330,9 @@
         "signature": [
           "AppFeatureSecurityKey",
           " | ",
-          "AppFeatureCasesKey"
+          "AppFeatureCasesKey",
+          " | ",
+          "AppFeatureAssistantKey"
         ],
         "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
         "deprecated": false,
@@ -3288,7 +3401,7 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly discoverInTimeline: boolean; }"
+          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly discoverInTimeline: boolean; }"
         ],
         "path": "x-pack/plugins/security_solution/common/experimental_features.ts",
         "deprecated": false,
@@ -3339,7 +3452,9 @@
           "AppFeatureSecurityKey",
           " | ",
           "AppFeatureCasesKey",
-          ".casesConnectors)[]"
+          ".casesConnectors | ",
+          "AppFeatureAssistantKey",
+          ".assistant)[]"
         ],
         "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
         "deprecated": false,
@@ -3356,7 +3471,7 @@
           "\nA list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly discoverInTimeline: boolean; }"
+          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly discoverInTimeline: boolean; }"
         ],
         "path": "x-pack/plugins/security_solution/common/experimental_features.ts",
         "deprecated": false,
@@ -3374,6 +3489,20 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.AppFeatureKey.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "securitySolution",
             "id": "def-common.AppFeatureKey.Unnamed",

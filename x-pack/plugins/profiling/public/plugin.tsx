@@ -62,7 +62,6 @@ export class ProfilingPlugin implements Plugin {
               label: i18n.translate('xpack.profiling.navigation.sectionLabel', {
                 defaultMessage: 'Universal Profiling',
               }),
-              isBetaFeature: true,
               entries: links.map((link) => {
                 return {
                   app: 'profiling',

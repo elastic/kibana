@@ -36,6 +36,7 @@ import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
@@ -43,6 +44,7 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
 import { PLUGIN_ID } from '../common';
 import { DocViewInput, DocViewInputFn } from './services/doc_views/doc_views_types';
@@ -78,7 +80,10 @@ import {
   createProfileRegistry,
 } from './customizations/profile_registry';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
-import { DiscoverContainerInternal, DiscoverContainerProps } from './components/discover_container';
+import {
+  DiscoverContainerInternal,
+  type DiscoverContainerProps,
+} from './components/discover_container';
 
 const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')
@@ -206,6 +211,8 @@ export interface DiscoverStartPlugins {
   savedSearch: SavedSearchPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   lens: LensPublicStart;
+  contentManagement: ContentManagementPublicStart;
+  serverless?: ServerlessPluginStart;
 }
 
 /**
@@ -430,20 +437,18 @@ export class DiscoverPlugin
     injectTruncateStyles(core.uiSettings.get(TRUNCATE_MAX_HEIGHT));
 
     const isDev = this.initializerContext.env.mode.dev;
-
     const getDiscoverServicesInternal = () => {
       return this.getDiscoverServices(core, plugins);
     };
 
     return {
       locator: this.locator,
-      DiscoverContainer: ({ overrideServices, ...restProps }: DiscoverContainerProps) => {
+      DiscoverContainer: (props: DiscoverContainerProps) => {
         return (
           <DiscoverContainerInternal
-            overrideServices={overrideServices}
             getDiscoverServices={getDiscoverServicesInternal}
             isDev={isDev}
-            {...restProps}
+            {...props}
           />
         );
       },

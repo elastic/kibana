@@ -19,6 +19,13 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
     body: t.type({
       messages: t.array(messageRt),
       connectorId: t.string,
+      functions: t.array(
+        t.type({
+          name: t.string,
+          description: t.string,
+          parameters: t.any,
+        })
+      ),
     }),
   }),
   handler: async (resources): Promise<IncomingMessage> => {
@@ -30,9 +37,14 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
+    const {
+      body: { messages, connectorId, functions },
+    } = params;
+
     return client.chat({
-      messages: params.body.messages,
-      connectorId: params.body.connectorId,
+      messages,
+      connectorId,
+      functions,
     });
   },
 });

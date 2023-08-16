@@ -159,6 +159,7 @@ export interface DocLinks {
     readonly machineLearningStart: string;
     readonly mailService: string;
     readonly mlDocumentEnrichment: string;
+    readonly mlDocumentEnrichmentUpdateMappings: string;
     readonly searchApplicationsTemplates: string;
     readonly searchApplicationsSearchApi: string;
     readonly searchApplications: string;
@@ -298,6 +299,7 @@ export interface DocLinks {
     readonly overview: string;
     readonly batchReindex: string;
     readonly remoteReindex: string;
+    readonly reindexWithPipeline: string;
   };
   readonly rollupJobs: string;
   readonly elasticsearch: Record<string, string>;

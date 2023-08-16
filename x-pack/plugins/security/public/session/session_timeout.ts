@@ -16,6 +16,8 @@ import type {
   Toast,
 } from '@kbn/core/public';
 
+import { createSessionExpirationToast } from './session_expiration_toast';
+import type { SessionExpired } from './session_expired';
 import {
   SESSION_CHECK_MS,
   SESSION_EXPIRATION_WARNING_MS,
@@ -25,8 +27,6 @@ import {
 } from '../../common/constants';
 import { LogoutReason } from '../../common/types';
 import type { SessionInfo } from '../../common/types';
-import { createSessionExpirationToast } from './session_expiration_toast';
-import type { SessionExpired } from './session_expired';
 
 export interface SessionState extends Pick<SessionInfo, 'expiresInMs' | 'canBeExtended'> {
   lastExtensionTime: number;

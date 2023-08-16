@@ -279,9 +279,7 @@ describe('useCamera on an unpainted element', () => {
           throw new Error('failed to create tree');
         }
         const resolverNodes: ResolverNode[] = [
-          ...selectors
-            .layout(store.getState().analyzer.analyzerById[id])
-            .processNodePositions.keys(),
+          ...selectors.layout(store.getState().analyzer[id]).processNodePositions.keys(),
         ];
         node = resolverNodes[resolverNodes.length - 1];
         if (!process) {

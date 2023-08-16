@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mockTelemetryActions } from '../../../__mocks__/kea_logic';
 import { setMockValues } from './__mocks__';
+import { mockTelemetryActions } from '../../../__mocks__/kea_logic';
 import './__mocks__/overview_logic.mock';
 
 import React from 'react';

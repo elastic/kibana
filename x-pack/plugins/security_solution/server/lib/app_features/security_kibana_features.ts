@@ -122,9 +122,14 @@ export const getSecurityBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   },
 });
 
+/**
+ * Returns the list of Security SubFeature IDs that should be loaded and available in
+ * kibana regardless of PLI or License level.
+ * @param _
+ */
 export const getSecurityBaseKibanaSubFeatureIds = (
   _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
-): SecuritySubFeatureId[] => [];
+): SecuritySubFeatureId[] => [SecuritySubFeatureId.hostIsolation];
 
 /**
  * Maps the AppFeatures keys to Kibana privileges that will be merged
@@ -151,6 +156,16 @@ export const getSecurityAppFeaturesConfig = (
         },
       },
     },
+    [AppFeatureSecurityKey.investigationGuide]: {
+      privileges: {
+        all: {
+          ui: ['investigation-guide'],
+        },
+        read: {
+          ui: ['investigation-guide'],
+        },
+      },
+    },
 
     [AppFeatureSecurityKey.threatIntelligence]: {
       privileges: {
@@ -172,6 +187,9 @@ export const getSecurityAppFeaturesConfig = (
     [AppFeatureSecurityKey.endpointPolicyManagement]: {
       subFeatureIds: [SecuritySubFeatureId.policyManagement],
     },
+
+    // Adds no additional kibana feature controls
+    [AppFeatureSecurityKey.endpointPolicyProtections]: {},
 
     [AppFeatureSecurityKey.endpointArtifactManagement]: {
       subFeatureIds: [
@@ -201,12 +219,13 @@ export const getSecurityAppFeaturesConfig = (
         SecuritySubFeatureId.hostIsolationExceptions,
 
         SecuritySubFeatureId.responseActionsHistory,
-        SecuritySubFeatureId.hostIsolation,
         SecuritySubFeatureId.processOperations,
         SecuritySubFeatureId.fileOperations,
         SecuritySubFeatureId.executeAction,
       ],
       subFeaturesPrivileges: [
+        // Adds the privilege to Isolate hosts to the already loaded `host_isolation_all`
+        // sub-feature (always loaded), which included the `release` privilege already
         {
           id: 'host_isolation_all',
           api: [`${APP_ID}-writeHostIsolation`],
@@ -214,5 +233,7 @@ export const getSecurityAppFeaturesConfig = (
         },
       ],
     },
+
+    [AppFeatureSecurityKey.osqueryAutomatedResponseActions]: {},
   };
 };

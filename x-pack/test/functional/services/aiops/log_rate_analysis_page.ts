@@ -7,6 +7,8 @@
 
 import expect from '@kbn/expect';
 
+import type { LogRateAnalysisType } from '@kbn/aiops-utils';
+
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrProviderContext) {
@@ -239,11 +241,17 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       });
     },
 
-    async assertAnalysisComplete() {
+    async assertAnalysisComplete(analisysType: LogRateAnalysisType) {
       await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.existOrFail('aiopsAnalysisComplete');
         const currentProgressTitle = await testSubjects.getVisibleText('aiopsAnalysisComplete');
         expect(currentProgressTitle).to.be('Analysis complete');
+
+        await testSubjects.existOrFail('aiopsAnalysisTypeCalloutTitle');
+        const currentAnalysisTypeCalloutTitle = await testSubjects.getVisibleText(
+          'aiopsAnalysisTypeCalloutTitle'
+        );
+        expect(currentAnalysisTypeCalloutTitle).to.be(`Analysis type: Log rate ${analisysType}`);
       });
     },
 

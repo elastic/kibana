@@ -10,7 +10,7 @@ import GenerativeAiConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { OpenAiProviderType } from '../../../common/gen_ai/constants';
+import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/gen_ai/constants';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useGetDashboard } from './use_get_dashboard';
 
@@ -26,6 +26,7 @@ const openAiConnector = {
   config: {
     apiUrl: 'https://openaiurl.com',
     apiProvider: OpenAiProviderType.OpenAi,
+    defaultModel: DEFAULT_OPENAI_MODEL,
   },
   secrets: {
     apiKey: 'thats-a-nice-looking-key',

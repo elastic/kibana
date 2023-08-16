@@ -49,6 +49,16 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'jira',
   },
   {
+    iconPath: 'github.svg',
+    isBeta: true,
+    isNative: false,
+    keywords: ['github', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.github.name', {
+      defaultMessage: 'GitHub & GitHub Enterprise Server',
+    }),
+    serviceType: 'github',
+  },
+  {
     iconPath: 'google_cloud_storage.svg',
     isBeta: true,
     isNative: false,
@@ -132,13 +142,24 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'dropbox.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     isTechPreview: false,
     keywords: ['dropbox', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.dropbox.name', {
       defaultMessage: 'Dropbox',
     }),
     serviceType: 'dropbox',
+  },
+  {
+    iconPath: 'gmail.svg',
+    isBeta: false,
+    isNative: false,
+    isTechPreview: true,
+    keywords: ['google', 'gmail', 'connector', 'mail'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.gmail.name', {
+      defaultMessage: 'Gmail',
+    }),
+    serviceType: 'gmail',
   },
   {
     iconPath: 'oracle.svg',
@@ -163,13 +184,24 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'servicenow.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     isTechPreview: false,
     keywords: ['servicenow', 'cloud', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.serviceNow.name', {
       defaultMessage: 'ServiceNow',
     }),
     serviceType: 'servicenow',
+  },
+  {
+    iconPath: 'slack.svg',
+    isBeta: false,
+    isNative: false,
+    isTechPreview: true,
+    keywords: ['slack', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.slack.name', {
+      defaultMessage: 'Slack',
+    }),
+    serviceType: 'slack',
   },
   {
     iconPath: 'sharepoint_server.svg',

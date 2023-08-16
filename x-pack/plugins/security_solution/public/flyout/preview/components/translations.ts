@@ -26,3 +26,8 @@ export const RULE_PREVIEW_SCHEDULE_TEXT = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.rulePreviewScheduleSectionText',
   { defaultMessage: 'Schedule' }
 );
+
+export const RULE_PREVIEW_ACTIONS_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.rulePreviewActionsSectionText',
+  { defaultMessage: 'Actions' }
+);
