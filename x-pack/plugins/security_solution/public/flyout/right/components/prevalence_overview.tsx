@@ -14,7 +14,8 @@ import { usePrevalence } from '../hooks/use_prevalence';
 import { INSIGHTS_PREVALENCE_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
 import { PREVALENCE_TITLE } from './translations';
-import { LeftPanelKey, LeftPanelInsightsTabPath } from '../../left';
+import { LeftPanelKey, LeftPanelInsightsTab } from '../../left';
+import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
 
 /**
  * Prevalence section under Insights section, overview tab.
@@ -22,14 +23,23 @@ import { LeftPanelKey, LeftPanelInsightsTabPath } from '../../left';
  * and the SummaryPanel component for data rendering.
  */
 export const PrevalenceOverview: FC = () => {
-  const { eventId, indexName, browserFields, dataFormattedForFieldBrowser, scopeId } =
-    useRightPanelContext();
+  const {
+    eventId,
+    indexName,
+    browserFields,
+    dataFormattedForFieldBrowser,
+    scopeId,
+    investigationFields,
+  } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutContext();
 
   const goToCorrelationsTab = useCallback(() => {
     openLeftPanel({
       id: LeftPanelKey,
-      path: LeftPanelInsightsTabPath,
+      path: {
+        tab: LeftPanelInsightsTab,
+        subTab: PREVALENCE_TAB_ID,
+      },
       params: {
         id: eventId,
         indexName,
@@ -42,6 +52,7 @@ export const PrevalenceOverview: FC = () => {
     eventId,
     browserFields,
     dataFormattedForFieldBrowser,
+    investigationFields,
     scopeId,
   });
 

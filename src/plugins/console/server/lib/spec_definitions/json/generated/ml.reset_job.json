@@ -1,6 +1,10 @@
 {
   "ml.reset_job": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "wait_for_completion": "__flag__",
       "delete_user_annotations": "__flag__"
     },
@@ -10,6 +14,10 @@
     "patterns": [
       "_ml/anomaly_detectors/{job_id}/_reset"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-reset-job.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-reset-job.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

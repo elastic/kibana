@@ -26,6 +26,9 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     async toggleRollupIndices() {
       await testSubjects.click('checkboxToggles-rollupToggle');
     },
+    async toggleHiddenIndices() {
+      await testSubjects.click('indexTableIncludeHiddenIndicesToggle');
+    },
 
     async clickDeleteEnrichPolicyAt(indexOfRow: number): Promise<void> {
       const deleteButons = await testSubjects.findAll('deletePolicyButton');
@@ -47,7 +50,7 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await tabList[indexOfTab].click();
     },
 
-    async clickIndiceAt(indexOfRow: number): Promise<void> {
+    async clickIndexAt(indexOfRow: number): Promise<void> {
       const indexList = await testSubjects.findAll('indexTableIndexNameLink');
       await indexList[indexOfRow].click();
       await retry.waitFor('detail panel title to show up', async () => {
@@ -110,6 +113,15 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
 
     async clickNextButton() {
       await testSubjects.click('nextButton');
+    },
+    indexDetailsPage: {
+      async openIndexDetailsPage(indexOfRow: number) {
+        const indexList = await testSubjects.findAll('indexTableIndexNameLink');
+        await indexList[indexOfRow].click();
+        await retry.waitFor('index details page title to show up', async () => {
+          return (await testSubjects.isDisplayed('indexDetailsHeader')) === true;
+        });
+      },
     },
   };
 }
