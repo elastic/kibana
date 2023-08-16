@@ -4123,6 +4123,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/custom-integrations@link:packages/kbn-custom-integrations":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cypress-config@link:packages/kbn-cypress-config":
   version "0.0.0"
   uid ""
@@ -5935,6 +5939,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unified-data-table@link:packages/kbn-unified-data-table":
+  version "0.0.0"
+  uid ""
+
 "@kbn/unified-doc-viewer-examples@link:examples/unified_doc_viewer":
   version "0.0.0"
   uid ""
@@ -5944,10 +5952,6 @@
   uid ""
 
 "@kbn/unified-doc-viewer@link:packages/kbn-unified-doc-viewer":
-  version "0.0.0"
-  uid ""
-
-"@kbn/unified-data-table@link:packages/kbn-unified-data-table":
   version "0.0.0"
   uid ""
 
@@ -6104,6 +6108,10 @@
   uid ""
 
 "@kbn/whereis-pkg-cli@link:packages/kbn-whereis-pkg-cli":
+  version "0.0.0"
+  uid ""
+
+"@kbn/xstate-utils@link:packages/kbn-xstate-utils":
   version "0.0.0"
   uid ""
 
