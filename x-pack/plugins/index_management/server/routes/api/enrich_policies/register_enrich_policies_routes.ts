@@ -8,7 +8,11 @@
 import { RouteDependencies } from '../../../types';
 
 import { registerListRoute } from './register_list_route';
+import { registerDeleteRoute } from './register_delete_route';
+import { registerExecuteRoute } from './register_execute_policy';
 
 export function registerEnrichPoliciesRoute(dependencies: RouteDependencies) {
   registerListRoute(dependencies);
+  registerDeleteRoute(dependencies);
+  registerExecuteRoute(dependencies);
 }

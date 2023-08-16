@@ -47,6 +47,16 @@ const fetchAll = async (client: IScopedClusterClient) => {
   return serializeEnrichmentPolicies(res.policies);
 };
 
+const execute = (client: IScopedClusterClient, policyName: string) => {
+  return client.asCurrentUser.enrich.executePolicy({ name: policyName });
+};
+
+const remove = (client: IScopedClusterClient, policyName: string) => {
+  return client.asCurrentUser.enrich.deletePolicy({ name: policyName });
+};
+
 export const enrichPoliciesActions = {
   fetchAll,
+  execute,
+  remove,
 };

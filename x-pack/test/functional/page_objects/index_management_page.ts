@@ -30,6 +30,20 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await testSubjects.click('indexTableIncludeHiddenIndicesToggle');
     },
 
+    async clickDeleteEnrichPolicyAt(indexOfRow: number): Promise<void> {
+      const deleteButons = await testSubjects.findAll('deletePolicyButton');
+      await deleteButons[indexOfRow].click();
+    },
+
+    async clickExecuteEnrichPolicyAt(indexOfRow: number): Promise<void> {
+      const deleteButons = await testSubjects.findAll('executePolicyButton');
+      await deleteButons[indexOfRow].click();
+    },
+
+    async clickConfirmModalButton(): Promise<void> {
+      await testSubjects.click('confirmModalConfirmButton');
+    },
+
     async clickDetailPanelTabAt(indexOfTab: number): Promise<void> {
       const tabList = await testSubjects.findAll('detailPanelTab');
       log.debug(tabList.length);
@@ -87,7 +101,12 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     },
 
     async changeTabs(
-      tab: 'indicesTab' | 'data_streamsTab' | 'templatesTab' | 'component_templatesTab'
+      tab:
+        | 'indicesTab'
+        | 'data_streamsTab'
+        | 'templatesTab'
+        | 'component_templatesTab'
+        | 'enrich_policiesTab'
     ) {
       await testSubjects.click(tab);
     },

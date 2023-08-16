@@ -58,4 +58,78 @@ describe('Enrich policies API', () => {
       await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
     });
   });
+
+  describe('Execute policy - PUT /api/index_management/enrich_policies/{policy}', () => {
+    const executeEnrichPolicy = router.getMockESApiFn('enrich.executePolicy');
+
+    it('correctly executes a policy', async () => {
+      const mockRequest: RequestMock = {
+        method: 'put',
+        path: addInternalBasePath('/enrich_policies/{name}'),
+        params: {
+          name: 'my-policy',
+        },
+      };
+
+      executeEnrichPolicy.mockResolvedValue({ status: { phase: 'COMPLETE' } });
+
+      const res = await router.runRequest(mockRequest);
+
+      expect(res).toEqual({
+        body: { status: { phase: 'COMPLETE' } },
+      });
+    });
+
+    it('should return an error if it fails', async () => {
+      const mockRequest: RequestMock = {
+        method: 'put',
+        path: addInternalBasePath('/enrich_policies/{name}'),
+        params: {
+          name: 'my-policy',
+        },
+      };
+
+      const error = new Error('Oh no!');
+      executeEnrichPolicy.mockRejectedValue(error);
+
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
+    });
+  });
+
+  describe('Delete policy - DELETE /api/index_management/enrich_policies/{policy}', () => {
+    const deleteEnrichPolicy = router.getMockESApiFn('enrich.deletePolicy');
+
+    it('correctly deletes a policy', async () => {
+      const mockRequest: RequestMock = {
+        method: 'delete',
+        path: addInternalBasePath('/enrich_policies/{name}'),
+        params: {
+          name: 'my-policy',
+        },
+      };
+
+      deleteEnrichPolicy.mockResolvedValue({ status: { phase: 'COMPLETE' } });
+
+      const res = await router.runRequest(mockRequest);
+
+      expect(res).toEqual({
+        body: { status: { phase: 'COMPLETE' } },
+      });
+    });
+
+    it('should return an error if it fails', async () => {
+      const mockRequest: RequestMock = {
+        method: 'delete',
+        path: addInternalBasePath('/enrich_policies/{name}'),
+        params: {
+          name: 'my-policy',
+        },
+      };
+
+      const error = new Error('Oh no!');
+      deleteEnrichPolicy.mockRejectedValue(error);
+
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
+    });
+  });
 });

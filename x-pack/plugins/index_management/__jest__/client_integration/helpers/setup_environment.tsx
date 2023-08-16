@@ -43,6 +43,7 @@ const { GlobalFlyoutProvider } = GlobalFlyout;
 export const services = {
   extensionsService: new ExtensionsService(),
   uiMetricService: new UiMetricService('index_management'),
+  notificationService: notificationServiceMock.createSetupContract(),
 };
 
 services.uiMetricService.setup({ reportUiCounter() {} } as any);
