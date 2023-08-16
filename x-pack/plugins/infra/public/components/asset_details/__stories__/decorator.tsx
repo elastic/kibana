@@ -21,11 +21,16 @@ import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/data-plugin/publ
 import { AlertSummaryWidget } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alert_summary_widget/alert_summary_widget';
 import type { Theme } from '@elastic/charts/dist/utils/themes/theme';
 import type { AlertSummaryWidgetProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alert_summary_widget';
+import { defaultLogViewAttributes } from '@kbn/logs-shared-plugin/common';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { PluginKibanaContextValue } from '../../../hooks/use_kibana';
 import { SourceProvider } from '../../../containers/metrics_source';
 import { getHttp } from './context/http';
-import { assetDetailsState, getLogEntries } from './context/fixtures';
+import { assetDetailsProps, getLogEntries } from './context/fixtures';
 import { AssetDetailsStateProvider } from '../hooks/use_asset_details_state';
+import { MetadataProvider } from '../hooks/use_metadata_provider';
+import { DateRangeProvider } from '../hooks/use_date_range_provider';
+import { DataViewsProvider } from '../hooks/use_data_views_provider';
 
 const settings: Record<string, any> = {
   'dateFormat:scaled': [['', 'HH:mm:ss.SSS']],
@@ -57,6 +62,13 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
           removeFilter: () => {},
         },
       },
+    },
+    dataViews: {
+      create: () =>
+        Promise.resolve({
+          id: 'default',
+          getFieldByName: () => 'hostname' as unknown as DataViewField,
+        } as unknown as DataView),
     },
     locators: {
       nodeLogsLocator: {
@@ -111,6 +123,25 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
         },
       },
     },
+    logsShared: {
+      logViews: {
+        client: {
+          getLogView: () =>
+            Promise.resolve({
+              id: 'log',
+              attributes: defaultLogViewAttributes,
+              origin: 'internal',
+            }),
+          getResolvedLogView: () =>
+            Promise.resolve({
+              dataViewReference: {
+                id: 'default',
+                getFieldByName: () => 'hostname' as unknown as DataViewField,
+              } as unknown as DataView,
+            } as any),
+        },
+      },
+    },
     lens: {
       navigateToPrefilledEditor: () => {},
       stateHelperApi: () => new Promise(() => {}),
@@ -130,5 +161,18 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
 };
 
 export const DecorateWithAssetDetailsStateContext: DecoratorFn = (story) => {
-  return <AssetDetailsStateProvider state={assetDetailsState}>{story()}</AssetDetailsStateProvider>;
+  return (
+    <DateRangeProvider
+      dateRange={{
+        from: '2023-04-09T11:07:49Z',
+        to: '2023-04-09T11:23:49Z',
+      }}
+    >
+      <MetadataProvider asset={assetDetailsProps.asset} assetType={assetDetailsProps.assetType}>
+        <AssetDetailsStateProvider state={assetDetailsProps}>
+          <DataViewsProvider metricAlias="metrics-*">{story()}</DataViewsProvider>
+        </AssetDetailsStateProvider>
+      </MetadataProvider>
+    </DateRangeProvider>
+  );
 };

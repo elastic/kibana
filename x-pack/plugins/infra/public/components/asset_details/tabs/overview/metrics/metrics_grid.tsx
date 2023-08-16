@@ -94,12 +94,12 @@ const MetricsSectionTitle = () => {
     <EuiFlexGroup gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiTitle size="xxs">
-          <h5>
+          <span>
             <FormattedMessage
               id="xpack.infra.assetDetails.overview.metricsSectionTitle"
               defaultMessage="Metrics"
             />
-          </h5>
+          </span>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

@@ -18,6 +18,7 @@ import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { findInventoryFields } from '../../../../../common/inventory_models';
 import { InfraLoadingPanel } from '../../../loading';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
+import { useDataViewsProviderContext } from '../../hooks/use_data_views_provider';
 
 const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 
@@ -25,8 +26,10 @@ export const Logs = () => {
   const { asset, assetType, overrides, onTabsStateChange, dateRangeTs } =
     useAssetDetailsStateContext();
 
-  const { logView: overrideLogView, query: overrideQuery } = overrides?.logs ?? {};
-  const { loading: logViewLoading, reference: logViewReference } = overrideLogView ?? {};
+  const { logs } = useDataViewsProviderContext();
+
+  const { query: overrideQuery } = overrides?.logs ?? {};
+  const { loading: logViewLoading, reference: logViewReference } = logs ?? {};
 
   const { services } = useKibanaContextForPlugin();
   const { locators } = services;

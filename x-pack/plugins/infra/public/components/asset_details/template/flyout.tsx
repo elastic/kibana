@@ -15,8 +15,7 @@ import { ASSET_DETAILS_FLYOUT_COMPONENT_NAME } from '../constants';
 import { Content } from '../content/content';
 import { FlyoutHeader } from '../header/flyout_header';
 import { useAssetDetailsStateContext } from '../hooks/use_asset_details_state';
-import { useRighSideItems } from '../hooks/use_right_side_items';
-import { useTabs } from '../hooks/use_tabs';
+import { usePageHeader } from '../hooks/use_page_header';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import { ContentTemplateProps } from '../types';
 
@@ -25,8 +24,7 @@ export const Flyout = ({
   closeFlyout,
 }: ContentTemplateProps & { closeFlyout: () => void }) => {
   const { asset, assetType, loading } = useAssetDetailsStateContext();
-  const { tabs: tabsProp } = useTabs(tabs);
-  const { components: rightSideComponents } = useRighSideItems(links);
+  const { rightSideItems, tabEntries } = usePageHeader(tabs, links);
   const { initialActiveTabId } = useTabSwitcherContext();
   const {
     services: { telemetry },
@@ -58,7 +56,7 @@ export const Flyout = ({
       ) : (
         <>
           <EuiFlyoutHeader hasBorder>
-            <FlyoutHeader title={asset.name} tabs={tabsProp} rightSideItems={rightSideComponents} />
+            <FlyoutHeader title={asset.name} tabs={tabEntries} rightSideItems={rightSideItems} />
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <Content />

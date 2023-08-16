@@ -13,6 +13,7 @@ import { MetadataProvider } from './hooks/use_metadata_provider';
 import { DateRangeProvider } from './hooks/use_date_range_provider';
 import { Flyout } from './template/flyout';
 import { Page } from './template/page';
+import { DataViewsProvider } from './hooks/use_data_views_provider';
 
 const ContentTemplate = ({
   header,
@@ -34,9 +35,8 @@ export const AssetDetails = ({
   tabs = [],
   links = [],
   assetType = 'host',
-  renderMode = {
-    mode: 'page',
-  },
+  renderMode,
+  metricAlias,
 }: AssetDetailsProps) => {
   return (
     <DateRangeProvider dateRange={dateRange}>
@@ -53,7 +53,9 @@ export const AssetDetails = ({
           <TabSwitcherProvider
             initialActiveTabId={tabs.length > 0 ? activeTabId ?? tabs[0].id : undefined}
           >
-            <ContentTemplate header={{ tabs, links }} renderMode={renderMode} />
+            <DataViewsProvider metricAlias={metricAlias}>
+              <ContentTemplate header={{ tabs, links }} renderMode={renderMode} />
+            </DataViewsProvider>
           </TabSwitcherProvider>
         </AssetDetailsStateProvider>
       </MetadataProvider>

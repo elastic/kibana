@@ -7,9 +7,6 @@
 
 import { HostLimitOptions } from './types';
 
-export const TIMESTAMP_FIELD = '@timestamp';
-export const DATA_VIEW_PREFIX = 'infra_metrics';
-
 export const DEFAULT_HOST_LIMIT: HostLimitOptions = 100;
 export const DEFAULT_PAGE_SIZE = 10;
 export const LOCAL_STORAGE_HOST_LIMIT_KEY = 'hostsView:hostLimitSelection';

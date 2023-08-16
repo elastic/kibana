@@ -5,56 +5,49 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiPageTemplate } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { MetricsPageTemplate } from '../../../pages/metrics/page_template';
-import { fullHeightContentStyles } from '../../../page_template.styles';
+import { useKibanaHeader } from '../../../hooks/use_kibana_header';
 import { InfraLoadingPanel } from '../../loading';
 import { Content } from '../content/content';
 import { useAssetDetailsStateContext } from '../hooks/use_asset_details_state';
-import { useRighSideItems } from '../hooks/use_right_side_items';
-import { useTabs } from '../hooks/use_tabs';
-import { ContentTemplateProps } from '../types';
+import { usePageHeader } from '../hooks/use_page_header';
+import type { ContentTemplateProps } from '../types';
 
 export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps) => {
   const { asset, loading } = useAssetDetailsStateContext();
-  const { tabs: tabsProp } = useTabs(tabs);
-  const { components: rightSideComponents } = useRighSideItems(links);
+  const { rightSideItems, tabEntries } = usePageHeader(tabs, links);
+  const { headerHeight } = useKibanaHeader();
 
-  if (loading) {
-    return (
-      <MetricsPageTemplate
-        pageSectionProps={{
-          contentProps: {
-            css: fullHeightContentStyles,
-          },
-        }}
-      >
-        <InfraLoadingPanel
-          height="100%"
-          width="auto"
-          text={i18n.translate('xpack.infra.waffle.loadingDataText', {
-            defaultMessage: 'Loading data',
-          })}
-        />
-      </MetricsPageTemplate>
-    );
-  }
-
-  return (
-    <MetricsPageTemplate
-      pageHeader={{
-        pageTitle: asset.name,
-        tabs: tabsProp,
-        rightSideItems: rightSideComponents,
-      }}
-      pageSectionProps={{
-        contentProps: {
-          css: fullHeightContentStyles,
-        },
-      }}
+  return loading ? (
+    <EuiFlexGroup
+      direction="column"
+      css={css`
+        height: calc(100vh - ${headerHeight}px);
+      `}
     >
-      <Content />
-    </MetricsPageTemplate>
+      <InfraLoadingPanel
+        height="100%"
+        width="auto"
+        text={i18n.translate('xpack.infra.waffle.loadingDataText', {
+          defaultMessage: 'Loading data',
+        })}
+      />
+    </EuiFlexGroup>
+  ) : (
+    <EuiPageTemplate panelled contentBorder={false} offset={0}>
+      <EuiPageTemplate.Section grow={false} paddingSize="none">
+        <EuiPageTemplate.Header
+          pageTitle={asset.name}
+          tabs={tabEntries}
+          rightSideItems={rightSideItems}
+        />
+        <EuiPageTemplate.Section>
+          <Content />
+        </EuiPageTemplate.Section>
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
   );
 };

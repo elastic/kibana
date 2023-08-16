@@ -32,6 +32,7 @@ export const EntryTitle = ({ onClick, time, title }: EntryTitleProps) => {
     pathname: `/detail/host/${name}`,
     search: {
       _a: encode({ time: { ...time, interval: '>=1m' } }),
+      assetName: name,
     },
   });
 

@@ -27,7 +27,7 @@ export function useAssetDetailsState({ state }: UseAssetDetailsStateProps) {
   return {
     asset: {
       ...asset,
-      name: asset.name ?? metadata?.name ?? '',
+      name: asset.name || metadata?.name || 'asset-name',
     },
     assetType,
     dateRange,

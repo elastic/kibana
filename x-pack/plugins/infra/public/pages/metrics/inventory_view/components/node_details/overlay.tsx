@@ -83,6 +83,7 @@ export const NodeContextPopover = ({
       nodeId: node.id,
       from: nodeDetailFrom,
       to: currentTime,
+      assetName: node.name,
     }),
   });
   const apmField = nodeType === 'host' ? 'host.hostname' : inventoryModel.fields.id;
