@@ -71,8 +71,8 @@ export async function executeEsQuery(
                       },
                       {
                         field: geoField,
-                        format: 'wkt'
-                      }
+                        format: 'wkt',
+                      },
                     ],
                     _source: false,
                   },
