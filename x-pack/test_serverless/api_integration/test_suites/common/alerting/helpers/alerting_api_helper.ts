@@ -110,7 +110,7 @@ export async function createEsQueryRule({
       name,
       rule_type_id: ruleTypeId,
       actions,
-      ...(notifyWhen ? { notify_when: notifyWhen, throttle: '1m' } : {}),
+      ...(notifyWhen ? { notify_when: notifyWhen, throttle: '5m' } : {}),
     });
   return body;
 }
@@ -173,11 +173,11 @@ export async function runRule({
   supertest: SuperTest<Test>;
   ruleId: string;
 }) {
-  const { body } = await supertest
+  const response = await supertest
     .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
     .set('kbn-xsrf', 'foo')
     .set('x-elastic-internal-origin', 'foo');
-  return body;
+  return response;
 }
 
 export async function muteRule({

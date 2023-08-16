@@ -6,11 +6,13 @@
  */
 
 import pRetry from 'p-retry';
+import type { SuperTest, Test } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type {
   AggregationsAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { runRule } from './alerting_api_helper';
 
 export async function waitForDocumentInIndex({
   esClient,
@@ -300,4 +302,37 @@ export async function waitForEventLog({
     },
     { retries: 10 }
   );
+}
+
+export async function waitForNumRuleRuns({
+  supertest,
+  numOfRuns,
+  ruleId,
+  esClient,
+  testStart,
+}: {
+  supertest: SuperTest<Test>;
+  numOfRuns: number;
+  ruleId: string;
+  esClient: Client;
+  testStart: Date;
+}) {
+  for (let i = 0; i < numOfRuns; i++) {
+    await pRetry(
+      async () => {
+        const resp = await runRule({ supertest, ruleId });
+        if (resp.status !== 204) {
+          throw new Error(`Expected ${resp.status} to equal 204`);
+        }
+        await waitForEventLog({
+          esClient,
+          provider: 'alerting',
+          filter: testStart,
+          num: i + 1,
+        });
+        await waitForAllTasksIdle({ esClient, filter: testStart });
+      },
+      { retries: 10 }
+    );
+  }
 }
