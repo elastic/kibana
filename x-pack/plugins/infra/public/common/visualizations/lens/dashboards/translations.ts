@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TOOLTIP = {
+export const METRICS_TOOLTIP = {
   hostCount: i18n.translate('xpack.infra.hostsViewPage.metrics.tooltip.hostCount', {
     defaultMessage: 'Number of hosts returned by your search criteria.',
   }),
@@ -43,3 +43,10 @@ export const TOOLTIP = {
       'Number of bytes which have been sent per second on the public interfaces of the hosts.',
   }),
 };
+
+export const AVERAGE_SUBTITLE = i18n.translate(
+  'xpack.infra.assetDetailsEmbeddable.overview.kpi.subtitle.average',
+  {
+    defaultMessage: 'Average',
+  }
+);

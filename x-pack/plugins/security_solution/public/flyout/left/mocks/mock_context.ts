@@ -47,4 +47,5 @@ export const mockContextValue: LeftPanelContext = {
   dataAsNestedObject: {
     _id: 'testId',
   },
+  investigationFields: [],
 };
