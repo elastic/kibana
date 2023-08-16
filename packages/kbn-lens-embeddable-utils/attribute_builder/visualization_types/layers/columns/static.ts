@@ -10,7 +10,7 @@ import type { PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import type { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
 import type { StaticChartColumn, StaticValueConfig } from '../../../types';
 
-export class ReferenceLineColumn implements StaticChartColumn {
+export class StaticColumn implements StaticChartColumn {
   constructor(private valueConfig: StaticValueConfig) {}
 
   getValueConfig(): StaticValueConfig {
