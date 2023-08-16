@@ -19,6 +19,10 @@ export interface UseHighlightedFieldsParams {
    * An array of field objects with category and value
    */
   dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  /**
+   * An array of fields user has selected to highlight, defined on rule
+   */
+  investigationFields?: string[];
 }
 
 export interface UseHighlightedFieldsResult {
@@ -43,6 +47,7 @@ export interface UseHighlightedFieldsResult {
  */
 export const useHighlightedFields = ({
   dataFormattedForFieldBrowser,
+  investigationFields,
 }: UseHighlightedFieldsParams): UseHighlightedFieldsResult[] => {
   if (!dataFormattedForFieldBrowser) return [];
 
@@ -61,6 +66,7 @@ export const useHighlightedFields = ({
     { category: 'kibana', field: ALERT_RULE_TYPE },
     dataFormattedForFieldBrowser
   );
+
   const eventRuleType = Array.isArray(eventRuleTypeField?.originalValue)
     ? eventRuleTypeField?.originalValue?.[0]
     : eventRuleTypeField?.originalValue;
@@ -69,6 +75,7 @@ export const useHighlightedFields = ({
     eventCategories,
     eventCode,
     eventRuleType,
+    highlightedFieldsOverride: investigationFields ?? [],
   });
 
   return tableFields.reduce<UseHighlightedFieldsResult[]>((acc, field) => {
