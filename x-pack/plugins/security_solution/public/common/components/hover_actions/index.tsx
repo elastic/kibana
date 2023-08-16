@@ -7,7 +7,7 @@
 
 import { EuiFocusTrap, EuiScreenReaderOnly } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { DraggableId } from 'react-beautiful-dnd';
+import type { DraggableId } from '@hello-pangea/dnd';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 

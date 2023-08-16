@@ -34,7 +34,7 @@ describe('useTimeline', () => {
             selectConnector: () => {},
             connectors: [{ id: 'OpenAI' }] as FindActionResult[],
           },
-          service: {},
+          chatService: {},
           messages: [],
           onChatComplete: jest.fn(),
           onChatUpdate: jest.fn(),
@@ -45,9 +45,16 @@ describe('useTimeline', () => {
       expect(hookResult.result.current.items.length).toEqual(1);
 
       expect(hookResult.result.current.items[0]).toEqual({
-        canEdit: false,
-        canRegenerate: false,
-        canGiveFeedback: false,
+        display: {
+          collapsed: false,
+          hide: false,
+        },
+        actions: {
+          canCopy: false,
+          canEdit: false,
+          canRegenerate: false,
+          canGiveFeedback: false,
+        },
         role: MessageRole.User,
         title: 'started a conversation',
         loading: false,
@@ -62,14 +69,12 @@ describe('useTimeline', () => {
         initialProps: {
           messages: [
             {
-              '@timestamp': new Date().toISOString(),
               message: {
                 role: MessageRole.User,
                 content: 'Hello',
               },
             },
             {
-              '@timestamp': new Date().toISOString(),
               message: {
                 role: MessageRole.Assistant,
                 content: 'Goodbye',
@@ -79,7 +84,7 @@ describe('useTimeline', () => {
           connectors: {
             selectedConnector: 'foo',
           },
-          service: {
+          chatService: {
             chat: () => {},
           },
         } as unknown as HookProps,
@@ -89,9 +94,16 @@ describe('useTimeline', () => {
       expect(hookResult.result.current.items.length).toEqual(3);
 
       expect(hookResult.result.current.items[1]).toEqual({
-        canEdit: true,
-        canRegenerate: false,
-        canGiveFeedback: false,
+        actions: {
+          canCopy: true,
+          canEdit: true,
+          canRegenerate: false,
+          canGiveFeedback: false,
+        },
+        display: {
+          collapsed: false,
+          hide: false,
+        },
         role: MessageRole.User,
         content: 'Hello',
         loading: false,
@@ -100,9 +112,16 @@ describe('useTimeline', () => {
       });
 
       expect(hookResult.result.current.items[2]).toEqual({
-        canEdit: false,
-        canRegenerate: true,
-        canGiveFeedback: true,
+        display: {
+          collapsed: false,
+          hide: false,
+        },
+        actions: {
+          canCopy: true,
+          canEdit: false,
+          canRegenerate: true,
+          canGiveFeedback: true,
+        },
         role: MessageRole.Assistant,
         content: 'Goodbye',
         loading: false,
@@ -115,11 +134,11 @@ describe('useTimeline', () => {
   describe('when submitting a new prompt', () => {
     let subject: Subject<PendingMessage>;
 
-    let props: Omit<HookProps, 'onChatUpdate' | 'onChatComplete' | 'service'> & {
+    let props: Omit<HookProps, 'onChatUpdate' | 'onChatComplete' | 'chatService'> & {
       onChatUpdate: jest.MockedFn<HookProps['onChatUpdate']>;
       onChatComplete: jest.MockedFn<HookProps['onChatComplete']>;
-      service: Omit<HookProps['service'], 'executeFunction'> & {
-        executeFunction: jest.MockedFn<HookProps['service']['executeFunction']>;
+      chatService: Omit<HookProps['chatService'], 'executeFunction'> & {
+        executeFunction: jest.MockedFn<HookProps['chatService']['executeFunction']>;
       };
     };
 
@@ -129,7 +148,7 @@ describe('useTimeline', () => {
         connectors: {
           selectedConnector: 'foo',
         },
-        service: {
+        chatService: {
           chat: jest.fn().mockImplementation(() => {
             subject = new BehaviorSubject<PendingMessage>({
               message: {
@@ -179,8 +198,10 @@ describe('useTimeline', () => {
           role: MessageRole.Assistant,
           content: '',
           loading: true,
-          canRegenerate: false,
-          canGiveFeedback: false,
+          actions: {
+            canRegenerate: false,
+            canGiveFeedback: false,
+          },
         });
 
         expect(hookResult.result.current.items.length).toBe(3);
@@ -189,8 +210,10 @@ describe('useTimeline', () => {
           role: MessageRole.Assistant,
           content: '',
           loading: true,
-          canRegenerate: false,
-          canGiveFeedback: false,
+          actions: {
+            canRegenerate: false,
+            canGiveFeedback: false,
+          },
         });
 
         act(() => {
@@ -201,8 +224,10 @@ describe('useTimeline', () => {
           role: MessageRole.Assistant,
           content: 'Goodbye',
           loading: true,
-          canRegenerate: false,
-          canGiveFeedback: false,
+          actions: {
+            canRegenerate: false,
+            canGiveFeedback: false,
+          },
         });
 
         act(() => {
@@ -215,8 +240,10 @@ describe('useTimeline', () => {
           role: MessageRole.Assistant,
           content: 'Goodbye',
           loading: false,
-          canRegenerate: true,
-          canGiveFeedback: true,
+          actions: {
+            canRegenerate: true,
+            canGiveFeedback: true,
+          },
         });
       });
 
@@ -240,9 +267,16 @@ describe('useTimeline', () => {
           expect(hookResult.result.current.items.length).toBe(3);
 
           expect(hookResult.result.current.items[2]).toEqual({
-            canEdit: false,
-            canRegenerate: true,
-            canGiveFeedback: false,
+            actions: {
+              canEdit: false,
+              canRegenerate: true,
+              canGiveFeedback: false,
+              canCopy: true,
+            },
+            display: {
+              collapsed: false,
+              hide: false,
+            },
             content: 'My partial',
             id: expect.any(String),
             loading: false,
@@ -262,9 +296,16 @@ describe('useTimeline', () => {
 
           it('updates the last item in the array to be loading', () => {
             expect(hookResult.result.current.items[2]).toEqual({
-              canEdit: false,
-              canRegenerate: false,
-              canGiveFeedback: false,
+              display: {
+                hide: false,
+                collapsed: false,
+              },
+              actions: {
+                canCopy: true,
+                canEdit: false,
+                canRegenerate: false,
+                canGiveFeedback: false,
+              },
               content: '',
               id: expect.any(String),
               loading: true,
@@ -288,9 +329,16 @@ describe('useTimeline', () => {
               expect(hookResult.result.current.items.length).toBe(3);
 
               expect(hookResult.result.current.items[2]).toEqual({
-                canEdit: false,
-                canRegenerate: false,
-                canGiveFeedback: false,
+                actions: {
+                  canCopy: true,
+                  canEdit: false,
+                  canRegenerate: false,
+                  canGiveFeedback: false,
+                },
+                display: {
+                  collapsed: false,
+                  hide: false,
+                },
                 content: '',
                 id: expect.any(String),
                 loading: true,
@@ -308,9 +356,16 @@ describe('useTimeline', () => {
               expect(hookResult.result.current.items.length).toBe(3);
 
               expect(hookResult.result.current.items[2]).toEqual({
-                canEdit: false,
-                canRegenerate: true,
-                canGiveFeedback: true,
+                display: {
+                  collapsed: false,
+                  hide: false,
+                },
+                actions: {
+                  canCopy: true,
+                  canEdit: false,
+                  canRegenerate: true,
+                  canGiveFeedback: true,
+                },
                 content: 'Regenerated',
                 id: expect.any(String),
                 loading: false,
@@ -340,7 +395,7 @@ describe('useTimeline', () => {
             subject.complete();
           });
 
-          props.service.executeFunction.mockResolvedValueOnce({
+          props.chatService.executeFunction.mockResolvedValueOnce({
             content: {
               message: 'my-response',
             },
@@ -364,7 +419,7 @@ describe('useTimeline', () => {
 
           expect(props.onChatComplete).not.toHaveBeenCalled();
 
-          expect(props.service.executeFunction).toHaveBeenCalledWith(
+          expect(props.chatService.executeFunction).toHaveBeenCalledWith(
             'my_function',
             '{}',
             expect.any(Object)
