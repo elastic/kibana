@@ -170,6 +170,7 @@
     "@kbn/unified-histogram-plugin",
     "@kbn/navigation-plugin",
     "@kbn/core-logging-server-mocks",
-    "@kbn/core-lifecycle-browser"
+    "@kbn/core-lifecycle-browser",
+    "@kbn/handlebars"
   ]
 }
