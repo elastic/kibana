@@ -41,7 +41,7 @@ interface UrlDrilldownDeps {
   application: () => ApplicationStart;
 }
 
-export type ActionContext = ApplyGlobalFilterActionContext & { embeddable: IEmbeddable };
+export type ActionContext = ApplyGlobalFilterActionContext;
 
 export interface Config extends SerializableRecord {
   openInNewTab: boolean;
