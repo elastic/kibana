@@ -20,7 +20,6 @@ import {
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   TOASTER,
 } from '../../../screens/alerts_detection_rules';
-import { waitForRulesTableToBeLoaded } from '../../../tasks/alerts_detection_rules';
 import {
   getRuleAssets,
   createAndInstallMockedPrebuiltRules,
@@ -60,7 +59,6 @@ describe(
         cy.intercept('POST', '/api/fleet/epm/packages/security_detection_engine/*').as(
           'installPackage'
         );
-        waitForRulesTableToBeLoaded();
       });
 
       it('should install package from Fleet in the background', () => {
@@ -150,7 +148,6 @@ describe(
       });
       beforeEach(() => {
         createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2], installToKibana: false });
-        waitForRulesTableToBeLoaded();
         cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/installation/_perform').as(
           'installPrebuiltRules'
         );
@@ -232,7 +229,6 @@ describe(
           rules: [UPDATED_RULE_1, UPDATED_RULE_2],
           installToKibana: false,
         });
-        waitForRulesTableToBeLoaded();
         reload();
       });
 
