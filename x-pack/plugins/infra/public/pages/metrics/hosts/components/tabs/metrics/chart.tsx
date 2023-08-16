@@ -8,7 +8,6 @@ import React, { useMemo } from 'react';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { XYVisualOptions } from '@kbn/lens-embeddable-utils';
 import { LensChart } from '../../../../../../components/lens';
-import type { UseLensAttributesXYLayerConfig } from '../../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
@@ -16,14 +15,14 @@ import { buildCombinedHostsFilter } from '../../../../../../utils/filters/build'
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
 import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
 import { METRIC_CHART_HEIGHT } from '../../../constants';
+import { XYChartLayerParams } from '../../../../../../common/visualizations/types';
 
-export interface MetricChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides'> {
-  title: string;
-  layers: UseLensAttributesXYLayerConfig;
+export interface ChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides' | 'title'> {
+  layers: XYChartLayerParams[];
   visualOptions?: XYVisualOptions;
 }
 
-export const MetricChart = ({ id, title, layers, visualOptions, overrides }: MetricChartProps) => {
+export const Chart = ({ id, title, layers, visualOptions, overrides }: ChartProps) => {
   const { searchCriteria } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { requestTs, loading } = useHostsViewContext();
