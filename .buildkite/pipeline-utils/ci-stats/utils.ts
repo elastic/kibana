@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { execSync } from 'child_process';
 import Fs from 'fs';
+
+import { readConfig } from 'jest-config';
+import { SearchSource } from 'jest';
+import Runtime from 'jest-runtime';
 
 export const getRequiredEnv = (name: string) => {
   const value = process.env[name];
@@ -72,4 +77,40 @@ export function getTrackedBranch(): string {
 
 export function isObj(x: unknown): x is Record<string, unknown> {
   return typeof x === 'object' && x !== null;
+}
+
+export function getChangedFileList(): string[] {
+  const targetBranch = getTrackedBranch();
+
+  const gitDiffOutput = execSync(`git diff HEAD..${targetBranch} --name-only`).toString().trim();
+
+  const changedFiles = gitDiffOutput.split('\n').map((line) => line.trim());
+
+  return changedFiles;
+}
+
+// Based on: packages/kbn-test/src/jest/configs/get_tests_for_config_paths.ts
+export async function getAllTestFilesForConfigs(configPaths: string[]): Promise<string[]> {
+  const EMPTY_ARGV = {
+    $0: '',
+    _: [],
+  };
+
+  return Promise.all(
+    configPaths.map(async (configPath) => {
+      const config = await readConfig(EMPTY_ARGV, configPath);
+
+      const searchSource = new SearchSource(
+        await Runtime.createContext(config.projectConfig, {
+          maxWorkers: 1,
+          watchman: false,
+          watch: false,
+        })
+      );
+
+      const results = await searchSource.getTestPaths(config.globalConfig, undefined, undefined);
+
+      return results.tests.map((t) => t.path);
+    })
+  ).then((x) => x.flat());
 }

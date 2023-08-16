@@ -10,6 +10,7 @@
     "@octokit/rest": "^18.10.0",
     "axios": "^0.21.4",
     "globby": "^11.1.0",
+    "jest": "^29.6.2",
     "js-yaml": "^4.1.0",
     "minimatch": "^5.0.1",
     "tslib": "*"

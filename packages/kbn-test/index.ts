@@ -53,6 +53,8 @@ export { runCheckJestConfigsCli } from './src/jest/run_check_jest_configs_cli';
 
 export { runJest } from './src/jest/run';
 
+export { getTestsForConfigPaths } from './src/jest/configs/get_tests_for_config_paths';
+
 export * from './src/kbn_archiver_cli';
 
 export * from './src/kbn_client';

@@ -17,6 +17,8 @@ import { CiStatsClient, SourceDescriptor, TestGroupRunOrderResponse } from './cl
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import {
+  getAllTestFilesForConfigs,
+  getChangedFileList,
   getFloatFromEnv,
   getIntFromEnv,
   getListFromEnv,
@@ -74,6 +76,17 @@ export async function pickTestGroupRunOrder() {
   if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
     throw new Error('unable to find any unit, integration, or FTR configs');
   }
+
+  const allJestTestFiles = getAllTestFilesForConfigs(jestUnitConfigs);
+  const allChangedFiles = getChangedFileList();
+
+  console.log('--- All jest configs listed');
+  console.log({
+    allJestTestFiles,
+    allChangedFiles,
+  });
+
+  throw new Error('STOP HERE!');
 
   const runOrderConfig = buildRunOrderConfig({
     jestUnitConfigs,
