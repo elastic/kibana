@@ -6,7 +6,8 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { transformGetAllConnectorsResponse } from './transforms';
+import { ConnectorResponseV1 } from '../../../../common/routes/connector/response';
+import { transformGetAllConnectorsResponseV1 } from './transforms';
 import { ActionsRequestHandlerContext } from '../../../types';
 import { BASE_ACTION_API_PATH } from '../../../../common';
 import { ILicenseState } from '../../../lib';
@@ -25,9 +26,9 @@ export const getAllConnectorsRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
         const result = await actionsClient.getAll();
-        return res.ok({
-          body: transformGetAllConnectorsResponse(result),
-        });
+
+        const responseBody: ConnectorResponseV1[] = transformGetAllConnectorsResponseV1(result);
+        return res.ok({ body: responseBody });
       })
     )
   );

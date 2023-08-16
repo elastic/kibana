@@ -6,23 +6,26 @@
  */
 
 import { FindConnectorResult } from '../../../../../application/connector/types';
-import { ConnectorResponse } from '../../../../../../common/routes/connector/response';
-import { RewriteResponseCase } from '../../../../../../common/rewrite_request_case';
+import { ConnectorResponseV1 } from '../../../../../../common/routes/connector/response';
 
-export const transformGetAllConnectorsResponse: RewriteResponseCase<FindConnectorResult[]> = (
-  results
-): ConnectorResponse[] => {
+export const transformGetAllConnectorsResponse = (
+  results: FindConnectorResult[]
+): ConnectorResponseV1[] => {
   return results.map(
     ({
+      id,
+      name,
+      config,
       actionTypeId,
       isPreconfigured,
       isDeprecated,
       referencedByCount,
       isMissingSecrets,
       isSystemAction,
-      ...res
     }) => ({
-      ...res,
+      id,
+      name,
+      config,
       connector_type_id: actionTypeId,
       is_preconfigured: isPreconfigured,
       is_deprecated: isDeprecated,
