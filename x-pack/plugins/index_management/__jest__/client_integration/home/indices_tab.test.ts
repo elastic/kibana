@@ -443,7 +443,7 @@ describe('<IndexManagementHome />', () => {
       const { tableCellsValues } = table.getMetaData('indexTable');
 
       expect(tableCellsValues).toEqual([
-        ['', 'test', '1', '1', '', 'green', 'open', '10000', '156kb'],
+        ['', 'test', 'green', 'open', '1', '1', '10000', '156kb', ''],
       ]);
     });
 
