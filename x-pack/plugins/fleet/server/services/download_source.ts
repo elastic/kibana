@@ -209,6 +209,20 @@ class DownloadSourceService {
     }
   }
 
+  public async listAllForProxyId(soClient: SavedObjectsClientContract, proxyId: string) {
+    const downloadSources = await soClient.find<DownloadSourceSOAttributes>({
+      type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+      searchFields: ['proxy_id'],
+      search: proxyId,
+      perPage: SO_SEARCH_LIMIT,
+    });
+
+    return {
+      items: downloadSources.saved_objects.map<DownloadSource>(savedObjectToDownloadSource),
+      total: downloadSources.total,
+    };
+  }
+
   private async throwIfProxyNotFound(soClient: SavedObjectsClientContract, id: string) {
     try {
       await getFleetProxy(soClient, id);
