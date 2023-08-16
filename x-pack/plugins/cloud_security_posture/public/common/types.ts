@@ -37,24 +37,31 @@ export interface CspFindingsQueryData {
 
 export type Sort<T> = NonNullable<Criteria<T>['sort']>;
 
+type RuleSeverityMapping = {
+  field: string;
+  value: string;
+  operator: 'equals';
+  severity: string;
+};
+
 export interface RuleCreateProps {
   type: string;
   language: string;
   license: string;
   author: string[];
-  filters: any[];
-  false_positives: any[];
+  filters: unknown[];
+  false_positives: unknown[];
   risk_score: number;
-  risk_score_mapping: any[];
+  risk_score_mapping: unknown[];
   severity: string;
-  severity_mapping: any[];
-  threat: any[];
+  severity_mapping: RuleSeverityMapping[];
+  threat: unknown[];
   interval: string;
   from: string;
   to: string;
   timestamp_override: string;
   timestamp_override_fallback_disabled: boolean;
-  actions: any[];
+  actions: unknown[];
   enabled: boolean;
   alert_suppression: {
     group_by: string[];
