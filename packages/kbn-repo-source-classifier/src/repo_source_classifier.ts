@@ -13,7 +13,7 @@ import { RANDOM_TEST_FILE_NAMES, TEST_DIR, TEST_TAG } from './config';
 import { RepoPath } from './repo_path';
 
 const STATIC_EXTS = new Set(
-  'json|woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg|html|md|txt|tmpl'.split('|').map((e) => `.${e}`)
+  'json|woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg|html|md|txt|tmpl|xml'.split('|').map((e) => `.${e}`)
 );
 
 export class RepoSourceClassifier {
@@ -153,6 +153,7 @@ export class RepoSourceClassifier {
 
     const pkgInfo = path.getPkgInfo();
     if (!pkgInfo) {
+      // TODO: consider if static, test or mock and tooling should only be checked before triggering non-package
       return 'non-package';
     }
 
