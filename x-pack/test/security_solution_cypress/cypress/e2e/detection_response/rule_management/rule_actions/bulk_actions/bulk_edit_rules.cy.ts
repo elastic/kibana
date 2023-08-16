@@ -12,8 +12,6 @@ import {
   MODAL_CONFIRMATION_BODY,
   RULES_TAGS_POPOVER_BTN,
   MODAL_ERROR_BODY,
-  RULE_NAME as RULE_NAME_SELECTOR,
-  RULES_ROW,
 } from '../../../../../screens/alerts_detection_rules';
 
 import {
@@ -41,6 +39,7 @@ import {
   selectRulesByName,
   getRulesManagementTableRows,
   selectAllRulesOnPage,
+  getRuleRow,
 } from '../../../../../tasks/alerts_detection_rules';
 
 import {
@@ -249,12 +248,8 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
       testMultipleSelectedRulesLabel(rulesToUpdate.length);
       // check if first four(rulesCount) rules still selected and tags are updated
       for (const ruleName of rulesToUpdate) {
-        cy.contains(RULE_NAME_SELECTOR, ruleName)
-          .parents(RULES_ROW)
-          .find(EUI_CHECKBOX)
-          .should('be.checked');
-        cy.contains(RULE_NAME_SELECTOR, ruleName)
-          .parents(RULES_ROW)
+        getRuleRow(ruleName).find(EUI_CHECKBOX).should('be.checked');
+        getRuleRow(ruleName)
           .find(RULES_TAGS_POPOVER_BTN)
           .each(($el) => {
             testTagsBadge($el, prePopulatedTags.concat(['new-tag-1']));

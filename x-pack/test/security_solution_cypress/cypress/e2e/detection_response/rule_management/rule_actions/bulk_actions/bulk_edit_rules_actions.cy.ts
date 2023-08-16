@@ -162,6 +162,8 @@ describe(
           'Threshold Rule',
           'New Terms Rule',
           'New Rule Test',
+          'Test rule 1',
+          'Test rule 2',
         ]);
         waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
 
@@ -186,6 +188,8 @@ describe(
           'Threshold Rule',
           'New Terms Rule',
           'New Rule Test',
+          'Test rule 1',
+          'Test rule 2',
         ]);
         disableAutoRefresh();
       });
