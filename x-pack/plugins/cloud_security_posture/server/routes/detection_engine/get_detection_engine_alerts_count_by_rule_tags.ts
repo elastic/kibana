@@ -9,7 +9,10 @@ import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey'
 import { schema } from '@kbn/config-schema';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { GET_DETECTION_RULE_ALERTS_STATUS_PATH } from '../../../common/constants';
+import {
+  DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION,
+  GET_DETECTION_RULE_ALERTS_STATUS_PATH,
+} from '../../../common/constants';
 import { CspRouter } from '../../types';
 
 export interface VulnerabilitiesStatisticsQueryResult {
@@ -57,7 +60,7 @@ export const defineGetDetectionEngineAlertsStatus = (router: CspRouter) =>
     })
     .addVersion(
       {
-        version: '1',
+        version: DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION,
         validate: {
           request: {
             query: schema.object({
