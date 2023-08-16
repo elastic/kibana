@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.pressEnter();
       await PageObjects.console.enterText(`{\n\t"query": {`);
       await PageObjects.console.pressEnter();
-      await PageObjects.console.sleepforDebouncePeriod();
+      await PageObjects.console.sleepForDebouncePeriod();
       await PageObjects.console.promptAutocomplete();
       expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
     });
@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'pressLeft',
         ];
         for (const keyPress of keyPresses) {
-          await PageObjects.console.sleepforDebouncePeriod();
+          await PageObjects.console.sleepForDebouncePeriod();
           await PageObjects.console[keyPress]();
           expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
         }
@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.console.pressEnter();
 
           for (const char of method.slice(0, -1)) {
-            await PageObjects.console.sleepforDebouncePeriod();
+            await PageObjects.console.sleepForDebouncePeriod();
             await PageObjects.console.enterText(char); // e.g. 'P' -> 'Po' -> 'Pos'
             await retry.waitFor('autocomplete to be visible', () =>
               PageObjects.console.isAutocompleteVisible()
@@ -94,10 +94,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
           }
 
-          await PageObjects.console.sleepforDebouncePeriod();
+          await PageObjects.console.sleepForDebouncePeriod();
           await PageObjects.console.enterText(method.at(-1) + ' '); // e.g. 'Post '
 
-          await PageObjects.console.sleepforDebouncePeriod();
+          await PageObjects.console.sleepForDebouncePeriod();
           await PageObjects.console.enterText('_'); // e.g. 'Post _'
           await retry.waitFor('autocomplete to be visible', () =>
             PageObjects.console.isAutocompleteVisible()
@@ -109,10 +109,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should activate auto-complete for a single character immediately following a slash in URL', async () => {
         await PageObjects.console.enterText('GET .kibana');
 
-        await PageObjects.console.sleepforDebouncePeriod();
+        await PageObjects.console.sleepForDebouncePeriod();
         await PageObjects.console.enterText('/'); // i.e. 'GET .kibana/'
 
-        await PageObjects.console.sleepforDebouncePeriod();
+        await PageObjects.console.sleepForDebouncePeriod();
         await PageObjects.console.enterText('_'); // i.e. 'GET .kibana/_'
         await retry.waitFor('autocomplete to be visible', () =>
           PageObjects.console.isAutocompleteVisible()
@@ -134,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.pressEnter();
         await PageObjects.console.pressEnter();
         await PageObjects.console.pressEnter();
-        await PageObjects.console.sleepforDebouncePeriod();
+        await PageObjects.console.sleepForDebouncePeriod();
         await PageObjects.console.promptAutocomplete();
         await PageObjects.console.pressEnter();
         await retry.try(async () => {
@@ -198,7 +198,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should insert different templates depending on the value of type', async () => {
           await PageObjects.console.enterText(`{\n\t"type": "${type}"`);
           await PageObjects.console.pressEnter();
-          await PageObjects.console.sleepforDebouncePeriod();
+          await PageObjects.console.sleepForDebouncePeriod();
           // Prompt autocomplete for 'settings'
           await PageObjects.console.promptAutocomplete('s');
 

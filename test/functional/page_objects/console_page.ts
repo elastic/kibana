@@ -587,7 +587,7 @@ export class ConsolePageObject extends FtrService {
     await closeButton.click();
   }
 
-  public async sleepforDebouncePeriod(duration: number = 100) {
+  public async sleepForDebouncePeriod(duration: number = 100) {
     await this.common.sleep(duration);
   }
 }
