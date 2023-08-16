@@ -21,7 +21,6 @@ import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
   RULE_NAME,
-  RULES_ROW,
   RULES_MANAGEMENT_TABLE,
   RULE_SWITCH,
   SEVERITY,
@@ -77,6 +76,7 @@ import {
   deleteFirstRule,
   deleteRuleFromDetailsPage,
   editFirstRule,
+  getRulesManagementTableRows,
   goToRuleDetails,
   selectRulesByName,
 } from '../../../tasks/alerts_detection_rules';
@@ -174,7 +174,7 @@ describe('Custom query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, ()
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
       cy.log('Asserting rule view in rules list');
-      cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW).should('have.length', expectedNumberOfRules);
+      getRulesManagementTableRows().should('have.length', expectedNumberOfRules);
       cy.get(RULE_NAME).should('have.text', ruleFields.ruleName);
       cy.get(RISK_SCORE).should('have.text', ruleFields.riskScore);
       cy.get(SEVERITY)
@@ -259,101 +259,87 @@ describe('Custom query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, ()
       });
 
       it('Deletes one rule', () => {
-        cy.get(RULES_MANAGEMENT_TABLE)
-          .find(RULES_ROW)
-          .then((rules) => {
-            const initialNumberOfRules = rules.length;
-            const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
+        getRulesManagementTableRows().then((rules) => {
+          const initialNumberOfRules = rules.length;
+          const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
 
-            cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
-              const numberOfRules = body.data.length;
-              expect(numberOfRules).to.eql(initialNumberOfRules);
-            });
-
-            deleteFirstRule();
-
-            cy.get(RULES_MANAGEMENT_TABLE)
-              .find(RULES_ROW)
-              .should('have.length', expectedNumberOfRulesAfterDeletion);
-            cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
-              const numberOfRules = body.data.length;
-              expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
-            });
-            cy.get(CUSTOM_RULES_BTN).should(
-              'have.text',
-              `Custom rules (${expectedNumberOfRulesAfterDeletion})`
-            );
+          cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
+            const numberOfRules = body.data.length;
+            expect(numberOfRules).to.eql(initialNumberOfRules);
           });
+
+          deleteFirstRule();
+
+          getRulesManagementTableRows().should('have.length', expectedNumberOfRulesAfterDeletion);
+          cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
+            const numberOfRules = body.data.length;
+            expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
+          });
+          cy.get(CUSTOM_RULES_BTN).should(
+            'have.text',
+            `Custom rules (${expectedNumberOfRulesAfterDeletion})`
+          );
+        });
       });
 
       it('Deletes more than one rule', () => {
-        cy.get(RULES_MANAGEMENT_TABLE)
-          .find(RULES_ROW)
-          .then((rules) => {
-            const rulesToDelete = ['New Rule Test', 'Override Rule'] as const;
-            const initialNumberOfRules = rules.length;
-            const numberOfRulesToBeDeleted = 2;
-            const expectedNumberOfRulesAfterDeletion =
-              initialNumberOfRules - numberOfRulesToBeDeleted;
+        getRulesManagementTableRows().then((rules) => {
+          const rulesToDelete = ['New Rule Test', 'Override Rule'] as const;
+          const initialNumberOfRules = rules.length;
+          const numberOfRulesToBeDeleted = 2;
+          const expectedNumberOfRulesAfterDeletion =
+            initialNumberOfRules - numberOfRulesToBeDeleted;
 
-            selectRulesByName(rulesToDelete);
-            deleteSelectedRules();
+          selectRulesByName(rulesToDelete);
+          deleteSelectedRules();
 
-            cy.get(RULES_MANAGEMENT_TABLE)
-              .get(RULES_ROW)
-              .first()
-              .within(() => {
-                cy.get(RULE_SWITCH).should('not.exist');
-              });
+          getRulesManagementTableRows()
+            .first()
+            .within(() => {
+              cy.get(RULE_SWITCH).should('not.exist');
+            });
 
-            cy.get(RULES_MANAGEMENT_TABLE)
-              .find(RULES_ROW)
-              .should('have.length', expectedNumberOfRulesAfterDeletion);
+          getRulesManagementTableRows().should('have.length', expectedNumberOfRulesAfterDeletion);
+          cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
+            const numberOfRules = body.data.length;
+            expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
+          });
+          getRulesManagementTableRows()
+            .first()
+            .within(() => {
+              cy.get(RULE_SWITCH).should('exist');
+            });
+          cy.get(CUSTOM_RULES_BTN).should(
+            'have.text',
+            `Custom rules (${expectedNumberOfRulesAfterDeletion})`
+          );
+        });
+      });
+
+      it('Deletes one rule from detail page', () => {
+        getRulesManagementTableRows().then((rules) => {
+          const initialNumberOfRules = rules.length;
+          const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
+
+          goToRuleDetails();
+          cy.intercept('POST', '/api/detection_engine/rules/_bulk_delete').as('deleteRule');
+
+          deleteRuleFromDetailsPage();
+
+          // @ts-expect-error update types
+          cy.waitFor('@deleteRule').then(() => {
+            cy.get(RULES_MANAGEMENT_TABLE).should('exist');
+            getRulesManagementTableRows().should('have.length', expectedNumberOfRulesAfterDeletion);
             cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
               const numberOfRules = body.data.length;
               expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
             });
-            cy.get(RULES_MANAGEMENT_TABLE)
-              .get(RULES_ROW)
-              .first()
-              .within(() => {
-                cy.get(RULE_SWITCH).should('exist');
-              });
             cy.get(CUSTOM_RULES_BTN).should(
               'have.text',
               `Custom rules (${expectedNumberOfRulesAfterDeletion})`
             );
           });
-      });
-
-      it('Deletes one rule from detail page', () => {
-        cy.get(RULES_MANAGEMENT_TABLE)
-          .find(RULES_ROW)
-          .then((rules) => {
-            const initialNumberOfRules = rules.length;
-            const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
-
-            goToRuleDetails();
-            cy.intercept('POST', '/api/detection_engine/rules/_bulk_delete').as('deleteRule');
-
-            deleteRuleFromDetailsPage();
-
-            // @ts-expect-error update types
-            cy.waitFor('@deleteRule').then(() => {
-              cy.get(RULES_MANAGEMENT_TABLE).should('exist');
-              cy.get(RULES_MANAGEMENT_TABLE)
-                .find(RULES_ROW)
-                .should('have.length', expectedNumberOfRulesAfterDeletion);
-              cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
-                const numberOfRules = body.data.length;
-                expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
-              });
-              cy.get(CUSTOM_RULES_BTN).should(
-                'have.text',
-                `Custom rules (${expectedNumberOfRulesAfterDeletion})`
-              );
-            });
-          });
+        });
       });
     });
 
