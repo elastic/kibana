@@ -13,7 +13,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'findings', 'header']);
 
   // Failing: See https://github.com/elastic/kibana/issues/163950
-  describe.skip('Findings Page onboarding', function () {
+  describe('Findings Page onboarding', function () {
     this.tags(['cloud_security_posture_findings_onboarding']);
     let findings: typeof PageObjects.findings;
     let notInstalledVulnerabilities: typeof findings.notInstalledVulnerabilities;
