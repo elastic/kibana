@@ -47,6 +47,11 @@ export enum AppFeatureSecurityKey {
    * Test for the POC extracting rules page functionality
    */
   rulesTest = 'rulesTest',
+
+  /**
+   * Enables managing endpoint exceptions on rules and alerts
+   */
+  endpointExceptions = 'endpointExceptions',
 }
 
 export enum AppFeatureCasesKey {
@@ -66,6 +71,7 @@ export const ALL_APP_FEATURE_KEYS = Object.freeze(Object.values(AppFeatureKey));
 /** Sub-features IDs for Security */
 export enum SecuritySubFeatureId {
   endpointList = 'endpointListSubFeature',
+  endpointExceptions = 'endpointExceptionsSubFeature',
   trustedApplications = 'trustedApplicationsSubFeature',
   hostIsolationExceptions = 'hostIsolationExceptionsSubFeature',
   blocklist = 'blocklistSubFeature',

@@ -19,4 +19,14 @@ export const AppFeaturesPrivileges = {
       api: [`${APP_ID}-showRules`],
     },
   },
+  [AppFeatureKey.endpointExceptions]: {
+    all: {
+      ui: ['showEndpointExceptions', 'crudEndpointExceptions'],
+      api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`],
+    },
+    read: {
+      ui: ['showEndpointExceptions'],
+      api: [`${APP_ID}-showEndpointExceptions`],
+    },
+  },
 };

@@ -7,13 +7,13 @@
 
 import { APP_ID, type ExperimentalFeatures } from '@kbn/security-solution-plugin/common';
 import {
-  AppFeatureSecurityKey,
-  SecuritySubFeatureId,
-  type AppFeatureKibanaConfig,
-  type AppFeaturesSecurityConfig,
-  type AppFeatureKeys,
   AppFeatureKey,
+  type AppFeatureKeys,
+  type AppFeatureKibanaConfig,
+  AppFeatureSecurityKey,
   AppFeaturesPrivileges,
+  type AppFeaturesSecurityConfig,
+  SecuritySubFeatureId,
 } from '@kbn/security-solution-features';
 
 export const getSecurityAppFeaturesConfigurator =
@@ -140,6 +140,19 @@ const securityAppFeaturesConfig: Record<
       read: {
         api: AppFeaturesPrivileges[AppFeatureKey.rulesTest].read.api,
         ui: AppFeaturesPrivileges[AppFeatureKey.rulesTest].read.ui,
+      },
+    },
+  },
+
+  [AppFeatureSecurityKey.endpointExceptions]: {
+    privileges: {
+      all: {
+        api: AppFeaturesPrivileges[AppFeatureKey.endpointExceptions].all.api,
+        ui: AppFeaturesPrivileges[AppFeatureKey.endpointExceptions].all.ui,
+      },
+      read: {
+        api: AppFeaturesPrivileges[AppFeatureKey.endpointExceptions].read.api,
+        ui: AppFeaturesPrivileges[AppFeatureKey.endpointExceptions].read.ui,
       },
     },
   },

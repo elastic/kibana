@@ -7,12 +7,12 @@
 
 import { APP_ID, type ExperimentalFeatures } from '@kbn/security-solution-plugin/common';
 import {
-  AppFeatureSecurityKey,
-  SecuritySubFeatureId,
-  type AppFeatureKibanaConfig,
-  type AppFeaturesSecurityConfig,
-  type AppFeatureKeys,
   type AppFeatureKey,
+  type AppFeatureKeys,
+  type AppFeatureKibanaConfig,
+  AppFeatureSecurityKey,
+  type AppFeaturesSecurityConfig,
+  SecuritySubFeatureId,
 } from '@kbn/security-solution-features';
 
 export const getSecurityAppFeaturesConfigurator =
@@ -81,6 +81,10 @@ const securityAppFeaturesConfig: Record<
 
   [AppFeatureSecurityKey.endpointHostManagement]: {
     subFeatureIds: [SecuritySubFeatureId.endpointList],
+  },
+
+  [AppFeatureSecurityKey.endpointExceptions]: {
+    subFeatureIds: [SecuritySubFeatureId.endpointExceptions],
   },
 
   [AppFeatureSecurityKey.endpointPolicyManagement]: {

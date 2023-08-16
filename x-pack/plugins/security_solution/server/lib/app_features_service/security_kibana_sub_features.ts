@@ -577,10 +577,59 @@ const rulesTestSubFeature: SubFeatureConfig = {
   ],
 };
 
+const endpointExceptionsSubFeature: SubFeatureConfig = {
+  requireAllSpaces: true,
+  privilegesTooltip: i18n.translate(
+    'xpack.securitySolution.featureRegistry.subFeatures.endpointExceptions.privilegesTooltip',
+    {
+      defaultMessage: 'All Spaces is required for Endpoint Exceptions access.',
+    }
+  ),
+  name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.endpointExceptions', {
+    defaultMessage: 'Endpoint Exceptions',
+  }),
+  description: i18n.translate(
+    'xpack.securitySolution.featureRegistry.subFeatures.endpointExceptions.description',
+    {
+      defaultMessage: 'Use Endpoint Exceptions (this is a test sub-feature).',
+    }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: AppFeaturesPrivileges[AppFeatureKey.endpointExceptions].all.api,
+          id: 'endpoint_exceptions_all',
+          includeIn: 'all',
+          name: 'All',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: AppFeaturesPrivileges[AppFeatureKey.endpointExceptions].all.ui,
+        },
+        {
+          api: AppFeaturesPrivileges[AppFeatureKey.endpointExceptions].read.api,
+          id: 'endpoint_exceptions_read',
+          includeIn: 'read',
+          name: 'Read',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: AppFeaturesPrivileges[AppFeatureKey.endpointExceptions].read.ui,
+        },
+      ],
+    },
+  ],
+};
+
 // Defines all the ordered Security subFeatures available
 export const securitySubFeaturesMap = Object.freeze(
   new Map<SecuritySubFeatureId, SubFeatureConfig>([
     [SecuritySubFeatureId.endpointList, endpointListSubFeature],
+    [SecuritySubFeatureId.endpointExceptions, endpointExceptionsSubFeature],
     [SecuritySubFeatureId.trustedApplications, trustedApplicationsSubFeature],
     [SecuritySubFeatureId.hostIsolationExceptions, hostIsolationExceptionsSubFeature],
     [SecuritySubFeatureId.blocklist, blocklistSubFeature],
