@@ -43,7 +43,7 @@ export async function registerFleetPolicyCallbacks({
   }
 
   const fleetPluginStart = await plugins.fleet.start();
-  const { getApmIndices } = plugins.apmDataAccess.setup;
+  const { getApmIndices } = await plugins.apmDataAccess.start();
   const coreStart = await coreStartPromise;
 
   fleetPluginStart.registerExternalCallback(

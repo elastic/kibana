@@ -6,17 +6,11 @@
  */
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import {
-  CoreSetup,
-  Logger,
-  SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import { CoreSetup, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
 import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
@@ -26,22 +20,19 @@ import { collectDataTelemetry } from './collect_data_telemetry';
 import { APMUsage } from './types';
 import { apmSchema } from './schema';
 import { getTelemetryClient } from './telemetry_client';
+import { APMPluginStartDependencies } from '../../types';
 
 export const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
 
 export async function createApmTelemetry({
   core,
-  getApmIndices,
   usageCollector,
   taskManager,
   logger,
   kibanaVersion,
   isProd,
 }: {
-  core: CoreSetup;
-  getApmIndices: (
-    soClient: SavedObjectsClientContract
-  ) => Promise<APMDataAccessConfig['indices']>;
+  core: CoreSetup<APMPluginStartDependencies>;
   usageCollector: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
   logger: Logger;
@@ -63,9 +54,11 @@ export async function createApmTelemetry({
   });
 
   const telemetryClient = await getTelemetryClient({ core });
-  const [coreStart] = await core.getStartServices();
+  const [coreStart, pluginStart] = await core.getStartServices();
   const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
-  const apmIndices = await getApmIndices(savedObjectsClient);
+  const apmIndices = await pluginStart.apmDataAccess.getApmIndices(
+    savedObjectsClient
+  );
 
   const collectAndStore = async () => {
     const dataTelemetry = await collectDataTelemetry({

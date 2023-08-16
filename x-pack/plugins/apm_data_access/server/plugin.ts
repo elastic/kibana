@@ -28,21 +28,10 @@ export class ApmDataAccessPlugin
   }
 
   public setup(core: CoreSetup): ApmDataAccessPluginSetup {
-    // retrieve APM indices from config
-    const apmDataAccessConfig = this.initContext.config.get<APMDataAccessConfig>();
-    const apmIndicesFromConfigFile = apmDataAccessConfig.indices;
-
     // register saved object
     core.savedObjects.registerType(apmIndicesSavedObjectDefinition);
 
-    // expose
-    return {
-      apmIndicesFromConfigFile,
-      getApmIndices: async (savedObjectsClient: SavedObjectsClientContract) => {
-        const apmIndicesFromSavedObject = await getApmIndicesSavedObject(savedObjectsClient);
-        return { ...apmIndicesFromConfigFile, ...apmIndicesFromSavedObject };
-      },
-    };
+    return {};
   }
 
   public start(core: CoreStart) {
@@ -52,7 +41,18 @@ export class ApmDataAccessPlugin
       logger.error('Failed to run migration making APM indices space aware');
       logger.error(e);
     });
-    return {};
+
+    // retrieve APM indices from config
+    const apmDataAccessConfig = this.initContext.config.get<APMDataAccessConfig>();
+    const apmIndicesFromConfigFile = apmDataAccessConfig.indices;
+
+    return {
+      apmIndicesFromConfigFile,
+      getApmIndices: async (savedObjectsClient: SavedObjectsClientContract) => {
+        const apmIndicesFromSavedObject = await getApmIndicesSavedObject(savedObjectsClient);
+        return { ...apmIndicesFromConfigFile, ...apmIndicesFromSavedObject };
+      },
+    };
   }
 
   public stop() {}
