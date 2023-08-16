@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'findings', 'header']);
   const retry = getService('retry');
-  const testSubjects = getService('testSubjects');
+  // const testSubjects = getService('testSubjects');
 
   // Failing: See https://github.com/elastic/kibana/issues/163950
   describe('Findings Page onboarding', function () {
@@ -37,9 +37,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         // await notInstalledVulnerabilities.navigateToAction('cnvm-not-installed-action');
-        await testSubjects.click('cnvm-not-installed-action');
-        await PageObjects.common.waitUntilUrlIncludes('add-integration/vuln_mgmt');
+        // await testSubjects.click('cnvm-not-installed-action');
+        await PageObjects.common.clickAndValidate(
+          'cnvm-not-installed-action',
+          'createPackagePolicy_pageTitle'
+        );
       });
+      await PageObjects.common.waitUntilUrlIncludes('add-integration/vuln_mgmt');
     });
 
     it('clicking on the `No integrations installed` prompt action button - `install cloud posture intergation`: navigates to the CSPM integration installation page', async () => {
@@ -50,9 +54,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         // await notInstalledCSP.navigateToAction('cspm-not-installed-action');
-        await testSubjects.click('cspm-not-installed-action');
-        await PageObjects.common.waitUntilUrlIncludes('add-integration/cspm');
+        // await testSubjects.click('cspm-not-installed-action');
+        await PageObjects.common.clickAndValidate(
+          'cspm-not-installed-action',
+          'createPackagePolicy_pageTitle'
+        );
       });
+      await PageObjects.common.waitUntilUrlIncludes('add-integration/cspm');
     });
 
     it('clicking on the `No integrations installed` prompt action button - `install kubernetes posture intergation`: navigates to the KSPM integration installation page', async () => {
@@ -63,9 +71,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         // await notInstalledCSP.navigateToAction('kspm-not-installed-action');
-        await testSubjects.click('kspm-not-installed-action');
-        await PageObjects.common.waitUntilUrlIncludes('add-integration/kspm');
+        // await testSubjects.click('kspm-not-installed-action');
+        await PageObjects.common.clickAndValidate(
+          'kspm-not-installed-action',
+          'createPackagePolicy_pageTitle'
+        );
       });
+      await PageObjects.common.waitUntilUrlIncludes('add-integration/kspm');
     });
   });
 };
