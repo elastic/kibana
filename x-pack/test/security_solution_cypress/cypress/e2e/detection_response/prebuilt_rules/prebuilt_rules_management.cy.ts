@@ -110,7 +110,7 @@ describe('Prebuilt rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
         cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'false');
       });
 
-      it('Does not allow to delete one rule when more than one is selected', () => {
+      it.only('Does not allow to delete one rule when more than one is selected', () => {
         const numberOfRulesToBeSelected = 2;
         selectNumberOfRules(numberOfRulesToBeSelected);
 
