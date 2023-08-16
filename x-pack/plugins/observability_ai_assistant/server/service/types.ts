@@ -7,20 +7,35 @@
 
 import { IncomingMessage } from 'http';
 import { KibanaRequest } from '@kbn/core/server';
-import {
+import type {
   Conversation,
   ConversationCreateRequest,
   ConversationUpdateRequest,
+  FunctionDefinition,
+  KnowledgeBaseEntry,
   Message,
 } from '../../common/types';
 
 export interface IObservabilityAIAssistantClient {
-  chat: (options: { messages: Message[]; connectorId: string }) => Promise<IncomingMessage>;
-  get: (conversationId: string) => void;
+  chat: (options: {
+    messages: Message[];
+    connectorId: string;
+    functions: Array<Pick<FunctionDefinition['options'], 'name' | 'description' | 'parameters'>>;
+  }) => Promise<IncomingMessage>;
+  get: (conversationId: string) => Promise<Conversation>;
   find: (options?: { query?: string }) => Promise<{ conversations: Conversation[] }>;
   create: (conversation: ConversationCreateRequest) => Promise<Conversation>;
   update: (conversation: ConversationUpdateRequest) => Promise<Conversation>;
   delete: (conversationId: string) => Promise<void>;
+  recall: (query: string) => Promise<{ entries: KnowledgeBaseEntry[] }>;
+  summarise: (options: { entry: Omit<KnowledgeBaseEntry, '@timestamp'> }) => Promise<void>;
+  getKnowledgeBaseStatus: () => Promise<{
+    ready: boolean;
+    error?: any;
+    deployment_state?: string;
+    allocation_state?: string;
+  }>;
+  setupKnowledgeBase: () => Promise<void>;
 }
 
 export interface IObservabilityAIAssistantService {
@@ -32,17 +47,24 @@ export interface IObservabilityAIAssistantService {
 export interface ObservabilityAIAssistantResourceNames {
   componentTemplate: {
     conversations: string;
+    kb: string;
   };
   indexTemplate: {
     conversations: string;
+    kb: string;
   };
   ilmPolicy: {
     conversations: string;
   };
   aliases: {
     conversations: string;
+    kb: string;
   };
   indexPatterns: {
     conversations: string;
+    kb: string;
+  };
+  pipelines: {
+    kb: string;
   };
 }

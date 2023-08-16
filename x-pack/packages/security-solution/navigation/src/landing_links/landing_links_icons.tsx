@@ -7,25 +7,28 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { isExternalId, LinkAnchor, type WrappedLinkProps } from '../links';
 import type { NavigationLink } from '../types';
 import { BetaBadge } from './beta_badge';
+import { LandingLink } from './landing_links';
 
 export interface LandingLinksIconsProps {
-  items: NavigationLink[];
+  items: Readonly<NavigationLink[]>;
+  urlState?: string;
+  onLinkClick?: (id: string) => void;
+}
+export interface LandingLinkIconProps {
+  item: NavigationLink;
   urlState?: string;
   onLinkClick?: (id: string) => void;
 }
 
-const useStyles = () => {
+const useLinkIconStyles = () => {
   const { euiTheme } = useEuiTheme();
   return {
-    container: css`
-      min-width: 22em;
-    `,
     title: css`
+      min-height: ${euiTheme.size.l};
       margin-top: ${euiTheme.size.m};
-      margin-bottom: ${euiTheme.size.s};
+      margin-bottom: ${euiTheme.size.xs};
     `,
     description: css`
       max-width: 22em;
@@ -33,63 +36,75 @@ const useStyles = () => {
   };
 };
 
+export const LandingLinkIcon: React.FC<LandingLinkIconProps> = React.memo(function LandingLinkIcon({
+  item,
+  urlState,
+  onLinkClick,
+  children,
+}) {
+  const styles = useLinkIconStyles();
+  const { title, description, landingIcon, isBeta, betaOptions } = item;
+
+  return (
+    <EuiFlexGroup
+      direction="column"
+      alignItems="flexStart"
+      gutterSize="none"
+      responsive={false}
+      data-test-subj="LandingItem"
+    >
+      <EuiFlexItem grow={false}>
+        <LandingLink
+          tabIndex={-1} // Prevents the icon from being tabbable
+          item={item}
+          urlState={urlState}
+          onLinkClick={onLinkClick}
+          external={false} // Never show the external icon
+        >
+          <EuiIcon aria-hidden="true" size="xl" type={landingIcon ?? ''} role="presentation" />
+        </LandingLink>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xxs" css={styles.title}>
+          <EuiFlexGroup gutterSize="none" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <LandingLink item={item} urlState={urlState} onLinkClick={onLinkClick}>
+                {title}
+              </LandingLink>
+            </EuiFlexItem>
+            {isBeta && (
+              <EuiFlexItem grow={false}>
+                <BetaBadge text={betaOptions?.text} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={styles.description}>
+        <EuiText size="s" color="text">
+          {description}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>{children}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});
+
+const linkIconContainerStyles = css`
+  min-width: 22em;
+`;
 export const LandingLinksIcons: React.FC<LandingLinksIconsProps> = ({
   items,
   urlState,
   onLinkClick,
 }) => {
-  const styles = useStyles();
   return (
     <EuiFlexGroup gutterSize="xl" wrap>
-      {items.map(({ id, title, description, landingIcon, isBeta, betaOptions, skipUrlState }) => {
-        const linkProps: WrappedLinkProps = {
-          id,
-          ...(!isExternalId(id) && !skipUrlState && { urlState }),
-          ...(onLinkClick && { onClick: () => onLinkClick(id) }),
-        };
-        return (
-          <EuiFlexItem key={id} data-test-subj="LandingItem" grow={false} css={styles.container}>
-            <EuiFlexGroup
-              direction="column"
-              alignItems="flexStart"
-              gutterSize="none"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false}>
-                <LinkAnchor tabIndex={-1} {...linkProps}>
-                  <EuiIcon
-                    aria-hidden="true"
-                    size="xl"
-                    type={landingIcon ?? ''}
-                    role="presentation"
-                  />
-                </LinkAnchor>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xxs" css={styles.title}>
-                  <EuiFlexGroup gutterSize="none">
-                    <EuiFlexItem grow={false}>
-                      <LinkAnchor {...linkProps}>
-                        <h2>{title}</h2>
-                      </LinkAnchor>
-                    </EuiFlexItem>
-                    {isBeta && (
-                      <EuiFlexItem grow={false}>
-                        <BetaBadge text={betaOptions?.text} />
-                      </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem css={styles.description}>
-                <EuiText size="s" color="text">
-                  {description}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        );
-      })}
+      {items.map((item) => (
+        <EuiFlexItem key={item.id} grow={false} css={linkIconContainerStyles}>
+          <LandingLinkIcon item={item} urlState={urlState} onLinkClick={onLinkClick} />
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
   );
 };

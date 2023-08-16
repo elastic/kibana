@@ -68,6 +68,8 @@
     "@kbn/core-http-server",
     "@kbn/logs-shared-plugin",
     "@kbn/licensing-plugin",
+    "@kbn/aiops-utils",
+    "@kbn/lens-embeddable-utils"
   ],
   "exclude": ["target/**/*"]
 }
