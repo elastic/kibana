@@ -53,6 +53,20 @@ export interface TestGroupRunOrderResponse {
   }>;
 }
 
+export type SourceDescriptor =
+  | {
+      branch: string;
+      jobName: string;
+    }
+  | {
+      prId: string;
+      jobName: string;
+    }
+  | {
+      commit: string;
+      jobName: string;
+    };
+
 interface RequestOptions {
   path: string;
   method?: Method;
@@ -148,20 +162,7 @@ export class CiStatsClient {
   };
 
   pickTestGroupRunOrder = async (body: {
-    sources: Array<
-      | {
-          branch: string;
-          jobName: string;
-        }
-      | {
-          prId: string;
-          jobName: string;
-        }
-      | {
-          commit: string;
-          jobName: string;
-        }
-    >;
+    sources: SourceDescriptor[];
     groups: Array<{
       type: string;
       queue?: string;
