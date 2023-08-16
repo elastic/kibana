@@ -76,6 +76,7 @@ describe(
           data_view_id: DATA_VIEW_ID,
           rule_id: '1',
           name: 'New Rule Test 1',
+          enabled: false,
         })
       );
       createRule(
@@ -84,6 +85,7 @@ describe(
           data_view_id: DATA_VIEW_ID,
           rule_id: '2',
           name: 'New EQL Rule',
+          enabled: false,
         })
       );
       createRule(
@@ -92,6 +94,7 @@ describe(
           data_view_id: DATA_VIEW_ID,
           rule_id: '3',
           name: 'Threat Indicator Rule Test',
+          enabled: false,
         })
       );
       createRule(
@@ -100,6 +103,7 @@ describe(
           data_view_id: DATA_VIEW_ID,
           rule_id: '4',
           name: 'Threshold Rule',
+          enabled: false,
         })
       );
       createRule(
@@ -108,6 +112,7 @@ describe(
           data_view_id: DATA_VIEW_ID,
           rule_id: '5',
           name: 'New Terms Rule',
+          enabled: false,
         })
       );
       createRule(
@@ -117,6 +122,7 @@ describe(
           saved_id: 'mocked',
           rule_id: '6',
           name: 'New Rule Test 2',
+          enabled: false,
         })
       );
 
