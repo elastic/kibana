@@ -17,8 +17,6 @@ import { SimplifiedSelectable } from '../../../../../shared/simplified_selectabl
 
 import { UrlComboBox } from '../../../../../shared/url_combo_box/url_combo_box';
 
-import { rerender } from '../../../../../test_helpers';
-
 import { CrawlCustomSettingsFlyoutSeedUrlsPanel } from './crawl_custom_settings_flyout_seed_urls_panel';
 
 const MOCK_VALUES = {
@@ -64,7 +62,25 @@ describe('CrawlCustomSettingsFlyoutSeedUrlsPanel', () => {
     setMockValues(MOCK_VALUES);
     setMockActions(MOCK_ACTIONS);
 
-    wrapper = shallow(<CrawlCustomSettingsFlyoutSeedUrlsPanel />);
+    wrapper = shallow(
+      <CrawlCustomSettingsFlyoutSeedUrlsPanel
+        scheduleConfig={{
+          customEntryPointUrls: MOCK_VALUES.customEntryPointUrls,
+          customSitemapUrls: MOCK_VALUES.customSitemapUrls,
+          includeSitemapsInRobotsTxt: MOCK_VALUES.includeSitemapsInRobotsTxt,
+          selectedDomainUrls: MOCK_VALUES.selectedDomainUrls,
+          selectedEntryPointUrls: MOCK_VALUES.selectedEntryPointUrls,
+          selectedSitemapUrls: MOCK_VALUES.selectedSitemapUrls,
+        }}
+        onSelectCustomEntryPointUrls={MOCK_ACTIONS.onSelectCustomEntryPointUrls}
+        onSelectCustomSitemapUrls={MOCK_ACTIONS.onSelectCustomSitemapUrls}
+        onSelectEntryPointUrls={MOCK_ACTIONS.onSelectEntryPointUrls}
+        onSelectSitemapUrls={MOCK_ACTIONS.onSelectSitemapUrls}
+        toggleIncludeSitemapsInRobotsTxt={MOCK_ACTIONS.toggleIncludeSitemapsInRobotsTxt}
+        entryPointUrls={MOCK_VALUES.entryPointUrls}
+        sitemapUrls={MOCK_VALUES.sitemapUrls}
+      />
+    );
   });
 
   describe('sitemaps tab', () => {
@@ -138,15 +154,16 @@ describe('CrawlCustomSettingsFlyoutSeedUrlsPanel', () => {
     expect(badge.render().text()).toContain('6');
     expect(badge.prop('color')).toEqual('accent');
 
-    setMockValues({
-      ...MOCK_VALUES,
-      customEntryPointUrls: [],
-      customSitemapUrls: [],
-      selectedEntryPointUrls: [],
-      selectedSitemapUrls: [],
+    wrapper.setProps({
+      scheduleConfig: {
+        ...MOCK_VALUES,
+        customEntryPointUrls: [],
+        customSitemapUrls: [],
+        selectedEntryPointUrls: [],
+        selectedSitemapUrls: [],
+      },
     });
 
-    rerender(wrapper);
     badge = getAccordionBadge(wrapper);
 
     expect(badge.render().text()).toContain('0');
@@ -154,12 +171,14 @@ describe('CrawlCustomSettingsFlyoutSeedUrlsPanel', () => {
   });
 
   it('shows empty messages when the user has not selected any domains', () => {
-    setMockValues({
-      ...MOCK_VALUES,
-      selectedDomainUrls: [],
+    wrapper.setProps({
+      scheduleConfig: {
+        ...MOCK_VALUES,
+        selectedDomainUrls: [],
+      },
     });
 
-    rerender(wrapper);
+    // rerender(wrapper);
 
     const tabs = wrapper.find(EuiTabbedContent).prop('tabs');
     const sitemapsTab = shallow(<div>{tabs[0].content}</div>);
