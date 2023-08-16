@@ -56,6 +56,7 @@ import {
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_FIELD_STATISTICS,
+  SORT_DEFAULT_ORDER_SETTING,
   buildDataTableRecord,
 } from '@kbn/discover-utils';
 import { VIEW_MODE, DISABLE_SHARD_FAILURE_WARNING } from '../../common/constants';
@@ -275,8 +276,8 @@ export class SavedSearchEmbeddable
       useNewFieldsApi,
       {
         sampleSize: this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
-      },
-      this.services.uiSettings
+        sortDir: this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
+      }
     );
 
     // Log request to inspector

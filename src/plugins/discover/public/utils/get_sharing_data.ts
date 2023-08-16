@@ -15,7 +15,11 @@ import type {
 } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '@kbn/discover-utils';
 import {
   DiscoverAppState,
   isEqualFilters,
@@ -41,7 +45,7 @@ export async function getSharingData(
     getSortForSearchSource({
       sort: state.sort as SortOrder[],
       dataView: index,
-      uiSettings,
+      defaultSortDir: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     })
   );
 

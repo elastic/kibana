@@ -148,16 +148,12 @@ export function searchSourceFromLocatorFactory(services: LocatorServicesDeps) {
 
     // Inject sort
     if (savedSearch.sort) {
-      const defaultSortingSetting = await services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING);
-      const uiSettingsSyncReplacement = {
-        get: (key: string) =>
-          key === SORT_DEFAULT_ORDER_SETTING ? defaultSortingSetting : undefined,
-      };
+      const defaultSortDir = await services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING);
 
       const sort = getSortForSearchSource({
         sort: savedSearch.sort as Array<[string, string]>,
         dataView: index,
-        uiSettings: uiSettingsSyncReplacement,
+        defaultSortDir,
       });
       searchSource.setField('sort', sort);
     }

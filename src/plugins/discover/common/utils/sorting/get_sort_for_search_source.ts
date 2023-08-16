@@ -9,8 +9,6 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EsQuerySortValue, SortDirection } from '@kbn/data-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { getSort } from './get_sort';
 import {
   getESQuerySortForTimeField,
@@ -28,15 +26,15 @@ import {
 export function getSortForSearchSource({
   sort,
   dataView,
-  uiSettings,
+  defaultSortDir,
   includeTieBreaker = false,
 }: {
   sort: SortOrder[] | undefined;
   dataView: DataView | undefined;
-  uiSettings: Pick<IUiSettingsClient, 'get'>;
+  defaultSortDir: string;
   includeTieBreaker?: boolean;
 }): EsQuerySortValue[] {
-  const defaultDirection = uiSettings.get(SORT_DEFAULT_ORDER_SETTING) || 'desc';
+  const defaultDirection = defaultSortDir || 'desc';
 
   if (!sort || !dataView || (Array.isArray(sort) && sort.length === 0)) {
     if (dataView?.timeFieldName) {
