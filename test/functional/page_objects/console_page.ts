@@ -136,7 +136,7 @@ export class ConsolePageObject extends FtrService {
 
   // Prompt autocomplete window and provide a initial letter of properties to narrow down the results. E.g. 'b' = 'bool'
   public async promptAutocomplete(letter = 'b') {
-    // give browser enough moments to complete events from past UI operations
+    // Wait for double a debounce period to elapse
     await this.common.sleep(200);
 
     const textArea = await this.testSubjects.find('console-textarea');
