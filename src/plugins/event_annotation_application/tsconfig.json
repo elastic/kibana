@@ -32,7 +32,15 @@
     "@kbn/event-annotation-plugin",
     "@kbn/event-annotation-components",
     "@kbn/event-annotation-common",
-    "@kbn/lens-plugin"
+    "@kbn/lens-plugin",
+    "@kbn/ui-theme",
+    "@kbn/test-jest-helpers",
+    "@kbn/expressions-plugin",
+    "@kbn/es-query",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-saved-objects-api-browser"
   ],
   "exclude": [
     "target/**/*",
