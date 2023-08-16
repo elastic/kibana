@@ -39,11 +39,14 @@ describe('Alert Event Details - Cases', () => {
     loadRule(true).then((data) => {
       ruleId = data.id;
       ruleName = data.name;
+      loadRuleAlerts(data.name);
     });
   });
 
   beforeEach(() => {
     login(ROLE.soc_manager);
+    cy.visit('/app/security/rules');
+    cy.contains(ruleName).click();
   });
 
   after(() => {
@@ -66,7 +69,6 @@ describe('Alert Event Details - Cases', () => {
 
     it('runs osquery against alert and creates a new case', () => {
       const [caseName, caseDescription] = generateRandomStringName(2);
-      loadRuleAlerts(ruleName);
       cy.getBySel('expand-event').first().click({ force: true });
       cy.getBySel('take-action-dropdown-btn').click();
       cy.getBySel('osquery-action-item').click();
@@ -103,7 +105,6 @@ describe('Alert Event Details - Cases', () => {
     });
 
     it('sees osquery results from last action and add to a case', () => {
-      loadRuleAlerts(ruleName);
       cy.getBySel('expand-event').first().click();
       cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
       cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseButton').click();

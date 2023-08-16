@@ -27,7 +27,7 @@ describe('Alert Event Details', () => {
     loadRule().then((data) => {
       ruleId = data.id;
       ruleName = data.name;
-      loadRuleAlerts(ruleName);
+      loadRuleAlerts(data.name);
     });
   });
 
@@ -67,7 +67,6 @@ describe('Alert Event Details', () => {
 
   it('should be able to run live query and add to timeline', () => {
     const TIMELINE_NAME = 'Untitled timeline';
-    loadRuleAlerts(ruleName);
     cy.getBySel('timeline-context-menu-button').first().click();
     cy.contains('Run Osquery');
     cy.getBySel('expand-event').first().click();
@@ -101,7 +100,6 @@ describe('Alert Event Details', () => {
 
   it('can visit discover from response action results', () => {
     const discoverRegex = new RegExp(`action_id: ${UUID_REGEX}`);
-    loadRuleAlerts(ruleName);
     cy.getBySel('expand-event').first().click();
     cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
     cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseButton').click();
