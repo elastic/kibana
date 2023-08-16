@@ -13,7 +13,7 @@ test('getContainedAlertContext', () => {
     getContainedAlertContext({
       entityName: 'entity1',
       containment: {
-        location: [100, 0],
+        location: 'POINT (100 0)',
         shapeLocationId: 'boundary1Id',
         dateInShape: '2022-06-21T16:56:11.923Z',
         docId: 'docId',
@@ -37,7 +37,7 @@ describe('getRecoveredAlertContext', () => {
     const activeEntities = new Map();
     activeEntities.set('entity1', [
       {
-        location: [100, 0],
+        location: 'POINT (100 0)',
         shapeLocationId: 'boundary1Id',
         dateInShape: '2022-06-21T16:56:11.923Z',
         docId: 'docId',
@@ -63,7 +63,7 @@ describe('getRecoveredAlertContext', () => {
     const inactiveEntities = new Map();
     inactiveEntities.set('entity1', [
       {
-        location: [100, 0],
+        location: 'POINT (100 0)',
         shapeLocationId: OTHER_CATEGORY,
         dateInShape: '2022-06-21T16:56:11.923Z',
         docId: 'docId',

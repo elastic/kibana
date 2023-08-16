@@ -27,13 +27,13 @@ describe('transformResults', () => {
             {
               dateInShape: '2021-04-28T16:56:11.923Z',
               docId: 'ZVBoGXkBsFLYN2Tj1wmV',
-              location: 'POINT (-73.99018926545978, 40.751759740523994)',
+              location: 'POINT (-73.99018926545978 40.751759740523994)',
               shapeLocationId: 'kFATGXkBsFLYN2Tj6AAk',
             },
             {
               dateInShape: '2021-04-28T16:56:01.896Z',
               docId: 'YlBoGXkBsFLYN2TjsAlp',
-              location: 'POINT (-73.98968475870788, 40.7506317878142)',
+              location: 'POINT (-73.98968475870788 40.7506317878142)',
               shapeLocationId: 'other',
             },
           ],
@@ -44,13 +44,13 @@ describe('transformResults', () => {
             {
               dateInShape: '2021-04-28T16:56:11.923Z',
               docId: 'ZlBoGXkBsFLYN2Tj1wmV',
-              location: 'POINT (-73.99561604484916, 40.75449890457094)',
+              location: 'POINT (-73.99561604484916 40.75449890457094)',
               shapeLocationId: 'kFATGXkBsFLYN2Tj6AAk',
             },
             {
               dateInShape: '2021-04-28T16:56:01.896Z',
               docId: 'Y1BoGXkBsFLYN2TjsAlp',
-              location: 'POINT (-73.99459345266223, 40.755913141183555)',
+              location: 'POINT (-73.99459345266223 40.755913141183555)',
               shapeLocationId: 'other',
             },
           ],
@@ -61,7 +61,7 @@ describe('transformResults', () => {
             {
               dateInShape: '2021-04-28T16:56:11.923Z',
               docId: 'Z1BoGXkBsFLYN2Tj1wmV',
-              location: 'POINT (-73.98662586696446, 40.7667087810114)',
+              location: 'POINT (-73.98662586696446 40.7667087810114)',
               shapeLocationId: 'other',
             },
           ],
@@ -87,7 +87,7 @@ describe('transformResults', () => {
             {
               dateInShape: '2020-09-28T18:01:41.190Z',
               docId: 'N-ng1XQB6yyY-xQxnGSM',
-              location: 'POINT (-82.8814151789993, 40.62806099653244)',
+              location: 'POINT (-82.8814151789993 40.62806099653244)',
               shapeLocationId: '0DrJu3QB6yyY-xQxv6Ip',
             },
           ],
@@ -98,7 +98,7 @@ describe('transformResults', () => {
             {
               dateInShape: '2020-09-28T18:01:41.191Z',
               docId: 'iOng1XQB6yyY-xQxnGSM',
-              location: 'POINT (-82.22068064846098, 39.006176185794175)',
+              location: 'POINT (-82.22068064846098 39.006176185794175)',
               shapeLocationId: '0DrJu3QB6yyY-xQxv6Ip',
             },
           ],
@@ -109,7 +109,7 @@ describe('transformResults', () => {
             {
               dateInShape: '2020-09-28T18:01:41.191Z',
               docId: 'n-ng1XQB6yyY-xQxnGSM',
-              location: 'POINT (-84.71324851736426, 41.6677269525826)',
+              location: 'POINT (-84.71324851736426 41.6677269525826)',
               shapeLocationId: '0DrJu3QB6yyY-xQxv6Ip',
             },
           ],
@@ -120,7 +120,7 @@ describe('transformResults', () => {
             {
               dateInShape: '2020-09-28T18:01:41.192Z',
               docId: 'GOng1XQB6yyY-xQxnGWM',
-              location: 'POINT (6.073727197945118, 39.07997465226799)',
+              location: 'POINT (6.073727197945118 39.07997465226799)',
               shapeLocationId: '0DrJu3QB6yyY-xQxv6Ip',
             },
           ],
