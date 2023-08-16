@@ -27,8 +27,10 @@ import type {
   EventAnnotationConfig,
   EventAnnotationGroupConfig,
 } from '@kbn/event-annotation-common';
-import { EVENT_ANNOTATION_APP_NAME } from '../../../constants';
-import { AnnotationEditorControls } from '../../annotation_editor_controls';
+import {
+  EVENT_ANNOTATION_APP_NAME,
+  AnnotationEditorControls,
+} from '@kbn/event-annotation-components';
 import { AnnotationList } from './annotation_list';
 
 const isTitleValid = (title: string) => Boolean(title.length);

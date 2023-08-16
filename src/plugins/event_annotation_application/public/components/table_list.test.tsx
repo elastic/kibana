@@ -16,7 +16,7 @@ import {
   TableListViewTable,
   type UserContentCommonSchema,
 } from '@kbn/content-management-table-list-view-table';
-import type { EventAnnotationServiceType } from '../types';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-components/types';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { shallow, ShallowWrapper } from 'enzyme';
 import {

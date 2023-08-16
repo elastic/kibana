@@ -24,7 +24,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { createCopiedAnnotation } from '@kbn/event-annotation-common';
-import { getAnnotationAccessor } from '../..';
+import { getAnnotationAccessor } from '@kbn/event-annotation-components';
 
 export const AnnotationList = ({
   annotations,

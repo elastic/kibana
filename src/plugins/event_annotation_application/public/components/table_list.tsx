@@ -24,7 +24,7 @@ import type {
   EventAnnotationGroupContent,
 } from '@kbn/event-annotation-common';
 import { ISessionService } from '@kbn/data-plugin/public';
-import type { EventAnnotationServiceType } from '../types';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-components';
 import { GroupEditorFlyout } from './group_editor_flyout';
 
 export const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
