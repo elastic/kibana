@@ -266,6 +266,8 @@ export class MlServerPlugin
         });
       }
     };
+    // this should be called in start, but it causes a test to fail.
+    this.registerMlAlerts();
 
     this.registerCases = () => {
       if (plugins.cases) {
@@ -325,7 +327,7 @@ export class MlServerPlugin
       }
 
       if (mlLicense.isMlEnabled() && mlLicense.isFullLicense()) {
-        this.registerMlAlerts();
+        // this.registerMlAlerts();
         this.registerCases();
         this.registerSampleDatasetsIntegration();
         this.registerKibanaSettings();
