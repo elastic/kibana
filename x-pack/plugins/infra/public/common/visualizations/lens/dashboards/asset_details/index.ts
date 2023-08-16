@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { hostMetricCharts } from './host/host_metric_charts';
+import { hostKPICharts, KPIChartProps } from './host/host_kpi_charts';
 
-export const NOT_AVAILABLE_LABEL = i18n.translate(
-  'xpack.infra.assetDetailsEmbeddable.notApplicableLabel',
-  {
-    defaultMessage: 'N/A',
-  }
-);
+export { type KPIChartProps };
+export const assetDetailsDashboards = {
+  host: { hostMetricCharts, hostKPICharts },
+};
