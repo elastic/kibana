@@ -216,7 +216,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.closeAlertFlyout();
       });
 
-      it('should open and close inventory alert flyout', async () => {
+      it('should open and close metrics threshold alert flyout', async () => {
         await pageObjects.infraHome.openMetricsThresholdAlertFlyout();
         await pageObjects.infraHome.closeAlertFlyout();
       });

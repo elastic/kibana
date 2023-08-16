@@ -22,4 +22,4 @@ steps:
     parallelism: 1
     soft_fail: true
     artifact_paths:
-      - "target/kibana-security-solution/**/*"
+      - "target/kibana-security-solution/**/*"      

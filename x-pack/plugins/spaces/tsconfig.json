@@ -8,7 +8,6 @@
     "@kbn/features-plugin",
     "@kbn/licensing-plugin",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/advanced-settings-plugin",
     "@kbn/home-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/management-plugin",

@@ -49,11 +49,11 @@ export function useAbortableAsync<T>(
       } else {
         setError(undefined);
         setValue(response);
+        setLoading(false);
       }
     } catch (err) {
       setValue(undefined);
       setError(err);
-    } finally {
       setLoading(false);
     }
 
