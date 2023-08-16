@@ -78,12 +78,12 @@ export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props)
   const { dismiss, isCompact, isDismissable, show } = useTextExpansionCallOutData(props);
   const { ingestionMethod } = useValues(IndexViewLogic);
   const {
-    textExpansionError,
     isCreateButtonDisabled,
     isModelDownloadInProgress,
     isModelDownloaded,
     isModelRunningSingleThreaded,
     isModelStarted,
+    textExpansionError,
     isStartButtonDisabled,
   } = useValues(TextExpansionCalloutLogic);
 
