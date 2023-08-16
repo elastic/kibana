@@ -20,7 +20,9 @@ import { waitForFleetSetup } from './helpers';
 
 const logFilePath = path.join(__dirname, 'logs.log');
 
-describe('fleet usage telemetry', () => {
+// Failing ES promotion: https://github.com/elastic/kibana/issues/156245
+// FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/163998
+describe.skip('fleet usage telemetry', () => {
   let core: any;
   let esServer: TestElasticsearchUtils;
   let kbnServer: TestKibanaUtils;
@@ -435,7 +437,7 @@ describe('fleet usage telemetry', () => {
           },
         ],
         components_status: [
-          /* To uncomment when ES new snapshot will be built 
+          /* To uncomment when ES new snapshot will be built
           {
             id: 'filestream-monitoring',
             status: 'HEALTHY',
