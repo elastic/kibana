@@ -31101,7 +31101,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdFieldCardinalityFieldHelpText": "选择字段以检查基数",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdLabel": "阈值",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupBy.licenseWarning": "告警阻止通过白金级或更高级许可证启用",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupBy.placeholderText": "选择字段",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByDurationValueLabel": "阻止以下项的告警",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabel": "阻止告警的依据",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabelAppend": "可选（技术预览）",
