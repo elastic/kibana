@@ -26,7 +26,6 @@ import {
   StartTextExpansionModelApiLogic,
   StartTextExpansionModelApiLogicActions,
 } from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
-import { TextExpansionErrors } from './text_expansion_errors';
 
 const FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION = 5000; // 5 seconds
 const FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds
