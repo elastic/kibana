@@ -6,7 +6,7 @@
  */
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import type { IdentifierType } from '../../../common/risk_engine';
-import { RiskScoreEntity } from '../../../common/risk_engine/types';
+import { RiskScoreEntity, riskScoreBaseIndexName } from '../../../common/risk_engine';
 import type { IIndexPatternString } from './utils/create_datastream';
 
 export const ilmPolicy = {
@@ -53,6 +53,11 @@ const commonRiskFields: FieldMap = {
   },
   category_1_score: {
     type: 'float',
+    array: false,
+    required: false,
+  },
+  category_1_count: {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -139,9 +144,30 @@ export const ilmPolicyName = '.risk-score-ilm-policy';
 export const mappingComponentName = '.risk-score-mappings';
 export const totalFieldsLimit = 1000;
 
-const riskScoreBaseIndexName = 'risk-score';
-
-export const getIndexPattern = (namespace: string): IIndexPatternString => ({
+export const getIndexPatternDataStream = (namespace: string): IIndexPatternString => ({
   template: `.${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}-index-template`,
   alias: `${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}`,
+});
+
+export const getLatestTransformId = (namespace: string): string =>
+  `risk_score_latest_transform_${namespace}`;
+
+export const getTransformOptions = ({ dest, source }: { dest: string; source: string[] }) => ({
+  dest: {
+    index: dest,
+  },
+  frequency: '1h',
+  latest: {
+    sort: '@timestamp',
+    unique_key: [`host.name`, `user.name`],
+  },
+  source: {
+    index: source,
+  },
+  sync: {
+    time: {
+      delay: '2s',
+      field: '@timestamp',
+    },
+  },
 });

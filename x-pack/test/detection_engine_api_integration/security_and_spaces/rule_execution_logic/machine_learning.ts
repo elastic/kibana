@@ -146,6 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
             to: 'now',
             type: 'machine_learning',
             version: 1,
+            investigation_fields: [],
           },
           [ALERT_DEPTH]: 1,
           [ALERT_REASON]: `event with process store, by root on mothra created critical alert Test ML rule.`,
@@ -248,11 +249,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('alerts should be be enriched', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
       });
 
       it('should be enriched with host risk score', async () => {
