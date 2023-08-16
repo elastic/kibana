@@ -37,14 +37,20 @@ export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps
       />
     </EuiFlexGroup>
   ) : (
-    <EuiPageTemplate panelled contentBorder={false} offset={0}>
-      <EuiPageTemplate.Section grow={false} paddingSize="none">
+    <EuiPageTemplate
+      panelled
+      contentBorder={false}
+      offset={0}
+      restrictWidth={false}
+      style={{ minBlockSize: `calc(100vh - ${headerHeight}px)` }}
+    >
+      <EuiPageTemplate.Section paddingSize="none">
         <EuiPageTemplate.Header
           pageTitle={asset.name}
           tabs={tabEntries}
           rightSideItems={rightSideItems}
         />
-        <EuiPageTemplate.Section>
+        <EuiPageTemplate.Section grow>
           <Content />
         </EuiPageTemplate.Section>
       </EuiPageTemplate.Section>
