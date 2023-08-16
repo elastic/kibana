@@ -27,7 +27,8 @@ const defaultProps = {
   isLoadingDescription: false,
 };
 
-describe('Description', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/164049
+describe.skip('Description', () => {
   const onUpdateField = jest.fn();
   let appMockRender: AppMockRenderer;
 
