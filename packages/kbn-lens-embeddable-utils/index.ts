@@ -10,15 +10,18 @@ export * from './attribute_builder/types';
 
 export type {
   MetricLayerOptions,
+  MetricLayerConfig,
   XYLayerOptions,
+  XYLayerConfig,
+  XYReferenceLinesLayerConfig,
   XYVisualOptions,
 } from './attribute_builder/visualization_types';
 
 export {
-  FormulaDataColumn,
+  FormulaColumn,
   MetricChart,
   MetricLayer,
-  ReferenceLineColumn,
+  StaticColumn,
   XYChart,
   XYDataLayer,
   XYReferenceLinesLayer,
