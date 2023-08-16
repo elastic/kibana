@@ -54,7 +54,7 @@ spec:
       provider_settings:
         trigger_mode: none
       teams:
-        security:
+        security-engineering-productivity:
           access_level: MANAGE_BUILD_AND_READ
         fleet:
           access_level: MANAGE_BUILD_AND_READ
