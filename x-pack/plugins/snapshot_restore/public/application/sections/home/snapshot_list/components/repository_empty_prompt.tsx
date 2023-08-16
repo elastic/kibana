@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiButton, EuiPageTemplate, } from '@elastic/eui';
+import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { linkToAddRepository } from '../../../../services/navigation';

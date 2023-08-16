@@ -8,7 +8,7 @@
 import React, { Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiPageSection, EuiEmptyPrompt, EuiButton, EuiCallOut, EuiSpacer, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
