@@ -17,22 +17,10 @@ export type ApmIndexSettingsResponse = Array<{
 export async function getApmIndexSettings(
   resources: APMRouteHandlerResources
 ): Promise<ApmIndexSettingsResponse> {
-  let apmIndicesSavedObject: Awaited<
-    ReturnType<typeof getApmIndicesSavedObject>
-  >;
-
   const { apmIndicesFromConfigFile } = resources.plugins.apmDataAccess.setup;
 
-  try {
-    const soClient = (await resources.context.core).savedObjects.client;
-    apmIndicesSavedObject = await getApmIndicesSavedObject(soClient);
-  } catch (error: any) {
-    if (error.output && error.output.statusCode === 404) {
-      apmIndicesSavedObject = {};
-    } else {
-      throw error;
-    }
-  }
+  const soClient = (await resources.context.core).savedObjects.client;
+  const apmIndicesSavedObject = await getApmIndicesSavedObject(soClient);
 
   const apmIndicesKeys = Object.keys(apmIndicesFromConfigFile) as Array<
     keyof typeof apmIndicesFromConfigFile

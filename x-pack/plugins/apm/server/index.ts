@@ -102,18 +102,12 @@ export const config: PluginConfigDescriptor<APMConfig> = {
     deprecateFromRoot,
     unusedFromRoot,
   }) => [
-    unused('indices.sourcemap', { level: 'warning' }),
     unused('ui.transactionGroupBucketSize', {
       level: 'warning',
     }),
     rename('autocreateApmIndexPattern', 'autoCreateApmDataView', {
       level: 'warning',
     }),
-    renameFromRoot(
-      'apm_oss.onboardingIndices',
-      'xpack.apm.indices.onboarding',
-      { level: 'warning' }
-    ),
     deprecateFromRoot('apm_oss.enabled', '8.0.0', { level: 'warning' }),
     unusedFromRoot('apm_oss.fleetMode', { level: 'warning' }),
     unusedFromRoot('apm_oss.indexPattern', { level: 'warning' }),

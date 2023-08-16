@@ -15,8 +15,10 @@ import {
 import { APMDataAccessConfig } from '.';
 import { ApmDataAccessPluginSetup, ApmDataAccessPluginStart } from './types';
 import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
-import { getApmIndicesFromSavedObjectsAndConfigFile } from './lib/get_apm_indices';
-import { apmIndicesSavedObjectDefinition } from './saved_objects/apm_indices';
+import {
+  apmIndicesSavedObjectDefinition,
+  getApmIndicesSavedObject,
+} from './saved_objects/apm_indices';
 
 export class ApmDataAccessPlugin
   implements Plugin<ApmDataAccessPluginSetup, ApmDataAccessPluginStart>
@@ -27,19 +29,19 @@ export class ApmDataAccessPlugin
 
   public setup(core: CoreSetup): ApmDataAccessPluginSetup {
     // retrieve APM indices from config
-    const { indices } = this.initContext.config.get<APMDataAccessConfig>();
+    const apmDataAccessConfig = this.initContext.config.get<APMDataAccessConfig>();
+    const apmIndicesFromConfigFile = apmDataAccessConfig.indices;
 
     // register saved object
     core.savedObjects.registerType(apmIndicesSavedObjectDefinition);
 
     // expose
     return {
-      apmIndicesFromConfigFile: indices,
-      getApmIndices: async (savedObjectsClient: SavedObjectsClientContract) =>
-        getApmIndicesFromSavedObjectsAndConfigFile({
-          apmIndicesFromConfigFile: indices,
-          savedObjectsClient,
-        }),
+      apmIndicesFromConfigFile,
+      getApmIndices: async (savedObjectsClient: SavedObjectsClientContract) => {
+        const apmIndicesFromSavedObject = await getApmIndicesSavedObject(savedObjectsClient);
+        return { ...apmIndicesFromConfigFile, ...apmIndicesFromSavedObject };
+      },
     };
   }
 

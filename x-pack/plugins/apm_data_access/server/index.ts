@@ -11,17 +11,24 @@ import { ApmDataAccessPlugin } from './plugin';
 
 const configSchema = schema.object({
   indices: schema.object({
-    transaction: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
+    transaction: schema.string({ defaultValue: 'traces-apm*,apm-*' }), // TODO: remove apm-* pattern in 9.0
     span: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
     error: schema.string({ defaultValue: 'logs-apm*,apm-*' }),
     metric: schema.string({ defaultValue: 'metrics-apm*,apm-*' }),
-    onboarding: schema.string({ defaultValue: 'apm-*' }),
+    onboarding: schema.string({ defaultValue: 'apm-*' }), // Unused: to be deleted
   }),
 });
 
 // plugin config
 export const config: PluginConfigDescriptor<APMDataAccessConfig> = {
-  deprecations: ({ renameFromRoot }) => [
+  deprecations: ({ renameFromRoot, unused, deprecate }) => [
+    // deprecations
+    unused('indices.sourcemap', { level: 'warning' }),
+    deprecate('indices.onboarding', 'a future version', {
+      level: 'warning',
+      message: `Configuring "xpack.apm.indices.onboarding" is deprecated and will be removed in a future version. Please remove this setting.`,
+    }),
+
     // deprecations due to removal of apm_oss plugin
     renameFromRoot('apm_oss.transactionIndices', 'xpack.apm.indices.transaction', {
       level: 'warning',
@@ -35,6 +42,10 @@ export const config: PluginConfigDescriptor<APMDataAccessConfig> = {
     renameFromRoot('apm_oss.metricsIndices', 'xpack.apm.indices.metric', {
       level: 'warning',
     }),
+    renameFromRoot('apm_oss.onboardingIndices', 'xpack.apm.indices.onboarding', {
+      level: 'warning',
+    }),
+
     // rename from apm to apm_data_access plugin
     renameFromRoot('xpack.apm.indices.transaction', 'xpack.apm_data_access.indices.transaction', {
       level: 'warning',
