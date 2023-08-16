@@ -88,8 +88,15 @@ export const TopNFunctionsGrid = forwardRef(
         comparisonScaleFactor,
         comparisonTopNFunctions,
         topNFunctions,
+        totalSeconds,
       });
-    }, [topNFunctions, comparisonTopNFunctions, comparisonScaleFactor, baselineScaleFactor]);
+    }, [
+      baselineScaleFactor,
+      comparisonScaleFactor,
+      comparisonTopNFunctions,
+      topNFunctions,
+      totalSeconds,
+    ]);
 
     const { columns, leadingControlColumns } = useMemo(() => {
       const gridColumns: EuiDataGridColumn[] = [

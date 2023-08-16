@@ -180,6 +180,10 @@
                 "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_preview_panel_context.ts"
+              },
+              {
                 "plugin": "threatIntelligence",
                 "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
               },
@@ -440,6 +444,42 @@
                 "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
               {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
+              },
+              {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
               },
@@ -522,42 +562,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "infra",
@@ -8068,6 +8072,10 @@
                 "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_preview_panel_context.ts"
+              },
+              {
                 "plugin": "threatIntelligence",
                 "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
               },
@@ -8328,6 +8336,42 @@
                 "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
               {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
+              },
+              {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
               },
@@ -8410,42 +8454,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "infra",
@@ -15109,6 +15117,10 @@
                 "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_preview_panel_context.ts"
+              },
+              {
                 "plugin": "threatIntelligence",
                 "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
               },
@@ -15369,6 +15381,42 @@
                 "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
               {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
+              },
+              {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
               },
@@ -15451,42 +15499,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "infra",

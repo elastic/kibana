@@ -1727,7 +1727,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"alert\" | \"circle\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"triangle\")[]"
+                      "(\"alert\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"circle\" | \"triangle\")[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
@@ -2906,7 +2906,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"alert\" | \"circle\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"triangle\")[]"
+                      "(\"alert\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"circle\" | \"triangle\")[]"
                     ],
                     "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
                     "deprecated": false,

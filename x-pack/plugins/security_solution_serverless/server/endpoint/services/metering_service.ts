@@ -113,13 +113,15 @@ export class EndpointMeteringService {
       creation_timestamp: timestampStr,
       usage: {
         type: 'security_solution_endpoint',
-        sub_type: this.tier,
         period_seconds: SAMPLE_PERIOD_SECONDS,
         quantity: 1,
       },
       source: {
         id: taskId,
         instance_group_id: projectId,
+        metadata: {
+          tier: this.tier,
+        },
       },
     };
   }
