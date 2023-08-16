@@ -6,10 +6,9 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { hostLensFormulas } from '../../../../../common/visualizations';
+import { hostLensFormulas, METRICS_TOOLTIP } from '../../../../../common/visualizations';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
-import { TOOLTIP } from '../../../../../common/visualizations/lens/dashboards/host/translations';
 
 import { type Props, MetricChartWrapper } from '../chart/metric_chart_wrapper';
 import { TooltipContent } from '../../../../../components/lens';
@@ -22,7 +21,7 @@ const HOSTS_CHART: Omit<Props, 'loading' | 'value' | 'toolTip'> = {
   }),
 };
 
-export const HostsTile = ({ height }: { height: number }) => {
+export const HostCountKpi = ({ height }: { height: number }) => {
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
   const { searchCriteria } = useUnifiedSearchContext();
 
@@ -46,7 +45,7 @@ export const HostsTile = ({ height }: { height: number }) => {
       toolTip={
         <TooltipContent
           formula={hostLensFormulas.hostCount.value}
-          description={TOOLTIP.hostCount}
+          description={METRICS_TOOLTIP.hostCount}
         />
       }
       loading={hostCountLoading}

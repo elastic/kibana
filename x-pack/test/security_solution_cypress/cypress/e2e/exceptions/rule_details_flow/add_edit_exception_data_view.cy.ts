@@ -44,7 +44,7 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
 describe(
   'Add exception using data views from rule details',
-  { tags: [tag.ESS, tag.SERVERLESS] },
+  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
   () => {
     const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
     const ITEM_NAME = 'Sample Exception List Item';
