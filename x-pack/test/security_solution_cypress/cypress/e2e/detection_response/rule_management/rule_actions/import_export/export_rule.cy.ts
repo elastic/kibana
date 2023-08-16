@@ -17,7 +17,6 @@ import {
 } from '../../../../../screens/alerts_detection_rules';
 import {
   filterByElasticRules,
-  selectNumberOfRules,
   selectAllRules,
   waitForRuleExecution,
   exportRule,
@@ -106,7 +105,7 @@ describe('Export rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
     createAndInstallMockedPrebuiltRules({ rules: prebuiltRules });
 
     filterByElasticRules();
-    selectNumberOfRules(prebuiltRules.length);
+    selectAllRules();
     bulkExportRules();
 
     cy.get(MODAL_CONFIRMATION_BODY).contains(

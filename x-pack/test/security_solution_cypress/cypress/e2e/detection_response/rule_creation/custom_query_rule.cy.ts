@@ -78,7 +78,7 @@ import {
   deleteRuleFromDetailsPage,
   editFirstRule,
   goToRuleDetails,
-  selectNumberOfRules,
+  selectRulesByName,
 } from '../../../tasks/alerts_detection_rules';
 import { deleteSelectedRules } from '../../../tasks/rules_bulk_actions';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -242,9 +242,18 @@ describe('Custom query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, ()
     context('Deletion', () => {
       beforeEach(() => {
         deleteAlertsAndRules();
-        createRule(getNewRule({ rule_id: 'rule1', enabled: true, max_signals: 500 }));
-        createRule(getNewOverrideRule({ rule_id: 'rule2', enabled: true, max_signals: 500 }));
-        createRule(getExistingRule({ rule_id: 'rule3', enabled: true }));
+        createRule(
+          getNewRule({ rule_id: 'rule1', name: 'New Rule Test', enabled: true, max_signals: 500 })
+        );
+        createRule(
+          getNewOverrideRule({
+            rule_id: 'rule2',
+            name: 'Override Rule',
+            enabled: true,
+            max_signals: 500,
+          })
+        );
+        createRule(getExistingRule({ rule_id: 'rule3', name: 'Rule 1', enabled: true }));
         login();
         visit(DETECTIONS_RULE_MANAGEMENT_URL);
       });
@@ -281,12 +290,13 @@ describe('Custom query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, ()
         cy.get(RULES_MANAGEMENT_TABLE)
           .find(RULES_ROW)
           .then((rules) => {
+            const rulesToDelete = ['New Rule Test', 'Override Rule'] as const;
             const initialNumberOfRules = rules.length;
             const numberOfRulesToBeDeleted = 2;
             const expectedNumberOfRulesAfterDeletion =
               initialNumberOfRules - numberOfRulesToBeDeleted;
 
-            selectNumberOfRules(numberOfRulesToBeDeleted);
+            selectRulesByName(rulesToDelete);
             deleteSelectedRules();
 
             cy.get(RULES_MANAGEMENT_TABLE)

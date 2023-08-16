@@ -9,8 +9,8 @@ import { tag } from '../../../../../tags';
 
 import {
   goToTheRuleDetailsOf,
-  selectNumberOfRules,
   expectManagementTableRules,
+  selectAllRules,
 } from '../../../../../tasks/alerts_detection_rules';
 import {
   duplicateSelectedRulesWithoutExceptions,
@@ -104,14 +104,14 @@ describe('Detection rules, bulk duplicate', { tags: [tag.ESS, tag.SERVERLESS] },
   });
 
   it('Duplicates rules', () => {
-    selectNumberOfRules(1);
+    selectAllRules();
     duplicateSelectedRulesWithoutExceptions();
     expectManagementTableRules([`${RULE_NAME} [Duplicate]`]);
   });
 
   describe('With exceptions', () => {
     it('Duplicates rules with expired exceptions', () => {
-      selectNumberOfRules(1);
+      selectAllRules();
       duplicateSelectedRulesWithExceptions();
       expectManagementTableRules([`${RULE_NAME} [Duplicate]`]);
       goToTheRuleDetailsOf(`${RULE_NAME} [Duplicate]`);
@@ -122,7 +122,7 @@ describe('Detection rules, bulk duplicate', { tags: [tag.ESS, tag.SERVERLESS] },
     });
 
     it('Duplicates rules with exceptions, excluding expired exceptions', () => {
-      selectNumberOfRules(1);
+      selectAllRules();
       duplicateSelectedRulesWithNonExpiredExceptions();
       expectManagementTableRules([`${RULE_NAME} [Duplicate]`]);
       goToTheRuleDetailsOf(`${RULE_NAME} [Duplicate]`);

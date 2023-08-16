@@ -16,9 +16,9 @@ import { DATA_VIEW_DETAILS, INDEX_PATTERNS_DETAILS } from '../../../../../screen
 
 import {
   goToRuleDetails,
-  selectNumberOfRules,
   goToTheRuleDetailsOf,
   expectManagementTableRules,
+  selectAllRules,
 } from '../../../../../tasks/alerts_detection_rules';
 
 import {
@@ -134,7 +134,7 @@ describe(
     });
 
     it('Add index patterns to custom rules with configured data view: all rules are skipped', () => {
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
 
       openBulkEditAddIndexPatternsForm();
       typeIndexPatterns(expectedIndexPatterns);
@@ -152,7 +152,7 @@ describe(
     });
 
     it('Add index patterns to custom rules with configured data view when data view checkbox is checked: rules are updated', () => {
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
 
       openBulkEditAddIndexPatternsForm();
       typeIndexPatterns(expectedIndexPatterns);
@@ -173,7 +173,7 @@ describe(
     });
 
     it('Overwrite index patterns in custom rules with configured data view when overwrite data view checkbox is NOT checked:: rules are skipped', () => {
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
 
       openBulkEditAddIndexPatternsForm();
       typeIndexPatterns(expectedIndexPatterns);
@@ -192,7 +192,7 @@ describe(
     });
 
     it('Overwrite index patterns in custom rules with configured data view when overwrite data view checkbox is checked: rules are updated', () => {
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
 
       openBulkEditAddIndexPatternsForm();
       typeIndexPatterns(expectedIndexPatterns);
@@ -210,7 +210,7 @@ describe(
     });
 
     it('Delete index patterns in custom rules with configured data view: rules are skipped', () => {
-      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      selectAllRules();
 
       openBulkEditDeleteIndexPatternsForm();
       typeIndexPatterns(expectedIndexPatterns);
@@ -233,8 +233,6 @@ describe(
 );
 
 describe('Bulk editing index patterns of rules with index patterns and rules with a data view', () => {
-  const customRulesNumber = 2;
-
   before(() => {
     cleanKibana();
   });
@@ -257,7 +255,7 @@ describe('Bulk editing index patterns of rules with index patterns and rules wit
   });
 
   it('Add index patterns to custom rules: one rule is updated, one rule is skipped', () => {
-    selectNumberOfRules(customRulesNumber);
+    selectAllRules();
 
     openBulkEditAddIndexPatternsForm();
     typeIndexPatterns(expectedIndexPatterns);
@@ -276,7 +274,7 @@ describe('Bulk editing index patterns of rules with index patterns and rules wit
   });
 
   it('Add index patterns to custom rules when overwrite data view checkbox is checked: all rules are updated', () => {
-    selectNumberOfRules(customRulesNumber);
+    selectAllRules();
 
     openBulkEditAddIndexPatternsForm();
     typeIndexPatterns(expectedIndexPatterns);

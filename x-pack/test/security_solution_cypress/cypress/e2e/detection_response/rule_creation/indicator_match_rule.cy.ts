@@ -62,9 +62,9 @@ import {
   duplicateFirstRule,
   duplicateRuleFromMenu,
   goToRuleDetails,
-  selectNumberOfRules,
   checkDuplicatedRule,
   expectNumberOfRules,
+  selectAllRules,
 } from '../../../tasks/alerts_detection_rules';
 import { duplicateSelectedRulesWithExceptions } from '../../../tasks/rules_bulk_actions';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -555,7 +555,7 @@ describe('indicator match', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () =>
       });
 
       it("Allows the rule to be duplicated from the table's bulk actions", () => {
-        selectNumberOfRules(1);
+        selectAllRules();
         duplicateSelectedRulesWithExceptions();
         checkDuplicatedRule();
       });

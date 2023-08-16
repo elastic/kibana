@@ -16,13 +16,13 @@ import {
 import {
   selectAllRules,
   clearAllRuleSelection,
-  selectNumberOfRules,
   mockGlobalClock,
   disableAutoRefresh,
   expectAutoRefreshIsDisabled,
   expectAutoRefreshIsEnabled,
   expectAutoRefreshIsDeactivated,
   expectNumberOfRules,
+  selectRulesByName,
 } from '../../../../tasks/alerts_detection_rules';
 import { login, visit, visitWithoutDateRange } from '../../../../tasks/login';
 
@@ -68,7 +68,7 @@ describe('Rules table: auto-refresh', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS
 
     expectNumberOfRules(RULES_MANAGEMENT_TABLE, NUM_OF_TEST_RULES);
 
-    selectNumberOfRules(1);
+    selectRulesByName(['Test rule 1']);
 
     // mock 1 minute passing to make sure refresh is not conducted
     cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');

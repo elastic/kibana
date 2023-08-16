@@ -196,17 +196,9 @@ export const openIntegrationsPopover = () => {
   cy.get(INTEGRATIONS_POPOVER).click();
 };
 
-/**
- * Selects the number of rules. Since there can be missing click handlers
- * when the page loads at first, we use a pipe and a trigger of click
- * on it and then check to ensure that it is checked before continuing
- * with the tests.
- * @param numberOfRules The number of rules to click/check
- */
-export const selectNumberOfRules = (numberOfRules: number) => {
-  for (let i = 0; i < numberOfRules; i++) {
-    cy.get(RULE_CHECKBOX).eq(i).check();
-    cy.get(RULE_CHECKBOX).eq(i).should('be.checked');
+export const selectRulesByName = (ruleNames: Readonly<string[]>) => {
+  for (const ruleName of ruleNames) {
+    selectRuleByName(ruleName);
   }
 };
 
@@ -506,4 +498,9 @@ export const goToEditRuleActionsSettingsOf = (name: string) => {
   // wait until first step loads completely. Otherwise cypress stuck at the first edit page
   cy.get(EDIT_SUBMIT_BUTTON).should('be.enabled');
   goToActionsStepTab();
+};
+
+const selectRuleByName = (ruleName: string) => {
+  cy.contains(RULE_NAME, ruleName).parents(RULES_ROW).find(EUI_CHECKBOX).check();
+  cy.contains(RULE_NAME, ruleName).parents(RULES_ROW).find(EUI_CHECKBOX).should('be.checked');
 };
