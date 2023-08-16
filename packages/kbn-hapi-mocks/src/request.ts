@@ -7,7 +7,7 @@
  */
 
 import type { Request } from '@hapi/hapi';
-import { format as formatUrl, URL, URLSearchParams } from 'url';
+import { format as formatUrl, URL } from 'url';
 import { merge } from 'lodash';
 import type { DeepPartial } from '@kbn/utility-types';
 
@@ -15,7 +15,7 @@ export const createRequestMock = (customization: DeepPartial<Request> = {}): Req
   const pathname = customization.url?.pathname || '/';
   const path = `${pathname}${customization.url?.search || ''}`;
   const url = new URL(
-    formatUrl(Object.assign({ pathname, path, href: path }, customization.url )),
+    formatUrl(Object.assign({ pathname, path, href: path }, customization.url)),
     'http://localhost'
   );
   if (customization.query) {
