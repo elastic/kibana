@@ -350,7 +350,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('infrastructure-alerts-and-rules');
       await testSubjects.click('inventory-alerts-menu-option');
 
-      // forces date picker tooltip to close
+      // forces date picker tooltip to close in case it pops up after Alerts and rules opens
       await testSubjects.moveMouseTo('contextMenuPanelTitleButton');
 
       await retry.tryForTime(1000, () => testSubjects.click('inventory-alerts-create-rule'));
@@ -362,7 +362,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('infrastructure-alerts-and-rules');
       await testSubjects.click('metrics-threshold-alerts-menu-option');
 
-      // forces date picker tooltip to close
+      // forces date picker tooltip to close in case it pops up after Alerts and rules opens
       await testSubjects.moveMouseTo('contextMenuPanelTitleButton');
 
       await retry.tryForTime(1000, () =>
