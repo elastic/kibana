@@ -56,7 +56,7 @@ export interface GeoContainmentRuleState extends RuleTypeState {
 export interface GeoContainmentAlertInstanceState extends AlertInstanceState {
   // 8.11+, location will be wkt represenation of geometry.
   // 8.10-, location is [lon, lat] array.
-  // support both formats to remain backword compataible with persisted alert instance state
+  // support both formats for backwards compatibility with persisted alert instance state
   location: number[] | string;
   shapeLocationId: string;
   dateInShape: string | null;

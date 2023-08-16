@@ -32,7 +32,7 @@ test('getContainedAlertContext', () => {
   });
 });
 
-test('getContainedAlertContext for legacy number[] location format', () => {
+test('getContainedAlertContext for backwards compatible number[] location format', () => {
   expect(
     getContainedAlertContext({
       entityName: 'entity1',
