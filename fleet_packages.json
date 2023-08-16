@@ -24,7 +24,7 @@
 [
   {
     "name": "apm",
-    "version": "8.10.0-preview-1689351101",
+    "version": "8.10.0-preview-1692199701",
     "forceAlignStackVersion": true,
     "allowSyncToPrerelease": true
   },
@@ -34,7 +34,7 @@
   },
   {
     "name": "endpoint",
-    "version": "8.9.1"
+    "version": "8.10.2"
   },
   {
     "name": "fleet_server",
