@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('Visualize Reporting Screenshots', function () {
+    this.tags(['smoke']);
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await browser.setWindowSize(1600, 850);

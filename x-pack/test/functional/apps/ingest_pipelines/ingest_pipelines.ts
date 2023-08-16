@@ -23,7 +23,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
 
   describe('Ingest Pipelines', function () {
-    this.tags('smoke');
     this.onlyEsVersion('<=7');
 
     before(async () => {
