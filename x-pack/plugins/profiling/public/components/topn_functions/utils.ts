@@ -10,12 +10,20 @@ import { StackFrameMetadata } from '../../../common/profiling';
 import { calculateImpactEstimates } from '../../../common/calculate_impact_estimates';
 
 export function getColorLabel(percent: number) {
+  if (percent === 0) {
+    return { color: 'text', label: `0%`, icon: undefined };
+  }
+
   const color = percent < 0 ? 'success' : 'danger';
   const icon = percent < 0 ? 'sortUp' : 'sortDown';
   const isSmallPercent = Math.abs(percent) <= 0.01;
   const value = isSmallPercent ? '<0.01' : Math.abs(percent).toFixed(2);
 
-  return { color, label: `${value}%`, icon };
+  if (isFinite(percent)) {
+    return { color, label: `${value}%`, icon };
+  }
+
+  return { color: 'text', label: undefined, icon: undefined };
 }
 
 export function scaleValue({ value, scaleFactor = 1 }: { value: number; scaleFactor?: number }) {

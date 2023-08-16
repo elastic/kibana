@@ -98,14 +98,16 @@ export function TopNFunctionsSummary({
         defaultMessage: '{label} overall performance by',
         values: {
           label:
-            isLoading || totalSamplesDiff.percentDiffDelta === undefined
+            isLoading ||
+            totalSamplesDiff.percentDiffDelta === undefined ||
+            totalSamplesDiff.label === undefined
               ? 'Gained/Lost'
               : totalSamplesDiff?.percentDiffDelta > 0
               ? 'Lost'
               : 'Gained',
         },
       }) as string,
-      baseValue: totalSamplesDiff.label || '',
+      baseValue: totalSamplesDiff.label || '0%',
       baseIcon: totalSamplesDiff.icon,
       baseColor: totalSamplesDiff.color,
       titleHint: ESTIMATED_VALUE_LABEL,

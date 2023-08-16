@@ -39,8 +39,8 @@ export function calculateImpactEstimates({
       totalSeconds,
     }),
     selfCPU: calculateImpact({
-      totalSamples,
       samples: countExclusive,
+      totalSamples,
       totalSeconds,
     }),
   };
