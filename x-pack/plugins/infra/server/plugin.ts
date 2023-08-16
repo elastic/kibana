@@ -70,7 +70,7 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
         ),
       }),
       options: {
-        defaultValue: { app_target: LOGS_APP_TARGET },
+        defaultValue: { app_target: LOGS_APP_TARGET } as const, // "as const" is required for TS to not generalize `app_target: string`
       },
     }),
     alerting: schema.object({
