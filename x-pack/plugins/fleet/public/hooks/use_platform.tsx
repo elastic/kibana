@@ -15,7 +15,6 @@ export type PLATFORM_TYPE =
   | 'rpm'
   | 'deb'
   | 'kubernetes'
-  | 'googleCloudShell';
 
 export const REDUCED_PLATFORM_OPTIONS: Array<{
   label: string;

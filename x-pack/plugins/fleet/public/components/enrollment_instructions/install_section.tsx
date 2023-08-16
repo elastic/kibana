@@ -44,7 +44,6 @@ export const InstallSection: React.FunctionComponent<Props> = ({
         windowsCommand={installCommand.windows}
         linuxDebCommand={installCommand.deb}
         linuxRpmCommand={installCommand.rpm}
-        googleCloudShellCommand={installCommand.googleCloudShell}
         k8sCommand={installCommand.kubernetes}
         hasK8sIntegration={isK8s === 'IS_KUBERNETES' || isK8s === 'IS_KUBERNETES_MULTIPAGE'}
         cloudSecurityIntegration={cloudSecurityIntegration}

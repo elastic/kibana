@@ -27,12 +27,10 @@ import { type PLATFORM_TYPE } from '../hooks';
 import {
   REDUCED_PLATFORM_OPTIONS,
   PLATFORM_OPTIONS,
-  PLATFORM_OPTIONS_CLOUD_SHELL,
   usePlatform,
 } from '../hooks';
 
 import { KubernetesInstructions } from './agent_enrollment_flyout/kubernetes_instructions';
-import { GoogleCloudShellInstructions } from './agent_enrollment_flyout/google_cloud_shell_instructions';
 import type { CloudSecurityIntegration } from './agent_enrollment_flyout/types';
 
 interface Props {
@@ -42,7 +40,6 @@ interface Props {
   linuxDebCommand: string;
   linuxRpmCommand: string;
   k8sCommand: string;
-  googleCloudShellCommand?: string | undefined;
   hasK8sIntegration: boolean;
   cloudSecurityIntegration?: CloudSecurityIntegration | undefined;
   hasK8sIntegrationMultiPage: boolean;
@@ -65,7 +62,6 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   linuxDebCommand,
   linuxRpmCommand,
   k8sCommand,
-  googleCloudShellCommand,
   hasK8sIntegration,
   cloudSecurityIntegration,
   hasK8sIntegrationMultiPage,
@@ -76,9 +72,6 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   onCopy,
 }) => {
   const getInitialPlatform = useCallback(() => {
-    if (cloudSecurityIntegration?.cloudShellUrl) {
-      return 'googleCloudShell';
-    }
     if (
       hasK8sIntegration ||
       (cloudSecurityIntegration?.integrationType ===
@@ -92,7 +85,6 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     hasK8sIntegration,
     cloudSecurityIntegration?.integrationType,
     isManaged,
-    cloudSecurityIntegration?.cloudShellUrl,
   ]);
 
   const { platform, setPlatform } = usePlatform(getInitialPlatform());
@@ -104,12 +96,9 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
 
   const getPlatformOptions = useCallback(() => {
     const platformOptions = isReduced ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS;
-    const platformOptionsWithCloudShell = cloudSecurityIntegration?.cloudShellUrl
-      ? PLATFORM_OPTIONS_CLOUD_SHELL
-      : platformOptions;
 
-    return platformOptionsWithCloudShell;
-  }, [isReduced, cloudSecurityIntegration?.cloudShellUrl]);
+    return platformOptions;
+  }, [isReduced]);
 
   const [copyButtonClicked, setCopyButtonClicked] = useState(false);
 
@@ -164,7 +153,6 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     deb: linuxDebCommand,
     rpm: linuxRpmCommand,
     kubernetes: k8sCommand,
-    googleCloudShell: k8sCommand,
   };
   const onTextAreaClick = () => {
     if (onCopy) onCopy();
@@ -229,15 +217,6 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiSpacer size="s" />
           </>
         )}
-        {platform === 'googleCloudShell' && isManaged && (
-          <>
-            <GoogleCloudShellInstructions
-              cloudShellUrl={cloudSecurityIntegration?.cloudShellUrl || ''}
-              cloudShellCommand={googleCloudShellCommand || ''}
-            />
-            <EuiSpacer size="s" />
-          </>
-        )}
         {!hasK8sIntegrationMultiPage && (
           <>
             {platform === 'kubernetes' && (
@@ -250,7 +229,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                 <EuiSpacer size="m" />
               </EuiText>
             )}
-            {platform !== 'googleCloudShell' && (
+
               <EuiCodeBlock
                 onClick={onTextAreaClick}
                 fontSize="m"
@@ -262,7 +241,6 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               >
                 <CommandCode>{commandsByPlatform[platform]}</CommandCode>
               </EuiCodeBlock>
-            )}
 
             <EuiSpacer size="s" />
             {fullCopyButton && (
