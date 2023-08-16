@@ -103,9 +103,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await editCommentTextArea.type('   ');
 
         const error = await find.byCssSelector('.euiFormErrorText');
-        expect(await error.getVisibleText()).equal(
-          'A description is required.'
-        );
+        expect(await error.getVisibleText()).equal('A description is required.');
 
         await editCommentTextArea.type('Description with space     ');
 
@@ -117,7 +115,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
 
         expect(await desc.getVisibleText()).equal('Description with space');
-
       });
 
       it('adds a comment to a case', async () => {
