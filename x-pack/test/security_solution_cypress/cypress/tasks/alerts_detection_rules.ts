@@ -495,16 +495,18 @@ export const goToEditRuleActionsSettingsOf = (name: string) => {
   goToActionsStepTab();
 };
 
+export const getRuleRow = (ruleName: string) => cy.contains(RULE_NAME, ruleName).parents(RULES_ROW);
+
 const selectRuleByName = (ruleName: string) => {
   cy.log(`Select rule "${ruleName}"`);
-  cy.contains(RULE_NAME, ruleName).parents(RULES_ROW).find(EUI_CHECKBOX).check();
+  getRuleRow(ruleName).find(EUI_CHECKBOX).check();
   cy.log(`Make sure rule "${ruleName}" has been selected`);
-  cy.contains(RULE_NAME, ruleName).parents(RULES_ROW).find(EUI_CHECKBOX).should('be.checked');
+  getRuleRow(ruleName).find(EUI_CHECKBOX).should('be.checked');
 };
 
 const unselectRuleByName = (ruleName: string) => {
   cy.log(`Unselect rule "${ruleName}"`);
-  cy.contains(RULE_NAME, ruleName).parents(RULES_ROW).find(EUI_CHECKBOX).uncheck();
+  getRuleRow(ruleName).find(EUI_CHECKBOX).uncheck();
   cy.log(`Make sure rule "${ruleName}" has been unselected`);
-  cy.contains(RULE_NAME, ruleName).parents(RULES_ROW).find(EUI_CHECKBOX).should('not.be.checked');
+  getRuleRow(ruleName).find(EUI_CHECKBOX).should('not.be.checked');
 };

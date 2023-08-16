@@ -8,11 +8,11 @@
 import { tag } from '../../../../tags';
 
 import {
-  RULE_CHECKBOX,
   REFRESH_RULES_STATUS,
   RULES_TABLE_AUTOREFRESH_INDICATOR,
   RULES_MANAGEMENT_TABLE,
 } from '../../../../screens/alerts_detection_rules';
+import { EUI_CHECKBOX } from '../../../../screens/common/controls';
 import {
   selectAllRules,
   clearAllRuleSelection,
@@ -23,6 +23,7 @@ import {
   expectAutoRefreshIsDeactivated,
   expectNumberOfRules,
   selectRulesByName,
+  getRuleRow,
 } from '../../../../tasks/alerts_detection_rules';
 import { login, visit, visitWithoutDateRange } from '../../../../tasks/login';
 
@@ -40,7 +41,7 @@ describe('Rules table: auto-refresh', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS
     login();
 
     for (let i = 1; i <= NUM_OF_TEST_RULES; ++i) {
-      createRule(getNewRule({ name: `Test rule ${i}`, rule_id: `${i}` }));
+      createRule(getNewRule({ name: `Test rule ${i}`, rule_id: `${i}`, enabled: false }));
     }
   });
 
@@ -76,7 +77,7 @@ describe('Rules table: auto-refresh', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS
     cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
 
     // ensure rule is still selected
-    cy.get(RULE_CHECKBOX).first().should('be.checked');
+    getRuleRow('Test rule 1').find(EUI_CHECKBOX).should('be.checked');
 
     cy.get(REFRESH_RULES_STATUS).should('have.not.text', 'Updated now');
   });

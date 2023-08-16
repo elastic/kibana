@@ -8,8 +8,12 @@
 import { tag } from '../../../tags';
 
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
-import { ADD_ELASTIC_RULES_BTN, RULES_UPDATES_TAB } from '../../../screens/alerts_detection_rules';
-import { deleteFirstRule, waitForRulesTableToShow } from '../../../tasks/alerts_detection_rules';
+import {
+  ADD_ELASTIC_RULES_BTN,
+  ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN,
+  RULES_UPDATES_TAB,
+} from '../../../screens/alerts_detection_rules';
+import { deleteFirstRule } from '../../../tasks/alerts_detection_rules';
 import {
   installAllPrebuiltRulesRequest,
   createAndInstallMockedPrebuiltRules,
@@ -43,7 +47,8 @@ describe(
     describe('No notifications', () => {
       it('should NOT display install or update notifications when no prebuilt assets and no rules are installed', () => {
         visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-        waitForRulesTableToShow();
+
+        cy.get(ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN).should('be.visible');
 
         // TODO: test plan asserts "should NOT see a CTA to install prebuilt rules"
         // but current behavior is to always show the CTA, even with no prebuilt rule assets installed
