@@ -75,7 +75,7 @@ import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../schedule_item_form';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 import { defaultCustomQuery } from '../../../pages/detection_engine/rules/utils';
-import { GroupByFields } from '../group_by_fields';
+import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 import { useLicense } from '../../../../common/hooks/use_license';
 import {
   minimumLicenseForSuppression,
@@ -752,9 +752,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           >
             <UseField
               path="groupByFields"
-              component={GroupByFields}
+              component={MultiSelectFieldsAutocomplete}
               componentProps={{
                 browserFields: termsAggregationFields,
+                disabledText: i18n.GROUP_BY_FIELD_LICENSE_WARNING,
                 isDisabled:
                   !license.isAtLeast(minimumLicenseForSuppression) && groupByFields?.length === 0,
               }}

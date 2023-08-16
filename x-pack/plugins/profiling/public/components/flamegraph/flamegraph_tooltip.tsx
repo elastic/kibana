@@ -99,8 +99,8 @@ export function FlameGraphTooltip({
                     labelStyle={{ fontWeight: 'bold' }}
                   />
                 }
-                value={impactEstimates.percentage}
-                comparison={comparisonImpactEstimates?.percentage}
+                value={impactEstimates.totalCPU.percentage}
+                comparison={comparisonImpactEstimates?.totalCPU.percentage}
                 formatValue={asPercentage}
                 showDifference
                 formatDifferenceAsPercentage
@@ -115,8 +115,8 @@ export function FlameGraphTooltip({
                     labelStyle={{ fontWeight: 'bold' }}
                   />
                 }
-                value={impactEstimates.percentageNoChildren}
-                comparison={comparisonImpactEstimates?.percentageNoChildren}
+                value={impactEstimates.selfCPU.percentage}
+                comparison={comparisonImpactEstimates?.selfCPU.percentage}
                 showDifference
                 formatDifferenceAsPercentage
                 formatValue={asPercentage}
@@ -144,8 +144,8 @@ export function FlameGraphTooltip({
             label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedCo2', {
               defaultMessage: `Annualized CO2`,
             })}
-            value={impactEstimates.annualizedCo2}
-            comparison={comparisonImpactEstimates?.annualizedCo2}
+            value={impactEstimates.totalCPU.annualizedCo2}
+            comparison={comparisonImpactEstimates?.totalCPU.annualizedCo2}
             formatValue={asWeight}
             showDifference
             formatDifferenceAsPercentage={false}
@@ -155,8 +155,8 @@ export function FlameGraphTooltip({
             label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedDollarCost', {
               defaultMessage: `Annualized dollar cost`,
             })}
-            value={impactEstimates.annualizedDollarCost}
-            comparison={comparisonImpactEstimates?.annualizedDollarCost}
+            value={impactEstimates.totalCPU.annualizedDollarCost}
+            comparison={comparisonImpactEstimates?.totalCPU.annualizedDollarCost}
             formatValue={asCost}
             showDifference
             formatDifferenceAsPercentage={false}
