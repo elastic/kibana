@@ -204,7 +204,7 @@ export const getAlertsStats = async (
     }
     return [];
   } catch (e) {
-    logger.error(`Failed to get index stats for ${index}`);
+    logger.error(`Failed to get index stats for ${index}: ${e}`);
     return [];
   }
 };
