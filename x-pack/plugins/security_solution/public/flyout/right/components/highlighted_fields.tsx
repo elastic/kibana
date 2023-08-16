@@ -9,6 +9,8 @@ import type { FC } from 'react';
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel, EuiTitle } from '@elastic/eui';
+import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
+import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
 import {
   CellActionsMode,
@@ -57,8 +59,13 @@ const columns: Array<EuiBasicTableColumn<UseHighlightedFieldsResult>> = [
  */
 export const HighlightedFields: FC = () => {
   const { dataFormattedForFieldBrowser } = useRightPanelContext();
+  const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const { rule: maybeRule } = useRuleWithFallback(ruleId);
 
-  const highlightedFields = useHighlightedFields({ dataFormattedForFieldBrowser });
+  const highlightedFields = useHighlightedFields({
+    dataFormattedForFieldBrowser,
+    investigationFields: maybeRule?.investigation_fields ?? [],
+  });
 
   if (!dataFormattedForFieldBrowser || highlightedFields.length === 0) {
     return null;

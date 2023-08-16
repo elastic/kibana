@@ -1,9 +1,16 @@
 {
   "indices.get_template": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "flat_settings": "__flag__",
-      "master_timeout": "",
-      "local": "__flag__"
+      "local": "__flag__",
+      "master_timeout": [
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "GET"
@@ -12,6 +19,10 @@
       "_template",
       "_template/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

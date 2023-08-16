@@ -325,6 +325,21 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-as-data-utils",
+        "id": "def-common.StackAlert",
+        "type": "Type",
+        "tags": [],
+        "label": "StackAlert",
+        "description": [],
+        "signature": [
+          "{} & { kibana?: { alert?: { evaluation?: { conditions?: string | undefined; value?: string | undefined; } | undefined; title?: string | undefined; } | undefined; } | undefined; } & { '@timestamp': string; kibana: { alert: { instance: { id: string; }; rule: { category: string; consumer: string; name: string; producer: string; revision: string | number; rule_type_id: string; uuid: string; }; status: string; uuid: string; }; space_ids: string[]; }; } & { event?: { action?: string | undefined; kind?: string | undefined; } | undefined; kibana?: { alert?: { action_group?: string | undefined; case_ids?: string[] | undefined; duration?: { us?: string | number | undefined; } | undefined; end?: string | undefined; flapping?: boolean | undefined; flapping_history?: boolean[] | undefined; last_detected?: string | undefined; maintenance_window_ids?: string[] | undefined; reason?: string | undefined; rule?: { execution?: { uuid?: string | undefined; } | undefined; parameters?: unknown; tags?: string[] | undefined; } | undefined; start?: string | undefined; time_range?: { gte?: string | undefined; lte?: string | undefined; } | undefined; url?: string | undefined; workflow_status?: string | undefined; workflow_tags?: string[] | undefined; } | undefined; version?: string | undefined; } | undefined; tags?: string[] | undefined; }"
+        ],
+        "path": "packages/kbn-alerts-as-data-utils/src/schemas/generated/stack_schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [

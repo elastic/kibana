@@ -25,19 +25,18 @@ export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter, logg
       const siemResponse = buildSiemResponse(response);
 
       const securitySolution = await context.securitySolution;
-      const soClient = (await context.core).savedObjects.client;
       const riskEngineClient = securitySolution.getRiskEngineDataClient();
       const spaceId = securitySolution.getSpaceId();
 
       try {
         const result = await riskEngineClient.getStatus({
-          savedObjectsClient: soClient,
           namespace: spaceId,
         });
         return response.ok({
           body: {
             risk_engine_status: result.riskEngineStatus,
             legacy_risk_engine_status: result.legacyRiskEngineStatus,
+            is_max_amount_of_risk_engines_reached: result.isMaxAmountOfRiskEnginesReached,
           },
         });
       } catch (e) {
