@@ -24,11 +24,11 @@ export function SamlToolsProvider({ getService }: FtrProviderContext) {
   const signatureAlgorithm = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';
 
   async function getSAMLResponse({
-  destination,
-  inResponseTo,
-  sessionIndex,
-  username = 'a@b.c',
-  issuer = 'http://www.elastic.co/saml1',
+    destination,
+    inResponseTo,
+    sessionIndex,
+    username = 'a@b.c',
+    issuer = 'http://www.elastic.co/saml1',
   }: {
     destination?: string;
     inResponseTo?: string;
