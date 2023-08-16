@@ -11,7 +11,6 @@ import {
   CUSTOM_RULES_BTN,
   DELETE_RULE_ACTION_BTN,
   RULES_SELECTED_TAG,
-  RULE_CHECKBOX,
   RULE_NAME,
   RULE_SWITCH,
   RULE_SWITCH_LOADER,
@@ -202,22 +201,9 @@ export const selectRulesByName = (ruleNames: Readonly<string[]>) => {
   }
 };
 
-export const unselectRuleByName = (ruleName: string) => {
-  cy.contains(RULE_NAME, ruleName).parents(RULES_ROW).find(EUI_CHECKBOX).uncheck();
-  cy.contains(RULE_NAME, ruleName).parents(RULES_ROW).find(EUI_CHECKBOX).should('not.be.checked');
-};
-
-/**
- * Unselects a passed number of rules. To use together with selectNumberOfRules
- * as this utility will expect and check the passed number of rules
- * to have been previously checked.
- * @param numberOfRules The number of rules to click/check
- */
-export const unselectNumberOfRules = (numberOfRules: number) => {
-  for (let i = 0; i < numberOfRules; i++) {
-    cy.get(RULE_CHECKBOX).eq(i).should('be.checked');
-    cy.get(RULE_CHECKBOX).eq(i).uncheck();
-    cy.get(RULE_CHECKBOX).eq(i).should('not.be.checked');
+export const unselectRulesByName = (ruleNames: Readonly<string[]>) => {
+  for (const ruleName of ruleNames) {
+    unselectRuleByName(ruleName);
   }
 };
 
@@ -501,6 +487,15 @@ export const goToEditRuleActionsSettingsOf = (name: string) => {
 };
 
 const selectRuleByName = (ruleName: string) => {
+  cy.log(`Select rule "${ruleName}"`);
   cy.contains(RULE_NAME, ruleName).parents(RULES_ROW).find(EUI_CHECKBOX).check();
+  cy.log(`Make sure rule "${ruleName}" has been selected`);
   cy.contains(RULE_NAME, ruleName).parents(RULES_ROW).find(EUI_CHECKBOX).should('be.checked');
+};
+
+const unselectRuleByName = (ruleName: string) => {
+  cy.log(`Unselect rule "${ruleName}"`);
+  cy.contains(RULE_NAME, ruleName).parents(RULES_ROW).find(EUI_CHECKBOX).uncheck();
+  cy.log(`Make sure rule "${ruleName}" has been unselected`);
+  cy.contains(RULE_NAME, ruleName).parents(RULES_ROW).find(EUI_CHECKBOX).should('not.be.checked');
 };
