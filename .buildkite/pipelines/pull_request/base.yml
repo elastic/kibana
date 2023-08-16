@@ -94,7 +94,7 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 3
-  
+
   - command: .buildkite/scripts/steps/functional/security_serverless.sh
     label: 'Serverless Security Cypress Tests'
     agents:
@@ -103,11 +103,9 @@ steps:
     timeout_in_minutes: 40
     parallelism: 10
     soft_fail:
-      - exit_status: 10    
+      - exit_status: 10
     retry:
       automatic:
-        - exit_status: '-1'
-          limit: 3
         - exit_status: '*'
           limit: 1
     artifact_paths:
@@ -123,13 +121,11 @@ steps:
       - exit_status: 10
     retry:
       automatic:
-        - exit_status: '-1'
-          limit: 3
         - exit_status: '*'
           limit: 1
     artifact_paths:
       - "target/kibana-security-solution/**/*"
-    
+
   - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
     label: 'Serverless Security Investigations Cypress Tests'
     agents:
@@ -141,8 +137,6 @@ steps:
       - exit_status: 10
     retry:
       automatic:
-        - exit_status: '-1'
-          limit: 3
         - exit_status: '*'
           limit: 1
     artifact_paths:
@@ -159,8 +153,6 @@ steps:
       - exit_status: 10
     retry:
       automatic:
-        - exit_status: '-1'
-          limit: 3
         - exit_status: '*'
           limit: 1
     artifact_paths:
