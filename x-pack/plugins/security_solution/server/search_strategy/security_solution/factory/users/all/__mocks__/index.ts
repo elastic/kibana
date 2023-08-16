@@ -33,6 +33,7 @@ export const mockOptions: UsersRequestOptions = {
     querySize: 10,
   },
   sort: { field: UsersFields.name, direction: Direction.asc },
+  isNewRiskScoreModuleAvailable: false,
 };
 
 export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {

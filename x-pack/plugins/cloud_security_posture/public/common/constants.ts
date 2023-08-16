@@ -27,6 +27,7 @@ import {
 import eksLogo from '../assets/icons/cis_eks_logo.svg';
 import aksLogo from '../assets/icons/cis_aks_logo.svg';
 import gkeLogo from '../assets/icons/cis_gke_logo.svg';
+import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
 
 export const statusColors = {
   passed: euiThemeVars.euiColorSuccess,
@@ -91,7 +92,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.cspmIntegration.gcpOption.benchmarkTitle', {
           defaultMessage: 'CIS GCP',
         }),
-        icon: 'logoGCP',
+        icon: googleCloudLogo,
         isBeta: true,
       },
       {
@@ -191,7 +192,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'GCP',
         }),
         disabled: true,
-        icon: 'logoGCP',
+        icon: googleCloudLogo,
         tooltip: i18n.translate('xpack.csp.vulnMgmtIntegration.gcpOption.tooltipContent', {
           defaultMessage: 'Coming soon',
         }),
@@ -216,3 +217,6 @@ export const FINDINGS_DOCS_URL = 'https://ela.st/findings';
 export const MIN_VERSION_GCP_CIS = '1.5.0';
 
 export const NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS = 10000;
+
+export const DETECTION_ENGINE_RULES_KEY = 'detection_engine_rules';
+export const DETECTION_ENGINE_ALERTS_KEY = 'detection_engine_alerts';
