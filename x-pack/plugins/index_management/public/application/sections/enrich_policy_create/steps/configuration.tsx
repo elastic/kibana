@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiFieldText, EuiForm, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
@@ -64,8 +65,17 @@ export const ConfigurationStep = ({ onNext }: Props) => {
 
       <EuiSpacer />
 
-      <EuiButton fill onClick={onNext}>
-        Next
+      <EuiButton
+        fill
+        color="primary"
+        iconSide="right"
+        iconType="arrowRight"
+        onClick={onNext}
+      >
+        <FormattedMessage
+          id="xpack.idxMgmt.enrichPolicies.create.stepConfiguration.nextButtonLabel"
+          defaultMessage="Next"
+        />
       </EuiButton>
     </EuiForm>
   );
