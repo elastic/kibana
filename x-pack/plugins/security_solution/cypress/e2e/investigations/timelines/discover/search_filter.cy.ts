@@ -35,6 +35,7 @@ import { ALERTS_URL } from '../../../../urls/navigation';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
+const NEW_START_DATE = 'Jan 18, 2023 @ 20:33:29.186';
 
 describe(
   'Basic discover search and filter operations',
@@ -119,9 +120,7 @@ describe(
         cy.get(DISCOVER_QUERY_INPUT).should('not.have.text', kqlQuery);
       });
 
-      it('should changed the timerange to foo when back is pressed after modifying timerange from foo to baz ', () => {
-        const NEW_START_DATE = 'Jan 18, 2023 @ 20:33:29.186';
-
+      it(`should changed the timerange to ${INITIAL_START_DATE} when back is pressed after modifying timerange from ${INITIAL_START_DATE} to ${NEW_START_DATE} `, () => {
         setStartDate(NEW_START_DATE, DISCOVER_CONTAINER);
         updateDates(DISCOVER_CONTAINER);
 
