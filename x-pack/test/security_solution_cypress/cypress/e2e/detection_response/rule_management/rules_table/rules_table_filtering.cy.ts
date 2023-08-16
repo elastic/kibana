@@ -17,8 +17,6 @@ import {
 
 import { SECURITY_DETECTIONS_RULES_URL } from '../../../../urls/navigation';
 
-import { waitForRulesTableToBeLoaded } from '../../../../tasks/alerts_detection_rules';
-
 import { createRule, waitForRulesToFinishExecution } from '../../../../tasks/api_calls/rules';
 import {
   deleteIndex,
@@ -82,8 +80,6 @@ describe('Rules table: filtering', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       waitForRulesToFinishExecution(['successful_rule', 'warning_rule', 'failed_rule'], new Date());
 
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-
-      waitForRulesTableToBeLoaded();
 
       // Initial table state - before filtering by status
       expectNumberOfRulesShownOnPage(3);
