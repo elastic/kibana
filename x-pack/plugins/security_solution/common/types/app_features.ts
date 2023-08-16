@@ -50,6 +50,11 @@ export enum AppFeatureSecurityKey {
   threatIntelligence = 'threat-intelligence',
 
   /**
+   * Enables external rule actions (SOAR, webhook, etc)
+   */
+  externalRuleActions = 'external-rule-actions',
+
+  /**
    * Enables Osquery Response Actions
    */
   osqueryAutomatedResponseActions = 'osquery_automated_response_actions',

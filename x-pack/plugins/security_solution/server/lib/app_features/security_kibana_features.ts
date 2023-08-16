@@ -227,6 +227,27 @@ export const getSecurityAppFeaturesConfig = (
         },
       ],
     },
+    // [AppFeatureSecurityKey.ruleActions]: {
+    //   subFeatureIds: [SecuritySubFeatureId.ruleActions],
+    //   subFeaturesPrivileges: [
+    //     {
+    //       id: 'rule_actions',
+    //       api: [`${APP_ID}-writeHostIsolation`],
+    //       ui: ['writeHostIsolation'],
+    //     },
+    //   ],
+    // },
+
+    [AppFeatureSecurityKey.externalRuleActions]: {
+      privileges: {
+        all: {
+          ui: ['external-rule-actions'],
+        },
+        read: {
+          ui: ['external-rule-actions'],
+        },
+      },
+    },
 
     [AppFeatureSecurityKey.osqueryAutomatedResponseActions]: {},
   };
