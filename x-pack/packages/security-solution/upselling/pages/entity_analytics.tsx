@@ -23,7 +23,7 @@ import styled from '@emotion/styled';
 import { useNavigation } from '@kbn/security-solution-navigation';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import * as i18n from './translations';
-import paywallPng from '../../common/images/entity_paywall.png';
+import paywallPng from '../images/entity_paywall.png';
 
 const PaywallDiv = styled.div`
   max-width: 75%;
@@ -45,15 +45,31 @@ const StyledEuiCard = styled(EuiCard)`
   }
 `;
 
-const EntityAnalyticsUpsellingComponent = () => {
-  const { getAppUrl, navigateTo } = useNavigation();
-  const subscriptionUrl = getAppUrl({
-    appId: 'management',
-    path: 'stack/license_management',
-  });
+const EntityAnalyticsUpsellingComponent = ({
+  requiredLicense,
+  requiredProduct,
+  subscriptionUrl,
+}: {
+  requiredLicense?: string;
+  requiredProduct?: string;
+  subscriptionUrl?: string;
+}) => {
+  const { navigateTo } = useNavigation();
+
   const goToSubscription = useCallback(() => {
     navigateTo({ url: subscriptionUrl });
   }, [navigateTo, subscriptionUrl]);
+
+  if (!requiredProduct && !requiredLicense) {
+    throw new Error('requiredProduct or requiredLicense must be defined');
+  }
+
+  const upgradeMessage = requiredLicense
+    ? i18n.UPGRADE_LICENSE_MESSAGE(requiredLicense)
+    : i18n.UPGRADE_PRODUCT_MESSAGE(requiredProduct ?? '');
+
+  const requiredLicenseOrProduct = requiredProduct ?? requiredLicense ?? '';
+
   return (
     <KibanaPageTemplate restrictWidth={false} contentBorder={false} grow={true}>
       <KibanaPageTemplate.Section>
@@ -62,7 +78,7 @@ const EntityAnalyticsUpsellingComponent = () => {
         <PaywallDiv>
           <StyledEuiCard
             data-test-subj="platinumCard"
-            betaBadgeProps={{ label: i18n.PLATINUM }}
+            betaBadgeProps={{ label: requiredLicenseOrProduct }}
             icon={<EuiIcon size="xl" type="lock" />}
             display="subdued"
             title={
@@ -77,22 +93,24 @@ const EntityAnalyticsUpsellingComponent = () => {
               <EuiText>
                 <EuiFlexItem>
                   <p>
-                    <EuiTextColor color="subdued">{i18n.UPGRADE_MESSAGE}</EuiTextColor>
+                    <EuiTextColor color="subdued">{upgradeMessage}</EuiTextColor>
                   </p>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <div>
-                    <EuiButton onClick={goToSubscription} fill>
-                      {i18n.UPGRADE_BUTTON}
-                    </EuiButton>
-                  </div>
+                  {subscriptionUrl && (
+                    <div>
+                      <EuiButton onClick={goToSubscription} fill>
+                        {i18n.UPGRADE_BUTTON(requiredLicenseOrProduct)}
+                      </EuiButton>
+                    </div>
+                  )}
                 </EuiFlexItem>
               </EuiText>
             </EuiFlexGroup>
           </StyledEuiCard>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiImage alt={i18n.UPGRADE_MESSAGE} src={paywallPng} size="fullWidth" />
+              <EuiImage alt={upgradeMessage} src={paywallPng} size="fullWidth" />
             </EuiFlexItem>
           </EuiFlexGroup>
         </PaywallDiv>

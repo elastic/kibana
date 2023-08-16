@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SecurityPageName } from '../../../../common';
+import type { SecurityPageName } from '@kbn/security-solution-navigation';
 
 export type PageUpsellings = Partial<Record<SecurityPageName, React.ComponentType>>;
 export type MessageUpsellings = Partial<Record<UpsellingMessageId, string>>;

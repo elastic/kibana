@@ -17,7 +17,7 @@ export type {
   PageUpsellings,
   SectionUpsellings,
   UpsellingSectionId,
-} from './common/lib/upsellings';
+} from '@kbn/security-solution-upselling/service';
 
 export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);
 

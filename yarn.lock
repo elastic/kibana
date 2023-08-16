@@ -5310,6 +5310,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-solution-upselling@link:x-pack/packages/security-solution/upselling":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-test-endpoints-plugin@link:x-pack/test/security_functional/plugins/test_endpoints":
   version "0.0.0"
   uid ""
