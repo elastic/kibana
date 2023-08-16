@@ -22,6 +22,3 @@ export const investigationGuideUpselling = (requiredPLI: AppFeatureKey): string 
   const productTypeRequired = getProductTypeByPLI(requiredPLI);
   return productTypeRequired ? UPGRADE_INVESTIGATION_GUIDE(productTypeRequired) : '';
 };
-
-// eslint-disable-next-line import/no-default-export
-export { investigationGuideUpselling as default };

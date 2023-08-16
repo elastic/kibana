@@ -56,6 +56,10 @@ function BaseValue({ value, icon, color }: { value: string; icon?: string; color
   );
 }
 
+export function getValueLable(value: string, perc?: string) {
+  return perc ? `${value} (${perc})` : `${value}`;
+}
+
 export function SummaryItem({
   baseValue,
   baseIcon,
@@ -98,7 +102,7 @@ export function SummaryItem({
         {!isLoading && comparisonValue ? (
           <EuiText color={comparisonColor}>
             {comparisonIcon ? <EuiIcon type={comparisonIcon} /> : null}
-            {`${comparisonValue}  (${comparisonPerc})`}
+            {getValueLable(comparisonValue, comparisonPerc)}
           </EuiText>
         ) : null}
       </EuiStat>
