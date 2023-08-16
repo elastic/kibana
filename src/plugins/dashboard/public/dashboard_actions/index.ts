@@ -36,7 +36,7 @@ export const buildAllDashboardActions = async ({
   const { uiActions, share, presentationUtil, savedObjectsManagement, savedObjectsTaggingOss } =
     plugins;
 
-  const clonePanelAction = new ClonePanelAction(core.savedObjects);
+  const clonePanelAction = new ClonePanelAction();
   uiActions.registerAction(clonePanelAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
 
