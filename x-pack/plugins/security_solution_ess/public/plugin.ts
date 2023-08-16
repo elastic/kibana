@@ -28,13 +28,8 @@ export class SecuritySolutionEssPlugin
 {
   public setup(
     _core: CoreSetup,
-    setupDeps: SecuritySolutionEssPluginSetupDeps
+    _setupDeps: SecuritySolutionEssPluginSetupDeps
   ): SecuritySolutionEssPluginSetup {
-    const { securitySolution, licensing } = setupDeps;
-    licensing.license$.subscribe((license) => {
-      registerUpsellings(securitySolution.upselling, license);
-    });
-
     return {};
   }
 
@@ -42,8 +37,12 @@ export class SecuritySolutionEssPlugin
     core: CoreStart,
     startDeps: SecuritySolutionEssPluginStartDeps
   ): SecuritySolutionEssPluginStart {
-    const { securitySolution } = startDeps;
+    const { securitySolution, licensing } = startDeps;
     const services = createServices(core, startDeps);
+
+    licensing.license$.subscribe((license) => {
+      registerUpsellings(securitySolution.getUpselling(), license, services);
+    });
 
     securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services));
     subscribeBreadcrumbs(services);

@@ -18,6 +18,8 @@ import type { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
 import { lazy } from 'react';
 import type React from 'react';
 import { UPGRADE_INVESTIGATION_GUIDE } from './messages/investigation_guide_upselling';
+import type { Services } from '../common/services';
+import { withServicesProvider } from '../common/services';
 const EntityAnalyticsUpsellingLazy = lazy(() => import('./pages/entity_analytics_upselling'));
 
 interface UpsellingsConfig {
@@ -35,11 +37,15 @@ type UpsellingPages = Array<UpsellingsConfig & { pageName: SecurityPageName }>;
 type UpsellingSections = Array<UpsellingsConfig & { id: UpsellingSectionId }>;
 type UpsellingMessages = UpsellingsMessageConfig[];
 
-export const registerUpsellings = (upselling: UpsellingService, license: ILicense) => {
+export const registerUpsellings = (
+  upselling: UpsellingService,
+  license: ILicense,
+  services: Services
+) => {
   const upsellingPagesToRegister = upsellingPages.reduce<PageUpsellings>(
     (pageUpsellings, { pageName, minimumLicenseRequired, component }) => {
       if (!license.hasAtLeast(minimumLicenseRequired)) {
-        pageUpsellings[pageName] = component;
+        pageUpsellings[pageName] = withServicesProvider(component, services);
       }
       return pageUpsellings;
     },

@@ -20,10 +20,10 @@ export interface SecuritySolutionEssPluginStart {}
 
 export interface SecuritySolutionEssPluginSetupDeps {
   securitySolution: SecuritySolutionPluginSetup;
-  licensing: LicensingPluginStart;
 }
 
 export interface SecuritySolutionEssPluginStartDeps {
   securitySolution: SecuritySolutionPluginStart;
   cloudExperiments?: CloudExperimentsPluginStart;
+  licensing: LicensingPluginStart;
 }
