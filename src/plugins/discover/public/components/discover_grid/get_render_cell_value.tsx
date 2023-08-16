@@ -9,6 +9,7 @@
 import React, { Fragment, useContext, useEffect, useMemo } from 'react';
 import classnames from 'classnames';
 import { i18n } from '@kbn/i18n';
+import { EuiDelayRender, EuiLoadingSpinner } from '@elastic/eui';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
@@ -27,7 +28,7 @@ import type {
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
 import { MAX_DOC_FIELDS_DISPLAYED, formatFieldValue, formatHit } from '@kbn/discover-utils';
-import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
+import { LazyJsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import { DiscoverGridContext } from './discover_grid_context';
 import { defaultMonacoEditorWidth } from './constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -202,11 +203,19 @@ function renderPopoverContent({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <JsonCodeEditor
-            json={getJSON(columnId, row, useTopLevelObjectColumns)}
-            width={defaultMonacoEditorWidth}
-            height={200}
-          />
+          <React.Suspense
+            fallback={
+              <EuiDelayRender>
+                <EuiLoadingSpinner />
+              </EuiDelayRender>
+            }
+          >
+            <LazyJsonCodeEditor
+              json={getJSON(columnId, row, useTopLevelObjectColumns)}
+              width={defaultMonacoEditorWidth}
+              height={200}
+            />
+          </React.Suspense>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

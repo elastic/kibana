@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { JsonCodeEditor } from './json_code_editor';
+import JsonCodeEditor from './json_code_editor';
 
 it('returns the `JsonCodeEditor` component', () => {
   const value = {

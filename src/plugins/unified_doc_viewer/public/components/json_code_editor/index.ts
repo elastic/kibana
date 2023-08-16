@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './json_code_editor';
+import React from 'react';
+
+export const LazyJsonCodeEditor = React.lazy(() => import('./json_code_editor'));
 export * from './json_code_editor_common';

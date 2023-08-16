@@ -18,7 +18,14 @@ interface JsonCodeEditorProps {
   hasLineNumbers?: boolean;
 }
 
-export const JsonCodeEditor = ({ json, width, height, hasLineNumbers }: JsonCodeEditorProps) => {
+// Required for usage in React.lazy
+// eslint-disable-next-line import/no-default-export
+export default function JsonCodeEditor({
+  json,
+  width,
+  height,
+  hasLineNumbers,
+}: JsonCodeEditorProps) {
   const jsonValue = JSON.stringify(json, null, 2);
 
   return (
@@ -31,4 +38,4 @@ export const JsonCodeEditor = ({ json, width, height, hasLineNumbers }: JsonCode
       hideCopyButton={true}
     />
   );
-};
+}
