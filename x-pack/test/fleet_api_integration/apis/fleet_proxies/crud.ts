@@ -80,7 +80,6 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-      // create a download source with a proxy_id
       const { body: downloadSourceResponse } = await supertest
         .post(`/api/fleet/agent_download_sources`)
         .set('kbn-xsrf', 'xxxx')
