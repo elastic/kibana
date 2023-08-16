@@ -30,7 +30,7 @@ import {
   TRUNCATE_MAX_HEIGHT,
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
-  ENABLE_TEXT_BASED,
+  ENABLE_ESQL,
 } from '@kbn/discover-utils';
 import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
 
@@ -308,18 +308,18 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
   },
-  [ENABLE_TEXT_BASED]: {
-    name: i18n.translate('discover.advancedSettings.enableSQLTitle', {
-      defaultMessage: 'Enable text based languages',
+  [ENABLE_ESQL]: {
+    name: i18n.translate('discover.advancedSettings.enableESQLTitle', {
+      defaultMessage: 'Enable ESQL',
     }),
-    value: false,
-    description: i18n.translate('discover.advancedSettings.enableSQLDescription', {
+    value: true,
+    description: i18n.translate('discover.advancedSettings.enableESQLDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} This tech preview feature is highly experimental--do not rely on this for production saved searches, visualizations or dashboards. This setting enables SQL and ESQL as a text-based query language in Discover and Lens. If you have feedback on this experience please reach out to us on {link}',
+        '{technicalPreviewLabel} This tech preview feature is highly experimental--do not rely on this for production saved searches, visualizations or dashboards. This setting enables ESQL in Discover and Lens. If you have feedback on this experience please reach out to us on {link}',
       values: {
         link:
           `<a href="https://discuss.elastic.co/c/elastic-stack/kibana" target="_blank" rel="noopener">` +
-          i18n.translate('discover.advancedSettings.enableSQL.discussLinkText', {
+          i18n.translate('discover.advancedSettings.enableESQL.discussLinkText', {
             defaultMessage: 'discuss.elastic.co/c/elastic-stack/kibana',
           }) +
           '</a>',

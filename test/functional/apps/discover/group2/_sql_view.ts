@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    'discover:enableTextBased': true,
+    'discover:enableESQL': true,
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/159194

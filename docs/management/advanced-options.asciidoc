@@ -288,7 +288,7 @@ in the current data view is used.
 The columns that appear by default on the *Discover* page. The default is
 `_source`.
 
-[[discover:enableTextBased]]`discover:enableTextBased`::
+[[discover:enableESQL]]`discover:enableESQL`::
 experimental[] Allows SQL and ESQL queries for search.
 
 [[discover-max-doc-fields-displayed]]`discover:maxDocFieldsDisplayed`::

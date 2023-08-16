@@ -9798,7 +9798,7 @@
             "description": "Non-default value of setting."
           }
         },
-        "discover:enableTextBased": {
+        "discover:enableESQL": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
