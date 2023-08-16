@@ -36,10 +36,11 @@ import {
   pickSummaryOfAlertsOption,
 } from '../../../../../tasks/common/rule_actions';
 import {
-  selectNumberOfRules,
   goToEditRuleActionsSettingsOf,
   disableAutoRefresh,
   expectManagementTableRules,
+  selectAllRules,
+  selectRulesByName,
 } from '../../../../../tasks/alerts_detection_rules';
 import {
   waitForBulkEditActionToFinish,
@@ -149,7 +150,7 @@ describe(
         ]);
         waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
 
-        selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+        selectAllRules();
 
         openBulkActionsMenu();
 
@@ -183,7 +184,7 @@ describe(
         excessivelyInstallAllPrebuiltRules();
 
         // select both custom and prebuilt rules
-        selectNumberOfRules(expectedNumberOfRulesToBeEdited);
+        selectAllRules();
         openBulkEditRuleActionsForm();
 
         // ensure rule actions info callout displayed on the form
@@ -211,7 +212,7 @@ describe(
         excessivelyInstallAllPrebuiltRules();
 
         // select both custom and prebuilt rules
-        selectNumberOfRules(expectedNumberOfRulesToBeEdited);
+        selectAllRules();
         openBulkEditRuleActionsForm();
 
         addSlackRuleAction(expectedSlackMessage);
@@ -245,7 +246,15 @@ describe(
         const expectedEmail = 'test@example.com';
         const expectedSubject = 'Subject';
 
-        selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+        selectRulesByName([
+          ruleNameToAssert,
+          'New EQL Rule',
+          'New ML Rule Test',
+          'Threat Indicator Rule Test',
+          'Threshold Rule',
+          'New Terms Rule',
+          'New Rule Test',
+        ]);
         openBulkEditRuleActionsForm();
 
         addEmailConnectorAndRuleAction(expectedEmail, expectedSubject);
