@@ -45,7 +45,7 @@ export const fetchDocuments = (
   const fetch$ = searchSource
     .fetch$({
       abortSignal: abortController.signal,
-      sessionId: searchSessionId,
+      sessionId: isFetchingMore ? undefined : searchSessionId,
       inspector: {
         adapter: inspectorAdapters.requests,
         title: isFetchingMore // TODO: show it as a separate request in Inspect flyout
