@@ -32,6 +32,30 @@ test('getContainedAlertContext', () => {
   });
 });
 
+test('getContainedAlertContext for legacy number[] location format', () => {
+  expect(
+    getContainedAlertContext({
+      entityName: 'entity1',
+      containment: {
+        location: [100, 0],
+        shapeLocationId: 'boundary1Id',
+        dateInShape: '2022-06-21T16:56:11.923Z',
+        docId: 'docId',
+      },
+      shapesIdsNamesMap: { boundary1Id: 'boundary1Name' },
+      windowEnd: new Date('2022-06-21T17:00:00.000Z'),
+    })
+  ).toEqual({
+    containingBoundaryId: 'boundary1Id',
+    containingBoundaryName: 'boundary1Name',
+    detectionDateTime: '2022-06-21T17:00:00.000Z',
+    entityDateTime: '2022-06-21T16:56:11.923Z',
+    entityDocumentId: 'docId',
+    entityId: 'entity1',
+    entityLocation: 'POINT (100 0)',
+  });
+});
+
 describe('getRecoveredAlertContext', () => {
   test('should set context from contained entity location when entity is contained by another boundary', () => {
     const activeEntities = new Map();

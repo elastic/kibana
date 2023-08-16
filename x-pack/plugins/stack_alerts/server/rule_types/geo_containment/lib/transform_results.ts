@@ -17,6 +17,10 @@ export function transformResults(
   const resultsMap = new Map<string, GeoContainmentAlertInstanceState[]>();
   const boundarySplitBuckets = results?.aggregations?.shapes?.buckets ?? {};
   for (const boundaryId in boundarySplitBuckets) {
+    if (!(boundarySplitBuckets.hasOwnProperty(boundaryId))) {
+      continue;
+    }
+    
     const entitySplitBuckets = boundarySplitBuckets[boundaryId]?.entitySplit?.buckets ?? [];
     for (let i=0; i<entitySplitBuckets.length; i++) {
       const entityName = entitySplitBuckets[i].key;
