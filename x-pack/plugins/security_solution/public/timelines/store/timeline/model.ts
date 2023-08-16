@@ -191,7 +191,7 @@ export type SubsetTimelineModel = Readonly<
 
 export interface TimelineUrl {
   activeTab?: TimelineTabs;
-  id: string;
+  id?: string;
   isOpen: boolean;
   graphEventId?: string;
 }

@@ -22,15 +22,12 @@ export const useSyncTimelineUrlParam = () => {
   );
 
   useEffect(() => {
-    updateUrlParam(
-      savedObjectId != null
-        ? {
-            id: savedObjectId,
-            isOpen: show,
-            activeTab,
-            graphEventId: graphEventId ?? '',
-          }
-        : null
-    );
+    const params = {
+      ...(savedObjectId ? { id: savedObjectId } : {}),
+      isOpen: show,
+      activeTab,
+      graphEventId: graphEventId ?? '',
+    };
+    updateUrlParam(params);
   }, [activeTab, graphEventId, savedObjectId, show, updateUrlParam]);
 };
