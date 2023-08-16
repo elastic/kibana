@@ -142,7 +142,7 @@ describe('useStateProps', () => {
       useStateProps({
         stateService,
         dataView: dataViewWithTimefieldMock,
-        query: { sql: 'SELECT * FROM index' },
+        query: { esql: 'FROM index' },
         requestAdapter: new RequestAdapter(),
         searchSessionId: '123',
       })
@@ -222,7 +222,7 @@ describe('useStateProps', () => {
       useStateProps({
         stateService,
         dataView: dataViewWithTimefieldMock,
-        query: { sql: 'SELECT * FROM index' },
+        query: { esql: 'FROM index' },
         requestAdapter: new RequestAdapter(),
         searchSessionId: '123',
       })

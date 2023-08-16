@@ -244,7 +244,7 @@ describe('test fetchAll', () => {
     ]);
   });
 
-  test('emits loading and documents on documents$ correctly for SQL query', async () => {
+  test('emits loading and documents on documents$ correctly for ES|QL query', async () => {
     const collect = subjectCollector(subjects.documents$);
     const hits = [
       { _id: '1', _index: 'logs' },
@@ -255,7 +255,7 @@ describe('test fetchAll', () => {
       records: documents,
       textBasedQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
     });
-    const query = { sql: 'SELECT * from foo' };
+    const query = { esql: 'from foo' };
     deps = {
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },

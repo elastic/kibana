@@ -76,8 +76,8 @@ import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../schedule_item_form';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 import { defaultCustomQuery } from '../../../pages/detection_engine/rules/utils';
-import { GroupByFields } from '../group_by_fields';
 import { EsqlFieldsSelect } from '../esql_fields_select/esql_fields_select';
+import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 import { useLicense } from '../../../../common/hooks/use_license';
 import {
   minimumLicenseForSuppression,
@@ -119,6 +119,7 @@ interface StepDefineRuleReadOnlyProps {
   descriptionColumns: 'multi' | 'single' | 'singleSplit';
   defaultValues: DefineStepRule;
   indexPattern: DataViewBase;
+  isInPanelView?: boolean; // Option to show description list in smaller font
 }
 
 export const MyLabelButton = styled(EuiButtonEmpty)`
@@ -877,9 +878,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           >
             <UseField
               path="groupByFields"
-              component={GroupByFields}
+              component={MultiSelectFieldsAutocomplete}
               componentProps={{
                 browserFields: termsAggregationFields,
+                disabledText: i18n.GROUP_BY_FIELD_LICENSE_WARNING,
                 isDisabled:
                   !license.isAtLeast(minimumLicenseForSuppression) && groupByFields?.length === 0,
               }}
@@ -1034,6 +1036,7 @@ const StepDefineRuleReadOnlyComponent: FC<StepDefineRuleReadOnlyProps> = ({
   defaultValues: data,
   descriptionColumns,
   indexPattern,
+  isInPanelView = false,
 }) => {
   const dataForDescription: Partial<DefineStepRule> = getStepDataDataSource(data);
 
@@ -1044,6 +1047,7 @@ const StepDefineRuleReadOnlyComponent: FC<StepDefineRuleReadOnlyProps> = ({
         schema={filterRuleFieldsForType(schema, data.ruleType)}
         data={filterRuleFieldsForType(dataForDescription, data.ruleType)}
         indexPatterns={indexPattern}
+        isInPanelView={isInPanelView}
       />
     </StepContentWrapper>
   );

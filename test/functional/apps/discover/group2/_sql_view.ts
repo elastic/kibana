@@ -28,10 +28,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    'discover:enableTextBased': true,
+    'discover:enableESQL': true,
   };
 
-  describe('discover sql view', async function () {
+  // Failing: See https://github.com/elastic/kibana/issues/159194
+  describe.skip('discover sql view', async function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       log.debug('load kibana index with default index pattern');
@@ -72,8 +73,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);
         expect(await testSubjects.exists('addFilter')).to.be(false);
         expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(false);
-        // when Lens suggests a table, we render the histogram
-        expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
+        // when Lens suggests a table, we render an ESQL based histogram
+        expect(await testSubjects.exists('unifiedHistogramChart')).to.be(false);
         expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(true);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(false);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);

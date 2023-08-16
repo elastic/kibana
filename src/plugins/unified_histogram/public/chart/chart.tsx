@@ -69,6 +69,7 @@ export interface ChartProps {
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
   lensTablesAdapter?: Record<string, Datatable>;
+  isOnHistogramMode?: boolean;
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
@@ -104,6 +105,7 @@ export function Chart({
   disabledActions,
   input$: originalInput$,
   lensTablesAdapter,
+  isOnHistogramMode,
   onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -425,7 +427,7 @@ export function Chart({
               disableTriggers={disableTriggers}
               disabledActions={disabledActions}
               onTotalHitsChange={onTotalHitsChange}
-              hasLensSuggestions={Boolean(currentSuggestion)}
+              hasLensSuggestions={!Boolean(isOnHistogramMode)}
               onChartLoad={onChartLoad}
               onFilter={onFilter}
               onBrushEnd={onBrushEnd}

@@ -376,7 +376,7 @@ export const validateAdvancedEditor = (state: State): State => {
     !resultsFieldEmptyString &&
     !dependentVariableEmpty &&
     !modelMemoryLimitEmpty &&
-    numTopFeatureImportanceValuesValid &&
+    (numTopFeatureImportanceValuesValid || jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION) &&
     (!destinationIndexPatternTitleExists || !createIndexPattern);
 
   return state;
@@ -457,7 +457,7 @@ const validateForm = (state: State): State => {
     !destinationIndexNameEmpty &&
     destinationIndexNameValid &&
     !dependentVariableEmpty &&
-    numTopFeatureImportanceValuesValid &&
+    (numTopFeatureImportanceValuesValid || jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION) &&
     (!destinationIndexPatternTitleExists || !createIndexPattern);
 
   return state;

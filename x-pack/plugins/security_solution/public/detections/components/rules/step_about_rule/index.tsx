@@ -35,6 +35,7 @@ import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRuleIndices } from '../../../../detection_engine/rule_management/logic/use_rule_indices';
 import { EsqlAutocomplete } from '../esql_autocomplete';
+import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -59,6 +60,7 @@ interface StepAboutRuleReadOnlyProps {
   addPadding: boolean;
   descriptionColumns: 'multi' | 'single' | 'singleSplit';
   defaultValues: AboutStepRule;
+  isInPanelView?: boolean; // Option to show description list in smaller font
 }
 
 const ThreeQuartersContainer = styled.div`
@@ -241,6 +243,16 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             />
             <EuiSpacer size="l" />
             <UseField
+              path="investigationFields"
+              component={MultiSelectFieldsAutocomplete}
+              componentProps={{
+                browserFields: indexPattern.fields,
+                isDisabled: isLoading || indexPatternLoading,
+                fullWidth: true,
+              }}
+            />
+            <EuiSpacer size="l" />
+            <UseField
               path="note"
               component={MarkdownEditorForm}
               componentProps={{
@@ -383,10 +395,16 @@ const StepAboutRuleReadOnlyComponent: FC<StepAboutRuleReadOnlyProps> = ({
   addPadding,
   defaultValues: data,
   descriptionColumns,
+  isInPanelView = false,
 }) => {
   return (
     <StepContentWrapper data-test-subj="aboutStep" addPadding={addPadding}>
-      <StepRuleDescription columns={descriptionColumns} schema={defaultSchema} data={data} />
+      <StepRuleDescription
+        columns={descriptionColumns}
+        schema={defaultSchema}
+        data={data}
+        isInPanelView={isInPanelView}
+      />
     </StepContentWrapper>
   );
 };

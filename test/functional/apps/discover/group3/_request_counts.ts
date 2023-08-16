@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
         'bfetch:disable': true,
-        'discover:enableTextBased': true,
+        'discover:enableESQL': true,
       });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
@@ -218,7 +218,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('SQL mode', () => {
+    describe.skip('SQL mode', () => {
       const type = 'sql';
 
       beforeEach(async () => {

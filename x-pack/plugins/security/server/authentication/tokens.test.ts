@@ -9,9 +9,9 @@ import { errors } from '@elastic/elasticsearch';
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
+import { Tokens } from './tokens';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { securityMock } from '../mocks';
-import { Tokens } from './tokens';
 
 describe('Tokens', () => {
   let tokens: Tokens;

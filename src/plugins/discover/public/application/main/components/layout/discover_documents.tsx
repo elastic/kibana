@@ -20,6 +20,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { SearchResponseWarnings } from '@kbn/search-response-warnings';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
@@ -178,8 +179,8 @@ function DiscoverDocumentsComponent({
 
   const showTimeCol = useMemo(
     () =>
-      (!isTextBasedQuery ||
-        (isTextBasedQuery && columns?.length === 1 && columns[0] === dataView.timeFieldName)) &&
+      // for ES|QL we want to show the time column only when is on Document view
+      (!isTextBasedQuery || (isTextBasedQuery && !columns?.length)) &&
       !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
       !!dataView.timeFieldName,
     [isTextBasedQuery, columns, uiSettings, dataView.timeFieldName]
@@ -204,6 +205,13 @@ function DiscoverDocumentsComponent({
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
         </h2>
       </EuiScreenReaderOnly>
+      {!!documentState.interceptedWarnings?.length && (
+        <SearchResponseWarnings
+          variant="callout"
+          interceptedWarnings={documentState.interceptedWarnings}
+          data-test-subj="dscInterceptedWarningsCallout"
+        />
+      )}
       {isLegacy && rows && rows.length && (
         <>
           {!hideAnnouncements && <DocumentExplorerCallout />}
