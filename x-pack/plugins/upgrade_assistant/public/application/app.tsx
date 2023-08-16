@@ -11,7 +11,7 @@ import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageSection, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
 import { API_BASE_PATH } from '../../common/constants';
@@ -48,26 +48,20 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
 
   if (missingManageSpacesPrivilege) {
     return (
-      <EuiPageSection
-        alignment="center"
-        color="subdued"
-        data-test-subj="missingKibanaPrivilegesMessage"
-      >
-        <NotAuthorizedSection
-          title={
-            <FormattedMessage
-              id="xpack.upgradeAssistant.app.deniedPrivilegeTitle"
-              defaultMessage="Kibana admin role required"
-            />
-          }
-          message={
-            <FormattedMessage
-              id="xpack.upgradeAssistant.app.deniedPrivilegeDescription"
-              defaultMessage="To use Upgrade Assistant and resolve deprecation issues, you must have access to manage all Kibana spaces."
-            />
-          }
-        />
-      </EuiPageSection>
+      <NotAuthorizedSection
+        title={
+          <FormattedMessage
+            id="xpack.upgradeAssistant.app.deniedPrivilegeTitle"
+            defaultMessage="Kibana admin role required"
+          />
+        }
+        message={
+          <FormattedMessage
+            id="xpack.upgradeAssistant.app.deniedPrivilegeDescription"
+            defaultMessage="To use Upgrade Assistant and resolve deprecation issues, you must have access to manage all Kibana spaces."
+          />
+        }
+      />
     );
   }
 
