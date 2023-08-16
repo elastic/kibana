@@ -45,6 +45,20 @@ export const ADD_NEW_CONNECTOR = i18n.translate(
   }
 );
 
+export const INLINE_CONNECTOR_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.connectorSelectorInline.connectorLabel',
+  {
+    defaultMessage: 'Connector:',
+  }
+);
+
+export const INLINE_CONNECTOR_PLACEHOLDER = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.connectorSelectorInline.connectorPlaceholder',
+  {
+    defaultMessage: 'Select a Connector',
+  }
+);
+
 export const ADD_CONNECTOR_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.addConnectorButton.title',
   {
