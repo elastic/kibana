@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { onServerless } from './on_serverless';
+export { offeringBasedSchema } from './offering_based_schema';

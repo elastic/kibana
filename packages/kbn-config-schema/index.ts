@@ -55,7 +55,7 @@ export { ObjectType, Type };
 export { ByteSizeValue } from './src/byte_size_value';
 export { SchemaTypeError, ValidationError } from './src/errors';
 export { isConfigSchema } from './src/typeguards';
-export { onServerless } from './src/helpers';
+export { offeringBasedSchema } from './src/helpers';
 
 function any(options?: TypeOptions<any>) {
   return new AnyType(options);
