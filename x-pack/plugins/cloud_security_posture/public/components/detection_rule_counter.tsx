@@ -11,10 +11,10 @@ import { EuiLink, EuiLoadingSpinner, EuiSkeletonText, EuiText } from '@elastic/e
 import type { HttpSetup } from '@kbn/core/public';
 import { useHistory } from 'react-router-dom';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
+import { useQueryClient } from '@tanstack/react-query';
 import { useFetchDetectionRulesAlertsStatus } from '../common/api/use_fetch_detection_rules_alerts_status';
 import { useFetchDetectionRulesByTags } from '../common/api/use_fetch_detection_rules_by_tags';
 import { RuleResponse } from '../common/types';
-import { useQueryClient } from '@tanstack/react-query';
 import { useKibana } from '../common/hooks/use_kibana';
 import { showSuccessToast } from './take_action';
 import { DETECTION_ENGINE_ALERTS_KEY, DETECTION_ENGINE_RULES_KEY } from '../common/constants';
@@ -24,10 +24,10 @@ const ALERTS_PAGE_PATH = '/alerts';
 
 const RULES_TABLE_SESSION_STORAGE_KEY = 'securitySolution.rulesTable';
 
-type DetectionRuleCounterProps = {
+interface DetectionRuleCounterProps {
   tags: string[];
   createRuleFn: (http: HttpSetup) => Promise<RuleResponse>;
-};
+}
 
 export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounterProps) => {
   const { data, isLoading } = useFetchDetectionRulesByTags(tags);
