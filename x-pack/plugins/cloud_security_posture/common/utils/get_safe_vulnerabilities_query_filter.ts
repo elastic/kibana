@@ -15,7 +15,6 @@ export const getSafeVulnerabilitiesQueryFilter = (query?: QueryDslQueryContainer
       { exists: { field: 'vulnerability.score.base' } },
       { exists: { field: 'vulnerability.score.version' } },
       { exists: { field: 'resource.id' } },
-      { exists: { field: 'resource.name' } },
     ],
   },
 });
