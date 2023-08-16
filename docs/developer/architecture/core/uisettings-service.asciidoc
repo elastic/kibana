@@ -115,7 +115,7 @@ export class MyPlugin implements Plugin {
 Migrations for 3rd party plugin advanced settings are not currently supported. If a 3rd party plugin registers an advanced setting, the setting is essentially permanent and cannot be fixed without manual intervention.
 ==============================================
 
-To change or remove a `uiSetting`, the whole `config` Saved Object needs to be migrated. `uiSettings` {kib-repo}blob/{branch}/src/core/server/ui_settings/saved_objects/migrations.ts[migrations] are declared directly in the service.
+To change or remove a `uiSetting`, the whole `config` Saved Object needs to be migrated.
 
 For example, if we wanted to remove a `custom` setting, or rename `my_setting:fourtyTwo` to `my_other_setting:fourtyTwo`, we'd need two migration entries, one for each change targeting the version in which these changes apply:
 

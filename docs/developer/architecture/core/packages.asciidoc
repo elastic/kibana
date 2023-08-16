@@ -3,20 +3,18 @@
 
 experimental[]
 
-Core packages have well defined boundaries, have a single responsibility, are organized by domain and follow the following naming scheme:
+Core packages have well defined boundaries, have a single responsibility, and are organized by domain. Core packages follow a specific naming schema, according to what the contain:
 
-`@kbn/core-domain-component-type`
-For example:
-*
-*
-*
-*
-*
-*
+For example, core capapability packages are:
 
-Generally, every domain has a specific package for:
-* public types available everywhere in {kib} `src` and `x-pack`
-* implementation and unit tests
+* `core-capabilities-browser-internal`
+* `core-capabilities-browser-mocks`
+* `core-capabilities-common`
+* `core-capabilities-server`
+* `core-capabilities-server-internal`
+* `core-capabilities-server-mocks`
+
+Every domain has a specific package for public types, importable from everywhere in Kibana code, implementation and unit tests, internal to core, not intended for public use, and mocks, exposed to plugins for unit testing.
 
 In addition, domains contain separate packages for the client-side and server-side and, in some cases, a base, that 
 supports both client and server needs. When a domain shares code between the server and client, that code lives in

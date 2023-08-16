@@ -39,5 +39,4 @@ The services that core provides are:
 * <<saved-objects-service, Saved Objects service>>
 * <<ui-settings-service, UI settings service>>
 
-NOTE: Core provides the {kib} building blocks for plugins and is implemented as a collection of packages. 
-* <<core-packages, Core packages>>
+NOTE: Core provides the {kib} building blocks for plugins and is implemented as a collection of <<core-packages, packages>>.
