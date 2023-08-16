@@ -136,9 +136,6 @@ export class ConsolePageObject extends FtrService {
 
   // Prompt autocomplete window and provide a initial letter of properties to narrow down the results. E.g. 'b' = 'bool'
   public async promptAutocomplete(letter = 'b') {
-    // Wait for double a debounce period to elapse
-    await this.common.sleep(200);
-
     const textArea = await this.testSubjects.find('console-textarea');
     await textArea.clickMouseButton();
     await textArea.type(letter);
@@ -207,6 +204,26 @@ export class ConsolePageObject extends FtrService {
   public async pressEscape() {
     const textArea = await this.testSubjects.find('console-textarea');
     await textArea.pressKeys(Key.ESCAPE);
+  }
+
+  public async pressDown() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys(Key.DOWN);
+  }
+
+  public async pressLeft() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys(Key.LEFT);
+  }
+
+  public async pressRight() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys(Key.RIGHT);
+  }
+
+  public async pressUp() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys(Key.UP);
   }
 
   public async clearTextArea() {
@@ -568,5 +585,9 @@ export class ConsolePageObject extends FtrService {
   public async closeHistory() {
     const closeButton = await this.testSubjects.find('consoleHistoryCloseButton');
     await closeButton.click();
+  }
+
+  public async sleepforDebouncePeriod(duration: number = 100) {
+    await this.common.sleep(duration);
   }
 }
