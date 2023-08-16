@@ -10,7 +10,6 @@ import moment, { Duration } from 'moment';
 import { padStart, chunk } from 'lodash';
 import { EuiBasicTable, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { AlertStatus, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { AlertStatusValues, MaintenanceWindow } from '@kbn/alerting-plugin/common';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
@@ -213,7 +212,7 @@ export const RuleAlertList = (props: RuleAlertListProps) => {
       },
       {
         field: '',
-        align: RIGHT_ALIGNMENT,
+        align: 'right' as const,
         width: '60px',
         name: i18n.translate(
           'xpack.triggersActionsUI.sections.ruleDetails.alertsList.columns.mute',

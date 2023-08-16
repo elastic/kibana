@@ -25,11 +25,10 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiToolTip,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 
 import { addItemToRecentlyAccessed } from '../../../util/recently_accessed';
 import { ml } from '../../../services/ml_api_service';
