@@ -525,6 +525,8 @@ function getPatternFiringAlertsAsDataRuleType() {
       schema.string(),
       schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()]))
     ),
+    index: schema.maybe(schema.string()),
+    reference: schema.maybe(schema.string()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
   interface State extends RuleTypeState {
