@@ -29,15 +29,10 @@ export const riskEngineDisableRoute = (
       const siemResponse = buildSiemResponse(response);
 
       const securitySolution = await context.securitySolution;
-      const soClient = (await context.core).savedObjects.client;
       const riskEngineClient = securitySolution.getRiskEngineDataClient();
-      const user = security?.authc.getCurrentUser(request);
 
       try {
-        await riskEngineClient.disableRiskEngine({
-          savedObjectsClient: soClient,
-          user,
-        });
+        await riskEngineClient.disableRiskEngine();
         return response.ok({ body: { success: true } });
       } catch (e) {
         const error = transformError(e);
