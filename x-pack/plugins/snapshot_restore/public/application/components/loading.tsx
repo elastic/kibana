@@ -14,7 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTextColor,
-  EuiPageSection,
+  EuiPageTemplate,
 } from '@elastic/eui';
 
 interface Props {
@@ -55,12 +55,10 @@ export const SectionLoading: React.FunctionComponent<Props> = ({ children }) => 
  */
 export const PageLoading: React.FunctionComponent<Props> = ({ children }) => {
   return (
-    <EuiPageSection alignment="center" color="subdued">
-      <EuiEmptyPrompt
-        title={<EuiLoadingSpinner size="xl" />}
-        body={<EuiText color="subdued">{children}</EuiText>}
-        data-test-subj="sectionLoading"
-      />
-    </EuiPageSection>
+    <EuiPageTemplate.EmptyPrompt
+      title={<EuiLoadingSpinner size="xl" />}
+      body={<EuiText color="subdued">{children}</EuiText>}
+      data-test-subj="sectionLoading"
+    />
   );
 };

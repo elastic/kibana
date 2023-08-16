@@ -8,44 +8,42 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiEmptyPrompt, EuiLink, EuiPageSection } from '@elastic/eui';
+import { EuiLink, EuiPageTemplate } from '@elastic/eui';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { linkToRepositories } from '../../../../services/navigation';
 
 export const RepositoryError: React.FunctionComponent = () => {
   const history = useHistory();
   return (
-    <EuiPageSection alignment="center" color="danger">
-      <EuiEmptyPrompt
-        iconType="managementApp"
-        data-test-subj="repositoryErrorsPrompt"
-        title={
-          <h1 data-test-subj="title">
-            <FormattedMessage
-              id="xpack.snapshotRestore.snapshotList.emptyPrompt.errorRepositoriesTitle"
-              defaultMessage="Some repositories contain errors"
-            />
-          </h1>
-        }
-        body={
-          <p>
-            <FormattedMessage
-              id="xpack.snapshotRestore.snapshotList.emptyPrompt.repositoryWarningDescription"
-              defaultMessage="Go to {repositoryLink} to fix the errors."
-              values={{
-                repositoryLink: (
-                  <EuiLink {...reactRouterNavigate(history, linkToRepositories())}>
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.repositoryWarningLinkText"
-                      defaultMessage="Repositories"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        }
-      />
-    </EuiPageSection>
+    <EuiPageTemplate.EmptyPrompt
+      iconType="managementApp"
+      data-test-subj="repositoryErrorsPrompt"
+      title={
+        <h1 data-test-subj="title">
+          <FormattedMessage
+            id="xpack.snapshotRestore.snapshotList.emptyPrompt.errorRepositoriesTitle"
+            defaultMessage="Some repositories contain errors"
+          />
+        </h1>
+      }
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.snapshotRestore.snapshotList.emptyPrompt.repositoryWarningDescription"
+            defaultMessage="Go to {repositoryLink} to fix the errors."
+            values={{
+              repositoryLink: (
+                <EuiLink {...reactRouterNavigate(history, linkToRepositories())}>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.repositoryWarningLinkText"
+                    defaultMessage="Repositories"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+      }
+    />
   );
 };

@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiLoadingSpinner,
   EuiLink,
+  EuiPageTemplate,
 } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { APP_RESTORE_INDEX_PRIVILEGES } from '../../../../../common';
@@ -106,40 +107,38 @@ export const RestoreList: React.FunctionComponent = () => {
   } else {
     if (restores && restores.length === 0) {
       content = (
-        <EuiPageSection paddingSize="none" alignment="center">
-          <EuiEmptyPrompt
-            iconType="managementApp"
-            title={
-              <h1 data-test-subj="noRestoredSnapshotsHeader">
+        <EuiPageTemplate.EmptyPrompt
+          iconType="managementApp"
+          title={
+            <h1 data-test-subj="noRestoredSnapshotsHeader">
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreList.emptyPromptTitle"
+                defaultMessage="No restored snapshots"
+              />
+            </h1>
+          }
+          body={
+            <Fragment>
+              <p>
                 <FormattedMessage
-                  id="xpack.snapshotRestore.restoreList.emptyPromptTitle"
-                  defaultMessage="No restored snapshots"
+                  id="xpack.snapshotRestore.restoreList.emptyPromptDescription"
+                  defaultMessage="Go to {snapshotsLink} to start a restore."
+                  values={{
+                    snapshotsLink: (
+                      <EuiLink {...reactRouterNavigate(history, linkToSnapshots())}>
+                        <FormattedMessage
+                          id="xpack.snapshotRestore.restoreList.emptyPromptDescriptionLink"
+                          defaultMessage="Snapshots"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
                 />
-              </h1>
-            }
-            body={
-              <Fragment>
-                <p>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.restoreList.emptyPromptDescription"
-                    defaultMessage="Go to {snapshotsLink} to start a restore."
-                    values={{
-                      snapshotsLink: (
-                        <EuiLink {...reactRouterNavigate(history, linkToSnapshots())}>
-                          <FormattedMessage
-                            id="xpack.snapshotRestore.restoreList.emptyPromptDescriptionLink"
-                            defaultMessage="Snapshots"
-                          />
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </p>
-              </Fragment>
-            }
-            data-test-subj="emptyPrompt"
-          />
-        </EuiPageSection>
+              </p>
+            </Fragment>
+          }
+          data-test-subj="emptyPrompt"
+        />
       );
     } else {
       content = (
