@@ -10,12 +10,21 @@ We currently support the following SLI:
 - APM Transaction Duration, known as APM Latency
 - Custom KQL
 - Custom Metric
+- Custom Histogram
 
 For the APM SLIs, customer can provide the service, environment, transaction name and type to configure them. For the **APM Latency** SLI, a threshold in milliseconds needs to be provided to discriminate the good and bad responses (events). For the **APM Availability** SLI, we use the `event.outcome` as a way to discriminate the good and the bad responses(events). The API supports an optional kql filter to further filter the apm data.
 
-The **custom KQL** SLI requires an index pattern, an optional filter query, a numerator query, and denominator query. A custom 'timestampField' can be provided to override the default @timestamp field.
+The **custom KQL** SLI requires an index pattern, an optional filter query, a numerator query, and denominator query. A custom `timestampField` can be provided to override the default @timestamp field.
 
-The **custom Metric** SLI requires an index pattern, an optional filter query, a set of metrics for the numerator, and a set of metrics for the denominator. A custom 'timestampField' can be provided to override the default @timestamp field.
+The **custom Metric** SLI requires an index pattern, an optional filter query, a set of metrics for the numerator, and a set of metrics for the denominator. A custom `timestampField` can be provided to override the default @timestamp field.
+
+The **custom Histogram** SLI requires an index pattern, an optional filter query, and an optional `timestampField`. `good` represents the numerator and `total` represents the denominator, and both require the following fields:
+
+* field - the histogram field used to aggregate good/total events.
+* aggregation - type of aggregation to use, limited to `value_count` or `range`.
+* from - if the `range` aggregation is used, this defines the starting value of the range.
+* to - if the `range` aggregation is used, this defines the ending value of the range.
+
 
 ## SLO configuration
 
@@ -364,4 +373,48 @@ curl --request POST \
 }'
 ```
 
+</details>
+
+### Custom Histogram
+
+<details>
+<summary>95.0% of transactions with latency between 0 and 300ms over the last 7 days</summary>
+
+```
+curl --request POST \
+  --url http://localhost:5601/cyp/api/observability/slos \
+  --header 'Authorization: Basic ZWxhc3RpYzpjaGFuZ2VtZQ==' \
+  --header 'Content-Type: application/json' \
+  --header 'kbn-xsrf: oui' \
+  --data '{
+    "name": "My SLO Name",
+    "description": "My SLO Description",
+    "indicator": {
+        "type": "sli.histogram.custom",
+        "params": {
+            "filter": "",
+            "index": "transactions-*",
+            "timestampField": "custom_timestamp",
+            "good": {
+                "aggregation": "range",
+                "field": "latency",
+                "from": 0,
+                "to": 300
+            },
+            "total": {
+                "aggregation": "value_count",
+                "field": "latency"
+            }
+        }
+    },
+    "timeWindow": {
+        "duration": "7d",
+        "type": "rolling"
+    },
+    "budgetingMethod": "occurrences",
+    "objective": {
+        "target": 0.95
+    }
+}'
+```
 </details>

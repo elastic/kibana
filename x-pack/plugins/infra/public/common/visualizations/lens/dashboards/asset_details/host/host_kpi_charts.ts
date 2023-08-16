@@ -7,24 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { UseLensAttributesMetricLayerConfig } from '../../../../../hooks/use_lens_attributes';
-import { hostLensFormulas } from '../../../constants';
-import { TOOLTIP } from './translations';
-
-export const KPI_CHART_HEIGHT = 150;
-export const AVERAGE_SUBTITLE = i18n.translate(
-  'xpack.infra.assetDetailsEmbeddable.overview.kpi.subtitle.average',
-  {
-    defaultMessage: 'Average',
-  }
-);
+import { hostLensFormulas } from '../../../../constants';
+import type { MetricChartLayerParams } from '../../../../types';
+import { METRICS_TOOLTIP } from '../../translations';
 
 export interface KPIChartProps extends Pick<TypedLensByValueInput, 'id' | 'title' | 'overrides'> {
-  layers: UseLensAttributesMetricLayerConfig;
+  layers: MetricChartLayerParams;
   toolTip: string;
 }
 
-export const KPI_CHARTS: KPIChartProps[] = [
+export const hostKPICharts: KPIChartProps[] = [
   {
     id: 'cpuUsage',
     title: i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.kpi.cpuUsage.title', {
@@ -42,20 +34,20 @@ export const KPI_CHARTS: KPIChartProps[] = [
             }
           : undefined,
       },
-      layerType: 'data',
       options: {
         backgroundColor: '#F1D86F',
         showTrendLine: true,
       },
+      type: 'visualization',
     },
-    toolTip: TOOLTIP.cpuUsage,
+    toolTip: METRICS_TOOLTIP.cpuUsage,
   },
   {
     id: 'normalizedLoad1m',
     title: i18n.translate(
       'xpack.infra.assetDetailsEmbeddable.overview.kpi.normalizedLoad1m.title',
       {
-        defaultMessage: 'CPU Usage',
+        defaultMessage: 'Normalized Load',
       }
     ),
     layers: {
@@ -70,18 +62,18 @@ export const KPI_CHARTS: KPIChartProps[] = [
             }
           : undefined,
       },
-      layerType: 'data',
       options: {
         backgroundColor: '#79AAD9',
         showTrendLine: true,
       },
+      type: 'visualization',
     },
-    toolTip: TOOLTIP.normalizedLoad1m,
+    toolTip: METRICS_TOOLTIP.normalizedLoad1m,
   },
   {
     id: 'memoryUsage',
     title: i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.kpi.memoryUsage.title', {
-      defaultMessage: 'CPU Usage',
+      defaultMessage: 'Memory Usage',
     }),
     layers: {
       data: {
@@ -95,18 +87,18 @@ export const KPI_CHARTS: KPIChartProps[] = [
             }
           : undefined,
       },
-      layerType: 'data',
       options: {
         backgroundColor: '#A987D1',
         showTrendLine: true,
       },
+      type: 'visualization',
     },
-    toolTip: TOOLTIP.memoryUsage,
+    toolTip: METRICS_TOOLTIP.memoryUsage,
   },
   {
     id: 'diskSpaceUsage',
     title: i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.kpi.diskSpaceUsage.title', {
-      defaultMessage: 'CPU Usage',
+      defaultMessage: 'Disk Space Usage',
     }),
     layers: {
       data: {
@@ -120,12 +112,12 @@ export const KPI_CHARTS: KPIChartProps[] = [
             }
           : undefined,
       },
-      layerType: 'data',
       options: {
         backgroundColor: '#F5A35C',
         showTrendLine: true,
       },
+      type: 'visualization',
     },
-    toolTip: TOOLTIP.diskSpaceUsage,
+    toolTip: METRICS_TOOLTIP.diskSpaceUsage,
   },
 ];
