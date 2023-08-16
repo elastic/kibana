@@ -1,0 +1,9 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["../../../typings/**/*", "server/**/*"],
+  "exclude": ["target/**/*"],
+  "kbn_references": []
+}
