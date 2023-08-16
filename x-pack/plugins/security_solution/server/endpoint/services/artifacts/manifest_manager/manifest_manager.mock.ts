@@ -27,9 +27,9 @@ import { createEndpointArtifactClientMock, getManifestClientMock } from '../mock
 import type { ManifestManagerContext } from './manifest_manager';
 import { ManifestManager } from './manifest_manager';
 import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
-import type { AppFeaturesMock } from '../../../../lib/app_features/mocks';
 import { createAppFeaturesMock } from '../../../../lib/app_features/mocks';
 import type { AppFeatureKeys } from '../../../../../common/types/app_features';
+import type { AppFeatures } from '../../../../lib/app_features/app_features';
 
 export const createExceptionListResponse = (data: ExceptionListItemSchema[], total?: number) => ({
   data,
@@ -71,7 +71,7 @@ export interface ManifestManagerMockOptions {
   exceptionListClient: ExceptionListClient;
   packagePolicyService: jest.Mocked<PackagePolicyClient>;
   savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
-  appFeatures: AppFeaturesMock;
+  appFeatures: AppFeatures;
 }
 
 export const buildManifestManagerMockOptions = (
