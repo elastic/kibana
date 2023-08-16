@@ -5,7 +5,15 @@
  * 2.0.
  */
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants';
+import expect from '@kbn/expect';
+import type { ReportingJobResponse } from '@kbn/reporting-plugin/server/types';
+import rison from '@kbn/rison';
 import { FtrProviderContext } from '../ftr_provider_context';
+
+const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
+const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
 
 const DATA_ANALYST_PASSWORD = 'data_analyst-password';
 const DATA_ANALYST_ROLE = 'data_analyst_role';
@@ -19,6 +27,8 @@ const REPORTING_USER_USERNAME = 'reporting_user';
  */
 export function SvlReportingServiceProvider({ getService }: FtrProviderContext) {
   const security = getService('security');
+  const log = getService('log');
+  const supertest = getService('supertestWithoutAuth');
 
   return {
     DATA_ANALYST_PASSWORD,
@@ -97,6 +107,30 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
         roles: [REPORTING_ROLE],
         full_name: 'Reporting User',
       });
+    },
+
+    /**
+     * Use the internal API to create any kind of report job
+     */
+    async createReportJobInternal(
+      jobType: string,
+      job: object,
+      username: string,
+      password: string
+    ) {
+      const requestPath = `${INTERNAL_ROUTES.GENERATE_PREFIX}/${jobType}`;
+      log.debug(`POST request to ${requestPath}`);
+
+      const { status, body } = await supertest
+        .post(requestPath)
+        .auth(username, password)
+        .set(...API_HEADER)
+        .set(...INTERNAL_HEADER)
+        .send({ jobParams: rison.encode(job) });
+
+      expect(status).to.be(200);
+
+      return (body as ReportingJobResponse).job.id;
     },
   };
 }

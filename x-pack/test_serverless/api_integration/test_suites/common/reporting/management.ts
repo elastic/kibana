@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common/src/constants';
+import expect from '@kbn/expect';
 import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -23,7 +23,6 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('Reporting Management', function () {
     before(async () => {
-      // NOTE: unused, since we only need test_user for this suite
       await reportingAPI.createReportingRole();
       await reportingAPI.createReportingUser();
       await reportingAPI.createReportingUser(TEST_USERNAME, TEST_USER_PASSWORD);
