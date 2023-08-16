@@ -154,6 +154,7 @@ export class RepoSourceClassifier {
     const pkgInfo = path.getPkgInfo();
     if (!pkgInfo) {
       // TODO: consider if static, test or mock and tooling should only be checked before triggering non-package
+      // GH ISSUE: https://github.com/elastic/kibana/issues/164110
       return 'non-package';
     }
 
