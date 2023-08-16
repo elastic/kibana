@@ -46,7 +46,9 @@ const FlyoutTemplate: Story<AssetDetailsProps> = (args) => {
       >
         Open flyout
       </EuiButton>
-      <div hidden={!isOpen}>{isOpen && <AssetDetails {...args} />}</div>
+      <div hidden={!isOpen}>
+        {isOpen && <AssetDetails {...args} renderMode={{ mode: 'flyout', closeFlyout }} />}
+      </div>
     </div>
   );
 };
@@ -54,11 +56,5 @@ const FlyoutTemplate: Story<AssetDetailsProps> = (args) => {
 export const Page = PageTemplate.bind({});
 
 export const Flyout = FlyoutTemplate.bind({});
-Flyout.args = {
-  renderMode: {
-    mode: 'flyout',
-    closeFlyout: () => {},
-  },
-};
 
 export default stories;

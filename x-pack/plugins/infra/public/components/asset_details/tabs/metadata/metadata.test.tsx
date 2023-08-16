@@ -13,6 +13,8 @@ import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { AssetDetailsStateProvider } from '../../hooks/use_asset_details_state';
+import { DateRangeProvider } from '../../hooks/use_date_range_provider';
+import { MetadataProvider } from '../../hooks/use_metadata_provider';
 
 jest.mock('../../../../containers/metrics_source');
 jest.mock('../../hooks/use_metadata');
@@ -20,26 +22,40 @@ jest.mock('../../hooks/use_metadata');
 const renderHostMetadata = () =>
   render(
     <I18nProvider>
-      <AssetDetailsStateProvider
-        state={{
-          dateRange: {
-            from: '2023-04-09T11:07:49Z',
-            to: '2023-04-09T11:23:49Z',
-          },
-          assetType: 'host',
-          asset: {
-            id: 'host-1',
-            name: 'host-1',
-          },
-          overrides: {
-            metadata: {
-              showActionsColumn: true,
-            },
-          },
+      <DateRangeProvider
+        dateRange={{
+          from: '2023-04-09T11:07:49Z',
+          to: '2023-04-09T11:23:49Z',
         }}
       >
-        <Metadata />
-      </AssetDetailsStateProvider>
+        <MetadataProvider
+          asset={{
+            id: 'host-1',
+            name: 'host-1',
+          }}
+          assetType="host"
+        >
+          <AssetDetailsStateProvider
+            state={{
+              assetType: 'host',
+              asset: {
+                id: 'host-1',
+                name: 'host-1',
+              },
+              overrides: {
+                metadata: {
+                  showActionsColumn: true,
+                },
+              },
+              renderMode: {
+                mode: 'page',
+              },
+            }}
+          >
+            <Metadata />
+          </AssetDetailsStateProvider>
+        </MetadataProvider>
+      </DateRangeProvider>
     </I18nProvider>,
     { wrapper: EuiThemeProvider }
   );
