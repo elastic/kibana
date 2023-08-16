@@ -10,7 +10,8 @@
     "requiredPlugins": [
       "developerExamples",
       "security",
-      "spaces"
+      "spaces",
+      "features",
     ]
   }
 }

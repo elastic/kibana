@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { PluginInitializer } from '@kbn/core/server';
 import { MyFeaturePlugin } from './plugin';
 
-export const plugin = () => new MyFeaturePlugin();
+export const plugin: PluginInitializer<void, void> = () => new MyFeaturePlugin();

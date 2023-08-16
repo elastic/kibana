@@ -9,18 +9,15 @@
 import { CoreSetup, Plugin } from '@kbn/core/server';
 import {
   PluginSetupContract as FeaturesPluginSetup,
-  PluginStartContract as FeaturesPluginStart,
+  // PluginStartContract as FeaturesPluginStart,
 } from '@kbn/features-plugin/server';
 
-export interface SetupDeps {
+export interface FeatureControlExampleDeps {
   features: FeaturesPluginSetup;
 }
-export interface StartDeps {
-  features: FeaturesPluginStart;
-}
 
-export class MyFeaturePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  public setup(core: CoreSetup<StartDeps>) {
+export class MyFeaturePlugin implements Plugin<void, void, any, FeatureControlExampleDeps> {
+  public setup(core: CoreSetup, { features }: FeatureControlExampleDeps) {
     const router = core.http.createRouter();
     router.get(
       {
@@ -37,8 +34,7 @@ export class MyFeaturePlugin implements Plugin<void, void, SetupDeps, StartDeps>
     );
   }
 
-  start(core: any, plugins: StartDeps) {
-    console.log(plugins.features.getKibanaFeatures());
+  start() {
     return {};
   }
 
