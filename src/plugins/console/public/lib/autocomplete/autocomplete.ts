@@ -1103,7 +1103,8 @@ export default function ({
       // do not suppress autocomplete for a single character following method in URL
     } else if (
       (lastEvaluatedToken.position.column ?? 0) < currentToken.position.column &&
-      (lastEvaluatedToken.position.lineNumber ?? currentToken.position.lineNumber)=== currentToken.position.lineNumber &&
+      (lastEvaluatedToken.position.lineNumber ?? currentToken.position.lineNumber) ===
+        currentToken.position.lineNumber &&
       !lastEvaluatedToken.type &&
       currentToken.type === 'method' &&
       currentToken.value.length === 1
