@@ -141,6 +141,20 @@
           },
           {
             "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavItem.openInNewTab",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "openInNewTab",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
             "id": "def-common.SolutionSideNavItem.description",
             "type": "string",
             "tags": [],
@@ -241,6 +255,20 @@
                 "text": "SolutionSideNavItemPosition"
               },
               " | undefined"
+            ],
+            "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-side-nav",
+            "id": "def-common.SolutionSideNavItem.disabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/packages/security-solution/side_nav/src/types.ts",
             "deprecated": false,
