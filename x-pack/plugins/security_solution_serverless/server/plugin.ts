@@ -49,28 +49,21 @@ export class SecuritySolutionServerlessPlugin
     this.logger = this.initializerContext.logger.get();
   }
 
-  public setup(_coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
+  public setup(coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
     // securitySolutionEss plugin should always be disabled when securitySolutionServerless is enabled.
     // This check is an additional layer of security to prevent double registrations when
     // `plugins.forceEnableAllPlugins` flag is enabled).
-
     const shouldRegister = pluginsSetup.securitySolutionEss == null;
-
-    this.logger.info(
-      `Security Solution running with product tiers:\n${JSON.stringify(
-        this.config.productTypes,
-        null,
-        2
-      )}`
-    );
-
     if (shouldRegister) {
+      const productTypesStr = JSON.stringify(this.config.productTypes, null, 2);
+      this.logger.info(`Security Solution running with product types:\n${productTypesStr}`);
       pluginsSetup.securitySolution.setAppFeatures(getProductAppFeatures(this.config.productTypes));
     }
+
     pluginsSetup.ml.setFeaturesEnabled({ ad: true, dfa: true, nlp: false });
 
     this.cspmUsageReportingTask = new SecurityUsageReportingTask({
-      core: _coreSetup,
+      core: coreSetup,
       logFactory: this.initializerContext.logger,
       config: this.config,
       taskManager: pluginsSetup.taskManager,
@@ -82,7 +75,7 @@ export class SecuritySolutionServerlessPlugin
     });
 
     this.endpointUsageReportingTask = new SecurityUsageReportingTask({
-      core: _coreSetup,
+      core: coreSetup,
       logFactory: this.initializerContext.logger,
       config: this.config,
       taskType: ENDPOINT_METERING_TASK.TYPE,
