@@ -38,7 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         // await notInstalledVulnerabilities.navigateToAction('cnvm-not-installed-action');
         await testSubjects.click('cnvm-not-installed-action');
-
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const result = await testSubjects.exists('createPackagePolicy_pageTitle');
 
         if (!result) {
@@ -58,7 +58,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         // await notInstalledCSP.navigateToAction('cspm-not-installed-action');
         await testSubjects.click('cspm-not-installed-action');
-
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const result = await testSubjects.exists('createPackagePolicy_pageTitle');
 
         if (!result) {
@@ -78,6 +78,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         // await notInstalledCSP.navigateToAction('kspm-not-installed-action');
         await testSubjects.click('kspm-not-installed-action');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const result = await testSubjects.exists('createPackagePolicy_pageTitle');
 
         if (!result) {
