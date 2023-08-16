@@ -54,7 +54,7 @@ export interface GeoContainmentRuleState extends RuleTypeState {
 }
 
 export interface GeoContainmentAlertInstanceState extends AlertInstanceState {
-  location: number[];
+  location: string;
   shapeLocationId: string;
   dateInShape: string | null;
   docId: string;
