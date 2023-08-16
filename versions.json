@@ -17,7 +17,7 @@
       "version": "8.9.1",
       "branch": "8.9",
       "currentMajor": true,
-      "previousMinor": true
+      "previousMinor": false
     },
     {
       "version": "7.17.13",
