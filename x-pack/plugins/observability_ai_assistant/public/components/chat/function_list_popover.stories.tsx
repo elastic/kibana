@@ -23,7 +23,6 @@ const Template: ComponentStory<typeof Component> = (props: FunctionListPopover) 
 };
 
 const defaultProps: FunctionListPopover = {
-  functions: [],
   onSelectFunction: () => {},
 };
 

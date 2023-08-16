@@ -13,6 +13,17 @@ import { CspRuleTemplate } from './schemas';
 import { findCspRuleTemplateRequest } from './schemas/csp_rule_template_api/get_csp_rule_template';
 import { getComplianceDashboardSchema } from './schemas/stats';
 
+export type AwsCredentialsType =
+  | 'assume_role'
+  | 'direct_access_keys'
+  | 'temporary_keys'
+  | 'shared_credentials'
+  | 'cloud_formation';
+
+export type AwsCredentialsTypeFieldMap = {
+  [key in AwsCredentialsType]: string[];
+};
+
 export type Evaluation = 'passed' | 'failed' | 'NA';
 
 export type PostureTypes = 'cspm' | 'kspm' | 'vuln_mgmt' | 'all';

@@ -375,6 +375,7 @@ export interface RuleTypeParamsExpressionProps<
   MetaData = Record<string, unknown>,
   ActionGroupIds extends string = string
 > {
+  id?: string;
   ruleParams: Params;
   ruleInterval: string;
   ruleThrottle: string;

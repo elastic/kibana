@@ -32,6 +32,7 @@ import { calculateTimeRangeBucketSize } from '../overview/helpers/calculate_buck
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERTS_URL_STORAGE_KEY } from '../../../common/constants';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -178,6 +179,7 @@ function InternalAlertsPage() {
           rightSideItems: renderRuleStats(ruleStats, manageRulesHref, ruleStatsLoading),
         }}
       >
+        <HeaderMenu />
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem>
             <ObservabilityAlertSearchBar

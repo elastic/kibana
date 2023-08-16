@@ -39,7 +39,7 @@ const renderHeader = (contextValue: RightPanelContext) =>
     <TestProvidersComponent>
       <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
         <RightPanelContext.Provider value={contextValue}>
-          <HeaderTitle />
+          <HeaderTitle flyoutIsExpandable={true} />
         </RightPanelContext.Provider>
       </ExpandableFlyoutContext.Provider>
     </TestProvidersComponent>
@@ -52,7 +52,7 @@ describe('<HeaderTitle />', () => {
     jest.mocked(useAssistant).mockReturnValue({ showAssistant: true, promptContextId: '' });
   });
 
-  it('should render mitre attack information', () => {
+  it('should render component', () => {
     const contextValue = {
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),

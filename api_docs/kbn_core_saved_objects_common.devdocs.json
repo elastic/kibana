@@ -1524,14 +1524,6 @@
             "path": "src/core/public/index.ts"
           },
           {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
-          },
-          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/utils/saved_visualization_references/saved_visualization_references.ts"
           },
@@ -1554,6 +1546,14 @@
           {
             "plugin": "triggersActionsUi",
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
+          },
+          {
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
+          },
+          {
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
           },
           {
             "plugin": "@kbn/core",

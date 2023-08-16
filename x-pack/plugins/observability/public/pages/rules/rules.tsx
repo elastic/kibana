@@ -19,6 +19,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { observabilityRuleCreationValidConsumers } from '../../../common/constants';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 export function RulesPage() {
   const {
@@ -143,6 +144,7 @@ export function RulesPage() {
       }}
       data-test-subj="rulesPage"
     >
+      <HeaderMenu />
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <RuleList

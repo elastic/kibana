@@ -659,6 +659,7 @@ export const RuleForm = ({
             }
           >
             <RuleParamsExpressionComponent
+              id={rule.id}
               ruleParams={rule.params}
               ruleInterval={`${ruleInterval ?? 1}${ruleIntervalUnit}`}
               ruleThrottle={''}
