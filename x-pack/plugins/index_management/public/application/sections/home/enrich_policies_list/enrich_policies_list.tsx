@@ -14,9 +14,9 @@ import { useAppContext } from '../../../app_context';
 
 import { documentationService } from '../../../services/documentation';
 import { useLoadEnrichPolicies } from '../../../services/api';
-import { PageLoading, PageError } from '../../../../shared_imports';
 import { PoliciesTable } from './policies_table';
 import { DeletePolicyModal, ExecutePolicyModal } from './confirm_modals';
+import { LoadingState, ErrorState } from './empty_states';
 
 export const EnrichPoliciesList = () => {
   const {
@@ -39,29 +39,11 @@ export const EnrichPoliciesList = () => {
   } = useLoadEnrichPolicies();
 
   if (isLoading) {
-    return (
-      <PageLoading>
-        <FormattedMessage
-          id="xpack.idxMgmt.enrich_policies.list.loadingStateLabel"
-          defaultMessage="Loading enrich policies…"
-        />
-      </PageLoading>
-    );
+    return <LoadingState />;
   }
 
   if (error) {
-    return (
-      <PageError
-        data-test-subj="sectionError"
-        title={
-          <FormattedMessage
-            id="xpack.idxMgmt.enrich_policies.list.errorStateLabel"
-            defaultMessage="Error loading enrich policies"
-          />
-        }
-        error={error}
-      />
-    );
+    return <ErrorState resendRequest={reloadPolicies} />;
   }
 
   return (
