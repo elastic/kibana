@@ -20,8 +20,6 @@ import { waitForFleetSetup } from './helpers';
 
 const logFilePath = path.join(__dirname, 'logs.log');
 
-// Failing ES promotion: https://github.com/elastic/kibana/issues/156245
-// FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/163998
 describe('fleet usage telemetry', () => {
   let core: any;
   let esServer: TestElasticsearchUtils;
