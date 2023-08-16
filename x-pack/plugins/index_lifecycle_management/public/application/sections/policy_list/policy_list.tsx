@@ -8,7 +8,7 @@
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiButton, EuiEmptyPrompt, EuiSpacer, EuiPageHeader, EuiPageSection, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiPageHeader, EuiPageTemplate } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { PolicyFromES } from '../../../../common/types';

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiPageSection, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PolicyList as PresentationComponent } from './policy_list';
 import { useKibana } from '../../../shared_imports';
