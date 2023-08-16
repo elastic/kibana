@@ -32,7 +32,7 @@ const columns: Array<EuiBasicTableColumn<UseHighlightedFieldsResult>> = [
     field: 'field',
     name: HIGHLIGHTED_FIELDS_FIELD_COLUMN,
     'data-test-subj': 'fieldCell',
-    width: '125px',
+    width: '150px',
   },
   {
     field: 'description',
