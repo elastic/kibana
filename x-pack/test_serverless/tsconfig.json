@@ -45,9 +45,6 @@
     "@kbn/cases-plugin",
     "@kbn/test-subj-selector",
     "@kbn/reporting-plugin",
-    "@kbn/rison",
     "@kbn/core-http-common",
-    "@kbn/data-views-plugin",
-    "@kbn/core-saved-objects-server",
   ]
 }
