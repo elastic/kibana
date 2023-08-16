@@ -16,11 +16,7 @@ export default createTestConfig({
   suiteTags: { exclude: ['skipSvlOblt'] },
   services,
   // add feature flags
-  kbnServerArgs: [
-    `--xpack.alerting.enableFrameworkAlerts=true`,
-    '--xpack.observability.unsafe.thresholdRule.enabled=true',
-    '--server.publicBaseUrl=https://localhost:5601',
-  ],
+  kbnServerArgs: ['--xpack.observability.unsafe.thresholdRule.enabled=true'],
   // import only tests that require feature flags
   testFiles: [require.resolve('./threshold_rule')],
 });

@@ -11,6 +11,7 @@
  * 2.0.
  */
 
+import { kbnTestConfig } from '@kbn/test';
 import moment from 'moment';
 import { cleanup, generate } from '@kbn/infra-forge';
 import { Aggregators, Comparator } from '@kbn/observability-plugin/common/threshold_rule/types';
@@ -212,10 +213,11 @@ export default function ({ getService }: FtrProviderContext) {
         }>({
           indexName: ALERT_ACTION_INDEX,
         });
+        const { protocol, hostname, port } = kbnTestConfig.getUrlParts();
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
-          `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
+          `${protocol}://${hostname}:${port}/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
           'Custom equation is 0.8 in the last 1 min for host-0. Alert when >= 0.2.'
