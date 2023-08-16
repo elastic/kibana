@@ -31,7 +31,7 @@ const sendApiLoginRequest = (
     url: url.toString(),
     body: {
       providerType: 'basic',
-      providerName: 'cloud-basic',
+      providerName: 'basic',
       currentURL: '/',
       params: {
         username,

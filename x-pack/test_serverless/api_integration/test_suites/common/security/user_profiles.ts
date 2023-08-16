@@ -5,63 +5,44 @@
  * 2.0.
  */
 
-import { kibanaTestUser } from '@kbn/test';
 import expect from 'expect';
-import { parse as parseCookie } from 'tough-cookie';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { kibanaTestUser } from '@kbn/test';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const samlTools = getService('samlTools');
 
   describe('security/user_profiles', function () {
-    // ToDo: this test will need to change when we disable the login route
-    // Use SAML callback?
-    async function login() {
-      const response = await supertestWithoutAuth
-        .post('/internal/security/login')
-        .set(svlCommonApi.getInternalRequestHeader())
-        .send({
-          providerType: 'basic',
-          providerName: 'cloud-basic',
-          currentURL: '/',
-          params: { username: kibanaTestUser.username, password: kibanaTestUser.password },
-        })
-        .expect(200);
-      return parseCookie(response.header['set-cookie'][0])!;
-    }
-
     describe('route access', () => {
       describe('internal', () => {
         it('update', async () => {
-          const sessionCookie = await login();
+          const sessionCookie = await samlTools.login(kibanaTestUser.username);
           const { status } = await supertestWithoutAuth
             .post(`/internal/security/user_profile/_data`)
             .set(svlCommonApi.getInternalRequestHeader())
             .set('Cookie', sessionCookie.cookieString())
             .send({ key: 'value' });
-          // Status should be 401, unauthorized
           expect(status).not.toBe(404);
         });
 
         it('get current', async () => {
-          const sessionCookie = await login();
+          const sessionCookie = await samlTools.login(kibanaTestUser.username);
           const { status } = await supertestWithoutAuth
             .get(`/internal/security/user_profile`)
             .set(svlCommonApi.getInternalRequestHeader())
             .set('Cookie', sessionCookie.cookieString());
-          // Status should be 401, unauthorized
           expect(status).not.toBe(404);
         });
 
         it('bulk get', async () => {
-          const sessionCookie = await login();
+          const sessionCookie = await samlTools.login(kibanaTestUser.username);
           const { status } = await supertestWithoutAuth
             .get(`/internal/security/user_profile`)
             .set(svlCommonApi.getInternalRequestHeader())
             .set('Cookie', sessionCookie.cookieString())
             .send({ uids: ['12345678'] });
-          // Status should be 401, unauthorized
           expect(status).not.toBe(404);
         });
       });
