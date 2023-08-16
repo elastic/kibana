@@ -21,6 +21,9 @@ export function registerFlameChartSearchRoute({
   router,
   logger,
   services: { createProfilingEsClient },
+  dependencies: {
+    start: { profilingDataAccess },
+  },
 }: RouteRegisterParameters) {
   const paths = getRoutePaths();
   router.get(
@@ -36,39 +39,16 @@ export function registerFlameChartSearchRoute({
       },
     },
     async (context, request, response) => {
+      // await profilingDataAccess.fetchFlamechartData();
       const { timeFrom, timeTo, kuery } = request.query;
-      const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
       try {
         const esClient = await getClient(context);
-        const profilingElasticsearchClient = createProfilingEsClient({ request, esClient });
-        const filter = createCommonFilter({
-          timeFrom,
-          timeTo,
+        const flamegraph = await profilingDataAccess.services.fetchFlamechartData({
+          esClient,
+          rangeFrom: timeFrom,
+          rangeTo: timeTo,
           kuery,
-        });
-        const totalSeconds = timeTo - timeFrom;
-
-        const { events, stackTraces, executables, stackFrames, totalFrames, samplingRate } =
-          await searchStackTraces({
-            client: profilingElasticsearchClient,
-            filter,
-            sampleSize: targetSampleSize,
-          });
-
-        const flamegraph = await withProfilingSpan('create_flamegraph', async () => {
-          const tree = createCalleeTree(
-            events,
-            stackTraces,
-            stackFrames,
-            executables,
-            totalFrames,
-            samplingRate
-          );
-
-          const fg = createBaseFlameGraph(tree, samplingRate, totalSeconds);
-
-          return fg;
         });
 
         return response.ok({ body: flamegraph });
