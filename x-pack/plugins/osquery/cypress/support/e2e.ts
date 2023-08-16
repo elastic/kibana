@@ -26,13 +26,12 @@
 import registerCypressGrep from '@cypress/grep';
 
 // force ESM in this module
-import type { ServerlessRoleName } from '../../../../test_serverless/shared/lib';
-
 export {};
+
+import type { ServerlessRoleName } from '../../../../test_serverless/shared/lib';
 
 import 'cypress-react-selector';
 import { login } from '../tasks/login';
-// import './coverage';
 
 registerCypressGrep();
 

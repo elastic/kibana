@@ -111,7 +111,7 @@ describe('ALL - Packs', () => {
     });
 
     beforeEach(() => {
-      cy.login('soc_manager');
+      cy.login('elastic');
       navigateTo('/app/osquery');
     });
 
@@ -712,7 +712,7 @@ describe('ALL - Packs', () => {
 
   describe('Load prebuilt packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     beforeEach(() => {
-      cy.login('soc_manager');
+      cy.login('elastic');
       navigateTo('/app/osquery/packs');
     });
 

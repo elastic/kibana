@@ -29,17 +29,12 @@ import {
   interceptAgentPolicyId,
   policyContainsIntegration,
 } from '../../tasks/integrations';
-import {
-  findAndClickButton,
-  findFormFieldByRowsLabelAndType,
-  isServerless,
-} from '../../tasks/live_query';
+import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
 
 // TODO try to fix it for serverless too
 describe('ALL - Add Integration', { tags: [tag.ESS] }, () => {
   let savedQueryId: string;
 
-  console.log({ isServerless });
   before(() => {
     loadSavedQuery().then((data) => {
       savedQueryId = data.saved_object_id;
@@ -47,7 +42,7 @@ describe('ALL - Add Integration', { tags: [tag.ESS] }, () => {
   });
 
   beforeEach(() => {
-    cy.login();
+    cy.login('elastic');
   });
 
   after(() => {

@@ -23,7 +23,7 @@ describe('ALL - Inventory', { tags: [tag.ESS] }, () => {
   });
 
   beforeEach(() => {
-    cy.login('soc_manager');
+    cy.login('elastic');
     navigateTo('/app/osquery');
   });
 

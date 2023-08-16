@@ -21,7 +21,7 @@ describe('ALL - Edit saved query', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   });
 
   beforeEach(() => {
-    cy.login('soc_manager');
+    cy.login('elastic');
     navigateTo('/app/osquery/saved_queries');
   });
 

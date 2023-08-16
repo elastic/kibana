@@ -58,7 +58,7 @@ describe('ALL - Custom space', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       });
 
       beforeEach(() => {
-        cy.login('soc_manager');
+        cy.login('elastic');
         navigateTo(`/s/${spaceId}/app/osquery`);
       });
 

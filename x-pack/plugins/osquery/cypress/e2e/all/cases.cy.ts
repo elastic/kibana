@@ -37,7 +37,7 @@ describe('Add to Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
           caseId = caseInfo.id;
           caseTitle = caseInfo.title;
         });
-        cy.login('soc_manager');
+        cy.login('elastic');
         navigateTo('/app/osquery');
       });
 
@@ -70,7 +70,7 @@ describe('Add to Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
       });
-      cy.login('soc_manager');
+      cy.login('elastic');
       navigateTo('/app/osquery');
     });
 

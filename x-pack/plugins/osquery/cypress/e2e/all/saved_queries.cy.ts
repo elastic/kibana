@@ -32,7 +32,7 @@ describe('ALL - Saved queries', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   });
 
   beforeEach(() => {
-    cy.login('soc_manager');
+    cy.login('elastic');
     navigateTo('/app/osquery');
   });
 

@@ -10,7 +10,7 @@ import { takeOsqueryActionWithParams } from '../../tasks/live_query';
 
 describe('ALL - Timelines', { tags: [tag.ESS] }, () => {
   beforeEach(() => {
-    cy.login('soc_manager');
+    cy.login('elastic');
   });
 
   it('should substitute osquery parameter on non-alert event take action', () => {
