@@ -90,6 +90,7 @@ export interface AboutStepRule {
   riskScore: AboutStepRiskScore;
   references: string[];
   falsePositives: string[];
+  investigationFields: string[];
   license: string;
   ruleNameOverride: string;
   tags: string[];
