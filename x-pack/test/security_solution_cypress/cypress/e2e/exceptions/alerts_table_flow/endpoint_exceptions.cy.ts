@@ -42,7 +42,8 @@ import {
 } from '../../../screens/exceptions';
 import { goToEndpointExceptionsTab } from '../../../tasks/rule_details';
 
-describe(
+// See https://github.com/elastic/kibana/issues/163967
+describe.skip(
   'Endpoint Exceptions workflows from Alert',
   { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
   () => {

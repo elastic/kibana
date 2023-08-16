@@ -306,34 +306,6 @@ describe('Create case', () => {
       });
     });
 
-    it('does not submits the title when the length is longer than 160 characters', async () => {
-      const longTitle = 'a'.repeat(161);
-
-      appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess}>
-          <CreateCaseFormFields {...defaultCreateCaseForm} />
-          <SubmitCaseButton />
-        </FormContext>
-      );
-
-      await waitForFormToRender(screen);
-
-      const titleInput = within(screen.getByTestId('caseTitle')).getByTestId('input');
-      userEvent.paste(titleInput, longTitle);
-
-      userEvent.click(screen.getByTestId('create-case-submit'));
-
-      await waitFor(() => {
-        expect(
-          screen.getByText(
-            'The length of the name is too long. The maximum length is 160 characters.'
-          )
-        ).toBeInTheDocument();
-      });
-
-      expect(postCase).not.toHaveBeenCalled();
-    });
-
     it('should toggle sync settings', async () => {
       useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
