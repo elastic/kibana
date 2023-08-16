@@ -625,7 +625,7 @@ describe('HomePage', () => {
       );
     });
 
-    it('it removes empty timeline state from URL', async () => {
+    it('it keeps timeline visibility and selected tab state in URL', async () => {
       const { storage } = createSecuritySolutionStorageMock();
       const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
@@ -649,7 +649,11 @@ describe('HomePage', () => {
 
       rerender(<TestComponent />);
 
-      expect(mockUpdateUrlParam).toHaveBeenCalledWith(null);
+      expect(mockUpdateUrlParam).toHaveBeenCalledWith({
+        activeTab: 'query',
+        graphEventId: '',
+        isOpen: false,
+      });
     });
 
     it('it updates URL when timeline store changes', async () => {
