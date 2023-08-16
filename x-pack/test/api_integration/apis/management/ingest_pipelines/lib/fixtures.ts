@@ -81,9 +81,29 @@ export function IngestPipelinesFixturesProvider() {
     };
   };
 
+  const createDocuments = () => {
+    return [
+      {
+        _index: 'index',
+        _id: 'id1',
+        _source: {
+          foo: 'bar',
+        },
+      },
+      {
+        _index: 'index',
+        _id: 'id2',
+        _source: {
+          foo: 'rab',
+        },
+      },
+    ]
+  }
+
   return {
     createPipelineBodyWithRequiredFields,
     createPipelineBody,
+    createDocuments,
     apiBasePath,
   };
 }

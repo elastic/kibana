@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Ingest Pipelines', function () {
     after(async () => {
-      await ingestPipelines.api.cleanPipelines();
+      await ingestPipelines.api.deletePipelines();
     });
 
     describe('Create', () => {
@@ -307,6 +307,98 @@ export default function ({ getService }: FtrProviderContext) {
               status: 404,
             },
           ],
+        });
+      });
+    });
+
+    describe('Simulate', () => {
+      it('should successfully simulate a pipeline', async () => {
+        const { name, ...pipeline } = ingestPipelines.fixtures.createPipelineBody();
+        const documents = ingestPipelines.fixtures.createDocuments();
+        const { body } = await supertest
+          .post(`${ingestPipelines.fixtures.apiBasePath}/simulate`)
+          .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
+          .send({
+            pipeline,
+            documents,
+          })
+          .expect(200)
+
+        // The simulate ES response is quite long and includes timestamps
+        // so for now, we just confirm the docs array is returned with the correct length
+        expect(body.docs?.length).to.eql(2);
+      });
+
+      it('should successfully simulate a pipeline with only required pipeline fields', async () => {
+        const { name, ...pipeline } = ingestPipelines.fixtures.createPipelineBodyWithRequiredFields();
+        const documents = ingestPipelines.fixtures.createDocuments();
+        const { body } = await supertest
+          .post(`${ingestPipelines.fixtures.apiBasePath}/simulate`)
+          .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
+          .send({
+            pipeline,
+            documents,
+          })
+          .expect(200);
+
+        // The simulate ES response is quite long and includes timestamps
+        // so for now, we just confirm the docs array is returned with the correct length
+        expect(body.docs?.length).to.eql(2);
+      });
+    });
+
+
+    describe('Fetch documents', () => {
+      const INDEX = 'test_index';
+      const DOCUMENT_ID = '1';
+      const DOCUMENT = {
+        name: 'John Doe',
+      };
+
+      before(async () => {
+        // Create an index with a document that can be used to test GET request
+        try {
+          await ingestPipelines.api.createIndex({ id: DOCUMENT_ID, index: INDEX, body: DOCUMENT });
+        } catch (err) {
+          log.debug('[Setup error] Error creating index');
+          throw err;
+        }
+      });
+
+      after(async () => {
+        // Clean up index created
+        try {
+          await ingestPipelines.api.deleteIndex(INDEX);
+        } catch (err) {
+          log.debug('[Cleanup error] Error deleting index');
+          throw err;
+        }
+      });
+
+      it('should return a document', async () => {
+        const uri = `${ingestPipelines.fixtures.apiBasePath}/documents/${INDEX}/${DOCUMENT_ID}`;
+
+        const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').set('x-elastic-internal-origin', 'xxx').expect(200);
+
+        expect(body).to.eql({
+          _index: INDEX,
+          _id: DOCUMENT_ID,
+          _source: DOCUMENT,
+        });
+      });
+
+      it('should return an error if the document does not exist', async () => {
+        const uri = `${ingestPipelines.fixtures.apiBasePath}/documents/${INDEX}/2`; // Document 2 does not exist
+
+        const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').set('x-elastic-internal-origin', 'xxx').expect(404);
+
+        expect(body).to.eql({
+          error: 'Not Found',
+          message: '{"_index":"test_index","_id":"2","found":false}',
+          statusCode: 404,
+          attributes: {},
         });
       });
     });

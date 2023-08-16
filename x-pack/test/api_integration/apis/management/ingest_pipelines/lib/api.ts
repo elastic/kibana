@@ -40,7 +40,7 @@ export function IngestPipelinesAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async cleanPipelines() {
+    async deletePipelines() {
       const pipelines = await es.ingest.getPipeline();
       // Assumes all test pipelines will be prefixed with `test-pipeline*`
       const pipelineIds = Object.keys(pipelines).filter((pipeline) =>
@@ -54,5 +54,17 @@ export function IngestPipelinesAPIProvider({ getService }: FtrProviderContext) {
         console.log(`[Cleanup error] Error deleting ES resources: ${err.message}`);
       });
     },
+
+    async createIndex(index: { index: string; id: string; body: object }) {
+      log.debug(`Creating index: '${index.index}'`);
+
+      return await es.index(index);;
+    },
+
+    async deleteIndex(indexName: string) {
+      log.debug(`Deleting index: '${indexName}'`);
+
+      return await es.indices.delete({ index: indexName });
+    }
   };
 }

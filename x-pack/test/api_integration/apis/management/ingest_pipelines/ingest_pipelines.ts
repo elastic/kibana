@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 
 import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
-import { registerEsHelpers } from './lib';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -17,11 +16,9 @@ export default function ({ getService }: FtrProviderContext) {
   const ingestPipelines = getService('ingestPipelines');
   const log = getService('log');
 
-  const { createIndex, deleteIndex } = registerEsHelpers(getService);
-
   describe('Pipelines', function () {
     after(async () => {
-      await ingestPipelines.api.cleanPipelines();
+      await ingestPipelines.api.deletePipelines();
     });
 
     describe('Create', () => {
@@ -298,49 +295,14 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('Simulate', () => {
       it('should successfully simulate a pipeline', async () => {
+        const { name, ...pipeline } = ingestPipelines.fixtures.createPipelineBody();
+        const documents = ingestPipelines.fixtures.createDocuments();
         const { body } = await supertest
           .post(`${ingestPipelines.fixtures.apiBasePath}/simulate`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            pipeline: {
-              description: 'test simulate pipeline description',
-              processors: [
-                {
-                  set: {
-                    field: 'field2',
-                    value: '_value',
-                  },
-                },
-              ],
-              version: 1,
-              on_failure: [
-                {
-                  set: {
-                    field: '_index',
-                    value: 'failed-{{ _index }}',
-                  },
-                },
-              ],
-              _meta: {
-                field: 'test simulate metadata',
-              },
-            },
-            documents: [
-              {
-                _index: 'index',
-                _id: 'id',
-                _source: {
-                  foo: 'bar',
-                },
-              },
-              {
-                _index: 'index',
-                _id: 'id',
-                _source: {
-                  foo: 'rab',
-                },
-              },
-            ],
+            pipeline,
+            documents,
           })
           .expect(200);
 
@@ -350,36 +312,14 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should successfully simulate a pipeline with only required pipeline fields', async () => {
+        const { name, ...pipeline } = ingestPipelines.fixtures.createPipelineBodyWithRequiredFields();
+        const documents = ingestPipelines.fixtures.createDocuments();
         const { body } = await supertest
           .post(`${ingestPipelines.fixtures.apiBasePath}/simulate`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            pipeline: {
-              processors: [
-                {
-                  set: {
-                    field: 'field2',
-                    value: '_value',
-                  },
-                },
-              ],
-            },
-            documents: [
-              {
-                _index: 'index',
-                _id: 'id',
-                _source: {
-                  foo: 'bar',
-                },
-              },
-              {
-                _index: 'index',
-                _id: 'id',
-                _source: {
-                  foo: 'rab',
-                },
-              },
-            ],
+            pipeline,
+            documents,
           })
           .expect(200);
 
@@ -399,10 +339,9 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         // Create an index with a document that can be used to test GET request
         try {
-          await createIndex({ id: DOCUMENT_ID, index: INDEX, body: DOCUMENT });
+          await ingestPipelines.api.createIndex({ id: DOCUMENT_ID, index: INDEX, body: DOCUMENT });
         } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log('[Setup error] Error creating index');
+          log.debug('[Setup error] Error creating index');
           throw err;
         }
       });
@@ -410,10 +349,9 @@ export default function ({ getService }: FtrProviderContext) {
       after(async () => {
         // Clean up index created
         try {
-          await deleteIndex(INDEX);
+          await ingestPipelines.api.deleteIndex(INDEX);
         } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log('[Cleanup error] Error deleting index');
+          log.debug('[Cleanup error] Error deleting index');
           throw err;
         }
       });
