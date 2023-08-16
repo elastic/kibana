@@ -10,7 +10,7 @@ import type { GeoContainmentAlertInstanceState } from '../types';
 
 // Flatten agg results and get latest locations for each entity
 export function transformResults(
-  results: SearchResponse<any>,
+  results: SearchResponse<any>, // eslint-disable-line @typescript-eslint/no-explicit-any
   dateField: string,
   geoField: string
 ): Map<string, GeoContainmentAlertInstanceState[]> {
