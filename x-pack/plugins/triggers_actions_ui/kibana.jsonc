@@ -36,8 +36,7 @@
       "esUiShared",
       "kibanaReact",
       "kibanaUtils",
-      "actions",
-      "stackAlerts"
+      "actions"
     ],
     "extraPublicDirs": [
       "public/common",
