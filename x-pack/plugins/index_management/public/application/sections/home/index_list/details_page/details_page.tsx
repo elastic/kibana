@@ -16,6 +16,7 @@ import {
   EuiPageSection,
   EuiButton,
 } from '@elastic/eui';
+import { DiscoverLink } from '../../../../lib/discover_link';
 import { DetailsPageError } from './details_page_error';
 import { useLoadIndex } from '../../../../services';
 import { Section } from '../../home';
@@ -116,7 +117,7 @@ export const DetailsPage: React.FunctionComponent<
         data-test-subj="indexDetailsHeader"
         pageTitle={indexName}
         bottomBorder
-        rightSideItems={[]}
+        rightSideItems={[<DiscoverLink indexName={indexName} asButton={true} />]}
         tabs={headerTabs}
       />
 
