@@ -89,3 +89,6 @@ export { calculateTimeRangeBucketSize } from './pages/overview/helpers/calculate
 
 export { convertTo } from '../common/utils/formatters/duration';
 export { formatAlertEvaluationValue } from './utils/format_alert_evaluation_value';
+export { WithKueryAutocompletion } from './components/rule_kql_filter/with_kuery_autocompletion';
+export { AutocompleteField } from './components/rule_kql_filter/autocomplete_field';
+export { RuleFlyoutKueryBar } from './components/rule_kql_filter/kuery_bar';
