@@ -551,6 +551,7 @@
     "@kbn/portable-dashboards-example": "link:examples/portable_dashboards_example",
     "@kbn/preboot-example-plugin": "link:examples/preboot_example",
     "@kbn/presentation-util-plugin": "link:src/plugins/presentation_util",
+    "@kbn/profiling-data-access-plugin": "link:x-pack/plugins/profiling_data_access",
     "@kbn/profiling-plugin": "link:x-pack/plugins/profiling",
     "@kbn/random-sampling": "link:x-pack/packages/kbn-random-sampling",
     "@kbn/react-field": "link:packages/kbn-react-field",

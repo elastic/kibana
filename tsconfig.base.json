@@ -1076,6 +1076,8 @@
       "@kbn/preboot-example-plugin/*": ["examples/preboot_example/*"],
       "@kbn/presentation-util-plugin": ["src/plugins/presentation_util"],
       "@kbn/presentation-util-plugin/*": ["src/plugins/presentation_util/*"],
+      "@kbn/profiling-data-access-plugin": ["x-pack/plugins/profiling_data_access"],
+      "@kbn/profiling-data-access-plugin/*": ["x-pack/plugins/profiling_data_access/*"],
       "@kbn/profiling-plugin": ["x-pack/plugins/profiling"],
       "@kbn/profiling-plugin/*": ["x-pack/plugins/profiling/*"],
       "@kbn/random-sampling": ["x-pack/packages/kbn-random-sampling"],
