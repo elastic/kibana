@@ -77,7 +77,7 @@ export async function pickTestGroupRunOrder() {
     throw new Error('unable to find any unit, integration, or FTR configs');
   }
 
-  const allJestTestFiles = getAllTestFilesForConfigs(jestUnitConfigs);
+  const allJestTestFiles = await getAllTestFilesForConfigs(jestUnitConfigs);
   const allChangedFiles = getChangedFileList();
 
   console.log('--- All jest configs listed');
