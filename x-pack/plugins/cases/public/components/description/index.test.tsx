@@ -27,7 +27,13 @@ const defaultProps = {
   isLoadingDescription: false,
 };
 
-describe('Description', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/164049
+// FLAKY: https://github.com/elastic/kibana/issues/164048
+// FLAKY: https://github.com/elastic/kibana/issues/164047
+// FLAKY: https://github.com/elastic/kibana/issues/164046
+// FLAKY: https://github.com/elastic/kibana/issues/164045
+// FLAKY: https://github.com/elastic/kibana/issues/164044
+describe.skip('Description', () => {
   const onUpdateField = jest.fn();
   let appMockRender: AppMockRenderer;
 
@@ -146,7 +152,8 @@ describe('Description', () => {
     expect(screen.queryByTestId('description-edit-icon')).not.toBeInTheDocument();
   });
 
-  describe('draft message', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/164050
+  describe.skip('draft message', () => {
     const draftStorageKey = `cases.testAppId.basic-case-id.description.markdownEditor`;
 
     beforeEach(() => {
