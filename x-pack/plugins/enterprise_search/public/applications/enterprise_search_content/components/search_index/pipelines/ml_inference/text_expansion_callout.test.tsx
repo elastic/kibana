@@ -37,7 +37,6 @@ const DEFAULT_VALUES = {
   isModelDownloaded: false,
   isModelStarted: false,
   isStartButtonDisabled: false,
-  textExpansionError: null,
 };
 
 describe('TextExpansionCallOut', () => {
@@ -48,13 +47,10 @@ describe('TextExpansionCallOut', () => {
   it('renders error panel instead of normal panel if there are some errors', () => {
     setMockValues({
       ...DEFAULT_VALUES,
-      startTextExpansionModelError: {
-        body: {
-          error: 'some-error',
-          message: 'some-error-message',
-          statusCode: 500,
-        },
-      } as HttpError,
+      textExpansionError: {
+        title: 'Error with ELSER deployment',
+        message: 'Mocked error message',
+      },
     });
 
     const wrapper = shallow(<TextExpansionCallOut />);
