@@ -476,9 +476,7 @@ export class IndexTable extends Component {
       };
 
       return (
-        <EuiPageSection paddingSize="none" alignment="center">
-          {renderNoContent()}
-        </EuiPageSection>
+        {renderNoContent()}
       );
     }
 
