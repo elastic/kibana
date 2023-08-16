@@ -16,6 +16,7 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { Groupings } from './threshold_executor';
 import { ObservabilityConfig } from '../../..';
 import { AlertExecutionDetails } from './types';
 
@@ -227,21 +228,20 @@ export const flattenObject = (obj: AdditionalContext, prefix: string = ''): Addi
     return acc;
   }, {});
 
-export const getGroupByObject = (
+export const getFormattedGroupBy = (
   groupBy: string | string[] | undefined,
-  resultGroupSet: Set<string>
-): Record<string, object> => {
-  const groupByKeysObjectMapping: Record<string, object> = {};
+  groupSet: Set<string>
+): Record<string, Groupings> => {
+  const groupByKeysObjectMapping: Record<string, Groupings> = {};
   if (groupBy) {
-    resultGroupSet.forEach((groupSet) => {
-      const groupSetKeys = groupSet.split(',');
-      groupByKeysObjectMapping[groupSet] = unflattenObject(
-        Array.isArray(groupBy)
-          ? groupBy.reduce((result, group, index) => {
-              return { ...result, [group]: groupSetKeys[index]?.trim() };
-            }, {})
-          : { [groupBy]: groupSet }
-      );
+    groupSet.forEach((group) => {
+      const groupSetKeys = group.split(',');
+      groupByKeysObjectMapping[group] = Array.isArray(groupBy)
+        ? groupBy.reduce((result: Groupings, groupByItem, index) => {
+            result.push({ field: groupByItem, value: groupSetKeys[index]?.trim() });
+            return result;
+          }, [])
+        : [{ field: groupBy, value: group }];
     });
   }
   return groupByKeysObjectMapping;

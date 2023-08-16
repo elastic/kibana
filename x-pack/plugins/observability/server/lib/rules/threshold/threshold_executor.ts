@@ -6,7 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALERT_ACTION_GROUP, ALERT_EVALUATION_VALUES, ALERT_REASON } from '@kbn/rule-data-utils';
+import {
+  ALERT_ACTION_GROUP,
+  ALERT_EVALUATION_VALUES,
+  ALERT_REASON,
+  ALERT_GROUPINGS,
+} from '@kbn/rule-data-utils';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { isEqual } from 'lodash';
 import {
@@ -36,7 +41,7 @@ import {
   hasAdditionalContext,
   validGroupByForContext,
   flattenAdditionalContext,
-  getGroupByObject,
+  getFormattedGroupBy,
 } from './utils';
 
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
@@ -77,12 +82,18 @@ type MetricThresholdAlert = Alert<
   MetricThresholdAllowedActionGroups
 >;
 
+export type Groupings = Array<{
+  field: string;
+  value: string;
+}>;
+
 type MetricThresholdAlertFactory = (
   id: string,
   reason: string,
   actionGroup: MetricThresholdActionGroup,
   additionalContext?: AdditionalContext | null,
-  evaluationValues?: Array<number | null>
+  evaluationValues?: Array<number | null>,
+  groupings?: Groupings
 ) => MetricThresholdAlert;
 
 export const createMetricThresholdExecutor = ({
@@ -136,7 +147,8 @@ export const createMetricThresholdExecutor = ({
       reason,
       actionGroup,
       additionalContext,
-      evaluationValues
+      evaluationValues,
+      groupings
     ) =>
       alertWithLifecycle({
         id,
@@ -144,6 +156,7 @@ export const createMetricThresholdExecutor = ({
           [ALERT_REASON]: reason,
           [ALERT_ACTION_GROUP]: actionGroup,
           [ALERT_EVALUATION_VALUES]: evaluationValues,
+          [ALERT_GROUPINGS]: groupings,
           ...flattenAdditionalContext(additionalContext),
         },
       });
@@ -192,7 +205,7 @@ export const createMetricThresholdExecutor = ({
       }
     }
 
-    const groupByKeysObjectMapping = getGroupByObject(params.groupBy, resultGroupSet);
+    const groupByKeysObjectMapping = getFormattedGroupBy(params.groupBy, resultGroupSet);
     const groups = [...resultGroupSet];
     const nextMissingGroups = new Set<MissingGroupsRecord>();
     const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
@@ -286,7 +299,8 @@ export const createMetricThresholdExecutor = ({
           reason,
           actionGroupId,
           additionalContext,
-          evaluationValues
+          evaluationValues,
+          groupByKeysObjectMapping[group]
         );
         const alertUuid = getAlertUuid(group);
         const indexedStartedAt = getAlertStartedDate(group) ?? startedAt.toISOString();
@@ -319,7 +333,7 @@ export const createMetricThresholdExecutor = ({
     const { getRecoveredAlerts } = services.alertFactory.done();
     const recoveredAlerts = getRecoveredAlerts();
 
-    const groupByKeysObjectForRecovered = getGroupByObject(
+    const groupByKeysObjectForRecovered = getFormattedGroupBy(
       params.groupBy,
       new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.getId()))
     );

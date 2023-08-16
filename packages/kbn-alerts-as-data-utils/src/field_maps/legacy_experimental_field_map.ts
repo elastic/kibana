@@ -11,6 +11,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_VALUES,
+  ALERT_GROUPINGS,
 } from '@kbn/rule-data-utils';
 
 export const legacyExperimentalFieldMap = {
@@ -26,6 +27,16 @@ export const legacyExperimentalFieldMap = {
     scaling_factor: 100,
     required: false,
     array: true,
+  },
+  [`${ALERT_GROUPINGS}.field`]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [`${ALERT_GROUPINGS}.value`]: {
+    type: 'keyword',
+    array: false,
+    required: false,
   },
 } as const;
 
