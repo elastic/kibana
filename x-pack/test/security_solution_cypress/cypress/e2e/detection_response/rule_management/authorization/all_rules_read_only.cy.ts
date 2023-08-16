@@ -22,11 +22,10 @@ import {
   dismissCallOut,
   getCallOut,
   waitForCallOutToBeShown,
+  MISSING_PRIVILEGES_CALLOUT,
 } from '../../../../tasks/common/callouts';
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../../../urls/navigation';
-
-const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 
 describe('All rules - read only', { tags: tag.ESS }, () => {
   before(() => {
