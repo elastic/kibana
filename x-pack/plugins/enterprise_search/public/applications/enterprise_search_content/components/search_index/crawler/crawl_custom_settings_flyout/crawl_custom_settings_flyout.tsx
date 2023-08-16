@@ -28,20 +28,34 @@ import { i18n } from '@kbn/i18n';
 import { CANCEL_BUTTON_LABEL } from '../../../../../shared/constants';
 import { Loading } from '../../../../../shared/loading';
 
-import { CrawlCustomSettingsFlyoutCrawlDepthPanel } from './crawl_custom_settings_flyout_crawl_depth_panel';
-import { CrawlCustomSettingsFlyoutDomainsPanel } from './crawl_custom_settings_flyout_domains_panel';
+import { CrawlCustomSettingsFlyoutCrawlDepthPanelWithLogicProps } from './crawl_custom_settings_flyout_crawl_depth_panel';
+import { CrawlCustomSettingsFlyoutCrawlTypeSelection } from './crawl_custom_settings_flyout_crawl_type_select';
+import { CrawlCustomSettingsFlyoutDomainsPanelWithLogicProps } from './crawl_custom_settings_flyout_domains_panel';
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
-import { CrawlCustomSettingsFlyoutSeedUrlsPanel } from './crawl_custom_settings_flyout_seed_urls_panel';
+import { CrawlCustomSettingsFlyoutMultipleCrawlDelete } from './crawl_custom_settings_flyout_multi_crawl_delete';
+import { CrawlCustomSettingsFlyoutMultipleCrawlTabs } from './crawl_custom_settings_flyout_multi_crawl_tabs';
+import { CrawlCustomSettingsFlyoutMultiCrawlScheduling } from './crawl_custom_settings_flyout_mutli_crawl';
+import { CrawlCustomSettingsFlyoutSeedUrlsPanelWithLogicProps } from './crawl_custom_settings_flyout_seed_urls_panel';
 
 export const CrawlCustomSettingsFlyout: React.FC = () => {
-  const { isDataLoading, isFormSubmitting, isFlyoutVisible, selectedDomainUrls } = useValues(
+  const {
+    isDataLoading,
+    isFormSubmitting,
+    isFlyoutVisible,
+    isSingleCrawlType,
+    selectedDomainUrls,
+  } = useValues(CrawlCustomSettingsFlyoutLogic);
+  const { hideFlyout, startCustomCrawl, saveCustomSchedulingConfiguration } = useActions(
     CrawlCustomSettingsFlyoutLogic
   );
-  const { hideFlyout, startCustomCrawl } = useActions(CrawlCustomSettingsFlyoutLogic);
 
   if (!isFlyoutVisible) {
     return null;
   }
+
+  const submitFunctionLogic = isSingleCrawlType
+    ? startCustomCrawl
+    : saveCustomSchedulingConfiguration;
 
   return (
     <EuiFlyout ownFocus onClose={hideFlyout} size="m">
@@ -62,22 +76,37 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
             {i18n.translate(
               'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.flyoutHeaderDescription',
               {
-                defaultMessage: 'Set up a one-time crawl with custom settings.',
+                defaultMessage: 'Set up a one-time crawl or multiple crawling custom settings.',
               }
             )}
           </p>
         </EuiText>
       </EuiFlyoutHeader>
+
       <EuiFlyoutBody>
         {isDataLoading ? (
           <Loading />
         ) : (
           <>
-            <CrawlCustomSettingsFlyoutCrawlDepthPanel />
+            <CrawlCustomSettingsFlyoutCrawlTypeSelection />
             <EuiSpacer />
-            <CrawlCustomSettingsFlyoutDomainsPanel />
-            <EuiSpacer />
-            <CrawlCustomSettingsFlyoutSeedUrlsPanel />
+            {isSingleCrawlType ? (
+              <>
+                <CrawlCustomSettingsFlyoutCrawlDepthPanelWithLogicProps />
+                <EuiSpacer />
+                <CrawlCustomSettingsFlyoutDomainsPanelWithLogicProps />
+                <EuiSpacer />
+                <CrawlCustomSettingsFlyoutSeedUrlsPanelWithLogicProps />
+              </>
+            ) : (
+              <>
+                <CrawlCustomSettingsFlyoutMultipleCrawlTabs />
+                <EuiSpacer />
+                <CrawlCustomSettingsFlyoutMultiCrawlScheduling />
+                <EuiSpacer />
+                <CrawlCustomSettingsFlyoutMultipleCrawlDelete />
+              </>
+            )}
           </>
         )}
       </EuiFlyoutBody>
@@ -95,16 +124,23 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
             <EuiButton
               data-telemetry-id="entSearchContent-crawler-customCrawlSettings-startCrawl"
               fill
-              onClick={startCustomCrawl}
+              onClick={submitFunctionLogic}
               disabled={isDataLoading || selectedDomainUrls.length === 0}
               isLoading={isFormSubmitting}
             >
-              {i18n.translate(
-                'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.startCrawlButtonLabel',
-                {
-                  defaultMessage: 'Apply and crawl now',
-                }
-              )}
+              {isSingleCrawlType
+                ? i18n.translate(
+                    'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.startCrawlButtonLabel',
+                    {
+                      defaultMessage: 'Apply and crawl now',
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.saveMultipleCrawlersConfiguration',
+                    {
+                      defaultMessage: 'Save configuration',
+                    }
+                  )}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

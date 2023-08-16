@@ -40,8 +40,10 @@ export const canUseCases =
         acc.update = acc.update || userCapabilitiesForOwner.update;
         acc.delete = acc.delete || userCapabilitiesForOwner.delete;
         acc.push = acc.push || userCapabilitiesForOwner.push;
-        const allFromAcc = acc.create && acc.read && acc.update && acc.delete && acc.push;
+        const allFromAcc =
+          acc.create && acc.read && acc.update && acc.delete && acc.push && acc.connectors;
         acc.all = acc.all || userCapabilitiesForOwner.all || allFromAcc;
+        acc.connectors = acc.connectors || userCapabilitiesForOwner.connectors;
 
         return acc;
       },
@@ -52,6 +54,7 @@ export const canUseCases =
         update: false,
         delete: false,
         push: false,
+        connectors: false,
       }
     );
 

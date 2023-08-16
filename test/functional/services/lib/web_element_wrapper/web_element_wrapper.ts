@@ -31,6 +31,7 @@ const RETRY_ON_ERRORS = [
   'ElementNotInteractableError',
   'StaleElementReferenceError',
   'WebDriverError',
+  'NoSuchElementError', // https://bugs.chromium.org/p/chromedriver/issues/detail?id=4534
 ];
 
 export class WebElementWrapper {

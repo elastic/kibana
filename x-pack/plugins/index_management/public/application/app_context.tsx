@@ -44,6 +44,11 @@ export interface AppDependencies {
     httpService: HttpService;
     notificationService: NotificationService;
   };
+  config: {
+    enableIndexActions: boolean;
+    enableLegacyTemplates: boolean;
+    enableIndexDetailsPage: boolean;
+  };
   history: ScopedHistory;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   uiSettings: IUiSettingsClient;
@@ -52,7 +57,6 @@ export interface AppDependencies {
   docLinks: DocLinksStart;
   kibanaVersion: SemVer;
   theme$: Observable<CoreTheme>;
-  enableIndexActions: boolean;
 }
 
 export const AppContextProvider = ({
