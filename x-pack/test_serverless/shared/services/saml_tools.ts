@@ -6,10 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
 import { getSAMLResponse } from '@kbn/security-api-integration-helpers/saml/saml_tools';
-import { parse as parseCookie } from 'tough-cookie';
 import { kbnTestConfig } from '@kbn/test';
+
+import { parse as parseCookie } from 'tough-cookie';
+
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SamlToolsProvider({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');

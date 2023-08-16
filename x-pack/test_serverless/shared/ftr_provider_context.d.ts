@@ -6,6 +6,7 @@
  */
 
 import { GenericFtrProviderContext } from '@kbn/test';
+
 import { services } from './services';
 
 export type FtrProviderContext = GenericFtrProviderContext<typeof services>;
