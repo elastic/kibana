@@ -12,9 +12,9 @@ import React, { useCallback, useMemo } from 'react';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/public';
 import { capitalize } from 'lodash';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { APM_FIELD } from '../constants';
+import { APM_HOST_FILTER_FIELD } from '../constants';
 import { LinkToAlertsRule, LinkToApmServices, LinkToNodeDetails, LinkToUptime } from '../links';
-import { FlyoutTabIds, LinkOptions, Tab, TabIds } from '../types';
+import { FlyoutTabIds, type LinkOptions, type Tab, type TabIds } from '../types';
 import { toTimestampRange } from '../utils';
 import { useAssetDetailsStateContext } from './use_asset_details_state';
 import { useDateRangeProviderContext } from './use_date_range_provider';
@@ -45,7 +45,7 @@ const useRightSideItems = (links?: LinkOptions[]) => {
         />
       ),
       alertRule: <LinkToAlertsRule onClick={overrides?.alertRule?.onCreateRuleClick} />,
-      apmServices: <LinkToApmServices assetName={asset.name} apmField={APM_FIELD} />,
+      apmServices: <LinkToApmServices assetName={asset.name} apmField={APM_HOST_FILTER_FIELD} />,
       uptime: (
         <LinkToUptime
           assetName={asset.name}
@@ -87,7 +87,7 @@ const useTabs = (tabs: Tab[]) => {
     app: 'apm',
     hash: 'traces',
     search: {
-      kuery: `${APM_FIELD}:"${asset.name}"`,
+      kuery: `${APM_HOST_FILTER_FIELD}:"${asset.name}"`,
     },
   });
 
