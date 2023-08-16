@@ -55,6 +55,14 @@ export const RuleAuthorArray = t.array(t.string); // should be non-empty strings
 export type RuleFalsePositiveArray = t.TypeOf<typeof RuleFalsePositiveArray>;
 export const RuleFalsePositiveArray = t.array(t.string); // should be non-empty strings?
 
+/**
+ * User defined fields to display in areas such as alert details and exceptions auto-populate
+ * Field added in PR - https://github.com/elastic/kibana/pull/163235
+ * @example const investigationFields: RuleCustomHighlightedFieldArray = ['host.os.name']
+ */
+export type RuleCustomHighlightedFieldArray = t.TypeOf<typeof RuleCustomHighlightedFieldArray>;
+export const RuleCustomHighlightedFieldArray = t.array(NonEmptyString);
+
 export type RuleReferenceArray = t.TypeOf<typeof RuleReferenceArray>;
 export const RuleReferenceArray = t.array(t.string); // should be non-empty strings?
 
