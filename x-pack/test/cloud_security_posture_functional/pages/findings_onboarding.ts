@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'findings', 'header']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/163950
   describe('Findings Page onboarding', function () {
     this.tags(['cloud_security_posture_findings_onboarding']);
     let findings: typeof PageObjects.findings;
