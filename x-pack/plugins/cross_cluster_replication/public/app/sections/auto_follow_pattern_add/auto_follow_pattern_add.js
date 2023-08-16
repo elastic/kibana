@@ -47,18 +47,12 @@ export class AutoFollowPatternAdd extends PureComponent {
         {({ isLoading, error, remoteClusters }) => {
           if (isLoading) {
             return (
-              <EuiPageSection
-                alignment="center"
-                color="subdued"
-                data-test-subj="remoteClustersLoading"
-              >
-                <SectionLoading>
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClustersMessage"
-                    defaultMessage="Loading remote clusters…"
-                  />
-                </SectionLoading>
-              </EuiPageSection>
+              <SectionLoading>
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClustersMessage"
+                  defaultMessage="Loading remote clusters…"
+                />
+              </SectionLoading>
             );
           }
 

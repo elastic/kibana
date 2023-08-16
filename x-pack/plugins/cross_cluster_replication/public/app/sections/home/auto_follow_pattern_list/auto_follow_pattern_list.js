@@ -9,7 +9,7 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageSection, EuiButton, EuiEmptyPrompt, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiText, EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { extractQueryParams, PageError, PageLoading } from '../../../../shared_imports';
@@ -93,42 +93,40 @@ export class AutoFollowPatternList extends PureComponent {
 
   renderEmpty() {
     return (
-      <EuiPageSection paddingSize="none" alignment="center">
-        <EuiEmptyPrompt
-          iconType="managementApp"
-          data-test-subj="emptyPrompt"
-          title={
-            <h1>
-              <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternList.emptyPromptTitle"
-                defaultMessage="Create your first auto-follow pattern"
-              />
-            </h1>
-          }
-          body={
-            <p>
-              <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternList.emptyPromptDescription"
-                defaultMessage="Use an auto-follow pattern to automatically replicate indices from
-                a remote cluster."
-              />
-            </p>
-          }
-          actions={
-            <EuiButton
-              {...reactRouterNavigate(this.props.history, `/auto_follow_patterns/add`)}
-              fill
-              iconType="plusInCircle"
-              data-test-subj="createAutoFollowPatternButton"
-            >
-              <FormattedMessage
-                id="xpack.crossClusterReplication.addAutoFollowPatternButtonLabel"
-                defaultMessage="Create auto-follow pattern"
-              />
-            </EuiButton>
-          }
-        />
-      </EuiPageSection>
+      <EuiPageTemplate.EmptyPrompt
+        iconType="managementApp"
+        data-test-subj="emptyPrompt"
+        title={
+          <h1>
+            <FormattedMessage
+              id="xpack.crossClusterReplication.autoFollowPatternList.emptyPromptTitle"
+              defaultMessage="Create your first auto-follow pattern"
+            />
+          </h1>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.crossClusterReplication.autoFollowPatternList.emptyPromptDescription"
+              defaultMessage="Use an auto-follow pattern to automatically replicate indices from
+              a remote cluster."
+            />
+          </p>
+        }
+        actions={
+          <EuiButton
+            {...reactRouterNavigate(this.props.history, `/auto_follow_patterns/add`)}
+            fill
+            iconType="plusInCircle"
+            data-test-subj="createAutoFollowPatternButton"
+          >
+            <FormattedMessage
+              id="xpack.crossClusterReplication.addAutoFollowPatternButtonLabel"
+              defaultMessage="Create auto-follow pattern"
+            />
+          </EuiButton>
+        }
+      />
     );
   }
 

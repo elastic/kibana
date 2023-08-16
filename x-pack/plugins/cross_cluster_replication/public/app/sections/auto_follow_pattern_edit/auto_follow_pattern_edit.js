@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiButton, EuiPageSection, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButton, EuiPageSection, EuiPageTemplate } from '@elastic/eui';
 
 import { listBreadcrumb, editBreadcrumb, setBreadcrumbs } from '../../services/breadcrumbs';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -93,42 +93,38 @@ export class AutoFollowPatternEdit extends PureComponent {
         : error;
 
     return (
-      <EuiPageSection alignment="center" color="danger">
-        <EuiEmptyPrompt
-          iconType="warning"
-          title={
-            <h2>
-              <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternEditForm.loadingErrorTitle"
-                defaultMessage="Error loading auto-follow pattern"
-              />
-            </h2>
-          }
-          body={<p>{errorMessage}</p>}
-          actions={
-            <EuiButton
-              {...reactRouterNavigate(this.props.history, `/auto_follow_patterns`)}
-              color="danger"
-              flush="left"
-              iconType="arrowLeft"
-              data-test-subj="viewAutoFollowPatternListButton"
-            >
-              <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternEditForm.viewAutoFollowPatternsButtonLabel"
-                defaultMessage="View auto-follow patterns"
-              />
-            </EuiButton>
-          }
-        />
-      </EuiPageSection>
+      <EuiPageTemplate.EmptyPrompt
+        iconType="warning"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.crossClusterReplication.autoFollowPatternEditForm.loadingErrorTitle"
+              defaultMessage="Error loading auto-follow pattern"
+            />
+          </h2>
+        }
+        body={<p>{errorMessage}</p>}
+        actions={
+          <EuiButton
+            {...reactRouterNavigate(this.props.history, `/auto_follow_patterns`)}
+            color="danger"
+            flush="left"
+            iconType="arrowLeft"
+            data-test-subj="viewAutoFollowPatternListButton"
+          >
+            <FormattedMessage
+              id="xpack.crossClusterReplication.autoFollowPatternEditForm.viewAutoFollowPatternsButtonLabel"
+              defaultMessage="View auto-follow patterns"
+            />
+          </EuiButton>
+        }
+      />
     );
   }
 
   renderLoading(loadingTitle) {
     return (
-      <EuiPageSection alignment="center" color="subdued">
-        <SectionLoading>{loadingTitle}</SectionLoading>
-      </EuiPageSection>
+      <SectionLoading>{loadingTitle}</SectionLoading>
     );
   }
 
