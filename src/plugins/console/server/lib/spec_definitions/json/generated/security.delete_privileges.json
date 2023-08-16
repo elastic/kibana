@@ -1,6 +1,10 @@
 {
   "security.delete_privileges": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "refresh": [
         "true",
         "false",
@@ -13,6 +17,10 @@
     "patterns": [
       "_security/privilege/{application}/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-delete-privilege.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-delete-privilege.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

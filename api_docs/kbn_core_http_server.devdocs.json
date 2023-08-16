@@ -4077,6 +4077,10 @@
               },
               {
                 "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_multiple_schedules.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
               },
               {
@@ -5605,6 +5609,46 @@
               },
               {
                 "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/routes/agent_policy/index.ts"
               },
               {
@@ -5642,46 +5686,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/routes/data_streams/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
               },
               {
                 "plugin": "fleet",
@@ -6832,6 +6836,10 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_entry_points.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_multiple_schedules.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -8111,6 +8119,34 @@
               },
               {
                 "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/routes/agent_policy/index.ts"
               },
               {
@@ -8144,34 +8180,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/routes/package_policy/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
               },
               {
                 "plugin": "fleet",
@@ -9089,19 +9097,19 @@
               },
               {
                 "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/routes/agent_policy/index.ts"
               },
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/routes/package_policy/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
               },
               {
                 "plugin": "fleet",
@@ -10137,15 +10145,15 @@
               },
               {
                 "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/routes/package_policy/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
               },
               {
                 "plugin": "fleet",
