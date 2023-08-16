@@ -42,7 +42,7 @@ export function registerGetApmTimeseriesFunction({
       contexts: ['apm'],
       name: 'get_apm_timeseries',
       descriptionForUser: i18n.translate(
-        'xpack.apm.observabilityAiAssistant.functions.registerGetApmCorrelationsFunction.descriptionForUser',
+        'xpack.apm.observabilityAiAssistant.functions.registerGetApmTimeseries.descriptionForUser',
         {
           defaultMessage: `Display different APM metrics, like throughput, failure rate, or latency, for any service or all services, or any or all of its dependencies, both as a timeseries and as a single statistic. Additionally, the function will return any changes, such as spikes, step and trend changes, or dips. You can also use it to compare data by requesting two different time ranges, or for instance two different service versions`,
         }
