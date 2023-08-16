@@ -7,7 +7,7 @@
 
 import type { TimeRange } from '@kbn/es-query';
 import React, { useMemo } from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import { useLocation, useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { NoRemoteCluster } from '../../../components/empty_states';
 import { SourceErrorPage } from '../../../components/source_error_page';
@@ -63,6 +63,12 @@ export const AssetDetail = () => {
   const {
     params: { type: nodeType, node: nodeId },
   } = useRouteMatch<{ type: InventoryItemType; node: string }>();
+  const { search } = useLocation();
+
+  const assetName = useMemo(() => {
+    const queryParams = new URLSearchParams(search);
+    return queryParams.get('assetName') ?? undefined;
+  }, [search]);
 
   const { parsedTimeRange } = useMetricsTimeContext();
 
@@ -76,7 +82,7 @@ export const AssetDetail = () => {
 
   const { metricIndicesExist, remoteClustersExist } = source?.status ?? {};
 
-  if (isLoading && !source) return <SourceLoadingPage />;
+  if (isLoading || !source) return <SourceLoadingPage />;
 
   if (!remoteClustersExist) {
     return <NoRemoteCluster />;
@@ -92,18 +98,27 @@ export const AssetDetail = () => {
     return <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />;
 
   return (
-    <AssetDetails
-      asset={{
-        id: nodeId,
+    <MetricsPageTemplate
+      hasData={metricIndicesExist}
+      pageSectionProps={{
+        paddingSize: 'none',
       }}
-      assetType={nodeType}
-      dateRange={dateRange}
-      activeTabId={FlyoutTabIds.OVERVIEW}
-      tabs={orderedFlyoutTabs}
-      links={['apmServices', 'uptime']}
-      renderMode={{
-        mode: 'page',
-      }}
-    />
+    >
+      <AssetDetails
+        asset={{
+          id: nodeId,
+          name: assetName,
+        }}
+        assetType={nodeType}
+        dateRange={dateRange}
+        activeTabId={FlyoutTabIds.OVERVIEW}
+        tabs={orderedFlyoutTabs}
+        links={['uptime', 'apmServices']}
+        renderMode={{
+          mode: 'page',
+        }}
+        metricAlias={source.configuration.metricAlias}
+      />
+    </MetricsPageTemplate>
   );
 };
