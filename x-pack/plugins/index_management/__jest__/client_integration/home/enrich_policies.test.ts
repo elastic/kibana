@@ -11,8 +11,7 @@ import { notificationServiceMock } from '@kbn/core/public/mocks';
 import { setupEnvironment } from '../helpers';
 import { createTestEnrichPolicy } from '../helpers/fixtures';
 import { EnrichPoliciesTestBed, setup } from './enrich_policies.helpers';
-
-const toastsMock = notificationServiceMock.createStartContract().toasts;
+import { notificationService } from '../../../public/application/services/notification';
 
 describe('Enrich policies tab', () => {
   const { httpSetup, httpRequestsMockHelpers, setDelayResponse } = setupEnvironment();
@@ -67,8 +66,7 @@ describe('Enrich policies tab', () => {
         createTestEnrichPolicy('policy-range', 'range'),
       ]);
 
-      testBed = await setup(httpSetup, { toasts: toastsMock });
-
+      testBed = await setup(httpSetup);
       await act(async () => {
         testBed.actions.goToEnrichPoliciesTab();
       });
@@ -97,12 +95,20 @@ describe('Enrich policies tab', () => {
     });
 
     describe('policy actions', () => {
+      const notificationsServiceMock = notificationServiceMock.createStartContract();
+
       beforeEach(async () => {
+        notificationService.setup(notificationsServiceMock);
+
         httpRequestsMockHelpers.setLoadEnrichPoliciesResponse([
           createTestEnrichPolicy('policy-match', 'match'),
         ]);
 
-        testBed = await setup(httpSetup, { toasts: toastsMock });
+        testBed = await setup(httpSetup, {
+          services: {
+            notificationService,
+          },
+        });
 
         await act(async () => {
           testBed.actions.goToEnrichPoliciesTab();
@@ -125,7 +131,11 @@ describe('Enrich policies tab', () => {
 
           await actions.clickConfirmDeletePolicyButton();
 
-          expect(toastsMock.addSuccess).toHaveBeenCalled();
+          expect(notificationsServiceMock.toasts.add).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+              title: 'Deleted policy-match',
+            })
+          );
           expect(httpSetup.delete.mock.calls.length).toBe(1);
         });
 
@@ -146,7 +156,11 @@ describe('Enrich policies tab', () => {
 
           await actions.clickConfirmDeletePolicyButton();
 
-          expect(toastsMock.addDanger).toHaveBeenCalled();
+          expect(notificationsServiceMock.toasts.add).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+              title: `Error deleting enrich policy: 'something went wrong...'`,
+            })
+          );
         });
       });
 
@@ -164,7 +178,11 @@ describe('Enrich policies tab', () => {
 
           await actions.clickConfirmExecutePolicyButton();
 
-          expect(toastsMock.addSuccess).toHaveBeenCalled();
+          expect(notificationsServiceMock.toasts.add).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+              title: 'Executed policy-match',
+            })
+          );
           expect(httpSetup.put.mock.calls.length).toBe(1);
         });
 
@@ -185,7 +203,11 @@ describe('Enrich policies tab', () => {
 
           await actions.clickConfirmExecutePolicyButton();
 
-          expect(toastsMock.addDanger).toHaveBeenCalled();
+          expect(notificationsServiceMock.toasts.add).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+              title: `Error executing enrich policy: 'something went wrong...'`,
+            })
+          );
         });
       });
     });

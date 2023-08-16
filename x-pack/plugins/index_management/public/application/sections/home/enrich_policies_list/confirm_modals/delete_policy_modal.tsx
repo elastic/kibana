@@ -20,7 +20,9 @@ export const DeletePolicyModal = ({
   callback: (data?: { hasDeletedPolicy: boolean }) => void;
 }) => {
   const mounted = useRef(false);
-  const { toasts } = useAppContext();
+  const {
+    services: { notificationService },
+  } = useAppContext();
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Since the async action of this component needs to set state after unmounting,
@@ -39,23 +41,23 @@ export const DeletePolicyModal = ({
       .then(({ data, error }) => {
         if (data) {
           const successMessage = i18n.translate(
-            'xpack.idxMgmt.enrich_policies.deleteModal.successDeleteNotificationMessage',
+            'xpack.idxMgmt.enrichPolicies.deleteModal.successDeleteNotificationMessage',
             { defaultMessage: 'Deleted {policyToDelete}', values: { policyToDelete } }
           );
-          toasts.addSuccess(successMessage);
+          notificationService.showSuccessToast(successMessage);
 
           return callback({ hasDeletedPolicy: true });
         }
 
         if (error) {
           const errorMessage = i18n.translate(
-            'xpack.idxMgmt.enrich_policies.deleteModal.errorDeleteNotificationMessage',
+            'xpack.idxMgmt.enrichPolicies.deleteModal.errorDeleteNotificationMessage',
             {
               defaultMessage: "Error deleting enrich policy: '{error}'",
               values: { error: error.message },
             }
           );
-          toasts.addDanger(errorMessage);
+          notificationService.showDangerToast(errorMessage);
         }
 
         callback();
@@ -75,22 +77,22 @@ export const DeletePolicyModal = ({
     <EuiConfirmModal
       buttonColor="danger"
       data-test-subj="deletePolicyModal"
-      title={i18n.translate('xpack.idxMgmt.enrich_policies.deleteModal.confirmTitle', {
+      title={i18n.translate('xpack.idxMgmt.enrichPolicies.deleteModal.confirmTitle', {
         defaultMessage: 'Delete enrich policy',
       })}
       onCancel={handleOnCancel}
       onConfirm={handleDeletePolicy}
-      cancelButtonText={i18n.translate('xpack.idxMgmt.enrich_policies.deleteModal.cancelButton', {
+      cancelButtonText={i18n.translate('xpack.idxMgmt.enrichPolicies.deleteModal.cancelButton', {
         defaultMessage: 'Cancel',
       })}
-      confirmButtonText={i18n.translate('xpack.idxMgmt.enrich_policies.deleteModal.deleteButton', {
+      confirmButtonText={i18n.translate('xpack.idxMgmt.enrichPolicies.deleteModal.deleteButton', {
         defaultMessage: 'Delete',
       })}
       confirmButtonDisabled={isDeleting}
     >
       <p>
         <FormattedMessage
-          id="xpack.idxMgmt.enrich_policies.deleteModal.bodyCopy"
+          id="xpack.idxMgmt.enrichPolicies.deleteModal.bodyCopy"
           defaultMessage="You are about to delete the enrich policy {policy}. This action is irreverisble."
           values={{
             policy: <strong>{policyToDelete}</strong>,

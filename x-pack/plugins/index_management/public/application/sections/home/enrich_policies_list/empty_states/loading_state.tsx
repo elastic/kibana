@@ -17,8 +17,8 @@ export const LoadingState = () => {
       body={
         <EuiText color="subdued">
           <FormattedMessage
-            id="xpack.idxMgmt.enrich_policies.list.loadingStateLabel"
-            defaultMessage="Loading index details…"
+            id="xpack.idxMgmt.enrichPolicies.list.loadingStateLabel"
+            defaultMessage="Loading enrich policies…"
           />
         </EuiText>
       }

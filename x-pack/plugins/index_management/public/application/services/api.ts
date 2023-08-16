@@ -322,7 +322,7 @@ export const useLoadEnrichPolicies = () => {
 
 export async function deleteEnrichPolicy(policyName: string) {
   const result = sendRequest({
-    path: `${API_BASE_PATH}/enrich_policies/${policyName}`,
+    path: `${INTERNAL_API_BASE_PATH}/enrich_policies/${policyName}`,
     method: 'delete',
   });
 
@@ -331,7 +331,7 @@ export async function deleteEnrichPolicy(policyName: string) {
 
 export async function executeEnrichPolicy(policyName: string) {
   const result = sendRequest({
-    path: `${API_BASE_PATH}/enrich_policies/${policyName}`,
+    path: `${INTERNAL_API_BASE_PATH}/enrich_policies/${policyName}`,
     method: 'put',
   });
 

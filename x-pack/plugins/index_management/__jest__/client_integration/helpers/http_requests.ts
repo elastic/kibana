@@ -136,13 +136,20 @@ const registerHttpRequestMockHelpers = (
     policyName: string,
     response?: HttpResponse,
     error?: ResponseError
-  ) => mockResponse('DELETE', `${API_BASE_PATH}/enrich_policies/${policyName}`, response, error);
+  ) =>
+    mockResponse(
+      'DELETE',
+      `${INTERNAL_API_BASE_PATH}/enrich_policies/${policyName}`,
+      response,
+      error
+    );
 
   const setExecuteEnrichPolicyResponse = (
     policyName: string,
     response?: HttpResponse,
     error?: ResponseError
-  ) => mockResponse('PUT', `${API_BASE_PATH}/enrich_policies/${policyName}`, response, error);
+  ) =>
+    mockResponse('PUT', `${INTERNAL_API_BASE_PATH}/enrich_policies/${policyName}`, response, error);
 
   return {
     setLoadTemplatesResponse,

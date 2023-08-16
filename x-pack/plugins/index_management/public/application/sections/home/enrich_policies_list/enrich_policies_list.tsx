@@ -50,7 +50,7 @@ export const EnrichPoliciesList = () => {
     <div className={APP_WRAPPER_CLASS} data-test-subj="enrichPoliciesList">
       <EuiText color="subdued">
         <FormattedMessage
-          id="xpack.idxMgmt.enrich_policies.list.descriptionTitle"
+          id="xpack.idxMgmt.enrichPolicies.list.descriptionTitle"
           defaultMessage="Enrich policies allow you to enrich your data by adding context via additional data. {learnMoreLink}"
           values={{
             learnMoreLink: (
@@ -61,7 +61,7 @@ export const EnrichPoliciesList = () => {
                 data-test-subj="enrichPoliciesLearnMoreLink"
               >
                 <FormattedMessage
-                  id="xpack.idxMgmt.enrich_policies.list.docsLink"
+                  id="xpack.idxMgmt.enrichPolicies.list.docsLink"
                   defaultMessage="Learn more"
                 />
               </EuiLink>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { addInternalBasePath, addBasePath } from '..';
+import { addInternalBasePath } from '..';
 import { RouterMock, routeDependencies, RequestMock } from '../../../test/helpers';
 import { serializeEnrichmentPolicies } from '../../../lib/enrich_policies';
 import { createTestESEnrichPolicy } from '../../../test/helpers';
@@ -65,7 +65,7 @@ describe('Enrich policies API', () => {
     it('correctly executes a policy', async () => {
       const mockRequest: RequestMock = {
         method: 'put',
-        path: addBasePath('/enrich_policies/{name}'),
+        path: addInternalBasePath('/enrich_policies/{name}'),
         params: {
           name: 'my-policy',
         },
@@ -83,7 +83,7 @@ describe('Enrich policies API', () => {
     it('should return an error if it fails', async () => {
       const mockRequest: RequestMock = {
         method: 'put',
-        path: addBasePath('/enrich_policies/{name}'),
+        path: addInternalBasePath('/enrich_policies/{name}'),
         params: {
           name: 'my-policy',
         },
@@ -102,7 +102,7 @@ describe('Enrich policies API', () => {
     it('correctly deletes a policy', async () => {
       const mockRequest: RequestMock = {
         method: 'delete',
-        path: addBasePath('/enrich_policies/{name}'),
+        path: addInternalBasePath('/enrich_policies/{name}'),
         params: {
           name: 'my-policy',
         },
@@ -120,7 +120,7 @@ describe('Enrich policies API', () => {
     it('should return an error if it fails', async () => {
       const mockRequest: RequestMock = {
         method: 'delete',
-        path: addBasePath('/enrich_policies/{name}'),
+        path: addInternalBasePath('/enrich_policies/{name}'),
         params: {
           name: 'my-policy',
         },

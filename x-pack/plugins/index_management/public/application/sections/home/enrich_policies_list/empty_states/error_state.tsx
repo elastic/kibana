@@ -23,7 +23,7 @@ export const ErrorState = ({
       title={
         <h2>
           <FormattedMessage
-            id="xpack.idxMgmt.enrich_policies.list.errorTitle"
+            id="xpack.idxMgmt.enrichPolicies.list.errorTitle"
             defaultMessage="Unable to load enrich policies"
           />
         </h2>
@@ -32,14 +32,14 @@ export const ErrorState = ({
         <>
           <EuiText color="subdued">
             <FormattedMessage
-              id="xpack.idxMgmt.enrich_policies.list.errorDescription"
+              id="xpack.idxMgmt.enrichPolicies.list.errorDescription"
               defaultMessage="There was an error loading enrich policies."
             />
           </EuiText>
           <EuiSpacer />
           <EuiButton iconSide="right" onClick={resendRequest} iconType="refresh" color="danger">
             <FormattedMessage
-              id="xpack.idxMgmt.enrich_policies.list.errorReloadButton"
+              id="xpack.idxMgmt.enrichPolicies.list.errorReloadButton"
               defaultMessage="Reload"
             />
           </EuiButton>

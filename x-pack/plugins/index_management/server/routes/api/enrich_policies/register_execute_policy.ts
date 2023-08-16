@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { IScopedClusterClient } from '@kbn/core/server';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '..';
+import { addInternalBasePath } from '..';
 import { enrichPoliciesActions } from '../../../lib/enrich_policies';
 
 const paramsSchema = schema.object({
@@ -19,7 +19,7 @@ const paramsSchema = schema.object({
 export function registerExecuteRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.put(
     {
-      path: addBasePath('/enrich_policies/{name}'),
+      path: addInternalBasePath('/enrich_policies/{name}'),
       validate: { params: paramsSchema },
     },
     async (context, request, response) => {

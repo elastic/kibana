@@ -19,8 +19,8 @@ export interface Props {
 }
 
 const pagination = {
-  initialPageSize: 5,
-  pageSizeOptions: [3, 5, 8],
+  initialPageSize: 50,
+  pageSizeOptions: [25, 50, 100],
 };
 
 export const PoliciesTable: FunctionComponent<Props> = ({
@@ -39,13 +39,13 @@ export const PoliciesTable: FunctionComponent<Props> = ({
         onClick={onReloadClick}
       >
         <FormattedMessage
-          id="xpack.idxMgmt.enrich_policies.table.reloadButton"
+          id="xpack.idxMgmt.enrichPolicies.table.reloadButton"
           defaultMessage="Reload"
         />
       </EuiButton>,
       <EuiButton key="createPolicy" fill iconType="plusInCircle">
         <FormattedMessage
-          id="xpack.idxMgmt.enrich_policies.table.createPolicyButton"
+          id="xpack.idxMgmt.enrichPolicies.table.createPolicyButton"
           defaultMessage="Create enrich policy"
         />
       </EuiButton>,
@@ -62,7 +62,7 @@ export const PoliciesTable: FunctionComponent<Props> = ({
   const columns: Array<EuiBasicTableColumn<SerializedEnrichPolicy>> = [
     {
       field: 'name',
-      name: i18n.translate('xpack.idxMgmt.enrich_policies.table.nameField', {
+      name: i18n.translate('xpack.idxMgmt.enrichPolicies.table.nameField', {
         defaultMessage: 'Name',
       }),
       sortable: true,
@@ -70,14 +70,14 @@ export const PoliciesTable: FunctionComponent<Props> = ({
     },
     {
       field: 'type',
-      name: i18n.translate('xpack.idxMgmt.enrich_policies.table.typeField', {
+      name: i18n.translate('xpack.idxMgmt.enrichPolicies.table.typeField', {
         defaultMessage: 'Type',
       }),
       sortable: true,
     },
     {
       field: 'sourceIndices',
-      name: i18n.translate('xpack.idxMgmt.enrich_policies.table.sourceIndicesField', {
+      name: i18n.translate('xpack.idxMgmt.enrichPolicies.table.sourceIndicesField', {
         defaultMessage: 'Source indices',
       }),
       truncateText: true,
@@ -85,30 +85,30 @@ export const PoliciesTable: FunctionComponent<Props> = ({
     },
     {
       field: 'matchField',
-      name: i18n.translate('xpack.idxMgmt.enrich_policies.table.matchFieldField', {
+      name: i18n.translate('xpack.idxMgmt.enrichPolicies.table.matchFieldField', {
         defaultMessage: 'Match field',
       }),
       truncateText: true,
     },
     {
       field: 'enrichFields',
-      name: i18n.translate('xpack.idxMgmt.enrich_policies.table.enrichFieldsField', {
+      name: i18n.translate('xpack.idxMgmt.enrichPolicies.table.enrichFieldsField', {
         defaultMessage: 'Enrich fields',
       }),
       truncateText: true,
       render: (fields: string[]) => <span className="eui-textTruncate">{fields.join(', ')}</span>,
     },
     {
-      name: i18n.translate('xpack.idxMgmt.enrich_policies.table.actionsField', {
+      name: i18n.translate('xpack.idxMgmt.enrichPolicies.table.actionsField', {
         defaultMessage: 'Actions',
       }),
       actions: [
         {
           isPrimary: true,
-          name: i18n.translate('xpack.idxMgmt.enrich_policies.table.executeAction', {
+          name: i18n.translate('xpack.idxMgmt.enrichPolicies.table.executeAction', {
             defaultMessage: 'Execute',
           }),
-          description: i18n.translate('xpack.idxMgmt.enrich_policies.table.executeDescription', {
+          description: i18n.translate('xpack.idxMgmt.enrichPolicies.table.executeDescription', {
             defaultMessage: 'Execute this enrich policy',
           }),
           type: 'icon',
@@ -118,10 +118,10 @@ export const PoliciesTable: FunctionComponent<Props> = ({
         },
         {
           isPrimary: true,
-          name: i18n.translate('xpack.idxMgmt.enrich_policies.table.deleteAction', {
+          name: i18n.translate('xpack.idxMgmt.enrichPolicies.table.deleteAction', {
             defaultMessage: 'Delete',
           }),
-          description: i18n.translate('xpack.idxMgmt.enrich_policies.table.deleteDescription', {
+          description: i18n.translate('xpack.idxMgmt.enrichPolicies.table.deleteDescription', {
             defaultMessage: 'Delete this enrich policy',
           }),
           type: 'icon',

@@ -20,7 +20,9 @@ export const ExecutePolicyModal = ({
   callback: (data?: { hasExecutedPolicy: boolean }) => void;
 }) => {
   const mounted = useRef(false);
-  const { toasts } = useAppContext();
+  const {
+    services: { notificationService },
+  } = useAppContext();
   const [isExecuting, setIsExecuting] = useState(false);
 
   // Since the async action of this component needs to set state after unmounting,
@@ -39,23 +41,23 @@ export const ExecutePolicyModal = ({
       .then(({ data, error }) => {
         if (data) {
           const successMessage = i18n.translate(
-            'xpack.idxMgmt.enrich_policies.executeModal.successDeleteNotificationMessage',
+            'xpack.idxMgmt.enrichPolicies.executeModal.successExecuteNotificationMessage',
             { defaultMessage: 'Executed {policyToExecute}', values: { policyToExecute } }
           );
-          toasts.addSuccess(successMessage);
+          notificationService.showSuccessToast(successMessage);
 
           return callback({ hasExecutedPolicy: true });
         }
 
         if (error) {
           const errorMessage = i18n.translate(
-            'xpack.idxMgmt.enrich_policies.executeModal.errorDeleteNotificationMessage',
+            'xpack.idxMgmt.enrichPolicies.executeModal.errorExecuteNotificationMessage',
             {
               defaultMessage: "Error executing enrich policy: '{error}'",
               values: { error: error.message },
             }
           );
-          toasts.addDanger(errorMessage);
+          notificationService.showDangerToast(errorMessage);
         }
 
         callback();
@@ -74,23 +76,22 @@ export const ExecutePolicyModal = ({
   return (
     <EuiConfirmModal
       data-test-subj="executePolicyModal"
-      title={i18n.translate('xpack.idxMgmt.enrich_policies.executeModal.confirmTitle', {
+      title={i18n.translate('xpack.idxMgmt.enrichPolicies.executeModal.confirmTitle', {
         defaultMessage: 'Execute enrich policy',
       })}
       onCancel={handleOnCancel}
       onConfirm={handleExecutePolicy}
-      cancelButtonText={i18n.translate('xpack.idxMgmt.enrich_policies.executeModal.cancelButton', {
+      cancelButtonText={i18n.translate('xpack.idxMgmt.enrichPolicies.executeModal.cancelButton', {
         defaultMessage: 'Cancel',
       })}
-      confirmButtonText={i18n.translate(
-        'xpack.idxMgmt.enrich_policies.executeModal.executeButton',
-        { defaultMessage: 'Execute' }
-      )}
+      confirmButtonText={i18n.translate('xpack.idxMgmt.enrichPolicies.executeModal.executeButton', {
+        defaultMessage: 'Execute',
+      })}
       confirmButtonDisabled={isExecuting}
     >
       <p>
         <FormattedMessage
-          id="xpack.idxMgmt.enrich_policies.executeModal.bodyCopy"
+          id="xpack.idxMgmt.enrichPolicies.executeModal.bodyCopy"
           defaultMessage="You are about to execute the enrich policy {policy}."
           values={{
             policy: <strong>{policyToExecute}</strong>,
