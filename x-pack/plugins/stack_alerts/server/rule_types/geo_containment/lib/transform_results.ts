@@ -17,18 +17,19 @@ export function transformResults(
   const resultsMap = new Map<string, GeoContainmentAlertInstanceState[]>();
   const boundarySplitBuckets = results?.aggregations?.shapes?.buckets ?? {};
   for (const boundaryId in boundarySplitBuckets) {
-    if (!(boundarySplitBuckets.hasOwnProperty(boundaryId))) {
+    if (!boundarySplitBuckets.hasOwnProperty(boundaryId)) {
       continue;
     }
-    
+
     const entitySplitBuckets = boundarySplitBuckets[boundaryId]?.entitySplit?.buckets ?? [];
-    for (let i=0; i<entitySplitBuckets.length; i++) {
+    for (let i = 0; i < entitySplitBuckets.length; i++) {
       const entityName = entitySplitBuckets[i].key;
       const entityResults = resultsMap.get(entityName) ?? [];
       entityResults.push({
         location: entitySplitBuckets[i].entityHits?.hits?.hits?.[0]?.fields?.[geoField]?.[0] ?? '',
         shapeLocationId: boundaryId,
-        dateInShape: entitySplitBuckets[i].entityHits?.hits?.hits?.[0]?.fields?.[dateField]?.[0] ?? null,
+        dateInShape:
+          entitySplitBuckets[i].entityHits?.hits?.hits?.[0]?.fields?.[dateField]?.[0] ?? null,
         docId: entitySplitBuckets[i].entityHits?.hits?.hits?.[0]?._id,
       });
       resultsMap.set(entityName, entityResults);
