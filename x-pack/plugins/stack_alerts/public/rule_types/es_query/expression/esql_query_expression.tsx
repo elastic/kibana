@@ -183,12 +183,12 @@ export const EsqlQueryExpression: React.FC<
       <EuiFormRow
         id="timeField"
         fullWidth
-        isInvalid={errors.timeField.length > 0}
+        isInvalid={errors.timeField.length > 0 && timeField !== undefined}
         error={errors.timeField}
       >
         <EuiSelect
           options={timeFieldOptions}
-          isInvalid={errors.timeField.length > 0}
+          isInvalid={errors.timeField.length > 0 && timeField !== undefined}
           fullWidth
           name="timeField"
           data-test-subj="timeFieldSelect"
