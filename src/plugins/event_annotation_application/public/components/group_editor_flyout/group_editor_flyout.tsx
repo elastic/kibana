@@ -118,7 +118,7 @@ export const GroupEditorFlyout = ({
             <EuiTitle size="s">
               <h2 id={flyoutHeadingId}>
                 <FormattedMessage
-                  id="eventAnnotationComponents.groupEditorFlyout.title"
+                  id="eventAnnotationApplication.groupEditorFlyout.title"
                   defaultMessage="Edit annotation group"
                 />
               </h2>
@@ -149,7 +149,7 @@ export const GroupEditorFlyout = ({
                     onClick={() => setSelectedAnnotation(undefined)}
                   >
                     <FormattedMessage
-                      id="eventAnnotationComponents.edit.back"
+                      id="eventAnnotationApplication.edit.back"
                       defaultMessage="Back"
                     />
                   </EuiButtonEmpty>
@@ -159,7 +159,7 @@ export const GroupEditorFlyout = ({
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty data-test-subj="cancelGroupEdit" onClick={onClose}>
                       <FormattedMessage
-                        id="eventAnnotationComponents.edit.cancel"
+                        id="eventAnnotationApplication.edit.cancel"
                         defaultMessage="Cancel"
                       />
                     </EuiButtonEmpty>
@@ -178,7 +178,7 @@ export const GroupEditorFlyout = ({
                       }}
                     >
                       <FormattedMessage
-                        id="eventAnnotationComponents.edit.save"
+                        id="eventAnnotationApplication.edit.save"
                         defaultMessage="Save annotation group"
                       />
                     </EuiButton>

@@ -98,7 +98,7 @@ export const GroupPreview = ({
             <EuiTitle size="s">
               <h4>
                 <FormattedMessage
-                  id="eventAnnotationComponents.groupPreview.preview"
+                  id="eventAnnotationApplication.groupPreview.preview"
                   defaultMessage="Preview"
                 />
               </h4>
@@ -126,12 +126,12 @@ export const GroupPreview = ({
               customQuickSelectRender={customQuickSelectRender}
               customQuickSelectPanels={[
                 {
-                  title: i18n.translate('eventAnnotationComponents.timeField', {
+                  title: i18n.translate('eventAnnotationApplication.timeField', {
                     defaultMessage: 'Time field',
                   }),
                   content: (
                     <EuiSelect
-                      aria-label={i18n.translate('eventAnnotationComponents.timeField', {
+                      aria-label={i18n.translate('eventAnnotationApplication.timeField', {
                         defaultMessage: 'Time field',
                       })}
                       options={timeFieldNames.map((name) => ({
@@ -192,7 +192,7 @@ export const GroupPreview = ({
                 title={
                   <h2>
                     <FormattedMessage
-                      id="eventAnnotationComponents.groupPreview.missingDataViewTitle"
+                      id="eventAnnotationApplication.groupPreview.missingDataViewTitle"
                       defaultMessage="Select a valid data view"
                     />
                   </h2>
@@ -200,7 +200,7 @@ export const GroupPreview = ({
                 body={
                   <p>
                     <FormattedMessage
-                      id="eventAnnotationComponents.groupPreview.missingDataViewDescription"
+                      id="eventAnnotationApplication.groupPreview.missingDataViewDescription"
                       defaultMessage="The currently selected data view no longer exists. Please select a valid data view in order to preview and use this annotation group."
                     />
                   </p>
