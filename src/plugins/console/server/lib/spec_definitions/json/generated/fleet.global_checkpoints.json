@@ -1,10 +1,20 @@
 {
   "fleet.global_checkpoints": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "wait_for_advance": "__flag__",
       "wait_for_index": "__flag__",
-      "checkpoints": [],
-      "timeout": ""
+      "checkpoints": [
+        ""
+      ],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "GET"
@@ -12,6 +22,10 @@
     "patterns": [
       "{index}/_fleet/global_checkpoints"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-global-checkpoints.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-global-checkpoints.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

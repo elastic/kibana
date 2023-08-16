@@ -12,6 +12,7 @@ import {
   EXCEPTIONS_PATH,
   RULES_LANDING_PATH,
   RULES_ADD_PATH,
+  SERVER_APP_ID,
 } from '../../common/constants';
 import { ADD_RULES, CREATE_NEW_RULE, EXCEPTIONS, RULES, SIEM_RULES } from '../app/translations';
 import { SecurityPageName } from '../app/types';
@@ -26,19 +27,19 @@ export const links: LinkItem = {
   path: RULES_LANDING_PATH,
   hideTimeline: true,
   skipUrlState: true,
+  capabilities: [`${SERVER_APP_ID}.show`],
   links: [
     {
       id: SecurityPageName.rules,
       title: SIEM_RULES,
       description: i18n.translate('xpack.securitySolution.appLinks.rulesDescription', {
-        defaultMessage:
-          "Create and manage rules to check for suspicious source events, and create alerts when a rule's conditions are met.",
+        defaultMessage: 'Create and manage detection rules for threat detection and monitoring.',
       }),
       landingIcon: IconRollup,
       path: RULES_PATH,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.rules', {
-          defaultMessage: 'Rules',
+          defaultMessage: 'SIEM Rules',
         }),
       ],
       links: [
@@ -79,16 +80,14 @@ export const links: LinkItem = {
   ],
   categories: [
     {
-      label: i18n.translate('xpack.securitySolution.appLinks.category.siemRules', {
-        defaultMessage: 'Security Detection Rules',
+      label: i18n.translate('xpack.securitySolution.appLinks.category.management', {
+        defaultMessage: 'Management',
       }),
-      linkIds: [SecurityPageName.rules, SecurityPageName.exceptions],
-    },
-    {
-      label: i18n.translate('xpack.securitySolution.appLinks.category.cspRules', {
-        defaultMessage: 'Cloud Security Rules',
-      }),
-      linkIds: [SecurityPageName.cloudSecurityPostureBenchmarks],
+      linkIds: [
+        SecurityPageName.rules,
+        SecurityPageName.cloudSecurityPostureBenchmarks,
+        SecurityPageName.exceptions,
+      ],
     },
   ],
 };
