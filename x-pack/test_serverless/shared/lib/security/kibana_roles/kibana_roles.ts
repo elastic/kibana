@@ -24,11 +24,12 @@ const ROLE_NAMES = [
   'platform_engineer',
   'endpoint_operations_analyst',
   'endpoint_policy_manager',
+  'reader', // custom role to test lack of permissions
 ] as const;
 
 export type ServerlessRoleName = typeof ROLE_NAMES[number];
 
-type YamlRoleDefinitions = Record<
+export type YamlRoleDefinitions = Record<
   ServerlessRoleName,
   {
     cluster: string[] | null;
@@ -46,10 +47,13 @@ const roleDefinitions = loadYaml(readFileSync(ROLES_YAML_FILE_PATH, 'utf8')) as 
 export type ServerlessSecurityRoles = Record<ServerlessRoleName, Role>;
 
 export const getServerlessSecurityKibanaRoleDefinitions = (
-  additionalRoleDefinitions: any
+  additionalRoleDefinitions?: YamlRoleDefinitions
 ): ServerlessSecurityRoles => {
   const definitions = cloneDeep(roleDefinitions);
-  const mergedDefinitions = merge(definitions, additionalRoleDefinitions);
+  const mergedDefinitions: YamlRoleDefinitions = merge(
+    definitions,
+    additionalRoleDefinitions || {}
+  );
 
   return Object.entries(mergedDefinitions).reduce((roles, [roleName, definition]) => {
     if (!ROLE_NAMES.includes(roleName as ServerlessRoleName)) {

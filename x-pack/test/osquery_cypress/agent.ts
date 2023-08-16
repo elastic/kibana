@@ -14,7 +14,7 @@ import {
 } from '@kbn/fleet-plugin/common/types';
 import { getLatestVersion } from './artifact_manager';
 import { Manager } from './resource_manager';
-import { addIntegrationToAgentPolicy } from './utils';
+import { addIntegrationToAgentPolicy, DEFAULT_HEADERS } from './utils';
 
 export class AgentManager extends Manager {
   private log: ToolingLog;
@@ -40,6 +40,7 @@ export class AgentManager extends Manager {
     } = await this.kbnClient.request<CreateAgentPolicyResponse>({
       method: 'POST',
       path: `/api/fleet/agent_policies?sys_monitoring=true`,
+      headers: DEFAULT_HEADERS,
       body: {
         name: agentPolicyName,
         description: '',

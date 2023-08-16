@@ -15,6 +15,7 @@ import { AxiosError } from 'axios';
 import {
   getServerlessSecurityKibanaRoleDefinitions,
   ServerlessSecurityRoles,
+  YamlRoleDefinitions,
 } from './kibana_roles';
 import { STANDARD_HTTP_HEADERS } from '../default_http_headers';
 
@@ -123,7 +124,11 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
 }
 
 export class SecurityRoleAndUserLoader extends RoleAndUserLoader<ServerlessSecurityRoles> {
-  constructor(kbnClient: KbnClient, logger: ToolingLog, additionalRoleDefinitions: any) {
+  constructor(
+    kbnClient: KbnClient,
+    logger: ToolingLog,
+    additionalRoleDefinitions?: YamlRoleDefinitions
+  ) {
     super(kbnClient, logger, getServerlessSecurityKibanaRoleDefinitions(additionalRoleDefinitions));
   }
 }

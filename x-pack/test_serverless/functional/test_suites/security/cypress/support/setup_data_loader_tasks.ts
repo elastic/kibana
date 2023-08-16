@@ -1,17 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { createRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
 import { LoadUserAndRoleCyTaskOptions } from '../cypress';
-import { LoadedRoleAndUser, SecurityRoleAndUserLoader } from '../../../../../shared/lib';
+import {
+  LoadedRoleAndUser,
+  SecurityRoleAndUserLoader,
+  YamlRoleDefinitions,
+} from '../../../../../shared/lib';
 
 export const setupUserDataLoader = (
   on: Cypress.PluginEvents,
-  config: Cypress.PluginConfigOptions
+  config: Cypress.PluginConfigOptions,
+  roleDefinitions?: YamlRoleDefinitions
 ) => {
   const stackServicesPromise = createRuntimeServices({
     kibanaUrl: config.env.KIBANA_URL,
@@ -25,7 +31,7 @@ export const setupUserDataLoader = (
 
   const roleAndUserLoaderPromise: Promise<SecurityRoleAndUserLoader> = stackServicesPromise.then(
     ({ kbnClient, log }) => {
-      return new SecurityRoleAndUserLoader(kbnClient, log, {});
+      return new SecurityRoleAndUserLoader(kbnClient, log, roleDefinitions);
     }
   );
 

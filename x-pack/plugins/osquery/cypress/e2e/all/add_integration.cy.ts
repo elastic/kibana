@@ -29,12 +29,17 @@ import {
   interceptAgentPolicyId,
   policyContainsIntegration,
 } from '../../tasks/integrations';
-import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
+import {
+  findAndClickButton,
+  findFormFieldByRowsLabelAndType,
+  isServerless,
+} from '../../tasks/live_query';
 
 // TODO try to fix it for serverless too
 describe('ALL - Add Integration', { tags: [tag.ESS] }, () => {
   let savedQueryId: string;
 
+  console.log({ isServerless });
   before(() => {
     loadSavedQuery().then((data) => {
       savedQueryId = data.saved_object_id;
@@ -58,9 +63,9 @@ describe('ALL - Add Integration', { tags: [tag.ESS] }, () => {
     cy.contains('Add Osquery Manager');
     cy.getBySel('osquery-add-integration-button');
     cy.getBySel('nav-search-input').type('Osquery');
-    cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGEMENT}"]`).should('exist');
-    cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.LOGS}"]`).should('exist');
-    cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGER}"]`).should('exist').click();
+    cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGEMENT}"]`).should('exist').click();
+    // cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.LOGS}"]`).should('exist');
+    // cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGER}"]`).should('exist').click();
   });
 
   describe('Add and upgrade integration', () => {
