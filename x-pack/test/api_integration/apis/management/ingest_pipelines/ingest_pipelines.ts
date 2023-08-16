@@ -312,7 +312,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should successfully simulate a pipeline with only required pipeline fields', async () => {
-        const { name, ...pipeline } = ingestPipelines.fixtures.createPipelineBodyWithRequiredFields();
+        const { name, ...pipeline } =
+          ingestPipelines.fixtures.createPipelineBodyWithRequiredFields();
         const documents = ingestPipelines.fixtures.createDocuments();
         const { body } = await supertest
           .post(`${ingestPipelines.fixtures.apiBasePath}/simulate`)

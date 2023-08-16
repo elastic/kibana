@@ -58,13 +58,13 @@ export function IngestPipelinesAPIProvider({ getService }: FtrProviderContext) {
     async createIndex(index: { index: string; id: string; body: object }) {
       log.debug(`Creating index: '${index.index}'`);
 
-      return await es.index(index);;
+      return await es.index(index);
     },
 
     async deleteIndex(indexName: string) {
       log.debug(`Deleting index: '${indexName}'`);
 
       return await es.indices.delete({ index: indexName });
-    }
+    },
   };
 }

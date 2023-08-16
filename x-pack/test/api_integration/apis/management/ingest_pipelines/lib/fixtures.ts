@@ -97,8 +97,8 @@ export function IngestPipelinesFixturesProvider() {
           foo: 'rab',
         },
       },
-    ]
-  }
+    ];
+  };
 
   return {
     createPipelineBodyWithRequiredFields,

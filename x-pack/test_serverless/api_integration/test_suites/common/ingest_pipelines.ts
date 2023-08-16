@@ -323,7 +323,7 @@ export default function ({ getService }: FtrProviderContext) {
             pipeline,
             documents,
           })
-          .expect(200)
+          .expect(200);
 
         // The simulate ES response is quite long and includes timestamps
         // so for now, we just confirm the docs array is returned with the correct length
@@ -331,7 +331,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should successfully simulate a pipeline with only required pipeline fields', async () => {
-        const { name, ...pipeline } = ingestPipelines.fixtures.createPipelineBodyWithRequiredFields();
+        const { name, ...pipeline } =
+          ingestPipelines.fixtures.createPipelineBodyWithRequiredFields();
         const documents = ingestPipelines.fixtures.createDocuments();
         const { body } = await supertest
           .post(`${ingestPipelines.fixtures.apiBasePath}/simulate`)
@@ -348,7 +349,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.docs?.length).to.eql(2);
       });
     });
-
 
     describe('Fetch documents', () => {
       const INDEX = 'test_index';
@@ -380,7 +380,11 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return a document', async () => {
         const uri = `${ingestPipelines.fixtures.apiBasePath}/documents/${INDEX}/${DOCUMENT_ID}`;
 
-        const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').set('x-elastic-internal-origin', 'xxx').expect(200);
+        const { body } = await supertest
+          .get(uri)
+          .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
+          .expect(200);
 
         expect(body).to.eql({
           _index: INDEX,
@@ -392,7 +396,11 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return an error if the document does not exist', async () => {
         const uri = `${ingestPipelines.fixtures.apiBasePath}/documents/${INDEX}/2`; // Document 2 does not exist
 
-        const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').set('x-elastic-internal-origin', 'xxx').expect(404);
+        const { body } = await supertest
+          .get(uri)
+          .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
+          .expect(404);
 
         expect(body).to.eql({
           error: 'Not Found',
