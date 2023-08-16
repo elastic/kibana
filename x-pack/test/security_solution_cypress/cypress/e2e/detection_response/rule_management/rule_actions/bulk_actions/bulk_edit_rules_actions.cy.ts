@@ -7,6 +7,11 @@
 
 import type { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import {
+  MISSING_PRIVILEGES_CALLOUT,
+  waitForCallOutToBeShown,
+} from '../../../../../tasks/common/callouts';
+import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 import { tag } from '../../../../../tags';
 
 import {
@@ -34,6 +39,7 @@ import {
   waitForRulesTableToBeLoaded,
   selectNumberOfRules,
   goToEditRuleActionsSettingsOf,
+  disableAutoRefresh,
 } from '../../../../../tasks/alerts_detection_rules';
 import {
   waitForBulkEditActionToFinish,
@@ -57,28 +63,28 @@ import {
   getMachineLearningRule,
   getNewTermsRule,
 } from '../../../../../objects/rule';
-import { excessivelyInstallAllPrebuiltRules } from '../../../../../tasks/api_calls/prebuilt_rules';
+import {
+  createAndInstallMockedPrebuiltRules,
+  excessivelyInstallAllPrebuiltRules,
+  preventPrebuiltRulesPackageInstallation,
+} from '../../../../../tasks/api_calls/prebuilt_rules';
 
 const ruleNameToAssert = 'Custom rule name with actions';
 const expectedNumberOfCustomRulesToBeEdited = 7;
-// 7 custom rules of different types + 3 prebuilt.
+// 7 custom rules of different types + 2 prebuilt.
 // number of selected rules doesn't matter, we only want to make sure they will be edited an no modal window displayed as for other actions
-const expectedNumberOfRulesToBeEdited = expectedNumberOfCustomRulesToBeEdited + 3;
+const expectedNumberOfRulesToBeEdited = expectedNumberOfCustomRulesToBeEdited + 2;
 
 const expectedExistingSlackMessage = 'Existing slack action';
 const expectedSlackMessage = 'Slack action test message';
 
-// TODO: Fix flakiness and unskip https://github.com/elastic/kibana/issues/154721
-describe.skip(
+describe(
   'Detection rules, bulk edit of rule actions',
   { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
   () => {
-    before(() => {
+    beforeEach(() => {
       cleanKibana();
       login();
-    });
-
-    beforeEach(() => {
       deleteAlertsAndRules();
       deleteConnectors();
       cy.task('esArchiverResetKibana');
@@ -111,12 +117,27 @@ describe.skip(
       createRule(getNewRule({ saved_id: 'mocked', rule_id: '7' }));
 
       createSlackConnector();
+
+      // Prevent prebuilt rules package installation and mock two prebuilt rules
+      preventPrebuiltRulesPackageInstallation();
+
+      const RULE_1 = createRuleAssetSavedObject({
+        name: 'Test rule 1',
+        rule_id: 'rule_1',
+      });
+      const RULE_2 = createRuleAssetSavedObject({
+        name: 'Test rule 2',
+        rule_id: 'rule_2',
+      });
+
+      createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2] });
     });
 
     context('Restricted action privileges', () => {
       it("User with no privileges can't add rule actions", () => {
         login(ROLES.hunter_no_actions);
         visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL, ROLES.hunter_no_actions);
+        waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
         waitForRulesTableToBeLoaded();
 
         selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
@@ -129,8 +150,10 @@ describe.skip(
 
     context('All actions privileges', () => {
       beforeEach(() => {
+        login();
         visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
         waitForRulesTableToBeLoaded();
+        disableAutoRefresh();
       });
 
       it('Add a rule action to rules (existing connector)', () => {

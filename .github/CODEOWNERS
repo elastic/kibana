@@ -1283,7 +1283,11 @@ x-pack/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-an
 
 ## Security Solution sub teams - security-engineering-productivity
 x-pack/test/security_solution_cypress/cypress/README.md @elastic/security-engineering-productivity
-x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
+x-pack/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
+x-pack/test/security_solution_cypress/cli_config.ts @elastic/security-engineering-productivity
+x-pack/test/security_solution_cypress/config.ts @elastic/security-engineering-productivity
+x-pack/test/security_solution_cypress/runner.ts @elastic/security-engineering-productivity
+x-pack/test/security_solution_cypress/serverless_config.ts @elastic/security-engineering-productivity
 
 ## Security Solution sub teams - adaptive-workload-protection
 x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/sec-cloudnative-integrations
