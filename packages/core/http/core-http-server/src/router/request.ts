@@ -136,10 +136,10 @@ export interface KibanaRequest<
   readonly isFakeRequest: boolean;
 
   /**
-   * An internal request and therefore, for example, should have access to internal routes.
-   * @note See also {@link KibanaRequestRouteOptions#access} on the route options.
+   * An internal request has access to internal routes.
+   * @note See the {@link KibanaRequestRouteOptions#access} route option.
    */
-  readonly isInternalRequest: boolean;
+  readonly isInternalApiRequest: boolean;
 
   /**
    * The socket associated with this request.

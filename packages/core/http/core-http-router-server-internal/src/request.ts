@@ -136,7 +136,7 @@ export class CoreKibanaRequest<
   /** {@inheritDoc KibanaRequest.isFakeRequest} */
   public readonly isFakeRequest: boolean;
   /** {@inheritDoc KibanaRequest.isInternalRequest} */
-  public readonly isInternalRequest: boolean;
+  public readonly isInternalApiRequest: boolean;
   /** {@inheritDoc KibanaRequest.rewrittenUrl} */
   public readonly rewrittenUrl?: URL;
 
@@ -164,7 +164,7 @@ export class CoreKibanaRequest<
     this.headers = isRealRawRequest(request) ? deepFreeze({ ...request.headers }) : request.headers;
     this.isSystemRequest = this.headers['kbn-system-request'] === 'true';
     this.isFakeRequest = isFakeRawRequest(request);
-    this.isInternalRequest =
+    this.isInternalApiRequest =
       X_ELASTIC_INTERNAL_ORIGIN_REQUEST in this.headers ||
       Boolean(this.url?.searchParams?.has(ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM));
     // prevent Symbol exposure via Object.getOwnPropertySymbols()
