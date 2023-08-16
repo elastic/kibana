@@ -29,16 +29,12 @@ export const riskEngineInitRoute = (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const securitySolution = await context.securitySolution;
-      const soClient = (await context.core).savedObjects.client;
       const riskEngineClient = securitySolution.getRiskEngineDataClient();
       const spaceId = securitySolution.getSpaceId();
-      const user = security?.authc.getCurrentUser(request);
 
       try {
         const initResult = await riskEngineClient.init({
-          savedObjectsClient: soClient,
           namespace: spaceId,
-          user,
         });
 
         const initResultResponse = {

@@ -125,7 +125,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         page: pagination.page,
         results: finalResults.map((doc) => ({
           id: doc._source!.slo.id,
-          instanceId: doc._source?.slo.instanceId ?? ALL_VALUE,
+          instanceId: doc._source!.slo.instanceId ?? ALL_VALUE,
           summary: {
             errorBudget: {
               initial: toHighPrecision(doc._source!.errorBudgetInitial),

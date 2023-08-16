@@ -59,3 +59,27 @@ export const useInvalidateFetchRuleByIdQuery = () => {
     });
   }, [queryClient]);
 };
+
+/**
+ * We should use this hook to update the rules cache when modifying a rule.
+ * Use it with the new rule data after operations like rule edit.
+ *
+ * @returns A rules cache update callback
+ */
+export const useUpdateRuleByIdCache = () => {
+  const queryClient = useQueryClient();
+  /**
+   * Use this method to update rules data cached by react-query.
+   * It is useful when we receive new rules back from a mutation query (bulk edit, etc.);
+   * we can merge those rules with the existing cache to avoid an extra roundtrip to re-fetch updated rules.
+   */
+  return useCallback(
+    (updatedRuleResponse: Rule) => {
+      queryClient.setQueryData<ReturnType<typeof useFetchRuleByIdQuery>['data']>(
+        [...FIND_ONE_RULE_QUERY_KEY, updatedRuleResponse.id],
+        transformInput(updatedRuleResponse)
+      );
+    },
+    [queryClient]
+  );
+};
