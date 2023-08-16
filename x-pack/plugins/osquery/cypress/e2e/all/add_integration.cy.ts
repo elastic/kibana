@@ -29,10 +29,18 @@ import {
   interceptAgentPolicyId,
   policyContainsIntegration,
 } from '../../tasks/integrations';
-import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
+import {
+  findAndClickButton,
+  findFormFieldByRowsLabelAndType,
+  isServerless,
+} from '../../tasks/live_query';
 
 // TODO try to fix it for serverless too
 describe('ALL - Add Integration', { tags: [tag.ESS] }, () => {
+  if (isServerless) {
+    return;
+  }
+
   let savedQueryId: string;
 
   before(() => {

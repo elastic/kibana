@@ -6,7 +6,8 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
-import { setupUserDataLoader } from './support/setup_data_loader_tasks';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { setupUserDataLoader } from '../../test_serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
 
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
@@ -30,12 +31,13 @@ export default defineCypressConfig({
   e2e: {
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
-    supportFile: './support/e2e.js',
-    specPattern: '../../../../../plugins/osquery/cypress/e2e/**/*.cy.ts',
+    // supportFile: './support/e2e.js',
+    specPattern: './cypress/e2e/**/*.cy.ts',
     setupNodeEvents: (on, config) => {
       setupUserDataLoader(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
+
       return config;
     },
   },

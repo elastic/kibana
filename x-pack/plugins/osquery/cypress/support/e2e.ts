@@ -47,7 +47,7 @@ declare global {
 
       clickOutside(): Chainable<JQuery<HTMLBodyElement>>;
 
-      login(role?: ServerlessRoleName): void;
+      login(role?: ServerlessRoleName | 'elastic'): void;
     }
   }
 }
