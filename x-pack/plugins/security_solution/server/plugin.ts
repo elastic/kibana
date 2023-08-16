@@ -17,6 +17,7 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
+import { i18n } from '@kbn/i18n';
 import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
 import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
 import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
@@ -375,7 +376,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       /**
        * Register a config for the security guide
        */
-      if (depsStart.cloudExperiments) {
+      if (depsStart.cloudExperiments && i18n.getLocale() === 'en') {
         try {
           depsStart.cloudExperiments
             .getVariation('security-solutions.guided-onboarding-content', defaultGuideTranslations)

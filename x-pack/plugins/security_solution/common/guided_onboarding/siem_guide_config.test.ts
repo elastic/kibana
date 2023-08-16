@@ -48,6 +48,7 @@ describe('getSiemGuideConfig', () => {
             appID: 'securitySolutionUI',
             path: '/rules',
           },
+          manualCompletion: defaultGuideTranslations.steps.rules.manualCompletion,
         },
         {
           id: 'alertsCases',
@@ -57,6 +58,7 @@ describe('getSiemGuideConfig', () => {
             appID: 'securitySolutionUI',
             path: '/alerts',
           },
+          manualCompletion: defaultGuideTranslations.steps.alertsCases.manualCompletion,
         },
       ],
     });
@@ -207,6 +209,7 @@ describe('getSiemGuideConfig', () => {
             appID: 'securitySolutionUI',
             path: '/rules',
           },
+          manualCompletion: defaultGuideTranslations.steps.rules.manualCompletion,
         },
         {
           id: 'alertsCases',
