@@ -71,11 +71,11 @@ export const defineGetDetectionEngineAlertsStatus = (router: CspRouter) =>
           return response.forbidden();
         }
 
-        const requestBody: any = request.query;
+        const requestBody = request.query;
         const cspContext = await context.csp;
 
         try {
-          const alerts: any = await getDetectionEngineAlertsStatus(
+          const alerts = await getDetectionEngineAlertsStatus(
             cspContext.esClient.asCurrentUser,
             requestBody.tags
           );

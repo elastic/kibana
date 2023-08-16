@@ -22,7 +22,7 @@ import { DETECTION_ENGINE_ALERTS_KEY, DETECTION_ENGINE_RULES_KEY } from '../comm
 const RULES_PAGE_PATH = '/rules/management';
 const ALERTS_PAGE_PATH = '/alerts';
 
-const RULES_TABLE_STATE_STORAGE_KEY = 'securitySolution.rulesTable';
+const RULES_TABLE_SESSION_STORAGE_KEY = 'securitySolution.rulesTable';
 
 type DetectionRuleCounterProps = {
   tags: string[];
@@ -40,7 +40,7 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
 
   const history = useHistory();
 
-  const [, setRulesTable] = useSessionStorage(RULES_TABLE_STATE_STORAGE_KEY);
+  const [, setRulesTable] = useSessionStorage(RULES_TABLE_SESSION_STORAGE_KEY);
 
   const rulePageNavigation = useCallback(async () => {
     await setRulesTable({
@@ -102,7 +102,7 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
             <FormattedMessage
               id="xpack.csp.findingsFlyout.alerts.alertCount"
               defaultMessage="{alertCount, plural, one {# alert} other {# alerts}}"
-              values={{ alertCount: alertsData?.total || '0' }}
+              values={{ alertCount: alertsData?.total || 0 }}
             />
           </EuiLink>{' '}
           <FormattedMessage
@@ -113,7 +113,7 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
             <FormattedMessage
               id="xpack.csp.findingsFlyout.alerts.ruleCount"
               defaultMessage="{ruleCount, plural, one {# rule} other {# rules}}"
-              values={{ ruleCount: data?.total || '0' }}
+              values={{ ruleCount: data?.total || 0 }}
             />
           </EuiLink>
         </>
