@@ -14,14 +14,14 @@ import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { InfraLoadingPanel } from '../../../components/loading';
 import { findInventoryModel } from '../../../../common/inventory_models';
-import { NavItem } from './lib/side_nav_context';
+import type { NavItem } from './lib/side_nav_context';
 import { NodeDetailsPage } from './components/node_details_page';
-import { InventoryItemType } from '../../../../common/inventory_models/types';
+import type { InventoryItemType } from '../../../../common/inventory_models/types';
 import { useMetricsTimeContext } from './hooks/use_metrics_time';
 import { MetricsPageTemplate } from '../page_template';
 import { inventoryTitle } from '../../../translations';
 
-export const MetricDetail = () => {
+export const MetricDetailPage = () => {
   const {
     params: { type: nodeType, node: nodeId },
   } = useRouteMatch<{ type: InventoryItemType; node: string }>();

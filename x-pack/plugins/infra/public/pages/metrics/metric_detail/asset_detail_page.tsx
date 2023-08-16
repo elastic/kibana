@@ -15,7 +15,7 @@ import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { FlyoutTabIds, type Tab } from '../../../components/asset_details/types';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
-import AssetDetails from '../../../components/asset_details/asset_details';
+import { AssetDetails } from '../../../components/asset_details/asset_details';
 import { useMetricsTimeContext } from './hooks/use_metrics_time';
 import { MetricsPageTemplate } from '../page_template';
 
@@ -58,7 +58,7 @@ const orderedFlyoutTabs: Tab[] = [
   },
 ];
 
-export const AssetDetail = () => {
+export const AssetDetailPage = () => {
   const { isLoading, loadSourceFailureMessage, loadSource, source } = useSourceContext();
   const {
     params: { type: nodeType, node: nodeId },

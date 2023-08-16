@@ -25,7 +25,6 @@ const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 export const Logs = () => {
   const { asset, assetType, overrides, onTabsStateChange, dateRangeTs } =
     useAssetDetailsStateContext();
-
   const { logs } = useDataViewsProviderContext();
 
   const { query: overrideQuery } = overrides?.logs ?? {};

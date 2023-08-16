@@ -17,7 +17,7 @@ import { FlyoutHeader } from '../header/flyout_header';
 import { useAssetDetailsStateContext } from '../hooks/use_asset_details_state';
 import { usePageHeader } from '../hooks/use_page_header';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
-import { ContentTemplateProps } from '../types';
+import type { ContentTemplateProps } from '../types';
 
 export const Flyout = ({
   header: { tabs = [], links = [] },
