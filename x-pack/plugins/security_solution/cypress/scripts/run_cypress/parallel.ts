@@ -85,7 +85,7 @@ export const cli = () => {
 
       if (argv.changedSpecsOnly) {
         const basePath = process.cwd().split('kibana/')[1];
-        files = findChangedFiles('main', false)
+        files = findChangedFiles('7.17', false)
           .filter(
             minimatch.filter(path.join(basePath, cypressConfigFile?.e2e?.specPattern), {
               matchBase: true,
