@@ -6,7 +6,6 @@
  */
 
 import type { Metadata } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   createOrUpdateComponentTemplate,
@@ -15,32 +14,43 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import {
   riskScoreFieldMap,
-  getIndexPattern,
+  getIndexPatternDataStream,
   totalFieldsLimit,
   mappingComponentName,
   ilmPolicyName,
   ilmPolicy,
+  getLatestTransformId,
+  getTransformOptions,
 } from './configurations';
 import { createDataStream } from './utils/create_datastream';
 import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
-import type { InitRiskEngineResult } from '../../../common/risk_engine/types';
-import { RiskEngineStatus } from '../../../common/risk_engine/types';
-import { getLegacyTransforms, removeLegacyTransforms } from './utils/risk_engine_transforms';
+import type { InitRiskEngineResult } from '../../../common/risk_engine';
+import {
+  RiskEngineStatus,
+  getRiskScoreLatestIndex,
+  MAX_SPACES_COUNT,
+} from '../../../common/risk_engine';
+import {
+  getLegacyTransforms,
+  removeLegacyTransforms,
+  startTransform,
+  createTransform,
+} from './utils/transforms';
 import {
   updateSavedObjectAttribute,
   getConfiguration,
   initSavedObjects,
+  getEnabledRiskEngineAmount,
 } from './utils/saved_object_configuration';
-import type { UpdateConfigOpts, SavedObjectsClients } from './utils/saved_object_configuration';
+import { createIndex } from './utils/create_index';
 
-interface InitOpts extends SavedObjectsClients {
+interface InitOpts {
   namespace: string;
-  user: AuthenticatedUser | null | undefined;
 }
 
 interface InitializeRiskEngineResourcesOpts {
@@ -50,14 +60,16 @@ interface InitializeRiskEngineResourcesOpts {
 interface RiskEngineDataClientOpts {
   logger: Logger;
   kibanaVersion: string;
-  elasticsearchClientPromise: Promise<ElasticsearchClient>;
+  esClient: ElasticsearchClient;
+  namespace: string;
+  soClient: SavedObjectsClientContract;
 }
 
 export class RiskEngineDataClient {
   private writerCache: Map<string, Writer> = new Map();
   constructor(private readonly options: RiskEngineDataClientOpts) {}
 
-  public async init({ namespace, savedObjectsClient, user }: InitOpts) {
+  public async init({ namespace }: InitOpts) {
     const result: InitRiskEngineResult = {
       legacyRiskEngineDisabled: false,
       riskEngineResourcesInstalled: false,
@@ -82,7 +94,7 @@ export class RiskEngineDataClient {
     }
 
     try {
-      await initSavedObjects({ savedObjectsClient, user });
+      await initSavedObjects({ savedObjectsClient: this.options.soClient });
       result.riskEngineConfigurationCreated = true;
     } catch (e) {
       result.errors.push(e.message);
@@ -90,7 +102,7 @@ export class RiskEngineDataClient {
     }
 
     try {
-      await this.enableRiskEngine({ savedObjectsClient, user });
+      await this.enableRiskEngine();
       result.riskEngineEnabled = true;
     } catch (e) {
       result.errors.push(e.message);
@@ -104,14 +116,14 @@ export class RiskEngineDataClient {
     if (this.writerCache.get(namespace)) {
       return this.writerCache.get(namespace) as Writer;
     }
-
-    await this.initializeResources({ namespace });
+    const indexPatterns = getIndexPatternDataStream(namespace);
+    await this.initializeWriter(namespace, indexPatterns.alias);
     return this.writerCache.get(namespace) as Writer;
   }
 
   private async initializeWriter(namespace: string, index: string): Promise<Writer> {
     const writer = new RiskEngineDataWriter({
-      esClient: await this.options.elasticsearchClientPromise,
+      esClient: this.options.esClient,
       namespace,
       index,
       logger: this.options.logger,
@@ -121,35 +133,28 @@ export class RiskEngineDataClient {
     return writer;
   }
 
-  public async getStatus({
-    savedObjectsClient,
-    namespace,
-  }: SavedObjectsClients & {
-    namespace: string;
-  }) {
-    const riskEngineStatus = await this.getCurrentStatus({ savedObjectsClient });
+  public async getStatus({ namespace }: { namespace: string }) {
+    const riskEngineStatus = await this.getCurrentStatus();
     const legacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
-    return { riskEngineStatus, legacyRiskEngineStatus };
+    const isMaxAmountOfRiskEnginesReached = await this.getIsMaxAmountOfRiskEnginesReached();
+    return { riskEngineStatus, legacyRiskEngineStatus, isMaxAmountOfRiskEnginesReached };
   }
 
-  public async enableRiskEngine({ savedObjectsClient, user }: UpdateConfigOpts) {
+  public async enableRiskEngine() {
     // code to run task
-
     return updateSavedObjectAttribute({
-      savedObjectsClient,
-      user,
+      savedObjectsClient: this.options.soClient,
       attributes: {
         enabled: true,
       },
     });
   }
 
-  public async disableRiskEngine({ savedObjectsClient, user }: UpdateConfigOpts) {
+  public async disableRiskEngine() {
     // code to stop task
 
     return updateSavedObjectAttribute({
-      savedObjectsClient,
-      user,
+      savedObjectsClient: this.options.soClient,
       attributes: {
         enabled: false,
       },
@@ -163,9 +168,8 @@ export class RiskEngineDataClient {
       return true;
     }
 
-    const esClient = await this.options.elasticsearchClientPromise;
     await removeLegacyTransforms({
-      esClient,
+      esClient: this.options.esClient,
       namespace,
     });
 
@@ -174,8 +178,8 @@ export class RiskEngineDataClient {
     return newlegacyRiskEngineStatus === RiskEngineStatus.NOT_INSTALLED;
   }
 
-  private async getCurrentStatus({ savedObjectsClient }: SavedObjectsClients) {
-    const configuration = await getConfiguration({ savedObjectsClient });
+  private async getCurrentStatus() {
+    const configuration = await getConfiguration({ savedObjectsClient: this.options.soClient });
 
     if (configuration) {
       return configuration.enabled ? RiskEngineStatus.ENABLED : RiskEngineStatus.DISABLED;
@@ -184,9 +188,21 @@ export class RiskEngineDataClient {
     return RiskEngineStatus.NOT_INSTALLED;
   }
 
+  private async getIsMaxAmountOfRiskEnginesReached() {
+    try {
+      const amountOfEnabledConfigurations = await getEnabledRiskEngineAmount({
+        savedObjectsClient: this.options.soClient,
+      });
+
+      return amountOfEnabledConfigurations >= MAX_SPACES_COUNT;
+    } catch (e) {
+      this.options.logger.error(`Error while getting amount of enabled risk engines: ${e.message}`);
+      return false;
+    }
+  }
+
   private async getLegacyStatus({ namespace }: { namespace: string }) {
-    const esClient = await this.options.elasticsearchClientPromise;
-    const transforms = await getLegacyTransforms({ namespace, esClient });
+    const transforms = await getLegacyTransforms({ namespace, esClient: this.options.esClient });
 
     if (transforms.length === 0) {
       return RiskEngineStatus.NOT_INSTALLED;
@@ -199,9 +215,9 @@ export class RiskEngineDataClient {
     namespace = DEFAULT_NAMESPACE_STRING,
   }: InitializeRiskEngineResourcesOpts) {
     try {
-      const esClient = await this.options.elasticsearchClientPromise;
+      const esClient = this.options.esClient;
 
-      const indexPatterns = getIndexPattern(namespace);
+      const indexPatterns = getIndexPatternDataStream(namespace);
 
       const indexMetadata: Metadata = {
         kibana: {
@@ -270,7 +286,29 @@ export class RiskEngineDataClient {
         indexPatterns,
       });
 
-      await this.initializeWriter(namespace, indexPatterns.alias);
+      await createIndex({
+        esClient,
+        logger: this.options.logger,
+        options: {
+          index: getRiskScoreLatestIndex(namespace),
+          mappings: mappingFromFieldMap(riskScoreFieldMap, 'strict'),
+        },
+      });
+
+      const transformId = getLatestTransformId(namespace);
+      await createTransform({
+        esClient,
+        logger: this.options.logger,
+        transform: {
+          transform_id: transformId,
+          ...getTransformOptions({
+            dest: getRiskScoreLatestIndex(namespace),
+            source: [indexPatterns.alias],
+          }),
+        },
+      });
+
+      await startTransform({ esClient, transformId });
     } catch (error) {
       this.options.logger.error(`Error initializing risk engine resources: ${error.message}`);
       throw error;
