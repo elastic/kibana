@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { AlertsClientFactory, AlertsClientFactoryProps } from './alerts_client_factory';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -12,7 +13,6 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
 import { ruleDataServiceMock } from '../rule_data_plugin_service/rule_data_plugin_service.mock';
-import { mockRouter } from '@kbn/core-http-router-server-mocks';
 
 jest.mock('./alerts_client');
 

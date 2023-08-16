@@ -179,7 +179,7 @@ describe('CoreKibanaRequest', () => {
       });
     });
 
-    describe.only('sanitize input', () => {
+    describe('sanitize input', () => {
       it('does not pass the reserved query parameter to consumers', () => {
         const request = hapiMocks.createRequest({
           query: { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: 'true', myCoolValue: 'cool!' },
