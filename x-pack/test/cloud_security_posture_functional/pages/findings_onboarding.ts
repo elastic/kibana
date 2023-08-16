@@ -11,8 +11,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'findings', 'header']);
-  const retry = getService('retry');
-  const testSubjects = getService('testSubjects');
 
   // Failing: See https://github.com/elastic/kibana/issues/163950
   describe('Findings Page onboarding', function () {
