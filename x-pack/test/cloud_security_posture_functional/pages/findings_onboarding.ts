@@ -35,16 +35,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const element = await notInstalledVulnerabilities.getElement();
       expect(element).to.not.be(null);
 
-      await retry.try(async () => {
-        // await notInstalledVulnerabilities.navigateToAction('cnvm-not-installed-action');
-        await testSubjects.click('cnvm-not-installed-action');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const result = await testSubjects.exists('createPackagePolicy_pageTitle');
-
-        if (!result) {
-          throw new Error('CNVM integration installation page not found');
-        }
-      });
+      await notInstalledVulnerabilities.navigateToAction('cnvm-not-installed-action');
 
       await PageObjects.common.waitUntilUrlIncludes('add-integration/vuln_mgmt');
     });
@@ -55,16 +46,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const element = await notInstalledCSP.getElement();
       expect(element).to.not.be(null);
 
-      await retry.try(async () => {
-        // await notInstalledCSP.navigateToAction('cspm-not-installed-action');
-        await testSubjects.click('cspm-not-installed-action');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const result = await testSubjects.exists('createPackagePolicy_pageTitle');
-
-        if (!result) {
-          throw new Error('CSPM integration installation page not found');
-        }
-      });
+      await notInstalledCSP.navigateToAction('cspm-not-installed-action');
 
       await PageObjects.common.waitUntilUrlIncludes('add-integration/cspm');
     });
@@ -75,17 +57,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const element = await notInstalledCSP.getElement();
       expect(element).to.not.be(null);
 
-      await retry.try(async () => {
-        // await notInstalledCSP.navigateToAction('kspm-not-installed-action');
-        await testSubjects.click('kspm-not-installed-action');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const result = await testSubjects.exists('createPackagePolicy_pageTitle');
-
-        if (!result) {
-          throw new Error('KSPM integration installation page not found');
-        }
-      });
-
+      await notInstalledCSP.navigateToAction('kspm-not-installed-action');
       await PageObjects.common.waitUntilUrlIncludes('add-integration/kspm');
     });
   });
