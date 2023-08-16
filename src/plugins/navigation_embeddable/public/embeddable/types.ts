@@ -14,14 +14,29 @@ import {
 } from '@kbn/embeddable-plugin/public';
 
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
-import { ExternalLinkEmbeddableStrings } from '../components/external_link/external_link_strings';
-import { DashboardLinkEmbeddableStrings } from '../components/dashboard_link/dashboard_link_strings';
 import {
-  DASHBOARD_LINK_TYPE,
-  EXTERNAL_LINK_TYPE,
   NavigationLinkType,
+  EXTERNAL_LINK_TYPE,
+  DASHBOARD_LINK_TYPE,
+  NAV_VERTICAL_LAYOUT,
+  NavigationLayoutType,
+  NAV_HORIZONTAL_LAYOUT,
   NavigationEmbeddableAttributes,
 } from '../../common/content_management';
+import { DashboardLinkStrings } from '../components/dashboard_link/dashboard_link_strings';
+import { ExternalLinkStrings } from '../components/external_link/external_link_strings';
+import { NavEmbeddableStrings } from '../components/navigation_embeddable_strings';
+
+export const NavigationLayoutInfo: {
+  [id in NavigationLayoutType]: { displayName: string };
+} = {
+  [NAV_HORIZONTAL_LAYOUT]: {
+    displayName: NavEmbeddableStrings.editor.panelEditor.getHorizontalLayoutLabel(),
+  },
+  [NAV_VERTICAL_LAYOUT]: {
+    displayName: NavEmbeddableStrings.editor.panelEditor.getVerticalLayoutLabel(),
+  },
+};
 
 export interface DashboardItem {
   id: string;
@@ -29,17 +44,24 @@ export interface DashboardItem {
 }
 
 export const NavigationLinkInfo: {
-  [id in NavigationLinkType]: { icon: string; displayName: string; description: string };
+  [id in NavigationLinkType]: {
+    icon: string;
+    type: string;
+    displayName: string;
+    description: string;
+  };
 } = {
   [DASHBOARD_LINK_TYPE]: {
     icon: 'dashboardApp',
-    displayName: DashboardLinkEmbeddableStrings.getDisplayName(),
-    description: DashboardLinkEmbeddableStrings.getDescription(),
+    type: DashboardLinkStrings.getType(),
+    displayName: DashboardLinkStrings.getDisplayName(),
+    description: DashboardLinkStrings.getDescription(),
   },
   [EXTERNAL_LINK_TYPE]: {
     icon: 'link',
-    displayName: ExternalLinkEmbeddableStrings.getDisplayName(),
-    description: ExternalLinkEmbeddableStrings.getDescription(),
+    type: ExternalLinkStrings.getType(),
+    displayName: ExternalLinkStrings.getDisplayName(),
+    description: ExternalLinkStrings.getDescription(),
   },
 };
 

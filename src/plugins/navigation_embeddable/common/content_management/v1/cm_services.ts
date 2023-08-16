@@ -10,12 +10,13 @@ import { schema } from '@kbn/config-schema';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
   savedObjectSchema,
-  objectTypeToGetResultSchema,
-  createOptionsSchemas,
-  updateOptionsSchema,
   createResultSchema,
+  updateOptionsSchema,
+  createOptionsSchemas,
+  objectTypeToGetResultSchema,
 } from '@kbn/content-management-utils';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '.';
+import { NAV_HORIZONTAL_LAYOUT, NAV_VERTICAL_LAYOUT } from './constants';
 
 const navigationEmbeddableLinkSchema = schema.object({
   id: schema.string(),
@@ -30,6 +31,9 @@ const navigationEmbeddableAttributesSchema = schema.object(
     title: schema.string(),
     description: schema.maybe(schema.string()),
     links: schema.maybe(schema.arrayOf(navigationEmbeddableLinkSchema)),
+    layout: schema.maybe(
+      schema.oneOf([schema.literal(NAV_HORIZONTAL_LAYOUT), schema.literal(NAV_VERTICAL_LAYOUT)])
+    ),
   },
   { unknowns: 'forbid' }
 );

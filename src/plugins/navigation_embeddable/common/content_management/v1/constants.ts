@@ -7,11 +7,13 @@
  */
 
 /**
- * Dashboard to dashboard links
+ * Link types
  */
 export const DASHBOARD_LINK_TYPE = 'dashboardLink';
+export const EXTERNAL_LINK_TYPE = 'externalLink';
 
 /**
- * External URL links
+ * Layout options
  */
-export const EXTERNAL_LINK_TYPE = 'externalLink';
+export const NAV_HORIZONTAL_LAYOUT = 'horizontal';
+export const NAV_VERTICAL_LAYOUT = 'vertical';

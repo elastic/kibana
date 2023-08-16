@@ -11,13 +11,19 @@ export { LATEST_VERSION, CONTENT_ID } from '../constants';
 export type { NavigationEmbeddableContentType } from '../types';
 
 export type {
+  NavigationLinkType,
+  NavigationLayoutType,
+  NavigationEmbeddableLink,
+  NavigationEmbeddableItem,
   NavigationEmbeddableCrudTypes,
   NavigationEmbeddableAttributes,
-  NavigationEmbeddableItem,
-  NavigationLinkType,
-  NavigationEmbeddableLink,
 } from './latest';
 
-export { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from './latest';
+export {
+  EXTERNAL_LINK_TYPE,
+  DASHBOARD_LINK_TYPE,
+  NAV_VERTICAL_LAYOUT,
+  NAV_HORIZONTAL_LAYOUT,
+} from './latest';
 
 export * as NavigationEmbeddableV1 from './v1';

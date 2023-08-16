@@ -31,6 +31,10 @@ export const NavEmbeddableStrings = {
         defaultMessage: 'Close',
       }),
     panelEditor: {
+      getLinksTitle: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.linksTitle', {
+          defaultMessage: 'Links',
+        }),
       getEmptyLinksMessage: () =>
         i18n.translate('navigationEmbeddable.panelEditor.emptyLinksMessage', {
           defaultMessage: 'Use links to navigate to commonly used dashboards and websites.',
@@ -47,46 +51,46 @@ export const NavEmbeddableStrings = {
         i18n.translate('navigationEmbeddable.panelEditor.editFlyoutTitle', {
           defaultMessage: 'Edit links panel',
         }),
-      getApplyButtonLabel: () =>
-        i18n.translate('navigationEmbeddable.panelEditor.applyButtonLabel', {
-          defaultMessage: 'Apply',
+      getSaveButtonLabel: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.saveButtonLabel', {
+          defaultMessage: 'Save',
         }),
-      getAddToDashboardButtonLabel: () =>
-        i18n.translate('navigationEmbeddable.panelEditor.addToDashboardButtonLabel', {
-          defaultMessage: 'Add to dashboard',
-        }),
-      getAddToDashboardButtonTooltip: () =>
-        i18n.translate('navigationEmbeddable.panelEditor.addToDashboardButtonTooltip', {
-          defaultMessage: 'Add this links panel directly to this dashboard.',
-        }),
-      getSaveToLibraryButtonLabel: () =>
-        i18n.translate('navigationEmbeddable.panelEditor.saveToLibraryButtonLabel', {
+      getSaveToLibrarySwitchLabel: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.saveToLibrarySwitchLabel', {
           defaultMessage: 'Save to library',
         }),
-      getSaveToLibraryButtonTooltip: () =>
-        i18n.translate('navigationEmbeddable.panelEditor.saveToLibraryButtonTooltip', {
+      getSaveToLibrarySwitchTooltip: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.saveToLibrarySwitchTooltip', {
           defaultMessage:
             'Save this links panel to the library so you can easily add it to other dashboards.',
-        }),
-      getUpdateLibraryItemButtonLabel: () =>
-        i18n.translate('navigationEmbeddable.panelEditor.updateLibraryItemButtonLabel', {
-          defaultMessage: 'Update library item',
-        }),
-      getUpdateLibraryItemButtonTooltip: () =>
-        i18n.translate('navigationEmbeddable.panelEditor.updateLibraryItemButtonTooltip', {
-          defaultMessage: 'Editing this panel might affect other dashboards.',
         }),
       getTitleInputLabel: () =>
         i18n.translate('navigationEmbeddable.panelEditor.titleInputLabel', {
           defaultMessage: 'Title',
         }),
-      getLinkLoadingAriaLabel: () =>
-        i18n.translate('navigationEmbeddable.linkEditor.linkLoadingAriaLabel', {
-          defaultMessage: 'Loading link',
+      getBrokenDashboardLinkAriaLabel: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.brokenDashboardLinkAriaLabel', {
+          defaultMessage: 'Broken dashboard link',
         }),
       getDragHandleAriaLabel: () =>
-        i18n.translate('navigationEmbeddable.editor.dragHandleAriaLabel', {
+        i18n.translate('navigationEmbeddable.panelEditor.dragHandleAriaLabel', {
           defaultMessage: 'Link drag handle',
+        }),
+      getLayoutSettingsTitle: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.layoutSettingsTitle', {
+          defaultMessage: 'Layout',
+        }),
+      getLayoutSettingsLegend: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.layoutSettingsLegend', {
+          defaultMessage: 'Choose how to display your links.',
+        }),
+      getHorizontalLayoutLabel: () =>
+        i18n.translate('navigationEmbeddable.editor.horizontalLayout', {
+          defaultMessage: 'Horizontal',
+        }),
+      getVerticalLayoutLabel: () =>
+        i18n.translate('navigationEmbeddable.editor.verticalLayout', {
+          defaultMessage: 'Vertical',
         }),
       getErrorDuringSaveToastTitle: () =>
         i18n.translate('navigationEmbeddable.editor.unableToSaveToastTitle', {

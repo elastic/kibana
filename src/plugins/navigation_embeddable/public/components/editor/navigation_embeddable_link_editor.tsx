@@ -28,18 +28,17 @@ import {
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { NavigationLinkInfo } from '../embeddable/types';
 import {
   NavigationLinkType,
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
   NavigationEmbeddableLink,
-} from '../../common/content_management';
-import { DashboardItem } from '../embeddable/types';
-import { NavEmbeddableStrings } from './navigation_embeddable_strings';
-import { NavigationEmbeddableUnorderedLink } from '../editor/open_link_editor_flyout';
-import { ExternalLinkDestinationPicker } from './external_link/external_link_destination_picker';
-import { DashboardLinkDestinationPicker } from './dashboard_link/dashboard_link_destination_picker';
+} from '../../../common/content_management';
+import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
+import { DashboardItem, NavigationLinkInfo } from '../../embeddable/types';
+import { NavigationEmbeddableUnorderedLink } from '../../editor/open_link_editor_flyout';
+import { ExternalLinkDestinationPicker } from '../external_link/external_link_destination_picker';
+import { DashboardLinkDestinationPicker } from '../dashboard_link/dashboard_link_destination_picker';
 
 export const NavigationEmbeddableLinkEditor = ({
   link,
@@ -169,7 +168,7 @@ export const NavigationEmbeddableLinkEditor = ({
                 (linkDestination ? defaultLinkLabel : '') ||
                 NavEmbeddableStrings.editor.linkEditor.getLinkTextPlaceholder()
               }
-              value={linkDestination ? currentLinkLabel : ''}
+              value={currentLinkLabel}
               onChange={(e) => setCurrentLinkLabel(e.target.value)}
             />
           </EuiFormRow>

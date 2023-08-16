@@ -14,18 +14,19 @@ import {
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import {
-  NavigationEmbeddableByReferenceInput,
   NavigationEmbeddableByValueInput,
+  NavigationEmbeddableByReferenceInput,
   NavigationEmbeddableInput,
 } from './types';
 import type { NavigationEmbeddable } from './navigation_embeddable';
-import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
+import { NAV_VERTICAL_LAYOUT } from '../../common/content_management';
+import { APP_ICON, APP_NAME, CONTENT_ID, EMBEDDABLE_DISPLAY_NAME } from '../../common';
 import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
-import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
+import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
 
@@ -38,6 +39,7 @@ export interface NavigationEmbeddableCreationOptions {
 const getDefaultNavigationEmbeddableInput = (): Omit<NavigationEmbeddableByValueInput, 'id'> => ({
   attributes: {
     title: '',
+    layout: NAV_VERTICAL_LAYOUT,
   },
   disabledActions: [ACTION_ADD_PANEL, 'OPEN_FLYOUT_ADD_DRILLDOWN'],
 });
@@ -124,7 +126,7 @@ export class NavigationEmbeddableFactoryDefinition
   }
 
   public getDisplayName() {
-    return APP_NAME;
+    return EMBEDDABLE_DISPLAY_NAME;
   }
 
   public getIconType() {
