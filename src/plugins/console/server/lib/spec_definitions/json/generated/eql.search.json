@@ -1,9 +1,29 @@
 {
   "eql.search": {
     "url_params": {
-      "wait_for_completion_timeout": "",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ],
+      "ignore_unavailable": "__flag__",
+      "keep_alive": [
+        "5d",
+        "-1",
+        "0"
+      ],
       "keep_on_completion": "__flag__",
-      "keep_alive": ""
+      "wait_for_completion_timeout": [
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "GET",
@@ -12,6 +32,10 @@
     "patterns": [
       "{index}/_eql/search"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/eql-search-api.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/eql-search-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

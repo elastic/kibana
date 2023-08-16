@@ -23,18 +23,20 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@tanstack/react-query';
+import { OverviewPanel, LanguageClientPanel, CodeBox } from '@kbn/search-api-panels';
+import type {
+  LanguageDefinition,
+  LanguageDefinitionSnippetArguments,
+} from '@kbn/search-api-panels';
 
+import { PLUGIN_ID } from '../../../common';
 import { IndexData, FetchIndicesResult } from '../../../common/types';
 import { FETCH_INDICES_PATH } from '../routes';
 import { API_KEY_PLACEHOLDER, ELASTICSEARCH_URL_PLACEHOLDER } from '../constants';
 import { useKibanaServices } from '../hooks/use_kibana';
-import { CodeBox } from './code_box';
 import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
-import { LanguageDefinition, LanguageDefinitionSnippetArguments } from './languages/types';
-
-import { OverviewPanel } from './overview_panels/overview_panel';
-import { LanguageClientPanel } from './overview_panels/language_client_panel';
+import { getCodeSnippet, showTryInConsole } from './languages/utils';
 
 const NoIndicesContent = () => (
   <>
@@ -115,7 +117,7 @@ const IndicesContent = ({
 };
 
 export const ElasticsearchIndexingApi = () => {
-  const { cloud, http } = useKibanaServices();
+  const { cloud, http, share } = useKibanaServices();
   const [selectedLanguage, setSelectedLanguage] =
     useState<LanguageDefinition>(javascriptDefinition);
   const [indexSearchQuery, setIndexSearchQuery] = useState<string | undefined>(undefined);
@@ -200,17 +202,26 @@ export const ElasticsearchIndexingApi = () => {
                       language={language}
                       setSelectedLanguage={setSelectedLanguage}
                       isSelectedLanguage={selectedLanguage === language}
+                      http={http}
+                      pluginId={PLUGIN_ID}
                     />
                   </EuiFlexItem>
                 ))}
               </EuiFlexGroup>
               <EuiSpacer />
               <CodeBox
-                code="ingestDataIndex"
-                codeArgs={codeSnippetArguments}
                 languages={languageDefinitions}
+                codeSnippet={getCodeSnippet(
+                  selectedLanguage,
+                  'ingestDataIndex',
+                  codeSnippetArguments
+                )}
                 selectedLanguage={selectedLanguage}
                 setSelectedLanguage={setSelectedLanguage}
+                http={http}
+                pluginId={PLUGIN_ID}
+                sharePlugin={share}
+                showTryInConsole={showTryInConsole('ingestDataIndex')}
               />
             </>
           }
