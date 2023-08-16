@@ -18,6 +18,7 @@ import type {
   DatatableColumn,
   DatatableColumnMeta,
 } from '@kbn/expressions-plugin/common';
+import { EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import type { FormatFactory } from '../../../../common/types';
 import type { ColumnConfig } from '../../../../common/expressions';
 import { LensCellValueAction } from '../../../types';
@@ -79,7 +80,7 @@ export const createGridColumns = (
 
     const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
 
-    const cellActions = [];
+    const cellActions: EuiDataGridColumnCellAction[] = [];
     if (filterable && handleFilterClick && !columnArgs?.oneClickFilter) {
       cellActions.push(
         ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
@@ -91,33 +92,35 @@ export const createGridColumns = (
           const filterForText = i18n.translate(
             'xpack.lens.table.tableCellFilter.filterForValueText',
             {
-              defaultMessage: 'Filter for value',
+              defaultMessage: 'Filter for',
             }
           );
           const filterForAriaLabel = i18n.translate(
             'xpack.lens.table.tableCellFilter.filterForValueAriaLabel',
             {
-              defaultMessage: 'Filter for value: {cellContent}',
+              defaultMessage: 'Filter for: {cellContent}',
               values: {
                 cellContent,
               },
             }
           );
 
+          if (!contentsIsDefined) {
+            return null;
+          }
+
           return (
-            contentsIsDefined && (
-              <Component
-                aria-label={filterForAriaLabel}
-                data-test-subj="lensDatatableFilterFor"
-                onClick={() => {
-                  handleFilterClick(field, rowValue, colIndex, rowIndex);
-                  closeCellPopover?.();
-                }}
-                iconType="plusInCircle"
-              >
-                {filterForText}
-              </Component>
-            )
+            <Component
+              aria-label={filterForAriaLabel}
+              data-test-subj="lensDatatableFilterFor"
+              onClick={() => {
+                handleFilterClick(field, rowValue, colIndex, rowIndex);
+                closeCellPopover?.();
+              }}
+              iconType="plusInCircle"
+            >
+              {filterForText}
+            </Component>
           );
         },
         ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
@@ -129,33 +132,35 @@ export const createGridColumns = (
           const filterOutText = i18n.translate(
             'xpack.lens.table.tableCellFilter.filterOutValueText',
             {
-              defaultMessage: 'Filter out value',
+              defaultMessage: 'Filter out',
             }
           );
           const filterOutAriaLabel = i18n.translate(
             'xpack.lens.table.tableCellFilter.filterOutValueAriaLabel',
             {
-              defaultMessage: 'Filter out value: {cellContent}',
+              defaultMessage: 'Filter out: {cellContent}',
               values: {
                 cellContent,
               },
             }
           );
 
+          if (!contentsIsDefined) {
+            return null;
+          }
+
           return (
-            contentsIsDefined && (
-              <Component
-                data-test-subj="lensDatatableFilterOut"
-                aria-label={filterOutAriaLabel}
-                onClick={() => {
-                  handleFilterClick(field, rowValue, colIndex, rowIndex, true);
-                  closeCellPopover?.();
-                }}
-                iconType="minusInCircle"
-              >
-                {filterOutText}
-              </Component>
-            )
+            <Component
+              data-test-subj="lensDatatableFilterOut"
+              aria-label={filterOutAriaLabel}
+              onClick={() => {
+                handleFilterClick(field, rowValue, colIndex, rowIndex, true);
+                closeCellPopover?.();
+              }}
+              iconType="minusInCircle"
+            >
+              {filterOutText}
+            </Component>
           );
         }
       );
@@ -171,20 +176,23 @@ export const createGridColumns = (
           value: rowValue,
           columnMeta,
         };
+
+        if (rowValue == null) {
+          return null;
+        }
+
         return (
-          rowValue != null && (
-            <Component
-              aria-label={action.displayName}
-              data-test-subj={`lensDatatableCellAction-${action.id}`}
-              onClick={() => {
-                action.execute([data]);
-                closeCellPopover?.();
-              }}
-              iconType={action.iconType}
-            >
-              {action.displayName}
-            </Component>
-          )
+          <Component
+            aria-label={action.displayName}
+            data-test-subj={`lensDatatableCellAction-${action.id}`}
+            onClick={() => {
+              action.execute([data]);
+              closeCellPopover?.();
+            }}
+            iconType={action.iconType}
+          >
+            {action.displayName}
+          </Component>
         );
       });
     });
@@ -230,7 +238,7 @@ export const createGridColumns = (
           onClick: () => handleTransposedColumnClick(bucketValues, false),
           iconType: 'plusInCircle',
           label: i18n.translate('xpack.lens.table.columnFilter.filterForValueText', {
-            defaultMessage: 'Filter for column',
+            defaultMessage: 'Filter for',
           }),
           'data-test-subj': 'lensDatatableHide',
         });
@@ -241,7 +249,7 @@ export const createGridColumns = (
           onClick: () => handleTransposedColumnClick(bucketValues, true),
           iconType: 'minusInCircle',
           label: i18n.translate('xpack.lens.table.columnFilter.filterOutValueText', {
-            defaultMessage: 'Filter out column',
+            defaultMessage: 'Filter out',
           }),
           'data-test-subj': 'lensDatatableHide',
         });
