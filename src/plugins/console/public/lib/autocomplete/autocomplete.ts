@@ -1102,6 +1102,14 @@ export default function ({
     ) {
       // do not suppress autocomplete for a single character following method in URL
     } else if (
+      (lastEvaluatedToken.position.column ?? 0) < currentToken.position.column &&
+      (lastEvaluatedToken.position.lineNumber ?? currentToken.position.lineNumber)=== currentToken.position.lineNumber &&
+      !lastEvaluatedToken.type &&
+      currentToken.type === 'method' &&
+      currentToken.value.length === 1
+    ) {
+      // do not suppress autocompletion for the first character of method
+    } else if (
       // if the column or the line number have changed for the last token or
       // user did not provided a new value, then we should not show autocomplete
       // this guards against triggering autocomplete when clicking around the editor
