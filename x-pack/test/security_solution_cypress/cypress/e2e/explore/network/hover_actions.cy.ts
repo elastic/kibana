@@ -20,6 +20,7 @@ import {
   clickOnShowTopN,
   mouseoverOnToOverflowItem,
   openHoverActions,
+  waitForIpsTableToBeLoaded,
 } from '../../../tasks/network/flows';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 
@@ -42,6 +43,7 @@ describe('Hover actions', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   beforeEach(() => {
     login();
     visit(NETWORK_URL, { onBeforeLoad: onBeforeLoadCallback });
+    waitForIpsTableToBeLoaded();
     openHoverActions();
     mouseoverOnToOverflowItem();
   });
