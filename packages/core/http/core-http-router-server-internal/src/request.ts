@@ -135,7 +135,7 @@ export class CoreKibanaRequest<
   public readonly auth: KibanaRequestAuth;
   /** {@inheritDoc KibanaRequest.isFakeRequest} */
   public readonly isFakeRequest: boolean;
-  /** {@inheritDoc KibanaRequest.isInternalRequest} */
+  /** {@inheritDoc KibanaRequest.isInternalApiRequest} */
   public readonly isInternalApiRequest: boolean;
   /** {@inheritDoc KibanaRequest.rewrittenUrl} */
   public readonly rewrittenUrl?: URL;

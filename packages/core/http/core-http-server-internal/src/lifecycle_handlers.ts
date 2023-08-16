@@ -44,7 +44,7 @@ export const createRestrictInternalRoutesPostAuthHandler = (
 
   return (request, response, toolkit) => {
     const isInternalRoute = request.route.options.access === 'internal';
-    if (isRestrictionEnabled && isInternalRoute && !request.isInternalRequest) {
+    if (isRestrictionEnabled && isInternalRoute && !request.isInternalApiRequest) {
       // throw 400
       return response.badRequest({
         body: `uri [${request.url}] with method [${request.route.method}] exists but is not available with the current configuration`,
