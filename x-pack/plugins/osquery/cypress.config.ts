@@ -54,8 +54,6 @@ export default defineCypressConfig({
     numTestsKeptInMemory: 10,
     setupNodeEvents(on, config) {
       setupUserDataLoader(on, config, roleDefinitions);
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('@cypress/grep/src/plugin')(config);
 
       return config;
     },
