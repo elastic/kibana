@@ -8,15 +8,23 @@
 import { map, combineLatest, skipWhile, debounceTime, type Observable } from 'rxjs';
 import type { ChromeNavLinks, CoreStart } from '@kbn/core/public';
 import { SecurityPageName, type NavigationLink } from '@kbn/security-solution-navigation';
-import { isExternalId } from '@kbn/security-solution-navigation/links';
+import { isSecurityId } from '@kbn/security-solution-navigation/links';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+import { assetsNavLinks } from './sections/assets_links';
 import { mlNavCategories, mlNavLinks } from './sections/ml_links';
+import {
+  projectSettingsNavCategories,
+  projectSettingsNavLinks,
+} from './sections/project_settings_links';
 import { devToolsNavLink } from './sections/dev_tools_links';
 import type { ProjectNavigationLink } from './types';
-import { getNavLinkIdFromProjectPageName } from './util';
+import { getCloudLinkKey, getCloudUrl, getNavLinkIdFromProjectPageName, isCloudLink } from './util';
+import { investigationsNavLinks } from './sections/investigations_links';
 
-export const getProjectNavLinks$ = (
+export const createProjectNavLinks$ = (
   securityNavLinks$: Observable<Array<NavigationLink<SecurityPageName>>>,
-  core: CoreStart
+  core: CoreStart,
+  cloud: CloudStart
 ): Observable<ProjectNavigationLink[]> => {
   const { chrome } = core;
   return combineLatest([securityNavLinks$, chrome.navLinks.getNavLinks$()]).pipe(
@@ -25,7 +33,7 @@ export const getProjectNavLinks$ = (
       ([securityNavLinks, chromeNavLinks]) =>
         securityNavLinks.length === 0 || chromeNavLinks.length === 0 // skip if not initialized
     ),
-    map(([securityNavLinks]) => processNavLinks(securityNavLinks, chrome.navLinks))
+    map(([securityNavLinks]) => processNavLinks(securityNavLinks, chrome.navLinks, cloud))
   );
 };
 
@@ -35,9 +43,22 @@ export const getProjectNavLinks$ = (
  */
 const processNavLinks = (
   securityNavLinks: Array<NavigationLink<SecurityPageName>>,
-  chromeNavLinks: ChromeNavLinks
+  chromeNavLinks: ChromeNavLinks,
+  cloud: CloudStart
 ): ProjectNavigationLink[] => {
   const projectNavLinks: ProjectNavigationLink[] = [...securityNavLinks];
+
+  // Investigations. injecting external sub-links and categories definition to the landing
+  const investigationsLinkIndex = projectNavLinks.findIndex(
+    ({ id }) => id === SecurityPageName.investigations
+  );
+  if (investigationsLinkIndex !== -1) {
+    const investigationNavLink = projectNavLinks[investigationsLinkIndex];
+    projectNavLinks[investigationsLinkIndex] = {
+      ...investigationNavLink,
+      links: [...(investigationNavLink.links ?? []), ...investigationsNavLinks],
+    };
+  }
 
   // ML. injecting external sub-links and categories definition to the landing
   const mlLinkIndex = projectNavLinks.findIndex(({ id }) => id === SecurityPageName.mlLanding);
@@ -49,16 +70,37 @@ const processNavLinks = (
     };
   }
 
+  // Assets, adding fleet external sub-links
+  const assetsLinkIndex = projectNavLinks.findIndex(({ id }) => id === SecurityPageName.assets);
+  if (assetsLinkIndex !== -1) {
+    const assetsNavLink = projectNavLinks[assetsLinkIndex];
+    projectNavLinks[assetsLinkIndex] = {
+      ...assetsNavLink,
+      links: [...assetsNavLinks, ...(assetsNavLink.links ?? [])], // adds fleet to the existing (endpoints and cloud) links
+    };
+  }
+
+  // Project Settings, adding all external sub-links
+  const projectSettingsLinkIndex = projectNavLinks.findIndex(
+    ({ id }) => id === SecurityPageName.projectSettings
+  );
+  if (projectSettingsLinkIndex !== -1) {
+    const projectSettingsNavLink = projectNavLinks[projectSettingsLinkIndex];
+    projectNavLinks[projectSettingsLinkIndex] = {
+      ...projectSettingsNavLink,
+      categories: projectSettingsNavCategories,
+      links: [...projectSettingsNavLinks, ...(projectSettingsNavLink.links ?? [])],
+    };
+  }
+
   // Dev Tools. just pushing it
   projectNavLinks.push(devToolsNavLink);
 
-  // TODO: Project Settings. Override "Settings" link
-
-  return filterDisabled(projectNavLinks, chromeNavLinks);
+  return processCloudLinks(filterDisabled(projectNavLinks, chromeNavLinks), cloud);
 };
 
 /**
- * Filters out the disabled external nav links from the project nav links.
+ * Filters out the disabled external kibana nav links from the project nav links.
  * Internal Security links are already filtered by the security_solution plugin appLinks.
  */
 const filterDisabled = (
@@ -67,7 +109,7 @@ const filterDisabled = (
 ): ProjectNavigationLink[] => {
   return projectNavLinks.reduce<ProjectNavigationLink[]>((filteredNavLinks, navLink) => {
     const { id, links } = navLink;
-    if (isExternalId(id)) {
+    if (!isSecurityId(id) && !isCloudLink(id)) {
       const navLinkId = getNavLinkIdFromProjectPageName(id);
       if (!chromeNavLinks.has(navLinkId)) {
         return filteredNavLinks;
@@ -80,4 +122,24 @@ const filterDisabled = (
     }
     return filteredNavLinks;
   }, []);
+};
+
+const processCloudLinks = (
+  links: ProjectNavigationLink[],
+  cloud: CloudStart
+): ProjectNavigationLink[] => {
+  return links.map((link) => {
+    const extraProps: Partial<ProjectNavigationLink> = {};
+    if (isCloudLink(link.id)) {
+      const externalUrl = getCloudUrl(getCloudLinkKey(link.id), cloud);
+      extraProps.externalUrl = externalUrl || '#'; // fallback to # if empty, should only happen in dev
+    }
+    if (link.links) {
+      extraProps.links = processCloudLinks(link.links, cloud);
+    }
+    return {
+      ...link,
+      ...extraProps,
+    };
+  });
 };

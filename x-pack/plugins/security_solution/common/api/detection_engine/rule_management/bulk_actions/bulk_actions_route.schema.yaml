@@ -34,6 +34,7 @@ paths:
                   $ref: '#/components/schemas/BulkEditActionResponse'
 
 components:
+  x-codegen-enabled: false
   schemas:
     BulkEditSkipReason:
       type: string
