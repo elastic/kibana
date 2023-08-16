@@ -11,7 +11,8 @@ import {
   isOfAggregateQueryType,
   getAggregateQueryMode,
   getIndexPatternFromSQLQuery,
-} from './es_query_sql';
+  getIndexPatternFromESQLQuery,
+} from './es_aggregate_query';
 
 describe('sql query helpers', () => {
   describe('isOfQueryType', () => {
@@ -79,6 +80,22 @@ describe('sql query helpers', () => {
         'SELECT * FROM (SELECT woof, miaou FROM "logstash-1234!" GROUP BY woof)'
       );
       expect(idxPattern8).toBe('logstash-1234!');
+    });
+  });
+
+  describe('getIndexPatternFromESQLQuery', () => {
+    it('should return the index pattern string from esql queries', () => {
+      const idxPattern1 = getIndexPatternFromESQLQuery('FROM foo');
+      expect(idxPattern1).toBe('foo');
+
+      const idxPattern3 = getIndexPatternFromESQLQuery('from foo | project abc, def');
+      expect(idxPattern3).toBe('foo');
+
+      const idxPattern4 = getIndexPatternFromESQLQuery('from foo | project a | limit 2');
+      expect(idxPattern4).toBe('foo');
+
+      const idxPattern5 = getIndexPatternFromESQLQuery('from foo | limit 2');
+      expect(idxPattern5).toBe('foo');
     });
   });
 });

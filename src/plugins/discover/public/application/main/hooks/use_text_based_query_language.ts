@@ -16,6 +16,7 @@ import { getValidViewMode } from '../utils/get_valid_view_mode';
 import { FetchStatus } from '../../types';
 
 const MAX_NUM_OF_COLUMNS = 50;
+// For ES|QL we want in case of the following commands to display a table view, otherwise display a document view
 const TRANSFORMATIONAL_COMMANDS = ['stats', 'project', 'keep'];
 
 /**

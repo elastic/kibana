@@ -61,7 +61,7 @@ describe('TextBasedLanguagesEditor', () => {
   let props: TextBasedLanguagesEditorProps;
   beforeEach(() => {
     props = {
-      query: { sql: 'SELECT * FROM test' },
+      query: { esql: 'from test' },
       isCodeEditorExpanded: false,
       onTextLangQueryChange: jest.fn(),
       onTextLangQuerySubmit: jest.fn(),

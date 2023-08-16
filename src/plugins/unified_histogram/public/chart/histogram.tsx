@@ -64,6 +64,7 @@ const computeTotalHits = (
   if (isPlainRecord && hasLensSuggestions) {
     return Object.values(adapterTables ?? {})?.[0]?.rows?.length;
   } else if (isPlainRecord && !hasLensSuggestions) {
+    // ES|QL histogram case
     let rowsCount = 0;
     Object.values(adapterTables ?? {})?.[0]?.rows.forEach((r) => {
       rowsCount += r.rows;

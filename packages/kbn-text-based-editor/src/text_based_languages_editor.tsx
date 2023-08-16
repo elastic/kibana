@@ -394,6 +394,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         pipes?.pop();
         const validContent = pipes?.join('|');
         if (validContent) {
+          // ES|QL with limit 0 returns only the columns and is more performant
           const esqlQuery = {
             esql: `${validContent} | limit 0`,
           };

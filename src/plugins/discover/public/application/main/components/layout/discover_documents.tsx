@@ -179,6 +179,7 @@ function DiscoverDocumentsComponent({
 
   const showTimeCol = useMemo(
     () =>
+      // for ES|QL we want to show the time column only when is on Document view
       (!isTextBasedQuery || (isTextBasedQuery && !columns?.length)) &&
       !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
       !!dataView.timeFieldName,

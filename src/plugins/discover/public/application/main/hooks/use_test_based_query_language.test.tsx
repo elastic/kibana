@@ -50,7 +50,7 @@ function getHookProps(
     replaceUrlState,
   };
 }
-const query = { sql: 'SELECT * from the-data-view-title' };
+const query = { esql: 'rom the-data-view-title' };
 const msgComplete = {
   recordRawType: RecordRawType.PLAIN,
   fetchStatus: FetchStatus.PARTIAL,
@@ -143,7 +143,7 @@ describe('useTextBasedQueryLanguage', () => {
           flattened: { field1: 1 },
         } as unknown as DataTableRecord,
       ],
-      query: { sql: 'SELECT field1 from the-data-view-title' },
+      query: { esql: 'from the-data-view-title | keep field1' },
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
 
@@ -173,7 +173,7 @@ describe('useTextBasedQueryLanguage', () => {
           flattened: { field1: 1 },
         } as unknown as DataTableRecord,
       ],
-      query: { sql: 'SELECT field1 from the-data-view-title' },
+      query: { esql: 'from the-data-view-title | keep field1' },
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     replaceUrlState.mockReset();
@@ -188,7 +188,7 @@ describe('useTextBasedQueryLanguage', () => {
           flattened: { field1: 1 },
         } as unknown as DataTableRecord,
       ],
-      query: { sql: 'SELECT field1 from the-data-view-title WHERE field1=1' },
+      query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
     });
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
@@ -223,7 +223,7 @@ describe('useTextBasedQueryLanguage', () => {
           flattened: { field1: 1 },
         } as unknown as DataTableRecord,
       ],
-      query: { sql: 'SELECT field1 from the-data-view-title WHERE field1=1' },
+      query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
     });
 
     await waitFor(() => {
@@ -251,7 +251,7 @@ describe('useTextBasedQueryLanguage', () => {
           flattened: { field1: 1 },
         } as unknown as DataTableRecord,
       ],
-      query: { sql: 'SELECT field1 from the-data-view-title WHERE field1=1' },
+      query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
     });
 
     documents$.next({
@@ -264,7 +264,7 @@ describe('useTextBasedQueryLanguage', () => {
           flattened: { field1: 1 },
         } as unknown as DataTableRecord,
       ],
-      query: { sql: 'SELECT field1 from the-data-view-title' },
+      query: { esql: 'from the-data-view-title | keep field1' },
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
@@ -282,7 +282,7 @@ describe('useTextBasedQueryLanguage', () => {
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.LOADING,
-      query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
+      query: { esql: 'from the-data-view-title | WHERE field1=2' },
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
     documents$.next({
@@ -295,7 +295,7 @@ describe('useTextBasedQueryLanguage', () => {
           flattened: { field1: 1 },
         } as unknown as DataTableRecord,
       ],
-      query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
+      query: { esql: 'from the-data-view-title | WHERE field1=2' },
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
     stateContainer.appState.getState = jest.fn(() => {
@@ -306,7 +306,7 @@ describe('useTextBasedQueryLanguage', () => {
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.LOADING,
-      query: { sql: 'SELECT field1; from the-data-view-title WHERE field1=2' },
+      query: { esql: 'from the-data-view-title | keep field 1; | WHERE field1=2' },
     });
 
     documents$.next({
@@ -317,7 +317,7 @@ describe('useTextBasedQueryLanguage', () => {
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.LOADING,
-      query: { sql: 'SELECT field1 from the-data-view-title' },
+      query: { esql: 'from the-data-view-title | keep field1' },
     });
 
     documents$.next({
@@ -330,7 +330,7 @@ describe('useTextBasedQueryLanguage', () => {
           flattened: { field1: 1 },
         } as unknown as DataTableRecord,
       ],
-      query: { sql: 'SELECT field1 from the-data-view-title' },
+      query: { esql: 'from the-data-view-title | keep field1' },
     });
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
@@ -361,7 +361,7 @@ describe('useTextBasedQueryLanguage', () => {
           flattened: { field1: 1 },
         } as unknown as DataTableRecord,
       ],
-      query: { sql: 'SELECT field1 from the-data-view-*' },
+      query: { esql: 'from the-data-view-* | keep field1' },
     });
     props.stateContainer.actions.setDataView(dataViewAdHoc);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));

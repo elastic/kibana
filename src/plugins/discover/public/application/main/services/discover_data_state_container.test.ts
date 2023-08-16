@@ -8,7 +8,7 @@
 import { Subject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { savedSearchMockWithSQL } from '../../../__mocks__/saved_search';
+import { savedSearchMockWithESQL } from '../../../__mocks__/saved_search';
 import { FetchStatus } from '../../types';
 import { setUrlTracker } from '../../../kibana_services';
 import { urlTrackerMock } from '../../../__mocks__/url_tracker.mock';
@@ -77,10 +77,10 @@ describe('test getDataStateContainer', () => {
 
   test('useSavedSearch returns plain record raw type', async () => {
     const stateContainer = getDiscoverStateMock({
-      savedSearch: savedSearchMockWithSQL,
+      savedSearch: savedSearchMockWithESQL,
     });
-    stateContainer.savedSearchState.load = jest.fn().mockResolvedValue(savedSearchMockWithSQL);
-    await stateContainer.actions.loadSavedSearch({ savedSearchId: savedSearchMockWithSQL.id });
+    stateContainer.savedSearchState.load = jest.fn().mockResolvedValue(savedSearchMockWithESQL);
+    await stateContainer.actions.loadSavedSearch({ savedSearchId: savedSearchMockWithESQL.id });
 
     expect(stateContainer.dataState.data$.main$.getValue().recordRawType).toBe(RecordRawType.PLAIN);
   });

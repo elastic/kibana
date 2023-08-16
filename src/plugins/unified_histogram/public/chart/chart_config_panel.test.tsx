@@ -36,7 +36,7 @@ describe('ChartConfigPanel', () => {
           isPlainRecord: true,
           lensTablesAdapter: lensTablesAdapterMock,
           query: {
-            sql: 'Select * from test',
+            esql: 'from test',
           },
         }}
       />

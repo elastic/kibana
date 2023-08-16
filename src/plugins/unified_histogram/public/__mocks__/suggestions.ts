@@ -39,7 +39,7 @@ export const currentSuggestionMock = {
       '46aa21fa-b747-4543-bf90-0b40007c546d': {
         index: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
         query: {
-          sql: 'SELECT Dest, AvgTicketPrice FROM "kibana_sample_data_flights"',
+          esql: 'FROM kibana_sample_data_flights | keep Dest, AvgTicketPrice',
         },
         columns: [
           {
@@ -141,7 +141,7 @@ export const currentSuggestionMock = {
       fieldName: '',
       contextualFields: ['Dest', 'AvgTicketPrice'],
       query: {
-        sql: 'SELECT Dest, AvgTicketPrice FROM "kibana_sample_data_flights"',
+        esql: 'FROM "kibana_sample_data_flights"',
       },
     },
   },
@@ -178,7 +178,7 @@ export const allSuggestionsMock = [
         '2513a3d4-ad9d-48ea-bd58-8b6419ab97e6': {
           index: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
           query: {
-            sql: 'SELECT Dest, AvgTicketPrice FROM "kibana_sample_data_flights"',
+            esql: 'FROM "kibana_sample_data_flights"',
           },
           columns: [
             {
@@ -281,7 +281,7 @@ export const allSuggestionsMock = [
         fieldName: '',
         contextualFields: ['Dest', 'AvgTicketPrice'],
         query: {
-          sql: 'SELECT Dest, AvgTicketPrice FROM "kibana_sample_data_flights"',
+          esql: 'FROM "kibana_sample_data_flights"',
         },
       },
     },

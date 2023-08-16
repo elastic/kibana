@@ -10,7 +10,7 @@ import { parseErrors, parseWarning, getInlineEditorText } from './helpers';
 
 describe('helpers', function () {
   describe('parseErrors', function () {
-    it('should return the correct error object from SQL ES response for an one liner query', function () {
+    it('should return the correct error object from ESQL ES response for an one liner query', function () {
       const error = new Error(
         '[essql] > Unexpected error from Elasticsearch: verification_exception - Found 1 problem\nline 1:8: Unknown column [miaou]'
       );
@@ -27,7 +27,7 @@ describe('helpers', function () {
       ]);
     });
 
-    it('should return the correct error object from SQL ES response for an multi liner query', function () {
+    it('should return the correct error object from ESQL ES response for an multi liner query', function () {
       const error = new Error(
         '[essql] > Unexpected error from Elasticsearch: verification_exception - Found 1 problem line 3:7: Condition expression needs to be boolean, found [TEXT]'
       );
@@ -54,7 +54,7 @@ describe('helpers', function () {
     it('should return the generic error object for an error of unknown format', function () {
       const error = new Error('I am an unknown error');
       const errors = [error];
-      expect(parseErrors(errors, `SELECT * FROM "kibana_sample_data_ecommerce"`)).toEqual([
+      expect(parseErrors(errors, `FROM "kibana_sample_data_ecommerce"`)).toEqual([
         {
           endColumn: 10,
           endLineNumber: 1,
@@ -112,27 +112,28 @@ describe('helpers', function () {
 
   describe('getInlineEditorText', function () {
     it('should return the entire query if it is one liner', function () {
-      const text = getInlineEditorText(
-        'SELECT field1, count(*) FROM index1 ORDER BY field1',
-        false
-      );
+      const text = getInlineEditorText('FROM index1 | keep field1, field2 | order field1', false);
       expect(text).toEqual(text);
     });
 
     it('should return the query on one line with extra space if is multiliner', function () {
       const text = getInlineEditorText(
-        'SELECT field1, count(*)\nFROM index1 ORDER BY field1',
+        'FROM index1 | keep field1, field2\n| keep field1, field2 | order field1',
         true
       );
-      expect(text).toEqual('SELECT field1, count(*) FROM index1 ORDER BY field1');
+      expect(text).toEqual(
+        'FROM index1 | keep field1, field2 | keep field1, field2 | order field1'
+      );
     });
 
     it('should return the query on one line with extra spaces removed if is multiliner', function () {
       const text = getInlineEditorText(
-        'SELECT field1, count(*)\nFROM index1 \n   ORDER BY field1',
+        'FROM index1 | keep field1, field2\n| keep field1, field2 \n  | order field1',
         true
       );
-      expect(text).toEqual('SELECT field1, count(*) FROM index1 ORDER BY field1');
+      expect(text).toEqual(
+        'FROM index1 | keep field1, field2 | keep field1, field2 | order field1'
+      );
     });
   });
 });
