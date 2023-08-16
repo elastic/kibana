@@ -73,6 +73,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(documentTitle).to.contain('Inventory - Infrastructure - Observability - Elastic');
       });
 
+      it('renders the inventory survey link', async () => {
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.infraHome.waitForLoading();
+
+        await pageObjects.infraHome.ensureInventoryFeedbackLinkIsVisible();
+      });
+
       it('renders the kubernetes tour component and allows user to dismiss it without seeing it again', async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
         const kubernetesTourText =
@@ -192,7 +199,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('alerts flyouts', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/157711
+    describe.skip('alerts flyouts', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.common.navigateToApp('infraOps');

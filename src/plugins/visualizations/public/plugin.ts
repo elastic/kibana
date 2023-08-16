@@ -59,6 +59,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
@@ -164,6 +165,7 @@ export interface VisualizationsStartDeps {
   usageCollection: UsageCollectionStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   contentManagement: ContentManagementPublicStart;
+  serverless?: ServerlessPluginStart;
 }
 
 /**
@@ -327,6 +329,7 @@ export class VisualizationsPlugin
           visEditorsRegistry,
           listingViewRegistry,
           unifiedSearch: pluginsStart.unifiedSearch,
+          serverless: pluginsStart.serverless,
         };
 
         params.element.classList.add('visAppWrapper');

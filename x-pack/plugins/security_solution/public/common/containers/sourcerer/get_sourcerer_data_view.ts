@@ -18,30 +18,7 @@ export const getSourcererDataView = async (
   const dataView = await dataViewsService.get(dataViewId, true, refreshFields);
   const dataViewData = dataView.toSpec();
   const defaultPatternsList = ensurePatternFormat(dataView.getIndexPattern().split(','));
-
-  // typeguard used to assert that pattern is a string, otherwise
-  // typescript expects patternList to be (string | null)[]
-  // but we want it to always be string[]
-  const filterTypeGuard = (str: unknown): str is string => str != null;
-  const patternList = await Promise.all(
-    defaultPatternsList.map(async (pattern) => {
-      try {
-        await dataViewsService.getFieldsForWildcard({
-          type: dataViewData.type,
-          rollupIndex: dataViewData?.typeMeta?.params?.rollup_index,
-          allowNoIndex: false,
-          pattern,
-        });
-        return pattern;
-      } catch {
-        return null;
-      }
-    })
-  )
-    .then((allPatterns) =>
-      allPatterns.filter((pattern): pattern is string => filterTypeGuard(pattern))
-    )
-    .catch(() => defaultPatternsList);
+  const patternList = await dataViewsService.getExistingIndices(defaultPatternsList);
 
   return {
     loading: false,

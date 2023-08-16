@@ -88,7 +88,7 @@ export const dataLoaders = (
       agentPolicyName,
     }: {
       policyName: string;
-      endpointPackageVersion: string;
+      endpointPackageVersion?: string;
       agentPolicyName?: string;
     }) => {
       const { kbnClient } = await stackServicesPromise;

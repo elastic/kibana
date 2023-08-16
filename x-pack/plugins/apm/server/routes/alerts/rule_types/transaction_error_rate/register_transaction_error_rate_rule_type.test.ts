@@ -429,4 +429,83 @@ describe('Transaction error rate alert', () => {
       alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
   });
+
+  it('sends alert when rule is configured with a filter query', async () => {
+    const { services, dependencies, executor, scheduleActions } =
+      createRuleTypeMocks();
+
+    registerTransactionErrorRateRuleType({
+      ...dependencies,
+    });
+
+    services.scopedClusterClient.asCurrentUser.search.mockResponse({
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 1,
+        },
+      },
+      aggregations: {
+        series: {
+          buckets: [
+            {
+              key: ['bar', 'env-bar', 'type-bar'],
+              outcomes: {
+                buckets: [
+                  {
+                    key: 'success',
+                    doc_count: 90,
+                  },
+                  {
+                    key: 'failure',
+                    doc_count: 10,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
+
+    const params = {
+      threshold: 10,
+      windowSize: 5,
+      windowUnit: 'm',
+      kqlFilter:
+        'service.name: bar and service.environment: env-bar and transaction.type: type-bar',
+      groupBy: ['service.name', 'service.environment', 'transaction.type'],
+    };
+
+    await executor({ params });
+
+    expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
+
+    expect(services.alertFactory.create).toHaveBeenCalledWith(
+      'bar_env-bar_type-bar'
+    );
+
+    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
+      serviceName: 'bar',
+      transactionType: 'type-bar',
+      environment: 'env-bar',
+      reason:
+        'Failed transactions is 10% in the last 5 mins for service: bar, env: env-bar, type: type-bar. Alert when > 10%.',
+      threshold: 10,
+      triggerValue: '10',
+      interval: '5 mins',
+      viewInAppUrl:
+        'http://localhost:5601/eyr/app/apm/services/bar?transactionType=type-bar&environment=env-bar',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+    });
+  });
 });
