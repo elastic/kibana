@@ -29,6 +29,7 @@ export interface CreateAlertWithActionOpts {
   summary?: boolean;
   throttle?: string | null;
   alertsFilter?: AlertsFilter;
+  messageTemplate?: string;
 }
 export interface CreateNoopAlertOpts {
   objectRemover?: ObjectRemover;
@@ -248,7 +249,7 @@ export class AlertUtils {
     return response;
   }
 
-  public async createAlwaysFiringSummaryAction({
+  public async createAlwaysFiringRuleWithSummaryAction({
     objectRemover,
     overwrites = {},
     indexRecordActionId,
@@ -256,6 +257,7 @@ export class AlertUtils {
     notifyWhen,
     throttle,
     alertsFilter,
+    messageTemplate,
   }: CreateAlertWithActionOpts) {
     const objRemover = objectRemover || this.objectRemover;
     const actionId = indexRecordActionId || this.indexRecordActionId;
@@ -278,7 +280,8 @@ export class AlertUtils {
       actionId,
       notifyWhen,
       throttle,
-      alertsFilter
+      alertsFilter,
+      messageTemplate
     );
 
     const response = await request.send({ ...rule, ...overwrites });
@@ -505,14 +508,16 @@ function getAlwaysFiringRuleWithSummaryAction(
   actionId: string,
   notifyWhen = 'onActiveAlert',
   throttle: string | null = '1m',
-  alertsFilter?: AlertsFilter
+  alertsFilter?: AlertsFilter,
+  messageTemplate?: string
 ) {
-  const messageTemplate =
+  const message =
+    messageTemplate ??
     `Alerts, ` +
-    `all:{{alerts.all.count}}, ` +
-    `new:{{alerts.new.count}} IDs:[{{#alerts.new.data}}{{kibana.alert.instance.id}},{{/alerts.new.data}}], ` +
-    `ongoing:{{alerts.ongoing.count}} IDs:[{{#alerts.ongoing.data}}{{kibana.alert.instance.id}},{{/alerts.ongoing.data}}], ` +
-    `recovered:{{alerts.recovered.count}} IDs:[{{#alerts.recovered.data}}{{kibana.alert.instance.id}},{{/alerts.recovered.data}}]`.trim();
+      `all:{{alerts.all.count}}, ` +
+      `new:{{alerts.new.count}} IDs:[{{#alerts.new.data}}{{kibana.alert.instance.id}},{{/alerts.new.data}}], ` +
+      `ongoing:{{alerts.ongoing.count}} IDs:[{{#alerts.ongoing.data}}{{kibana.alert.instance.id}},{{/alerts.ongoing.data}}], ` +
+      `recovered:{{alerts.recovered.count}} IDs:[{{#alerts.recovered.data}}{{kibana.alert.instance.id}},{{/alerts.recovered.data}}]`.trim();
 
   return {
     enabled: true,
@@ -532,7 +537,7 @@ function getAlwaysFiringRuleWithSummaryAction(
         params: {
           index: ES_TEST_INDEX_NAME,
           reference,
-          message: messageTemplate,
+          message,
         },
         frequency: {
           summary: true,
