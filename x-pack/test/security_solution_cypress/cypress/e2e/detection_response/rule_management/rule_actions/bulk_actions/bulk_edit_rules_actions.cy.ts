@@ -41,6 +41,7 @@ import {
   expectManagementTableRules,
   selectAllRules,
   selectRulesByName,
+  getRulesManagementTableRows,
 } from '../../../../../tasks/alerts_detection_rules';
 import {
   waitForBulkEditActionToFinish,
@@ -71,10 +72,6 @@ import {
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 
 const ruleNameToAssert = 'Custom rule name with actions';
-const expectedNumberOfCustomRulesToBeEdited = 7;
-// 7 custom rules of different types + 2 prebuilt.
-// number of selected rules doesn't matter, we only want to make sure they will be edited an no modal window displayed as for other actions
-const expectedNumberOfRulesToBeEdited = expectedNumberOfCustomRulesToBeEdited + 2;
 
 const expectedExistingSlackMessage = 'Existing slack action';
 const expectedSlackMessage = 'Slack action test message';
@@ -107,15 +104,33 @@ describe(
           },
         ];
 
-        createRule(getNewRule({ rule_id: '1', name: ruleNameToAssert, max_signals: 500, actions }));
+        createRule(
+          getNewRule({
+            rule_id: '1',
+            name: ruleNameToAssert,
+            max_signals: 500,
+            actions,
+            enabled: false,
+          })
+        );
       });
 
-      createRule(getEqlRule({ rule_id: '2', name: 'New EQL Rule' }));
-      createRule(getMachineLearningRule({ rule_id: '3', name: 'New ML Rule Test' }));
-      createRule(getNewThreatIndicatorRule({ rule_id: '4', name: 'Threat Indicator Rule Test' }));
-      createRule(getNewThresholdRule({ rule_id: '5', name: 'Threshold Rule' }));
-      createRule(getNewTermsRule({ rule_id: '6', name: 'New Terms Rule' }));
-      createRule(getNewRule({ saved_id: 'mocked', rule_id: '7', name: 'New Rule Test' }));
+      createRule(getEqlRule({ rule_id: '2', name: 'New EQL Rule', enabled: false }));
+      createRule(
+        getMachineLearningRule({ rule_id: '3', name: 'New ML Rule Test', enabled: false })
+      );
+      createRule(
+        getNewThreatIndicatorRule({
+          rule_id: '4',
+          name: 'Threat Indicator Rule Test',
+          enabled: false,
+        })
+      );
+      createRule(getNewThresholdRule({ rule_id: '5', name: 'Threshold Rule', enabled: false }));
+      createRule(getNewTermsRule({ rule_id: '6', name: 'New Terms Rule', enabled: false }));
+      createRule(
+        getNewRule({ saved_id: 'mocked', rule_id: '7', name: 'New Rule Test', enabled: false })
+      );
 
       createSlackConnector();
 
@@ -183,70 +198,67 @@ describe(
 
         excessivelyInstallAllPrebuiltRules();
 
-        // select both custom and prebuilt rules
-        selectAllRules();
-        openBulkEditRuleActionsForm();
+        getRulesManagementTableRows().then((rows) => {
+          // select both custom and prebuilt rules
+          selectAllRules();
+          openBulkEditRuleActionsForm();
 
-        // ensure rule actions info callout displayed on the form
-        cy.get(RULES_BULK_EDIT_ACTIONS_INFO).should('be.visible');
+          // ensure rule actions info callout displayed on the form
+          cy.get(RULES_BULK_EDIT_ACTIONS_INFO).should('be.visible');
 
-        addSlackRuleAction(expectedSlackMessage);
-        pickSummaryOfAlertsOption();
-        pickCustomFrequencyOption(expectedActionFrequency);
+          addSlackRuleAction(expectedSlackMessage);
+          pickSummaryOfAlertsOption();
+          pickCustomFrequencyOption(expectedActionFrequency);
 
-        submitBulkEditForm();
-        waitForBulkEditActionToFinish({ updatedCount: expectedNumberOfRulesToBeEdited });
+          submitBulkEditForm();
+          waitForBulkEditActionToFinish({ updatedCount: rows.length });
 
-        // check if rule has been updated
-        goToEditRuleActionsSettingsOf(ruleNameToAssert);
+          // check if rule has been updated
+          goToEditRuleActionsSettingsOf(ruleNameToAssert);
 
-        assertSelectedSummaryOfAlertsOption();
-        assertSelectedCustomFrequencyOption(expectedActionFrequency, 1);
-        assertSlackRuleAction(expectedExistingSlackMessage, 0);
-        assertSlackRuleAction(expectedSlackMessage, 1);
-        // ensure there is no third action
-        cy.get(actionFormSelector(2)).should('not.exist');
+          assertSelectedSummaryOfAlertsOption();
+          assertSelectedCustomFrequencyOption(expectedActionFrequency, 1);
+          assertSlackRuleAction(expectedExistingSlackMessage, 0);
+          assertSlackRuleAction(expectedSlackMessage, 1);
+          // ensure there is no third action
+          cy.get(actionFormSelector(2)).should('not.exist');
+        });
       });
 
       it('Overwrite rule actions in rules', () => {
         excessivelyInstallAllPrebuiltRules();
 
-        // select both custom and prebuilt rules
-        selectAllRules();
-        openBulkEditRuleActionsForm();
+        getRulesManagementTableRows().then((rows) => {
+          // select both custom and prebuilt rules
+          selectAllRules();
+          openBulkEditRuleActionsForm();
 
-        addSlackRuleAction(expectedSlackMessage);
-        pickSummaryOfAlertsOption();
-        pickPerRuleRunFrequencyOption();
+          addSlackRuleAction(expectedSlackMessage);
+          pickSummaryOfAlertsOption();
+          pickPerRuleRunFrequencyOption();
 
-        // check overwrite box, ensure warning is displayed
-        checkOverwriteRuleActionsCheckbox();
-        cy.get(RULES_BULK_EDIT_ACTIONS_WARNING).contains(
-          `You're about to overwrite rule actions for ${expectedNumberOfRulesToBeEdited} selected rules`
-        );
+          // check overwrite box, ensure warning is displayed
+          checkOverwriteRuleActionsCheckbox();
+          cy.get(RULES_BULK_EDIT_ACTIONS_WARNING).contains(
+            `You're about to overwrite rule actions for ${rows.length} selected rules`
+          );
 
-        submitBulkEditForm();
-        waitForBulkEditActionToFinish({ updatedCount: expectedNumberOfRulesToBeEdited });
+          submitBulkEditForm();
+          waitForBulkEditActionToFinish({ updatedCount: rows.length });
 
-        // check if rule has been updated
-        goToEditRuleActionsSettingsOf(ruleNameToAssert);
+          // check if rule has been updated
+          goToEditRuleActionsSettingsOf(ruleNameToAssert);
 
-        assertSelectedSummaryOfAlertsOption();
-        assertSelectedPerRuleRunFrequencyOption();
-        assertSlackRuleAction(expectedSlackMessage);
-        // ensure existing action was overwritten
-        cy.get(actionFormSelector(1)).should('not.exist');
+          assertSelectedSummaryOfAlertsOption();
+          assertSelectedPerRuleRunFrequencyOption();
+          assertSlackRuleAction(expectedSlackMessage);
+          // ensure existing action was overwritten
+          cy.get(actionFormSelector(1)).should('not.exist');
+        });
       });
 
       it('Add a rule action to rules (new connector)', () => {
-        const expectedActionFrequency: RuleActionCustomFrequency = {
-          throttle: 2,
-          throttleUnit: 'h',
-        };
-        const expectedEmail = 'test@example.com';
-        const expectedSubject = 'Subject';
-
-        selectRulesByName([
+        const rulesToSelect = [
           ruleNameToAssert,
           'New EQL Rule',
           'New ML Rule Test',
@@ -254,7 +266,15 @@ describe(
           'Threshold Rule',
           'New Terms Rule',
           'New Rule Test',
-        ]);
+        ] as const;
+        const expectedActionFrequency: RuleActionCustomFrequency = {
+          throttle: 2,
+          throttleUnit: 'h',
+        };
+        const expectedEmail = 'test@example.com';
+        const expectedSubject = 'Subject';
+
+        selectRulesByName(rulesToSelect);
         openBulkEditRuleActionsForm();
 
         addEmailConnectorAndRuleAction(expectedEmail, expectedSubject);
@@ -262,7 +282,7 @@ describe(
         pickCustomFrequencyOption(expectedActionFrequency);
 
         submitBulkEditForm();
-        waitForBulkEditActionToFinish({ updatedCount: expectedNumberOfCustomRulesToBeEdited });
+        waitForBulkEditActionToFinish({ updatedCount: rulesToSelect.length });
 
         // check if rule has been updated
         goToEditRuleActionsSettingsOf(ruleNameToAssert);

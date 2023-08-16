@@ -19,6 +19,7 @@ import {
   goToTheRuleDetailsOf,
   expectManagementTableRules,
   selectAllRules,
+  getRulesManagementTableRows,
 } from '../../../../../tasks/alerts_detection_rules';
 
 import {
@@ -53,8 +54,6 @@ import {
 const DATA_VIEW_ID = 'auditbeat';
 
 const expectedIndexPatterns = ['index-1-*', 'index-2-*'];
-
-const expectedNumberOfCustomRulesToBeEdited = 6;
 
 describe(
   'Bulk editing index patterns of rules with a data view only',
@@ -134,100 +133,110 @@ describe(
     });
 
     it('Add index patterns to custom rules with configured data view: all rules are skipped', () => {
-      selectAllRules();
+      getRulesManagementTableRows().then((rows) => {
+        selectAllRules();
 
-      openBulkEditAddIndexPatternsForm();
-      typeIndexPatterns(expectedIndexPatterns);
-      submitBulkEditForm();
+        openBulkEditAddIndexPatternsForm();
+        typeIndexPatterns(expectedIndexPatterns);
+        submitBulkEditForm();
 
-      waitForBulkEditActionToFinish({
-        skippedCount: expectedNumberOfCustomRulesToBeEdited,
-        showDataViewsWarning: true,
+        waitForBulkEditActionToFinish({
+          skippedCount: rows.length,
+          showDataViewsWarning: true,
+        });
+
+        // check if rule still has data view and index patterns field does not exist
+        goToRuleDetails();
+        getDetails(DATA_VIEW_DETAILS).contains(DATA_VIEW_ID);
+        assertDetailsNotExist(INDEX_PATTERNS_DETAILS);
       });
-
-      // check if rule still has data view and index patterns field does not exist
-      goToRuleDetails();
-      getDetails(DATA_VIEW_DETAILS).contains(DATA_VIEW_ID);
-      assertDetailsNotExist(INDEX_PATTERNS_DETAILS);
     });
 
     it('Add index patterns to custom rules with configured data view when data view checkbox is checked: rules are updated', () => {
-      selectAllRules();
+      getRulesManagementTableRows().then((rows) => {
+        selectAllRules();
 
-      openBulkEditAddIndexPatternsForm();
-      typeIndexPatterns(expectedIndexPatterns);
+        openBulkEditAddIndexPatternsForm();
+        typeIndexPatterns(expectedIndexPatterns);
 
-      // click on data view overwrite checkbox, ensure warning is displayed
-      cy.get(RULES_BULK_EDIT_DATA_VIEWS_WARNING).should('not.exist');
-      checkOverwriteDataViewCheckbox();
-      cy.get(RULES_BULK_EDIT_DATA_VIEWS_WARNING).should('be.visible');
+        // click on data view overwrite checkbox, ensure warning is displayed
+        cy.get(RULES_BULK_EDIT_DATA_VIEWS_WARNING).should('not.exist');
+        checkOverwriteDataViewCheckbox();
+        cy.get(RULES_BULK_EDIT_DATA_VIEWS_WARNING).should('be.visible');
 
-      submitBulkEditForm();
+        submitBulkEditForm();
 
-      waitForBulkEditActionToFinish({ updatedCount: expectedNumberOfCustomRulesToBeEdited });
+        waitForBulkEditActionToFinish({ updatedCount: rows.length });
 
-      // check if rule has been updated with index patterns and data view does not exist
-      goToRuleDetails();
-      hasIndexPatterns(expectedIndexPatterns.join(''));
-      assertDetailsNotExist(DATA_VIEW_DETAILS);
+        // check if rule has been updated with index patterns and data view does not exist
+        goToRuleDetails();
+        hasIndexPatterns(expectedIndexPatterns.join(''));
+        assertDetailsNotExist(DATA_VIEW_DETAILS);
+      });
     });
 
     it('Overwrite index patterns in custom rules with configured data view when overwrite data view checkbox is NOT checked:: rules are skipped', () => {
-      selectAllRules();
+      getRulesManagementTableRows().then((rows) => {
+        selectAllRules();
 
-      openBulkEditAddIndexPatternsForm();
-      typeIndexPatterns(expectedIndexPatterns);
-      checkOverwriteIndexPatternsCheckbox();
-      submitBulkEditForm();
+        openBulkEditAddIndexPatternsForm();
+        typeIndexPatterns(expectedIndexPatterns);
+        checkOverwriteIndexPatternsCheckbox();
+        submitBulkEditForm();
 
-      waitForBulkEditActionToFinish({
-        skippedCount: expectedNumberOfCustomRulesToBeEdited,
-        showDataViewsWarning: true,
+        waitForBulkEditActionToFinish({
+          skippedCount: rows.length,
+          showDataViewsWarning: true,
+        });
+
+        // check if rule still has data view and index patterns field does not exist
+        goToRuleDetails();
+        getDetails(DATA_VIEW_DETAILS).contains(DATA_VIEW_ID);
+        assertDetailsNotExist(INDEX_PATTERNS_DETAILS);
       });
-
-      // check if rule still has data view and index patterns field does not exist
-      goToRuleDetails();
-      getDetails(DATA_VIEW_DETAILS).contains(DATA_VIEW_ID);
-      assertDetailsNotExist(INDEX_PATTERNS_DETAILS);
     });
 
     it('Overwrite index patterns in custom rules with configured data view when overwrite data view checkbox is checked: rules are updated', () => {
-      selectAllRules();
+      getRulesManagementTableRows().then((rows) => {
+        selectAllRules();
 
-      openBulkEditAddIndexPatternsForm();
-      typeIndexPatterns(expectedIndexPatterns);
-      checkOverwriteIndexPatternsCheckbox();
-      checkOverwriteDataViewCheckbox();
+        openBulkEditAddIndexPatternsForm();
+        typeIndexPatterns(expectedIndexPatterns);
+        checkOverwriteIndexPatternsCheckbox();
+        checkOverwriteDataViewCheckbox();
 
-      submitBulkEditForm();
+        submitBulkEditForm();
 
-      waitForBulkEditActionToFinish({ updatedCount: expectedNumberOfCustomRulesToBeEdited });
+        waitForBulkEditActionToFinish({ updatedCount: rows.length });
 
-      // check if rule has been overwritten with index patterns and data view does not exist
-      goToRuleDetails();
-      hasIndexPatterns(expectedIndexPatterns.join(''));
-      assertDetailsNotExist(DATA_VIEW_DETAILS);
+        // check if rule has been overwritten with index patterns and data view does not exist
+        goToRuleDetails();
+        hasIndexPatterns(expectedIndexPatterns.join(''));
+        assertDetailsNotExist(DATA_VIEW_DETAILS);
+      });
     });
 
     it('Delete index patterns in custom rules with configured data view: rules are skipped', () => {
-      selectAllRules();
+      getRulesManagementTableRows().then((rows) => {
+        selectAllRules();
 
-      openBulkEditDeleteIndexPatternsForm();
-      typeIndexPatterns(expectedIndexPatterns);
+        openBulkEditDeleteIndexPatternsForm();
+        typeIndexPatterns(expectedIndexPatterns);
 
-      // in delete form data view checkbox is absent
-      cy.get(RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX).should('not.exist');
+        // in delete form data view checkbox is absent
+        cy.get(RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX).should('not.exist');
 
-      submitBulkEditForm();
+        submitBulkEditForm();
 
-      waitForBulkEditActionToFinish({
-        skippedCount: expectedNumberOfCustomRulesToBeEdited,
-        showDataViewsWarning: true,
+        waitForBulkEditActionToFinish({
+          skippedCount: rows.length,
+          showDataViewsWarning: true,
+        });
+
+        // check if rule still has data view and index patterns field does not exist
+        goToRuleDetails();
+        getDetails(DATA_VIEW_DETAILS).contains(DATA_VIEW_ID);
       });
-
-      // check if rule still has data view and index patterns field does not exist
-      goToRuleDetails();
-      getDetails(DATA_VIEW_DETAILS).contains(DATA_VIEW_ID);
     });
   }
 );

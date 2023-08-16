@@ -14,14 +14,13 @@ import {
   ADD_ELASTIC_RULES_BTN,
   RULES_EMPTY_PROMPT,
   RULES_MONITORING_TAB,
-  RULES_ROW,
-  RULES_MANAGEMENT_TABLE,
   RULE_SWITCH,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   INSTALL_ALL_RULES_BUTTON,
 } from '../../../screens/alerts_detection_rules';
 import {
   deleteFirstRule,
+  getRulesManagementTableRows,
   selectAllRules,
   selectRulesByName,
   waitForPrebuiltDetectionRulesToBeLoaded,
@@ -69,7 +68,7 @@ describe('Prebuilt rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   describe('Alerts rules, prebuilt rules', () => {
     it('Loads prebuilt rules', () => {
       // Check that the rules table contains rules
-      cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW).should('have.length.gte', 1);
+      getRulesManagementTableRows().should('have.length.gte', 1);
 
       // Check the correct count of prebuilt rules is displayed
       getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {

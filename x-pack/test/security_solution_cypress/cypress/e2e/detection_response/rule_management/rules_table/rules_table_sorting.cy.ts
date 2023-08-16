@@ -14,9 +14,12 @@ import {
   SECOND_RULE,
   FOURTH_RULE,
   RULES_MANAGEMENT_TABLE,
-  RULES_ROW,
 } from '../../../../screens/alerts_detection_rules';
-import { enableRule, waitForRuleToUpdate } from '../../../../tasks/alerts_detection_rules';
+import {
+  enableRule,
+  getRulesManagementTableRows,
+  waitForRuleToUpdate,
+} from '../../../../tasks/alerts_detection_rules';
 import { login, visit } from '../../../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
@@ -82,7 +85,7 @@ describe('Rules table: sorting', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       .then((ruleNameFirstPage) => {
         goToTablePage(2);
         // Check that the rules table shows at least one row
-        cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW).should('have.length.gte', 1);
+        getRulesManagementTableRows().should('have.length.gte', 1);
         // Check that the rules table doesn't show the rule from the first page
         cy.get(RULES_MANAGEMENT_TABLE).should('not.contain', ruleNameFirstPage);
       });

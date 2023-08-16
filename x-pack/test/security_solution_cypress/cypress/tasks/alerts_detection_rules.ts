@@ -54,6 +54,7 @@ import {
   ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN,
   CONFIRM_DELETE_RULE_BTN,
   AUTO_REFRESH_POPOVER_TRIGGER_BUTTON,
+  SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
@@ -63,6 +64,8 @@ import { LOADING_INDICATOR } from '../screens/security_header';
 
 import { goToRuleEditSettings } from './rule_details';
 import { goToActionsStepTab } from './create_new_rule';
+
+export const getRulesManagementTableRows = () => cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW);
 
 export const enableRule = (rulePosition: number) => {
   cy.get(RULE_SWITCH).eq(rulePosition).click();
@@ -211,6 +214,12 @@ export const selectAllRules = () => {
   cy.log('Select all rules');
   cy.get(SELECT_ALL_RULES_BTN).contains('Select all').click();
   cy.get(SELECT_ALL_RULES_BTN).contains('Clear');
+};
+
+export const selectAllRulesOnPage = () => {
+  cy.log('Select all rules on page');
+  cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).check();
+  cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).should('be.checked');
 };
 
 export const clearAllRuleSelection = () => {
