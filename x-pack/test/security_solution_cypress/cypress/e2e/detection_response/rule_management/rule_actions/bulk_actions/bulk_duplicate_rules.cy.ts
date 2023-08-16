@@ -8,7 +8,6 @@
 import { tag } from '../../../../../tags';
 
 import {
-  waitForRulesTableToBeLoaded,
   goToTheRuleDetailsOf,
   selectNumberOfRules,
   expectManagementTableRules,
@@ -102,8 +101,6 @@ describe('Detection rules, bulk duplicate', { tags: [tag.ESS, tag.SERVERLESS] },
     );
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-
-    waitForRulesTableToBeLoaded();
   });
 
   it('Duplicates rules', () => {
