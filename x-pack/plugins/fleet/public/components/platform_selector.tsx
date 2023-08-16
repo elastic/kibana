@@ -24,11 +24,7 @@ import {
   FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
 } from '../../common/constants/epm';
 import { type PLATFORM_TYPE } from '../hooks';
-import {
-  REDUCED_PLATFORM_OPTIONS,
-  PLATFORM_OPTIONS,
-  usePlatform,
-} from '../hooks';
+import { REDUCED_PLATFORM_OPTIONS, PLATFORM_OPTIONS, usePlatform } from '../hooks';
 
 import { KubernetesInstructions } from './agent_enrollment_flyout/kubernetes_instructions';
 import type { CloudSecurityIntegration } from './agent_enrollment_flyout/types';
@@ -81,11 +77,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
       return 'kubernetes';
 
     return 'linux';
-  }, [
-    hasK8sIntegration,
-    cloudSecurityIntegration?.integrationType,
-    isManaged,
-  ]);
+  }, [hasK8sIntegration, cloudSecurityIntegration?.integrationType, isManaged]);
 
   const { platform, setPlatform } = usePlatform(getInitialPlatform());
 
@@ -230,17 +222,17 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               </EuiText>
             )}
 
-              <EuiCodeBlock
-                onClick={onTextAreaClick}
-                fontSize="m"
-                isCopyable={!fullCopyButton}
-                paddingSize="m"
-                css={`
-                  max-width: 1100px;
-                `}
-              >
-                <CommandCode>{commandsByPlatform[platform]}</CommandCode>
-              </EuiCodeBlock>
+            <EuiCodeBlock
+              onClick={onTextAreaClick}
+              fontSize="m"
+              isCopyable={!fullCopyButton}
+              paddingSize="m"
+              css={`
+                max-width: 1100px;
+              `}
+            >
+              <CommandCode>{commandsByPlatform[platform]}</CommandCode>
+            </EuiCodeBlock>
 
             <EuiSpacer size="s" />
             {fullCopyButton && (
