@@ -245,14 +245,14 @@ export class KnowledgeBaseService {
         await installModel();
       }
     } catch (error) {
-      if (
-        error instanceof errors.ResponseError &&
-        error.body.error.type === 'resource_not_found_exception'
-      ) {
-        await installModel();
-      } else {
-        throw error;
-      }
+      // if (
+      //   error instanceof errors.ResponseError &&
+      //   error.body.error.type === 'resource_not_found_exception'
+      // ) {
+      //   await installModel();
+      // } else {
+      throw error;
+      // }
     }
 
     try {

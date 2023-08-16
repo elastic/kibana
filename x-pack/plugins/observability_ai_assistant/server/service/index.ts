@@ -82,7 +82,7 @@ export class ObservabilityAIAssistantService {
           return {
             run: async () => {
               if (this.kbService) {
-                await this.kbService.processQueue();
+                // await this.kbService.processQueue();
               }
             },
           };
