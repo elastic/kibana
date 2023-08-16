@@ -8,6 +8,7 @@
 import React, { useState, memo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { AggregateQuery, Query } from '@kbn/es-query';
+import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
 import { UnifiedDataTable } from '@kbn/unified-data-table';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import './saved_search_grid.scss';
@@ -18,6 +19,7 @@ import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 export interface DiscoverGridEmbeddableProps extends UnifiedDataTableProps {
   totalHitCount: number;
   query?: AggregateQuery | Query;
+  interceptedWarnings?: SearchResponseInterceptedWarning[];
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
   savedSearch?: SavedSearch;
@@ -26,6 +28,7 @@ export interface DiscoverGridEmbeddableProps extends UnifiedDataTableProps {
 export const DataGridMemoized = memo(UnifiedDataTable);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
+  const { interceptedWarnings, ...gridProps } = props;
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
   return (
@@ -33,9 +36,10 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       totalHitCount={props.totalHitCount}
       isLoading={props.isLoading}
       dataTestSubj="embeddedSavedSearchDocTable"
+      interceptedWarnings={props.interceptedWarnings}
     >
       <DataGridMemoized
-        {...props}
+        {...gridProps}
         setExpandedDoc={setExpandedDoc}
         expandedDoc={expandedDoc}
         getDocumentView={(displayedRows: DataTableRecord[], displayedColumns: string[]) => {

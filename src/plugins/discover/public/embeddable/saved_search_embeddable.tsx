@@ -18,7 +18,6 @@ import React from 'react';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { I18nProvider } from '@kbn/i18n-react';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import {
   Container,
@@ -41,10 +40,15 @@ import {
 import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import {
+  getSearchResponseInterceptedWarnings,
+  type SearchResponseInterceptedWarning,
+} from '@kbn/search-response-warnings';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -56,9 +60,9 @@ import {
   buildDataTableRecord,
 } from '@kbn/discover-utils';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
+import { VIEW_MODE, DISABLE_SHARD_FAILURE_WARNING } from '../../common/constants';
 import type { UnifiedDataTableSettings } from '@kbn/unified-data-table';
 import { columnActions } from '@kbn/unified-data-table';
-import { VIEW_MODE } from '../../common/constants';
 import type { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import type { DiscoverServices } from '../build_services';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
@@ -86,6 +90,7 @@ export type SearchProps = Partial<UnifiedDataTableProps> &
     filter?: (field: DataViewField, value: string[], operator: string) => void;
     hits?: DataTableRecord[];
     totalHitCount?: number;
+    interceptedWarnings?: SearchResponseInterceptedWarning[];
     onMoveColumn?: (column: string, index: number) => void;
     onUpdateRowHeight?: (rowHeight?: number) => void;
     onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
@@ -279,6 +284,7 @@ export class SavedSearchEmbeddable
     this.inspectorAdapters.requests!.reset();
 
     searchProps.isLoading = true;
+    searchProps.interceptedWarnings = undefined;
 
     const wasAlreadyRendered = this.getOutput().rendered;
 
@@ -357,8 +363,19 @@ export class SavedSearchEmbeddable
             }),
           },
           executionContext,
+          disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
         })
       );
+
+      if (this.inspectorAdapters.requests) {
+        searchProps.interceptedWarnings = getSearchResponseInterceptedWarnings({
+          services: this.services,
+          adapter: this.inspectorAdapters.requests,
+          options: {
+            disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
+          },
+        });
+      }
 
       this.updateOutput({
         ...this.getOutput(),
@@ -622,21 +639,22 @@ export class SavedSearchEmbeddable
       Array.isArray(searchProps.columns)
     ) {
       ReactDOM.render(
-        <I18nProvider>
-          <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
-            <KibanaContextProvider services={searchProps.services}>
-              <FieldStatisticsTable
-                dataView={searchProps.dataView}
-                columns={searchProps.columns}
-                savedSearch={savedSearch}
-                filters={this.input.filters}
-                query={this.input.query}
-                onAddFilter={searchProps.onFilter}
-                searchSessionId={this.input.searchSessionId}
-              />
-            </KibanaContextProvider>
-          </KibanaThemeProvider>
-        </I18nProvider>,
+        <KibanaRenderContextProvider
+          theme={searchProps.services.core.theme}
+          i18n={searchProps.services.core.i18n}
+        >
+          <KibanaContextProvider services={searchProps.services}>
+            <FieldStatisticsTable
+              dataView={searchProps.dataView}
+              columns={searchProps.columns}
+              savedSearch={savedSearch}
+              filters={this.input.filters}
+              query={this.input.query}
+              onAddFilter={searchProps.onFilter}
+              searchSessionId={this.input.searchSessionId}
+            />
+          </KibanaContextProvider>
+        </KibanaRenderContextProvider>,
         domNode
       );
 
@@ -661,15 +679,16 @@ export class SavedSearchEmbeddable
       const { getTriggerCompatibleActions } = searchProps.services.uiActions;
 
       ReactDOM.render(
-        <I18nProvider>
-          <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
-            <KibanaContextProvider services={searchProps.services}>
-              <CellActionsProvider getTriggerCompatibleActions={getTriggerCompatibleActions}>
-                <SavedSearchEmbeddableComponent {...props} />
-              </CellActionsProvider>
-            </KibanaContextProvider>
-          </KibanaThemeProvider>
-        </I18nProvider>,
+        <KibanaRenderContextProvider
+          theme={searchProps.services.core.theme}
+          i18n={searchProps.services.core.i18n}
+        >
+          <KibanaContextProvider services={searchProps.services}>
+            <CellActionsProvider getTriggerCompatibleActions={getTriggerCompatibleActions}>
+              <SavedSearchEmbeddableComponent {...props} />
+            </CellActionsProvider>
+          </KibanaContextProvider>
+        </KibanaRenderContextProvider>,
         domNode
       );
 
