@@ -40,7 +40,6 @@
     "@kbn/text-based-languages",
     "@kbn/text-based-editor",
     "@kbn/core-doc-links-browser",
-    "@kbn/embeddable-plugin"
   ],
   "exclude": [
     "target/**/*",
