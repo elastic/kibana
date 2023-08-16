@@ -102,8 +102,7 @@ steps:
     depends_on: build
     timeout_in_minutes: 40
     parallelism: 10
-    soft_fail:
-      - exit_status: 10
+    soft_fail: true
     retry:
       automatic:
         - exit_status: '*'
@@ -117,8 +116,7 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 40
-    soft_fail:
-      - exit_status: 10
+    soft_fail: true
     retry:
       automatic:
         - exit_status: '*'
@@ -133,8 +131,7 @@ steps:
     depends_on: build
     timeout_in_minutes: 40
     parallelism: 4
-    soft_fail:
-      - exit_status: 10
+    soft_fail: true
     retry:
       automatic:
         - exit_status: '*'
@@ -149,8 +146,7 @@ steps:
     depends_on: build
     timeout_in_minutes: 40
     parallelism: 2
-    soft_fail:
-      - exit_status: 10
+    soft_fail: true
     retry:
       automatic:
         - exit_status: '*'

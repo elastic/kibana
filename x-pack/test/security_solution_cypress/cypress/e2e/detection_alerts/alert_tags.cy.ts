@@ -47,6 +47,8 @@ describe('Alert tagging', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
   it('Add and remove a tag using the alert bulk action menu', () => {
     // Add a tag to one alert
+    selectNumberOfAlerts(1);
+    openAlertTaggingBulkActionMenu();
     clickAlertTag('Duplicate');
     updateAlertTags();
     cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
