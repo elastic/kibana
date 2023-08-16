@@ -24,6 +24,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { GroupPreview } from './group_preview';
 import { LensByValueInput } from '@kbn/lens-plugin/public/embeddable';
 import { getCurrentTimeField } from './lens_attributes';
+import moment from 'moment';
 
 class EuiSuperDatePickerTestHarness {
   public static get currentCommonlyUsedRange() {
@@ -180,9 +181,10 @@ describe('group editor preview', () => {
     // from chart brush
     userEvent.click(screen.getByTestId('brushEnd'));
 
+    const format = 'MMM D, YYYY @ HH:mm:ss.SSS'; // from https://github.com/elastic/eui/blob/6a30eba7c2a154691c96a1d17c8b2f3506d351a3/src/components/date_picker/super_date_picker/super_date_picker.tsx#L222;
     expect(EuiSuperDatePickerTestHarness.currentRange).toEqual({
-      from: 'Dec 31, 1969 @ 17:00:00.000',
-      to: 'Dec 31, 1969 @ 17:00:00.100',
+      from: moment(BRUSH_RANGE[0]).format(format),
+      to: moment(BRUSH_RANGE[1]).format(format),
     });
     expect(getEmbeddableTimeRange()).toEqual({
       from: new Date(BRUSH_RANGE[0]).toISOString(),
