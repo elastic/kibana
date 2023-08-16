@@ -108,10 +108,9 @@ export const DetailPanel = ({ panelType, indexName, index, openDetailPanel, clos
               key="menu"
               render={() => (
                 <IndexActionsContextMenu
-                  iconSide="left"
                   indexNames={[indexName]}
                   anchorPosition="upRight"
-                  detailPanel={true}
+                  iconSide="left"
                   iconType="arrowUp"
                   label={
                     <FormattedMessage

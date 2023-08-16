@@ -63,7 +63,7 @@ export class IndexActionsContextMenu extends Component {
       showMapping,
       showStats,
       showSettings,
-      detailPanel,
+      isOnListView,
       indexNames,
       indexStatusByName,
       performExtensionAction,
@@ -78,7 +78,7 @@ export class IndexActionsContextMenu extends Component {
     const allFrozen = every(indices, (index) => index.isFrozen);
     const selectedIndexCount = indexNames.length;
     const items = [];
-    if (!detailPanel && selectedIndexCount === 1) {
+    if (isOnListView && selectedIndexCount === 1) {
       items.push({
         'data-test-subj': 'showSettingsIndexMenuButton',
         name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexSettingsLabel', {

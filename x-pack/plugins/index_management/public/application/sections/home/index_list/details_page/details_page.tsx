@@ -17,11 +17,11 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { DiscoverLink } from '../../../../lib/discover_link';
-import { DetailsPageError } from './details_page_error';
 import { useLoadIndex } from '../../../../services';
 import { Section } from '../../home';
 import { DetailsPageLoading } from './details_page_loading';
-
+import { DetailsPageError } from './details_page_error';
+import { IndexActionsContextMenuWithoutRedux } from '../index_actions_context_menu/index_actions_context_menu.without_redux';
 export enum IndexDetailsSection {
   Overview = 'overview',
   Documents = 'documents',
@@ -101,7 +101,7 @@ export const DetailsPage: React.FunctionComponent<
           color="text"
           iconType="arrowLeft"
           onClick={() => {
-            return history.push(encodeURI(`/indices`));
+            return history.push(`/${Section.Indices}`);
           }}
         >
           <FormattedMessage
@@ -117,7 +117,10 @@ export const DetailsPage: React.FunctionComponent<
         data-test-subj="indexDetailsHeader"
         pageTitle={indexName}
         bottomBorder
-        rightSideItems={[<DiscoverLink indexName={indexName} asButton={true} />]}
+        rightSideItems={[
+          <DiscoverLink indexName={indexName} asButton={true} />,
+          <IndexActionsContextMenuWithoutRedux indexNames={[indexName]} />,
+        ]}
         tabs={headerTabs}
       />
 
