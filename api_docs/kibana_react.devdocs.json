@@ -3496,14 +3496,6 @@
           },
           {
             "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/embeddable/handle_explicit_input.tsx"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/embeddable/handle_explicit_input.tsx"
-          },
-          {
-            "plugin": "aiops",
             "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_app_state.tsx"
           },
           {
