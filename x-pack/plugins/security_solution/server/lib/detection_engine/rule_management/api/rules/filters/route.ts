@@ -8,8 +8,11 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { RuleManagementFiltersResponse } from '../../../../../../../common/detection_engine/rule_management/api/rules/filters/response_schema';
-import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../../../common/detection_engine/rule_management/api/urls';
+import type { IKibanaResponse } from '@kbn/core/server';
+import {
+  GetRuleManagementFiltersResponse,
+  RULE_MANAGEMENT_FILTERS_URL,
+} from '../../../../../../../common/api/detection_engine/rule_management';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';
@@ -57,7 +60,7 @@ export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) =
         tags: ['access:securitySolution'],
       },
     },
-    async (context, _, response) => {
+    async (context, _, response): Promise<IKibanaResponse<GetRuleManagementFiltersResponse>> => {
       const siemResponse = buildSiemResponse(response);
       const ctx = await context.resolve(['alerting']);
       const rulesClient = ctx.alerting.getRulesClient();
@@ -65,7 +68,7 @@ export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) =
       try {
         const [{ prebuilt: prebuiltRulesCount, custom: customRulesCount }, tags] =
           await Promise.all([fetchRulesCount(rulesClient), readTags({ rulesClient })]);
-        const responseBody: RuleManagementFiltersResponse = {
+        const responseBody: GetRuleManagementFiltersResponse = {
           rules_summary: {
             custom_count: customRulesCount,
             prebuilt_installed_count: prebuiltRulesCount,
@@ -76,13 +79,13 @@ export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) =
         };
         const [validatedBody, validationError] = validate(
           responseBody,
-          RuleManagementFiltersResponse
+          GetRuleManagementFiltersResponse
         );
 
         if (validationError != null) {
           return siemResponse.error({ statusCode: 500, body: validationError });
         } else {
-          return response.ok({ body: validatedBody ?? {} });
+          return response.ok({ body: validatedBody });
         }
       } catch (err) {
         const error = transformError(err);

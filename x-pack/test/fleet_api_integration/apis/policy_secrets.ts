@@ -12,6 +12,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { FullAgentPolicy } from '@kbn/fleet-plugin/common';
+import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../helpers';
@@ -41,6 +42,7 @@ function createdPolicyToUpdatePolicy(policy: any) {
   return updatedPolicy;
 }
 
+const SECRETS_INDEX_NAME = '.fleet-secrets';
 export default function (providerContext: FtrProviderContext) {
   describe('fleet policy secrets', () => {
     const { getService } = providerContext;
@@ -49,28 +51,184 @@ export default function (providerContext: FtrProviderContext) {
     const supertest = getService('supertest');
     const kibanaServer = getService('kibanaServer');
 
+    const createFleetServerAgentPolicy = async () => {
+      const agentPolicyResponse = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          name: `Fleet server policy ${uuidv4()}`,
+          namespace: 'default',
+        })
+        .expect(200);
+
+      const agentPolicyId = agentPolicyResponse.body.item.id;
+
+      // create fleet_server package policy
+      await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          force: true,
+          package: {
+            name: 'fleet_server',
+            version: '1.3.1',
+          },
+          name: `Fleet Server ${uuidv4()}`,
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          vars: {},
+          inputs: {
+            'fleet_server-fleet-server': {
+              enabled: true,
+              vars: {
+                custom: '',
+              },
+              streams: {},
+            },
+          },
+        })
+        .expect(200);
+
+      return agentPolicyId;
+    };
+
+    const createPolicyWithSecrets = async () => {
+      return supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: `secrets-${Date.now()}`,
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          inputs: {
+            'secrets-test_input': {
+              enabled: true,
+              vars: {
+                input_var_secret: 'input_secret_val',
+              },
+              streams: {
+                'secrets.log': {
+                  enabled: true,
+                  vars: {
+                    stream_var_secret: 'stream_secret_val',
+                  },
+                },
+              },
+            },
+          },
+          vars: {
+            package_var_secret: 'package_secret_val',
+          },
+          package: {
+            name: 'secrets',
+            version: '1.0.0',
+          },
+        })
+        .expect(200);
+    };
+
+    const createFleetServerAgent = async (
+      agentPolicyId: string,
+      hostname: string,
+      agentVersion: string
+    ) => {
+      const agentResponse = await es.index({
+        index: '.fleet-agents',
+        refresh: true,
+        body: {
+          access_api_key_id: 'api-key-3',
+          active: true,
+          policy_id: agentPolicyId,
+          type: 'PERMANENT',
+          local_metadata: {
+            host: { hostname },
+            elastic: { agent: { version: agentVersion } },
+          },
+          user_provided_metadata: {},
+          enrolled_at: '2022-06-21T12:14:25Z',
+          last_checkin: '2022-06-27T12:28:29Z',
+          tags: ['tag1'],
+        },
+      });
+
+      return agentResponse._id;
+    };
+
+    const clearAgents = async () => {
+      try {
+        await es.deleteByQuery({
+          index: '.fleet-agents',
+          refresh: true,
+          body: {
+            query: {
+              match_all: {},
+            },
+          },
+        });
+      } catch (err) {
+        // index doesn't exist
+      }
+    };
+
+    const getSecrets = async (ids?: string[]) => {
+      const query = ids ? { terms: { _id: ids } } : { match_all: {} };
+      return es.search({
+        index: SECRETS_INDEX_NAME,
+        body: {
+          query,
+        },
+      });
+    };
+
+    const deleteAllSecrets = async () => {
+      try {
+        await es.deleteByQuery({
+          index: SECRETS_INDEX_NAME,
+          body: {
+            query: {
+              match_all: {},
+            },
+          },
+        });
+      } catch (err) {
+        // index doesn't exist
+      }
+    };
+
     const getPackagePolicyById = async (id: string) => {
       const { body } = await supertest.get(`/api/fleet/package_policies/${id}`);
       return body.item;
     };
 
-    const maybeCreateSecretsIndex = async () => {
-      // create mock .secrets index for testing
-      if (await es.indices.exists({ index: '.fleet-test-secrets' })) {
-        await es.indices.delete({ index: '.fleet-test-secrets' });
-      }
-      await es.indices.create({
-        index: '.fleet-test-secrets',
-        body: {
-          mappings: {
-            properties: {
-              value: {
-                type: 'keyword',
-              },
-            },
+    const enableSecrets = async () => {
+      try {
+        await kibanaServer.savedObjects.update({
+          type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+          id: 'fleet-default-settings',
+          attributes: {
+            secret_storage_requirements_met: true,
           },
-        },
-      });
+          overwrite: false,
+        });
+      } catch (e) {
+        throw e;
+      }
+    };
+
+    const disableSecrets = async () => {
+      try {
+        await kibanaServer.savedObjects.update({
+          type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+          id: 'fleet-default-settings',
+          attributes: {
+            secret_storage_requirements_met: false,
+          },
+          overwrite: false,
+        });
+      } catch (e) {
+        throw e;
+      }
     };
 
     const getFullAgentPolicyById = async (id: string) => {
@@ -134,12 +292,13 @@ export default function (providerContext: FtrProviderContext) {
 
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
+    let fleetServerAgentPolicyId: string;
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await getService('esArchiver').load(
-        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
-      );
-      await maybeCreateSecretsIndex();
+
+      await deleteAllSecrets();
+      await clearAgents();
+      await enableSecrets();
     });
 
     setupFleetAndAgents(providerContext);
@@ -155,6 +314,8 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       agentPolicyId = agentPolicyResponse.item.id;
+
+      fleetServerAgentPolicyId = await createFleetServerAgentPolicy();
     });
 
     after(async () => {
@@ -260,16 +421,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should have correctly created the secrets', async () => {
-      const searchRes = await es.search({
-        index: '.fleet-test-secrets',
-        body: {
-          query: {
-            ids: {
-              values: [packageVarId, inputVarId, streamVarId],
-            },
-          },
-        },
-      });
+      const searchRes = await getSecrets([packageVarId, inputVarId, streamVarId]);
 
       expect(searchRes.hits.hits.length).to.eql(3);
 
@@ -336,14 +488,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should have correctly deleted unused secrets after update', async () => {
-      const searchRes = await es.search({
-        index: '.fleet-test-secrets',
-        body: {
-          query: {
-            match_all: {},
-          },
-        },
-      });
+      const searchRes = await getSecrets();
 
       expect(searchRes.hits.hits.length).to.eql(3); // should have created 1 and deleted 1 doc
 
@@ -373,14 +518,7 @@ export default function (providerContext: FtrProviderContext) {
 
       expectCompiledPolicyVars(policyDoc, updatedPackageVarId);
 
-      const searchRes = await es.search({
-        index: '.fleet-test-secrets',
-        body: {
-          query: {
-            match_all: {},
-          },
-        },
-      });
+      const searchRes = await getSecrets();
 
       expect(searchRes.hits.hits.length).to.eql(3);
 
@@ -412,55 +550,100 @@ export default function (providerContext: FtrProviderContext) {
         updatedPackagePolicy.vars.package_var_secret.value.id,
         updatedPackageVarId,
       ];
-
-      const searchRes = await es.search({
-        index: '.fleet-test-secrets',
-        body: {
-          query: {
-            terms: {
-              _id: packageVarSecretIds,
-            },
-          },
-        },
-      });
+      const searchRes = await getSecrets(packageVarSecretIds);
 
       expect(searchRes.hits.hits.length).to.eql(2);
     });
 
     it('should not delete used secrets on package policy delete', async () => {
-      return supertest
+      await supertest
         .delete(`/api/fleet/package_policies/${duplicatedPackagePolicyId}`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      const searchRes = await es.search({
-        index: '.fleet-test-secrets',
-        body: {
-          query: {
-            match_all: {},
-          },
-        },
-      });
+      // sleep to allow for secrets to be deleted
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
+      const searchRes = await getSecrets();
+
+      // should have deleted new_package_secret_val_2
       expect(searchRes.hits.hits.length).to.eql(3);
     });
 
     it('should delete all secrets on package policy delete', async () => {
-      return supertest
+      await supertest
         .delete(`/api/fleet/package_policies/${createdPackagePolicyId}`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      const searchRes = await es.search({
-        index: '.fleet-test-secrets',
-        body: {
-          query: {
-            match_all: {},
-          },
-        },
-      });
+      // sleep to allow for secrets to be deleted
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const searchRes = await getSecrets();
 
       expect(searchRes.hits.hits.length).to.eql(0);
+    });
+
+    it('should not store secrets if fleet server does not meet minimum version', async () => {
+      await createFleetServerAgent(fleetServerAgentPolicyId, 'server_1', '7.0.0');
+      await disableSecrets();
+
+      const createdPolicy = await createPolicyWSecretVar();
+
+      // secret should be in plain text i.e not a secret refrerence
+      expect(createdPolicy.vars.package_var_secret.value).eql('package_secret_val');
+    });
+
+    async function createPolicyWSecretVar() {
+      const { body: createResBody } = await createPolicyWithSecrets();
+      const createdPolicy = createResBody.item;
+      return createdPolicy;
+    }
+
+    it('should not store secrets if there are no fleet servers', async () => {
+      await clearAgents();
+
+      const { body: createResBody } = await createPolicyWithSecrets();
+
+      const createdPolicy = createResBody.item;
+
+      // secret should be in plain text i.e not a secret refrerence
+      expect(createdPolicy.vars.package_var_secret.value).eql('package_secret_val');
+    });
+
+    it('should convert plain text values to secrets once fleet server requirements are met', async () => {
+      await clearAgents();
+
+      const createdPolicy = await createPolicyWSecretVar();
+
+      await createFleetServerAgent(fleetServerAgentPolicyId, 'server_2', '9.0.0');
+
+      const updatedPolicy = createdPolicyToUpdatePolicy(createdPolicy);
+      delete updatedPolicy.name;
+
+      updatedPolicy.vars.package_var_secret.value = 'package_secret_val_2';
+
+      const updateRes = await supertest
+        .put(`/api/fleet/package_policies/${createdPolicy.id}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send(updatedPolicy)
+        .expect(200);
+
+      const updatedPolicyRes = updateRes.body.item;
+
+      expect(updatedPolicyRes.vars.package_var_secret.value.isSecretRef).eql(true);
+      expect(updatedPolicyRes.inputs[0].vars.input_var_secret.value.isSecretRef).eql(true);
+      expect(updatedPolicyRes.inputs[0].streams[0].vars.stream_var_secret.value.isSecretRef).eql(
+        true
+      );
+    });
+
+    it('should not revert to plaintext values if the user adds an out of date fleet server', async () => {
+      await createFleetServerAgent(fleetServerAgentPolicyId, 'server_3', '7.0.0');
+
+      const createdPolicy = await createPolicyWSecretVar();
+
+      expect(createdPolicy.vars.package_var_secret.value.isSecretRef).eql(true);
     });
   });
 }

@@ -6,22 +6,22 @@
  */
 
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
-import type { ActionCategory } from '../../../../common/api';
-import { ActionTypes, Actions } from '../../../../common/api';
+import type { UserActionAction } from '../../../../common/types/domain';
+import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 import { getPastTenseVerb } from './audit_logger_utils';
 
 export class TagsUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'tags'>): UserActionEvent {
-    const action = args.action ?? Actions.add;
+    const action = args.action ?? UserActionActions.add;
 
     const parameters = this.buildCommonUserAction({
       ...args,
-      action: args.action ?? Actions.add,
+      action: args.action ?? UserActionActions.add,
       valueKey: 'tags',
       value: args.payload.tags,
-      type: ActionTypes.tags,
+      type: UserActionTypes.tags,
     });
 
     const verb = getPastTenseVerb(action);
@@ -45,11 +45,11 @@ export class TagsUserActionBuilder extends UserActionBuilder {
   }
 }
 
-const getPreposition = (action: ActionCategory): string => {
+const getPreposition = (action: UserActionAction): string => {
   switch (action) {
-    case Actions.add:
+    case UserActionActions.add:
       return 'to';
-    case Actions.delete:
+    case UserActionActions.delete:
       return 'in';
     default:
       return 'for';

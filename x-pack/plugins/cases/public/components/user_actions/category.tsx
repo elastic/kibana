@@ -8,14 +8,15 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { CategoryUserAction } from '../../../common/api';
-import type { UserActionBuilder, UserActionResponse } from './types';
+import type { SnakeToCamelCase } from '../../../common/types';
+import type { CategoryUserAction } from '../../../common/types/domain';
+import { UserActionActions } from '../../../common/types/domain';
+import type { UserActionBuilder } from './types';
 
-import { Actions } from '../../../common/api';
 import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
 
-const getLabelTitle = (userAction: UserActionResponse<CategoryUserAction>) => {
+const getLabelTitle = (userAction: SnakeToCamelCase<CategoryUserAction>) => {
   const category = userAction.payload.category ?? '';
   return (
     <EuiFlexGroup
@@ -24,7 +25,7 @@ const getLabelTitle = (userAction: UserActionResponse<CategoryUserAction>) => {
       data-test-subj={`${userAction.id}-category-user-action-title`}
       responsive={false}
     >
-      {userAction.action === Actions.update ? (
+      {userAction.action === UserActionActions.update ? (
         <EuiFlexItem grow={false}>{`${i18n.ADD_CATEGORY} "${category}"`}</EuiFlexItem>
       ) : (
         <EuiFlexItem grow={false}>{i18n.REMOVE_CATEGORY}</EuiFlexItem>
@@ -39,7 +40,7 @@ export const createCategoryUserActionBuilder: UserActionBuilder = ({
   handleOutlineComment,
 }) => ({
   build: () => {
-    const categoryUserAction = userAction as UserActionResponse<CategoryUserAction>;
+    const categoryUserAction = userAction as SnakeToCamelCase<CategoryUserAction>;
     const label = getLabelTitle(categoryUserAction);
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,

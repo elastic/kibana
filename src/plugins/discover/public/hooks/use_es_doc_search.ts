@@ -11,11 +11,10 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { lastValueFrom } from 'rxjs';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { buildDataTableRecord } from '../utils/build_data_record';
-import { DataTableRecord } from '../types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { SEARCH_FIELDS_FROM_SOURCE, buildDataTableRecord } from '@kbn/discover-utils';
 import { DocProps } from '../application/doc/components/doc';
 import { ElasticRequestState } from '../application/doc/types';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../common';
 import { useDiscoverServices } from './use_discover_services';
 
 type RequestBody = Pick<estypes.SearchRequest, 'body'>;

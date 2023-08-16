@@ -26,9 +26,15 @@ import { timeSeriesDataViewWarning } from '../../application/utils/time_series_d
 
 const localStorage = new Storage(window.localStorage);
 
+/**
+ * Props for the LogCategorizationAppState component.
+ */
 export interface LogCategorizationAppStateProps {
+  /** The data view to analyze. */
   dataView: DataView;
+  /** The saved search to analyze. */
   savedSearch: SavedSearch | null;
+  /** App dependencies */
   appDependencies: AiopsAppDependencies;
 }
 

@@ -74,5 +74,6 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
       },
       deleteDashboards: jest.fn(),
       checkForDuplicateDashboardTitle: jest.fn(),
+      updateDashboardMeta: jest.fn(),
     };
   };

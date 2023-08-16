@@ -33,6 +33,7 @@ import {
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
 } from './constants';
 import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
+import { AssistantTelemetry } from './types';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -45,8 +46,9 @@ type ShowAssistantOverlay = ({
   promptContextId,
   conversationId,
 }: ShowAssistantOverlayProps) => void;
-interface AssistantProviderProps {
+export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
+  assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   baseAllow: string[];
   baseAllowReplacement: string[];
@@ -77,6 +79,7 @@ interface AssistantProviderProps {
 
 export interface UseAssistantContext {
   actionTypeRegistry: ActionTypeRegistryContract;
+  assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   allQuickPrompts: QuickPrompt[];
   allSystemPrompts: Prompt[];
@@ -101,7 +104,6 @@ export interface UseAssistantContext {
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
-  isSettingsModalVisible: boolean;
   localStorageLastConversationId: string | undefined;
   promptContexts: Record<string, PromptContext>;
   nameSpace: string;
@@ -112,7 +114,6 @@ export interface UseAssistantContext {
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
-  setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
@@ -125,6 +126,7 @@ const AssistantContext = React.createContext<UseAssistantContext | undefined>(un
 
 export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   actionTypeRegistry,
+  assistantTelemetry,
   augmentMessageCodeBlocks,
   baseAllow,
   baseAllowReplacement,
@@ -159,12 +161,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     `${nameSpace}.${SYSTEM_PROMPT_LOCAL_STORAGE_KEY}`,
     baseSystemPrompts
   );
-
-  // if basePrompt has been updated, the localstorage should be accordingly updated
-  // if it exists
-  useEffect(() => {
-    setLocalStorageSystemPrompts(baseSystemPrompts);
-  }, [baseSystemPrompts, setLocalStorageSystemPrompts]);
 
   const [localStorageLastConversationId, setLocalStorageLastConversationId] =
     useLocalStorage<string>(`${nameSpace}.${LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY}`);
@@ -212,7 +208,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   /**
    * Settings State
    */
-  const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
   const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs>(CONVERSATIONS_TAB);
 
   const [conversations, setConversationsInternal] = useState(getInitialConversations());
@@ -249,6 +244,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   const value = useMemo(
     () => ({
       actionTypeRegistry,
+      assistantTelemetry,
       augmentMessageCodeBlocks,
       allQuickPrompts: localStorageQuickPrompts ?? [],
       allSystemPrompts: localStorageSystemPrompts ?? [],
@@ -264,7 +260,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
-      isSettingsModalVisible,
       promptContexts,
       nameSpace,
       registerPromptContext,
@@ -274,7 +269,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setConversations: onConversationsUpdated,
       setDefaultAllow,
       setDefaultAllowReplacement,
-      setIsSettingsModalVisible,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
       showAssistantOverlay,
@@ -285,6 +279,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     }),
     [
       actionTypeRegistry,
+      assistantTelemetry,
       augmentMessageCodeBlocks,
       baseAllow,
       baseAllowReplacement,
@@ -298,7 +293,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
-      isSettingsModalVisible,
       localStorageLastConversationId,
       localStorageQuickPrompts,
       localStorageSystemPrompts,
@@ -309,7 +303,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       selectedSettingsTab,
       setDefaultAllow,
       setDefaultAllowReplacement,
-      setIsSettingsModalVisible,
       setLocalStorageLastConversationId,
       setLocalStorageQuickPrompts,
       setLocalStorageSystemPrompts,

@@ -95,8 +95,8 @@
     "@kbn/profiling-plugin",
     "@kbn/logs-shared-plugin",
     "@kbn/unified-field-list",
-    "@kbn/slo-schema",
-    "@kbn/discover-plugin"
+    "@kbn/discover-plugin",
+    "@kbn/observability-ai-assistant-plugin"
   ],
   "exclude": ["target/**/*"]
 }

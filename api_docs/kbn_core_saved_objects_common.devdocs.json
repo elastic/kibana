@@ -1442,22 +1442,6 @@
             "path": "src/plugins/saved_objects_management/server/lib/find_relationships.test.ts"
           },
           {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/api.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/api.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/effects.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/effects.ts"
-          },
-          {
             "plugin": "@kbn/core-saved-objects-browser-internal",
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.test.ts"
           },
@@ -1540,14 +1524,6 @@
             "path": "src/core/public/index.ts"
           },
           {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
-          },
-          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/utils/saved_visualization_references/saved_visualization_references.ts"
           },
@@ -1570,6 +1546,14 @@
           {
             "plugin": "triggersActionsUi",
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
+          },
+          {
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
+          },
+          {
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
           },
           {
             "plugin": "@kbn/core",
@@ -1638,18 +1622,6 @@
           {
             "plugin": "savedObjects",
             "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_flyout.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_flyout.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_flyout.tsx"
           },
           {
             "plugin": "embeddable",
@@ -2515,22 +2487,6 @@
             "path": "x-pack/plugins/lens/common/embeddable_factory/index.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/attachment_framework/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/attachment_framework/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/attachment_framework/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/attachment_framework/so_references.ts"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/common/migrations/references.ts"
           },
@@ -2689,86 +2645,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/app_plugin/share_action.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/types.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/types.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/types.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/utils.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/utils.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/xy_chart.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/xy_chart.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/metric_chart.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/metric_chart.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/layers/metric_layer.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/layers/metric_layer.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/layers/xy_data_layer.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/layers/xy_data_layer.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/layers/xy_reference_lines_layer.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/layers/xy_reference_lines_layer.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.test.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.test.ts"
           }
         ],
         "initialIsOpen": false

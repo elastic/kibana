@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import { stringHash } from '@kbn/ml-string-hash';
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import { useMlKibana } from './kibana_context';
 import type { MappedEmbeddableTypeOf, MlEmbeddableTypes } from '../../../embeddables';
 
@@ -38,7 +38,7 @@ export const useCasesModal = <EmbeddableType extends MlEmbeddableTypes>(
       selectCaseModal.open({
         getAttachments: () => [
           {
-            type: CommentType.persistableState,
+            type: AttachmentType.persistableState,
             persistableStateAttachmentTypeId: embeddableType,
             // TODO Cases: improve type for persistableStateAttachmentState with io-ts
             persistableStateAttachmentState: JSON.parse(

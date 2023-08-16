@@ -13,6 +13,7 @@ export class SingleDatasetSelection implements DatasetSelectionStrategy {
   selectionType: 'single';
   selection: {
     name?: string;
+    title?: string;
     version?: string;
     dataset: Dataset;
   };
@@ -21,6 +22,7 @@ export class SingleDatasetSelection implements DatasetSelectionStrategy {
     this.selectionType = 'single';
     this.selection = {
       name: dataset.parentIntegration?.name,
+      title: dataset.parentIntegration?.title,
       version: dataset.parentIntegration?.version,
       dataset,
     };
@@ -40,6 +42,7 @@ export class SingleDatasetSelection implements DatasetSelectionStrategy {
       selectionType: this.selectionType,
       selection: {
         name: this.selection.name,
+        title: this.selection.title,
         version: this.selection.version,
         dataset: this.selection.dataset.toPlain(),
       },
@@ -47,10 +50,10 @@ export class SingleDatasetSelection implements DatasetSelectionStrategy {
   }
 
   public static fromSelection(selection: SingleDatasetSelectionPayload) {
-    const { name, version, dataset } = selection;
+    const { name, title, version, dataset } = selection;
 
     // Attempt reconstructing the integration object
-    const integration = name && version ? { name, version } : undefined;
+    const integration = name && version ? { name, title, version } : undefined;
     const datasetInstance = Dataset.create(dataset, integration);
 
     return new SingleDatasetSelection(datasetInstance);

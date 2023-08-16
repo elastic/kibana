@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React, { ComponentType, useRef, useState } from 'react';
 import { breadcrumbsApp } from '../../application/app';
-import { HorizontalSteps } from '../../components/app/custom_logs/wizard/horizontal_steps';
 import { Provider as WizardProvider } from '../../components/app/custom_logs/wizard';
 import {
   FilmstripFrame,
@@ -28,7 +27,7 @@ export function CustomLogs({ children }: Props) {
       {
         text: i18n.translate(
           'xpack.observability_onboarding.breadcrumbs.customLogs',
-          { defaultMessage: 'Custom Logs' }
+          { defaultMessage: 'Stream log files' }
         ),
       },
     ],
@@ -41,16 +40,20 @@ const TRANSITION_DURATION = 180;
 
 function AnimatedTransitionsWizard({ children }: Props) {
   const [transition, setTransition] = useState<TransitionState>('ready');
+  const [title, setTitle] = useState<string>();
   const TransitionComponent = useRef<ComponentType>(() => null);
 
   function onChangeStep({
     direction,
+    stepTitle,
     StepComponent,
   }: {
     direction: 'back' | 'next';
+    stepTitle?: string;
     StepComponent: ComponentType;
   }) {
     setTransition(direction);
+    setTitle(stepTitle);
     TransitionComponent.current = StepComponent;
     setTimeout(() => {
       setTransition('ready');
@@ -70,17 +73,16 @@ function AnimatedTransitionsWizard({ children }: Props) {
             data-test-subj="obltOnboardingStreamLogFilePageHeader"
           >
             <h1>
-              {i18n.translate(
-                'xpack.observability_onboarding.title.collectCustomLogs',
-                {
-                  defaultMessage: 'Collect custom logs',
-                }
-              )}
+              {title
+                ? title
+                : i18n.translate(
+                    'xpack.observability_onboarding.title.collectCustomLogs',
+                    {
+                      defaultMessage: 'Stream log files to Elastic',
+                    }
+                  )}
             </h1>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ width: '50%' }}>
-          <HorizontalSteps />
         </EuiFlexItem>
         <EuiFlexItem grow={1} style={{ width: '50%' }}>
           <FilmstripTransition

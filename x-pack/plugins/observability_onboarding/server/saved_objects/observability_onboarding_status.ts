@@ -9,30 +9,50 @@ import { SavedObjectsType } from '@kbn/core/server';
 
 export const OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE =
   'observability-onboarding-state';
-
-export interface ObservabilityOnboardingState {
-  state: {
-    datasetName: string;
-    serviceName?: string;
-    customConfigurations?: string;
-    logFilePaths: string[];
-    namespace: string;
-  };
-  progress: Record<string, string>;
+export interface LogFilesState {
+  datasetName: string;
+  serviceName?: string;
+  customConfigurations?: string;
+  logFilePaths: string[];
+  namespace: string;
 }
 
-export interface SavedObservabilityOnboardingState
-  extends ObservabilityOnboardingState {
+export interface SystemLogsState {
+  namespace: string;
+}
+
+export type ObservabilityOnboardingType = 'logFiles' | 'systemLogs';
+
+type ObservabilityOnboardingFlowState =
+  | LogFilesState
+  | SystemLogsState
+  | undefined;
+
+export interface ObservabilityOnboardingFlow {
+  type: ObservabilityOnboardingType;
+  state: ObservabilityOnboardingFlowState;
+  progress: Record<
+    string,
+    {
+      status: string;
+      message?: string;
+    }
+  >;
+}
+
+export interface SavedObservabilityOnboardingFlow
+  extends ObservabilityOnboardingFlow {
   id: string;
   updatedAt: number;
 }
 
-export const observabilityOnboardingState: SavedObjectsType = {
+export const observabilityOnboardingFlow: SavedObjectsType = {
   name: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
   hidden: false,
   namespaceType: 'agnostic',
   mappings: {
     properties: {
+      type: { type: 'keyword' },
       state: { type: 'object', dynamic: false },
       progress: { type: 'object', dynamic: false },
     },

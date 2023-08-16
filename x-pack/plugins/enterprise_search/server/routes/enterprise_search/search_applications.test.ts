@@ -13,8 +13,13 @@ jest.mock('../../lib/search_applications/field_capabilities', () => ({
 jest.mock('../../lib/search_applications/fetch_indices_stats', () => ({
   fetchIndicesStats: jest.fn(),
 }));
+jest.mock('../../lib/search_applications/fetch_alias_indices', () => ({
+  fetchAliasIndices: jest.fn(),
+}));
+
 import { RequestHandlerContext } from '@kbn/core/server';
 
+import { fetchAliasIndices } from '../../lib/search_applications/fetch_alias_indices';
 import { fetchIndicesStats } from '../../lib/search_applications/fetch_indices_stats';
 import { fetchSearchApplicationFieldCapabilities } from '../../lib/search_applications/field_capabilities';
 
@@ -49,13 +54,11 @@ describe('engines routes', () => {
     });
 
     it('GET search applications API creates request', async () => {
-      mockClient.asCurrentUser.searchApplication.list.mockImplementation(() => ({}));
+      mockClient.asCurrentUser.searchApplication.list.mockImplementation(() => ({ results: [] }));
       const request = { query: {} };
-      await mockRouter.callRoute({});
+      await mockRouter.callRoute(request);
       expect(mockClient.asCurrentUser.searchApplication.list).toHaveBeenCalledWith(request.query);
-      expect(mockRouter.response.ok).toHaveBeenCalledWith({
-        body: {},
-      });
+      expect(mockRouter.response.ok).toHaveBeenCalled();
     });
 
     it('validates query parameters', () => {
@@ -105,32 +108,40 @@ describe('engines routes', () => {
     });
 
     it('GET search application API creates request', async () => {
-      mockClient.asCurrentUser.searchApplication.get.mockImplementation(() => ({}));
-      await mockRouter.callRoute({
-        params: { engine_name: 'engine-name' },
-      });
-
-      expect(mockClient.asCurrentUser.searchApplication.get).toHaveBeenCalledWith({
-        name: 'engine-name',
-      });
-      const mock = jest.fn();
-
       const fetchIndicesStatsResponse = [
         { count: 5, health: 'green', name: 'test-index-name-1' },
         { count: 10, health: 'yellow', name: 'test-index-name-2' },
         { count: 0, health: 'red', name: 'test-index-name-3' },
       ];
+      const mock = jest.fn();
+      const fetchAliasIndicesResponse = mock([
+        'test-index-name-1',
+        'test-index-name-2',
+        'test-index-name-3',
+      ]);
+
       const engineResult = {
-        indices: mock(['test-index-name-1', 'test-index-name-2', 'test-index-name-3']),
-        name: 'test-engine-1',
+        indices: fetchAliasIndicesResponse,
+        name: 'engine-name',
         updated_at_millis: 1679847286355,
       };
 
+      (mockClient.asCurrentUser.searchApplication.get as jest.Mock).mockResolvedValueOnce(
+        engineResult
+      );
+
+      await mockRouter.callRoute({
+        params: { engine_name: engineResult.name },
+      });
+
+      (fetchAliasIndices as jest.Mock).mockResolvedValueOnce(fetchAliasIndicesResponse);
+      expect(fetchAliasIndices).toHaveBeenCalledWith(mockClient, engineResult.name);
+
       (fetchIndicesStats as jest.Mock).mockResolvedValueOnce(fetchIndicesStatsResponse);
-      expect(fetchIndicesStats).toHaveBeenCalledWith(mockClient, engineResult.indices);
+      expect(fetchIndicesStats).toHaveBeenCalledWith(mockClient, fetchAliasIndicesResponse);
 
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
-        body: {},
+        body: engineResult,
       });
     });
 
@@ -574,7 +585,7 @@ describe('engines routes', () => {
           attributes: {
             error_code: 'uncaught_exception',
           },
-          message: 'Enterprise Search encountered an error. Check Kibana Server logs for details.',
+          message: 'Search encountered an error. Check Kibana Server logs for details.',
         },
         statusCode: 502,
       });

@@ -22,8 +22,9 @@ import type {
   DashboardContentManagementRequiredServices,
   DashboardContentManagementService,
 } from './types';
-import { loadDashboardState } from './lib/load_dashboard_state';
 import { deleteDashboards } from './lib/delete_dashboards';
+import { loadDashboardState } from './lib/load_dashboard_state';
+import { updateDashboardMeta } from './lib/update_dashboard_meta';
 import { DashboardContentManagementCache } from './dashboard_content_management_cache';
 
 export type DashboardContentManagementServiceFactory = KibanaPluginServiceFactory<
@@ -85,5 +86,7 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
     checkForDuplicateDashboardTitle: (props) =>
       checkForDuplicateDashboardTitle(props, contentManagement),
     deleteDashboards: (ids) => deleteDashboards(ids, contentManagement),
+    updateDashboardMeta: (props) =>
+      updateDashboardMeta(props, { contentManagement, savedObjectsTagging, embeddable }),
   };
 };

@@ -13,11 +13,20 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { CasesUiSetup } from '@kbn/cases-plugin/public';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { EmbeddableChangePointChartProps } from './embeddable';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AiopsPluginSetupDeps {}
+export interface AiopsPluginSetupDeps {
+  embeddable: EmbeddableSetup;
+  cases: CasesUiSetup;
+  licensing: LicensingPluginSetup;
+
+  uiActions: UiActionsSetup;
+}
 
 export interface AiopsPluginStartDeps {
   data: DataPublicPluginStart;
@@ -30,12 +39,10 @@ export interface AiopsPluginStartDeps {
   storage: IStorageWrapper;
   licensing: LicensingPluginStart;
   executionContext: ExecutionContextStart;
+  embeddable: EmbeddableStart;
 }
 
-/**
- * aiops plugin server setup contract
- */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AiopsPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AiopsPluginStart {}
+export type AiopsPluginSetup = void;
+export interface AiopsPluginStart {
+  EmbeddableChangePointChart: React.ComponentType<EmbeddableChangePointChartProps>;
+}

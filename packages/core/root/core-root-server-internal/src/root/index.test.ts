@@ -29,7 +29,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.restoreAllMocks();
+  jest.clearAllMocks();
   logger.asLoggerFactory.mockClear();
   logger.stop.mockClear();
   rawConfigService.getConfig$.mockClear();

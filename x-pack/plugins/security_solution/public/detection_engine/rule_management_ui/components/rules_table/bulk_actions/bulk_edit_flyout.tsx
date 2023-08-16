@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import { BulkActionEditType } from '../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 
 import { IndexPatternsForm } from './forms/index_patterns_form';
 import { TagsForm } from './forms/tags_form';

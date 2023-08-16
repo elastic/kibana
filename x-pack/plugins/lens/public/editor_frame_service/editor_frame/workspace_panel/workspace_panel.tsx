@@ -138,6 +138,10 @@ export const WorkspacePanel = React.memo(function WorkspacePanel(props: Workspac
   );
 });
 
+const log = (...messages: Array<string | number>) => {
+  // console.log(...messages);
+};
+
 // Exported for testing purposes only.
 export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   framePublicAPI,
@@ -170,7 +174,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     errors: [],
   });
 
-  const initialRenderComplete = useRef<boolean>();
+  const initialVisualizationRenderComplete = useRef<boolean>(false);
+
+  // NOTE: This does not reflect the actual visualization render
+  const initialWorkspaceRenderComplete = useRef<boolean>();
 
   const renderDeps = useRef<{
     datasourceMap: DatasourceMap;
@@ -192,8 +199,20 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     dataViews,
   };
 
+  // NOTE: initialRenderTime is only set once when the component mounts
+  const visualizationRenderStartTime = useRef<number>(NaN);
+  const dataReceivedTime = useRef<number>(NaN);
+
   const onRender$ = useCallback(() => {
     if (renderDeps.current) {
+      if (!initialVisualizationRenderComplete.current) {
+        initialVisualizationRenderComplete.current = true;
+        // NOTE: this metric is only reported for an initial editor load of a pre-existing visualization
+        log(
+          'initial visualization took to render after data received',
+          performance.now() - dataReceivedTime.current
+        );
+      }
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
         (acc, datasource) => {
           if (!renderDeps.current!.datasourceStates[datasource.id]) return [];
@@ -232,6 +251,15 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const onData$ = useCallback(
     (_data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
       if (renderDeps.current) {
+        dataReceivedTime.current = performance.now();
+        if (!initialVisualizationRenderComplete.current) {
+          // NOTE: this metric is only reported for an initial editor load of a pre-existing visualization
+          log(
+            'initial data took to arrive',
+            dataReceivedTime.current - visualizationRenderStartTime.current
+          );
+        }
+
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
         const datasource = Object.values(renderDeps.current.datasourceMap)[0];
         const datasourceState = Object.values(renderDeps.current.datasourceStates)[0].state;
@@ -276,7 +304,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     [addUserMessages, dispatchLens, plugins.data.search]
   );
 
-  const shouldApplyExpression = autoApplyEnabled || !initialRenderComplete.current || triggerApply;
+  const shouldApplyExpression =
+    autoApplyEnabled || !initialWorkspaceRenderComplete.current || triggerApply;
   const activeVisualization = visualization.activeId
     ? visualizationMap[visualization.activeId]
     : null;
@@ -353,9 +382,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     addUserMessages,
   ]);
 
+  const isSaveable = Boolean(unappliedExpression);
+
   useEffect(() => {
-    dispatchLens(setSaveable(Boolean(unappliedExpression)));
-  }, [unappliedExpression, dispatchLens]);
+    dispatchLens(setSaveable(isSaveable));
+  }, [isSaveable, dispatchLens]);
 
   useEffect(() => {
     if (!autoApplyEnabled) {
@@ -387,9 +418,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     // null signals an empty workspace which should count as an initial render
     if (
       (expressionExists || localState.expressionToRender === null) &&
-      !initialRenderComplete.current
+      !initialWorkspaceRenderComplete.current
     ) {
-      initialRenderComplete.current = true;
+      initialWorkspaceRenderComplete.current = true;
     }
   }, [expressionExists, localState.expressionToRender]);
 
@@ -403,7 +434,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
           data: {
             ...event.data,
-            timeFieldName: inferTimeField(plugins.data.datatableUtilities, event.data),
+            timeFieldName: inferTimeField(plugins.data.datatableUtilities, event),
           },
         });
       }
@@ -411,7 +442,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
           data: {
             ...event.data,
-            timeFieldName: inferTimeField(plugins.data.datatableUtilities, event.data),
+            timeFieldName: inferTimeField(plugins.data.datatableUtilities, event),
           },
         });
       }
@@ -557,7 +588,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     return (
       <VisualizationWrapper
         expression={localState.expressionToRender}
-        framePublicAPI={framePublicAPI}
         lensInspector={lensInspector}
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
@@ -566,9 +596,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         errors={localState.errors}
         ExpressionRendererComponent={ExpressionRendererComponent}
         core={core}
-        activeDatasourceId={activeDatasourceId}
         onRender$={onRender$}
         onData$={onData$}
+        onComponentRendered={() => {
+          visualizationRenderStartTime.current = performance.now();
+        }}
       />
     );
   };
@@ -654,7 +686,6 @@ function useReportingState(errors: UserMessage[]): {
 
 export const VisualizationWrapper = ({
   expression,
-  framePublicAPI,
   lensInspector,
   onEvent,
   hasCompatibleActions,
@@ -663,12 +694,11 @@ export const VisualizationWrapper = ({
   errors,
   ExpressionRendererComponent,
   core,
-  activeDatasourceId,
   onRender$,
   onData$,
+  onComponentRendered,
 }: {
   expression: string | null | undefined;
-  framePublicAPI: FramePublicAPI;
   lensInspector: LensInspector;
   onEvent: (event: ExpressionRendererEvent) => void;
   hasCompatibleActions: (event: ExpressionRendererEvent) => Promise<boolean>;
@@ -677,14 +707,25 @@ export const VisualizationWrapper = ({
   errors: UserMessage[];
   ExpressionRendererComponent: ReactExpressionRendererType;
   core: CoreStart;
-  activeDatasourceId: string | null;
   onRender$: () => void;
   onData$: (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => void;
+  onComponentRendered: () => void;
 }) => {
+  useEffect(() => {
+    onComponentRendered();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const context = useLensSelector(selectExecutionContext);
   // Used for reporting
   const { isRenderComplete, hasDynamicError, setIsRenderComplete, setDynamicError, nodeRef } =
     useReportingState(errors);
+
+  const onRenderHandler = useCallback(() => {
+    setIsRenderComplete(true);
+    onRender$();
+  }, [setIsRenderComplete, onRender$]);
+
   const searchContext: ExecutionContextSearch = useMemo(
     () => ({
       query: context.query,
@@ -780,17 +821,14 @@ export const VisualizationWrapper = ({
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
         onData$={onData$}
-        onRender$={() => {
-          setIsRenderComplete(true);
-          onRender$();
-        }}
+        onRender$={onRenderHandler}
         inspectorAdapters={lensInspector.adapters}
         executionContext={executionContext}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
-          const errorsFromRequest = getOriginalRequestErrorMessages(error);
+          const errorsFromRequest = getOriginalRequestErrorMessages(error || null, core.docLinks);
           const visibleErrorMessages = errorsFromRequest.length
-            ? errorsFromRequest
+            ? errorsFromRequest.map((e) => e.longMessage || e.shortMessage)
             : errorMessage
             ? [errorMessage]
             : [];
@@ -829,11 +867,15 @@ export const VisualizationWrapper = ({
                       </p>
 
                       {localState.expandError
-                        ? visibleErrorMessages.map((visibleErrorMessage) => (
-                            <p className="eui-textBreakWord" key={visibleErrorMessage}>
-                              {visibleErrorMessage}
-                            </p>
-                          ))
+                        ? visibleErrorMessages.map((visibleErrorMessage) =>
+                            typeof visibleErrorMessage === 'string' ? (
+                              <p className="eui-textBreakWord" key={visibleErrorMessage}>
+                                {visibleErrorMessage}
+                              </p>
+                            ) : (
+                              visibleErrorMessage
+                            )
+                          )
                         : null}
                     </>
                   }

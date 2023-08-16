@@ -32,7 +32,7 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
       this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
-      this.buildGroupBy(slo, slo.indicator.params.timestampField),
+      this.buildCommonGroupBy(slo, slo.indicator.params.timestampField),
       this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo, slo.indicator.params.timestampField)
     );

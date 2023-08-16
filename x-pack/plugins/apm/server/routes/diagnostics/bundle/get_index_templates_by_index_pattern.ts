@@ -8,6 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { IndicesSimulateTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
 import { orderBy } from 'lodash';
+import { errors } from '@elastic/elasticsearch';
 import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { getApmIndexPatterns } from './get_indices';
 import { getIndexTemplate } from './get_index_template';
@@ -27,16 +28,13 @@ export async function getIndexTemplatesByIndexPattern({
     apmIndices.transaction,
   ]);
 
-  try {
-    return await Promise.all(
+  return await handleInvalidIndexTemplateException(
+    Promise.all(
       indexPatterns.map(async (indexPattern) =>
         getSimulatedIndexTemplateForIndexPattern({ indexPattern, esClient })
       )
-    );
-  } catch (e) {
-    console.error(e);
-    return [];
-  }
+    )
+  );
 }
 
 async function getSimulatedIndexTemplateForIndexPattern({
@@ -94,4 +92,24 @@ function getIsNonStandardIndexTemplate(templateName: string) {
   });
 
   return isNonStandard;
+}
+
+async function handleInvalidIndexTemplateException<T>(promise: Promise<T>) {
+  try {
+    return await promise;
+  } catch (error) {
+    if (
+      error instanceof errors.ResponseError &&
+      error.meta.statusCode === 400 &&
+      // @ts-expect-error
+      error.meta.body.error.type === 'invalid_index_template_exception'
+    ) {
+      console.error(
+        `Suppressed exception caused by cross cluster search: ${error.message}}`
+      );
+      return [];
+    }
+
+    throw error;
+  }
 }

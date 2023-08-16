@@ -23,6 +23,7 @@ import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
 import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -33,7 +34,6 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../sidebar';
-import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../../common';
 import { popularizeField } from '../../../../utils/popularize_field';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
@@ -47,6 +47,7 @@ import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
+import { addLog } from '../../../../utils/add_log';
 
 /**
  * Local storage key for sidebar persistence state
@@ -73,6 +74,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     spaces,
     inspector,
   } = useDiscoverServices();
+  const globalQueryState = data.query.getState();
   const { main$ } = stateContainer.dataState.data$;
   const [query, savedQuery, columns, sort] = useAppStateSelector((state) => [
     state.query,
@@ -194,21 +196,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   }, [onAddColumn, draggingFieldName, currentColumns]);
 
   const mainDisplay = useMemo(() => {
-    if (resultState === 'none') {
-      const globalQueryState = data.query.getState();
-
-      return (
-        <DiscoverNoResults
-          isTimeBased={isTimeBased}
-          query={globalQueryState.query}
-          filters={globalQueryState.filters}
-          dataView={dataView}
-          onDisableFilters={onDisableFilters}
-        />
-      );
-    }
-
     if (resultState === 'uninitialized') {
+      addLog('[DiscoverLayout] uninitialized triggers data fetching');
       return <DiscoverUninitialized onRefresh={() => stateContainer.dataState.fetch()} />;
     }
 
@@ -230,12 +219,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     );
   }, [
     currentColumns,
-    data,
     dataView,
     isPlainRecord,
-    isTimeBased,
     onAddFilter,
-    onDisableFilters,
     onFieldEdited,
     resultState,
     stateContainer,
@@ -314,14 +300,25 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             </EuiFlexItem>
           </EuiHideFor>
           <EuiFlexItem className="dscPageContent__wrapper">
-            {resultState === 'none' && dataState.error ? (
-              <ErrorCallout
-                title={i18n.translate('discover.noResults.searchExamples.noResultsErrorTitle', {
-                  defaultMessage: 'Unable to retrieve search results',
-                })}
-                error={dataState.error}
-                data-test-subj="discoverNoResultsError"
-              />
+            {resultState === 'none' ? (
+              dataState.error ? (
+                <ErrorCallout
+                  title={i18n.translate('discover.noResults.searchExamples.noResultsErrorTitle', {
+                    defaultMessage: 'Unable to retrieve search results',
+                  })}
+                  error={dataState.error}
+                  data-test-subj="discoverNoResultsError"
+                />
+              ) : (
+                <DiscoverNoResults
+                  stateContainer={stateContainer}
+                  isTimeBased={isTimeBased}
+                  query={globalQueryState.query}
+                  filters={globalQueryState.filters}
+                  dataView={dataView}
+                  onDisableFilters={onDisableFilters}
+                />
+              )
             ) : (
               <EuiPanel
                 role="main"

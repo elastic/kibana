@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import {
-  AttributesTypeExternalReference,
-  AttributesTypeExternalReferenceSO,
+  ExternalReferenceAttachmentAttributes,
+  ExternalReferenceSOAttachmentAttributes,
   Case,
-  CommentResponseTypePersistableState,
-} from '@kbn/cases-plugin/common/api';
+  PersistableStateAttachment,
+} from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
         });
 
-        const persistableState = response.attachments[0] as CommentResponseTypePersistableState;
+        const persistableState = response.attachments[0] as PersistableStateAttachment;
 
         expect(persistableState.persistableStateAttachmentState).to.eql(
           persistableStateAttachment.persistableStateAttachmentState
@@ -145,7 +145,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
         });
 
-        const externalRefSO = response.attachments[0] as AttributesTypeExternalReferenceSO;
+        const externalRefSO = response.attachments[0] as ExternalReferenceSOAttachmentAttributes;
 
         expect(externalRefSO.externalReferenceId).to.eql(
           postExternalReferenceSOReq.externalReferenceId
@@ -172,7 +172,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
         });
 
-        const externalRefES = response.attachments[0] as AttributesTypeExternalReference;
+        const externalRefES = response.attachments[0] as ExternalReferenceAttachmentAttributes;
 
         expect(externalRefES.externalReferenceId).to.eql(
           postExternalReferenceESReq.externalReferenceId

@@ -6,12 +6,12 @@
  */
 import createContainer from 'constate';
 import { useCallback, useEffect, useState } from 'react';
-import DateMath from '@kbn/datemath';
 import { buildEsQuery, fromKueryExpression, type Query } from '@kbn/es-query';
 import { map, skip, startWith } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { parseDateRange } from '../../../../utils/datemath';
 import { useKibanaQuerySettings } from '../../../../utils/use_kibana_query_settings';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
@@ -102,9 +102,7 @@ export const useUnifiedSearch = () => {
   const getParsedDateRange = useCallback(() => {
     const defaults = getDefaultTimestamps();
 
-    const from = DateMath.parse(searchCriteria.dateRange.from)?.toISOString() ?? defaults.from;
-    const to =
-      DateMath.parse(searchCriteria.dateRange.to, { roundUp: true })?.toISOString() ?? defaults.to;
+    const { from = defaults.from, to = defaults.to } = parseDateRange(searchCriteria.dateRange);
 
     return { from, to };
   }, [searchCriteria.dateRange]);

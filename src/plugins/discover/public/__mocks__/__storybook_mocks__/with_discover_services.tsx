@@ -20,7 +20,7 @@ import {
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_MULTIFIELDS,
-} from '../../../common';
+} from '@kbn/discover-utils';
 import { SIDEBAR_CLOSED_KEY } from '../../application/main/components/layout/discover_layout';
 import { LocalStorageMock } from '../local_storage_mock';
 import { DiscoverServices } from '../../build_services';

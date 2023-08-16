@@ -15,8 +15,13 @@ import type {
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import type { UserActionTypes } from '../../../../common/api';
-import { Actions, ActionTypes, CaseStatuses, CommentType } from '../../../../common/api';
+import type { UserActionType } from '../../../../common/types/domain';
+import {
+  UserActionActions,
+  UserActionTypes,
+  CaseStatuses,
+  AttachmentType,
+} from '../../../../common/types/domain';
 import { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from './constants';
 import { getNoneCaseConnector } from '../../../common/utils';
 import { logError } from '../utils';
@@ -30,7 +35,7 @@ export function payloadMigration(
   const owner = originalDocWithReferences.attributes.owner;
   const { new_value, old_value, action_field, action_at, action_by, action, ...restAttributes } =
     originalDocWithReferences.attributes;
-  const newAction = action === 'push-to-service' ? Actions.push_to_service : action;
+  const newAction = action === 'push-to-service' ? UserActionActions.push_to_service : action;
   const type = getUserActionType(action_field, action);
 
   try {
@@ -74,16 +79,16 @@ export function payloadMigration(
 }
 
 export const getUserActionType = (fields: string[], action: string): string => {
-  if (fields.length > 1 && action === Actions.create) {
-    return ActionTypes.create_case;
+  if (fields.length > 1 && action === UserActionActions.create) {
+    return UserActionTypes.create_case;
   }
 
-  if (fields.length > 1 && action === Actions.delete) {
-    return ActionTypes.delete_case;
+  if (fields.length > 1 && action === UserActionActions.delete) {
+    return UserActionTypes.delete_case;
   }
 
-  const field = fields[0] as UserActionTypes;
-  return ActionTypes[field] ?? '';
+  const field = fields[0] as UserActionType;
+  return UserActionTypes[field] ?? '';
 };
 
 export const getPayload = (
@@ -113,13 +118,13 @@ export const getPayload = (
   return {
     ...payload,
     ...(payload.connector == null &&
-      (type === ActionTypes.create_case || type === ActionTypes.connector) && {
+      (type === UserActionTypes.create_case || type === UserActionTypes.connector) && {
         connector: noneConnector,
       }),
     ...(isEmpty(payload.status) &&
-      type === ActionTypes.create_case && { status: CaseStatuses.open }),
-    ...(type === ActionTypes.create_case && isEmpty(payload.owner) && { owner }),
-    ...(type === ActionTypes.create_case &&
+      type === UserActionTypes.create_case && { status: CaseStatuses.open }),
+    ...(type === UserActionTypes.create_case && isEmpty(payload.owner) && { owner }),
+    ...(type === UserActionTypes.create_case &&
       isEmpty(payload.settings) && { settings: { syncAlerts: true } }),
   };
 };
@@ -203,7 +208,7 @@ const getSingleFieldPayload = (
             }
           : {
               comment: isString(value) ? value : '',
-              type: CommentType.user,
+              type: AttachmentType.user,
               owner,
             },
       };

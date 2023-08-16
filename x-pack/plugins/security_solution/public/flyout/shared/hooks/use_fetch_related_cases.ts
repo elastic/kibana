@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { CasesByAlertId } from '@kbn/cases-plugin/common/api';
+import type { GetRelatedCasesByAlertResponse } from '@kbn/cases-plugin/common';
 import { useMemo } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
 import { APP_ID } from '../../../../common/constants';
@@ -32,7 +32,7 @@ export interface UseFetchRelatedCasesResult {
   /**
    * Cases data retrieved
    */
-  data: CasesByAlertId;
+  data: GetRelatedCasesByAlertResponse;
   /**
    * Number of data entries received
    */
@@ -48,7 +48,7 @@ export const useFetchRelatedCases = ({
   const {
     services: { cases },
   } = useKibana();
-  const { data, isLoading, isError } = useQuery<CasesByAlertId | undefined>(
+  const { data, isLoading, isError } = useQuery<GetRelatedCasesByAlertResponse | undefined>(
     [QUERY_KEY, eventId],
     () =>
       cases.api.getRelatedCases(eventId, {

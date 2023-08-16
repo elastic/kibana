@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  ALL_VALUE,
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
   BudgetingMethod,
@@ -179,6 +180,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOForm = {
   objective: {
     target: 99,
   },
+  groupBy: ALL_VALUE,
 };
 
 export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
@@ -194,4 +196,5 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
   objective: {
     target: 99,
   },
+  groupBy: ALL_VALUE,
 };

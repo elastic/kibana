@@ -18,7 +18,6 @@ const highlightedField = {
   name: 'field',
   values: ['values'],
 };
-const scopeId = 'scopeId';
 const dataTestSubj = 'test';
 const iconDataTestSubj = 'testIcon';
 const valueDataTestSubj = 'testValue';
@@ -39,12 +38,7 @@ describe('<PrevalenceOverviewRow />', () => {
     });
 
     const { getByTestId, getAllByText, queryByTestId } = render(
-      <PrevalenceOverviewRow
-        highlightedField={highlightedField}
-        scopeId={scopeId}
-        callbackIfNull={() => {}}
-        data-test-subj={dataTestSubj}
-      />
+      <PrevalenceOverviewRow highlightedField={highlightedField} data-test-subj={dataTestSubj} />
     );
 
     const { name, values } = highlightedField;
@@ -66,19 +60,12 @@ describe('<PrevalenceOverviewRow />', () => {
       error: false,
       count: 2,
     });
-    const callbackIfNull = jest.fn();
 
     const { queryAllByAltText } = render(
-      <PrevalenceOverviewRow
-        highlightedField={highlightedField}
-        scopeId={scopeId}
-        callbackIfNull={callbackIfNull}
-        data-test-subj={dataTestSubj}
-      />
+      <PrevalenceOverviewRow highlightedField={highlightedField} data-test-subj={dataTestSubj} />
     );
 
     expect(queryAllByAltText('is uncommon')).toHaveLength(0);
-    expect(callbackIfNull).toHaveBeenCalled();
   });
 
   it('should not display row if error retrieving data', () => {
@@ -92,19 +79,12 @@ describe('<PrevalenceOverviewRow />', () => {
       error: true,
       count: 0,
     });
-    const callbackIfNull = jest.fn();
 
     const { queryAllByAltText } = render(
-      <PrevalenceOverviewRow
-        highlightedField={highlightedField}
-        scopeId={scopeId}
-        callbackIfNull={callbackIfNull}
-        data-test-subj={dataTestSubj}
-      />
+      <PrevalenceOverviewRow highlightedField={highlightedField} data-test-subj={dataTestSubj} />
     );
 
     expect(queryAllByAltText('is uncommon')).toHaveLength(0);
-    expect(callbackIfNull).toHaveBeenCalled();
   });
 
   it('should display loading', () => {
@@ -120,12 +100,7 @@ describe('<PrevalenceOverviewRow />', () => {
     });
 
     const { getByTestId } = render(
-      <PrevalenceOverviewRow
-        highlightedField={highlightedField}
-        scopeId={scopeId}
-        callbackIfNull={() => {}}
-        data-test-subj={dataTestSubj}
-      />
+      <PrevalenceOverviewRow highlightedField={highlightedField} data-test-subj={dataTestSubj} />
     );
 
     expect(getByTestId(loadingDataTestSubj)).toBeInTheDocument();

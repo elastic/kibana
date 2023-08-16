@@ -8,12 +8,13 @@
 import { schema } from '@kbn/config-schema';
 
 import {
-  kafkaAcknowledgeReliabilityLevel,
   kafkaAuthType,
   kafkaCompressionType,
+  kafkaConnectionType,
   kafkaPartitionType,
   kafkaSaslMechanism,
   kafkaTopicWhenType,
+  kafkaVerificationModes,
   outputType,
 } from '../../../common/constants';
 
@@ -33,6 +34,21 @@ export function validateLogstashHost(val: string) {
   }
 }
 
+export const validateKafkaHost = (input: string): string | undefined => {
+  const parts = input.split(':');
+
+  if (parts.length !== 2 || !parts[0] || parts[0].includes('://')) {
+    return 'Invalid format. Expected "host:port" without protocol';
+  }
+
+  const port = parseInt(parts[1], 10);
+  if (isNaN(port) || port < 1 || port > 65535) {
+    return 'Invalid port number. Expected a number between 1 and 65535';
+  }
+
+  return undefined;
+};
+
 /**
  * Base schemas
  */
@@ -50,6 +66,14 @@ const BaseSchema = {
       certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
       certificate: schema.maybe(schema.string()),
       key: schema.maybe(schema.string()),
+      verification_mode: schema.maybe(
+        schema.oneOf([
+          schema.literal(kafkaVerificationModes.Full),
+          schema.literal(kafkaVerificationModes.None),
+          schema.literal(kafkaVerificationModes.Certificate),
+          schema.literal(kafkaVerificationModes.Strict),
+        ])
+      ),
     })
   ),
   proxy_id: schema.nullable(schema.string()),
@@ -121,15 +145,9 @@ const KafkaTopicsSchema = schema.arrayOf(
       schema.object({
         type: schema.maybe(
           schema.oneOf([
-            schema.literal(kafkaTopicWhenType.And),
-            schema.literal(kafkaTopicWhenType.Not),
-            schema.literal(kafkaTopicWhenType.Or),
             schema.literal(kafkaTopicWhenType.Equals),
             schema.literal(kafkaTopicWhenType.Contains),
             schema.literal(kafkaTopicWhenType.Regexp),
-            schema.literal(kafkaTopicWhenType.HasFields),
-            schema.literal(kafkaTopicWhenType.Network),
-            schema.literal(kafkaTopicWhenType.Range),
           ])
         ),
         condition: schema.maybe(schema.string()),
@@ -142,7 +160,7 @@ const KafkaTopicsSchema = schema.arrayOf(
 export const KafkaSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Kafka),
-  hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 }),
+  hosts: schema.arrayOf(schema.string({ validate: validateKafkaHost }), { minSize: 1 }),
   version: schema.maybe(schema.string()),
   key: schema.maybe(schema.string()),
   compression: schema.maybe(
@@ -150,20 +168,31 @@ export const KafkaSchema = {
       schema.literal(kafkaCompressionType.Gzip),
       schema.literal(kafkaCompressionType.Snappy),
       schema.literal(kafkaCompressionType.Lz4),
+      schema.literal(kafkaCompressionType.None),
     ])
   ),
   compression_level: schema.conditional(
     schema.siblingRef('compression'),
-    schema.string(),
+    schema.string({ validate: (val) => (val === kafkaCompressionType.Gzip ? undefined : 'never') }),
     schema.number(),
     schema.never()
   ),
   client_id: schema.maybe(schema.string()),
   auth_type: schema.oneOf([
+    schema.literal(kafkaAuthType.None),
     schema.literal(kafkaAuthType.Userpass),
     schema.literal(kafkaAuthType.Ssl),
     schema.literal(kafkaAuthType.Kerberos),
   ]),
+  connection_type: schema.conditional(
+    schema.siblingRef('auth_type'),
+    kafkaAuthType.None,
+    schema.oneOf([
+      schema.literal(kafkaConnectionType.Plaintext),
+      schema.literal(kafkaConnectionType.Encryption),
+    ]),
+    schema.never()
+  ),
   username: schema.conditional(
     schema.siblingRef('auth_type'),
     kafkaAuthType.Userpass,
@@ -205,13 +234,8 @@ export const KafkaSchema = {
   ),
   timeout: schema.maybe(schema.number()),
   broker_timeout: schema.maybe(schema.number()),
-  broker_buffer_size: schema.maybe(schema.number()),
-  broker_ack_reliability: schema.maybe(
-    schema.oneOf([
-      schema.literal(kafkaAcknowledgeReliabilityLevel.Commit),
-      schema.literal(kafkaAcknowledgeReliabilityLevel.Replica),
-      schema.literal(kafkaAcknowledgeReliabilityLevel.DoNotWait),
-    ])
+  required_acks: schema.maybe(
+    schema.oneOf([schema.literal(1), schema.literal(0), schema.literal(-1)])
   ),
 };
 
@@ -219,9 +243,12 @@ const KafkaUpdateSchema = {
   ...UpdateSchema,
   ...KafkaSchema,
   type: schema.maybe(schema.literal(outputType.Kafka)),
-  hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 })),
+  hosts: schema.maybe(
+    schema.arrayOf(schema.string({ validate: validateKafkaHost }), { minSize: 1 })
+  ),
   auth_type: schema.maybe(
     schema.oneOf([
+      schema.literal(kafkaAuthType.None),
       schema.literal(kafkaAuthType.Userpass),
       schema.literal(kafkaAuthType.Ssl),
       schema.literal(kafkaAuthType.Kerberos),
