@@ -10,7 +10,8 @@ import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { IndexPattern } from '@kbn/io-ts-utils';
 import { DatasetId, DatasetType, IntegrationType } from '../types';
 
-type IntegrationBase = Pick<IntegrationType, 'name' | 'version'>;
+type IntegrationBase = Pick<IntegrationType, 'name' | 'title' | 'icons' | 'version'>;
+
 interface DatasetDeps extends DatasetType {
   iconType?: IconType;
 }
@@ -29,14 +30,22 @@ export class Dataset {
     this.title = dataset.title ?? dataset.name;
     this.parentIntegration = parentIntegration && {
       name: parentIntegration.name,
+      title: parentIntegration.title,
+      icons: parentIntegration.icons,
       version: parentIntegration.version,
     };
   }
 
   getFullTitle(): string {
-    return this.parentIntegration?.name
-      ? `[${this.parentIntegration.name}] ${this.title}`
+    return this.parentIntegration?.title
+      ? `[${this.parentIntegration.title}] ${this.title}`
       : this.title;
+  }
+
+  getDatasetWildcard(): IndexPattern {
+    const [type, dataset, _namespace] = this.name.split('-');
+
+    return `${type}-${dataset}-*` as IndexPattern;
   }
 
   toDataviewSpec(): DataViewSpec {
@@ -65,5 +74,16 @@ export class Dataset {
       title: 'All log datasets',
       iconType: 'editorChecklist',
     });
+  }
+
+  public static createWildcardDatasetsFrom(datasets: Dataset[]) {
+    // Gather unique list of wildcards
+    const wildcards = datasets.reduce(
+      (list, dataset) => list.add(dataset.getDatasetWildcard()),
+      new Set<IndexPattern>()
+    );
+
+    // Create new datasets for the retrieved wildcards
+    return Array.from(wildcards).map((wildcard) => Dataset.create({ name: wildcard }));
   }
 }

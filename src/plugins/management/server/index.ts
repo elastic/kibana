@@ -8,6 +8,7 @@
 
 import { PluginInitializerContext } from '@kbn/core/server';
 import { ManagementServerPlugin } from './plugin';
+export { config } from './config';
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new ManagementServerPlugin(initContext);

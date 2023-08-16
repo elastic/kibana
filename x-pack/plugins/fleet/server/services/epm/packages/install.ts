@@ -25,6 +25,8 @@ import { uniqBy } from 'lodash';
 
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 
+import type { PackageDataStreamTypes } from '../../../../common/types';
+
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
@@ -49,7 +51,11 @@ import type {
   PackageVerificationResult,
   RegistryDataStream,
 } from '../../../types';
-import { AUTO_UPGRADE_POLICIES_PACKAGES, DATASET_VAR_NAME } from '../../../../common/constants';
+import {
+  AUTO_UPGRADE_POLICIES_PACKAGES,
+  CUSTOM_INTEGRATION_PACKAGE_SPEC_VERSION,
+  DATASET_VAR_NAME,
+} from '../../../../common/constants';
 import {
   type FleetError,
   PackageOutdatedError,
@@ -91,6 +97,12 @@ import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackages } from './bundled_packages';
 import { withPackageSpan } from './utils';
+import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
+import { INITIAL_VERSION } from './custom_integrations/constants';
+import { createAssets } from './custom_integrations';
+import { cacheAssets } from './custom_integrations/assets/cache';
+import { generateDatastreamEntries } from './custom_integrations/assets/dataset/utils';
+import { checkForNamingCollision } from './custom_integrations/validation/check_naming_collision';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -288,6 +300,21 @@ interface InstallRegistryPackageParams {
   prerelease?: boolean;
   authorizationHeader?: HTTPAuthorizationHeader | null;
 }
+
+export interface CustomPackageDatasetConfiguration {
+  name: string;
+  type: PackageDataStreamTypes;
+}
+interface InstallCustomPackageParams {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  datasets: CustomPackageDatasetConfiguration[];
+  esClient: ElasticsearchClient;
+  spaceId: string;
+  force?: boolean;
+  authorizationHeader?: HTTPAuthorizationHeader | null;
+  kibanaVersion: string;
+}
 interface InstallUploadedArchiveParams {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
@@ -424,7 +451,7 @@ function getElasticSubscription(packageInfo: ArchivePackage) {
 async function installPackageCommon(options: {
   pkgName: string;
   pkgVersion: string;
-  installSource: 'registry' | 'upload';
+  installSource: 'registry' | 'upload' | 'custom';
   installedPkg?: SavedObject<Installation>;
   installType: InstallType;
   savedObjectsClient: SavedObjectsClientContract;
@@ -659,6 +686,7 @@ export type InstallPackageParams = {
   | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
   | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
   | ({ installSource: Extract<InstallSource, 'bundled'> } & InstallUploadedArchiveParams)
+  | ({ installSource: Extract<InstallSource, 'custom'> } & InstallCustomPackageParams)
 );
 
 export async function installPackage(args: InstallPackageParams): Promise<InstallResult> {
@@ -723,8 +751,73 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       authorizationHeader,
     });
     return response;
+  } else if (args.installSource === 'custom') {
+    const { pkgName, force, datasets, spaceId, kibanaVersion } = args;
+    const response = await installCustomPackage({
+      savedObjectsClient,
+      pkgName,
+      datasets,
+      esClient,
+      spaceId,
+      force,
+      authorizationHeader,
+      kibanaVersion,
+    });
+    return response;
   }
   throw new Error(`Unknown installSource: ${args.installSource}`);
+}
+
+export async function installCustomPackage(
+  args: InstallCustomPackageParams
+): Promise<InstallResult> {
+  const {
+    savedObjectsClient,
+    esClient,
+    spaceId,
+    pkgName,
+    force,
+    authorizationHeader,
+    datasets,
+    kibanaVersion,
+  } = args;
+
+  // Validate that we can create this package, validations will throw if they don't pass
+  await checkForNamingCollision(savedObjectsClient, pkgName);
+
+  // Compose a packageInfo
+  const packageInfo = {
+    format_version: CUSTOM_INTEGRATION_PACKAGE_SPEC_VERSION,
+    name: pkgName,
+    title: convertStringToTitle(pkgName),
+    description: generateDescription(datasets.map((dataset) => dataset.name)),
+    version: INITIAL_VERSION,
+    owner: { github: authorizationHeader?.username ?? 'unknown' },
+    type: 'integration' as const,
+    data_streams: generateDatastreamEntries(datasets, pkgName),
+  };
+
+  const assets = createAssets({
+    ...packageInfo,
+    kibanaVersion,
+    datasets,
+  });
+
+  const paths = cacheAssets(assets, pkgName, INITIAL_VERSION);
+
+  return await installPackageCommon({
+    pkgName,
+    pkgVersion: INITIAL_VERSION,
+    installSource: 'custom',
+    installType: 'install',
+    savedObjectsClient,
+    esClient,
+    spaceId,
+    force,
+    packageInfo,
+    paths,
+    authorizationHeader,
+  });
 }
 
 export const updateVersion = async (

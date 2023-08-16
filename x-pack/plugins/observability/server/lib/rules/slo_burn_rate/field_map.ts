@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { SLO_ID_FIELD, SLO_REVISION_FIELD } from '../../../../common/field_names/infra_metrics';
+import {
+  SLO_ID_FIELD,
+  SLO_INSTANCE_ID_FIELD,
+  SLO_REVISION_FIELD,
+} from '../../../../common/field_names/slo';
 
 export const sloRuleFieldMap = {
   [SLO_ID_FIELD]: {
@@ -15,6 +19,11 @@ export const sloRuleFieldMap = {
   },
   [SLO_REVISION_FIELD]: {
     type: 'long',
+    array: false,
+    required: false,
+  },
+  [SLO_INSTANCE_ID_FIELD]: {
+    type: 'keyword',
     array: false,
     required: false,
   },

@@ -24,7 +24,6 @@ import {
   GetCustomFieldType,
   useGroupedFields,
 } from '@kbn/unified-field-list';
-import { ChildDragDropProvider } from '@kbn/dom-drag-drop';
 import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';
 import { getStateFromAggregateQuery } from './utils';
@@ -42,7 +41,6 @@ export type TextBasedDataPanelProps = DatasourceDataPanelProps<TextBasedPrivateS
 export function TextBasedDataPanel({
   setState,
   state,
-  dragDropContext,
   core,
   data,
   query,
@@ -54,7 +52,7 @@ export function TextBasedDataPanel({
   layerFields,
   hasSuggestionForField,
   dropOntoWorkspace,
-}: TextBasedDataPanelProps) {
+}: Omit<TextBasedDataPanelProps, 'dragDropContext'>) {
   const prevQuery = usePrevious(query);
   const [dataHasLoaded, setDataHasLoaded] = useState(false);
   useEffect(() => {
@@ -99,7 +97,7 @@ export function TextBasedDataPanel({
 
   const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields<DatatableColumn>({
     dataViewId: null,
-    allFields: dataHasLoaded ? fieldList : null,
+    allFields: dataHasLoaded ? fieldList ?? [] : null,
     services: {
       dataViews,
       core,
@@ -138,22 +136,20 @@ export function TextBasedDataPanel({
         ...core,
       }}
     >
-      <ChildDragDropProvider {...dragDropContext}>
-        <FieldList
-          className="lnsInnerIndexPatternDataPanel"
-          isProcessing={!dataHasLoaded}
-          prepend={
-            <FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsTextBasedLanguages" />
-          }
-        >
-          <FieldListGrouped<DatatableColumn>
-            {...fieldListGroupedProps}
-            renderFieldItem={renderFieldItem}
-            data-test-subj="lnsTextBasedLanguages"
-            localStorageKeyPrefix="lens"
-          />
-        </FieldList>
-      </ChildDragDropProvider>
+      <FieldList
+        className="lnsInnerIndexPatternDataPanel"
+        isProcessing={!dataHasLoaded}
+        prepend={
+          <FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsTextBasedLanguages" />
+        }
+      >
+        <FieldListGrouped<DatatableColumn>
+          {...fieldListGroupedProps}
+          renderFieldItem={renderFieldItem}
+          data-test-subj="lnsTextBasedLanguages"
+          localStorageKeyPrefix="lens"
+        />
+      </FieldList>
     </KibanaContextProvider>
   );
 }

@@ -14,7 +14,7 @@ import type {
 import type { SignalSearchResponse, SignalSource, OverrideBodyQuery } from '../types';
 import { buildEventsSearchQuery } from './build_events_query';
 import { createErrorsFromShard, makeFloatString } from './utils';
-import type { TimestampOverride } from '../../../../../common/detection_engine/rule_schema';
+import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 

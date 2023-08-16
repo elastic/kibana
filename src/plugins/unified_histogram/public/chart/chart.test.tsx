@@ -244,6 +244,17 @@ describe('Chart', () => {
     ).toBeTruthy();
   });
 
+  it('should not render the edit on the fly button when chart is visible and suggestions dont exist', async () => {
+    const component = await mountComponent({
+      currentSuggestion: undefined,
+      allSuggestions: undefined,
+      isPlainRecord: true,
+    });
+    expect(
+      component.find('[data-test-subj="unifiedHistogramEditFlyoutVisualization"]').exists()
+    ).toBeFalsy();
+  });
+
   it('should render the save button when chart is visible and suggestions exist', async () => {
     const component = await mountComponent({
       currentSuggestion: currentSuggestionMock,

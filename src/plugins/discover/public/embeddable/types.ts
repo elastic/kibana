@@ -6,31 +6,17 @@
  * Side Public License, v 1.
  */
 
-import {
-  Embeddable,
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-} from '@kbn/embeddable-plugin/public';
-import type { Filter, TimeRange, Query } from '@kbn/es-query';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import type { Embeddable, EmbeddableOutput, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type {
+  SavedSearch,
+  SearchByReferenceInput,
+  SearchByValueInput,
+} from '@kbn/saved-search-plugin/public';
 
-export interface SearchInput extends EmbeddableInput {
-  timeRange: TimeRange;
-  timeslice?: [number, number];
-  query?: Query;
-  filters?: Filter[];
-  hidePanelTitles?: boolean;
-  columns?: string[];
-  sort?: SortOrder[];
-  rowHeight?: number;
-  rowsPerPage?: number;
-}
+export type SearchInput = SearchByValueInput | SearchByReferenceInput;
 
 export interface SearchOutput extends EmbeddableOutput {
-  editUrl: string;
   indexPatterns?: DataView[];
   editable: boolean;
 }

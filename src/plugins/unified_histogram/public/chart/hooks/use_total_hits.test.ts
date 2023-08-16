@@ -123,7 +123,7 @@ describe('useTotalHits', () => {
       ...getDeps(),
       isPlainRecord: true,
       onTotalHitsChange,
-      query: { sql: 'select * from test' },
+      query: { esql: 'from test' },
     };
     renderHook(() => useTotalHits(deps));
     expect(onTotalHitsChange).toBeCalledTimes(1);

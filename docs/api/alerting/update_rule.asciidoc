@@ -29,21 +29,6 @@ features, *{observability}*, or *Security* features. If the rule has
 *{connectors-feature}* feature. For more details, refer to
 <<kibana-feature-privileges>>.
 
-=== {api-description-title}
-
-[WARNING]
-====
-* This API supports only
-<<token-api-authentication,token-based authentication>>.
-* When you update a rule, it identifies which roles you have at that point in time.
-Thereafter, when the rule performs queries, it uses those security privileges.
-If you have different privileges than the user that created or most recently
-updated the rule, you might change its behavior.
-* Though some properties are optional, when you update the rule the existing
-property values are overwritten with default values. Therefore, it is
-recommended to explicitly set all property values.
-====
-
 [[update-rule-api-path-params]]
 === {api-path-parms-title}
 

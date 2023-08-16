@@ -73,6 +73,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(documentTitle).to.contain('Inventory - Infrastructure - Observability - Elastic');
       });
 
+      it('renders the inventory survey link', async () => {
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.infraHome.waitForLoading();
+
+        await pageObjects.infraHome.ensureInventoryFeedbackLinkIsVisible();
+      });
+
       it('renders the kubernetes tour component and allows user to dismiss it without seeing it again', async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
         const kubernetesTourText =
@@ -209,7 +216,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.closeAlertFlyout();
       });
 
-      it('should open and close inventory alert flyout', async () => {
+      it('should open and close metrics threshold alert flyout', async () => {
         await pageObjects.infraHome.openMetricsThresholdAlertFlyout();
         await pageObjects.infraHome.closeAlertFlyout();
       });
@@ -224,8 +231,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/157740
-    describe.skip('Saved Views', () => {
+    describe('Saved Views', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.infraHome.goToMetricExplorer();

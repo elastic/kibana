@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 
 export function useGuessRuleIdsForBulkAction(): (bulkActionType: BulkActionType) => string[] {

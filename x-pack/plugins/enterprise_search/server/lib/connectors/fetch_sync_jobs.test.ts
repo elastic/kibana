@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import { setupConnectorsIndices } from '../../index_management/setup_indices';
-
 import { fetchSyncJobsByConnectorId } from './fetch_sync_jobs';
-
-jest.mock('../../index_management/setup_indices', () => ({
-  setupConnectorsIndices: jest.fn(),
-}));
 
 describe('fetchSyncJobs lib', () => {
   const mockClient = {
@@ -71,7 +65,7 @@ describe('fetchSyncJobs lib', () => {
       });
       expect(mockClient.asCurrentUser.search).not.toHaveBeenCalled();
     });
-    it('should call setup connectors on index not found error', async () => {
+    it('should return empty array on index not found error', async () => {
       mockClient.asCurrentUser.search.mockImplementationOnce(() =>
         Promise.reject({
           meta: {
@@ -109,9 +103,8 @@ describe('fetchSyncJobs lib', () => {
           },
         },
       });
-      expect(setupConnectorsIndices as jest.Mock).toHaveBeenCalledWith(mockClient.asCurrentUser);
     });
-    it('should not call setup connectors on other errors', async () => {
+    it('should throw on other errors', async () => {
       mockClient.asCurrentUser.search.mockImplementationOnce(() =>
         Promise.reject({
           meta: {
@@ -147,7 +140,6 @@ describe('fetchSyncJobs lib', () => {
           },
         },
       });
-      expect(setupConnectorsIndices as jest.Mock).not.toHaveBeenCalled();
     });
   });
 });

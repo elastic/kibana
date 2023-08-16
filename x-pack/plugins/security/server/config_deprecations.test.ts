@@ -231,6 +231,22 @@ describe('Config Deprecations', () => {
     `);
   });
 
+  it(`warns that 'xpack.security.showNavLinks' is unused`, () => {
+    const config = {
+      xpack: {
+        security: {
+          showNavLinks: true,
+        },
+      },
+    };
+    const { messages } = applyConfigDeprecations(cloneDeep(config));
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "You no longer need to configure \\"xpack.security.showNavLinks\\".",
+      ]
+    `);
+  });
+
   it(`warns that 'xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize' is unused`, () => {
     const config = {
       xpack: {

@@ -93,7 +93,7 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
     <I18nProvider>
       <EuiThemeProvider darkMode={isDarkMode}>
         <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider services={{ ...deps }}>
+          <KibanaContextProvider services={{ ...deps, theme: { theme$ } }}>
             <Router history={deps.history}>
               <QueryClientProvider client={queryClient}>
                 <AppWithoutRouter sectionsRegex={sectionsRegex} />

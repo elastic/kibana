@@ -7,7 +7,7 @@
  */
 
 import { getTopNavLinks } from './get_top_nav_links';
-import { dataViewMock } from '../../../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 

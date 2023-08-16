@@ -6,17 +6,15 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { AccessorConfig } from '@kbn/visualization-ui-components/public';
+import { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   Visualization,
@@ -374,6 +372,7 @@ export const getPieVisualization = ({
         accessors,
         supportsMoreColumns: layer.metrics.length === 0 || Boolean(layer.allowMultipleMetrics),
         filterOperations: numberMetricOperations,
+        isMetricDimension: true,
         requiredMinDimensionCount: 1,
         dimensionsTooMany: layer.allowMultipleMetrics ? 0 : layer.metrics.length - 1,
         dataTestSubj: 'lnsPie_sizeByDimensionPanel',
@@ -459,25 +458,11 @@ export const getPieVisualization = ({
       layers: newState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
     };
   },
-  renderDimensionEditor(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
-        <I18nProvider>
-          <DimensionEditor {...props} paletteService={paletteService} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  DimensionEditorComponent(props) {
+    return <DimensionEditor {...props} paletteService={paletteService} />;
   },
-  renderDimensionEditorDataExtra(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
-        <I18nProvider>
-          <DimensionDataExtraEditor {...props} paletteService={paletteService} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  DimensionEditorDataExtraComponent(props) {
+    return <DimensionDataExtraEditor {...props} paletteService={paletteService} />;
   },
 
   getSupportedLayers() {
@@ -501,30 +486,16 @@ export const getPieVisualization = ({
   toPreviewExpression: (state, layers, datasourceExpressionsByLayers) =>
     toPreviewExpression(state, layers, paletteService, datasourceExpressionsByLayers),
 
-  renderToolbar(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
-        <I18nProvider>
-          <PieToolbar {...props} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  ToolbarComponent(props) {
+    return <PieToolbar {...props} />;
   },
 
   hasLayerSettings(props) {
     return { data: props.state.shape !== PieChartTypes.MOSAIC, appearance: false };
   },
 
-  renderLayerSettings(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
-        <I18nProvider>
-          <LayerSettings {...props} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  LayerSettingsComponent(props) {
+    return <LayerSettings {...props} />;
   },
 
   getSuggestionFromConvertToLensContext(props) {

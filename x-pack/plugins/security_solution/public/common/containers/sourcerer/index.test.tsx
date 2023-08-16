@@ -160,7 +160,6 @@ describe('Sourcerer Hooks', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
     store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     mockUseUserInfo.mockImplementation(() => userInfoState);
   });

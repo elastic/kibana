@@ -7,11 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { defer, from } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import { SavedObjectsClientCommon } from '../types';
+import { rateLimitingForkJoin } from './utils';
+import { PersistenceAPI } from '../types';
 
 import { createDataViewCache } from '.';
 import type { RuntimeField, RuntimeFieldSpec, RuntimeType } from '../types';
@@ -89,7 +91,7 @@ export interface DataViewsServiceDeps {
   /**
    * Saved objects client interface wrapped in a common interface
    */
-  savedObjectsClient: SavedObjectsClientCommon;
+  savedObjectsClient: PersistenceAPI;
   /**
    * Wrapper around http call functionality so it can be used on client or server
    */
@@ -237,6 +239,12 @@ export interface DataViewsServicePublicMethods {
    */
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldSpec[]>;
   /**
+   * Get existing index pattern list by providing string array index pattern list.
+   * @param indices - index pattern list
+   * @returns index pattern list of index patterns that match indices
+   */
+  getExistingIndices: (indices: string[]) => Promise<string[]>;
+  /**
    * Get list of data view ids.
    * @param refresh - clear cache and fetch from server
    */
@@ -292,7 +300,7 @@ export interface DataViewsServicePublicMethods {
  */
 export class DataViewsService {
   private config: UiSettingsCommon;
-  private savedObjectsClient: SavedObjectsClientCommon;
+  private savedObjectsClient: PersistenceAPI;
   private savedObjectsCache?: Array<SavedObject<DataViewSavedObjectAttrs>> | null;
   private apiClient: IDataViewsApiClient;
   private fieldFormats: FieldFormatsStartCommon;
@@ -503,6 +511,41 @@ export class DataViewsService {
       metaFields,
     });
     return fields;
+  };
+
+  /**
+   * Get existing index pattern list by providing string array index pattern list.
+   * @param indices index pattern list
+   * @returns index pattern list
+   */
+  getExistingIndices = async (indices: string[]): Promise<string[]> => {
+    const indicesObs = indices.map((pattern) => {
+      // when checking a negative pattern, check if the positive pattern exists
+      const indexToQuery = pattern.trim().startsWith('-')
+        ? pattern.trim().substring(1)
+        : pattern.trim();
+      return defer(() =>
+        from(
+          this.getFieldsForWildcard({
+            // check one field to keep request fast/small
+            fields: ['_id'],
+            // true so no errors thrown in browser
+            allowNoIndex: true,
+            pattern: indexToQuery,
+          })
+        )
+      );
+    });
+
+    return new Promise<boolean[]>((resolve) => {
+      rateLimitingForkJoin(indicesObs, 3, []).subscribe((value) => {
+        resolve(value.map((v) => v.length > 0));
+      });
+    })
+      .then((allPatterns: boolean[]) =>
+        indices.filter((pattern, i, self) => self.indexOf(pattern) === i && allPatterns[i])
+      )
+      .catch(() => indices);
   };
 
   /**

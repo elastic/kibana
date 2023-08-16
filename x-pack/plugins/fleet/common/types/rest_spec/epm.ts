@@ -51,7 +51,7 @@ export interface GetPackagesResponse {
   response?: PackageList;
 }
 
-interface InstalledPackage {
+export interface InstalledPackage {
   name: string;
   version: string;
   status: EpmPackageInstallStatus;

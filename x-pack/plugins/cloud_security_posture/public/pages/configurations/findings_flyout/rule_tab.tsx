@@ -9,7 +9,7 @@ import { EuiBadge, EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
-import { CisKubernetesIcons, Markdown } from './findings_flyout';
+import { CisKubernetesIcons, CspFlyoutMarkdown } from './findings_flyout';
 
 export const getRuleList = (rule: CspFinding['rule']) => [
   {
@@ -22,7 +22,7 @@ export const getRuleList = (rule: CspFinding['rule']) => [
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.descriptionTitle', {
       defaultMessage: 'Description',
     }),
-    description: <Markdown>{rule.description}</Markdown>,
+    description: <CspFlyoutMarkdown>{rule.description}</CspFlyoutMarkdown>,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.tagsTitle', {
@@ -54,7 +54,7 @@ export const getRuleList = (rule: CspFinding['rule']) => [
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.profileApplicabilityTitle', {
       defaultMessage: 'Profile Applicability',
     }),
-    description: <Markdown>{rule.profile_applicability}</Markdown>,
+    description: <CspFlyoutMarkdown>{rule.profile_applicability}</CspFlyoutMarkdown>,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.benchmarkTitle', {
@@ -66,7 +66,7 @@ export const getRuleList = (rule: CspFinding['rule']) => [
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.auditTitle', {
       defaultMessage: 'Audit',
     }),
-    description: <Markdown>{rule.audit}</Markdown>,
+    description: <CspFlyoutMarkdown>{rule.audit}</CspFlyoutMarkdown>,
   },
   ...(rule.references
     ? [
@@ -74,7 +74,7 @@ export const getRuleList = (rule: CspFinding['rule']) => [
           title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.referencesTitle', {
             defaultMessage: 'References',
           }),
-          description: <Markdown>{rule.references}</Markdown>,
+          description: <CspFlyoutMarkdown>{rule.references}</CspFlyoutMarkdown>,
         },
       ]
     : []),

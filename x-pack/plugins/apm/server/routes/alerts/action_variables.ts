@@ -102,4 +102,13 @@ export const apmActionVariables = {
     ),
     name: 'errorGroupingKey' as const,
   },
+  errorGroupingName: {
+    description: i18n.translate(
+      'xpack.apm.alerts.action_variables.errorGroupingName',
+      {
+        defaultMessage: 'The error grouping name the alert is created for',
+      }
+    ),
+    name: 'errorGroupingName' as const,
+  },
 };

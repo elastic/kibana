@@ -3901,7 +3901,20 @@
         },
         "operationId": "get-package-policies",
         "security": [],
-        "parameters": []
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/page_size"
+          },
+          {
+            "$ref": "#/components/parameters/page_index"
+          },
+          {
+            "$ref": "#/components/parameters/kuery"
+          },
+          {
+            "$ref": "#/components/parameters/format"
+          }
+        ]
       },
       "parameters": [],
       "post": {
@@ -3949,6 +3962,9 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/format"
           }
         ]
       }
@@ -4011,7 +4027,11 @@
         },
         "operationId": "bulk-get-package-policies",
         "security": [],
-        "parameters": []
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/format"
+          }
+        ]
       }
     },
     "/package_policies/delete": {
@@ -4214,6 +4234,16 @@
       }
     },
     "/package_policies/{packagePolicyId}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "packagePolicyId",
+          "in": "path",
+          "required": true
+        }
+      ],
       "get": {
         "summary": "Get package policy by ID",
         "tags": [
@@ -4242,18 +4272,13 @@
             "$ref": "#/components/responses/error"
           }
         },
-        "operationId": "get-package-policy"
+        "operationId": "get-package-policy",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/format"
+          }
+        ]
       },
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "packagePolicyId",
-          "in": "path",
-          "required": true
-        }
-      ],
       "put": {
         "summary": "Update package policy by ID",
         "tags": [
@@ -4299,6 +4324,9 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/format"
           }
         ]
       },
@@ -5378,7 +5406,6 @@
         "name": "kuery",
         "in": "query",
         "required": false,
-        "deprecated": true,
         "schema": {
           "type": "string"
         }
@@ -5427,6 +5454,19 @@
         "required": false,
         "schema": {
           "type": "boolean"
+        }
+      },
+      "format": {
+        "name": "format",
+        "in": "query",
+        "description": "Simplified or legacy format for package inputs",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "simplified",
+            "legacy"
+          ]
         }
       }
     },
@@ -6676,8 +6716,15 @@
                 "type": "number"
               },
               "inputs": {
-                "type": "array",
-                "items": {}
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {}
+                  },
+                  {
+                    "type": "object"
+                  }
+                ]
               }
             },
             "required": [
@@ -7653,6 +7700,15 @@
               },
               "key": {
                 "type": "string"
+              },
+              "verification_mode": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "full",
+                  "certificate",
+                  "strict"
+                ]
               }
             }
           },
@@ -7702,6 +7758,13 @@
           },
           "auth_type": {
             "type": "string"
+          },
+          "connection_type": {
+            "type": "string",
+            "enum": [
+              "plaintext",
+              "encryption"
+            ]
           },
           "username": {
             "type": "string"
@@ -7778,11 +7841,8 @@
           "broker_timeout": {
             "type": "number"
           },
-          "broker_buffer_size": {
+          "required_acks": {
             "type": "number"
-          },
-          "broker_ack_reliability": {
-            "type": "string"
           }
         },
         "required": [
@@ -8055,6 +8115,15 @@
               },
               "key": {
                 "type": "string"
+              },
+              "verification_mode": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "full",
+                  "certificate",
+                  "strict"
+                ]
               }
             }
           },
@@ -8104,6 +8173,13 @@
           },
           "auth_type": {
             "type": "string"
+          },
+          "connection_type": {
+            "type": "string",
+            "enum": [
+              "plaintext",
+              "encryption"
+            ]
           },
           "username": {
             "type": "string"
@@ -8180,10 +8256,7 @@
           "broker_timeout": {
             "type": "number"
           },
-          "broker_ack_reliability": {
-            "type": "string"
-          },
-          "broker_buffer_size": {
+          "required_acks": {
             "type": "number"
           }
         },

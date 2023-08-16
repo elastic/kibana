@@ -19,7 +19,10 @@ import {
   UpdateViewParams,
 } from '../../common/saved_views';
 import { MetricsSourceConfigurationResponse } from '../../common/metrics_sources';
-import { CreateInventoryViewAttributesRequestPayload } from '../../common/http_api/latest';
+import {
+  CreateInventoryViewAttributesRequestPayload,
+  UpdateInventoryViewAttributesRequestPayload,
+} from '../../common/http_api/latest';
 import type { InventoryView } from '../../common/inventory_views';
 import { useKibanaContextForPlugin } from './use_kibana';
 import { useUrlState } from '../utils/use_url_state';
@@ -133,7 +136,7 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
   const { mutateAsync: updateViewById, isLoading: isUpdatingView } = useMutation<
     InventoryView,
     ServerError,
-    UpdateViewParams<CreateInventoryViewAttributesRequestPayload>
+    UpdateViewParams<UpdateInventoryViewAttributesRequestPayload>
   >({
     mutationFn: ({ id, attributes }) => inventoryViews.client.updateInventoryView(id, attributes),
     onError: (error) => {

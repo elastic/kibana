@@ -23,8 +23,8 @@ import {
 } from '../services/discover_data_state_container';
 import { fetchDocuments } from './fetch_documents';
 import { fetchTextBased } from './fetch_text_based';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
 }));
@@ -68,6 +68,13 @@ describe('test fetchAll', () => {
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
       getAppState: () => ({}),
+      getInternalState: () => ({
+        dataView: undefined,
+        savedDataViews: [],
+        adHocDataViews: [],
+        expandedDoc: undefined,
+        customFilters: [],
+      }),
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
       useNewFieldsApi: true,
@@ -237,7 +244,7 @@ describe('test fetchAll', () => {
     ]);
   });
 
-  test('emits loading and documents on documents$ correctly for SQL query', async () => {
+  test('emits loading and documents on documents$ correctly for ES|QL query', async () => {
     const collect = subjectCollector(subjects.documents$);
     const hits = [
       { _id: '1', _index: 'logs' },
@@ -248,7 +255,7 @@ describe('test fetchAll', () => {
       records: documents,
       textBasedQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
     });
-    const query = { sql: 'SELECT * from foo' };
+    const query = { esql: 'from foo' };
     deps = {
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
@@ -258,6 +265,13 @@ describe('test fetchAll', () => {
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
       getAppState: () => ({ query }),
+      getInternalState: () => ({
+        dataView: undefined,
+        savedDataViews: [],
+        adHocDataViews: [],
+        expandedDoc: undefined,
+        customFilters: [],
+      }),
     };
     fetchAll(subjects, false, deps);
     await waitForNextTick();

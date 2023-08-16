@@ -7,10 +7,10 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
-import { streamFactory } from '@kbn/aiops-utils';
+import { streamFactory } from '@kbn/ml-response-stream/server';
 
 import { simpleStringStreamRequestBodySchema } from '../../common/api/simple_string_stream';
-import { API_ENDPOINT } from '../../common/api';
+import { RESPONSE_STREAM_API_ENDPOINT } from '../../common/api';
 
 function timeout(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -19,7 +19,7 @@ function timeout(ms: number) {
 export const defineSimpleStringStreamRoute = (router: IRouter, logger: Logger) => {
   router.versioned
     .post({
-      path: API_ENDPOINT.SIMPLE_STRING_STREAM,
+      path: RESPONSE_STREAM_API_ENDPOINT.SIMPLE_STRING_STREAM,
       access: 'internal',
     })
     .addVersion(

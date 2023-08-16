@@ -32,18 +32,23 @@ jest.mock('./helpers', () => {
     }),
   };
 });
+import { of } from 'rxjs';
 
 describe('TextBasedLanguagesEditor', () => {
   const uiConfig: Record<string, any> = {};
   const uiSettings = {
     get: (key: string) => uiConfig[key],
   } as IUiSettingsClient;
+  const theme = {
+    theme$: of({ darkMode: false }),
+  };
 
   const services = {
     uiSettings,
     settings: {
       client: uiSettings,
     },
+    theme,
   };
 
   function renderTextBasedLanguagesEditorComponent(testProps: TextBasedLanguagesEditorProps) {
@@ -56,7 +61,7 @@ describe('TextBasedLanguagesEditor', () => {
   let props: TextBasedLanguagesEditorProps;
   beforeEach(() => {
     props = {
-      query: { sql: 'SELECT * FROM test' },
+      query: { esql: 'from test' },
       isCodeEditorExpanded: false,
       onTextLangQueryChange: jest.fn(),
       onTextLangQuerySubmit: jest.fn(),

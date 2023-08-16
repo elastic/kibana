@@ -10,12 +10,14 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiIconTip,
   EuiLink,
   EuiSpacer,
   EuiText,
@@ -25,7 +27,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import { isEmpty } from 'lodash';
+import React, { useCallback, useState } from 'react';
+import {
+  IntegrationError,
+  IntegrationOptions,
+  useCreateIntegration,
+} from '../../../../hooks/use_create_integration';
 import { useWizard } from '.';
 import { OptionalFormRow } from '../../../shared/optional_form_row';
 import {
@@ -33,14 +41,23 @@ import {
   StepPanelContent,
   StepPanelFooter,
 } from '../../../shared/step_panel';
+import { BackButton } from './back_button';
 import { getFilename, replaceSpecialChars } from './get_filename';
 
 export function ConfigureLogs() {
+  const [datasetNameTouched, setDatasetNameTouched] = useState(false);
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
   const { goToStep, goBack, getState, setState } = useWizard();
   const wizardState = getState();
+  const [integrationName, setIntegrationName] = useState(
+    wizardState.integrationName
+  );
+  const [integrationNameTouched, setIntegrationNameTouched] = useState(false);
+  const [integrationError, setIntegrationError] = useState<
+    IntegrationError | undefined
+  >();
   const [datasetName, setDatasetName] = useState(wizardState.datasetName);
   const [serviceName, setServiceName] = useState(wizardState.serviceName);
   const [logFilePaths, setLogFilePaths] = useState(wizardState.logFilePaths);
@@ -48,24 +65,65 @@ export function ConfigureLogs() {
   const [customConfigurations, setCustomConfigurations] = useState(
     wizardState.customConfigurations
   );
-
   const logFilePathNotConfigured = logFilePaths.every((filepath) => !filepath);
 
-  function onBack() {
-    goBack();
-  }
+  const onIntegrationCreationSuccess = useCallback(
+    (integration: IntegrationOptions) => {
+      setState((state) => ({
+        ...state,
+        lastCreatedIntegration: integration,
+      }));
+      goToStep('installElasticAgent');
+    },
+    [goToStep, setState]
+  );
 
-  function onContinue() {
+  const onIntegrationCreationFailure = useCallback(
+    (error: IntegrationError) => {
+      setIntegrationError(error);
+    },
+    [setIntegrationError]
+  );
+
+  const { createIntegration, createIntegrationRequest } = useCreateIntegration({
+    onIntegrationCreationSuccess,
+    onIntegrationCreationFailure,
+    initialLastCreatedIntegration: wizardState.lastCreatedIntegration,
+  });
+
+  const isCreatingIntegration = createIntegrationRequest.state === 'pending';
+  const hasFailedCreatingIntegration =
+    createIntegrationRequest.state === 'rejected';
+
+  const onContinue = useCallback(() => {
     setState((state) => ({
       ...state,
       datasetName,
+      integrationName,
       serviceName,
       logFilePaths: logFilePaths.filter((filepath) => !!filepath),
       namespace,
       customConfigurations,
     }));
-    goToStep('installElasticAgent');
-  }
+    createIntegration({
+      integrationName,
+      datasets: [
+        {
+          name: datasetName,
+          type: 'logs' as const,
+        },
+      ],
+    });
+  }, [
+    createIntegration,
+    customConfigurations,
+    datasetName,
+    integrationName,
+    logFilePaths,
+    namespace,
+    serviceName,
+    setState,
+  ]);
 
   function addLogFilePath() {
     setLogFilePaths((prev) => [...prev, '']);
@@ -85,37 +143,58 @@ export function ConfigureLogs() {
     );
 
     if (index === 0) {
+      setIntegrationName(getFilename(filepath));
       setDatasetName(getFilename(filepath));
     }
   }
 
+  const hasNamingCollision =
+    integrationError && integrationError.type === 'NamingCollision';
+
+  const isIntegrationNameInvalid =
+    (integrationNameTouched &&
+      (isEmpty(integrationName) || !isLowerCase(integrationName))) ||
+    hasNamingCollision;
+
+  const integrationNameError = getIntegrationNameError(
+    integrationName,
+    integrationNameTouched,
+    integrationError
+  );
+
+  const isDatasetNameInvalid =
+    datasetNameTouched && (isEmpty(datasetName) || !isLowerCase(datasetName));
+
+  const datasetNameError = getDatasetNameError(datasetName, datasetNameTouched);
+
   return (
     <StepPanel
-      title={i18n.translate(
-        'xpack.observability_onboarding.configureLogs.title',
-        {
-          defaultMessage: 'Stream log files to Elastic',
-        }
-      )}
       panelFooter={
         <StepPanelFooter
           items={[
-            <EuiButton color="text" onClick={onBack}>
-              {i18n.translate('xpack.observability_onboarding.steps.back', {
-                defaultMessage: 'Back',
-              })}
-            </EuiButton>,
+            <BackButton onBack={goBack} />,
             <EuiButton
               color="primary"
               fill
               onClick={onContinue}
+              isLoading={isCreatingIntegration}
               isDisabled={
                 logFilePathNotConfigured || !datasetName || !namespace
               }
             >
-              {i18n.translate('xpack.observability_onboarding.steps.continue', {
-                defaultMessage: 'Continue',
-              })}
+              {isCreatingIntegration
+                ? i18n.translate(
+                    'xpack.observability_onboarding.steps.loading',
+                    {
+                      defaultMessage: 'Creating integration...',
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.observability_onboarding.steps.continue',
+                    {
+                      defaultMessage: 'Continue',
+                    }
+                  )}
             </EuiButton>,
           ]}
         />
@@ -127,8 +206,7 @@ export function ConfigureLogs() {
             {i18n.translate(
               'xpack.observability_onboarding.configureLogs.description',
               {
-                defaultMessage:
-                  'Fill the paths to the log files on your hosts.',
+                defaultMessage: 'Configure inputs',
               }
             )}
           </p>
@@ -198,42 +276,35 @@ export function ConfigureLogs() {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="s" />
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.observability_onboarding.configureLogs.dataset.name',
-              {
-                defaultMessage: 'Dataset name',
-              }
-            )}
-            helpText={i18n.translate(
-              'xpack.observability_onboarding.configureLogs.dataset.helper',
-              {
-                defaultMessage:
-                  "Pick a name for your logs. All lowercase, max 100 chars, special characters will be replaced with '_'.",
-              }
-            )}
-          >
-            <EuiFieldText
-              placeholder={i18n.translate(
-                'xpack.observability_onboarding.configureLogs.dataset.placeholder',
-                {
-                  defaultMessage: 'Dataset name',
-                }
-              )}
-              value={datasetName}
-              onChange={(event) =>
-                setDatasetName(replaceSpecialChars(event.target.value))
-              }
-            />
-          </EuiFormRow>
-          <EuiSpacer size="m" />
           <OptionalFormRow
-            label={i18n.translate(
-              'xpack.observability_onboarding.configureLogs.serviceName',
-              {
-                defaultMessage: 'Service name',
-              }
-            )}
+            label={
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="xs"
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
+                  {i18n.translate(
+                    'xpack.observability_onboarding.configureLogs.serviceName',
+                    {
+                      defaultMessage: 'Service name',
+                    }
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.observability_onboarding.configureLogs.serviceName.tooltip',
+                      {
+                        defaultMessage:
+                          'Provide a service name to allow for distributed services running on multiple hosts to correlate the related instances.',
+                      }
+                    )}
+                    position="right"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
             helpText={
               <FormattedMessage
                 id="xpack.observability_onboarding.configureLogs.serviceName.helper"
@@ -245,7 +316,7 @@ export function ConfigureLogs() {
               placeholder={i18n.translate(
                 'xpack.observability_onboarding.configureLogs.serviceName.placeholder',
                 {
-                  defaultMessage: 'Give a name to your service',
+                  defaultMessage: 'Give your service a name',
                 }
               )}
               value={serviceName}
@@ -281,12 +352,34 @@ export function ConfigureLogs() {
               >
                 <EuiSpacer size="l" />
                 <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.observability_onboarding.configureLogs.namespace',
-                    {
-                      defaultMessage: 'Namespace',
-                    }
-                  )}
+                  label={
+                    <EuiFlexGroup
+                      alignItems="center"
+                      gutterSize="xs"
+                      responsive={false}
+                    >
+                      <EuiFlexItem grow={false}>
+                        {i18n.translate(
+                          'xpack.observability_onboarding.configureLogs.namespace',
+                          {
+                            defaultMessage: 'Namespace',
+                          }
+                        )}
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          content={i18n.translate(
+                            'xpack.observability_onboarding.configureLogs.namespace.tooltip',
+                            {
+                              defaultMessage:
+                                'Provide a namespace to customize the grouping of your logs. Defaults to the default namespace.',
+                            }
+                          )}
+                          position="right"
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  }
                   helpText={
                     <FormattedMessage
                       id="xpack.observability_onboarding.configureLogs.namespace.helper"
@@ -368,7 +461,203 @@ export function ConfigureLogs() {
             <EuiSpacer size="s" />
           </EuiFlexGroup>
         </EuiForm>
+        <EuiSpacer size="l" />
+        <EuiText color="subdued">
+          <p>
+            {i18n.translate(
+              'xpack.observability_onboarding.configureLogs.configureIntegrationDescription',
+              {
+                defaultMessage: 'Configure integration',
+              }
+            )}
+          </p>
+        </EuiText>
+        <EuiSpacer size="l" />
+        <EuiForm fullWidth>
+          <EuiFormRow
+            label={
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="xs"
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
+                  {i18n.translate(
+                    'xpack.observability_onboarding.configureLogs.integration.name',
+                    {
+                      defaultMessage: 'Integration name',
+                    }
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.observability_onboarding.configureLogs.integration.name.tooltip',
+                      {
+                        defaultMessage:
+                          'Provide an integration name for the integration that will be created to organise these custom logs. Defaults to the name of the log file.',
+                      }
+                    )}
+                    position="right"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            helpText={i18n.translate(
+              'xpack.observability_onboarding.configureLogs.integration.helper',
+              {
+                defaultMessage:
+                  "All lowercase, max 100 chars, special characters will be replaced with '_'.",
+              }
+            )}
+            isInvalid={isIntegrationNameInvalid}
+            error={integrationNameError}
+          >
+            <EuiFieldText
+              placeholder={i18n.translate(
+                'xpack.observability_onboarding.configureLogs.integration.placeholder',
+                {
+                  defaultMessage: 'Give your integration a name',
+                }
+              )}
+              value={integrationName}
+              onChange={(event) =>
+                setIntegrationName(replaceSpecialChars(event.target.value))
+              }
+              isInvalid={isIntegrationNameInvalid}
+              onInput={() => setIntegrationNameTouched(true)}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label={
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="xs"
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
+                  {i18n.translate(
+                    'xpack.observability_onboarding.configureLogs.dataset.name',
+                    {
+                      defaultMessage: 'Dataset name',
+                    }
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.observability_onboarding.configureLogs.dataset.name.tooltip',
+                      {
+                        defaultMessage:
+                          'Provide a dataset name to help organise these custom logs. This dataset will be associated with the integration. Defaults to the name of the log file.',
+                      }
+                    )}
+                    position="right"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            helpText={i18n.translate(
+              'xpack.observability_onboarding.configureLogs.dataset.helper',
+              {
+                defaultMessage:
+                  "All lowercase, max 100 chars, special characters will be replaced with '_'.",
+              }
+            )}
+            isInvalid={isDatasetNameInvalid}
+            error={datasetNameError}
+          >
+            <EuiFieldText
+              placeholder={i18n.translate(
+                'xpack.observability_onboarding.configureLogs.dataset.placeholder',
+                {
+                  defaultMessage: "Give your integration's dataset a name",
+                }
+              )}
+              value={datasetName}
+              onChange={(event) =>
+                setDatasetName(replaceSpecialChars(event.target.value))
+              }
+              isInvalid={isDatasetNameInvalid}
+              onInput={() => setDatasetNameTouched(true)}
+            />
+          </EuiFormRow>
+        </EuiForm>
+        {hasFailedCreatingIntegration && integrationError && (
+          <>
+            <EuiSpacer size="l" />
+            {getIntegrationErrorCallout(integrationError)}
+          </>
+        )}
       </StepPanelContent>
     </StepPanel>
   );
 }
+
+const getIntegrationErrorCallout = (integrationError: IntegrationError) => {
+  const title = i18n.translate(
+    'xpack.observability_onboarding.configureLogs.integrationCreation.error.title',
+    { defaultMessage: 'Sorry, there was an error' }
+  );
+
+  switch (integrationError.type) {
+    case 'AuthorizationError':
+      const authorizationDescription = i18n.translate(
+        'xpack.observability_onboarding.configureLogs.integrationCreation.error.authorization.description',
+        {
+          defaultMessage:
+            'This user does not have permissions to create an integration.',
+        }
+      );
+      return (
+        <EuiCallOut title={title} color="danger" iconType="error">
+          <p>{authorizationDescription}</p>
+        </EuiCallOut>
+      );
+    case 'UnknownError':
+      return (
+        <EuiCallOut title={title} color="danger" iconType="error">
+          <p>{integrationError.message}</p>
+        </EuiCallOut>
+      );
+  }
+};
+
+const isLowerCase = (str: string) => str.toLowerCase() === str;
+
+const getIntegrationNameError = (
+  integrationName: string,
+  touched: boolean,
+  integrationError?: IntegrationError
+) => {
+  if (touched && isEmpty(integrationName)) {
+    return i18n.translate(
+      'xpack.observability_onboarding.configureLogs.integration.emptyError',
+      { defaultMessage: 'An integration name is required.' }
+    );
+  }
+  if (touched && !isLowerCase(integrationName)) {
+    return i18n.translate(
+      'xpack.observability_onboarding.configureLogs.integration.lowercaseError',
+      { defaultMessage: 'An integration name should be lowercase.' }
+    );
+  }
+  if (integrationError && integrationError.type === 'NamingCollision') {
+    return integrationError.message;
+  }
+};
+
+const getDatasetNameError = (datasetName: string, touched: boolean) => {
+  if (touched && isEmpty(datasetName)) {
+    return i18n.translate(
+      'xpack.observability_onboarding.configureLogs.dataset.emptyError',
+      { defaultMessage: 'A dataset name is required.' }
+    );
+  }
+  if (touched && !isLowerCase(datasetName)) {
+    return i18n.translate(
+      'xpack.observability_onboarding.configureLogs.dataset.lowercaseError',
+      { defaultMessage: 'A dataset name should be lowercase.' }
+    );
+  }
+};

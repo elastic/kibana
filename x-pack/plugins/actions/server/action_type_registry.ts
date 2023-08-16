@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { rawConnectorSchema } from './raw_connector_schema';
 import { ActionType as CommonActionType, areValidFeatures } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
 import { getActionTypeFeatureUsageName, TaskRunnerFactory, ILicenseState } from './lib';
@@ -78,7 +79,9 @@ export class ActionTypeRegistry {
   }
 
   /**
-   * Returns true if action type is enabled or it is an in memory action type.
+   * Returns true if action type is enabled or preconfigured.
+   * An action type can be disabled but used with a preconfigured action.
+   * This does not apply to system actions as those can be disabled.
    */
   public isActionExecutable(
     actionId: string,
@@ -86,12 +89,11 @@ export class ActionTypeRegistry {
     options: { notifyUsage: boolean } = { notifyUsage: false }
   ) {
     const actionTypeEnabled = this.isActionTypeEnabled(actionTypeId, options);
-    return (
-      actionTypeEnabled ||
-      (!actionTypeEnabled &&
-        this.inMemoryConnectors.find((inMemoryConnector) => inMemoryConnector.id === actionId) !==
-          undefined)
+    const inMemoryConnector = this.inMemoryConnectors.find(
+      (connector) => connector.id === actionId
     );
+
+    return actionTypeEnabled || (!actionTypeEnabled && inMemoryConnector?.isPreconfigured === true);
   }
 
   /**
@@ -99,6 +101,22 @@ export class ActionTypeRegistry {
    */
   public isSystemActionType = (actionTypeId: string): boolean =>
     Boolean(this.actionTypes.get(actionTypeId)?.isSystemActionType);
+
+  /**
+   * Returns the kibana privileges of a system action type
+   */
+  public getSystemActionKibanaPrivileges<Params extends ActionTypeParams = ActionTypeParams>(
+    actionTypeId: string,
+    params?: Params
+  ): string[] {
+    const actionType = this.actionTypes.get(actionTypeId);
+
+    if (!actionType?.isSystemActionType) {
+      return [];
+    }
+
+    return actionType?.getKibanaPrivileges?.({ params }) ?? [];
+  }
 
   /**
    * Registers an action type to the action type registry
@@ -147,6 +165,15 @@ export class ActionTypeRegistry {
       );
     }
 
+    if (!actionType.isSystemActionType && actionType.getKibanaPrivileges) {
+      throw new Error(
+        i18n.translate('xpack.actions.actionTypeRegistry.register.invalidKibanaPrivileges', {
+          defaultMessage:
+            'Kibana privilege authorization is only supported for system action types',
+        })
+      );
+    }
+
     const maxAttempts = this.actionsConfigUtils.getMaxAttempts({
       actionTypeId: actionType.id,
       actionTypeMaxAttempts: actionType.maxAttempts,
@@ -158,6 +185,7 @@ export class ActionTypeRegistry {
         title: actionType.name,
         maxAttempts,
         createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
+        indirectParamsSchema: rawConnectorSchema,
       },
     });
     // No need to notify usage on basic action types

@@ -7,10 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n-react';
-import { render } from 'react-dom';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { ExpressionTagcloudFunctionDefinition } from '@kbn/expression-tagcloud-plugin/common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -268,31 +265,20 @@ export const getTagcloudVisualization = ({
     return update;
   },
 
-  renderDimensionEditor(domElement, props) {
+  DimensionEditorComponent(props) {
     if (props.groupId === TAG_GROUP_ID) {
-      render(
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <I18nProvider>
-            <TagsDimensionEditor
-              paletteService={paletteService}
-              state={props.state}
-              setState={props.setState}
-            />
-          </I18nProvider>
-        </KibanaThemeProvider>,
-        domElement
+      return (
+        <TagsDimensionEditor
+          paletteService={paletteService}
+          state={props.state}
+          setState={props.setState}
+        />
       );
     }
+    return null;
   },
 
-  renderToolbar(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <TagcloudToolbar {...props} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  ToolbarComponent(props) {
+    return <TagcloudToolbar {...props} />;
   },
 });

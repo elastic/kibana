@@ -139,16 +139,15 @@ export const getDocumentationSections = async (language: string) => {
     };
   }
   if (language === 'esql') {
-    const { sourceCommands, processingCommands, initialSection, functions } = await import(
-      './esql_documentation_sections'
-    );
+    const { sourceCommands, processingCommands, initialSection, functions, aggregationFunctions } =
+      await import('./esql_documentation_sections');
     groups.push({
       label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.esql', {
         defaultMessage: 'ESQL',
       }),
       items: [],
     });
-    groups.push(sourceCommands, processingCommands, functions);
+    groups.push(sourceCommands, processingCommands, functions, aggregationFunctions);
     return {
       groups,
       initialSection,

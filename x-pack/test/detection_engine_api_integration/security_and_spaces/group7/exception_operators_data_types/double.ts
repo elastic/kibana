@@ -489,9 +489,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(hits).to.eql([]);
         });
       });
-
-      // FLAKY: https://github.com/elastic/kibana/issues/155122
-      describe.skip('working against string values in the data set', () => {
+      describe('working against string values in the data set', () => {
         it('will return 3 results if we have a list that includes 1 double', async () => {
           await importFile(supertest, log, 'double', ['1.0'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['double_as_string']);
@@ -509,7 +507,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           ]);
           await waitForRuleSuccess({ supertest, log, id });
-          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          await waitForSignalsToBePresent(supertest, log, 3, [id]);
           const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
           expect(hits).to.eql(['1.1', '1.2', '1.3']);

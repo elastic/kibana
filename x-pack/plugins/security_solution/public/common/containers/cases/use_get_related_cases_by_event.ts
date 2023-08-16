@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useState, useEffect } from 'react';
-import type { RelatedCaseInfo } from '@kbn/cases-plugin/common/api';
+import type { RelatedCase } from '@kbn/cases-plugin/common';
 import { useKibana, useToasts } from '../../lib/kibana';
 import { CASES_ERROR_TOAST } from '../../components/event_details/insights/translations';
 import { APP_ID } from '../../../../common/constants';
@@ -17,13 +17,13 @@ export const useGetRelatedCasesByEvent = (eventId: string) => {
   } = useKibana();
   const toasts = useToasts();
 
-  const [relatedCases, setRelatedCases] = useState<RelatedCaseInfo[] | undefined>(undefined);
+  const [relatedCases, setRelatedCases] = useState<RelatedCase[] | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<null | unknown>(null);
 
   const getRelatedCases = useCallback(async () => {
     setLoading(true);
-    let relatedCasesResponse: RelatedCaseInfo[] = [];
+    let relatedCasesResponse: RelatedCase[] = [];
     try {
       if (eventId) {
         relatedCasesResponse =

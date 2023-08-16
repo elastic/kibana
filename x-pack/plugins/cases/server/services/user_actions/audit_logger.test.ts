@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Actions } from '../../../common/api';
+import { UserActionActions } from '../../../common/types/domain';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { UserActionAuditLogger } from './audit_logger';
@@ -19,11 +19,11 @@ describe('UserActionAuditLogger', () => {
   });
 
   it.each([
-    [Actions.add, 'change'],
-    [Actions.create, 'creation'],
-    [Actions.delete, 'deletion'],
-    [Actions.push_to_service, 'creation'],
-    [Actions.update, 'change'],
+    [UserActionActions.add, 'change'],
+    [UserActionActions.create, 'creation'],
+    [UserActionActions.delete, 'deletion'],
+    [UserActionActions.push_to_service, 'creation'],
+    [UserActionActions.update, 'change'],
   ])('logs %s user action as event.type %s', (action, type) => {
     const eventDetails: EventDetails = {
       getMessage: (id?: string) => `id: ${id}`,

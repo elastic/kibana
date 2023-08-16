@@ -9,7 +9,14 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
+  enabled: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    // cloud_data_migration is disabled in serverless; refer to the serverless.yml file as the source of truth
+    // We take this approach in order to have a central place (serverless.yml) to view disabled plugins across Kibana
+    schema.boolean({ defaultValue: true }),
+    schema.never()
+  ),
 });
 
 export type CloudDataMigrationConfig = TypeOf<typeof configSchema>;

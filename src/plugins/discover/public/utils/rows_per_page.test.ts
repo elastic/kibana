@@ -7,7 +7,7 @@
  */
 
 import { discoverServiceMock } from '../__mocks__/services';
-import { SAMPLE_ROWS_PER_PAGE_SETTING } from '../../common';
+import { SAMPLE_ROWS_PER_PAGE_SETTING } from '@kbn/discover-utils';
 import { getRowsPerPageOptions, getDefaultRowsPerPage } from './rows_per_page';
 
 const SORTED_OPTIONS = [10, 25, 50, 100, 250, 500];

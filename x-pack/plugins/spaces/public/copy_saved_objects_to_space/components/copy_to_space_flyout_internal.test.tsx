@@ -13,15 +13,15 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
-import type { Space } from '../../../common';
-import { getSpacesContextProviderWrapper } from '../../spaces_context';
-import { spacesManagerMock } from '../../spaces_manager/mocks';
-import type { CopyToSpaceSavedObjectTarget } from '../types';
 import { CopyModeControl } from './copy_mode_control';
 import { getCopyToSpaceFlyoutComponent } from './copy_to_space_flyout';
 import { CopyToSpaceForm } from './copy_to_space_form';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { SelectableSpacesControl } from './selectable_spaces_control';
+import type { Space } from '../../../common';
+import { getSpacesContextProviderWrapper } from '../../spaces_context';
+import { spacesManagerMock } from '../../spaces_manager/mocks';
+import type { CopyToSpaceSavedObjectTarget } from '../types';
 
 interface SetupOpts {
   mockSpaces?: Space[];

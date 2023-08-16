@@ -11,8 +11,6 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { CONNECTORS_INDEX } from '../..';
 import { Connector, ConnectorDocument } from '../../../common/types/connectors';
 import { OptimisticConcurrency } from '../../../common/types/util_types';
-import { setupConnectorsIndices } from '../../index_management/setup_indices';
-
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 import { fetchAll } from '../fetch_all';
 
@@ -34,9 +32,9 @@ export const fetchConnectorById = async (
       : undefined;
   } catch (error) {
     if (isIndexNotFoundException(error)) {
-      await setupConnectorsIndices(client.asCurrentUser);
+      return undefined;
     }
-    return undefined;
+    throw error;
   }
 };
 
@@ -57,9 +55,9 @@ export const fetchConnectorByIndexName = async (
     return result;
   } catch (error) {
     if (isIndexNotFoundException(error)) {
-      await setupConnectorsIndices(client.asCurrentUser);
+      return undefined;
     }
-    return undefined;
+    throw error;
   }
 };
 
@@ -75,8 +73,8 @@ export const fetchConnectors = async (
     return await fetchAll<Connector>(client, CONNECTORS_INDEX, query);
   } catch (error) {
     if (isIndexNotFoundException(error)) {
-      await setupConnectorsIndices(client.asCurrentUser);
+      return [];
     }
-    return [];
+    throw error;
   }
 };

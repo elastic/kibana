@@ -18,7 +18,7 @@ import type { TimelinesTableProps } from './timelines_table';
 import { mockTimelineResults } from '../../../common/mock/timeline_results';
 import { OpenTimeline } from './open_timeline';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from './constants';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
+import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
 import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 

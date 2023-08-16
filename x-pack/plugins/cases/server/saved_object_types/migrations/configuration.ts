@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import type { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/types/domain';
 import type { SanitizedCaseOwner } from '.';
 import { addOwnerToSO } from '.';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';

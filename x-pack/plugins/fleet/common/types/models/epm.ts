@@ -34,7 +34,7 @@ export interface DefaultPackagesInstallationError {
 }
 
 export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install' | 'unknown';
-export type InstallSource = 'registry' | 'upload' | 'bundled';
+export type InstallSource = 'registry' | 'upload' | 'bundled' | 'custom';
 
 export type EpmPackageInstallStatus = 'installed' | 'installing' | 'install_failed';
 
@@ -335,6 +335,8 @@ export enum RegistryDataStreamKeys {
   ingest_pipeline = 'ingest_pipeline',
   elasticsearch = 'elasticsearch',
   dataset_is_prefix = 'dataset_is_prefix',
+  routing_rules = 'routing_rules',
+  lifecycle = 'lifecycle',
 }
 
 export interface RegistryDataStream {
@@ -351,6 +353,8 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.ingest_pipeline]?: string;
   [RegistryDataStreamKeys.elasticsearch]?: RegistryElasticsearch;
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
+  [RegistryDataStreamKeys.routing_rules]?: RegistryDataStreamRoutingRules[];
+  [RegistryDataStreamKeys.lifecycle]?: RegistryDataStreamLifecycle;
 }
 
 export interface RegistryElasticsearch {
@@ -372,6 +376,19 @@ export interface RegistryDataStreamProperties {
 export interface RegistryDataStreamPrivileges {
   cluster?: string[];
   indices?: string[];
+}
+
+export interface RegistryDataStreamRoutingRules {
+  source_dataset: string;
+  rules: Array<{
+    target_dataset: string;
+    if: string;
+    namespace: string;
+  }>;
+}
+
+export interface RegistryDataStreamLifecycle {
+  data_retention: string;
 }
 
 export type RegistryVarType =
@@ -582,6 +599,7 @@ export interface PackageAssetReference {
 export interface IndexTemplateMappings {
   properties: any;
   dynamic_templates?: any;
+  runtime?: any;
 }
 
 // This is an index template v2, see https://github.com/elastic/elasticsearch/issues/53101
@@ -593,6 +611,7 @@ export interface IndexTemplate {
   template: {
     settings: any;
     mappings: any;
+    lifecycle?: any;
   };
   data_stream: { hidden?: boolean };
   composed_of: string[];
@@ -614,6 +633,9 @@ export interface TemplateMapEntry {
       }
     | {
         settings: NonNullable<RegistryElasticsearch['index_template.settings']>;
+      }
+    | {
+        lifecycle?: any;
       };
 }
 

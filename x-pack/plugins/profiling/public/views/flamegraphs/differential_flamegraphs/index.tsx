@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useState } from 'react';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
@@ -117,11 +117,13 @@ export function DifferentialFlameGraphsView() {
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
-        <DifferentialFlameGraphSearchPanel
-          comparisonMode={comparisonMode}
-          normalizationMode={normalizationMode}
-          normalizationOptions={normalizationOptions}
-        />
+        <EuiPanel hasShadow={false} color="subdued">
+          <DifferentialFlameGraphSearchPanel
+            comparisonMode={comparisonMode}
+            normalizationMode={normalizationMode}
+            normalizationOptions={normalizationOptions}
+          />
+        </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
         <AsyncComponent {...state} style={{ height: '100%' }} size="xl">

@@ -9,9 +9,11 @@ import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
 import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
-import type { RecordsFetchResponse, EsHitRecord } from '../../../types';
-import { buildDataTableRecordList } from '../../../utils/build_data_record';
-import { SAMPLE_SIZE_SETTING } from '../../../../common';
+import { SAMPLE_SIZE_SETTING, buildDataTableRecordList } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
+import { getSearchResponseInterceptedWarnings } from '@kbn/search-response-warnings';
+import type { RecordsFetchResponse } from '../../../types';
+import { DISABLE_SHARD_FAILURE_WARNING } from '../../../../common/constants';
 import { FetchDeps } from './fetch_all';
 
 /**
@@ -53,6 +55,7 @@ export const fetchDocuments = (
         }),
       },
       executionContext,
+      disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
     })
     .pipe(
       filter((res) => isCompleteResponse(res)),
@@ -61,5 +64,21 @@ export const fetchDocuments = (
       })
     );
 
-  return lastValueFrom(fetch$).then((records) => ({ records }));
+  return lastValueFrom(fetch$).then((records) => {
+    const adapter = inspectorAdapters.requests;
+    const interceptedWarnings = adapter
+      ? getSearchResponseInterceptedWarnings({
+          services,
+          adapter,
+          options: {
+            disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
+          },
+        })
+      : [];
+
+    return {
+      records,
+      interceptedWarnings,
+    };
+  });
 };

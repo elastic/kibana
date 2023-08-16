@@ -7,6 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ADD_QUICK_PROMPT = i18n.translate(
+  'xpack.elasticAssistant.assistant.quickPrompts.addQuickPromptTitle',
+  {
+    defaultMessage: 'Add quick prompt...',
+  }
+);
 export const QUICK_PROMPT_OVERFLOW_ARIA = i18n.translate(
   'xpack.elasticAssistant.assistant.quickPrompts.overflowAriaTitle',
   {

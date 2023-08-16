@@ -7,17 +7,14 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX, CONNECTORS_VERSION } from '../..';
+import { CURRENT_CONNECTORS_INDEX } from '../..';
 import { ConnectorDocument } from '../../../common/types/connectors';
 import { ErrorCode } from '../../../common/types/error_codes';
-import {
-  DefaultConnectorsPipelineMeta,
-  setupConnectorsIndices,
-} from '../../index_management/setup_indices';
 import { createConnectorDocument } from '../../utils/create_connector_document';
 
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 import { createIndex } from '../indices/create_index';
+import { getDefaultPipeline } from '../pipelines/get_default_pipeline';
 
 import { deleteConnectorById } from './delete_connector';
 
@@ -53,7 +50,7 @@ const createConnector = async (
 
   const result = await client.asCurrentUser.index({
     document,
-    index: CONNECTORS_INDEX,
+    index: CURRENT_CONNECTORS_INDEX,
     refresh: 'wait_for',
   });
   await createIndex(client, document.index_name, language, false);
@@ -71,31 +68,13 @@ export const addConnector = async (
     service_type?: string;
   }
 ): Promise<{ id: string; index_name: string }> => {
-  const connectorsIndexExists = await client.asCurrentUser.indices.exists({
-    index: CONNECTORS_INDEX,
-  });
-  if (!connectorsIndexExists) {
-    await setupConnectorsIndices(client.asCurrentUser);
-  }
-  const connectorsIndicesMapping = await client.asCurrentUser.indices.getMapping({
-    index: CONNECTORS_INDEX,
-  });
-  const pipeline: DefaultConnectorsPipelineMeta =
-    connectorsIndicesMapping[`${CONNECTORS_INDEX}-v${CONNECTORS_VERSION}`]?.mappings?._meta
-      ?.pipeline;
+  const pipeline = await getDefaultPipeline(client);
 
   const document = createConnectorDocument({
     indexName: input.index_name,
     isNative: input.is_native,
     language: input.language,
-    pipeline: pipeline
-      ? {
-          extract_binary_content: pipeline.default_extract_binary_content,
-          name: pipeline.default_name,
-          reduce_whitespace: pipeline.default_reduce_whitespace,
-          run_ml_inference: pipeline.default_run_ml_inference,
-        }
-      : null,
+    pipeline,
     serviceType: input.service_type ?? null,
   });
 

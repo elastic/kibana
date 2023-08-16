@@ -43,9 +43,10 @@ export const loadSavedSearch = async (
   deps: LoadSavedSearchDeps
 ): Promise<SavedSearch> => {
   addLog('[discoverState] loadSavedSearch');
-  const { savedSearchId, useAppState } = params ?? {};
+  const { savedSearchId } = params ?? {};
   const { appStateContainer, internalStateContainer, savedSearchContainer, services } = deps;
-  const appState = useAppState ? appStateContainer.getState() : undefined;
+  const appStateExists = !appStateContainer.isEmptyURL();
+  const appState = appStateExists ? appStateContainer.getState() : undefined;
 
   // Loading the saved search or creating a new one
   let nextSavedSearch = savedSearchId
@@ -57,7 +58,11 @@ export const loadSavedSearch = async (
   // Cleaning up the previous state
   services.filterManager.setAppFilters([]);
   services.data.query.queryString.clearQuery();
-  if (!useAppState) {
+
+  // reset appState in case a saved search with id is loaded and
+  // the url is empty so the saved search is loaded in a clean
+  // state else it might be updated by the previous app state
+  if (!appStateExists) {
     appStateContainer.set({});
   }
 
@@ -85,12 +90,15 @@ export const loadSavedSearch = async (
 
   // Update app state container with the next state derived from the next saved search
   const nextAppState = getInitialState(undefined, nextSavedSearch, services);
-  appStateContainer.set(
-    appState ? { ...nextAppState, ...cleanupUrlState({ ...appState }) } : nextAppState
-  );
+  const mergedAppState = appState
+    ? { ...nextAppState, ...cleanupUrlState({ ...appState }) }
+    : nextAppState;
+
+  appStateContainer.resetToState(mergedAppState);
 
   // Update all other services and state containers by the next saved search
   updateBySavedSearch(nextSavedSearch, deps);
+
   return nextSavedSearch;
 };
 

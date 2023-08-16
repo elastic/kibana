@@ -21,7 +21,7 @@ Array [
     </div>
   </div>,
   <button
-    class="euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly"
+    class="euiButton euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly"
     tabindex="0"
     type="button"
   >
@@ -44,7 +44,7 @@ Array [
       id="globalHeaderBars"
     >
       <div
-        class="euiHeader euiHeader--dark euiHeader--fixed header__firstBar"
+        class="euiHeader header__firstBar emotion-euiHeader-fixed-dark"
         data-fixed-header="true"
       >
         <div
@@ -55,7 +55,7 @@ Array [
           >
             <a
               aria-label="Elastic home"
-              class="euiHeaderLogo"
+              class="chrHeaderLogo"
               data-test-subj="logo"
               href="/"
             >
@@ -146,7 +146,7 @@ Array [
         </div>
       </div>
       <div
-        class="euiHeader euiHeader--default euiHeader--fixed header__secondBar"
+        class="euiHeader header__secondBar emotion-euiHeader-fixed-default"
         data-fixed-header="true"
       >
         <div

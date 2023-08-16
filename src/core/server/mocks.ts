@@ -100,6 +100,7 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
         buildSha: 'buildSha',
         dist: false,
         buildDate: new Date('2023-05-15T23:12:09.000Z'),
+        buildFlavor: 'traditional',
       },
       instanceUuid: 'instance-uuid',
       configs: ['/some/path/to/config/kibana.yml'],

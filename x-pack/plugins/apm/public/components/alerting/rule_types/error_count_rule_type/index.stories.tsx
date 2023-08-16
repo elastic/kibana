@@ -10,7 +10,8 @@ import React, { useState } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
-import { RuleParams, ErrorCountRuleType } from '.';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ErrorCountRuleParams, ErrorCountRuleType } from '.';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import { AlertMetadata } from '../../utils/helper';
@@ -21,10 +22,15 @@ const coreMock = {
   uiSettings: { get: () => {} },
 } as unknown as CoreStart;
 
-const KibanaReactContext = createKibanaReactContext(coreMock);
+const KibanaReactContext = createKibanaReactContext({
+  ...coreMock,
+  dataViews: {
+    create: async () => {},
+  },
+});
 
 interface Args {
-  ruleParams: RuleParams;
+  ruleParams: ErrorCountRuleParams;
   metadata?: AlertMetadata;
 }
 
@@ -36,11 +42,13 @@ const stories: Meta<{}> = {
       createCallApmApi(coreMock);
 
       return (
-        <KibanaReactContext.Provider>
-          <div style={{ width: 400 }}>
-            <StoryComponent />
-          </div>
-        </KibanaReactContext.Provider>
+        <IntlProvider locale="en">
+          <KibanaReactContext.Provider>
+            <div style={{ width: 400 }}>
+              <StoryComponent />
+            </div>
+          </KibanaReactContext.Provider>
+        </IntlProvider>
       );
     },
   ],
@@ -51,7 +59,7 @@ export const CreatingInApmFromInventory: Story<Args> = ({
   ruleParams,
   metadata,
 }) => {
-  const [params, setParams] = useState<RuleParams>(ruleParams);
+  const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {
     setParams({ ...params, [property]: value });
@@ -80,7 +88,7 @@ export const CreatingInApmFromService: Story<Args> = ({
   ruleParams,
   metadata,
 }) => {
-  const [params, setParams] = useState<RuleParams>(ruleParams);
+  const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {
     setParams({ ...params, [property]: value });
@@ -109,7 +117,7 @@ export const EditingInStackManagement: Story<Args> = ({
   ruleParams,
   metadata,
 }) => {
-  const [params, setParams] = useState<RuleParams>(ruleParams);
+  const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {
     setParams({ ...params, [property]: value });
@@ -139,7 +147,7 @@ export const CreatingInStackManagement: Story<Args> = ({
   ruleParams,
   metadata,
 }) => {
-  const [params, setParams] = useState<RuleParams>(ruleParams);
+  const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {
     setParams({ ...params, [property]: value });

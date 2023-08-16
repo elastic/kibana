@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react';
 
 import { TestProviders } from '../../../../../common/mock';
 import { useRuleDetailsContextMock } from '../__mocks__/rule_details_context';
-import { getRuleExecutionResultsResponseMock } from '../../../../../../common/detection_engine/rule_monitoring/mocks';
+import { getRuleExecutionResultsResponseMock } from '../../../../../../common/api/detection_engine/rule_monitoring/mocks';
 
 import { useExecutionResults } from '../../../../rule_monitoring';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';

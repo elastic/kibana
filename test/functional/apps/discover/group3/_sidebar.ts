@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show filters by type in text-based view', async function () {
-        await kibanaServer.uiSettings.update({ 'discover:enableTextBased': true });
+        await kibanaServer.uiSettings.update({ 'discover:enableESQL': true });
         await browser.refresh();
 
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -366,7 +366,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show selected and available fields in text-based mode', async function () {
-        await kibanaServer.uiSettings.update({ 'discover:enableTextBased': true });
+        await kibanaServer.uiSettings.update({ 'discover:enableESQL': true });
         await browser.refresh();
 
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();

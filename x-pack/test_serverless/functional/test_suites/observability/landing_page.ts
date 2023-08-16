@@ -9,19 +9,18 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlObltOnboardingPage = getPageObject('svlObltOnboardingPage');
-  const svlObltOverviewPage = getPageObject('svlObltOverviewPage');
   const svlObltNavigation = getService('svlObltNavigation');
+  const SvlObltOnboardingStreamLogFilePage = getPageObject('SvlObltOnboardingStreamLogFilePage');
 
   describe('landing page', function () {
-    it('has button to skip onboarding', async () => {
+    it('has quickstart badge', async () => {
       await svlObltNavigation.navigateToLandingPage();
-      await svlObltOnboardingPage.assertSkipButtonExists();
+      await svlObltOnboardingPage.assertQuickstartBadgeExists();
     });
 
-    it('skips onboarding', async () => {
-      await svlObltOnboardingPage.skipOnboarding();
-      await svlObltOverviewPage.assertPageHeaderExists();
-      await svlObltOverviewPage.assertAlertsSectionExists();
+    it('stream log files onboarding', async () => {
+      await svlObltOnboardingPage.goToStreamLogFiles();
+      await SvlObltOnboardingStreamLogFilePage.assertPageHeaderExists();
     });
   });
 }

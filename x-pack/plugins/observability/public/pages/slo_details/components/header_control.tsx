@@ -18,7 +18,7 @@ import { isApmIndicatorType } from '../../../utils/slo/indicator';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { rulesLocatorID, sloFeatureId } from '../../../../common';
-import { paths } from '../../../routes/paths';
+import { paths } from '../../../../common/locators/paths';
 import {
   transformSloResponseToCreateSloForm,
   transformCreateSLOFormToCreateSLOInput,
@@ -70,15 +70,8 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const handleNavigateToRules = async () => {
     const locator = locators.get<RulesParams>(rulesLocatorID);
 
-    if (slo?.id) {
-      locator?.navigate(
-        {
-          params: { sloId: slo.id },
-        },
-        {
-          replace: false,
-        }
-      );
+    if (slo?.id && locator) {
+      locator.navigate({ params: { sloId: slo.id } }, { replace: false });
     }
   };
 
@@ -250,7 +243,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
         />
       </EuiPopover>
 
-      {!!slo && isRuleFlyoutVisible ? (
+      {slo && isRuleFlyoutVisible ? (
         <AddRuleFlyout
           consumer={sloFeatureId}
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}

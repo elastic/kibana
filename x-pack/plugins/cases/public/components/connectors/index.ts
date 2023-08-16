@@ -18,7 +18,7 @@ import type {
   ServiceNowSIRFieldsType,
   ResilientFieldsType,
   SwimlaneFieldsType,
-} from '../../../common/api';
+} from '../../../common/types/domain';
 
 export * from './types';
 

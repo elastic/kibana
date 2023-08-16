@@ -13,30 +13,32 @@ import { findInventoryModel } from '../../../../common/inventory_models';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
 
 export interface LinkToNodeDetailsProps {
-  currentTime: number;
-  nodeName: string;
-  nodeType: InventoryItemType;
+  currentTimestamp: number;
+  assetName: string;
+  assetType: InventoryItemType;
 }
 
-export const LinkToNodeDetails = ({ nodeName, nodeType, currentTime }: LinkToNodeDetailsProps) => {
-  const inventoryModel = findInventoryModel(nodeType);
-  const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
+export const LinkToNodeDetails = ({
+  assetName,
+  assetType,
+  currentTimestamp,
+}: LinkToNodeDetailsProps) => {
+  const inventoryModel = findInventoryModel(assetType);
+  const nodeDetailFrom = currentTimestamp - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
 
   const nodeDetailMenuItemLinkProps = useLinkProps({
     ...getNodeDetailUrl({
-      nodeType,
-      nodeId: nodeName,
+      nodeType: assetType,
+      nodeId: assetName,
       from: nodeDetailFrom,
-      to: currentTime,
+      to: currentTimestamp,
     }),
   });
 
   return (
     <EuiButtonEmpty
-      data-test-subj="infraNodeContextPopoverOpenAsPageButton"
+      data-test-subj="infraAssetDetailsOpenAsPageButton"
       size="xs"
-      iconSide="left"
-      iconType="popout"
       flush="both"
       {...nodeDetailMenuItemLinkProps}
     >

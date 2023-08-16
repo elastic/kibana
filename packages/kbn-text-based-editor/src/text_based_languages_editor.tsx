@@ -17,7 +17,7 @@ import {
   ESQLCustomAutocompleteCallbacks,
 } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
-import { getAggregateQueryMode } from '@kbn/es-query';
+import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import {
@@ -394,6 +394,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         pipes?.pop();
         const validContent = pipes?.join('|');
         if (validContent) {
+          // ES|QL with limit 0 returns only the columns and is more performant
           const esqlQuery = {
             esql: `${validContent} | limit 0`,
           };
@@ -535,7 +536,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 {documentationSections && (
                   <EuiFlexItem grow={false}>
                     <LanguageDocumentationPopover
-                      language={String(language).toUpperCase()}
+                      language={getLanguageDisplayName(String(language)).toUpperCase()}
                       sections={documentationSections}
                       buttonProps={{
                         color: 'text',
@@ -692,7 +693,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 {documentationSections && (
                   <EuiFlexItem grow={false}>
                     <LanguageDocumentationPopover
-                      language={String(language).toUpperCase()}
+                      language={
+                        String(language) === 'esql' ? 'ES|QL' : String(language).toUpperCase()
+                      }
                       sections={documentationSections}
                       buttonProps={{
                         display: 'empty',

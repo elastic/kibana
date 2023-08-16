@@ -5,12 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { DataView } from '@kbn/data-views-plugin/common';
-import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import {
+  AggregateQuery,
+  isOfAggregateQueryType,
+  Query,
+  TimeRange,
+  getAggregateQueryMode,
+} from '@kbn/es-query';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
 import { isEqual } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { computeInterval } from './compute_interval';
 
 export const useLensSuggestions = ({
   dataView,
@@ -18,6 +26,8 @@ export const useLensSuggestions = ({
   originalSuggestion,
   isPlainRecord,
   columns,
+  timeRange,
+  data,
   lensSuggestionsApi,
   onSuggestionChange,
 }: {
@@ -25,7 +35,9 @@ export const useLensSuggestions = ({
   query?: Query | AggregateQuery;
   originalSuggestion?: Suggestion;
   isPlainRecord?: boolean;
-  columns?: string[];
+  columns?: DatatableColumn[];
+  timeRange?: TimeRange;
+  data: DataPublicPluginStart;
   lensSuggestionsApi: LensSuggestionsApi;
   onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
 }) => {
@@ -33,20 +45,64 @@ export const useLensSuggestions = ({
     const context = {
       dataViewSpec: dataView?.toSpec(),
       fieldName: '',
-      contextualFields: columns,
+      textBasedColumns: columns,
       query: query && isOfAggregateQueryType(query) ? query : undefined,
     };
     const allSuggestions = isPlainRecord
       ? lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? []
       : [];
+
     const [firstSuggestion] = allSuggestions;
 
     return { firstSuggestion, allSuggestions };
-  }, [columns, dataView, isPlainRecord, lensSuggestionsApi, query]);
+  }, [dataView, isPlainRecord, lensSuggestionsApi, query, columns]);
 
   const [allSuggestions, setAllSuggestions] = useState(suggestions.allSuggestions);
-  const currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
+  let currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
   const suggestionDeps = useRef(getSuggestionDeps({ dataView, query, columns }));
+  let isOnHistogramMode = false;
+
+  if (
+    !currentSuggestion &&
+    dataView.isTimeBased() &&
+    query &&
+    isOfAggregateQueryType(query) &&
+    getAggregateQueryMode(query) === 'esql' &&
+    timeRange
+  ) {
+    const language = getAggregateQueryMode(query);
+    const interval = computeInterval(timeRange, data);
+    const histogramQuery = `${query[language]} | eval uniqueName = 1
+      | EVAL timestamp=DATE_TRUNC(${dataView.timeFieldName}, ${interval}) | stats rows = count(uniqueName) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${interval}\``;
+    const context = {
+      dataViewSpec: dataView?.toSpec(),
+      fieldName: '',
+      textBasedColumns: [
+        {
+          id: `${dataView.timeFieldName} every ${interval}`,
+          name: `${dataView.timeFieldName} every ${interval}`,
+          meta: {
+            type: 'date',
+          },
+        },
+        {
+          id: 'rows',
+          name: 'rows',
+          meta: {
+            type: 'number',
+          },
+        },
+      ] as DatatableColumn[],
+      query: {
+        esql: histogramQuery,
+      },
+    };
+    const sug = isPlainRecord ? lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? [] : [];
+    if (sug.length) {
+      currentSuggestion = sug[0];
+      isOnHistogramMode = true;
+    }
+  }
 
   useEffect(() => {
     const newSuggestionsDeps = getSuggestionDeps({ dataView, query, columns });
@@ -70,6 +126,7 @@ export const useLensSuggestions = ({
     allSuggestions,
     currentSuggestion,
     suggestionUnsupported: isPlainRecord && !currentSuggestion,
+    isOnHistogramMode,
   };
 };
 
@@ -80,5 +137,5 @@ const getSuggestionDeps = ({
 }: {
   dataView: DataView;
   query?: Query | AggregateQuery;
-  columns?: string[];
+  columns?: DatatableColumn[];
 }) => [dataView.id, columns, query];

@@ -178,8 +178,13 @@ export function createMessageSigningServiceMock(): MessageSigningServiceInterfac
   return {
     isEncryptionAvailable: true,
     generateKeyPair: jest.fn(),
-    sign: jest.fn(),
-    getPublicKey: jest.fn(),
+    sign: jest.fn().mockImplementation((message: Record<string, unknown>) =>
+      Promise.resolve({
+        data: Buffer.from(JSON.stringify(message), 'utf8'),
+        signature: 'thisisasignature',
+      })
+    ),
+    getPublicKey: jest.fn().mockResolvedValue('thisisapublickey'),
     rotateKeyPair: jest.fn(),
   };
 }

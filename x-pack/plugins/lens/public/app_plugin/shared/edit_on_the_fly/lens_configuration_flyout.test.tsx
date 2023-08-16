@@ -148,12 +148,7 @@ describe('LensEditConfigurationFlyout', () => {
         "activeData": Object {},
         "dataViews": Object {
           "indexPatternRefs": Array [],
-          "indexPatterns": Object {
-            "index1": Object {
-              "id": "index1",
-              "isPersisted": [Function],
-            },
-          },
+          "indexPatterns": Object {},
         },
         "datasourceLayers": Object {
           "a": Object {
@@ -196,6 +191,7 @@ describe('LensEditConfigurationFlyout', () => {
     const { instance } = await prepareAndMountComponent(props);
     expect(instance.find(VisualizationToolbar).prop('activeVisualization')).toMatchInlineSnapshot(`
       Object {
+        "DimensionEditorComponent": [MockFunction],
         "appendLayer": [MockFunction],
         "clearLayer": [MockFunction],
         "getConfiguration": [MockFunction] {
@@ -206,12 +202,7 @@ describe('LensEditConfigurationFlyout', () => {
                   "activeData": Object {},
                   "dataViews": Object {
                     "indexPatternRefs": Array [],
-                    "indexPatterns": Object {
-                      "index1": Object {
-                        "id": "index1",
-                        "isPersisted": [Function],
-                      },
-                    },
+                    "indexPatterns": Object {},
                   },
                   "datasourceLayers": Object {
                     "a": Object {
@@ -256,12 +247,7 @@ describe('LensEditConfigurationFlyout', () => {
                   "activeData": Object {},
                   "dataViews": Object {
                     "indexPatternRefs": Array [],
-                    "indexPatterns": Object {
-                      "index1": Object {
-                        "id": "index1",
-                        "isPersisted": [Function],
-                      },
-                    },
+                    "indexPatterns": Object {},
                   },
                   "datasourceLayers": Object {
                     "a": Object {
@@ -414,7 +400,6 @@ describe('LensEditConfigurationFlyout', () => {
         "initialize": [MockFunction],
         "removeDimension": [MockFunction],
         "removeLayer": [MockFunction],
-        "renderDimensionEditor": [MockFunction],
         "setDimension": [MockFunction],
         "switchVisualizationType": [MockFunction],
         "toExpression": [MockFunction],
