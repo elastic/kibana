@@ -39,6 +39,7 @@ export class DataViewsPublicPlugin
     >
 {
   private readonly hasData = new HasData();
+  private rollupsEnabled: boolean = false;
 
   public setup(
     core: CoreSetup<DataViewsPublicStartDependencies, DataViewsPublicPluginStart>,
@@ -56,7 +57,9 @@ export class DataViewsPublicPlugin
       }),
     });
 
-    return {};
+    return {
+      enableRollups: () => (this.rollupsEnabled = true),
+    };
   }
 
   public start(
@@ -91,6 +94,7 @@ export class DataViewsPublicPlugin
       getCanSaveAdvancedSettings: () =>
         Promise.resolve(application.capabilities.advancedSettings.save === true),
       getIndices: (props) => getIndices({ ...props, http: core.http }),
+      getRollupsEnabled: () => this.rollupsEnabled,
     });
   }
 

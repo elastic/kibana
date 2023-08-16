@@ -108,8 +108,10 @@ export const EditIndexPattern = withRouter(
     }, [indexPattern]);
 
     useEffect(() => {
-      setTags(getTags(indexPattern, indexPattern.id === defaultIndex));
-    }, [defaultIndex, indexPattern]);
+      setTags(
+        getTags(indexPattern, indexPattern.id === defaultIndex, dataViews.getRollupsEnabled())
+      );
+    }, [defaultIndex, indexPattern, dataViews]);
 
     const setDefaultPattern = useCallback(() => {
       uiSettings.set('defaultIndex', indexPattern.id);
@@ -125,7 +127,9 @@ export const EditIndexPattern = withRouter(
       },
     });
 
-    const isRollup = new URLSearchParams(useLocation().search).get('type') === 'rollup';
+    const isRollup =
+      new URLSearchParams(useLocation().search).get('type') === 'rollup' &&
+      dataViews.getRollupsEnabled();
     const displayIndexPatternEditor = showEditDialog ? (
       <IndexPatternEditor
         onSave={() => {
