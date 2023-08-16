@@ -26,6 +26,7 @@ import {
   StartTextExpansionModelApiLogic,
   StartTextExpansionModelApiLogicActions,
 } from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
+import { TextExpansionErrors } from './text_expansion_errors';
 
 const FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION = 5000; // 5 seconds
 const FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds
@@ -48,6 +49,11 @@ interface TextExpansionCalloutActions {
   textExpansionModel: FetchTextExpansionModelApiLogicActions['apiSuccess'];
 }
 
+export interface TextExpansionCalloutErrors {
+  title: string;
+  message: string;
+}
+
 export interface TextExpansionCalloutValues {
   createTextExpansionModelError: HttpError | undefined;
   createTextExpansionModelStatus: Status;
@@ -64,6 +70,7 @@ export interface TextExpansionCalloutValues {
   startTextExpansionModelStatus: Status;
   textExpansionModel: FetchTextExpansionModelResponse | undefined;
   textExpansionModelPollTimeoutId: null | ReturnType<typeof setTimeout>;
+  textExpansionError: TextExpansionCalloutErrors | undefined;
 }
 
 /**
@@ -256,6 +263,23 @@ export const TextExpansionCalloutLogic = kea<
       () => [selectors.textExpansionModelPollTimeoutId],
       (pollingTimeoutId: TextExpansionCalloutValues['textExpansionModelPollTimeoutId']) =>
         pollingTimeoutId !== null,
+    ],
+    textExpansionError: [
+      () => [
+        selectors.createTextExpansionModelError,
+        selectors.fetchTextExpansionModelError,
+        selectors.startTextExpansionModelError,
+      ],
+      (
+        createTextExpansionError: TextExpansionCalloutValues['createTextExpansionModelError'],
+        fetchTextExpansionError: TextExpansionCalloutValues['fetchTextExpansionModelError'],
+        startTextExpansionError: TextExpansionCalloutValues['startTextExpansionModelError']
+      ) =>
+        getTextExpansionError(
+          createTextExpansionError,
+          fetchTextExpansionError,
+          startTextExpansionError
+        ),
     ],
     isStartButtonDisabled: [
       () => [selectors.startTextExpansionModelStatus],
