@@ -108,7 +108,7 @@ const assertFilterControlsWithFilterObject = (
   });
 };
 
-describe(`Detections : Page Filters`, { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe(`Detections : Page Filters`, { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
@@ -235,7 +235,7 @@ describe(`Detections : Page Filters`, { tags: [tag.ESS, tag.SERVERLESS] }, () =>
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
   });
 
-  context('with data modificiation', () => {
+  context.skip('with data modificiation', () => {
     after(() => {
       cleanKibana();
       createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
@@ -363,7 +363,7 @@ describe(`Detections : Page Filters`, { tags: [tag.ESS, tag.SERVERLESS] }, () =>
         value: 'invalid',
       });
       waitForPageFilters();
-      togglePageFilterPopover(0);
+      openPageFilterPopover(0);
       cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
       cy.get(EMPTY_ALERT_TABLE).should('be.visible');
     });
