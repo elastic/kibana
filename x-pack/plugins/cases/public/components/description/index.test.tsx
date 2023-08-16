@@ -198,7 +198,8 @@ describe('Description', () => {
     expect(screen.queryByTestId('description-edit-icon')).not.toBeInTheDocument();
   });
 
-  describe('draft message', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/164050
+  describe.skip('draft message', () => {
     const draftStorageKey = `cases.testAppId.basic-case-id.description.markdownEditor`;
 
     beforeEach(() => {
