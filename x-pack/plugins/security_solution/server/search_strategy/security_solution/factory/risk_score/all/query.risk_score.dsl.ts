@@ -10,7 +10,11 @@ import type {
   RiskScoreRequestOptions,
   RiskScoreSortField,
 } from '../../../../../../common/search_strategy';
-import { Direction, RiskScoreFields } from '../../../../../../common/search_strategy';
+import {
+  Direction,
+  RiskScoreFields,
+  RiskScoreEntity,
+} from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 export const QUERY_SIZE = 10;
@@ -24,9 +28,10 @@ export const buildRiskScoreQuery = ({
     cursorStart: 0,
   },
   sort,
+  riskScoreEntity,
 }: RiskScoreRequestOptions) => {
   const filter = createQueryFilterClauses(filterQuery);
-
+  const nameField = riskScoreEntity === RiskScoreEntity.host ? 'host.name' : 'user.name';
   if (timerange) {
     filter.push({
       range: {
@@ -38,6 +43,11 @@ export const buildRiskScoreQuery = ({
       },
     });
   }
+  filter.push({
+    exists: {
+      field: nameField,
+    },
+  });
 
   const dslQuery = {
     index: defaultIndex,
