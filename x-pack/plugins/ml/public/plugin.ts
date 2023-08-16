@@ -164,24 +164,23 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       }).enable();
     }
 
+    if (pluginsSetup.home) {
+      registerFeature(pluginsSetup.home);
+    }
+
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing.subscribe(async (license) => {
       const mlEnabled = isMlEnabled(license);
-      const fullLicense = isFullLicense(license);
-      const [coreStart, pluginStart] = await core.getStartServices();
-      const { capabilities } = coreStart.application;
-
-      if (mlEnabled) {
-        // add ML to home page
-        if (pluginsSetup.home) {
-          registerFeature(pluginsSetup.home);
-        }
-      } else {
+      if (!mlEnabled) {
         // if ml is disabled in elasticsearch, disable ML in kibana
         this.appUpdater$.next(() => ({
           status: AppStatus.inaccessible,
         }));
       }
+
+      const fullLicense = isFullLicense(license);
+      const [coreStart, pluginStart] = await core.getStartServices();
+      const { capabilities } = coreStart.application;
 
       // register various ML plugin features which require a full license
       // note including registerFeature in register_helper would cause the page bundle size to increase significantly
