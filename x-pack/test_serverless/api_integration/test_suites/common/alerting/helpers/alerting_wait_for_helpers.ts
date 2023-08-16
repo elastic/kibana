@@ -252,15 +252,15 @@ export async function waitForDisabled({
   );
 }
 
-export async function waitForEventLog({
+export async function waitForExecutionEventLog({
   esClient,
-  provider,
   filter,
+  ruleId,
   num = 1,
 }: {
   esClient: Client;
-  provider: string;
   filter: Date;
+  ruleId: string;
   num?: number;
 }): Promise<SearchResponse> {
   return pRetry(
@@ -273,8 +273,15 @@ export async function waitForEventLog({
               filter: [
                 {
                   term: {
+                    'rule.id': {
+                      value: ruleId,
+                    },
+                  },
+                },
+                {
+                  term: {
                     'event.provider': {
-                      value: provider,
+                      value: 'alerting',
                     },
                   },
                 },
@@ -324,10 +331,10 @@ export async function waitForNumRuleRuns({
         if (resp.status !== 204) {
           throw new Error(`Expected ${resp.status} to equal 204`);
         }
-        await waitForEventLog({
+        await waitForExecutionEventLog({
           esClient,
-          provider: 'alerting',
           filter: testStart,
+          ruleId,
           num: i + 1,
         });
         await waitForAllTasksIdle({ esClient, filter: testStart });

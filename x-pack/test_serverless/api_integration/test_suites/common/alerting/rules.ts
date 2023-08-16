@@ -26,7 +26,7 @@ import {
   waitForAllTasksIdle,
   waitForDisabled,
   waitForDocumentInIndex,
-  waitForEventLog,
+  waitForExecutionEventLog,
   waitForNumRuleRuns,
 } from './helpers/alerting_wait_for_helpers';
 
@@ -149,10 +149,10 @@ export default function ({ getService }: FtrProviderContext) {
         tags: '',
       });
 
-      const eventLogResp = await waitForEventLog({
+      const eventLogResp = await waitForExecutionEventLog({
         esClient,
-        provider: 'alerting',
         filter: testStart,
+        ruleId,
       });
       expect(eventLogResp.hits.hits.length).to.be(1);
 
@@ -605,10 +605,10 @@ export default function ({ getService }: FtrProviderContext) {
         ruleId,
       });
 
-      const eventLogResp = await waitForEventLog({
+      const eventLogResp = await waitForExecutionEventLog({
         esClient,
-        provider: 'alerting',
         filter: testStart,
+        ruleId,
         num: 2,
       });
       expect(eventLogResp.hits.hits.length).to.be(2);
