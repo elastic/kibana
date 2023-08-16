@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Filter } from '@kbn/es-query';
 
+import type { ExperimentalFeatures } from '../../../../../../common';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
@@ -75,11 +76,13 @@ export type SearchEnrichments = (params: {
 export type GetIsRiskScoreAvailable = (params: {
   spaceId: string;
   services: RuleServices;
+  isNewRiskScoreModuleAvailable: boolean;
 }) => Promise<boolean>;
 
 export type CreateRiskEnrichment = <T extends BaseFieldsLatest>(
   params: BasedEnrichParamters<T> & {
     spaceId: string;
+    isNewRiskScoreModuleAvailable: boolean;
   }
 ) => Promise<EventsMapByEnrichments>;
 
@@ -96,6 +99,7 @@ export type CreateFieldsMatchEnrichment = <T extends BaseFieldsLatest>(
 export type EnrichEventsFunction = <T extends BaseFieldsLatest>(
   params: BasedEnrichParamters<T> & {
     spaceId: string;
+    experimentalFeatures?: ExperimentalFeatures;
   }
 ) => Promise<Array<EventsForEnrichment<T>>>;
 
@@ -106,7 +110,8 @@ export type CreateEnrichEventsFunction = (params: {
 
 export type EnrichEvents = <T extends BaseFieldsLatest>(
   alerts: Array<EventsForEnrichment<T>>,
-  params: { spaceId: string }
+  params: { spaceId: string },
+  experimentalFeatures?: ExperimentalFeatures
 ) => Promise<Array<EventsForEnrichment<T>>>;
 
 interface Risk {

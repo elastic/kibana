@@ -6,41 +6,47 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
+import { EmbeddableChangePointChartExplicitInput } from './types';
+import { AiopsAppDependencies } from '..';
+import { AiopsAppContext } from '../hooks/use_aiops_app_context';
+import type { AiopsPluginStartDeps } from '../types';
 import { ChangePointChartInitializer } from './change_point_chart_initializer';
-import { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
+import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
 
 export async function resolveEmbeddableChangePointUserInput(
   coreStart: CoreStart,
+  pluginStart: AiopsPluginStartDeps,
   input?: EmbeddableChangePointChartInput
-): Promise<Partial<EmbeddableChangePointChartInput>> {
+): Promise<EmbeddableChangePointChartExplicitInput> {
   const { overlays } = coreStart;
 
   return new Promise(async (resolve, reject) => {
     try {
-      const title = input?.title;
-      const { theme$ } = coreStart.theme;
       const modalSession = overlays.openModal(
         toMountPoint(
-          wrapWithTheme(
+          <AiopsAppContext.Provider
+            value={
+              {
+                ...coreStart,
+                ...pluginStart,
+              } as unknown as AiopsAppDependencies
+            }
+          >
             <ChangePointChartInitializer
-              defaultTitle={title ?? ''}
               initialInput={input}
-              onCreate={({ panelTitle, maxSeriesToPlot }) => {
+              onCreate={(update: EmbeddableChangePointChartExplicitInput) => {
                 modalSession.close();
-                resolve({
-                  title: panelTitle,
-                  maxSeriesToPlot,
-                });
+                resolve(update);
               }}
               onCancel={() => {
                 modalSession.close();
                 reject();
               }}
-            />,
-            theme$
-          )
+            />
+          </AiopsAppContext.Provider>,
+          { theme: coreStart.theme, i18n: coreStart.i18n }
         )
       );
     } catch (error) {
