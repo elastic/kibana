@@ -18,8 +18,8 @@ import {
   EuiPageHeader,
   EuiSpacer,
 } from '@elastic/eui';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
+
+import styled from '@emotion/styled';
 import { useNavigation } from '@kbn/security-solution-navigation';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import * as i18n from './translations';
