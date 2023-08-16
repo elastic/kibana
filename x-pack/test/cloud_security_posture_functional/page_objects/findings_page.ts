@@ -94,7 +94,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     async navigateToAction(actionTestSubject: string) {
       await retry.waitFor(
         'Action button is displayed',
-        async () => !!testSubjects.find(actionTestSubject)
+        async () => await testSubjects.exists(actionTestSubject)
       );
       await testSubjects.click(actionTestSubject);
     },

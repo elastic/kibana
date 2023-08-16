@@ -9,8 +9,10 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default ({ getPageObjects }: FtrProviderContext) => {
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'findings', 'header']);
+  const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
 
   // Failing: See https://github.com/elastic/kibana/issues/163950
   describe('Findings Page onboarding', function () {
@@ -33,8 +35,11 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       const element = await notInstalledVulnerabilities.getElement();
       expect(element).to.not.be(null);
 
-      await notInstalledVulnerabilities.navigateToAction('cnvm-not-installed-action');
-      await PageObjects.common.waitUntilUrlIncludes('add-integration/vuln_mgmt');
+      await retry.try(async () => {
+        // await notInstalledVulnerabilities.navigateToAction('cnvm-not-installed-action');
+        await testSubjects.click('cnvm-not-installed-action');
+        await PageObjects.common.waitUntilUrlIncludes('add-integration/vuln_mgmt');
+      });
     });
 
     it('clicking on the `No integrations installed` prompt action button - `install cloud posture intergation`: navigates to the CSPM integration installation page', async () => {
@@ -43,8 +48,11 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       const element = await notInstalledCSP.getElement();
       expect(element).to.not.be(null);
 
-      await notInstalledCSP.navigateToAction('cspm-not-installed-action');
-      await PageObjects.common.waitUntilUrlIncludes('add-integration/cspm');
+      await retry.try(async () => {
+        // await notInstalledCSP.navigateToAction('cspm-not-installed-action');
+        await testSubjects.click('cspm-not-installed-action');
+        await PageObjects.common.waitUntilUrlIncludes('add-integration/cspm');
+      });
     });
 
     it('clicking on the `No integrations installed` prompt action button - `install kubernetes posture intergation`: navigates to the KSPM integration installation page', async () => {
@@ -53,8 +61,11 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       const element = await notInstalledCSP.getElement();
       expect(element).to.not.be(null);
 
-      await notInstalledCSP.navigateToAction('kspm-not-installed-action');
-      await PageObjects.common.waitUntilUrlIncludes('add-integration/kspm');
+      await retry.try(async () => {
+        // await notInstalledCSP.navigateToAction('kspm-not-installed-action');
+        await testSubjects.click('kspm-not-installed-action');
+        await PageObjects.common.waitUntilUrlIncludes('add-integration/kspm');
+      });
     });
   });
 };
