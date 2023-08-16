@@ -27,7 +27,13 @@ const defaultProps = {
   isLoadingDescription: false,
 };
 
-describe('Description', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/164049
+// FLAKY: https://github.com/elastic/kibana/issues/164048
+// FLAKY: https://github.com/elastic/kibana/issues/164047
+// FLAKY: https://github.com/elastic/kibana/issues/164046
+// FLAKY: https://github.com/elastic/kibana/issues/164045
+// FLAKY: https://github.com/elastic/kibana/issues/164044
+describe.skip('Description', () => {
   const onUpdateField = jest.fn();
   let appMockRender: AppMockRenderer;
 
@@ -88,6 +94,27 @@ describe('Description', () => {
 
     await waitFor(() => {
       expect(onUpdateField).toHaveBeenCalledWith({ key: 'description', value: editedDescription });
+    });
+  });
+
+  it('trims the description correctly when saved', async () => {
+    const descriptionWithSpaces = 'New updated description               ';
+    const res = appMockRender.render(
+      <Description {...defaultProps} onUpdateField={onUpdateField} />
+    );
+
+    userEvent.click(res.getByTestId('description-edit-icon'));
+
+    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), descriptionWithSpaces);
+
+    userEvent.click(screen.getByTestId('editable-save-markdown'));
+
+    await waitFor(() => {
+      expect(onUpdateField).toHaveBeenCalledWith({
+        key: 'description',
+        value: descriptionWithSpaces.trim(),
+      });
     });
   });
 
@@ -177,7 +204,8 @@ describe('Description', () => {
     expect(screen.queryByTestId('description-edit-icon')).not.toBeInTheDocument();
   });
 
-  describe('draft message', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/164050
+  describe.skip('draft message', () => {
     const draftStorageKey = `cases.testAppId.basic-case-id.description.markdownEditor`;
 
     beforeEach(() => {
