@@ -68,18 +68,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const methods = _.sampleSize(
           _.compact(
             `
-          GET GEt GeT Get gET gEt geT get
-          PUT PUt PuT Put pUT pUt puT put
-          POST POSt POsT POst PoST PoSt PosT Post pOST pOSt pOsT pOst poST poSt posT post
-          DELETE DELETe DELEtE DELEte DELeTE DELeTe DELetE DELete DElETE DElETe DElEtE DElEte DEleTE DEleTe DEletE DElete
-          DeLETE DeLETe DeLEtE DeLEte DeLeTE DeLeTe DeLetE DeLete DelETE DelETe DelEtE DelEte DeleTE DeleTe DeletE Delete
-          dELETE dELETe dELEtE dELEte dELeTE dELeTe dELetE dELete dElETE dElETe dElEtE dElEte dEleTE dEleTe dEletE dElete
-          deLETE deLETe deLEtE deLEte deLeTE deLeTe deLetE deLete delETE delETe delEtE delEte deleTE deleTe deletE delete
-          HEAD HEAd HEaD HEad HeAD HeAd HeaD Head hEAD hEAd hEaD hEad heAD heAd heaD head
-          `.split(/\s+/m)
+            GET GEt GeT Get gET gEt geT get
+            PUT PUt PuT Put pUT pUt puT put
+            POST POSt POsT POst PoST PoSt PosT Post pOST pOSt pOsT pOst poST poSt posT post
+            DELETE DELETe DELEtE DELEte DELeTE DELeTe DELetE DELete DElETE DElETe DElEtE DElEte DEleTE DEleTe DEletE DElete
+            DeLETE DeLETe DeLEtE DeLEte DeLeTE DeLeTe DeLetE DeLete DelETE DelETe DelEtE DelEte DeleTE DeleTe DeletE Delete
+            dELETE dELETe dELEtE dELEte dELeTE dELeTe dELetE dELete dElETE dElETe dElEtE dElEte dEleTE dEleTe dEletE dElete
+            deLETE deLETe deLEtE deLEte deLeTE deLeTe deLetE deLete delETE delETe delEtE delEte deleTE deleTe deletE delete
+            HEAD HEAd HEaD HEad HeAD HeAd HeaD Head hEAD hEAd hEaD hEad heAD heAd heaD head
+            `.split(/\s+/m)
           ),
-          20
-        ); // 20 of 112 (approx. one-fifth) should be enough for testing
+          20 // 20 of 112 (approx. one-fifth) should be enough for testing
+        );
 
         for (const method of methods) {
           await PageObjects.console.clearTextArea();
