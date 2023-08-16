@@ -31,6 +31,7 @@ const defaultProps = {
 // FLAKY: https://github.com/elastic/kibana/issues/164048
 // FLAKY: https://github.com/elastic/kibana/issues/164047
 // FLAKY: https://github.com/elastic/kibana/issues/164046
+// FLAKY: https://github.com/elastic/kibana/issues/164045
 describe.skip('Description', () => {
   const onUpdateField = jest.fn();
   let appMockRender: AppMockRenderer;
