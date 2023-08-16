@@ -58,7 +58,7 @@ export const unsavedChangesBadgeStrings = {
   getHasRunMigrationsToolTipContent: () =>
     i18n.translate('dashboard.hasRunMigrationsBadgeToolTipContent', {
       defaultMessage:
-        'Some panels on this Dashboard have been upgraded to their latest versions. Saving will help this Dashboard open faster next time',
+        'One or more panels on this dashboard have been updated to a new version. Save the dashboard so it loads faster next time.',
     }),
 };
 
