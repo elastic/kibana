@@ -23,7 +23,7 @@ deployments, the environments, and the infrastructure that it is running in, for
 many pods, and a list of its downstream dependencies. It also returns active 
 alerts and anomalies.`,
       descriptionForUser: i18n.translate(
-        'xpack.apm.observabilityAiAssistant.functions.registerGetApmCorrelationsFunction.descriptionForUser',
+        'xpack.apm.observabilityAiAssistant.functions.registerGetApmServiceSummary.descriptionForUser',
         {
           defaultMessage: `Gets a summary of a single service, including: the language, service version, 
 deployments, the environments, and the infrastructure that it is running in, for instance on how 
