@@ -16,11 +16,7 @@ import {
   RULES_MANAGEMENT_TABLE,
   RULES_ROW,
 } from '../../../../screens/alerts_detection_rules';
-import {
-  enableRule,
-  waitForRulesTableToBeLoaded,
-  waitForRuleToUpdate,
-} from '../../../../tasks/alerts_detection_rules';
+import { enableRule, waitForRuleToUpdate } from '../../../../tasks/alerts_detection_rules';
 import { login, visit } from '../../../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
@@ -55,7 +51,6 @@ describe('Rules table: sorting', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
   it('Sorts by enabled rules', () => {
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
-    waitForRulesTableToBeLoaded();
 
     enableRule(SECOND_RULE);
     waitForRuleToUpdate();
@@ -76,7 +71,6 @@ describe('Rules table: sorting', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     createRule(getNewRule({ name: 'Not same as first rule', rule_id: '6' }));
 
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
-    waitForRulesTableToBeLoaded();
     setRowsPerPageTo(5);
 
     cy.get(RULES_MANAGEMENT_TABLE).find(TABLE_FIRST_PAGE).should('have.attr', 'aria-current');
