@@ -122,11 +122,31 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 
   ['xpack.ml.enabled', 'true'],
 
-  ['xpack.security.enabled', 'false'],
+  // ['xpack.security.enabled', 'false'],
 
-  ['xpack.security.operator_privileges.enabled', 'true'],
+  ['xpack.security.enabled', 'true'],
 
-  ['xpack.watcher.enabled', 'false'],
+  ['xpack.security.transport.ssl.enabled', 'true'],
+
+  ['xpack.security.transport.ssl.key', '/usr/share/elasticsearch/config/certs/elasticsearch.key'],
+
+  ['xpack.security.transport.ssl.key_passphrase', 'storepass'],
+
+  [
+    'xpack.security.transport.ssl.certificate',
+    '/usr/share/elasticsearch/config/certs/elasticsearch.crt',
+  ],
+
+  [
+    'xpack.security.transport.ssl.certificate_authorities',
+    '/usr/share/elasticsearch/config/certs/ca.crt',
+  ],
+
+  ['xpack.security.transport.ssl.verification_mode', 'certificate'],
+
+  // ['xpack.security.operator_privileges.enabled', 'true'],
+
+  // ['xpack.watcher.enabled', 'false'],
 ];
 
 const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
@@ -309,7 +329,8 @@ export function resolveEsArgs(
   }
 
   if (options.password) {
-    esArgs.set('ELASTIC_PASSWORD', options.password);
+    // esArgs.set('ELASTIC_PASSWORD', options.password);
+    // esArgs.set('bootstrap.password', options.password);
   }
 
   return Array.from(esArgs).flatMap((e) => ['--env', e.join('=')]);
@@ -320,6 +341,9 @@ export function resolveEsArgs(
  */
 export async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
   const volumePath = resolve(options.basePath, 'stateless');
+  const certs = resolve(options.basePath, 'certs');
+  const keystore = resolve(options.basePath, 'config', 'elasticsearch.keystore');
+  // const users = resolve(options.basePath, 'config', 'elasticsearch.keystore');
 
   log.info(chalk.bold(`Checking for local serverless ES object store at ${volumePath}`));
   log.indent(4);
@@ -344,7 +368,14 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 
   log.indent(-4);
 
-  return ['--volume', `${options.basePath}:/objectstore:z`];
+  return [
+    '--volume',
+    `${options.basePath}:/objectstore:z`,
+    '--volume',
+    `${certs}:/usr/share/elasticsearch/config/certs:z`,
+    '--volume',
+    `${keystore}:/usr/share/elasticsearch/config/elasticsearch.keystore`,
+  ];
 }
 
 /**
