@@ -139,7 +139,7 @@ describe('Alert details', () => {
 
     expect(alertDetails.queryByTestId('alertDetails')).toBeTruthy();
     expect(alertDetails.queryByTestId('alertDetailsError')).toBeFalsy();
-    expect(alertDetails.queryByTestId('page-title-container')).toBeTruthy();
+    expect(alertDetails.queryByTestId('alertDetailsPageTitle')).toBeTruthy();
     expect(alertDetails.queryByTestId('alert-summary-container')).toBeTruthy();
   });
 

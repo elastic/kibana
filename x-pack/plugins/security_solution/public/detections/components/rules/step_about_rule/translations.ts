@@ -28,6 +28,13 @@ export const ADD_FALSE_POSITIVE = i18n.translate(
   }
 );
 
+export const ADD_CUSTOM_HIGHLIGHTED_FIELD = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutRuleForm.addCustomHighlightedFieldDescription',
+  {
+    defaultMessage: 'Add a custom highlighted field',
+  }
+);
+
 export const GLOBAL_ENDPOINT_EXCEPTION_LIST = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepAboutRuleForm.endpointExceptionListLabel',
   {
