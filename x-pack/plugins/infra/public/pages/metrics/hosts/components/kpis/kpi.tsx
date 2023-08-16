@@ -7,10 +7,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { LensChart, TooltipContent } from '../../../../../components/lens';
-import {
-  type KPIChartProps,
-  AVERAGE_SUBTITLE,
-} from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
+import { type KPIChartProps, AVERAGE_SUBTITLE } from '../../../../../common/visualizations';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { useMetricsDataViewContext } from '../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
@@ -18,13 +15,7 @@ import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
 
-export const Tile = ({
-  id,
-  title,
-  layers,
-  toolTip,
-  height,
-}: KPIChartProps & { height: number }) => {
+export const Kpi = ({ id, title, layers, toolTip, height }: KPIChartProps & { height: number }) => {
   const { searchCriteria } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { requestTs, hostNodes, loading: hostsLoading } = useHostsViewContext();

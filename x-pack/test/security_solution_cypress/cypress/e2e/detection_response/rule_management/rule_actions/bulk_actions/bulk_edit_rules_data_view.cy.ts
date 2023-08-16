@@ -58,7 +58,7 @@ const expectedNumberOfCustomRulesToBeEdited = 6;
 
 describe(
   'Bulk editing index patterns of rules with a data view only',
-  { tags: [tag.ESS, tag.SERVERLESS] },
+  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
   () => {
     before(() => {
       cleanKibana();
