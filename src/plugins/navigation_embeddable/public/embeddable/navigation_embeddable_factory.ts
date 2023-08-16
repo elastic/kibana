@@ -22,9 +22,9 @@ import {
   NavigationEmbeddableByReferenceInput,
   NavigationEmbeddableInput,
 } from './types';
+import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
 import type { NavigationEmbeddable } from './navigation_embeddable';
 import { NAV_VERTICAL_LAYOUT } from '../../common/content_management';
-import { APP_ICON, APP_NAME, CONTENT_ID, EMBEDDABLE_DISPLAY_NAME } from '../../common';
 import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
 import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
 
@@ -126,7 +126,7 @@ export class NavigationEmbeddableFactoryDefinition
   }
 
   public getDisplayName() {
-    return EMBEDDABLE_DISPLAY_NAME;
+    return APP_NAME;
   }
 
   public getIconType() {

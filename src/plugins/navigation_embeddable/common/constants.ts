@@ -17,10 +17,3 @@ export const APP_ICON = 'link';
 export const APP_NAME = i18n.translate('navigationEmbeddable.visTypeAlias.title', {
   defaultMessage: 'Links',
 });
-
-export const EMBEDDABLE_DISPLAY_NAME = i18n.translate(
-  'navigationEmbeddable.embeddableDisplayName',
-  {
-    defaultMessage: 'links',
-  }
-);

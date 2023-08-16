@@ -6,10 +6,4 @@
  * Side Public License, v 1.
  */
 
-export {
-  APP_ICON,
-  APP_NAME,
-  CONTENT_ID,
-  LATEST_VERSION,
-  EMBEDDABLE_DISPLAY_NAME,
-} from './constants';
+export { APP_ICON, APP_NAME, CONTENT_ID, LATEST_VERSION } from './constants';
