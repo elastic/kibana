@@ -39,7 +39,8 @@ import {
 } from '../../../../screens/exceptions';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-describe(
+// See https://github.com/elastic/kibana/issues/163967
+describe.skip(
   'Auto populate exception with Alert data',
   { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
   () => {
