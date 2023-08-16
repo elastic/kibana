@@ -99,7 +99,6 @@ import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   ENDPOINT_SEARCH_STRATEGY,
 } from '../common/endpoint/constants';
-import { RiskEngineDataClient } from './lib/risk_engine/risk_engine_data_client';
 
 import { AppFeatures } from './lib/app_features';
 
@@ -125,7 +124,6 @@ export class Plugin implements ISecuritySolutionPlugin {
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private telemetryUsageCounter?: UsageCounter;
   private endpointContext: EndpointAppContext;
-  private riskEngineDataClient: RiskEngineDataClient | undefined;
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
@@ -167,14 +165,6 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.ruleMonitoringService.setup(core, plugins);
 
-    this.riskEngineDataClient = new RiskEngineDataClient({
-      logger: this.logger,
-      kibanaVersion: this.pluginContext.env.packageInfo.version,
-      elasticsearchClientPromise: core
-        .getStartServices()
-        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
-    });
-
     const requestContextFactory = new RequestContextFactory({
       config,
       logger,
@@ -184,7 +174,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleMonitoringService: this.ruleMonitoringService,
       kibanaVersion: pluginContext.env.packageInfo.version,
       kibanaBranch: pluginContext.env.packageInfo.branch,
-      riskEngineDataClient: this.riskEngineDataClient,
     });
 
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
@@ -255,6 +244,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleExecutionLoggerFactory:
         this.ruleMonitoringService.createRuleExecutionLogClientForExecutors,
       version: pluginContext.env.packageInfo.version,
+      experimentalFeatures: config.experimentalFeatures,
     };
 
     const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
