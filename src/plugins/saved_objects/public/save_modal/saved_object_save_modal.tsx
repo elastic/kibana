@@ -151,7 +151,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
             ) : (
               <FormattedMessage
                 id="savedObjects.saveModal.saveTitle"
-                defaultMessage="Save {objectType} to library"
+                defaultMessage="Save {objectType}"
                 values={{ objectType: this.props.objectType }}
               />
             )}
