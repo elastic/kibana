@@ -6,3 +6,4 @@
  */
 
 export const STACK_ALERTS_FEATURE_ID = 'stackAlerts';
+export const ES_QUERY_ID = '.es-query';

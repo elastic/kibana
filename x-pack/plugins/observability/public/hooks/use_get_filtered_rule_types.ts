@@ -6,10 +6,13 @@
  */
 
 import { useMemo } from 'react';
+import { ES_QUERY_ID } from '@kbn/stack-alerts-plugin/common';
 import { usePluginContext } from './use_plugin_context';
 
 export function useGetFilteredRuleTypes() {
   const { observabilityRuleTypeRegistry } = usePluginContext();
 
-  return useMemo(() => observabilityRuleTypeRegistry.list(), [observabilityRuleTypeRegistry]);
+  return useMemo(() => {
+    return [...observabilityRuleTypeRegistry.list(), ES_QUERY_ID];
+  }, [observabilityRuleTypeRegistry]);
 }

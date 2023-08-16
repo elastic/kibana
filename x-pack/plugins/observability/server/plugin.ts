@@ -26,9 +26,13 @@ import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/serve
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { ES_QUERY_ID } from '@kbn/stack-alerts-plugin/common';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';
+import {
+  SLO_BURN_RATE_RULE_TYPE_ID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+} from '../common/constants';
 import {
   kubernetesGuideConfig,
   kubernetesGuideId,
@@ -69,6 +73,8 @@ interface PluginSetup {
 interface PluginStart {
   alerting: PluginStartContract;
 }
+
+const ruleTypes = [SLO_BURN_RATE_RULE_TYPE_ID, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID, ES_QUERY_ID];
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   private logger: Logger;
@@ -192,7 +198,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       category: DEFAULT_APP_CATEGORIES.observability,
       app: [sloFeatureId, 'kibana'],
       catalogue: [sloFeatureId, 'observability'],
-      alerting: [SLO_BURN_RATE_RULE_TYPE_ID],
+      alerting: ruleTypes,
       privileges: {
         all: {
           app: [sloFeatureId, 'kibana'],
@@ -204,10 +210,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           },
           alerting: {
             rule: {
-              all: [SLO_BURN_RATE_RULE_TYPE_ID],
+              all: ruleTypes,
             },
             alert: {
-              all: [SLO_BURN_RATE_RULE_TYPE_ID],
+              all: ruleTypes,
             },
           },
           ui: ['read', 'write'],
@@ -222,10 +228,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           },
           alerting: {
             rule: {
-              read: [SLO_BURN_RATE_RULE_TYPE_ID],
+              read: ruleTypes,
             },
             alert: {
-              read: [SLO_BURN_RATE_RULE_TYPE_ID],
+              read: ruleTypes,
             },
           },
           ui: ['read'],

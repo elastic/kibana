@@ -22,7 +22,10 @@ import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { rulesLocatorID, sloFeatureId } from '../../../../common';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
+import {
+  SLO_BURN_RATE_RULE_TYPE_ID,
+  observabilityRuleCreationValidConsumers,
+} from '../../../../common/constants';
 import { sloKeys } from '../../../hooks/slo/query_key_factory';
 import { useCapabilities } from '../../../hooks/slo/use_capabilities';
 import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
@@ -273,6 +276,7 @@ export function SloListItem({
           filteredRuleTypes={filteredRuleTypes}
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
           initialValues={{ name: `${slo.name} Burn Rate rule`, params: { sloId: slo.id } }}
+          validConsumers={observabilityRuleCreationValidConsumers}
           onSave={handleSavedRule}
           onClose={() => {
             setIsAddRuleFlyoutOpen(false);

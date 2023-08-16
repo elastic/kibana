@@ -29,8 +29,20 @@ export function hasAllPrivilege(
 ): boolean {
   return ruleType?.authorizedConsumers[ruleConsumer]?.all ?? false;
 }
+
+export function hasAllPrivilegeWithProducerCheck(
+  ruleConsumer: InitialRule['consumer'],
+  ruleType?: RuleType
+): boolean {
+  if (ruleConsumer === ruleType?.producer) {
+    return true;
+  }
+  return hasAllPrivilege(ruleConsumer, ruleType);
+}
+
 export function hasReadPrivilege(rule: InitialRule, ruleType?: RuleType): boolean {
   return ruleType?.authorizedConsumers[rule.consumer]?.read ?? false;
 }
+
 export const hasManageApiKeysCapability = (capabilities: Capabilities) =>
   capabilities?.management?.security?.api_keys;

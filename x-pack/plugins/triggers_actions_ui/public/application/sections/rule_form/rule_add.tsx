@@ -19,6 +19,7 @@ import {
   RuleAddProps,
   RuleTypeIndex,
   TriggersActionsUiConfig,
+  RuleCreationValidConsumer,
 } from '../../../types';
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
@@ -51,6 +52,7 @@ const RuleAdd = ({
   hideInterval,
   metadata: initialMetadata,
   filteredRuleTypes,
+  validConsumers,
   ...props
 }: RuleAddProps) => {
   const onSaveHandler = onSave ?? reloadRules;
@@ -83,6 +85,7 @@ const RuleAdd = ({
     props.ruleTypeIndex
   );
   const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
+  const [selectedConsumer, setSelectedConsumer] = useState<RuleCreationValidConsumer | undefined>();
 
   const setRule = (value: InitialRule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
@@ -207,7 +210,13 @@ const RuleAdd = ({
 
   async function onSaveRule(): Promise<Rule | undefined> {
     try {
-      const newRule = await createRule({ http, rule: rule as RuleUpdates });
+      const newRule = await createRule({
+        http,
+        rule: {
+          ...rule,
+          ...(selectedConsumer ? { consumer: selectedConsumer } : {}),
+        } as RuleUpdates,
+      });
       toasts.addSuccess(
         i18n.translate('xpack.triggersActionsUI.sections.ruleAdd.saveSuccessNotificationText', {
           defaultMessage: 'Created rule "{ruleName}"',
@@ -250,6 +259,7 @@ const RuleAdd = ({
           <HealthCheck inFlyout={true} waitForCheck={true}>
             <EuiFlyoutBody>
               <RuleForm
+                canShowConsumerSelection
                 rule={rule}
                 config={config}
                 dispatch={dispatch}
@@ -261,12 +271,14 @@ const RuleAdd = ({
                     defaultMessage: 'create',
                   }
                 )}
+                validConsumers={validConsumers}
                 actionTypeRegistry={actionTypeRegistry}
                 ruleTypeRegistry={ruleTypeRegistry}
                 metadata={metadata}
                 filteredRuleTypes={filteredRuleTypes}
                 hideInterval={hideInterval}
                 onChangeMetaData={onChangeMetaData}
+                setConsumer={setSelectedConsumer}
               />
             </EuiFlyoutBody>
             <RuleAddFooter
