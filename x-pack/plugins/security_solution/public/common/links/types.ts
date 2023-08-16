@@ -136,6 +136,7 @@ export interface LinkItem {
 }
 
 export type AppLinkItems = Readonly<LinkItem[]>;
+export type AppLinksSwitcher = (appLinks: AppLinkItems) => AppLinkItems;
 
 export type LinkInfo = Omit<LinkItem, 'links'>;
 export type NormalizedLink = LinkInfo & { parentId?: SecurityPageName };

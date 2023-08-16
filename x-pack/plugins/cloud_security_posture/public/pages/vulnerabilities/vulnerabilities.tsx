@@ -22,7 +22,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../common/constants';
 import { useCloudPostureTable } from '../../common/hooks/use_cloud_posture_table';
 import { useLatestVulnerabilities } from './hooks/use_latest_vulnerabilities';
-import type { VulnerabilityRecord, VulnerabilitiesQueryData } from './types';
+import type { VulnerabilitiesQueryData } from './types';
 import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../common/constants';
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { FindingsSearchBar } from '../configurations/layout/findings_search_bar';
@@ -160,9 +160,9 @@ const VulnerabilitiesDataGrid = ({
   });
 
   const onOpenFlyout = useCallback(
-    (vulnerabilityRow: VulnerabilityRecord) => {
+    (vulnerabilityRow: VulnerabilitiesQueryData['page'][number]) => {
       const vulnerabilityIndex = data?.page.findIndex(
-        (vulnerabilityRecord: VulnerabilityRecord) =>
+        (vulnerabilityRecord: VulnerabilitiesQueryData['page'][number]) =>
           vulnerabilityRecord.vulnerability?.id === vulnerabilityRow.vulnerability?.id &&
           vulnerabilityRecord.resource?.id === vulnerabilityRow.resource?.id &&
           vulnerabilityRecord.vulnerability.package.name ===
@@ -204,7 +204,7 @@ const VulnerabilitiesDataGrid = ({
     }): React.ReactElement | null => {
       const rowIndexFromPage = rowIndex > pageSize - 1 ? rowIndex % pageSize : rowIndex;
 
-      const vulnerabilityRow = data?.page[rowIndexFromPage] as VulnerabilityRecord;
+      const vulnerabilityRow = data?.page[rowIndexFromPage];
 
       useEffect(() => {
         if (selectedVulnerabilityIndex === rowIndex) {
@@ -254,8 +254,11 @@ const VulnerabilitiesDataGrid = ({
           />
         );
       }
-      if (columnId === vulnerabilitiesColumns.resource) {
+      if (columnId === vulnerabilitiesColumns.resourceName) {
         return <>{vulnerabilityRow.resource?.name}</>;
+      }
+      if (columnId === vulnerabilitiesColumns.resourceId) {
+        return <>{vulnerabilityRow.resource?.id}</>;
       }
       if (columnId === vulnerabilitiesColumns.severity) {
         if (!vulnerabilityRow.vulnerability.severity) {
@@ -270,7 +273,7 @@ const VulnerabilitiesDataGrid = ({
       if (columnId === vulnerabilitiesColumns.version) {
         return <>{vulnerabilityRow.vulnerability?.package?.version}</>;
       }
-      if (columnId === vulnerabilitiesColumns.fix_version) {
+      if (columnId === vulnerabilitiesColumns.fixedVersion) {
         return <>{vulnerabilityRow.vulnerability?.package?.fixed_version}</>;
       }
 
