@@ -35,8 +35,6 @@ export interface PersistableFilter extends Filter {
   meta: PersistableFilterMeta;
 }
 
-export type SortingHint = string;
-
 export type LayerType = typeof layerTypes[keyof typeof layerTypes];
 
 export type ValueLabelConfig = 'hide' | 'show';

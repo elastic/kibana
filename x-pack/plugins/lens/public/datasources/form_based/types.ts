@@ -46,22 +46,6 @@ export type DraggedField = DragDropIdentifier & {
   indexPatternId: string;
 };
 
-export interface FormBasedLayer {
-  columnOrder: string[];
-  columns: Record<string, GenericIndexPatternColumn>;
-  // Each layer is tied to the index pattern that created it
-  indexPatternId: string;
-  linkToLayers?: string[];
-  // Partial columns represent the temporary invalid states
-  incompleteColumns?: Record<string, IncompleteColumn>;
-  sampling?: number;
-  ignoreGlobalFilters?: boolean;
-}
-
-export interface FormBasedPersistedState {
-  layers: Record<string, Omit<FormBasedLayer, 'indexPatternId'>>;
-}
-
 export type PersistedIndexPatternLayer = Omit<FormBasedLayer, 'indexPatternId'>;
 
 export interface FormBasedPrivateState {

@@ -484,6 +484,7 @@
     "@kbn/language-documentation-popover": "link:packages/kbn-language-documentation-popover",
     "@kbn/lens-embeddable-utils": "link:packages/kbn-lens-embeddable-utils",
     "@kbn/lens-plugin": "link:x-pack/plugins/lens",
+    "@kbn/lens-types": "link:packages/kbn-lens-types",
     "@kbn/license-api-guard-plugin": "link:x-pack/plugins/license_api_guard",
     "@kbn/license-management-plugin": "link:x-pack/plugins/license_management",
     "@kbn/licensing-plugin": "link:x-pack/plugins/licensing",

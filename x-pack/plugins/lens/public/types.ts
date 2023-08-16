@@ -705,37 +705,6 @@ export type FieldOnlyDataType =
   | 'counter'
   | 'gauge'
   | 'murmur3';
-export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataType;
-
-// An operation represents a column in a table, not any information
-// about how the column was created such as whether it is a sum or average.
-// Visualizations are able to filter based on the output, not based on the
-// underlying data
-export interface Operation extends OperationMetadata {
-  // User-facing label for the operation
-  label: string;
-  sortingHint?: SortingHint;
-}
-
-export interface OperationMetadata {
-  interval?: string;
-  // The output of this operation will have this data type
-  dataType: DataType;
-  // A bucketed operation is grouped by duplicate values, otherwise each row is
-  // treated as unique
-  isBucketed: boolean;
-  /**
-   * ordinal: Each name is a unique value, but the names are in sorted order, like "Top values"
-   * interval: Histogram data, like date or number histograms
-   * ratio: Most number data is rendered as a ratio that includes 0
-   */
-  scale?: 'ordinal' | 'interval' | 'ratio';
-  // Extra meta-information like cardinality, color
-  // TODO currently it's not possible to differentiate between a field from a raw
-  // document and an aggregated metric which might be handy in some cases. Once we
-  // introduce a raw document datasource, this should be considered here.
-  isStaticValue?: boolean;
-}
 
 /**
  * Specific type used to store some meta information on top of the Operation type

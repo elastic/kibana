@@ -727,12 +727,6 @@ export type OperationDefinition<
 > = BaseOperationDefinitionProps<C, AR> & OperationDefinitionMap<C, P>[Input];
 
 /**
- * A union type of all available operation types. The operation type is a unique id of an operation.
- * Each column is assigned to exactly one operation type.
- */
-export type OperationType = string;
-
-/**
  * This is an operation definition of an unspecified column out of all possible
  * column types.
  */

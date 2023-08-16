@@ -4744,6 +4744,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/lens-types@link:packages/kbn-lens-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/license-api-guard-plugin@link:x-pack/plugins/license_api_guard":
   version "0.0.0"
   uid ""

@@ -918,6 +918,8 @@
       "@kbn/lens-embeddable-utils/*": ["packages/kbn-lens-embeddable-utils/*"],
       "@kbn/lens-plugin": ["x-pack/plugins/lens"],
       "@kbn/lens-plugin/*": ["x-pack/plugins/lens/*"],
+      "@kbn/lens-types": ["packages/kbn-lens-types"],
+      "@kbn/lens-types/*": ["packages/kbn-lens-types/*"],
       "@kbn/license-api-guard-plugin": ["x-pack/plugins/license_api_guard"],
       "@kbn/license-api-guard-plugin/*": ["x-pack/plugins/license_api_guard/*"],
       "@kbn/license-management-plugin": ["x-pack/plugins/license_management"],

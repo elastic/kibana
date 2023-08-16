@@ -5,55 +5,6 @@
  * 2.0.
  */
 
-import type { Query } from '@kbn/es-query';
 import type { Operation } from '../../../../types';
 import type { TimeScaleUnit } from '../../../../../common/expressions';
 import type { OperationType } from '.';
-
-export interface BaseIndexPatternColumn extends Operation {
-  // Private
-  operationType: string;
-  customLabel?: boolean;
-  timeScale?: TimeScaleUnit;
-  filter?: Query;
-  reducedTimeRange?: string;
-  timeShift?: string;
-}
-
-export interface ValueFormatConfig {
-  id: string;
-  params?: {
-    decimals: number;
-    suffix?: string;
-    compact?: boolean;
-    pattern?: string;
-    fromUnit?: string;
-    toUnit?: string;
-  };
-}
-
-// Formatting can optionally be added to any column
-export interface FormattedIndexPatternColumn extends BaseIndexPatternColumn {
-  params?: {
-    format?: ValueFormatConfig;
-  };
-}
-
-export interface FieldBasedIndexPatternColumn extends BaseIndexPatternColumn {
-  sourceField: string;
-}
-
-export interface ReferenceBasedIndexPatternColumn extends FormattedIndexPatternColumn {
-  references: string[];
-}
-
-export type GenericIndexPatternColumn =
-  | BaseIndexPatternColumn
-  | FieldBasedIndexPatternColumn
-  | ReferenceBasedIndexPatternColumn;
-
-// Used to store the temporary invalid state
-export interface IncompleteColumn {
-  operationType?: OperationType;
-  sourceField?: string;
-}
