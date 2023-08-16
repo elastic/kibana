@@ -11,15 +11,16 @@ import { services as xpackApiIntegrationServices } from '../../../test/api_integ
 import { services as svlSharedServices } from '../../shared/services';
 
 import { SvlCommonApiServiceProvider } from './svl_common_api';
+import { SvlReportingServiceProvider } from './svl_reporting';
 import { AlertingApiProvider } from './alerting_api';
-import { ReportingApiProvider } from './reporting_api';
 
 export const services = {
   ...xpackApiIntegrationServices,
   ...svlSharedServices,
+
   svlCommonApi: SvlCommonApiServiceProvider,
+  svlReportingAPI: SvlReportingServiceProvider,
   alertingApi: AlertingApiProvider,
-  reportingApi: ReportingApiProvider,
 };
 
 export type InheritedFtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
