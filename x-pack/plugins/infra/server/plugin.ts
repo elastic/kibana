@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
 import { alertsLocatorID } from '@kbn/observability-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { GetMetricIndicesOptions } from '@kbn/metrics-data-plugin/server';
 import {
   DISCOVER_APP_TARGET,
   LOGS_APP_TARGET,
@@ -156,8 +157,17 @@ export class InfraServerPlugin
 
   setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
     const framework = new KibanaFramework(core, this.config, plugins);
+    const metricsClient = plugins.metricsData.client;
+    metricsClient.setDefaultMetricIndicesHandler(async (options: GetMetricIndicesOptions) => {
+      const sourceConfiguration = await sources.getInfraSourceConfiguration(
+        options.savedObjectsClient,
+        options.savedObjectId
+      );
+      return sourceConfiguration.configuration.metricAlias;
+    });
     const sources = new InfraSources({
       config: this.config,
+      metricsClient,
     });
     const sourceStatus = new InfraSourceStatus(
       new InfraElasticsearchSourceStatusAdapter(framework),
@@ -189,6 +199,7 @@ export class InfraServerPlugin
       framework,
       sources,
       sourceStatus,
+      metricsClient,
       ...domainLibs,
       handleEsError,
       logsRules: this.logsRules.setup(core, plugins),

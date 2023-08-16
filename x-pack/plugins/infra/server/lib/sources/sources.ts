@@ -15,6 +15,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
+import { MetricsDataClient } from '@kbn/metrics-data-plugin/server/client';
 import {
   InfraSavedSourceConfiguration,
   InfraSource,
@@ -35,6 +36,7 @@ import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
 
 interface Libs {
   config: InfraConfig;
+  metricsClient: MetricsDataClient;
 }
 
 // extract public interface
@@ -48,7 +50,7 @@ export class InfraSources {
     this.libs = libs;
   }
 
-  public async getSourceConfiguration(
+  public async getInfraSourceConfiguration(
     savedObjectsClient: SavedObjectsClientContract,
     sourceId: string
   ): Promise<InfraSource> {
@@ -90,6 +92,22 @@ export class InfraSources {
     return savedSourceConfiguration;
   }
 
+  public async getSourceConfiguration(
+    savedObjectsClient: SavedObjectsClientContract,
+    sourceId: string
+  ): Promise<InfraSource> {
+    const sourceConfiguration = await this.getInfraSourceConfiguration(
+      savedObjectsClient,
+      sourceId
+    );
+    const metricAlias = await this.libs.metricsClient.getMetricIndices({
+      savedObjectsClient,
+      savedObjectId: sourceId,
+    });
+    sourceConfiguration.configuration.metricAlias = metricAlias;
+    return sourceConfiguration;
+  }
+
   public async getAllSourceConfigurations(savedObjectsClient: SavedObjectsClientContract) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
 
@@ -128,6 +146,12 @@ export class InfraSources {
         references,
       })
     );
+
+    await this.libs.metricsClient.updateMetricIndices({
+      savedObjectsClient,
+      savedObjectId: sourceId,
+      metricIndices: newSourceConfiguration.metricAlias,
+    });
 
     return {
       ...createdSourceConfiguration,
@@ -179,6 +203,12 @@ export class InfraSources {
         version,
       })
     );
+
+    await this.libs.metricsClient.updateMetricIndices({
+      savedObjectsClient,
+      savedObjectId: sourceId,
+      metricIndices: updatedSourceConfiguration.configuration.metricAlias!,
+    });
 
     return {
       ...updatedSourceConfiguration,
