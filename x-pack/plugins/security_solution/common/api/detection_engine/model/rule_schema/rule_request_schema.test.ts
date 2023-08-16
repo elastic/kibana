@@ -1290,10 +1290,26 @@ describe('rules schema', () => {
       expect(getPaths(left(message.errors))).toEqual(['invalid keys "data_view_id"']);
     });
 
-    test('You can optionally send in an array of investigation_fields', () => {
+    test('You can omit investigation_fields', () => {
       const payload: RuleCreateProps = {
         ...getCreateRulesSchemaMock(),
-        investigation_fields: ['field1', 'field2'],
+      };
+
+      if (payload.investigation_fields) {
+        delete payload.investigation_fields;
+      }
+
+      const decoded = RuleCreateProps.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+
+    test('You can send in investigation_fields', () => {
+      const payload: RuleCreateProps = {
+        ...getCreateRulesSchemaMock(),
+        investigation_fields: { fields: ['field1', 'field2'] },
       };
 
       const decoded = RuleCreateProps.decode(payload);
@@ -1303,10 +1319,25 @@ describe('rules schema', () => {
       expect(message.schema).toEqual(payload);
     });
 
-    test('You cannot send in an array of investigation_fields that are numbers', () => {
+    test('You cannot send in an empty array of investigation_fields.fields', () => {
       const payload = {
         ...getCreateRulesSchemaMock(),
-        investigation_fields: [0, 1, 2],
+        investigation_fields: { fields: [] },
+      };
+
+      const decoded = RuleCreateProps.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "0" supplied to "investigation_fields"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('You cannot send in an array of investigation_fields.fields that are numbers', () => {
+      const payload = {
+        ...getCreateRulesSchemaMock(),
+        investigation_fields: { fields: [0, 1, 2] },
       };
 
       const decoded = RuleCreateProps.decode(payload);
@@ -1316,6 +1347,21 @@ describe('rules schema', () => {
         'Invalid value "0" supplied to "investigation_fields"',
         'Invalid value "1" supplied to "investigation_fields"',
         'Invalid value "2" supplied to "investigation_fields"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('You cannot send in investigation_fields without specifying fields', () => {
+      const payload = {
+        ...getCreateRulesSchemaMock(),
+        investigation_fields: { foo: true },
+      };
+
+      const decoded = RuleCreateProps.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "foo" supplied to "investigation_fields"',
       ]);
       expect(message.schema).toEqual({});
     });

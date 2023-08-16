@@ -555,7 +555,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
-        investigation_fields: ['foo', 'bar'],
+        investigation_fields: { fields: ['foo', 'bar'] },
       };
 
       expect(result).toEqual(expected);
@@ -636,7 +636,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
-        investigation_fields: ['foo', 'bar'],
+        investigation_fields: { fields: ['foo', 'bar'] },
       };
 
       expect(result).toEqual(expected);
@@ -661,7 +661,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
-        investigation_fields: ['foo', 'bar'],
+        investigation_fields: { fields: ['foo', 'bar'] },
       };
 
       expect(result).toEqual(expected);
@@ -705,7 +705,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
-        investigation_fields: ['foo', 'bar'],
+        investigation_fields: { fields: ['foo', 'bar'] },
       };
 
       expect(result).toEqual(expected);
@@ -758,7 +758,7 @@ describe('helpers', () => {
             ],
           },
         ],
-        investigation_fields: ['foo', 'bar'],
+        investigation_fields: { fields: ['foo', 'bar'] },
       };
 
       expect(result).toEqual(expected);
@@ -787,7 +787,7 @@ describe('helpers', () => {
         threat: getThreatMock(),
         timestamp_override: 'event.ingest',
         timestamp_override_fallback_disabled: true,
-        investigation_fields: ['foo', 'bar'],
+        investigation_fields: { fields: ['foo', 'bar'] },
       };
 
       expect(result).toEqual(expected);
@@ -796,7 +796,7 @@ describe('helpers', () => {
     test('returns formatted object if investigation_fields is empty array', () => {
       const mockStepData: AboutStepRule = {
         ...mockData,
-        investigationFields: [],
+        investigationFields: { fields: [] },
       };
       const result = formatAboutStepData(mockStepData);
       const expected: AboutStepRuleJson = {
@@ -817,7 +817,7 @@ describe('helpers', () => {
         timestamp_override: undefined,
         timestamp_override_fallback_disabled: undefined,
         threat: getThreatMock(),
-        investigation_fields: [],
+        investigation_fields: undefined,
       };
 
       expect(result).toEqual(expected);
@@ -826,7 +826,7 @@ describe('helpers', () => {
     test('returns formatted object with investigation_fields', () => {
       const mockStepData: AboutStepRule = {
         ...mockData,
-        investigationFields: ['foo', 'bar'],
+        investigationFields: { fields: ['foo', 'bar'] },
       };
       const result = formatAboutStepData(mockStepData);
       const expected: AboutStepRuleJson = {
@@ -843,7 +843,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
-        investigation_fields: ['foo', 'bar'],
+        investigation_fields: { fields: ['foo', 'bar'] },
         threat_indicator_path: undefined,
         timestamp_override: undefined,
         timestamp_override_fallback_disabled: undefined,
@@ -855,7 +855,7 @@ describe('helpers', () => {
     test('returns formatted object if investigation_fields includes empty string', () => {
       const mockStepData: AboutStepRule = {
         ...mockData,
-        investigationFields: [' '],
+        investigationFields: { fields: ['  '] },
       };
       const result = formatAboutStepData(mockStepData);
       const expected: AboutStepRuleJson = {
@@ -872,7 +872,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
-        investigation_fields: [],
+        investigation_fields: undefined,
         threat_indicator_path: undefined,
         timestamp_override: undefined,
         timestamp_override_fallback_disabled: undefined,

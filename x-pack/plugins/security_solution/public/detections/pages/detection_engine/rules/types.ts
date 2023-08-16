@@ -34,6 +34,7 @@ import type {
   SetupGuide,
   TimestampOverride,
   AlertSuppressionMissingFields,
+  InvestigationFields,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { SortOrder } from '../../../../../common/api/detection_engine';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
@@ -89,7 +90,6 @@ export interface AboutStepRule {
   riskScore: AboutStepRiskScore;
   references: string[];
   falsePositives: string[];
-  investigationFields: string[];
   license: string;
   ruleNameOverride: string;
   tags: string[];
@@ -98,6 +98,7 @@ export interface AboutStepRule {
   threatIndicatorPath?: string;
   threat: Threats;
   note: string;
+  investigationFields?: InvestigationFields;
 }
 
 export interface AboutStepRuleDetails {
@@ -239,7 +240,7 @@ export interface AboutStepRuleJson {
   timestamp_override?: TimestampOverride;
   timestamp_override_fallback_disabled?: boolean;
   note?: string;
-  investigation_fields?: string[];
+  investigation_fields?: InvestigationFields;
 }
 
 export interface ScheduleStepRuleJson {
