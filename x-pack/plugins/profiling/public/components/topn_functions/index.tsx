@@ -331,7 +331,6 @@ export const TopNFunctionsGrid = forwardRef(
             }}
             totalSeconds={totalSeconds}
             totalSamples={totalCount}
-            samplingRate={topNFunctions?.SamplingRate ?? 1.0}
           />
         )}
       </>

@@ -11,10 +11,10 @@
  * 2.0.
  */
 
-const start = '2023-03-17T01:00:00.000Z';
-const end = '2023-03-17T01:05:00.000Z';
-
 describe('Home page', () => {
+  const start = '2023-04-18T00:00:00.000Z';
+  const end = '2023-04-18T00:05:00.000Z';
+
   beforeEach(() => {
     cy.loginAsElastic();
   });

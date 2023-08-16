@@ -38,7 +38,6 @@ interface Props {
   comparisonCountExclusive?: number;
   comparisonTotalSamples?: number;
   comparisonTotalSeconds?: number;
-  samplingRate?: number;
   onShowMoreClick?: () => void;
 }
 
@@ -55,7 +54,6 @@ export function FlameGraphTooltip({
   comparisonCountExclusive,
   comparisonTotalSamples,
   comparisonTotalSeconds,
-  samplingRate,
   onShowMoreClick,
 }: Props) {
   const theme = useEuiTheme();
@@ -80,8 +78,6 @@ export function FlameGraphTooltip({
         })
       : undefined;
 
-  const prependString = samplingRate === 1.0 ? ' ' : '~';
-
   return (
     <TooltipContainer>
       <EuiPanel paddingSize="s">
@@ -104,7 +100,6 @@ export function FlameGraphTooltip({
                 formatValue={asPercentage}
                 showDifference
                 formatDifferenceAsPercentage
-                prependValue={prependString}
               />
               <TooltipRow
                 label={
@@ -120,7 +115,6 @@ export function FlameGraphTooltip({
                 showDifference
                 formatDifferenceAsPercentage
                 formatValue={asPercentage}
-                prependValue={prependString}
               />
             </>
           )}
@@ -138,7 +132,6 @@ export function FlameGraphTooltip({
             }
             showDifference
             formatDifferenceAsPercentage={false}
-            prependValue={prependString}
           />
           <TooltipRow
             label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedCo2', {
@@ -149,7 +142,6 @@ export function FlameGraphTooltip({
             formatValue={asWeight}
             showDifference
             formatDifferenceAsPercentage={false}
-            prependValue={prependString}
           />
           <TooltipRow
             label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedDollarCost', {
@@ -160,7 +152,6 @@ export function FlameGraphTooltip({
             formatValue={asCost}
             showDifference
             formatDifferenceAsPercentage={false}
-            prependValue={prependString}
           />
           {onShowMoreClick && (
             <>
