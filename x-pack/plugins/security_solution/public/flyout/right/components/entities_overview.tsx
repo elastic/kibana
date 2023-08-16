@@ -15,7 +15,8 @@ import { ENTITIES_TITLE } from './translations';
 import { getField } from '../../shared/utils';
 import { HostEntityOverview } from './host_entity_overview';
 import { UserEntityOverview } from './user_entity_overview';
-import { LeftPanelKey, LeftPanelInsightsTabPath } from '../../left';
+import { LeftPanelKey, LeftPanelInsightsTab } from '../../left';
+import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 
 /**
  * Entities section under Insights section, overview tab. It contains a preview of host and user information.
@@ -29,7 +30,10 @@ export const EntitiesOverview: React.FC = () => {
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
       id: LeftPanelKey,
-      path: LeftPanelInsightsTabPath,
+      path: {
+        tab: LeftPanelInsightsTab,
+        subTab: ENTITIES_TAB_ID,
+      },
       params: {
         id: eventId,
         indexName,
