@@ -65,8 +65,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should activate auto-complete for methods case-insensitively', async () => {
-        const methods = _.sampleSize(_.compact(
-          `
+        const methods = _.sampleSize(
+          _.compact(
+            `
           GET GEt GeT Get gET gEt geT get
           PUT PUt PuT Put pUT pUt puT put
           POST POSt POsT POst PoST PoSt PosT Post pOST pOSt pOsT pOst poST poSt posT post
@@ -76,16 +77,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           deLETE deLETe deLEtE deLEte deLeTE deLeTe deLetE deLete delETE delETe delEtE delEte deleTE deleTe deletE delete
           HEAD HEAd HEaD HEad HeAD HeAd HeaD Head hEAD hEAd hEaD hEad heAD heAd heaD head
           `.split(/\s+/m)
-        ), 20); // 20 of 112 (approx. one-fifth) should be enough for testing
+          ),
+          20
+        ); // 20 of 112 (approx. one-fifth) should be enough for testing
 
-       for (const method of methods) {
+        for (const method of methods) {
           await PageObjects.console.clearTextArea();
           await PageObjects.console.pressEnter();
 
           for (const char of method.slice(0, -1)) {
             await PageObjects.console.sleepforDebouncePeriod();
             await PageObjects.console.enterText(char); // e.g. 'P' -> 'Po' -> 'Pos'
-            await retry.waitFor('autocomplete to be visible', () => PageObjects.console.isAutocompleteVisible());
+            await retry.waitFor('autocomplete to be visible', () =>
+              PageObjects.console.isAutocompleteVisible()
+            );
             expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
           }
 
@@ -94,7 +99,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.console.sleepforDebouncePeriod();
           await PageObjects.console.enterText('_'); // e.g. 'Post _'
-          await retry.waitFor('autocomplete to be visible', () => PageObjects.console.isAutocompleteVisible());
+          await retry.waitFor('autocomplete to be visible', () =>
+            PageObjects.console.isAutocompleteVisible()
+          );
           expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
         }
       });
@@ -107,7 +114,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.console.sleepforDebouncePeriod();
         await PageObjects.console.enterText('_'); // i.e. 'GET .kibana/_'
-        await retry.waitFor('autocomplete to be visible', () => PageObjects.console.isAutocompleteVisible());
+        await retry.waitFor('autocomplete to be visible', () =>
+          PageObjects.console.isAutocompleteVisible()
+        );
         expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
       });
     });
