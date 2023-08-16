@@ -5,5 +5,8 @@
   },
   "include": ["../../../typings/**/*", "server/**/*"],
   "exclude": ["target/**/*"],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/core-saved-objects-api-server",
+  ]
 }
