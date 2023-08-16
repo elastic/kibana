@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { GeoContainmentAlertInstanceState } from '../types';
 
@@ -15,36 +14,22 @@ export function transformResults(
   dateField: string,
   geoField: string
 ): Map<string, GeoContainmentAlertInstanceState[]> {
-  const buckets = results?.aggregations?.shapes?.buckets ?? {};
-  const arrResults = _.flatMap(buckets, (bucket: unknown, bucketKey: string) => {
-    const subBuckets = bucket?.entitySplit?.buckets ?? [];
-    return _.map(subBuckets, (subBucket) => {
-      return {
-        location: subBucket?.entityHits?.hits?.hits?.[0]?.fields?.[geoField]?.[0] ?? '',
-        shapeLocationId: bucketKey,
-        entityName: subBucket.key,
-        dateInShape: subBucket?.entityHits?.hits?.hits?.[0]?.fields?.[dateField]?.[0] ?? null,
-        docId: subBucket?.entityHits?.hits?.hits?.[0]?._id,
-      };
-    });
-  });
-  const orderedResults = _.orderBy(arrResults, ['entityName', 'dateInShape'], ['asc', 'desc'])
-    // Get unique
-    .reduce(
-      (
-        accu: Map<string, GeoContainmentAlertInstanceState[]>,
-        el: GeoContainmentAlertInstanceState & { entityName: string }
-      ) => {
-        const { entityName, ...locationData } = el;
-        if (entityName) {
-          if (!accu.has(entityName)) {
-            accu.set(entityName, []);
-          }
-          accu.get(entityName)!.push(locationData);
-        }
-        return accu;
-      },
-      new Map()
-    );
-  return orderedResults;
+  const resultsMap = new Map<string, GeoContainmentAlertInstanceState[]>();
+  const boundarySplitBuckets = results?.aggregations?.shapes?.buckets ?? {};
+  for (const boundaryId in boundarySplitBuckets) {
+    const entitySplitBuckets = boundarySplitBuckets[shapeLocationId]?.entitySplit?.buckets ?? [];
+    for (let i=0; i<entitySplitBuckets.length; i++) {
+      const entityName = entitySplitBuckets[i].key;
+      const entityResults = resultsMap.get(entityName) ?? [];
+      entityResults.push({
+        location: entitySplitBuckets[i].entityHits?.hits?.hits?.[0]?.fields?.[geoField]?.[0] ?? '',
+        shapeLocationId: boundaryId,
+        dateInShape: entitySplitBuckets[i].entityHits?.hits?.hits?.[0]?.fields?.[dateField]?.[0] ?? null,
+        docId: entitySplitBuckets[i].entityHits?.hits?.hits?.[0]?._id,
+      });
+      resultsMap.set(entityName, entityResults);
+    }
+  }
+
+  return resultsMap;
 }
