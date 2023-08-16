@@ -1,8 +1,20 @@
 {
   "snapshot.cleanup_repository": {
     "url_params": {
-      "master_timeout": "",
-      "timeout": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "POST"
@@ -10,6 +22,10 @@
     "patterns": [
       "_snapshot/{repository}/_cleanup"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/clean-up-snapshot-repo-api.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/clean-up-snapshot-repo-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

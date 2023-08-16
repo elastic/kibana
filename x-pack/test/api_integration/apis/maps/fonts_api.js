@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import path from 'path';
 import { copyFile, rm } from 'fs/promises';
 
@@ -38,6 +41,7 @@ export default function ({ getService }) {
       const resp = await supertest
         .get(`/internal/maps/fonts/Open%20Sans%20Regular,Arial%20Unicode%20MS%20Regular/0-255`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200);
 
       expect(resp.body.length).to.be(74696);
@@ -49,6 +53,7 @@ export default function ({ getService }) {
           `/internal/maps/fonts/Open%20Sans%20Regular,Arial%20Unicode%20MS%20Regular/noGonaFindMe`
         )
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(404);
     });
 
@@ -56,6 +61,7 @@ export default function ({ getService }) {
       await supertest
         .get(`/internal/maps/fonts/open_sans/..%2f0-255`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(404);
     });
 
@@ -63,6 +69,7 @@ export default function ({ getService }) {
       await supertest
         .get(`/internal/maps/fonts/open_sans/.%2f..%2f0-255`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(404);
     });
   });
