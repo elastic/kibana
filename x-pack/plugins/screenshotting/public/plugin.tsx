@@ -27,13 +27,13 @@ export class ScreenshottingPlugin implements Plugin<void, void, SetupDeps> {
         title: 'Screenshotting Expressions Renderer',
         navLinkStatus: AppNavLinkStatus.hidden,
         chromeless: true,
-        
+
         mount: async ({ element }: AppMountParameters) => {
           ReactDOM.render(
             <ScreenshotModeContext.Provider value={screenshotMode}>
-            <App />
-          </ScreenshotModeContext.Provider>,
-          element
+              <App />
+            </ScreenshotModeContext.Provider>,
+            element
           );
           return () => ReactDOM.unmountComponentAtNode(element);
         },
