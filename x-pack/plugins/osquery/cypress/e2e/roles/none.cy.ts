@@ -66,6 +66,7 @@ describe('None', () => {
       cy.getBySel('expand-event').first().click();
       cy.getBySel('take-action-dropdown-btn').click();
       cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseButton').click();
       cy.contains('Permission denied').should('exist');
     });
   });
