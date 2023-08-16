@@ -10,7 +10,7 @@ import {
   InstructionsSchema,
   INSTRUCTION_VARIANT,
 } from '@kbn/home-plugin/server';
-import type { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   createDownloadServerDeb,
   createDownloadServerOsx,
@@ -32,7 +32,7 @@ export function getOnPremApmServerInstructionSet({
   apmIndices,
   isFleetPluginEnabled,
 }: {
-  apmIndices: APMDataAccessConfig['indices'];
+  apmIndices: APMIndices;
   isFleetPluginEnabled: boolean;
 }): InstructionsSchema['instructionSets'][0] {
   return {

@@ -18,7 +18,7 @@ import {
   PutPackagePolicyUpdateCallback,
 } from '@kbn/fleet-plugin/server';
 import { get } from 'lodash';
-import type { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { decoratePackagePolicyWithAgentConfigAndSourceMap } from './merge_package_policy_with_apm';
 import { addApiKeysToPackagePolicyIfMissing } from './api_keys/add_api_keys_to_policies_if_missing';
 import {
@@ -159,9 +159,7 @@ function onPackagePolicyCreateOrUpdate({
   coreStart,
 }: {
   fleetPluginStart: FleetStartContract;
-  getApmIndices: (
-    soClient: SavedObjectsClientContract
-  ) => Promise<APMDataAccessConfig['indices']>;
+  getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMIndices>;
   coreStart: CoreStart;
 }): PutPackagePolicyUpdateCallback & PostPackagePolicyCreateCallback {
   return async (packagePolicy) => {

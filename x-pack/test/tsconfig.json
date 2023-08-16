@@ -140,6 +140,5 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/aiops-utils",
     "@kbn/stack-alerts-plugin",
-    "@kbn/apm-data-access-plugin",
   ]
 }

@@ -10,7 +10,7 @@ import {
   INSTRUCTION_VARIANT,
   InstructionsSchema,
 } from '@kbn/home-plugin/server';
-import type { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   createDjangoAgentInstructions,
   createDotNetAgentInstructions,
@@ -30,7 +30,7 @@ export function onPremInstructions({
   apmIndices,
   isFleetPluginEnabled,
 }: {
-  apmIndices: APMDataAccessConfig['indices'];
+  apmIndices: APMIndices;
   isFleetPluginEnabled: boolean;
 }): InstructionsSchema {
   return {

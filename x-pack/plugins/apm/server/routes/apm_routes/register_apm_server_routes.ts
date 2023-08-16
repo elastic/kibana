@@ -27,7 +27,7 @@ import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import apm from 'elastic-apm-node';
 import { VersionedRouteRegistrar } from '@kbn/core-http-server';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import type { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { APMCore, TelemetryUsageCounter } from '../typings';
@@ -273,5 +273,5 @@ export interface APMRouteHandlerResources {
   ruleDataClient: IRuleDataClient;
   telemetryUsageCounter?: TelemetryUsageCounter;
   kibanaVersion: string;
-  getApmIndices: () => Promise<APMDataAccessConfig['indices']>;
+  getApmIndices: () => Promise<APMIndices>;
 }

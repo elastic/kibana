@@ -20,7 +20,7 @@ import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import type { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   AGENT_NAME,
   ERROR_GROUP_ID,
@@ -95,9 +95,7 @@ export const ApmRuleTypeAlertDefinition: IRuleTypeAlerts = {
 export interface RegisterRuleDependencies {
   alerting: AlertingPluginSetupContract;
   basePath: IBasePath;
-  getApmIndices: (
-    soClient: SavedObjectsClientContract
-  ) => Promise<APMDataAccessConfig['indices']>;
+  getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMIndices>;
   apmConfig: APMConfig;
   logger: Logger;
   ml?: MlPluginSetup;
