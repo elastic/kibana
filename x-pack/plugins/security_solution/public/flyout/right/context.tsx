@@ -10,9 +10,13 @@ import { css } from '@emotion/react';
 import React, { createContext, useContext, useMemo } from 'react';
 import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+
 import type { SearchHit } from '../../../common/search_strategy';
 import { useTimelineEventsDetails } from '../../timelines/containers/details';
-import { getAlertIndexAlias } from '../../timelines/components/side_panel/event_details/helpers';
+import {
+  getAlertIndexAlias,
+  useBasicDataFromDetailsData,
+} from '../../timelines/components/side_panel/event_details/helpers';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { SecurityPageName } from '../../../common/constants';
@@ -21,6 +25,7 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import type { RightPanelProps } from '.';
 import type { GetFieldsData } from '../../common/hooks/use_get_fields_data';
 import { useGetFieldsData } from '../../common/hooks/use_get_fields_data';
+import { useRuleWithFallback } from '../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
 export interface RightPanelContext {
   /**
@@ -51,6 +56,10 @@ export interface RightPanelContext {
    * The actual raw document object
    */
   searchHit: SearchHit | undefined;
+  /**
+   * User defined fields to highlight (defined on the rule)
+   */
+  investigationFields: string[];
   /**
    * Promise to trigger a data refresh
    */
@@ -94,6 +103,8 @@ export const RightPanelProvider = ({
       skip: !id,
     });
   const getFieldsData = useGetFieldsData(searchHit?.fields);
+  const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const { rule: maybeRule } = useRuleWithFallback(ruleId);
 
   const contextValue = useMemo(
     () =>
@@ -106,12 +117,14 @@ export const RightPanelProvider = ({
             dataAsNestedObject,
             dataFormattedForFieldBrowser,
             searchHit,
+            investigationFields: maybeRule?.investigation_fields ?? [],
             refetchFlyoutData,
             getFieldsData,
           }
         : undefined,
     [
       id,
+      maybeRule,
       indexName,
       scopeId,
       sourcererDataView.browserFields,
