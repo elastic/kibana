@@ -55,7 +55,7 @@ describe('rule snoozing', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   });
 
   it('ensures the rule is snoozed on the rules management page, rule details page and rule editing page', () => {
-    createRule(getNewRule({ name: 'Test on all pages' }));
+    createRule(getNewRule({ name: 'Test on all pages', enabled: false }));
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 
@@ -79,7 +79,7 @@ describe('rule snoozing', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
   describe('Rules management table', () => {
     it('snoozes a rule without actions for 3 hours', () => {
-      createRule(getNewRule({ name: 'Test rule without actions' }));
+      createRule(getNewRule({ name: 'Test rule without actions', enabled: false }));
 
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 
@@ -134,7 +134,7 @@ describe('rule snoozing', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     });
 
     it('ensures snooze settings persist after page reload', () => {
-      createRule(getNewRule({ name: 'Test persistence' }));
+      createRule(getNewRule({ name: 'Test persistence', enabled: false }));
 
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 
@@ -154,7 +154,7 @@ describe('rule snoozing', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     });
 
     it('ensures a duplicated rule is not snoozed', () => {
-      createRule(getNewRule({ name: 'Test rule' }));
+      createRule(getNewRule({ name: 'Test rule', enabled: false }));
 
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 
@@ -214,7 +214,7 @@ describe('rule snoozing', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
   describe('Handling errors', () => {
     it('shows an error if unable to load snooze settings', () => {
-      createRule(getNewRule({ name: 'Test rule' })).then(({ body: rule }) => {
+      createRule(getNewRule({ name: 'Test rule', enabled: false })).then(({ body: rule }) => {
         cy.intercept('GET', `${INTERNAL_ALERTING_API_FIND_RULES_PATH}*`, {
           statusCode: 500,
         });
@@ -228,7 +228,7 @@ describe('rule snoozing', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     });
 
     it('shows an error if unable to save snooze settings', () => {
-      createRule(getNewRule({ name: 'Test rule' })).then(({ body: rule }) => {
+      createRule(getNewRule({ name: 'Test rule', enabled: false })).then(({ body: rule }) => {
         cy.intercept('POST', internalAlertingSnoozeRule(rule.id), { forceNetworkError: true });
 
         visitWithoutDateRange(ruleDetailsUrl(rule.id));
