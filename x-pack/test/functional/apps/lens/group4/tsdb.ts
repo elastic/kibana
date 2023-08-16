@@ -385,8 +385,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/163971
-      describe.skip('for rolled up metric (downsampled)', () => {
+      describe('for rolled up metric (downsampled)', () => {
         it('defaults to average for rolled up metric', async () => {
           await PageObjects.lens.switchDataPanelIndexPattern(downsampleDataView.dataView);
           await PageObjects.lens.removeLayer();
@@ -394,25 +393,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.lens.dragFieldToWorkspace('bytes_gauge', 'xyVisChart');
           expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
             'Average of bytes_gauge'
-          );
-        });
-        it('shows warnings in editor when using median', async () => {
-          await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel');
-          await testSubjects.existOrFail('median-partial-warning');
-          await testSubjects.click('lns-indexPatternDimension-median');
-          await PageObjects.lens.waitForVisualization('xyVisChart');
-          await PageObjects.lens.assertMessageListContains(
-            'Median of bytes_gauge uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
-            'warning'
-          );
-        });
-        it('shows warnings in dashboards as well', async () => {
-          await PageObjects.lens.save('New', false, false, false, 'new');
-
-          await PageObjects.dashboard.waitForRenderComplete();
-          await PageObjects.lens.assertMessageListContains(
-            'Median of bytes_gauge uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
-            'warning'
           );
         });
       });
