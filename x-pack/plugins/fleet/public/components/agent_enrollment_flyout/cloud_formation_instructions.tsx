@@ -50,7 +50,9 @@ export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
         }
       )}
     >
-      <CloudFormationGuide />
+      <CloudFormationGuide
+        awsAccountType={cloudSecurityIntegration?.cloudFormationProps?.awsAccountType}
+      />
       <EuiSpacer size="m" />
       <EuiButton
         color="primary"
