@@ -9,10 +9,7 @@ import { tag } from '../../../tags';
 
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import { ADD_ELASTIC_RULES_BTN, RULES_UPDATES_TAB } from '../../../screens/alerts_detection_rules';
-import {
-  deleteFirstRule,
-  waitForRulesTableToBeLoaded,
-} from '../../../tasks/alerts_detection_rules';
+import { deleteFirstRule, waitForRulesTableToShow } from '../../../tasks/alerts_detection_rules';
 import {
   installAllPrebuiltRulesRequest,
   createAndInstallMockedPrebuiltRules,
@@ -46,7 +43,8 @@ describe(
     describe('No notifications', () => {
       it('should NOT display install or update notifications when no prebuilt assets and no rules are installed', () => {
         visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-        waitForRulesTableToBeLoaded();
+        waitForRulesTableToShow();
+
         // TODO: test plan asserts "should NOT see a CTA to install prebuilt rules"
         // but current behavior is to always show the CTA, even with no prebuilt rule assets installed
         // Update that behaviour and then update this test.
@@ -56,7 +54,6 @@ describe(
       it('should NOT display install or update notifications when latest rules are installed', () => {
         createAndInstallMockedPrebuiltRules({ rules: [RULE_1], installToKibana: true });
         visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-        waitForRulesTableToBeLoaded();
 
         /* Assert that there are no installation or update notifications */
         /* Add Elastic Rules button should not contain a number badge */
@@ -102,7 +99,6 @@ describe(
               installToKibana: false,
             });
             visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-            waitForRulesTableToBeLoaded();
           });
         });
 
@@ -140,7 +136,6 @@ describe(
             });
             createAndInstallMockedPrebuiltRules({ rules: [UPDATED_RULE], installToKibana: false });
             visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-            waitForRulesTableToBeLoaded();
             reload();
           });
         });
@@ -175,7 +170,6 @@ describe(
               installToKibana: false,
             });
             visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-            waitForRulesTableToBeLoaded();
           });
         });
 

@@ -11,7 +11,6 @@ import {
   CUSTOM_RULES_BTN,
   DELETE_RULE_ACTION_BTN,
   RULES_SELECTED_TAG,
-  RULES_TABLE_INITIAL_LOADING_INDICATOR,
   RULE_CHECKBOX,
   RULE_NAME,
   RULE_SWITCH,
@@ -264,21 +263,6 @@ export const confirmRulesDelete = () => {
 export const waitForRulesTableToShow = () => {
   // Wait up to 5 minutes for the table to show up as in CI containers this can be very slow
   cy.get(RULES_MANAGEMENT_TABLE, { timeout: 300000 }).should('exist');
-};
-
-/**
- * Because the Rule Management page is relatively slow, in order to avoid timeouts and flakiness,
- * we almost always want to wait until the Rules table is "loaded" before we do anything with it.
- *
- * This task can be needed for some tests that e.g. check the table load/refetch/pagination logic.
- * It waits for the table's own loading indicator to show up and disappear.
- *
- * NOTE: Normally, we should not rely on loading indicators in tests, because due to their
- * dynamic nature it's possible to introduce race conditions and flakiness.
- */
-export const waitForRulesTableToBeLoaded = () => {
-  // Wait up to 5 minutes for the rules to load as in CI containers this can be very slow
-  cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR, { timeout: 300000 }).should('not.exist');
 };
 
 export const waitForRulesTableToBeRefreshed = () => {

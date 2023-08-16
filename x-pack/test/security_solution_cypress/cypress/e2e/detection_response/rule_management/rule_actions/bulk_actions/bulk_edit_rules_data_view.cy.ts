@@ -15,10 +15,10 @@ import {
 import { DATA_VIEW_DETAILS, INDEX_PATTERNS_DETAILS } from '../../../../../screens/rule_details';
 
 import {
-  waitForRulesTableToBeLoaded,
   goToRuleDetails,
   selectNumberOfRules,
   goToTheRuleDetailsOf,
+  expectManagementTableRules,
 } from '../../../../../tasks/alerts_detection_rules';
 
 import {
@@ -71,27 +71,66 @@ describe(
 
       postDataView(DATA_VIEW_ID);
 
-      createRule(getNewRule({ index: undefined, data_view_id: DATA_VIEW_ID, rule_id: '1' }));
-      createRule(getEqlRule({ index: undefined, data_view_id: DATA_VIEW_ID, rule_id: '2' }));
       createRule(
-        getNewThreatIndicatorRule({ index: undefined, data_view_id: DATA_VIEW_ID, rule_id: '3' })
+        getNewRule({
+          index: undefined,
+          data_view_id: DATA_VIEW_ID,
+          rule_id: '1',
+          name: 'New Rule Test 1',
+        })
       );
       createRule(
-        getNewThresholdRule({ index: undefined, data_view_id: DATA_VIEW_ID, rule_id: '4' })
+        getEqlRule({
+          index: undefined,
+          data_view_id: DATA_VIEW_ID,
+          rule_id: '2',
+          name: 'New EQL Rule',
+        })
       );
-      createRule(getNewTermsRule({ index: undefined, data_view_id: DATA_VIEW_ID, rule_id: '5' }));
+      createRule(
+        getNewThreatIndicatorRule({
+          index: undefined,
+          data_view_id: DATA_VIEW_ID,
+          rule_id: '3',
+          name: 'Threat Indicator Rule Test',
+        })
+      );
+      createRule(
+        getNewThresholdRule({
+          index: undefined,
+          data_view_id: DATA_VIEW_ID,
+          rule_id: '4',
+          name: 'Threshold Rule',
+        })
+      );
+      createRule(
+        getNewTermsRule({
+          index: undefined,
+          data_view_id: DATA_VIEW_ID,
+          rule_id: '5',
+          name: 'New Terms Rule',
+        })
+      );
       createRule(
         getNewRule({
           index: undefined,
           data_view_id: DATA_VIEW_ID,
           saved_id: 'mocked',
           rule_id: '6',
+          name: 'New Rule Test 2',
         })
       );
 
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 
-      waitForRulesTableToBeLoaded();
+      expectManagementTableRules([
+        'New Rule Test 1',
+        'New EQL Rule',
+        'Threat Indicator Rule Test',
+        'Threshold Rule',
+        'New Terms Rule',
+        'New Rule Test 2',
+      ]);
     });
 
     it('Add index patterns to custom rules with configured data view: all rules are skipped', () => {
@@ -214,7 +253,7 @@ describe('Bulk editing index patterns of rules with index patterns and rules wit
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 
-    waitForRulesTableToBeLoaded();
+    expectManagementTableRules(['with dataview', 'no data view']);
   });
 
   it('Add index patterns to custom rules: one rule is updated, one rule is skipped', () => {

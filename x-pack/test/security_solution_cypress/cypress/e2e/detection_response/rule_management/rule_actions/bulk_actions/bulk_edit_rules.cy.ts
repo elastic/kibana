@@ -29,7 +29,6 @@ import { TIMELINE_TEMPLATE_DETAILS } from '../../../../../screens/rule_details';
 import { EUI_FILTER_SELECT_ITEM } from '../../../../../screens/common/controls';
 
 import {
-  waitForRulesTableToBeLoaded,
   selectAllRules,
   goToTheRuleDetailsOf,
   selectNumberOfRules,
@@ -141,8 +140,6 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
     createRule(getNewTermsRule({ ...defaultRuleData, rule_id: '6' }));
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-
-    waitForRulesTableToBeLoaded();
   });
 
   describe('Prerequisites', () => {

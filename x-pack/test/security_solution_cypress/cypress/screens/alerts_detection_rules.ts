@@ -63,9 +63,6 @@ export const UPGRADE_SELECTED_RULES_BUTTON = '[data-test-subj="upgradeSelectedRu
 
 export const GO_BACK_TO_RULES_TABLE_BUTTON = '[data-test-subj="addRulesGoBackToRulesTableBtn"]';
 
-export const RULES_TABLE_INITIAL_LOADING_INDICATOR =
-  '[data-test-subj="initialLoadingPanelAllRulesTable"]';
-
 export const RULES_TABLE_REFRESH_INDICATOR = '[data-test-subj="loading-spinner"]';
 
 export const RULES_TABLE_AUTOREFRESH_INDICATOR = '[data-test-subj="loadingRulesInfoProgress"]';

@@ -8,7 +8,6 @@
 import { tag } from '../../../tags';
 
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
-import { waitForRulesTableToBeLoaded } from '../../../tasks/alerts_detection_rules';
 import { createAndInstallMockedPrebuiltRules } from '../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../../tasks/common';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
@@ -50,7 +49,6 @@ describe(
       });
       beforeEach(() => {
         createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2], installToKibana: false });
-        waitForRulesTableToBeLoaded();
       });
 
       it('installing prebuilt rules one by one', () => {
@@ -114,7 +112,6 @@ describe(
           rules: [UPDATED_RULE_1, UPDATED_RULE_2],
           installToKibana: false,
         });
-        waitForRulesTableToBeLoaded();
         reload();
       });
 
