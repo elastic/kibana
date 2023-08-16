@@ -42,10 +42,10 @@ describe('Rules table: sorting', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
     login();
-    createRule(getNewRule({ rule_id: '1' }));
-    createRule(getExistingRule({ rule_id: '2' }));
-    createRule(getNewOverrideRule({ rule_id: '3' }));
-    createRule(getNewThresholdRule({ rule_id: '4' }));
+    createRule(getNewRule({ rule_id: '1', enabled: false }));
+    createRule(getExistingRule({ rule_id: '2', enabled: false }));
+    createRule(getNewOverrideRule({ rule_id: '3', enabled: false }));
+    createRule(getNewThresholdRule({ rule_id: '4', enabled: false }));
   });
 
   beforeEach(() => {
@@ -70,8 +70,8 @@ describe('Rules table: sorting', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   });
 
   it('Pagination updates page number and results', () => {
-    createRule(getNewRule({ name: 'Test a rule', rule_id: '5' }));
-    createRule(getNewRule({ name: 'Not same as first rule', rule_id: '6' }));
+    createRule(getNewRule({ name: 'Test a rule', rule_id: '5', enabled: false }));
+    createRule(getNewRule({ name: 'Not same as first rule', rule_id: '6', enabled: false }));
 
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
     setRowsPerPageTo(5);
