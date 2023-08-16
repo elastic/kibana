@@ -314,7 +314,7 @@ export interface QueryTimelineById<TCache> {
   activeTimelineTab?: TimelineTabs;
   duplicate?: boolean;
   graphEventId?: string;
-  timelineId: string;
+  timelineId?: string;
   timelineType?: TimelineType;
   onError?: TimelineErrorCallback;
   onOpenTimeline?: (timeline: TimelineModel) => void;
