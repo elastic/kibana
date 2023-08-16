@@ -131,7 +131,6 @@ export class RangeSliderEmbeddable
   }
 
   private initialize = async () => {
-    debugger;
     const initialValue = this.getInput().value;
     if (!initialValue) {
       this.setInitializationFinished();
