@@ -57,10 +57,11 @@ const ecsObjectFields = getEcsObjectFields();
 
 /**
  * checks if path is a valid Ecs object type (object or flattened)
+ * geo_point also can be object
  */
 const getIsEcsFieldObject = (path: string) => {
   const ecsField = ecsFieldMap[path as keyof typeof ecsFieldMap];
-  return ['object', 'flattened'].includes(ecsField?.type) || ecsObjectFields[path];
+  return ['object', 'flattened', 'geo_point'].includes(ecsField?.type) || ecsObjectFields[path];
 };
 
 /**
@@ -116,6 +117,11 @@ const computeIsEcsCompliant = (value: SourceField, path: string) => {
 
   const ecsField = ecsFieldMap[path as keyof typeof ecsFieldMap];
   const isEcsFieldObject = getIsEcsFieldObject(path);
+
+  // do not validate geo_point, since it's very complex type that can be string/array/object
+  if (ecsField?.type === 'geo_point') {
+    return true;
+  }
 
   // validate if value is a long type
   if (ecsField?.type === 'long') {

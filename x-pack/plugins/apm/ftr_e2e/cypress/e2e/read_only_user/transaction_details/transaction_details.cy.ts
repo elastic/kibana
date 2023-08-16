@@ -151,4 +151,30 @@ describe('Transaction details', () => {
       });
     });
   });
+
+  describe('when changing filters which results in no trace samples', () => {
+    it('trace waterfall must reset to empty state', () => {
+      cy.visitKibana(
+        `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams(
+          {
+            ...timeRange,
+            transactionName: 'GET /api/product',
+          }
+        )}`
+      );
+
+      cy.getByTestSubj('apmWaterfallButton').should('exist');
+
+      cy.getByTestSubj('apmUnifiedSearchBar')
+        .type(`_id: "123"`)
+        .type('{enter}');
+
+      cy.getByTestSubj('apmWaterfallButton').should('not.exist');
+      cy.getByTestSubj('apmNoTraceFound').should('exist');
+
+      cy.reload();
+
+      cy.getByTestSubj('apmNoTraceFound').should('exist');
+    });
+  });
 });
