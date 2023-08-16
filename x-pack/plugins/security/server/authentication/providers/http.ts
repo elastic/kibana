@@ -103,8 +103,10 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
         this.jwt?.taggedRoutesOnly &&
         !request.route.options.tags.includes(ROUTE_TAG_ACCEPT_JWT)
       ) {
+        // Log a portion of the JWT signature to make debugging easier.
+        const jwtExcerpt = authorizationHeader.credentials.slice(-10);
         this.logger.error(
-          `Attempted to authenticate with JWT credentials against ${request.url.pathname}${request.url.search}, but it's not allowed. ` +
+          `Attempted to authenticate with JWT credentials (${jwtExcerpt}…) against ${request.url.pathname}${request.url.search}, but it's not allowed. ` +
             `Ensure that the route is defined with the "${ROUTE_TAG_ACCEPT_JWT}" tag.`
         );
         return AuthenticationResult.notHandled();

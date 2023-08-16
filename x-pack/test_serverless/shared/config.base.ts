@@ -18,12 +18,29 @@ export default async () => {
     elasticsearch: esTestConfig.getUrlParts(),
   };
 
+  const jwksPath = require.resolve('@kbn/security-api-integration-helpers/oidc/jwks.json');
   return {
     servers,
 
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
+      serverArgs: [
+        'xpack.security.authc.realms.file.file1.order=-100',
+
+        'xpack.security.authc.realms.native.native1.order=-99',
+
+        'xpack.security.authc.realms.jwt.jwt1.order=-98',
+        `xpack.security.authc.realms.jwt.jwt1.token_type=access_token`,
+        'xpack.security.authc.realms.jwt.jwt1.client_authentication.type=shared_secret',
+        `xpack.security.authc.realms.jwt.jwt1.client_authentication.shared_secret=my_super_secret`,
+        `xpack.security.authc.realms.jwt.jwt1.allowed_issuer=https://kibana.elastic.co/jwt/`,
+        `xpack.security.authc.realms.jwt.jwt1.allowed_subjects=elastic-agent`,
+        'xpack.security.authc.realms.jwt.jwt1.allowed_audiences=elasticsearch',
+        `xpack.security.authc.realms.jwt.jwt1.allowed_signature_algorithms=[RS256]`,
+        `xpack.security.authc.realms.jwt.jwt1.claims.principal=sub`,
+        `xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path=${jwksPath}`,
+      ],
     },
 
     kbnTestServer: {

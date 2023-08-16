@@ -62,12 +62,14 @@ function getMockOptions({
   selector,
   accessAgreementMessage,
   customLogoutURL,
+  configContext = {},
 }: {
   providers?: Record<string, unknown> | string[];
   http?: Partial<AuthenticatorOptions['config']['authc']['http']>;
   selector?: AuthenticatorOptions['config']['authc']['selector'];
   accessAgreementMessage?: string;
   customLogoutURL?: string;
+  configContext?: Record<string, unknown>;
 } = {}) {
   const auditService = auditServiceMock.create();
   auditLogger = auditLoggerMock.create();
@@ -86,10 +88,10 @@ function getMockOptions({
     loggers: loggingSystemMock.create(),
     getServerBaseURL: jest.fn(),
     config: createConfig(
-      ConfigSchema.validate({
-        authc: { selector, providers, http },
-        ...accessAgreementObj,
-      }),
+      ConfigSchema.validate(
+        { authc: { selector, providers, http }, ...accessAgreementObj },
+        configContext
+      ),
       loggingSystemMock.create().get(),
       { isTLSEnabled: false }
     ),
@@ -314,6 +316,23 @@ describe('Authenticator', () => {
           jest.requireMock('./providers/http').HTTPAuthenticationProvider
         ).toHaveBeenCalledWith(expect.anything(), {
           supportedSchemes: new Set(['apikey', 'basic', 'bearer']),
+        });
+      });
+
+      it('includes JWT options if specified', () => {
+        new Authenticator(
+          getMockOptions({
+            providers: { basic: { basic1: { order: 0 } } },
+            http: { jwt: { taggedRoutesOnly: true } },
+            configContext: { serverless: true },
+          })
+        );
+
+        expect(
+          jest.requireMock('./providers/http').HTTPAuthenticationProvider
+        ).toHaveBeenCalledWith(expect.anything(), {
+          supportedSchemes: new Set(['apikey', 'bearer', 'basic']),
+          jwt: { taggedRoutesOnly: true },
         });
       });
 
