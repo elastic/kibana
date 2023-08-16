@@ -437,7 +437,11 @@ describe.skip('fleet usage telemetry', () => {
           },
         ],
         components_status: [
-          /* To uncomment when ES new snapshot will be built
+          {
+            id: 'beat/metrics-monitoring',
+            status: 'HEALTHY',
+            count: 2,
+          },
           {
             id: 'filestream-monitoring',
             status: 'HEALTHY',
@@ -448,11 +452,6 @@ describe.skip('fleet usage telemetry', () => {
             status: 'UNHEALTHY',
             count: 1,
           },
-          {
-            id: 'beat/metrics-monitoring',
-            status: 'HEALTHY',
-            count: 2,
-          }, */
         ],
         fleet_server_config: {
           policies: [
