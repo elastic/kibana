@@ -75,6 +75,7 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/core-saved-objects-server",
     "@kbn/monaco",
-    "@kbn/io-ts-utils"
+    "@kbn/io-ts-utils",
+    "@kbn/cypress-config"
   ]
 }
