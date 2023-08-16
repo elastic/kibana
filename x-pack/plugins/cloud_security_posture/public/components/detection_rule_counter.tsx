@@ -30,7 +30,7 @@ interface DetectionRuleCounterProps {
 }
 
 export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounterProps) => {
-  const { data, isLoading } = useFetchDetectionRulesByTags(tags);
+  const { data: rulesData, isLoading: ruleIsLoading } = useFetchDetectionRulesByTags(tags);
   const { data: alertsData, isLoading: alertsIsLoading } = useFetchDetectionRulesAlertsStatus(tags);
 
   const [isCreateRuleLoading, setIsCreateRuleLoading] = useState(false);
@@ -68,8 +68,8 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
   }, [createRuleFn, http, notifications, queryClient]);
 
   return (
-    <EuiSkeletonText lines={1} size="m" isLoading={isLoading || alertsIsLoading}>
-      {data?.total === 0 ? (
+    <EuiSkeletonText lines={1} size="m" isLoading={ruleIsLoading || alertsIsLoading}>
+      {rulesData?.total === 0 ? (
         <>
           <EuiText size="s">
             {isCreateRuleLoading ? (
@@ -113,7 +113,7 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
             <FormattedMessage
               id="xpack.csp.findingsFlyout.alerts.ruleCount"
               defaultMessage="{ruleCount, plural, one {# rule} other {# rules}}"
-              values={{ ruleCount: data?.total || 0 }}
+              values={{ ruleCount: rulesData?.total || 0 }}
             />
           </EuiLink>
         </>
