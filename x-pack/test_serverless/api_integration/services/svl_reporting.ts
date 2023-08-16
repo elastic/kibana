@@ -14,6 +14,9 @@ const REPORTING_ROLE = 'reporting_user_role';
 const REPORTING_USER_PASSWORD = 'reporting_user-password';
 const REPORTING_USER_USERNAME = 'reporting_user';
 
+/**
+ * Services to create roles and users for security testing
+ */
 export function SvlReportingServiceProvider({ getService }: FtrProviderContext) {
   const security = getService('security');
 
