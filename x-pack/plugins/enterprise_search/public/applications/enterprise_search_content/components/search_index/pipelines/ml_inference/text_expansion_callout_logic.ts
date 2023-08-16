@@ -69,7 +69,7 @@ export interface TextExpansionCalloutValues {
   startTextExpansionModelStatus: Status;
   textExpansionModel: FetchTextExpansionModelResponse | undefined;
   textExpansionModelPollTimeoutId: null | ReturnType<typeof setTimeout>;
-  textExpansionError: TextExpansionCalloutErrors | undefined;
+  textExpansionError: TextExpansionCalloutErrors | null;
 }
 
 /**

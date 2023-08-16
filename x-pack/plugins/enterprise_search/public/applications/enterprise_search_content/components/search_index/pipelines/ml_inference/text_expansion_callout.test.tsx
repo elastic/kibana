@@ -37,6 +37,7 @@ const DEFAULT_VALUES = {
   isModelDownloaded: false,
   isModelStarted: false,
   isStartButtonDisabled: false,
+  textExpansionError: null,
 };
 
 describe('TextExpansionCallOut', () => {
