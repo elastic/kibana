@@ -22,8 +22,5 @@ export default createTestConfig({
     '--server.publicBaseUrl=https://localhost:5601',
   ],
   // import only tests that require feature flags
-  testFiles: [
-    require.resolve('./threshold_rule'),
-    require.resolve('./apm_api_integration/feature_flags.ts'),
-  ],
+  testFiles: [require.resolve('./threshold_rule')],
 });

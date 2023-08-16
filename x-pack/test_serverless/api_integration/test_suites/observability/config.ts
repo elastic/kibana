@@ -14,7 +14,8 @@ export default createTestConfig({
     require.resolve('../common'),
     require.resolve('./fleet/fleet.ts'),
     require.resolve('./telemetry/snapshot_telemetry'),
-    require.resolve('./cases/post_case'),
+    require.resolve('./cases'),
+    require.resolve('./apm_api_integration/feature_flags.ts'),
   ],
   junit: {
     reportName: 'Serverless Observability API Integration Tests',

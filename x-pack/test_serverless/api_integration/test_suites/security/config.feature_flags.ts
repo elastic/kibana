@@ -16,5 +16,5 @@ export default createTestConfig({
   // add feature flags
   kbnServerArgs: [],
   // import only tests that require feature flags
-  testFiles: [],
+  testFiles: [require.resolve('./feature_flag_test_suite_template')],
 });
