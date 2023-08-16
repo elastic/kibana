@@ -7,13 +7,6 @@
 
 import './app.scss';
 import React, { useContext, useMemo, useRef } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPage,
-  EuiPageBody,
-  EuiPageSection,
-} from '@elastic/eui';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { SCREENSHOTTING_EXPRESSION, SCREENSHOTTING_EXPRESSION_INPUT } from '../../common';
@@ -39,24 +32,16 @@ export function App() {
   });
 
   return (
-    <EuiPage paddingSize="none" data-shared-items-container data-shared-items-count={1}>
-      <EuiPageBody>
-        <EuiPageSection
-          paddingSize="none"
-          className="eui-fullHeight"
-        >
-          <EuiFlexGroup className="eui-fullHeight" gutterSize="none" direction="column">
-            <EuiFlexItem className="eui-fullHeight">
-              <div
-                data-shared-item={!isEmpty || !error || null}
-                data-render-error={!isEmpty && error ? error.message : null}
-                ref={elementRef}
-                className="scrExpression"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPageSection>
-      </EuiPageBody>
-    </EuiPage>
+    <div
+      data-shared-item={!isEmpty || !error || null}
+      data-render-error={!isEmpty && error ? error.message : null}
+      ref={elementRef}
+      className="scrExpression"
+      style={{
+        background: 'white',
+        width: '100vw',
+        height: '100vh',
+      }}
+    />
   );
 }
