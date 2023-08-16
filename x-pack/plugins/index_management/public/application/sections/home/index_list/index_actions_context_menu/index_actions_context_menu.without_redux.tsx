@@ -30,9 +30,8 @@ export interface ReduxProps {
   showStats: ({}: { indexNames: string[] }) => void; // opens the stats tab for the 1st index
   editIndex: ({}: { indexNames: string[] }) => void; // opens the edit settings tab for the 1st index
 
-  indices: Index[];
   indexStatusByName: {
-    [indexName: string]: Index['status'];
+    [indexName: string]: Index['status'] | undefined;
   };
   reloadIndices: typeof reloadIndices;
 
@@ -58,9 +57,27 @@ interface Props {
   iconSide?: EuiButtonProps['iconSide'];
   iconType?: EuiButtonProps['iconType'];
   label?: React.Component;
+
+  // instead of getting indices data from the redux store, pass it as a prop
+  indices: Index[];
 }
 
-export const IndexActionsContextMenuWithoutRedux: FunctionComponent<Props> = ({ indexNames }) => {
+const getIndexStatusByName = (
+  indexNames: string[],
+  indices: Index[]
+): ReduxProps['indexStatusByName'] => {
+  const indexStatusByName: ReduxProps['indexStatusByName'] = {};
+  indexNames.forEach((indexName) => {
+    const { status } = indices.find((index) => index.name === indexName) ?? {};
+    indexStatusByName[indexName] = status;
+  });
+  return indexStatusByName;
+};
+
+export const IndexActionsContextMenuWithoutRedux: FunctionComponent<Props> = ({
+  indexNames,
+  indices,
+}) => {
   const props: ReduxProps = {
     closeIndices: async () => {},
     openIndices: async () => {},
@@ -71,16 +88,16 @@ export const IndexActionsContextMenuWithoutRedux: FunctionComponent<Props> = ({ 
     forcemergeIndices: async () => {},
     deleteIndices: async () => {},
 
+    // there actions are not displayed on the index details page
     showSettings: () => {},
     showMapping: () => {},
     showStats: () => {},
     editIndex: () => {},
 
-    indices: [],
-    indexStatusByName: {},
+    indexStatusByName: getIndexStatusByName(indexNames, indices),
     reloadIndices: async () => {},
 
     performExtensionAction: async () => {},
   };
-  return <IndexActionsContextMenu indexNames={indexNames} {...props} />;
+  return <IndexActionsContextMenu indexNames={indexNames} indices={indices} {...props} />;
 };

@@ -86,11 +86,11 @@ export const DetailsPage: React.FunctionComponent<
     }));
   }, [indexDetailsSection, onSectionChange]);
 
-  const { isLoading, error, resendRequest } = useLoadIndex(indexName);
+  const { isLoading, error, resendRequest, data } = useLoadIndex(indexName);
   if (isLoading) {
     return <DetailsPageLoading />;
   }
-  if (error) {
+  if (error || !data) {
     return <DetailsPageError indexName={indexName} resendRequest={resendRequest} />;
   }
 
@@ -119,7 +119,7 @@ export const DetailsPage: React.FunctionComponent<
         bottomBorder
         rightSideItems={[
           <DiscoverLink indexName={indexName} asButton={true} />,
-          <IndexActionsContextMenuWithoutRedux indexNames={[indexName]} />,
+          <IndexActionsContextMenuWithoutRedux indexNames={[indexName]} indices={[data]} />,
         ]}
         tabs={headerTabs}
       />
