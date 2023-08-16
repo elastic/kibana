@@ -17,6 +17,7 @@ import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   success: boolean;
@@ -32,14 +33,16 @@ export const bulkCreateFactory =
   (
     alertWithPersistence: PersistenceAlertService,
     refreshForBulkCreate: RefreshTypes,
-    ruleExecutionLogger: IRuleExecutionLogForExecutors
+    ruleExecutionLogger: IRuleExecutionLogForExecutors,
+    experimentalFeatures?: ExperimentalFeatures
   ) =>
   async <T extends BaseFieldsLatest>(
     wrappedDocs: Array<WrappedFieldsLatest<T>>,
     maxAlerts?: number,
     enrichAlerts?: (
       alerts: Array<Pick<WrappedFieldsLatest<T>, '_id' | '_source'>>,
-      params: { spaceId: string }
+      params: { spaceId: string },
+      experimentalFeatures?: ExperimentalFeatures
     ) => Promise<Array<Pick<WrappedFieldsLatest<T>, '_id' | '_source'>>>
   ): Promise<GenericBulkCreateResponse<T>> => {
     if (wrappedDocs.length === 0) {
@@ -63,7 +66,7 @@ export const bulkCreateFactory =
       enrichAlertsWrapper = async (alerts, params) => {
         enrichmentsTimeStart = performance.now();
         try {
-          const enrichedAlerts = await enrichAlerts(alerts, params);
+          const enrichedAlerts = await enrichAlerts(alerts, params, experimentalFeatures);
           return enrichedAlerts;
         } catch (error) {
           ruleExecutionLogger.error(`Enrichments failed ${error}`);

@@ -14,62 +14,35 @@ import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
 import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import {
-  type XYLayerOptions,
-  type MetricLayerOptions,
-  type FormulaValueConfig,
-  type LensAttributes,
-  type StaticValueConfig,
   type LensVisualizationState,
   type XYVisualOptions,
   type Chart,
+  type LensAttributes,
   LensAttributesBuilder,
-  XYDataLayer,
-  MetricLayer,
   XYChart,
   MetricChart,
+  MetricLayer,
+  XYDataLayer,
   XYReferenceLinesLayer,
 } from '@kbn/lens-embeddable-utils';
 
 import { InfraClientSetupDeps } from '../types';
 import { useLazyRef } from './use_lazy_ref';
-
-type Options = XYLayerOptions | MetricLayerOptions;
-
-interface StaticValueLayer {
-  data: StaticValueConfig[];
-  layerType: 'referenceLine';
-}
-
-interface FormulaValueLayer<
-  TOptions extends Options,
-  TData extends FormulaValueConfig[] | FormulaValueConfig
-> {
-  options?: TOptions;
-  data: TData;
-  layerType: 'data';
-}
-
-type XYLayerConfig = StaticValueLayer | FormulaValueLayer<XYLayerOptions, FormulaValueConfig[]>;
-
-export type UseLensAttributesXYLayerConfig = XYLayerConfig | XYLayerConfig[];
-export type UseLensAttributesMetricLayerConfig = FormulaValueLayer<
-  MetricLayerOptions,
-  FormulaValueConfig
->;
+import type { MetricChartLayerParams, XYChartLayerParams } from '../common/visualizations/types';
 
 interface UseLensAttributesBaseParams {
   dataView?: DataView;
   title?: string;
 }
 
-interface UseLensAttributesXYChartParams extends UseLensAttributesBaseParams {
-  layers: UseLensAttributesXYLayerConfig;
+export interface UseLensAttributesXYChartParams extends UseLensAttributesBaseParams {
+  layers: XYChartLayerParams[];
   visualizationType: 'lnsXY';
   visualOptions?: XYVisualOptions;
 }
 
-interface UseLensAttributesMetricChartParams extends UseLensAttributesBaseParams {
-  layers: UseLensAttributesMetricLayerConfig;
+export interface UseLensAttributesMetricChartParams extends UseLensAttributesBaseParams {
+  layers: MetricChartLayerParams;
   visualizationType: 'lnsMetric';
 }
 
@@ -157,7 +130,7 @@ export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesPara
   const getFormula = () => {
     const firstDataLayer = [
       ...(Array.isArray(params.layers) ? params.layers : [params.layers]),
-    ].find((p) => p.layerType === 'data');
+    ].find((p) => p.type === 'visualization');
 
     if (!firstDataLayer) {
       return '';
@@ -187,21 +160,21 @@ const chartFactory = ({
         throw new Error(`Invalid layers type. Expected an array of layers.`);
       }
 
-      const xyLayerFactory = (layer: XYLayerConfig) => {
-        switch (layer.layerType) {
-          case 'data': {
+      const xyLayerFactory = (layer: XYChartLayerParams) => {
+        switch (layer.type) {
+          case 'visualization': {
             return new XYDataLayer({
               data: layer.data,
               options: layer.options,
             });
           }
-          case 'referenceLine': {
+          case 'referenceLines': {
             return new XYReferenceLinesLayer({
               data: layer.data,
             });
           }
           default:
-            throw new Error(`Invalid layerType`);
+            throw new Error(`Invalid layer type`);
         }
       };
 
@@ -217,7 +190,7 @@ const chartFactory = ({
 
     case 'lnsMetric':
       if (Array.isArray(params.layers)) {
-        throw new Error(`Invalid layers type. Expected a single layer object.`);
+        throw new Error(`Invalid layer type. Expected a single layer object.`);
       }
 
       return new MetricChart({

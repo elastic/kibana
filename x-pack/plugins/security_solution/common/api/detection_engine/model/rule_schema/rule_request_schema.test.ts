@@ -1289,6 +1289,36 @@ describe('rules schema', () => {
       expect(message.schema).toEqual({});
       expect(getPaths(left(message.errors))).toEqual(['invalid keys "data_view_id"']);
     });
+
+    test('You can optionally send in an array of investigation_fields', () => {
+      const payload: RuleCreateProps = {
+        ...getCreateRulesSchemaMock(),
+        investigation_fields: ['field1', 'field2'],
+      };
+
+      const decoded = RuleCreateProps.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+
+    test('You cannot send in an array of investigation_fields that are numbers', () => {
+      const payload = {
+        ...getCreateRulesSchemaMock(),
+        investigation_fields: [0, 1, 2],
+      };
+
+      const decoded = RuleCreateProps.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "0" supplied to "investigation_fields"',
+        'Invalid value "1" supplied to "investigation_fields"',
+        'Invalid value "2" supplied to "investigation_fields"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
   });
 
   describe('response', () => {

@@ -87,6 +87,7 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
     const { ruleDiff, ruleVersions } = result;
     const installedCurrentVersion = ruleVersions.input.current;
     const diffableCurrentVersion = ruleVersions.output.current;
+    const diffableTargetVersion = ruleVersions.output.target;
     invariant(installedCurrentVersion != null, 'installedCurrentVersion not found');
 
     return {
@@ -94,6 +95,7 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
       rule_id: installedCurrentVersion.rule_id,
       revision: installedCurrentVersion.revision,
       rule: diffableCurrentVersion,
+      target_rule: diffableTargetVersion,
       diff: {
         fields: pickBy<ThreeWayDiff<unknown>>(
           ruleDiff.fields,
