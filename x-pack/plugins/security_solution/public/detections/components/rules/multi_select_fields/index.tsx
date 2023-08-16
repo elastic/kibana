@@ -11,40 +11,44 @@ import { EuiToolTip } from '@elastic/eui';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { FieldHook } from '../../../../shared_imports';
 import { Field } from '../../../../shared_imports';
-import { GROUP_BY_FIELD_PLACEHOLDER, GROUP_BY_FIELD_LICENSE_WARNING } from './translations';
+import { FIELD_PLACEHOLDER } from './translations';
 
-interface GroupByFieldsProps {
+interface MultiSelectAutocompleteProps {
   browserFields: DataViewFieldBase[];
   isDisabled: boolean;
   field: FieldHook;
+  fullWidth?: boolean;
+  disabledText?: string;
 }
 
 const FIELD_COMBO_BOX_WIDTH = 410;
 
-const fieldDescribedByIds = 'detectionEngineStepDefineRuleGroupByField';
+const fieldDescribedByIds = 'detectionEngineMultiSelectAutocompleteField';
 
-export const GroupByComponent: React.FC<GroupByFieldsProps> = ({
+export const MultiSelectAutocompleteComponent: React.FC<MultiSelectAutocompleteProps> = ({
   browserFields,
+  disabledText,
   isDisabled,
   field,
-}: GroupByFieldsProps) => {
+  fullWidth = false,
+}: MultiSelectAutocompleteProps) => {
   const fieldEuiFieldProps = useMemo(
     () => ({
       fullWidth: true,
       noSuggestions: false,
       options: browserFields.map((browserField) => ({ label: browserField.name })),
-      placeholder: GROUP_BY_FIELD_PLACEHOLDER,
+      placeholder: FIELD_PLACEHOLDER,
       onCreateOption: undefined,
-      style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },
+      ...(fullWidth ? {} : { style: { width: `${FIELD_COMBO_BOX_WIDTH}px` } }),
       isDisabled,
     }),
-    [browserFields, isDisabled]
+    [browserFields, isDisabled, fullWidth]
   );
   const fieldComponent = (
     <Field field={field} idAria={fieldDescribedByIds} euiFieldProps={fieldEuiFieldProps} />
   );
   return isDisabled ? (
-    <EuiToolTip position="right" content={GROUP_BY_FIELD_LICENSE_WARNING}>
+    <EuiToolTip position="right" content={disabledText}>
       {fieldComponent}
     </EuiToolTip>
   ) : (
@@ -52,4 +56,4 @@ export const GroupByComponent: React.FC<GroupByFieldsProps> = ({
   );
 };
 
-export const GroupByFields = React.memo(GroupByComponent);
+export const MultiSelectFieldsAutocomplete = React.memo(MultiSelectAutocompleteComponent);
