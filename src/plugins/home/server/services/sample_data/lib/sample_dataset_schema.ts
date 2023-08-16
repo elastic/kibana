@@ -62,6 +62,15 @@ export const sampleDataSchema = schema.object({
       }
     },
   }),
+  index: schema.maybe(
+    schema.string({
+      validate(value: string) {
+        if (!idRegExp.test(value)) {
+          return `Does not satisfy regexp: ${idRegExp.toString()}`;
+        }
+      },
+    })
+  ),
   name: schema.string(),
   description: schema.string(),
   previewImagePath: schema.string(),
@@ -69,7 +78,7 @@ export const sampleDataSchema = schema.object({
   iconPath: schema.maybe(schema.string()), // relative path to icon. Used for display in the Fleet-integrations app
 
   // saved object id of main dashboard for sample data set
-  overviewDashboard: schema.string(),
+  overviewDashboard: schema.maybe(schema.string()),
 
   // saved object id of default index-pattern for sample data set
   defaultIndex: schema.string(),

@@ -23,6 +23,7 @@ import {
   logsSpecProvider,
   ecommerceSpecProvider,
   logsTSDBSpecProvider,
+  auditbeatSpecProvider,
 } from './data_sets';
 import { createListRoute, createInstallRoute } from './routes';
 import { makeSampleDataUsageCollector, usage } from './usage';
@@ -51,13 +52,17 @@ export class SampleDataRegistry {
       );
     }
 
-    const dashboardSavedObjectJson = value.savedObjects.find((savedObjectJson: any) => {
-      return savedObjectJson.type === 'dashboard' && savedObjectJson.id === value.overviewDashboard;
-    });
-    if (!dashboardSavedObjectJson) {
-      throw new Error(
-        `Unable to register sample dataset spec, overviewDashboard: "${value.overviewDashboard}" does not exist in savedObject list.`
-      );
+    if (value.overviewDashboard) {
+      const dashboardSavedObjectJson = value.savedObjects.find((savedObjectJson: any) => {
+        return (
+          savedObjectJson.type === 'dashboard' && savedObjectJson.id === value.overviewDashboard
+        );
+      });
+      if (!dashboardSavedObjectJson) {
+        throw new Error(
+          `Unable to register sample dataset spec, overviewDashboard: "${value.overviewDashboard}" does not exist in savedObject list.`
+        );
+      }
     }
     this.sampleDatasets.push(value);
   }
@@ -86,6 +91,7 @@ export class SampleDataRegistry {
     this.registerSampleDataSet(flightsSpecProvider);
     this.registerSampleDataSet(logsSpecProvider);
     this.registerSampleDataSet(ecommerceSpecProvider);
+    this.registerSampleDataSet(auditbeatSpecProvider);
     if (isDevMode) {
       this.registerSampleDataSet(logsTSDBSpecProvider);
     }

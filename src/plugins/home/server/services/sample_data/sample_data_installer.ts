@@ -72,7 +72,7 @@ export class SampleDataInstaller {
 
     for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
       const dataIndex = sampleDataset.dataIndices[i];
-      const indexName = createIndexName(sampleDataset.id, dataIndex.id);
+      const indexName = createIndexName(sampleDataset.id, dataIndex.id, sampleDataset.index);
       // clean up any old installation of dataset
       await this.uninstallDataIndex(sampleDataset, dataIndex);
       await this.installDataIndex(sampleDataset, dataIndex);
@@ -113,7 +113,7 @@ export class SampleDataInstaller {
   }
 
   private async uninstallDataIndex(dataset: SampleDatasetSchema, dataIndex: DataIndexSchema) {
-    let index = createIndexName(dataset.id, dataIndex.id);
+    let index = createIndexName(dataset.id, dataIndex.id, dataset.index);
 
     try {
       // if the sample data was reindexed using UA, the index name is actually an alias pointing to the reindexed
@@ -154,7 +154,7 @@ export class SampleDataInstaller {
   }
 
   private async installDataIndex(dataset: SampleDatasetSchema, dataIndex: DataIndexSchema) {
-    const index = createIndexName(dataset.id, dataIndex.id);
+    const index = createIndexName(dataset.id, dataIndex.id, dataset.index);
     try {
       if (dataIndex.isDataStream) {
         const request = {

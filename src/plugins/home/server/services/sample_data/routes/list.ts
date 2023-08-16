@@ -55,7 +55,9 @@ export const createListRoute = (
           description: sampleDataset.description,
           previewImagePath: sampleDataset.previewImagePath,
           darkPreviewImagePath: sampleDataset.darkPreviewImagePath,
-          overviewDashboard: findObjectId('dashboard', sampleDataset.overviewDashboard),
+          overviewDashboard: sampleDataset.overviewDashboard
+            ? findObjectId('dashboard', sampleDataset.overviewDashboard)
+            : null,
           appLinks: sortBy(appLinks, 'order'),
           defaultIndex: findObjectId('index-pattern', sampleDataset.defaultIndex),
           dataIndices: sampleDataset.dataIndices.map(({ id }) => ({ id })),
@@ -95,11 +97,13 @@ async function getSampleDatasetStatus(
   existingSampleObjects: ExistingSampleObjects,
   sampleDataset: SampleDatasetSchema
 ): Promise<{ status: string; statusMsg?: string }> {
-  const dashboard = existingSampleObjects
-    .get(sampleDataset.id)!
-    .find(({ type, id }) => type === 'dashboard' && id === sampleDataset.overviewDashboard);
-  if (!dashboard?.foundObjectId) {
-    return { status: NOT_INSTALLED };
+  if (sampleDataset.overviewDashboard) {
+    const dashboard = existingSampleObjects
+      .get(sampleDataset.id)!
+      .find(({ type, id }) => type === 'dashboard' && id === sampleDataset.overviewDashboard);
+    if (!dashboard?.foundObjectId) {
+      return { status: NOT_INSTALLED };
+    }
   }
 
   const { elasticsearch } = await context.core;
