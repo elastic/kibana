@@ -247,6 +247,7 @@ describe('Querybar Menu component', () => {
           },
           filters: [],
         },
+        namespaces: ['default'],
       },
     };
     const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
