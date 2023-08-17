@@ -16,7 +16,7 @@ interface DashboardDrilldownOptionsProps {
   onOptionChange: (newOptions: Partial<DashboardDrilldownOptions>) => void;
 }
 
-const DashboardDrilldownOptionToggles = ({
+const DashboardDrilldownOptionsComponent = ({
   options,
   onOptionChange,
 }: DashboardDrilldownOptionsProps) => {
@@ -58,4 +58,4 @@ const DashboardDrilldownOptionToggles = ({
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export
-export default DashboardDrilldownOptionToggles;
+export default DashboardDrilldownOptionsComponent;

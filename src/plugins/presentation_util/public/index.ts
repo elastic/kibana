@@ -33,11 +33,11 @@ export {
   LazyLabsFlyout,
   LazyDashboardPicker,
   LazySavedObjectSaveModalDashboard,
-  LazyDashboardDrilldownOptionToggles,
   withSuspense,
   LazyDataViewPicker,
   LazyFieldPicker,
   FloatingActions,
+  LazyDashboardDrilldownOptionsComponent,
 } from './components';
 
 export {

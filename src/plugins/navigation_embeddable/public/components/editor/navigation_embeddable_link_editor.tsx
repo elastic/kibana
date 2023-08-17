@@ -28,9 +28,13 @@ import {
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import {
+  UrlDrilldownCollectConfig,
+  UrlDrilldownConfig,
+} from '@kbn/ui-actions-enhanced-plugin/public';
+import {
   withSuspense,
   DashboardDrilldownOptions,
-  LazyDashboardDrilldownOptionToggles,
+  LazyDashboardDrilldownOptionsComponent,
 } from '@kbn/presentation-util-plugin/public';
 
 import {
@@ -45,7 +49,10 @@ import { NavigationEmbeddableUnorderedLink } from '../../editor/open_link_editor
 import { ExternalLinkDestinationPicker } from '../external_link/external_link_destination_picker';
 import { DashboardLinkDestinationPicker } from '../dashboard_link/dashboard_link_destination_picker';
 
-const DashboardDrilldownOptionToggles = withSuspense(LazyDashboardDrilldownOptionToggles, null);
+const DashboardDrilldownOptionsComponent = withSuspense(
+  LazyDashboardDrilldownOptionsComponent,
+  null
+);
 
 export const NavigationEmbeddableLinkEditor = ({
   link,
@@ -69,6 +76,8 @@ export const NavigationEmbeddableLinkEditor = ({
     useCurrentDateRange: true,
     useCurrentFilters: true,
   });
+
+  // | UrlDrilldownConfig
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
     return ([DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE] as NavigationLinkType[]).map((type) => {
@@ -187,12 +196,13 @@ export const NavigationEmbeddableLinkEditor = ({
 
           <EuiFormRow label={'Options'}>
             {selectedLinkType === DASHBOARD_LINK_TYPE ? (
-              <DashboardDrilldownOptionToggles
+              <DashboardDrilldownOptionsComponent
                 options={linkOptions}
                 onOptionChange={(change) => setLinkOptions({ ...linkOptions, ...change })}
               />
             ) : (
-              <>Link config</>
+              // <UrlDrilldownCollectConfig />
+              <>Config</>
             )}
           </EuiFormRow>
         </EuiForm>
