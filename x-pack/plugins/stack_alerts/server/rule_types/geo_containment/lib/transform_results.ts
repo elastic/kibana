@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { GeoContainmentAlertInstanceState } from '../types';
 
@@ -35,6 +36,16 @@ export function transformResults(
       resultsMap.set(entityName, entityResults);
     }
   }
+
+  // TODO remove sort
+  // legacy algorithm sorted entity hits oldest to newest for an undocumented reason
+  // preserving sort to avoid unknown breaking changes
+  resultsMap.forEach((value, key) => {
+    if (value.length > 1) {
+      // sort oldest to newest
+      resultsMap.set(key, _.orderBy(value, ['dateInShape'], ['desc', 'asc']));
+    }
+  });
 
   return resultsMap;
 }
