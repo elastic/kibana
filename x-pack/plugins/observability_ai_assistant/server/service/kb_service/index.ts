@@ -37,9 +37,16 @@ export class KnowledgeBaseService {
 
   constructor(private readonly dependencies: Dependencies) {
     this.ensureTaskScheduled();
+    this.status().then((response) => {
+      this.hasSetup = response.ready;
+
+      if (response.ready) {
+        this.processQueue();
+      }
+    });
   }
 
-  private ensureTaskScheduled() {
+  private ensureTaskScheduled = () => {
     this.dependencies.taskManagerStart
       .ensureScheduled({
         taskType: INDEX_QUEUED_DOCUMENTS_TASK_TYPE,
@@ -61,14 +68,16 @@ export class KnowledgeBaseService {
         this.dependencies.logger.error(`Failed to schedule document queue task`);
         this.dependencies.logger.error(err);
       });
-  }
+  };
 
-  async processQueue() {
+  processQueue = async () => {
     if (!this.entryQueue.length) {
       return;
     }
 
-    if (!(await this.status()).ready) {
+    const status = await this.status();
+
+    if (!status.ready) {
       this.dependencies.logger.debug(`Bailing on document queue task: KB is not ready yet`);
       return;
     }
@@ -92,9 +101,9 @@ export class KnowledgeBaseService {
     );
 
     this.dependencies.logger.info('Indexed all queued entries into KB');
-  }
+  };
 
-  async store(entries: KnowledgeBaseEntry[]) {
+  store = async (entries: KnowledgeBaseEntry[]): Promise<void> => {
     if (!entries.length) {
       return;
     }
@@ -107,12 +116,11 @@ export class KnowledgeBaseService {
     const limiter = pLimit(5);
 
     const limitedFunctions = entries.map((entry) => limiter(() => this.summarise({ entry })));
-
-    Promise.all(limitedFunctions).catch((err) => {
+    Promise.allSettled(limitedFunctions).catch((err) => {
       this.dependencies.logger.error(`Failed to index all knowledge base entries`);
       this.dependencies.logger.error(err);
     });
-  }
+  };
 
   recall = async ({
     user,
@@ -202,6 +210,7 @@ export class KnowledgeBaseService {
       const elserModelStats = modelStats.trained_model_stats[0];
       const deploymentState = elserModelStats.deployment_stats?.state;
       const allocationState = elserModelStats.deployment_stats?.allocation_status.state;
+
       return {
         ready: deploymentState === 'started' && allocationState === 'fully_allocated',
         deployment_state: deploymentState,

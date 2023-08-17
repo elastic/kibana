@@ -18,13 +18,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
-
 export function KnowledgeBaseCallout({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   let content: React.ReactNode;
 
   let color: 'primary' | 'danger' | 'plain' = 'primary';
 
-  if (knowledgeBase.status.loading) {
+  if (knowledgeBase.status.loading || knowledgeBase.status.value?.ready === false) {
     content = (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>

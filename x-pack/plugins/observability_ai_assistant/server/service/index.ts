@@ -262,7 +262,7 @@ export class ObservabilityAIAssistantService {
     >
   ): Promise<void> {
     await this.init();
-    this.kbService!.store(
+    this.kbService?.store(
       entries.map((entry) => ({
         ...entry,
         '@timestamp': new Date().toISOString(),
