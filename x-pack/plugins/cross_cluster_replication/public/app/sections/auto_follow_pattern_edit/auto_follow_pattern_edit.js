@@ -94,6 +94,7 @@ export class AutoFollowPatternEdit extends PureComponent {
 
     return (
       <EuiPageTemplate.EmptyPrompt
+        color="danger"
         iconType="warning"
         title={
           <h2>
@@ -123,9 +124,7 @@ export class AutoFollowPatternEdit extends PureComponent {
   }
 
   renderLoading(loadingTitle) {
-    return (
-      <SectionLoading>{loadingTitle}</SectionLoading>
-    );
+    return <SectionLoading>{loadingTitle}</SectionLoading>;
   }
 
   render() {

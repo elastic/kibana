@@ -97,9 +97,7 @@ export class FollowerIndexEdit extends PureComponent {
   closeConfirmModal = () => this.setState({ showConfirmModal: false });
 
   renderLoading(loadingTitle) {
-    return (
-      <SectionLoading>{loadingTitle}</SectionLoading>
-    );
+    return <SectionLoading>{loadingTitle}</SectionLoading>;
   }
 
   renderGetFollowerIndexError(error) {
@@ -124,6 +122,7 @@ export class FollowerIndexEdit extends PureComponent {
 
     return (
       <EuiPageTemplate.EmptyPrompt
+        color="danger"
         iconType="warning"
         title={
           <h2>
