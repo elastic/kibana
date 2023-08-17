@@ -18,6 +18,7 @@ import {
   shareReplay,
   finalize,
   delay,
+  tap,
 } from 'rxjs';
 import { HttpResponse } from '@kbn/core/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
@@ -37,6 +38,12 @@ import type {
   PendingMessage,
 } from '../types';
 import { readableStreamReaderIntoObservable } from '../utils/readable_stream_reader_into_observable';
+
+class TokenLimitReachedError extends Error {
+  constructor() {
+    super(`Token limit reached`);
+  }
+}
 
 export async function createChatService({
   signal: setupAbortSignal,
@@ -166,6 +173,11 @@ export async function createChatService({
               rxJsFilter((line) => !!line && line !== '[DONE]'),
               map((line) => JSON.parse(line) as CreateChatCompletionResponseChunk),
               rxJsFilter((line) => line.object === 'chat.completion.chunk'),
+              tap((choice) => {
+                if (choice.choices[0].finish_reason === 'length') {
+                  throw new TokenLimitReachedError();
+                }
+              }),
               scan(
                 (acc, { choices }) => {
                   acc.message.content += choices[0].delta.content ?? '';

@@ -37,19 +37,15 @@ export const createDefaultPolicy = (
   esClientInfo: InfoResponse,
   appFeatures: AppFeatures
 ): PolicyConfig => {
-  const factoryPolicy = policyConfigFactory();
-
-  // Add license and cloud information after policy creation
-  factoryPolicy.meta.license = licenseService.getLicenseType();
-  factoryPolicy.meta.cloud = cloud?.isCloudEnabled;
-  factoryPolicy.meta.cluster_name = esClientInfo?.cluster_name
-    ? esClientInfo.cluster_name
-    : factoryPolicy.meta.cluster_name;
-  factoryPolicy.meta.cluster_uuid = esClientInfo?.cluster_uuid
-    ? esClientInfo.cluster_uuid
-    : factoryPolicy.meta.cluster_uuid;
-  factoryPolicy.meta.license_uid = licenseService.getLicenseUID();
-  factoryPolicy.meta.serverless = cloud.isServerlessEnabled || false;
+  // Pass license and cloud information to use in Policy creation
+  const factoryPolicy = policyConfigFactory(
+    licenseService.getLicenseType(),
+    cloud?.isCloudEnabled,
+    licenseService.getLicenseUID(),
+    esClientInfo?.cluster_uuid,
+    esClientInfo?.cluster_name,
+    cloud?.isServerlessEnabled
+  );
 
   let defaultPolicyPerType: PolicyConfig =
     config?.type === 'cloud'
