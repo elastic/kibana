@@ -13,6 +13,7 @@ export {
   createRootWithCorePlugins,
   createTestServers,
   createServerlessES,
+  createServerlessKibana,
   request,
 } from './src';
 
@@ -22,4 +23,5 @@ export type {
   TestKibanaUtils,
   TestUtils,
   TestServerlessESUtils,
+  TestServerlessKibanaUtils,
 } from './src';

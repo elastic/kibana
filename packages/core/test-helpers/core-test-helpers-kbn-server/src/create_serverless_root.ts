@@ -5,23 +5,52 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { defaultsDeep } from 'lodash';
 import { Cluster } from '@kbn/es';
+import Path from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
+import { CliArgs } from '@kbn/config';
+import { createRoot } from './create_root';
 
 export type TestServerlessESUtils = ReturnType<typeof createServerlessES>;
 
 export const createServerlessES = () => {
-  const log = new ToolingLog();
+  const log = new ToolingLog({
+    level: 'info',
+    writeTo: process.stdout,
+  });
   const cluster = new Cluster({ log });
-  return {
+  const api = {
     start: async () => {
-      await cluster.runServerless();
+      await Promise.race([
+        cluster.runServerless({
+          basePath: Path.join(REPO_ROOT, '.es/es_test_serverless'),
+        }),
+        new Promise((res) => setTimeout(res, 60000)),
+      ]);
     },
     stop: async () => {
       // hack to stop the ES cluster
-      await execa('docker', ['container stop es01 es02 es03']);
+      await execa('docker', ['container', 'stop', 'es01', 'es02', 'es03']);
     },
   };
+
+  return api;
+};
+
+export type TestServerlessKibanaUtils = ReturnType<typeof createServerlessKibana>;
+
+export const createServerlessKibana = (settings = {}, cliArgs: Partial<CliArgs> = {}) => {
+  const defaults = {
+    server: {
+      port: 5620,
+    },
+    elasticsearch: {
+      serviceAccountToken: 'BEEF',
+    },
+  };
+
+  return createRoot(defaultsDeep(settings, defaults), { ...cliArgs, serverless: true });
 };

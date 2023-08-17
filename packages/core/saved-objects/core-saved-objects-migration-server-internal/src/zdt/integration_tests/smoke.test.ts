@@ -6,17 +6,35 @@
  * Side Public License, v 1.
  */
 
-import { createServerlessES, TestServerlessESUtils } from '@kbn/core-test-helpers-kbn-server';
+import {
+  createServerlessES,
+  createServerlessKibana,
+  TestServerlessESUtils,
+  TestServerlessKibanaUtils,
+  request,
+} from '@kbn/core-test-helpers-kbn-server';
 
 describe('smoke', () => {
   let serverlessES: TestServerlessESUtils;
+  let serverlessKibana: TestServerlessKibanaUtils;
+  jest.setTimeout(60_000);
   beforeEach(() => {
     serverlessES = createServerlessES();
+    serverlessKibana = createServerlessKibana();
   });
   afterEach(async () => {
     await serverlessES?.stop();
+    await serverlessKibana?.shutdown();
   });
-  test('it can start ES serverless', async () => {
-    expect(true).toBe(true);
+  test('it can start Kibana and ES serverless', async () => {
+    async function doIt() {
+      await serverlessES.start();
+      await serverlessKibana.preboot();
+      await serverlessKibana.setup();
+      await serverlessKibana.start();
+    }
+    await expect(doIt()).resolves.toBe(undefined);
+    const { body } = await request.get(serverlessKibana, '/api/status').expect(200);
+    expect(body).toMatchObject({ status: { overall: { level: 'available' } } });
   });
 });

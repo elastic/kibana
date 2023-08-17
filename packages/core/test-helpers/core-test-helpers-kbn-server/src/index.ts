@@ -15,7 +15,7 @@ export {
   request,
 } from './create_root';
 
-export { createServerlessES } from './create_serverless_root';
-export type { TestServerlessESUtils } from './create_serverless_root';
+export { createServerlessES, createServerlessKibana } from './create_serverless_root';
+export type { TestServerlessESUtils, TestServerlessKibanaUtils } from './create_serverless_root';
 
 export type { HttpMethod, TestElasticsearchUtils, TestKibanaUtils, TestUtils } from './create_root';
