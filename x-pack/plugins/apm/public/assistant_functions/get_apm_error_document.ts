@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { RegisterFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { callApmApi } from '../../services/rest/create_call_apm_api';
+import { callApmApi } from '../services/rest/create_call_apm_api';
 
 export function registerGetApmErrorDocumentFunction({
   registerFunction,
@@ -20,8 +21,13 @@ export function registerGetApmErrorDocumentFunction({
       description: `Get a sample error document based on its grouping name. This also includes the 
       stacktrace of the error, which might give you a hint as to what the cause is. 
       ONLY use this for error events.`,
-      descriptionForUser: `Get a sample error document based on its grouping name. This also includes the 
+      descriptionForUser: i18n.translate(
+        'xpack.apm.observabilityAiAssistant.functions.registerGetApmErrorDocument.descriptionForUser',
+        {
+          defaultMessage: `Get a sample error document based on its grouping name. This also includes the 
       stacktrace of the error, which might give you a hint as to what the cause is.`,
+        }
+      ),
       parameters: {
         type: 'object',
         properties: {
