@@ -205,7 +205,7 @@ const NavigationEmbeddablePanelEditor = ({
                               parentDashboard={parentDashboard}
                               editLink={() => addOrEditLink(link)}
                               deleteLink={() => deleteLink(link.id)}
-                              dragHandleProps={provided.dragHandleProps}
+                              dragHandleProps={provided.dragHandleProps ?? undefined} // casting `null` to `undefined`
                             />
                           )}
                         </EuiDraggable>

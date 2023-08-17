@@ -11,6 +11,7 @@ export type {
   NavigationEmbeddableCrudTypes,
   NavigationEmbeddableAttributes,
   NavigationEmbeddableLink,
+  NavigationLinkOptions,
   NavigationLayoutType,
   NavigationLinkType,
 } from './types';
@@ -20,4 +21,6 @@ export {
   DASHBOARD_LINK_TYPE,
   NAV_VERTICAL_LAYOUT,
   NAV_HORIZONTAL_LAYOUT,
+  DEFAULT_URL_LINK_OPTIONS,
+  DEFAULT_DASHBOARD_LINK_OPTIONS,
 } from './constants';

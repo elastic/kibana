@@ -41,7 +41,10 @@ import {
   NavigationLinkType,
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
+  NavigationLinkOptions,
   NavigationEmbeddableLink,
+  DEFAULT_URL_LINK_OPTIONS,
+  DEFAULT_DASHBOARD_LINK_OPTIONS,
 } from '../../../common/content_management';
 import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
 import { DashboardItem, NavigationLinkInfo } from '../../embeddable/types';
@@ -71,15 +74,9 @@ export const NavigationEmbeddableLinkEditor = ({
   const [defaultLinkLabel, setDefaultLinkLabel] = useState<string | undefined>();
   const [currentLinkLabel, setCurrentLinkLabel] = useState<string>(link?.label ?? '');
   const [linkDestination, setLinkDestination] = useState<string | undefined>(link?.destination);
-  const [linkOptions, setLinkOptions] = useState<DashboardDrilldownOptions | UrlDrilldownOptions>({
-    openInNewTab: false,
-    useCurrentDateRange: true,
-    useCurrentFilters: true,
-  });
-
-  // useEffect(() => {
-  //   console.log(linkOptions);
-  // }, [linkOptions]);
+  const [linkOptions, setLinkOptions] = useState<NavigationLinkOptions | undefined>(
+    link?.options ?? DEFAULT_DASHBOARD_LINK_OPTIONS
+  );
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
     return ([DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE] as NavigationLinkType[]).map((type) => {
@@ -158,11 +155,17 @@ export const NavigationEmbeddableLinkEditor = ({
               idSelected={selectedLinkType}
               onChange={(id) => {
                 if (link?.type === id) {
+                  setLinkOptions(link.options);
                   setLinkDestination(link.destination);
                   setCurrentLinkLabel(link.label ?? '');
                 } else {
                   setLinkDestination(undefined);
                   setCurrentLinkLabel('');
+                  if (id === DASHBOARD_LINK_TYPE) {
+                    setLinkOptions(DEFAULT_DASHBOARD_LINK_OPTIONS);
+                  } else {
+                    setLinkOptions(DEFAULT_URL_LINK_OPTIONS);
+                  }
                 }
                 setDefaultLinkLabel(undefined);
                 setSelectedLinkType(id as NavigationLinkType);
@@ -200,13 +203,16 @@ export const NavigationEmbeddableLinkEditor = ({
             {selectedLinkType === DASHBOARD_LINK_TYPE ? (
               <DashboardDrilldownOptionsComponent
                 options={linkOptions as DashboardDrilldownOptions}
-                onOptionChange={(change) => setLinkOptions({ ...linkOptions, ...change })}
+                onOptionChange={(change) =>
+                  setLinkOptions({ ...(linkOptions as DashboardDrilldownOptions), ...change })
+                }
               />
             ) : (
-              // <UrlDrilldownCollectConfig />
               <UrlDrilldownOptionsComponent
                 options={linkOptions as UrlDrilldownOptions}
-                onOptionChange={(change) => setLinkOptions({ ...linkOptions, ...change })}
+                onOptionChange={(change) =>
+                  setLinkOptions({ ...(linkOptions as UrlDrilldownOptions), ...change })
+                }
               />
             )}
           </EuiFormRow>
@@ -230,6 +236,7 @@ export const NavigationEmbeddableLinkEditor = ({
                     type: selectedLinkType,
                     id: link?.id ?? uuidv4(),
                     destination: linkDestination,
+                    options: linkOptions,
                   });
 
                   onClose();

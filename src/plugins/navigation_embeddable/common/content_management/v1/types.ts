@@ -11,6 +11,8 @@ import type {
   SavedObjectCreateOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
+import { UrlDrilldownOptions } from '@kbn/ui-actions-enhanced-plugin/public';
+import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
 import { NavigationEmbeddableContentType } from '../../types';
 import {
   DASHBOARD_LINK_TYPE,
@@ -35,12 +37,15 @@ export type NavigationEmbeddableCrudTypes = ContentManagementCrudTypes<
  */
 export type NavigationLinkType = typeof DASHBOARD_LINK_TYPE | typeof EXTERNAL_LINK_TYPE;
 
+export type NavigationLinkOptions = DashboardDrilldownOptions | UrlDrilldownOptions;
+
 export interface NavigationEmbeddableLink {
   id: string;
   type: NavigationLinkType;
   destination: string;
   label?: string;
   order: number;
+  options?: NavigationLinkOptions;
 }
 
 export type NavigationLayoutType = typeof NAV_HORIZONTAL_LAYOUT | typeof NAV_VERTICAL_LAYOUT;

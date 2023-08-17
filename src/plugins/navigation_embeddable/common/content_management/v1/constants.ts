@@ -6,11 +6,28 @@
  * Side Public License, v 1.
  */
 
+import { UrlDrilldownOptions } from '@kbn/ui-actions-enhanced-plugin/public';
+import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
+
 /**
  * Link types
  */
 export const DASHBOARD_LINK_TYPE = 'dashboardLink';
 export const EXTERNAL_LINK_TYPE = 'externalLink';
+
+/**
+ * Link options
+ */
+export const DEFAULT_DASHBOARD_LINK_OPTIONS: DashboardDrilldownOptions = {
+  openInNewTab: false,
+  useCurrentDateRange: true,
+  useCurrentFilters: true,
+};
+
+export const DEFAULT_URL_LINK_OPTIONS: UrlDrilldownOptions = {
+  encodeUrl: true,
+  openInNewTab: true,
+};
 
 /**
  * Layout options

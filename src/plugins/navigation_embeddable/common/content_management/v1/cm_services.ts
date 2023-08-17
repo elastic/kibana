@@ -24,6 +24,25 @@ const navigationEmbeddableLinkSchema = schema.object({
   destination: schema.string(),
   label: schema.maybe(schema.string()),
   order: schema.number(),
+  options: schema.maybe(
+    schema.oneOf([
+      schema.object(
+        {
+          openInNewTab: schema.boolean(),
+          useCurrentFilters: schema.boolean(),
+          useCurrentDateRange: schema.boolean(),
+        },
+        { unknowns: 'forbid' }
+      ),
+      schema.object(
+        {
+          openInNewTab: schema.boolean(),
+          encodeUrl: schema.maybe(schema.boolean()),
+        },
+        { unknowns: 'forbid' }
+      ),
+    ])
+  ),
 });
 
 const navigationEmbeddableAttributesSchema = schema.object(
