@@ -23,9 +23,9 @@ export const PageError = ({ error, name }: Props) => {
   return (
     <>
       {error.body?.statusCode === 404 ? (
-        <InvalidNodeError nodeName={name} />
-      ) : (
         <ErrorPageBody message={error.message} />
+      ) : (
+        <InvalidNodeError nodeName={name} />
       )}
     </>
   );
