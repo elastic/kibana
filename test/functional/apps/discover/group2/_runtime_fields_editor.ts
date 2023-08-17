@@ -54,6 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['saved-search'] });
     });
 
+    // TESTING FLAKINESS
     it('allows adding custom label to existing fields', async function () {
       const customLabel = 'megabytes';
       await PageObjects.discover.editField('bytes');
