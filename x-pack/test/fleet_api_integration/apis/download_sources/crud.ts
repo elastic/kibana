@@ -70,6 +70,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'Elastic Artifacts',
             is_default: true,
             host: 'https://artifacts.elastic.co/downloads/',
+            proxy_id: null,
           },
         });
       });
@@ -152,6 +153,7 @@ export default function (providerContext: FtrProviderContext) {
           name: 'My download source',
           host: 'http://test.fr:443',
           is_default: false,
+          proxy_id: null,
         });
       });
 
