@@ -10,6 +10,7 @@ import type { RegisterContextDefinition, RegisterFunctionDefinition } from '../.
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import type { ObservabilityAIAssistantService } from '../types';
 import { registerElasticsearchFunction } from './elasticsearch';
+import { registerLensFunction } from './lens';
 import { registerRecallFunction } from './recall';
 import { registerSummarisationFunction } from './summarise';
 
@@ -33,7 +34,7 @@ export async function registerFunctions({
     .then((response) => {
       const isReady = response.ready;
 
-      let description = `You have the ability to call Elasticsearch APIs or create visualisations using Lens.`;
+      let description = `You have the ability to call Elasticsearch APIs with the "elasticsearch" function or create visualisations using Lens with the "lens" function in the context of this chat.`;
 
       if (isReady) {
         description += `You can use the "summarise" functions to store new information you have learned in a knowledge database. Once you have established that you did not know the answer to a question, and the user gave you this information, it's important that you create a summarisation of what you have learned and store it in the knowledge database. When you create this summarisation, make sure you craft it in a way that can be recalled with a semantic search later.
@@ -55,11 +56,17 @@ export async function registerFunctions({
       
         WRONG:
         User: "What is NASA"
-        Assistant answers question without querying the knowledge`;
+        Assistant answers question without querying the knowledge.
+        
+        BEFORE you use a function, always query the knowledge database for more information about that function. This is important.
+        
+        Avoid making too many assumptions about user's data. If clarification is needed, query the knowledge base for previous learnings. If you don't find anything, ask the user for clarification, and when successful, store this into the knowledge base. 
+        `;
         registerSummarisationFunction({ service, registerFunction });
         registerRecallFunction({ service, registerFunction });
+        registerLensFunction({ service, pluginsStart, registerFunction });
       } else {
-        description += `You do not have a working memory. Don't try to recall information via other functions.  If the user expects you to remember the previous conversations, tell them they can set up the knowledge base. A banner is available at the top of the conversation to set this up.`;
+        description += `You do not have a working memory. Don't try to recall information via the "recall" function.  If the user expects you to remember the previous conversations, tell them they can set up the knowledge base. A banner is available at the top of the conversation to set this up.`;
       }
 
       registerElasticsearchFunction({ service, registerFunction });
