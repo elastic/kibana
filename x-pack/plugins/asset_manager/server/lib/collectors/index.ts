@@ -16,10 +16,11 @@ export type Collector = (opts: CollectorOptions) => Promise<CollectorResult>;
 
 export interface CollectorOptions {
   client: ElasticsearchClient;
-  from: number;
-  to: number;
+  from: string;
+  to: string;
   sourceIndices: AssetManagerConfig['sourceIndices'];
   afterKey?: estypes.SortResults;
+  filters?: estypes.QueryDslQueryContainer[];
 }
 
 export interface CollectorResult {
