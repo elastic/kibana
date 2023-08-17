@@ -9,7 +9,17 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiCode, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
-import { useForm, Form, fieldValidators, FormSchema, FIELD_TYPES, UseField, TextField, SelectField, JsonEditorField } from '../../../../shared_imports';
+import {
+  useForm,
+  Form,
+  fieldValidators,
+  FormSchema,
+  FIELD_TYPES,
+  UseField,
+  TextField,
+  SelectField,
+  JsonEditorField,
+} from '../../../../shared_imports';
 
 interface Props {
   onNext: () => void;
@@ -46,12 +56,9 @@ export const configurationFormSchema: FormSchema = {
     validations: [
       {
         validator: fieldValidators.emptyField(
-          i18n.translate(
-            'xpack.ingestPipelines.pipelineEditor.inferenceForm.typeRequiredError',
-            {
-              defaultMessage: 'A policy type value is required.',
-            }
-          )
+          i18n.translate('xpack.ingestPipelines.pipelineEditor.inferenceForm.typeRequiredError', {
+            defaultMessage: 'A policy type value is required.',
+          })
         ),
       },
     ],
@@ -83,8 +90,7 @@ export const configurationFormSchema: FormSchema = {
   },
 };
 
-const defaultValue = {
-};
+const defaultValue = {};
 
 export const ConfigurationStep = ({ onNext }: Props) => {
   const [editorValue, setEditorValue] = useState('');
@@ -106,16 +112,8 @@ export const ConfigurationStep = ({ onNext }: Props) => {
   };
 
   return (
-    <Form
-      form={form}
-      isInvalid={form.isSubmitted && !form.isValid}
-      error={form.getErrors()}
-    >
-      <UseField
-        path="name"
-        component={TextField}
-        componentProps={{ fullWidth: false }}
-      />
+    <Form form={form} isInvalid={form.isSubmitted && !form.isValid} error={form.getErrors()}>
+      <UseField path="name" component={TextField} componentProps={{ fullWidth: false }} />
 
       <UseField
         path="policyType"
@@ -177,7 +175,7 @@ export const ConfigurationStep = ({ onNext }: Props) => {
               lineNumbers: 'off',
               tabSize: 2,
               automaticLayout: true,
-            }
+            },
           },
         }}
       />
