@@ -73556,6 +73556,13 @@ Emitter.prototype.removeEventListener = function(event, fn){
       break;
     }
   }
+
+  // Remove event specific arrays for event types that no
+  // one is subscribed for to avoid memory leak.
+  if (callbacks.length === 0) {
+    delete this._callbacks['$' + event];
+  }
+
   return this;
 };
 
@@ -73569,8 +73576,13 @@ Emitter.prototype.removeEventListener = function(event, fn){
 
 Emitter.prototype.emit = function(event){
   this._callbacks = this._callbacks || {};
-  var args = [].slice.call(arguments, 1)
+
+  var args = new Array(arguments.length - 1)
     , callbacks = this._callbacks['$' + event];
+
+  for (var i = 1; i < arguments.length; i++) {
+    args[i - 1] = arguments[i];
+  }
 
   if (callbacks) {
     callbacks = callbacks.slice(0);
