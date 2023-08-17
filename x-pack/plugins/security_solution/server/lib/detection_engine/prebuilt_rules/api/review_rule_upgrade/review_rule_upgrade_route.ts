@@ -23,6 +23,7 @@ import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
 import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
+import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/normalization/rule_converters';
 
 export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -91,16 +92,16 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
   return results.map((result) => {
     const { ruleDiff, ruleVersions } = result;
     const installedCurrentVersion = ruleVersions.input.current;
-    const diffableCurrentVersion = ruleVersions.output.current;
-    const diffableTargetVersion = ruleVersions.output.target;
+    const targetVersion = ruleVersions.input.target;
     invariant(installedCurrentVersion != null, 'installedCurrentVersion not found');
+    invariant(targetVersion != null, 'targetVersion not found');
 
     return {
       id: installedCurrentVersion.id,
       rule_id: installedCurrentVersion.rule_id,
       revision: installedCurrentVersion.revision,
-      rule: diffableCurrentVersion,
-      target_rule: diffableTargetVersion,
+      current_rule: installedCurrentVersion,
+      target_rule: convertPrebuiltRuleAssetToRuleResponse(targetVersion),
       diff: {
         fields: pickBy<ThreeWayDiff<unknown>>(
           ruleDiff.fields,

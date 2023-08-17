@@ -94,7 +94,7 @@ interface RequiredFieldsProps {
 const RequiredFields = ({ requiredFields }: RequiredFieldsProps) => (
   <EuiFlexGrid gutterSize={'s'}>
     {requiredFields.map((rF, index) => (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} key={rF.name}>
         <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
           <EuiFlexItem grow={false}>
             <FieldIcon

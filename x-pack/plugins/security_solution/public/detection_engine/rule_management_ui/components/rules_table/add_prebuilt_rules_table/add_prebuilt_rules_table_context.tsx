@@ -9,10 +9,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
-import type {
-  RuleInstallationInfoForReview,
-  RuleSignatureId,
-} from '../../../../../../common/api/detection_engine';
+import type { RuleSignatureId } from '../../../../../../common/api/detection_engine';
 import { invariant } from '../../../../../../common/utils/invariant';
 import {
   usePerformInstallAllRules,
@@ -22,16 +19,17 @@ import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic
 import type { AddPrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_install';
 import { useFilterPrebuiltRulesToInstall } from './use_filter_prebuilt_rules_to_install';
 import { useRuleDetailsFlyout } from '../../../../rule_management/components/rule_details/use_rule_details_flyout';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
 
 export interface AddPrebuiltRulesTableState {
   /**
    * Rules available to be installed
    */
-  rules: RuleInstallationInfoForReview[];
+  rules: RuleResponse[];
   /**
    * Rules to display in table after applying filters
    */
-  filteredRules: RuleInstallationInfoForReview[];
+  filteredRules: RuleResponse[];
   /**
    * Currently selected table filter
    */
@@ -68,11 +66,11 @@ export interface AddPrebuiltRulesTableState {
   /**
    * Rule rows selected in EUI InMemory Table
    */
-  selectedRules: RuleInstallationInfoForReview[];
+  selectedRules: RuleResponse[];
   /**
    * Rule that is currently displayed in the flyout or null if flyout is closed
    */
-  flyoutRule: RuleInstallationInfoForReview | null;
+  flyoutRule: RuleResponse | null;
   /**
    * Is true when the install button in the flyout is disabled
    * (e.g. when the rule is already being installed or when the table is being refetched)
@@ -87,7 +85,7 @@ export interface AddPrebuiltRulesTableActions {
   installAllRules: () => void;
   installSelectedRules: () => void;
   setFilterOptions: Dispatch<SetStateAction<AddPrebuiltRulesTableFilterOptions>>;
-  selectRules: (rules: RuleInstallationInfoForReview[]) => void;
+  selectRules: (rules: RuleResponse[]) => void;
   openFlyoutForRuleId: (ruleId: RuleSignatureId) => void;
   closeFlyout: () => void;
 }
@@ -107,7 +105,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
   children,
 }: AddPrebuiltRulesTableContextProviderProps) => {
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
-  const [selectedRules, setSelectedRules] = useState<RuleInstallationInfoForReview[]>([]);
+  const [selectedRules, setSelectedRules] = useState<RuleResponse[]>([]);
 
   const [filterOptions, setFilterOptions] = useState<AddPrebuiltRulesTableFilterOptions>({
     filter: '',

@@ -23,6 +23,7 @@ import type { UpgradePrebuiltRulesTableFilterOptions } from './use_filter_prebui
 import { useFilterPrebuiltRulesToUpgrade } from './use_filter_prebuilt_rules_to_upgrade';
 import { useAsyncConfirmation } from '../rules_table/use_async_confirmation';
 import { useRuleDetailsFlyout } from '../../../../rule_management/components/rule_details/use_rule_details_flyout';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
 
 import { MlJobUpgradeModal } from '../../../../../detections/components/modals/ml_job_upgrade_modal';
 
@@ -76,7 +77,7 @@ export interface UpgradePrebuiltRulesTableState {
   /**
    * Rule that is currently displayed in the flyout or null if flyout is closed
    */
-  flyoutRule: RuleUpgradeInfoForReview['rule'] | null;
+  flyoutRule: RuleResponse | null;
   /**
    * Is true when the upgrade button in the flyout is disabled
    * (e.g. when the rule is already being upgrade or when the table is being refetched)
