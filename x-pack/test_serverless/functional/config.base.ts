@@ -64,7 +64,13 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         directory: resolve(__dirname, 'screenshots'),
       },
       junit: options.junit,
-      suiteTags: options.suiteTags,
+      suiteTags: {
+        include: options.suiteTags?.include,
+        exclude: [
+          ...(svlSharedConfig.get('suiteTags').exclude || []),
+          ...(options.suiteTags?.exclude || []),
+        ],
+      },
     };
   };
 }

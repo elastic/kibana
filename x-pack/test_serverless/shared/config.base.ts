@@ -74,6 +74,11 @@ export default async () => {
       ...commonFunctionalServices,
     },
 
+    suiteTags: {
+      // default exclude tags for all the base configs
+      exclude: ['skipMKI'],
+    },
+
     // overriding default timeouts from packages/kbn-test/src/functional_test_runner/lib/config/schema.ts
     // so we can easily adjust them for serverless where needed
     timeouts: {
