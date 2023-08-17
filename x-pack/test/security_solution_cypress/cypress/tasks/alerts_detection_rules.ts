@@ -61,10 +61,10 @@ import { EUI_CHECKBOX } from '../screens/common/controls';
 import { REST_ACTIONS_BUTTON, RULE_NAME_HEADER } from '../screens/rule_details';
 import { EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
 import { LOADING_INDICATOR } from '../screens/security_header';
+import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 
 import { goToRuleEditSettings } from './rule_details';
 import { goToActionsStepTab } from './create_new_rule';
-import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 
 export const getRulesManagementTableRows = () => cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW);
 

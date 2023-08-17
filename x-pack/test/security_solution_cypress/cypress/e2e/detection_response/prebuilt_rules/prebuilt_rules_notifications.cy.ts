@@ -24,8 +24,7 @@ import {
   reload,
   deletePrebuiltRulesAssets,
 } from '../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { SECURITY_DETECTIONS_RULES_URL } from '../../../urls/navigation';
+import { login, visitSecurityDetectionRulesPage } from '../../../tasks/login';
 
 const RULE_1 = createRuleAssetSavedObject({
   name: 'Test rule 1',
@@ -46,7 +45,7 @@ describe(
 
     describe('No notifications', () => {
       it('should NOT display install or update notifications when no prebuilt assets and no rules are installed', () => {
-        visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+        visitSecurityDetectionRulesPage();
 
         cy.get(ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN).should('be.visible');
 
@@ -58,7 +57,7 @@ describe(
 
       it('should NOT display install or update notifications when latest rules are installed', () => {
         createAndInstallMockedPrebuiltRules({ rules: [RULE_1], installToKibana: true });
-        visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+        visitSecurityDetectionRulesPage();
 
         /* Assert that there are no installation or update notifications */
         /* Add Elastic Rules button should not contain a number badge */
@@ -75,7 +74,7 @@ describe(
 
       describe('Rules installation notification when no rules have been installed', () => {
         beforeEach(() => {
-          visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+          visitSecurityDetectionRulesPage();
         });
 
         it('should notify user about prebuilt rules available for installation', () => {
@@ -103,7 +102,7 @@ describe(
               rules: [RULE_2, RULE_3],
               installToKibana: false,
             });
-            visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+            visitSecurityDetectionRulesPage();
           });
         });
 
@@ -140,7 +139,7 @@ describe(
               version: 2,
             });
             createAndInstallMockedPrebuiltRules({ rules: [UPDATED_RULE], installToKibana: false });
-            visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+            visitSecurityDetectionRulesPage();
             reload();
           });
         });
@@ -174,7 +173,7 @@ describe(
               rules: [RULE_2, UPDATED_RULE],
               installToKibana: false,
             });
-            visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+            visitSecurityDetectionRulesPage();
           });
         });
 

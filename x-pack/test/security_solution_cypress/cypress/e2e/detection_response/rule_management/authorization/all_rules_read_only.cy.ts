@@ -23,8 +23,7 @@ import {
   waitForCallOutToBeShown,
   MISSING_PRIVILEGES_CALLOUT,
 } from '../../../../tasks/common/callouts';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
-import { SECURITY_DETECTIONS_RULES_URL } from '../../../../urls/navigation';
+import { login, visitSecurityDetectionRulesPage } from '../../../../tasks/login';
 
 describe('All rules - read only', { tags: tag.ESS }, () => {
   before(() => {
@@ -34,7 +33,7 @@ describe('All rules - read only', { tags: tag.ESS }, () => {
 
   beforeEach(() => {
     login(ROLES.reader);
-    visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL, ROLES.reader);
+    visitSecurityDetectionRulesPage(ROLES.reader);
     cy.get(RULE_NAME).should('have.text', getNewRule().name);
   });
 

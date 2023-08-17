@@ -37,11 +37,11 @@ import {
 } from '../../../../../tasks/common/rule_actions';
 import {
   goToEditRuleActionsSettingsOf,
-  disableAutoRefresh,
   expectManagementTableRules,
   selectAllRules,
   selectRulesByName,
   getRulesManagementTableRows,
+  disableAutoRefresh,
 } from '../../../../../tasks/alerts_detection_rules';
 import {
   waitForBulkEditActionToFinish,
@@ -50,9 +50,7 @@ import {
   openBulkEditRuleActionsForm,
   openBulkActionsMenu,
 } from '../../../../../tasks/rules_bulk_actions';
-import { login, visitWithoutDateRange } from '../../../../../tasks/login';
-
-import { SECURITY_DETECTIONS_RULES_URL } from '../../../../../urls/navigation';
+import { login, visitSecurityDetectionRulesPage } from '../../../../../tasks/login';
 
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import { createSlackConnector } from '../../../../../tasks/api_calls/connectors';
@@ -152,7 +150,7 @@ describe(
     context('Restricted action privileges', () => {
       it("User with no privileges can't add rule actions", () => {
         login(ROLES.hunter_no_actions);
-        visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL, ROLES.hunter_no_actions);
+        visitSecurityDetectionRulesPage(ROLES.hunter_no_actions);
 
         expectManagementTableRules([
           ruleNameToAssert,
@@ -178,7 +176,8 @@ describe(
     context('All actions privileges', () => {
       beforeEach(() => {
         login();
-        visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+        visitSecurityDetectionRulesPage();
+        disableAutoRefresh();
 
         expectManagementTableRules([
           ruleNameToAssert,
@@ -191,7 +190,6 @@ describe(
           'Test rule 1',
           'Test rule 2',
         ]);
-        disableAutoRefresh();
       });
 
       it('Add a rule action to rules (existing connector)', () => {

@@ -40,6 +40,7 @@ import {
   getRulesManagementTableRows,
   selectAllRulesOnPage,
   getRuleRow,
+  disableAutoRefresh,
 } from '../../../../../tasks/alerts_detection_rules';
 
 import {
@@ -74,9 +75,8 @@ import {
 } from '../../../../../tasks/rules_bulk_actions';
 
 import { hasIndexPatterns, getDetails } from '../../../../../tasks/rule_details';
-import { login, visitWithoutDateRange } from '../../../../../tasks/login';
+import { login, visitSecurityDetectionRulesPage } from '../../../../../tasks/login';
 
-import { SECURITY_DETECTIONS_RULES_URL } from '../../../../../urls/navigation';
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../../../../tasks/api_calls/timelines';
 import {
@@ -156,7 +156,8 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
       getNewTermsRule({ ...defaultRuleData, rule_id: '6', name: 'New Terms Rule', enabled: false })
     );
 
-    visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+    visitSecurityDetectionRulesPage();
+    disableAutoRefresh();
   });
 
   describe('Prerequisites', () => {
