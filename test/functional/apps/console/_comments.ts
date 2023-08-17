@@ -12,17 +12,14 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
-  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
-  describe('console app', function testComments() {
+  describe('console request comments', function testComments() {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
-      // blocks the close help button for several seconds so just retry until we can click it.
-      await retry.try(async () => {
-        await PageObjects.console.collapseHelp();
-      });
+      // Ensure that the text area can be interacted with
+      await PageObjects.console.closeHelpIfExists();
     });
 
     describe('with comments', async () => {
