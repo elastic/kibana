@@ -3228,7 +3228,7 @@
         "label": "CloudLinkId",
         "description": [],
         "signature": [
-          "\"userAndRoles\" | \"performance\" | \"billingAndSub\""
+          "\"userAndRoles\" | \"performance\" | \"billingAndSub\" | \"deployment\""
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,
