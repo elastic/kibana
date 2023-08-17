@@ -216,7 +216,7 @@ export class InfraServerPlugin
 
     // Register an handler to retrieve the fallback logView starting from a source configuration
     plugins.logsShared.logViews.registerLogViewFallbackHandler(async (sourceId, { soClient }) => {
-      const sourceConfiguration = await sources.getSourceConfiguration(soClient, sourceId);
+      const sourceConfiguration = await sources.getInfraSourceConfiguration(soClient, sourceId);
       return mapSourceToLogView(sourceConfiguration);
     });
     plugins.logsShared.logViews.setLogViewsStaticConfig({

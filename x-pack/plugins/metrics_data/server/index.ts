@@ -15,6 +15,8 @@ export type {
   DefaultMetricIndicesHandler,
 } from './types';
 
+export { metricsDataSourceSavedObjectName } from './saved_objects/metrics_data_source';
+
 export function plugin(context: PluginInitializerContext) {
   return new MetricsDataPlugin(context);
 }
