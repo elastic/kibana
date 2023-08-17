@@ -98,7 +98,6 @@ export const upsellingPages: UpsellingPages = [
       />
     ),
   },
-
   {
     pageName: SecurityPageName.threatIntelligence,
     pli: AppFeatureKey.threatIntelligence,
