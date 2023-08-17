@@ -1709,8 +1709,8 @@
     qs "^6.7.0"
 
 "@elastic/synthetics@https://github.com/elastic/synthetics.git#buildkite-reporter":
-  version "1.3.0"
-  resolved "https://github.com/elastic/synthetics.git#5a25bbd2eb9d53289c91f1759e087d170d3c4410"
+  version "1.3.1"
+  resolved "https://github.com/elastic/synthetics.git#d4aab64b9442ab421ab43c400d3d1e9fb3a32bd9"
   dependencies:
     archiver "^5.3.1"
     commander "^10.0.1"

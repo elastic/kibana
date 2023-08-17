@@ -14,7 +14,6 @@ import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_u
 
 import { EsArchiver } from '@kbn/es-archiver';
 import { esArchiverUnload } from '../tasks/es_archiver';
-import { TestReporter } from './test_reporter';
 
 export interface ArgParams {
   headless: boolean;
@@ -127,7 +126,7 @@ export class SyntheticsRunner {
         match: match === 'undefined' ? '' : match,
         pauseOnError,
         screenshots: 'only-on-failure',
-        reporter: TestReporter,
+        reporter: 'buildKite',
       });
       if (noOfRuns > 1) {
         // need to reload again since runner resets the journeys
