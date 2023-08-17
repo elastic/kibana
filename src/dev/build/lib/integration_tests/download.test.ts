@@ -22,6 +22,8 @@ import { downloadToDisk, downloadToString } from '../download';
 const TMP_DIR = join(tmpdir(), CI_PARALLEL_PROCESS_PREFIX, 'download-js-test-tmp-dir');
 const TMP_DESTINATION = join(TMP_DIR, '__tmp_download_js_test_file__');
 
+// dummy change
+
 expect.addSnapshotSerializer(createStripAnsiSerializer());
 expect.addSnapshotSerializer(createReplaceSerializer(TMP_DIR, 'TMP_DIR'));
 expect.addSnapshotSerializer(
