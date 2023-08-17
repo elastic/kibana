@@ -31,3 +31,6 @@ const TimestampColumnContent = euiStyled(LogEntryColumnContent)`
   text-overflow: clip;
   white-space: pre;
 `;
+
+// eslint-disable-next-line import/no-default-export
+export default LogEntryTimestampColumn;
