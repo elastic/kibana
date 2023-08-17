@@ -144,7 +144,7 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 
   ['xpack.security.transport.ssl.verification_mode', 'certificate'],
 
-  // ['xpack.security.operator_privileges.enabled', 'true'],
+  ['xpack.security.operator_privileges.enabled', 'true'],
 
   // ['xpack.watcher.enabled', 'false'],
 ];
@@ -342,8 +342,8 @@ export function resolveEsArgs(
 export async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
   const volumePath = resolve(options.basePath, 'stateless');
   const certs = resolve(options.basePath, 'certs');
-  const keystore = resolve(options.basePath, 'config', 'elasticsearch.keystore');
-  // const users = resolve(options.basePath, 'config', 'elasticsearch.keystore');
+  const operatorUsers = resolve(options.basePath, 'config', 'operator_users.yml');
+  const serviceTokens = resolve(options.basePath, 'config', 'service_tokens');
 
   log.info(chalk.bold(`Checking for local serverless ES object store at ${volumePath}`));
   log.indent(4);
@@ -374,7 +374,9 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     '--volume',
     `${certs}:/usr/share/elasticsearch/config/certs:z`,
     '--volume',
-    `${keystore}:/usr/share/elasticsearch/config/elasticsearch.keystore`,
+    `${operatorUsers}:/usr/share/elasticsearch/config/operator_users.yml`,
+    '--volume',
+    `${serviceTokens}:/usr/share/elasticsearch/config/service_tokens`,
   ];
 }
 
@@ -462,6 +464,7 @@ export async function stopServerlessCluster(log: ToolingLog, nodes: string[]) {
  * Kill any serverless ES nodes which are running.
  */
 export function teardownServerlessClusterSync(log: ToolingLog) {
+  // TODO: this should use the resolved image
   const { stdout } = execa.commandSync(
     `docker ps --filter status=running --filter ancestor=${SERVERLESS_IMG} --quiet`
   );
