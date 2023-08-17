@@ -15,6 +15,7 @@
       "licensing",
       "triggersActionsUi",
       "observabilityShared",
+      "observabilityAIAssistant",
       "embeddable",
       "infra",
       "inspector",

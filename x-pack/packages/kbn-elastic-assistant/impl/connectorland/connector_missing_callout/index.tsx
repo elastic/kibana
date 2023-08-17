@@ -46,7 +46,7 @@ export const ConnectorMissingCallout: React.FC<Props> = React.memo(
         <p>
           {' '}
           <FormattedMessage
-            defaultMessage="Select a connector from the {link} to continue"
+            defaultMessage="Select a connector above or from the {link} to continue"
             id="xpack.elasticAssistant.assistant.connectors.connectorMissingCallout.calloutDescription"
             values={{
               link: (

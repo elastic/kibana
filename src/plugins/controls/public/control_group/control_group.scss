@@ -74,23 +74,17 @@ $controlMinWidth: $euiSize * 14;
   }
 }
 
-.controlFrame__labelToolTip {
-  max-width: 40%;
-}
-
 .controlFrameWrapper {
   flex-basis: auto;
   position: relative;
 
-  &.controlFrameWrapper-isEditable {
-    .controlFrame__formControlLayoutLabel {
-      padding-left: 0;
-    }
+  .controlFrame__labelToolTip {
+    max-width: 40%;
   }
 
-  &:not(.controlFrameWrapper-isEditable) {
-    .controlFrameFormControlLayout--twoLine .euiFormControlLayout__childrenWrapper {
-      border-radius: $euiBorderRadius 0 0 $euiBorderRadius;
+  &-isEditable {
+    .controlFrame__formControlLayoutLabel {
+      padding-left: 0;
     }
   }
 
@@ -113,10 +107,9 @@ $controlMinWidth: $euiSize * 14;
     .controlFrame__control {
       height: 100%;
       transition: opacity .1s;
+      background-color: $euiFormBackgroundColor !important;
 
-      &.controlFrame--twoLine {
-        width: 100%;
-      }
+      @include euiFormControlSideBorderRadius($euiFormControlBorderRadius, $side: 'right', $internal: true);
     }
 
     .controlFrame--controlLoading {
@@ -130,6 +123,12 @@ $controlMinWidth: $euiSize * 14;
   &--small {
     width: $smallControl;
     min-width: $smallControl;
+
+    &:not(.controlFrameWrapper--grow) {
+      .controlFrame__labelToolTip {
+        max-width: 20%;
+      }
+    }
   }
 
   &--medium {

@@ -11,3 +11,8 @@ export const RULE_PREVIEW = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.rulePreviewPanel',
   { defaultMessage: 'Rule preview' }
 );
+
+export const ALERT_REASON_PREVIEW = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.alertReasonPreviewPanel',
+  { defaultMessage: 'Alert reason preview' }
+);
