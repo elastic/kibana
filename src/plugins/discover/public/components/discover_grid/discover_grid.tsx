@@ -56,10 +56,17 @@ import {
 import { GRID_STYLE, toolbarVisibility as toolbarVisibilityDefaults } from './constants';
 import { getDisplayedColumns } from '../../utils/columns';
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
+import { DiscoverGridFooter } from './discover_grid_footer';
 import type { ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { convertValueToString } from '../../utils/convert_value_to_string';
 import { getRowsPerPageOptions, getDefaultRowsPerPage } from '../../utils/rows_per_page';
+
+export enum DataLoadingState {
+  loading = 'loading',
+  loadingMore = 'loadingMore',
+  loaded = 'loaded',
+}
 
 const themeDefault = { darkMode: false };
 
@@ -92,7 +99,7 @@ export interface DiscoverGridProps {
   /**
    * Determines if data is currently loaded
    */
-  isLoading: boolean;
+  loadingState: DataLoadingState;
   /**
    * Function used to add a column in the document flyout
    */
@@ -225,7 +232,16 @@ export interface DiscoverGridProps {
     dataViewFieldEditor: DataViewFieldEditorStart;
     toastNotifications: ToastsStart;
   };
+  /**
+   * Number total hits from ES
+   */
+  totalHits?: number;
+  /**
+   * To fetch more
+   */
+  onFetchMoreRecords?: () => void;
 }
+
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
 const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
@@ -234,7 +250,7 @@ export const DiscoverGrid = ({
   ariaLabelledBy,
   columns,
   dataView,
-  isLoading,
+  loadingState,
   expandedDoc,
   onAddColumn,
   filters,
@@ -268,6 +284,8 @@ export const DiscoverGrid = ({
   onFieldEdited,
   DocumentView,
   services,
+  totalHits,
+  onFetchMoreRecords,
 }: DiscoverGridProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings } = services;
   const { darkMode } = useObservable(services.core.theme?.theme$ ?? of(themeDefault), themeDefault);
@@ -358,8 +376,6 @@ export const DiscoverGrid = ({
       : undefined;
   }, [pagination, pageCount, isPaginationEnabled, onUpdateRowsPerPage]);
 
-  const isOnLastPage = paginationObj ? paginationObj.pageIndex === pageCount - 1 : false;
-
   useEffect(() => {
     setPagination((paginationData) =>
       paginationData.pageSize === currentPageSize
@@ -413,7 +429,6 @@ export const DiscoverGrid = ({
   /**
    * Render variables
    */
-  const showDisclaimer = rowCount === sampleSize && isOnLastPage;
   const randomId = useMemo(() => htmlIdGenerator()(), []);
   const closeFieldEditor = useRef<() => void | undefined>();
 
@@ -602,7 +617,9 @@ export const DiscoverGrid = ({
     onUpdateRowHeight,
   });
 
-  if (!rowCount && isLoading) {
+  const isRenderComplete = loadingState !== DataLoadingState.loading;
+
+  if (!rowCount && loadingState === DataLoadingState.loading) {
     return (
       <div className="euiDataGrid__loading">
         <EuiText size="xs" color="subdued">
@@ -618,7 +635,7 @@ export const DiscoverGrid = ({
     return (
       <div
         className="euiDataGrid__noResults"
-        data-render-complete={!isLoading}
+        data-render-complete={isRenderComplete}
         data-shared-item=""
         data-title={searchTitle}
         data-description={searchDescription}
@@ -655,7 +672,7 @@ export const DiscoverGrid = ({
       <span className="dscDiscoverGrid__inner">
         <div
           data-test-subj="discoverDocTable"
-          data-render-complete={!isLoading}
+          data-render-complete={isRenderComplete}
           data-shared-item=""
           data-title={searchTitle}
           data-description={searchDescription}
@@ -682,17 +699,18 @@ export const DiscoverGrid = ({
             gridStyle={GRID_STYLE}
           />
         </div>
-        {showDisclaimer && (
-          <p className="dscDiscoverGrid__footer" data-test-subj="discoverTableFooter">
-            <FormattedMessage
-              id="discover.gridSampleSize.limitDescription"
-              defaultMessage="Search results are limited to {sampleSize} documents. Add more search terms to narrow your search."
-              values={{
-                sampleSize,
-              }}
+        {loadingState !== DataLoadingState.loading &&
+          isPaginationEnabled && ( // we hide the footer for Surrounding Documents page
+            <DiscoverGridFooter
+              isLoadingMore={loadingState === DataLoadingState.loadingMore}
+              rowCount={rowCount}
+              sampleSize={sampleSize}
+              pageCount={pageCount}
+              pageIndex={paginationObj?.pageIndex}
+              totalHits={totalHits}
+              onFetchMoreRecords={onFetchMoreRecords}
             />
-          </p>
-        )}
+          )}
         {searchTitle && (
           <EuiScreenReaderOnly>
             <p id={String(randomId)}>
