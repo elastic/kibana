@@ -394,6 +394,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(404);
       });
 
+      // TESTING FLAKINESS
       it(`should prevent users from deleting other users' sessions`, async () => {
         const sessionId = `my-session-${Math.random()}`;
         await supertest
