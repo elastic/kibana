@@ -31,7 +31,7 @@ export const readListIndexRoute = (router: ListsPluginRouter): void => {
         const listDataStreamExists = await lists.getListDataStreamExists();
         const listItemDataStreamExists = await lists.getListItemDataStreamExists();
 
-        if (listDataStreamExists || listItemDataStreamExists) {
+        if (listDataStreamExists && listItemDataStreamExists) {
           const [validated, errors] = validate(
             { list_index: listDataStreamExists, list_item_index: listItemDataStreamExists },
             readListIndexResponse
