@@ -7,12 +7,12 @@
 import React, { useMemo } from 'react';
 import { EuiTextColor, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   ProcessEventHost,
   ProcessEventContainer,
   ProcessEventOrchestrator,
   ProcessEventCloud,
-} from '../../../common/types/process_tree';
+} from '../../../common';
 import { DetailPanelAccordion } from '../detail_panel_accordion';
 import { DetailPanelCopy } from '../detail_panel_copy';
 import { DetailPanelListItem } from '../detail_panel_list_item';

@@ -9,9 +9,8 @@
 import ReactDOM from 'react-dom';
 import React, { useMemo } from 'react';
 import { useAsync } from 'react-use/lib';
-import { Router, Redirect, Switch } from 'react-router-dom';
-
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters } from '@kbn/core/public';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { DashboardListingTable } from '@kbn/dashboard-plugin/public';
@@ -49,7 +48,7 @@ const PortableDashboardsDemos = ({
 }) => {
   return (
     <Router history={history}>
-      <Switch>
+      <Routes>
         <Route exact path="/">
           <Redirect to={DASHBOARD_DEMO_PATH} />
         </Route>
@@ -59,7 +58,7 @@ const PortableDashboardsDemos = ({
         <Route path={DASHBOARD_DEMO_PATH}>
           <DashboardsDemo data={data} dashboard={dashboard} history={history} />
         </Route>
-      </Switch>
+      </Routes>
     </Router>
   );
 };

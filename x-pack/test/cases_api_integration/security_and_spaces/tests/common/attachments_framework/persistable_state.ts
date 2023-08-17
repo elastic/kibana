@@ -8,7 +8,7 @@
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 
-import { ActionTypes, CommentType } from '@kbn/cases-plugin/common/api';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -25,7 +25,6 @@ import {
   createCase,
   createComment,
   removeServerGeneratedPropertiesFromSavedObject,
-  getComment,
   getSOFromKibanaIndex,
   getReferenceFromEsResponse,
   bulkCreateAttachments,
@@ -37,7 +36,6 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
-  const kibanaServer = getService('kibanaServer');
 
   /**
    * Attachment types are being registered in
@@ -156,7 +154,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const externalRefComment = patchedCase.comments?.find(
-          (comment) => comment.type === CommentType.persistableState
+          (comment) => comment.type === AttachmentType.persistableState
         );
 
         const esResponse = await getSOFromKibanaIndex({
@@ -276,63 +274,6 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('Migrations', () => {
-      const CASE_ID = 'cdeede80-fa0f-11ec-bcb4-59410ea3e0fe';
-      const ATTACHMENT_ID = '8cf7a270-fa11-11ec-bcb4-59410ea3e0fe';
-
-      before(async () => {
-        await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.4.0/persistable_state_attachment.json'
-        );
-      });
-
-      after(async () => {
-        await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.4.0/persistable_state_attachment.json'
-        );
-        await deleteAllCaseItems(es);
-      });
-
-      it('migrates a persistable state attachment correctly', async () => {
-        const attachment = await getComment({
-          supertest,
-          caseId: CASE_ID,
-          commentId: ATTACHMENT_ID,
-        });
-
-        const normalizedAttachment = removeServerGeneratedPropertiesFromSavedObject(attachment);
-
-        expect(normalizedAttachment).to.eql({
-          created_by: { email: null, full_name: null, username: 'elastic' },
-          owner: 'cases',
-          // The inject method of the attachment injects the testRef when you get the attachment
-          persistableStateAttachmentState: { migrated: true, injectedId: 'testRef' },
-          persistableStateAttachmentTypeId: '.test',
-          pushed_at: null,
-          pushed_by: null,
-          type: 'persistableState',
-          updated_by: null,
-        });
-      });
-
-      it('migrates a persistable state attachment correctly on user action', async () => {
-        const userActions = await getCaseUserActions({ supertest, caseID: CASE_ID });
-        const attachment = userActions.find(
-          (userAction) => userAction.type === ActionTypes.comment
-        );
-
-        expect(attachment?.payload).to.eql({
-          comment: {
-            owner: 'cases',
-            // The inject method of the attachment injects the testRef when you get the attachment
-            persistableStateAttachmentState: { migrated: true, injectedId: 'testRef' },
-            persistableStateAttachmentTypeId: '.test',
-            type: 'persistableState',
-          },
-        });
-      });
-    });
-
     // This test is intended to fail when new persistable state attachment types are registered.
     // To resolve, add the new persistable state attachment types ID to this list. This will trigger
     // a CODEOWNERS review by Response Ops.
@@ -348,9 +289,11 @@ export default ({ getService }: FtrProviderContext): void => {
         const types = await getRegisteredTypes();
 
         expect(types).to.eql({
-          '.test': 'dde5bd7492d266a0d54b77b5eddbeca95e19651c',
-          ml_anomaly_charts: 'f9bab0d17e31b89ae52a1b0d25fe117d9f23b38d',
-          ml_anomaly_swimlane: 'cf30664ea040f8e4190c816d093566ae22df54fe',
+          '.lens': '78559fd806809ac3a1008942ead2a079864054f5',
+          '.test': 'ab2204830c67f5cf992c9aa2f7e3ead752cc60a1',
+          aiopsChangePointChart: 'a1212d71947ec34487b374cecc47ab9941b5d91c',
+          ml_anomaly_charts: '23e92e824af9db6e8b8bb1d63c222e04f57d2147',
+          ml_anomaly_swimlane: 'a3517f3e53fb041e9cbb150477fb6ef0f731bd5f',
         });
       });
     });

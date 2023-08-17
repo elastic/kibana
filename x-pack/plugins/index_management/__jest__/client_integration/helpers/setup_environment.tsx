@@ -14,6 +14,7 @@ import {
   notificationServiceMock,
   docLinksServiceMock,
   uiSettingsServiceMock,
+  themeServiceMock,
   executionContextServiceMock,
 } from '@kbn/core/public/mocks';
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
@@ -55,6 +56,11 @@ const appDependencies = {
     executionContext: executionContextServiceMock.createStartContract(),
   },
   plugins: {},
+  // Default stateful configuration
+  config: {
+    enableLegacyTemplates: true,
+    enableIndexActions: true,
+  },
 } as any;
 
 export const kibanaVersion = new SemVer(MAJOR_VERSION);
@@ -62,6 +68,7 @@ export const kibanaVersion = new SemVer(MAJOR_VERSION);
 const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
   uiSettings: uiSettingsServiceMock.createSetupContract(),
   settings: settingsServiceMock.createStartContract(),
+  theme: themeServiceMock.createStartContract(),
   kibanaVersion: {
     get: () => kibanaVersion,
   },
@@ -80,7 +87,6 @@ export const WithAppDependencies =
   (props: any) => {
     httpService.setup(httpSetup);
     const mergedDependencies = merge({}, appDependencies, overridingDependencies);
-
     return (
       <KibanaReactContextProvider>
         <AppContextProvider value={mergedDependencies}>

@@ -42,4 +42,6 @@ export type HandlerResolutionStrategy =
   /** Use the oldest available version by default */
   | 'oldest'
   /** Use the newest available version by default */
-  | 'newest';
+  | 'newest'
+  /** Dev-only: remove resolution and fail if no version is provided */
+  | 'none';

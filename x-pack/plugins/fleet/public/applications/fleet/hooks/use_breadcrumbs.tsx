@@ -139,6 +139,14 @@ const breadcrumbGetters: {
       }),
     },
   ],
+  uninstall_tokens: () => [
+    BASE_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.uninstallTokensPageTitle', {
+        defaultMessage: 'Uninstall tokens',
+      }),
+    },
+  ],
   data_streams: () => [
     BASE_BREADCRUMB,
     {

@@ -50,10 +50,12 @@ const externals = {
   'react-dom/server': '__kbnSharedDeps__.ReactDomServer',
   'react-router': '__kbnSharedDeps__.ReactRouter',
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
+  'react-router-dom-v5-compat': '__kbnSharedDeps__.ReactRouterDomV5Compat',
   'styled-components': '__kbnSharedDeps__.StyledComponents',
   '@kbn/monaco': '__kbnSharedDeps__.KbnMonaco',
   // this is how plugins/consumers from npm load monaco
   'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBarePluginApi',
+  'io-ts': '__kbnSharedDeps__.IoTs',
 
   /**
    * big deps which are locked to a single version
@@ -70,7 +72,7 @@ const externals = {
   '@elastic/eui/dist/eui_charts_theme': '__kbnSharedDeps__.ElasticEuiChartsTheme',
 
   // transient dep of eui
-  'react-beautiful-dnd': '__kbnSharedDeps__.ReactBeautifulDnD',
+  '@hello-pangea/dnd': '__kbnSharedDeps__.HelloPangeaDnd',
   lodash: '__kbnSharedDeps__.Lodash',
   'lodash/fp': '__kbnSharedDeps__.LodashFp',
   fflate: '__kbnSharedDeps__.Fflate',

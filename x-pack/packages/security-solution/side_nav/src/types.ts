@@ -7,31 +7,32 @@
 
 import type React from 'react';
 import type { UiCounterMetricType } from '@kbn/analytics';
-import type { EuiListGroupItemProps, IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import type { LinkCategories } from '@kbn/security-solution-navigation';
+
+export enum SolutionSideNavItemPosition {
+  top = 'top',
+  bottom = 'bottom',
+}
 
 export interface SolutionSideNavItem<T extends string = string> {
   id: T;
   label: string;
   href: string;
   onClick?: React.MouseEventHandler;
+  openInNewTab?: boolean;
   description?: string;
   items?: Array<SolutionSideNavItem<T>>;
   categories?: LinkCategories<T>;
   iconType?: IconType;
-  labelSize?: EuiListGroupItemProps['size'];
   appendSeparator?: boolean;
+  position?: SolutionSideNavItemPosition;
+  disabled?: boolean;
   isBeta?: boolean;
   betaOptions?: {
     text: string;
   };
 }
-
-export interface LinkCategory<T extends string = string> {
-  label: string;
-  linkIds: readonly T[];
-}
-
-export type LinkCategories<T extends string = string> = Readonly<Array<LinkCategory<T>>>;
 
 export type Tracker = (
   type: UiCounterMetricType,

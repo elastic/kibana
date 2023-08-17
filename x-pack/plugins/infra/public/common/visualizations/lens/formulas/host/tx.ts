@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import type { LensChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const tx: LensChartConfig = {
-  title: 'Network Outbound (TX)',
-  formula: {
-    formula:
-      "average(host.network.egress.bytes) * 8 / (max(metricset.period, kql='host.network.egress.bytes: *') / 1000)",
-    format: {
-      id: 'bits',
-      params: {
-        decimals: 1,
-      },
+export const tx: FormulaValueConfig = {
+  label: 'Network Outbound (TX)',
+  value:
+    "average(host.network.egress.bytes) * 8 / (max(metricset.period, kql='host.network.egress.bytes: *') / 1000)",
+  format: {
+    id: 'bits',
+    params: {
+      decimals: 1,
     },
   },
-  getFilters,
 };

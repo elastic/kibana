@@ -7,14 +7,14 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  DeleteExceptionListSchemaDecoded,
-  deleteExceptionListSchema,
-  exceptionListSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
+import {
+  DeleteExceptionListRequestQueryDecoded,
+  deleteExceptionListRequestQuery,
+  deleteExceptionListResponse,
+} from '../../common/api';
 
 import {
   buildRouteValidation,
@@ -32,9 +32,9 @@ export const deleteExceptionListRoute = (router: ListsPluginRouter): void => {
       path: EXCEPTION_LIST_URL,
       validate: {
         query: buildRouteValidation<
-          typeof deleteExceptionListSchema,
-          DeleteExceptionListSchemaDecoded
-        >(deleteExceptionListSchema),
+          typeof deleteExceptionListRequestQuery,
+          DeleteExceptionListRequestQueryDecoded
+        >(deleteExceptionListRequestQuery),
       },
     },
     async (context, request, response) => {
@@ -59,7 +59,7 @@ export const deleteExceptionListRoute = (router: ListsPluginRouter): void => {
               statusCode: 404,
             });
           } else {
-            const [validated, errors] = validate(deleted, exceptionListSchema);
+            const [validated, errors] = validate(deleted, deleteExceptionListResponse);
             if (errors != null) {
               return siemResponse.error({ body: errors, statusCode: 500 });
             } else {

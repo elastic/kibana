@@ -34,8 +34,6 @@ export const getUsersColumns = (
       getRowItemsWithActions({
         values: userName ? [userName] : undefined,
         fieldName: 'user.name',
-        fieldType: 'keyword',
-        aggregatable: true,
         idPrefix: `${tableId}-table-${flowTarget}-user`,
       }),
   },
@@ -49,8 +47,6 @@ export const getUsersColumns = (
       getRowItemsWithActions({
         values: userIds,
         fieldName: 'user.id',
-        fieldType: 'keyword',
-        aggregatable: true,
         idPrefix: `${tableId}-table-${flowTarget}`,
       }),
   },
@@ -64,8 +60,6 @@ export const getUsersColumns = (
       getRowItemsWithActions({
         values: groupNames,
         fieldName: 'user.group.name',
-        fieldType: 'keyword',
-        aggregatable: true,
         idPrefix: `${tableId}-table-${flowTarget}`,
       }),
   },
@@ -79,8 +73,6 @@ export const getUsersColumns = (
       getRowItemsWithActions({
         values: groupId,
         fieldName: 'user.group.id',
-        fieldType: 'keyword',
-        aggregatable: true,
         idPrefix: `${tableId}-table-${flowTarget}`,
       }),
   },

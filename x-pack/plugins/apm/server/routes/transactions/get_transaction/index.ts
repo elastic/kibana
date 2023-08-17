@@ -21,8 +21,8 @@ export async function getTransaction({
   transactionId: string;
   traceId?: string;
   apmEventClient: APMEventClient;
-  start?: number;
-  end?: number;
+  start: number;
+  end: number;
 }) {
   const resp = await apmEventClient.search('get_transaction', {
     apm: {
@@ -31,12 +31,13 @@ export async function getTransaction({
     body: {
       track_total_hits: false,
       size: 1,
+      terminate_after: 1,
       query: {
         bool: {
           filter: asMutableArray([
             { term: { [TRANSACTION_ID]: transactionId } },
             ...termQuery(TRACE_ID, traceId),
-            ...(start && end ? rangeQuery(start, end) : []),
+            ...rangeQuery(start, end),
           ]),
         },
       },

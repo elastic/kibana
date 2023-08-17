@@ -7,7 +7,6 @@
  */
 
 export { DataViewMissingIndices } from './errors';
-export { getTitle } from './get_title';
 
 export * from './types';
 export { validateDataView } from './validate_data_view';

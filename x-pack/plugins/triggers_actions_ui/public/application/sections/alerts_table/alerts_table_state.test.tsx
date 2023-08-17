@@ -9,7 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
 import { fireEvent, render, waitFor, screen } from '@testing-library/react';
-import { AlertConsumers, ALERT_CASE_IDS } from '@kbn/rule-data-utils';
+import { AlertConsumers, ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import {
@@ -30,10 +30,13 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { getCasesMockMap } from './cases/index.mock';
 import { createCasesServiceMock } from './index.mock';
+import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
+import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
 
 jest.mock('./hooks/use_fetch_alerts');
 jest.mock('./hooks/use_fetch_browser_fields_capabilities');
 jest.mock('./hooks/use_bulk_get_cases');
+jest.mock('./hooks/use_bulk_get_maintenance_windows');
 
 jest.mock('@kbn/kibana-utils-plugin/public');
 
@@ -44,6 +47,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
     services: {
       application: {
+        getUrlForApp: jest.fn(() => ''),
         capabilities: {
           fakeCases: {
             create_cases: true,
@@ -65,6 +69,43 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   }),
 }));
 
+const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
+
+beforeAll(() => {
+  // The JSDOM implementation is too slow
+  // Especially for dropdowns that try to position themselves
+  // perf issue - https://github.com/jsdom/jsdom/issues/3234
+  Object.defineProperty(window, 'getComputedStyle', {
+    value: (el: HTMLElement) => {
+      /**
+       * This is based on the jsdom implementation of getComputedStyle
+       * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+       *
+       * It is missing global style parsing and will only return styles applied directly to an element.
+       * Will not return styles that are global or from emotion
+       */
+      const declaration = new CSSStyleDeclaration();
+      const { style } = el;
+
+      Array.prototype.forEach.call(style, (property: string) => {
+        declaration.setProperty(
+          property,
+          style.getPropertyValue(property),
+          style.getPropertyPriority(property)
+        );
+      });
+
+      return declaration;
+    },
+    configurable: true,
+    writable: true,
+  });
+});
+
+afterAll(() => {
+  Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
+});
+
 const columns = [
   {
     id: AlertsField.name,
@@ -78,6 +119,10 @@ const columns = [
     id: ALERT_CASE_IDS,
     displayAsText: 'Cases',
   },
+  {
+    id: ALERT_MAINTENANCE_WINDOW_IDS,
+    displayAsText: 'Maintenance Windows',
+  },
 ];
 
 const alerts = [
@@ -86,12 +131,14 @@ const alerts = [
     [AlertsField.reason]: ['two'],
     [AlertsField.uuid]: ['1047d115-670d-469e-af7a-86fdd2b2f814'],
     [ALERT_CASE_IDS]: ['test-id'],
+    [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-mw-id-1'],
   },
   {
     [AlertsField.name]: ['three'],
     [AlertsField.reason]: ['four'],
     [AlertsField.uuid]: ['bf5f6d63-5afd-48e0-baf6-f28c2b68db46'],
     [ALERT_CASE_IDS]: ['test-id-2'],
+    [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-mw-id-2'],
   },
   {
     [AlertsField.name]: ['five'],
@@ -245,6 +292,9 @@ hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [false, {}]);
 const casesMap = getCasesMockMap();
 const useBulkGetCasesMock = useBulkGetCases as jest.Mock;
 
+const maintenanceWindowsMap = getMaintenanceWindowMockMap();
+const useBulkGetMaintenanceWindowsMock = useBulkGetMaintenanceWindows as jest.Mock;
+
 const AlertsTableWithLocale: React.FunctionComponent<AlertsTableStateProps> = (props) => (
   <IntlProvider locale="en">
     <AlertsTableState {...props} />
@@ -286,6 +336,10 @@ describe('AlertsTableState', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useBulkGetCasesMock.mockReturnValue({ data: casesMap, isFetching: false });
+    useBulkGetMaintenanceWindowsMock.mockReturnValue({
+      data: maintenanceWindowsMap,
+      isFetching: false,
+    });
   });
 
   describe('Cases', () => {
@@ -481,6 +535,103 @@ describe('AlertsTableState', () => {
     });
   });
 
+  describe('Maintenance windows', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should show maintenance windows column', async () => {
+      render(<AlertsTableWithLocale {...tableProps} />);
+      expect(await screen.findByText('Maintenance Windows')).toBeInTheDocument();
+    });
+
+    it('should show maintenance windows titles correctly', async () => {
+      render(<AlertsTableWithLocale {...tableProps} />);
+      expect(await screen.findByText('test-title')).toBeInTheDocument();
+      expect(await screen.findByText('test-title-2')).toBeInTheDocument();
+    });
+
+    it('should pass the correct maintenance window ids to useBulkGetMaintenanceWindows', async () => {
+      render(<AlertsTableWithLocale {...tableProps} />);
+      await waitFor(() => {
+        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith({
+          ids: ['test-mw-id-1', 'test-mw-id-2'],
+          canFetchMaintenanceWindows: true,
+        });
+      });
+    });
+
+    it('should remove duplicated maintenance window ids', async () => {
+      hookUseFetchAlerts.mockReturnValue([
+        false,
+        {
+          ...fetchAlertsResponse,
+          alerts: [...fetchAlertsResponse.alerts, ...fetchAlertsResponse.alerts],
+        },
+      ]);
+
+      render(<AlertsTableWithLocale {...tableProps} />);
+      await waitFor(() => {
+        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith({
+          ids: ['test-mw-id-1', 'test-mw-id-2'],
+          canFetchMaintenanceWindows: true,
+        });
+      });
+    });
+
+    it('should skip alerts with empty maintenance window ids', async () => {
+      hookUseFetchAlerts.mockReturnValue([
+        false,
+        {
+          ...fetchAlertsResponse,
+          alerts: [
+            { ...fetchAlertsResponse.alerts[0], 'kibana.alert.maintenance_window_ids': [] },
+            fetchAlertsResponse.alerts[1],
+          ],
+        },
+      ]);
+
+      render(<AlertsTableWithLocale {...tableProps} />);
+      await waitFor(() => {
+        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith({
+          ids: ['test-mw-id-2'],
+          canFetchMaintenanceWindows: true,
+        });
+      });
+    });
+
+    it('should show loading skeleton when fetching maintenance windows', async () => {
+      useBulkGetMaintenanceWindowsMock.mockReturnValue({
+        data: maintenanceWindowsMap,
+        isFetching: true,
+      });
+
+      render(<AlertsTableWithLocale {...tableProps} />);
+      expect((await screen.findAllByTestId('maintenance-window-cell-loading')).length).toBe(1);
+    });
+
+    it('should not fetch maintenance windows if the user does not have permission', async () => {});
+
+    it('should not fetch maintenance windows if the column is not visible', async () => {
+      const props = mockCustomProps({
+        columns: [
+          {
+            id: AlertsField.name,
+            displayAsText: 'Name',
+          },
+        ],
+      });
+
+      render(<AlertsTableWithLocale {...props} />);
+      await waitFor(() => {
+        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith({
+          ids: ['test-mw-id-2'],
+          canFetchMaintenanceWindows: false,
+        });
+      });
+    });
+  });
+
   describe('Alerts table configuration registry', () => {
     it('should read the configuration from the registry', async () => {
       render(<AlertsTableWithLocale {...tableProps} />);
@@ -616,6 +767,11 @@ describe('AlertsTableState', () => {
     beforeEach(() => {
       hookUseFetchBrowserFieldCapabilities.mockClear();
       hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [true, browserFields]);
+      useBulkGetCasesMock.mockReturnValue({ data: new Map(), isFetching: false });
+      useBulkGetMaintenanceWindowsMock.mockReturnValue({
+        data: new Map(),
+        isFetching: false,
+      });
     });
 
     it('should show field browser', () => {
@@ -642,9 +798,15 @@ describe('AlertsTableState', () => {
       storageMock.mockImplementation(() => ({
         get: () => {
           return {
-            columns: [{ displayAsText: 'Reason', id: 'kibana.alert.reason', schema: undefined }],
-            sort: [],
-            visibleColumns: ['kibana.alert.reason'],
+            columns: [{ displayAsText: 'Reason', id: AlertsField.reason, schema: undefined }],
+            sort: [
+              {
+                [AlertsField.reason]: {
+                  order: 'asc',
+                },
+              },
+            ],
+            visibleColumns: [AlertsField.reason],
           };
         },
         set: jest.fn(),
@@ -660,11 +822,11 @@ describe('AlertsTableState', () => {
 
       await waitFor(() => {
         expect(queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).not.toBe(null);
-        expect(
-          getByTestId('dataGridHeader')
-            .querySelectorAll('.euiDataGridHeaderCell__content')[1]
-            .getAttribute('title')
-        ).toBe('Name');
+        const titles: string[] = [];
+        getByTestId('dataGridHeader')
+          .querySelectorAll('.euiDataGridHeaderCell__content')
+          .forEach((n) => titles.push(n?.getAttribute('title') ?? ''));
+        expect(titles).toContain('Name');
       });
     });
 

@@ -11,6 +11,7 @@ import {
   Logger,
   KibanaRequest,
   CoreStart,
+  RouteConfigOptions,
 } from '@kbn/core/server';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
@@ -38,10 +39,11 @@ export interface APMRouteCreateOptions {
       | 'access:ml:canGetJobs'
       | 'access:ml:canCreateJob'
       | 'access:ml:canCloseJob'
+      | 'access:ai_assistant'
     >;
     body?: { accepts: Array<'application/json' | 'multipart/form-data'> };
     disableTelemetry?: boolean;
-  };
+  } & RouteConfigOptions<any>;
 }
 
 export type TelemetryUsageCounter = ReturnType<
@@ -59,8 +61,6 @@ export interface APMRouteHandlerResources {
   params: {
     query: {
       _inspect: boolean;
-      start?: number;
-      end?: number;
     };
   };
   config: APMConfig;

@@ -37,9 +37,11 @@ import { useRiskScore } from '../../../explore/containers/risk_score';
 import { RiskScore } from '../../../explore/components/risk_score/severity/common';
 import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
 import { RiskScoreHeaderTitle } from '../../../explore/components/risk_score/risk_score_onboarding/risk_score_header_title';
+import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 export interface UserSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
+  sourcererScopeId?: SourcererScopeName;
   data: UserItem;
   id: string;
   isDraggable?: boolean;
@@ -64,6 +66,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
   ({
     anomaliesData,
     contextID,
+    sourcererScopeId,
     data,
     id,
     isDraggable = false,
@@ -95,7 +98,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
       [from, to]
     );
 
-    const { data: userRisk, isLicenseValid } = useRiskScore({
+    const { data: userRisk, isAuthorized } = useRiskScore({
       filterQuery,
       skip: userName == null,
       timerange,
@@ -109,9 +112,10 @@ export const UserOverview = React.memo<UserSummaryProps>(
           attrName={fieldName}
           idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
           isDraggable={isDraggable}
+          sourcererScopeId={sourcererScopeId}
         />
       ),
-      [contextID, isDraggable]
+      [contextID, isDraggable, sourcererScopeId]
     );
 
     const [userRiskScore, userRiskLevel] = useMemo(() => {
@@ -243,6 +247,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
                 rowItems={getOr([], 'host.ip', data)}
                 attrName={'host.ip'}
                 idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
+                sourcererScopeId={sourcererScopeId}
                 isDraggable={isDraggable}
                 render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
               />
@@ -250,7 +255,16 @@ export const UserOverview = React.memo<UserSummaryProps>(
           },
         ],
       ],
-      [data, indexPatterns, getDefaultRenderer, contextID, isDraggable, userName, firstColumn]
+      [
+        data,
+        indexPatterns,
+        getDefaultRenderer,
+        contextID,
+        sourcererScopeId,
+        isDraggable,
+        userName,
+        firstColumn,
+      ]
     );
     return (
       <>
@@ -277,7 +291,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
             )}
           </OverviewWrapper>
         </InspectButtonContainer>
-        {isLicenseValid && (
+        {isAuthorized && (
           <UserRiskOverviewWrapper
             gutterSize={isInDetailsSidePanel ? 'm' : 'none'}
             direction={isInDetailsSidePanel ? 'column' : 'row'}

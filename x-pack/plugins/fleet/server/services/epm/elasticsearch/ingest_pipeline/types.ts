@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import type { RegistryDataStream } from '../../../../types';
+
 export interface PipelineInstall {
   nameForInstallation: string;
   contentForInstallation: string;
   customIngestPipelineNameForInstallation?: string;
   extension: string;
+  dataStream?: RegistryDataStream;
 }
 
 export interface RewriteSubstitution {

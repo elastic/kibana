@@ -7,17 +7,17 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { ProjectMonitor } from '../../../common/runtime_types';
 
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { ProjectMonitorFormatter } from '../../synthetics_service/project_monitor/project_monitor_formatter';
 
 const MAX_PAYLOAD_SIZE = 1048576 * 20; // 20MiB
 
 export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
-  path: API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE,
+  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE,
   validate: {
     params: schema.object({
       projectName: schema.string(),
@@ -31,6 +31,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       maxBytes: MAX_PAYLOAD_SIZE,
     },
   },
+  writeAccess: true,
   handler: async (routeContext): Promise<any> => {
     const { request, response, server } = routeContext;
     const { projectName } = request.params;

@@ -6,3 +6,4 @@
  */
 
 export { slo, SO_SLO_TYPE } from './slo';
+export { compositeSlo, SO_COMPOSITE_SLO_TYPE } from './composite_slo';

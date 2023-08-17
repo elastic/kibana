@@ -21,13 +21,21 @@ import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common'
 
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
-import { getDataViewAndSavedSearch, isCcsIndexPattern } from '../../../../../util/index_utils';
+import {
+  getDataViewAndSavedSearchCallback,
+  isCcsIndexPattern,
+} from '../../../../../util/index_utils';
 
 const fixedPageSize: number = 20;
 
 export const SourceSelection: FC = () => {
   const {
-    services: { http, uiSettings, savedObjectsManagement },
+    services: {
+      savedSearch: savedSearchService,
+      data: { dataViews: dataViewsService },
+      contentManagement,
+      uiSettings,
+    },
   } = useMlKibana();
   const navigateToPath = useNavigateToPath();
 
@@ -51,7 +59,10 @@ export const SourceSelection: FC = () => {
       dataViewName = getNestedProperty(savedObject, 'attributes.title');
     } else if (type === 'search') {
       try {
-        const dataViewAndSavedSearch = await getDataViewAndSavedSearch(id);
+        const dataViewAndSavedSearch = await getDataViewAndSavedSearchCallback({
+          savedSearchService,
+          dataViewsService,
+        })(id);
         dataViewName = dataViewAndSavedSearch.dataView?.title ?? '';
       } catch (error) {
         // an unexpected error has occurred. This could be caused by a saved search for which the data view no longer exists.
@@ -147,14 +158,12 @@ export const SourceSelection: FC = () => {
                     defaultMessage: 'Data view',
                   }
                 ),
-                defaultSearchField: 'name',
               },
             ]}
             fixedPageSize={fixedPageSize}
             services={{
+              contentClient: contentManagement.client,
               uiSettings,
-              http,
-              savedObjectsManagement,
             }}
           />
         </EuiPageContent>

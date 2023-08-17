@@ -14,6 +14,13 @@ jest.mock('../kibana_services', () => {
     getMapsCapabilities() {
       return { save: true };
     },
+    getEMSSettings() {
+      return {
+        isEMSUrlSet() {
+          return false;
+        },
+      };
+    },
   };
 });
 

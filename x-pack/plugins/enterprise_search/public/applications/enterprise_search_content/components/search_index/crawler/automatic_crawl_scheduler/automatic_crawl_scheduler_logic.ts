@@ -32,7 +32,10 @@ export interface AutomaticCrawlSchedulerLogicValues {
   useConnectorSchedule: CrawlSchedule['useConnectorSchedule'];
 }
 
-const DEFAULT_VALUES: Pick<AutomaticCrawlSchedulerLogicValues, 'crawlFrequency' | 'crawlUnit'> = {
+export const DEFAULT_VALUES: Pick<
+  AutomaticCrawlSchedulerLogicValues,
+  'crawlFrequency' | 'crawlUnit'
+> = {
   crawlFrequency: 24,
   crawlUnit: CrawlUnits.hours,
 };
@@ -179,7 +182,7 @@ export const AutomaticCrawlSchedulerLogic = kea<
         actions.deleteCrawlSchedule();
       }
       actions.submitConnectorSchedule({
-        ...values.index.connector.scheduling,
+        ...values.index.connector.scheduling.full,
         enabled: values.crawlAutomatically && values.useConnectorSchedule,
       });
     },
@@ -190,7 +193,10 @@ export const AutomaticCrawlSchedulerLogic = kea<
     submitConnectorSchedule: ({ scheduling }) => {
       actions.makeUpdateConnectorSchedulingRequest({
         connectorId: values.index.connector.id,
-        scheduling,
+        scheduling: {
+          ...values.index.connector.scheduling,
+          full: scheduling,
+        },
       });
     },
     submitCrawlSchedule: async () => {
@@ -206,8 +212,8 @@ export const AutomaticCrawlSchedulerLogic = kea<
           `/internal/enterprise_search/indices/${indexName}/crawler/crawl_schedule`,
           {
             body: JSON.stringify({
-              unit: values.crawlUnit,
               frequency: values.crawlFrequency,
+              unit: values.crawlUnit,
               use_connector_schedule: values.useConnectorSchedule,
             }),
           }

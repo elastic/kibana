@@ -16,12 +16,12 @@ import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
 import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
-import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { rulesLocatorID, sloFeatureId } from '../../../../common';
-import { paths } from '../../../config/paths';
+import { paths } from '../../../../common/locators/paths';
 import {
-  transformSloResponseToCreateSloInput,
-  transformValuesToCreateSLOInput,
+  transformSloResponseToCreateSloForm,
+  transformCreateSLOFormToCreateSLOInput,
 } from '../../slo_edit/helpers/process_slo_form_values';
 import { SloDeleteConfirmationModal } from '../../slos/components/slo_delete_confirmation_modal';
 import type { RulesParams } from '../../../locators/rules';
@@ -70,15 +70,8 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const handleNavigateToRules = async () => {
     const locator = locators.get<RulesParams>(rulesLocatorID);
 
-    if (slo?.id) {
-      locator?.navigate(
-        {
-          params: { sloId: slo.id },
-        },
-        {
-          replace: true,
-        }
-      );
+    if (slo?.id && locator) {
+      locator.navigate({ params: { sloId: slo.id } }, { replace: false });
     }
   };
 
@@ -111,11 +104,11 @@ export function HeaderControl({ isLoading, slo }: Props) {
     if (slo) {
       setIsPopoverOpen(false);
 
-      const newSlo = transformValuesToCreateSLOInput(
-        transformSloResponseToCreateSloInput({ ...slo, name: `[Copy] ${slo.name}` })!
+      const newSlo = transformCreateSLOFormToCreateSLOInput(
+        transformSloResponseToCreateSloForm({ ...slo, name: `[Copy] ${slo.name}` })!
       );
 
-      cloneSlo({ slo: newSlo, idToCopyFrom: slo.id });
+      cloneSlo({ slo: newSlo, originalSloId: slo.id });
 
       navigate(basePath.prepend(paths.observability.slos));
     }
@@ -250,10 +243,10 @@ export function HeaderControl({ isLoading, slo }: Props) {
         />
       </EuiPopover>
 
-      {!!slo && isRuleFlyoutVisible ? (
+      {slo && isRuleFlyoutVisible ? (
         <AddRuleFlyout
           consumer={sloFeatureId}
-          ruleTypeId={SLO_BURN_RATE_RULE_ID}
+          ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
           canChangeTrigger={false}
           onClose={onCloseRuleFlyout}
           initialValues={{ name: `${slo.name} burn rate`, params: { sloId: slo.id } }}

@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-export { cpu } from './cpu';
-export { diskIORead } from './diskio_read';
-export { diskIOWrite } from './diskio_write';
+export { cpuUsage } from './cpu_usage';
+export { diskIORead } from './disk_read_iops';
+export { diskIOWrite } from './disk_write_iops';
+export { diskReadThroughput } from './disk_read_throughput';
+export { diskWriteThroughput } from './disk_write_throughput';
+export { diskSpaceAvailability } from './disk_space_availability';
+export { diskSpaceAvailable } from './disk_space_available';
+export { diskSpaceUsage } from './disk_space_usage';
 export { hostCount } from './host_count';
-export { load } from './load';
-export { memory } from './memory';
-export { memoryAvailable } from './memory_available';
+export { logRate } from './log_rate';
+export { normalizedLoad1m } from './normalized_load_1m';
+export { memoryUsage } from './memory_usage';
+export { memoryFree } from './memory_free';
 export { rx } from './rx';
 export { tx } from './tx';

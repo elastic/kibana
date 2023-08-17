@@ -25,7 +25,7 @@ import { DASHBOARD_CONTAINER_TYPE } from '..';
 import type { DashboardContainer } from './dashboard_container';
 import { DEFAULT_DASHBOARD_INPUT } from '../../dashboard_constants';
 import { createInject, createExtract, DashboardContainerInput } from '../../../common';
-import { LoadDashboardFromSavedObjectReturn } from '../../services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object';
+import { LoadDashboardReturn } from '../../services/dashboard_content_management/types';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
@@ -34,9 +34,9 @@ export type DashboardContainerFactory = EmbeddableFactory<
 >;
 
 export interface DashboardCreationOptions {
-  initialInput?: Partial<DashboardContainerInput>;
+  getInitialInput?: () => Partial<DashboardContainerInput>;
 
-  incomingEmbeddable?: EmbeddablePackageState;
+  getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
 
   useSearchSessionsIntegration?: boolean;
   searchSessionSettings?: {
@@ -55,7 +55,9 @@ export interface DashboardCreationOptions {
   useUnifiedSearchIntegration?: boolean;
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
 
-  validateLoadedSavedObject?: (result: LoadDashboardFromSavedObjectReturn) => boolean;
+  validateLoadedSavedObject?: (result: LoadDashboardReturn) => 'valid' | 'invalid' | 'redirected';
+
+  isEmbeddedExternally?: boolean;
 }
 
 export class DashboardContainerFactoryDefinition
@@ -93,15 +95,18 @@ export class DashboardContainerFactoryDefinition
     parent?: Container,
     creationOptions?: DashboardCreationOptions,
     savedObjectId?: string
-  ): Promise<DashboardContainer | ErrorEmbeddable> => {
+  ): Promise<DashboardContainer | ErrorEmbeddable | undefined> => {
     const dashboardCreationStartTime = performance.now();
     const { createDashboard } = await import('./create/create_dashboard');
     try {
-      return Promise.resolve(
-        createDashboard(initialInput.id, creationOptions, dashboardCreationStartTime, savedObjectId)
+      const dashboard = await createDashboard(
+        creationOptions,
+        dashboardCreationStartTime,
+        savedObjectId
       );
+      return dashboard;
     } catch (e) {
-      return new ErrorEmbeddable(e.text, { id: e.id });
+      return new ErrorEmbeddable(e, { id: e.id });
     }
   };
 }

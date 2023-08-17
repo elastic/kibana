@@ -8,15 +8,14 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import type { LeftPanelContext } from '../context';
-import { LeftFlyoutContext } from '../context';
+import { LeftPanelContext } from '../context';
 import { TestProviders } from '../../../common/mock';
 import {
   THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID,
   THREAT_INTELLIGENCE_DETAILS_SPINNER_TEST_ID,
 } from './test_ids';
 import { ThreatIntelligenceDetails } from './threat_intelligence_details';
-import { useThreatIntelligenceDetails } from './hooks/use_threat_intelligence_details';
+import { useThreatIntelligenceDetails } from '../hooks/use_threat_intelligence_details';
 
 jest.mock('../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../common/lib/kibana');
@@ -32,7 +31,7 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('./hooks/use_threat_intelligence_details');
+jest.mock('../hooks/use_threat_intelligence_details');
 
 const defaultContextValue = {
   getFieldsData: () => 'id',
@@ -42,9 +41,9 @@ const defaultContextValue = {
 const renderSUT = (contextValue: LeftPanelContext) =>
   render(
     <TestProviders>
-      <LeftFlyoutContext.Provider value={contextValue}>
+      <LeftPanelContext.Provider value={contextValue}>
         <ThreatIntelligenceDetails />
-      </LeftFlyoutContext.Provider>
+      </LeftPanelContext.Provider>
     </TestProviders>
   );
 

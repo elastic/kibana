@@ -9,7 +9,7 @@ import { ILicense } from '@kbn/licensing-plugin/public';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { ProfilingAppPageTemplate } from '../../profiling_app_page_template';
-import { LicensePrompt } from '../../shared/license_prompt';
+import { LicensePrompt } from '../../license_prompt';
 import { useProfilingDependencies } from '../profiling_dependencies/use_profiling_dependencies';
 
 export const LicenseContext = React.createContext<ILicense | undefined>(undefined);

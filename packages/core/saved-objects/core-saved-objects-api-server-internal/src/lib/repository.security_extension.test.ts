@@ -742,6 +742,9 @@ describe('SavedObjectsRepository Security Extension', () => {
           attributes: doc._source![doc._source!.type],
           references: [],
           namespaces: doc._source!.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : [namespace],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: expect.any(String),
+          managed: expect.any(Boolean),
         });
       });
     });
@@ -795,6 +798,9 @@ describe('SavedObjectsRepository Security Extension', () => {
           attributes: doc._source![doc._source!.type],
           references: [],
           namespaces: doc._source!.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : [namespace],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: expect.any(String),
+          managed: expect.any(Boolean),
         });
       });
     });
@@ -849,6 +855,9 @@ describe('SavedObjectsRepository Security Extension', () => {
           attributes: doc._source![doc._source!.type],
           references: [],
           namespaces: doc._source!.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : [namespace],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: expect.any(String),
+          managed: expect.any(Boolean),
         });
       });
     });

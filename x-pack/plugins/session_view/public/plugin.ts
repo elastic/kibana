@@ -6,15 +6,24 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { SessionViewServices, SessionViewDeps } from './types';
+import {
+  SessionViewPluginStart,
+  SessionViewPluginStartDeps,
+  SessionViewPluginSetup,
+  SessionViewPluginSetupDeps,
+  SessionViewDeps,
+} from './types';
 import { getSessionViewLazy } from './methods';
 
-export class SessionViewPlugin implements Plugin {
-  public setup(core: CoreSetup<SessionViewServices, void>) {}
+export class SessionViewPlugin implements Plugin<SessionViewPluginStart, SessionViewPluginSetup> {
+  public setup(core: CoreSetup<SessionViewPluginSetupDeps, SessionViewPluginSetup>) {
+    return {};
+  }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, plugins: SessionViewPluginStartDeps): SessionViewPluginStart {
     return {
-      getSessionView: (sessionViewDeps: SessionViewDeps) => getSessionViewLazy(sessionViewDeps),
+      getSessionView: (sessionViewDeps: SessionViewDeps) =>
+        getSessionViewLazy({ ...sessionViewDeps, usageCollection: plugins?.usageCollection }),
     };
   }
 

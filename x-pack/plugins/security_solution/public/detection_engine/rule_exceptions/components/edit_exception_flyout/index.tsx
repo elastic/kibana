@@ -48,7 +48,6 @@ import { ExceptionsLinkedToRule } from '../flyout_components/linked_to_rule';
 import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
 import { ExceptionsConditions } from '../flyout_components/item_conditions';
 
-import { filterIndexPatterns } from '../../utils/helpers';
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
 import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
@@ -109,7 +108,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   const rules = useMemo(() => (rule != null ? [rule] : null), [rule]);
   const listType = useMemo((): ExceptionListTypeEnum => list.type as ExceptionListTypeEnum, [list]);
 
-  const { isLoading, indexPatterns } = useFetchIndexPatterns(rules);
+  const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitEditExceptionItems] = useEditExceptionItems();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
 
@@ -369,7 +368,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           isEdit
           onExceptionItemAdd={setExceptionItemsToAdd}
           onSetErrorExists={setConditionsValidationError}
-          onFilterIndexPatterns={filterIndexPatterns}
+          getExtendedFields={getExtendedFields}
         />
         {!openedFromListDetailPage && listType === ExceptionListTypeEnum.DETECTION && (
           <>

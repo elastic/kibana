@@ -7,10 +7,7 @@
     "id": "ml",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "ml"
-    ],
+    "configPath": ["xpack", "ml"],
     "requiredPlugins": [
       "aiops",
       "charts",
@@ -29,8 +26,10 @@
       "triggersActionsUi",
       "uiActions",
       "unifiedSearch",
-      "savedObjectsFinder",
-      "savedObjectsManagement"
+      "savedObjectsManagement",
+      "savedSearch",
+      "contentManagement",
+      "presentationUtil"
     ],
     "optionalPlugins": [
       "alerting",
@@ -54,13 +53,10 @@
       "kibanaUtils",
       "lens",
       "maps",
-      "savedSearch",
+      "savedObjectsFinder",
       "usageCollection",
-      "unifiedFieldList",
       "unifiedSearch"
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }

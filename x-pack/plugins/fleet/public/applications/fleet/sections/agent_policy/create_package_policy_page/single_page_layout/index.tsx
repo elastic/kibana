@@ -30,7 +30,6 @@ import {
 import { useCancelAddPackagePolicy } from '../hooks';
 
 import { splitPkgKey } from '../../../../../../../common/services';
-import { generateNewAgentPolicyWithDefaults } from '../../../../services';
 import type { NewAgentPolicy } from '../../../../types';
 import { useConfig, sendGetAgentStatus, useGetPackageInfoByKeyQuery } from '../../../../hooks';
 import {
@@ -56,8 +55,12 @@ import {
   StepSelectHosts,
 } from '../components';
 
+import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
+
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
 import { useDevToolsRequest, useOnSubmit } from './hooks';
+import { PostInstallCloudFormationModal } from './components/post_install_cloud_formation_modal';
+import { PostInstallGoogleCloudShellModal } from './components/post_install_google_cloud_shell_modal';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -402,9 +405,28 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             onCancel={() => setFormState('VALID')}
           />
         )}
-        {formState === 'SUBMITTED_NO_AGENTS' && agentPolicy && packageInfo && (
-          <PostInstallAddAgentModal
-            packageInfo={packageInfo}
+        {formState === 'SUBMITTED_NO_AGENTS' &&
+          agentPolicy &&
+          packageInfo &&
+          savedPackagePolicy && (
+            <PostInstallAddAgentModal
+              packageInfo={packageInfo}
+              onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+              onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+            />
+          )}
+        {formState === 'SUBMITTED_CLOUD_FORMATION' && agentPolicy && savedPackagePolicy && (
+          <PostInstallCloudFormationModal
+            agentPolicy={agentPolicy}
+            packagePolicy={savedPackagePolicy}
+            onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+            onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+          />
+        )}
+        {formState === 'SUBMITTED_GOOGLE_CLOUD_SHELL' && agentPolicy && savedPackagePolicy && (
+          <PostInstallGoogleCloudShellModal
+            agentPolicy={agentPolicy}
+            packagePolicy={savedPackagePolicy}
             onConfirm={() => navigateAddAgent(savedPackagePolicy)}
             onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
           />

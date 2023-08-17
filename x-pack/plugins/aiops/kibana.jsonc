@@ -13,12 +13,21 @@
       "lens",
       "licensing",
       "uiActions",
-      "unifiedFieldList",
+      "embeddable",
+      "presentationUtil",
+      "dashboard",
+      "fieldFormats",
+      "unifiedSearch"
+    ],
+    "optionalPlugins": [
+      "cases"
     ],
     "requiredBundles": [
       "fieldFormats",
       "kibanaReact",
-      "kibanaUtils"
+      "kibanaUtils",
+      "embeddable",
+      "cases"
     ],
     "extraPublicDirs": [
       "common"

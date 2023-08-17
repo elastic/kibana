@@ -9,7 +9,7 @@ import createContainter from 'constate';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { ProcessListAPIResponse, ProcessListAPIResponseRT } from '../../../../../common/http_api';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
@@ -29,7 +29,6 @@ export function useProcessList(
   const { createDerivedIndexPattern } = useSourceContext();
   const indexPattern = createDerivedIndexPattern().title;
 
-  const [inErrorState, setInErrorState] = useState(false);
   const decodeResponse = (response: any) => {
     return pipe(
       ProcessListAPIResponseRT.decode(response),
@@ -58,15 +57,12 @@ export function useProcessList(
     decodeResponse
   );
 
-  useEffect(() => setInErrorState(true), [error]);
-  useEffect(() => setInErrorState(false), [loading]);
-
   useEffect(() => {
     makeRequest();
   }, [makeRequest]);
 
   return {
-    error: inErrorState,
+    error: (error && error.message) || null,
     loading,
     response,
     makeRequest,

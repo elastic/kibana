@@ -9,6 +9,7 @@ import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 
+import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
@@ -21,7 +22,7 @@ interface UseUpdatePackProps {
   options?: UseMutationOptions<
     { data: PackSavedObject },
     { body: { message: string; error: string } },
-    Partial<PackSavedObject['attributes']> & { id: string }
+    Partial<PackSavedObject> & { id: string }
   >;
 }
 
@@ -37,10 +38,11 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
   return useMutation<
     { data: PackSavedObject },
     { body: { message: string; error: string } },
-    Partial<PackSavedObject['attributes']> & { id: string }
+    Partial<PackSavedObject> & { id: string }
   >(
     ({ id, ...payload }) =>
       http.put(`/api/osquery/packs/${id}`, {
+        version: API_VERSIONS.public.v1,
         body: JSON.stringify(payload),
       }),
     {
@@ -57,7 +59,7 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
           i18n.translate('xpack.osquery.updatePack.successToastMessageText', {
             defaultMessage: 'Successfully updated "{packName}" pack',
             values: {
-              packName: response?.data?.attributes?.name ?? '',
+              packName: response?.data?.name ?? '',
             },
           })
         );

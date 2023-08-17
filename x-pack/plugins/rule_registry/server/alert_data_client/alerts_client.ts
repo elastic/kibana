@@ -38,8 +38,9 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
+import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import { BrowserFields } from '../../common';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
@@ -79,6 +80,7 @@ export interface ConstructorOptions {
   auditLogger?: AuditLogger;
   esClient: ElasticsearchClient;
   ruleDataService: IRuleDataService;
+  getRuleType: RuleTypeRegistry['get'];
 }
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
@@ -130,7 +132,7 @@ interface SingleSearchAfterAndAudit {
   aggs?: Record<string, any> | undefined;
   index?: string;
   _source?: string[] | undefined;
-  track_total_hits?: boolean | undefined;
+  track_total_hits?: boolean | number;
   size?: number | undefined;
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
   sort?: estypes.SortOptions[] | undefined;
@@ -149,6 +151,7 @@ export class AlertsClient {
   private readonly esClient: ElasticsearchClient;
   private readonly spaceId: string | undefined;
   private readonly ruleDataService: IRuleDataService;
+  private readonly getRuleType: RuleTypeRegistry['get'];
 
   constructor(options: ConstructorOptions) {
     this.logger = options.logger;
@@ -159,6 +162,7 @@ export class AlertsClient {
     // Otherwise, if space is enabled and not specified, it is "default"
     this.spaceId = this.authorization.getSpaceId();
     this.ruleDataService = options.ruleDataService;
+    this.getRuleType = options.getRuleType;
   }
 
   private getOutcome(
@@ -789,7 +793,6 @@ export class AlertsClient {
         const result = await this.esClient.updateByQuery({
           index,
           conflicts: 'proceed',
-          refresh: true,
           body: {
             script: {
               source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
@@ -929,7 +932,6 @@ export class AlertsClient {
       await this.esClient.updateByQuery({
         index,
         conflicts: 'proceed',
-        refresh: true,
         body: {
           script: {
             source: painlessScript,
@@ -964,7 +966,7 @@ export class AlertsClient {
     search_after?: Array<string | number>;
     size?: number;
     sort?: estypes.SortOptions[];
-    track_total_hits?: boolean;
+    track_total_hits?: boolean | number;
     _source?: string[];
   }) {
     try {
@@ -1083,7 +1085,7 @@ export class AlertsClient {
     indices: string[];
     metaFields: string[];
     allowNoIndex: boolean;
-  }): Promise<BrowserFields> {
+  }): Promise<{ browserFields: BrowserFields; fields: FieldDescriptor[] }> {
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
     const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
       pattern: indices,
@@ -1091,6 +1093,24 @@ export class AlertsClient {
       fieldCapsOptions: { allow_no_indices: allowNoIndex },
     });
 
-    return fieldDescriptorToBrowserFieldMapper(fields);
+    return {
+      browserFields: fieldDescriptorToBrowserFieldMapper(fields),
+      fields,
+    };
+  }
+
+  public async getAADFields({ ruleTypeId }: { ruleTypeId: string }) {
+    const { producer, fieldsForAAD = [] } = this.getRuleType(ruleTypeId);
+    const indices = await this.getAuthorizedAlertsIndices([producer]);
+    const o11yIndices = indices?.filter((index) => index.startsWith('.alerts-observability')) ?? [];
+    const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
+    const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+      pattern: o11yIndices,
+      metaFields: ['_id', '_index'],
+      fieldCapsOptions: { allow_no_indices: true },
+      fields: [...fieldsForAAD, 'kibana.*'],
+    });
+
+    return fields;
   }
 }

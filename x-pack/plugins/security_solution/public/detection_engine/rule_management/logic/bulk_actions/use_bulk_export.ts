@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useBulkExportMutation } from '../../api/hooks/use_bulk_export_mutation';
 import { useShowBulkErrorToast } from './use_show_bulk_error_toast';

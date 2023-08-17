@@ -10,63 +10,21 @@ import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import {
-  EuiButtonEmpty,
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
   EuiLoadingChart,
-  EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { FloatingActions } from '@kbn/presentation-util-plugin/public';
 
 import {
   controlGroupSelector,
   useControlGroupContainer,
 } from '../embeddable/control_group_container';
-import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
-
-interface ControlFrameErrorProps {
-  error: Error;
-}
-
-const ControlFrameError = ({ error }: ControlFrameErrorProps) => {
-  const [isPopoverOpen, setPopoverOpen] = useState(false);
-  const popoverButton = (
-    <EuiButtonEmpty
-      color="danger"
-      iconSize="m"
-      iconType="error"
-      onClick={() => setPopoverOpen((open) => !open)}
-      className={'errorEmbeddableCompact__button'}
-      textProps={{ className: 'errorEmbeddableCompact__text' }}
-    >
-      <FormattedMessage
-        id="controls.frame.error.message"
-        defaultMessage="An error occurred. View more"
-      />
-    </EuiButtonEmpty>
-  );
-
-  return (
-    <EuiPopover
-      button={popoverButton}
-      isOpen={isPopoverOpen}
-      className="errorEmbeddableCompact__popover"
-      anchorClassName="errorEmbeddableCompact__popoverAnchor"
-      closePopover={() => setPopoverOpen(false)}
-    >
-      <Markdown
-        markdown={error.message}
-        openLinksInNewTab={true}
-        data-test-subj="errorMessageMarkdown"
-      />
-    </EuiPopover>
-  );
-};
+import { ControlError } from './control_error_component';
 
 export interface ControlFrameProps {
   customPrepend?: JSX.Element;
@@ -82,7 +40,6 @@ export const ControlFrame = ({
   embeddableType,
 }: ControlFrameProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
-  const [fatalError, setFatalError] = useState<Error>();
 
   const controlGroup = useControlGroupContainer();
 
@@ -107,19 +64,14 @@ export const ControlFrame = ({
     const inputSubscription = embeddable
       ?.getInput$()
       .subscribe((newInput) => setTitle(newInput.title));
-    const errorSubscription = embeddable?.getOutput$().subscribe({
-      error: setFatalError,
-    });
     return () => {
       inputSubscription?.unsubscribe();
-      errorSubscription?.unsubscribe();
     };
   }, [embeddable, embeddableRoot]);
 
   const embeddableParentClassNames = classNames('controlFrame__control', {
     'controlFrame--twoLine': controlStyle === 'twoLine',
     'controlFrame--oneLine': controlStyle === 'oneLine',
-    'controlFrame--fatalError': !!fatalError,
   });
 
   function renderEmbeddablePrepend() {
@@ -149,18 +101,13 @@ export const ControlFrame = ({
         </>
       }
     >
-      {embeddable && !fatalError && (
+      {embeddable && (
         <div
           className={embeddableParentClassNames}
           id={`controlFrame--${embeddableId}`}
           ref={embeddableRoot}
         >
-          {fatalError && <ControlFrameError error={fatalError} />}
-        </div>
-      )}
-      {fatalError && (
-        <div className={embeddableParentClassNames} id={`controlFrame--${embeddableId}`}>
-          {<ControlFrameError error={fatalError} />}
+          {isErrorEmbeddable(embeddable) && <ControlError error={embeddable.error} />}
         </div>
       )}
       {!embeddable && (
@@ -187,11 +134,7 @@ export const ControlFrame = ({
       <EuiFormRow
         data-test-subj="control-frame-title"
         fullWidth
-        label={
-          usingTwoLineLayout
-            ? title || ControlGroupStrings.emptyState.getTwoLineLoadingTitle()
-            : undefined
-        }
+        label={usingTwoLineLayout ? title || '...' : undefined}
       >
         {form}
       </EuiFormRow>

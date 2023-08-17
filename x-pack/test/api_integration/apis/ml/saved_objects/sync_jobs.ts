@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash';
 import { MlSavedObjectType } from '@kbn/ml-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
@@ -22,12 +22,18 @@ export default ({ getService }: FtrProviderContext) => {
   const adJobId3 = 'fq_single_3';
   const adJobIdES = 'fq_single_es';
   const idSpace1 = 'space1';
+  const idSpace2 = 'space2';
 
-  async function runSyncRequest(user: USER, expectedStatusCode: number) {
+  async function runSyncRequest(
+    user: USER,
+    expectedStatusCode: number,
+    simulate: boolean = false,
+    space: string = idSpace1
+  ) {
     const { body, status } = await supertest
-      .get(`/s/${idSpace1}/api/ml/saved_objects/sync`)
+      .get(`/s/${space}/api/ml/saved_objects/sync?simulate=${simulate}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS);
+      .set(getCommonRequestHeader('2023-10-31'));
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
@@ -36,12 +42,13 @@ export default ({ getService }: FtrProviderContext) => {
   async function runSyncCheckRequest(
     user: USER,
     mlSavedObjectType: MlSavedObjectType,
-    expectedStatusCode: number
+    expectedStatusCode: number,
+    space: string = idSpace1
   ) {
     const { body, status } = await supertest
-      .post(`/s/${idSpace1}/api/ml/saved_objects/sync_check`)
+      .post(`/s/${space}/internal/ml/saved_objects/sync_check`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send({ mlSavedObjectType });
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
@@ -52,11 +59,13 @@ export default ({ getService }: FtrProviderContext) => {
     beforeEach(async () => {
       await ml.api.initSavedObjects();
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
+      await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
     afterEach(async () => {
       await spacesService.delete(idSpace1);
+      await spacesService.delete(idSpace2);
       await ml.api.cleanMlIndices();
       await ml.testResources.cleanMLSavedObjects();
     });
@@ -128,6 +137,122 @@ export default ({ getService }: FtrProviderContext) => {
         savedObjectsDeleted: {
           'anomaly-detector': { [adJobId1]: { success: true } },
         },
+      });
+    });
+
+    it('should simulate syncing saved objects', async () => {
+      // check to see if a sync is needed
+      const syncNeeded = await runSyncCheckRequest(
+        USER.ML_POWERUSER_ALL_SPACES,
+        'anomaly-detector',
+        200
+      );
+      expect(syncNeeded.result).to.eql(false, 'sync should not be needed');
+
+      // prepare test data
+      await ml.api.createAnomalyDetectionJobES(
+        ml.commonConfig.getADFqSingleMetricJobConfig(adJobId1)
+      );
+      await ml.api.createDatafeedES(ml.commonConfig.getADFqDatafeedConfig(adJobId1));
+
+      // check to see if a sync is needed
+      const syncNeeded2 = await runSyncCheckRequest(
+        USER.ML_POWERUSER_ALL_SPACES,
+        'anomaly-detector',
+        200
+      );
+      expect(syncNeeded2.result).to.eql(true, 'sync should be needed');
+
+      // run the sync request and verify the response
+      const body = await runSyncRequest(USER.ML_POWERUSER_ALL_SPACES, 200, true);
+
+      expect(body).to.eql({
+        datafeedsAdded: {},
+        datafeedsRemoved: {},
+        savedObjectsCreated: {
+          'anomaly-detector': {
+            [adJobId1]: { success: true },
+          },
+        },
+        savedObjectsDeleted: {},
+      });
+
+      const syncNeeded3 = await runSyncCheckRequest(
+        USER.ML_POWERUSER_ALL_SPACES,
+        'anomaly-detector',
+        200
+      );
+      expect(syncNeeded3.result).to.eql(true, 'sync should still be needed');
+
+      const body2 = await runSyncRequest(USER.ML_POWERUSER_ALL_SPACES, 200, true);
+
+      expect(body2).to.eql({
+        datafeedsAdded: {},
+        datafeedsRemoved: {},
+        savedObjectsCreated: {
+          'anomaly-detector': {
+            [adJobId1]: { success: true },
+          },
+        },
+        savedObjectsDeleted: {},
+      });
+    });
+
+    // add a job to space 2, then check that it is not synced from space 1
+    it('should not sync saved objects in different space', async () => {
+      // check to see if a sync is needed
+      const syncNeeded = await runSyncCheckRequest(
+        USER.ML_POWERUSER_ALL_SPACES,
+        'anomaly-detector',
+        200
+      );
+      expect(syncNeeded.result).to.eql(false, 'sync should not be needed');
+
+      // prepare test data
+      await ml.api.createAnomalyDetectionJob(
+        ml.commonConfig.getADFqSingleMetricJobConfig(adJobId1),
+        idSpace2
+      );
+      await ml.api.createDatafeed(ml.commonConfig.getADFqDatafeedConfig(adJobId1), idSpace2);
+
+      // check to see if a sync is needed
+      const syncNeeded2 = await runSyncCheckRequest(
+        USER.ML_POWERUSER_ALL_SPACES,
+        'anomaly-detector',
+        200
+      );
+      expect(syncNeeded2.result).to.eql(
+        false,
+        'sync should be needed for a user who can see all spaces'
+      );
+
+      const syncNeeded3 = await runSyncCheckRequest(
+        USER.ML_POWERUSER_SPACE1,
+        'anomaly-detector',
+        200
+      );
+      expect(syncNeeded3.result).to.eql(
+        false,
+        'sync should be needed for a user who can only see space 1'
+      );
+
+      // check sync outputs
+      const body = await runSyncRequest(USER.ML_POWERUSER_ALL_SPACES, 200, true);
+
+      expect(body).to.eql({
+        datafeedsAdded: {},
+        datafeedsRemoved: {},
+        savedObjectsCreated: {},
+        savedObjectsDeleted: {},
+      });
+
+      const body2 = await runSyncRequest(USER.ML_POWERUSER_SPACE1, 200, true);
+
+      expect(body2).to.eql({
+        datafeedsAdded: {},
+        datafeedsRemoved: {},
+        savedObjectsCreated: {},
+        savedObjectsDeleted: {},
       });
     });
 

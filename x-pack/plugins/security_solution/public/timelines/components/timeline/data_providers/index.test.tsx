@@ -11,7 +11,7 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
 import { DataProviders } from '.';
-import { TimelineId } from '../../../../../common/types';
+import { TimelineId } from '../../../../../common/types/timeline';
 
 describe('DataProviders', () => {
   const mount = useMountAppended();

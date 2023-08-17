@@ -1,0 +1,15 @@
+{
+  "watcher.update_settings": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_watcher/settings"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-update-settings.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

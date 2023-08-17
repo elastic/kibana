@@ -15,16 +15,12 @@
     padding: 0;
   }
 
-  .dscDiscoverGrid__textLanguageMode .euiDataGridRowCell.euiDataGridRowCell--firstColumn {
-    padding: $euiSizeXS;
-  }
-
   .euiDataGridRowCell.euiDataGridRowCell--lastColumn {
     border-right: none;
   }
 
-  .dscDiscoverGrid__documentsMode .euiDataGridRowCell:first-of-type,
-  .dscDiscoverGrid__documentsMode .euiDataGrid--headerShade.euiDataGrid--bordersAll .euiDataGridHeaderCell:first-of-type {
+  .dscDiscoverGrid__table .euiDataGridRowCell:first-of-type,
+  .dscDiscoverGrid__table .euiDataGrid--headerShade.euiDataGrid--bordersAll .euiDataGridHeaderCell:first-of-type {
     border-left: none;
     border-right: none;
   }
@@ -123,8 +119,8 @@
 }
 
 .dscDiscoverGrid__descriptionListDescription {
-  word-break: normal !important;
-  white-space: nowrap;
+  word-break: break-all;
+  white-space: normal;
 
   // Special handling for images coming from the image field formatter
   img {

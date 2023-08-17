@@ -8,22 +8,24 @@
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { ManagementApp, ManagementSetup } from '@kbn/management-plugin/public';
 
+import { spacesManagementApp } from './spaces_management_app';
+import type { ConfigType } from '../config';
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';
-import { spacesManagementApp } from './spaces_management_app';
 
 interface SetupDeps {
   management: ManagementSetup;
   getStartServices: StartServicesAccessor<PluginsStart>;
   spacesManager: SpacesManager;
+  config: ConfigType;
 }
 
 export class ManagementService {
   private registeredSpacesManagementApp?: ManagementApp;
 
-  public setup({ getStartServices, management, spacesManager }: SetupDeps) {
+  public setup({ getStartServices, management, spacesManager, config }: SetupDeps) {
     this.registeredSpacesManagementApp = management.sections.section.kibana.registerApp(
-      spacesManagementApp.create({ getStartServices, spacesManager })
+      spacesManagementApp.create({ getStartServices, spacesManager, config })
     );
   }
 

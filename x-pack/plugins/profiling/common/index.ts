@@ -15,7 +15,7 @@ export const INDEX_TRACES = 'profiling-stacktraces';
 export const INDEX_FRAMES = 'profiling-stackframes';
 export const INDEX_EXECUTABLES = 'profiling-executables';
 
-const BASE_ROUTE_PATH = '/api/profiling/v1';
+const BASE_ROUTE_PATH = '/internal/profiling';
 
 export function getRoutePaths() {
   return {
@@ -27,11 +27,11 @@ export function getRoutePaths() {
     TopNThreads: `${BASE_ROUTE_PATH}/topn/threads`,
     TopNTraces: `${BASE_ROUTE_PATH}/topn/traces`,
     Flamechart: `${BASE_ROUTE_PATH}/flamechart`,
-    CacheExecutables: `${BASE_ROUTE_PATH}/cache/executables`,
-    CacheStackFrames: `${BASE_ROUTE_PATH}/cache/stackframes`,
     HasSetupESResources: `${BASE_ROUTE_PATH}/setup/es_resources`,
-    HasSetupDataCollection: `${BASE_ROUTE_PATH}/setup/has_data`,
     SetupDataCollectionInstructions: `${BASE_ROUTE_PATH}/setup/instructions`,
+    StorageExplorerSummary: `${BASE_ROUTE_PATH}/storage_explorer/summary`,
+    StorageExplorerHostStorageDetails: `${BASE_ROUTE_PATH}/storage_explorer/host_storage_details`,
+    StorageExplorerIndicesStorageDetails: `${BASE_ROUTE_PATH}/storage_explorer/indices_storage_details`,
   };
 }
 

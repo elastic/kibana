@@ -9,6 +9,7 @@
 import { ValueSuggestionsMethod } from '@kbn/data-plugin/common';
 // for replace IIndexPattern => DataView need to fix the issue https://github.com/elastic/kibana/issues/131292
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
 export enum QuerySuggestionTypes {
   Field = 'field',
@@ -33,6 +34,7 @@ export interface QuerySuggestionGetFnArgs {
   useTimeRange?: boolean;
   boolFilter?: any;
   method?: ValueSuggestionsMethod;
+  suggestionsAbstraction?: SuggestionsAbstraction;
 }
 
 /** @public **/

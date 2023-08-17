@@ -6,12 +6,11 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import * as React from 'react';
-
 import { euiStyled, keyframes } from '@kbn/kibana-react-plugin/common';
-import { LogEntryTime } from '../../../../common/log_entry';
+import { LogEntriesSummaryHighlightsBucket, LogEntryTime } from '@kbn/logs-shared-plugin/common';
+import * as React from 'react';
 import { SearchMarkerTooltip } from './search_marker_tooltip';
-import { LogEntriesSummaryHighlightsBucket } from '../../../../common/http_api';
+
 interface SearchMarkerProps {
   bucket: LogEntriesSummaryHighlightsBucket;
   height: number;

@@ -8,6 +8,11 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import {
+  AlertsLocatorParams,
+  getAlertDetailsUrl,
+  getAlertUrl,
+} from '@kbn/observability-plugin/common';
+import {
   ALERT_CONTEXT,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -23,7 +28,9 @@ import {
   RuleExecutorServices,
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { asyncForEach } from '@kbn/std';
 
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
@@ -36,7 +43,6 @@ import {
   Comparator,
   CountRuleParams,
   CountCriteria,
-  Criterion,
   getDenominator,
   getNumerator,
   GroupedSearchQueryResponse,
@@ -49,15 +55,15 @@ import {
   UngroupedSearchQueryResponse,
   UngroupedSearchQueryResponseRT,
   ExecutionTimeRange,
+  Criterion,
 } from '../../../../common/alerting/logs/log_threshold';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
-import { getIntervalInSeconds } from '../../../../common/utils/get_interval_in_seconds';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   AdditionalContext,
   flattenAdditionalContext,
-  getAlertDetailsUrl,
+  getAlertDetailsPageEnabledForApp,
   getContextForRecoveredAlerts,
   getGroupByObject,
   unflattenObject,
@@ -69,9 +75,13 @@ import {
   getReasonMessageForUngroupedCountAlert,
   getReasonMessageForUngroupedRatioAlert,
 } from './reason_formatters';
+import {
+  buildFiltersFromCriteria,
+  LogThresholdRuleTypeParams,
+  positiveComparators,
+} from '../../../../common/alerting/logs/log_threshold/query_helpers';
 
 export type LogThresholdActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
-export type LogThresholdRuleTypeParams = RuleParams;
 export type LogThresholdRuleTypeState = RuleTypeState; // no specific state used
 export type LogThresholdAlertState = AlertState; // no specific state used
 export type LogThresholdAlertContext = AlertContext; // no specific instance context used
@@ -127,7 +137,8 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
       getAlertUuid,
       getAlertByAlertUuid,
     } = services;
-    const { basePath } = libs;
+    const { basePath, alertsLocator } = libs;
+    const config = libs.getAlertDetailsConfig();
 
     const alertFactory: LogThresholdAlertFactory = (
       id,
@@ -139,7 +150,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     ) => {
       const alertContext =
         actions != null
-          ? actions.reduce((next, action) => ({ ...next, ...action.context }), {})
+          ? actions.reduce((next, action) => Object.assign(next, action.context), {})
           : {};
 
       const alert = alertWithLifecycle({
@@ -168,7 +179,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           viewInAppUrl,
         };
 
-        actions.forEach((actionSet) => {
+        asyncForEach(actions, async (actionSet) => {
           const { actionGroup, context } = actionSet;
 
           const alertInstanceId = (context.group || id) as string;
@@ -178,7 +189,15 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           alert.scheduleActions(actionGroup, {
             ...sharedContext,
             ...context,
-            alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+            alertDetailsUrl: getAlertDetailsPageEnabledForApp(config, 'logs')
+              ? getAlertDetailsUrl(libs.basePath, spaceId, alertUuid)
+              : await getAlertUrl(
+                  alertUuid,
+                  spaceId,
+                  indexedStartedAt,
+                  libs.alertsLocator,
+                  libs.basePath.publicBaseUrl
+                ),
           });
         });
       }
@@ -190,12 +209,12 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
       return alert;
     };
 
-    const [, , { logViews }] = await libs.getStartServices();
+    const [, { logsShared }] = await libs.getStartServices();
 
     try {
       const validatedParams = decodeOrThrow(ruleParamsRT)(params);
 
-      const { indices, timestampField, runtimeMappings } = await logViews
+      const { indices, timestampField, runtimeMappings } = await logsShared.logViews
         .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser)
         .getResolvedLogView(validatedParams.logView);
 
@@ -234,6 +253,8 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
         startedAt,
         validatedParams,
         getAlertByAlertUuid,
+        alertsLocator,
+        isAlertDetailsPageEnabled: getAlertDetailsPageEnabledForApp(config, 'logs'),
       });
     } catch (e) {
       throw new Error(e);
@@ -650,56 +671,6 @@ export const processGroupByRatioResults = (
   alertLimit.setLimitReached(remainingAlertCount <= 0);
 };
 
-export const buildFiltersFromCriteria = (
-  params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
-  timestampField: string,
-  executionTimeRange?: ExecutionTimeRange
-) => {
-  const { timeSize, timeUnit, criteria } = params;
-  const interval = `${timeSize}${timeUnit}`;
-  const intervalAsSeconds = getIntervalInSeconds(interval);
-  const intervalAsMs = intervalAsSeconds * 1000;
-  const to = executionTimeRange?.lte || Date.now();
-  const from = executionTimeRange?.gte || to - intervalAsMs;
-
-  const positiveCriteria = criteria.filter((criterion) =>
-    positiveComparators.includes(criterion.comparator)
-  );
-  const negativeCriteria = criteria.filter((criterion) =>
-    negativeComparators.includes(criterion.comparator)
-  );
-  // Positive assertions (things that "must" match)
-  const mustFilters = buildFiltersForCriteria(positiveCriteria);
-  // Negative assertions (things that "must not" match)
-  const mustNotFilters = buildFiltersForCriteria(negativeCriteria);
-
-  const rangeFilter = {
-    range: {
-      [timestampField]: {
-        gte: from,
-        lte: to,
-        format: 'epoch_millis',
-      },
-    },
-  };
-
-  // For group by scenarios we'll pad the time range by 1 x the interval size on the left (lte) and right (gte), this is so
-  // a wider net is cast to "capture" the groups. This is to account for scenarios where we want ascertain if
-  // there were "no documents" (less than 1 for example). In these cases we may be missing documents to build the groups
-  // and match / not match the criteria.
-  const groupedRangeFilter = {
-    range: {
-      [timestampField]: {
-        gte: from - intervalAsMs,
-        lte: to + intervalAsMs,
-        format: 'epoch_millis',
-      },
-    },
-  };
-
-  return { rangeFilter, groupedRangeFilter, mustFilters, mustNotFilters };
-};
-
 export const getGroupedESQuery = (
   params: Pick<RuleParams, 'timeSize' | 'timeUnit' | 'groupBy'> & {
     criteria: CountCriteria;
@@ -856,107 +827,6 @@ export const getUngroupedESQuery = (
   };
 };
 
-const buildFiltersForCriteria = (criteria: CountCriteria) => {
-  let filters: estypes.QueryDslQueryContainer[] = [];
-
-  criteria.forEach((criterion) => {
-    const criterionQuery = buildCriterionQuery(criterion);
-    if (criterionQuery) {
-      filters = [...filters, criterionQuery];
-    }
-  });
-  return filters;
-};
-
-const buildCriterionQuery = (criterion: Criterion): estypes.QueryDslQueryContainer | undefined => {
-  const { field, value, comparator } = criterion;
-
-  const queryType = getQueryMappingForComparator(comparator);
-
-  switch (queryType) {
-    case 'term':
-      return {
-        term: {
-          [field]: {
-            value,
-          },
-        },
-      };
-    case 'match': {
-      return {
-        match: {
-          [field]: value,
-        },
-      };
-    }
-    case 'match_phrase': {
-      return {
-        match_phrase: {
-          [field]: String(value),
-        },
-      };
-    }
-    case 'range': {
-      const comparatorToRangePropertyMapping: {
-        [key: string]: string;
-      } = {
-        [Comparator.LT]: 'lt',
-        [Comparator.LT_OR_EQ]: 'lte',
-        [Comparator.GT]: 'gt',
-        [Comparator.GT_OR_EQ]: 'gte',
-      };
-
-      const rangeProperty = comparatorToRangePropertyMapping[comparator];
-
-      return {
-        range: {
-          [field]: {
-            [rangeProperty]: value,
-          },
-        },
-      };
-    }
-    default: {
-      return undefined;
-    }
-  }
-};
-
-export const positiveComparators = [
-  Comparator.GT,
-  Comparator.GT_OR_EQ,
-  Comparator.LT,
-  Comparator.LT_OR_EQ,
-  Comparator.EQ,
-  Comparator.MATCH,
-  Comparator.MATCH_PHRASE,
-];
-
-export const negativeComparators = [
-  Comparator.NOT_EQ,
-  Comparator.NOT_MATCH,
-  Comparator.NOT_MATCH_PHRASE,
-];
-
-export const queryMappings: {
-  [key: string]: string;
-} = {
-  [Comparator.GT]: 'range',
-  [Comparator.GT_OR_EQ]: 'range',
-  [Comparator.LT]: 'range',
-  [Comparator.LT_OR_EQ]: 'range',
-  [Comparator.EQ]: 'term',
-  [Comparator.MATCH]: 'match',
-  [Comparator.MATCH_PHRASE]: 'match_phrase',
-  [Comparator.NOT_EQ]: 'term',
-  [Comparator.NOT_MATCH]: 'match',
-  [Comparator.NOT_MATCH_PHRASE]: 'match_phrase',
-};
-
-const getQueryMappingForComparator = (comparator: Comparator) => {
-  return queryMappings[comparator];
-};
-
 const getUngroupedResults = async (query: object, esClient: ElasticsearchClient) => {
   return decodeOrThrow(UngroupedSearchQueryResponseRT)(await esClient.search(query));
 };
@@ -997,6 +867,8 @@ const processRecoveredAlerts = async ({
   startedAt,
   validatedParams,
   getAlertByAlertUuid,
+  alertsLocator,
+  isAlertDetailsPageEnabled = false,
 }: {
   basePath: IBasePath;
   getAlertStartedDate: (alertId: string) => string | null;
@@ -1008,6 +880,8 @@ const processRecoveredAlerts = async ({
   getAlertByAlertUuid: (
     alertUuid: string
   ) => Promise<Partial<ParsedTechnicalFields & ParsedExperimentalFields> | null> | null;
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
+  isAlertDetailsPageEnabled?: boolean;
 }) => {
   const groupByKeysObjectForRecovered = getGroupByObject(
     validatedParams.groupBy,
@@ -1024,7 +898,15 @@ const processRecoveredAlerts = async ({
     const viewInAppUrl = addSpaceIdToPath(basePath.publicBaseUrl, spaceId, relativeViewInAppUrl);
 
     const baseContext = {
-      alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
+      alertDetailsUrl: isAlertDetailsPageEnabled
+        ? getAlertDetailsUrl(basePath, spaceId, alertUuid)
+        : await getAlertUrl(
+            alertUuid,
+            spaceId,
+            indexedStartedAt,
+            alertsLocator,
+            basePath.publicBaseUrl
+          ),
       group: hasGroupBy(validatedParams) ? recoveredAlertId : null,
       groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
       timestamp: startedAt.toISOString(),

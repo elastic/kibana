@@ -6,24 +6,24 @@
  */
 
 import React from 'react';
-import { Redirect, Switch } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { EnginesRouter } from './components/engines/engines_router';
 import { NotFound } from './components/not_found';
-import { ROOT_PATH, ENGINES_PATH } from './routes';
+import { SearchApplicationsRouter } from './components/search_applications/search_applications_router';
+import { ROOT_PATH, SEARCH_APPLICATIONS_PATH } from './routes';
 
 export const Applications = () => {
   return (
-    <Switch>
-      <Redirect exact from={ROOT_PATH} to={ENGINES_PATH} />
-      <Route path={ENGINES_PATH}>
-        <EnginesRouter />
+    <Routes>
+      <Redirect exact from={ROOT_PATH} to={SEARCH_APPLICATIONS_PATH} />
+      <Route path={SEARCH_APPLICATIONS_PATH}>
+        <SearchApplicationsRouter />
       </Route>
       <Route>
         <NotFound />
       </Route>
-    </Switch>
+    </Routes>
   );
 };

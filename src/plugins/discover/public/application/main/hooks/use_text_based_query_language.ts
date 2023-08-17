@@ -37,6 +37,7 @@ export function useTextBasedQueryLanguage({
     columns: [],
     query: undefined,
   });
+  const indexTitle = useRef<string>('');
   const savedSearch = useSavedSearchInitial();
 
   const cleanup = useCallback(() => {
@@ -46,6 +47,7 @@ export function useTextBasedQueryLanguage({
         columns: [],
         query: undefined,
       };
+      indexTitle.current = '';
     }
   }, []);
 
@@ -55,14 +57,23 @@ export function useTextBasedQueryLanguage({
       if (!query || next.fetchStatus === FetchStatus.ERROR) {
         return;
       }
+      const sendComplete = () => {
+        stateContainer.dataState.data$.documents$.next({
+          ...next,
+          fetchStatus: FetchStatus.COMPLETE,
+        });
+      };
       const { columns: stateColumns, index, viewMode } = stateContainer.appState.getState();
       let nextColumns: string[] = [];
       const isTextBasedQueryLang =
         recordRawType === 'plain' && isOfAggregateQueryType(query) && 'sql' in query;
-      const hasResults = next.result?.length && next.fetchStatus === FetchStatus.COMPLETE;
+      const hasResults = Boolean(next.result?.length);
       const initialFetch = !prev.current.columns.length;
 
       if (isTextBasedQueryLang) {
+        if (next.fetchStatus !== FetchStatus.PARTIAL) {
+          return;
+        }
         if (hasResults) {
           // check if state needs to contain column transformation due to a different columns in the resultset
           const firstRow = next.result![0];
@@ -80,36 +91,24 @@ export function useTextBasedQueryLanguage({
           }
         }
         const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
-        const internalState = stateContainer.internalState.getState();
-        const dataViewList = [...internalState.savedDataViews, ...internalState.adHocDataViews];
-        let dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
 
-        // no dataview found but the index pattern is valid
-        // create an adhoc instance instead
-        if (!dataViewObj) {
-          dataViewObj = await dataViews.create({
-            title: indexPatternFromQuery,
-          });
-          stateContainer.internalState.transitions.setAdHocDataViews([dataViewObj]);
-
-          if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
-            dataViewObj.timeFieldName = '@timestamp';
-          } else if (dataViewObj.fields.getByType('date')?.length) {
-            const dateFields = dataViewObj.fields.getByType('date');
-            dataViewObj.timeFieldName = dateFields[0].name;
-          }
-        }
+        const dataViewObj = stateContainer.internalState.getState().dataView!;
 
         // don't set the columns on initial fetch, to prevent overwriting existing state
         const addColumnsToState = Boolean(
           nextColumns.length && (!initialFetch || !stateColumns?.length)
         );
         // no need to reset index to state if it hasn't changed
-        const addDataViewToState = Boolean(dataViewObj.id !== index);
-        if (!addColumnsToState && !addDataViewToState) {
+        const addDataViewToState = Boolean(dataViewObj?.id !== index) || initialFetch;
+        const queryChanged = indexPatternFromQuery !== indexTitle.current;
+        if (!addColumnsToState && !queryChanged) {
+          sendComplete();
           return;
         }
 
+        if (queryChanged) {
+          indexTitle.current = indexPatternFromQuery;
+        }
         const nextState = {
           ...(addDataViewToState && { index: dataViewObj.id }),
           ...(addColumnsToState && { columns: nextColumns }),
@@ -117,7 +116,8 @@ export function useTextBasedQueryLanguage({
             viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),
           }),
         };
-        stateContainer.appState.replaceUrlState(nextState);
+        await stateContainer.appState.replaceUrlState(nextState);
+        sendComplete();
       } else {
         // cleanup for a "regular" query
         cleanup();

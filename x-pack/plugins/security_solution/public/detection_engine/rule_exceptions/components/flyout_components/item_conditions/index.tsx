@@ -20,6 +20,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type {
+  DataViewField,
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
@@ -84,11 +85,8 @@ interface ExceptionsFlyoutConditionsComponentProps {
   onExceptionItemAdd: (items: ExceptionsBuilderReturnExceptionItem[]) => void;
   /* Exception item builder takes a callback used when there are updates to the item that includes information on if any form errors exist */
   onSetErrorExists: (errorExists: boolean) => void;
-  onFilterIndexPatterns: (
-    patterns: DataViewBase,
-    type: ExceptionListType,
-    osTypes?: Array<'linux' | 'macos' | 'windows'> | undefined
-  ) => DataViewBase;
+
+  getExtendedFields?: (fields: string[]) => Promise<DataViewField[]>;
 }
 
 const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponentProps> = ({
@@ -104,7 +102,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
   onOsChange,
   onExceptionItemAdd,
   onSetErrorExists,
-  onFilterIndexPatterns,
+  getExtendedFields,
 }): JSX.Element => {
   const { http, unifiedSearch } = useKibana().services;
   const isEndpointException = useMemo(
@@ -256,7 +254,6 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
         osTypes,
         listId: listIdToUse,
         listNamespaceType,
-        listTypeSpecificIndexPatternFilter: onFilterIndexPatterns,
         exceptionItemName,
         indexPatterns,
         isOrDisabled: isExceptionBuilderFormDisabled,
@@ -267,6 +264,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
         onChange: handleBuilderOnChange,
         isDisabled: isExceptionBuilderFormDisabled,
         allowCustomFieldOptions: !isEndpointException,
+        getExtendedFields,
       })}
     </>
   );

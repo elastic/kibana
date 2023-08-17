@@ -37,7 +37,6 @@ export function useTransactionLatencyChartsFetcher({
     '/services/{serviceName}',
     '/mobile-services/{serviceName}'
   );
-
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const preferred = usePreferredDataSourceAndBucketSize({
@@ -45,7 +44,9 @@ export function useTransactionLatencyChartsFetcher({
     numBuckets: 100,
     start,
     end,
-    type: ApmDocumentType.ServiceTransactionMetric,
+    type: transactionName
+      ? ApmDocumentType.TransactionMetric
+      : ApmDocumentType.ServiceTransactionMetric,
   });
 
   const shouldUseDurationSummary =
@@ -77,7 +78,7 @@ export function useTransactionLatencyChartsFetcher({
                 start,
                 end,
                 transactionType,
-                useDurationSummary: shouldUseDurationSummary,
+                useDurationSummary: !!shouldUseDurationSummary,
                 transactionName: transactionName || undefined,
                 latencyAggregationType,
                 offset:

@@ -7,20 +7,20 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { merge } from 'rxjs';
+import type { Moment } from 'moment';
 
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SignificantTerm } from '@kbn/ml-agg-utils';
-import type { SavedSearch } from '@kbn/discover-plugin/public';
+
 import type { Dictionary } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { PLUGIN_ID } from '../../common';
 
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
-import type { AiOpsIndexBasedAppState } from '../application/utils/url_state';
-import { getEsQueryFromSavedSearch } from '../application/utils/search_utils';
-import type { GroupTableItem } from '../components/spike_analysis_table/types';
+import type { GroupTableItem } from '../components/log_rate_analysis_results_table/types';
 
 import { useTimeBuckets } from './use_time_buckets';
 import { useAiopsAppContext } from './use_aiops_app_context';
@@ -30,25 +30,16 @@ import { useDocumentCountStats } from './use_document_count_stats';
 const DEFAULT_BAR_TARGET = 75;
 
 export const useData = (
-  {
-    selectedDataView,
-    selectedSavedSearch,
-  }: { selectedDataView: DataView; selectedSavedSearch: SavedSearch | null },
+  selectedDataView: DataView,
   contextId: string,
-  aiopsListState: AiOpsIndexBasedAppState,
+  searchQuery: estypes.QueryDslQueryContainer,
   onUpdate?: (params: Dictionary<unknown>) => void,
   selectedSignificantTerm?: SignificantTerm,
-  selectedGroup?: GroupTableItem | null,
+  selectedGroup: GroupTableItem | null = null,
   barTarget: number = DEFAULT_BAR_TARGET,
-  readOnly: boolean = false
+  timeRange?: { min: Moment; max: Moment }
 ) => {
-  const {
-    executionContext,
-    uiSettings,
-    data: {
-      query: { filterManager },
-    },
-  } = useAiopsAppContext();
+  const { executionContext } = useAiopsAppContext();
 
   useExecutionContext(executionContext, {
     name: PLUGIN_ID,
@@ -58,47 +49,6 @@ export const useData = (
 
   const [lastRefresh, setLastRefresh] = useState(0);
 
-  /** Prepare required params to pass to search strategy **/
-  const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
-    const searchData = getEsQueryFromSavedSearch({
-      dataView: selectedDataView,
-      uiSettings,
-      savedSearch: selectedSavedSearch,
-      filterManager,
-    });
-
-    if (searchData === undefined || aiopsListState.searchString !== '') {
-      if (aiopsListState.filters && readOnly === false) {
-        const globalFilters = filterManager?.getGlobalFilters();
-
-        if (filterManager) filterManager.setFilters(aiopsListState.filters);
-        if (globalFilters) filterManager?.addFilters(globalFilters);
-      }
-      return {
-        searchQuery: aiopsListState.searchQuery,
-        searchString: aiopsListState.searchString,
-        searchQueryLanguage: aiopsListState.searchQueryLanguage,
-      };
-    } else {
-      return {
-        searchQuery: searchData.searchQuery,
-        searchString: searchData.searchString,
-        searchQueryLanguage: searchData.queryLanguage,
-      };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    selectedSavedSearch?.id,
-    selectedDataView.id,
-    aiopsListState.searchString,
-    aiopsListState.searchQueryLanguage,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify({
-      searchQuery: aiopsListState.searchQuery,
-    }),
-    lastRefresh,
-  ]);
-
   const _timeBuckets = useTimeBuckets();
   const timefilter = useTimefilter({
     timeRangeSelector: selectedDataView?.timeFieldName !== undefined,
@@ -106,7 +56,7 @@ export const useData = (
   });
 
   const fieldStatsRequest: DocumentStatsSearchStrategyParams | undefined = useMemo(() => {
-    const timefilterActiveBounds = timefilter.getActiveBounds();
+    const timefilterActiveBounds = timeRange ?? timefilter.getActiveBounds();
     if (timefilterActiveBounds !== undefined) {
       _timeBuckets.setInterval('auto');
       _timeBuckets.setBounds(timefilterActiveBounds);
@@ -122,7 +72,7 @@ export const useData = (
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastRefresh, searchQuery]);
+  }, [lastRefresh, searchQuery, timeRange]);
 
   const overallStatsRequest = useMemo(() => {
     return fieldStatsRequest
@@ -189,9 +139,6 @@ export const useData = (
     /** End timestamp filter */
     latest: fieldStatsRequest?.latest,
     intervalMs: fieldStatsRequest?.intervalMs,
-    searchQueryLanguage,
-    searchString,
-    searchQuery,
     forceRefresh: () => setLastRefresh(Date.now()),
   };
 };

@@ -176,7 +176,7 @@ describe('extractMigrationInfo', () => {
             changes: [
               {
                 type: 'data_backfill',
-                transform: jest.fn(),
+                backfillFn: jest.fn(),
               },
             ],
           },
@@ -202,12 +202,18 @@ describe('extractMigrationInfo', () => {
           changeTypes: ['data_backfill'],
           hasTransformation: true,
           newMappings: [],
+          schemas: {
+            forwardCompatibility: false,
+          },
         },
         {
           version: '2',
           changeTypes: ['mappings_addition'],
           hasTransformation: false,
           newMappings: ['foo.type'],
+          schemas: {
+            forwardCompatibility: false,
+          },
         },
       ]);
     });
@@ -219,7 +225,7 @@ describe('extractMigrationInfo', () => {
             changes: [
               {
                 type: 'data_backfill',
-                transform: jest.fn(),
+                backfillFn: jest.fn(),
               },
             ],
           },
@@ -245,12 +251,58 @@ describe('extractMigrationInfo', () => {
           changeTypes: ['data_backfill'],
           hasTransformation: true,
           newMappings: [],
+          schemas: {
+            forwardCompatibility: false,
+          },
         },
         {
           version: '2',
           changeTypes: ['mappings_addition'],
           hasTransformation: false,
           newMappings: ['foo.type'],
+          schemas: {
+            forwardCompatibility: false,
+          },
+        },
+      ]);
+    });
+
+    it('returns the unique list of changes', () => {
+      const type = createType({
+        modelVersions: {
+          '1': {
+            changes: [
+              {
+                type: 'data_backfill',
+                backfillFn: jest.fn(),
+              },
+              {
+                type: 'unsafe_transform',
+                transformFn: jest.fn(),
+              },
+              {
+                type: 'data_removal',
+                removedAttributePaths: [],
+              },
+              {
+                type: 'data_backfill',
+                backfillFn: jest.fn(),
+              },
+            ],
+          },
+        },
+      });
+      const output = extractMigrationInfo(type);
+
+      expect(output.modelVersions).toEqual([
+        {
+          version: '1',
+          changeTypes: ['data_backfill', 'data_removal', 'unsafe_transform'],
+          hasTransformation: true,
+          newMappings: [],
+          schemas: {
+            forwardCompatibility: false,
+          },
         },
       ]);
     });
@@ -262,6 +314,32 @@ describe('extractMigrationInfo', () => {
       const output = extractMigrationInfo(type);
 
       expect(output.modelVersions).toEqual([]);
+    });
+
+    it('returns the correct values for schemas', () => {
+      const type = createType({
+        switchToModelVersionAt: '8.8.0',
+        modelVersions: {
+          1: {
+            changes: [],
+            schemas: {
+              forwardCompatibility: jest.fn(),
+            },
+          },
+          2: {
+            changes: [],
+            schemas: {},
+          },
+        },
+      });
+      const output = extractMigrationInfo(type);
+
+      expect(output.modelVersions[0].schemas).toEqual({
+        forwardCompatibility: true,
+      });
+      expect(output.modelVersions[1].schemas).toEqual({
+        forwardCompatibility: false,
+      });
     });
   });
 
@@ -278,7 +356,7 @@ describe('extractMigrationInfo', () => {
             changes: [
               {
                 type: 'data_backfill',
-                transform: jest.fn(),
+                backfillFn: jest.fn(),
               },
             ],
           },
@@ -310,12 +388,18 @@ describe('extractMigrationInfo', () => {
               changeTypes: ['data_backfill'],
               hasTransformation: true,
               newMappings: [],
+              schemas: {
+                forwardCompatibility: false,
+              },
             },
             {
               version: '2',
               changeTypes: ['mappings_addition'],
               hasTransformation: false,
               newMappings: ['foo.type'],
+              schemas: {
+                forwardCompatibility: false,
+              },
             },
           ],
         })

@@ -7,18 +7,17 @@
 
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useFormContext } from 'react-hook-form';
 import { LiveQuery } from '../../live_queries';
 
-const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
-  &.euiFlyoutHeader {
-    padding-top: 21px;
-    padding-bottom: 20px;
-  }
-`;
+const euiFlyoutHeaderCss = {
+  '&.euiFlyoutHeader': {
+    paddingTop: '21px',
+    paddingBottom: '20px',
+  },
+};
 
 interface PlaygroundFlyoutProps {
   enabled?: boolean;
@@ -35,8 +34,8 @@ const PlaygroundFlyoutComponent: React.FC<PlaygroundFlyoutProps> = ({ enabled, o
   const serializedFormData = useMemo(() => serializer(watchedValues), [ecsMapping]);
 
   return (
-    <EuiFlyout type="push" size="m" onClose={onClose}>
-      <StyledEuiFlyoutHeader hasBorder>
+    <EuiFlyout type="push" size="m" onClose={onClose} data-test-subj={'osquery-save-query-flyout'}>
+      <EuiFlyoutHeader css={euiFlyoutHeaderCss} hasBorder>
         <EuiTitle size="s">
           <h5>
             <FormattedMessage
@@ -45,7 +44,7 @@ const PlaygroundFlyoutComponent: React.FC<PlaygroundFlyoutProps> = ({ enabled, o
             />
           </h5>
         </EuiTitle>
-      </StyledEuiFlyoutHeader>
+      </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <LiveQuery
           enabled={enabled && query !== ''}

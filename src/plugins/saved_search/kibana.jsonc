@@ -7,14 +7,9 @@
     "id": "savedSearch",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "data"
-    ],
-    "requiredBundles": [
-      "kibanaUtils"
-    ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "requiredPlugins": ["data", "contentManagement", "embeddable", "expressions"],
+    "optionalPlugins": ["spaces", "savedObjectsTaggingOss"],
+    "requiredBundles": [],
+    "extraPublicDirs": ["common"]
   }
 }

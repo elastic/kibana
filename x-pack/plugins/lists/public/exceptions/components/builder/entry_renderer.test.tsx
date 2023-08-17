@@ -197,14 +197,15 @@ describe('BuilderEntryItem', () => {
     );
   });
 
-  test('it render mapping issues warning text when field has mapping conflicts', () => {
+  test('it render mapping issues warning text when field has mapping conflicts', async () => {
+    const field = getField('mapping issues');
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
         entry={{
           correspondingKeywordField: undefined,
           entryIndex: 0,
-          field: getField('mapping issues'),
+          field,
           id: '123',
           nested: undefined,
           operator: isOperator,
@@ -223,12 +224,16 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel
         allowCustomOptions
+        getExtendedFields={(): Promise<FieldSpec[]> => Promise.resolve([field])}
       />
     );
 
-    expect(wrapper.find('.euiFormHelpText.euiFormRow__text').text()).toMatch(
-      /This field is defined as different types across the following indices or is unmapped. This can cause unexpected query results./
-    );
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('.euiFormHelpText.euiFormRow__text').text()).toMatch(
+        /This field is defined as different types across the following indices or is unmapped. This can cause unexpected query results./
+      );
+    });
   });
 
   test('it renders field values correctly when operator is "isOperator"', () => {

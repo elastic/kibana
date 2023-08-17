@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Axis, Chart, niceTimeFormatter, Position, Settings } from '@elastic/charts';
+import { Axis, Chart, niceTimeFormatter, Position, Settings, Tooltip } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
+import { useTimelineChartTheme } from '../../../utils/use_timeline_chart_theme';
 import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerAggregation, MetricsExplorerRow } from '../../../../common/http_api';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useSnapshot } from '../../../pages/metrics/inventory_view/hooks/use_snaphot';
 import { useWaffleOptionsContext } from '../../../pages/metrics/inventory_view/hooks/use_waffle_options';
 import { createInventoryMetricFormatter } from '../../../pages/metrics/inventory_view/lib/create_inventory_metric_formatter';
@@ -24,7 +24,6 @@ import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explor
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import {
   ChartContainer,
-  getChartTheme,
   LoadingState,
   NoDataState,
   TIME_LABELS,
@@ -45,6 +44,7 @@ export const ExpressionChart: React.FC<Props> = ({
   nodeType,
   sourceId,
 }) => {
+  const chartTheme = useTimelineChartTheme();
   const timerange = useMemo(
     () => ({
       interval: `${expression.timeSize || 1}${expression.timeUnit}`,
@@ -78,14 +78,11 @@ export const ExpressionChart: React.FC<Props> = ({
     timerange,
   });
 
-  const { uiSettings } = useKibanaContextForPlugin().services;
-
   const metric = {
     field: expression.metric,
     aggregation: 'avg' as MetricsExplorerAggregation,
     color: Color.color0,
   };
-  const isDarkMode = uiSettings?.get('theme:darkMode') || false;
   const dateFormatter = useMemo(() => {
     const firstSeries = nodes[0]?.metrics[0]?.timeseries;
     const firstTimestamp = first(firstSeries?.rows)?.timestamp;
@@ -194,7 +191,8 @@ export const ExpressionChart: React.FC<Props> = ({
             tickFormat={dateFormatter}
           />
           <Axis id={'values'} position={Position.Left} tickFormat={yAxisFormater} domain={domain} />
-          <Settings tooltip={tooltipProps} theme={getChartTheme(isDarkMode)} />
+          <Settings baseTheme={chartTheme.baseTheme} />
+          <Tooltip {...tooltipProps} />
         </Chart>
       </ChartContainer>
       <div style={{ textAlign: 'center' }}>

@@ -52,11 +52,11 @@ describe('getOutdatedDocumentsQuery', () => {
                       "type": "foo",
                     },
                   },
-                ],
-                "must_not": Array [
                   Object {
-                    "term": Object {
-                      "typeMigrationVersion": "10.2.0",
+                    "range": Object {
+                      "typeMigrationVersion": Object {
+                        "lt": "10.2.0",
+                      },
                     },
                   },
                 ],
@@ -70,11 +70,11 @@ describe('getOutdatedDocumentsQuery', () => {
                       "type": "bar",
                     },
                   },
-                ],
-                "must_not": Array [
                   Object {
-                    "term": Object {
-                      "typeMigrationVersion": "10.3.0",
+                    "range": Object {
+                      "typeMigrationVersion": Object {
+                        "lt": "10.3.0",
+                      },
                     },
                   },
                 ],
@@ -118,11 +118,11 @@ describe('getOutdatedDocumentsQuery', () => {
                       "type": "foo",
                     },
                   },
-                ],
-                "must_not": Array [
                   Object {
-                    "term": Object {
-                      "typeMigrationVersion": "8.5.0",
+                    "range": Object {
+                      "typeMigrationVersion": Object {
+                        "lt": "8.5.0",
+                      },
                     },
                   },
                 ],
@@ -136,11 +136,11 @@ describe('getOutdatedDocumentsQuery', () => {
                       "type": "bar",
                     },
                   },
-                ],
-                "must_not": Array [
                   Object {
-                    "term": Object {
-                      "typeMigrationVersion": "8.7.2",
+                    "range": Object {
+                      "typeMigrationVersion": Object {
+                        "lt": "8.7.2",
+                      },
                     },
                   },
                 ],
@@ -189,11 +189,11 @@ describe('getOutdatedDocumentsQuery', () => {
                       "type": "foo",
                     },
                   },
-                ],
-                "must_not": Array [
                   Object {
-                    "term": Object {
-                      "typeMigrationVersion": "10.2.0",
+                    "range": Object {
+                      "typeMigrationVersion": Object {
+                        "lt": "10.2.0",
+                      },
                     },
                   },
                 ],
@@ -207,11 +207,11 @@ describe('getOutdatedDocumentsQuery', () => {
                       "type": "bar",
                     },
                   },
-                ],
-                "must_not": Array [
                   Object {
-                    "term": Object {
-                      "typeMigrationVersion": "8.7.2",
+                    "range": Object {
+                      "typeMigrationVersion": Object {
+                        "lt": "8.7.2",
+                      },
                     },
                   },
                 ],

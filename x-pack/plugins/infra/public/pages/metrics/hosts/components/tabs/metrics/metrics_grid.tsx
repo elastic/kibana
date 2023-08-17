@@ -5,71 +5,37 @@
  * 2.0.
  */
 import React from 'react';
-
-import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { MetricChart, MetricChartProps } from './metric_chart';
-
-const DEFAULT_BREAKDOWN_SIZE = 20;
-const CHARTS_IN_ORDER: Array<Pick<MetricChartProps, 'title' | 'type'> & { fullRow?: boolean }> = [
-  {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.load', {
-      defaultMessage: 'Normalized Load',
-    }),
-    type: 'load',
-  },
-  {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.cpu', {
-      defaultMessage: 'CPU Usage',
-    }),
-    type: 'cpu',
-  },
-  {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.memory', {
-      defaultMessage: 'Memory Usage',
-    }),
-    type: 'memory',
-  },
-  {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.memoryAvailable', {
-      defaultMessage: 'Memory Available',
-    }),
-    type: 'memoryAvailable',
-  },
-  {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.rx', {
-      defaultMessage: 'Network Inbound (RX)',
-    }),
-    type: 'rx',
-  },
-  {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.tx', {
-      defaultMessage: 'Network Outbound (TX)',
-    }),
-    type: 'tx',
-  },
-  {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskIORead', {
-      defaultMessage: 'Disk Read IOPS',
-    }),
-    type: 'diskIORead',
-  },
-  {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.DiskIOWrite', {
-      defaultMessage: 'Disk Write IOPS',
-    }),
-    type: 'diskIOWrite',
-  },
-];
+import { EuiFlexGrid, EuiFlexItem, EuiText, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import {
+  hostsViewDashboards,
+  XY_MISSING_VALUE_DOTTED_LINE_CONFIG,
+} from '../../../../../../common/visualizations';
+import { HostMetricsExplanationContent } from '../../../../../../components/lens';
+import { Chart } from './chart';
+import { Popover } from '../../table/popover';
 
 export const MetricsGrid = React.memo(() => {
   return (
-    <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
-      {CHARTS_IN_ORDER.map(({ fullRow, ...chartProp }) => (
-        <EuiFlexItem key={chartProp.type} style={fullRow ? { gridColumn: '1/-1' } : {}}>
-          <MetricChart breakdownSize={DEFAULT_BREAKDOWN_SIZE} {...chartProp} />
+    <>
+      <EuiFlexGroup gutterSize="xs" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">Learn more about metrics</EuiText>
         </EuiFlexItem>
-      ))}
-    </EuiFlexGrid>
+        <EuiFlexItem grow={false}>
+          <Popover>
+            <HostMetricsExplanationContent />
+          </Popover>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+      <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
+        {hostsViewDashboards.hostsMetricCharts.map((chartProp, index) => (
+          <EuiFlexItem key={index} grow={false}>
+            <Chart {...chartProp} visualOptions={XY_MISSING_VALUE_DOTTED_LINE_CONFIG} />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGrid>
+    </>
   );
 });

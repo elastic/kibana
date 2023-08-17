@@ -29,7 +29,7 @@ exports[`Embedded Map it renders 1`] = `
   min-height: 0;
 }
 
-.c0.c0.c0 .mapboxgl-canvas {
+.c0.c0.c0 .maplibregl-canvas {
   -webkit-animation: none !important;
   animation: none !important;
 }

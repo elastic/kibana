@@ -59,6 +59,8 @@ jest.mock('./dimension_panel/reference_editor', () => ({
   ReferenceEditor: () => null,
 }));
 
+const nowInstant = new Date();
+
 const fieldsOne = [
   {
     name: 'timestamp',
@@ -245,32 +247,36 @@ describe('IndexPattern Data Source', () => {
         dataType: 'number',
         isBucketed: false,
         label: 'Foo',
+        customLabel: true,
         operationType: 'count',
         sourceField: '___records___',
       };
-      const map = FormBasedDatasource.uniqueLabels({
-        layers: {
-          a: {
-            columnOrder: ['a', 'b'],
-            columns: {
-              a: col,
-              b: col,
-            },
-            indexPatternId: 'foo',
-          },
-          b: {
-            columnOrder: ['c', 'd'],
-            columns: {
-              c: col,
-              d: {
-                ...col,
-                label: 'Foo [1]',
+      const map = FormBasedDatasource.uniqueLabels(
+        {
+          layers: {
+            a: {
+              columnOrder: ['a', 'b'],
+              columns: {
+                a: col,
+                b: col,
               },
+              indexPatternId: 'foo',
             },
-            indexPatternId: 'foo',
+            b: {
+              columnOrder: ['c', 'd'],
+              columns: {
+                c: col,
+                d: {
+                  ...col,
+                  label: 'Foo [1]',
+                },
+              },
+              indexPatternId: 'foo',
+            },
           },
-        },
-      } as unknown as FormBasedPrivateState);
+        } as unknown as FormBasedPrivateState,
+        indexPatterns
+      );
 
       expect(map).toMatchInlineSnapshot(`
         Object {
@@ -365,7 +371,14 @@ describe('IndexPattern Data Source', () => {
     it('should generate an empty expression when no columns are selected', async () => {
       const state = FormBasedDatasource.initialize();
       expect(
-        FormBasedDatasource.toExpression(state, 'first', indexPatterns, dateRange, 'testing-seed')
+        FormBasedDatasource.toExpression(
+          state,
+          'first',
+          indexPatterns,
+          dateRange,
+          nowInstant,
+          'testing-seed'
+        )
       ).toEqual(null);
     });
 
@@ -395,6 +408,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         )
       ).toEqual({
@@ -450,6 +464,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         )
       ).toMatchInlineSnapshot(`
@@ -531,6 +546,9 @@ describe('IndexPattern Data Source', () => {
                     "type": "expression",
                   },
                 ],
+                "ignoreGlobalFilters": Array [
+                  false,
+                ],
                 "index": Array [
                   Object {
                     "chain": Array [
@@ -569,7 +587,7 @@ describe('IndexPattern Data Source', () => {
             Object {
               "arguments": Object {
                 "idMap": Array [
-                  "{\\"col-0-0\\":[{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"___records___\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"}],\\"col-1-1\\":[{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}]}",
+                  "{\\"col-0-0\\":[{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"___records___\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"}],\\"col-1-1\\":[{\\"label\\":\\"timestampLabel\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}]}",
                 ],
               },
               "function": "lens_map_to_columns",
@@ -637,6 +655,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
@@ -678,6 +697,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       expect((ast.chain[1].arguments.aggs[1] as Ast).chain[0].arguments.timeShift).toEqual(['1d']);
@@ -891,6 +911,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       const count = (ast.chain[1].arguments.aggs[1] as Ast).chain[0];
@@ -961,6 +982,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       expect(ast.chain[1].arguments.aggs[0]).toMatchInlineSnapshot(`
@@ -1091,6 +1113,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       const timeScaleCalls = ast.chain.filter((fn) => fn.function === 'lens_time_scale');
@@ -1108,7 +1131,7 @@ describe('IndexPattern Data Source', () => {
             "col1",
           ],
           "outputColumnName": Array [
-            "Count of records",
+            "Count of records per hour",
           ],
           "reducedTimeRange": Array [],
           "targetUnit": Array [
@@ -1162,6 +1185,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       const filteredMetricAgg = (ast.chain[1].arguments.aggs[0] as Ast).chain[0].arguments;
@@ -1219,6 +1243,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       const formatIndex = ast.chain.findIndex((fn) => fn.function === 'lens_format_column');
@@ -1273,6 +1298,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       expect(ast.chain[1].arguments.metricsAtAllLevels).toEqual([false]);
@@ -1318,6 +1344,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp']);
@@ -1381,6 +1408,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         );
 
@@ -1455,6 +1483,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         ) as Ast;
 
@@ -1525,6 +1554,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         ) as Ast;
 
@@ -1544,7 +1574,7 @@ describe('IndexPattern Data Source', () => {
                 "dataType": "string",
                 "id": "col1",
                 "isBucketed": true,
-                "label": "My Op",
+                "label": "Top 5 values of Missing field",
                 "operationType": "terms",
                 "params": Object {
                   "orderBy": Object {
@@ -1562,7 +1592,7 @@ describe('IndexPattern Data Source', () => {
                 "dataType": "number",
                 "id": "col2",
                 "isBucketed": false,
-                "label": "Count of records",
+                "label": "Count of records per hour",
                 "operationType": "count",
                 "sourceField": "___records___",
                 "timeScale": "h",
@@ -1571,7 +1601,7 @@ describe('IndexPattern Data Source', () => {
                 "dataType": "number",
                 "id": "col3",
                 "isBucketed": false,
-                "label": "Count of records",
+                "label": "Count of records per hour",
                 "operationType": "count",
                 "sourceField": "___records___",
                 "timeScale": "h",
@@ -1580,7 +1610,7 @@ describe('IndexPattern Data Source', () => {
                 "dataType": "number",
                 "id": "col4",
                 "isBucketed": false,
-                "label": "Count of records",
+                "label": "Count of records per hour",
                 "operationType": "count",
                 "sourceField": "___records___",
                 "timeScale": "h",
@@ -1636,6 +1666,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         ) as Ast;
         // @ts-expect-error we can't isolate just the reference type
@@ -1675,6 +1706,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         ) as Ast;
 
@@ -1768,6 +1800,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         ) as Ast;
         const chainLength = ast.chain.length;
@@ -1805,6 +1838,7 @@ describe('IndexPattern Data Source', () => {
             columns: {},
             sampling: 1,
             linkToLayers: ['link-to-id'],
+            ignoreGlobalFilters: false,
           },
         },
       });
@@ -1895,6 +1929,7 @@ describe('IndexPattern Data Source', () => {
               indexPatternId: '1',
               columnOrder: [],
               columns: {},
+              ignoreGlobalFilters: false,
               linkToLayers: ['some-layer'],
               sampling: 1,
             },
@@ -1925,7 +1960,12 @@ describe('IndexPattern Data Source', () => {
         newState: {
           ...state,
           layers: {
-            first: { ...state.layers.first, linkToLayers: undefined, sampling: 1 },
+            first: {
+              ...state.layers.first,
+              linkToLayers: undefined,
+              sampling: 1,
+              ignoreGlobalFilters: false,
+            },
           },
         },
       });
@@ -2118,12 +2158,15 @@ describe('IndexPattern Data Source', () => {
     describe('getOperationForColumnId', () => {
       it('should get an operation for col1', () => {
         expect(publicAPI.getOperationForColumnId('col1')).toEqual({
-          label: 'My Op',
+          label: 'Top 5 values of Missing field',
           dataType: 'string',
           isBucketed: true,
           isStaticValue: false,
           hasTimeShift: false,
           hasReducedTimeRange: false,
+          scale: undefined,
+          sortingHint: undefined,
+          interval: undefined,
         } as OperationDescriptor);
       });
 
@@ -2248,7 +2291,7 @@ describe('IndexPattern Data Source', () => {
           disabled: { kuery: [], lucene: [] },
         });
       });
-      it('shuold collect top values fields as kuery existence filters if no data is provided', () => {
+      it('should collect top values fields as kuery existence filters if no data is provided', () => {
         publicAPI = FormBasedDatasource.getPublicAPI({
           state: {
             ...baseState,
@@ -2292,10 +2335,10 @@ describe('IndexPattern Data Source', () => {
         expect(publicAPI.getFilters()).toEqual({
           enabled: {
             kuery: [
-              [{ language: 'kuery', query: 'geo.src: *' }],
+              [{ language: 'kuery', query: '"geo.src": *' }],
               [
-                { language: 'kuery', query: 'geo.dest: *' },
-                { language: 'kuery', query: 'myField: *' },
+                { language: 'kuery', query: '"geo.dest": *' },
+                { language: 'kuery', query: '"myField": *' },
               ],
             ],
             lucene: [],
@@ -2860,8 +2903,8 @@ describe('IndexPattern Data Source', () => {
                 { language: 'kuery', query: 'memory > 500000' },
               ],
               [
-                { language: 'kuery', query: 'geo.src: *' },
-                { language: 'kuery', query: 'myField: *' },
+                { language: 'kuery', query: '"geo.src": *' },
+                { language: 'kuery', query: '"myField": *' },
               ],
             ],
             lucene: [

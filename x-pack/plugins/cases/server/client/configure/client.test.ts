@@ -8,9 +8,18 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { CasesClientArgs } from '../types';
-import { getConnectors } from './client';
+import { getConnectors, get, update } from './client';
+import { createCasesClientInternalMock, createCasesClientMockArgs } from '../mocks';
+import { MAX_SUPPORTED_CONNECTORS_RETURNED } from '../../../common/constants';
 
 describe('client', () => {
+  const clientArgs = createCasesClientMockArgs();
+  const casesClientInternal = createCasesClientInternalMock();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('getConnectors', () => {
     const logger = loggingSystemMock.createLogger();
     const actionsClient = actionsClientMock.create();
@@ -26,6 +35,7 @@ describe('client', () => {
         enabledInLicense: true,
         minimumLicenseRequired: 'basic' as const,
         supportedFeatureIds: ['alerting', 'cases'],
+        isSystemActionType: false,
       },
       {
         id: '.servicenow',
@@ -35,6 +45,7 @@ describe('client', () => {
         enabledInLicense: true,
         minimumLicenseRequired: 'basic' as const,
         supportedFeatureIds: ['alerting', 'cases'],
+        isSystemActionType: false,
       },
       {
         id: '.unsupported',
@@ -44,6 +55,7 @@ describe('client', () => {
         enabledInLicense: true,
         minimumLicenseRequired: 'basic' as const,
         supportedFeatureIds: ['alerting'],
+        isSystemActionType: false,
       },
       {
         id: '.swimlane',
@@ -53,6 +65,7 @@ describe('client', () => {
         enabledInLicense: false,
         minimumLicenseRequired: 'basic' as const,
         supportedFeatureIds: ['alerting', 'cases'],
+        isSystemActionType: false,
       },
     ];
 
@@ -64,6 +77,7 @@ describe('client', () => {
         config: {},
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
         referencedByCount: 1,
       },
       {
@@ -73,6 +87,8 @@ describe('client', () => {
         config: {},
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
+
         referencedByCount: 1,
       },
       {
@@ -82,6 +98,7 @@ describe('client', () => {
         config: {},
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
         referencedByCount: 1,
       },
     ];
@@ -102,6 +119,7 @@ describe('client', () => {
           config: {},
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
           referencedByCount: 1,
         },
         {
@@ -110,6 +128,7 @@ describe('client', () => {
           name: '2',
           config: {},
           isPreconfigured: false,
+          isSystemAction: false,
           isDeprecated: false,
           referencedByCount: 1,
         },
@@ -127,6 +146,7 @@ describe('client', () => {
           config: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           referencedByCount: 1,
         },
       ]);
@@ -139,6 +159,7 @@ describe('client', () => {
           config: {},
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
           referencedByCount: 1,
         },
         {
@@ -148,6 +169,7 @@ describe('client', () => {
           config: {},
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
           referencedByCount: 1,
         },
         {
@@ -156,6 +178,7 @@ describe('client', () => {
           name: 'sn-preconfigured',
           config: {},
           isPreconfigured: true,
+          isSystemAction: false,
           isDeprecated: false,
           referencedByCount: 1,
         },
@@ -173,6 +196,7 @@ describe('client', () => {
           config: {},
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
           referencedByCount: 1,
         },
       ]);
@@ -185,6 +209,7 @@ describe('client', () => {
           config: {},
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
           referencedByCount: 1,
         },
         {
@@ -194,9 +219,37 @@ describe('client', () => {
           config: {},
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
           referencedByCount: 1,
         },
       ]);
+    });
+
+    it('limits connectors returned to 1000', async () => {
+      actionsClient.listTypes.mockImplementation(async () => actionTypes.slice(0, 1));
+      actionsClient.getAll.mockImplementation(async () =>
+        Array(MAX_SUPPORTED_CONNECTORS_RETURNED + 1).fill(connectors[0])
+      );
+
+      expect((await getConnectors(args)).length).toEqual(MAX_SUPPORTED_CONNECTORS_RETURNED);
+    });
+  });
+
+  describe('get', () => {
+    it('throws with excess fields', async () => {
+      await expect(
+        // @ts-expect-error: excess attribute
+        get({ owner: 'cases', foo: 'bar' }, clientArgs, casesClientInternal)
+      ).rejects.toThrow('invalid keys "foo"');
+    });
+  });
+
+  describe('update', () => {
+    it('throws with excess fields', async () => {
+      await expect(
+        // @ts-expect-error: excess attribute
+        update('test-id', { version: 'test-version', foo: 'bar' }, clientArgs, casesClientInternal)
+      ).rejects.toThrow('invalid keys "foo"');
     });
   });
 });

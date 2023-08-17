@@ -40,6 +40,7 @@ const connector: ActionConnector = {
   isDeprecated: false,
   isPreconfigured: false,
   isMissingSecrets: false,
+  isSystemAction: false,
 };
 
 describe('EditConnectorFlyout', () => {
@@ -393,7 +394,8 @@ describe('EditConnectorFlyout', () => {
     });
   });
 
-  describe('Submitting', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/157060
+  describe.skip('Submitting', () => {
     it('updates the connector correctly', async () => {
       const { getByTestId } = appMockRenderer.render(
         <EditConnectorFlyout

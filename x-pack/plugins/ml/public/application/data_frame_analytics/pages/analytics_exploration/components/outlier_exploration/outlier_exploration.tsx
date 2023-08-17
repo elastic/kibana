@@ -10,22 +10,17 @@ import React, { useCallback, useState, FC } from 'react';
 import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { isOutlierAnalysis, FEATURE_INFLUENCE } from '@kbn/ml-data-frame-analytics-utils';
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   useColorRange,
   COLOR_RANGE,
   COLOR_RANGE_SCALE,
 } from '../../../../../components/color_range_legend';
 import { useScatterplotFieldOptions } from '../../../../../components/scatterplot_matrix';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
 
-import {
-  defaultSearchQuery,
-  isOutlierAnalysis,
-  useResultsViewConfig,
-  getDestinationIndex,
-} from '../../../../common';
-import { FEATURE_INFLUENCE } from '../../../../common/constants';
+import { defaultSearchQuery, useResultsViewConfig, getDestinationIndex } from '../../../../common';
 
 import {
   ExpandableSectionSplom,
@@ -50,7 +45,8 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
   const { indexPattern, indexPatternErrorMessage, jobConfig, needsDestIndexPattern } =
     useResultsViewConfig(jobId);
   const [pageUrlState, setPageUrlState] = useExplorationUrlState();
-  const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
+  const [searchQuery, setSearchQuery] =
+    useState<estypes.QueryDslQueryContainer>(defaultSearchQuery);
   const outlierData = useOutlierData(indexPattern, jobConfig, searchQuery);
 
   const searchQueryUpdateHandler: ExplorationQueryBarProps['setSearchQuery'] = useCallback(

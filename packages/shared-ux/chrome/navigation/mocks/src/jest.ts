@@ -6,70 +6,42 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { NavigationServices, ChromeNavigationNodeViewModel } from '../../types';
+import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { BehaviorSubject, of } from 'rxjs';
+import { NavigationServices } from '../../types';
+import { navLinksMock } from './navlinks';
 
-export const getServicesMock = (): NavigationServices => {
+const activeNodes: ChromeProjectNavigationNode[][] = [];
+
+export const getServicesMock = ({
+  navLinks = navLinksMock,
+}: { navLinks?: ChromeNavLink[] } = {}): NavigationServices => {
   const navigateToUrl = jest.fn().mockResolvedValue(undefined);
   const basePath = { prepend: jest.fn((path: string) => `/base${path}`) };
-  const loadingCount$ = new BehaviorSubject(0);
   const recentlyAccessed$ = new BehaviorSubject([]);
+  const navLinks$ = new BehaviorSubject(navLinks);
 
   return {
     basePath,
-    loadingCount$,
     recentlyAccessed$,
+    navLinks$,
     navIsOpen: true,
     navigateToUrl,
+    onProjectNavigationChange: jest.fn(),
+    activeNodes$: of(activeNodes),
+    cloudLinks: {
+      billingAndSub: {
+        title: 'Mock Billing & Subscriptions',
+        href: 'https://cloud.elastic.co/account/billing',
+      },
+      performance: {
+        title: 'Mock Performance',
+        href: 'https://cloud.elastic.co/deployments/123456789/performance',
+      },
+      userAndRoles: {
+        title: 'Mock Users & Roles',
+        href: 'https://cloud.elastic.co/deployments/123456789/security/users',
+      },
+    },
   };
 };
-
-export const getSolutionPropertiesMock = (): ChromeNavigationNodeViewModel => ({
-  id: 'example_project',
-  icon: 'logoObservability',
-  title: 'Example project',
-  items: [
-    {
-      id: 'root',
-      title: '',
-      items: [
-        {
-          id: 'get_started',
-          title: 'Get started',
-          href: '/app/example_project/get_started',
-        },
-        {
-          id: 'alerts',
-          title: 'Alerts',
-          href: '/app/example_project/alerts',
-        },
-        {
-          id: 'cases',
-          title: 'Cases',
-          href: '/app/example_project/cases',
-        },
-      ],
-    },
-    {
-      id: 'example_settings',
-      title: 'Settings',
-      items: [
-        {
-          id: 'logs',
-          title: 'Logs',
-          href: '/app/management/logs',
-        },
-        {
-          id: 'signals',
-          title: 'Signals',
-          href: '/app/management/signals',
-        },
-        {
-          id: 'tracing',
-          title: 'Tracing',
-          href: '/app/management/tracing',
-        },
-      ],
-    },
-  ],
-});

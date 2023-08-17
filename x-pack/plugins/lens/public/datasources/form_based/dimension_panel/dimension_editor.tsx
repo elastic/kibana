@@ -27,7 +27,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import ReactDOM from 'react-dom';
-import { NameInput } from '@kbn/visualization-ui-components/public';
+import { NameInput } from '@kbn/visualization-ui-components';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
 import { deleteColumn, GenericIndexPatternColumn } from '../form_based';
@@ -105,7 +105,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
     isFullscreen,
     supportStaticValue,
     enableFormatSelector = true,
-    formatSelectorOptions,
     layerType,
     paramEditorCustomProps,
   } = props;
@@ -113,7 +112,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
     data: props.data,
     fieldFormats: props.fieldFormats,
     uiSettings: props.uiSettings,
-    savedObjectsClient: props.savedObjectsClient,
     http: props.http,
     storage: props.storage,
     unifiedSearch: props.unifiedSearch,
@@ -222,10 +220,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
     [columnId, fireOrResetRandomSamplingToast, layerId, setState, state.layers]
   );
 
-  const setIsCloseable = (isCloseable: boolean) => {
-    setState((prevState) => ({ ...prevState, isDimensionClosePrevented: !isCloseable }));
-  };
-
   const incompleteInfo = (state.layers[layerId].incompleteColumns ?? {})[columnId];
   const {
     operationType: incompleteOperation,
@@ -278,7 +272,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   // changes from the static value operation (which has to be a function)
   // Note: it forced a rerender at this point to avoid UI glitches in async updates (another hack upstream)
   // TODO: revisit this once we get rid of updateDatasourceAsync upstream
-  const moveDefinetelyToStaticValueAndUpdate = (
+  const moveDefinitelyToStaticValueAndUpdate = (
     setter:
       | FormBasedLayer
       | ((prevLayer: FormBasedLayer) => FormBasedLayer)
@@ -431,8 +425,16 @@ export function DimensionEditor(props: DimensionEditorProps) {
       } else if (!compatibleWithCurrentField) {
         label = (
           <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs }}>
-              {label}
+            <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs, minWidth: 0 }}>
+              <span
+                css={css`
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                `}
+              >
+                {label}
+              </span>
             </EuiFlexItem>
             {shouldDisplayDots && (
               <EuiFlexItem grow={false}>
@@ -504,6 +506,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                           helpPopoverContainer.current = null;
                         }
                       }}
+                      theme={props.core.theme}
                     >
                       <HelpComponent />
                     </WrappingHelpPopover>
@@ -657,7 +660,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
     operationDefinitionMap,
     toggleFullscreen,
     isFullscreen,
-    setIsCloseable,
     paramEditorCustomProps,
     ReferenceEditor,
     dataSectionExtra: props.dataSectionExtra,
@@ -858,7 +860,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 })}
                 isFullscreen={isFullscreen}
                 toggleFullscreen={toggleFullscreen}
-                setIsCloseable={setIsCloseable}
                 paramEditorCustomProps={paramEditorCustomProps}
                 {...services}
               />
@@ -920,7 +921,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         layer={state.layers[layerId]}
         activeData={props.activeData}
         paramEditorUpdater={
-          temporaryStaticValue ? moveDefinetelyToStaticValueAndUpdate : setStateWrapper
+          temporaryStaticValue ? moveDefinitelyToStaticValueAndUpdate : setStateWrapper
         }
         columnId={columnId}
         currentColumn={state.layers[layerId].columns[columnId]}
@@ -931,7 +932,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
         isFullscreen={isFullscreen}
         indexPattern={currentIndexPattern}
         toggleFullscreen={toggleFullscreen}
-        setIsCloseable={setIsCloseable}
         ReferenceEditor={ReferenceEditor}
         {...services}
       />
@@ -1227,7 +1227,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               <FormatSelector
                 selectedColumn={selectedColumn}
                 onChange={onFormatChange}
-                options={formatSelectorOptions}
+                docLinks={props.core.docLinks}
               />
             ) : null}
           </>

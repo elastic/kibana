@@ -11,8 +11,8 @@ import type {
   FieldCapsResponse,
   MsearchMultisearchBody,
   MsearchMultisearchHeader,
-  TermsEnumRequest,
   TermsEnumResponse,
+  TermsEnumRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
@@ -46,17 +46,13 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   };
 };
 
-export type APMEventESTermsEnumRequest = Omit<TermsEnumRequest, 'index'> & {
+type APMEventWrapper<T> = Omit<T, 'index'> & {
   apm: { events: ProcessorEvent[] };
 };
 
-export type APMEventEqlSearchRequest = Omit<EqlSearchRequest, 'index'> & {
-  apm: { events: ProcessorEvent[] };
-};
-
-export type APMEventFieldCapsRequest = Omit<FieldCapsRequest, 'index'> & {
-  apm: { events: ProcessorEvent[] };
-};
+type APMEventTermsEnumRequest = APMEventWrapper<TermsEnumRequest>;
+type APMEventEqlSearchRequest = APMEventWrapper<EqlSearchRequest>;
+type APMEventFieldCapsRequest = APMEventWrapper<FieldCapsRequest>;
 
 // These keys shoul all be `ProcessorEvent.x`, but until TypeScript 4.2 we're inlining them here.
 // See https://github.com/microsoft/TypeScript/issues/37888
@@ -280,7 +276,7 @@ export class APMEventClient {
 
     return this.callAsyncWithDebug({
       operationName,
-      requestType: 'field_caps',
+      requestType: '_field_caps',
       params: requestParams,
       cb: (opts) => this.esClient.fieldCaps(requestParams, opts),
     });
@@ -288,7 +284,7 @@ export class APMEventClient {
 
   async termsEnum(
     operationName: string,
-    params: APMEventESTermsEnumRequest
+    params: APMEventTermsEnumRequest
   ): Promise<TermsEnumResponse> {
     const index = processorEventsToIndex(params.apm.events, this.indices);
 
@@ -299,7 +295,7 @@ export class APMEventClient {
 
     return this.callAsyncWithDebug({
       operationName,
-      requestType: 'terms_enum',
+      requestType: '_terms_enum',
       params: requestParams,
       cb: (opts) => this.esClient.termsEnum(requestParams, opts),
     });

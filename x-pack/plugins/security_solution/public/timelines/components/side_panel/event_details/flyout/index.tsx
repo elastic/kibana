@@ -136,7 +136,6 @@ export const useToGetInternalFlyout = () => {
         <FlyoutFooter
           detailsData={detailsData}
           detailsEcsData={ecsData}
-          expandedEvent={{ eventId: localAlert._id, indexName: localAlert._index }}
           refetchFlyoutData={refetchFlyoutData}
           handleOnEventClosed={noop}
           isHostIsolationPanelOpen={isHostIsolationPanelOpen}

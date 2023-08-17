@@ -1,4 +1,0 @@
-{
-  "indexExists": true,
-  "indices": "heartbeat-8*,heartbeat-7*,synthetics-*"
-}

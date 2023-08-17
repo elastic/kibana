@@ -12,8 +12,8 @@ import { fetchAnalyticsCollections } from './fetch_analytics_collection';
 describe('fetch analytics collection lib function', () => {
   const mockClient = {
     asCurrentUser: {
-      transport: {
-        request: jest.fn(),
+      searchApplication: {
+        getBehavioralAnalytics: jest.fn(),
       },
     },
     asInternalUser: {},
@@ -25,7 +25,7 @@ describe('fetch analytics collection lib function', () => {
 
   describe('fetch collections', () => {
     it('should return a list of analytics collections', async () => {
-      mockClient.asCurrentUser.transport.request.mockImplementation(() =>
+      mockClient.asCurrentUser.searchApplication.getBehavioralAnalytics.mockImplementation(() =>
         Promise.resolve({
           example: {
             event_data_stream: {
@@ -50,7 +50,7 @@ describe('fetch analytics collection lib function', () => {
 
   describe('fetch collection by Id', () => {
     it('should fetch analytics collection by Id', async () => {
-      mockClient.asCurrentUser.transport.request.mockImplementation(() =>
+      mockClient.asCurrentUser.searchApplication.getBehavioralAnalytics.mockImplementation(() =>
         Promise.resolve({
           example: {
             event_data_stream: {

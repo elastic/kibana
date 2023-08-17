@@ -7,11 +7,16 @@
  */
 
 export { NavigationKibanaProvider, NavigationProvider } from './src/services';
-export { Navigation } from './src/ui/navigation';
+
+export { DefaultNavigation, getPresets, Navigation } from './src/ui';
+
 export type {
-  ChromeNavigation,
-  ChromeNavigationViewModel,
-  NavigationServices,
-  ChromeNavigationNode,
-  ChromeNavigationNodeViewModel,
-} from './types';
+  GroupDefinition,
+  NavigationGroupPreset,
+  NavigationTreeDefinition,
+  ProjectNavigationDefinition,
+  RecentlyAccessedDefinition,
+  RootNavigationItemDefinition,
+} from './src/ui';
+
+export type { NavigationServices } from './types';

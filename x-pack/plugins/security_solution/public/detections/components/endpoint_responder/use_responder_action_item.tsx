@@ -7,22 +7,17 @@
 
 import React, { useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import {
-  isAlertFromEndpointEvent,
-  isTimelineEventItemAnAlert,
-} from '../../../common/utils/endpoint_alert_check';
-import { ResponderContextMenuItem } from './responder_context_menu_item';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { isTimelineEventItemAnAlert } from '../../../common/utils/endpoint_alert_check';
 import { getFieldValue } from '../host_isolation/helpers';
+import type { AlertTableContextMenuItem } from '../alerts_table/types';
+import { useResponderActionData } from './use_responder_action_data';
 
 export const useResponderActionItem = (
   eventDetailsData: TimelineEventsDetailsItem[] | null,
   onClick: () => void
-): JSX.Element[] => {
-  const isResponseActionsConsoleEnabled = useIsExperimentalFeatureEnabled(
-    'responseActionsConsoleEnabled'
-  );
+): AlertTableContextMenuItem[] => {
   const { loading: isAuthzLoading, canAccessResponseConsole } =
     useUserPrivileges().endpointPrivileges;
 
@@ -30,36 +25,43 @@ export const useResponderActionItem = (
     return isTimelineEventItemAnAlert(eventDetailsData || []);
   }, [eventDetailsData]);
 
-  const isEndpointAlert = useMemo(() => {
-    return isAlertFromEndpointEvent({ data: eventDetailsData || [] });
-  }, [eventDetailsData]);
-
   const endpointId = useMemo(
     () => getFieldValue({ category: 'agent', field: 'agent.id' }, eventDetailsData),
     [eventDetailsData]
   );
 
-  return useMemo(() => {
-    const actions: JSX.Element[] = [];
+  const { handleResponseActionsClick, isDisabled, tooltip } = useResponderActionData({
+    endpointId,
+    onClick,
+  });
 
-    if (isResponseActionsConsoleEnabled && !isAuthzLoading && canAccessResponseConsole && isAlert) {
-      actions.push(
-        <ResponderContextMenuItem
-          key="endpointResponseActions-action-item"
-          endpointId={isEndpointAlert ? endpointId : ''}
-          onClick={onClick}
-        />
-      );
+  return useMemo(() => {
+    const actions: AlertTableContextMenuItem[] = [];
+
+    if (!isAuthzLoading && canAccessResponseConsole && isAlert) {
+      actions.push({
+        key: 'endpointResponseActions-action-item',
+        'data-test-subj': 'endpointResponseActions-action-item',
+        disabled: isDisabled,
+        toolTipContent: tooltip,
+        size: 's',
+        onClick: handleResponseActionsClick,
+        name: (
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.buttonLabel"
+            defaultMessage="Respond"
+          />
+        ),
+      });
     }
 
     return actions;
   }, [
     canAccessResponseConsole,
-    endpointId,
+    handleResponseActionsClick,
     isAlert,
     isAuthzLoading,
-    isEndpointAlert,
-    isResponseActionsConsoleEnabled,
-    onClick,
+    isDisabled,
+    tooltip,
   ]);
 };

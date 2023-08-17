@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPage, EuiPageBody } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { getRootBreadcrumbs } from '../../../utils/breadcrumbs';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { setBreadcrumbs } from '../../../utils/breadcrumbs';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { ElasticRequestState } from '../types';
 import { useEsDocSearch } from '../../../hooks/use_es_doc_search';
@@ -38,25 +39,26 @@ export interface DocProps {
    * Discover main view url
    */
   referrer?: string;
+  /**
+   * Records fetched from text based query
+   */
+  textBasedHits?: DataTableRecord[];
 }
 
 export function Doc(props: DocProps) {
   const { dataView } = props;
   const [reqState, hit] = useEsDocSearch(props);
-  const { locator, chrome, docLinks } = useDiscoverServices();
+  const services = useDiscoverServices();
+  const { locator, chrome, docLinks } = services;
   const indexExistsLink = docLinks.links.apis.indexExists;
 
-  const singleDocTitle = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
-    singleDocTitle.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs(props.referrer),
-      { text: `${props.index}#${props.id}` },
-    ]);
-  }, [chrome, props.referrer, props.index, props.id, dataView, locator]);
+    setBreadcrumbs({
+      services,
+      titleBreadcrumbText: `${props.index}#${props.id}`,
+      rootBreadcrumbPath: props.referrer,
+    });
+  }, [chrome, props.referrer, props.index, props.id, dataView, locator, services]);
 
   return (
     <EuiPage>
@@ -64,8 +66,6 @@ export function Doc(props: DocProps) {
         id="singleDocTitle"
         className="euiScreenReaderOnly"
         data-test-subj="discoverSingleDocTitle"
-        tabIndex={-1}
-        ref={singleDocTitle}
       >
         {i18n.translate('discover.doc.pageTitle', {
           defaultMessage: 'Single document - #{id}',

@@ -15,6 +15,7 @@ export interface UseUnallowedValues {
   unallowedValues: Record<string, UnallowedValueCount[]> | null;
   error: string | null;
   loading: boolean;
+  requestTime: number | undefined;
 }
 
 export const useUnallowedValues = ({
@@ -31,7 +32,7 @@ export const useUnallowedValues = ({
   const { httpFetch } = useDataQualityContext();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-
+  const [requestTime, setRequestTime] = useState<number>();
   useEffect(() => {
     if (requestItems.length === 0) {
       return;
@@ -40,6 +41,8 @@ export const useUnallowedValues = ({
     const abortController = new AbortController();
 
     async function fetchData() {
+      const startTime = Date.now();
+
       try {
         const searchResults = await fetchUnallowedValues({
           abortController,
@@ -59,10 +62,12 @@ export const useUnallowedValues = ({
       } catch (e) {
         if (!abortController.signal.aborted) {
           setError(e.message);
+          setRequestTime(Date.now() - startTime);
         }
       } finally {
         if (!abortController.signal.aborted) {
           setLoading(false);
+          setRequestTime(Date.now() - startTime);
         }
       }
     }
@@ -74,5 +79,5 @@ export const useUnallowedValues = ({
     };
   }, [httpFetch, indexName, requestItems, setError]);
 
-  return { unallowedValues, error, loading };
+  return { unallowedValues, error, loading, requestTime };
 };

@@ -132,7 +132,7 @@ export function timelionFunctionFactory(initialize: InitializeArguments): () => 
         let result: any;
 
         try {
-          result = await fetch(initialize.prependBasePath(`/api/timelion/run`), {
+          result = await fetch(initialize.prependBasePath(`/internal/timelion/run`), {
             method: 'POST',
             responseType: 'json',
             data: body,

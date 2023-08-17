@@ -22,12 +22,12 @@ import { i18n } from '@kbn/i18n';
 import { isFinite, isNumber } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ResolvedLogViewField } from '@kbn/logs-shared-plugin/common';
 import {
   Comparator,
   ComparatorToi18nMap,
   Criterion as CriterionType,
 } from '../../../../../common/alerting/logs/log_threshold/types';
-import type { ResolvedLogViewField } from '../../../../../common/log_views';
 
 const firstCriterionFieldPrefix = i18n.translate(
   'xpack.infra.logs.alertFlyout.firstCriterionFieldPrefix',

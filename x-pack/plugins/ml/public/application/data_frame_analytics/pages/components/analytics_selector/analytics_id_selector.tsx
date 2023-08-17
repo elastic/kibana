@@ -24,11 +24,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import { useTrainedModelsApiService } from '../../../../services/ml_api_service/trained_models';
 import { GetDataFrameAnalyticsResponse } from '../../../../services/ml_api_service/data_frame_analytics';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { ModelsTableToConfigMapping } from '../../../../model_management';
-import { DataFrameAnalyticsConfig } from '../../../common';
 import { useMlApiContext } from '../../../../contexts/kibana';
 import { TrainedModelConfigResponse } from '../../../../../../common/types/trained_models';
 
@@ -206,6 +206,7 @@ export function AnalyticsIdSelector({
     },
     onSelectionChange: (selectedItem: TableItem[]) => {
       const item = selectedItem[0];
+
       if (!item) {
         setSelected(undefined);
         return;
@@ -216,7 +217,7 @@ export function AnalyticsIdSelector({
 
       setSelected({
         model_id: isDFA ? undefined : item.model_id,
-        job_id: isDFA ? item.id : item.metadata?.analytics_config.id,
+        job_id: isDFA ? item.id : item.metadata?.analytics_config?.id,
         analysis_type: analysisType,
       });
     },

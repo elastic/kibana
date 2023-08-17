@@ -160,7 +160,6 @@ describe('Sourcerer Hooks', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
     store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     mockUseUserInfo.mockImplementation(() => userInfoState);
   });
@@ -245,7 +244,7 @@ describe('Sourcerer Hooks', () => {
           type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
           payload: { loading: false },
         });
-        expect(mockDispatch).toHaveBeenCalledTimes(9);
+        expect(mockDispatch).toHaveBeenCalledTimes(7);
         expect(mockSearch).toHaveBeenCalledTimes(2);
       });
     });

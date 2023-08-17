@@ -20,8 +20,8 @@ import {
   deleteOutputHandler,
   getOneOuputHandler,
   getOutputsHandler,
-  postOuputHandler,
-  putOuputHandler,
+  postOutputHandler,
+  putOutputHandler,
   postLogstashApiKeyHandler,
 } from './handler';
 
@@ -54,7 +54,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         fleet: { all: true },
       },
     },
-    putOuputHandler
+    putOutputHandler
   );
 
   router.post(
@@ -65,7 +65,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         fleet: { all: true },
       },
     },
-    postOuputHandler
+    postOutputHandler
   );
 
   router.delete(

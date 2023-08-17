@@ -19,6 +19,7 @@
     ],
     "optionalPlugins": [
       "infra",
+      "logsShared",
       "usageCollection",
       "home",
       "cloud",

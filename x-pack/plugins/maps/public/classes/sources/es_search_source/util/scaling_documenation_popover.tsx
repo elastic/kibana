@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
-import { EuiButtonIcon, EuiLink, EuiPopover, EuiText } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiButtonIcon, EuiLink, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getDocLinks } from '../../../../kibana_services';
 
@@ -17,39 +17,43 @@ interface Props {
   mvtOptionLabel: string;
 }
 
-interface State {
-  isPopoverOpen: boolean;
-}
+export function ScalingDocumenationPopover(props: Props) {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-export class ScalingDocumenationPopover extends Component<Props, State> {
-  state: State = {
-    isPopoverOpen: false,
-  };
+  return (
+    <EuiPopover
+      id="scalingHelpPopover"
+      anchorPosition="leftCenter"
+      button={
+        <EuiButtonIcon
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+          }}
+          iconType="documentation"
+          aria-label="Scaling documentation"
+        />
+      }
+      isOpen={isPopoverOpen}
+      closePopover={() => {
+        setIsPopoverOpen(false);
+      }}
+      repositionOnScroll
+      ownFocus
+    >
+      <EuiPopoverTitle>
+        <FormattedMessage id="xpack.maps.scalingDocs.title" defaultMessage="Scaling" />
+      </EuiPopoverTitle>
 
-  _togglePopover = () => {
-    this.setState((prevState) => ({
-      isPopoverOpen: !prevState.isPopoverOpen,
-    }));
-  };
-
-  _closePopover = () => {
-    this.setState({
-      isPopoverOpen: false,
-    });
-  };
-
-  _renderContent() {
-    return (
       <div>
-        <EuiText style={{ maxWidth: '36em' }}>
+        <EuiText size="s" style={{ maxWidth: '36em' }}>
           <dl>
-            <dt>{this.props.mvtOptionLabel} (Default)</dt>
+            <dt>{props.mvtOptionLabel} (Default)</dt>
             <dd>
               <p>
                 <FormattedMessage
                   id="xpack.maps.scalingDocs.mvtDetails"
                   defaultMessage="Vector tiles partition your map into tiles, with each tile displaying features from the first {maxResultWindow} documents. Results exceeding {maxResultWindow} are not displayed in a tile. A bounding box indicates the area where data is incomplete."
-                  values={{ maxResultWindow: this.props.maxResultWindow }}
+                  values={{ maxResultWindow: props.maxResultWindow }}
                 />
               </p>
               <p>
@@ -60,64 +64,74 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
               </p>
             </dd>
 
-            <dt>{this.props.clustersOptionLabel}</dt>
+            <dt>{props.clustersOptionLabel}</dt>
             <dd>
               <p>
                 <FormattedMessage
                   id="xpack.maps.scalingDocs.clustersDetails"
                   defaultMessage="Display clusters when results exceed {maxResultWindow} documents. Display documents when results are less then {maxResultWindow}."
-                  values={{ maxResultWindow: this.props.maxResultWindow }}
+                  values={{ maxResultWindow: props.maxResultWindow }}
                 />
               </p>
               <p>
                 <FormattedMessage
                   id="xpack.maps.scalingDocs.clustersUseCase"
-                  defaultMessage="Use this option to display large data sets. Does not support term joins."
+                  defaultMessage="Use this option to display large data sets. "
                 />
+                <i>
+                  <FormattedMessage
+                    id="xpack.maps.scalingDocs.doesNotSupportJoins"
+                    defaultMessage="Does not support joins."
+                  />
+                </i>
               </p>
             </dd>
 
-            <dt>{this.props.limitOptionLabel}</dt>
+            <dt>{props.limitOptionLabel}</dt>
             <dd>
               <p>
                 <FormattedMessage
                   id="xpack.maps.scalingDocs.limitDetails"
                   defaultMessage="Display features from the first {maxResultWindow} documents."
-                  values={{ maxResultWindow: this.props.maxResultWindow }}
+                  values={{ maxResultWindow: props.maxResultWindow }}
                 />
               </p>
-              <p>
-                <FormattedMessage
-                  id="xpack.maps.scalingDocs.limitUseCases"
-                  defaultMessage="Use this option when you can not use vector tiles for the following reasons:"
-                />
-                <ul>
-                  <li>
-                    <FormattedMessage
-                      id="xpack.maps.scalingDocs.limitUseCase.formatLabels"
-                      defaultMessage="Formatted labels"
-                    />
-                  </li>
-                  <li>
-                    <FormattedMessage
-                      id="xpack.maps.scalingDocs.limitUseCase.multipleJoins"
-                      defaultMessage="Multiple term joins"
-                    />
-                  </li>
-                  <li>
-                    <FormattedMessage
-                      id="xpack.maps.scalingDocs.limitUseCase.joinFieldsWithLayoutStyles"
-                      defaultMessage="Data driven styling from term join metrics with 'Label', 'Label size', icon 'Symbol size', and 'Symbol orientation' style properties"
-                    />
-                  </li>
-                  <li>
-                    <FormattedMessage
-                      id="xpack.maps.scalingDocs.limitUseCase.scriptedFields"
-                      defaultMessage="Data driven styling from scripted fields"
-                    />
-                  </li>
-                </ul>
-              </p>
+              <FormattedMessage
+                id="xpack.maps.scalingDocs.limitUseCases"
+                defaultMessage="Use this option when you can not use vector tiles for the following reasons:"
+              />
+              <ul>
+                <li>
+                  <FormattedMessage
+                    id="xpack.maps.scalingDocs.limitUseCase.formatLabels"
+                    defaultMessage="Formatted labels"
+                  />
+                </li>
+                <li>
+                  <FormattedMessage
+                    id="xpack.maps.scalingDocs.limitUseCase.multipleJoins"
+                    defaultMessage="Spatial joins"
+                  />
+                </li>
+                <li>
+                  <FormattedMessage
+                    id="xpack.maps.scalingDocs.limitUseCase.spatialJoins"
+                    defaultMessage="Multiple term joins"
+                  />
+                </li>
+                <li>
+                  <FormattedMessage
+                    id="xpack.maps.scalingDocs.limitUseCase.joinFieldsWithLayoutStyles"
+                    defaultMessage="Data driven styling from join metrics with 'Label', 'Label size', icon 'Symbol size', and 'Symbol orientation' style properties"
+                  />
+                </li>
+                <li>
+                  <FormattedMessage
+                    id="xpack.maps.scalingDocs.limitUseCase.scriptedFields"
+                    defaultMessage="Data driven styling from scripted fields"
+                  />
+                </li>
+              </ul>
             </dd>
           </dl>
 
@@ -126,7 +140,7 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
               id="xpack.maps.scalingDocs.maxResultWindow"
               defaultMessage="{maxResultWindow} constraint provided by {link} index setting."
               values={{
-                maxResultWindow: this.props.maxResultWindow,
+                maxResultWindow: props.maxResultWindow,
                 link: (
                   <EuiLink
                     href={getDocLinks().links.elasticsearch.dynamicIndexSettings}
@@ -141,28 +155,6 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
           </p>
         </EuiText>
       </div>
-    );
-  }
-
-  render() {
-    return (
-      <EuiPopover
-        id="scalingHelpPopover"
-        anchorPosition="leftCenter"
-        button={
-          <EuiButtonIcon
-            onClick={this._togglePopover}
-            iconType="documentation"
-            aria-label="Scaling documentation"
-          />
-        }
-        isOpen={this.state.isPopoverOpen}
-        closePopover={this._closePopover}
-        repositionOnScroll
-        ownFocus
-      >
-        {this._renderContent()}
-      </EuiPopover>
-    );
-  }
+    </EuiPopover>
+  );
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
+import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
 import { useParams, useRouteMatch } from 'react-router-dom';
 import React, { useEffect } from 'react';

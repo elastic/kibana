@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { Wordcloud, Settings, WordcloudSpec } from '@elastic/charts';
+import { Wordcloud, Settings, WordcloudSpec, Chart } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { mount } from 'enzyme';
@@ -61,6 +61,7 @@ const visParams: TagCloudRendererParams = {
   minFontSize: 12,
   maxFontSize: 70,
   showLabel: true,
+  isPreview: false,
 };
 
 const formattedData: WordcloudSpec['data'] = [
@@ -193,5 +194,16 @@ describe('TagCloudChart', function () {
       ],
     ]);
     expect(wrapperPropsWithIndexes.fireEvent).toHaveBeenCalled();
+  });
+
+  test('should apply overrides at the right level', async () => {
+    const component = mount(
+      <TagCloudChart
+        {...wrapperPropsWithIndexes}
+        overrides={{ settings: { rotation: -90 }, chart: { title: 'Hello' } }}
+      />
+    );
+    expect(component.find(Chart).props().title).toBe('Hello');
+    expect(component.find(Settings).props().rotation).toBe(-90);
   });
 });

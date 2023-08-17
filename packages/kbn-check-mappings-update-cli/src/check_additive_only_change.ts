@@ -27,14 +27,14 @@ export function checkAdditiveOnlyChange(
   next: SavedObjectsTypeMappingDefinitions
 ) {
   let checkedCount = 0;
-  const Os: Array<[path: string[], value: unknown]> = [[[], current]];
+  const pathValueTuples: Array<[path: string[], value: unknown]> = [[[], current]];
   const missingProps: string[] = [];
 
-  while (Os.length) {
-    const [path, value] = Os.shift()!;
+  while (pathValueTuples.length) {
+    const [path, value] = pathValueTuples.shift()!;
     // "Recurse" into the value if it's an object
     if (isObject(value)) {
-      Object.entries(value).forEach(([k, v]) => Os.push([[...path, k], v]));
+      Object.entries(value).forEach(([k, v]) => pathValueTuples.push([[...path, k], v]));
     }
     // If we're at a "properties" object, check that the next mappings have the same field
     if (path.length > 1 && path[path.length - 2] === 'properties') {
@@ -47,7 +47,10 @@ export function checkAdditiveOnlyChange(
   if (missingProps.length > 0) {
     const props = JSON.stringify(missingProps, null, 2);
     throw createFailError(
-      `Removing mapped properties is disallowed. Properties found in current mappings but not in next mappings:\n${props}`
+      `Removing mapped properties is disallowed >8.8. Found the following properties in current mappings but not in next mappings:
+${props}
+
+Reach out to the Kibana core team if you have any questions.`
     );
   }
 

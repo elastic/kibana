@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
 import { useMlApiContext } from '../../contexts/kibana';
 import { JobSpacesSyncFlyout } from '../job_spaces_sync';
-import { checkPermission } from '../../capabilities/check_capabilities';
+import { usePermissionCheck } from '../../capabilities/check_capabilities';
 
 interface Props {
   mlSavedObjectType?: MlSavedObjectType;
@@ -31,7 +31,7 @@ export const SavedObjectsWarning: FC<Props> = ({
   const mounted = useRef(false);
   const [showWarning, setShowWarning] = useState(false);
   const [showSyncFlyout, setShowSyncFlyout] = useState(false);
-  const canCreateJob = useMemo(() => checkPermission('canCreateJob'), []);
+  const canCreateJob = usePermissionCheck('canCreateJob');
 
   const checkStatus = useCallback(async () => {
     try {

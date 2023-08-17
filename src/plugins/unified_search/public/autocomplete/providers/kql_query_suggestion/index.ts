@@ -58,11 +58,29 @@ export const setupKqlQuerySuggestionProvider = (
       querySuggestionsArgs: QuerySuggestionGetFnArgs
     ): Promise<Array<Promise<QuerySuggestion[]>> | []> => {
       try {
-        const cursorNode = fromKueryExpression(cursoredQuery, {
+        const { suggestionsAbstraction } = querySuggestionsArgs;
+        let cursorNode = fromKueryExpression(cursoredQuery, {
           cursorSymbol,
           parseCursor: true,
         });
-
+        const isNested = cursorNode.nestedPath && cursorNode.nestedPath.length > 0;
+        const fieldName = isNested
+          ? `${cursorNode.nestedPath}.${cursorNode.fieldName}`
+          : cursorNode.fieldName;
+        if (suggestionsAbstraction && suggestionsAbstraction?.fields[fieldName]) {
+          if (isNested) {
+            cursorNode = {
+              ...cursorNode,
+              fieldName: suggestionsAbstraction?.fields[fieldName]?.nestedField ?? fieldName,
+              nestedPath: suggestionsAbstraction?.fields[fieldName]?.nestedPath ?? fieldName,
+            };
+          } else {
+            cursorNode = {
+              ...cursorNode,
+              fieldName: suggestionsAbstraction?.fields[fieldName]?.field ?? fieldName,
+            };
+          }
+        }
         return cursorNode.suggestionTypes.map((type: $Keys<typeof providers>) =>
           providers[type](querySuggestionsArgs, cursorNode)
         );

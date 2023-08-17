@@ -41,9 +41,9 @@ import {
   ALERT_NEW_TERMS,
   ALERT_RULE_INDICES,
 } from '../../../../common/field_maps/field_names';
-import type { TimelineResult } from '../../../../common/types/timeline';
-import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
-import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
+import type { TimelineResult } from '../../../../common/api/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import type {
   SendAlertToTimelineActionProps,
   ThresholdAggregationData,
@@ -82,20 +82,7 @@ import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
-
-export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
-  return {
-    query: {
-      bool: {
-        filter: {
-          terms: {
-            _id: eventIds,
-          },
-        },
-      },
-    },
-  };
-};
+import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 
 export const updateAlertStatusAction = async ({
   query,
@@ -109,8 +96,12 @@ export const updateAlertStatusAction = async ({
   try {
     setEventsLoading({ eventIds: alertIds, isLoading: true });
 
-    const queryObject = query ? { query: JSON.parse(query) } : getUpdateAlertsQuery(alertIds);
-    const response = await updateAlertStatus({ query: queryObject, status: selectedStatus });
+    const response = await updateAlertStatus({
+      query: query && JSON.parse(query),
+      status: selectedStatus,
+      signalIds: alertIds,
+    });
+
     // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: alertIds, isDeleted: true });
 

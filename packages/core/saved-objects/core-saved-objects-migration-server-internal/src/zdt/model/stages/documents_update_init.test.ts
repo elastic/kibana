@@ -46,6 +46,22 @@ describe('Stage: documentsUpdateInit', () => {
     context.typeRegistry.registerType(createType({ name: 'bar' }));
   });
 
+  describe('when state.previousAlgorithm is `v2`', () => {
+    it('DOCUMENTS_UPDATE_INIT -> SET_DOC_MIGRATION_STARTED', () => {
+      const state = createState({
+        previousAlgorithm: 'v2',
+      });
+      const res: ResponseType<'DOCUMENTS_UPDATE_INIT'> = Either.right('noop' as const);
+
+      const newState = documentsUpdateInit(
+        state,
+        res as StateActionResponse<'DOCUMENTS_UPDATE_INIT'>,
+        context
+      );
+      expect(newState.controlState).toEqual('SET_DOC_MIGRATION_STARTED');
+    });
+  });
+
   describe('when checkVersionCompatibility returns `greater`', () => {
     beforeEach(() => {
       checkVersionCompatibilityMock.mockReturnValue({

@@ -207,7 +207,7 @@ export const focusUtilityBarAction = (containerElement: HTMLElement | null) => {
  * Resets keyboard focus on the page
  */
 export const resetKeyboardFocus = () => {
-  document.querySelector<HTMLAnchorElement>('header.headerGlobalNav a.euiHeaderLogo')?.focus();
+  document.querySelector<HTMLAnchorElement>('header.headerGlobalNav a.chrHeaderLogo')?.focus();
 };
 
 interface OperatorHandler {

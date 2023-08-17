@@ -13,6 +13,8 @@ import type {
   SavedObjectsFindOptions,
 } from '@kbn/core-saved-objects-api-server';
 
+import { getMSearch, type GetMSearchType } from '@kbn/content-management-utils';
+
 import { CONTENT_ID } from '../../common/content_management';
 import { cmServicesDefinition } from '../../common/content_management/cm_services';
 import type {
@@ -91,7 +93,14 @@ function savedObjectToLensSavedObject(
 const SO_TYPE: LensContentType = 'lens';
 
 export class LensStorage implements ContentStorage<LensSavedObject, PartialLensSavedObject> {
-  constructor() {}
+  mSearch: GetMSearchType<LensSavedObject>;
+  constructor() {
+    this.mSearch = getMSearch<LensSavedObject, LensSearchOut>({
+      savedObjectType: SO_TYPE,
+      cmServicesDefinition,
+      allowedSavedObjectAttributes: ['title', 'description', 'visualizationType', 'state'],
+    });
+  }
 
   async get(ctx: StorageContext, id: string): Promise<LensGetOut> {
     const {
@@ -217,19 +226,19 @@ export class LensStorage implements ContentStorage<LensSavedObject, PartialLensS
 
     // Save data in DB
     const soClient = await savedObjectClientFromRequest(ctx);
-    const partialSavedObject = await soClient.update<LensSavedObjectAttributes>(
-      SO_TYPE,
+
+    const savedObject = await soClient.create<LensSavedObjectAttributes>(SO_TYPE, dataToLatest, {
       id,
-      dataToLatest,
-      optionsToLatest
-    );
+      overwrite: true,
+      ...optionsToLatest,
+    });
 
     // Validate DB response and DOWN transform to the request version
     const { value, error: resultError } = transforms.update.out.result.down<
       LensUpdateOut,
       LensUpdateOut
     >({
-      item: savedObjectToLensSavedObject(partialSavedObject, true),
+      item: savedObjectToLensSavedObject(savedObject, true),
     });
 
     if (resultError) {

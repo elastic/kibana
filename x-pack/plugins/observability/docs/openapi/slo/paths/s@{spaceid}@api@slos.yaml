@@ -1,11 +1,11 @@
 post:
   summary: Creates an SLO.
-  operationId: createSlo
+  operationId: createSloOp
   description: >
     You must have `all` privileges for the **SLOs** feature in the
     **Observability** section of the Kibana feature privileges.
   tags:
-    - slos
+    - slo
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: ../components/parameters/space_id.yaml
@@ -24,44 +24,48 @@ post:
             $ref: '../components/schemas/create_slo_response.yaml'
     '400':
       description: Bad request
-      content: 
+      content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/400_response.yaml'
     '401':
       description: Unauthorized response
-      content: 
+      content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'
+    '409':
+      description: Conflict - The SLO id already exists
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/409_response.yaml'
   servers:
     - url: https://localhost:5601
 
 get:
   summary: Retrieves a paginated list of SLOs
-  operationId: findSlos
+  operationId: findSlosOp
   description: >
     You must have the `read` privileges for the **SLOs** feature in the
     **Observability** section of the Kibana feature privileges.
   tags:
-    - slos
+    - slo
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: ../components/parameters/space_id.yaml
-    - name: name
+    - name: kqlQuery
       in: query
-      description: Filter by name
+      description: A valid kql query to filter the SLO with
       schema:
         type: string
-      example: awesome-service
-    - name: indicatorTypes
-      in: query
-      description: Filter by indicator type
-      schema:
-        type: array
-        items: 
-          type: string
-      example: ["sli.kql.custom"]
+      example: 'slo.name:latency* and slo.tags : "prod"'
     - name: page
       in: query
       description: The page number to return
@@ -75,15 +79,15 @@ get:
       schema:
         type: integer
         default: 25
-      example: 20
+      example: 25
     - name: sortBy
       in: query
       description: Sort by field
       schema:
         type: string
-        enum: [creationTime, indicatorType]
-        default: name
-      example: name
+        enum: [sli_value, status, error_budget_consumed, error_budget_remaining]
+        default: status
+      example: status
     - name: sortDirection
       in: query
       description: Sort order
@@ -101,13 +105,25 @@ get:
             $ref: '../components/schemas/find_slo_response.yaml'
     '400':
       description: Bad request
-      content: 
+      content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/400_response.yaml'
     '401':
       description: Unauthorized response
-      content: 
+      content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'
+    '404':
+      description: Not found response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'

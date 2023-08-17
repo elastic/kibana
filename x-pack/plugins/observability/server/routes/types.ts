@@ -10,6 +10,7 @@ import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ObservabilityServerRouteRepository } from './get_global_observability_server_route_repository';
 import { ObservabilityRequestHandlerContext } from '../types';
 import { RegisterRoutesDependencies } from './register_routes';
+import { ObservabilityConfig } from '..';
 
 export type { ObservabilityServerRouteRepository };
 
@@ -18,6 +19,7 @@ export interface ObservabilityRouteHandlerResources {
   dependencies: RegisterRoutesDependencies;
   logger: Logger;
   request: KibanaRequest;
+  config: ObservabilityConfig;
 }
 
 export interface ObservabilityRouteCreateOptions {

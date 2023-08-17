@@ -24,11 +24,14 @@ export {
   executionStatusFromError,
   ruleExecutionStatusToRaw,
   ruleExecutionStatusFromRaw,
+  getRuleExecutionStatusPending,
+  getRuleExecutionStatusPendingAttributes,
 } from './rule_execution_status';
 export { lastRunFromState, lastRunFromError, lastRunToRaw } from './last_run_status';
 export {
   resetMonitoringLastRun,
   getDefaultMonitoring,
+  getDefaultMonitoringRuleDomainProperties,
   convertMonitoringFromRawAndVerify,
 } from './monitoring';
 export { getNextRun } from './next_run';

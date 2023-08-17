@@ -52,6 +52,21 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-public.XYCurveTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "XYCurveTypes",
+        "description": [],
+        "signature": [
+          "{ readonly LINEAR: \"LINEAR\"; readonly CURVE_MONOTONE_X: \"CURVE_MONOTONE_X\"; readonly CURVE_STEP_AFTER: \"CURVE_STEP_AFTER\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ]
   },
@@ -561,7 +576,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\""
+              "\"bar\" | \"line\" | \"area\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -1889,7 +1904,9 @@
               },
               "<Partial<",
               "GridLineStyle",
-              "> | undefined>; ticks?: number | undefined; domain?: ",
+              "> | undefined>; position?: ",
+              "Position",
+              " | undefined; ticks?: number | undefined; domain?: ",
               {
                 "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
@@ -1899,11 +1916,7 @@
               },
               "<",
               "YDomainRange",
-              " | undefined>; position?: ",
-              "Position",
-              " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; showGridLines?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> & Partial<Record<\"settings\", { tooltip?: ",
-              "TooltipSettings",
-              " | undefined; debug?: boolean | undefined; theme?: ",
+              " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> & Partial<Record<\"settings\", { debug?: boolean | undefined; theme?: ",
               "MakeOverridesSerializable",
               "<",
               "RecursivePartial",
@@ -1937,7 +1950,7 @@
               "CustomXDomain",
               " | undefined>; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaLabelledBy?: string | undefined; ariaTableCaption?: string | undefined; legendAction?: \"ignore\" | undefined; legendStrategy?: ",
               "LegendStrategy",
-              " | undefined; onLegendItemClick?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; legendSort?: \"ignore\" | undefined; }>>) | undefined"
+              " | undefined; onLegendItemClick?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; legendSort?: \"ignore\" | undefined; }>> & Partial<Record<\"chart\", { description?: string | undefined; title?: string | undefined; }>>) | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
@@ -2128,7 +2141,9 @@
           },
           "<Partial<",
           "GridLineStyle",
-          "> | undefined>; ticks?: number | undefined; domain?: ",
+          "> | undefined>; position?: ",
+          "Position",
+          " | undefined; ticks?: number | undefined; domain?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2138,9 +2153,7 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; position?: ",
-          "Position",
-          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; showGridLines?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisLeft?: { children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; style?: ",
+          " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisLeft?: { children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; style?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2162,7 +2175,9 @@
           },
           "<Partial<",
           "GridLineStyle",
-          "> | undefined>; ticks?: number | undefined; domain?: ",
+          "> | undefined>; position?: ",
+          "Position",
+          " | undefined; ticks?: number | undefined; domain?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2172,9 +2187,7 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; position?: ",
-          "Position",
-          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; showGridLines?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisRight?: { children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; style?: ",
+          " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisRight?: { children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; style?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2196,7 +2209,9 @@
           },
           "<Partial<",
           "GridLineStyle",
-          "> | undefined>; ticks?: number | undefined; domain?: ",
+          "> | undefined>; position?: ",
+          "Position",
+          " | undefined; ticks?: number | undefined; domain?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2206,9 +2221,7 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; position?: ",
-          "Position",
-          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; showGridLines?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; }"
+          " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; }"
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -2223,7 +2236,7 @@
         "label": "AvailableReferenceLineIcon",
         "description": [],
         "signature": [
-          "\"alert\" | \"circle\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"empty\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"tag\" | \"triangle\""
+          "\"alert\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"empty\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"circle\" | \"triangle\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -3313,7 +3326,7 @@
         "label": "SeriesType",
         "description": [],
         "signature": [
-          "\"area\" | \"line\" | \"bar\""
+          "\"bar\" | \"line\" | \"area\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -3621,6 +3634,21 @@
         "description": [],
         "signature": [
           "{ readonly DATA: \"data\"; readonly REFERENCELINE: \"referenceLine\"; readonly ANNOTATIONS: \"annotations\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.XYCurveTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "XYCurveTypes",
+        "description": [],
+        "signature": [
+          "{ readonly LINEAR: \"LINEAR\"; readonly CURVE_MONOTONE_X: \"CURVE_MONOTONE_X\"; readonly CURVE_STEP_AFTER: \"CURVE_STEP_AFTER\"; }"
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/constants.ts",
         "deprecated": false,

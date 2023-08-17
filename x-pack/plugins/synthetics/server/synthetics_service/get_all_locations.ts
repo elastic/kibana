@@ -5,30 +5,37 @@
  * 2.0.
  */
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { getPrivateLocations } from './get_private_locations';
+import { toClientContract } from '../routes/settings/private_locations/helpers';
+import { getPrivateLocationsAndAgentPolicies } from '../routes/settings/private_locations/get_private_locations';
+import { SyntheticsServerSetup } from '../types';
 import { getServiceLocations } from './get_service_locations';
 import { SyntheticsMonitorClient } from './synthetics_monitor/synthetics_monitor_client';
-import { UptimeServerSetup } from '../legacy_uptime/lib/adapters/framework';
 
 export async function getAllLocations({
   syntheticsMonitorClient,
   savedObjectsClient,
   server,
 }: {
-  server: UptimeServerSetup;
+  server: SyntheticsServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   savedObjectsClient: SavedObjectsClientContract;
 }) {
   try {
-    const [privateLocations, { locations: publicLocations, throttling }] = await Promise.all([
-      getPrivateLocations(syntheticsMonitorClient, savedObjectsClient),
+    const [
+      { locations: privateLocations, agentPolicies },
+      { locations: publicLocations, throttling },
+    ] = await Promise.all([
+      getPrivateLocationsAndAgentPolicies(savedObjectsClient, syntheticsMonitorClient),
       getServicePublicLocations(server, syntheticsMonitorClient),
     ]);
     return {
       publicLocations,
       privateLocations,
       throttling,
-      allLocations: [...publicLocations, ...privateLocations],
+      allLocations: [
+        ...publicLocations,
+        ...toClientContract({ locations: privateLocations }, agentPolicies).locations,
+      ],
     };
   } catch (e) {
     server.logger.error(e);
@@ -37,7 +44,7 @@ export async function getAllLocations({
 }
 
 const getServicePublicLocations = async (
-  server: UptimeServerSetup,
+  server: SyntheticsServerSetup,
   syntheticsMonitorClient: SyntheticsMonitorClient
 ) => {
   if (syntheticsMonitorClient.syntheticsService.locations.length === 0) {

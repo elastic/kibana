@@ -14,7 +14,7 @@ import {
   EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { useTheme } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { colourPalette } from '../common/network_data/data_formatting';
 

@@ -12,19 +12,17 @@ import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
+import { DOC_TABLE_LEGACY } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import { DOC_TABLE_LEGACY } from '../../../../../common';
 
 async function saveDataSource({
-  navigateTo,
   savedSearch,
   saveOptions,
   services,
   state,
   navigateOrReloadSavedSearch,
 }: {
-  navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
   saveOptions: SaveSavedSearchOptions;
   services: DiscoverServices;
@@ -45,7 +43,7 @@ async function saveDataSource({
       });
       if (navigateOrReloadSavedSearch) {
         if (id !== prevSavedSearchId) {
-          navigateTo(`/view/${encodeURIComponent(id)}`);
+          services.locator.navigate({ savedSearchId: id });
         } else {
           // Update defaults so that "reload saved query" functions correctly
           state.actions.undoSavedSearchChanges();
@@ -78,14 +76,12 @@ async function saveDataSource({
 }
 
 export async function onSaveSearch({
-  navigateTo,
   savedSearch,
   services,
   state,
   onClose,
   onSaveCb,
 }: {
-  navigateTo: (path: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
   state: DiscoverStateContainer;
@@ -139,7 +135,6 @@ export async function onSaveSearch({
     const response = await saveDataSource({
       saveOptions,
       services,
-      navigateTo,
       savedSearch,
       state,
       navigateOrReloadSavedSearch,

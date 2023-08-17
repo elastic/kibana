@@ -10,10 +10,10 @@ import { EuiFieldNumber, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 import useObservable from 'react-use/lib/useObservable';
 import { isDefined } from '@kbn/ml-is-defined';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { getSelectionInfluencers } from '../explorer_utils';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import { escapeKueryForFieldValuePair } from '../../util/string_utils';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { useDashboardTable } from './use_dashboards_table';
 import { AddToDashboardControl } from './add_to_dashboard_controls';
 import { useAddToDashboardActions } from './use_add_to_dashboard_actions';
@@ -104,8 +104,19 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
     />
   );
 
+  const isMaxSeriesToPlotValid =
+    maxSeriesToPlot >= 1 && maxSeriesToPlot <= MAX_ANOMALY_CHARTS_ALLOWED;
   const extraControls = (
     <EuiFormRow
+      isInvalid={!isMaxSeriesToPlotValid}
+      error={
+        !isMaxSeriesToPlotValid ? (
+          <FormattedMessage
+            id="xpack.ml.anomalyChartsEmbeddable.maxSeriesToPlotError"
+            defaultMessage="Maximum number of series to plot must be between 1 and 50."
+          />
+        ) : undefined
+      }
       label={
         <FormattedMessage
           id="xpack.ml.explorer.addToDashboard.anomalyCharts.maxSeriesToPlotLabel"
@@ -119,7 +130,7 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
         name="selectMaxSeriesToPlot"
         value={maxSeriesToPlot}
         onChange={(e) => setMaxSeriesToPlot(parseInt(e.target.value, 10))}
-        min={0}
+        min={1}
         max={MAX_ANOMALY_CHARTS_ALLOWED}
       />
     </EuiFormRow>
@@ -132,7 +143,7 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
       isLoading={isLoading}
       search={search}
       addToDashboardAndEditCallback={addToDashboardAndEditCallback}
-      disabled={false}
+      disabled={!isMaxSeriesToPlotValid}
       title={title}
     >
       {extraControls}

@@ -5,14 +5,21 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
+import { Frequency } from '@kbn/rrule';
 import moment from 'moment';
 import { css } from '@emotion/react';
-import { getUseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import {
+  FIELD_TYPES,
+  getUseField,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  Field,
+  MultiButtonGroupFieldValue,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiSpacer } from '@elastic/eui';
-import { CREATE_FORM_CUSTOM_FREQUENCY, Frequency, WEEKDAY_OPTIONS } from '../../constants';
+import { CREATE_FORM_CUSTOM_FREQUENCY, WEEKDAY_OPTIONS } from '../../constants';
 import * as i18n from '../../translations';
-import { ButtonGroupField } from '../fields/button_group_field';
 import { getInitialByWeekday } from '../../helpers/get_initial_by_weekday';
 import { getWeekdayInfo } from '../../helpers/get_weekday_info';
 import { FormProps } from '../schema';
@@ -99,30 +106,47 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
           <EuiSpacer size="s" />
         </>
       ) : null}
-      {recurringSchedule?.customFrequency === Frequency.WEEKLY ||
+      {Number(recurringSchedule?.customFrequency) === Frequency.WEEKLY ||
       recurringSchedule?.frequency === Frequency.DAILY ? (
         <UseField
           path="recurringSchedule.byweekday"
-          config={{ label: '', validations: [], defaultValue: defaultByWeekday }}
-          component={ButtonGroupField}
+          config={{
+            type: FIELD_TYPES.MULTI_BUTTON_GROUP,
+            label: '',
+            validations: [
+              {
+                validator: ({ value }) => {
+                  if (
+                    Object.values(value as MultiButtonGroupFieldValue).every((v) => v === false)
+                  ) {
+                    return {
+                      message: i18n.CREATE_FORM_BYWEEKDAY_REQUIRED,
+                    };
+                  }
+                },
+              },
+            ],
+            defaultValue: defaultByWeekday,
+          }}
           componentProps={{
             'data-test-subj': 'byweekday-field',
-            legend: 'Repeat on weekday',
-            options: WEEKDAY_OPTIONS,
-            type: 'multi',
+            euiFieldProps: {
+              legend: 'Repeat on weekday',
+              options: WEEKDAY_OPTIONS,
+            },
           }}
         />
       ) : null}
 
-      {recurringSchedule?.customFrequency === Frequency.MONTHLY ? (
+      {Number(recurringSchedule?.customFrequency) === Frequency.MONTHLY ? (
         <UseField
           path="recurringSchedule.bymonth"
-          config={{ label: '', validations: [], defaultValue: 'day' }}
-          component={ButtonGroupField}
           componentProps={{
             'data-test-subj': 'bymonth-field',
-            legend: 'Repeat on weekday or month day',
-            options: bymonthOptions,
+            euiFieldProps: {
+              legend: 'Repeat on weekday or month day',
+              options: bymonthOptions,
+            },
           }}
         />
       ) : null}

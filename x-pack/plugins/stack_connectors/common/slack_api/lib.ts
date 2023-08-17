@@ -8,10 +8,10 @@
 import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
 import { i18n } from '@kbn/i18n';
 
-export function successResult(
+export function successResult<T = unknown>(
   actionId: string,
-  data: unknown
-): ConnectorTypeExecutorResult<unknown> {
+  data: T
+): ConnectorTypeExecutorResult<T> {
   return { status: 'ok', data, actionId };
 }
 

@@ -5,34 +5,28 @@
  * 2.0.
  */
 
-import { ReportingCore } from '../../..';
 import { ReportingConfigType } from '../../../config';
-import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
 import { getFullRedirectAppUrl } from './get_full_redirect_app_url';
 
 describe('getFullRedirectAppUrl', () => {
-  let reporting: ReportingCore;
-  beforeEach(async () => {
-    reporting = await createMockReportingCore(createMockConfigSchema());
-    reporting.getConfig = jest.fn(() => ({ kibanaServer: {} } as unknown as ReportingConfigType));
-    reporting.getServerInfo = jest.fn(() => ({
-      name: 'localhost',
-      uuid: 'test-test-test-test',
-      basePath: 'test',
-      protocol: 'http',
-      hostname: 'localhost',
-      port: 1234,
-    }));
-  });
+  const mockConfig = { kibanaServer: {} } as unknown as ReportingConfigType;
+  const mockServerInfo = {
+    name: 'localhost',
+    uuid: 'test-test-test-test',
+    basePath: 'test',
+    protocol: 'http',
+    hostname: 'localhost',
+    port: 1234,
+  };
 
   test('smoke test', () => {
-    expect(getFullRedirectAppUrl(reporting, 'test', undefined)).toBe(
+    expect(getFullRedirectAppUrl(mockConfig, mockServerInfo, 'test', undefined)).toBe(
       'http://localhost:1234/test/s/test/app/reportingRedirect'
     );
   });
 
   test('adding forceNow', () => {
-    expect(getFullRedirectAppUrl(reporting, 'test', 'TEST with a space')).toBe(
+    expect(getFullRedirectAppUrl(mockConfig, mockServerInfo, 'test', 'TEST with a space')).toBe(
       'http://localhost:1234/test/s/test/app/reportingRedirect?forceNow=TEST%20with%20a%20space'
     );
   });

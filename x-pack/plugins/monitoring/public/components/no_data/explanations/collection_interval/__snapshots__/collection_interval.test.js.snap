@@ -80,7 +80,7 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-m-fill-disabled"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-fill-disabled"
         data-test-subj="enableCollectionInterval"
         disabled=""
         type="button"
@@ -154,7 +154,7 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
         data-test-subj="enableCollectionInterval"
         type="button"
       >

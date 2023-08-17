@@ -27,11 +27,13 @@ describe('DataQualityPanel', () => {
             getGroupByFieldsOnClick={jest.fn()}
             httpFetch={jest.fn()}
             ilmPhases={ilmPhases}
+            isAssistantEnabled={true}
             lastChecked={''}
             openCreateCaseFlyout={jest.fn()}
             patterns={[]}
+            reportDataQualityIndexChecked={jest.fn()}
             setLastChecked={jest.fn()}
-            theme={DARK_THEME}
+            baseTheme={DARK_THEME}
           />
         </TestProviders>
       );
@@ -60,11 +62,13 @@ describe('DataQualityPanel', () => {
             getGroupByFieldsOnClick={jest.fn()}
             httpFetch={jest.fn()}
             ilmPhases={ilmPhases}
+            isAssistantEnabled={true}
             lastChecked={''}
             openCreateCaseFlyout={jest.fn()}
             patterns={[]}
+            reportDataQualityIndexChecked={jest.fn()}
             setLastChecked={jest.fn()}
-            theme={DARK_THEME}
+            baseTheme={DARK_THEME}
           />
         </TestProviders>
       );

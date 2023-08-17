@@ -32,7 +32,7 @@ export function ApmTimeRangeMetadataContextProvider({
 
   const { query } = useApmParams('/*');
 
-  const kuery = 'kuery' in query ? query.kuery : '';
+  const kuery = 'kuery' in query && query.kuery ? query.kuery : '';
 
   const range =
     'rangeFrom' in query && 'rangeTo' in query

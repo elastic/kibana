@@ -13,15 +13,13 @@ import {
 } from '@kbn/ml-trained-models-utils';
 import type { ModelItem } from '../models_list';
 
-const PYTORCH_TYPES = Object.values(SUPPORTED_PYTORCH_TASKS).filter(
-  (taskType) => taskType !== SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION
-);
+const PYTORCH_TYPES = Object.values(SUPPORTED_PYTORCH_TASKS);
 
 export function isTestable(modelItem: ModelItem, checkForState = false) {
   if (
     modelItem.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
     PYTORCH_TYPES.includes(
-      Object.keys(modelItem.inference_config)[0] as SupportedPytorchTasksType
+      Object.keys(modelItem.inference_config ?? {})[0] as SupportedPytorchTasksType
     ) &&
     (checkForState === false ||
       modelItem.stats?.deployment_stats?.some((v) => v.state === DEPLOYMENT_STATE.STARTED))

@@ -7,12 +7,21 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
+import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter, EuiThemeProvider } from '@elastic/eui';
+import useObservable from 'react-use/lib/useObservable';
+import { Observable, of } from 'rxjs';
 
+import { Theme } from '../services';
 import type { Props } from './editor_flyout_content_container';
 
-export const ContentEditorLoader: React.FC<Props> = (props) => {
+const themeDefault = { darkMode: false };
+
+export const ContentEditorLoader: React.FC<Props & { theme$?: Observable<Theme> }> = ({
+  theme$,
+  ...rest
+}) => {
   const [Editor, setEditor] = useState<React.ComponentType<Props> | null>(null);
+  const { darkMode } = useObservable(theme$ ?? of(themeDefault), themeDefault);
 
   const loadEditor = useCallback(async () => {
     const { ContentEditorFlyoutContentContainer } = await import(
@@ -27,7 +36,9 @@ export const ContentEditorLoader: React.FC<Props> = (props) => {
   }, [loadEditor]);
 
   return Editor ? (
-    <Editor {...props} />
+    <EuiThemeProvider colorMode={darkMode ? 'dark' : 'light'}>
+      <Editor {...rest} />
+    </EuiThemeProvider>
   ) : (
     <>
       <EuiFlyoutHeader />

@@ -12,8 +12,8 @@ import { createTopNFunctions } from '../../common/functions';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
-import { getStackTraces } from './get_stacktraces';
 import { createCommonFilter } from './query';
+import { searchStackTraces } from './search_stacktraces';
 
 const querySchema = schema.object({
   timeFrom: schema.number(),
@@ -34,6 +34,7 @@ export function registerTopNFunctionsSearchRoute({
   router.get(
     {
       path: paths.TopNFunctions,
+      options: { tags: ['access:profiling'] },
       validate: {
         query: querySchema,
       },
@@ -41,7 +42,6 @@ export function registerTopNFunctionsSearchRoute({
     async (context, request, response) => {
       try {
         const { timeFrom, timeTo, startIndex, endIndex, kuery }: QuerySchemaType = request.query;
-
         const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
         const esClient = await getClient(context);
         const profilingElasticsearchClient = createProfilingEsClient({ request, esClient });
@@ -51,36 +51,35 @@ export function registerTopNFunctionsSearchRoute({
           kuery,
         });
 
-        const t0 = Date.now();
-        const { stackTraceEvents, stackTraces, executables, stackFrames } = await getStackTraces({
-          context,
-          logger,
-          client: profilingElasticsearchClient,
-          filter,
-          sampleSize: targetSampleSize,
-        });
-        logger.info(`querying stacktraces took ${Date.now() - t0} ms`);
+        const { events, stackTraces, executables, stackFrames, samplingRate } =
+          await searchStackTraces({
+            client: profilingElasticsearchClient,
+            filter,
+            sampleSize: targetSampleSize,
+          });
 
-        const t1 = Date.now();
         const topNFunctions = await withProfilingSpan('create_topn_functions', async () => {
-          return createTopNFunctions(
-            stackTraceEvents,
-            stackTraces,
-            stackFrames,
+          return createTopNFunctions({
+            endIndex,
+            events,
             executables,
+            samplingRate,
+            stackFrames,
+            stackTraces,
             startIndex,
-            endIndex
-          );
+          });
         });
-        logger.info(`creating topN functions took ${Date.now() - t1} ms`);
-
-        logger.info('returning payload response to client');
 
         return response.ok({
           body: topNFunctions,
         });
       } catch (error) {
-        return handleRouteHandlerError({ error, logger, response });
+        return handleRouteHandlerError({
+          error,
+          logger,
+          response,
+          message: 'Error while fetching TopN functions',
+        });
       }
     }
   );

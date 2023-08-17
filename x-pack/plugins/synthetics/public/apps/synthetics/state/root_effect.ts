@@ -6,13 +6,20 @@
  */
 
 import { all, fork } from 'redux-saga/effects';
+import { getCertsListEffect } from './certs';
 import { addGlobalParamEffect, editGlobalParamEffect, getGlobalParamEffect } from './global_params';
 import { fetchManualTestRunsEffect } from './manual_test_runs/effects';
-import { enableDefaultAlertingEffect, updateDefaultAlertingEffect } from './alert_rules/effects';
+import {
+  enableDefaultAlertingEffect,
+  enableDefaultAlertingSilentlyEffect,
+  getDefaultAlertingEffect,
+  updateDefaultAlertingEffect,
+} from './alert_rules/effects';
 import { executeEsQueryEffect } from './elasticsearch';
 import {
   fetchAlertConnectorsEffect,
   fetchDynamicSettingsEffect,
+  fetchLocationMonitorsEffect,
   setDynamicSettingsEffect,
 } from './settings/effects';
 import { syncGlobalParamsEffect } from './settings';
@@ -24,6 +31,7 @@ import {
   enableMonitorAlertEffect,
   fetchMonitorListEffect,
   upsertMonitorEffect,
+  fetchMonitorFiltersEffect,
 } from './monitor_list';
 import { fetchMonitorOverviewEffect } from './overview';
 import { fetchServiceLocationsEffect } from './service_locations';
@@ -35,6 +43,7 @@ export const rootEffect = function* root(): Generator {
   yield all([
     fork(fetchSyntheticsEnablementEffect),
     fork(upsertMonitorEffect),
+    fork(fetchMonitorFiltersEffect),
     fork(fetchServiceLocationsEffect),
     fork(fetchMonitorListEffect),
     fork(fetchSyntheticsMonitorEffect),
@@ -45,6 +54,7 @@ export const rootEffect = function* root(): Generator {
     fork(fetchPingStatusesEffect),
     fork(fetchAgentPoliciesEffect),
     fork(fetchDynamicSettingsEffect),
+    fork(fetchLocationMonitorsEffect),
     fork(setDynamicSettingsEffect),
     fork(fetchAlertConnectorsEffect),
     fork(syncGlobalParamsEffect),
@@ -57,5 +67,8 @@ export const rootEffect = function* root(): Generator {
     fork(addGlobalParamEffect),
     fork(editGlobalParamEffect),
     fork(getGlobalParamEffect),
+    fork(getCertsListEffect),
+    fork(getDefaultAlertingEffect),
+    fork(enableDefaultAlertingSilentlyEffect),
   ]);
 };

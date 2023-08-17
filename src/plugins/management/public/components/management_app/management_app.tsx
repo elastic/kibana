@@ -13,10 +13,13 @@ import { BehaviorSubject } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { reactRouterNavigate, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import useObservable from 'react-use/lib/useObservable';
+import { AppContextProvider } from './management_context';
 import {
   ManagementSection,
   MANAGEMENT_BREADCRUMB,
@@ -24,7 +27,7 @@ import {
 } from '../../utils';
 import { ManagementRouter } from './management_router';
 import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
-import { SectionsServiceStart } from '../../types';
+import { SectionsServiceStart, NavigationCardsSubject } from '../../types';
 
 interface ManagementAppProps {
   appBasePath: string;
@@ -36,15 +39,26 @@ interface ManagementAppProps {
 export interface ManagementAppDependencies {
   sections: SectionsServiceStart;
   kibanaVersion: string;
+  coreStart: CoreStart;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   isSidebarEnabled$: BehaviorSubject<boolean>;
+  cardsNavigationConfig$: BehaviorSubject<NavigationCardsSubject>;
+  landingPageRedirect$: BehaviorSubject<string | undefined>;
 }
 
-export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppProps) => {
-  const { setBreadcrumbs, isSidebarEnabled$ } = dependencies;
+export const ManagementApp = ({
+  dependencies,
+  history,
+  theme$,
+  appBasePath,
+}: ManagementAppProps) => {
+  const { setBreadcrumbs, isSidebarEnabled$, cardsNavigationConfig$, landingPageRedirect$ } =
+    dependencies;
   const [selectedId, setSelectedId] = useState<string>('');
   const [sections, setSections] = useState<ManagementSection[]>();
   const isSidebarEnabled = useObservable(isSidebarEnabled$);
+  const cardsNavigationConfig = useObservable(cardsNavigationConfig$);
+  const landingPageRedirect = useObservable(landingPageRedirect$);
 
   const onAppMounted = useCallback((id: string) => {
     setSelectedId(id);
@@ -95,26 +109,39 @@ export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppPr
       }
     : undefined;
 
+  const contextDependencies = {
+    appBasePath,
+    sections,
+    cardsNavigationConfig,
+    kibanaVersion: dependencies.kibanaVersion,
+    landingPageRedirect,
+    navigateToUrl: dependencies.coreStart.application.navigateToUrl,
+    basePath: dependencies.coreStart.http.basePath,
+  };
+
   return (
-    <I18nProvider>
-      <KibanaThemeProvider theme$={theme$}>
-        <KibanaPageTemplate
-          restrictWidth={false}
-          solutionNav={solution}
-          // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
-          // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
-          mainProps={{ paddingSize: 'l' }}
-        >
-          <ManagementRouter
-            history={history}
-            theme$={theme$}
-            setBreadcrumbs={setBreadcrumbsScoped}
-            onAppMounted={onAppMounted}
-            sections={sections}
-            dependencies={dependencies}
-          />
-        </KibanaPageTemplate>
-      </KibanaThemeProvider>
-    </I18nProvider>
+    <RedirectAppLinks coreStart={dependencies.coreStart}>
+      <I18nProvider>
+        <AppContextProvider value={contextDependencies}>
+          <KibanaThemeProvider theme$={theme$}>
+            <KibanaPageTemplate
+              restrictWidth={false}
+              solutionNav={solution}
+              // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
+              // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
+              mainProps={{ paddingSize: 'l' }}
+            >
+              <ManagementRouter
+                history={history}
+                theme$={theme$}
+                setBreadcrumbs={setBreadcrumbsScoped}
+                onAppMounted={onAppMounted}
+                sections={sections}
+              />
+            </KibanaPageTemplate>
+          </KibanaThemeProvider>
+        </AppContextProvider>
+      </I18nProvider>
+    </RedirectAppLinks>
   );
 };

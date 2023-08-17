@@ -13,6 +13,7 @@ export class FieldEditorService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
+  private readonly comboBox = this.ctx.getService('comboBox');
 
   public async setName(name: string, clearFirst = false, typeCharByChar = false) {
     await this.testSubjects.setValue('nameField > input', name, {
@@ -88,6 +89,10 @@ export class FieldEditorService extends FtrService {
 
   public async setTruncateFormatLength(length: string) {
     await this.testSubjects.setValue('truncateEditorLength', length);
+  }
+
+  public async setFieldType(type: string) {
+    await this.comboBox.set('typeField', type);
   }
 
   public async setFieldFormat(format: string) {

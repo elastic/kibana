@@ -30,11 +30,15 @@ import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt'
 import { docLinks } from '../../../shared/doc_links';
 import { ElasticsearchResources } from '../../../shared/elasticsearch_resources';
 import { GettingStartedSteps } from '../../../shared/getting_started_steps';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { HttpLogic } from '../../../shared/http/http_logic';
+import { KibanaLogic } from '../../../shared/kibana';
+import { EuiButtonTo, EuiLinkTo } from '../../../shared/react_router_helpers';
 import { handlePageChange } from '../../../shared/table_pagination';
 import { useLocalStorage } from '../../../shared/use_local_storage';
 import { NEW_INDEX_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
+
+import { CannotConnect } from '../search_index/components/cannot_connect';
 
 import { DeleteIndexModal } from './delete_index_modal';
 import { IndicesLogic } from './indices_logic';
@@ -55,6 +59,8 @@ export const SearchIndices: React.FC = () => {
   const [showHiddenIndices, setShowHiddenIndices] = useState(false);
   const [onlyShowSearchOptimizedIndices, setOnlyShowSearchOptimizedIndices] = useState(false);
   const [searchQuery, setSearchValue] = useState('');
+  const { config } = useValues(KibanaLogic);
+  const { errorConnectingMessage } = useValues(HttpLogic);
 
   const [calloutDismissed, setCalloutDismissed] = useLocalStorage<boolean>(
     'enterprise-search-indices-callout-dismissed',
@@ -87,7 +93,7 @@ export const SearchIndices: React.FC = () => {
     ? ''
     : hasNoIndices
     ? i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.emptyPageTitle', {
-        defaultMessage: 'Welcome to Enterprise Search',
+        defaultMessage: 'Welcome to Search',
       })
     : i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.pageTitle', {
         defaultMessage: 'Elasticsearch indices',
@@ -123,6 +129,37 @@ export const SearchIndices: React.FC = () => {
               ],
         }}
       >
+        {config.host && config.canDeployEntSearch && errorConnectingMessage && (
+          <>
+            <CannotConnect />
+            <EuiSpacer />
+          </>
+        )}
+        {!config.host && config.canDeployEntSearch && (
+          <>
+            <EuiCallOut
+              title={i18n.translate('xpack.enterpriseSearch.noEntSearchConfigured.title', {
+                defaultMessage: 'Enterprise Search has not been configured',
+              })}
+              iconType="warning"
+              color="warning"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.noEntSearch.noCrawler"
+                  defaultMessage="The Elastic web crawler is not available without Enterprise Search."
+                />
+              </p>
+              <EuiButtonTo iconType="help" fill to="/setup_guide" color="warning">
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.noEntSearch.setupGuideCta"
+                  defaultMessage="Review setup guide"
+                />
+              </EuiButtonTo>
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
         {!hasNoIndices ? (
           <EuiFlexGroup direction="column">
             {!calloutDismissed && (
@@ -131,14 +168,14 @@ export const SearchIndices: React.FC = () => {
                 <EuiCallOut
                   size="m"
                   title={i18n.translate('xpack.enterpriseSearch.content.callout.title', {
-                    defaultMessage: 'Introducing Elasticsearch indices in Enterprise Search',
+                    defaultMessage: 'Introducing Elasticsearch indices in Search',
                   })}
                   iconType="iInCircle"
                 >
                   <p>
                     <FormattedMessage
                       id="xpack.enterpriseSearch.content.indices.callout.text"
-                      defaultMessage="Your Elasticsearch indices are now front and center in Enterprise Search. You can create new indices and build search experiences with them directly. To learn more about how to use Elasticsearch indices in Enterprise Search {docLink}"
+                      defaultMessage="Your Elasticsearch indices are now front and center in Search. You can create new indices and build search experiences with them directly. To learn more about how to use Elasticsearch indices in Search {docLink}"
                       values={{
                         docLink: (
                           <EuiLink
@@ -259,12 +296,12 @@ export const SearchIndices: React.FC = () => {
             <AddContentEmptyPrompt />
             <EuiSpacer size="xxl" />
             <>
-              <EuiTitle>
+              <EuiTitle data-test-subj="search-indices-empty-title">
                 <h2>
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.searchIndices.searchIndices.stepsTitle',
                     {
-                      defaultMessage: 'Build beautiful search experiences with Enterprise Search',
+                      defaultMessage: 'Build beautiful search experiences with Search',
                     }
                   )}
                 </h2>

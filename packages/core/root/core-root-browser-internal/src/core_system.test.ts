@@ -311,6 +311,11 @@ describe('#setup()', () => {
     await setupCore();
     expect(MockThemeService.setup).toHaveBeenCalledTimes(1);
   });
+
+  it('calls chrome#setup()', async () => {
+    await setupCore();
+    expect(MockChromeService.setup).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('#start()', () => {

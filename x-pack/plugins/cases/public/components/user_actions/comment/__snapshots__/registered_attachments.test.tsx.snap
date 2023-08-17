@@ -1,0 +1,342 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`createRegisteredAttachmentUserActionBuilder builds the buttons correctly 1`] = `
+Array [
+  Object {
+    "actions": <Memo(UserActionContentToolbar)
+      id="basic-comment-id"
+    >
+      <React.Fragment>
+        My button
+      </React.Fragment>
+      <Memo(RegisteredAttachmentsPropertyActions)
+        hideDefaultActions={false}
+        isLoading={false}
+        onDelete={[Function]}
+        registeredAttachmentActions={
+          Array [
+            Object {
+              "iconType": "danger",
+              "isPrimary": false,
+              "label": "My button 2",
+              "onClick": [Function],
+              "type": "button",
+            },
+          ]
+        }
+      />
+    </Memo(UserActionContentToolbar)>,
+    "children": <React.Suspense
+      fallback={<EuiLoadingSpinner />}
+    >
+      <UNDEFINED
+        attachmentId="basic-comment-id"
+        caseData={
+          Object {
+            "id": "basic-case-id",
+            "title": "Another horrible breach!!",
+          }
+        }
+        foo="bar"
+      />
+    </React.Suspense>,
+    "className": "comment-user-attachment-test",
+    "data-test-subj": "comment-user-test",
+    "event": <React.Fragment>
+      My event
+    </React.Fragment>,
+    "timelineAvatar": "casesApp",
+    "timestamp": <Memo(UserActionTimestamp)
+      createdAt="2020-02-19T23:06:33.798Z"
+    />,
+    "username": <Memo(HoverableUserResolver)
+      user={
+        Object {
+          "email": "leslie.knope@elastic.co",
+          "fullName": "Leslie Knope",
+          "username": "lknope",
+        }
+      }
+      userProfiles={
+        Map {
+          "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0" => Object {
+            "data": Object {},
+            "enabled": true,
+            "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+            "user": Object {
+              "email": "damaged_raccoon@elastic.co",
+              "full_name": "Damaged Raccoon",
+              "username": "damaged_raccoon",
+            },
+          },
+          "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0" => Object {
+            "data": Object {},
+            "enabled": true,
+            "uid": "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
+            "user": Object {
+              "email": "physical_dinosaur@elastic.co",
+              "full_name": "Physical Dinosaur",
+              "username": "physical_dinosaur",
+            },
+          },
+          "u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0" => Object {
+            "data": Object {},
+            "enabled": true,
+            "uid": "u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0",
+            "user": Object {
+              "email": "wet_dingo@elastic.co",
+              "full_name": "Wet Dingo",
+              "username": "wet_dingo",
+            },
+          },
+        }
+      }
+    />,
+  },
+]
+`;
+
+exports[`createRegisteredAttachmentUserActionBuilder builds the buttons correctly when hideDefaultActions=true 1`] = `
+Array [
+  Object {
+    "actions": <Memo(UserActionContentToolbar)
+      id="basic-comment-id"
+    >
+      <React.Fragment>
+        My button
+      </React.Fragment>
+      <Memo(RegisteredAttachmentsPropertyActions)
+        hideDefaultActions={true}
+        isLoading={false}
+        onDelete={[Function]}
+        registeredAttachmentActions={
+          Array [
+            Object {
+              "iconType": "danger",
+              "isPrimary": false,
+              "label": "My button 2",
+              "onClick": [Function],
+              "type": "button",
+            },
+          ]
+        }
+      />
+    </Memo(UserActionContentToolbar)>,
+    "children": <React.Suspense
+      fallback={<EuiLoadingSpinner />}
+    >
+      <UNDEFINED
+        attachmentId="basic-comment-id"
+        caseData={
+          Object {
+            "id": "basic-case-id",
+            "title": "Another horrible breach!!",
+          }
+        }
+        foo="bar"
+      />
+    </React.Suspense>,
+    "className": "comment-user-attachment-test",
+    "data-test-subj": "comment-user-test",
+    "event": <React.Fragment>
+      My event
+    </React.Fragment>,
+    "timelineAvatar": "casesApp",
+    "timestamp": <Memo(UserActionTimestamp)
+      createdAt="2020-02-19T23:06:33.798Z"
+    />,
+    "username": <Memo(HoverableUserResolver)
+      user={
+        Object {
+          "email": "leslie.knope@elastic.co",
+          "fullName": "Leslie Knope",
+          "username": "lknope",
+        }
+      }
+      userProfiles={
+        Map {
+          "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0" => Object {
+            "data": Object {},
+            "enabled": true,
+            "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+            "user": Object {
+              "email": "damaged_raccoon@elastic.co",
+              "full_name": "Damaged Raccoon",
+              "username": "damaged_raccoon",
+            },
+          },
+          "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0" => Object {
+            "data": Object {},
+            "enabled": true,
+            "uid": "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
+            "user": Object {
+              "email": "physical_dinosaur@elastic.co",
+              "full_name": "Physical Dinosaur",
+              "username": "physical_dinosaur",
+            },
+          },
+          "u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0" => Object {
+            "data": Object {},
+            "enabled": true,
+            "uid": "u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0",
+            "user": Object {
+              "email": "wet_dingo@elastic.co",
+              "full_name": "Wet Dingo",
+              "username": "wet_dingo",
+            },
+          },
+        }
+      }
+    />,
+  },
+]
+`;
+
+exports[`createRegisteredAttachmentUserActionBuilder builds the user action correctly 1`] = `
+Array [
+  Object {
+    "actions": <Memo(UserActionContentToolbar)
+      id="basic-comment-id"
+    >
+      <Memo(RegisteredAttachmentsPropertyActions)
+        hideDefaultActions={false}
+        isLoading={false}
+        onDelete={[Function]}
+        registeredAttachmentActions={Array []}
+      />
+    </Memo(UserActionContentToolbar)>,
+    "children": <React.Suspense
+      fallback={<EuiLoadingSpinner />}
+    >
+      <UNDEFINED
+        attachmentId="basic-comment-id"
+        caseData={
+          Object {
+            "id": "basic-case-id",
+            "title": "Another horrible breach!!",
+          }
+        }
+        foo="bar"
+      />
+    </React.Suspense>,
+    "className": "comment-user-attachment-test",
+    "data-test-subj": "comment-user-test",
+    "event": <React.Fragment>
+      My event
+    </React.Fragment>,
+    "timelineAvatar": "casesApp",
+    "timestamp": <Memo(UserActionTimestamp)
+      createdAt="2020-02-19T23:06:33.798Z"
+    />,
+    "username": <Memo(HoverableUserResolver)
+      user={
+        Object {
+          "email": "leslie.knope@elastic.co",
+          "fullName": "Leslie Knope",
+          "username": "lknope",
+        }
+      }
+      userProfiles={
+        Map {
+          "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0" => Object {
+            "data": Object {},
+            "enabled": true,
+            "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+            "user": Object {
+              "email": "damaged_raccoon@elastic.co",
+              "full_name": "Damaged Raccoon",
+              "username": "damaged_raccoon",
+            },
+          },
+          "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0" => Object {
+            "data": Object {},
+            "enabled": true,
+            "uid": "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
+            "user": Object {
+              "email": "physical_dinosaur@elastic.co",
+              "full_name": "Physical Dinosaur",
+              "username": "physical_dinosaur",
+            },
+          },
+          "u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0" => Object {
+            "data": Object {},
+            "enabled": true,
+            "uid": "u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0",
+            "user": Object {
+              "email": "wet_dingo@elastic.co",
+              "full_name": "Wet Dingo",
+              "username": "wet_dingo",
+            },
+          },
+        }
+      }
+    />,
+  },
+]
+`;
+
+exports[`createRegisteredAttachmentUserActionBuilder returns an unknown user action if the attachment type is not registered 1`] = `
+Array [
+  Object {
+    "children": <EuiCallOut
+      color="danger"
+      iconType="warning"
+      title="Attachment type is not registered"
+    />,
+    "className": "comment-user-not-found",
+    "data-test-subj": "comment-user-not-found",
+    "event": <React.Fragment>
+      added an attachment of type 
+      <EuiCode>
+        invalid
+      </EuiCode>
+    </React.Fragment>,
+    "timestamp": <Memo(UserActionTimestamp)
+      createdAt="2020-02-19T23:06:33.798Z"
+    />,
+    "username": <Memo(HoverableUserResolver)
+      user={
+        Object {
+          "email": "leslie.knope@elastic.co",
+          "fullName": "Leslie Knope",
+          "username": "lknope",
+        }
+      }
+      userProfiles={
+        Map {
+          "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0" => Object {
+            "data": Object {},
+            "enabled": true,
+            "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+            "user": Object {
+              "email": "damaged_raccoon@elastic.co",
+              "full_name": "Damaged Raccoon",
+              "username": "damaged_raccoon",
+            },
+          },
+          "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0" => Object {
+            "data": Object {},
+            "enabled": true,
+            "uid": "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
+            "user": Object {
+              "email": "physical_dinosaur@elastic.co",
+              "full_name": "Physical Dinosaur",
+              "username": "physical_dinosaur",
+            },
+          },
+          "u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0" => Object {
+            "data": Object {},
+            "enabled": true,
+            "uid": "u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0",
+            "user": Object {
+              "email": "wet_dingo@elastic.co",
+              "full_name": "Wet Dingo",
+              "username": "wet_dingo",
+            },
+          },
+        }
+      }
+    />,
+  },
+]
+`;

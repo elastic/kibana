@@ -6,7 +6,7 @@
  */
 
 import { EuiCommentList } from '@elastic/eui';
-import { Actions, CaseSeverity } from '../../../common/api';
+import { CaseSeverity, UserActionActions } from '../../../common/types/domain';
 import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -24,7 +24,7 @@ describe('createSeverityUserActionBuilder', () => {
     appMockRenderer = createAppMockRenderer();
   });
   it('renders correctly', () => {
-    const userAction = getUserAction('severity', Actions.update, {
+    const userAction = getUserAction('severity', UserActionActions.update, {
       payload: { severity: CaseSeverity.LOW },
     });
     const builder = createSeverityUserActionBuilder({

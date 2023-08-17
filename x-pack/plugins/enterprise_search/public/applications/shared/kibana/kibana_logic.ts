@@ -21,7 +21,9 @@ import {
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { GetUserProfileResponse, UserProfileData } from '@kbn/security-plugin/common';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../common/types';
 
@@ -45,12 +47,14 @@ interface KibanaLogicProps {
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
-  renderHeaderActions(HeaderActions: FC): void;
+  renderHeaderActions(HeaderActions?: FC): void;
   security: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
+  share: SharePluginStart;
   uiSettings: IUiSettingsClient;
+  userProfile: GetUserProfileResponse<UserProfileData>;
 }
 
 export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
@@ -89,7 +93,9 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],
+    share: [props.share, {}],
     uiSettings: [props.uiSettings, {}],
+    userProfile: [props.userProfile, {}],
   }),
   selectors: ({ selectors }) => ({
     isCloud: [() => [selectors.cloud], (cloud?: Partial<CloudSetup>) => !!cloud?.isCloudEnabled],

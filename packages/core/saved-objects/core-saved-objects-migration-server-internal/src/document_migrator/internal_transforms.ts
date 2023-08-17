@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { isFunction } from 'lodash';
 import {
   ISavedObjectTypeRegistry,
   SavedObjectsType,
@@ -16,16 +17,25 @@ import {
   LEGACY_URL_ALIAS_TYPE,
   LegacyUrlAlias,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { Logger } from '@kbn/logging';
 import { migrations as coreMigrationsMap } from './migrations';
 import { type Transform, TransformType } from './types';
+import { convertMigrationFunction } from './utils';
 
 /**
  * Returns all available core transforms for all object types.
  */
-export function getCoreTransforms(): Transform[] {
+export function getCoreTransforms({
+  type,
+  log,
+}: {
+  type: SavedObjectsType;
+  log: Logger;
+}): Transform[] {
   return Object.entries(coreMigrationsMap).map<Transform>(([version, transform]) => ({
     version,
-    transform,
+    deferred: !isFunction(transform) && !!transform.deferred,
+    transform: convertMigrationFunction(version, type, transform, log),
     transformType: TransformType.Core,
   }));
 }

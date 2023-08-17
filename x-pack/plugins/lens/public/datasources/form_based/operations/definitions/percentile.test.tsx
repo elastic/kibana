@@ -8,7 +8,7 @@
 import React, { ChangeEvent } from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiRange } from '@elastic/eui';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { EuiFormRow } from '@elastic/eui';
 import { shallow, mount } from 'enzyme';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -17,7 +17,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
-import { percentileOperation } from '.';
+import { LastValueIndexPatternColumn, percentileOperation } from '.';
 import { FormBasedLayer } from '../../types';
 import { PercentileIndexPatternColumn } from './percentile';
 import { TermsIndexPatternColumn } from './terms';
@@ -45,7 +45,6 @@ const uiSettingsMock = {} as IUiSettingsClient;
 const defaultProps = {
   storage: {} as IStorageWrapper,
   uiSettings: uiSettingsMock,
-  savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
@@ -220,19 +219,19 @@ describe('percentile', () => {
         ],
         // filtered
         [
-          `aggFilteredMetric id="2" enabled=true schema="metric" 
+          `aggFilteredMetric id="2" enabled=true schema="metric"
             customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}}
             customMetric={aggSinglePercentile id="2" enabled=true schema="metric" field="foo" percentile=10}`,
-          `aggFilteredMetric id="3" enabled=true schema="metric" 
+          `aggFilteredMetric id="3" enabled=true schema="metric"
             customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}}
             customMetric={aggSinglePercentile id="2" enabled=true schema="metric" field="foo" percentile=10}`,
         ],
         // different filter
         [
-          `aggFilteredMetric id="4" enabled=true schema="metric" 
+          `aggFilteredMetric id="4" enabled=true schema="metric"
             customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"AL\\" "}}
             customMetric={aggSinglePercentile id="2" enabled=true schema="metric" field="foo" percentile=10}`,
-          `aggFilteredMetric id="5" enabled=true schema="metric" 
+          `aggFilteredMetric id="5" enabled=true schema="metric"
             customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"AL\\" "}}
             customMetric={aggSinglePercentile id="2" enabled=true schema="metric" field="foo" percentile=10}`,
         ],
@@ -553,6 +552,24 @@ describe('percentile', () => {
       expect(percentileColumn.params.percentile).toEqual(75);
       expect(percentileColumn.filter).toEqual({ language: 'kuery', query: 'bytes > 100' });
       expect(percentileColumn.label).toEqual('75th percentile of test');
+    });
+
+    it('should not keep a filter if coming from last value', () => {
+      const indexPattern = createMockedIndexPattern();
+      const bytesField = indexPattern.fields.find(({ name }) => name === 'bytes')!;
+      bytesField.displayName = 'test';
+      const percentileColumn = percentileOperation.buildColumn({
+        indexPattern,
+        field: bytesField,
+        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
+        previousColumn: {
+          operationType: 'last_value',
+          sourceField: 'bytes',
+          label: 'Last bytes',
+          filter: { language: 'kuery', query: 'bytes: *' },
+        } as LastValueIndexPatternColumn,
+      });
+      expect(percentileColumn.filter).toEqual(undefined);
     });
   });
 

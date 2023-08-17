@@ -16,9 +16,14 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
+import { EuiSwitchEvent } from '@elastic/eui';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { asPercent } from '../../../../../common/utils/formatters';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import {
+  FETCH_STATUS,
+  isPending,
+  useFetcher,
+} from '../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import { ChartPreview } from '../../ui_components/chart_preview';
 import {
@@ -37,8 +42,14 @@ import {
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
+import {
+  ErrorState,
+  LoadingState,
+  NoDataState,
+} from '../../ui_components/chart_preview/chart_preview_helper';
+import { ApmRuleKqlFilter } from '../../ui_components/apm_rule_kql_filter';
 
-export interface RuleParams {
+export interface ErrorRateRuleParams {
   windowSize?: number;
   windowUnit?: string;
   threshold?: number;
@@ -47,10 +58,12 @@ export interface RuleParams {
   transactionName?: string;
   environment?: string;
   groupBy?: string[] | undefined;
+  useKqlFilter?: boolean;
+  kqlFilter?: string;
 }
 
 export interface Props {
-  ruleParams: RuleParams;
+  ruleParams: ErrorRateRuleParams;
   metadata?: AlertMetadata;
   setRuleParams: (key: string, value: any) => void;
   setRuleProperty: (key: string, value: any) => void;
@@ -74,15 +87,13 @@ export function TransactionErrorRateRuleType(props: Props) {
     }
   );
 
-  const thresholdAsPercent = (params.threshold ?? 0) / 100;
-
-  const { data } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       const { interval, start, end } = getIntervalAndTimeRange({
         windowSize: params.windowSize,
         windowUnit: params.windowUnit,
       });
-      if (interval && start && end) {
+      if (params.windowSize && start && end) {
         return callApmApi(
           'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
           {
@@ -95,6 +106,8 @@ export function TransactionErrorRateRuleType(props: Props) {
                 interval,
                 start,
                 end,
+                groupBy: params.groupBy,
+                kqlFilter: params.kqlFilter,
               },
             },
           }
@@ -108,6 +121,8 @@ export function TransactionErrorRateRuleType(props: Props) {
       params.serviceName,
       params.windowSize,
       params.windowUnit,
+      params.groupBy,
+      params.kqlFilter,
     ]
   );
 
@@ -118,7 +133,7 @@ export function TransactionErrorRateRuleType(props: Props) {
     [setRuleParams]
   );
 
-  const fields = [
+  const filterFields = [
     <ServiceField
       currentValue={params.serviceName}
       onChange={(value) => {
@@ -150,6 +165,9 @@ export function TransactionErrorRateRuleType(props: Props) {
       onChange={(value) => setRuleParams('transactionName', value)}
       serviceName={params.serviceName}
     />,
+  ];
+
+  const criteriaFields = [
     <IsAboveField
       value={params.threshold}
       unit="%"
@@ -171,16 +189,33 @@ export function TransactionErrorRateRuleType(props: Props) {
     />,
   ];
 
-  // hide preview chart until https://github.com/elastic/kibana/pull/156625 gets merged
-  const showChartPreview = false;
-  const chartPreview = showChartPreview ? (
+  const fields = [
+    ...(!ruleParams.useKqlFilter ? filterFields : []),
+    ...criteriaFields,
+  ];
+
+  const errorRateChartPreview = data?.errorRateChartPreview;
+  const series = errorRateChartPreview?.series ?? [];
+  const hasData = series.length > 0;
+  const totalGroups = errorRateChartPreview?.totalGroups ?? 0;
+
+  const chartPreview = isPending(status) ? (
+    <LoadingState />
+  ) : !hasData ? (
+    <NoDataState />
+  ) : status === FETCH_STATUS.SUCCESS ? (
     <ChartPreview
-      series={[{ data: data?.errorRateChartPreview ?? [] }]}
-      yTickFormat={(d: number | null) => asPercent(d, 1)}
-      threshold={thresholdAsPercent}
+      series={series}
+      yTickFormat={(d: number | null) => asPercent(d, 100)}
+      threshold={params.threshold}
       uiSettings={services.uiSettings}
+      timeSize={params.windowSize}
+      timeUnit={params.windowUnit}
+      totalGroups={totalGroups}
     />
-  ) : null;
+  ) : (
+    <ErrorState />
+  );
 
   const groupAlertsBy = (
     <>
@@ -216,11 +251,31 @@ export function TransactionErrorRateRuleType(props: Props) {
     </>
   );
 
+  const onToggleKqlFilter = (e: EuiSwitchEvent) => {
+    setRuleParams('serviceName', undefined);
+    setRuleParams('transactionType', undefined);
+    setRuleParams('transactionName', undefined);
+    setRuleParams('environment', ENVIRONMENT_ALL.value);
+    setRuleParams('kqlFilter', undefined);
+    setRuleParams('useKqlFilter', e.target.checked);
+  };
+
+  const kqlFilter = (
+    <>
+      <ApmRuleKqlFilter
+        ruleParams={ruleParams}
+        setRuleParams={setRuleParams}
+        onToggleKqlFilter={onToggleKqlFilter}
+      />
+    </>
+  );
+
   return (
     <ApmRuleParamsContainer
       minimumWindowSize={{ value: 5, unit: TIME_UNITS.MINUTE }}
       fields={fields}
       groupAlertsBy={groupAlertsBy}
+      kqlFilter={kqlFilter}
       defaultParams={params}
       setRuleParams={setRuleParams}
       setRuleProperty={setRuleProperty}

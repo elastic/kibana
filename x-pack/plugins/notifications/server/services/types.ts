@@ -7,6 +7,7 @@
 
 export interface EmailService {
   sendPlainTextEmail(payload: PlainTextEmail): Promise<void>;
+  sendHTMLEmail(payload: HTMLEmail): Promise<void>;
 }
 
 export interface EmailServiceStart {
@@ -32,4 +33,8 @@ export interface PlainTextEmail {
   context?: {
     relatedObjects?: RelatedSavedObject[];
   };
+}
+
+export interface HTMLEmail extends PlainTextEmail {
+  messageHTML: string;
 }

@@ -15,34 +15,28 @@ import {
 } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
+import {
+  SyntheticsPluginsSetupDependencies,
+  SyntheticsPluginsStartDependencies,
+  SyntheticsServerSetup,
+} from './types';
+import { TelemetryEventsSender } from './telemetry/sender';
 import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { initSyntheticsServer } from './server';
-import { initUptimeServer } from './legacy_uptime/uptime_server';
 import { uptimeFeature } from './feature';
-import {
-  KibanaTelemetryAdapter,
-  UptimeCorePluginsSetup,
-  UptimeCorePluginsStart,
-  UptimeServerSetup,
-} from './legacy_uptime/lib/adapters';
-import { TelemetryEventsSender } from './legacy_uptime/lib/telemetry/sender';
-import {
-  registerUptimeSavedObjects,
-  savedObjectsAdapter,
-} from './legacy_uptime/lib/saved_objects/saved_objects';
+
+import { registerUptimeSavedObjects, savedObjectsAdapter } from './saved_objects/saved_objects';
 import { UptimeConfig } from '../common/config';
 import { SyntheticsService } from './synthetics_service/synthetics_service';
-import { syntheticsServiceApiKey } from './legacy_uptime/lib/saved_objects/service_api_key';
+import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
-import { uptimeRuleTypeFieldMap } from './legacy_uptime/lib/alerts/common';
-
-export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
+import { uptimeRuleTypeFieldMap } from './alert_rules/common';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
   private initContext: PluginInitializerContext;
   private logger: Logger;
-  private server?: UptimeServerSetup;
+  private server?: SyntheticsServerSetup;
   private syntheticsService?: SyntheticsService;
   private syntheticsMonitorClient?: SyntheticsMonitorClient;
   private readonly telemetryEventsSender: TelemetryEventsSender;
@@ -53,7 +47,7 @@ export class Plugin implements PluginType {
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
   }
 
-  public setup(core: CoreSetup, plugins: UptimeCorePluginsSetup) {
+  public setup(core: CoreSetup, plugins: SyntheticsPluginsSetupDependencies) {
     const config = this.initContext.config.get<UptimeConfig>();
 
     savedObjectsAdapter.config = config;
@@ -83,7 +77,8 @@ export class Plugin implements PluginType {
       logger: this.logger,
       telemetry: this.telemetryEventsSender,
       isDev: this.initContext.env.mode.dev,
-    } as UptimeServerSetup;
+      share: plugins.share,
+    } as SyntheticsServerSetup;
 
     this.syntheticsService = new SyntheticsService(this.server);
 
@@ -95,29 +90,21 @@ export class Plugin implements PluginType {
 
     plugins.features.registerKibanaFeature(uptimeFeature);
 
-    initUptimeServer(this.server, plugins, ruleDataClient, this.logger);
-
     initSyntheticsServer(this.server, this.syntheticsMonitorClient, plugins, ruleDataClient);
 
     registerUptimeSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
-    KibanaTelemetryAdapter.registerUsageCollector(
-      plugins.usageCollection,
-      () => this.savedObjectsClient
-    );
-
-    return {
-      ruleRegistry: ruleDataClient,
-    };
+    return {};
   }
 
-  public start(coreStart: CoreStart, pluginsStart: UptimeCorePluginsStart) {
+  public start(coreStart: CoreStart, pluginsStart: SyntheticsPluginsStartDependencies) {
     this.savedObjectsClient = new SavedObjectsClient(
       coreStart.savedObjects.createInternalRepository([syntheticsServiceApiKey.name])
     );
 
     if (this.server) {
       this.server.coreStart = coreStart;
+      this.server.pluginsStart = pluginsStart;
       this.server.security = pluginsStart.security;
       this.server.fleet = pluginsStart.fleet;
       this.server.encryptedSavedObjects = pluginsStart.encryptedSavedObjects;

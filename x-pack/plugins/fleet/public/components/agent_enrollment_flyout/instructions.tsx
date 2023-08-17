@@ -14,10 +14,7 @@ import { FleetServerRequirementPage } from '../../applications/fleet/sections/ag
 import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT } from '../../constants';
 import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
 import { Loading } from '..';
-import {
-  getCloudFormationTemplateUrlFromPackagePolicy,
-  policyHasFleetServer,
-} from '../../services';
+import { policyHasFleetServer } from '../../services';
 import { AdvancedTab } from '../../applications/fleet/components/fleet_server_instructions/advanced_tab';
 
 import type { InstructionProps } from './types';
@@ -82,20 +79,19 @@ export const Instructions = (props: InstructionProps) => {
       isFleetServerUnhealthy ||
       (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
 
-  const cloudFormationTemplateUrl = getCloudFormationTemplateUrlFromPackagePolicy(
-    props.selectedPolicy
-  );
-
   useEffect(() => {
-    // If we have a cloudFormationTemplateUrl, we want to hide the selection type
-    if (cloudFormationTemplateUrl) {
+    // If we detect a CloudFormation integration, we want to hide the selection type
+    if (
+      props.cloudSecurityIntegration?.isCloudFormation ||
+      props.cloudSecurityIntegration?.cloudShellUrl
+    ) {
       setSelectionType(undefined);
     } else if (!isIntegrationFlow && showAgentEnrollment) {
       setSelectionType('radio');
     } else {
       setSelectionType('tabs');
     }
-  }, [isIntegrationFlow, showAgentEnrollment, setSelectionType, cloudFormationTemplateUrl]);
+  }, [isIntegrationFlow, showAgentEnrollment, setSelectionType, props.cloudSecurityIntegration]);
 
   if (isLoadingAgents || isLoadingAgentPolicies || isLoadingFleetServerHealth)
     return <Loading size="l" />;
@@ -110,7 +106,7 @@ export const Instructions = (props: InstructionProps) => {
     } else if (showAgentEnrollment) {
       return (
         <>
-          {selectionType === 'tabs' && (
+          {selectionType === 'tabs' && !props.cloudSecurityIntegration?.cloudShellUrl && (
             <>
               <EuiText>
                 <FormattedMessage
@@ -124,7 +120,7 @@ export const Instructions = (props: InstructionProps) => {
           {isFleetServerPolicySelected ? (
             <AdvancedTab selectedPolicyId={props.selectedPolicy?.id} onClose={() => undefined} />
           ) : (
-            <ManagedSteps {...props} cloudFormationTemplateUrl={cloudFormationTemplateUrl} />
+            <ManagedSteps {...props} />
           )}
         </>
       );

@@ -71,6 +71,7 @@ export const performBulkCreate = async <T>(
     encryption: encryptionHelper,
     preflight: preflightHelper,
     serializer: serializerHelper,
+    migration: migrationHelper,
   } = helpers;
   const { securityExtension } = extensions;
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
@@ -213,7 +214,7 @@ export const performBulkCreate = async <T>(
       const originId = Object.keys(object).includes('originId')
         ? object.originId
         : existingOriginId;
-      const migrated = migrator.migrateDocument({
+      const migrated = migrationHelper.migrateInputDocument({
         id: object.id,
         type: object.type,
         attributes: await encryptionHelper.optionallyEncryptAttributes(

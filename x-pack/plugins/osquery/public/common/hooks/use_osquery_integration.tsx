@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 
+import { API_VERSIONS } from '../../../common/constants';
 import { useKibana } from '../lib/kibana';
 import { useErrorToast } from './use_error_toast';
 
@@ -19,7 +20,8 @@ export const useOsqueryIntegrationStatus = () => {
     ['integration'],
     () =>
       http.get<{ name: string; version: string; title: string; install_status: string }>(
-        '/internal/osquery/status'
+        '/internal/osquery/status',
+        { version: API_VERSIONS.internal.v1 }
       ),
     {
       onError: (error: Error) =>

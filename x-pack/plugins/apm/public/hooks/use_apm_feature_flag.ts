@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import {
   ApmFeatureFlagName,
-  getApmFeatureFlags,
   ValueOfApmFeatureFlag,
 } from '../../common/apm_feature_flags';
+import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
 export function useApmFeatureFlag<
   TApmFeatureFlagName extends ApmFeatureFlagName
 >(
   featureFlag: TApmFeatureFlagName
 ): ValueOfApmFeatureFlag<TApmFeatureFlagName> {
-  const featureFlags = useMemo(() => {
-    // this should be replaced with an API call
-    return getApmFeatureFlags();
-  }, []);
-
-  return featureFlags[featureFlag];
+  const { config } = useApmPluginContext();
+  return config.featureFlags[featureFlag];
 }

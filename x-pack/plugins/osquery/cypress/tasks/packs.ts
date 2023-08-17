@@ -6,6 +6,7 @@
  */
 
 import { some } from 'lodash';
+import { API_VERSIONS } from '../../common/constants';
 import type { UsePacksResponse } from '../../public/packs/use_packs';
 import { request } from './common';
 import { closeModalIfVisible, closeToastIfVisible } from './integrations';
@@ -21,7 +22,7 @@ export const preparePack = (packName: string) => {
 
 export const deactivatePack = (packName: string) => {
   cy.react('ActiveStateSwitchComponent', {
-    props: { item: { attributes: { name: packName } } },
+    props: { item: { name: packName } },
   }).click();
   closeModalIfVisible();
 
@@ -32,7 +33,7 @@ export const deactivatePack = (packName: string) => {
 
 export const activatePack = (packName: string) => {
   cy.react('ActiveStateSwitchComponent', {
-    props: { item: { attributes: { name: packName } } },
+    props: { item: { name: packName } },
   }).click();
   closeModalIfVisible();
 
@@ -45,11 +46,14 @@ export const cleanupAllPrebuiltPacks = () => {
   request<UsePacksResponse>({
     method: 'GET',
     url: '/api/osquery/packs',
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
   }).then((response) => {
     const prebuiltPacks = response.body.data?.filter((pack) =>
       some(pack.references, { type: 'osquery-pack-asset' })
     );
 
-    return Promise.all(prebuiltPacks?.map((pack) => cleanupPack(pack.id)));
+    return Promise.all(prebuiltPacks?.map((pack) => cleanupPack(pack.saved_object_id)));
   });
 };

@@ -86,12 +86,11 @@ export const ruleRegistrySearchStrategyProvider = (
             }
             const alertIndexInfo = ruleDataService.findIndexByFeature(featureId, Dataset.alerts);
             if (alertIndexInfo) {
-              return [
-                ...accum,
+              accum.push(
                 featureId === 'siem'
                   ? `${alertIndexInfo.baseName}-${space?.id ?? ''}*`
-                  : `${alertIndexInfo.baseName}*`,
-              ];
+                  : `${alertIndexInfo.baseName}*`
+              );
             }
             return accum;
           }, []);

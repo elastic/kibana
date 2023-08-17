@@ -23,8 +23,9 @@ export const responseActionTasks = (
   const stackServicesPromise = createRuntimeServices({
     kibanaUrl: config.env.KIBANA_URL,
     elasticsearchUrl: config.env.ELASTICSEARCH_URL,
-    username: config.env.ELASTICSEARCH_USERNAME,
-    password: config.env.ELASTICSEARCH_PASSWORD,
+    fleetServerUrl: config.env.FLEET_SERVER_URL,
+    username: config.env.KIBANA_USERNAME,
+    password: config.env.KIBANA_PASSWORD,
     asSuperuser: true,
   });
 

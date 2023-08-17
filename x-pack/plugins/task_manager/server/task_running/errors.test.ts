@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { isUnrecoverableError, throwUnrecoverableError } from './errors';
+import {
+  createSkipError,
+  isSkipError,
+  isUnrecoverableError,
+  throwUnrecoverableError,
+} from './errors';
 
 describe('Error Types', () => {
   describe('Unrecoverable error', () => {
@@ -25,6 +30,10 @@ describe('Error Types', () => {
 
     it('idnentifies normal errors', () => {
       expect(isUnrecoverableError(new Error('OMG'))).toBeFalsy();
+    });
+
+    it('createSkipError', () => {
+      expect(isSkipError(createSkipError(new Error('OMG')))).toBeTruthy();
     });
   });
 });

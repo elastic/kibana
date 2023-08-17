@@ -343,7 +343,7 @@
               "\nThe state of checking the results of a license type meeting the license minimum."
             ],
             "signature": [
-              "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
+              "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
@@ -543,6 +543,26 @@
                 "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/common/services/agent_policy_config.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/common/services/agent_policy_config.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
               },
@@ -695,7 +715,7 @@
         "label": "LicenseCheckState",
         "description": [],
         "signature": [
-          "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
+          "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
@@ -791,12 +811,20 @@
               "path": "x-pack/plugins/security/public/plugin.tsx"
             },
             {
+              "plugin": "aiops",
+              "path": "x-pack/plugins/aiops/public/plugin.tsx"
+            },
+            {
               "plugin": "licenseManagement",
               "path": "x-pack/plugins/license_management/public/plugin.ts"
             },
             {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/public/plugin.ts"
+            },
+            {
+              "plugin": "profiling",
+              "path": "x-pack/plugins/profiling/public/components/contexts/license/license_context.tsx"
             },
             {
               "plugin": "apm",
@@ -833,10 +861,6 @@
             {
               "plugin": "watcher",
               "path": "x-pack/plugins/watcher/public/plugin.ts"
-            },
-            {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/profiling/public/components/contexts/license/license_context.tsx"
             }
           ]
         },
@@ -1578,7 +1602,7 @@
               "\nThe state of checking the results of a license type meeting the license minimum."
             ],
             "signature": [
-              "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
+              "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
@@ -1828,6 +1852,26 @@
                 "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/common/services/agent_policy_config.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/common/services/agent_policy_config.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
               },
@@ -2027,7 +2071,7 @@
         "label": "LicenseCheckState",
         "description": [],
         "signature": [
-          "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
+          "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,

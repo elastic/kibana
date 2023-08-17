@@ -10,20 +10,45 @@ import {
   getDefaultEuiMarkdownProcessingPlugins,
   getDefaultEuiMarkdownUiPlugins,
 } from '@elastic/eui';
-
 import * as timelineMarkdownPlugin from './timeline';
 import * as osqueryMarkdownPlugin from './osquery';
 import * as insightMarkdownPlugin from './insight';
 
-export const { uiPlugins, parsingPlugins, processingPlugins } = {
+export const {
+  uiPlugins: nonStatefulUiPlugins,
+  parsingPlugins,
+  processingPlugins,
+} = {
   uiPlugins: getDefaultEuiMarkdownUiPlugins(),
   parsingPlugins: getDefaultEuiMarkdownParsingPlugins(),
   processingPlugins: getDefaultEuiMarkdownProcessingPlugins(),
 };
 
-uiPlugins.push(timelineMarkdownPlugin.plugin);
-uiPlugins.push(osqueryMarkdownPlugin.plugin);
-uiPlugins.push(insightMarkdownPlugin.plugin);
+export const platinumOnlyPluginTokens = [insightMarkdownPlugin.insightPrefix];
+
+export const uiPlugins = ({
+  insightsUpsellingMessage,
+}: {
+  insightsUpsellingMessage: string | null;
+}) => {
+  const currentPlugins = nonStatefulUiPlugins.map((plugin) => plugin.name);
+  const insightPluginWithLicense = insightMarkdownPlugin.plugin({
+    insightsUpsellingMessage,
+  });
+  if (currentPlugins.includes(insightPluginWithLicense.name) === false) {
+    nonStatefulUiPlugins.push(timelineMarkdownPlugin.plugin);
+    nonStatefulUiPlugins.push(osqueryMarkdownPlugin.plugin);
+    nonStatefulUiPlugins.push(insightPluginWithLicense);
+  } else {
+    // When called for the second time we need to update insightMarkdownPlugin
+    const index = nonStatefulUiPlugins.findIndex(
+      (plugin) => plugin.name === insightPluginWithLicense.name
+    );
+    nonStatefulUiPlugins[index] = insightPluginWithLicense;
+  }
+
+  return nonStatefulUiPlugins;
+};
 
 parsingPlugins.push(insightMarkdownPlugin.parser);
 parsingPlugins.push(timelineMarkdownPlugin.parser);

@@ -87,7 +87,7 @@ export const getNormalizedDataStreams = (
       release: packageInfo.release || 'ga',
       package: packageInfo.name,
       path: packageInfo.name,
-      elasticsearch: packageInfo.elasticsearch,
+      elasticsearch: packageInfo.elasticsearch || {},
       streams: [
         {
           input: policyTemplate.input,
@@ -99,6 +99,16 @@ export const getNormalizedDataStreams = (
         },
       ],
     };
+
+    if (packageInfo.type === 'input') {
+      dataStream.elasticsearch = {
+        ...dataStream.elasticsearch,
+        ...{
+          dynamic_dataset: true,
+          dynamic_namespace: true,
+        },
+      };
+    }
 
     return dataStream;
   });

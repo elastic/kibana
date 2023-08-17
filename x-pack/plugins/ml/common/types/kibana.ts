@@ -20,10 +20,4 @@ export interface Route {
 // TODO define saved object type
 export type SavedSearchSavedObject = SimpleSavedObject<any>;
 
-export function isSavedSearchSavedObject(
-  ss: SavedSearchSavedObject | null
-): ss is SavedSearchSavedObject {
-  return ss !== null;
-}
-
 export type FieldFormatsRegistryProvider = () => Promise<FieldFormatsRegistry>;

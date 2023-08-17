@@ -13,6 +13,7 @@
       "charts",
       "data",
       "dataViews",
+      "dataViewEditor",
       "embeddable",
       "exploratoryView",
       "features",
@@ -21,6 +22,7 @@
       "inspector",
       "lens",
       "observabilityShared",
+      "observabilityAIAssistant",
       "ruleRegistry",
       "triggersActionsUi",
       "security",
@@ -28,8 +30,8 @@
       "unifiedSearch",
       "visualizations"
     ],
-    "optionalPlugins": ["discover", "home", "licensing", "spaces", "usageCollection"],
-    "requiredBundles": ["data", "kibanaReact", "kibanaUtils", "unifiedSearch"],
+    "optionalPlugins": ["discover", "home", "licensing", "usageCollection", "cloud", "spaces"],
+    "requiredBundles": ["data", "kibanaReact", "kibanaUtils", "unifiedSearch", "cloudChat", "stackAlerts", "spaces"],
     "extraPublicDirs": ["common"]
   }
 }

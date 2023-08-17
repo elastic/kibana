@@ -12,6 +12,8 @@ export interface CspmUsage {
   resources_stats: CspmResourcesStats[];
   accounts_stats: CspmAccountsStats[];
   rules_stats: CspmRulesStats[];
+  installation_stats: CloudSecurityInstallationStats[];
+  alerts_stats: CloudSecurityAlertsStats[];
 }
 
 export interface PackageSetupStatus {
@@ -75,4 +77,24 @@ export interface CspmRulesStats {
   benchmark_version: string;
   passed_findings_count: number;
   failed_findings_count: number;
+}
+
+export interface CloudSecurityInstallationStats {
+  package_policy_id: string;
+  feature: string;
+  package_version: string;
+  agent_policy_id: string;
+  deployment_mode: string;
+  created_at: string;
+  agent_count: number;
+  account_type?: 'single-account' | 'organization-account';
+}
+
+export interface CloudSecurityAlertsStats {
+  posture_type: string;
+  rules_count: number;
+  alerts_count: number;
+  alerts_open_count: number;
+  alerts_closed_count: number;
+  alerts_acknowledged_count: number;
 }

@@ -14,6 +14,8 @@
     "@kbn/kibana-react-plugin",
     "@kbn/i18n",
     "@kbn/saved-objects-tagging-oss-plugin",
+    "@kbn/core-chrome-browser",
+    "@kbn/analytics-client",
   ],
   "exclude": [
     "target/**/*",

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { Cookie } from 'tough-cookie';
 import { UserProfile } from '@kbn/security-plugin/common';
-import { GetCaseUsersResponseRt } from '@kbn/cases-plugin/common/api';
+import { GetCaseUsersResponseRt } from '@kbn/cases-plugin/common/types/api';
 import { securitySolutionOnlyAllSpacesRole } from '../../../../common/lib/authentication/roles';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import {
@@ -430,6 +430,67 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(assignees).to.eql([]);
           expect(unassignedUsers).to.eql([]);
+        });
+
+        it('does not throw with imageUrl set to null', async () => {
+          await updateUserProfileAvatar({
+            supertest,
+            req: {
+              // @ts-expect-error: types are not correct
+              initials: null,
+              // @ts-expect-error: types are not correct
+              color: null,
+              imageUrl: null,
+            },
+            headers: superUserHeaders,
+          });
+
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest(),
+            200,
+            null,
+            superUserHeaders
+          );
+
+          const res = await getCaseUsers({
+            caseId: postedCase.id,
+            supertest,
+          });
+
+          expect(res.participants[0].avatar).to.eql({});
+          expect(res.reporter.avatar).to.eql({});
+        });
+
+        it('does not return any avatar data if they are not a string', async () => {
+          await updateUserProfileAvatar({
+            supertest,
+            req: {
+              // @ts-expect-error: types are not correct
+              initials: 4,
+              // @ts-expect-error: types are not correct
+              color: true,
+              // @ts-expect-error: types are not correct
+              imageUrl: [],
+            },
+            headers: superUserHeaders,
+          });
+
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest(),
+            200,
+            null,
+            superUserHeaders
+          );
+
+          const res = await getCaseUsers({
+            caseId: postedCase.id,
+            supertest,
+          });
+
+          expect(res.participants[0].avatar).to.eql({});
+          expect(res.reporter.avatar).to.eql({});
         });
       });
     });

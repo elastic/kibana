@@ -3,8 +3,18 @@
 ++++
 <titleabbrev>Jira</titleabbrev>
 ++++
+:frontmatter-description: Add a connector that can create indicidents in Jira.
+:frontmatter-tags-products: [kibana] 
+:frontmatter-tags-content-type: [how-to] 
+:frontmatter-tags-user-goals: [configure]
 
-The Jira connector uses the https://developer.atlassian.com/cloud/jira/platform/rest/v2/[REST API v2] to create Jira issues.
+The Jira connector uses the https://developer.atlassian.com/cloud/jira/platform/rest/v2/[REST API v2] to create Atlassian Jira issues.
+
+[float]
+[[jira-compatibility]]
+=== Compatibility
+
+Jira on-premise deployments (Server and Data Center) are not supported.
 
 [float]
 [[define-jira-ui]]
@@ -86,9 +96,3 @@ Additional comments:: Additional information for the client, such as how to trou
 === Connector networking configuration
 
 Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-
-[float]
-[[configuring-jira]]
-=== Configure Jira
-
-Jira offers free https://www.atlassian.com/software/jira/free[Instances], which you can use to test incidents.

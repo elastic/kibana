@@ -9,8 +9,8 @@ import { AsyncLocalStorage } from 'async_hooks';
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 
-export function getRequestStore() {
-  const requestStore = new AsyncLocalStorage<KibanaRequest>();
+const requestStore = new AsyncLocalStorage<KibanaRequest>();
 
+export function getRequestStore() {
   return requestStore;
 }

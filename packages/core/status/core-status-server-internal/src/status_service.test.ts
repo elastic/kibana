@@ -65,7 +65,32 @@ describe('StatusService', () => {
     };
   };
 
-  describe('setup', () => {
+  describe('#preboot', () => {
+    it('registers `status` route', async () => {
+      const configService = configServiceMock.create();
+      configService.atPath.mockReturnValue(new BehaviorSubject({ allowAnonymous: true }));
+      service = new StatusService(mockCoreContext.create({ configService }));
+
+      const prebootRouterMock: RouterMock = mockRouter.create();
+      const httpPreboot = httpServiceMock.createInternalPrebootContract();
+      httpPreboot.registerRoutes.mockImplementation((path, callback) =>
+        callback(prebootRouterMock)
+      );
+      await service.preboot({ http: httpPreboot });
+
+      expect(prebootRouterMock.get).toHaveBeenCalledTimes(1);
+      expect(prebootRouterMock.get).toHaveBeenCalledWith(
+        {
+          path: '/api/status',
+          options: { authRequired: false, tags: ['api'], access: 'public' },
+          validate: false,
+        },
+        expect.any(Function)
+      );
+    });
+  });
+
+  describe('#setup', () => {
     describe('core$', () => {
       it('rolls up core status observables into single observable', async () => {
         const setup = await service.setup(
@@ -497,45 +522,6 @@ describe('StatusService', () => {
             },
           ]
         `);
-      });
-    });
-
-    describe('preboot status routes', () => {
-      let prebootRouterMock: RouterMock;
-      beforeEach(async () => {
-        prebootRouterMock = mockRouter.create();
-      });
-
-      it('does not register `status` route if anonymous access is not allowed', async () => {
-        const httpSetup = httpServiceMock.createInternalSetupContract();
-        httpSetup.registerPrebootRoutes.mockImplementation((path, callback) =>
-          callback(prebootRouterMock)
-        );
-        await service.setup(setupDeps({ http: httpSetup }));
-
-        expect(prebootRouterMock.get).not.toHaveBeenCalled();
-      });
-
-      it('registers `status` route if anonymous access is allowed', async () => {
-        const configService = configServiceMock.create();
-        configService.atPath.mockReturnValue(new BehaviorSubject({ allowAnonymous: true }));
-        service = new StatusService(mockCoreContext.create({ configService }));
-
-        const httpSetup = httpServiceMock.createInternalSetupContract();
-        httpSetup.registerPrebootRoutes.mockImplementation((path, callback) =>
-          callback(prebootRouterMock)
-        );
-        await service.setup(setupDeps({ http: httpSetup }));
-
-        expect(prebootRouterMock.get).toHaveBeenCalledTimes(1);
-        expect(prebootRouterMock.get).toHaveBeenCalledWith(
-          {
-            path: '/api/status',
-            options: { authRequired: false, tags: ['api'] },
-            validate: expect.anything(),
-          },
-          expect.any(Function)
-        );
       });
     });
 

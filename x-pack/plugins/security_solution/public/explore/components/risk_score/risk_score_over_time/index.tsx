@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import type { TooltipValue } from '@elastic/charts';
+import type { TooltipHeaderFormatter } from '@elastic/charts';
 import {
   Chart,
   LineSeries,
@@ -16,11 +16,12 @@ import {
   Position,
   AnnotationDomainType,
   LineAnnotation,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { chartDefaultSettings, useTheme } from '../../../../common/components/charts/common';
+import { chartDefaultSettings, useThemes } from '../../../../common/components/charts/common';
 import { useTimeZone } from '../../../../common/lib/kibana';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
 import { HeaderSection } from '../../../../common/components/header_section';
@@ -80,13 +81,12 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
   const timeZone = useTimeZone();
 
   const dataTimeFormatter = useMemo(() => histogramDateTimeFormatter([from, to]), [from, to]);
-  const headerFormatter = useCallback(
-    (tooltip: TooltipValue) => <PreferenceFormattedDate value={tooltip.value} />,
+  const headerFormatter = useCallback<TooltipHeaderFormatter>(
+    ({ value }) => <PreferenceFormattedDate value={value} />,
     []
   );
 
-  const theme = useTheme();
-
+  const { baseTheme, theme } = useThemes();
   const graphData = useMemo(
     () =>
       riskScore
@@ -144,19 +144,14 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
                     <LoadingChart size="l" data-test-subj="RiskScoreOverTime-loading" />
                   ) : (
                     <Chart>
-                      <Settings
-                        {...chartDefaultSettings}
-                        theme={theme}
-                        tooltip={{
-                          headerFormatter,
-                        }}
-                      />
+                      <Tooltip headerFormatter={headerFormatter} />
+                      <Settings {...chartDefaultSettings} baseTheme={baseTheme} theme={theme} />
                       <Axis
                         id="bottom"
                         position={Position.Bottom}
                         tickFormat={dataTimeFormatter}
-                        showGridLines
                         gridLine={{
+                          visible: true,
                           strokeWidth: 1,
                           opacity: 1,
                           dash: [3, 5],

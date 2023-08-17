@@ -8,13 +8,12 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { EcsError } from '@kbn/ecs';
 import type { FileJSON, BaseFileMetadata, FileCompression } from '@kbn/files-plugin/common';
+import type { ResponseActionBodySchema, UploadActionApiRequestBody } from '../../api/endpoint';
+import type { ActionStatusRequestSchema } from '../../api/endpoint/actions/action_status_route';
 import type {
-  ActionStatusRequestSchema,
-  NoParametersRequestSchema,
-  ResponseActionBodySchema,
   KillOrSuspendProcessRequestSchema,
-  UploadActionApiRequestBody,
-} from '../schema/actions';
+  NoParametersRequestSchema,
+} from '../../api/endpoint/actions/common/base';
 import type {
   ResponseActionStatus,
   ResponseActionsApiCommandNames,
@@ -133,6 +132,15 @@ export interface LogsEndpointAction {
   };
 }
 
+export interface LogsEndpointActionWithHosts extends LogsEndpointAction {
+  EndpointActions: EndpointActionFields &
+    ActionRequestFields & {
+      data: EndpointActionData & {
+        hosts: Record<string, { name: string }>;
+      };
+    };
+}
+
 /**
  * An Action response written by the endpoint to the Endpoint `.logs-endpoint.action.responses` datastream
  * @since v7.16
@@ -189,6 +197,7 @@ export interface EndpointActionData<
   parameters?: TParameters;
   output?: ActionResponseOutput<TOutputContent>;
   alert_id?: string[];
+  hosts?: Record<string, { name: string }>;
 }
 
 export interface FleetActionResponseData {
@@ -456,6 +465,7 @@ export interface FileUploadMetadata {
   transithash: {
     sha256: string;
   };
+  '@timestamp': string;
 }
 
 export type UploadedFileInfo = Pick<

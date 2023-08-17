@@ -12,10 +12,12 @@ import { Subject } from 'rxjs';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { DocProps } from '../application/doc/components/doc';
 import { ElasticRequestState } from '../application/doc/types';
-import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../common';
+import {
+  SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource,
+  buildDataTableRecord,
+} from '@kbn/discover-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { buildDataTableRecord } from '../utils/build_data_record';
 
 const index = 'test-index';
 const mockSearchResult = new Subject();
@@ -284,6 +286,41 @@ describe('Test of <Doc /> helper / hook', () => {
     expect(hook.result.current.slice(0, 2)).toEqual([
       ElasticRequestState.Found,
       buildDataTableRecord(record),
+    ]);
+  });
+
+  test('useEsDocSearch for text based languages', async () => {
+    const dataView = {
+      getComputedFields: () => [],
+      getIndexPattern: () => index,
+    };
+    const props = {
+      id: '1',
+      index: 'index1',
+      dataView,
+      textBasedHits: [
+        {
+          id: '1',
+          raw: { field1: 1, field2: 2 },
+          flattened: { field1: 1, field2: 2 },
+        },
+      ],
+    } as unknown as DocProps;
+
+    const hook = renderHook((p: DocProps) => useEsDocSearch(p), {
+      initialProps: props,
+      wrapper: ({ children }) => (
+        <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+      ),
+    });
+
+    expect(hook.result.current.slice(0, 2)).toEqual([
+      ElasticRequestState.Found,
+      {
+        id: '1',
+        raw: { field1: 1, field2: 2 },
+        flattened: { field1: 1, field2: 2 },
+      },
     ]);
   });
 });

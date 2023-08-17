@@ -29,12 +29,12 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
 
   before(() => {
     loadPack().then((data) => {
-      packId = data.id;
-      packName = data.attributes.name;
+      packId = data.saved_object_id;
+      packName = data.name;
     });
     loadSavedQuery().then((data) => {
-      savedQueryId = data.id;
-      savedQueryName = data.attributes.id;
+      savedQueryId = data.saved_object_id;
+      savedQueryName = data.id;
     });
   });
 
@@ -57,7 +57,7 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     cy.getBySel('tablePagination-50-rows').click();
     cy.contains('Add pack').should('be.disabled');
     cy.react('ActiveStateSwitchComponent', {
-      props: { item: { attributes: { name: packName } } },
+      props: { item: { name: packName } },
     })
       .find('button')
       .should('be.disabled');
@@ -121,7 +121,7 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   it('to click the edit button and edit pack', () => {
     navigateTo('/app/osquery/saved_queries');
     cy.react('CustomItemAction', {
-      props: { index: 1, item: { attributes: { id: savedQueryName } } },
+      props: { index: 1, item: { id: savedQueryName } },
     }).click();
     cy.contains('Custom key/value pairs.').should('exist');
     cy.contains('Hours of uptime').should('exist');
@@ -134,7 +134,7 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     cy.wait(5000);
 
     cy.react('CustomItemAction', {
-      props: { index: 1, item: { attributes: { id: savedQueryName } } },
+      props: { index: 1, item: { id: savedQueryName } },
     }).click();
     cy.contains('Custom key/value pairs').should('not.exist');
     cy.contains('Hours of uptime').should('not.exist');

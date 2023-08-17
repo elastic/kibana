@@ -29,11 +29,11 @@ export const useDataView = ({ metricAlias }: { metricAlias: string }) => {
     });
   }, [metricAlias]);
 
-  const { value, loading, error, retry } = state;
+  const { value: dataView, loading, error, retry } = state;
 
   return {
     metricAlias,
-    dataView: value,
+    dataView,
     loading,
     loadDataView: retry,
     error,

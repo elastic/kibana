@@ -65,3 +65,41 @@ export interface Crawler {
   index_name: string;
   most_recent_crawl_request_status?: CrawlerStatus;
 }
+
+export interface CrawlerCustomScheduleConfigOverridesServer {
+  max_crawl_depth?: number;
+  sitemap_discovery_disabled?: boolean;
+  domain_allowlist?: string[];
+  sitemap_urls?: string[];
+  seed_urls?: string[];
+}
+
+export interface CrawlerCustomScheduleServer {
+  name: string;
+  interval: string;
+  configuration_overrides: CrawlerCustomScheduleConfigOverridesServer;
+  enabled: boolean;
+}
+
+export type CrawlerCustomScheduleMappingServer = Map<string, CrawlerCustomScheduleServer>;
+
+export interface CrawlerCustomSchedulesServer {
+  custom_scheduling: CrawlerCustomScheduleMappingServer;
+}
+
+export interface CrawlerCustomScheduleConfigOverridesClient {
+  maxCrawlDepth?: number;
+  sitemapDiscoveryDisabled?: boolean;
+  domainAllowlist?: string[];
+  sitemapUrls?: string[];
+  seedUrls?: string[];
+}
+
+export interface CrawlerCustomScheduleClient {
+  name: string;
+  interval: string;
+  configurationOverrides: CrawlerCustomScheduleConfigOverridesClient;
+  enabled: boolean;
+}
+
+export type CrawlerCustomScheduleMappingClient = Map<string, CrawlerCustomScheduleClient>;

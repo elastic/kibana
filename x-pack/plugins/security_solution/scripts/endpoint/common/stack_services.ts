@@ -9,7 +9,11 @@ import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
 import type { StatusResponse } from '@kbn/core-status-common-internal';
-import { getLocalhostRealIp, isLocalhost } from './localhost_services';
+import pRetry from 'p-retry';
+import nodeFetch from 'node-fetch';
+import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
+import { isLocalhost } from './is_localhost';
+import { getLocalhostRealIp } from './localhost_services';
 import { createSecuritySuperuser } from './security_user_services';
 
 export interface RuntimeServices {
@@ -33,13 +37,24 @@ export interface RuntimeServices {
     port: string;
     isLocalhost: boolean;
   };
+  fleetServer: {
+    url: string;
+    hostname: string;
+    port: string;
+    isLocalhost: boolean;
+  };
 }
 
 interface CreateRuntimeServicesOptions {
   kibanaUrl: string;
   elasticsearchUrl: string;
+  fleetServerUrl?: string;
   username: string;
   password: string;
+  /** If undefined, ES username defaults to `username` */
+  esUsername?: string;
+  /** If undefined, ES password defaults to `password` */
+  esPassword?: string;
   log?: ToolingLog;
   asSuperuser?: boolean;
 }
@@ -47,15 +62,20 @@ interface CreateRuntimeServicesOptions {
 export const createRuntimeServices = async ({
   kibanaUrl,
   elasticsearchUrl,
+  fleetServerUrl = 'https://localhost:8220',
   username: _username,
   password: _password,
-  log = new ToolingLog(),
+  esUsername,
+  esPassword,
+  log = new ToolingLog({ level: 'info', writeTo: process.stdout }),
   asSuperuser = false,
 }: CreateRuntimeServicesOptions): Promise<RuntimeServices> => {
   let username = _username;
   let password = _password;
 
   if (asSuperuser) {
+    await waitForKibana(kibanaUrl);
+
     const superuserResponse = await createSecuritySuperuser(
       createEsClient({
         url: elasticsearchUrl,
@@ -74,10 +94,16 @@ export const createRuntimeServices = async ({
 
   const kbnURL = new URL(kibanaUrl);
   const esURL = new URL(elasticsearchUrl);
+  const fleetURL = new URL(fleetServerUrl);
 
   return {
     kbnClient: createKbnClient({ log, url: kibanaUrl, username, password }),
-    esClient: createEsClient({ log, url: elasticsearchUrl, username, password }),
+    esClient: createEsClient({
+      log,
+      url: elasticsearchUrl,
+      username: esUsername ?? username,
+      password: esPassword ?? password,
+    }),
     log,
     localhostRealIp: await getLocalhostRealIp(),
     user: {
@@ -89,6 +115,12 @@ export const createRuntimeServices = async ({
       hostname: kbnURL.hostname,
       port: kbnURL.port,
       isLocalhost: isLocalhost(kbnURL.hostname),
+    },
+    fleetServer: {
+      url: fleetServerUrl,
+      hostname: fleetURL.hostname,
+      port: fleetURL.port,
+      isLocalhost: isLocalhost(fleetURL.hostname),
     },
     elastic: {
       url: elasticsearchUrl,
@@ -158,10 +190,12 @@ export const createKbnClient = ({
  */
 export const fetchStackVersion = async (kbnClient: KbnClient): Promise<string> => {
   const status = (
-    await kbnClient.request<StatusResponse>({
-      method: 'GET',
-      path: '/api/status',
-    })
+    await kbnClient
+      .request<StatusResponse>({
+        method: 'GET',
+        path: '/api/status',
+      })
+      .catch(catchAxiosErrorFormatAndThrow)
   ).data;
 
   if (!status?.version?.number) {
@@ -171,4 +205,30 @@ export const fetchStackVersion = async (kbnClient: KbnClient): Promise<string> =
   }
 
   return status.version.number;
+};
+
+/**
+ * Checks to ensure Kibana is up and running
+ * @param kbnUrl
+ */
+export const waitForKibana = async (kbnUrl: string): Promise<void> => {
+  const url = (() => {
+    const u = new URL(kbnUrl);
+    // This API seems to be available even if user is not authenticated
+    u.pathname = '/api/status';
+    return u.toString();
+  })();
+
+  await pRetry(
+    async () => {
+      const response = await nodeFetch(url);
+
+      if (response.status !== 200) {
+        throw new Error(
+          `Kibana not available. Returned: [${response.status}]: ${response.statusText}`
+        );
+      }
+    },
+    { maxTimeout: 10000 }
+  );
 };

@@ -6,26 +6,19 @@
  */
 
 import React, { FC } from 'react';
-import { Router, type RouteProps } from 'react-router-dom';
+import type { RouteProps } from 'react-router-dom';
 import { type Location } from 'history';
+import { Router } from '@kbn/shared-ux-router';
 
-import type {
-  AppMountParameters,
-  IUiSettingsClient,
-  ChromeStart,
-  ChromeBreadcrumb,
-} from '@kbn/core/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { AppMountParameters, ChromeStart, ChromeBreadcrumb } from '@kbn/core/public';
 
 import { EuiSkeletonText } from '@elastic/eui';
 import { UrlStateProvider } from '@kbn/ml-url-state';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { SavedObjectsClientContract } from '@kbn/core/public';
 import { MlNotificationsContextProvider } from '../contexts/ml/ml_notifications_context';
-import { MlContext, MlContextValue } from '../contexts/ml';
 
 import { MlPage } from '../components/ml_page';
 import { MlPages } from '../../locator';
+import { type RouteResolverContext } from './use_resolver';
 
 // custom RouteProps making location non-optional
 interface MlRouteProps extends RouteProps {
@@ -61,22 +54,21 @@ export interface PageProps {
 }
 
 export interface PageDependencies {
-  config: IUiSettingsClient;
   history: AppMountParameters['history'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  dataViewsContract: DataViewsContract;
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
-  redirectToMlAccessDeniedPage: () => Promise<void>;
-  getSavedSearchDeps: {
-    search: DataPublicPluginStart['search'];
-    savedObjectsClient: SavedObjectsClientContract;
-  };
 }
 
-export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {
+export const PageLoader: FC<{ context: RouteResolverContext }> = ({ context, children }) => {
+  const isLoading = !context.initialized;
+
+  if (context?.resolvedComponent) {
+    return context.resolvedComponent;
+  }
+
   return (
-    <EuiSkeletonText lines={10} isLoading={context === null}>
-      <MlContext.Provider value={context}>{children}</MlContext.Provider>
+    <EuiSkeletonText lines={10} isLoading={isLoading}>
+      {!isLoading ? children : null}
     </EuiSkeletonText>
   );
 };

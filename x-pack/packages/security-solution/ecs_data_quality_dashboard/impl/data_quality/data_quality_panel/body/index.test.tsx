@@ -35,11 +35,12 @@ describe('IndexInvalidValues', () => {
           formatNumber={formatNumber}
           getGroupByFieldsOnClick={jest.fn()}
           ilmPhases={[]}
+          isAssistantEnabled={true}
           lastChecked={''}
           openCreateCaseFlyout={jest.fn()}
           patterns={[]}
           setLastChecked={jest.fn()}
-          theme={DARK_THEME}
+          baseTheme={DARK_THEME}
         />
       </TestProviders>
     );
@@ -63,11 +64,12 @@ describe('IndexInvalidValues', () => {
               formatNumber={formatNumber}
               getGroupByFieldsOnClick={jest.fn()}
               ilmPhases={ilmPhases}
+              isAssistantEnabled={true}
               lastChecked={''}
               openCreateCaseFlyout={jest.fn()}
               patterns={patterns}
               setLastChecked={jest.fn()}
-              theme={DARK_THEME}
+              baseTheme={DARK_THEME}
             />
           </TestProviders>
         );
@@ -88,11 +90,12 @@ describe('IndexInvalidValues', () => {
             formatNumber={formatNumber}
             getGroupByFieldsOnClick={jest.fn()}
             ilmPhases={ilmPhases}
+            isAssistantEnabled={true}
             lastChecked={''}
             openCreateCaseFlyout={jest.fn()}
             patterns={patterns}
             setLastChecked={jest.fn()}
-            theme={DARK_THEME}
+            baseTheme={DARK_THEME}
           />
         </TestProviders>
       );

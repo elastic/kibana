@@ -5,29 +5,27 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { encode } from '@kbn/rison';
-import moment from 'moment';
-
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import { useLinkProps } from '@kbn/observability-plugin/public';
-import { LogEntry, LogEntryContext } from '../../../../../../common/log_entry';
-import { TimeRange } from '../../../../../../common/time';
-import {
-  getFriendlyNameForPartitionId,
-  partitionField,
-} from '../../../../../../common/log_analysis';
-import { useViewLogInProviderContext } from '../../../../../containers/logs/view_log_in_context';
+import { LogEntry, LogEntryContext } from '@kbn/logs-shared-plugin/common';
 import {
   LogEntryColumn,
+  LogEntryContextMenu,
   LogEntryFieldColumn,
   LogEntryMessageColumn,
   LogEntryRowWrapper,
   LogEntryTimestampColumn,
-} from '../../../../../components/logging/log_text_stream';
+} from '@kbn/logs-shared-plugin/public';
+import { useLinkProps, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { encode } from '@kbn/rison';
+import moment from 'moment';
+import React, { useCallback, useState } from 'react';
+import {
+  getFriendlyNameForPartitionId,
+  partitionField,
+} from '../../../../../../common/log_analysis';
+import { TimeRange } from '../../../../../../common/time';
+import { useViewLogInProviderContext } from '../../../../../containers/logs/view_log_in_context';
 import { LogColumnConfiguration } from '../../../../../utils/source_configuration';
-import { LogEntryContextMenu } from '../../../../../components/logging/log_text_stream/log_entry_context_menu';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'dateTime' as const;

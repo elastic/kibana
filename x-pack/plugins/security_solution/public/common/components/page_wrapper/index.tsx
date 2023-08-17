@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { AssistantOverlay } from '@kbn/elastic-assistant';
 import classNames from 'classnames';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import type { CommonProps } from '@elastic/eui';
 
+import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { AppGlobalStyle } from '../page';
 
@@ -32,7 +34,6 @@ Wrapper.displayName = 'Wrapper';
 
 interface SecuritySolutionPageWrapperProps {
   children: React.ReactNode;
-  restrictWidth?: boolean | number | string;
   style?: Record<string, string>;
   noPadding?: boolean;
   noTimeline?: boolean;
@@ -41,6 +42,7 @@ interface SecuritySolutionPageWrapperProps {
 const SecuritySolutionPageWrapperComponent: React.FC<
   SecuritySolutionPageWrapperProps & CommonProps
 > = ({ children, className, style, noPadding, noTimeline, ...otherProps }) => {
+  const { isAssistantEnabled, hasAssistantPrivilege } = useAssistantAvailability();
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   useEffect(() => {
     setGlobalFullScreen(false); // exit full screen mode on page load
@@ -57,6 +59,7 @@ const SecuritySolutionPageWrapperComponent: React.FC<
     <Wrapper className={classes} style={style} {...otherProps}>
       {children}
       <AppGlobalStyle />
+      {hasAssistantPrivilege && <AssistantOverlay isAssistantEnabled={isAssistantEnabled} />}
     </Wrapper>
   );
 };

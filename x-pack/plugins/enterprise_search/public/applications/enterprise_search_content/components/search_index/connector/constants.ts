@@ -31,11 +31,35 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.custom,
   },
+  dropbox: {
+    docsUrl: docLinks.connectorsDropbox,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.dropbox,
+  },
+  github: {
+    docsUrl: docLinks.connectorsGithub,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.github,
+  },
+  gmail: {
+    docsUrl: docLinks.connectorsGmail,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.gmail,
+  },
   google_cloud_storage: {
     docsUrl: docLinks.connectorsGoogleCloudStorage,
     externalAuthDocsUrl: 'https://cloud.google.com/storage/docs/authentication',
     externalDocsUrl: 'https://cloud.google.com/storage/docs',
     icon: CONNECTOR_ICONS.google_cloud_storage,
+  },
+  google_drive: {
+    docsUrl: docLinks.connectorsGoogleDrive,
+    externalAuthDocsUrl: 'https://cloud.google.com/iam/docs/service-account-overview',
+    externalDocsUrl: 'https://developers.google.com/drive',
+    icon: CONNECTOR_ICONS.google_drive,
   },
   jira: {
     docsUrl: docLinks.connectorsJira,
@@ -67,6 +91,12 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.network_drive,
   },
+  onedrive: {
+    docsUrl: docLinks.connectorsOneDrive,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.onedrive,
+  },
   oracle: {
     docsUrl: docLinks.connectorsOracle,
     externalAuthDocsUrl:
@@ -86,11 +116,38 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.amazon_s3,
   },
-  sharepoint: {
+  salesforce: {
+    docsUrl: docLinks.connectorsSalesforce,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.salesforce,
+  },
+  servicenow: {
+    docsUrl: docLinks.connectorsServiceNow,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.servicenow,
+  },
+  sharepoint_server: {
     docsUrl: docLinks.connectorsSharepoint,
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.sharepoint,
+    platinumOnly: false,
+  },
+  sharepoint_online: {
+    docsUrl: docLinks.connectorsSharepointOnline,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
     icon: CONNECTOR_ICONS.sharepoint_online,
+    platinumOnly: true,
+  },
+  slack: {
+    docsUrl: docLinks.connectorsSlack,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.slack,
+    platinumOnly: false,
   },
 };
 

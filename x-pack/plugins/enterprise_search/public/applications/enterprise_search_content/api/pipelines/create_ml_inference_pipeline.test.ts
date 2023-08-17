@@ -20,25 +20,31 @@ describe('CreateMlInferencePipelineApiLogic', () => {
   describe('createMlInferencePipeline', () => {
     it('calls the api', async () => {
       const response: Promise<CreateMlInferencePipelineResponse> = Promise.resolve({
-        created: 'ml-inference-unit-test',
+        created: 'ml-inference-my-pipeline',
       });
       http.post.mockReturnValue(response);
 
       const args: CreateMlInferencePipelineApiLogicArgs = {
-        indexName: 'unit-test-index',
-        modelId: 'test-model',
-        pipelineName: 'unit-test',
-        sourceField: 'body',
+        fieldMappings: [
+          {
+            sourceField: 'my_source_field',
+            targetField: 'my_target_field',
+          },
+        ],
+        indexName: 'my-index',
+        modelId: 'my-model-id',
+        pipelineName: 'my-pipeline',
+        pipelineDefinition: { processors: [], version: 1 },
       };
       const result = await createMlInferencePipeline(args);
       expect(http.post).toHaveBeenCalledWith(
-        '/internal/enterprise_search/indices/unit-test-index/ml_inference/pipeline_processors',
+        '/internal/enterprise_search/indices/my-index/ml_inference/pipeline_processors',
         {
-          body: '{"model_id":"test-model","pipeline_name":"unit-test","source_field":"body"}',
+          body: '{"field_mappings":[{"sourceField":"my_source_field","targetField":"my_target_field"}],"model_id":"my-model-id","pipeline_definition":{"processors":[],"version":1},"pipeline_name":"my-pipeline"}',
         }
       );
       expect(result).toEqual({
-        created: 'ml-inference-unit-test',
+        created: 'ml-inference-my-pipeline',
       });
     });
   });

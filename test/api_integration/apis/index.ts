@@ -17,6 +17,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./home'));
     loadTestFile(require.resolve('./data_view_field_editor'));
     loadTestFile(require.resolve('./data_views'));
+    loadTestFile(require.resolve('./event_annotations'));
     loadTestFile(require.resolve('./kql_telemetry'));
     loadTestFile(require.resolve('./saved_objects_management'));
     loadTestFile(require.resolve('./saved_objects'));
@@ -28,7 +29,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./stats'));
     loadTestFile(require.resolve('./ui_metric'));
     loadTestFile(require.resolve('./ui_counters'));
-    loadTestFile(require.resolve('./unified_field_list'));
     loadTestFile(require.resolve('./telemetry'));
     loadTestFile(require.resolve('./guided_onboarding'));
   });

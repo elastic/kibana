@@ -12,7 +12,7 @@ import type {
   ResponseErrorBody,
 } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useInspectorContext } from '@kbn/observability-plugin/public';
+import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import {
   AutoAbortedObservabilityClient,
   callObservabilityOnboardingApi,

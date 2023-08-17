@@ -6,20 +6,20 @@
  */
 
 import React, { memo, useEffect, useMemo } from 'react';
-import { Switch, useParams } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { useParams } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { ALERT_RULE_NAME, TIMESTAMP } from '@kbn/rule-data-utils';
 import { EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { timelineActions } from '../../../timelines/store/timeline';
-import { TimelineId } from '../../../../common/types';
+import { TimelineId } from '../../../../common/types/timeline';
 import { useGetFieldsData } from '../../../common/hooks/use_get_fields_data';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { getAlertDetailsTabUrl } from '../../../common/components/link_to';
 import { AlertDetailRouteType } from './types';
-import { TabNavigationWithBreadcrumbs } from '../../../common/components/navigation/tab_navigation_with_breadcrumbs';
+import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { getAlertDetailsNavTabs } from './utils/navigation';
 import { SecurityPageName } from '../../../../common/constants';
 import { eventID } from '../../../../common/endpoint/models/event';
@@ -29,6 +29,7 @@ import { AlertDetailsErrorPage } from './components/error_page';
 import { AlertDetailsHeader } from './components/header';
 import { DetailsSummaryTab } from './tabs/summary';
 
+// eslint-disable-next-line react/display-name
 export const AlertDetailsPage = memo(() => {
   const { detailName: eventId } = useParams<{ detailName: string }>();
   const dispatch = useDispatch();
@@ -73,9 +74,9 @@ export const AlertDetailsPage = memo(() => {
       {hasData && (
         <>
           <AlertDetailsHeader loading={loading} ruleName={ruleName} timestamp={timestamp} />
-          <TabNavigationWithBreadcrumbs navTabs={getAlertDetailsNavTabs(eventId)} />
+          <TabNavigation navTabs={getAlertDetailsNavTabs(eventId)} />
           <EuiSpacer size="l" />
-          <Switch>
+          <Routes>
             <Route exact path={getAlertDetailsTabUrl(eventId, AlertDetailRouteType.summary)}>
               <DetailsSummaryTab
                 eventId={eventId}
@@ -85,7 +86,7 @@ export const AlertDetailsPage = memo(() => {
                 sourcererDataView={sourcererDataView}
               />
             </Route>
-          </Switch>
+          </Routes>
         </>
       )}
       <SpyRoute pageName={SecurityPageName.alerts} state={{ ruleName }} />

@@ -53,6 +53,7 @@ import {
   ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   EVENT_KIND,
   SPACE_IDS,
   TIMESTAMP,
@@ -320,6 +321,7 @@ export const sampleAlertDocAADNoSortId = (
       ],
     },
     [ALERT_URL]: 'http://example.com/docID',
+    [ALERT_WORKFLOW_TAGS]: [],
   },
   fields: {
     someKey: ['someValue'],
@@ -521,6 +523,7 @@ export const sampleSignalHit = (): SignalHit => ({
       filters: undefined,
       saved_id: undefined,
       alert_suppression: undefined,
+      investigation_fields: undefined,
     },
     depth: 1,
   },

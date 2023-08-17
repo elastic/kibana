@@ -40,9 +40,31 @@ const coreMock = {
   application: {
     getUrlForApp: () => {},
   },
+  data: {
+    query: {
+      filterManager: {},
+    },
+  },
   uiSettings,
+  notifications: {
+    toasts: {
+      addError: () => {},
+      addSuccess: () => {},
+      addWarning: () => {},
+      remove: () => {},
+    },
+  },
+  timelines: {
+    getHoverActions: () => ({
+      getAddToTimelineButton: () => {},
+      getColumnToggleButton: () => {},
+      getCopyButton: () => {},
+      getFilterForValueButton: () => {},
+      getFilterOutValueButton: () => {},
+      getOverflowButton: () => {},
+    }),
+  },
 } as unknown as CoreStart;
-
 const KibanaReactContext = createKibanaReactContext(coreMock);
 
 /**
@@ -52,6 +74,7 @@ const KibanaReactContext = createKibanaReactContext(coreMock);
  */
 export const StorybookProviders: React.FC = ({ children }) => {
   const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
   return (
     <I18nProvider>
       <KibanaReactContext.Provider>

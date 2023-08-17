@@ -82,6 +82,7 @@ export const ControlGroup = () => {
         });
       }
     }
+    (document.activeElement as HTMLElement)?.blur();
     setDraggingId(null);
   };
 

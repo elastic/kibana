@@ -14,6 +14,7 @@ import {
   Position,
   RectAnnotation,
   Settings,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,6 +22,7 @@ import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
 import { first, last } from 'lodash';
 
+import { useTimelineChartTheme } from '../../../utils/use_timeline_chart_theme';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
@@ -41,7 +43,6 @@ import {
   NoDataState,
   TIME_LABELS,
   tooltipProps,
-  getChartTheme,
 } from '../../common/criterion_preview_chart/criterion_preview_chart';
 import { ThresholdAnnotations } from '../../common/criterion_preview_chart/threshold_annotations';
 import { CUSTOM_EQUATION } from '../i18n_strings';
@@ -69,7 +70,8 @@ export const ExpressionChart: React.FC<Props> = ({
   source,
   timeRange,
 }) => {
-  const { uiSettings, charts } = useKibanaContextForPlugin().services;
+  const { charts } = useKibanaContextForPlugin().services;
+  const chartTheme = useTimelineChartTheme();
 
   const { isLoading, data } = useMetricsExplorerChartData(
     expression,
@@ -93,7 +95,6 @@ export const ExpressionChart: React.FC<Props> = ({
     return <NoDataState />;
   }
 
-  const isDarkMode = uiSettings?.get('theme:darkMode') || false;
   const firstSeries = first(first(data.pages)!.series);
   // Creating a custom series where the ID is changed to 0
   // so that we can get a proper domain
@@ -192,13 +193,13 @@ export const ExpressionChart: React.FC<Props> = ({
             tickFormat={createFormatterForMetric(metric)}
             domain={domain}
           />
+          <Tooltip {...tooltipProps} />
           <Settings
             onPointerUpdate={handleCursorUpdate}
-            tooltip={tooltipProps}
             externalPointerEvents={{
               tooltip: { visible: true },
             }}
-            theme={getChartTheme(isDarkMode)}
+            baseTheme={chartTheme.baseTheme}
           />
         </Chart>
       </ChartContainer>

@@ -19,10 +19,21 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import {
+  FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
+  FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
+} from '../../common/constants/epm';
 import { type PLATFORM_TYPE } from '../hooks';
-import { REDUCED_PLATFORM_OPTIONS, PLATFORM_OPTIONS, usePlatform } from '../hooks';
+import {
+  REDUCED_PLATFORM_OPTIONS,
+  PLATFORM_OPTIONS,
+  PLATFORM_OPTIONS_CLOUD_SHELL,
+  usePlatform,
+} from '../hooks';
 
 import { KubernetesInstructions } from './agent_enrollment_flyout/kubernetes_instructions';
+import { GoogleCloudShellInstructions } from './agent_enrollment_flyout/google_cloud_shell_instructions';
+import type { CloudSecurityIntegration } from './agent_enrollment_flyout/types';
 
 interface Props {
   linuxCommand: string;
@@ -31,7 +42,9 @@ interface Props {
   linuxDebCommand: string;
   linuxRpmCommand: string;
   k8sCommand: string;
+  googleCloudShellCommand?: string | undefined;
   hasK8sIntegration: boolean;
+  cloudSecurityIntegration?: CloudSecurityIntegration | undefined;
   hasK8sIntegrationMultiPage: boolean;
   isManaged?: boolean;
   hasFleetServer?: boolean;
@@ -52,7 +65,9 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   linuxDebCommand,
   linuxRpmCommand,
   k8sCommand,
+  googleCloudShellCommand,
   hasK8sIntegration,
+  cloudSecurityIntegration,
   hasK8sIntegrationMultiPage,
   isManaged,
   enrollToken,
@@ -61,22 +76,40 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   onCopy,
 }) => {
   const getInitialPlatform = useCallback(() => {
-    if (hasK8sIntegration) return 'kubernetes';
+    if (cloudSecurityIntegration?.cloudShellUrl) {
+      return 'googleCloudShell';
+    }
+    if (
+      hasK8sIntegration ||
+      (cloudSecurityIntegration?.integrationType ===
+        FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE &&
+        isManaged)
+    )
+      return 'kubernetes';
 
     return 'linux';
-  }, [hasK8sIntegration]);
+  }, [
+    hasK8sIntegration,
+    cloudSecurityIntegration?.integrationType,
+    isManaged,
+    cloudSecurityIntegration?.cloudShellUrl,
+  ]);
 
   const { platform, setPlatform } = usePlatform(getInitialPlatform());
 
   // In case of fleet server installation or standalone agent without
   // Kubernetes integration in the policy use reduced platform options
+  // If it has Cloud Shell URL, then it should show platform options with Cloudshell in it
   const isReduced = hasFleetServer || (!isManaged && !hasK8sIntegration);
 
   const getPlatformOptions = useCallback(() => {
     const platformOptions = isReduced ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS;
+    const platformOptionsWithCloudShell = cloudSecurityIntegration?.cloudShellUrl
+      ? PLATFORM_OPTIONS_CLOUD_SHELL
+      : platformOptions;
 
-    return platformOptions;
-  }, [isReduced]);
+    return platformOptionsWithCloudShell;
+  }, [isReduced, cloudSecurityIntegration?.cloudShellUrl]);
 
   const [copyButtonClicked, setCopyButtonClicked] = useState(false);
 
@@ -102,6 +135,28 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     />
   );
 
+  const k8sCSPMCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.placeHolderCallout', {
+        defaultMessage:
+          'We strongly advise against deploying CSPM within a Kubernetes cluster. Doing so may lead to redundant data fetching, which can cause increased consumption costs within your Elastic account and potentially trigger API rate limiting in your cloud account(s).',
+      })}
+      color="warning"
+      iconType="warning"
+    />
+  );
+
+  const macCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.macCallout', {
+        defaultMessage:
+          'We recommend against deploying this integration within Mac as it is currently not being supported.',
+      })}
+      color="warning"
+      iconType="warning"
+    />
+  );
+
   const commandsByPlatform: Record<PLATFORM_TYPE, string> = {
     linux: linuxCommand,
     mac: macCommand,
@@ -109,6 +164,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     deb: linuxDebCommand,
     rpm: linuxRpmCommand,
     kubernetes: k8sCommand,
+    googleCloudShell: k8sCommand,
   };
   const onTextAreaClick = () => {
     if (onCopy) onCopy();
@@ -139,6 +195,24 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiSpacer size="m" />
           </>
         )}
+        {platform === 'mac' &&
+          (cloudSecurityIntegration?.integrationType ===
+            FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
+            cloudSecurityIntegration?.integrationType ===
+              FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE) && (
+            <>
+              {macCallout}
+              <EuiSpacer size="m" />
+            </>
+          )}
+        {platform === 'kubernetes' &&
+          cloudSecurityIntegration?.integrationType ===
+            FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE && (
+            <>
+              {k8sCSPMCallout}
+              <EuiSpacer size="m" />
+            </>
+          )}
         {platform === 'kubernetes' && !hasK8sIntegration && (
           <>
             {k8sCallout}
@@ -155,6 +229,15 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiSpacer size="s" />
           </>
         )}
+        {platform === 'googleCloudShell' && isManaged && (
+          <>
+            <GoogleCloudShellInstructions
+              cloudShellUrl={cloudSecurityIntegration?.cloudShellUrl || ''}
+              cloudShellCommand={googleCloudShellCommand || ''}
+            />
+            <EuiSpacer size="s" />
+          </>
+        )}
         {!hasK8sIntegrationMultiPage && (
           <>
             {platform === 'kubernetes' && (
@@ -167,17 +250,20 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                 <EuiSpacer size="m" />
               </EuiText>
             )}
-            <EuiCodeBlock
-              onClick={onTextAreaClick}
-              fontSize="m"
-              isCopyable={!fullCopyButton}
-              paddingSize="m"
-              css={`
-                max-width: 1100px;
-              `}
-            >
-              <CommandCode>{commandsByPlatform[platform]}</CommandCode>
-            </EuiCodeBlock>
+            {platform !== 'googleCloudShell' && (
+              <EuiCodeBlock
+                onClick={onTextAreaClick}
+                fontSize="m"
+                isCopyable={!fullCopyButton}
+                paddingSize="m"
+                css={`
+                  max-width: 1100px;
+                `}
+              >
+                <CommandCode>{commandsByPlatform[platform]}</CommandCode>
+              </EuiCodeBlock>
+            )}
+
             <EuiSpacer size="s" />
             {fullCopyButton && (
               <EuiCopy textToCopy={commandsByPlatform[platform]}>

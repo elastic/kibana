@@ -6,67 +6,55 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
+import React from 'react';
 import { css } from '@emotion/react';
+import { EuiCollapsibleNav, EuiCollapsibleNavProps } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiCollapsibleNav } from '@elastic/eui';
+const SIZE_EXPANDED = 248;
+const SIZE_COLLAPSED = 0;
 
-const LOCAL_STORAGE_IS_OPEN_KEY = 'PROJECT_NAVIGATION_OPEN' as const;
-const SIZE_OPEN = 248;
-const SIZE_CLOSED = 40;
+export interface ProjectNavigationProps {
+  isOpen: boolean;
+  closeNav: () => void;
+  button: EuiCollapsibleNavProps['button'];
+}
 
-const buttonCSS = css`
-  margin-left: -32px;
-  margin-top: 12px;
-  position: fixed;
-  z-index: 1000;
-`;
-
-const openAriaLabel = i18n.translate('core.ui.chrome.projectNav.collapsibleNavOpenAriaLabel', {
-  defaultMessage: 'Close navigation',
-});
-
-const closedAriaLabel = i18n.translate('core.ui.chrome.projectNav.collapsibleNavClosedAriaLabel', {
-  defaultMessage: 'Open navigation',
-});
-
-export const ProjectNavigation: React.FC = ({ children }) => {
-  const [isOpen, setIsOpen] = useLocalStorage(LOCAL_STORAGE_IS_OPEN_KEY, true);
-
-  const toggleOpen = useCallback(() => {
-    setIsOpen(!isOpen);
-  }, [isOpen, setIsOpen]);
-
+export const ProjectNavigation: React.FC<ProjectNavigationProps> = ({
+  children,
+  isOpen,
+  closeNav,
+  button,
+}) => {
   const collabsibleNavCSS = css`
     border-inline-end-width: 1,
     display: flex,
     flex-direction: row,
   `;
 
+  const DOCKED_BREAKPOINT = 's' as const;
+  const isVisible = isOpen;
+
   return (
-    <EuiCollapsibleNav
-      css={collabsibleNavCSS}
-      isOpen={true}
-      showButtonIfDocked={true}
-      onClose={toggleOpen}
-      isDocked={true}
-      size={isOpen ? SIZE_OPEN : SIZE_CLOSED}
-      hideCloseButton={false}
-      ownFocus={false}
-      button={
-        <span css={buttonCSS}>
-          <EuiButtonIcon
-            iconType={isOpen ? 'menuLeft' : 'menuRight'}
-            aria-label={isOpen ? openAriaLabel : closedAriaLabel}
-            color={isOpen ? 'ghost' : 'text'}
-            onClick={toggleOpen}
-          />
-        </span>
+    <>
+      {
+        /* must render the tree to initialize the navigation, even if it shouldn't be visible */
+        !isOpen && <div hidden>{children}</div>
       }
-    >
-      {isOpen && children}
-    </EuiCollapsibleNav>
+      <EuiCollapsibleNav
+        className="projectLayoutSideNav"
+        css={collabsibleNavCSS}
+        isOpen={isVisible /* only affects docked state */}
+        showButtonIfDocked={true}
+        onClose={closeNav}
+        isDocked={true}
+        size={isVisible ? SIZE_EXPANDED : SIZE_COLLAPSED}
+        hideCloseButton={false}
+        dockedBreakpoint={DOCKED_BREAKPOINT}
+        ownFocus={false}
+        button={button}
+      >
+        {isOpen && children}
+      </EuiCollapsibleNav>
+    </>
   );
 };

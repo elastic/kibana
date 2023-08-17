@@ -480,9 +480,7 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.isMlKibanaUrlConfigWithTimeRange",
         "type": "Function",
-        "tags": [
-          "export"
-        ],
+        "tags": [],
         "label": "isMlKibanaUrlConfigWithTimeRange",
         "description": [
           "\nType guard to idenfity MlKibanaUrlConfigWithTimeRange.\n"
@@ -695,6 +693,581 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.AggFieldNamePair",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggFieldNamePair",
+        "description": [
+          "\nDefinition for a pair of aggregation and field name."
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.AggFieldNamePair.agg",
+            "type": "string",
+            "tags": [],
+            "label": "agg",
+            "description": [
+              "\nThe aggregation definition."
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.AggFieldNamePair.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "\nThe field name"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.AggFieldNamePair.by",
+            "type": "Object",
+            "tags": [],
+            "label": "by",
+            "description": [
+              "\nOptional by-field configuration"
+            ],
+            "signature": [
+              "{ field: string | null; value: string | null; } | undefined"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.AggFieldNamePair.over",
+            "type": "Object",
+            "tags": [],
+            "label": "over",
+            "description": [
+              "\nOptional over-field configuration"
+            ],
+            "signature": [
+              "{ field: string | null; value: string | null; } | undefined"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.AggFieldNamePair.partition",
+            "type": "Object",
+            "tags": [],
+            "label": "partition",
+            "description": [
+              "\nOptional partition-field configuration"
+            ],
+            "signature": [
+              "{ field: string | null; value: string | null; } | undefined"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.AggFieldNamePair.excludeFrequent",
+            "type": "string",
+            "tags": [],
+            "label": "excludeFrequent",
+            "description": [
+              "\nOptional exclude frequent."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.AggFieldPair",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggFieldPair",
+        "description": [
+          "\nDefinition for a pair of aggregation and field."
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.AggFieldPair.agg",
+            "type": "Object",
+            "tags": [],
+            "label": "agg",
+            "description": [
+              "\nThe aggregation."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-anomaly-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAnomalyUtilsPluginApi",
+                "section": "def-common.Aggregation",
+                "text": "Aggregation"
+              }
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.AggFieldPair.field",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "\nThe field."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-anomaly-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAnomalyUtilsPluginApi",
+                "section": "def-common.Field",
+                "text": "Field"
+              }
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.AggFieldPair.by",
+            "type": "Object",
+            "tags": [],
+            "label": "by",
+            "description": [
+              "\nOptional by-field configuration."
+            ],
+            "signature": [
+              "{ field: ",
+              {
+                "pluginId": "@kbn/ml-anomaly-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAnomalyUtilsPluginApi",
+                "section": "def-common.SplitField",
+                "text": "SplitField"
+              },
+              "; value: string | null; } | undefined"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.AggFieldPair.over",
+            "type": "Object",
+            "tags": [],
+            "label": "over",
+            "description": [
+              "\nOptional over-field configuration"
+            ],
+            "signature": [
+              "{ field: ",
+              {
+                "pluginId": "@kbn/ml-anomaly-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAnomalyUtilsPluginApi",
+                "section": "def-common.SplitField",
+                "text": "SplitField"
+              },
+              "; value: string | null; } | undefined"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.AggFieldPair.partition",
+            "type": "Object",
+            "tags": [],
+            "label": "partition",
+            "description": [
+              "\nOptional partition field configuration"
+            ],
+            "signature": [
+              "{ field: ",
+              {
+                "pluginId": "@kbn/ml-anomaly-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAnomalyUtilsPluginApi",
+                "section": "def-common.SplitField",
+                "text": "SplitField"
+              },
+              "; value: string | null; } | undefined"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.AggFieldPair.excludeFrequent",
+            "type": "string",
+            "tags": [],
+            "label": "excludeFrequent",
+            "description": [
+              "\nOptional exclude frequent."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.Aggregation",
+        "type": "Interface",
+        "tags": [],
+        "label": "Aggregation",
+        "description": [
+          "\nAggregation definition."
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.Aggregation.id",
+            "type": "Enum",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nThe aggregation id."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-anomaly-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAnomalyUtilsPluginApi",
+                "section": "def-common.ML_JOB_AGGREGATION",
+                "text": "ML_JOB_AGGREGATION"
+              }
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.Aggregation.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [
+              "\nThe aggregation title."
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.Aggregation.kibanaName",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "kibanaName",
+            "description": [
+              "\nThe Kibana name for the aggregation."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-anomaly-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAnomalyUtilsPluginApi",
+                "section": "def-common.KIBANA_AGGREGATION",
+                "text": "KIBANA_AGGREGATION"
+              },
+              " | null"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.Aggregation.dslName",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dslName",
+            "description": [
+              "\nThe ES DSL name for the aggregation."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-anomaly-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAnomalyUtilsPluginApi",
+                "section": "def-common.ES_AGGREGATION",
+                "text": "ES_AGGREGATION"
+              },
+              " | null"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.Aggregation.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nThe metric agg type."
+            ],
+            "signature": [
+              "\"metrics\""
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.Aggregation.mlModelPlotAgg",
+            "type": "Object",
+            "tags": [],
+            "label": "mlModelPlotAgg",
+            "description": [
+              "\nThe model plot agg definition."
+            ],
+            "signature": [
+              "{ min: string; max: string; }"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.Aggregation.fieldIds",
+            "type": "Array",
+            "tags": [],
+            "label": "fieldIds",
+            "description": [
+              "\nOptional array of field ids."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.Aggregation.fields",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [
+              "\nOptional array or fields."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-anomaly-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAnomalyUtilsPluginApi",
+                "section": "def-common.Field",
+                "text": "Field"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.Field",
+        "type": "Interface",
+        "tags": [],
+        "label": "Field",
+        "description": [
+          "\nField definition"
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.Field.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nThe field id"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.Field.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nThe field name"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.Field.type",
+            "type": "Enum",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nThe field type is based on ES field types."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              }
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.Field.aggregatable",
+            "type": "boolean",
+            "tags": [],
+            "label": "aggregatable",
+            "description": [
+              "\nFlag whether the field is aggregatable."
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.Field.counter",
+            "type": "boolean",
+            "tags": [],
+            "label": "counter",
+            "description": [
+              "\nFlag for counter."
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.Field.aggIds",
+            "type": "Array",
+            "tags": [],
+            "label": "aggIds",
+            "description": [
+              "\nOptional array of AggId."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-anomaly-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAnomalyUtilsPluginApi",
+                "section": "def-common.ML_JOB_AGGREGATION",
+                "text": "ML_JOB_AGGREGATION"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.Field.aggs",
+            "type": "Array",
+            "tags": [],
+            "label": "aggs",
+            "description": [
+              "\nOptional array fo aggregations."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-anomaly-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAnomalyUtilsPluginApi",
+                "section": "def-common.Aggregation",
+                "text": "Aggregation"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.Field.runtimeField",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimeField",
+            "description": [
+              "\nOptional runtime field."
+            ],
+            "signature": [
+              "MappingRuntimeField",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.MlAnomaliesTableRecord",
@@ -1028,9 +1601,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlAnomaliesTableRecordExtended.detector",
             "type": "string",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "detector",
             "description": [
               "\nThe detector name."
@@ -1043,9 +1614,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlAnomaliesTableRecordExtended.rulesLength",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "rulesLength",
             "description": [
               "\nThe length of the rule."
@@ -1064,14 +1633,10 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.MlAnomalyCategorizerStatsDoc",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "MlAnomalyCategorizerStatsDoc",
         "description": [
-          "\nAnomaly record document for categorizer stats.\n"
+          "\nAnomaly record document for categorizer stats."
         ],
         "path": "x-pack/packages/ml/anomaly_utils/types.ts",
         "deprecated": false,
@@ -1097,9 +1662,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlAnomalyCategorizerStatsDoc.job_id",
             "type": "string",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "job_id",
             "description": [
               "\nThe identifier for the anomaly detection job."
@@ -1112,9 +1675,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlAnomalyCategorizerStatsDoc.result_type",
             "type": "string",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "result_type",
             "description": [
               "\nThe type of the result document."
@@ -1130,9 +1691,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlAnomalyCategorizerStatsDoc.partition_field_name",
             "type": "string",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "partition_field_name",
             "description": [
               "\nThe field used to segment the analysis.\nWhen you use this property, you have completely independent baselines for each value of this field."
@@ -1148,9 +1707,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlAnomalyCategorizerStatsDoc.partition_field_value",
             "type": "string",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "partition_field_value",
             "description": [
               "\nThe value of the partition field."
@@ -1166,9 +1723,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlAnomalyCategorizerStatsDoc.categorized_doc_count",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "categorized_doc_count",
             "description": [
               "\nThe number of documents."
@@ -1181,9 +1736,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlAnomalyCategorizerStatsDoc.total_category_count",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "total_category_count",
             "description": [
               "\nThe total number of categories."
@@ -1196,9 +1749,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlAnomalyCategorizerStatsDoc.frequent_category_count",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "frequent_category_count",
             "description": [
               "\nThe number of frequent categories."
@@ -1211,9 +1762,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlAnomalyCategorizerStatsDoc.rare_category_count",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "rare_category_count",
             "description": [
               "\nThe number of rare categories."
@@ -1226,9 +1775,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlAnomalyCategorizerStatsDoc.dead_category_count",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "dead_category_count",
             "description": [
               "\nThe number of dead categories."
@@ -1241,9 +1788,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlAnomalyCategorizerStatsDoc.failed_category_count",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "failed_category_count",
             "description": [
               "\nThe number of failed categories."
@@ -1256,9 +1801,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlAnomalyCategorizerStatsDoc.categorization_status",
             "type": "CompoundType",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "categorization_status",
             "description": [
               "\nThe categorization status."
@@ -1274,9 +1817,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlAnomalyCategorizerStatsDoc.log_time",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "log_time",
             "description": [
               "\nThe log time."
@@ -1289,9 +1830,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlAnomalyCategorizerStatsDoc.timestamp",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "timestamp",
             "description": [
               "\nThe start time of the bucket for which these results were calculated."
@@ -1684,7 +2223,7 @@
               "\nAn explanation for the anomaly score"
             ],
             "signature": [
-              "{ anomaly_type?: \"dip\" | \"spike\" | undefined; anomaly_length?: number | undefined; single_bucket_impact?: number | undefined; multi_bucket_impact?: number | undefined; anomaly_characteristics_impact?: number | undefined; lower_confidence_bound?: number | undefined; typical_value?: number | undefined; upper_confidence_bound?: number | undefined; high_variance_penalty?: boolean | undefined; incomplete_bucket_penalty?: boolean | undefined; multimodal_distribution?: boolean | undefined; } | undefined"
+              "{ anomaly_type?: \"spike\" | \"dip\" | undefined; anomaly_length?: number | undefined; single_bucket_impact?: number | undefined; multi_bucket_impact?: number | undefined; anomaly_characteristics_impact?: number | undefined; lower_confidence_bound?: number | undefined; typical_value?: number | undefined; upper_confidence_bound?: number | undefined; high_variance_penalty?: boolean | undefined; incomplete_bucket_penalty?: boolean | undefined; multimodal_distribution?: boolean | undefined; } | undefined"
             ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
@@ -1697,15 +2236,10 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.MlCustomUrlAnomalyRecordDoc",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef",
-          "extends"
-        ],
+        "tags": [],
         "label": "MlCustomUrlAnomalyRecordDoc",
         "description": [
-          "\nExtended interface of MlAnomalyRecordDoc to include time range information.\n"
+          "\nExtended interface of MlAnomalyRecordDoc to include time range information."
         ],
         "signature": [
           {
@@ -1732,9 +2266,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlCustomUrlAnomalyRecordDoc.earliest",
             "type": "string",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "earliest",
             "description": [
               "\nThe `earliest` timestamp."
@@ -1747,9 +2279,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlCustomUrlAnomalyRecordDoc.latest",
             "type": "string",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "latest",
             "description": [
               "\nThe `latest` timestamp."
@@ -1765,11 +2295,7 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.MlEntityField",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "MlEntityField",
         "description": [
           "\nInterface of an entity field"
@@ -1782,9 +2308,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlEntityField.fieldName",
             "type": "string",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "fieldName",
             "description": [
               "\nThe field name"
@@ -1797,9 +2321,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlEntityField.fieldValue",
             "type": "CompoundType",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "fieldValue",
             "description": [
               "\nThe field value"
@@ -1815,9 +2337,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlEntityField.fieldType",
             "type": "CompoundType",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "fieldType",
             "description": [
               "\nOptional field type"
@@ -1840,9 +2360,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlEntityField.operation",
             "type": "CompoundType",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "operation",
             "description": [
               "\nOptional entity field operation"
@@ -1913,15 +2431,10 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.MlKibanaUrlConfig",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef",
-          "extends"
-        ],
+        "tags": [],
         "label": "MlKibanaUrlConfig",
         "description": [
-          "\nExtended interface for custom URLs including an optional time range.\n"
+          "\nExtended interface for custom URLs including an optional time range."
         ],
         "signature": [
           {
@@ -1941,15 +2454,27 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlKibanaUrlConfig.time_range",
             "type": "string",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "time_range",
             "description": [
               "\nThe optional time range for the custom URL configuration"
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/custom_urls.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.MlKibanaUrlConfig.is_custom_time_range",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "is_custom_time_range",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/packages/ml/anomaly_utils/custom_urls.ts",
             "deprecated": false,
@@ -1962,14 +2487,10 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.MlSeverityType",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "MlSeverityType",
         "description": [
-          "\nInterface for severity types to be used in ML_ANOMALY_SEVERITY_TYPES.\n"
+          "\nInterface for severity types to be used in ML_ANOMALY_SEVERITY_TYPES."
         ],
         "path": "x-pack/packages/ml/anomaly_utils/anomaly_severity.ts",
         "deprecated": false,
@@ -1979,9 +2500,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlSeverityType.id",
             "type": "Enum",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "id",
             "description": [
               "\nOne of ML_ANOMALY_SEVERITY"
@@ -2003,9 +2522,7 @@
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlSeverityType.label",
             "type": "string",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "label",
             "description": [
               "\nTranslated ML_ANOMALY_SEVERITY"
@@ -2016,9 +2533,138 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.NewJobCaps",
+        "type": "Interface",
+        "tags": [],
+        "label": "NewJobCaps",
+        "description": [
+          "\nJob caps for a new job."
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.NewJobCaps.fields",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [
+              "\nArray of fields."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-anomaly-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAnomalyUtilsPluginApi",
+                "section": "def-common.Field",
+                "text": "Field"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.NewJobCaps.aggs",
+            "type": "Array",
+            "tags": [],
+            "label": "aggs",
+            "description": [
+              "\nArray of aggregations."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-anomaly-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAnomalyUtilsPluginApi",
+                "section": "def-common.Aggregation",
+                "text": "Aggregation"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.NewJobCapsResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "NewJobCapsResponse",
+        "description": [
+          "\nJob caps response for a new job."
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.NewJobCapsResponse.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[indexPattern: string]: NewJobCaps",
+            "description": [
+              "\nIndex pattern"
+            ],
+            "signature": [
+              "[indexPattern: string]:  ",
+              {
+                "pluginId": "@kbn/ml-anomaly-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAnomalyUtilsPluginApi",
+                "section": "def-common.NewJobCaps",
+                "text": "NewJobCaps"
+              }
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.ES_AGGREGATION",
+        "type": "Enum",
+        "tags": [],
+        "label": "ES_AGGREGATION",
+        "description": [
+          "\nEnum for ES aggregatins."
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/aggregation_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.KIBANA_AGGREGATION",
+        "type": "Enum",
+        "tags": [],
+        "label": "KIBANA_AGGREGATION",
+        "description": [
+          "\nEnum for Kibana aggregations."
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/aggregation_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.ML_ANOMALY_SEVERITY",
@@ -2051,10 +2697,7 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.ML_DETECTOR_RULE_ACTION",
         "type": "Enum",
-        "tags": [
-          "export",
-          "enum"
-        ],
+        "tags": [],
         "label": "ML_DETECTOR_RULE_ACTION",
         "description": [
           "\nEnum ML_DETECTOR_RULE_ACTION"
@@ -2068,10 +2711,7 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.ML_DETECTOR_RULE_APPLIES_TO",
         "type": "Enum",
-        "tags": [
-          "export",
-          "enum"
-        ],
+        "tags": [],
         "label": "ML_DETECTOR_RULE_APPLIES_TO",
         "description": [
           "\nEnum ML_DETECTOR_RULE_APPLIES_TO"
@@ -2085,10 +2725,7 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.ML_DETECTOR_RULE_FILTER_TYPE",
         "type": "Enum",
-        "tags": [
-          "export",
-          "enum"
-        ],
+        "tags": [],
         "label": "ML_DETECTOR_RULE_FILTER_TYPE",
         "description": [
           "\nEnum ML_DETECTOR_RULE_FILTER_TYPE"
@@ -2102,10 +2739,7 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.ML_DETECTOR_RULE_OPERATOR",
         "type": "Enum",
-        "tags": [
-          "export",
-          "enum"
-        ],
+        "tags": [],
         "label": "ML_DETECTOR_RULE_OPERATOR",
         "description": [
           "\nEnum ML_DETECTOR_RULE_OPERATOR"
@@ -2119,10 +2753,7 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.ML_ENTITY_FIELD_TYPE",
         "type": "Enum",
-        "tags": [
-          "export",
-          "enum"
-        ],
+        "tags": [],
         "label": "ML_ENTITY_FIELD_TYPE",
         "description": [
           "\nEnum of entity field types"
@@ -2131,9 +2762,148 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.ML_JOB_AGGREGATION",
+        "type": "Enum",
+        "tags": [],
+        "label": "ML_JOB_AGGREGATION",
+        "description": [
+          "\nEnum for ML job aggregations."
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/aggregation_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common._DOC_COUNT",
+        "type": "string",
+        "tags": [],
+        "label": "_DOC_COUNT",
+        "description": [
+          "\nElasticsearch field showing number of documents aggregated in a single summary field for\npre-aggregated data. For use as summary_count_field_name in datafeeds which do not use aggregations."
+        ],
+        "signature": [
+          "\"_doc_count\""
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/field_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.AggId",
+        "type": "Type",
+        "tags": [],
+        "label": "AggId",
+        "description": [
+          "\nAggId is an alias of ML_JOB_AGGREGATION"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.ML_JOB_AGGREGATION",
+            "text": "ML_JOB_AGGREGATION"
+          }
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.DOC_COUNT",
+        "type": "string",
+        "tags": [],
+        "label": "DOC_COUNT",
+        "description": [
+          "\nFor use as summary_count_field_name in datafeeds which use aggregations."
+        ],
+        "signature": [
+          "\"doc_count\""
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/field_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.EVENT_RATE_FIELD_ID",
+        "type": "string",
+        "tags": [],
+        "label": "EVENT_RATE_FIELD_ID",
+        "description": [
+          "\nEVENT_RATE_FIELD_ID"
+        ],
+        "signature": [
+          "\"__ml_event_rate_count__\""
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.FieldId",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldId",
+        "description": [
+          "\nField id"
+        ],
+        "signature": [
+          "string"
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.InfluencersFilterQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "InfluencersFilterQuery",
+        "description": [
+          "\nAlias for QueryDslQueryContainer"
+        ],
+        "signature": [
+          "QueryDslQueryContainer"
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/es_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.METRIC_AGG_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_AGG_TYPE",
+        "description": [
+          "\nMETRIC_AGG_TYPE"
+        ],
+        "signature": [
+          "\"metrics\""
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS",
@@ -2155,9 +2925,7 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.ML_JOB_ID",
         "type": "string",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "ML_JOB_ID",
         "description": [
           "\nMachine learning job id attribute name."
@@ -2174,9 +2942,7 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.ML_PARTITION_FIELD_VALUE",
         "type": "string",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "ML_PARTITION_FIELD_VALUE",
         "description": [
           "\nMachine learning partition field value attribute name."
@@ -2218,10 +2984,7 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.MLAnomalyDoc",
         "type": "Type",
-        "tags": [
-          "export",
-          "typedef"
-        ],
+        "tags": [],
         "label": "MLAnomalyDoc",
         "description": [
           "\nAlias of MlAnomalyRecordDoc"
@@ -2259,12 +3022,26 @@
       },
       {
         "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.MLCATEGORY",
+        "type": "string",
+        "tags": [],
+        "label": "MLCATEGORY",
+        "description": [
+          "\nMLCATEGORY"
+        ],
+        "signature": [
+          "\"mlcategory\""
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/field_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.MlEntityFieldOperation",
         "type": "Type",
-        "tags": [
-          "export",
-          "typedef"
-        ],
+        "tags": [],
         "label": "MlEntityFieldOperation",
         "description": [
           "\nUnion type of entity field operations"
@@ -2281,13 +3058,10 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.MlEntityFieldType",
         "type": "Type",
-        "tags": [
-          "export",
-          "typedef"
-        ],
+        "tags": [],
         "label": "MlEntityFieldType",
         "description": [
-          "\nUnion type for entity field types.\n"
+          "\nUnion type for entity field types."
         ],
         "signature": [
           "\"partition_field\" | \"over_field\" | \"by_field\""
@@ -2299,15 +3073,77 @@
       },
       {
         "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.mlJobAggregations",
+        "type": "Array",
+        "tags": [],
+        "label": "mlJobAggregations",
+        "description": [
+          "\nML job aggregation definitions."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.Aggregation",
+            "text": "Aggregation"
+          },
+          "[]"
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/aggregation_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.mlJobAggregationsWithoutEsEquivalent",
+        "type": "Array",
+        "tags": [],
+        "label": "mlJobAggregationsWithoutEsEquivalent",
+        "description": [
+          "\nList of aggregations only supported by ML and which don't have an equivalent ES aggregation.\nNote, not all aggs have a field list. Some aggs cannot be used with a field."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.Aggregation",
+            "text": "Aggregation"
+          },
+          "[]"
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/aggregation_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.MlJobFieldType",
+        "type": "Type",
+        "tags": [],
+        "label": "MlJobFieldType",
+        "description": [
+          "\nUnion type for ML_JOB_FIELD_TYPES"
+        ],
+        "signature": [
+          "\"number\" | \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"unknown\""
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/field_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.MlPartitionFieldsType",
         "type": "Type",
-        "tags": [
-          "export",
-          "typedef"
-        ],
+        "tags": [],
         "label": "MlPartitionFieldsType",
         "description": [
-          "\nUnion type for partitiion field types.\n"
+          "\nUnion type for partitiion field types."
         ],
         "signature": [
           "\"partition_field\" | \"over_field\" | \"by_field\""
@@ -2321,13 +3157,10 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.MlRecordForInfluencer",
         "type": "Type",
-        "tags": [
-          "export",
-          "typedef"
-        ],
+        "tags": [],
         "label": "MlRecordForInfluencer",
         "description": [
-          "\nMlRecordForInfluencer, an alias based on MlAnomalyRecordDoc.\n"
+          "\nMlRecordForInfluencer, an alias based on MlAnomalyRecordDoc."
         ],
         "signature": [
           {
@@ -2347,13 +3180,10 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.MlUrlConfig",
         "type": "Type",
-        "tags": [
-          "export",
-          "typedef"
-        ],
+        "tags": [],
         "label": "MlUrlConfig",
         "description": [
-          "\nUnion type of different custom URL configurations\n"
+          "\nUnion type of different custom URL configurations"
         ],
         "signature": [
           {
@@ -2366,6 +3196,136 @@
           " | BaseUrlConfig"
         ],
         "path": "x-pack/packages/ml/anomaly_utils/custom_urls.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.OMIT_FIELDS",
+        "type": "Array",
+        "tags": [],
+        "label": "OMIT_FIELDS",
+        "description": [
+          "\nList of system fields we don't want to display."
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/field_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.RollupFields",
+        "type": "Type",
+        "tags": [],
+        "label": "RollupFields",
+        "description": [
+          "\nRollup fields are a nested record of field ids and ES aggregations."
+        ],
+        "signature": [
+          "{ [x: string]: [Record<\"agg\", ",
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.ES_AGGREGATION",
+            "text": "ES_AGGREGATION"
+          },
+          ">]; }"
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.SparseDataAggregation",
+        "type": "Type",
+        "tags": [],
+        "label": "SparseDataAggregation",
+        "description": [
+          "\nType definition of SPARSE_DATA_AGGREGATIONS values."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.ML_JOB_AGGREGATION",
+            "text": "ML_JOB_AGGREGATION"
+          },
+          ".NON_ZERO_COUNT | ",
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.ML_JOB_AGGREGATION",
+            "text": "ML_JOB_AGGREGATION"
+          },
+          ".HIGH_NON_ZERO_COUNT | ",
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.ML_JOB_AGGREGATION",
+            "text": "ML_JOB_AGGREGATION"
+          },
+          ".LOW_NON_ZERO_COUNT | ",
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.ML_JOB_AGGREGATION",
+            "text": "ML_JOB_AGGREGATION"
+          },
+          ".NON_NULL_SUM | ",
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.ML_JOB_AGGREGATION",
+            "text": "ML_JOB_AGGREGATION"
+          },
+          ".HIGH_NON_NULL_SUM | ",
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.ML_JOB_AGGREGATION",
+            "text": "ML_JOB_AGGREGATION"
+          },
+          ".LOW_NON_NULL_SUM"
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/aggregation_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.SplitField",
+        "type": "Type",
+        "tags": [],
+        "label": "SplitField",
+        "description": [
+          "\nSplit field can be Field or null."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.Field",
+            "text": "Field"
+          },
+          " | null"
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2464,9 +3424,7 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.ML_ANOMALY_RESULT_TYPE",
         "type": "Object",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "ML_ANOMALY_RESULT_TYPE",
         "description": [
           "\nCustom enum for anomaly result type"
@@ -2483,9 +3441,7 @@
         "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.ML_ENTITY_FIELD_OPERATIONS",
         "type": "Object",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "ML_ENTITY_FIELD_OPERATIONS",
         "description": [
           "\nCustom enum of entity field operations"
@@ -2500,11 +3456,26 @@
       },
       {
         "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.ML_JOB_FIELD_TYPES",
+        "type": "Object",
+        "tags": [],
+        "label": "ML_JOB_FIELD_TYPES",
+        "description": [
+          "\nCustom enum for ML job field types"
+        ],
+        "signature": [
+          "{ readonly BOOLEAN: \"boolean\"; readonly DATE: \"date\"; readonly GEO_POINT: \"geo_point\"; readonly GEO_SHAPE: \"geo_shape\"; readonly IP: \"ip\"; readonly KEYWORD: \"keyword\"; readonly NUMBER: \"number\"; readonly TEXT: \"text\"; readonly UNKNOWN: \"unknown\"; }"
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/field_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.ML_PARTITION_FIELDS",
         "type": "Object",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "ML_PARTITION_FIELDS",
         "description": [
           "\nArray of partition fields."
@@ -2609,6 +3580,168 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.mlCategory",
+        "type": "Object",
+        "tags": [],
+        "label": "mlCategory",
+        "description": [
+          "\nDefinition for an ml category."
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.mlCategory.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "/**\n   * id `mlcategory` id\n   */"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.mlCategory.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "/**\n   * name `mlcategory`\n   */"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.mlCategory.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "/**\n   * type `keyword`\n   */"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".KEYWORD"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.mlCategory.aggregatable",
+            "type": "boolean",
+            "tags": [],
+            "label": "aggregatable",
+            "description": [
+              "/**\n   * non-aggregatable\n   */"
+            ],
+            "signature": [
+              "false"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.mlCategory.counter",
+            "type": "boolean",
+            "tags": [],
+            "label": "counter",
+            "description": [
+              "/**\n   * no counter\n   */"
+            ],
+            "signature": [
+              "false"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.SPARSE_DATA_AGGREGATIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "SPARSE_DATA_AGGREGATIONS",
+        "description": [
+          "\nCustom enum for sparse data aggregations."
+        ],
+        "signature": [
+          "readonly [",
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.ML_JOB_AGGREGATION",
+            "text": "ML_JOB_AGGREGATION"
+          },
+          ".NON_ZERO_COUNT, ",
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.ML_JOB_AGGREGATION",
+            "text": "ML_JOB_AGGREGATION"
+          },
+          ".HIGH_NON_ZERO_COUNT, ",
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.ML_JOB_AGGREGATION",
+            "text": "ML_JOB_AGGREGATION"
+          },
+          ".LOW_NON_ZERO_COUNT, ",
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.ML_JOB_AGGREGATION",
+            "text": "ML_JOB_AGGREGATION"
+          },
+          ".NON_NULL_SUM, ",
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.ML_JOB_AGGREGATION",
+            "text": "ML_JOB_AGGREGATION"
+          },
+          ".HIGH_NON_NULL_SUM, ",
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.ML_JOB_AGGREGATION",
+            "text": "ML_JOB_AGGREGATION"
+          },
+          ".LOW_NON_NULL_SUM]"
+        ],
+        "path": "x-pack/packages/ml/anomaly_utils/aggregation_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

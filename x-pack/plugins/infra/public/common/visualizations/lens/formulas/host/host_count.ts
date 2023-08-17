@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import type { LensChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const hostCount: LensChartConfig = {
-  title: 'Hosts',
-  formula: {
-    formula: 'unique_count(host.name)',
-    format: {
-      id: 'number',
-      params: {
-        decimals: 0,
-      },
+export const hostCount: FormulaValueConfig = {
+  label: 'Hosts',
+  value: 'unique_count(host.name)',
+  format: {
+    id: 'number',
+    params: {
+      decimals: 0,
     },
   },
-  getFilters,
 };

@@ -38,6 +38,7 @@ import {
   ELASTIC_MODEL_TAG,
   ELASTIC_MODEL_TYPE,
   MODEL_STATE,
+  ModelState,
 } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { useModelActions } from './model_actions';
@@ -61,6 +62,7 @@ import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../routing/use_refresh';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { TestTrainedModelFlyout } from './test_models';
+import { AddInferencePipelineFlyout } from '../components/ml_inference';
 
 type Stats = Omit<TrainedModelStat, 'model_id' | 'deployment_stats'>;
 
@@ -70,7 +72,7 @@ export type ModelItem = TrainedModelConfigResponse & {
   pipelines?: ModelPipelines['pipelines'] | null;
   deployment_ids: string[];
   putModelConfig?: object;
-  state: string;
+  state: ModelState;
 };
 
 export type ModelItemFull = Required<ModelItem>;
@@ -132,7 +134,8 @@ export const ModelsList: FC<Props> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<ModelItem[]>([]);
   const [selectedModels, setSelectedModels] = useState<ModelItem[]>([]);
-  const [modelIdsToDelete, setModelIdsToDelete] = useState<string[]>([]);
+  const [modelsToDelete, setModelsToDelete] = useState<ModelItem[]>([]);
+  const [modelToDeploy, setModelToDeploy] = useState<ModelItem | undefined>();
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
@@ -282,7 +285,7 @@ export const ModelsList: FC<Props> = ({
             (v) => v.state === DEPLOYMENT_STATE.STARTED
           )
             ? DEPLOYMENT_STATE.STARTED
-            : '';
+            : null;
         });
 
         const elasticModels = models.filter((model) =>
@@ -347,7 +350,8 @@ export const ModelsList: FC<Props> = ({
     isLoading,
     fetchModels: fetchModelsData,
     onTestAction: setModelToTest,
-    onModelsDeleteRequest: setModelIdsToDelete,
+    onModelsDeleteRequest: setModelsToDelete,
+    onModelDeployRequest: setModelToDeploy,
     onLoading: setIsLoading,
     modelAndDeploymentIds,
   });
@@ -501,13 +505,7 @@ export const ModelsList: FC<Props> = ({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton
-            color="danger"
-            onClick={setModelIdsToDelete.bind(
-              null,
-              selectedModels.map((m) => m.model_id)
-            )}
-          >
+          <EuiButton color="danger" onClick={setModelsToDelete.bind(null, selectedModels)}>
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.deleteModelsButtonLabel"
               defaultMessage="Delete"
@@ -633,20 +631,26 @@ export const ModelsList: FC<Props> = ({
           data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
         />
       </div>
-      {modelIdsToDelete.length > 0 && (
+      {modelsToDelete.length > 0 && (
         <DeleteModelsModal
           onClose={(refreshList) => {
-            setModelIdsToDelete([]);
+            setModelsToDelete([]);
             if (refreshList) {
               fetchModelsData();
             }
           }}
-          modelIds={modelIdsToDelete}
+          models={modelsToDelete}
         />
       )}
       {modelToTest === null ? null : (
         <TestTrainedModelFlyout model={modelToTest} onClose={setModelToTest.bind(null, null)} />
       )}
+      {modelToDeploy !== undefined ? (
+        <AddInferencePipelineFlyout
+          onClose={setModelToDeploy.bind(null, undefined)}
+          model={modelToDeploy}
+        />
+      ) : null}
     </>
   );
 };

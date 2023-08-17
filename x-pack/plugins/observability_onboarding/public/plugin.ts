@@ -23,6 +23,7 @@ import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
+import type { DiscoverSetup } from '@kbn/discover-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 
 export type ObservabilityOnboardingPluginSetup = void;
@@ -31,6 +32,7 @@ export type ObservabilityOnboardingPluginStart = void;
 export interface ObservabilityOnboardingPluginSetupDeps {
   data: DataPublicPluginSetup;
   observability: ObservabilityPublicSetup;
+  discover: DiscoverSetup;
 }
 
 export interface ObservabilityOnboardingPluginStartDeps {
@@ -52,9 +54,11 @@ export class ObservabilityOnboardingPlugin
     core: CoreSetup,
     plugins: ObservabilityOnboardingPluginSetupDeps
   ) {
+    const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
     const {
       ui: { enabled: isObservabilityOnboardingUiEnabled },
-    } = this.ctx.config.get<ObservabilityOnboardingConfig>();
+      serverless: { enabled: isServerlessEnabled },
+    } = config;
 
     const pluginSetupDeps = plugins;
 
@@ -62,14 +66,16 @@ export class ObservabilityOnboardingPlugin
     // and go to /app/observabilityOnboarding
     if (isObservabilityOnboardingUiEnabled) {
       core.application.register({
-        navLinkStatus: AppNavLinkStatus.hidden,
+        navLinkStatus: isServerlessEnabled
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.hidden,
         id: 'observabilityOnboarding',
         title: 'Observability Onboarding',
         order: 8500,
         euiIconType: 'logoObservability',
         category: DEFAULT_APP_CATEGORIES.observability,
         keywords: [],
-        async mount(appMountParameters: AppMountParameters<unknown>) {
+        async mount(appMountParameters: AppMountParameters) {
           // Load application bundle and Get start service
           const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
             import('./application/app'),
@@ -87,6 +93,7 @@ export class ObservabilityOnboardingPlugin
             deps: pluginSetupDeps,
             appMountParameters,
             corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
+            config,
           });
         },
       });

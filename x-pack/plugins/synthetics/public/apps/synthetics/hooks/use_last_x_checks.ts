@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { createEsParams } from '@kbn/observability-plugin/public';
+import { createEsParams } from '@kbn/observability-shared-plugin/public';
 import { useReduxEsSearch } from './use_redux_es_search';
 import { Ping } from '../../../../common/runtime_types';
 
@@ -20,14 +20,30 @@ import { selectServiceLocationsState } from '../state';
 import { useSyntheticsRefreshContext } from '../contexts/synthetics_refresh_context';
 import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../common/constants';
 
+export const getTimeRangeFilter = (schedule: string) => {
+  const inMinutes = Number(schedule);
+  const fiftyChecksInMinutes = inMinutes * 50;
+  const hours = Math.ceil(fiftyChecksInMinutes / 60);
+  return {
+    range: {
+      '@timestamp': {
+        gte: `now-${hours}h`,
+        lte: 'now',
+      },
+    },
+  };
+};
+
 export function useLastXChecks<Fields>({
   monitorId,
   locationId,
   fields = ['*'],
   size = 50,
   timestamp,
+  schedule,
 }: {
   monitorId: string;
+  schedule: string;
   locationId: string;
   timestamp?: string;
   fields?: string[];
@@ -45,6 +61,7 @@ export function useLastXChecks<Fields>({
           filter: [
             SUMMARY_FILTER,
             EXCLUDE_RUN_ONCE_FILTER,
+            getTimeRangeFilter(schedule),
             {
               term: {
                 'monitor.id': monitorId,
@@ -58,13 +75,14 @@ export function useLastXChecks<Fields>({
           }),
         },
       },
+      _source: false,
       sort: [{ '@timestamp': 'desc' }],
       fields,
     },
   });
 
   const { data } = useReduxEsSearch<Ping, typeof params>(params, [lastRefresh], {
-    name: `zGetLastXMonitorRunsByLocation/${monitorId}/${locationId}`,
+    name: `zGetLastXChecks/${monitorId}/${locationId}`,
     isRequestReady: locationsLoaded && Boolean(timestamp), // don't run query until locations are loaded
   });
 

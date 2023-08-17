@@ -26,17 +26,18 @@
       "usageCollection",
       "savedObjectsFinder",
       "savedObjectsManagement",
+      "savedSearch",
       "contentManagement",
     ],
     "optionalPlugins": [
       "home",
       "share",
       "spaces",
-      "savedObjectsTaggingOss"
+      "savedObjectsTaggingOss",
+      "serverless"
     ],
     "requiredBundles": [
       "kibanaUtils",
-      "savedSearch",
       "kibanaReact",
       "charts"
     ],

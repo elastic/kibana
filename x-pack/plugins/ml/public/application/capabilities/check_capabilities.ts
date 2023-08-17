@@ -6,57 +6,109 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, from, type Subscription, timer } from 'rxjs';
+import { distinctUntilChanged, retry, switchMap, tap } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
+import { useMemo, useRef } from 'react';
 import { useMlKibana } from '../contexts/kibana';
 import { hasLicenseExpired } from '../license';
 
-import { MlCapabilities, getDefaultCapabilities } from '../../../common/types/capabilities';
+import {
+  getDefaultCapabilities,
+  MlCapabilities,
+  MlCapabilitiesKey,
+} from '../../../common/types/capabilities';
 import { getCapabilities } from './get_capabilities';
-import type { MlApiServices } from '../services/ml_api_service';
+import { type MlApiServices } from '../services/ml_api_service';
 
 let _capabilities: MlCapabilities = getDefaultCapabilities();
 
+const CAPABILITIES_REFRESH_INTERVAL = 5 * 60 * 1000; // 5min;
+
 export class MlCapabilitiesService {
-  private _capabilities$ = new BehaviorSubject<MlCapabilities>(getDefaultCapabilities());
+  private _isLoading$ = new BehaviorSubject<boolean>(true);
+
+  /**
+   * Updates on manual request, e.g. in the route resolver.
+   * @private
+   */
+  private _updateRequested$ = new BehaviorSubject<number>(Date.now());
+
+  private _capabilities$ = new BehaviorSubject<MlCapabilities | null>(null);
 
   public capabilities$ = this._capabilities$.pipe(distinctUntilChanged(isEqual));
 
-  public getCapabilities(): MlCapabilities {
+  private _subscription: Subscription | undefined;
+
+  constructor(private readonly mlApiServices: MlApiServices) {
+    this.init();
+  }
+
+  private init() {
+    this._subscription = combineLatest([
+      this._updateRequested$,
+      timer(0, CAPABILITIES_REFRESH_INTERVAL),
+    ])
+      .pipe(
+        tap(() => {
+          this._isLoading$.next(true);
+        }),
+        switchMap(() => from(this.mlApiServices.checkMlCapabilities())),
+        retry({ delay: CAPABILITIES_REFRESH_INTERVAL })
+      )
+      .subscribe((results) => {
+        this._capabilities$.next(results.capabilities);
+        this._isLoading$.next(false);
+
+        /**
+         * To support legacy use of {@link checkPermission}
+         */
+        _capabilities = results.capabilities;
+      });
+  }
+
+  public getCapabilities(): MlCapabilities | null {
     return this._capabilities$.getValue();
   }
 
-  public updateCapabilities(update: MlCapabilities) {
-    this._capabilities$.next(update);
+  public refreshCapabilities() {
+    this._updateRequested$.next(Date.now());
+  }
+
+  public destroy() {
+    if (this._subscription) {
+      this._subscription.unsubscribe();
+    }
   }
 }
-
-/**
- * TODO should be initialized in getMlGlobalServices
- * Temp solution to make it work with the current setup.
- */
-export const mlCapabilities = new MlCapabilitiesService();
 
 /**
  * Check the privilege type and the license to see whether a user has permission to access a feature.
  *
  * @param capability
  */
-export function usePermissionCheck(capability: keyof MlCapabilities) {
+export function usePermissionCheck<T extends MlCapabilitiesKey | MlCapabilitiesKey[]>(
+  capability: T
+): T extends MlCapabilitiesKey ? boolean : boolean[] {
   const {
     services: {
       mlServices: { mlCapabilities: mlCapabilitiesService },
     },
   } = useMlKibana();
 
-  const licenseHasExpired = hasLicenseExpired();
+  // Memoize argument, in case it's an array to preserve the reference.
+  const requestedCapabilities = useRef(capability);
+
   const capabilities = useObservable(
     mlCapabilitiesService.capabilities$,
     mlCapabilitiesService.getCapabilities()
   );
-  return capabilities[capability] && !licenseHasExpired;
+  return useMemo(() => {
+    return Array.isArray(requestedCapabilities.current)
+      ? requestedCapabilities.current.map((c) => capabilities[c])
+      : capabilities[requestedCapabilities.current];
+  }, [capabilities]);
 }
 
 export function checkGetManagementMlJobsResolver({ checkMlCapabilities }: MlApiServices) {
@@ -64,7 +116,6 @@ export function checkGetManagementMlJobsResolver({ checkMlCapabilities }: MlApiS
     checkMlCapabilities()
       .then(({ capabilities, isPlatinumOrTrialLicense, mlFeatureEnabledInSpace }) => {
         _capabilities = capabilities;
-        mlCapabilities.updateCapabilities(capabilities);
         // Loop through all capabilities to ensure they are all set to true.
         const isManageML = Object.values(_capabilities).every((p) => p === true);
 
@@ -80,33 +131,6 @@ export function checkGetManagementMlJobsResolver({ checkMlCapabilities }: MlApiS
   });
 }
 
-export function checkGetJobsCapabilitiesResolver(
-  redirectToMlAccessDeniedPage: () => Promise<void>
-): Promise<MlCapabilities> {
-  return new Promise((resolve, reject) => {
-    getCapabilities()
-      .then(async ({ capabilities, isPlatinumOrTrialLicense }) => {
-        _capabilities = capabilities;
-        mlCapabilities.updateCapabilities(capabilities);
-        // the minimum privilege for using ML with a platinum or trial license is being able to get the transforms list.
-        // all other functionality is controlled by the return capabilities object.
-        // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
-        // allow the promise to resolve as the separate license check will redirect then user to
-        // a basic feature
-        if (_capabilities.canGetJobs || isPlatinumOrTrialLicense === false) {
-          return resolve(_capabilities);
-        } else {
-          await redirectToMlAccessDeniedPage();
-          return reject();
-        }
-      })
-      .catch(async (e) => {
-        await redirectToMlAccessDeniedPage();
-        return reject();
-      });
-  });
-}
-
 export function checkCreateJobsCapabilitiesResolver(
   redirectToJobsManagementPage: () => Promise<void>
 ): Promise<MlCapabilities> {
@@ -114,7 +138,6 @@ export function checkCreateJobsCapabilitiesResolver(
     getCapabilities()
       .then(async ({ capabilities, isPlatinumOrTrialLicense }) => {
         _capabilities = capabilities;
-        mlCapabilities.updateCapabilities(capabilities);
         // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
         // allow the promise to resolve as the separate license check will redirect then user to
         // a basic feature
@@ -129,30 +152,6 @@ export function checkCreateJobsCapabilitiesResolver(
       })
       .catch(async (e) => {
         await redirectToJobsManagementPage();
-        return reject();
-      });
-  });
-}
-
-export function checkFindFileStructurePrivilegeResolver(
-  redirectToMlAccessDeniedPage: () => Promise<void>
-): Promise<MlCapabilities> {
-  return new Promise((resolve, reject) => {
-    getCapabilities()
-      .then(async ({ capabilities }) => {
-        _capabilities = capabilities;
-        mlCapabilities.updateCapabilities(capabilities);
-        // the minimum privilege for using ML with a basic license is being able to use the datavisualizer.
-        // all other functionality is controlled by the return _capabilities object
-        if (_capabilities.canFindFileStructure) {
-          return resolve(_capabilities);
-        } else {
-          await redirectToMlAccessDeniedPage();
-          return reject();
-        }
-      })
-      .catch(async (e) => {
-        await redirectToMlAccessDeniedPage();
         return reject();
       });
   });

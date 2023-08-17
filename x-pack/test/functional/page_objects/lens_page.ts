@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import type { FittingFunction, XYCurveType } from '@kbn/lens-plugin/public';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
@@ -127,7 +128,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       extraFields?: string[];
     }) {
       // type * in the query editor
-      const queryInput = await testSubjects.find('lnsXY-annotation-query-based-query-input');
+      const queryInput = await testSubjects.find('annotation-query-based-query-input');
       await queryInput.type(opts.queryString);
       await testSubjects.click('indexPattern-filters-existingFilterTrigger');
       await this.selectOptionFromComboBox(
@@ -547,6 +548,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    /**
+     * Perform the specified layer action
+     */
+    async performLayerAction(testSubject: string, layerIndex = 0) {
+      await retry.try(async () => {
+        await testSubjects.click(`lnsLayerSplitButton--${layerIndex}`);
+        await testSubjects.click(testSubject);
+      });
+    },
+
     async isDimensionEditorOpen() {
       return await testSubjects.exists('lns-indexPattern-dimensionContainerBack');
     },
@@ -678,6 +689,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await this.selectOptionFromComboBox(`indexPattern-dimension-field-${lastIndex}`, field);
       });
     },
+    async getNumericFieldReady(testSubj: string) {
+      const numericInput = await find.byCssSelector(
+        `input[data-test-subj=${testSubj}][type='number']`
+      );
+      await numericInput.click();
+      await numericInput.clearValue();
+      return numericInput;
+    },
+
+    async setTermsNumberOfValues(value: number) {
+      const valuesInput = await this.getNumericFieldReady('indexPattern-terms-values');
+      await valuesInput.type(`${value}`);
+      await PageObjects.common.sleep(500);
+    },
 
     async checkTermsAreNotAvailableToAgg(fields: string[]) {
       const lastIndex = (
@@ -698,6 +723,30 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.missingOrFail(`lns-fieldOption-${field}`);
       }
     },
+    async saveModal(
+      title: string,
+      saveAsNew?: boolean,
+      redirectToOrigin?: boolean,
+      saveToLibrary?: boolean,
+      addToDashboard?: 'new' | 'existing' | null,
+      dashboardId?: string
+    ) {
+      await PageObjects.timeToVisualize.setSaveModalValues(title, {
+        saveAsNew,
+        redirectToOrigin,
+        addToDashboard: addToDashboard ? addToDashboard : null,
+        dashboardId,
+        saveToLibrary,
+      });
+
+      await testSubjects.click('confirmSaveSavedObjectButton');
+      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
+        testSubjects
+          .missingOrFail('confirmSaveSavedObjectButton')
+          .then(() => true)
+          .catch(() => false)
+      );
+    },
 
     /**
      * Save the current Lens visualization.
@@ -713,20 +762,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
 
-      await PageObjects.timeToVisualize.setSaveModalValues(title, {
+      await this.saveModal(
+        title,
         saveAsNew,
         redirectToOrigin,
-        addToDashboard: addToDashboard ? addToDashboard : null,
-        dashboardId,
         saveToLibrary,
-      });
-
-      await testSubjects.click('confirmSaveSavedObjectButton');
-      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
-        testSubjects
-          .missingOrFail('confirmSaveSavedObjectButton')
-          .then(() => true)
-          .catch(() => false)
+        addToDashboard,
+        dashboardId
       );
     },
 
@@ -745,10 +787,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async editDimensionLabel(label: string) {
-      await testSubjects.setValue('column-label-edit', label, { clearWithKeyboard: true });
+      await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
     },
-    async editDimensionFormat(format: string) {
+    async editDimensionFormat(format: string, options?: { decimals?: number; prefix?: string }) {
       await this.selectOptionFromComboBox('indexPattern-dimension-format', format);
+      if (options?.decimals != null) {
+        await testSubjects.setValue('indexPattern-dimension-formatDecimals', `${options.decimals}`);
+        // press tab key to remove the range popover of the EUI field
+        await PageObjects.common.pressTabKey();
+      }
+      if (options?.prefix != null) {
+        await testSubjects.setValue('indexPattern-dimension-formatSuffix', options.prefix);
+      }
     },
     async editDimensionColor(color: string) {
       const colorPickerInput = await testSubjects.find('~indexPattern-dimension-colorPicker');
@@ -777,10 +827,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         expect(await (await testSubjects.find(input)).getAttribute('value')).to.eql(value);
       });
     },
-    async useCurvedLines() {
-      await testSubjects.click('lnsCurveStyleToggle');
+    async setCurvedLines(option: XYCurveType) {
+      await testSubjects.click('lnsCurveStyleSelect');
+      const optionSelector = await find.byCssSelector(`#${option}`);
+      await optionSelector.click();
     },
-    async editMissingValues(option: string) {
+    async editMissingValues(option: FittingFunction) {
       await testSubjects.click('lnsMissingValuesSelect');
       const optionSelector = await find.byCssSelector(`#${option}`);
       await optionSelector.click();
@@ -915,7 +967,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Adds a new layer to the chart, fails if the chart does not support new layers
      */
-    async createLayer(layerType: 'data' | 'referenceLine' | 'annotations' = 'data') {
+    async createLayer(
+      layerType: 'data' | 'referenceLine' | 'annotations' = 'data',
+      annotationFromLibraryTitle?: string
+    ) {
       await testSubjects.click('lnsLayerAddButton');
       const layerCount = await this.getLayerCount();
 
@@ -926,8 +981,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         ]);
         return fasterChecks.filter(Boolean).length > 0;
       });
+
       if (await testSubjects.exists(`lnsLayerAddButton-${layerType}`)) {
         await testSubjects.click(`lnsLayerAddButton-${layerType}`);
+        if (layerType === 'annotations') {
+          if (!annotationFromLibraryTitle) {
+            await testSubjects.click('lnsAnnotationLayer_new');
+          } else {
+            await testSubjects.click('lnsAnnotationLayer_addFromLibrary');
+            await testSubjects.click(
+              `savedObjectTitle${annotationFromLibraryTitle.split(' ').join('-')}`
+            );
+          }
+        }
       }
     },
 
@@ -1024,6 +1090,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async getDatatableHeaderText(index = 0) {
       const el = await this.getDatatableHeader(index);
       return el.getVisibleText();
+    },
+
+    async getCurrentChartDebugStateForVizType(visType: string) {
+      await this.waitForVisualization(visType);
+      return await elasticChart.getChartDebugData(visType);
     },
 
     /**
@@ -1402,7 +1473,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       if (!opts.keepOpen) {
-        await this.closeDimensionEditor();
+        await testSubjects.click('collapseFlyoutButton');
       }
     },
 
@@ -1778,6 +1849,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         [void],
         Record<string, { content: string; type: string }> | undefined
       >(() => window.ELASTIC_LENS_CSV_CONTENT);
+    },
+
+    async closeSuggestionPanel() {
+      const isSuggestionPanelOpen = await testSubjects.exists('lnsSuggestionsPanel');
+      if (isSuggestionPanelOpen) {
+        await testSubjects.click('lensSuggestionsPanelToggleButton');
+      }
     },
   });
 }

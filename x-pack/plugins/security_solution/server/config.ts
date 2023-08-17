@@ -10,13 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
-import {
-  getExperimentalAllowedValues,
-  isValidExperimentalValue,
-  parseExperimentalConfigValue,
-} from '../common/experimental_features';
-
-const allowedExperimentalValues = getExperimentalAllowedValues();
+import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 export const configSchema = schema.object({
   maxRuleImportExportSize: schema.number({ defaultValue: 10000 }),
@@ -94,21 +88,17 @@ export const configSchema = schema.object({
    */
   enableExperimental: schema.arrayOf(schema.string(), {
     defaultValue: () => [],
-    validate(list) {
-      for (const key of list) {
-        if (!isValidExperimentalValue(key)) {
-          return `[${key}] is not allowed. Allowed values are: ${allowedExperimentalValues.join(
-            ', '
-          )}`;
-        }
-      }
-    },
   }),
 
   /**
    * Artifacts Configuration
    */
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),
+
+  /**
+   * Artifacts Configuration for package policy update concurrency
+   */
+  packagerTaskPackagePolicyUpdateBatchSize: schema.number({ defaultValue: 10, max: 50, min: 1 }),
 
   /**
    * For internal use. Specify which version of the Detection Rules fleet package to install
@@ -141,7 +131,20 @@ export type ConfigType = ConfigSchema & {
 
 export const createConfig = (context: PluginInitializerContext): ConfigType => {
   const pluginConfig = context.config.get<TypeOf<typeof configSchema>>();
-  const experimentalFeatures = parseExperimentalConfigValue(pluginConfig.enableExperimental);
+  const logger = context.logger.get('config');
+
+  const { invalid, features: experimentalFeatures } = parseExperimentalConfigValue(
+    pluginConfig.enableExperimental
+  );
+
+  if (invalid.length) {
+    logger.warn(`Unsupported "xpack.securitySolution.enableExperimental" values detected.
+The following configuration values are no longer supported and should be removed from the kibana configuration file:
+
+    xpack.securitySolution.enableExperimental:
+${invalid.map((key) => `      - ${key}`).join('\n')}
+`);
+  }
 
   return {
     ...pluginConfig,

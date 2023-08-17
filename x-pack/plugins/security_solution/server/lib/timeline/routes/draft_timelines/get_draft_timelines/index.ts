@@ -16,11 +16,11 @@ import type { SetupPlugins } from '../../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { getDraftTimeline, persistTimeline } from '../../../saved_object/timelines';
 import { draftTimelineDefaults } from '../../../utils/default_timeline';
-import { getDraftTimelineSchema } from '../../../schemas/draft_timelines';
+import { getDraftTimelineSchema } from '../../../../../../common/api/timeline';
 
 export const getDraftTimelinesRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
+  _: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.get(

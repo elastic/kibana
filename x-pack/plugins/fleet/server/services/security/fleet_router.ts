@@ -13,9 +13,13 @@ import type {
   Logger,
   RequestHandler,
   RouteMethod,
+  RouteConfig,
+  RouteConfigOptions,
 } from '@kbn/core/server';
 
 import type { FleetRequestHandlerContext } from '../..';
+
+import { getRequestStore } from '../request_store';
 
 import type { FleetAuthzRouteConfig, FleetAuthzRouter } from './types';
 import {
@@ -23,6 +27,25 @@ import {
   getAuthzFromRequest,
   doesNotHaveRequiredFleetAuthz,
 } from './security';
+
+function withDefaultPublicAccess<P, Q, B, Method extends RouteMethod>(
+  routeConfig: RouteConfig<P, Q, B, Method>
+): RouteConfig<P, Q, B, Method> {
+  let newOptions: RouteConfigOptions<Method>;
+  if (routeConfig?.options) {
+    newOptions = { ...routeConfig?.options };
+  } else {
+    newOptions = {};
+  }
+
+  if (!newOptions.access) {
+    newOptions.access = 'public';
+  }
+  return {
+    ...routeConfig,
+    options: newOptions,
+  };
+}
 
 export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerContext>(
   router: IRouter<TContext>,
@@ -60,30 +83,72 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
     return handler(context, request, response);
   };
 
+  const requestContextWrapper = async <R extends RouteMethod>({
+    context,
+    request,
+    response,
+    handler,
+  }: {
+    context: TContext;
+    request: KibanaRequest;
+    response: KibanaResponseFactory;
+    handler: RequestHandler<any, any, any, TContext, R, KibanaResponseFactory>;
+  }): Promise<IKibanaResponse<any>> => {
+    return getRequestStore().run(request, () => handler(context, request, response));
+  };
+
+  const fleetHandlerWrapper = async <R extends RouteMethod>({
+    context,
+    request,
+    response,
+    handler,
+    hasRequiredAuthz,
+  }: {
+    context: TContext;
+    request: KibanaRequest;
+    response: KibanaResponseFactory;
+    handler: RequestHandler<any, any, any, TContext, R, KibanaResponseFactory>;
+    hasRequiredAuthz?: FleetAuthzRouteConfig['fleetAuthz'];
+  }): Promise<IKibanaResponse<any>> => {
+    return requestContextWrapper({
+      context,
+      request,
+      response,
+      handler: (handlerContext, handlerRequest, handlerResponse) =>
+        routerAuthzWrapper({
+          context: handlerContext,
+          request: handlerRequest,
+          response: handlerResponse,
+          handler,
+          hasRequiredAuthz,
+        }),
+    });
+  };
+
   const fleetAuthzRouter: FleetAuthzRouter<TContext> = {
     get: ({ fleetAuthz: hasRequiredAuthz, ...options }, handler) => {
-      router.get(options, async (context, request, response) =>
-        routerAuthzWrapper({ context, request, response, handler, hasRequiredAuthz })
+      router.get(withDefaultPublicAccess(options), (context, request, response) =>
+        fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
       );
     },
     delete: ({ fleetAuthz: hasRequiredAuthz, ...options }, handler) => {
-      router.delete(options, async (context, request, response) =>
-        routerAuthzWrapper({ context, request, response, handler, hasRequiredAuthz })
+      router.delete(withDefaultPublicAccess(options), (context, request, response) =>
+        fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
       );
     },
     post: ({ fleetAuthz: hasRequiredAuthz, ...options }, handler) => {
-      router.post(options, async (context, request, response) =>
-        routerAuthzWrapper({ context, request, response, handler, hasRequiredAuthz })
+      router.post(withDefaultPublicAccess(options), (context, request, response) =>
+        fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
       );
     },
     put: ({ fleetAuthz: hasRequiredAuthz, ...options }, handler) => {
-      router.put(options, async (context, request, response) =>
-        routerAuthzWrapper({ context, request, response, handler, hasRequiredAuthz })
+      router.put(withDefaultPublicAccess(options), (context, request, response) =>
+        fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
       );
     },
     patch: ({ fleetAuthz: hasRequiredAuthz, ...options }, handler) => {
-      router.patch(options, async (context, request, response) =>
-        routerAuthzWrapper({ context, request, response, handler, hasRequiredAuthz })
+      router.patch(withDefaultPublicAccess(options), (context, request, response) =>
+        fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
       );
     },
     handleLegacyErrors: (handler) => router.handleLegacyErrors(handler),

@@ -14,8 +14,8 @@ import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { createBaseFlameGraph } from '../../common/flamegraph';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
-import { getStackTraces } from './get_stacktraces';
 import { createCommonFilter } from './query';
+import { searchStackTraces } from './search_stacktraces';
 
 export function registerFlameChartSearchRoute({
   router,
@@ -26,6 +26,7 @@ export function registerFlameChartSearchRoute({
   router.get(
     {
       path: paths.Flamechart,
+      options: { tags: ['access:profiling'] },
       validate: {
         query: schema.object({
           timeFrom: schema.number(),
@@ -48,40 +49,36 @@ export function registerFlameChartSearchRoute({
         });
         const totalSeconds = timeTo - timeFrom;
 
-        const t0 = Date.now();
-        const { stackTraceEvents, stackTraces, executables, stackFrames, totalFrames } =
-          await getStackTraces({
-            context,
-            logger,
+        const { events, stackTraces, executables, stackFrames, totalFrames, samplingRate } =
+          await searchStackTraces({
             client: profilingElasticsearchClient,
             filter,
             sampleSize: targetSampleSize,
           });
-        logger.info(`querying stacktraces took ${Date.now() - t0} ms`);
 
         const flamegraph = await withProfilingSpan('create_flamegraph', async () => {
-          const t1 = Date.now();
           const tree = createCalleeTree(
-            stackTraceEvents,
+            events,
             stackTraces,
             stackFrames,
             executables,
-            totalFrames
+            totalFrames,
+            samplingRate
           );
-          logger.info(`creating callee tree took ${Date.now() - t1} ms`);
 
-          const t2 = Date.now();
-          const fg = createBaseFlameGraph(tree, totalSeconds);
-          logger.info(`creating flamegraph took ${Date.now() - t2} ms`);
+          const fg = createBaseFlameGraph(tree, samplingRate, totalSeconds);
 
           return fg;
         });
 
-        logger.info('returning payload response to client');
-
         return response.ok({ body: flamegraph });
       } catch (error) {
-        return handleRouteHandlerError({ error, logger, response });
+        return handleRouteHandlerError({
+          error,
+          logger,
+          response,
+          message: 'Error while fetching flamegraph',
+        });
       }
     }
   );

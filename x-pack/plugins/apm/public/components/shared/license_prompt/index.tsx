@@ -8,41 +8,29 @@
 import { EuiButton, EuiCard, EuiTextColor } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
 
 export interface LicensePromptProps {
   text: string;
-  showBetaBadge?: boolean;
 }
 
-export function LicensePrompt({
-  text,
-  showBetaBadge = false,
-}: LicensePromptProps) {
+export function LicensePrompt({ text }: LicensePromptProps) {
+  const {
+    plugins: { licenseManagement },
+  } = useApmPluginContext();
   const licensePageUrl = useKibanaUrl(
     '/app/management/stack/license_management'
   );
-
+  const manageLicenseURL = licenseManagement?.locator
+    ? licenseManagement?.locator?.useUrl({
+        page: 'dashboard',
+      })
+    : licensePageUrl;
   return (
     <EuiCard
-      display={showBetaBadge ? undefined : 'plain'}
+      display="plain"
       paddingSize="l"
-      betaBadgeProps={
-        showBetaBadge
-          ? {
-              label: i18n.translate('xpack.apm.license.betaBadge', {
-                defaultMessage: 'Beta',
-              }),
-              tooltipContent: i18n.translate(
-                'xpack.apm.license.betaTooltipMessage',
-                {
-                  defaultMessage:
-                    'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
-                }
-              ),
-            }
-          : undefined
-      }
       title={i18n.translate('xpack.apm.license.title', {
         defaultMessage: 'Start free 30-day trial',
       })}
@@ -52,7 +40,7 @@ export function LicensePrompt({
         <EuiButton
           data-test-subj="apmLicensePromptStartTrialButton"
           fill={true}
-          href={licensePageUrl}
+          href={manageLicenseURL}
         >
           {i18n.translate('xpack.apm.license.button', {
             defaultMessage: 'Start trial',

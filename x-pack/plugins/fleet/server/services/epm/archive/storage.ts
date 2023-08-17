@@ -24,7 +24,7 @@ import { appContextService } from '../../app_context';
 
 import { getArchiveEntry, setArchiveEntry, setArchiveFilelist, setPackageInfo } from '.';
 import type { ArchiveEntry } from '.';
-import { MANIFEST_NAME, parseAndVerifyArchive } from './parse';
+import { filterAssetPathForParseAndVerifyArchive, parseAndVerifyArchive } from './parse';
 
 const ONE_BYTE = 1024 * 1024;
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
@@ -207,7 +207,7 @@ export const getEsPackage = async (
     return undefined;
   }
 
-  const manifests: Record<string, Buffer> = {};
+  const assetsMap: Record<string, Buffer> = {};
   const entries: ArchiveEntry[] = assets.map(packageAssetToArchiveEntry);
   const paths: string[] = [];
   entries.forEach(({ path, buffer }) => {
@@ -215,13 +215,14 @@ export const getEsPackage = async (
       setArchiveEntry(path, buffer);
       paths.push(path);
     }
-    paths.push(path);
-    if (path.endsWith(MANIFEST_NAME) && buffer) manifests[path] = buffer;
+    if (buffer && filterAssetPathForParseAndVerifyArchive(path)) {
+      assetsMap[path] = buffer;
+    }
   });
-  // // Add asset references to cache
+  // Add asset references to cache
   setArchiveFilelist({ name: pkgName, version: pkgVersion }, paths);
 
-  const packageInfo = parseAndVerifyArchive(paths, manifests);
+  const packageInfo = parseAndVerifyArchive(paths, assetsMap);
   setPackageInfo({ name: pkgName, version: pkgVersion, packageInfo });
 
   return {

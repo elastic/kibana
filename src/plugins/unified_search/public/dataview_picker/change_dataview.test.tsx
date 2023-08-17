@@ -15,6 +15,8 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { ChangeDataView } from './change_dataview';
+import { DataViewSelector } from './data_view_selector';
+import { dataViewMock } from './mocks/dataview';
 import { DataViewPickerPropsExtended, TextBasedLanguages } from './data_view_picker';
 
 describe('DataView component', () => {
@@ -161,5 +163,65 @@ describe('DataView component', () => {
     findTestSubject(component, 'dataview-trigger').simulate('click');
     component.find('[data-test-subj="dataview-create-new"]').first().simulate('click');
     expect(props.onTextLangQuerySubmit).toHaveBeenCalled();
+  });
+
+  it('should not propagate the adHoc dataviews for text based mode', async () => {
+    const component = mount(
+      wrapDataViewComponentInContext(
+        {
+          ...props,
+          onDataViewCreated: jest.fn(),
+          textBasedLanguages: [TextBasedLanguages.ESQL, TextBasedLanguages.SQL],
+          textBasedLanguage: TextBasedLanguages.ESQL,
+          savedDataViews: [
+            {
+              id: 'dataview-1',
+              title: 'dataview-1',
+            },
+          ],
+          adHocDataViews: [dataViewMock],
+        },
+        false
+      )
+    );
+    findTestSubject(component, 'dataview-trigger').simulate('click');
+    expect(component.find(DataViewSelector).prop('dataViewsList')).toStrictEqual([
+      {
+        id: 'dataview-1',
+        title: 'dataview-1',
+      },
+    ]);
+  });
+
+  it('should propagate the adHoc dataviews for dataview mode', async () => {
+    const component = mount(
+      wrapDataViewComponentInContext(
+        {
+          ...props,
+          onDataViewCreated: jest.fn(),
+          savedDataViews: [
+            {
+              id: 'dataview-1',
+              title: 'dataview-1',
+            },
+          ],
+          adHocDataViews: [dataViewMock],
+        },
+        false
+      )
+    );
+    findTestSubject(component, 'dataview-trigger').simulate('click');
+    expect(component.find(DataViewSelector).prop('dataViewsList')).toStrictEqual([
+      {
+        id: 'dataview-1',
+        title: 'dataview-1',
+      },
+      {
+        id: 'the-data-view-id',
+        title: 'the-data-view-title',
+        name: 'the-data-view',
+        isAdhoc: true,
+      },
+    ]);
   });
 });

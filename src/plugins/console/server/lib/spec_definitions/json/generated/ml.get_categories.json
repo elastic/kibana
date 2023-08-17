@@ -1,9 +1,15 @@
 {
   "ml.get_categories": {
     "url_params": {
-      "from": 0,
-      "size": 0,
-      "partition_field_value": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "from": "",
+      "partition_field_value": "",
+      "size": [
+        "100"
+      ]
     },
     "methods": [
       "GET",
@@ -11,8 +17,12 @@
     ],
     "patterns": [
       "_ml/anomaly_detectors/{job_id}/results/categories/{category_id}",
-      "_ml/anomaly_detectors/{job_id}/results/categories/"
+      "_ml/anomaly_detectors/{job_id}/results/categories"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-category.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-category.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

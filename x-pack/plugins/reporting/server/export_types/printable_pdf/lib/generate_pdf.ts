@@ -7,7 +7,7 @@
 
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
-import { ReportingCore } from '../../..';
+import { PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { PdfScreenshotOptions } from '../../../types';
 import type { PdfMetrics } from '../../../../common/types';
 import { getTracker } from '../../common/pdf_tracker';
@@ -18,14 +18,16 @@ interface PdfResult {
   warnings: string[];
 }
 
+type GetScreenshotsFn = (options: PdfScreenshotOptions) => Rx.Observable<PdfScreenshotResult>;
+
 export function generatePdfObservable(
-  reporting: ReportingCore,
+  getScreenshots: GetScreenshotsFn,
   options: PdfScreenshotOptions
 ): Rx.Observable<PdfResult> {
   const tracker = getTracker();
   tracker.startScreenshots();
 
-  return reporting.getScreenshots(options).pipe(
+  return getScreenshots(options).pipe(
     tap(({ metrics }) => {
       if (metrics.cpu) {
         tracker.setCpuUsage(metrics.cpu);

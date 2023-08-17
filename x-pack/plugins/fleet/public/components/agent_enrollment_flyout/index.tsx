@@ -38,7 +38,11 @@ import { Instructions } from './instructions';
 import { MissingFleetServerHostCallout } from './missing_fleet_server_host_callout';
 import type { FlyOutProps, SelectionType, FlyoutMode } from './types';
 
-import { useIsK8sPolicy, useAgentPolicyWithPackagePolicies } from './hooks';
+import {
+  useIsK8sPolicy,
+  useAgentPolicyWithPackagePolicies,
+  useCloudSecurityIntegration,
+} from './hooks';
 
 export * from './agent_policy_selection';
 export * from './agent_policy_select_create';
@@ -99,7 +103,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
     }
   }, [selectedPolicy, isFleetServerPolicySelected]);
 
-  const { isK8s } = useIsK8sPolicy(selectedPolicy ? selectedPolicy : undefined);
+  const { isK8s } = useIsK8sPolicy(selectedPolicy ?? undefined);
+  const { cloudSecurityIntegration } = useCloudSecurityIntegration(selectedPolicy ?? undefined);
 
   return (
     <EuiFlyout data-test-subj="agentEnrollmentFlyout" onClose={onClose} size="m">
@@ -197,6 +202,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
             agentPolicies={agentPolicies}
             isFleetServerPolicySelected={isFleetServerPolicySelected}
             isK8s={isK8s}
+            cloudSecurityIntegration={cloudSecurityIntegration}
             refreshAgentPolicies={refreshAgentPolicies}
             isLoadingAgentPolicies={isLoadingAgentPolicies}
             mode={mode}

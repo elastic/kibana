@@ -4,11 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { KibanaRequest } from '@kbn/core/server';
 import datemath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import {
+  getAlertUrl,
+  observabilityPaths,
+  ProcessorEvent,
+} from '@kbn/observability-plugin/common';
 import { termQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -18,6 +24,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { asyncForEach } from '@kbn/std';
 import { compact } from 'lodash';
 import { getSeverity } from '../../../../../common/anomaly_detection';
 import {
@@ -55,6 +62,7 @@ const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 
 export function registerAnomalyRuleType({
   alerting,
+  alertsLocator,
   basePath,
   config$,
   logger,
@@ -75,6 +83,7 @@ export function registerAnomalyRuleType({
       validate: { params: anomalyParamsSchema },
       actionVariables: {
         context: [
+          apmActionVariables.alertDetailsUrl,
           apmActionVariables.environment,
           apmActionVariables.reason,
           apmActionVariables.serviceName,
@@ -87,12 +96,17 @@ export function registerAnomalyRuleType({
       producer: 'apm',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      executor: async ({ params, services, spaceId }) => {
+      executor: async ({ params, services, spaceId, startedAt }) => {
         if (!ml) {
           return { state: {} };
         }
 
-        const { savedObjectsClient, scopedClusterClient } = services;
+        const {
+          getAlertUuid,
+          getAlertStartedDate,
+          savedObjectsClient,
+          scopedClusterClient,
+        } = services;
 
         const ruleParams = params;
         const request = {} as KibanaRequest;
@@ -231,7 +245,7 @@ export function registerAnomalyRuleType({
               anomaly ? anomaly.score >= threshold : false
             ) ?? [];
 
-        for (const anomaly of compact(anomalies)) {
+        await asyncForEach(compact(anomalies), async (anomaly) => {
           const {
             serviceName,
             environment,
@@ -261,7 +275,7 @@ export function registerAnomalyRuleType({
             windowUnit: params.windowUnit,
           });
 
-          const id = [
+          const alertId = [
             ApmRuleType.Anomaly,
             serviceName,
             environment,
@@ -270,47 +284,59 @@ export function registerAnomalyRuleType({
             .filter((name) => name)
             .join('_');
 
+          const alert = services.alertWithLifecycle({
+            id: alertId,
+            fields: {
+              [SERVICE_NAME]: serviceName,
+              ...getEnvironmentEsField(environment),
+              [TRANSACTION_TYPE]: transactionType,
+              [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+              [ALERT_SEVERITY]: severityLevel,
+              [ALERT_EVALUATION_VALUE]: score,
+              [ALERT_EVALUATION_THRESHOLD]: threshold,
+              [ALERT_REASON]: reasonMessage,
+              ...eventSourceFields,
+            },
+          });
+
           const relativeViewInAppUrl = getAlertUrlTransaction(
             serviceName,
             getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
             transactionType
           );
-
           const viewInAppUrl = addSpaceIdToPath(
             basePath.publicBaseUrl,
             spaceId,
             relativeViewInAppUrl
           );
+          const indexedStartedAt =
+            getAlertStartedDate(alertId) ?? startedAt.toISOString();
+          const alertUuid = getAlertUuid(alertId);
+          const alertDetailsUrl = await getAlertUrl(
+            alertUuid,
+            spaceId,
+            indexedStartedAt,
+            alertsLocator,
+            basePath.publicBaseUrl
+          );
 
-          services
-            .alertWithLifecycle({
-              id,
-              fields: {
-                [SERVICE_NAME]: serviceName,
-                ...getEnvironmentEsField(environment),
-                [TRANSACTION_TYPE]: transactionType,
-                [PROCESSOR_EVENT]: ProcessorEvent.transaction,
-                [ALERT_SEVERITY]: severityLevel,
-                [ALERT_EVALUATION_VALUE]: score,
-                [ALERT_EVALUATION_THRESHOLD]: threshold,
-                [ALERT_REASON]: reasonMessage,
-                ...eventSourceFields,
-              },
-            })
-            .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
-              environment: getEnvironmentLabel(environment),
-              reason: reasonMessage,
-              serviceName,
-              threshold: selectedOption?.label,
-              transactionType,
-              triggerValue: severityLevel,
-              viewInAppUrl,
-            });
-        }
+          alert.scheduleActions(ruleTypeConfig.defaultActionGroupId, {
+            alertDetailsUrl,
+            environment: getEnvironmentLabel(environment),
+            reason: reasonMessage,
+            serviceName,
+            threshold: selectedOption?.label,
+            transactionType,
+            triggerValue: severityLevel,
+            viewInAppUrl,
+          });
+        });
 
         return { state: {} };
       },
       alerts: ApmRuleTypeAlertDefinition,
+      getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+        observabilityPaths.ruleDetails(rule.id),
     })
   );
 }

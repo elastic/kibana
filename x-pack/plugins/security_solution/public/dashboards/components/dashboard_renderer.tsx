@@ -44,7 +44,8 @@ const DashboardRendererComponent = ({
   const getCreationOptions = useCallback(
     () =>
       Promise.resolve({
-        initialInput: { timeRange, viewMode: ViewMode.VIEW, query, filters },
+        getInitialInput: () => ({ timeRange, viewMode: ViewMode.VIEW, query, filters }),
+        useControlGroupIntegration: true,
       }),
     [filters, query, timeRange]
   );

@@ -12,13 +12,13 @@ import { waitFor } from '@testing-library/react';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import { Subset } from '../../typings';
 import { render } from '../../utils/test_helper';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { AlertDetails } from './alert_details';
 import { ConfigSchema } from '../../plugin';
 import { alert, alertWithNoData } from './mock/alert';
@@ -49,6 +49,7 @@ const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
       ...kibanaStartMock.startContract(),
+      theme: {},
       cases: casesPluginMock.createStartContract(),
       http: {
         basePath: {
@@ -74,7 +75,7 @@ jest.mock('../../hooks/use_fetch_rule', () => {
     }),
   };
 });
-jest.mock('../../hooks/use_breadcrumbs');
+jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/use_get_user_cases_permissions', () => ({
   useGetUserCasesPermissions: () => ({
     all: true,
@@ -138,7 +139,7 @@ describe('Alert details', () => {
 
     expect(alertDetails.queryByTestId('alertDetails')).toBeTruthy();
     expect(alertDetails.queryByTestId('alertDetailsError')).toBeFalsy();
-    expect(alertDetails.queryByTestId('page-title-container')).toBeTruthy();
+    expect(alertDetails.queryByTestId('alertDetailsPageTitle')).toBeTruthy();
     expect(alertDetails.queryByTestId('alert-summary-container')).toBeTruthy();
   });
 

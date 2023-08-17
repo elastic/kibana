@@ -9,6 +9,7 @@ import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
+import { IAlertsClient } from '../alerts_client/types';
 import { Alert } from '../alert';
 import { TaskRunnerContext } from './task_runner_factory';
 import {
@@ -21,6 +22,7 @@ import {
   SanitizedRule,
   RuleTypeState,
   RuleAction,
+  RuleAlertData,
 } from '../../common';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { RawRule, RulesClientApi, CombinedSummarizedAlerts } from '../types';
@@ -31,16 +33,12 @@ export interface RuleTaskRunResult {
   state: RuleTaskState;
   monitoring: RuleMonitoring | undefined;
   schedule: IntervalSchedule | undefined;
+  hasError: boolean;
 }
 
 // This is the state of the alerting task after rule execution, which includes run metrics plus the task state
 export type RuleTaskStateAndMetrics = RuleTaskState & {
   metrics: RuleRunMetrics;
-};
-
-export type RuleRunResult = Pick<RuleTaskRunResult, 'monitoring' | 'schedule'> & {
-  rulesClient: RulesClientApi;
-  stateWithMetrics: RuleTaskStateAndMetrics;
 };
 
 export interface RunRuleParams<Params extends RuleTypeParams> {
@@ -64,7 +62,8 @@ export interface ExecutionHandlerOptions<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
+  AlertData extends RuleAlertData
 > {
   ruleType: NormalizedRuleType<
     Params,
@@ -73,7 +72,8 @@ export interface ExecutionHandlerOptions<
     State,
     Context,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   >;
   logger: Logger;
   alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
@@ -88,15 +88,23 @@ export interface ExecutionHandlerOptions<
   previousStartedAt: Date | null;
   actionsClient: PublicMethodsOf<ActionsClient>;
   maintenanceWindowIds?: string[];
+  alertsClient: IAlertsClient<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>;
 }
 
-export interface Executable<
+export type Executable<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
-> {
+> = {
   action: RuleAction;
-  alert?: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
-  summarizedAlerts?: CombinedSummarizedAlerts;
-}
+} & (
+  | {
+      alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
+      summarizedAlerts?: never;
+    }
+  | {
+      alert?: never;
+      summarizedAlerts: CombinedSummarizedAlerts;
+    }
+);

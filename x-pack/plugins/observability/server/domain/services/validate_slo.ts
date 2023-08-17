@@ -23,6 +23,10 @@ import { SLO } from '../models';
  * @param slo {SLO}
  */
 export function validateSLO(slo: SLO) {
+  if (!isValidId(slo.id)) {
+    throw new IllegalArgumentError('Invalid id');
+  }
+
   if (!isValidTargetNumber(slo.objective.target)) {
     throw new IllegalArgumentError('Invalid objective.target');
   }
@@ -70,18 +74,19 @@ function validateSettings(slo: SLO) {
   }
 }
 
+function isValidId(id: string): boolean {
+  const MIN_ID_LENGTH = 8;
+  const MAX_ID_LENGTH = 36;
+  return MIN_ID_LENGTH <= id.length && id.length <= MAX_ID_LENGTH;
+}
+
 function isValidTargetNumber(value: number): boolean {
   return value > 0 && value < 1;
 }
 
 function isValidRollingTimeWindowDuration(duration: Duration): boolean {
-  return [
-    DurationUnit.Day,
-    DurationUnit.Week,
-    DurationUnit.Month,
-    DurationUnit.Quarter,
-    DurationUnit.Year,
-  ].includes(duration.unit);
+  // 7, 30 or 90days accepted
+  return duration.unit === DurationUnit.Day && [7, 30, 90].includes(duration.value);
 }
 
 function isValidCalendarAlignedTimeWindowDuration(duration: Duration): boolean {

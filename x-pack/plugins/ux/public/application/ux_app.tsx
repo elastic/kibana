@@ -27,11 +27,12 @@ import {
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
 
+import { DatePickerContextProvider } from '@kbn/observability-plugin/public';
 import {
-  DatePickerContextProvider,
   InspectorContextProvider,
   useBreadcrumbs,
-} from '@kbn/observability-plugin/public';
+} from '@kbn/observability-shared-plugin/public';
+import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
 import { CsmSharedContextProvider } from '../components/app/rum_dashboard/csm_shared_context';
 import {
   DASHBOARD_LABEL,
@@ -111,6 +112,7 @@ export function UXAppRoot({
     maps,
     observability,
     observabilityShared,
+    observabilityAIAssistant,
     exploratoryView,
     data,
     dataViews,
@@ -147,39 +149,42 @@ export function UXAppRoot({
           lens,
         }}
       >
-        <KibanaThemeProvider
-          theme$={appMountParameters.theme$}
-          modify={{
-            breakpoint: {
-              xxl: 1600,
-              xxxl: 2000,
-            },
-          }}
-        >
-          <PluginContext.Provider
-            value={{
-              appMountParameters,
-              exploratoryView,
+        <ObservabilityAIAssistantProvider value={observabilityAIAssistant}>
+          <KibanaThemeProvider
+            theme$={appMountParameters.theme$}
+            modify={{
+              breakpoint: {
+                xxl: 1600,
+                xxxl: 2000,
+              },
             }}
           >
-            <i18nCore.Context>
-              <RouterProvider history={history} router={uxRouter}>
-                <DatePickerContextProvider>
-                  <InspectorContextProvider>
-                    <UrlParamsProvider>
-                      <EuiErrorBoundary>
-                        <CsmSharedContextProvider>
-                          <UxApp />
-                        </CsmSharedContextProvider>
-                      </EuiErrorBoundary>
-                      <UXActionMenu appMountParameters={appMountParameters} />
-                    </UrlParamsProvider>
-                  </InspectorContextProvider>
-                </DatePickerContextProvider>
-              </RouterProvider>
-            </i18nCore.Context>
-          </PluginContext.Provider>
-        </KibanaThemeProvider>
+            <PluginContext.Provider
+              value={{
+                appMountParameters,
+                exploratoryView,
+                observabilityShared,
+              }}
+            >
+              <i18nCore.Context>
+                <RouterProvider history={history} router={uxRouter}>
+                  <DatePickerContextProvider>
+                    <InspectorContextProvider>
+                      <UrlParamsProvider>
+                        <EuiErrorBoundary>
+                          <CsmSharedContextProvider>
+                            <UxApp />
+                          </CsmSharedContextProvider>
+                        </EuiErrorBoundary>
+                        <UXActionMenu appMountParameters={appMountParameters} />
+                      </UrlParamsProvider>
+                    </InspectorContextProvider>
+                  </DatePickerContextProvider>
+                </RouterProvider>
+              </i18nCore.Context>
+            </PluginContext.Provider>
+          </KibanaThemeProvider>
+        </ObservabilityAIAssistantProvider>
       </KibanaContextProvider>
     </RedirectAppLinks>
   );

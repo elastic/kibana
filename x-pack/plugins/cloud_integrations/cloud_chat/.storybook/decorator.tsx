@@ -19,6 +19,9 @@ const services: CloudChatServices = {
       // this doesn't affect chat appearance,
       // but a user identity in Drift only
       jwt: 'identity-jwt',
+      trialEndDate: new Date(),
+      kbnVersion: '8.9.0',
+      kbnBuildNum: 12345,
     },
   },
 };

@@ -6,12 +6,15 @@
  */
 
 import React, { FC } from 'react';
+import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
+import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
 import { ELASTIC_SUPPORT_LINK, CLOUD_SNAPSHOTS_PATH } from '../common/constants';
-import { getFullCloudUrl } from './utils';
+import { decodeCloudId, type DecodedCloudId } from '../common/decode_cloud_id';
+import type { CloudSetup, CloudStart } from './types';
+import { getFullCloudUrl } from '../common/utils';
 
 export interface CloudConfigType {
   id?: string;
@@ -19,101 +22,41 @@ export interface CloudConfigType {
   base_url?: string;
   profile_url?: string;
   deployment_url?: string;
+  projects_url?: string;
+  billing_url?: string;
   organization_url?: string;
+  users_and_roles_url?: string;
+  performance_url?: string;
   trial_end_date?: string;
   is_elastic_staff_owned?: boolean;
-}
-
-export interface CloudStart {
-  /**
-   * A React component that provides a pre-wired `React.Context` which connects components to Cloud services.
-   */
-  CloudContextProvider: FC<{}>;
-  /**
-   * `true` when Kibana is running on Elastic Cloud.
-   */
-  isCloudEnabled: boolean;
-  /**
-   * Cloud ID. Undefined if not running on Cloud.
-   */
-  cloudId?: string;
-  /**
-   * The full URL to the deployment management page on Elastic Cloud. Undefined if not running on Cloud.
-   */
-  deploymentUrl?: string;
-  /**
-   * The full URL to the user profile page on Elastic Cloud. Undefined if not running on Cloud.
-   */
-  profileUrl?: string;
-  /**
-   * The full URL to the organization management page on Elastic Cloud. Undefined if not running on Cloud.
-   */
-  organizationUrl?: string;
-}
-
-export interface CloudSetup {
-  /**
-   * Cloud ID. Undefined if not running on Cloud.
-   */
-  cloudId?: string;
-  /**
-   * This value is the same as `baseUrl` on ESS but can be customized on ECE.
-   */
-  cname?: string;
-  /**
-   * This is the URL of the Cloud interface.
-   */
-  baseUrl?: string;
-  /**
-   * The full URL to the deployment management page on Elastic Cloud. Undefined if not running on Cloud.
-   */
-  deploymentUrl?: string;
-  /**
-   * The full URL to the user profile page on Elastic Cloud. Undefined if not running on Cloud.
-   */
-  profileUrl?: string;
-  /**
-   * The full URL to the organization management page on Elastic Cloud. Undefined if not running on Cloud.
-   */
-  organizationUrl?: string;
-  /**
-   * This is the path to the Snapshots page for the deployment to which the Kibana instance belongs. The value is already prepended with `deploymentUrl`.
-   */
-  snapshotsUrl?: string;
-  /**
-   * `true` when Kibana is running on Elastic Cloud.
-   */
-  isCloudEnabled: boolean;
-  /**
-   * When the Cloud Trial ends/ended for the organization that owns this deployment. Only available when running on Elastic Cloud.
-   */
-  trialEndDate?: Date;
-  /**
-   * `true` if the Elastic Cloud organization that owns this deployment is owned by an Elastician. Only available when running on Elastic Cloud.
-   */
-  isElasticStaffOwned?: boolean;
-  /**
-   * Registers CloudServiceProviders so start's `CloudContextProvider` hooks them.
-   * @param contextProvider The React component from the Service Provider.
-   */
-  registerCloudService: (contextProvider: FC) => void;
+  serverless?: {
+    project_id: string;
+  };
 }
 
 interface CloudUrls {
   deploymentUrl?: string;
   profileUrl?: string;
+  billingUrl?: string;
   organizationUrl?: string;
   snapshotsUrl?: string;
+  performanceUrl?: string;
+  usersAndRolesUrl?: string;
+  projectsUrl?: string;
 }
 
 export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly config: CloudConfigType;
   private readonly isCloudEnabled: boolean;
+  private readonly isServerlessEnabled: boolean;
   private readonly contextProviders: FC[] = [];
+  private readonly logger: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
     this.isCloudEnabled = getIsCloudEnabled(this.config.id);
+    this.isServerlessEnabled = !!this.config.serverless?.project_id;
+    this.logger = initializerContext.logger.get();
   }
 
   public setup(core: CoreSetup): CloudSetup {
@@ -127,14 +70,28 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       is_elastic_staff_owned: isElasticStaffOwned,
     } = this.config;
 
+    let decodedId: DecodedCloudId | undefined;
+    if (id) {
+      decodedId = decodeCloudId(id, this.logger);
+    }
+
     return {
       cloudId: id,
+      deploymentId: parseDeploymentIdFromDeploymentUrl(this.config.deployment_url),
       cname,
       baseUrl,
       ...this.getCloudUrls(),
+      elasticsearchUrl: decodedId?.elasticsearchUrl,
+      kibanaUrl: decodedId?.kibanaUrl,
+      cloudHost: decodedId?.host,
+      cloudDefaultPort: decodedId?.defaultPort,
       trialEndDate: trialEndDate ? new Date(trialEndDate) : undefined,
       isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,
+      isServerlessEnabled: this.isServerlessEnabled,
+      serverless: {
+        projectId: this.config.serverless?.project_id,
+      },
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);
       },
@@ -159,15 +116,38 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       );
     };
 
-    const { deploymentUrl, profileUrl, organizationUrl } = this.getCloudUrls();
+    const {
+      deploymentUrl,
+      profileUrl,
+      billingUrl,
+      organizationUrl,
+      performanceUrl,
+      usersAndRolesUrl,
+      projectsUrl,
+    } = this.getCloudUrls();
+
+    let decodedId: DecodedCloudId | undefined;
+    if (this.config.id) {
+      decodedId = decodeCloudId(this.config.id, this.logger);
+    }
 
     return {
       CloudContextProvider,
       isCloudEnabled: this.isCloudEnabled,
       cloudId: this.config.id,
+      billingUrl,
       deploymentUrl,
       profileUrl,
       organizationUrl,
+      projectsUrl,
+      elasticsearchUrl: decodedId?.elasticsearchUrl,
+      kibanaUrl: decodedId?.kibanaUrl,
+      isServerlessEnabled: this.isServerlessEnabled,
+      serverless: {
+        projectId: this.config.serverless?.project_id,
+      },
+      performanceUrl,
+      usersAndRolesUrl,
     };
   }
 
@@ -176,21 +156,33 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   private getCloudUrls(): CloudUrls {
     const {
       profile_url: profileUrl,
+      billing_url: billingUrl,
       organization_url: organizationUrl,
       deployment_url: deploymentUrl,
       base_url: baseUrl,
+      performance_url: performanceUrl,
+      users_and_roles_url: usersAndRolesUrl,
+      projects_url: projectsUrl,
     } = this.config;
 
     const fullCloudDeploymentUrl = getFullCloudUrl(baseUrl, deploymentUrl);
     const fullCloudProfileUrl = getFullCloudUrl(baseUrl, profileUrl);
+    const fullCloudBillingUrl = getFullCloudUrl(baseUrl, billingUrl);
     const fullCloudOrganizationUrl = getFullCloudUrl(baseUrl, organizationUrl);
+    const fullCloudPerformanceUrl = getFullCloudUrl(baseUrl, performanceUrl);
+    const fullCloudUsersAndRolesUrl = getFullCloudUrl(baseUrl, usersAndRolesUrl);
+    const fullCloudProjectsUrl = getFullCloudUrl(baseUrl, projectsUrl);
     const fullCloudSnapshotsUrl = `${fullCloudDeploymentUrl}/${CLOUD_SNAPSHOTS_PATH}`;
 
     return {
       deploymentUrl: fullCloudDeploymentUrl,
       profileUrl: fullCloudProfileUrl,
+      billingUrl: fullCloudBillingUrl,
       organizationUrl: fullCloudOrganizationUrl,
       snapshotsUrl: fullCloudSnapshotsUrl,
+      performanceUrl: fullCloudPerformanceUrl,
+      usersAndRolesUrl: fullCloudUsersAndRolesUrl,
+      projectsUrl: fullCloudProjectsUrl,
     };
   }
 }

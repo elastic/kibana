@@ -19,7 +19,7 @@ import {
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { bulkCreateRulesRoute } from './route';
-import { getCreateRulesSchemaMock } from '../../../../../../../common/detection_engine/rule_schema/mocks';
+import { getCreateRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';

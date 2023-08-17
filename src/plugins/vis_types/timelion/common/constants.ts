@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+export const TIMELION_VIS_NAME = 'timelion';
+
 export const UI_SETTINGS = {
   ES_TIMEFIELD: 'timelion:es.timefield',
   DEFAULT_INDEX: 'timelion:es.default_index',

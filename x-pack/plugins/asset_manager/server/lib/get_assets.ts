@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { debug } from '../../common/debug_log';
 import { Asset, AssetFilters } from '../../common/types_api';
 import { ASSETS_INDEX_PREFIX } from '../constants';
 import { ElasticsearchAccessorOptions } from '../types';
+import { isStringOrNonEmptyArray } from './utils';
 
 interface GetAssetsOptions extends ElasticsearchAccessorOptions {
   size?: number;
@@ -24,9 +24,78 @@ export async function getAssets({
   filters = {},
 }: GetAssetsOptions): Promise<Asset[]> {
   // Maybe it makes the most sense to validate the filters here?
+  debug('Get Assets Filters:', JSON.stringify(filters));
 
   const { from = 'now-24h', to = 'now' } = filters;
-  const dsl: SearchRequest = {
+  const must: QueryDslQueryContainer[] = [];
+
+  if (filters && Object.keys(filters).length > 0) {
+    if (typeof filters.collectionVersion === 'number') {
+      must.push({
+        term: {
+          ['asset.collection_version']: filters.collectionVersion,
+        },
+      });
+    }
+
+    if (isStringOrNonEmptyArray(filters.type)) {
+      must.push({
+        terms: {
+          ['asset.type']: Array.isArray(filters.type) ? filters.type : [filters.type],
+        },
+      });
+    }
+
+    if (isStringOrNonEmptyArray(filters.kind)) {
+      must.push({
+        terms: {
+          ['asset.kind']: Array.isArray(filters.kind) ? filters.kind : [filters.kind],
+        },
+      });
+    }
+
+    if (isStringOrNonEmptyArray(filters.ean)) {
+      must.push({
+        terms: {
+          ['asset.ean']: Array.isArray(filters.ean) ? filters.ean : [filters.ean],
+        },
+      });
+    }
+
+    if (filters.id) {
+      must.push({
+        term: {
+          ['asset.id']: filters.id,
+        },
+      });
+    }
+
+    if (filters.typeLike) {
+      must.push({
+        wildcard: {
+          ['asset.type']: filters.typeLike,
+        },
+      });
+    }
+
+    if (filters.kindLike) {
+      must.push({
+        wildcard: {
+          ['asset.kind']: filters.kindLike,
+        },
+      });
+    }
+
+    if (filters.eanLike) {
+      must.push({
+        wildcard: {
+          ['asset.ean']: filters.eanLike,
+        },
+      });
+    }
+  }
+
+  const dsl = {
     index: ASSETS_INDEX_PREFIX + '*',
     size,
     query: {
@@ -41,6 +110,7 @@ export async function getAssets({
             },
           },
         ],
+        must,
       },
     },
     collapse: {
@@ -53,74 +123,8 @@ export async function getAssets({
     },
   };
 
-  if (filters && Object.keys(filters).length > 0) {
-    const musts: QueryDslQueryContainer[] = [];
+  debug('Performing Get Assets Query', '\n\n', JSON.stringify(dsl, null, 2));
 
-    if (typeof filters.collectionVersion === 'number') {
-      musts.push({
-        term: {
-          ['asset.collection_version']: filters.collectionVersion,
-        },
-      });
-    }
-
-    if (filters.type?.length) {
-      musts.push({
-        terms: {
-          ['asset.type']: Array.isArray(filters.type) ? filters.type : [filters.type],
-        },
-      });
-    }
-
-    if (filters.kind) {
-      musts.push({
-        term: {
-          ['asset.kind']: filters.kind,
-        },
-      });
-    }
-
-    if (filters.ean) {
-      musts.push({
-        terms: {
-          ['asset.ean']: Array.isArray(filters.ean) ? filters.ean : [filters.ean],
-        },
-      });
-    }
-
-    if (filters.id) {
-      musts.push({
-        term: {
-          ['asset.id']: filters.id,
-        },
-      });
-    }
-
-    if (filters.typeLike) {
-      musts.push({
-        wildcard: {
-          ['asset.type']: filters.typeLike,
-        },
-      });
-    }
-
-    if (filters.eanLike) {
-      musts.push({
-        wildcard: {
-          ['asset.ean']: filters.eanLike,
-        },
-      });
-    }
-
-    if (musts.length > 0) {
-      dsl.query = dsl.query || {};
-      dsl.query.bool = dsl.query.bool || {};
-      dsl.query.bool.must = musts;
-    }
-  }
-
-  debug('Performing Asset Query', '\n\n', JSON.stringify(dsl, null, 2));
-
-  const response = await esClient.search<{}>(dsl);
-  return response.hits.hits.map((hit) => hit._source as Asset);
+  const response = await esClient.search<Asset>(dsl);
+  return response.hits.hits.map((hit) => hit._source).filter((asset): asset is Asset => !!asset);
 }

@@ -26,8 +26,7 @@ image::management/connectors/images/index-connector.png[Index connector]
 [[index-connector-configuration]]
 ==== Connector configuration
 
-Index connectors must have a name and an {es} index. You can optionally set the
-{ref}/docs-refresh.html[refresh] policy and the time field, which contains the
+Index connectors must have a name and an {es} index. You can optionally set the time field, which contains the
 details about when each alert condition was detected.
 
 [float]
@@ -46,10 +45,8 @@ xpack.actions.preconfigured:
     actionTypeId: .index
     config:
       index: .kibana
-      refresh: true <1>
       executionTimeField: my-field
 --
-<1> By default, the {ref}/docs-refresh.html[refresh] policy is `false`.
 
 For more information, go to <<pre-configured-connectors>>.
 

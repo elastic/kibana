@@ -112,13 +112,18 @@ export class CasePlugin {
       )}] and plugins [${Object.keys(plugins)}]`
     );
 
-    registerInternalAttachments(this.externalReferenceAttachmentTypeRegistry);
+    registerInternalAttachments(
+      this.externalReferenceAttachmentTypeRegistry,
+      this.persistableStateAttachmentTypeRegistry
+    );
     registerCaseFileKinds(this.caseConfig.files, plugins.files);
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
 
-    plugins.features.registerKibanaFeature(getCasesKibanaFeature());
+    if (this.caseConfig.stack.enabled) {
+      plugins.features.registerKibanaFeature(getCasesKibanaFeature());
+    }
 
     core.savedObjects.registerType(
       createCaseCommentSavedObjectType({

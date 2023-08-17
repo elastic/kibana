@@ -6,17 +6,15 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { AccessorConfig } from '@kbn/visualization-ui-components/public';
+import { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   Visualization,
@@ -42,7 +40,8 @@ import {
 } from '../../../common/constants';
 import { suggestions } from './suggestions';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import { DimensionDataExtraEditor, DimensionEditor, PieToolbar } from './toolbar';
+import { PieToolbar } from './toolbar';
+import { DimensionDataExtraEditor, DimensionEditor } from './dimension_editor';
 import { LayerSettings } from './layer_settings';
 import { checkTableForContainsSmallValues } from './render_helpers';
 import { DatasourcePublicAPI } from '../..';
@@ -79,21 +78,29 @@ const numberMetricOperations = (op: OperationMetadata) =>
 export const isCollapsed = (columnId: string, layer: PieLayerState) =>
   Boolean(layer.collapseFns?.[columnId]);
 
+export const hasNonCollapsedSliceBy = (l: PieLayerState) => {
+  const sliceByLength = l.primaryGroups.length;
+  const collapsedGroupsLength =
+    (l.collapseFns && Object.values(l.collapseFns).filter(Boolean).length) ?? 0;
+  return sliceByLength - collapsedGroupsLength > 0;
+};
+
 export const getDefaultColorForMultiMetricDimension = ({
   layer,
   columnId,
   paletteService,
   datasource,
+  palette,
 }: {
   layer: PieLayerState;
   columnId: string;
   paletteService: PaletteRegistry;
   datasource: DatasourcePublicAPI | undefined;
+  palette?: PieVisualizationState['palette'];
 }) => {
   const columnToLabelMap = datasource ? getColumnToLabelMap(layer.metrics, datasource) : {};
   const sortedMetrics = getSortedAccessorsForGroup(datasource, layer, 'metrics');
-
-  return paletteService.get('default').getCategoricalColor([
+  return paletteService.get(palette?.name || 'default').getCategoricalColor([
     {
       name: columnToLabelMap[columnId],
       rankAtDepth: sortedMetrics.indexOf(columnId),
@@ -320,8 +327,6 @@ export const getPieVisualization = ({
     };
 
     const getMetricGroupConfig = (): VisualizationDimensionGroupConfig => {
-      const hasSliceBy = layer.primaryGroups.length + (layer.secondaryGroups?.length ?? 0);
-
       const accessors: AccessorConfig[] = getSortedAccessorsForGroup(
         datasource,
         layer,
@@ -329,7 +334,7 @@ export const getPieVisualization = ({
       ).map<AccessorConfig>((columnId) => ({
         columnId,
         ...(layer.allowMultipleMetrics
-          ? hasSliceBy
+          ? hasNonCollapsedSliceBy(layer)
             ? {
                 triggerIconType: 'disabled',
               }
@@ -342,6 +347,7 @@ export const getPieVisualization = ({
                     columnId,
                     paletteService,
                     datasource,
+                    palette: state.palette,
                   }) ??
                   undefined,
               }
@@ -366,6 +372,7 @@ export const getPieVisualization = ({
         accessors,
         supportsMoreColumns: layer.metrics.length === 0 || Boolean(layer.allowMultipleMetrics),
         filterOperations: numberMetricOperations,
+        isMetricDimension: true,
         requiredMinDimensionCount: 1,
         dimensionsTooMany: layer.allowMultipleMetrics ? 0 : layer.metrics.length - 1,
         dataTestSubj: 'lnsPie_sizeByDimensionPanel',
@@ -451,25 +458,11 @@ export const getPieVisualization = ({
       layers: newState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
     };
   },
-  renderDimensionEditor(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
-        <I18nProvider>
-          <DimensionEditor {...props} paletteService={paletteService} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  DimensionEditorComponent(props) {
+    return <DimensionEditor {...props} paletteService={paletteService} />;
   },
-  renderDimensionEditorDataExtra(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
-        <I18nProvider>
-          <DimensionDataExtraEditor {...props} paletteService={paletteService} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  DimensionEditorDataExtraComponent(props) {
+    return <DimensionDataExtraEditor {...props} paletteService={paletteService} />;
   },
 
   getSupportedLayers() {
@@ -493,30 +486,16 @@ export const getPieVisualization = ({
   toPreviewExpression: (state, layers, datasourceExpressionsByLayers) =>
     toPreviewExpression(state, layers, paletteService, datasourceExpressionsByLayers),
 
-  renderToolbar(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
-        <I18nProvider>
-          <PieToolbar {...props} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  ToolbarComponent(props) {
+    return <PieToolbar {...props} />;
   },
 
   hasLayerSettings(props) {
     return { data: props.state.shape !== PieChartTypes.MOSAIC, appearance: false };
   },
 
-  renderLayerSettings(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
-        <I18nProvider>
-          <LayerSettings {...props} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  LayerSettingsComponent(props) {
+    return <LayerSettings {...props} />;
   },
 
   getSuggestionFromConvertToLensContext(props) {
@@ -671,10 +650,11 @@ export const getPieVisualization = ({
                 columnId,
                 paletteService,
                 datasource,
+                palette: state.palette,
               })
           )
         );
-      } else if (!layer.primaryGroups?.length) {
+      } else if (!hasNonCollapsedSliceBy(layer)) {
         // This is a logic integrated in the renderer, here simulated
         // In the particular case of no color assigned (as no sliceBy dimension defined)
         // the color is generated on the fly from the default palette
@@ -733,7 +713,7 @@ export const getPieVisualization = ({
         });
       });
 
-      if (layer.primaryGroups.some((id) => !isCollapsed(id, layer))) {
+      if (hasNonCollapsedSliceBy(layer)) {
         palette.push(
           ...paletteService
             .get(state.palette?.name || 'default')

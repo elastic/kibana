@@ -77,7 +77,8 @@ async function archiveWithOCC(
         ...attributes,
         events,
         expirationDate,
-        ...modificationMetadata,
+        updatedAt: modificationMetadata.updatedAt,
+        updatedBy: modificationMetadata.updatedBy,
       },
       {
         version,

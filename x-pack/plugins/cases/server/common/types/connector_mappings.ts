@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import * as rt from 'io-ts';
+import type { SavedObject } from '@kbn/core/server';
+import type { ConnectorMappingsAttributes } from '../../../common/types/domain';
+import { ConnectorMappingsAttributesRt } from '../../../common/types/domain';
+
 export interface ConnectorMappingsPersistedAttributes {
   mappings: Array<{
     action_type: string;
@@ -13,3 +18,13 @@ export interface ConnectorMappingsPersistedAttributes {
   }>;
   owner: string;
 }
+
+export const ConnectorMappingsAttributesTransformedRt = ConnectorMappingsAttributesRt;
+
+export type ConnectorMappingsAttributesTransformed = ConnectorMappingsAttributes;
+export type ConnectorMappingsSavedObjectTransformed =
+  SavedObject<ConnectorMappingsAttributesTransformed>;
+
+export const ConnectorMappingsAttributesPartialRt = rt.exact(
+  rt.partial(ConnectorMappingsAttributesRt.type.props)
+);

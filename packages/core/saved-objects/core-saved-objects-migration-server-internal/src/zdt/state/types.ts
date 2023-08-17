@@ -17,7 +17,7 @@ import type { MigrationLog, Progress, TransformRawDocs } from '../../types';
 import type { ControlState } from '../../state_action_machine';
 import type { BulkOperationBatch } from '../../model/create_batches';
 import type { AliasAction } from '../../actions';
-import { TransformErrorObjects } from '../../core';
+import type { TransformErrorObjects } from '../../core';
 
 export interface BaseState extends ControlState {
   readonly retryCount: number;
@@ -65,6 +65,11 @@ export interface PostInitState extends BaseState {
    * All operations updating this field will update in the state accordingly.
    */
   readonly currentIndexMeta: IndexMappingMeta;
+  /**
+   * The previous algorithm that was last used to migrate this index.
+   * Used for v2->zdt state conversion.
+   */
+  readonly previousAlgorithm: 'zdt' | 'v2';
 }
 
 /**

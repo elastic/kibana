@@ -13,11 +13,13 @@ import {
   indicatorSchema,
   indicatorTypesSchema,
   kqlCustomIndicatorSchema,
+  metricCustomIndicatorSchema,
 } from '@kbn/slo-schema';
 
 type APMTransactionErrorRateIndicator = t.TypeOf<typeof apmTransactionErrorRateIndicatorSchema>;
 type APMTransactionDurationIndicator = t.TypeOf<typeof apmTransactionDurationIndicatorSchema>;
 type KQLCustomIndicator = t.TypeOf<typeof kqlCustomIndicatorSchema>;
+type MetricCustomIndicator = t.TypeOf<typeof metricCustomIndicatorSchema>;
 type Indicator = t.TypeOf<typeof indicatorSchema>;
 type IndicatorTypes = t.TypeOf<typeof indicatorTypesSchema>;
 type IndicatorData = t.TypeOf<typeof indicatorDataSchema>;
@@ -28,5 +30,6 @@ export type {
   APMTransactionErrorRateIndicator,
   APMTransactionDurationIndicator,
   KQLCustomIndicator,
+  MetricCustomIndicator,
   IndicatorData,
 };

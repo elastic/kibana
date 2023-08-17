@@ -7,9 +7,8 @@
 
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Route } from '@kbn/shared-ux-router';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -17,7 +16,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AlertingPluginStart } from '../plugin';
-import { paths } from '../config';
+import { MAINTENANCE_WINDOW_PATHS } from '../../common';
 import { useLicense } from '../hooks/use_license';
 
 const MaintenanceWindowsLazy: React.FC = React.lazy(() => import('../pages/maintenance_windows'));
@@ -33,11 +32,11 @@ const App = React.memo(() => {
   const hasLicense = isAtLeastPlatinum();
 
   return (
-    <Switch>
+    <Routes>
       {hasLicense ? (
         <Route
-          key={paths.alerting.maintenanceWindowsCreate}
-          path={paths.alerting.maintenanceWindowsCreate}
+          key={MAINTENANCE_WINDOW_PATHS.alerting.maintenanceWindowsCreate}
+          path={MAINTENANCE_WINDOW_PATHS.alerting.maintenanceWindowsCreate}
           exact
         >
           <Suspense fallback={<EuiLoadingSpinner />}>
@@ -47,8 +46,8 @@ const App = React.memo(() => {
       ) : null}
       {hasLicense ? (
         <Route
-          key={paths.alerting.maintenanceWindowsEdit}
-          path={paths.alerting.maintenanceWindowsEdit}
+          key={MAINTENANCE_WINDOW_PATHS.alerting.maintenanceWindowsEdit}
+          path={MAINTENANCE_WINDOW_PATHS.alerting.maintenanceWindowsEdit}
           exact
         >
           <Suspense fallback={<EuiLoadingSpinner />}>
@@ -61,7 +60,7 @@ const App = React.memo(() => {
           <MaintenanceWindowsLazy />
         </Suspense>
       </Route>
-    </Switch>
+    </Routes>
   );
 });
 App.displayName = 'App';

@@ -47,10 +47,11 @@ import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/types';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
 import { TagsAddRemove } from './components/tags_add_remove';
-import { AgentActivityFlyout } from './components';
+import { AgentActivityFlyout, AgentSoftLimitCallout } from './components';
 import { TableRowActions } from './components/table_row_actions';
 import { AgentListTable } from './components/agent_list_table';
 import { getKuery } from './utils/get_kuery';
+import { useAgentSoftLimit } from './hooks';
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -396,6 +397,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { isFleetServerStandalone } = useFleetServerStandalone();
   const showUnhealthyCallout = isFleetServerUnhealthy && !isFleetServerStandalone;
 
+  const { shouldDisplayAgentSoftLimit } = useAgentSoftLimit();
+
   const onClickAddFleetServer = useCallback(() => {
     flyoutContext.openFleetServerFlyout();
   }, [flyoutContext]);
@@ -410,6 +413,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   };
 
   const isCurrentRequestIncremented = currentRequestRef?.current === 1;
+
   return (
     <>
       {isAgentActivityFlyoutOpen ? (
@@ -460,7 +464,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           />
         </EuiPortal>
       )}
-      {agentToGetUninstallCommand && (
+      {agentToGetUninstallCommand?.policy_id && (
         <EuiPortal>
           <UninstallCommandFlyout
             target="agent"
@@ -516,6 +520,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           ) : (
             <FleetServerOnPremUnhealthyCallout onClickAddFleetServer={onClickAddFleetServer} />
           )}
+          <EuiSpacer size="l" />
+        </>
+      )}
+      {shouldDisplayAgentSoftLimit && (
+        <>
+          <AgentSoftLimitCallout />
           <EuiSpacer size="l" />
         </>
       )}

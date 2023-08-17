@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { SecuritySolutionTabNavigationProps } from '../types';
+import type { NavTab } from '../types';
 
-export interface TabNavigationProps extends SecuritySolutionTabNavigationProps {
-  pathName: string;
-  pageName: string;
-  tabName?: string;
+export interface TabNavigationProps {
+  navTabs: Record<string, NavTab>;
 }
 
 export interface TabNavigationItemProps {

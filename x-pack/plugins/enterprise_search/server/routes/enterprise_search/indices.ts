@@ -26,6 +26,7 @@ import { fetchConnectorByIndexName, fetchConnectors } from '../../lib/connectors
 import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 
 import { createIndex } from '../../lib/indices/create_index';
+import { deleteAccessControlIndex } from '../../lib/indices/delete_access_control_index';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices, fetchSearchIndices } from '../../lib/indices/fetch_indices';
@@ -51,6 +52,7 @@ import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {
   isIndexNotFoundException,
+  isNotFoundException,
   isPipelineIsInUseException,
   isResourceNotFoundException,
 } from '../../utils/identify_exceptions';
@@ -200,6 +202,7 @@ export function registerIndexRoutes({
         }
 
         await deleteIndexPipelines(client, indexName);
+        await deleteAccessControlIndex(client, indexName);
 
         await client.asCurrentUser.indices.delete({ index: indexName });
 
@@ -338,7 +341,7 @@ export function registerIndexRoutes({
       const indexName = decodeURIComponent(request.params.indexName);
       const { client } = (await context.core).elasticsearch;
       const [defaultPipeline, customPipelines] = await Promise.all([
-        getPipeline(DEFAULT_PIPELINE_NAME, client),
+        getPipeline(DEFAULT_PIPELINE_NAME, client).catch(() => ({})),
         getCustomPipelines(indexName, client),
       ]);
       return response.ok({
@@ -391,22 +394,12 @@ export function registerIndexRoutes({
           indexName: schema.string(),
         }),
         body: schema.object({
-          destination_field: schema.maybe(schema.nullable(schema.string())),
           field_mappings: schema.maybe(
             schema.arrayOf(
               schema.object({ sourceField: schema.string(), targetField: schema.string() })
             )
           ),
-          inference_config: schema.maybe(
-            schema.object({
-              zero_shot_classification: schema.maybe(
-                schema.object({
-                  labels: schema.arrayOf(schema.string()),
-                })
-              ),
-            })
-          ),
-          model_id: schema.maybe(schema.string()),
+          model_id: schema.string(),
           pipeline_definition: schema.maybe(
             schema.object({
               description: schema.maybe(schema.string()),
@@ -415,7 +408,6 @@ export function registerIndexRoutes({
             })
           ),
           pipeline_name: schema.string(),
-          source_field: schema.maybe(schema.string()),
         }),
       },
     },
@@ -427,40 +419,8 @@ export function registerIndexRoutes({
         model_id: modelId,
         pipeline_name: pipelineName,
         pipeline_definition: pipelineDefinition,
-        source_field: sourceField,
-        destination_field: destinationField,
-        inference_config: inferenceConfig,
         field_mappings: fieldMappings,
       } = request.body;
-
-      // additional validations
-      if ((pipelineDefinition || fieldMappings) && (sourceField || destinationField || modelId)) {
-        return createError({
-          errorCode: ErrorCode.PARAMETER_CONFLICT,
-          message: i18n.translate(
-            'xpack.enterpriseSearch.server.routes.createMlInferencePipeline.ParameterConflictError',
-            {
-              defaultMessage:
-                'pipeline_definition and field_mappings should only be provided if source_field and destination_field and model_id are not provided',
-            }
-          ),
-          response,
-          statusCode: 400,
-        });
-      } else if (!((pipelineDefinition && fieldMappings) || (sourceField && modelId))) {
-        return createError({
-          errorCode: ErrorCode.PARAMETER_CONFLICT,
-          message: i18n.translate(
-            'xpack.enterpriseSearch.server.routes.createMlInferencePipeline.ParameterMissingError',
-            {
-              defaultMessage:
-                'either pipeline_definition AND fieldMappings or source_field AND model_id must be provided',
-            }
-          ),
-          response,
-          statusCode: 400,
-        });
-      }
 
       try {
         // Create the sub-pipeline for inference
@@ -469,10 +429,7 @@ export function registerIndexRoutes({
           pipelineName,
           pipelineDefinition,
           modelId,
-          sourceField,
-          destinationField,
           fieldMappings,
-          inferenceConfig,
           client.asCurrentUser
         );
         return response.ok({
@@ -948,6 +905,47 @@ export function registerIndexRoutes({
         body: pipelines,
         headers: { 'content-type': 'application/json' },
       });
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/pipelines/{pipelineName}',
+      validate: {
+        params: schema.object({
+          pipelineName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const pipelineName = decodeURIComponent(request.params.pipelineName);
+      const { client } = (await context.core).elasticsearch;
+      try {
+        const pipeline = await getPipeline(pipelineName, client);
+        return response.ok({
+          body: pipeline,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isNotFoundException(error)) {
+          // return specific message if pipeline doesn't exist
+          return createError({
+            errorCode: ErrorCode.PIPELINE_NOT_FOUND,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.indices.pipelines.pipelineNotFoundError',
+              {
+                defaultMessage: 'The pipeline {pipelineName} does not exist',
+                values: {
+                  pipelineName,
+                },
+              }
+            ),
+            response,
+            statusCode: 404,
+          });
+        }
+        throw error;
+      }
     })
   );
 

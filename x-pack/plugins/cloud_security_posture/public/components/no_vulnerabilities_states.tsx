@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedHTMLMessage, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -25,7 +26,10 @@ import { FullSizeCenteredPage } from './full_size_centered_page';
 import { CloudPosturePage } from './cloud_posture_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 import type { IndexDetails } from '../../common/types';
-import { NO_VULNERABILITIES_STATUS_TEST_SUBJ } from './test_subjects';
+import {
+  NO_VULNERABILITIES_STATUS_TEST_SUBJ,
+  CNVM_NOT_INSTALLED_ACTION_SUBJ,
+} from './test_subjects';
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
@@ -88,7 +92,12 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
       actions={
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton color="primary" fill href={vulnMgmtIntegrationLink}>
+            <EuiButton
+              color="primary"
+              fill
+              href={vulnMgmtIntegrationLink}
+              data-test-subj={CNVM_NOT_INSTALLED_ACTION_SUBJ}
+            >
               <FormattedMessage
                 id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.addVulMngtIntegrationButtonTitle"
                 defaultMessage="Install Cloud Native Vulnerability Management"
@@ -108,6 +117,40 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
     />
   );
 };
+
+const CnvmIndexTimeout = () => (
+  <EuiEmptyPrompt
+    data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.INDEX_TIMEOUT}
+    color="plain"
+    icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+    title={
+      <h2>
+        <FormattedMessage
+          id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutTitle"
+          defaultMessage="Findings Delayed"
+        />
+      </h2>
+    }
+    body={
+      <p>
+        <FormattedMessage
+          id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutDescription"
+          defaultMessage="Scanning workloads is taking longer than expected. Please check {docs}"
+          values={{
+            docs: (
+              <EuiLink href="https://ela.st/cnvm-faq" target="_blank">
+                <FormattedMessage
+                  id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutDocLink"
+                  defaultMessage="CNVM FAQ"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    }
+  />
+);
 
 const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }) => (
   <EuiEmptyPrompt
@@ -218,8 +261,9 @@ export const NoVulnerabilitiesStates = () => {
       .sort((a, b) => a.localeCompare(b));
 
   const render = () => {
-    if (status === 'indexing' || status === 'waiting_for_results' || status === 'index-timeout')
+    if (status === 'indexing' || status === 'waiting_for_results')
       return <ScanningVulnerabilitiesEmptyPrompt />; // integration installed, but no agents added// agent added, index timeout has passed
+    if (status === 'index-timeout') return <CnvmIndexTimeout />;
     if (status === 'not-installed')
       return (
         <CnvmIntegrationNotInstalledEmptyPrompt vulnMgmtIntegrationLink={vulnMgmtIntegrationLink} />

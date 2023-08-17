@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { CASE_CONFIGURE_URL } from '@kbn/cases-plugin/common/constants';
+import { ConfigurationRequest } from '@kbn/cases-plugin/common/types/api';
 import {
   CaseConnector,
-  CasesConfigureRequest,
-  CasesConfigureResponse,
+  Configuration,
   ConnectorTypes,
-} from '@kbn/cases-plugin/common/api';
-import { CASE_CONFIGURE_URL } from '@kbn/cases-plugin/common/constants';
+} from '@kbn/cases-plugin/common/types/domain';
 import type SuperTest from 'supertest';
 import { User } from '../authentication/types';
 
@@ -28,7 +28,7 @@ export const getConfigurationRequest = ({
   type = ConnectorTypes.none,
   fields = null,
   overrides,
-}: ConfigRequestParams = {}): CasesConfigureRequest => {
+}: ConfigRequestParams = {}): ConfigurationRequest => {
   return {
     connector: {
       id,
@@ -42,10 +42,7 @@ export const getConfigurationRequest = ({
   };
 };
 
-export const getConfigurationOutput = (
-  update = false,
-  overwrite = {}
-): Partial<CasesConfigureResponse> => {
+export const getConfigurationOutput = (update = false, overwrite = {}): Partial<Configuration> => {
   return {
     ...getConfigurationRequest(),
     error: null,
@@ -58,11 +55,11 @@ export const getConfigurationOutput = (
 
 export const createConfiguration = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
-  req: CasesConfigureRequest = getConfigurationRequest(),
+  req: ConfigurationRequest = getConfigurationRequest(),
   expectedHttpCode: number = 200,
   auth: { user: User; space: string | null } | null = { user: superUser, space: null },
   headers: Record<string, unknown> = {}
-): Promise<CasesConfigureResponse> => {
+): Promise<Configuration> => {
   const apiCall = supertest.post(`${getSpaceUrlPrefix(auth?.space)}${CASE_CONFIGURE_URL}`);
 
   setupAuth({ apiCall, headers, auth });

@@ -12,9 +12,9 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { CodeEditorField, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 
+import { IndexPrivilegeForm } from './index_privilege_form';
 import { indicesAPIClientMock } from '../../../index.mock';
 import { RoleValidator } from '../../validate_role';
-import { IndexPrivilegeForm } from './index_privilege_form';
 
 test('it renders without crashing', () => {
   const wrapper = shallowWithIntl(
@@ -414,6 +414,26 @@ describe('field level security', () => {
     await nextTick();
     expect(testProps.indicesAPIClient.getFields).toHaveBeenCalledTimes(2);
     expect(testProps.indicesAPIClient.getFields).toHaveBeenCalledWith('newPattern');
+  });
+
+  test('does not query availble fields for remote cluster indices', async () => {
+    const testProps = {
+      ...props,
+      indexType: 'remote_indices' as const,
+      indexPrivilege: {
+        ...props.indexPrivilege,
+        clusters: ['test-cluster'],
+        names: ['foo', 'bar-*'],
+      },
+      indicesAPIClient: indicesAPIClientMock.create(),
+      allowFieldLevelSecurity: true,
+    };
+
+    testProps.indicesAPIClient.getFields.mockResolvedValue(['a', 'b', 'c']);
+
+    mountWithIntl(<IndexPrivilegeForm {...testProps} />);
+    await nextTick();
+    expect(testProps.indicesAPIClient.getFields).not.toHaveBeenCalled();
   });
 
   test('it displays a warning when no fields are granted', () => {

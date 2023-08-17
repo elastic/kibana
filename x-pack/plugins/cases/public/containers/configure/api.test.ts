@@ -17,7 +17,7 @@ import {
   caseConfigurationResposeMock,
   caseConfigurationCamelCaseResponseMock,
 } from './mock';
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { KibanaServices } from '../../common/lib/kibana';
 import { actionTypesMock, connectorsMock } from '../../common/mock/connectors';

@@ -28,9 +28,54 @@ export const OptionsListStrings = {
       }),
   },
   editor: {
-    getAllowMultiselectTitle: () =>
-      i18n.translate('controls.optionsList.editor.allowMultiselectTitle', {
-        defaultMessage: 'Allow multiple selections in dropdown',
+    getSelectionOptionsTitle: () =>
+      i18n.translate('controls.optionsList.editor.selectionOptionsTitle', {
+        defaultMessage: 'Selections',
+      }),
+    selectionTypes: {
+      multi: {
+        getLabel: () =>
+          i18n.translate('controls.optionsList.editor.multiSelectLabel', {
+            defaultMessage: 'Allow  multiple selections',
+          }),
+      },
+      single: {
+        getLabel: () =>
+          i18n.translate('controls.optionsList.editor.singleSelectLabel', {
+            defaultMessage: 'Only allow a single selection',
+          }),
+      },
+    },
+    getSearchOptionsTitle: () =>
+      i18n.translate('controls.optionsList.editor.searchOptionsTitle', {
+        defaultMessage: `Searching`,
+      }),
+    searchTypes: {
+      prefix: {
+        getLabel: () =>
+          i18n.translate('controls.optionsList.editor.prefixSearchLabel', {
+            defaultMessage: 'Prefix',
+          }),
+        getTooltip: () =>
+          i18n.translate('controls.optionsList.editor.prefixSearchTooltip', {
+            defaultMessage: 'Matches values that begin with the given search string.',
+          }),
+      },
+      wildcard: {
+        getLabel: () =>
+          i18n.translate('controls.optionsList.editor.wildcardSearchLabel', {
+            defaultMessage: 'Contains',
+          }),
+        getTooltip: () =>
+          i18n.translate('controls.optionsList.editor.wildcardSearchTooltip', {
+            defaultMessage:
+              'Matches values that contain the given search string. Results might take longer to populate.',
+          }),
+      },
+    },
+    getAdditionalSettingsTitle: () =>
+      i18n.translate('controls.optionsList.editor.additionalSettingsTitle', {
+        defaultMessage: `Additional settings`,
       }),
     getRunPastTimeoutTitle: () =>
       i18n.translate('controls.optionsList.editor.runPastTimeout', {
@@ -84,14 +129,20 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.selectedOptionsTitle', {
         defaultMessage: 'Show only selected options',
       }),
-    getClearAllSelectionsButtonTitle: () =>
-      i18n.translate('controls.optionsList.popover.clearAllSelectionsTitle', {
-        defaultMessage: 'Clear selections',
-      }),
-    getSearchPlaceholder: () =>
-      i18n.translate('controls.optionsList.popover.searchPlaceholder', {
-        defaultMessage: 'Search',
-      }),
+    searchPlaceholder: {
+      prefix: {
+        getPlaceholderText: () =>
+          i18n.translate('controls.optionsList.popover.prefixSearchPlaceholder', {
+            defaultMessage: 'Starts with...',
+          }),
+      },
+      wildcard: {
+        getPlaceholderText: () =>
+          i18n.translate('controls.optionsList.popover.wildcardSearchPlaceholder', {
+            defaultMessage: 'Contains...',
+          }),
+      },
+    },
     getCardinalityLabel: (totalOptions: number) =>
       i18n.translate('controls.optionsList.popover.cardinalityLabel', {
         defaultMessage:

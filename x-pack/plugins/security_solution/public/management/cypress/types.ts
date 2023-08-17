@@ -42,10 +42,12 @@ export type ReturnTypeFromChainable<C extends PossibleChainable> = C extends Cyp
   : never;
 
 export type IndexEndpointHostsCyTaskOptions = Partial<
-  { count: number; withResponseActions: boolean } & Pick<
-    CyLoadEndpointDataOptions,
-    'version' | 'os' | 'isolation'
-  >
+  {
+    count: number;
+    withResponseActions: boolean;
+    numResponseActions?: number;
+    alertIds?: string[];
+  } & Pick<CyLoadEndpointDataOptions, 'version' | 'os' | 'isolation'>
 >;
 
 export interface HostActionResponse {

@@ -19,6 +19,8 @@
     "@kbn/kibana-react-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
+    "@kbn/config-schema",
+    "@kbn/core-plugins-server",
   ],
   "exclude": [
     "target/**/*",

@@ -10,64 +10,22 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { cloneDeep } from 'lodash';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import {
+  type ClassificationEvaluateResponse,
+  type DataFrameAnalysisConfigType,
+  type EvaluateMetrics,
+  type TrackTotalHitsSearchResponse,
+  ANALYSIS_CONFIG_TYPE,
+} from '@kbn/ml-data-frame-analytics-utils';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
-import {
-  ClassificationEvaluateResponse,
-  EvaluateMetrics,
-  TrackTotalHitsSearchResponse,
-} from '../../../../common/types/data_frame_analytics';
-import { SavedSearchQuery } from '../../contexts/ml';
-import {
-  AnalysisConfig,
-  ClassificationAnalysis,
-  DataFrameAnalysisConfigType,
-  RegressionAnalysis,
-} from '../../../../common/types/data_frame_analytics';
-import {
-  isOutlierAnalysis,
-  isRegressionAnalysis,
-  isClassificationAnalysis,
-  getPredictionFieldName,
-  getDependentVar,
-  getPredictedFieldName,
-} from '../../../../common/util/analytics_utils';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../common/constants/data_frame_analytics';
 
-export { getAnalysisType } from '../../../../common/util/analytics_utils';
 export type IndexPattern = string;
-
-export enum ANALYSIS_ADVANCED_FIELDS {
-  ALPHA = 'alpha',
-  ETA = 'eta',
-  ETA_GROWTH_RATE_PER_TREE = 'eta_growth_rate_per_tree',
-  DOWNSAMPLE_FACTOR = 'downsample_factor',
-  FEATURE_BAG_FRACTION = 'feature_bag_fraction',
-  FEATURE_INFLUENCE_THRESHOLD = 'feature_influence_threshold',
-  GAMMA = 'gamma',
-  LAMBDA = 'lambda',
-  MAX_TREES = 'max_trees',
-  MAX_OPTIMIZATION_ROUNDS_PER_HYPERPARAMETER = 'max_optimization_rounds_per_hyperparameter',
-  METHOD = 'method',
-  N_NEIGHBORS = 'n_neighbors',
-  NUM_TOP_CLASSES = 'num_top_classes',
-  NUM_TOP_FEATURE_IMPORTANCE_VALUES = 'num_top_feature_importance_values',
-  OUTLIER_FRACTION = 'outlier_fraction',
-  RANDOMIZE_SEED = 'randomize_seed',
-  SOFT_TREE_DEPTH_LIMIT = 'soft_tree_depth_limit',
-  SOFT_TREE_DEPTH_TOLERANCE = 'soft_tree_depth_tolerance',
-}
-
-export enum OUTLIER_ANALYSIS_METHOD {
-  LOF = 'lof',
-  LDOF = 'ldof',
-  DISTANCE_KTH_NN = 'distance_kth_nn',
-  DISTANCE_KNN = 'distance_knn',
-}
 
 export interface LoadExploreDataArg {
   filterByIsTraining?: boolean;
-  searchQuery: SavedSearchQuery;
+  searchQuery: estypes.QueryDslQueryContainer;
 }
 
 export interface ClassificationMetricItem {
@@ -77,11 +35,6 @@ export interface ClassificationMetricItem {
 }
 
 export const SEARCH_SIZE = 1000;
-
-export const TRAINING_PERCENT_MIN = 1;
-export const TRAINING_PERCENT_MAX = 100;
-
-export const NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN = 0;
 
 export const defaultSearchQuery = {
   match_all: {},
@@ -100,15 +53,8 @@ export const getDefaultTrainingFilterQuery = (resultsField: string, isTraining: 
 
 export interface SearchQuery {
   track_total_hits?: boolean;
-  query: SavedSearchQuery;
+  query: estypes.QueryDslQueryContainer;
   sort?: any;
-}
-
-export enum INDEX_STATUS {
-  UNUSED,
-  LOADING,
-  LOADED,
-  ERROR,
 }
 
 export interface Eval {
@@ -141,54 +87,6 @@ interface LoadEvaluateResult {
   eval: RegressionEvaluateResponse | ClassificationEvaluateResponse | null;
   error: string | null;
 }
-
-export const getTrainingPercent = (
-  analysis: AnalysisConfig
-):
-  | RegressionAnalysis['regression']['training_percent']
-  | ClassificationAnalysis['classification']['training_percent']
-  | undefined => {
-  let trainingPercent;
-
-  if (isRegressionAnalysis(analysis)) {
-    trainingPercent = analysis.regression.training_percent;
-  }
-
-  if (isClassificationAnalysis(analysis)) {
-    trainingPercent = analysis.classification.training_percent;
-  }
-  return trainingPercent;
-};
-
-export const getNumTopClasses = (
-  analysis: AnalysisConfig
-): ClassificationAnalysis['classification']['num_top_classes'] => {
-  let numTopClasses;
-  if (isClassificationAnalysis(analysis) && analysis.classification.num_top_classes !== undefined) {
-    numTopClasses = analysis.classification.num_top_classes;
-  }
-  return numTopClasses;
-};
-
-export const getNumTopFeatureImportanceValues = (
-  analysis: AnalysisConfig
-):
-  | RegressionAnalysis['regression']['num_top_feature_importance_values']
-  | ClassificationAnalysis['classification']['num_top_feature_importance_values'] => {
-  let numTopFeatureImportanceValues;
-  if (
-    isRegressionAnalysis(analysis) &&
-    analysis.regression.num_top_feature_importance_values !== undefined
-  ) {
-    numTopFeatureImportanceValues = analysis.regression.num_top_feature_importance_values;
-  } else if (
-    isClassificationAnalysis(analysis) &&
-    analysis.classification.num_top_feature_importance_values !== undefined
-  ) {
-    numTopFeatureImportanceValues = analysis.classification.num_top_feature_importance_values;
-  }
-  return numTopFeatureImportanceValues;
-};
 
 export const isResultsSearchBoolQuery = (arg: any): arg is ResultsSearchBoolQuery => {
   if (arg === undefined) return false;
@@ -328,7 +226,10 @@ interface QueryStringQuery {
   query_string: Dictionary<any>;
 }
 
-export type ResultsSearchQuery = ResultsSearchBoolQuery | ResultsSearchTermQuery | SavedSearchQuery;
+export type ResultsSearchQuery =
+  | ResultsSearchBoolQuery
+  | ResultsSearchTermQuery
+  | estypes.QueryDslQueryContainer;
 
 export function getEvalQueryBody({
   resultsField,
@@ -471,7 +372,7 @@ export const loadEvalData = async ({
 interface LoadDocsCountConfig {
   ignoreDefaultQuery?: boolean;
   isTraining?: boolean;
-  searchQuery: SavedSearchQuery;
+  searchQuery: estypes.QueryDslQueryContainer;
   resultsField: string;
   destIndex: string;
 }
@@ -510,14 +411,4 @@ export const loadDocsCount = async ({
       success: false,
     };
   }
-};
-
-export {
-  isOutlierAnalysis,
-  isRegressionAnalysis,
-  isClassificationAnalysis,
-  getPredictionFieldName,
-  getDependentVar,
-  getPredictedFieldName,
-  ANALYSIS_CONFIG_TYPE,
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { FC, useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import type { SavedSearch } from '@kbn/discover-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,7 +21,9 @@ import {
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
 
 import { usePageUrlState } from '@kbn/ml-url-state';
+import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import { useData } from '../../hooks/use_data';
+import { useSearch } from '../../hooks/use_search';
 import { useCategorizeRequest } from './use_categorize_request';
 import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
 import { CategoryTable } from './category_table';
@@ -31,11 +33,12 @@ import { createMergedEsQuery } from '../../application/utils/search_utils';
 import { SamplingMenu } from './sampling_menu';
 import { TechnicalPreviewBadge } from './technical_preview_badge';
 import { LoadingCategorization } from './loading_categorization';
+import { useValidateFieldRequest } from './use_validate_category_field';
 import {
-  type AiOpsPageUrlState,
-  getDefaultAiOpsListState,
-  isFullAiOpsListState,
+  type LogCategorizationPageUrlState,
+  getDefaultLogCategorizationAppState,
 } from '../../application/utils/url_state';
+import { FieldValidationCallout } from './category_validation_callout';
 
 export interface LogCategorizationPageProps {
   dataView: DataView;
@@ -59,14 +62,21 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     },
     uiSettings,
   } = useAiopsAppContext();
+
+  const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
+    useValidateFieldRequest();
   const { euiTheme } = useEuiTheme();
   const { filters, query } = useMemo(() => getState(), [getState]);
 
   const mounted = useRef(false);
-  const { runCategorizeRequest, cancelRequest, randomSampler } = useCategorizeRequest();
-  const [aiopsListState] = usePageUrlState<AiOpsPageUrlState>(
-    'AIOPS_INDEX_VIEWER',
-    getDefaultAiOpsListState({
+  const {
+    runCategorizeRequest,
+    cancelRequest: cancelCategorizationRequest,
+    randomSampler,
+  } = useCategorizeRequest();
+  const [stateFromUrl] = usePageUrlState<LogCategorizationPageUrlState>(
+    'logCategorization',
+    getDefaultLogCategorizationAppState({
       searchQuery: createMergedEsQuery(query, filters, dataView, uiSettings),
     })
   );
@@ -79,6 +89,14 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     categories: Category[];
     sparkLines: SparkLinesPerCategory;
   } | null>(null);
+  const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
+    null
+  );
+
+  const cancelRequest = useCallback(() => {
+    cancelValidationRequest();
+    cancelCategorizationRequest();
+  }, [cancelCategorizationRequest, cancelValidationRequest]);
 
   useEffect(
     function cancelRequestOnLeave() {
@@ -91,29 +109,25 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     [cancelRequest, mounted]
   );
 
-  const {
-    documentStats,
-    timefilter,
-    earliest,
-    latest,
-    searchQueryLanguage,
-    searchString,
-    searchQuery,
-    intervalMs,
-    forceRefresh,
-  } = useData(
-    { selectedDataView: dataView, selectedSavedSearch },
-    'log_categorization',
-    aiopsListState,
-    undefined,
-    undefined,
-    undefined,
-    BAR_TARGET,
+  const { searchQueryLanguage, searchString, searchQuery } = useSearch(
+    { dataView, savedSearch: selectedSavedSearch },
+    stateFromUrl,
     true
   );
 
+  const { documentStats, timefilter, earliest, latest, intervalMs, forceRefresh } = useData(
+    dataView,
+    'log_categorization',
+    searchQuery,
+    undefined,
+    undefined,
+    undefined,
+    BAR_TARGET
+  );
+
   const loadCategories = useCallback(async () => {
-    const { title: index, timeFieldName: timeField } = dataView;
+    const { getIndexPattern, timeFieldName: timeField } = dataView;
+    const index = getIndexPattern();
 
     if (selectedField === undefined || timeField === undefined) {
       return;
@@ -123,20 +137,35 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
 
     setLoading(true);
     setData(null);
+    setFieldValidationResult(null);
 
     try {
-      const { categories, sparkLinesPerCategory: sparkLines } = await runCategorizeRequest(
-        index,
-        selectedField.name,
-        timeField,
-        earliest,
-        latest,
-        searchQuery,
-        intervalMs
-      );
+      const [validationResult, categorizationResult] = await Promise.all([
+        runValidateFieldRequest(
+          index,
+          selectedField.name,
+          timeField,
+          earliest,
+          latest,
+          searchQuery
+        ),
+        runCategorizeRequest(
+          index,
+          selectedField.name,
+          timeField,
+          earliest,
+          latest,
+          searchQuery,
+          intervalMs
+        ),
+      ]);
 
       if (mounted.current === true) {
-        setData({ categories, sparkLines });
+        setFieldValidationResult(validationResult);
+        setData({
+          categories: categorizationResult.categories,
+          sparkLines: categorizationResult.sparkLinesPerCategory,
+        });
       }
     } catch (error) {
       toasts.addError(error, {
@@ -153,10 +182,11 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     dataView,
     selectedField,
     cancelRequest,
-    runCategorizeRequest,
+    runValidateFieldRequest,
     earliest,
     latest,
     searchQuery,
+    runCategorizeRequest,
     intervalMs,
     toasts,
   ]);
@@ -202,7 +232,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
-              <h2 id="flyoutTitle">
+              <h2 id="flyoutTitle" data-test-subj="mlJobSelectorFlyoutTitle">
                 <FormattedMessage
                   id="xpack.aiops.categorizeFlyout.title"
                   defaultMessage="Pattern analysis of {name}"
@@ -220,7 +250,9 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody data-test-subj={'mlJobSelectorFlyoutBody'}>
+      <EuiFlyoutBody data-test-subj="mlJobSelectorFlyoutBody">
+        <FieldValidationCallout validationResults={fieldValidationResult} />
+
         {loading === true ? <LoadingCategorization onClose={onClose} /> : null}
 
         <InformationText
@@ -230,13 +262,10 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
           fieldSelected={selectedField !== null}
         />
 
-        {loading === false &&
-        data !== null &&
-        data.categories.length > 0 &&
-        isFullAiOpsListState(aiopsListState) ? (
+        {loading === false && data !== null && data.categories.length > 0 ? (
           <CategoryTable
             categories={data.categories}
-            aiopsListState={aiopsListState}
+            aiopsListState={stateFromUrl}
             dataViewId={dataView.id!}
             eventRate={eventRate}
             sparkLines={data.sparkLines}

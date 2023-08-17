@@ -90,7 +90,7 @@ export interface MlSummaryJob {
 
   /**
    * Used in older implementations of the job config, where the datafeed was placed inside the job for convenience.
-   * This will be populated if the job's id has been passed to the /api/ml/jobs/jobs_summary endpoint.
+   * This will be populated if the job's id has been passed to the /internal/ml/jobs/jobs_summary endpoint.
    */
   fullJob?: CombinedJob;
 

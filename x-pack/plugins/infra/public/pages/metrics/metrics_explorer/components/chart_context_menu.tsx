@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import DateMath from '@kbn/datemath';
 import { Capabilities } from '@kbn/core/public';
-import { useLinkProps } from '@kbn/observability-plugin/public';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
@@ -181,7 +181,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   ];
 
   const handleClose = () => setPopoverState(false);
-  const handleOpen = () => setPopoverState(true);
+  const togglePopover = () => setPopoverState((currentIsOpen) => !currentIsOpen);
   const actionAriaLabel = i18n.translate('xpack.infra.metricsExplorer.actionsLabel.aria', {
     defaultMessage: 'Actions for {grouping}',
     values: { grouping: series.id },
@@ -193,7 +193,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
     <EuiButtonEmpty
       data-test-subj="infraMetricsExplorerChartContextMenuButton"
       contentProps={{ 'aria-label': actionAriaLabel }}
-      onClick={handleOpen}
+      onClick={togglePopover}
       size="s"
       iconType="arrowDown"
       iconSide="right"

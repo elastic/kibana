@@ -49,4 +49,5 @@ export const regionMapVisType = {
   },
   toExpressionAst,
   requiresSearch: true,
+  disableCreate: true,
 } as VisTypeDefinition<RegionMapVisParams>;

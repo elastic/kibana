@@ -12,13 +12,13 @@ import React from 'react';
 
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
+import { UserProfile, useUserProfileForm } from './user_profile';
 import { UserProfileAPIClient } from '..';
 import type { UserProfileData } from '../../../common';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { UserAPIClient } from '../../management';
 import { securityMock } from '../../mocks';
 import { Providers } from '../account_management_app';
-import { UserProfile, useUserProfileForm } from './user_profile';
 
 const user = mockAuthenticatedUser();
 const coreStart = coreMock.createStart();
@@ -58,6 +58,8 @@ describe('useUserProfileForm', () => {
     coreStart.http.post.mockReset().mockResolvedValue(undefined);
     coreStart.notifications.toasts.addDanger.mockReset();
     coreStart.notifications.toasts.addSuccess.mockReset();
+    coreStart.settings.client.get.mockReset();
+    coreStart.settings.client.isOverridden.mockReset();
   });
 
   it('should initialise form with values from user profile', () => {
@@ -255,7 +257,19 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      expect(testWrapper.exists('[data-test-subj="darkModeButton"]')).toBeTruthy();
+      const overrideMsg = testWrapper.find('EuiToolTip[data-test-subj="themeOverrideTooltip"]');
+      expect(overrideMsg).toHaveLength(0);
+
+      const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
+      expect(themeMenu).toHaveLength(1);
+
+      const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
+      expect(themeOptions).toHaveLength(3);
+      themeOptions.forEach((option) => {
+        expect(option.getDOMNode().classList.contains('euiKeyPadMenuItem-isDisabled')).toEqual(
+          false
+        );
+      });
     });
 
     it('should not display if the User is a cloud user', () => {
@@ -278,7 +292,7 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      expect(testWrapper.exists('[data-test-subj="darkModeButton"]')).toBeFalsy();
+      expect(testWrapper.exists('EuiKeyPadMenu[data-test-subj="themeMenu"]')).toBeFalsy();
     });
 
     it('should add special toast after submitting form successfully since darkMode requires a refresh', async () => {
@@ -305,6 +319,144 @@ describe('useUserProfileForm', () => {
         expect.objectContaining({ title: 'Profile updated' }),
         expect.objectContaining({ toastLifeTimeMs: 300000 })
       );
+    });
+
+    it('should be disabled if the theme has been set to `darkMode: true` in the config', () => {
+      const data: UserProfileData = {};
+
+      const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
+      coreStart.settings.client.get.mockReturnValue(true);
+      coreStart.settings.client.isOverridden.mockReturnValue(true);
+
+      const testWrapper = mount(
+        <Providers
+          services={coreStart}
+          theme$={theme$}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          <UserProfile user={nonCloudUser} data={data} />
+        </Providers>
+      );
+
+      const overrideMsg = testWrapper.find('EuiToolTip[data-test-subj="themeOverrideTooltip"]');
+      expect(overrideMsg).toHaveLength(1);
+      expect(overrideMsg.getElement().props.content).not.toEqual('');
+
+      const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
+      expect(themeMenu).toHaveLength(1);
+
+      const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
+      expect(themeOptions).toHaveLength(3);
+      themeOptions.forEach((option) => {
+        expect(option.getDOMNode().classList.contains('euiKeyPadMenuItem-isDisabled')).toEqual(
+          true
+        );
+      });
+    });
+
+    it('should be disabled if the theme has been set to `darkMode: false` in the config', () => {
+      const data: UserProfileData = {};
+
+      const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
+      coreStart.settings.client.get.mockReturnValue(false);
+      coreStart.settings.client.isOverridden.mockReturnValue(true);
+
+      const testWrapper = mount(
+        <Providers
+          services={coreStart}
+          theme$={theme$}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          <UserProfile user={nonCloudUser} data={data} />
+        </Providers>
+      );
+
+      const overrideMsg = testWrapper.find('EuiToolTip[data-test-subj="themeOverrideTooltip"]');
+      expect(overrideMsg).toHaveLength(1);
+      expect(overrideMsg.getElement().props.content).not.toEqual('');
+
+      const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
+      expect(themeMenu).toHaveLength(1);
+
+      const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
+      expect(themeOptions).toHaveLength(3);
+      themeOptions.forEach((option) => {
+        expect(option.getDOMNode().classList.contains('euiKeyPadMenuItem-isDisabled')).toEqual(
+          true
+        );
+      });
+    });
+  });
+
+  describe('User roles section', () => {
+    it('should display the user roles', () => {
+      const data: UserProfileData = {};
+
+      const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
+      coreStart.settings.client.get.mockReturnValue(false);
+      coreStart.settings.client.isOverridden.mockReturnValue(true);
+
+      const testWrapper = mount(
+        <Providers
+          services={coreStart}
+          theme$={theme$}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          <UserProfile user={nonCloudUser} data={data} />
+        </Providers>
+      );
+      expect(testWrapper.exists('span[data-test-subj="userRoles"]')).toBeTruthy();
+
+      expect(testWrapper.exists('EuiButtonEmpty[data-test-subj="userRolesExpand"]')).toBeFalsy();
+      expect(testWrapper.exists('EuiBadgeGroup[data-test-subj="remainingRoles"]')).toBeFalsy();
+    });
+
+    it('should display a popover for users with more than one role', () => {
+      const data: UserProfileData = {};
+
+      const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
+      coreStart.settings.client.get.mockReturnValue(false);
+      coreStart.settings.client.isOverridden.mockReturnValue(true);
+
+      nonCloudUser.roles = [...nonCloudUser.roles, 'user-role-1', 'user-role-2'];
+      const testWrapper = mount(
+        <Providers
+          services={coreStart}
+          theme$={theme$}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          <UserProfile user={nonCloudUser} data={data} />
+        </Providers>
+      );
+
+      const extraRoles = nonCloudUser.roles.splice(1);
+
+      const userRolesExpandButton = testWrapper.find(
+        'EuiButtonEmpty[data-test-subj="userRolesExpand"]'
+      );
+
+      expect(userRolesExpandButton).toBeTruthy();
+      expect(userRolesExpandButton.text()).toEqual(`+${extraRoles.length} more`);
     });
   });
 });

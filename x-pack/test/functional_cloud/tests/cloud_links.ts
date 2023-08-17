@@ -55,19 +55,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Fills up the user menu items', () => {
-      it('Shows the button Edit profile', async () => {
-        await PageObjects.common.clickAndValidate('userMenuButton', 'userMenuLink__Edit profile');
-        const cloudLink = await find.byLinkText('Edit profile');
+      it('Shows the button Profile', async () => {
+        await PageObjects.common.clickAndValidate('userMenuButton', 'userMenuLink__Profile');
+        const cloudLink = await find.byLinkText('Profile');
         expect(cloudLink).to.not.be(null);
       });
 
-      it('Shows the button Account & Billing', async () => {
-        await PageObjects.common.clickAndValidate(
-          'userMenuButton',
-          'userMenuLink__Account & Billing'
-        );
-        const cloudLink = await find.byLinkText('Account & Billing');
+      it('Shows the button Billing', async () => {
+        await PageObjects.common.clickAndValidate('userMenuButton', 'userMenuLink__Billing');
+        const cloudLink = await find.byLinkText('Billing');
         expect(cloudLink).to.not.be(null);
+      });
+
+      it('Shows the button Organization', async () => {
+        await PageObjects.common.clickAndValidate('userMenuButton', 'userMenuLink__Organization');
+        const cloudLink = await find.byLinkText('Organization');
+        expect(cloudLink).to.not.be(null);
+      });
+
+      it('Shows the theme darkMode toggle', async () => {
+        await PageObjects.common.clickAndValidate('userMenuButton', 'darkModeToggle');
+        const darkModeSwitch = await find.byCssSelector('[data-test-subj="darkModeToggleSwitch"]');
+        expect(darkModeSwitch).to.not.be(null);
       });
     });
   });

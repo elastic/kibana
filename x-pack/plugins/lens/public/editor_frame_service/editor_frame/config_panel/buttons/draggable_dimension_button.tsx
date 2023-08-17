@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useContext, ReactElement } from 'react';
+import React, { useMemo, useCallback, ReactElement } from 'react';
 import {
   DragDrop,
   DragDropIdentifier,
-  DragContext,
+  useDragDropContext,
   DropType,
   DropTargetSwapDuplicateCombine,
 } from '@kbn/dom-drag-drop';
@@ -61,7 +61,7 @@ export function DraggableDimensionButton({
   registerNewButtonRef: (id: string, instance: HTMLDivElement | null) => void;
   indexPatterns: IndexPatternMap;
 }) {
-  const { dragging } = useContext(DragContext);
+  const [{ dragging }] = useDragDropContext();
 
   let getDropProps;
 
@@ -139,20 +139,20 @@ export function DraggableDimensionButton({
       data-test-subj={group.dataTestSubj}
     >
       <DragDrop
+        draggable
         getCustomDropTarget={DropTargetSwapDuplicateCombine.getCustomDropTarget}
         getAdditionalClassesOnEnter={DropTargetSwapDuplicateCombine.getAdditionalClassesOnEnter}
         getAdditionalClassesOnDroppable={
           DropTargetSwapDuplicateCombine.getAdditionalClassesOnDroppable
         }
         order={order}
-        draggable
         dragType={isOperation(dragging) ? 'move' : 'copy'}
         dropTypes={dropTypes}
         reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
         value={value}
         onDrop={handleOnDrop}
-        onDragStart={() => onDragStart()}
-        onDragEnd={() => onDragEnd()}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
       >
         {children}
       </DragDrop>

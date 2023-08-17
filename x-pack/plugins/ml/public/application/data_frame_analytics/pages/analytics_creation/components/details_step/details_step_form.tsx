@@ -17,7 +17,7 @@ import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validat
 import { ContinueButton } from '../continue_button';
 import { ANALYTICS_STEPS } from '../../page';
 import { ml } from '../../../../../services/ml_api_service';
-import { useMlContext } from '../../../../../contexts/ml';
+import { useDataSource } from '../../../../../contexts/ml';
 import { DetailsStepTimeField } from './details_step_time_field';
 
 const DEFAULT_RESULTS_FIELD = 'ml';
@@ -39,8 +39,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     services: { docLinks, notifications },
   } = useMlKibana();
 
-  const mlContext = useMlContext();
-  const { currentDataView } = mlContext;
+  const { selectedDataView } = useDataSource();
 
   const createIndexLink = docLinks.links.apis.createIndex;
   const { setFormState } = actions;
@@ -87,19 +86,21 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
 
   useEffect(() => {
     // Default timeFieldName to the source data view's time field if it exists
-    if (currentDataView !== undefined) {
-      setFormState({ timeFieldName: currentDataView.timeFieldName });
+    if (selectedDataView !== undefined) {
+      setFormState({ timeFieldName: selectedDataView.timeFieldName });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     // Get possible timefields for the results data view
-    if (currentDataView !== undefined) {
-      const timefields = currentDataView.fields.filter((f) => f.type === 'date').map((f) => f.name);
+    if (selectedDataView !== undefined) {
+      const timefields = selectedDataView.fields
+        .filter((f) => f.type === 'date')
+        .map((f) => f.name);
       setDataViewAvailableTimeFields(timefields);
     }
-  }, [currentDataView, setFormState]);
+  }, [selectedDataView, setFormState]);
 
   const forceInput = useRef<HTMLInputElement | null>(null);
 

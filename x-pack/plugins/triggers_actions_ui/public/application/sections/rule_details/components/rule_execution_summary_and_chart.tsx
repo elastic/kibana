@@ -7,7 +7,14 @@
 
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPanel, EuiStat, EuiFlexItem, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiIconTip,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { RuleSummary, RuleType } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
@@ -36,6 +43,13 @@ type RuleExecutionSummaryAndChartProps = {
   fetchRuleSummary?: boolean;
 } & Pick<RuleApis, 'loadRuleSummary'>;
 
+const ruleTypeExcessDurationMessage = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.alertsList.ruleTypeExcessDurationMessage',
+  {
+    defaultMessage: `Duration exceeds the rule's expected run time.`,
+  }
+);
+
 export const RuleExecutionSummaryAndChart = (props: RuleExecutionSummaryAndChartProps) => {
   const {
     ruleId,
@@ -52,6 +66,7 @@ export const RuleExecutionSummaryAndChart = (props: RuleExecutionSummaryAndChart
   const {
     notifications: { toasts },
   } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
 
   const isInitialized = useRef(false);
 
@@ -154,40 +169,37 @@ export const RuleExecutionSummaryAndChart = (props: RuleExecutionSummaryAndChart
           color={showDurationWarning ? 'warning' : 'subdued'}
           hasBorder={false}
         >
-          <EuiStat
-            data-test-subj="avgExecutionDurationStat"
-            titleSize="xs"
-            title={
-              <EuiFlexGroup gutterSize="xs">
-                {showDurationWarning && (
-                  <EuiFlexItem grow={false}>
-                    <EuiIconTip
-                      data-test-subj="ruleDurationWarning"
-                      anchorClassName="ruleDurationWarningIcon"
-                      type="warning"
-                      color="warning"
-                      content={i18n.translate(
-                        'xpack.triggersActionsUI.sections.ruleDetails.alertsList.ruleTypeExcessDurationMessage',
-                        {
-                          defaultMessage: `Duration exceeds the rule's expected run time.`,
-                        }
-                      )}
-                      position="top"
-                    />
-                  </EuiFlexItem>
-                )}
-                <EuiFlexItem grow={false} data-test-subj="ruleEventLogListAvgDuration">
-                  {formatMillisForDisplay(computedRuleSummary.executionDuration.average)}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-            description={i18n.translate(
+          <EuiText size="s" color="text">
+            {i18n.translate(
               'xpack.triggersActionsUI.sections.ruleDetails.alertsList.avgDurationDescription',
               {
                 defaultMessage: `Average duration`,
               }
             )}
-          />
+          </EuiText>
+          <EuiFlexGroup gutterSize="xs" style={{ alignItems: 'center' }}>
+            {showDurationWarning && (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  data-test-subj="ruleDurationWarning"
+                  anchorClassName="ruleDurationWarningIcon"
+                  type="warning"
+                  color="warning"
+                  content={ruleTypeExcessDurationMessage}
+                  aria-label={ruleTypeExcessDurationMessage}
+                  position="top"
+                  size="m"
+                />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false} data-test-subj="ruleEventLogListAvgDuration">
+              <EuiText size="m" color={euiTheme.colors.text}>
+                <strong>
+                  {formatMillisForDisplay(computedRuleSummary.executionDuration.average)}
+                </strong>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={2}>

@@ -14,11 +14,19 @@ import {
 import { RightPanelContext } from '../context';
 import { InvestigationSection } from './investigation_section';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
+
+const mockUseRuleWithFallback = useRuleWithFallback as jest.Mock;
+jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 
 const flyoutContextValue = {} as unknown as ExpandableFlyoutContext;
 const panelContextValue = {} as unknown as RightPanelContext;
 
 describe('<InvestigationSection />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseRuleWithFallback.mockReturnValue({ rule: { note: 'test note' } });
+  });
   it('should render the component collapsed', () => {
     const { getByTestId } = render(
       <ExpandableFlyoutContext.Provider value={flyoutContextValue}>

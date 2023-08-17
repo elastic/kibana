@@ -7,14 +7,21 @@
 
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 
-export type Alerts = Array<
-  ParsedTechnicalFields & { agent?: { id: string }; process?: { pid: string } }
->;
+export type Alert = ParsedTechnicalFields & {
+  _id: string;
+  agent?: AlertAgent;
+  process?: { pid: string };
+};
 
-export interface AlertsWithAgentType {
-  alerts: Alerts;
-  agentIds: string[];
-  alertIds: string[];
-  ruleId?: string;
-  ruleName?: string;
+export interface AlertAgent {
+  id: string;
+  name: string;
+}
+
+export interface AlertWithAgent extends Alert {
+  agent: AlertAgent;
+}
+
+export interface ResponseActionAlerts {
+  alerts: AlertWithAgent[];
 }

@@ -995,7 +995,7 @@
             "label": "get",
             "description": [],
             "signature": [
-              "() => { path: string; fullscreenPath: string; type: \"failure\" | \"success\"; title: string; filename: string; fullscreenFilename: string; }[]"
+              "() => { path: string; fullscreenPath: string; type: \"success\" | \"failure\"; title: string; filename: string; fullscreenFilename: string; }[]"
             ],
             "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
             "deprecated": false,
