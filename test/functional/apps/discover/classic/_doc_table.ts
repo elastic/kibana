@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     hideAnnouncements: true,
+    'discover:rowHeightOption': 0, // single line
   };
   const testSubjects = getService('testSubjects');
 

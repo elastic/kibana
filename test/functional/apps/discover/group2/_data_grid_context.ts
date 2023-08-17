@@ -30,7 +30,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
     'unifiedFieldList',
   ]);
-  const defaultSettings = { defaultIndex: 'logstash-*' };
+  const defaultSettings = {
+    defaultIndex: 'logstash-*',
+    'discover:rowHeightOption': 0, // single line
+  };
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const dashboardAddPanel = getService('dashboardAddPanel');
