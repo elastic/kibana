@@ -150,7 +150,7 @@ export const loadRule = (includeResponseActions = false) =>
       ],
       filters: [],
       language: 'kuery',
-      query: '_id:*',
+      query: 'NOT host.name: "dev-fleet-server.8220"',
       author: [],
       false_positives: [],
       references: [],

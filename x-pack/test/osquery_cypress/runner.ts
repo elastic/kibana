@@ -12,7 +12,7 @@ import { FtrProviderContext } from './ftr_provider_context';
 
 import { AgentManager } from './agent';
 import { FleetManager } from './fleet_server';
-import { getLatestAvailableAgentVersion } from './utils';
+import { createAgentPolicy, getLatestAvailableAgentVersion } from './utils';
 
 async function setupFleetAgent({ getService }: FtrProviderContext) {
   const log = getService('log');
@@ -39,8 +39,15 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
     version: await getLatestAvailableAgentVersion(kbnClient),
   });
 
-  const fleetManager = new FleetManager(kbnClient, log);
-  const agentManager = new AgentManager(kbnClient, config.get('servers.fleetserver.port'), log);
+  const fleetManager = new FleetManager(log);
+
+  const policyEnrollmentKey = await createAgentPolicy(kbnClient, log);
+
+  const agentManager = new AgentManager(
+    policyEnrollmentKey,
+    config.get('servers.fleetserver.port'),
+    log
+  );
 
   await fleetManager.setup();
   await agentManager.setup();
