@@ -13,9 +13,11 @@ import { resolve } from 'path';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
+import { ES_P12_PASSWORD } from '@kbn/dev-utils';
 
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
+import { ESS_OPERATOR_USERS, ESS_SERVICE_TOKENS } from '../paths';
 
 interface BaseOptions {
   tag?: string;
@@ -42,6 +44,7 @@ interface ServerlessEsNodeArgs {
 
 export const DEFAULT_PORT = 9200;
 const DOCKER_REGISTRY = 'docker.elastic.co';
+const ESS_CONFIG_PATH = '/usr/share/elasticsearch/config/';
 
 const DOCKER_BASE_CMD = [
   'run',
@@ -122,31 +125,25 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 
   ['xpack.ml.enabled', 'true'],
 
-  // ['xpack.security.enabled', 'false'],
+  ['xpack.security.enabled', 'false'],
+];
 
+const SERVERLESS_SSL_ESARGS: Array<[string, string]> = [
   ['xpack.security.enabled', 'true'],
 
   ['xpack.security.transport.ssl.enabled', 'true'],
 
-  ['xpack.security.transport.ssl.key', '/usr/share/elasticsearch/config/certs/elasticsearch.key'],
+  ['xpack.security.transport.ssl.key', `${ESS_CONFIG_PATH}certs/elasticsearch.key`],
 
-  ['xpack.security.transport.ssl.key_passphrase', 'storepass'],
+  ['xpack.security.transport.ssl.key_passphrase', ES_P12_PASSWORD],
 
-  [
-    'xpack.security.transport.ssl.certificate',
-    '/usr/share/elasticsearch/config/certs/elasticsearch.crt',
-  ],
+  ['xpack.security.transport.ssl.certificate', `${ESS_CONFIG_PATH}certs/elasticsearch.crt`],
 
-  [
-    'xpack.security.transport.ssl.certificate_authorities',
-    '/usr/share/elasticsearch/config/certs/ca.crt',
-  ],
+  ['xpack.security.transport.ssl.certificate_authorities', `${ESS_CONFIG_PATH}certs/ca.crt`],
 
   ['xpack.security.transport.ssl.verification_mode', 'certificate'],
 
   ['xpack.security.operator_privileges.enabled', 'true'],
-
-  // ['xpack.watcher.enabled', 'false'],
 ];
 
 const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
@@ -339,20 +336,20 @@ export function resolveEsArgs(
  * Setup local volumes for Serverless ES
  */
 export async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
-  const volumePath = resolve(options.basePath, 'stateless');
-  const certs = resolve(options.basePath, 'certs');
-  const operatorUsers = resolve(options.basePath, 'config', 'operator_users.yml');
-  const serviceTokens = resolve(options.basePath, 'config', 'service_tokens');
+  const { basePath, clean } = options;
+
+  const volumePath = resolve(basePath, 'stateless');
+  const certs = resolve(basePath, 'certs');
 
   log.info(chalk.bold(`Checking for local serverless ES object store at ${volumePath}`));
   log.indent(4);
 
-  if (options.clean && fs.existsSync(volumePath)) {
+  if (clean && fs.existsSync(volumePath)) {
     log.info('Cleaning existing object store.');
     await Fsp.rm(volumePath, { recursive: true, force: true });
   }
 
-  if (options.clean || !fs.existsSync(volumePath)) {
+  if (clean || !fs.existsSync(volumePath)) {
     await Fsp.mkdir(volumePath, { recursive: true }).then(() =>
       log.info('Created new object store.')
     );
@@ -369,13 +366,16 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 
   return [
     '--volume',
-    `${options.basePath}:/objectstore:z`,
+    `${basePath}:/objectstore:z`,
+
     '--volume',
-    `${certs}:/usr/share/elasticsearch/config/certs:z`,
+    `${certs}:${ESS_CONFIG_PATH}certs:z`,
+
     '--volume',
-    `${operatorUsers}:/usr/share/elasticsearch/config/operator_users.yml`,
+    `${ESS_OPERATOR_USERS}:${ESS_CONFIG_PATH}operator_users.yml`,
+
     '--volume',
-    `${serviceTokens}:/usr/share/elasticsearch/config/service_tokens`,
+    `${ESS_SERVICE_TOKENS}:${ESS_CONFIG_PATH}service_tokens`,
   ];
 }
 

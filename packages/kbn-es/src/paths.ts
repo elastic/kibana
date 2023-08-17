@@ -7,7 +7,7 @@
  */
 
 import Os from 'os';
-import Path from 'path';
+import { resolve } from 'path';
 
 function maybeUseBat(bin: string) {
   return Os.platform().startsWith('win') ? `${bin}.bat` : bin;
@@ -15,7 +15,7 @@ function maybeUseBat(bin: string) {
 
 const tempDir = Os.tmpdir();
 
-export const BASE_PATH = Path.resolve(tempDir, 'kbn-es');
+export const BASE_PATH = resolve(tempDir, 'kbn-es');
 
 export const GRADLE_BIN = maybeUseBat('./gradlew');
 export const ES_BIN = maybeUseBat('bin/elasticsearch');
@@ -23,3 +23,6 @@ export const ES_PLUGIN_BIN = maybeUseBat('bin/elasticsearch-plugin');
 export const ES_CONFIG = 'config/elasticsearch.yml';
 
 export const ES_KEYSTORE_BIN = maybeUseBat('./bin/elasticsearch-keystore');
+
+export const ESS_OPERATOR_USERS = resolve(BASE_PATH, 'ess_resources/operator_users.yml');
+export const ESS_SERVICE_TOKENS = resolve(BASE_PATH, 'ess_resources/service_tokens');
