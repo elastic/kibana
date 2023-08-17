@@ -47,7 +47,7 @@ export const PolicyDetailsFlyout: FunctionComponent<Props> = ({ policy, onClose 
           {policy.type && (
             <>
               <EuiDescriptionListTitle>
-                {i18n.translate('xpack.idxMgmt.enrich_policies.detailsFlyout.typeTitle', {
+                {i18n.translate('xpack.idxMgmt.enrichPolicies.detailsFlyout.typeTitle', {
                   defaultMessage: 'Type',
                 })}
               </EuiDescriptionListTitle>
@@ -61,7 +61,7 @@ export const PolicyDetailsFlyout: FunctionComponent<Props> = ({ policy, onClose 
           {policy.sourceIndices && (
             <>
               <EuiDescriptionListTitle>
-                {i18n.translate('xpack.idxMgmt.enrich_policies.detailsFlyout.sourceIndicesTitle', {
+                {i18n.translate('xpack.idxMgmt.enrichPolicies.detailsFlyout.sourceIndicesTitle', {
                   defaultMessage: 'Source indices',
                 })}
               </EuiDescriptionListTitle>
@@ -77,7 +77,7 @@ export const PolicyDetailsFlyout: FunctionComponent<Props> = ({ policy, onClose 
           {policy.matchField && (
             <>
               <EuiDescriptionListTitle>
-                {i18n.translate('xpack.idxMgmt.enrich_policies.detailsFlyout.matchFieldTitle', {
+                {i18n.translate('xpack.idxMgmt.enrichPolicies.detailsFlyout.matchFieldTitle', {
                   defaultMessage: 'Match field',
                 })}
               </EuiDescriptionListTitle>
@@ -91,7 +91,7 @@ export const PolicyDetailsFlyout: FunctionComponent<Props> = ({ policy, onClose 
           {policy.enrichFields && (
             <>
               <EuiDescriptionListTitle>
-                {i18n.translate('xpack.idxMgmt.enrich_policies.detailsFlyout.enrichFieldsTitle', {
+                {i18n.translate('xpack.idxMgmt.enrichPolicies.detailsFlyout.enrichFieldsTitle', {
                   defaultMessage: 'Enrich fields',
                 })}
               </EuiDescriptionListTitle>
@@ -107,7 +107,7 @@ export const PolicyDetailsFlyout: FunctionComponent<Props> = ({ policy, onClose 
           {policy.query && (
             <>
               <EuiDescriptionListTitle>
-                {i18n.translate('xpack.idxMgmt.enrich_policies.detailsFlyout.queryTitle', {
+                {i18n.translate('xpack.idxMgmt.enrichPolicies.detailsFlyout.queryTitle', {
                   defaultMessage: 'Query',
                 })}
               </EuiDescriptionListTitle>
@@ -125,7 +125,7 @@ export const PolicyDetailsFlyout: FunctionComponent<Props> = ({ policy, onClose 
                     automaticLayout: true,
                   }}
                   aria-label={i18n.translate(
-                    'xpack.idxMgmt.enrich_policies.detailsFlyout.queryAriaLabel',
+                    'xpack.idxMgmt.enrichPolicies.detailsFlyout.queryAriaLabel',
                     { defaultMessage: 'Enrich policy query editor' }
                   )}
                 />
@@ -144,7 +144,7 @@ export const PolicyDetailsFlyout: FunctionComponent<Props> = ({ policy, onClose 
               flush="left"
               data-test-subj="closeFlyoutButton"
             >
-              {i18n.translate('xpack.idxMgmt.enrich_policies.detailsFlyout.closeButton', {
+              {i18n.translate('xpack.idxMgmt.enrichPolicies.detailsFlyout.closeButton', {
                 defaultMessage: 'Close',
               })}
             </EuiButtonEmpty>
