@@ -35,6 +35,7 @@ import { getMlJobsWithAPMGroup } from '../../../lib/anomaly_detection/get_ml_job
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 import { MlClient } from '../../../lib/helpers/get_ml_client';
+import { getEnvironments } from '../../environments/get_environments';
 import { getServiceAnnotations } from '../../services/annotations';
 import { getServiceMetadataDetails } from '../../services/get_service_metadata_details';
 
@@ -212,6 +213,7 @@ async function getAnomalies({
 
 export interface ServiceSummary {
   'service.name': string;
+  'service.environment': string[];
   'agent.name'?: string;
   'service.version'?: string[];
   'language.name'?: string;
@@ -256,52 +258,66 @@ export async function getApmServiceSummary({
   const environment = args['service.environment'] || ENVIRONMENT_ALL.value;
   const transactionType = args['transaction.type'];
 
-  const [metadataDetails, anomalies, annotations, alerts] = await Promise.all([
-    getServiceMetadataDetails({
-      apmEventClient,
-      start,
-      end,
-      serviceName,
-    }),
-    getAnomalies({
-      serviceName,
-      start,
-      end,
-      environment,
-      mlClient,
-      logger,
-      transactionType,
-    }),
-    getServiceAnnotations({
-      apmEventClient,
-      start,
-      end,
-      searchAggregatedTransactions: true,
-      client: esClient,
-      annotationsClient,
-      environment,
-      logger,
-      serviceName,
-    }),
-    apmAlertsClient.search({
-      size: 100,
-      // @ts-expect-error types for apm alerts client needs to be reviewed
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(ALERT_RULE_PRODUCER, 'apm'),
-            ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
-            ...rangeQuery(start, end),
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...environmentQuery(environment),
-          ],
+  const [environments, metadataDetails, anomalies, annotations, alerts] =
+    await Promise.all([
+      environment === ENVIRONMENT_ALL.value
+        ? getEnvironments({
+            apmEventClient,
+            start,
+            end,
+            size: 10,
+            serviceName,
+            searchAggregatedTransactions: true,
+          })
+        : Promise.resolve([environment]),
+      getServiceMetadataDetails({
+        apmEventClient,
+        start,
+        end,
+        serviceName,
+      }),
+      getAnomalies({
+        serviceName,
+        start,
+        end,
+        environment,
+        mlClient,
+        logger,
+        transactionType,
+      }),
+      getServiceAnnotations({
+        apmEventClient,
+        start,
+        end,
+        searchAggregatedTransactions: true,
+        client: esClient,
+        annotationsClient,
+        environment,
+        logger,
+        serviceName,
+      }),
+      apmAlertsClient.search({
+        size: 100,
+        track_total_hits: false,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                ...termQuery(ALERT_RULE_PRODUCER, 'apm'),
+                ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
+                ...rangeQuery(start, end),
+                ...termQuery(SERVICE_NAME, serviceName),
+                ...environmentQuery(environment),
+              ],
+            },
+          },
         },
-      },
-    }),
-  ]);
+      }),
+    ]);
 
   return {
     'service.name': serviceName,
+    'service.environment': environments,
     'agent.name': metadataDetails.service?.agent.name,
     'service.version': metadataDetails.service?.versions,
     'language.name': metadataDetails.service?.agent.name,

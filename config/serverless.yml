@@ -43,7 +43,7 @@ dev_tools.deeplinks.navLinkStatus: visible
 management.deeplinks.navLinkStatus: visible
 
 # Other disabled plugins
-#xpack.canvas.enabled: false #only disabable in dev-mode
+xpack.canvas.enabled: false
 xpack.cloud_integrations.data_migration.enabled: false
 data.search.sessions.enabled: false
 advanced_settings.enabled: false
@@ -97,3 +97,18 @@ xpack.graph.enabled: false
 
 # Disable cases in stack management
 xpack.cases.stack.enabled: false
+
+# Alerting and action circuit breakers
+xpack.alerting.rules.run.actions.max: 3000
+xpack.alerting.rules.run.timeout: 1m
+xpack.alerting.rules.run.ruleTypeOverrides:
+  - id: siem.indicatorRule
+    timeout: 1m
+xpack.alerting.rules.minimumScheduleInterval.enforce: true
+xpack.actions.run.maxAttempts: 10
+
+# Task Manager
+xpack.task_manager.allow_reading_invalid_state: false
+
+## TaskManager requeue invalid tasks, supports ZDT
+xpack.task_manager.requeue_invalid_tasks.enabled: true

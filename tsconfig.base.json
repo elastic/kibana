@@ -950,6 +950,8 @@
       "@kbn/management-cards-navigation/*": ["packages/kbn-management/cards_navigation/*"],
       "@kbn/management-plugin": ["src/plugins/management"],
       "@kbn/management-plugin/*": ["src/plugins/management/*"],
+      "@kbn/management-settings-section-registry": ["packages/kbn-management/settings/section_registry"],
+      "@kbn/management-settings-section-registry/*": ["packages/kbn-management/settings/section_registry/*"],
       "@kbn/management-storybook-config": ["packages/kbn-management/storybook/config"],
       "@kbn/management-storybook-config/*": ["packages/kbn-management/storybook/config/*"],
       "@kbn/management-test-plugin": ["test/plugin_functional/plugins/management_test_plugin"],
@@ -1562,7 +1564,9 @@
       "@kbn/yarn-lock-validator/*": ["packages/kbn-yarn-lock-validator/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": ["typings/@emotion"],
+      "@emotion/core": [
+        "typings/@emotion"
+      ],
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

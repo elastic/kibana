@@ -8,6 +8,7 @@
 
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
+import { OPTIONS_LIST_CONTROL } from '../../../common';
 import { ControlOutput } from '../../types';
 import { ControlGroupInput } from '../types';
 import { pluginServices } from '../../services';
@@ -55,13 +56,14 @@ test('Action is compatible with embeddables that are editable', async () => {
   const editControlAction = new EditControlAction(deleteControlAction);
   const emptyContainer = new ControlGroupContainer(mockedReduxEmbeddablePackage, controlGroupInput);
   await emptyContainer.untilInitialized();
-  await emptyContainer.addOptionsListControl({
+  const control = await emptyContainer.addOptionsListControl({
     dataViewId: 'test-data-view',
     title: 'test',
     fieldName: 'test-field',
     width: 'medium',
     grow: false,
   });
+  expect(emptyContainer.getInput().panels[control.getInput().id].type).toBe(OPTIONS_LIST_CONTROL);
 
   expect(
     await editControlAction.isCompatible({
@@ -88,18 +90,16 @@ test('Execute should open a flyout', async () => {
 
   const emptyContainer = new ControlGroupContainer(mockedReduxEmbeddablePackage, controlGroupInput);
   await emptyContainer.untilInitialized();
-  await emptyContainer.addOptionsListControl({
+  const control = (await emptyContainer.addOptionsListControl({
     dataViewId: 'test-data-view',
     title: 'test',
     fieldName: 'test-field',
     width: 'medium',
     grow: false,
-  });
-  const embeddable: OptionsListEmbeddable = emptyContainer.getChild(
-    emptyContainer.getChildIds()[0]
-  );
+  })) as OptionsListEmbeddable;
+  expect(emptyContainer.getInput().panels[control.getInput().id].type).toBe(OPTIONS_LIST_CONTROL);
 
   const editControlAction = new EditControlAction(deleteControlAction);
-  await editControlAction.execute({ embeddable });
+  await editControlAction.execute({ embeddable: control });
   expect(spyOn).toHaveBeenCalled();
 });
