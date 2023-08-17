@@ -21,6 +21,7 @@ export const DeprecationsPageLoadingError: FunctionComponent<Props> = ({
   message,
 }) => (
   <EuiPageTemplate.EmptyPrompt
+    color="danger"
     iconType="warning"
     title={
       <h2>
