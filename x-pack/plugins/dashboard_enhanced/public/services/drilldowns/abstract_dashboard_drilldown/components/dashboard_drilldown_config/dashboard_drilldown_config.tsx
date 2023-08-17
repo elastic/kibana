@@ -6,93 +6,57 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSwitch, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  txtChooseDestinationDashboard,
-  txtUseCurrentFilters,
-  txtUseCurrentDateRange,
-  txtOpenInNewTab,
-} from './i18n';
+  LazyDashboardDrilldownOptionToggles,
+  withSuspense,
+} from '@kbn/presentation-util-plugin/public';
+
+import { txtChooseDestinationDashboard } from './i18n';
+import { DrilldownConfig } from '../../../../../../common/drilldowns/dashboard_drilldown/types';
+
+const DashboardDrilldownOptionToggles = withSuspense(LazyDashboardDrilldownOptionToggles, null);
 
 export interface DashboardDrilldownConfigProps {
-  activeDashboardId?: string;
-  dashboards: Array<EuiComboBoxOptionOption<string>>;
-  currentFilters?: boolean;
-  keepRange?: boolean;
-  openInNewTab?: boolean;
-  onDashboardSelect: (dashboardId: string) => void;
-  onCurrentFiltersToggle?: () => void;
-  onKeepRangeToggle?: () => void;
-  onOpenInNewTab?: () => void;
-  onSearchChange: (searchString: string) => void;
-  isLoading: boolean;
   error?: string;
+  isLoading: boolean;
+  config: DrilldownConfig;
+  onSearchChange: (searchString: string) => void;
+  onDashboardSelect: (dashboardId: string) => void;
+  dashboards: Array<EuiComboBoxOptionOption<string>>;
+  onConfigChange: (changes: Partial<DrilldownConfig>) => void;
 }
 
 export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> = ({
-  activeDashboardId,
-  dashboards,
-  currentFilters,
-  keepRange,
-  openInNewTab,
-  onDashboardSelect,
-  onCurrentFiltersToggle,
-  onKeepRangeToggle,
-  onOpenInNewTab,
-  onSearchChange,
-  isLoading,
   error,
+  config,
+  dashboards,
+  isLoading,
+  onConfigChange,
+  onSearchChange,
+  onDashboardSelect,
 }: DashboardDrilldownConfigProps) => {
-  const selectedTitle = dashboards.find((item) => item.value === activeDashboardId)?.label || '';
+  const selectedTitle = dashboards.find((item) => item.value === config.dashboardId)?.label || '';
 
   return (
     <>
       <EuiFormRow label={txtChooseDestinationDashboard} fullWidth isInvalid={!!error} error={error}>
         <EuiComboBox<string>
           async
-          selectedOptions={
-            activeDashboardId ? [{ label: selectedTitle, value: activeDashboardId }] : []
-          }
-          options={dashboards}
-          onChange={([{ value = '' } = { value: '' }]) => onDashboardSelect(value)}
-          onSearchChange={onSearchChange}
-          isLoading={isLoading}
-          singleSelection={{ asPlainText: true }}
           fullWidth
-          data-test-subj={'dashboardDrilldownSelectDashboard'}
           isInvalid={!!error}
+          options={dashboards}
+          isLoading={isLoading}
+          onSearchChange={onSearchChange}
+          singleSelection={{ asPlainText: true }}
+          data-test-subj={'dashboardDrilldownSelectDashboard'}
+          onChange={([{ value = '' } = { value: '' }]) => onDashboardSelect(value)}
+          selectedOptions={
+            config.dashboardId ? [{ label: selectedTitle, value: config.dashboardId }] : []
+          }
         />
       </EuiFormRow>
-      {!!onCurrentFiltersToggle && (
-        <EuiFormRow hasChildLabel={false}>
-          <EuiSwitch
-            name="useCurrentFilters"
-            label={txtUseCurrentFilters}
-            checked={!!currentFilters}
-            onChange={onCurrentFiltersToggle}
-          />
-        </EuiFormRow>
-      )}
-      {!!onKeepRangeToggle && (
-        <EuiFormRow hasChildLabel={false}>
-          <EuiSwitch
-            name="useCurrentDateRange"
-            label={txtUseCurrentDateRange}
-            checked={!!keepRange}
-            onChange={onKeepRangeToggle}
-          />
-        </EuiFormRow>
-      )}
-      {!!onOpenInNewTab && (
-        <EuiFormRow hasChildLabel={false}>
-          <EuiSwitch
-            name="openInNewTab"
-            label={txtOpenInNewTab}
-            checked={!!openInNewTab}
-            onChange={onOpenInNewTab}
-          />
-        </EuiFormRow>
-      )}
+      <DashboardDrilldownOptionToggles options={config} onOptionChange={onConfigChange} />
     </>
   );
 };

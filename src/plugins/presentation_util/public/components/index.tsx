@@ -42,6 +42,10 @@ export const LazyDataViewPicker = React.lazy(() => import('./data_view_picker/da
 
 export const LazyFieldPicker = React.lazy(() => import('./field_picker/field_picker'));
 
+export const LazyDashboardDrilldownOptionToggles = React.lazy(
+  () => import('./dashboard_drilldown_options/dashboard_drilldown_option_toggles')
+);
+
 export { FloatingActions } from './floating_actions/floating_actions';
 
 /**

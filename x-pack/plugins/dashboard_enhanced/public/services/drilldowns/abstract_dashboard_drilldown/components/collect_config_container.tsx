@@ -14,6 +14,7 @@ import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
 import { txtDestinationDashboardNotFound } from './i18n';
 import { Config } from '../types';
 import { Params } from '../abstract_dashboard_drilldown';
+import { DrilldownConfig } from '../../../../../common/drilldowns/dashboard_drilldown/types';
 
 const mergeDashboards = (
   dashboards: Array<EuiComboBoxOptionOption<string>>,
@@ -80,13 +81,12 @@ export class CollectConfigContainer extends React.Component<
 
     return (
       <DashboardDrilldownConfig
-        activeDashboardId={config.dashboardId}
-        dashboards={mergeDashboards(dashboards, selectedDashboard)}
-        currentFilters={config.useCurrentFilters}
-        keepRange={config.useCurrentDateRange}
-        openInNewTab={config.openInNewTab}
-        isLoading={isLoading}
         error={error}
+        config={config}
+        isLoading={isLoading}
+        onConfigChange={(changes: Partial<DrilldownConfig>) => {
+          onConfig({ ...config, ...changes });
+        }}
         onDashboardSelect={(dashboardId) => {
           onConfig({ ...config, dashboardId });
           if (this.state.error) {
@@ -94,24 +94,7 @@ export class CollectConfigContainer extends React.Component<
           }
         }}
         onSearchChange={this.debouncedLoadDashboards}
-        onCurrentFiltersToggle={() =>
-          onConfig({
-            ...config,
-            useCurrentFilters: !config.useCurrentFilters,
-          })
-        }
-        onKeepRangeToggle={() =>
-          onConfig({
-            ...config,
-            useCurrentDateRange: !config.useCurrentDateRange,
-          })
-        }
-        onOpenInNewTab={() =>
-          onConfig({
-            ...config,
-            openInNewTab: !config.openInNewTab,
-          })
-        }
+        dashboards={mergeDashboards(dashboards, selectedDashboard)}
       />
     );
   }

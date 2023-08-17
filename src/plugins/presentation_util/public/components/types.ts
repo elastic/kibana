@@ -71,3 +71,12 @@ export interface ExpressionInputProps
 
   onEditorDidMount?: OnExpressionInputEditorDidMount;
 }
+
+/**
+ * Dashboard drilldown options, which are each controlled by a toggle
+ */
+export type DashboardDrilldownOptions = {
+  useCurrentFilters: boolean;
+  useCurrentDateRange: boolean;
+  openInNewTab: boolean;
+};

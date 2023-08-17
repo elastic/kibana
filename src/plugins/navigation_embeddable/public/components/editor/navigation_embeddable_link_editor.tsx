@@ -27,6 +27,11 @@ import {
   EuiRadioGroupOption,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import {
+  withSuspense,
+  DashboardDrilldownOptions,
+  LazyDashboardDrilldownOptionToggles,
+} from '@kbn/presentation-util-plugin/public';
 
 import {
   NavigationLinkType,
@@ -39,6 +44,8 @@ import { DashboardItem, NavigationLinkInfo } from '../../embeddable/types';
 import { NavigationEmbeddableUnorderedLink } from '../../editor/open_link_editor_flyout';
 import { ExternalLinkDestinationPicker } from '../external_link/external_link_destination_picker';
 import { DashboardLinkDestinationPicker } from '../dashboard_link/dashboard_link_destination_picker';
+
+const DashboardDrilldownOptionToggles = withSuspense(LazyDashboardDrilldownOptionToggles, null);
 
 export const NavigationEmbeddableLinkEditor = ({
   link,
@@ -57,6 +64,11 @@ export const NavigationEmbeddableLinkEditor = ({
   const [defaultLinkLabel, setDefaultLinkLabel] = useState<string | undefined>();
   const [currentLinkLabel, setCurrentLinkLabel] = useState<string>(link?.label ?? '');
   const [linkDestination, setLinkDestination] = useState<string | undefined>(link?.destination);
+  const [linkOptions, setLinkOptions] = useState<DashboardDrilldownOptions>({
+    openInNewTab: false,
+    useCurrentDateRange: true,
+    useCurrentFilters: true,
+  });
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
     return ([DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE] as NavigationLinkType[]).map((type) => {
@@ -172,15 +184,18 @@ export const NavigationEmbeddableLinkEditor = ({
               onChange={(e) => setCurrentLinkLabel(e.target.value)}
             />
           </EuiFormRow>
+
+          <EuiFormRow label={'Options'}>
+            {selectedLinkType === DASHBOARD_LINK_TYPE ? (
+              <DashboardDrilldownOptionToggles
+                options={linkOptions}
+                onOptionChange={(change) => setLinkOptions({ ...linkOptions, ...change })}
+              />
+            ) : (
+              <>Link config</>
+            )}
+          </EuiFormRow>
         </EuiForm>
-
-        {/* TODO: As part of https://github.com/elastic/kibana/issues/154381, we should pull in the custom settings for each link type.
-            Refer to `x-pack/examples/ui_actions_enhanced_examples/public/drilldowns/dashboard_to_discover_drilldown/collect_config_container.tsx`
-            for the dashboard drilldown settings, for example.
-
-            Open question: It probably makes sense to re-use these components so any changes made to the drilldown architecture
-            trickle down to the navigation embeddable - this would require some refactoring, though. Is this a goal for MVP?
-         */}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">

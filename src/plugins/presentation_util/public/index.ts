@@ -25,7 +25,7 @@ export type {
 export { PluginServices, PluginServiceProvider, PluginServiceRegistry } from './services/create';
 
 export type { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
-export type { SaveModalDashboardProps } from './components/types';
+export type { SaveModalDashboardProps, DashboardDrilldownOptions } from './components/types';
 
 export {
   LazyExpressionInput,
@@ -33,6 +33,7 @@ export {
   LazyLabsFlyout,
   LazyDashboardPicker,
   LazySavedObjectSaveModalDashboard,
+  LazyDashboardDrilldownOptionToggles,
   withSuspense,
   LazyDataViewPicker,
   LazyFieldPicker,
