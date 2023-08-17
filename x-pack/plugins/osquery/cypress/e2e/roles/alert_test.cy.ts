@@ -24,10 +24,10 @@ describe('Alert Test', { tags: [tag.ESS] }, () => {
     cy.visit(`/app/security/rules/id/${ruleId}/alerts`);
     cy.getBySel('expand-event').first().click();
 
-      cy.wait(500);
-      cy.getBySel('securitySolutionDocumentDetailsFlyoutInvestigationGuideButton').click();
-      cy.contains('Get processes').click();
-    });
+    cy.wait(500);
+    cy.getBySel('securitySolutionDocumentDetailsFlyoutInvestigationGuideButton').click();
+    cy.contains('Get processes').click();
+  });
 
   after(() => {
     cleanupRule(ruleId);
