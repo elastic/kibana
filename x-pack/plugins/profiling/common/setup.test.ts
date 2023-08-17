@@ -82,6 +82,9 @@ describe('Merging partial state operations', () => {
     const defaultSetupState = createDefaultSetupState();
     it('returns false when permission is not configured', () => {
       const mergedState = mergePartialSetupStates(defaultSetupState, [
+        createCollectorPolicyState(true),
+        createSymbolizerPolicyState(true),
+        createProfilingInApmPolicyState(true),
         createResourceState({ enabled: true, created: true }),
         createSettingsState(true),
         createPermissionState(false),
@@ -92,6 +95,9 @@ describe('Merging partial state operations', () => {
 
     it('returns false when resource management is not enabled', () => {
       const mergedState = mergePartialSetupStates(defaultSetupState, [
+        createCollectorPolicyState(true),
+        createSymbolizerPolicyState(true),
+        createProfilingInApmPolicyState(true),
         createResourceState({ enabled: false, created: true }),
         createSettingsState(true),
         createPermissionState(true),
@@ -102,6 +108,9 @@ describe('Merging partial state operations', () => {
 
     it('returns false when resources are not created', () => {
       const mergedState = mergePartialSetupStates(defaultSetupState, [
+        createCollectorPolicyState(true),
+        createSymbolizerPolicyState(true),
+        createProfilingInApmPolicyState(true),
         createResourceState({ enabled: true, created: false }),
         createSettingsState(true),
         createPermissionState(true),
@@ -112,6 +121,9 @@ describe('Merging partial state operations', () => {
 
     it('returns false when settings are not configured', () => {
       const mergedState = mergePartialSetupStates(defaultSetupState, [
+        createCollectorPolicyState(true),
+        createSymbolizerPolicyState(true),
+        createProfilingInApmPolicyState(true),
         createResourceState({ enabled: true, created: true }),
         createSettingsState(false),
         createPermissionState(true),
@@ -122,12 +134,54 @@ describe('Merging partial state operations', () => {
 
     it('returns true when all checks are valid', () => {
       const mergedState = mergePartialSetupStates(defaultSetupState, [
+        createCollectorPolicyState(true),
+        createSymbolizerPolicyState(true),
+        createProfilingInApmPolicyState(false),
         createResourceState({ enabled: true, created: true }),
         createSettingsState(true),
         createPermissionState(true),
       ]);
 
       expect(areResourcesSetupForAdmin(mergedState)).toBeTruthy();
+    });
+
+    it('returns false when collector is not found', () => {
+      const mergedState = mergePartialSetupStates(defaultSetupState, [
+        createCollectorPolicyState(false),
+        createSymbolizerPolicyState(true),
+        createProfilingInApmPolicyState(false),
+        createResourceState({ enabled: true, created: true }),
+        createSettingsState(true),
+        createPermissionState(true),
+      ]);
+
+      expect(areResourcesSetupForAdmin(mergedState)).toBeFalsy();
+    });
+
+    it('returns false when symbolizer is not found', () => {
+      const mergedState = mergePartialSetupStates(defaultSetupState, [
+        createCollectorPolicyState(true),
+        createSymbolizerPolicyState(false),
+        createProfilingInApmPolicyState(false),
+        createResourceState({ enabled: true, created: true }),
+        createSettingsState(true),
+        createPermissionState(true),
+      ]);
+
+      expect(areResourcesSetupForAdmin(mergedState)).toBeFalsy();
+    });
+
+    it('returns false when profiling is in APM server', () => {
+      const mergedState = mergePartialSetupStates(defaultSetupState, [
+        createCollectorPolicyState(true),
+        createSymbolizerPolicyState(true),
+        createProfilingInApmPolicyState(true),
+        createResourceState({ enabled: true, created: true }),
+        createSettingsState(true),
+        createPermissionState(true),
+      ]);
+
+      expect(areResourcesSetupForAdmin(mergedState)).toBeFalsy();
     });
   });
 
