@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { ErrorType } from '@kbn/ml-error-utils';
+import { type MlGetTrainedModelsRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
@@ -65,8 +66,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
             ...query,
             ...(modelId ? { model_id: modelId } : {}),
             size: DEFAULT_SIZE,
-            include: undefined,
-          });
+          } as MlGetTrainedModelsRequest);
           // model_type is missing
           // @ts-ignore
           const result = body.trained_model_configs as TrainedModelConfigResponse[];

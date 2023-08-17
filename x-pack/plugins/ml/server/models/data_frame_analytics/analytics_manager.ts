@@ -47,8 +47,8 @@ export class AnalyticsManager {
 
   private async initData() {
     const [models, jobs] = await Promise.all([
-      this._mlClient.getTrainedModels(),
-      this._mlClient.getDataFrameAnalytics({ size: 1000 }),
+      this._mlClient.getTrainedModels({ size: 10000 }),
+      this._mlClient.getDataFrameAnalytics({ size: 10000 }),
     ]);
     this._trainedModels = models.trained_model_configs;
     this._jobs = jobs.data_frame_analytics;
