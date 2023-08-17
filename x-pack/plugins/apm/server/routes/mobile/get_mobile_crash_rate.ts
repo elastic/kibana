@@ -111,7 +111,8 @@ async function getMobileCrashTimeseries({
 
   return {
     timeseries,
-    value: response.aggregations?.crashes?.value,
+    value:
+      (response.aggregations?.crashes?.value ?? 0) / ((end - start) / 60000),
   };
 }
 
@@ -159,7 +160,7 @@ export async function getMobileCrashRate({
         currentPeriodTimeseries: currentPeriod.timeseries,
         previousPeriodTimeseries: previousPeriod.timeseries,
       }),
-      value: previousPeriod?.value,
+      value: (previousPeriod?.value ?? 0) / ((end - start) / 60000),
     },
   };
 }
