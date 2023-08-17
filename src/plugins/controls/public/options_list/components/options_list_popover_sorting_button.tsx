@@ -85,7 +85,6 @@ export const OptionsListPopoverSortingButton = ({
     },
     [optionsList.dispatch]
   );
-
   const SortButton = () => (
     <EuiButtonEmpty
       size="s"
@@ -93,9 +92,9 @@ export const OptionsListPopoverSortingButton = ({
       iconSide="right"
       iconType="arrowDown"
       disabled={showOnlySelected}
+      className="optionsList__sortButton"
       data-test-subj="optionsListControl__sortingOptionsButton"
       onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
-      className="euiFilterGroup" // this gives the button a nice border
       aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
     >
       {OptionsListStrings.popover.getSortPopoverTitle()}
@@ -118,6 +117,7 @@ export const OptionsListPopoverSortingButton = ({
       aria-labelledby="optionsList_sortingOptions"
       closePopover={() => setIsSortingPopoverOpen(false)}
       panelClassName={'optionsList--sortPopover'}
+      anchorClassName={'optionsList__sortButtonPopoverAnchor'}
     >
       <span data-test-subj="optionsListControl__sortingOptionsPopover">
         <EuiPopoverTitle paddingSize="s">

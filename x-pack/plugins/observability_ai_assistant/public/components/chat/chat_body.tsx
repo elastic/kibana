@@ -15,7 +15,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { last } from 'lodash';
 import type { Message } from '../../../common/types';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
@@ -25,11 +26,10 @@ import { MissingCredentialsCallout } from '../missing_credentials_callout';
 import { ChatHeader } from './chat_header';
 import { ChatPromptEditor } from './chat_prompt_editor';
 import { ChatTimeline } from './chat_timeline';
-import { KnowledgeBaseCallout } from './knowledge_base_callout';
 
 const containerClassName = css`
   max-height: 100%;
-  max-width: 100%;
+  max-width: 800px;
 `;
 
 const timelineClassName = css`
@@ -42,22 +42,27 @@ const loadingSpinnerContainerClassName = css`
 
 export function ChatBody({
   title,
+  loading,
   messages,
   connectors,
   knowledgeBase,
-  currentUser,
   connectorsManagementHref,
+  currentUser,
   onChatUpdate,
   onChatComplete,
+  onSaveTitle,
 }: {
   title: string;
+  loading: boolean;
   messages: Message[];
   connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
-  currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   connectorsManagementHref: string;
+  conversationId?: string;
+  currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   onChatUpdate: (messages: Message[]) => void;
   onChatComplete: (messages: Message[]) => void;
+  onSaveTitle: (title: string) => void;
 }) {
   const chatService = useObservabilityAIAssistantChatService();
 
@@ -70,7 +75,56 @@ export function ChatBody({
     onChatComplete,
   });
 
+  const timelineContainerRef = useRef<HTMLDivElement | null>(null);
+
   let footer: React.ReactNode;
+
+  const isLoading = Boolean(
+    connectors.loading || knowledgeBase.status.loading || last(timeline.items)?.loading
+  );
+
+  useEffect(() => {
+    const parent = timelineContainerRef.current?.parentElement;
+    if (!parent) {
+      return;
+    }
+
+    let rafId: number | undefined;
+
+    const isAtBottom = () => parent.scrollTop >= parent.scrollHeight - parent.offsetHeight;
+
+    const stick = () => {
+      if (!isAtBottom()) {
+        parent.scrollTop = parent.scrollHeight - parent.offsetHeight;
+      }
+      rafId = requestAnimationFrame(stick);
+    };
+
+    const unstick = () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = undefined;
+      }
+    };
+
+    const onScroll = (event: Event) => {
+      if (isAtBottom()) {
+        stick();
+      } else {
+        unstick();
+      }
+    };
+
+    parent.addEventListener('scroll', onScroll);
+
+    stick();
+
+    return () => {
+      unstick();
+      parent.removeEventListener('scroll', onScroll);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timelineContainerRef.current]);
 
   if (connectors.loading || knowledgeBase.status.loading) {
     footer = (
@@ -89,15 +143,17 @@ export function ChatBody({
     footer = (
       <>
         <EuiFlexItem grow className={timelineClassName}>
-          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-            <ChatTimeline
-              items={timeline.items}
-              onEdit={timeline.onEdit}
-              onFeedback={timeline.onFeedback}
-              onRegenerate={timeline.onRegenerate}
-              onStopGenerating={timeline.onStopGenerating}
-            />
-          </EuiPanel>
+          <div ref={timelineContainerRef}>
+            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+              <ChatTimeline
+                items={timeline.items}
+                onEdit={timeline.onEdit}
+                onFeedback={timeline.onFeedback}
+                onRegenerate={timeline.onRegenerate}
+                onStopGenerating={timeline.onStopGenerating}
+              />
+            </EuiPanel>
+          </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiHorizontalRule margin="none" />
@@ -105,10 +161,11 @@ export function ChatBody({
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
             <ChatPromptEditor
-              loading={false}
+              loading={isLoading}
               disabled={!connectors.selectedConnector}
               onSubmit={timeline.onSubmit}
             />
+            <EuiSpacer size="s" />
           </EuiPanel>
         </EuiFlexItem>
       </>
@@ -118,12 +175,13 @@ export function ChatBody({
   return (
     <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
       <EuiFlexItem grow={false}>
-        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-          <ChatHeader title={title} connectors={connectors} />
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <KnowledgeBaseCallout knowledgeBase={knowledgeBase} />
+        <ChatHeader
+          title={title}
+          connectors={connectors}
+          knowledgeBase={knowledgeBase}
+          loading={loading}
+          onSaveTitle={onSaveTitle}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiHorizontalRule margin="none" />
