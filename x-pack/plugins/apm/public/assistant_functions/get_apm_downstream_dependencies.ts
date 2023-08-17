@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { RegisterFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { callApmApi } from '../../services/rest/create_call_apm_api';
+import { callApmApi } from '../services/rest/create_call_apm_api';
 
 export function registerGetApmDownstreamDependenciesFunction({
   registerFunction,
@@ -21,10 +22,15 @@ export function registerGetApmDownstreamDependenciesFunction({
       service. This allows you to map the dowstream dependency name to a service, by 
       returning both span.destination.service.resource and service.name. Use this to 
       drilldown further if needed.`,
-      descriptionForUser: `Get the downstream dependencies (services or uninstrumented backends) for a 
+      descriptionForUser: i18n.translate(
+        'xpack.apm.observabilityAiAssistant.functions.registerGetApmDownstreamDependencies.descriptionForUser',
+        {
+          defaultMessage: `Get the downstream dependencies (services or uninstrumented backends) for a 
       service. This allows you to map the dowstream dependency name to a service, by 
       returning both span.destination.service.resource and service.name. Use this to 
       drilldown further if needed.`,
+        }
+      ),
       parameters: {
         type: 'object',
         properties: {
