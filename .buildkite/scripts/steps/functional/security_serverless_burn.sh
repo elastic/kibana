@@ -8,6 +8,8 @@ source .buildkite/scripts/steps/functional/common_cypress.sh
 export JOB=kibana-security-solution-chrome
 export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
-echo "--- Investigations - Security Solution Cypress Tests"
+buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" 'false'
 
-yarn --cwd x-pack/test/security_solution_cypress cypress:investigations:run:ess
+echo "--- Security Solution Cypress tests, burning changed specs (Chrome)"
+
+yarn --cwd x-pack/test/security_solution_cypress cypress:changed-specs-only:serverless
