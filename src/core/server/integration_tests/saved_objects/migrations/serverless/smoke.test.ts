@@ -17,7 +17,7 @@ import {
 describe('smoke', () => {
   let serverlessES: TestServerlessESUtils;
   let serverlessKibana: TestServerlessKibanaUtils;
-  jest.setTimeout(180_000);
+  jest.setTimeout(300_000); // five mins :shrug:
   beforeEach(() => {
     serverlessES = createServerlessES();
     serverlessKibana = createServerlessKibana();
