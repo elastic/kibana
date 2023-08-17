@@ -39,18 +39,12 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
     version: await getLatestAvailableAgentVersion(kbnClient),
   });
 
-  const fleetManager = new FleetManager(log);
+  new FleetManager(log).setup();
 
   const policyEnrollmentKey = await createAgentPolicy(kbnClient, log);
 
-  const agentManager = new AgentManager(
-    policyEnrollmentKey,
-    config.get('servers.fleetserver.port'),
-    log
-  );
-
-  await fleetManager.setup();
-  await agentManager.setup();
+  new AgentManager(policyEnrollmentKey, config.get('servers.fleetserver.port'), log).setup();
+  new AgentManager(policyEnrollmentKey, config.get('servers.fleetserver.port'), log).setup();
 }
 
 export async function startOsqueryCypress(context: FtrProviderContext) {
