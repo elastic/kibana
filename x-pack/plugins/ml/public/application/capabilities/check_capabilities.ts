@@ -46,6 +46,10 @@ export class MlCapabilitiesService {
   private _capabilities$ = new BehaviorSubject<MlCapabilities | null>(null);
   private _capabilitiesObs$ = this._capabilities$.asObservable();
 
+  private _isPlatinumOrTrialLicense$ = new BehaviorSubject<boolean | null>(null);
+
+  private _mlFeatureEnabledInSpace$ = new BehaviorSubject<boolean | null>(null);
+
   public capabilities$ = this._capabilities$.pipe(distinctUntilChanged(isEqual));
 
   private _subscription: Subscription | undefined;
@@ -68,6 +72,8 @@ export class MlCapabilitiesService {
       )
       .subscribe((results) => {
         this._capabilities$.next(results.capabilities);
+        this._isPlatinumOrTrialLicense$.next(results.isPlatinumOrTrialLicense);
+        this._mlFeatureEnabledInSpace$.next(results.mlFeatureEnabledInSpace);
         this._isLoading$.next(false);
 
         /**
@@ -79,6 +85,14 @@ export class MlCapabilitiesService {
 
   public getCapabilities(): MlCapabilities | null {
     return this._capabilities$.getValue();
+  }
+
+  public isPlatinumOrTrialLicense(): boolean | null {
+    return this._isPlatinumOrTrialLicense$.getValue();
+  }
+
+  public mlFeatureEnabledInSpace(): boolean | null {
+    return this._mlFeatureEnabledInSpace$.getValue();
   }
 
   public getCapabilities$() {
@@ -142,7 +156,11 @@ export function checkGetManagementMlJobsResolver({
           if (isManageML === true) {
             return resolve();
           } else {
-            return reject();
+            return reject({
+              capabilities,
+              isPlatinumOrTrialLicense: mlCapabilities.isPlatinumOrTrialLicense(),
+              mlFeatureEnabledInSpace: mlCapabilities.mlFeatureEnabledInSpace(),
+            });
           }
         })
         .catch((e) => {
