@@ -194,7 +194,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
         }
       );
     },
-    async initLogs(){
+    async initLogs() {
       const logsSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs';
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(logsSOPath);
