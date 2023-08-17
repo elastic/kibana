@@ -50,5 +50,6 @@
     "@kbn/core-saved-objects-server",
     "@kbn/rison",
     "@kbn/discover-plugin",
+    "@kbn/data-plugin",
   ]
 }
