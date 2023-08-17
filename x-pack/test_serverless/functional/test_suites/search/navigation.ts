@@ -20,9 +20,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlSearchNavigation.navigateToLandingPage();
     });
 
-    // Requires SSL and security enabled on ES Serverless.
-    // https://github.com/elastic/kibana/issues/162625
-    it.skip('navigate search sidenav & breadcrumbs', async () => {
+    it('navigate search sidenav & breadcrumbs', async () => {
       const expectNoPageReload = await svlCommonNavigation.createNoPageReloadCheck();
 
       // check serverless search side nav exists

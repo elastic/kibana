@@ -11,9 +11,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getService('svlCommonNavigation');
 
-  // Requires SSL and security enabled on ES Serverless.
-  // https://github.com/elastic/kibana/issues/162625
-  describe.skip('Avatar menu', function () {
+  describe('Avatar menu', function () {
     it('is displayed', async () => {
       await svlCommonNavigation.navigateToKibanaHome();
       await svlCommonPage.assertUserAvatarExists();
