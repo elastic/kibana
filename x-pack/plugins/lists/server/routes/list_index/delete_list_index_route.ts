@@ -50,17 +50,20 @@ export const deleteListIndexRoute = (router: ListsPluginRouter): void => {
         const listDataStreamExists = await lists.getListDataStreamExists();
         const listItemDataStreamExists = await lists.getListItemDataStreamExists();
 
-        // data streams exists, it means indices were migrated
-        if (listDataStreamExists) {
-          await deleteDataStreams(lists, listDataStreamExists, listItemDataStreamExists);
-        } else if (!listIndexExists && !listItemIndexExists) {
+
+        // return early if no data stream or indices exist
+        if (!listDataStreamExists && !listItemDataStreamExists && !listIndexExists && !listItemIndexExists) {
           return siemResponse.error({
             body: `index and data stream: "${lists.getListName()}" and "${lists.getListItemName()}" does not exist`,
             statusCode: 404,
           });
-        } else {
-          await deleteIndices(lists, listIndexExists, listItemIndexExists);
         }
+
+        // ensure data streams deleted if exist
+        await deleteDataStreams(lists, listDataStreamExists, listItemDataStreamExists);
+
+        // ensure indices deleted if exist and were not migrated
+        await deleteIndices(lists, listIndexExists, listItemIndexExists);
 
         await deleteIndexTemplates(lists);
         await removeLegacyTemplatesIfExist(lists);
