@@ -26,7 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { FilterableEmbeddable, IEmbeddable, isFilterableEmbeddable } from '../../..';
+import { FilterableEmbeddable, IEmbeddable } from '../../..';
 
 export const filterDetailsActionStrings = {
   getQueryTitle: () =>
@@ -57,7 +57,10 @@ export function FiltersDetails({ embeddable, editMode, onEdit }: FiltersDetailsP
   );
 
   useMount(() => {
-    if (!(embeddable as FilterableEmbeddable).getFilters || !(embeddable as FilterableEmbeddable).getQuery) {
+    if (
+      !(embeddable as FilterableEmbeddable).getFilters ||
+      !(embeddable as FilterableEmbeddable).getQuery
+    ) {
       setIsLoading(false);
       return;
     }
