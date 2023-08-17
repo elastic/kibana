@@ -9,9 +9,7 @@
 import { execSync } from 'child_process';
 import Fs from 'fs';
 
-import { readConfig } from 'jest-config';
-import { SearchSource } from 'jest';
-import Runtime from 'jest-runtime';
+import { getChangedFilesForRoots } from 'jest-changed-files';
 
 export const getRequiredEnv = (name: string) => {
   const value = process.env[name];
@@ -89,30 +87,15 @@ export function getChangedFileList(): string[] {
   return changedFiles;
 }
 
-// Based on: packages/kbn-test/src/jest/configs/get_tests_for_config_paths.ts
 export async function getAllTestFilesForConfigs(configPaths: string[]): Promise<string[]> {
-  const EMPTY_ARGV = {
-    $0: '',
-    _: [],
-  };
+  const allRoots = configPaths.map((configPath) => {
+    return configPath.replace('/jest.config.js', '');
+  });
 
-  console.log('Running all config resolution');
-  return Promise.all(
-    configPaths.map(async (configPath) => {
-      const config = await readConfig(EMPTY_ARGV, configPath, true, null, 0, true);
-      console.log(config);
+  console.log({ allRoots });
 
-      const searchSource = new SearchSource(
-        await Runtime.createContext(config.projectConfig, {
-          maxWorkers: 1,
-          watchman: false,
-          watch: false,
-        })
-      );
+  const trackedBranch = getTrackedBranch();
+  const { changedFiles } = await getChangedFilesForRoots(allRoots, { changedSince: trackedBranch });
 
-      const results = await searchSource.getTestPaths(config.globalConfig, undefined, undefined);
-
-      return results.tests.map((t) => t.path);
-    })
-  ).then((x) => x.flat());
+  return [...changedFiles];
 }
