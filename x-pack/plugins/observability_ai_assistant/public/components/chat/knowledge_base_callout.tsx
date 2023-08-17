@@ -13,6 +13,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -93,6 +94,7 @@ export function KnowledgeBaseCallout({ knowledgeBase }: { knowledgeBase: UseKnow
         }}
       >
         <EuiText size="xs">
+          <EuiIcon type="iInCircle" />{' '}
           {i18n.translate('xpack.observabilityAiAssistant.setupKb', {
             defaultMessage: 'Improve your experience by setting up the knowledge base.',
           })}
@@ -102,14 +104,18 @@ export function KnowledgeBaseCallout({ knowledgeBase }: { knowledgeBase: UseKnow
   }
 
   return (
-    <EuiPanel
-      hasBorder={false}
-      hasShadow={false}
-      borderRadius="none"
-      color={color}
-      paddingSize={knowledgeBase.status.value?.ready ? 'none' : 's'}
-    >
-      {content}
-    </EuiPanel>
+    <>
+      {knowledgeBase.status.value?.ready ? null : <EuiSpacer size="s" />}
+      <EuiPanel
+        hasBorder={false}
+        hasShadow={false}
+        borderRadius="none"
+        color={color}
+        paddingSize={knowledgeBase.status.value?.ready ? 'none' : 's'}
+        css={{ width: 'max-content' }}
+      >
+        {content}
+      </EuiPanel>
+    </>
   );
 }

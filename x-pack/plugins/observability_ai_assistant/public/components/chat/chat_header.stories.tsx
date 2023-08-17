@@ -19,7 +19,7 @@ export default meta;
 
 export const ChatHeaderLoaded: ComponentStoryObj<typeof Component> = {
   args: {
-    title: 'My conversation jdhf lskdjhfsdlk jfh sdlkjfh sdlkfjhsd klfjhds flkjdsh flksdjh fl',
+    title: 'My conversation',
     connectors: {
       loading: false,
       selectedConnector: 'gpt-4',
@@ -28,6 +28,18 @@ export const ChatHeaderLoaded: ComponentStoryObj<typeof Component> = {
         { id: 'gpt-3.5-turbo', name: 'OpenAI GPT-3.5 Turbo' },
       ] as FindActionResult[],
       selectConnector: () => {},
+    },
+    knowledgeBase: {
+      status: {
+        loading: false,
+        value: {
+          ready: true,
+        },
+        refresh: () => {},
+      },
+      isInstalling: false,
+      installError: undefined,
+      install: async () => {},
     },
   },
   render: (props) => {

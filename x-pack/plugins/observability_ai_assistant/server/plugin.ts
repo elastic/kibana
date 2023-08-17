@@ -115,7 +115,7 @@ export class ObservabilityAIAssistantPlugin
       taskManager: plugins.taskManager,
     });
 
-    addLensDocsToKb(service);
+    // addLensDocsToKb(service);
 
     registerServerRoutes({
       core,

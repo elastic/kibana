@@ -46,6 +46,8 @@ export const DESCRIPTION_DETAILS_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutDescriptionDetails';
 export const REASON_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutReasonTitle';
 export const REASON_DETAILS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutReasonDetails';
+export const REASON_DETAILS_PREVIEW_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutReasonDetailsPreviewButton';
 export const MITRE_ATTACK_TITLE_TEST_ID = 'securitySolutionAlertDetailsFlyoutMitreAttackTitle';
 export const MITRE_ATTACK_DETAILS_TEST_ID = 'securitySolutionAlertDetailsFlyoutMitreAttackDetails';
 
@@ -90,17 +92,17 @@ export const INSIGHTS_ENTITIES_TITLE_ICON_TEST_ID =
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
 export const INSIGHTS_ENTITIES_CONTENT_TEST_ID =
   EXPANDABLE_PANEL_CONTENT_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
-export const TECHNICAL_PREVIEW_ICON_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutTechnicalPreviewIcon';
 export const ENTITIES_USER_OVERVIEW_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesUserOverview';
 export const ENTITIES_USER_OVERVIEW_LINK_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}Link`;
-export const ENTITIES_USER_OVERVIEW_IP_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}IP`;
+export const ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}Domain`;
+export const ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}LastSeen`;
 export const ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}RiskLevel`;
 export const ENTITIES_HOST_OVERVIEW_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesHostOverview';
 export const ENTITIES_HOST_OVERVIEW_LINK_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TEST_ID}Link`;
-export const ENTITIES_HOST_OVERVIEW_IP_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TEST_ID}IP`;
+export const ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TEST_ID}OsFamily`;
+export const ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TEST_ID}LastSeen`;
 export const ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TEST_ID}RiskLevel`;
 
 /* Insights Threat Intelligence */

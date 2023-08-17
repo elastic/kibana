@@ -261,8 +261,6 @@ export const useTimelineEventsHandler = ({
                       totalCount: response.totalCount,
                       updatedAt: Date.now(),
                     };
-                    setUpdated(newTimelineResponse.updatedAt);
-                    setTotalCount(newTimelineResponse.totalCount);
                     if (onNextHandler) onNextHandler(newTimelineResponse);
                     return newTimelineResponse;
                   });
@@ -294,19 +292,7 @@ export const useTimelineEventsHandler = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [
-      skip,
-      data,
-      setTotalCount,
-      entityType,
-      dataViewId,
-      setUpdated,
-      addWarning,
-      startTracking,
-      dispatch,
-      id,
-      prevFilterStatus,
-    ]
+    [skip, data, entityType, dataViewId, addWarning, startTracking, dispatch, id, prevFilterStatus]
   );
 
   useEffect(() => {
@@ -391,6 +377,13 @@ export const useTimelineEventsHandler = ({
     runtimeMappings,
     filterStatus,
   ]);
+
+  useEffect(() => {
+    if (timelineResponse.totalCount > -1) {
+      setUpdated(timelineResponse.updatedAt);
+      setTotalCount(timelineResponse.totalCount);
+    }
+  }, [setTotalCount, setUpdated, timelineResponse]);
 
   const timelineEventsSearchHandler = useCallback(
     (onNextHandler?: OnNextResponseHandler) => {

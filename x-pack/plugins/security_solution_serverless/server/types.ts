@@ -71,8 +71,10 @@ export interface UsageSource {
 }
 
 export interface UsageSourceMetadata {
-  tier?: ProductTier;
+  tier?: Tier;
 }
+
+export type Tier = ProductTier | 'none';
 
 export interface SecurityUsageReportingTaskSetupContract {
   core: CoreSetup;

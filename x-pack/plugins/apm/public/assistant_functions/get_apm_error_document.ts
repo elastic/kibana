@@ -22,7 +22,7 @@ export function registerGetApmErrorDocumentFunction({
       stacktrace of the error, which might give you a hint as to what the cause is. 
       ONLY use this for error events.`,
       descriptionForUser: i18n.translate(
-        'xpack.apm.observabilityAiAssistant.functions.registerGetApmCorrelationsFunction.descriptionForUser',
+        'xpack.apm.observabilityAiAssistant.functions.registerGetApmErrorDocument.descriptionForUser',
         {
           defaultMessage: `Get a sample error document based on its grouping name. This also includes the 
       stacktrace of the error, which might give you a hint as to what the cause is.`,
