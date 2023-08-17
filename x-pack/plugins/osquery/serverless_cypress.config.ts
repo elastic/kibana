@@ -20,7 +20,7 @@ export default defineCypressConfig({
   video: false,
   viewportHeight: 946,
   viewportWidth: 1680,
-  numTestsKeptInMemory: 10,
+
   env: {
     'cypress-react-selector': {
       root: '#osquery-app',
@@ -30,10 +30,10 @@ export default defineCypressConfig({
   },
 
   e2e: {
+    specPattern: './cypress/e2e/**/*.cy.ts',
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
-    // supportFile: './support/e2e.js',
-    specPattern: './cypress/e2e/**/*.cy.ts',
+    numTestsKeptInMemory: 3,
     setupNodeEvents: (on, config) => {
       setupUserDataLoader(on, config);
 
