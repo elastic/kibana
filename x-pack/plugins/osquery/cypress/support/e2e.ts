@@ -22,15 +22,15 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-// @ts-expect-error check this
-import registerCypressGrep from '@cypress/grep';
-
 // force ESM in this module
 export {};
 
-import type { ServerlessRoleName } from '../../../../test_serverless/shared/lib';
 
 import 'cypress-react-selector';
+import registerCypressGrep from '@cypress/grep';
+
+
+import type { ServerlessRoleName } from '../../../../test_serverless/shared/lib';
 import { login } from '../tasks/login';
 
 registerCypressGrep();
@@ -40,13 +40,10 @@ declare global {
   namespace Cypress {
     interface Chainable {
       getBySel(...args: Parameters<Cypress.Chainable['get']>): Chainable<JQuery<HTMLElement>>;
-
       getBySelContains(
         ...args: Parameters<Cypress.Chainable['get']>
       ): Chainable<JQuery<HTMLElement>>;
-
       clickOutside(): Chainable<JQuery<HTMLBodyElement>>;
-
       login(role?: ServerlessRoleName | 'elastic'): void;
     }
   }
