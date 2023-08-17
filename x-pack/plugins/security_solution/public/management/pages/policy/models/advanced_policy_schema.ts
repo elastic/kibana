@@ -195,8 +195,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.network_events_exclude_local',
       {
-        defaultMessage:
-          'Exclude local connections from network events. Default: false.',
+        defaultMessage: 'Exclude local connections from network events. Default: false.',
       }
     ),
   },
@@ -206,8 +205,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.network_events_exclude_local',
       {
-        defaultMessage:
-          'Exclude local connections from network events. Default: false.',
+        defaultMessage: 'Exclude local connections from network events. Default: false.',
       }
     ),
   },
@@ -420,8 +418,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.network_events_exclude_local',
       {
-        defaultMessage:
-          'Exclude local connections from network events. Default: false.',
+        defaultMessage: 'Exclude local connections from network events. Default: false.',
       }
     ),
   },
