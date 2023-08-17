@@ -141,7 +141,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
             fullWidth
             label={
               <FormattedMessage
-                id="xpack.fleet.settings.editOutputFlyout.proxyIdLabel"
+                id="xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdLabel"
                 defaultMessage="Proxy {badge}"
                 values={{
                   badge: (
@@ -149,7 +149,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
                       size="s"
                       className="eui-alignTop"
                       label={i18n.translate(
-                        'xpack.fleet.settings.editOutputFlyout.proxyIdBetaBadge',
+                        'xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdBetaBadge',
                         {
                           defaultMessage: 'Beta',
                         }
