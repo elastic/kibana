@@ -7,8 +7,6 @@
  */
 
 import { UnifiedDocViewerPublicPlugin } from './plugin';
-
-export { LazyJsonCodeEditor } from './components';
 export { getDocViewsRegistry, setDocViewsRegistry } from './plugin';
 export { useEsDocSearch, useUnifiedDocViewerServices } from './hooks';
 

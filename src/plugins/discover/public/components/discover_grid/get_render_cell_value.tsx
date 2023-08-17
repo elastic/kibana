@@ -28,7 +28,7 @@ import type {
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
 import { MAX_DOC_FIELDS_DISPLAYED, formatFieldValue, formatHit } from '@kbn/discover-utils';
-import { LazyJsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { DiscoverGridContext } from './discover_grid_context';
 import { defaultMonacoEditorWidth } from './constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -210,8 +210,9 @@ function renderPopoverContent({
               </EuiDelayRender>
             }
           >
-            <LazyJsonCodeEditor
-              json={getJSON(columnId, row, useTopLevelObjectColumns)}
+            <CodeEditor
+              languageId="json"
+              value={JSON.stringify(getJSON(columnId, row, useTopLevelObjectColumns), null, 2)}
               width={defaultMonacoEditorWidth}
               height={200}
             />
