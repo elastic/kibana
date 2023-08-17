@@ -13,6 +13,7 @@ import {
   EuiListGroupItem,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -26,6 +27,18 @@ const containerClassName = css`
 
 const titleClassName = css`
   text-transform: uppercase;
+`;
+
+const panelClassName = css`
+  max-height: 100%;
+`;
+
+const overflowScrollClassName = css`
+  overflow-y: auto;
+`;
+
+const newChatButtonWrapperClassName = css`
+  padding-bottom: 5px;
 `;
 
 export function ConversationList({
@@ -45,14 +58,15 @@ export function ConversationList({
   onClickDeleteConversation: (id: string) => void;
 }) {
   return (
-    <EuiPanel paddingSize="s" hasShadow={false}>
+    <EuiPanel paddingSize="s" hasShadow={false} className={panelClassName}>
       <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
-        <EuiFlexItem grow>
+        <EuiFlexItem grow className={overflowScrollClassName}>
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
                 <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
                   <EuiFlexItem grow={false}>
+                    <EuiSpacer size="s" />
                     <EuiText className={titleClassName} size="s">
                       <strong>
                         {i18n.translate('xpack.observabilityAiAssistant.conversationList.title', {
@@ -101,6 +115,7 @@ export function ConversationList({
                       isActive={conversation.id === selected}
                       isDisabled={loading}
                       href={conversation.href}
+                      wrapText
                       extraAction={
                         conversation.id
                           ? {
@@ -135,7 +150,7 @@ export function ConversationList({
         <EuiFlexItem grow={false}>
           <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
             <EuiFlexGroup alignItems="center">
-              <EuiFlexItem grow>
+              <EuiFlexItem grow className={newChatButtonWrapperClassName}>
                 <NewChatButton onClick={onClickNewChat} />
               </EuiFlexItem>
             </EuiFlexGroup>
