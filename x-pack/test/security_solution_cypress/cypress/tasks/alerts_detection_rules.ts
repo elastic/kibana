@@ -58,12 +58,13 @@ import {
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
-import { ALL_ACTIONS } from '../screens/rule_details';
+import { REST_ACTIONS_BUTTON, RULE_NAME_HEADER } from '../screens/rule_details';
 import { EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
 import { LOADING_INDICATOR } from '../screens/security_header';
 
 import { goToRuleEditSettings } from './rule_details';
 import { goToActionsStepTab } from './create_new_rule';
+import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 
 export const getRulesManagementTableRows = () => cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW);
 
@@ -94,7 +95,7 @@ export const duplicateFirstRule = () => {
  */
 export const duplicateRuleFromMenu = () => {
   cy.get(LOADING_INDICATOR).should('not.exist');
-  cy.get(ALL_ACTIONS).click({ force: true });
+  cy.get(REST_ACTIONS_BUTTON).click({ force: true });
   cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).should('be.visible');
 
   // Because of a fade effect and fast clicking this can produce more than one click
@@ -120,15 +121,7 @@ export const deleteFirstRule = () => {
 };
 
 export const deleteRuleFromDetailsPage = () => {
-  cy.get(ALL_ACTIONS).should('be.visible');
-  // We cannot use cy.root().pipe($el) withing this function and instead have to use a cy.wait()
-  // for the click handler to be registered. If you see flake here because of click handler issues
-  // increase the cy.wait(). The reason we cannot use cypress pipe is because multiple clicks on ALL_ACTIONS
-  // causes the pop up to show and then the next click for it to hide. Multiple clicks can cause
-  // the DOM to queue up and once we detect that the element is visible it can then become invisible later
-  // eslint-disable-next-line cypress/no-unnecessary-waiting
-  cy.wait(1000);
-  cy.get(ALL_ACTIONS).click();
+  cy.get(REST_ACTIONS_BUTTON).click();
   cy.get(RULE_DETAILS_DELETE_BTN).click();
   cy.get(RULE_DETAILS_DELETE_BTN).should('not.exist');
   cy.get(CONFIRM_DELETE_RULE_BTN).click();
@@ -186,6 +179,17 @@ export const filterByDisabledRules = () => {
   cy.get(DISABLED_RULES_BTN).click();
 };
 
+export const goToRuleDetailsPageFor = (ruleName: string) => {
+  cy.contains(RULE_NAME, ruleName).click();
+
+  cy.get(PAGE_CONTENT_SPINNER).should('be.visible');
+  cy.contains(RULE_NAME_HEADER, ruleName).should('be.visible');
+  cy.get(PAGE_CONTENT_SPINNER).should('not.exist');
+};
+
+/**
+ * @deprecated use goToRuleDetailsPageFor
+ */
 export const goToRuleDetails = () => {
   cy.get(RULE_NAME).first().click();
 };
