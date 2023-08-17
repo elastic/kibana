@@ -108,6 +108,7 @@ exports[`should render EntityIndexExpression 1`] = `
           includedGeoTypes={
             Array [
               "geo_point",
+              "geo_shape",
             ]
           }
           indexPatternService={
@@ -202,6 +203,7 @@ exports[`should render EntityIndexExpression w/ invalid flag if invalid 1`] = `
           includedGeoTypes={
             Array [
               "geo_point",
+              "geo_shape",
             ]
           }
           indexPatternService={
