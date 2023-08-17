@@ -8,28 +8,29 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { RegisterFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { groupBy } from 'lodash';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FETCH_STATUS } from '../../hooks/use_fetcher';
-import { callApmApi } from '../../services/rest/create_call_apm_api';
-import { getTimeZone } from '../shared/charts/helper/timezone';
-import { TimeseriesChart } from '../shared/charts/timeseries_chart';
-import { ChartPointerEventContextProvider } from '../../context/chart_pointer_event/chart_pointer_event_context';
-import { ApmThemeProvider } from '../routing/app_root';
-import { Coordinate, TimeSeries } from '../../../typings/timeseries';
+import { FETCH_STATUS } from '../hooks/use_fetcher';
+import { callApmApi } from '../services/rest/create_call_apm_api';
+import { getTimeZone } from '../components/shared/charts/helper/timezone';
+import { TimeseriesChart } from '../components/shared/charts/timeseries_chart';
+import { ChartPointerEventContextProvider } from '../context/chart_pointer_event/chart_pointer_event_context';
+import { ApmThemeProvider } from '../components/routing/app_root';
+import { Coordinate, TimeSeries } from '../../typings/timeseries';
 import {
   ChartType,
   getTimeSeriesColor,
-} from '../shared/charts/helper/get_timeseries_color';
-import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+} from '../components/shared/charts/helper/get_timeseries_color';
+import { LatencyAggregationType } from '../../common/latency_aggregation_types';
 import {
   asPercent,
   asTransactionRate,
   getDurationFormatter,
-} from '../../../common/utils/formatters';
+} from '../../common/utils/formatters';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
-} from '../shared/charts/transaction_charts/helper';
+} from '../components/shared/charts/transaction_charts/helper';
 
 export function registerGetApmTimeseriesFunction({
   registerFunction,
@@ -40,7 +41,12 @@ export function registerGetApmTimeseriesFunction({
     {
       contexts: ['apm'],
       name: 'get_apm_timeseries',
-      descriptionForUser: `Display different APM metrics, like throughput, failure rate, or latency, for any service or all services, or any or all of its dependencies, both as a timeseries and as a single statistic. Additionally, the function will return any changes, such as spikes, step and trend changes, or dips. You can also use it to compare data by requesting two different time ranges, or for instance two different service versions`,
+      descriptionForUser: i18n.translate(
+        'xpack.apm.observabilityAiAssistant.functions.registerGetApmTimeseries.descriptionForUser',
+        {
+          defaultMessage: `Display different APM metrics, like throughput, failure rate, or latency, for any service or all services, or any or all of its dependencies, both as a timeseries and as a single statistic. Additionally, the function will return any changes, such as spikes, step and trend changes, or dips. You can also use it to compare data by requesting two different time ranges, or for instance two different service versions`,
+        }
+      ),
       description: `Display different APM metrics, like throughput, failure rate, or latency, for any service or all services, or any or all of its dependencies, both as a timeseries and as a single statistic. Additionally, the function will return any changes, such as spikes, step and trend changes, or dips. You can also use it to compare data by requesting two different time ranges, or for instance two different service versions. In KQL, escaping happens with double quotes, not single quotes. Some characters that need escaping are: ':()\\\/\". Always put a field value in double quotes. Best: service.name:\"opbeans-go\". Wrong: service.name:opbeans-go. This is very important!`,
       parameters: {
         type: 'object',
@@ -135,7 +141,7 @@ export function registerGetApmTimeseriesFunction({
                 'service.environment': {
                   type: 'string',
                   description:
-                    "The environment that the service is running in. If you don't know this, use ENVIRONMENT_ALL.",
+                    'The environment that the service is running in.',
                 },
                 filter: {
                   type: 'string',
