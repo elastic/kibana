@@ -30,6 +30,8 @@ import {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { CoreStart } from '@kbn/core/public';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
 import {
   Datasource,
@@ -100,6 +102,7 @@ export interface SuggestionPanelProps {
   frame: FramePublicAPI;
   getUserMessages: UserMessagesGetter;
   nowProvider: DataPublicPluginStart['nowProvider'];
+  core: CoreStart;
 }
 
 const PreviewRenderer = ({
@@ -226,6 +229,7 @@ export function SuggestionPanel({
   ExpressionRenderer: ExpressionRendererComponent,
   getUserMessages,
   nowProvider,
+  core,
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -368,16 +372,19 @@ export function SuggestionPanel({
   const suggestionsRendered = useRef<boolean[]>([]);
   const totalSuggestions = suggestions.length + 1;
 
-  const onSuggestionRender = useCallback((suggestionIndex: number) => {
-    suggestionsRendered.current[suggestionIndex] = true;
-    if (initialRenderComplete.current === false && suggestionsRendered.current.every(Boolean)) {
-      initialRenderComplete.current = true;
-      // console.log(
-      //   'time to fetch data and perform initial render for all suggestions',
-      //   performance.now() - startTime.current
-      // );
-    }
-  }, []);
+  const onSuggestionRender = useCallback(
+    (suggestionIndex: number) => {
+      suggestionsRendered.current[suggestionIndex] = true;
+      if (initialRenderComplete.current === false && suggestionsRendered.current.every(Boolean)) {
+        initialRenderComplete.current = true;
+        reportPerformanceMetricEvent(core.analytics, {
+          eventName: 'lensSuggestionsRenderTime',
+          duration: performance.now() - startTime.current,
+        });
+      }
+    },
+    [core.analytics]
+  );
 
   const rollbackToCurrentVisualization = useCallback(() => {
     if (lastSelectedSuggestion !== -1) {
