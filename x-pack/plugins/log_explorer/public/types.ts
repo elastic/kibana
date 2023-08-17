@@ -10,6 +10,9 @@ import { DiscoverStart } from '@kbn/discover-plugin/public';
 export type DiscoverLogExplorerPluginSetup = void;
 export type DiscoverLogExplorerPluginStart = void;
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DiscoverLogExplorerSetupDeps {}
+
 export interface DiscoverLogExplorerStartDeps {
   data: DataPublicPluginStart;
   discover: DiscoverStart;

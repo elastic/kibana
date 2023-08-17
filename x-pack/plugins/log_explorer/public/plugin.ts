@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { LOG_EXPLORER_PROFILE_ID } from '../common/constants';
 import { DiscoverLogExplorerConfig } from '../common/plugin_config';
 import { createLogExplorerProfileCustomizations } from './customizations/log_explorer_profile';
@@ -13,6 +14,7 @@ import { getLogExplorerDeepLink } from './deep_links';
 import {
   DiscoverLogExplorerPluginSetup,
   DiscoverLogExplorerPluginStart,
+  DiscoverLogExplorerSetupDeps,
   DiscoverLogExplorerStartDeps,
 } from './types';
 
@@ -25,7 +27,15 @@ export class DiscoverLogExplorerPlugin
     this.config = context.config.get();
   }
 
-  public setup() {}
+  public setup(core: CoreSetup, plugins: DiscoverLogExplorerSetupDeps) {
+    core.application.register({
+      id: 'log-explorer',
+      title: i18n.translate('xpack.log_explorer.appTitle', { defaultMessage: 'Log Explorer' }),
+      mount(params) {
+        throw new Error('Function not implemented.');
+      },
+    });
+  }
 
   public start(core: CoreStart, plugins: DiscoverLogExplorerStartDeps) {
     const { discover, data } = plugins;

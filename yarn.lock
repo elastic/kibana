@@ -4208,10 +4208,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/discover-log-explorer-plugin@link:x-pack/plugins/discover_log_explorer":
-  version "0.0.0"
-  uid ""
-
 "@kbn/discover-plugin@link:src/plugins/discover":
   version "0.0.0"
   uid ""
@@ -4773,6 +4769,10 @@
   uid ""
 
 "@kbn/locator-explorer-plugin@link:examples/locator_explorer":
+  version "0.0.0"
+  uid ""
+
+"@kbn/log-explorer-plugin@link:x-pack/plugins/log_explorer":
   version "0.0.0"
   uid ""
 
