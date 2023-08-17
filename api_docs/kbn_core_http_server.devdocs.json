@@ -14119,6 +14119,10 @@
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/csp_rule_template/get_csp_rule_template.ts"
               },
               {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/plugins/cloud_security_posture/server/routes/detection_engine/get_detection_engine_alerts_count_by_rule_tags.ts"
+              },
+              {
                 "plugin": "fileUpload",
                 "path": "x-pack/plugins/file_upload/server/routes.ts"
               },

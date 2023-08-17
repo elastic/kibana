@@ -7,18 +7,23 @@
  */
 
 import expect from '@kbn/expect';
+import type {
+  EventAnnotationGroupSavedObjectAttributes,
+  EventAnnotationGroupCreateIn,
+  EventAnnotationGroupUpdateIn,
+  EventAnnotationGroupSearchIn,
+} from '@kbn/event-annotation-plugin/common';
+import { CONTENT_ID } from '@kbn/event-annotation-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const CONTENT_ENDPOINT = '/api/content_management/rpc';
-
-const CONTENT_TYPE_ID = 'event-annotation-group';
 
 const API_VERSION = 1;
 
 const EXISTING_ID_1 = 'fcebef20-3ba4-11ee-85d3-3dd00bdd66ef'; // from loaded archive
 const EXISTING_ID_2 = '0d1aa670-3baf-11ee-a4a7-c11cb33a9549'; // from loaded archive
 
-const DEFAULT_EVENT_ANNOTATION_GROUP = {
+const DEFAULT_EVENT_ANNOTATION_GROUP: EventAnnotationGroupSavedObjectAttributes = {
   title: 'a group',
   description: '',
   ignoreGlobalFilters: true,
@@ -66,20 +71,22 @@ export default function ({ getService }: FtrProviderContext) {
       // TODO test tag searching, ordering, pagination, etc
 
       it(`should retrieve existing groups`, async () => {
+        const payload: EventAnnotationGroupSearchIn = {
+          contentTypeId: CONTENT_ID,
+          query: {
+            limit: 1000,
+            tags: {
+              included: [],
+              excluded: [],
+            },
+          },
+          version: API_VERSION,
+        };
+
         const resp = await supertest
           .post(`${CONTENT_ENDPOINT}/search`)
           .set('kbn-xsrf', 'kibana')
-          .send({
-            contentTypeId: CONTENT_TYPE_ID,
-            query: {
-              limit: 1000,
-              tags: {
-                included: [],
-                excluded: [],
-              },
-            },
-            version: API_VERSION,
-          })
+          .send(payload)
           .expect(200);
 
         const results = resp.body.result.result.hits;
@@ -90,18 +97,20 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('create', () => {
       it(`should require dataViewSpec to be specified`, async () => {
-        const createWithDataViewSpec = (dataViewSpec: any) =>
-          supertest
+        const createWithDataViewSpec = (dataViewSpec: any) => {
+          const payload: EventAnnotationGroupCreateIn = {
+            contentTypeId: CONTENT_ID,
+            data: { ...DEFAULT_EVENT_ANNOTATION_GROUP, dataViewSpec },
+            options: {
+              references: DEFAULT_REFERENCES,
+            },
+            version: API_VERSION,
+          };
+          return supertest
             .post(`${CONTENT_ENDPOINT}/create`)
             .set('kbn-xsrf', 'kibana')
-            .send({
-              contentTypeId: CONTENT_TYPE_ID,
-              data: { ...DEFAULT_EVENT_ANNOTATION_GROUP, dataViewSpec },
-              options: {
-                references: DEFAULT_REFERENCES,
-              },
-              version: API_VERSION,
-            });
+            .send(payload);
+        };
 
         const errorResp = await createWithDataViewSpec(undefined).expect(400);
 
@@ -119,20 +128,22 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('update', () => {
       it(`should require dataViewSpec to be specified`, async () => {
-        const updateWithDataViewSpec = (dataViewSpec: any) =>
-          supertest
+        const updateWithDataViewSpec = (dataViewSpec: any) => {
+          const payload: EventAnnotationGroupUpdateIn = {
+            contentTypeId: CONTENT_ID,
+            data: { ...DEFAULT_EVENT_ANNOTATION_GROUP, dataViewSpec },
+            id: EXISTING_ID_1,
+            options: {
+              references: DEFAULT_REFERENCES,
+            },
+            version: API_VERSION,
+          };
+
+          return supertest
             .post(`${CONTENT_ENDPOINT}/update`)
             .set('kbn-xsrf', 'kibana')
-            .send({
-              contentTypeId: CONTENT_TYPE_ID,
-              data: { ...DEFAULT_EVENT_ANNOTATION_GROUP, dataViewSpec },
-              id: EXISTING_ID_1,
-              options: {
-                references: DEFAULT_REFERENCES,
-              },
-              version: API_VERSION,
-            });
-
+            .send(payload);
+        };
         const errorResp = await updateWithDataViewSpec(undefined).expect(400);
 
         expect(errorResp.body.message).to.be(
