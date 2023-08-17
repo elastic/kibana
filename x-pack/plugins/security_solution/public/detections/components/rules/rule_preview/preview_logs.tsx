@@ -10,7 +10,7 @@ import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion } from '@elastic/eui';
 import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 
-interface PreviewLogsComponentProps {
+interface PreviewLogsProps {
   logs: RulePreviewLogs[];
   hasNoiseWarning: boolean;
   isAborted: boolean;
@@ -42,36 +42,35 @@ const addLogs = (
   allLogs: SortedLogs[]
 ) => (logs.length ? [{ startedAt, logs, duration }, ...allLogs] : allLogs);
 
-export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = React.memo(
-  ({ logs, hasNoiseWarning, isAborted }) => {
-    const sortedLogs = useMemo(
-      () =>
-        logs.reduce<{
-          errors: SortedLogs[];
-          warnings: SortedLogs[];
-        }>(
-          ({ errors, warnings }, curr) => ({
-            errors: addLogs(curr.startedAt, curr.errors, curr.duration, errors),
-            warnings: addLogs(curr.startedAt, curr.warnings, curr.duration, warnings),
-          }),
-          { errors: [], warnings: [] }
-        ),
-      [logs]
-    );
-    return (
-      <>
-        <EuiSpacer size="s" />
-        {hasNoiseWarning ?? <CustomWarning message={i18n.QUERY_PREVIEW_NOISE_WARNING} />}
-        <LogAccordion logs={sortedLogs.errors} isError />
-        <LogAccordion logs={sortedLogs.warnings}>
-          {isAborted ? <CustomWarning message={i18n.PREVIEW_TIMEOUT_WARNING} /> : null}
-        </LogAccordion>
-      </>
-    );
-  }
-);
+const PreviewLogsComponent: React.FC<PreviewLogsProps> = ({ logs, hasNoiseWarning, isAborted }) => {
+  const sortedLogs = useMemo(
+    () =>
+      logs.reduce<{
+        errors: SortedLogs[];
+        warnings: SortedLogs[];
+      }>(
+        ({ errors, warnings }, curr) => ({
+          errors: addLogs(curr.startedAt, curr.errors, curr.duration, errors),
+          warnings: addLogs(curr.startedAt, curr.warnings, curr.duration, warnings),
+        }),
+        { errors: [], warnings: [] }
+      ),
+    [logs]
+  );
+  return (
+    <>
+      <EuiSpacer size="s" />
+      {hasNoiseWarning ?? <CustomWarning message={i18n.QUERY_PREVIEW_NOISE_WARNING} />}
+      <LogAccordion logs={sortedLogs.errors} isError />
+      <LogAccordion logs={sortedLogs.warnings}>
+        {isAborted ? <CustomWarning message={i18n.PREVIEW_TIMEOUT_WARNING} /> : null}
+      </LogAccordion>
+    </>
+  );
+};
 
-PreviewLogsComponent.displayName = 'PreviewLogs';
+export const PreviewLogs = React.memo(PreviewLogsComponent)
+PreviewLogs.displayName = 'PreviewLogs';
 
 const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError, children }) => {
   const firstLog = logs[0];

@@ -69,200 +69,199 @@ interface PreviewHistogramProps {
 
 const DEFAULT_HISTOGRAM_HEIGHT = 300;
 
-export const PreviewHistogram = React.memo(
-  ({
-    previewId,
-    addNoiseWarning,
-    spaceId,
-    ruleType,
-    indexPattern,
-    timeframeOptions,
-  }: PreviewHistogramProps) => {
-    const { uiSettings } = useKibana().services;
-    const { setQuery, isInitializing } = useGlobalTime();
-    const startDate = useMemo(
-      () => timeframeOptions.timeframeStart.toISOString(),
-      [timeframeOptions]
-    );
-    const endDate = useMemo(() => timeframeOptions.timeframeEnd.toISOString(), [timeframeOptions]);
-    // It seems like the Table/Grid component uses end date value as a non-inclusive one,
-    // thus the alerts which have timestamp equal to the end date value are not displayed in the table.
-    // To fix that, we extend end date value by 1s to make sure all alerts are included in the table.
-    const extendedEndDate = useMemo(
-      () => timeframeOptions.timeframeEnd.clone().add('1', 's').toISOString(),
-      [timeframeOptions]
-    );
-    const isEqlRule = useMemo(() => ruleType === 'eql', [ruleType]);
-    const isMlRule = useMemo(() => ruleType === 'machine_learning', [ruleType]);
+const PreviewHistogramComponent = ({
+  previewId,
+  addNoiseWarning,
+  spaceId,
+  ruleType,
+  indexPattern,
+  timeframeOptions,
+}: PreviewHistogramProps) => {
+  const { uiSettings } = useKibana().services;
+  const { setQuery, isInitializing } = useGlobalTime();
+  const startDate = useMemo(
+    () => timeframeOptions.timeframeStart.toISOString(),
+    [timeframeOptions]
+  );
+  const endDate = useMemo(() => timeframeOptions.timeframeEnd.toISOString(), [timeframeOptions]);
+  // It seems like the Table/Grid component uses end date value as a non-inclusive one,
+  // thus the alerts which have timestamp equal to the end date value are not displayed in the table.
+  // To fix that, we extend end date value by 1s to make sure all alerts are included in the table.
+  const extendedEndDate = useMemo(
+    () => timeframeOptions.timeframeEnd.clone().add('1', 's').toISOString(),
+    [timeframeOptions]
+  );
+  const isEqlRule = useMemo(() => ruleType === 'eql', [ruleType]);
+  const isMlRule = useMemo(() => ruleType === 'machine_learning', [ruleType]);
 
-    const isAlertsPreviewChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled(
-      'alertsPreviewChartEmbeddablesEnabled'
-    );
-    const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
+  const isAlertsPreviewChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled(
+    'alertsPreviewChartEmbeddablesEnabled'
+  );
+  const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
 
-    const extraVisualizationOptions = useMemo(
-      () => ({
-        ruleId: previewId,
-        spaceId,
-      }),
-      [previewId, spaceId]
-    );
-
-    const [isLoading, { data, inspect, totalCount, refetch }] = usePreviewHistogram({
-      previewId,
-      startDate,
-      endDate,
+  const extraVisualizationOptions = useMemo(
+    () => ({
+      ruleId: previewId,
       spaceId,
+    }),
+    [previewId, spaceId]
+  );
+
+  const [isLoading, { data, inspect, totalCount, refetch }] = usePreviewHistogram({
+    previewId,
+    startDate,
+    endDate,
+    spaceId,
+    indexPattern,
+    ruleType,
+    skip: isAlertsPreviewChartEmbeddablesEnabled,
+  });
+  const license = useLicense();
+  const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
+
+  const { globalFullScreen } = useGlobalFullScreen();
+  const previousPreviewId = usePrevious(previewId);
+  const previewQueryId = `${ID}-${previewId}`;
+
+  useEffect(() => {
+    if (previousPreviewId !== previewId && totalCount > 0) {
+      if (isNoisy(totalCount, timeframeOptions)) {
+        addNoiseWarning();
+      }
+    }
+  }, [totalCount, addNoiseWarning, previousPreviewId, previewId, timeframeOptions]);
+
+  useEffect((): void => {
+    if (!isLoading && !isInitializing) {
+      setQuery({
+        id: previewQueryId,
+        inspect,
+        loading: isLoading,
+        refetch,
+      });
+    }
+  }, [
+    setQuery,
+    inspect,
+    isLoading,
+    isInitializing,
+    refetch,
+    previewId,
+    isAlertsPreviewChartEmbeddablesEnabled,
+    previewQueryId,
+  ]);
+
+  const barConfig = useMemo(
+    (): ChartSeriesConfigs => getHistogramConfig(endDate, startDate, !isEqlRule),
+    [endDate, startDate, isEqlRule]
+  );
+
+  const chartData = useMemo((): ChartSeriesData[] => [{ key: 'hits', value: data }], [data]);
+  const config = getEsQueryConfig(uiSettings);
+  const pageFilters = useMemo(() => {
+    const filterQuery = buildEsQuery(
       indexPattern,
-      ruleType,
-      skip: isAlertsPreviewChartEmbeddablesEnabled,
-    });
-    const license = useLicense();
-    const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
-
-    const { globalFullScreen } = useGlobalFullScreen();
-    const previousPreviewId = usePrevious(previewId);
-    const previewQueryId = `${ID}-${previewId}`;
-
-    useEffect(() => {
-      if (previousPreviewId !== previewId && totalCount > 0) {
-        if (isNoisy(totalCount, timeframeOptions)) {
-          addNoiseWarning();
-        }
+      [{ query: `kibana.alert.rule.uuid:${previewId}`, language: 'kuery' }],
+      [],
+      {
+        nestedIgnoreUnmapped: true,
+        ...config,
+        dateFormatTZ: undefined,
       }
-    }, [totalCount, addNoiseWarning, previousPreviewId, previewId, timeframeOptions]);
-
-    useEffect((): void => {
-      if (!isLoading && !isInitializing) {
-        setQuery({
-          id: previewQueryId,
-          inspect,
-          loading: isLoading,
-          refetch,
-        });
-      }
-    }, [
-      setQuery,
-      inspect,
-      isLoading,
-      isInitializing,
-      refetch,
-      previewId,
-      isAlertsPreviewChartEmbeddablesEnabled,
-      previewQueryId,
-    ]);
-
-    const barConfig = useMemo(
-      (): ChartSeriesConfigs => getHistogramConfig(endDate, startDate, !isEqlRule),
-      [endDate, startDate, isEqlRule]
     );
-
-    const chartData = useMemo((): ChartSeriesData[] => [{ key: 'hits', value: data }], [data]);
-    const config = getEsQueryConfig(uiSettings);
-    const pageFilters = useMemo(() => {
-      const filterQuery = buildEsQuery(
-        indexPattern,
-        [{ query: `kibana.alert.rule.uuid:${previewId}`, language: 'kuery' }],
-        [],
-        {
-          nestedIgnoreUnmapped: true,
-          ...config,
-          dateFormatTZ: undefined,
-        }
-      );
-      return [
-        {
-          ...filterQuery,
-          meta: {
-            alias: null,
-            negate: false,
-            disabled: false,
-            type: 'phrase',
-            key: 'kibana.alert.rule.uuid',
-            params: {
-              query: previewId,
-            },
+    return [
+      {
+        ...filterQuery,
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'kibana.alert.rule.uuid',
+          params: {
+            query: previewId,
           },
         },
-      ];
-    }, [config, indexPattern, previewId]);
+      },
+    ];
+  }, [config, indexPattern, previewId]);
 
-    return (
-      <>
-        <Panel height={DEFAULT_HISTOGRAM_HEIGHT} data-test-subj={'preview-histogram-panel'}>
-          <EuiFlexGroup gutterSize="none" direction="column">
-            <EuiFlexItem grow={1}>
-              <HeaderSection
-                id={previewQueryId}
-                title={i18n.QUERY_GRAPH_HITS_TITLE}
-                titleSize="xs"
-                showInspectButton={!isAlertsPreviewChartEmbeddablesEnabled}
+  return (
+    <>
+      <Panel height={DEFAULT_HISTOGRAM_HEIGHT} data-test-subj={'preview-histogram-panel'}>
+        <EuiFlexGroup gutterSize="none" direction="column">
+          <EuiFlexItem grow={1}>
+            <HeaderSection
+              id={previewQueryId}
+              title={i18n.QUERY_GRAPH_HITS_TITLE}
+              titleSize="xs"
+              showInspectButton={!isAlertsPreviewChartEmbeddablesEnabled}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            {isLoading ? (
+              <LoadingChart size="l" data-test-subj="preview-histogram-loading" />
+            ) : isAlertsPreviewChartEmbeddablesEnabled ? (
+              <VisualizationEmbeddable
+                applyGlobalQueriesAndFilters={false}
+                extraOptions={extraVisualizationOptions}
+                getLensAttributes={getRulePreviewLensAttributes}
+                height={CHART_HEIGHT}
+                id={`${previewQueryId}-embeddable`}
+                inspectTitle={i18n.QUERY_GRAPH_HITS_TITLE}
+                scopeId={SourcererScopeName.detections}
+                stackByField={ruleType === 'machine_learning' ? 'host.name' : 'event.category'}
+                timerange={timerange}
+                withActions={false}
               />
-            </EuiFlexItem>
-            <EuiFlexItem grow={1}>
-              {isLoading ? (
-                <LoadingChart size="l" data-test-subj="preview-histogram-loading" />
-              ) : isAlertsPreviewChartEmbeddablesEnabled ? (
-                <VisualizationEmbeddable
-                  applyGlobalQueriesAndFilters={false}
-                  extraOptions={extraVisualizationOptions}
-                  getLensAttributes={getRulePreviewLensAttributes}
-                  height={CHART_HEIGHT}
-                  id={`${previewQueryId}-embeddable`}
-                  inspectTitle={i18n.QUERY_GRAPH_HITS_TITLE}
-                  scopeId={SourcererScopeName.detections}
-                  stackByField={ruleType === 'machine_learning' ? 'host.name' : 'event.category'}
-                  timerange={timerange}
-                  withActions={false}
-                />
-              ) : (
-                <BarChart
-                  configs={barConfig}
-                  barChart={chartData}
-                  data-test-subj="preview-histogram-bar-chart"
-                />
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <>
-                <EuiSpacer />
-                <EuiText size="s" color="subdued">
-                  <p>
-                    {isMlRule
-                      ? i18n.ML_PREVIEW_HISTOGRAM_DISCLAIMER
-                      : i18n.PREVIEW_HISTOGRAM_DISCLAIMER}
-                  </p>
-                </EuiText>
-              </>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </Panel>
-        <EuiSpacer />
-        <FullScreenContainer $isFullScreen={globalFullScreen}>
-          <StatefulEventsViewer
-            pageFilters={pageFilters}
-            defaultModel={getAlertsPreviewDefaultModel(license)}
-            end={extendedEndDate}
-            tableId={TableId.rulePreview}
-            leadingControlColumns={getPreviewTableControlColumn(1.5)}
-            renderCellValue={PreviewRenderCellValue}
-            rowRenderers={defaultRowRenderers}
-            start={startDate}
-            sourcererScope={SourcererScopeName.detections}
-            indexNames={[`${DEFAULT_PREVIEW_INDEX}-${spaceId}`]}
-            bulkActions={false}
-          />
-        </FullScreenContainer>
-        <DetailsPanel
-          browserFields={browserFields}
-          isFlyoutView
-          runtimeMappings={runtimeMappings}
-          scopeId={TableId.rulePreview}
-          isReadOnly
+            ) : (
+              <BarChart
+                configs={barConfig}
+                barChart={chartData}
+                data-test-subj="preview-histogram-bar-chart"
+              />
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <>
+              <EuiSpacer />
+              <EuiText size="s" color="subdued">
+                <p>
+                  {isMlRule
+                    ? i18n.ML_PREVIEW_HISTOGRAM_DISCLAIMER
+                    : i18n.PREVIEW_HISTOGRAM_DISCLAIMER}
+                </p>
+              </EuiText>
+            </>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </Panel>
+      <EuiSpacer />
+      <FullScreenContainer $isFullScreen={globalFullScreen}>
+        <StatefulEventsViewer
+          pageFilters={pageFilters}
+          defaultModel={getAlertsPreviewDefaultModel(license)}
+          end={extendedEndDate}
+          tableId={TableId.rulePreview}
+          leadingControlColumns={getPreviewTableControlColumn(1.5)}
+          renderCellValue={PreviewRenderCellValue}
+          rowRenderers={defaultRowRenderers}
+          start={startDate}
+          sourcererScope={SourcererScopeName.detections}
+          indexNames={[`${DEFAULT_PREVIEW_INDEX}-${spaceId}`]}
+          bulkActions={false}
         />
-      </>
-    );
-  }
-);
+      </FullScreenContainer>
+      <DetailsPanel
+        browserFields={browserFields}
+        isFlyoutView
+        runtimeMappings={runtimeMappings}
+        scopeId={TableId.rulePreview}
+        isReadOnly
+      />
+    </>
+  );
+};
 
+export const PreviewHistogram = React.memo(PreviewHistogramComponent);
 PreviewHistogram.displayName = 'PreviewHistogram';
