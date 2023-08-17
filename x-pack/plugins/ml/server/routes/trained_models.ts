@@ -30,7 +30,7 @@ import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import { modelsProvider } from '../models/model_management';
 
-const DEFAULT_SIZE = 10000;
+export const DEFAULT_TRAINED_MODELS_PAGE_SIZE = 10000;
 
 export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization) {
   /**
@@ -65,7 +65,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
           const body = await mlClient.getTrainedModels({
             ...query,
             ...(modelId ? { model_id: modelId } : {}),
-            size: DEFAULT_SIZE,
+            size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
           } as MlGetTrainedModelsRequest);
           // model_type is missing
           // @ts-ignore
@@ -154,7 +154,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       },
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
-          const body = await mlClient.getTrainedModelsStats({ size: DEFAULT_SIZE });
+          const body = await mlClient.getTrainedModelsStats({
+            size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
+          });
           return response.ok({
             body,
           });
