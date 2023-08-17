@@ -19,7 +19,7 @@ export const journey = new Journey({
       )
     );
     await page.waitForSelector(subj('table-is-ready'));
-    // wait extra 5 seconds
+    // wait extra 5 seconds: we're not sure why, but the extra sleep before loading the editor makes the metrics more consistent
     await page.waitForTimeout(5000);
   })
   .step('Open existing Lens visualization', async ({ page, kibanaPage }) => {
