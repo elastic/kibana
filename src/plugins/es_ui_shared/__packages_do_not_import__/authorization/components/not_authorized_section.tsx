@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 
 interface Props {
   title: React.ReactNode;
@@ -15,5 +15,9 @@ interface Props {
 }
 
 export const NotAuthorizedSection = ({ title, message }: Props) => (
-  <EuiEmptyPrompt iconType="securityApp" title={<h2>{title}</h2>} body={<p>{message}</p>} />
+  <EuiPageTemplate.EmptyPrompt
+    iconType="securityApp"
+    title={<h2>{title}</h2>}
+    body={<p>{message}</p>}
+  />
 );

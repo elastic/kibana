@@ -7,16 +7,14 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText, EuiPageSection } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiText, EuiPageTemplate } from '@elastic/eui';
 
 export const PageLoading: React.FunctionComponent = ({ children }) => {
   return (
-    <EuiPageSection alignment="center" color="subdued">
-      <EuiEmptyPrompt
-        title={<EuiLoadingSpinner size="xl" />}
-        body={<EuiText color="subdued">{children}</EuiText>}
-        data-test-subj="sectionLoading"
-      />
-    </EuiPageSection>
+    <EuiPageTemplate.EmptyPrompt
+      title={<EuiLoadingSpinner size="xl" />}
+      body={<EuiText color="subdued">{children}</EuiText>}
+      data-test-subj="sectionLoading"
+    />
   );
 };
