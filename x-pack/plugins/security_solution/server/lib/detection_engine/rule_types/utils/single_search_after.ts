@@ -99,13 +99,9 @@ export const singleSearchAfter = async <
       });
 
       return {
-        searchResult: nextSearchAfterResult as SignalSearchResponse<TAggregations>,
+        searchResult: nextSearchAfterResult,
         searchDuration: makeFloatString(end - start),
         searchErrors,
-      } as {
-        searchResult: SignalSearchResponse<TAggregations>;
-        searchDuration: string;
-        searchErrors: string[];
       };
     } catch (exc) {
       ruleExecutionLogger.error(`[-] nextSearchAfter threw an error ${exc}`);
@@ -132,13 +128,9 @@ export const singleSearchAfter = async <
           },
         };
         return {
-          searchResult: searchRes as SignalSearchResponse<TAggregations>,
+          searchResult: searchRes,
           searchDuration: '-1.0',
           searchErrors: exc.message,
-        } as {
-          searchResult: SignalSearchResponse<TAggregations>;
-          searchDuration: string;
-          searchErrors: string[];
         };
       }
 
