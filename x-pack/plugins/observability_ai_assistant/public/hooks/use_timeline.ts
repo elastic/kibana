@@ -25,6 +25,7 @@ import type { ObservabilityAIAssistantChatService, PendingMessage } from '../typ
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
 import type { UseGenAIConnectorsResult } from './use_genai_connectors';
 import { useKibana } from './use_kibana';
+import { usePrevious } from './use_previous';
 
 export function createNewConversation({
   contexts,
@@ -52,12 +53,14 @@ export type UseTimelineResult = Pick<
 export function useTimeline({
   messages,
   connectors,
+  conversationId,
   currentUser,
   chatService,
   onChatUpdate,
   onChatComplete,
 }: {
   messages: Message[];
+  conversationId?: string;
   connectors: UseGenAIConnectorsResult;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   chatService: ObservabilityAIAssistantChatService;
@@ -88,6 +91,13 @@ export function useTimeline({
   const controllerRef = useRef(new AbortController());
 
   const [pendingMessage, setPendingMessage] = useState<PendingMessage>();
+
+  const prevConversationId = usePrevious(conversationId);
+  useEffect(() => {
+    if (prevConversationId !== conversationId && pendingMessage?.error) {
+      setPendingMessage(undefined);
+    }
+  }, [conversationId, pendingMessage?.error, prevConversationId]);
 
   function chat(nextMessages: Message[]): Promise<Message[]> {
     const controller = new AbortController();

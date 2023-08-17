@@ -50,11 +50,7 @@ export function ChatTimeline({
   onStopGenerating,
 }: ChatTimelineProps) {
   return (
-    <EuiCommentList
-      css={css`
-        padding-bottom: 32px;
-      `}
-    >
+    <EuiCommentList>
       {compact(
         items.map((item, index) =>
           !item.display.hide ? (

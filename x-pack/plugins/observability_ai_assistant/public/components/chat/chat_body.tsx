@@ -41,25 +41,26 @@ const loadingSpinnerContainerClassName = css`
 `;
 
 export function ChatBody({
-  title,
+  connectors,
+  connectorsManagementHref,
+  conversationId,
+  currentUser,
+  knowledgeBase,
   loading,
   messages,
-  connectors,
-  knowledgeBase,
-  connectorsManagementHref,
-  currentUser,
+  title,
   onChatUpdate,
   onChatComplete,
   onSaveTitle,
 }: {
-  title: string;
-  loading: boolean;
-  messages: Message[];
   connectors: UseGenAIConnectorsResult;
-  knowledgeBase: UseKnowledgeBaseResult;
   connectorsManagementHref: string;
   conversationId?: string;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
+  knowledgeBase: UseKnowledgeBaseResult;
+  loading: boolean;
+  messages: Message[];
+  title: string;
   onChatUpdate: (messages: Message[]) => void;
   onChatComplete: (messages: Message[]) => void;
   onSaveTitle: (title: string) => void;
@@ -67,10 +68,11 @@ export function ChatBody({
   const chatService = useObservabilityAIAssistantChatService();
 
   const timeline = useTimeline({
-    messages,
-    connectors,
-    currentUser,
     chatService,
+    connectors,
+    conversationId,
+    currentUser,
+    messages,
     onChatUpdate,
     onChatComplete,
   });
