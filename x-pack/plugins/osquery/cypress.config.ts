@@ -36,6 +36,6 @@ export default defineCypressConfig({
     baseUrl: 'http://localhost:5601',
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
-    numTestsKeptInMemory: 10,
+    numTestsKeptInMemory: 3,
   },
 });

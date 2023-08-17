@@ -4,15 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiImage, EuiTitle, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
 import { withLink } from '../links';
@@ -96,11 +88,8 @@ export const LandingLinksImageCards: React.FC<LandingLinksImagesProps> = React.m
                     {isBeta && <BetaBadge text={betaOptions?.text} />}
                   </div>
                 }
-                description={
-                  <EuiText size="s" color="text" css={styles.description}>
-                    {description}
-                  </EuiText>
-                }
+                titleElement="span"
+                description={<span css={styles.description}>{description}</span>}
               />
             </EuiFlexItem>
           );
