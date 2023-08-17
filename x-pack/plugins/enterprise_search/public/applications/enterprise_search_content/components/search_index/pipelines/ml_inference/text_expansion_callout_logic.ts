@@ -48,7 +48,7 @@ interface TextExpansionCalloutActions {
   textExpansionModel: FetchTextExpansionModelApiLogicActions['apiSuccess'];
 }
 
-export interface TextExpansionCalloutErrors {
+export interface TextExpansionCalloutError {
   title: string;
   message: string;
 }
@@ -69,7 +69,7 @@ export interface TextExpansionCalloutValues {
   startTextExpansionModelStatus: Status;
   textExpansionModel: FetchTextExpansionModelResponse | undefined;
   textExpansionModelPollTimeoutId: null | ReturnType<typeof setTimeout>;
-  textExpansionError: TextExpansionCalloutErrors | null;
+  textExpansionError: TextExpansionCalloutError | null;
 }
 
 /**
