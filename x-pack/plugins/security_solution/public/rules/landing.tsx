@@ -18,6 +18,10 @@ import { SecuritySolutionLinkButton } from '../common/components/links';
 import { useRootNavLink } from '../common/links/nav_links';
 import { useGlobalQueryString } from '../common/utils/global_query_string';
 import { trackLandingLinkClick } from '../common/lib/telemetry/trackers';
+import { useReadonlyHeader } from '../use_readonly_header';
+import { useUserData } from '../detections/components/user_info';
+import { READ_ONLY_BADGE_TOOLTIP } from './translations';
+import { hasUserCRUDPermission } from '../common/utils/privileges';
 
 const RULES_PAGE_TITLE = i18n.translate('xpack.securitySolution.rules.landing.pageTitle', {
   defaultMessage: 'Rules',
@@ -27,18 +31,27 @@ const CREATE_RULE_BUTTON = i18n.translate('xpack.securitySolution.rules.landing.
   defaultMessage: 'Create rule',
 });
 
-const RulesLandingHeader: React.FC = () => (
-  <EuiFlexGroup gutterSize="none" direction="row">
-    <EuiFlexItem>
-      <Title title={RULES_PAGE_TITLE} />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <SecuritySolutionLinkButton deepLinkId={SecurityPageName.rulesCreate} iconType="plusInCircle">
-        {CREATE_RULE_BUTTON}
-      </SecuritySolutionLinkButton>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+const RulesLandingHeader: React.FC = () => {
+  const [{ canUserCRUD }] = useUserData();
+  useReadonlyHeader(READ_ONLY_BADGE_TOOLTIP);
+
+  return (
+    <EuiFlexGroup gutterSize="none" direction="row">
+      <EuiFlexItem>
+        <Title title={RULES_PAGE_TITLE} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <SecuritySolutionLinkButton
+          deepLinkId={SecurityPageName.rulesCreate}
+          iconType="plusInCircle"
+          isDisabled={!hasUserCRUDPermission(canUserCRUD)}
+        >
+          {CREATE_RULE_BUTTON}
+        </SecuritySolutionLinkButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export const RulesLandingPage = () => {
   const { links = [], categories = [] } = useRootNavLink(SecurityPageName.rulesLanding) ?? {};
