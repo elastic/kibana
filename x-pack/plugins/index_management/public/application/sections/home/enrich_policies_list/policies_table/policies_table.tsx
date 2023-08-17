@@ -9,6 +9,8 @@ import React, { FunctionComponent } from 'react';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiSearchBarProps, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { useAppContext } from '../../../../app_context';
 import type { SerializedEnrichPolicy } from '../../../../../../common/types';
 
 export interface Props {
@@ -29,6 +31,8 @@ export const PoliciesTable: FunctionComponent<Props> = ({
   onDeletePolicyClick,
   onExecutePolicyClick,
 }) => {
+  const { history } = useAppContext();
+
   const renderToolsRight = () => {
     return [
       <EuiButton
