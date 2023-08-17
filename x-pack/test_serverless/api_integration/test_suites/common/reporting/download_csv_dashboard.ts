@@ -16,7 +16,6 @@ const getMockJobParams = (obj: object) => {
   } as JobParamsDownloadCSV;
 };
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const supertestSvc = getService('supertest');
@@ -56,7 +55,6 @@ export default function ({ getService }: FtrProviderContext) {
       after(async () => {
         await kibanaServer.uiSettings.update({ 'csv:quoteValues': true });
       });
-
 
       it('Exports CSV with all fields when using defaults', async () => {
         const {
