@@ -16,13 +16,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
   const screenshotDirectories = ['response_ops_docs', 'stack_alerting'];
   const ruleName = 'test query rule';
-  // const queryJson =
-  // `{\n` +
-  // `"query":{\n` +
-  // `"bool" : {\n` +
-  // `"filter": [{\n` +
-  // `"term": {\n` +
-  // `"host.keyword": "www.elastic.co"\n`;
+
+  const validQueryJson = JSON.stringify({
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              'host.keyword': 'www.elastic.co',
+            },
+          },
+        ],
+      },
+    },
+  });
+  const invalidQueryJson = JSON.stringify({
+    query: {
+      bool: {
+        filter: [
+          {
+            error_clause: {
+              'host.keyword': 'www.elastic.co',
+            },
+          },
+        ],
+      },
+    },
+  });
 
   describe('elasticsearch query rule', function () {
     it('create rule screenshot', async () => {
@@ -33,7 +53,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('ruleNameInput', ruleName);
       await testSubjects.click(`.es-query-SelectOption`);
       await testSubjects.click('queryFormType_esQuery');
-      await testSubjects.click('selectIndexExpression');
+      const indexSelector = await testSubjects.find('selectIndexExpression');
+      await indexSelector.click();
       const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
       await indexComboBox.type('kibana_sample_data_logs ');
       const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
@@ -47,21 +68,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1500
       );
-      // Test a query
-      const queryJsonEditor = await testSubjects.find('queryJsonEditor');
-      await queryJsonEditor.clearValue();
-      await testSubjects.setValue('queryJsonEditor', '{\n"query":{\n"match_all":{\n}\n}\n', {
+      // Test a valid query
+      await testSubjects.setValue('queryJsonEditor', '', {
         clearWithKeyboard: true,
       });
-      // await testSubjects.setValue('queryJsonEditor', queryJson);
+      const queryJsonEditor = await testSubjects.find('queryJsonEditor');
+      await queryJsonEditor.clearValue();
+      await testSubjects.setValue('queryJsonEditor', validQueryJson, {
+        clearWithKeyboard: true,
+      });
       await testSubjects.click('forLastExpression');
       await testSubjects.setValue('timeWindowSizeNumber', '1');
       await testSubjects.setValue('timeWindowUnitSelect', 'day');
       await browser.pressKeys(browser.keys.ESCAPE);
       await testSubjects.click('testQuery');
-      await testSubjects.scrollIntoView('selectIndexExpression');
+      await testSubjects.scrollIntoView('ruleNameInput');
       await commonScreenshots.takeScreenshot(
         'rule-types-es-query-valid',
+        screenshotDirectories,
+        1400,
+        1500
+      );
+      // Test an invalid query
+      await testSubjects.setValue('queryJsonEditor', '', {
+        clearWithKeyboard: true,
+      });
+      await queryJsonEditor.clearValue();
+      await testSubjects.setValue('queryJsonEditor', invalidQueryJson, {
+        clearWithKeyboard: true,
+      });
+      await testSubjects.click('testQuery');
+      await testSubjects.scrollIntoView('ruleNameInput');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await commonScreenshots.takeScreenshot(
+        'rule-types-es-query-invalid',
         screenshotDirectories,
         1400,
         1500
