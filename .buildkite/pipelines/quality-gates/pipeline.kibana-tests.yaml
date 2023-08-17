@@ -1,3 +1,6 @@
+env:
+  ENVIRONMENT: ${ENVIRONMENT?}
+
 steps:
   - label: ":pipeline::grey_question::seedling: Trigger Kibana Tests for ${ENVIRONMENT}"
     env:
