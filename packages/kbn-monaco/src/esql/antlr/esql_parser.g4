@@ -66,6 +66,7 @@ whereBooleanExpression
     | left=whereBooleanExpression operator=OR right=whereBooleanExpression
     | valueExpression (NOT)? IN LP valueExpression (COMMA valueExpression)* RP
     | (NOT)? WHERE_FUNCTIONS LP qualifiedName ((COMMA functionExpressionArgument)*)? RP
+    | valueExpression IS NOT? NULL
     ;
 
 booleanExpression
@@ -187,6 +188,7 @@ qualifiedNames
 identifier
     : UNQUOTED_IDENTIFIER
     | QUOTED_IDENTIFIER
+    | ASTERISK
     ;
 
 mathFunctionIdentifier
