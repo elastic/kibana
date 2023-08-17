@@ -35,7 +35,6 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-
   return {
     DATA_ANALYST_PASSWORD,
     DATA_ANALYST_USERNAME,
@@ -138,16 +137,13 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
 
       return (body as ReportingJobResponse).job.id;
     },
-    async initEcommerce(){
-      const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
+    async initEcommerce() {
+      const ecommerceSOPath =
+        'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
       await kibanaServer.importExport.load(ecommerceSOPath);
     },
-   async generateCsv(
-      job: JobParamsCSV,
-      username = 'test_user',
-      password =  'changeme'
-    ) {
+    async generateCsv(job: JobParamsCSV, username = 'test_user', password = 'changeme') {
       const jobParams = rison.encode(job);
       return await supertest
         .post(`/${INTERNAL_ROUTES.GENERATE_PREFIX}/csv_searchsource`)
@@ -180,7 +176,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
             .get(downloadReportPath)
             .responseType('blob')
             .set(...API_HEADER)
-            .set(...INTERNAL_HEADER)
+            .set(...INTERNAL_HEADER);
 
           if (response.status === 503) {
             log.debug(`Report at path ${downloadReportPath} is pending`);
