@@ -16,7 +16,7 @@
       "contentManagement"
     ],
     "optionalPlugins": ["savedObjectsTaggingOss", "usageCollection"],
-    "requiredBundles": ["savedObjects", "kibanaReact", "kibanaUtils"],
+    "requiredBundles": ["savedObjects", "kibanaReact", "kibanaUtils", "unifiedSearch"],
     "extraPublicDirs": ["common"]
   }
 }

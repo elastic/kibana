@@ -481,10 +481,10 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.UpsellingService.registerSections",
+            "id": "def-public.UpsellingService.setSections",
             "type": "Function",
             "tags": [],
-            "label": "registerSections",
+            "label": "setSections",
             "description": [],
             "signature": [
               "(sections: Partial<Record<",
@@ -503,7 +503,7 @@
             "children": [
               {
                 "parentPluginId": "securitySolution",
-                "id": "def-public.UpsellingService.registerSections.$1",
+                "id": "def-public.UpsellingService.setSections.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "sections",
@@ -529,10 +529,10 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.UpsellingService.registerPages",
+            "id": "def-public.UpsellingService.setPages",
             "type": "Function",
             "tags": [],
-            "label": "registerPages",
+            "label": "setPages",
             "description": [],
             "signature": [
               "(pages: Partial<Record<",
@@ -551,7 +551,7 @@
             "children": [
               {
                 "parentPluginId": "securitySolution",
-                "id": "def-public.UpsellingService.registerPages.$1",
+                "id": "def-public.UpsellingService.setPages.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "pages",
@@ -577,10 +577,10 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.UpsellingService.registerMessages",
+            "id": "def-public.UpsellingService.setMessages",
             "type": "Function",
             "tags": [],
-            "label": "registerMessages",
+            "label": "setMessages",
             "description": [],
             "signature": [
               "(messages: Partial<Record<\"investigation_guide\", string>>) => void"
@@ -591,7 +591,7 @@
             "children": [
               {
                 "parentPluginId": "securitySolution",
-                "id": "def-public.UpsellingService.registerMessages.$1",
+                "id": "def-public.UpsellingService.setMessages.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "messages",
@@ -2140,26 +2140,6 @@
         },
         {
           "parentPluginId": "securitySolution",
-          "id": "def-public.PluginSetup.upselling",
-          "type": "Object",
-          "tags": [],
-          "label": "upselling",
-          "description": [],
-          "signature": [
-            {
-              "pluginId": "securitySolution",
-              "scope": "public",
-              "docId": "kibSecuritySolutionPluginApi",
-              "section": "def-public.UpsellingService",
-              "text": "UpsellingService"
-            }
-          ],
-          "path": "x-pack/plugins/security_solution/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "securitySolution",
           "id": "def-public.PluginSetup.setAppLinksSwitcher",
           "type": "Function",
           "tags": [],
@@ -2339,6 +2319,29 @@
             "<",
             "BreadcrumbsNav",
             ">"
+          ],
+          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-public.PluginStart.getUpselling",
+          "type": "Function",
+          "tags": [],
+          "label": "getUpselling",
+          "description": [],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "securitySolution",
+              "scope": "public",
+              "docId": "kibSecuritySolutionPluginApi",
+              "section": "def-public.UpsellingService",
+              "text": "UpsellingService"
+            }
           ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
           "deprecated": false,
