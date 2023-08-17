@@ -12,7 +12,7 @@ import { getEndpointManagementPageList } from '../../../screens/endpoint_managem
 import { ensureResponseActionAuthzAccess } from '../../../tasks/endpoint_management';
 
 describe(
-  'App Features for Complete PLI',
+  'App Features for Security Complete PLI',
   {
     env: {
       ftrConfig: { productTypes: [{ product_line: 'security', product_tier: 'complete' }] },
@@ -50,10 +50,17 @@ describe(
       });
     }
 
-    for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES) {
+    // No access to response actions (except `unisolate`)
+    for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
+      (apiName) => apiName !== 'unisolate'
+    )) {
       it(`should not allow access to Response Action: ${actionName}`, () => {
         ensureResponseActionAuthzAccess('none', actionName, username, password);
       });
     }
+
+    it('should have access to `unisolate` api', () => {
+      ensureResponseActionAuthzAccess('all', 'unisolate', username, password);
+    });
   }
 );

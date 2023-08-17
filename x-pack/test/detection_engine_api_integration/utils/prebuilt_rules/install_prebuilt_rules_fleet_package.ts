@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
+import type { Client } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';
 
 /**
@@ -17,10 +19,12 @@ import type SuperTest from 'supertest';
  * @param overrideExistingPackage Whether or not to force the install
  */
 export const installPrebuiltRulesFleetPackage = async ({
+  es,
   supertest,
   version,
   overrideExistingPackage,
 }: {
+  es: Client;
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   version?: string;
   overrideExistingPackage: boolean;
@@ -46,6 +50,22 @@ export const installPrebuiltRulesFleetPackage = async ({
       })
       .expect(200);
   }
+
+  // Before we proceed, we need to refresh saved object indices.
+  // At the previous step we installed the Fleet package with prebuilt detection rules.
+  // Prebuilt rules are assets that Fleet indexes as saved objects of a certain type.
+  // Fleet does this via a savedObjectsClient.import() call with explicit `refresh: false`.
+  // So, despite of the fact that the endpoint waits until the prebuilt rule assets will be
+  // successfully indexed, it doesn't wait until they become "visible" for subsequent read
+  // operations.
+  // And this is usually what we do next in integration tests: we read these SOs with utility
+  // function such as getPrebuiltRulesAndTimelinesStatus().
+  // Now, the time left until the next refresh can be anything from 0 to the default value, and
+  // it depends on the time when savedObjectsClient.import() call happens relative to the time of
+  // the next refresh. Also, probably the refresh time can be delayed when ES is under load?
+  // Anyway, this can cause race condition between a write and subsequent read operation, and to
+  // fix it deterministically we have to refresh saved object indices and wait until it's done.
+  await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
 };
 
 /**

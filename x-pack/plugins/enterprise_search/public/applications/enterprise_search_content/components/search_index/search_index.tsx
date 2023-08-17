@@ -18,6 +18,8 @@ import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
+import { ErrorStatePrompt } from '../../../shared/error_state';
+import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
 
@@ -65,6 +67,7 @@ export const SearchIndex: React.FC = () => {
   }>();
 
   const { indexName } = useValues(IndexNameLogic);
+  const { errorConnectingMessage } = useValues(HttpLogic);
 
   /**
    * Guided Onboarding needs us to mark the add data step as complete as soon as the user has data in an index.
@@ -72,6 +75,7 @@ export const SearchIndex: React.FC = () => {
    * Putting it here guarantees that if a user is viewing an index with data, it'll be marked as complete
    */
   const {
+    config,
     guidedOnboarding,
     productAccess: { hasAppSearchAccess },
     productFeatures: { hasDefaultIngestPipeline },
@@ -216,6 +220,8 @@ export const SearchIndex: React.FC = () => {
     >
       {isCrawlerIndex(index) && !index.connector ? (
         <NoConnectorRecord />
+      ) : isCrawlerIndex(index) && (Boolean(errorConnectingMessage) || !config.host) ? (
+        <ErrorStatePrompt />
       ) : (
         <>
           {indexName === index?.name && (
