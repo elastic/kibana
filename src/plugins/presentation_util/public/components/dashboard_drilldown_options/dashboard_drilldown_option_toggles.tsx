@@ -20,8 +20,6 @@ const DashboardDrilldownOptionToggles = ({
   options,
   onOptionChange,
 }: DashboardDrilldownOptionsProps) => {
-  console.log('options', options);
-
   return (
     <>
       {options.useCurrentFilters !== undefined && (
