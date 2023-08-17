@@ -69,7 +69,8 @@
     "@kbn/logs-shared-plugin",
     "@kbn/licensing-plugin",
     "@kbn/aiops-utils",
-    "@kbn/metrics-data-plugin",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/metrics-data-plugin"
   ],
   "exclude": ["target/**/*"]
 }

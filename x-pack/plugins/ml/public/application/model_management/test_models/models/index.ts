@@ -6,6 +6,7 @@
  */
 
 import { NerInference } from './ner';
+import { TextExpansionInference } from './text_expansion';
 import { QuestionAnsweringInference } from './question_answering';
 import {
   TextClassificationInference,
@@ -22,4 +23,5 @@ export type InferrerType =
   | TextEmbeddingInference
   | ZeroShotClassificationInference
   | FillMaskInference
-  | LangIdentInference;
+  | LangIdentInference
+  | TextExpansionInference;

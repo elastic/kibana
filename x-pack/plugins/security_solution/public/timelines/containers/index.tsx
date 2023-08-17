@@ -214,6 +214,13 @@ export const useTimelineEventsHandler = ({
     loadPage: wrappedLoadPage,
     updatedAt: 0,
   });
+
+  useEffect(() => {
+    if (timelineResponse.updatedAt !== 0) {
+      setUpdated(timelineResponse.updatedAt);
+    }
+  }, [setUpdated, timelineResponse.updatedAt]);
+
   const { addWarning } = useAppToasts();
 
   const timelineSearch = useCallback(
@@ -252,7 +259,6 @@ export const useTimelineEventsHandler = ({
                     totalCount: response.totalCount,
                     updatedAt: Date.now(),
                   };
-                  setUpdated(newTimelineResponse.updatedAt);
                   if (id === TimelineId.active) {
                     activeTimeline.setExpandedDetail({});
                     activeTimeline.setPageName(pageName);
@@ -336,7 +342,6 @@ export const useTimelineEventsHandler = ({
       startTracking,
       data.search,
       dataViewId,
-      setUpdated,
       addWarning,
       refetchGrid,
       wrappedLoadPage,
