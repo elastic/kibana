@@ -33,6 +33,7 @@ export default defineCypressConfig({
     specPattern: './cypress/e2e/**/*.cy.ts',
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
+    numTestsKeptInMemory: 3,
     setupNodeEvents: (on, config) => {
       setupUserDataLoader(on, config);
 
