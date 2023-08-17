@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import type { ReportingJobResponse } from '@kbn/reporting-plugin/server/types';
 import rison from '@kbn/rison';
 import { FtrProviderContext } from '../ftr_provider_context';
+import { JobParamsCSV } from '@kbn/reporting-plugin/common/types/export_types/csv_searchsource';
 
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
@@ -29,6 +30,9 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
   const security = getService('security');
   const log = getService('log');
   const supertest = getService('supertestWithoutAuth');
+  const retry = getService('retry');
+  const config = getService('config');
+
 
   return {
     DATA_ANALYST_PASSWORD,
@@ -132,5 +136,63 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
 
       return (body as ReportingJobResponse).job.id;
     },
+
+    // reportingAPI.generateCsv from generate_csv_discover.ts 
+   async generateCsv(
+      job: JobParamsCSV,
+      username = 'test_user',
+      password =  'changeme'
+    ) {
+      const jobParams = rison.encode(job);
+  
+      return await supertest
+        .post(`/api/reporting/generate/csv_searchsource`)
+        .auth(username, password)
+        .set('kbn-xsrf', 'xxx')
+        .send({ jobParams });
+    },
+    async getCompletedJobOutput(downloadReportPath: string){
+      const response = await supertest.get(downloadReportPath);
+      return response.text as unknown;
+    },
+    async deleteAllReports(){
+      log.debug('ReportingAPI.deleteAllReports');
+  
+      // ignores 409 errs and keeps retrying
+      await retry.tryForTime(5000, async () => {
+        await supertest
+          .post('/.reporting*/_delete_by_query')
+          .send({ query: { match_all: {} } })
+          .expect(200);
+      });
+    },
+    async waitForJobToFinish(downloadReportPath: string, options?: { timeout?: number }) {
+      await retry.waitForWithTimeout(
+        `job ${downloadReportPath} finished`,
+        options?.timeout ?? config.get('timeouts.kibanaReportCompletion'),
+        async () => {
+          const response = await supertest
+            .get(downloadReportPath)
+            .responseType('blob')
+            .set('kbn-xsrf', 'xxx');
+
+          if (response.status === 503) {
+            log.debug(`Report at path ${downloadReportPath} is pending`);
+            return false;
+          }
+
+          log.debug(`Report at path ${downloadReportPath} returned code ${response.status}`);
+
+          if (response.status === 200) {
+            log.debug(`Report at path ${downloadReportPath} is complete`);
+            return true;
+          }
+
+          throw new Error(`unexpected status code ${response.status}`);
+        }
+      );
+    },
+
+    
   };
 }

@@ -10,5 +10,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Reporting', function () {
     loadTestFile(require.resolve('./management'));
+    loadTestFile(require.resolve('./generate_csv_discover'));
   });
 };
