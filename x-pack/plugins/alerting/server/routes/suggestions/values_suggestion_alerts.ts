@@ -14,7 +14,12 @@ import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
+import {
+  AlertConsumers,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_TYPE_ID,
+  SPACE_IDS,
+} from '@kbn/rule-data-utils';
 
 import { verifyAccessAndContext } from '../lib';
 import { RuleAuditAction, ruleAuditEvent } from '../../rules_client/common/audit_events';
@@ -39,6 +44,14 @@ export const AlertsSuggestionsSchema = {
     fieldMeta: schema.maybe(schema.any()),
   }),
 };
+
+const VALID_FEATURE_IDS = new Set([
+  AlertConsumers.APM,
+  AlertConsumers.INFRASTRUCTURE,
+  AlertConsumers.LOGS,
+  AlertConsumers.SLO,
+  AlertConsumers.UPTIME,
+]);
 
 export function registerAlertsValueSuggestionsRoute(
   router: IRouter<AlertingRequestHandlerContext>,
@@ -69,7 +82,8 @@ export function registerAlertsValueSuggestionsRoute(
             alertingAuthorizationFilterOpts
           );
           authorizedRuleType = await authorization.getAuthorizedRuleTypes(
-            AlertingAuthorizationEntity.Alert
+            AlertingAuthorizationEntity.Alert,
+            VALID_FEATURE_IDS
           );
         } catch (error) {
           rulesClient.getAuditLogger()?.log(
@@ -91,7 +105,6 @@ export function registerAlertsValueSuggestionsRoute(
           authorizedRuleType.map((art) => art.id),
           spaceId
         ).join(',');
-
         try {
           const body = await termsAggSuggestions(
             config,

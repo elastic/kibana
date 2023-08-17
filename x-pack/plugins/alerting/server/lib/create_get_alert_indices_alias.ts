@@ -10,6 +10,7 @@ import { getIndexTemplateAndPattern } from '../alerts_service/resource_installer
 import { RuleTypeRegistry } from '../rule_type_registry';
 
 export type GetAlertIndicesAlias = (rulesTypes: string[], spaceId?: string) => string[];
+
 export function createGetAlertIndicesAliasFn(ruleTypeRegistry: RuleTypeRegistry) {
   return (rulesTypes: string[], spaceId?: string): string[] => {
     const aliases = new Set<string>();
