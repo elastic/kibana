@@ -36,7 +36,7 @@ import { find, FindParams } from './methods/find';
 import { aggregate, AggregateParams } from './methods/aggregate';
 import { deleteRule } from './methods/delete';
 import { update, UpdateOptions } from './methods/update';
-import { bulkDeleteRules } from './methods/bulk_delete';
+import { bulkDeleteRules } from '../application/rule/methods/bulk_delete';
 import {
   bulkEditRules,
   BulkEditOptions,

@@ -8,24 +8,24 @@ import pMap from 'p-map';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import { RawRule } from '../../types';
-import { convertRuleIdsToKueryNode } from '../../lib';
-import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { tryToRemoveTasks } from '../common';
-import { API_KEY_GENERATE_CONCURRENCY } from '../common/constants';
+import { RawRule } from '../../../../types';
+import { convertRuleIdsToKueryNode } from '../../../../lib';
+import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { tryToRemoveTasks } from '../../../../rules_client/common';
+import { API_KEY_GENERATE_CONCURRENCY } from '../../../../rules_client/common/constants';
 import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
   getAlertFromRaw,
   migrateLegacyActions,
-} from '../lib';
+} from '../../../../rules_client/lib';
 import {
   retryIfBulkOperationConflicts,
   buildKueryNodeFilter,
   getAndValidateCommonBulkOptions,
-} from '../common';
-import { BulkOptions, BulkOperationError, RulesClientContext } from '../types';
+} from '../../../../rules_client/common';
+import { BulkOptions, BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
 
 export const bulkDeleteRules = async (context: RulesClientContext, options: BulkOptions) => {
   const { ids, filter } = getAndValidateCommonBulkOptions(options);

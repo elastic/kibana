@@ -1,0 +1,1 @@
+export { bulkDeleteRules } from './bulk_delete';
