@@ -66,7 +66,7 @@ export interface KnowledgeBaseEntry {
   public: boolean;
 }
 
-type CompatibleJSONSchema = Exclude<JSONSchema, boolean>;
+export type CompatibleJSONSchema = Exclude<JSONSchema, boolean>;
 
 export interface ContextDefinition {
   name: string;
