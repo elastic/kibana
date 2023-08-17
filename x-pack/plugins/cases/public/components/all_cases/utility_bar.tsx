@@ -6,6 +6,8 @@
  */
 
 import type { FunctionComponent } from 'react';
+import { css } from '@emotion/react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import React, { useCallback, useState } from 'react';
 import {
   EuiButtonEmpty,
@@ -15,9 +17,13 @@ import {
   EuiPopover,
   EuiText,
   useEuiTheme,
+  Pagination,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 import * as i18n from './translations';
 import type { CasesUI } from '../../../common/ui/types';
+import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import { useRefreshCases } from './use_on_refresh_cases';
 import { useBulkActions } from './use_bulk_actions';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -27,16 +33,24 @@ interface Props {
   totalCases: number;
   selectedCases: CasesUI;
   deselectCases: () => void;
+  pagination: Pagination;
 }
 
 export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
-  ({ isSelectorView, totalCases, selectedCases, deselectCases }) => {
+  ({ isSelectorView, totalCases, selectedCases, deselectCases, pagination }) => {
     const { euiTheme } = useEuiTheme();
+    const refreshCases = useRefreshCases();
+    const { permissions, appId } = useCasesContext();
+
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const [isMessageDismissed, setIsMessageDismissed] = useState(false);
+    const localStorageKey = `cases.${appId}.utilityBar.hideMaxLimitWarning`;
+    const [localStorageWarning, setLocalStorageWarning] = useLocalStorage<boolean>(localStorageKey);
+
     const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-    const refreshCases = useRefreshCases();
-    const { permissions } = useCasesContext();
+
+    const toggleWarning = useCallback(() => setIsMessageDismissed(!isMessageDismissed), [isMessageDismissed]);
 
     const onRefresh = useCallback(() => {
       deselectCases();
@@ -49,12 +63,36 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
       onActionSuccess: onRefresh,
     });
 
+    const handleNotShowAgain = () => {
+      setLocalStorageWarning(true);
+    };
+
     /**
      * At least update or delete permissions needed to show bulk actions.
      * Granular permission check for each action is performed
      * in the useBulkActions hook.
      */
     const showBulkActions = (permissions.update || permissions.delete) && selectedCases.length > 0;
+
+    const visibleCases = totalCases > pagination.pageSize ? pagination.pageSize : totalCases;
+
+    const hasReachedMaxCases = totalCases > MAX_DOCS_PER_PAGE && (pagination.pageSize * (pagination.pageIndex + 1)) >= MAX_DOCS_PER_PAGE;
+
+    const isDoNotShowAgainSelected = localStorageWarning && localStorageWarning === true;
+
+    const renderMaxLengthWarning = (): React.ReactNode => (
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <EuiText color="default" size="m" css={css`margin-top: 4px;`}>{i18n.MAX_CASES(totalCases)}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty size="s" color="warning" onClick={toggleWarning}>{i18n.DISMISS}</EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty size="s" color="warning" onClick={handleNotShowAgain}>{i18n.NOT_SHOW_AGAIN}</EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
 
     return (
       <>
@@ -79,7 +117,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
             }}
           >
             <EuiText size="xs" color="subdued">
-              {i18n.SHOWING_CASES(totalCases)}
+              {i18n.SHOWING_CASES(totalCases, visibleCases)}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="case-table-utility-bar-actions" grow={false}>
@@ -136,6 +174,23 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
         </EuiFlexGroup>
         {modals}
         {flyouts}
+        {hasReachedMaxCases && !isMessageDismissed && !isDoNotShowAgainSelected
+          ? (
+            <>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiCallOut
+                    title={renderMaxLengthWarning()}
+                    color="warning"
+                    size="s"
+                    data-test-subj="maximum-length-warning"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
       </>
     );
   }

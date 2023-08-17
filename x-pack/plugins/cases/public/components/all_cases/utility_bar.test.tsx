@@ -27,6 +27,11 @@ describe('Severity form field', () => {
     totalCases: 5,
     selectedCases: [basicCase],
     deselectCases,
+    pagination: {
+      pageIndex: 1,
+      pageSize: 10,
+      totalItemCount: 5,
+    }
   };
 
   beforeEach(() => {
