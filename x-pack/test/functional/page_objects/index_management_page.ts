@@ -31,8 +31,8 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     },
 
     async clickEnrichPolicyAt(indexOfRow: number): Promise<void> {
-      const deleteButons = await testSubjects.findAll('enrichPolicyDetailsLink');
-      await deleteButons[indexOfRow].click();
+      const policyDetailsLinks = await testSubjects.findAll('enrichPolicyDetailsLink');
+      await policyDetailsLinks[indexOfRow].click();
     },
 
     async clickDeleteEnrichPolicyAt(indexOfRow: number): Promise<void> {
@@ -41,8 +41,8 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     },
 
     async clickExecuteEnrichPolicyAt(indexOfRow: number): Promise<void> {
-      const deleteButons = await testSubjects.findAll('executePolicyButton');
-      await deleteButons[indexOfRow].click();
+      const executeButtons = await testSubjects.findAll('executePolicyButton');
+      await executeButtons[indexOfRow].click();
     },
 
     async clickConfirmModalButton(): Promise<void> {
