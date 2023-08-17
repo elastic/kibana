@@ -138,5 +138,3 @@ export const users: Record<
     customRoleNames: [ApmCustomRolename.apmManageServiceAccount],
   },
 };
-
-export const APM_TEST_PASSWORD = 'changeme';
