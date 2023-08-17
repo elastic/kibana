@@ -10,8 +10,8 @@ import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants';
 import expect from '@kbn/expect';
 import type { ReportingJobResponse } from '@kbn/reporting-plugin/server/types';
 import rison from '@kbn/rison';
-import { FtrProviderContext } from '../ftr_provider_context';
 import { JobParamsCSV } from '@kbn/reporting-plugin/common/types/export_types/csv_searchsource';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
@@ -32,7 +32,6 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
   const supertest = getService('supertestWithoutAuth');
   const retry = getService('retry');
   const config = getService('config');
-
 
   return {
     DATA_ANALYST_PASSWORD,
@@ -137,27 +136,23 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
       return (body as ReportingJobResponse).job.id;
     },
 
-    // reportingAPI.generateCsv from generate_csv_discover.ts 
-   async generateCsv(
-      job: JobParamsCSV,
-      username = 'test_user',
-      password =  'changeme'
-    ) {
+    // reportingAPI.generateCsv from generate_csv_discover.ts
+    async generateCsv(job: JobParamsCSV, username = 'test_user', password = 'changeme') {
       const jobParams = rison.encode(job);
-  
+
       return await supertest
         .post(`/api/reporting/generate/csv_searchsource`)
         .auth(username, password)
         .set('kbn-xsrf', 'xxx')
         .send({ jobParams });
     },
-    async getCompletedJobOutput(downloadReportPath: string){
+    async getCompletedJobOutput(downloadReportPath: string) {
       const response = await supertest.get(downloadReportPath);
       return response.text as unknown;
     },
-    async deleteAllReports(){
+    async deleteAllReports() {
       log.debug('ReportingAPI.deleteAllReports');
-  
+
       // ignores 409 errs and keeps retrying
       await retry.tryForTime(5000, async () => {
         await supertest
@@ -192,7 +187,5 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
         }
       );
     },
-
-    
   };
 }
