@@ -7,13 +7,13 @@
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 
-export type DiscoverLogExplorerPluginSetup = void;
-export type DiscoverLogExplorerPluginStart = void;
+export type LogExplorerPluginSetup = void;
+export type LogExplorerPluginStart = void;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DiscoverLogExplorerSetupDeps {}
+export interface LogExplorerSetupDeps {}
 
-export interface DiscoverLogExplorerStartDeps {
+export interface LogExplorerStartDeps {
   data: DataPublicPluginStart;
   discover: DiscoverStart;
 }

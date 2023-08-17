@@ -4,5 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export { createPlainError, decodeOrThrow, formatErrors, throwErrors } from '@kbn/io-ts-utils';
+export const parameters = {
+  docs: {
+    source: {
+      type: 'code', // without this, stories in mdx documents freeze the browser
+    },
+  },
+};

@@ -6,40 +6,30 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { LOG_EXPLORER_PROFILE_ID } from '../common/constants';
-import { DiscoverLogExplorerConfig } from '../common/plugin_config';
+import { LogExplorerConfig } from '../common/plugin_config';
 import { createLogExplorerProfileCustomizations } from './customizations/log_explorer_profile';
 import { getLogExplorerDeepLink } from './deep_links';
 import {
-  DiscoverLogExplorerPluginSetup,
-  DiscoverLogExplorerPluginStart,
-  DiscoverLogExplorerSetupDeps,
-  DiscoverLogExplorerStartDeps,
+  LogExplorerPluginSetup,
+  LogExplorerPluginStart,
+  LogExplorerSetupDeps,
+  LogExplorerStartDeps,
 } from './types';
 
-export class DiscoverLogExplorerPlugin
-  implements Plugin<DiscoverLogExplorerPluginSetup, DiscoverLogExplorerPluginStart>
-{
-  private config: DiscoverLogExplorerConfig;
+export class LogExplorerPlugin implements Plugin<LogExplorerPluginSetup, LogExplorerPluginStart> {
+  private config: LogExplorerConfig;
 
-  constructor(context: PluginInitializerContext<DiscoverLogExplorerConfig>) {
+  constructor(context: PluginInitializerContext<LogExplorerConfig>) {
     this.config = context.config.get();
   }
 
-  public setup(core: CoreSetup, plugins: DiscoverLogExplorerSetupDeps) {
-    core.application.register({
-      id: 'log-explorer',
-      title: i18n.translate('xpack.log_explorer.appTitle', { defaultMessage: 'Log Explorer' }),
-      mount(params) {
-        throw new Error('Function not implemented.');
-      },
-    });
-  }
+  public setup(core: CoreSetup, plugins: LogExplorerSetupDeps) {}
 
-  public start(core: CoreStart, plugins: DiscoverLogExplorerStartDeps) {
+  public start(core: CoreStart, plugins: LogExplorerStartDeps) {
     const { discover, data } = plugins;
 
+    // TODO: replace with component export
     discover.registerCustomizationProfile(LOG_EXPLORER_PROFILE_ID, {
       customize: createLogExplorerProfileCustomizations({ core, data }),
       deepLinks: [getLogExplorerDeepLink({ isVisible: this.config.featureFlags.deepLinkVisible })],

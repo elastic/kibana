@@ -7,8 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
-
-import { DiscoverLogExplorerConfig } from '../common/plugin_config';
+import { LogExplorerConfig } from '../common/plugin_config';
 
 export const configSchema = schema.object({
   featureFlags: schema.object({
@@ -24,11 +23,6 @@ export const configSchema = schema.object({
   }),
 });
 
-export const config: PluginConfigDescriptor<DiscoverLogExplorerConfig> = {
+export const config: PluginConfigDescriptor<LogExplorerConfig> = {
   schema: configSchema,
-  exposeToBrowser: {
-    featureFlags: {
-      deepLinkVisible: true,
-    },
-  },
 };

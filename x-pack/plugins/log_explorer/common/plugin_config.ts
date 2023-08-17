@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface DiscoverLogExplorerConfig {
+export interface LogExplorerConfig {
   featureFlags: {
     deepLinkVisible: boolean;
   };
