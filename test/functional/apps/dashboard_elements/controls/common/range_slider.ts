@@ -218,7 +218,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.rangeSliderSetUpperBound(firstId, '400');
       });
 
-      it('hides range slider in popover when no data available', async () => {
+      it('cannot open popover when no data available', async () => {
         await dashboardControls.createControl({
           controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'logstash-*',
@@ -226,10 +226,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           width: 'small',
         });
         const secondId = (await dashboardControls.getAllControlIds())[1];
-        await dashboardControls.rangeSliderOpenPopover(secondId);
-        await dashboardControls.rangeSliderPopoverAssertOpen();
+        await testSubjects.click(
+          `range-slider-control-${secondId} > rangeSlider__lowerBoundFieldNumber`
+        ); // try to open popover
         await testSubjects.missingOrFail('rangeSlider__slider');
-        expect((await testSubjects.getVisibleText('rangeSlider__helpText')).length).to.be.above(0);
       });
     });
 
