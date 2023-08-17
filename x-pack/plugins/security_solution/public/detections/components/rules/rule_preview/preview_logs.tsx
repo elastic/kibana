@@ -42,36 +42,34 @@ const addLogs = (
   allLogs: SortedLogs[]
 ) => (logs.length ? [{ startedAt, logs, duration }, ...allLogs] : allLogs);
 
-export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = React.memo(({
-  logs,
-  hasNoiseWarning,
-  isAborted,
-}) => {
-  const sortedLogs = useMemo(
-    () =>
-      logs.reduce<{
-        errors: SortedLogs[];
-        warnings: SortedLogs[];
-      }>(
-        ({ errors, warnings }, curr) => ({
-          errors: addLogs(curr.startedAt, curr.errors, curr.duration, errors),
-          warnings: addLogs(curr.startedAt, curr.warnings, curr.duration, warnings),
-        }),
-        { errors: [], warnings: [] }
-      ),
-    [logs]
-  );
-  return (
-    <>
-      <EuiSpacer size="s" />
-      {hasNoiseWarning ?? <CustomWarning message={i18n.QUERY_PREVIEW_NOISE_WARNING} />}
-      <LogAccordion logs={sortedLogs.errors} isError />
-      <LogAccordion logs={sortedLogs.warnings}>
-        {isAborted ? <CustomWarning message={i18n.PREVIEW_TIMEOUT_WARNING} /> : null}
-      </LogAccordion>
-    </>
-  );
-});
+export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = React.memo(
+  ({ logs, hasNoiseWarning, isAborted }) => {
+    const sortedLogs = useMemo(
+      () =>
+        logs.reduce<{
+          errors: SortedLogs[];
+          warnings: SortedLogs[];
+        }>(
+          ({ errors, warnings }, curr) => ({
+            errors: addLogs(curr.startedAt, curr.errors, curr.duration, errors),
+            warnings: addLogs(curr.startedAt, curr.warnings, curr.duration, warnings),
+          }),
+          { errors: [], warnings: [] }
+        ),
+      [logs]
+    );
+    return (
+      <>
+        <EuiSpacer size="s" />
+        {hasNoiseWarning ?? <CustomWarning message={i18n.QUERY_PREVIEW_NOISE_WARNING} />}
+        <LogAccordion logs={sortedLogs.errors} isError />
+        <LogAccordion logs={sortedLogs.warnings}>
+          {isAborted ? <CustomWarning message={i18n.PREVIEW_TIMEOUT_WARNING} /> : null}
+        </LogAccordion>
+      </>
+    );
+  }
+);
 
 PreviewLogsComponent.displayName = 'PreviewLogs';
 
