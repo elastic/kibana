@@ -10,6 +10,7 @@ import { type Criteria, EuiBasicTable, formatDate, EuiEmptyPrompt } from '@elast
 
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { isRight } from 'fp-ts/lib/Either';
+import { ALERT_REASON, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { SeverityBadge } from '../../../detections/components/rules/severity_badge';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 import { ERROR_MESSAGE, ERROR_TITLE } from '../../shared/translations';
@@ -26,12 +27,12 @@ export const columns = [
     render: (value: string) => formatDate(value, TIMESTAMP_DATE_FORMAT),
   },
   {
-    field: 'kibana.alert.rule.name',
+    field: ALERT_RULE_NAME,
     name: i18n.CORRELATIONS_RULE_COLUMN_TITLE,
     truncateText: true,
   },
   {
-    field: 'kibana.alert.reason',
+    field: ALERT_REASON,
     name: i18n.CORRELATIONS_REASON_COLUMN_TITLE,
     truncateText: true,
   },

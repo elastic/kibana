@@ -23,11 +23,12 @@ import PageNotFound from '../404';
 import { SloDetails } from './components/slo_details';
 import { HeaderTitle } from './components/header_title';
 import { HeaderControl } from './components/header_control';
-import { paths } from '../../routes/paths';
+import { paths } from '../../../common/locators/paths';
 import type { SloDetailsPathParams } from './types';
 import { AutoRefreshButton } from '../slos/components/auto_refresh_button';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
 import { useGetInstanceIdQueryParam } from './hooks/use_get_instance_id_query_param';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 export function SloDetailsPage() {
   const {
@@ -83,6 +84,7 @@ export function SloDetailsPage() {
       }}
       data-test-subj="sloDetailsPage"
     >
+      <HeaderMenu />
       {isLoading && <EuiLoadingSpinner data-test-subj="sloDetailsLoading" />}
       {!isLoading && <SloDetails slo={slo!} isAutoRefreshing={isAutoRefreshing} />}
     </ObservabilityPageTemplate>

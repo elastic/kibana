@@ -2616,14 +2616,15 @@
       "actions": {
         "type": "array",
         "default": [],
-        "required": [
-          "group",
-          "id",
-          "params"
-        ],
         "nullable": true,
         "items": {
           "type": "object",
+          "required": [
+            "group",
+            "id",
+            "params"
+          ],
+          "description": "An action that runs under defined conditions.\n",
           "properties": {
             "alerts_filter": {
               "type": "object",
@@ -2696,7 +2697,7 @@
             },
             "frequency": {
               "type": "object",
-              "description": "The parameters that affect how often actions are generated. NOTE: You cannot specify these parameters when `notify_when` or `throttle` are defined at the rule level.\n",
+              "description": "The properties that affect how often actions are generated. If the rule type supports setting `summary` to `true`, the action can be a summary of alerts at the specified notification interval. Otherwise, an action runs for each alert at the specified notification interval. NOTE: You cannot specify these parameters when `notify_when` or `throttle` are defined at the rule level.\n",
               "required": [
                 "notify_when",
                 "summary"
@@ -2716,7 +2717,7 @@
             },
             "group": {
               "type": "string",
-              "description": "The group name for the actions. If you don't need to group actions, set to `default`.",
+              "description": "The group name, which affects when the action runs (for example, when the threshold is met or when the alert is recovered). Each rule type has a list of valid action group names. If you don't need to group actions, set to `default`.\n",
               "example": "default"
             },
             "id": {

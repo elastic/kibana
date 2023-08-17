@@ -6,7 +6,7 @@
  */
 
 //eslint-disable-next-line import/no-extraneous-dependencies
-const { CLIEngine } = require('eslint');
+const { ESLint } = require('eslint');
 const { resolve } = require('path');
 //eslint-disable-next-line import/no-extraneous-dependencies
 const { argv } = require('yargs');
@@ -14,15 +14,15 @@ const { argv } = require('yargs');
 async function run() {
   const fix = !!argv.fix;
 
-  const engine = new CLIEngine({
+  const eslint = new ESLint({
     fix,
     cache: true,
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
   });
 
-  const report = engine.executeOnFiles(resolve(__dirname, '..'));
+  const report = await eslint.lintFiles(resolve(__dirname, '..'));
 
-  const formatter = engine.getFormatter();
+  const formatter = await eslint.loadFormatter();
 
   return formatter(report.results);
 }

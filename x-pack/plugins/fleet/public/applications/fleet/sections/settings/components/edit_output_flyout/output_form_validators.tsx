@@ -8,6 +8,73 @@
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 
+export function validateKafkaHosts(value: string[]) {
+  const res: Array<{ message: string; index?: number }> = [];
+  const urlIndexes: { [key: string]: number[] } = {};
+
+  value.forEach((val, idx) => {
+    if (!val) {
+      res.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.kafkaHostFieldRequiredError', {
+          defaultMessage: 'Host is required',
+        }),
+      });
+      return;
+    }
+
+    // Split the URL into parts based on ":"
+    const urlParts = val.split(':');
+    if (urlParts.length !== 2 || !urlParts[0] || !urlParts[1]) {
+      res.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.kafkaHostPortError', {
+          defaultMessage: 'Invalid format. Expected "host:port" without protocol.',
+        }),
+        index: idx,
+      });
+      return;
+    }
+
+    // Validate that the port is a valid number
+    const port = parseInt(urlParts[1], 10);
+    if (isNaN(port) || port < 1 || port > 65535) {
+      res.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.kafkaPortError', {
+          defaultMessage: 'Invalid port number. Expected a number between 1 and 65535',
+        }),
+        index: idx,
+      });
+    }
+
+    const curIndexes = urlIndexes[val] || [];
+    urlIndexes[val] = [...curIndexes, idx];
+  });
+
+  Object.values(urlIndexes)
+    .filter(({ length }) => length > 1)
+    .forEach((indexes) => {
+      indexes.forEach((index) =>
+        res.push({
+          message: i18n.translate('xpack.fleet.settings.outputForm.kafkaHostDuplicateError', {
+            defaultMessage: 'Duplicate URL',
+          }),
+          index,
+        })
+      );
+    });
+
+  if (value.length === 0) {
+    res.push({
+      message: i18n.translate('xpack.fleet.settings.outputForm.kafkaHostRequiredError', {
+        defaultMessage: 'Host is required',
+      }),
+    });
+  }
+
+  if (res.length) {
+    return res;
+  }
+}
+
 export function validateESHosts(value: string[]) {
   const res: Array<{ message: string; index?: number }> = [];
   const urlIndexes: { [key: string]: number[] } = {};
@@ -211,14 +278,31 @@ export function validateKafkaDefaultTopic(value: string) {
   }
 }
 
+export function validateKafkaClientId(value: string) {
+  const regex = /^[A-Za-z0-9._-]+$/;
+  return regex.test(value)
+    ? undefined
+    : [
+        i18n.translate('xpack.fleet.settings.outputForm.kafkaClientIdFormattingMessage', {
+          defaultMessage:
+            'Client ID is invalid. Only letters, numbers, dots, underscores, and dashes are allowed.',
+        }),
+      ];
+}
+
 export function validateKafkaTopics(
   topics: Array<{
     topic: string;
+    when?: {
+      condition?: string;
+      type?: string;
+    };
   }>
 ) {
   const errors: Array<{
     message: string;
     index: number;
+    condition?: boolean;
   }> = [];
 
   topics.forEach((topic, index) => {
@@ -228,6 +312,19 @@ export function validateKafkaTopics(
           defaultMessage: 'Topic is required',
         }),
         index,
+      });
+    }
+    if (
+      !topic.when?.condition ||
+      topic.when.condition === '' ||
+      topic.when.condition.split(':').length - 1 !== 1
+    ) {
+      errors.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicConditionRequired', {
+          defaultMessage: 'Must be a key, value pair i.e. "http.response.code: 200"',
+        }),
+        index,
+        condition: true,
       });
     }
   });

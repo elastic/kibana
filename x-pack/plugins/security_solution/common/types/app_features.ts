@@ -28,6 +28,11 @@ export enum AppFeatureSecurityKey {
   endpointPolicyManagement = 'endpoint_policy_management',
 
   /**
+   * Enables Endpoint Policy protections (like Malware, Ransomware, etc)
+   */
+  endpointPolicyProtections = 'endpoint_policy_protections',
+
+  /**
    * Enables management of all endpoint related artifacts (ex. Trusted Applications, Event Filters,
    * Host Isolation Exceptions, Blocklist.
    */
@@ -43,6 +48,18 @@ export enum AppFeatureSecurityKey {
    * Enables Threat Intelligence
    */
   threatIntelligence = 'threat-intelligence',
+
+  /**
+   * Enables Osquery Response Actions
+   */
+  osqueryAutomatedResponseActions = 'osquery_automated_response_actions',
+}
+
+export enum AppFeatureAssistantKey {
+  /**
+   * Enables Elastic AI Assistant
+   */
+  assistant = 'assistant',
 }
 
 export enum AppFeatureCasesKey {
@@ -53,9 +70,13 @@ export enum AppFeatureCasesKey {
 }
 
 // Merges the two enums.
-export type AppFeatureKey = AppFeatureSecurityKey | AppFeatureCasesKey;
+export type AppFeatureKey = AppFeatureSecurityKey | AppFeatureCasesKey | AppFeatureAssistantKey;
 export type AppFeatureKeys = AppFeatureKey[];
 
 // We need to merge the value and the type and export both to replicate how enum works.
-export const AppFeatureKey = { ...AppFeatureSecurityKey, ...AppFeatureCasesKey };
+export const AppFeatureKey = {
+  ...AppFeatureSecurityKey,
+  ...AppFeatureCasesKey,
+  ...AppFeatureAssistantKey,
+};
 export const ALL_APP_FEATURE_KEYS = Object.freeze(Object.values(AppFeatureKey));
