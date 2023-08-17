@@ -55,176 +55,14 @@ const sampleRuleType: RuleType<never, never, {}, never, never, 'default', 'recov
 };
 
 describe('Alerting Plugin', () => {
-  describe('setup()', () => {
-    const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
-    const setupMocks = coreMock.createSetup();
-    const mockPlugins = {
-      licensing: licensingMock.createSetup(),
-      encryptedSavedObjects: encryptedSavedObjectsSetup,
-      taskManager: taskManagerMock.createSetup(),
-      eventLog: eventLogServiceMock.create(),
-      actions: actionsMock.createSetup(),
-      statusService: statusServiceMock.createSetupContract(),
-      monitoringCollection: monitoringCollectionMock.createSetup(),
-      data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
-      features: featuresPluginMock.createSetup(),
-      unifiedSearch: autocompletePluginMock.createSetupContract(),
-    };
+  for (const useDataStreamForAlerts of [false, true]) {
+    const label = useDataStreamForAlerts ? 'data streams' : 'aliases';
 
-    let plugin: AlertingPlugin;
-
-    beforeEach(() => jest.clearAllMocks());
-
-    it('should log warning when Encrypted Saved Objects plugin is missing encryption key', async () => {
-      const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-        generateAlertingConfig()
-      );
-      plugin = new AlertingPlugin(context);
-
-      plugin.setup(setupMocks, mockPlugins);
-      await waitForSetupComplete(setupMocks);
-
-      expect(setupMocks.status.set).toHaveBeenCalledTimes(1);
-      expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
-      expect(context.logger.get().warn).toHaveBeenCalledWith(
-        'APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
-      );
-    });
-
-    it('should create usage counter if usageCollection plugin is defined', async () => {
-      const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-        generateAlertingConfig()
-      );
-      plugin = new AlertingPlugin(context);
-
-      const usageCollectionSetup = createUsageCollectionSetupMock();
-
-      // need await to test number of calls of setupMocks.status.set, because it is under async function which awaiting core.getStartServices()
-      plugin.setup(setupMocks, { ...mockPlugins, usageCollection: usageCollectionSetup });
-      await waitForSetupComplete(setupMocks);
-
-      expect(usageCollectionSetup.createUsageCounter).toHaveBeenCalled();
-      expect(usageCollectionSetup.registerCollector).toHaveBeenCalled();
-    });
-
-    it('should initialize AlertsService if enableFrameworkAlerts config is true', async () => {
-      const context = coreMock.createPluginInitializerContext<AlertingConfig>({
-        ...generateAlertingConfig(),
-        enableFrameworkAlerts: true,
-      });
-      plugin = new AlertingPlugin(context);
-
-      // need await to test number of calls of setupMocks.status.set, because it is under async function which awaiting core.getStartServices()
-      const setupContract = plugin.setup(setupMocks, mockPlugins);
-      await waitForSetupComplete(setupMocks);
-
-      expect(AlertsService).toHaveBeenCalled();
-
-      expect(setupContract.frameworkAlerts.enabled()).toEqual(true);
-    });
-
-    it(`exposes configured minimumScheduleInterval()`, async () => {
-      const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-        generateAlertingConfig()
-      );
-      plugin = new AlertingPlugin(context);
-
-      const setupContract = plugin.setup(setupMocks, mockPlugins);
-      await waitForSetupComplete(setupMocks);
-
-      expect(setupContract.getConfig()).toEqual({
-        isUsingSecurity: false,
-        minimumScheduleInterval: { value: '1m', enforce: false },
-      });
-
-      expect(setupContract.frameworkAlerts.enabled()).toEqual(false);
-    });
-
-    describe('registerType()', () => {
-      let setup: PluginSetupContract;
-      beforeEach(async () => {
-        const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-          generateAlertingConfig()
-        );
-        plugin = new AlertingPlugin(context);
-        setup = plugin.setup(setupMocks, mockPlugins);
-        await waitForSetupComplete(setupMocks);
-      });
-
-      it('should throw error when license type is invalid', async () => {
-        expect(() =>
-          setup.registerType({
-            ...sampleRuleType,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            minimumLicenseRequired: 'foo' as any,
-          })
-        ).toThrowErrorMatchingInlineSnapshot(`"\\"foo\\" is not a valid license type"`);
-      });
-
-      it('should not throw when license type is gold', async () => {
-        setup.registerType({
-          ...sampleRuleType,
-          minimumLicenseRequired: 'gold',
-        });
-      });
-
-      it('should not throw when license type is basic', async () => {
-        setup.registerType({
-          ...sampleRuleType,
-          minimumLicenseRequired: 'basic',
-        });
-      });
-
-      it('should apply default config value for ruleTaskTimeout if no value is specified', async () => {
-        const ruleType = {
-          ...sampleRuleType,
-          minimumLicenseRequired: 'basic',
-        } as RuleType<never, never, {}, never, never, 'default', never, {}>;
-        await setup.registerType(ruleType);
-        expect(ruleType.ruleTaskTimeout).toBe('5m');
-      });
-
-      it('should apply value for ruleTaskTimeout if specified', async () => {
-        const ruleType = {
-          ...sampleRuleType,
-          minimumLicenseRequired: 'basic',
-          ruleTaskTimeout: '20h',
-        } as RuleType<never, never, {}, never, never, 'default', never, {}>;
-        await setup.registerType(ruleType);
-        expect(ruleType.ruleTaskTimeout).toBe('20h');
-      });
-
-      it('should apply default config value for cancelAlertsOnRuleTimeout if no value is specified', async () => {
-        const ruleType = {
-          ...sampleRuleType,
-          minimumLicenseRequired: 'basic',
-        } as RuleType<never, never, {}, never, never, 'default', never, {}>;
-        await setup.registerType(ruleType);
-        expect(ruleType.cancelAlertsOnRuleTimeout).toBe(true);
-      });
-
-      it('should apply value for cancelAlertsOnRuleTimeout if specified', async () => {
-        const ruleType = {
-          ...sampleRuleType,
-          minimumLicenseRequired: 'basic',
-          cancelAlertsOnRuleTimeout: false,
-        } as RuleType<never, never, {}, never, never, 'default', never, {}>;
-        await setup.registerType(ruleType);
-        expect(ruleType.cancelAlertsOnRuleTimeout).toBe(false);
-      });
-    });
-  });
-
-  describe('start()', () => {
-    describe('getRulesClientWithRequest()', () => {
-      it('throws error when encryptedSavedObjects plugin is missing encryption key', async () => {
-        const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-          generateAlertingConfig()
-        );
-        const plugin = new AlertingPlugin(context);
-
+    describe(`using ${label} for alert indices`, () => {
+      describe('setup()', () => {
         const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
-        plugin.setup(coreMock.createSetup(), {
+        const setupMocks = coreMock.createSetup();
+        const mockPlugins = {
           licensing: licensingMock.createSetup(),
           encryptedSavedObjects: encryptedSavedObjectsSetup,
           taskManager: taskManagerMock.createSetup(),
@@ -235,150 +73,323 @@ describe('Alerting Plugin', () => {
           data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
           features: featuresPluginMock.createSetup(),
           unifiedSearch: autocompletePluginMock.createSetupContract(),
-        });
-
-        const startContract = plugin.start(coreMock.createStart(), {
-          actions: actionsMock.createStart(),
-          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
-          features: mockFeatures(),
-          spaces: spacesMock.createStart(),
-          licensing: licensingMock.createStart(),
-          eventLog: eventLogMock.createStart(),
-          taskManager: taskManagerMock.createStart(),
-          data: dataPluginMock.createStartContract(),
-          share: {} as SharePluginStart,
-          dataViews: {
-            dataViewsServiceFactory: jest
-              .fn()
-              .mockResolvedValue(dataViewPluginMocks.createStartContract()),
-          } as DataViewsServerPluginStart,
-        });
-
-        expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
-        expect(() =>
-          startContract.getRulesClientWithRequest({} as KibanaRequest)
-        ).toThrowErrorMatchingInlineSnapshot(
-          `"Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
-        );
-      });
-
-      it(`doesn't throw error when encryptedSavedObjects plugin has encryption key`, async () => {
-        const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-          generateAlertingConfig()
-        );
-        const plugin = new AlertingPlugin(context);
-
-        const encryptedSavedObjectsSetup = {
-          ...encryptedSavedObjectsMock.createSetup(),
-          canEncrypt: true,
+          // serverless setup is currently empty, and there is no mock
+          ...(useDataStreamForAlerts ? { serverless: {} } : {}),
         };
-        plugin.setup(coreMock.createSetup(), {
-          licensing: licensingMock.createSetup(),
-          encryptedSavedObjects: encryptedSavedObjectsSetup,
-          taskManager: taskManagerMock.createSetup(),
-          eventLog: eventLogServiceMock.create(),
-          actions: actionsMock.createSetup(),
-          statusService: statusServiceMock.createSetupContract(),
-          monitoringCollection: monitoringCollectionMock.createSetup(),
-          data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
-          features: featuresPluginMock.createSetup(),
-          unifiedSearch: autocompletePluginMock.createSetupContract(),
+
+        let plugin: AlertingPlugin;
+
+        beforeEach(() => jest.clearAllMocks());
+
+        it('should log warning when Encrypted Saved Objects plugin is missing encryption key', async () => {
+          const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+            generateAlertingConfig()
+          );
+          plugin = new AlertingPlugin(context);
+
+          plugin.setup(setupMocks, mockPlugins);
+          await waitForSetupComplete(setupMocks);
+
+          expect(setupMocks.status.set).toHaveBeenCalledTimes(1);
+          expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
+          expect(context.logger.get().warn).toHaveBeenCalledWith(
+            'APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+          );
         });
 
-        const startContract = plugin.start(coreMock.createStart(), {
-          actions: actionsMock.createStart(),
-          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
-          features: mockFeatures(),
-          spaces: spacesMock.createStart(),
-          licensing: licensingMock.createStart(),
-          eventLog: eventLogMock.createStart(),
-          taskManager: taskManagerMock.createStart(),
-          data: dataPluginMock.createStartContract(),
-          share: {} as SharePluginStart,
-          dataViews: {
-            dataViewsServiceFactory: jest
-              .fn()
-              .mockResolvedValue(dataViewPluginMocks.createStartContract()),
-          } as DataViewsServerPluginStart,
+        it('should create usage counter if usageCollection plugin is defined', async () => {
+          const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+            generateAlertingConfig()
+          );
+          plugin = new AlertingPlugin(context);
+
+          const usageCollectionSetup = createUsageCollectionSetupMock();
+
+          // need await to test number of calls of setupMocks.status.set, because it is under async function which awaiting core.getStartServices()
+          plugin.setup(setupMocks, { ...mockPlugins, usageCollection: usageCollectionSetup });
+          await waitForSetupComplete(setupMocks);
+
+          expect(usageCollectionSetup.createUsageCounter).toHaveBeenCalled();
+          expect(usageCollectionSetup.registerCollector).toHaveBeenCalled();
         });
 
-        const fakeRequest = {
-          headers: {},
-          getBasePath: () => '',
-          path: '/',
-          route: { settings: {} },
-          url: {
-            href: '/',
-          },
-          raw: {
-            req: {
-              url: '/',
+        it('should initialize AlertsService if enableFrameworkAlerts config is true', async () => {
+          const context = coreMock.createPluginInitializerContext<AlertingConfig>({
+            ...generateAlertingConfig(),
+            enableFrameworkAlerts: true,
+          });
+          plugin = new AlertingPlugin(context);
+
+          // need await to test number of calls of setupMocks.status.set, because it is under async function which awaiting core.getStartServices()
+          const setupContract = plugin.setup(setupMocks, mockPlugins);
+          await waitForSetupComplete(setupMocks);
+
+          expect(AlertsService).toHaveBeenCalled();
+
+          expect(setupContract.frameworkAlerts.enabled()).toEqual(true);
+        });
+
+        it(`exposes configured minimumScheduleInterval()`, async () => {
+          const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+            generateAlertingConfig()
+          );
+          plugin = new AlertingPlugin(context);
+
+          const setupContract = plugin.setup(setupMocks, mockPlugins);
+          await waitForSetupComplete(setupMocks);
+
+          expect(setupContract.getConfig()).toEqual({
+            isUsingSecurity: false,
+            minimumScheduleInterval: { value: '1m', enforce: false },
+          });
+
+          expect(setupContract.frameworkAlerts.enabled()).toEqual(false);
+        });
+
+        describe('registerType()', () => {
+          let setup: PluginSetupContract;
+          beforeEach(async () => {
+            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+              generateAlertingConfig()
+            );
+            plugin = new AlertingPlugin(context);
+            setup = plugin.setup(setupMocks, mockPlugins);
+            await waitForSetupComplete(setupMocks);
+          });
+
+          it('should throw error when license type is invalid', async () => {
+            expect(() =>
+              setup.registerType({
+                ...sampleRuleType,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                minimumLicenseRequired: 'foo' as any,
+              })
+            ).toThrowErrorMatchingInlineSnapshot(`"\\"foo\\" is not a valid license type"`);
+          });
+
+          it('should not throw when license type is gold', async () => {
+            setup.registerType({
+              ...sampleRuleType,
+              minimumLicenseRequired: 'gold',
+            });
+          });
+
+          it('should not throw when license type is basic', async () => {
+            setup.registerType({
+              ...sampleRuleType,
+              minimumLicenseRequired: 'basic',
+            });
+          });
+
+          it('should apply default config value for ruleTaskTimeout if no value is specified', async () => {
+            const ruleType = {
+              ...sampleRuleType,
+              minimumLicenseRequired: 'basic',
+            } as RuleType<never, never, {}, never, never, 'default', never, {}>;
+            await setup.registerType(ruleType);
+            expect(ruleType.ruleTaskTimeout).toBe('5m');
+          });
+
+          it('should apply value for ruleTaskTimeout if specified', async () => {
+            const ruleType = {
+              ...sampleRuleType,
+              minimumLicenseRequired: 'basic',
+              ruleTaskTimeout: '20h',
+            } as RuleType<never, never, {}, never, never, 'default', never, {}>;
+            await setup.registerType(ruleType);
+            expect(ruleType.ruleTaskTimeout).toBe('20h');
+          });
+
+          it('should apply default config value for cancelAlertsOnRuleTimeout if no value is specified', async () => {
+            const ruleType = {
+              ...sampleRuleType,
+              minimumLicenseRequired: 'basic',
+            } as RuleType<never, never, {}, never, never, 'default', never, {}>;
+            await setup.registerType(ruleType);
+            expect(ruleType.cancelAlertsOnRuleTimeout).toBe(true);
+          });
+
+          it('should apply value for cancelAlertsOnRuleTimeout if specified', async () => {
+            const ruleType = {
+              ...sampleRuleType,
+              minimumLicenseRequired: 'basic',
+              cancelAlertsOnRuleTimeout: false,
+            } as RuleType<never, never, {}, never, never, 'default', never, {}>;
+            await setup.registerType(ruleType);
+            expect(ruleType.cancelAlertsOnRuleTimeout).toBe(false);
+          });
+        });
+      });
+
+      describe('start()', () => {
+        describe('getRulesClientWithRequest()', () => {
+          it('throws error when encryptedSavedObjects plugin is missing encryption key', async () => {
+            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+              generateAlertingConfig()
+            );
+            const plugin = new AlertingPlugin(context);
+
+            const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
+            plugin.setup(coreMock.createSetup(), {
+              licensing: licensingMock.createSetup(),
+              encryptedSavedObjects: encryptedSavedObjectsSetup,
+              taskManager: taskManagerMock.createSetup(),
+              eventLog: eventLogServiceMock.create(),
+              actions: actionsMock.createSetup(),
+              statusService: statusServiceMock.createSetupContract(),
+              monitoringCollection: monitoringCollectionMock.createSetup(),
+              data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
+              features: featuresPluginMock.createSetup(),
+              unifiedSearch: autocompletePluginMock.createSetupContract(),
+              ...(useDataStreamForAlerts ? { serverless: {} } : {}),
+            });
+
+            const startContract = plugin.start(coreMock.createStart(), {
+              actions: actionsMock.createStart(),
+              encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+              features: mockFeatures(),
+              spaces: spacesMock.createStart(),
+              licensing: licensingMock.createStart(),
+              eventLog: eventLogMock.createStart(),
+              taskManager: taskManagerMock.createStart(),
+              data: dataPluginMock.createStartContract(),
+              share: {} as SharePluginStart,
+              dataViews: {
+                dataViewsServiceFactory: jest
+                  .fn()
+                  .mockResolvedValue(dataViewPluginMocks.createStartContract()),
+              } as DataViewsServerPluginStart,
+            });
+
+            expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
+            expect(() =>
+              startContract.getRulesClientWithRequest({} as KibanaRequest)
+            ).toThrowErrorMatchingInlineSnapshot(
+              `"Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+            );
+          });
+
+          it(`doesn't throw error when encryptedSavedObjects plugin has encryption key`, async () => {
+            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+              generateAlertingConfig()
+            );
+            const plugin = new AlertingPlugin(context);
+
+            const encryptedSavedObjectsSetup = {
+              ...encryptedSavedObjectsMock.createSetup(),
+              canEncrypt: true,
+            };
+            plugin.setup(coreMock.createSetup(), {
+              licensing: licensingMock.createSetup(),
+              encryptedSavedObjects: encryptedSavedObjectsSetup,
+              taskManager: taskManagerMock.createSetup(),
+              eventLog: eventLogServiceMock.create(),
+              actions: actionsMock.createSetup(),
+              statusService: statusServiceMock.createSetupContract(),
+              monitoringCollection: monitoringCollectionMock.createSetup(),
+              data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
+              features: featuresPluginMock.createSetup(),
+              unifiedSearch: autocompletePluginMock.createSetupContract(),
+              ...(useDataStreamForAlerts ? { serverless: {} } : {}),
+            });
+
+            const startContract = plugin.start(coreMock.createStart(), {
+              actions: actionsMock.createStart(),
+              encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+              features: mockFeatures(),
+              spaces: spacesMock.createStart(),
+              licensing: licensingMock.createStart(),
+              eventLog: eventLogMock.createStart(),
+              taskManager: taskManagerMock.createStart(),
+              data: dataPluginMock.createStartContract(),
+              share: {} as SharePluginStart,
+              dataViews: {
+                dataViewsServiceFactory: jest
+                  .fn()
+                  .mockResolvedValue(dataViewPluginMocks.createStartContract()),
+              } as DataViewsServerPluginStart,
+            });
+
+            const fakeRequest = {
+              headers: {},
+              getBasePath: () => '',
+              path: '/',
+              route: { settings: {} },
+              url: {
+                href: '/',
+              },
+              raw: {
+                req: {
+                  url: '/',
+                },
+              },
+              getSavedObjectsClient: jest.fn(),
+            } as unknown as KibanaRequest;
+            startContract.getRulesClientWithRequest(fakeRequest);
+          });
+        });
+
+        test(`exposes getAlertingAuthorizationWithRequest()`, async () => {
+          const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+            generateAlertingConfig()
+          );
+          const plugin = new AlertingPlugin(context);
+
+          const encryptedSavedObjectsSetup = {
+            ...encryptedSavedObjectsMock.createSetup(),
+            canEncrypt: true,
+          };
+          plugin.setup(coreMock.createSetup(), {
+            licensing: licensingMock.createSetup(),
+            encryptedSavedObjects: encryptedSavedObjectsSetup,
+            taskManager: taskManagerMock.createSetup(),
+            eventLog: eventLogServiceMock.create(),
+            actions: actionsMock.createSetup(),
+            statusService: statusServiceMock.createSetupContract(),
+            monitoringCollection: monitoringCollectionMock.createSetup(),
+            data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
+            features: featuresPluginMock.createSetup(),
+            unifiedSearch: autocompletePluginMock.createSetupContract(),
+            ...(useDataStreamForAlerts ? { serverless: {} } : {}),
+          });
+
+          const startContract = plugin.start(coreMock.createStart(), {
+            actions: actionsMock.createStart(),
+            encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+            features: mockFeatures(),
+            spaces: spacesMock.createStart(),
+            licensing: licensingMock.createStart(),
+            eventLog: eventLogMock.createStart(),
+            taskManager: taskManagerMock.createStart(),
+            data: dataPluginMock.createStartContract(),
+            share: {} as SharePluginStart,
+            dataViews: {
+              dataViewsServiceFactory: jest
+                .fn()
+                .mockResolvedValue(dataViewPluginMocks.createStartContract()),
+            } as DataViewsServerPluginStart,
+          });
+
+          const fakeRequest = {
+            headers: {},
+            getBasePath: () => '',
+            path: '/',
+            route: { settings: {} },
+            url: {
+              href: '/',
             },
-          },
-          getSavedObjectsClient: jest.fn(),
-        } as unknown as KibanaRequest;
-        startContract.getRulesClientWithRequest(fakeRequest);
+            raw: {
+              req: {
+                url: '/',
+              },
+            },
+            getSavedObjectsClient: jest.fn(),
+          } as unknown as KibanaRequest;
+          startContract.getAlertingAuthorizationWithRequest(fakeRequest);
+        });
       });
     });
-
-    test(`exposes getAlertingAuthorizationWithRequest()`, async () => {
-      const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-        generateAlertingConfig()
-      );
-      const plugin = new AlertingPlugin(context);
-
-      const encryptedSavedObjectsSetup = {
-        ...encryptedSavedObjectsMock.createSetup(),
-        canEncrypt: true,
-      };
-      plugin.setup(coreMock.createSetup(), {
-        licensing: licensingMock.createSetup(),
-        encryptedSavedObjects: encryptedSavedObjectsSetup,
-        taskManager: taskManagerMock.createSetup(),
-        eventLog: eventLogServiceMock.create(),
-        actions: actionsMock.createSetup(),
-        statusService: statusServiceMock.createSetupContract(),
-        monitoringCollection: monitoringCollectionMock.createSetup(),
-        data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
-        features: featuresPluginMock.createSetup(),
-        unifiedSearch: autocompletePluginMock.createSetupContract(),
-      });
-
-      const startContract = plugin.start(coreMock.createStart(), {
-        actions: actionsMock.createStart(),
-        encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
-        features: mockFeatures(),
-        spaces: spacesMock.createStart(),
-        licensing: licensingMock.createStart(),
-        eventLog: eventLogMock.createStart(),
-        taskManager: taskManagerMock.createStart(),
-        data: dataPluginMock.createStartContract(),
-        share: {} as SharePluginStart,
-        dataViews: {
-          dataViewsServiceFactory: jest
-            .fn()
-            .mockResolvedValue(dataViewPluginMocks.createStartContract()),
-        } as DataViewsServerPluginStart,
-      });
-
-      const fakeRequest = {
-        headers: {},
-        getBasePath: () => '',
-        path: '/',
-        route: { settings: {} },
-        url: {
-          href: '/',
-        },
-        raw: {
-          req: {
-            url: '/',
-          },
-        },
-        getSavedObjectsClient: jest.fn(),
-      } as unknown as KibanaRequest;
-      startContract.getAlertingAuthorizationWithRequest(fakeRequest);
-    });
-  });
+  }
 });
 
 function mockFeatures() {
