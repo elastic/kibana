@@ -69,7 +69,7 @@ const PreviewLogsComponent: React.FC<PreviewLogsProps> = ({ logs, hasNoiseWarnin
   );
 };
 
-export const PreviewLogs = React.memo(PreviewLogsComponent)
+export const PreviewLogs = React.memo(PreviewLogsComponent);
 PreviewLogs.displayName = 'PreviewLogs';
 
 const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError, children }) => {
