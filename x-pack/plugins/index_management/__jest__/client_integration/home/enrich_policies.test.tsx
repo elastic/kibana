@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 
@@ -12,6 +13,23 @@ import { setupEnvironment } from '../helpers';
 import { createTestEnrichPolicy } from '../helpers/fixtures';
 import { EnrichPoliciesTestBed, setup } from './enrich_policies.helpers';
 import { notificationService } from '../../../public/application/services/notification';
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: any) => {
+          props.onChange(e.jsonContent);
+        }}
+      />
+    ),
+  };
+});
 
 describe('Enrich policies tab', () => {
   const { httpSetup, httpRequestsMockHelpers, setDelayResponse } = setupEnvironment();
@@ -60,9 +78,12 @@ describe('Enrich policies tab', () => {
   });
 
   describe('policies list', () => {
+    let testPolicy: ReturnType<typeof createTestEnrichPolicy>;
     beforeEach(async () => {
+      testPolicy = createTestEnrichPolicy('policy-match', 'match');
+
       httpRequestsMockHelpers.setLoadEnrichPoliciesResponse([
-        createTestEnrichPolicy('policy-match', 'match'),
+        testPolicy,
         createTestEnrichPolicy('policy-range', 'range'),
       ]);
 
@@ -92,6 +113,33 @@ describe('Enrich policies tab', () => {
       // Should have made a call to load the policies after the reload
       // button is clicked.
       expect(httpSetup.get.mock.calls).toHaveLength(1);
+    });
+
+    describe('details flyout', () => {
+      it('can open the details flyout', async () => {
+        const { actions, exists } = testBed;
+
+        await actions.clickEnrichPolicyAt(0);
+
+        expect(exists('policyDetailsFlyout')).toBe(true);
+      });
+
+      it('contains all the necessary policy fields', async () => {
+        const { actions, find } = testBed;
+
+        await actions.clickEnrichPolicyAt(0);
+
+        expect(find('policyTypeValue').text()).toBe(testPolicy.type);
+        expect(find('policyIndicesValue').text()).toBe(testPolicy.sourceIndices.join(', '));
+        expect(find('policyMatchFieldValue').text()).toBe(testPolicy.matchField);
+        expect(find('policyEnrichFieldsValue').text()).toBe(testPolicy.enrichFields.join(', '));
+
+        const codeEditorValue = find('queryEditor')
+          .at(0)
+          .getDOMNode()
+          .getAttribute('data-currentvalue');
+        expect(JSON.parse(codeEditorValue || '')).toEqual(testPolicy.query);
+      });
     });
 
     describe('policy actions', () => {
