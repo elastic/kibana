@@ -715,6 +715,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       datastreamsILM: `${FLEET_DOCS}data-streams.html#data-streams-ilm`,
       datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
       datastreamsManualRollover: `${ELASTICSEARCH_DOCS}use-a-data-stream.html#manually-roll-over-a-data-stream`,
+      datastreamsTSDS: `${ELASTICSEARCH_DOCS}tsds.html`,
+      datastreamsTSDSMetrics: `${ELASTICSEARCH_DOCS}tsds.html#time-series-metric`,
       installElasticAgent: `${FLEET_DOCS}install-fleet-managed-elastic-agent.html`,
       installElasticAgentStandalone: `${FLEET_DOCS}install-standalone-elastic-agent.html`,
       upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
