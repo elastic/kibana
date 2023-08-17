@@ -178,7 +178,7 @@ describe('ALL - Packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   if (!isServerless) {
     describe('Global packs', { tags: [tag.ESS] }, () => {
       beforeEach(() => {
-        cy.login();
+        cy.login('elastic');
         navigateTo('/app/osquery/packs');
       });
 

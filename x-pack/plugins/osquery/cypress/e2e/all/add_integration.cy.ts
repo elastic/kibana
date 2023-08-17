@@ -37,10 +37,6 @@ import {
 
 // TODO try to fix it for serverless too
 describe('ALL - Add Integration', { tags: [tag.ESS] }, () => {
-  if (isServerless) {
-    return;
-  }
-
   let savedQueryId: string;
 
   before(() => {
@@ -66,12 +62,16 @@ describe('ALL - Add Integration', { tags: [tag.ESS] }, () => {
     cy.contains('Add Osquery Manager');
     cy.getBySel('osquery-add-integration-button');
     cy.getBySel('nav-search-input').type('Osquery');
-    cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGEMENT}"]`).should('exist').click();
-    // cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.LOGS}"]`).should('exist');
-    // cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGER}"]`).should('exist').click();
+    cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGEMENT}"]`).should('exist');
+    cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.LOGS}"]`).should('exist');
+    cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGER}"]`).should('exist').click();
   });
 
-  describe('Add and upgrade integration', () => {
+  if (isServerless) {
+    return;
+  }
+
+  describe('Add and upgrade integration', { tags: [tag.ESS] }, () => {
     const oldVersion = '0.7.4';
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
