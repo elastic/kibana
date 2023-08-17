@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
         'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
       );
     });
-    it('scripted fields are ignore when disabled', async () => {
+    it('scripted fields are ignored when disabled', async () => {
       const response = await supertest
         .post(DATA_VIEW_PATH)
         .set('kbn-xsrf', 'some-xsrf-token')
