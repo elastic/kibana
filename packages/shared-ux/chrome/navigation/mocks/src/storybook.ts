@@ -44,6 +44,20 @@ export class StorybookMock extends AbstractStorybookMock<{}, NavigationServices>
       navLinks$: params.navLinks$ ?? new BehaviorSubject([]),
       onProjectNavigationChange: params.onProjectNavigationChange ?? (() => undefined),
       activeNodes$: new BehaviorSubject([]),
+      cloudLinks: {
+        billingAndSub: {
+          title: 'Billing & Subscriptions',
+          href: 'https://cloud.elastic.co/account/billing',
+        },
+        performance: {
+          title: 'Performance',
+          href: 'https://cloud.elastic.co/deployments/123456789/performance',
+        },
+        userAndRoles: {
+          title: 'Users & Roles',
+          href: 'https://cloud.elastic.co/deployments/123456789/security/users',
+        },
+      },
     };
   }
 

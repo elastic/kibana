@@ -80,6 +80,7 @@ const mockConfig: ConfigSchema = {
     sourcemapApiAvailable: true,
     storageExplorerAvailable: true,
   },
+  serverless: { enabled: false },
 };
 
 const urlService = new UrlService({
@@ -98,6 +99,13 @@ const mockPlugin = {
   data: {
     query: {
       timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
+    },
+  },
+  share: {
+    url: {
+      locators: {
+        get: jest.fn(),
+      },
     },
   },
 };

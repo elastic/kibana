@@ -10,10 +10,10 @@ import { renderHook } from '@testing-library/react-hooks';
 import type { UseAssistantParams, UseAssistantResult } from './use_assistant';
 import { useAssistant } from './use_assistant';
 import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
+import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 
-jest.mock('../../../common/hooks/use_experimental_features');
+jest.mock('../../../assistant/use_assistant_availability');
 jest.mock('@kbn/elastic-assistant');
 
 const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
@@ -28,7 +28,9 @@ describe('useAssistant', () => {
   let hookResult: RenderHookResult<UseAssistantParams, UseAssistantResult>;
 
   it(`should return showAssistant true and a value for promptContextId`, () => {
-    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+    jest
+      .mocked(useAssistantAvailability)
+      .mockReturnValue({ hasAssistantPrivilege: true, isAssistantEnabled: true });
     jest
       .mocked(useAssistantOverlay)
       .mockReturnValue({ showAssistantOverlay: jest.fn, promptContextId: '123' });
@@ -39,8 +41,10 @@ describe('useAssistant', () => {
     expect(hookResult.result.current.promptContextId).toEqual('123');
   });
 
-  it(`should return showAssistant false if feature flag is off`, () => {
-    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
+  it(`should return showAssistant false if hasAssistantPrivilege is false`, () => {
+    jest
+      .mocked(useAssistantAvailability)
+      .mockReturnValue({ hasAssistantPrivilege: false, isAssistantEnabled: true });
     jest
       .mocked(useAssistantOverlay)
       .mockReturnValue({ showAssistantOverlay: jest.fn, promptContextId: '123' });

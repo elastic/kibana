@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { ErrorType } from '@kbn/ml-error-utils';
+import { type MlGetTrainedModelsRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
@@ -22,11 +23,14 @@ import {
   putTrainedModelQuerySchema,
   threadingParamsSchema,
   updateDeploymentParamsSchema,
+  createIngestPipelineSchema,
 } from './schemas/inference_schema';
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import { modelsProvider } from '../models/model_management';
+
+export const DEFAULT_TRAINED_MODELS_PAGE_SIZE = 10000;
 
 export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization) {
   /**
@@ -59,11 +63,10 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
           const { modelId } = request.params;
           const { with_pipelines: withPipelines, ...query } = request.query;
           const body = await mlClient.getTrainedModels({
-            // @ts-expect-error @elastic-elasticsearch not sure why this is an error, size is a number
-            size: 1000,
             ...query,
             ...(modelId ? { model_id: modelId } : {}),
-          });
+            size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
+          } as MlGetTrainedModelsRequest);
           // model_type is missing
           // @ts-ignore
           const result = body.trained_model_configs as TrainedModelConfigResponse[];
@@ -151,7 +154,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       },
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
-          const body = await mlClient.getTrainedModelsStats();
+          const body = await mlClient.getTrainedModelsStats({
+            size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
+          });
           return response.ok({
             body,
           });
@@ -230,6 +235,78 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
           const result = await modelsProvider(client).getModelsPipelines(modelId.split(','));
           return response.ok({
             body: [...result].map(([id, pipelines]) => ({ model_id: id, pipelines })),
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {get} /internal/ml/trained_models/ingest_pipelines Get ingest pipelines
+   * @apiName GetIngestPipelines
+   * @apiDescription Retrieves pipelines
+   */
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/ingest_pipelines`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canGetTrainedModels'], // TODO: update permissions
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
+        try {
+          const body = await modelsProvider(client).getPipelines();
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /internal/ml/trained_models/create_inference_pipeline creates the pipeline with inference processor
+   * @apiName CreateInferencePipeline
+   * @apiDescription Creates the inference pipeline
+   */
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/create_inference_pipeline`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canCreateTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: createIngestPipelineSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
+        try {
+          const { pipeline, pipelineName } = request.body;
+          const body = await modelsProvider(client).createInferencePipeline(
+            pipeline!,
+            pipelineName
+          );
+          return response.ok({
+            body,
           });
         } catch (e) {
           return response.customError(wrapError(e));

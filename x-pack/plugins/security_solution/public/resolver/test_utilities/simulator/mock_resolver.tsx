@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { useEffect, useState, useCallback } from 'react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux';
 import type { Store, AnyAction } from 'redux';
@@ -64,6 +62,7 @@ type MockResolverProps = {
  * trigger a simulated resize on the root node reference any time it changes. This simulates the layout process a real
  * browser would do when an element is attached to the DOM.
  */
+// eslint-disable-next-line react/display-name
 export const MockResolver = React.memo((props: MockResolverProps) => {
   const [resolverElement, setResolverElement] = useState<HTMLDivElement | null>(null);
 

@@ -28,6 +28,7 @@ import {
   withCloseFilterEditorConfirmModal,
   WithCloseFilterEditorConfirmModalProps,
 } from '../filter_bar/filter_editor';
+import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 
 export const strings = {
   getFilterSetButtonLabel: () =>
@@ -68,6 +69,7 @@ export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProp
   indexPatterns?: Array<DataView | string>;
   buttonProps?: Partial<EuiButtonIconProps>;
   isDisabled?: boolean;
+  suggestionsAbstraction?: SuggestionsAbstraction;
 }
 
 function QueryBarMenuComponent({
@@ -101,6 +103,7 @@ function QueryBarMenuComponent({
   onCloseFilterPopover,
   onLocalFilterCreate,
   onLocalFilterUpdate,
+  suggestionsAbstraction,
 }: QueryBarMenuProps) {
   const [renderedComponent, setRenderedComponent] = useState('menu');
 
@@ -204,6 +207,7 @@ function QueryBarMenuComponent({
                 onLocalFilterCreate={onLocalFilterCreate}
                 closePopoverOnAdd={plainClosePopover}
                 closePopoverOnCancel={plainClosePopover}
+                suggestionsAbstraction={suggestionsAbstraction}
               />,
             ]}
           />

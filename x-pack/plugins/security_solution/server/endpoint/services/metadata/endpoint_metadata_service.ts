@@ -12,8 +12,8 @@ import type {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 
-import type { SearchTotalHits, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { Agent, AgentPolicy, AgentStatus, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import type {
@@ -32,9 +32,9 @@ import {
   FleetEndpointPackagePolicyNotFoundError,
 } from './errors';
 import {
+  buildUnitedIndexQuery,
   getESQueryHostMetadataByFleetAgentIds,
   getESQueryHostMetadataByID,
-  buildUnitedIndexQuery,
   getESQueryHostMetadataByIDs,
 } from '../../routes/metadata/query_builders';
 import {
@@ -50,7 +50,7 @@ import {
 } from '../../utils';
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
 import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/endpoint_package_policies';
-import type { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
+import type { GetMetadataListRequestQuery } from '../../../../common/api/endpoint';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import type { EndpointFleetServicesInterface } from '../fleet/endpoint_fleet_services_factory';
 
@@ -170,13 +170,13 @@ export class EndpointMetadataService {
       fleetAgent = await this.getFleetAgent(fleetServices.agent, fleetAgentId);
     } catch (error) {
       if (error instanceof FleetAgentNotFoundError) {
-        this.logger?.warn(`agent with id ${fleetAgentId} not found`);
+        this.logger?.debug(`agent with id ${fleetAgentId} not found`);
       } else {
         throw error;
       }
     }
 
-    // If the agent is not longer active, then that means that the Agent/Endpoint have been un-enrolled from the host
+    // If the agent is no longer active, then that means that the Agent/Endpoint have been un-enrolled from the host
     if (fleetAgent && !fleetAgent.active) {
       throw new EndpointHostUnEnrolledError(
         `Endpoint with id ${endpointId} (Fleet agent id ${fleetAgentId}) is unenrolled`
@@ -251,7 +251,7 @@ export class EndpointMetadataService {
       }
     }
 
-    // The fleetAgentPolicy might have the endpoint policy in the `package_policies`, lets check that first
+    // The fleetAgentPolicy might have the endpoint policy in the `package_policies`, let's check that first
     if (
       !endpointPackagePolicy &&
       fleetAgentPolicy &&
@@ -262,7 +262,7 @@ export class EndpointMetadataService {
       );
     }
 
-    // if we still don't have an endpoint package policy, try retrieving it from fleet
+    // if we still don't have an endpoint package policy, try retrieving it from `fleet`
     if (!endpointPackagePolicy) {
       try {
         endpointPackagePolicy = await this.getFleetEndpointPackagePolicy(
@@ -294,6 +294,8 @@ export class EndpointMetadataService {
           id: endpointPackagePolicy?.id ?? '',
         },
       },
+      last_checkin:
+        fleetAgent?.last_checkin || new Date(endpointMetadata['@timestamp']).toISOString(),
     };
   }
 
@@ -363,6 +365,8 @@ export class EndpointMetadataService {
    *
    * @param esClient
    * @param queryOptions
+   * @param soClient
+   * @param fleetServices
    *
    * @throws
    */
@@ -434,12 +438,16 @@ export class EndpointMetadataService {
         const agentPolicy = agentPoliciesMap[_agent.policy_id!];
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const endpointPolicy = endpointPoliciesMap[_agent.policy_id!];
-        // add the agent status from the fleet runtime field to
-        // the agent object
+
+        const runtimeFields: Partial<typeof _agent> = {
+          status: doc?.fields?.status?.[0],
+          last_checkin: doc?.fields?.last_checkin?.[0],
+        };
         const agent: typeof _agent = {
           ..._agent,
-          status: doc?.fields?.status?.[0] as AgentStatus,
+          ...runtimeFields,
         };
+
         hosts.push(
           await this.enrichHostMetadata(fleetServices, metadata, agent, agentPolicy, endpointPolicy)
         );

@@ -7,3 +7,4 @@
  */
 
 export { CoreVersionedRouter } from './core_versioned_router';
+export type { HandlerResolutionStrategy } from './types';

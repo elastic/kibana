@@ -7,12 +7,12 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
+import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis';
 
 import { getQueryWithParams } from './get_query_with_params';
 
 export function getHistogramQuery(
-  params: AiopsExplainLogRateSpikesSchema,
+  params: AiopsLogRateAnalysisSchema,
   filter: estypes.QueryDslQueryContainer[] = []
 ) {
   const histogramQuery = getQueryWithParams({

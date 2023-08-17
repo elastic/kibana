@@ -7,7 +7,8 @@
 
 import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
   Comparator,
@@ -49,6 +50,7 @@ import {
   WARNING_ACTIONS,
 } from './inventory_metric_threshold_executor';
 import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
+import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),
@@ -144,7 +146,9 @@ export async function registerMetricInventoryThresholdRuleType(
         },
       ],
     },
-    getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
     alerts: MetricsRulesTypeAlertDefinition,
+    fieldsForAAD: O11Y_AAD_FIELDS,
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
   });
 }

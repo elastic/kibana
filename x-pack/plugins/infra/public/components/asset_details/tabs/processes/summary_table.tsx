@@ -20,6 +20,7 @@ import {
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { ProcessListAPIResponse } from '../../../../../common/http_api';
 import { STATE_NAMES } from './states';
+import { NOT_AVAILABLE_LABEL } from '../../translations';
 
 interface Props {
   processSummary: ProcessListAPIResponse['summary'];
@@ -29,10 +30,6 @@ interface Props {
 type SummaryRecord = {
   total: number;
 } & Record<keyof typeof STATE_NAMES, number>;
-
-const NOT_AVAILABLE_LABEL = i18n.translate('xpack.infra.notAvailableLabel', {
-  defaultMessage: 'N/A',
-});
 
 const processSummaryNotAvailable = {
   total: NOT_AVAILABLE_LABEL,
@@ -62,7 +59,10 @@ export const SummaryTable = ({ processSummary, isLoading }: Props) => {
       <EuiFlexGroup gutterSize="m" responsive={false} wrap={true}>
         {Object.entries(processCount).map(([field, value]) => (
           <EuiFlexItem key={field}>
-            <EuiDescriptionList data-test-subj="infraProcessesSummaryTableItem" compressed>
+            <EuiDescriptionList
+              data-test-subj="infraAssetDetailsProcessesSummaryTableItem"
+              compressed
+            >
               <ColumnTitle>{columnTitles[field as keyof SummaryRecord]}</ColumnTitle>
               <EuiDescriptionListDescription>
                 {value === -1 ? <LoadingSpinner /> : value}

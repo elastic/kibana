@@ -5,32 +5,15 @@
  * 2.0.
  */
 
-import type { LensChartConfig, LensLineChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const cpuLineChart: LensLineChartConfig = {
-  extraVisualizationState: {
-    yLeftExtent: {
-      mode: 'custom',
-      lowerBound: 0,
-      upperBound: 1,
+export const cpuUsage: FormulaValueConfig = {
+  label: 'CPU Usage',
+  value: '(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)',
+  format: {
+    id: 'percent',
+    params: {
+      decimals: 0,
     },
   },
-};
-
-export const cpuUsage: LensChartConfig = {
-  title: 'CPU Usage',
-  formula: {
-    formula:
-      '(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)',
-    format: {
-      id: 'percent',
-      params: {
-        decimals: 0,
-      },
-    },
-  },
-  getFilters,
-
-  lineChartConfig: cpuLineChart,
 };

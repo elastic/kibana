@@ -21,6 +21,7 @@ import {
   getNavigateToApp,
   getUiSettings,
   getUsageCollection,
+  getServerless,
 } from '../../kibana_services';
 import { mapsClient } from '../../content_management';
 
@@ -78,7 +79,11 @@ function MapsListViewComp({ history }: Props) {
   // wrap chrome updates in useEffect to avoid potentially causing state changes in other component during render phase.
   useEffect(() => {
     getCoreChrome().docTitle.change(APP_NAME);
-    getCoreChrome().setBreadcrumbs([{ text: APP_NAME }]);
+    if (getServerless()) {
+      getServerless()!.setBreadcrumbs({ text: APP_NAME });
+    } else {
+      getCoreChrome().setBreadcrumbs([{ text: APP_NAME }]);
+    }
   }, []);
 
   const findMaps = useCallback(

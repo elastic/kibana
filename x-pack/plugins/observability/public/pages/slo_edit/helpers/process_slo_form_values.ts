@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import omit from 'lodash/omit';
-import type { CreateSLOInput, SLOWithSummaryResponse, UpdateSLOInput } from '@kbn/slo-schema';
-
+import { CreateSLOInput, SLOWithSummaryResponse, UpdateSLOInput } from '@kbn/slo-schema';
 import { toDuration } from '../../../utils/slo/duration';
+import { CreateSLOForm } from '../types';
 
-export function transformSloResponseToCreateSloInput(
+export function transformSloResponseToCreateSloForm(
   values: SLOWithSummaryResponse | undefined
-): CreateSLOInput | undefined {
+): CreateSLOForm | undefined {
   if (!values) return undefined;
 
   return {
-    ...omit(values, ['id', 'revision', 'createdAt', 'updatedAt', 'summary', 'enabled']),
+    name: values.name,
+    description: values.description,
+    indicator: values.indicator,
+    budgetingMethod: values.budgetingMethod,
+    timeWindow: {
+      duration: values.timeWindow.duration,
+      type: values.timeWindow.type,
+    },
     objective: {
       target: values.objective.target * 100,
       ...(values.budgetingMethod === 'timeslices' &&
@@ -28,12 +34,21 @@ export function transformSloResponseToCreateSloInput(
           timesliceWindow: String(toDuration(values.objective.timesliceWindow).value),
         }),
     },
+    groupBy: values.groupBy,
+    tags: values.tags,
   };
 }
 
-export function transformValuesToCreateSLOInput(values: CreateSLOInput): CreateSLOInput {
+export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): CreateSLOInput {
   return {
-    ...values,
+    name: values.name,
+    description: values.description,
+    indicator: values.indicator,
+    budgetingMethod: values.budgetingMethod,
+    timeWindow: {
+      duration: values.timeWindow.duration,
+      type: values.timeWindow.type,
+    },
     objective: {
       target: values.objective.target / 100,
       ...(values.budgetingMethod === 'timeslices' &&
@@ -45,12 +60,21 @@ export function transformValuesToCreateSLOInput(values: CreateSLOInput): CreateS
           timesliceWindow: `${values.objective.timesliceWindow}m`,
         }),
     },
+    tags: values.tags,
+    groupBy: values.groupBy,
   };
 }
 
-export function transformValuesToUpdateSLOInput(values: CreateSLOInput): UpdateSLOInput {
+export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSLOInput {
   return {
-    ...values,
+    name: values.name,
+    description: values.description,
+    indicator: values.indicator,
+    budgetingMethod: values.budgetingMethod,
+    timeWindow: {
+      duration: values.timeWindow.duration,
+      type: values.timeWindow.type,
+    },
     objective: {
       target: values.objective.target / 100,
       ...(values.budgetingMethod === 'timeslices' &&
@@ -62,5 +86,26 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOInput): UpdateS
           timesliceWindow: `${values.objective.timesliceWindow}m`,
         }),
     },
+    tags: values.tags,
+    groupBy: values.groupBy,
+  };
+}
+
+export function transformPartialCreateSLOInputToPartialCreateSLOForm(
+  values: Partial<CreateSLOInput>
+): Partial<CreateSLOForm> {
+  return {
+    ...values,
+    ...(values.objective && {
+      objective: {
+        target: values.objective.target * 100,
+        ...(values.objective.timesliceTarget && {
+          timesliceTarget: values.objective.timesliceTarget * 100,
+        }),
+        ...(values.objective.timesliceWindow && {
+          timesliceWindow: String(toDuration(values.objective.timesliceWindow).value),
+        }),
+      },
+    }),
   };
 }

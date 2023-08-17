@@ -225,6 +225,32 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "serverless",
+          "id": "def-public.ServerlessPluginStart.getActiveNavigationNodes$",
+          "type": "Function",
+          "tags": [],
+          "label": "getActiveNavigationNodes$",
+          "description": [],
+          "signature": [
+            "() => ",
+            "Observable",
+            "<",
+            {
+              "pluginId": "@kbn/core-chrome-browser",
+              "scope": "common",
+              "docId": "kibKbnCoreChromeBrowserPluginApi",
+              "section": "def-common.ChromeProjectNavigationNode",
+              "text": "ChromeProjectNavigationNode"
+            },
+            "[][]>"
+          ],
+          "path": "x-pack/plugins/serverless/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

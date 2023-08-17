@@ -14,17 +14,20 @@ import {
 } from '@kbn/core/server';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DefaultAlertService } from '../default_alerts/default_alert_service';
+import { triggerTestNow } from '../synthetics_service/test_now_monitor';
+import { SyntheticsServerSetup } from '../../types';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { formatKibanaNamespace } from '../../synthetics_service/formatters/private_formatters';
-import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
 import {
   ConfigKey,
   MonitorFields,
   SyntheticsMonitor,
-  EncryptedSyntheticsMonitor,
-  PrivateLocation,
+  EncryptedSyntheticsMonitorAttributes,
 } from '../../../common/runtime_types';
-import { RouteContext, SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+import { formatKibanaNamespace } from '../../synthetics_service/formatters/private_formatters';
+import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import {
   DEFAULT_FIELDS,
@@ -33,9 +36,8 @@ import {
 import { validateMonitor } from './monitor_validation';
 import { sendTelemetryEvents, formatTelemetryEvent } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
-import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framework';
 import { deleteMonitor } from './delete_monitor';
-import { StatusAlertService } from '../default_alerts/status_alert_service';
+import { mapSavedObjectToMonitor } from './helper';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -45,11 +47,12 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     query: schema.object({
       id: schema.maybe(schema.string()),
       preserve_namespace: schema.maybe(schema.boolean()),
+      gettingStarted: schema.maybe(schema.boolean()),
     }),
   },
   writeAccess: true,
   handler: async (routeContext): Promise<any> => {
-    const { context, request, response, savedObjectsClient, server } = routeContext;
+    const { request, response, savedObjectsClient, server } = routeContext;
     // usually id is auto generated, but this is useful for testing
     const { id } = request.query;
 
@@ -69,7 +72,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
     const normalizedMonitor = validationResult.decodedMonitor;
 
-    const privateLocations: PrivateLocation[] = await getPrivateLocations(
+    const privateLocations: PrivateLocationAttributes[] = await getPrivateLocationsForMonitor(
       savedObjectsClient,
       normalizedMonitor
     );
@@ -91,22 +94,10 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
           },
         });
       }
+      initDefaultAlerts(newMonitor.attributes.name, routeContext);
+      setupGettingStarted(newMonitor.id, routeContext);
 
-      try {
-        // we do this async, so we don't block the user, error handling will be done on the UI via separate api
-        const statusAlertService = new StatusAlertService(context, server, savedObjectsClient);
-        statusAlertService.createDefaultAlertIfNotExist().then(() => {
-          server.logger.debug(
-            `Successfully created default alert for monitor: ${newMonitor.attributes.name}`
-          );
-        });
-      } catch (e) {
-        server.logger.error(
-          `Error creating default alert: ${e} for monitor: ${newMonitor.attributes.name}`
-        );
-      }
-
-      return response.ok({ body: newMonitor });
+      return response.ok({ body: mapSavedObjectToMonitor(newMonitor) });
     } catch (getErr) {
       server.logger.error(getErr);
       if (SavedObjectsErrorHelpers.isForbiddenError(getErr)) {
@@ -130,7 +121,7 @@ export const createNewSavedObjectMonitor = async ({
   savedObjectsClient: SavedObjectsClientContract;
   normalizedMonitor: SyntheticsMonitor;
 }) => {
-  return await savedObjectsClient.create<EncryptedSyntheticsMonitor>(
+  return await savedObjectsClient.create<EncryptedSyntheticsMonitorAttributes>(
     syntheticsMonitorType,
     formatSecrets({
       ...normalizedMonitor,
@@ -181,12 +172,12 @@ export const syncNewMonitor = async ({
   id?: string;
   normalizedMonitor: SyntheticsMonitor;
   routeContext: RouteContext;
-  privateLocations: PrivateLocation[];
+  privateLocations: PrivateLocationAttributes[];
 }) => {
-  const { savedObjectsClient, server, syntheticsMonitorClient, request, spaceId } = routeContext;
+  const { savedObjectsClient, server, syntheticsMonitorClient, spaceId } = routeContext;
   const newMonitorId = id ?? uuidV4();
 
-  let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitor> | null = null;
+  let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitorAttributes> | null = null;
   const monitorWithNamespace = hydrateMonitorFields({
     normalizedMonitor,
     routeContext,
@@ -202,7 +193,6 @@ export const syncNewMonitor = async ({
 
     const syncErrorsPromise = syntheticsMonitorClient.addMonitors(
       [{ monitor: monitorWithNamespace as MonitorFields, id: newMonitorId }],
-      request,
       savedObjectsClient,
       privateLocations,
       spaceId
@@ -259,7 +249,7 @@ export const deleteMonitorIfCreated = async ({
 }) => {
   const { server, savedObjectsClient } = routeContext;
   try {
-    const encryptedMonitor = await savedObjectsClient.get<EncryptedSyntheticsMonitor>(
+    const encryptedMonitor = await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
       syntheticsMonitorType,
       newMonitorId
     );
@@ -277,7 +267,7 @@ export const deleteMonitorIfCreated = async ({
   }
 };
 
-export const getPrivateLocations = async (
+export const getPrivateLocationsForMonitor = async (
   soClient: SavedObjectsClientContract,
   normalizedMonitor: SyntheticsMonitor
 ) => {
@@ -286,11 +276,11 @@ export const getPrivateLocations = async (
   if (hasPrivateLocation.length === 0) {
     return [];
   }
-  return await getSyntheticsPrivateLocations(soClient);
+  return await getPrivateLocations(soClient);
 };
 
 export const getMonitorNamespace = (
-  server: UptimeServerSetup,
+  server: SyntheticsServerSetup,
   request: KibanaRequest,
   configuredNamespace: string
 ) => {
@@ -303,4 +293,39 @@ export const getMonitorNamespace = (
     throw new Error(`Cannot save monitor. Monitor namespace is invalid: ${error}`);
   }
   return namespace;
+};
+
+const initDefaultAlerts = (name: string, routeContext: RouteContext) => {
+  const { server, savedObjectsClient, context } = routeContext;
+  try {
+    // we do this async, so we don't block the user, error handling will be done on the UI via separate api
+    const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
+    defaultAlertService.setupDefaultAlerts().then(() => {
+      server.logger.debug(`Successfully created default alert for monitor: ${name}`);
+    });
+  } catch (e) {
+    server.logger.error(`Error creating default alert: ${e} for monitor: ${name}`);
+  }
+};
+
+const setupGettingStarted = (configId: string, routeContext: RouteContext) => {
+  const { server, request } = routeContext;
+
+  try {
+    const { gettingStarted } = request.query;
+
+    if (gettingStarted) {
+      // ignore await, since we don't want to block the response
+      triggerTestNow(configId, routeContext)
+        .then(() => {
+          server.logger.debug(`Successfully triggered test for monitor: ${configId}`);
+        })
+        .catch((e) => {
+          server.logger.error(`Error triggering test for monitor: ${configId}: ${e}`);
+        });
+    }
+  } catch (e) {
+    server.logger.info(`Error triggering test for getting started monitor: ${configId}`);
+    server.logger.error(e);
+  }
 };

@@ -323,7 +323,7 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                           class="euiFormRow__fieldWrapper"
                         >
                           <button
-                            class="euiButton emotion-euiButtonDisplay-s-s-base-primary"
+                            class="euiButton emotion-euiButtonDisplay-s-base-primary"
                             id="generated-id"
                             style="min-inline-size: auto;"
                             type="submit"

@@ -7,7 +7,7 @@
 
 import { decodeCloudIdMock, parseDeploymentIdFromDeploymentUrlMock } from './plugin.test.mocks';
 import { coreMock } from '@kbn/core/public/mocks';
-import { CloudPlugin } from './plugin';
+import { CloudPlugin, type CloudConfigType } from './plugin';
 import type { DecodedCloudId } from '../common/decode_cloud_id';
 
 const baseConfig = {
@@ -15,6 +15,7 @@ const baseConfig = {
   deployment_url: '/abc123',
   profile_url: '/user/settings/',
   organization_url: '/account/',
+  projects_url: '/projects/',
 };
 
 describe('Cloud Plugin', () => {
@@ -25,11 +26,12 @@ describe('Cloud Plugin', () => {
 
   describe('#setup', () => {
     describe('interface', () => {
-      const setupPlugin = () => {
+      const setupPlugin = (configParts: Partial<CloudConfigType> = {}) => {
         const initContext = coreMock.createPluginInitializerContext({
           ...baseConfig,
           id: 'cloudId',
           cname: 'cloud.elastic.co',
+          ...configParts,
         });
         const plugin = new CloudPlugin(initContext);
 
@@ -57,6 +59,11 @@ describe('Cloud Plugin', () => {
       it('exposes deploymentUrl', () => {
         const { setup } = setupPlugin();
         expect(setup.deploymentUrl).toBe('https://cloud.elastic.co/abc123');
+      });
+
+      it('exposes projectsUrl', () => {
+        const { setup } = setupPlugin();
+        expect(setup.projectsUrl).toBe('https://cloud.elastic.co/projects/');
       });
 
       it('exposes snapshotsUrl', () => {
@@ -114,11 +121,38 @@ describe('Cloud Plugin', () => {
         expect(decodeCloudIdMock).toHaveBeenCalledTimes(1);
         expect(decodeCloudIdMock).toHaveBeenCalledWith('cloudId', expect.any(Object));
       });
+
+      describe('isServerlessEnabled', () => {
+        it('is `true` when `serverless.projectId` is set', () => {
+          const { setup } = setupPlugin({
+            serverless: {
+              project_id: 'my-awesome-project',
+            },
+          });
+          expect(setup.isServerlessEnabled).toBe(true);
+        });
+
+        it('is `false` when `serverless.projectId` is not set', () => {
+          const { setup } = setupPlugin({
+            serverless: undefined,
+          });
+          expect(setup.isServerlessEnabled).toBe(false);
+        });
+      });
+
+      it('exposes `serverless.projectId`', () => {
+        const { setup } = setupPlugin({
+          serverless: {
+            project_id: 'my-awesome-project',
+          },
+        });
+        expect(setup.serverless.projectId).toBe('my-awesome-project');
+      });
     });
   });
 
   describe('#start', () => {
-    const startPlugin = () => {
+    const startPlugin = (configParts: Partial<CloudConfigType> = {}) => {
       const plugin = new CloudPlugin(
         coreMock.createPluginInitializerContext({
           id: 'cloudId',
@@ -132,6 +166,7 @@ describe('Cloud Plugin', () => {
           chat: {
             enabled: false,
           },
+          ...configParts,
         })
       );
       const coreSetup = coreMock.createSetup();
@@ -153,6 +188,39 @@ describe('Cloud Plugin', () => {
           "https://cloud.elastic.co/support",
         ]
       `);
+    });
+
+    describe('isServerlessEnabled', () => {
+      it('is `true` when `serverless.projectId` is set', () => {
+        const { plugin } = startPlugin({
+          serverless: {
+            project_id: 'my-awesome-project',
+          },
+        });
+        const coreStart = coreMock.createStart();
+        const start = plugin.start(coreStart);
+        expect(start.isServerlessEnabled).toBe(true);
+      });
+
+      it('is `false` when `serverless.projectId` is not set', () => {
+        const { plugin } = startPlugin({
+          serverless: undefined,
+        });
+        const coreStart = coreMock.createStart();
+        const start = plugin.start(coreStart);
+        expect(start.isServerlessEnabled).toBe(false);
+      });
+    });
+
+    it('exposes `serverless.projectId`', () => {
+      const { plugin } = startPlugin({
+        serverless: {
+          project_id: 'my-awesome-project',
+        },
+      });
+      const coreStart = coreMock.createStart();
+      const start = plugin.start(coreStart);
+      expect(start.serverless.projectId).toBe('my-awesome-project');
     });
   });
 });

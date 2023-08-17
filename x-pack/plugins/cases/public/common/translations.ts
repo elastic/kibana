@@ -292,7 +292,14 @@ export const SELECT_CASE_TITLE = i18n.translate('xpack.cases.common.allCases.cas
 export const MAX_LENGTH_ERROR = (field: string, length: number) =>
   i18n.translate('xpack.cases.createCase.maxLengthError', {
     values: { field, length },
-    defaultMessage: 'The length of the {field} is too long. The maximum length is {length}.',
+    defaultMessage:
+      'The length of the {field} is too long. The maximum length is {length} characters.',
+  });
+
+export const MAX_TAGS_ERROR = (length: number) =>
+  i18n.translate('xpack.cases.createCase.maxTagsError', {
+    values: { length },
+    defaultMessage: 'Too many tags. The maximum number of allowed tags is {length}',
   });
 
 export const LINK_APPROPRIATE_LICENSE = i18n.translate('xpack.cases.common.appropriateLicense', {

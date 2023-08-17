@@ -79,7 +79,11 @@
     "@kbn/cloud-chat-plugin",
     "@kbn/cloud-plugin",
     "@kbn/stack-alerts-plugin",
-    "@kbn/data-view-editor-plugin"
+    "@kbn/data-view-editor-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/core-capabilities-common",
+    "@kbn/deeplinks-analytics",
+    "@kbn/observability-ai-assistant-plugin"
   ],
   "exclude": [
     "target/**/*"

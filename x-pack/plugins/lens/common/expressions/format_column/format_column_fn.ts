@@ -42,7 +42,16 @@ function getPatternFromFormat(
 
 export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
   input,
-  { format, columnId, decimals, compact, suffix, pattern, parentFormat }: FormatColumnArgs
+  {
+    format,
+    columnId,
+    decimals,
+    compact,
+    suffix,
+    pattern,
+    parentFormat,
+    ...otherArgs
+  }: FormatColumnArgs
 ) => ({
   ...input,
   columns: input.columns
@@ -56,6 +65,12 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
               params: {
                 pattern: getPatternFromFormat(format, decimals, compact, pattern),
                 formatOverride: true,
+                ...supportedFormats[format].translateToFormatParams?.({
+                  decimals,
+                  compact,
+                  suffix,
+                  ...otherArgs,
+                }),
               },
             };
             return withParams(col, serializedFormat as Record<string, unknown>);
@@ -80,6 +95,12 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
           const customParams = {
             pattern: getPatternFromFormat(format, decimals, compact, pattern),
             formatOverride: true,
+            ...supportedFormats[format].translateToFormatParams?.({
+              decimals,
+              compact,
+              suffix,
+              ...otherArgs,
+            }),
           };
           // Some parent formatters are multi-fields and wrap the custom format into a "paramsPerField"
           // property. Here the format is passed to this property to make it work properly

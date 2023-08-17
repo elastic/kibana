@@ -6,13 +6,15 @@
  */
 
 import React from 'react';
+import { Prompt } from '../types';
+import { Conversation } from '../../assistant_context/types';
 
 export interface CodeBlockDetails {
   type: QueryType;
   content: string;
   start: number;
   end: number;
-  controlContainer?: React.ReactNode;
+  getControlContainer?: () => Element | undefined;
   button?: React.ReactNode;
 }
 
@@ -32,9 +34,15 @@ export const analyzeMarkdown = (markdown: string): CodeBlockDetails[] => {
   const matches = [...markdown.matchAll(codeBlockRegex)];
   // If your codeblocks aren't getting tagged with the right language, add keywords to the array.
   const types = {
-    eql: ['Event Query Language', 'EQL sequence query'],
-    kql: ['Kibana Query Language', 'KQL Query'],
-    dsl: ['Elasticsearch QueryDSL', 'Elasticsearch Query DSL', 'Elasticsearch DSL'],
+    eql: ['Event Query Language', 'EQL sequence query', 'EQL'],
+    kql: ['Kibana Query Language', 'KQL Query', 'KQL'],
+    dsl: [
+      'Elasticsearch QueryDSL',
+      'Elasticsearch Query DSL',
+      'Elasticsearch DSL',
+      'Query DSL',
+      'DSL',
+    ],
   };
 
   const result: CodeBlockDetails[] = matches.map((match) => {
@@ -43,7 +51,7 @@ export const analyzeMarkdown = (markdown: string): CodeBlockDetails[] => {
       const start = match.index || 0;
       const precedingText = markdown.slice(0, start);
       for (const [typeKey, keywords] of Object.entries(types)) {
-        if (keywords.some((kw) => precedingText.includes(kw))) {
+        if (keywords.some((kw) => precedingText.toLowerCase().includes(kw.toLowerCase()))) {
           type = typeKey;
           break;
         }
@@ -57,4 +65,25 @@ export const analyzeMarkdown = (markdown: string): CodeBlockDetails[] => {
   });
 
   return result;
+};
+
+/**
+ * Returns the default system prompt for a given conversation
+ *
+ * @param allSystemPrompts All available System Prompts
+ * @param conversation Conversation to get the default system prompt for
+ */
+export const getDefaultSystemPrompt = ({
+  allSystemPrompts,
+  conversation,
+}: {
+  allSystemPrompts: Prompt[];
+  conversation: Conversation | undefined;
+}): Prompt | undefined => {
+  const conversationSystemPrompt = allSystemPrompts.find(
+    (prompt) => prompt.id === conversation?.apiConfig?.defaultSystemPromptId
+  );
+  const defaultNewSystemPrompt = allSystemPrompts.find((prompt) => prompt.isNewConversationDefault);
+
+  return conversationSystemPrompt ?? defaultNewSystemPrompt ?? allSystemPrompts?.[0];
 };

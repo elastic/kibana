@@ -44,11 +44,37 @@ test('throws error when no data views are available', async () => {
 
 test('throws error when provided validation function returns invalid', async () => {
   const creationOptions: DashboardCreationOptions = {
-    validateLoadedSavedObject: jest.fn().mockImplementation(() => false),
+    validateLoadedSavedObject: jest.fn().mockImplementation(() => 'invalid'),
   };
   await expect(async () => {
     await createDashboard(creationOptions, 0, 'test-id');
   }).rejects.toThrow('Dashboard failed saved object result validation');
+});
+
+test('returns undefined when provided validation function returns redirected', async () => {
+  const creationOptions: DashboardCreationOptions = {
+    validateLoadedSavedObject: jest.fn().mockImplementation(() => 'redirected'),
+  };
+  const dashboard = await createDashboard(creationOptions, 0, 'test-id');
+  expect(dashboard).toBeUndefined();
+});
+
+/**
+ * Because the getInitialInput function may have side effects, we only want to call it once we are certain that the
+ * the loaded saved object passes validation.
+ *
+ * This is especially relevant in the Dashboard App case where calling the getInitialInput function removes the _a
+ * param from the URL. In alais match situations this caused a bug where the state from the URL wasn't properly applied
+ * after the redirect.
+ */
+test('does not get initial input when provided validation function returns redirected', async () => {
+  const creationOptions: DashboardCreationOptions = {
+    validateLoadedSavedObject: jest.fn().mockImplementation(() => 'redirected'),
+    getInitialInput: jest.fn(),
+  };
+  const dashboard = await createDashboard(creationOptions, 0, 'test-id');
+  expect(dashboard).toBeUndefined();
+  expect(creationOptions.getInitialInput).not.toHaveBeenCalled();
 });
 
 test('pulls state from dashboard saved object when given a saved object id', async () => {
@@ -64,7 +90,8 @@ test('pulls state from dashboard saved object when given a saved object id', asy
   expect(
     pluginServices.getServices().dashboardContentManagement.loadDashboardState
   ).toHaveBeenCalledWith({ id: 'wow-such-id' });
-  expect(dashboard.getState().explicitInput.description).toBe(`wow would you look at that? Wow.`);
+  expect(dashboard).toBeDefined();
+  expect(dashboard!.getState().explicitInput.description).toBe(`wow would you look at that? Wow.`);
 });
 
 test('pulls state from session storage which overrides state from saved object', async () => {
@@ -80,7 +107,8 @@ test('pulls state from session storage which overrides state from saved object',
     .fn()
     .mockReturnValue({ description: 'wow this description marginally better' });
   const dashboard = await createDashboard({ useSessionStorageIntegration: true }, 0, 'wow-such-id');
-  expect(dashboard.getState().explicitInput.description).toBe(
+  expect(dashboard).toBeDefined();
+  expect(dashboard!.getState().explicitInput.description).toBe(
     'wow this description marginally better'
   );
 });
@@ -105,7 +133,8 @@ test('pulls state from creation options initial input which overrides all other 
     0,
     'wow-such-id'
   );
-  expect(dashboard.getState().explicitInput.description).toBe(
+  expect(dashboard).toBeDefined();
+  expect(dashboard!.getState().explicitInput.description).toBe(
     'wow this description is a masterpiece'
   );
 });
@@ -165,7 +194,8 @@ test('applies time range from query service to initial input if time restore is 
       timeRange: savedTimeRange,
     }),
   });
-  expect(dashboard.getState().explicitInput.timeRange).toEqual(urlTimeRange);
+  expect(dashboard).toBeDefined();
+  expect(dashboard!.getState().explicitInput.timeRange).toEqual(urlTimeRange);
 });
 
 test('applies time range from query service to initial input if time restore is off', async () => {
@@ -179,7 +209,8 @@ test('applies time range from query service to initial input if time restore is 
       kbnUrlStateStorage: createKbnUrlStateStorage(),
     },
   });
-  expect(dashboard.getState().explicitInput.timeRange).toEqual(timeRange);
+  expect(dashboard).toBeDefined();
+  expect(dashboard!.getState().explicitInput.timeRange).toEqual(timeRange);
 });
 
 test('replaces panel with incoming embeddable if id matches existing panel', async () => {
@@ -205,7 +236,8 @@ test('replaces panel with incoming embeddable if id matches existing panel', asy
       },
     }),
   });
-  expect(dashboard.getState().explicitInput.panels.i_match.explicitInput).toStrictEqual(
+  expect(dashboard).toBeDefined();
+  expect(dashboard!.getState().explicitInput.panels.i_match.explicitInput).toStrictEqual(
     expect.objectContaining({
       id: 'i_match',
       firstName: 'wow look at this replacement wow',
@@ -323,7 +355,8 @@ test('searchSessionId is updated prior to child embeddable parent subscription e
       createSessionRestorationDataProvider: () => {},
     } as unknown as DashboardCreationOptions['searchSessionSettings'],
   });
-  const embeddable = await dashboard.addNewEmbeddable<
+  expect(dashboard).toBeDefined();
+  const embeddable = await dashboard!.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
     ContactCardEmbeddable
@@ -333,7 +366,7 @@ test('searchSessionId is updated prior to child embeddable parent subscription e
 
   expect(embeddable.getInput().searchSessionId).toBe('searchSessionId1');
 
-  dashboard.updateInput({
+  dashboard!.updateInput({
     timeRange: {
       to: 'now',
       from: 'now-7d',

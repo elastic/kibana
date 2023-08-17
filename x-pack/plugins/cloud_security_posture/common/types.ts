@@ -13,6 +13,17 @@ import { CspRuleTemplate } from './schemas';
 import { findCspRuleTemplateRequest } from './schemas/csp_rule_template_api/get_csp_rule_template';
 import { getComplianceDashboardSchema } from './schemas/stats';
 
+export type AwsCredentialsType =
+  | 'assume_role'
+  | 'direct_access_keys'
+  | 'temporary_keys'
+  | 'shared_credentials'
+  | 'cloud_formation';
+
+export type AwsCredentialsTypeFieldMap = {
+  [key in AwsCredentialsType]: string[];
+};
+
 export type Evaluation = 'passed' | 'failed' | 'NA';
 
 export type PostureTypes = 'cspm' | 'kspm' | 'vuln_mgmt' | 'all';
@@ -111,7 +122,7 @@ export type PostureInput = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];
 export type CloudSecurityPolicyTemplate = typeof SUPPORTED_POLICY_TEMPLATES[number];
 export type PosturePolicyTemplate = Extract<CloudSecurityPolicyTemplate, 'kspm' | 'cspm'>;
 
-export interface BenchmarkResponse {
+export interface GetBenchmarkResponse {
   items: Benchmark[];
   total: number;
   page: number;

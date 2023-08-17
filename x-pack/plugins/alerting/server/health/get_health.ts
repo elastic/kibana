@@ -7,6 +7,7 @@
 
 import { ISavedObjectsRepository, SavedObjectsServiceStart } from '@kbn/core/server';
 import { AlertsHealth, HealthStatus, RawRule, RuleExecutionStatusErrorReasons } from '../types';
+import type { LatestTaskStateSchema } from './task_state';
 
 export const getHealth = async (
   internalSavedObjectsRepository: ISavedObjectsRepository
@@ -104,13 +105,14 @@ export const getHealth = async (
 
 export const getAlertingHealthStatus = async (
   savedObjects: SavedObjectsServiceStart,
-  stateRuns?: number
+  stateRuns: number
 ) => {
   const alertingHealthStatus = await getHealth(savedObjects.createInternalRepository(['alert']));
+  const state: LatestTaskStateSchema = {
+    runs: stateRuns + 1,
+    health_status: alertingHealthStatus.decryptionHealth.status,
+  };
   return {
-    state: {
-      runs: (stateRuns || 0) + 1,
-      health_status: alertingHealthStatus.decryptionHealth.status,
-    },
+    state,
   };
 };

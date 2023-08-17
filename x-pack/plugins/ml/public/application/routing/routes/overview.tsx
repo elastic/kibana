@@ -42,7 +42,7 @@ export const overviewRouteFactory = (
 });
 
 const PageWrapper: FC<PageProps> = () => {
-  const { context } = useRouteResolver('full', ['canGetJobs'], {
+  const { context } = useRouteResolver('full', ['canGetMlInfo'], {
     getMlNodeCount,
     loadMlServerInfo,
   });

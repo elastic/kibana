@@ -20,6 +20,7 @@ import { RuleType } from './types';
 import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { dataPluginMock as autocompletePluginMock } from '@kbn/unified-search-plugin/server/mocks';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
 import {
   DataViewsServerPluginStart,
@@ -90,6 +91,7 @@ describe('Alerting Plugin', () => {
       monitoringCollection: monitoringCollectionMock.createSetup(),
       data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
       features: featuresPluginMock.createSetup(),
+      unifiedSearch: autocompletePluginMock.createSetupContract(),
     };
 
     let plugin: AlertingPlugin;
@@ -251,6 +253,7 @@ describe('Alerting Plugin', () => {
           monitoringCollection: monitoringCollectionMock.createSetup(),
           data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
           features: featuresPluginMock.createSetup(),
+          unifiedSearch: autocompletePluginMock.createSetupContract(),
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
@@ -298,6 +301,7 @@ describe('Alerting Plugin', () => {
           monitoringCollection: monitoringCollectionMock.createSetup(),
           data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
           features: featuresPluginMock.createSetup(),
+          unifiedSearch: autocompletePluginMock.createSetupContract(),
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
@@ -356,6 +360,7 @@ describe('Alerting Plugin', () => {
         monitoringCollection: monitoringCollectionMock.createSetup(),
         data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
         features: featuresPluginMock.createSetup(),
+        unifiedSearch: autocompletePluginMock.createSetupContract(),
       });
 
       const startContract = plugin.start(coreMock.createStart(), {

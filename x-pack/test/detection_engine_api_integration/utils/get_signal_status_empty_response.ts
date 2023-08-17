@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const getAlertUpdateEmptyResponse = () => ({
+export const getAlertUpdateByQueryEmptyResponse = () => ({
   timed_out: false,
   total: 0,
   updated: 0,

@@ -159,6 +159,7 @@ export class TaskScheduling {
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
       filter: (task) => !!task.enabled,
       map: (task) => ({ ...task, enabled: false }),
+      validate: false,
     });
   }
 
@@ -174,6 +175,7 @@ export class TaskScheduling {
         }
         return { ...task, enabled: true };
       },
+      validate: false,
     });
   }
 
@@ -208,6 +210,7 @@ export class TaskScheduling {
 
         return { ...task, schedule, runAt: new Date(newRunAtInMs) };
       },
+      validate: false,
     });
   }
 
@@ -229,12 +232,15 @@ export class TaskScheduling {
   public async runSoon(taskId: string): Promise<RunSoonResult> {
     const task = await this.getNonRunningTask(taskId);
     try {
-      await this.store.update({
-        ...task,
-        status: TaskStatus.Idle,
-        scheduledAt: new Date(),
-        runAt: new Date(),
-      });
+      await this.store.update(
+        {
+          ...task,
+          status: TaskStatus.Idle,
+          scheduledAt: new Date(),
+          runAt: new Date(),
+        },
+        { validate: false }
+      );
     } catch (e) {
       if (e.statusCode === 409) {
         this.logger.debug(

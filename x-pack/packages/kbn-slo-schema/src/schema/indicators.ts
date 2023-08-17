@@ -60,11 +60,16 @@ const metricCustomValidAggregations = t.keyof({
 });
 const metricCustomMetricDef = t.type({
   metrics: t.array(
-    t.type({
-      name: t.string,
-      aggregation: metricCustomValidAggregations,
-      field: t.string,
-    })
+    t.intersection([
+      t.type({
+        name: t.string,
+        aggregation: metricCustomValidAggregations,
+        field: t.string,
+      }),
+      t.partial({
+        filter: t.string,
+      }),
+    ])
   ),
   equation: t.string,
 });
@@ -80,6 +85,47 @@ const metricCustomIndicatorSchema = t.type({
   }),
 });
 
+const rangeHistogramMetricType = t.literal('range');
+const rangeBasedHistogramMetricDef = t.intersection([
+  t.type({
+    field: t.string,
+    aggregation: rangeHistogramMetricType,
+    from: t.number,
+    to: t.number,
+  }),
+  t.partial({
+    filter: t.string,
+  }),
+]);
+
+const valueCountHistogramMetricType = t.literal('value_count');
+const valueCountBasedHistogramMetricDef = t.intersection([
+  t.type({
+    field: t.string,
+    aggregation: valueCountHistogramMetricType,
+  }),
+  t.partial({
+    filter: t.string,
+  }),
+]);
+
+const histogramMetricDef = t.union([
+  valueCountBasedHistogramMetricDef,
+  rangeBasedHistogramMetricDef,
+]);
+
+const histogramIndicatorTypeSchema = t.literal('sli.histogram.custom');
+const histogramIndicatorSchema = t.type({
+  type: histogramIndicatorTypeSchema,
+  params: t.type({
+    index: t.string,
+    timestampField: t.string,
+    filter: t.string,
+    good: histogramMetricDef,
+    total: histogramMetricDef,
+  }),
+});
+
 const indicatorDataSchema = t.type({
   dateRange: dateRangeSchema,
   good: t.number,
@@ -91,6 +137,7 @@ const indicatorTypesSchema = t.union([
   apmTransactionErrorRateIndicatorTypeSchema,
   kqlCustomIndicatorTypeSchema,
   metricCustomIndicatorTypeSchema,
+  histogramIndicatorTypeSchema,
 ]);
 
 // Validate that a string is a comma separated list of indicator types,
@@ -117,6 +164,7 @@ const indicatorSchema = t.union([
   apmTransactionErrorRateIndicatorSchema,
   kqlCustomIndicatorSchema,
   metricCustomIndicatorSchema,
+  histogramIndicatorSchema,
 ]);
 
 export {
@@ -128,6 +176,8 @@ export {
   kqlCustomIndicatorTypeSchema,
   metricCustomIndicatorTypeSchema,
   metricCustomIndicatorSchema,
+  histogramIndicatorTypeSchema,
+  histogramIndicatorSchema,
   indicatorSchema,
   indicatorTypesArraySchema,
   indicatorTypesSchema,

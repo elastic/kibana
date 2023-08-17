@@ -30,11 +30,12 @@ import {
   createSessionRestorationDataProvider,
 } from './url/search_sessions_integration';
 import { DashboardAPI, DashboardRenderer } from '..';
+import { type DashboardEmbedSettings } from './types';
 import { DASHBOARD_APP_ID } from '../dashboard_constants';
 import { pluginServices } from '../services/plugin_services';
 import { DashboardTopNav } from './top_nav/dashboard_top_nav';
 import { AwaitingDashboardAPI } from '../dashboard_container';
-import { type DashboardEmbedSettings, DashboardRedirect } from './types';
+import { DashboardRedirect } from '../dashboard_container/types';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
@@ -113,9 +114,7 @@ export function DashboardApp({
   /**
    * Validate saved object load outcome
    */
-  const { validateOutcome, getLegacyConflictWarning } = useDashboardOutcomeValidation({
-    redirectTo,
-  });
+  const { validateOutcome, getLegacyConflictWarning } = useDashboardOutcomeValidation();
 
   /**
    * Create options to pass into the dashboard renderer
@@ -202,6 +201,7 @@ export function DashboardApp({
 
           <DashboardRenderer
             ref={setDashboardAPI}
+            dashboardRedirect={redirectTo}
             savedObjectId={savedDashboardId}
             showPlainSpinner={showPlainSpinner}
             getCreationOptions={getCreationOptions}

@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { Switch } from 'react-router-dom';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import {
   SEARCH_APPLICATIONS_PATH,
@@ -23,7 +22,7 @@ import { SearchApplicationsList } from './search_applications_list';
 
 export const SearchApplicationsRouter: React.FC = () => {
   return (
-    <Switch>
+    <Routes>
       <Route exact path={SEARCH_APPLICATIONS_PATH}>
         <SearchApplicationsList />
       </Route>
@@ -36,6 +35,6 @@ export const SearchApplicationsRouter: React.FC = () => {
       <Route>
         <NotFound />
       </Route>
-    </Switch>
+    </Routes>
   );
 };

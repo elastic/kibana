@@ -27,5 +27,9 @@
     "@kbn/security-plugin",
     "@kbn/cloud-plugin",
     "@kbn/share-plugin",
+    "@kbn/ml-plugin",
+    "@kbn/management-cards-navigation",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/search-api-panels",
   ]
 }

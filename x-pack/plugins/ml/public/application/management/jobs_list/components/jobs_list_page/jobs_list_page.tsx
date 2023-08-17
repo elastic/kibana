@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState, FC, useCallback, useMemo } from 'react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
@@ -70,6 +70,11 @@ export const JobsListPage: FC<{
   const I18nContext = coreStart.i18n.Context;
   const theme$ = coreStart.theme.theme$;
 
+  const mlServices = useMemo(
+    () => getMlGlobalServices(coreStart.http, usageCollection),
+    [coreStart.http, usageCollection]
+  );
+
   const check = async () => {
     try {
       await checkGetManagementMlJobsResolver(mlApiServices);
@@ -122,7 +127,7 @@ export const JobsListPage: FC<{
               usageCollection,
               fieldFormats,
               spacesApi,
-              mlServices: getMlGlobalServices(coreStart.http, usageCollection),
+              mlServices,
             }}
           >
             <ContextWrapper feature={PLUGIN_ID}>

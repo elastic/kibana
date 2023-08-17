@@ -6,23 +6,28 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, Fragment, useMemo, useCallback } from 'react';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiHorizontalRule, EuiText } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../common';
+import { CellActionsProvider } from '@kbn/cell-actions';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import {
+  type SearchResponseInterceptedWarning,
+  SearchResponseWarnings,
+} from '@kbn/search-response-warnings';
+import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
-import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
+import { DataLoadingState, DiscoverGrid } from '../../components/discover_grid/discover_grid';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { AppState } from './services/context_state';
 import { SurrDocType } from './services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import type { DataTableRecord } from '../../types';
 import { DiscoverGridFlyout } from '../../components/discover_grid/discover_grid_flyout';
 import { DocViewer } from '../../services/doc_views/components/doc_viewer';
 
@@ -40,6 +45,7 @@ export interface ContextAppContentProps {
   anchorStatus: LoadingStatus;
   predecessorsStatus: LoadingStatus;
   successorsStatus: LoadingStatus;
+  interceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
   useNewFieldsApi: boolean;
   isLegacy: boolean;
   setAppState: (newState: Partial<AppState>) => void;
@@ -70,12 +76,13 @@ export function ContextAppContent({
   anchorStatus,
   predecessorsStatus,
   successorsStatus,
+  interceptedWarnings,
   useNewFieldsApi,
   isLegacy,
   setAppState,
   addFilter,
 }: ContextAppContentProps) {
-  const { uiSettings: config } = useDiscoverServices();
+  const { uiSettings: config, uiActions } = useDiscoverServices();
   const services = useDiscoverServices();
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
@@ -117,6 +124,16 @@ export function ContextAppContent({
 
   return (
     <Fragment>
+      {!!interceptedWarnings?.length && (
+        <>
+          <SearchResponseWarnings
+            variant="callout"
+            interceptedWarnings={interceptedWarnings}
+            data-test-subj="dscContextInterceptedWarnings"
+          />
+          <EuiSpacer size="s" />
+        </>
+      )}
       <ActionBarMemoized
         type={SurrDocType.PREDECESSORS}
         defaultStepSize={defaultStepSize}
@@ -145,28 +162,30 @@ export function ContextAppContent({
       )}
       {!isLegacy && (
         <div className="dscDocsGrid">
-          <DiscoverGridMemoized
-            ariaLabelledBy="surDocumentsAriaLabel"
-            columns={columns}
-            rows={rows}
-            dataView={dataView}
-            expandedDoc={expandedDoc}
-            isLoading={isAnchorLoading}
-            sampleSize={0}
-            sort={sort as SortOrder[]}
-            isSortEnabled={false}
-            showTimeCol={showTimeCol}
-            useNewFieldsApi={useNewFieldsApi}
-            isPaginationEnabled={false}
-            controlColumnIds={controlColumnIds}
-            setExpandedDoc={setExpandedDoc}
-            onFilter={addFilter}
-            onAddColumn={onAddColumn}
-            onRemoveColumn={onRemoveColumn}
-            onSetColumns={onSetColumns}
-            DocumentView={DiscoverGridFlyout}
-            services={services}
-          />
+          <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
+            <DiscoverGridMemoized
+              ariaLabelledBy="surDocumentsAriaLabel"
+              columns={columns}
+              rows={rows}
+              dataView={dataView}
+              expandedDoc={expandedDoc}
+              loadingState={isAnchorLoading ? DataLoadingState.loading : DataLoadingState.loaded}
+              sampleSize={0}
+              sort={sort as SortOrder[]}
+              isSortEnabled={false}
+              showTimeCol={showTimeCol}
+              useNewFieldsApi={useNewFieldsApi}
+              isPaginationEnabled={false}
+              controlColumnIds={controlColumnIds}
+              setExpandedDoc={setExpandedDoc}
+              onFilter={addFilter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
+              onSetColumns={onSetColumns}
+              DocumentView={DiscoverGridFlyout}
+              services={services}
+            />
+          </CellActionsProvider>
         </div>
       )}
       <EuiHorizontalRule margin="xs" />

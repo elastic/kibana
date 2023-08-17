@@ -5,44 +5,46 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import React from 'react';
+import useAsync from 'react-use/lib/useAsync';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { HostFlyout, useHostFlyoutUrlState } from '../../hooks/use_host_flyout_url_state';
 import { AssetDetails } from '../../../../../components/asset_details/asset_details';
 import { orderedFlyoutTabs } from './tabs';
 import { useLogViewReference } from '../../hooks/use_log_view_reference';
+import { useMetricsDataViewContext } from '../../hooks/use_data_view';
 
 export interface Props {
   node: HostNodeRow;
   closeFlyout: () => void;
 }
 
-const NODE_TYPE = 'host' as InventoryItemType;
-
 export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
-  const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
-  const { logViewReference, loading } = useLogViewReference({
+  const { searchCriteria } = useUnifiedSearchContext();
+  const { dataView } = useMetricsDataViewContext();
+  const { logViewReference, loading, getLogsDataView } = useLogViewReference({
     id: 'hosts-flyout-logs-view',
   });
-  const currentTimeRange = useMemo(
-    () => ({
-      ...getDateRangeAsTimestamp(),
-      interval: '1m',
-    }),
-    [getDateRangeAsTimestamp]
+
+  const { value: logsDataView } = useAsync(
+    () => getLogsDataView(logViewReference),
+    [logViewReference]
   );
 
   const [hostFlyoutState, setHostFlyoutState] = useHostFlyoutUrlState();
 
   return (
     <AssetDetails
-      node={node}
-      nodeType={NODE_TYPE}
-      currentTimeRange={currentTimeRange}
+      asset={node}
+      assetType="host"
+      dateRange={searchCriteria.dateRange}
       activeTabId={hostFlyoutState?.tabId}
       overrides={{
+        overview: {
+          logsDataView,
+          metricsDataView: dataView,
+        },
         metadata: {
           query: hostFlyoutState?.metadataSearch,
           showActionsColumn: true,
@@ -67,9 +69,9 @@ export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
         })
       }
       tabs={orderedFlyoutTabs}
-      links={['apmServices', 'uptime']}
+      links={['apmServices', 'nodeDetails']}
       renderMode={{
-        showInFlyout: true,
+        mode: 'flyout',
         closeFlyout,
       }}
     />

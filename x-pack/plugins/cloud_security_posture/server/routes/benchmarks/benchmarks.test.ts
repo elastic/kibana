@@ -27,7 +27,7 @@ describe('benchmarks API', () => {
 
     defineGetBenchmarksRoute(router);
 
-    const [config] = router.get.mock.calls[0];
+    const [config] = router.versioned.get.mock.calls[0];
 
     expect(config.path).toEqual('/internal/cloud_security_posture/benchmarks');
   });
@@ -37,7 +37,9 @@ describe('benchmarks API', () => {
 
     defineGetBenchmarksRoute(router);
 
-    const [_, handler] = router.get.mock.calls[0];
+    const versionedRouter = router.versioned.get.mock.results[0].value;
+
+    const handler = versionedRouter.addVersion.mock.calls[0][1];
 
     const mockContext = createCspRequestHandlerContextMock();
     const mockResponse = httpServerMock.createResponseFactory();
@@ -54,7 +56,9 @@ describe('benchmarks API', () => {
 
     defineGetBenchmarksRoute(router);
 
-    const [_, handler] = router.get.mock.calls[0];
+    const versionedRouter = router.versioned.get.mock.results[0].value;
+
+    const handler = versionedRouter.addVersion.mock.calls[0][1];
 
     const mockContext = createCspRequestHandlerContextMock();
     mockContext.fleet.authz.fleet.all = false;
@@ -78,15 +82,15 @@ describe('benchmarks API', () => {
       });
     });
 
-    it('expect to find benchmark_name', async () => {
+    it('expect to find package_policy_name', async () => {
       const validatedQuery = benchmarksQueryParamsSchema.validate({
-        benchmark_name: 'my_cis_benchmark',
+        package_policy_name: 'my_cis_benchmark',
       });
 
       expect(validatedQuery).toMatchObject({
         page: 1,
         per_page: DEFAULT_BENCHMARKS_PER_PAGE,
-        benchmark_name: 'my_cis_benchmark',
+        package_policy_name: 'my_cis_benchmark',
       });
     });
 

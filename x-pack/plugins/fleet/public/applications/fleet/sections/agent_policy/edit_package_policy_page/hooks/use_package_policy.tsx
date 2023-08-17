@@ -235,6 +235,7 @@ export function usePackagePolicyWithRelatedData(
             created_at,
             updated_by,
             updated_at,
+            secret_references,
             /* eslint-enable @typescript-eslint/naming-convention */
             ...restOfPackagePolicy
           } = basePolicy;

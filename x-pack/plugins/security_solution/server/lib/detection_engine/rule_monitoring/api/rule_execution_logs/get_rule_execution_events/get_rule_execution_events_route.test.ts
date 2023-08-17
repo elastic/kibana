@@ -11,8 +11,8 @@ import {
   GET_RULE_EXECUTION_EVENTS_URL,
   LogLevel,
   RuleExecutionEventType,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
-import { getRuleExecutionEventsResponseMock } from '../../../../../../../common/detection_engine/rule_monitoring/mocks';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import { getRuleExecutionEventsResponseMock } from '../../../../../../../common/api/detection_engine/rule_monitoring/mocks';
 import type { GetExecutionEventsArgs } from '../../../logic/rule_execution_log';
 import { getRuleExecutionEventsRoute } from './get_rule_execution_events_route';
 

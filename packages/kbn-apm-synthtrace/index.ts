@@ -10,3 +10,9 @@ export { createLogger, LogLevel } from './src/lib/utils/create_logger';
 
 export { ApmSynthtraceEsClient } from './src/lib/apm/client/apm_synthtrace_es_client';
 export { ApmSynthtraceKibanaClient } from './src/lib/apm/client/apm_synthtrace_kibana_client';
+
+export { InfraSynthtraceEsClient } from './src/lib/infra/infra_synthtrace_es_client';
+
+export { AssetsSynthtraceEsClient } from './src/lib/assets/assets_synthtrace_es_client';
+
+export { MonitoringSynthtraceEsClient } from './src/lib/monitoring/monitoring_synthtrace_es_client';

@@ -5,16 +5,28 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, Plugin } from '@kbn/core/server';
+import type { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
 
-import { ServerlessObservabilityPluginSetup, ServerlessObservabilityPluginStart } from './types';
+import type {
+  ServerlessObservabilityPluginSetup,
+  ServerlessObservabilityPluginStart,
+  SetupDependencies,
+  StartDependencies,
+} from './types';
 
 export class ServerlessObservabilityPlugin
-  implements Plugin<ServerlessObservabilityPluginSetup, ServerlessObservabilityPluginStart>
+  implements
+    Plugin<
+      ServerlessObservabilityPluginSetup,
+      ServerlessObservabilityPluginStart,
+      SetupDependencies,
+      StartDependencies
+    >
 {
   constructor(_initializerContext: PluginInitializerContext) {}
 
-  public setup() {
+  public setup(_coreSetup: CoreSetup, pluginsSetup: SetupDependencies) {
+    pluginsSetup.ml.setFeaturesEnabled({ ad: true, dfa: false, nlp: false });
     return {};
   }
 

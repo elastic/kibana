@@ -22,13 +22,26 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   EuiDataGridRefProps,
+  EuiDataGridInMemory,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import {
+  useDataGridColumnsCellActions,
+  type UseDataGridColumnsCellActionsProps,
+} from '@kbn/cell-actions';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ToastsStart, IUiSettingsClient, HttpStart, CoreStart } from '@kbn/core/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { Serializable } from '@kbn/utility-types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { getShouldShowFieldHandler } from '@kbn/discover-utils';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  MAX_DOC_FIELDS_DISPLAYED,
+  SHOW_MULTIFIELDS,
+} from '@kbn/discover-utils';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -42,17 +55,18 @@ import {
 } from './discover_grid_columns';
 import { GRID_STYLE, toolbarVisibility as toolbarVisibilityDefaults } from './constants';
 import { getDisplayedColumns } from '../../utils/columns';
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  MAX_DOC_FIELDS_DISPLAYED,
-  SHOW_MULTIFIELDS,
-} from '../../../common';
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
-import { getShouldShowFieldHandler } from '../../utils/get_should_show_field_handler';
-import type { DataTableRecord, ValueToStringConverter } from '../../types';
+import { DiscoverGridFooter } from './discover_grid_footer';
+import type { ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { convertValueToString } from '../../utils/convert_value_to_string';
 import { getRowsPerPageOptions, getDefaultRowsPerPage } from '../../utils/rows_per_page';
+
+export enum DataLoadingState {
+  loading = 'loading',
+  loadingMore = 'loadingMore',
+  loaded = 'loaded',
+}
 
 const themeDefault = { darkMode: false };
 
@@ -85,7 +99,7 @@ export interface DiscoverGridProps {
   /**
    * Determines if data is currently loaded
    */
-  isLoading: boolean;
+  loadingState: DataLoadingState;
   /**
    * Function used to add a column in the document flyout
    */
@@ -204,6 +218,10 @@ export interface DiscoverGridProps {
    */
   DocumentView?: typeof DiscoverGridFlyout;
   /**
+   * Optional triggerId to retrieve the column cell actions that will override the default ones
+   */
+  cellActionsTriggerId?: string;
+  /**
    * Service dependencies
    */
   services: {
@@ -214,6 +232,14 @@ export interface DiscoverGridProps {
     dataViewFieldEditor: DataViewFieldEditorStart;
     toastNotifications: ToastsStart;
   };
+  /**
+   * Number total hits from ES
+   */
+  totalHits?: number;
+  /**
+   * To fetch more
+   */
+  onFetchMoreRecords?: () => void;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -224,7 +250,7 @@ export const DiscoverGrid = ({
   ariaLabelledBy,
   columns,
   dataView,
-  isLoading,
+  loadingState,
   expandedDoc,
   onAddColumn,
   filters,
@@ -248,6 +274,7 @@ export const DiscoverGrid = ({
   isSortEnabled = true,
   isPaginationEnabled = true,
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
+  cellActionsTriggerId,
   className,
   rowHeightState,
   onUpdateRowHeight,
@@ -257,6 +284,8 @@ export const DiscoverGrid = ({
   onFieldEdited,
   DocumentView,
   services,
+  totalHits,
+  onFetchMoreRecords,
 }: DiscoverGridProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings } = services;
   const { darkMode } = useObservable(services.core.theme?.theme$ ?? of(themeDefault), themeDefault);
@@ -347,8 +376,6 @@ export const DiscoverGrid = ({
       : undefined;
   }, [pagination, pageCount, isPaginationEnabled, onUpdateRowsPerPage]);
 
-  const isOnLastPage = paginationObj ? paginationObj.pageIndex === pageCount - 1 : false;
-
   useEffect(() => {
     setPagination((paginationData) =>
       paginationData.pageSize === currentPageSize
@@ -402,7 +429,6 @@ export const DiscoverGrid = ({
   /**
    * Render variables
    */
-  const showDisclaimer = rowCount === sampleSize && isOnLastPage;
   const randomId = useMemo(() => htmlIdGenerator()(), []);
   const closeFieldEditor = useRef<() => void | undefined>();
 
@@ -432,14 +458,48 @@ export const DiscoverGrid = ({
     [dataView, onFieldEdited, services.dataViewFieldEditor]
   );
 
+  const visibleColumns = useMemo(
+    () => getVisibleColumns(displayedColumns, dataView, showTimeCol) as string[],
+    [dataView, displayedColumns, showTimeCol]
+  );
+
+  const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
+    (fieldName, rowIndex) =>
+      displayedRows[rowIndex % displayedRows.length].flattened[fieldName] as Serializable,
+    [displayedRows]
+  );
+
+  const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
+    () =>
+      cellActionsTriggerId && !isPlainRecord
+        ? visibleColumns.map(
+            (columnName) =>
+              dataView.getFieldByName(columnName)?.toSpec() ?? {
+                name: '',
+                type: '',
+                aggregatable: false,
+                searchable: false,
+              }
+          )
+        : undefined,
+    [cellActionsTriggerId, isPlainRecord, visibleColumns, dataView]
+  );
+
+  const columnsCellActions = useDataGridColumnsCellActions({
+    fields: cellActionsFields,
+    getCellValue,
+    triggerId: cellActionsTriggerId,
+    dataGridRef,
+  });
+
   const euiGridColumns = useMemo(
     () =>
       getEuiGridColumns({
-        columns: displayedColumns,
+        columns: visibleColumns,
+        columnsCellActions,
         rowsCount: displayedRows.length,
         settings,
         dataView,
-        showTimeCol,
         defaultColumns,
         isSortEnabled,
         isPlainRecord,
@@ -454,10 +514,10 @@ export const DiscoverGrid = ({
       }),
     [
       onFilter,
-      displayedColumns,
+      visibleColumns,
+      columnsCellActions,
       displayedRows,
       dataView,
-      showTimeCol,
       settings,
       defaultColumns,
       isSortEnabled,
@@ -477,12 +537,12 @@ export const DiscoverGrid = ({
   const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
   const columnsVisibility = useMemo(
     () => ({
-      visibleColumns: getVisibleColumns(displayedColumns, dataView, showTimeCol) as string[],
+      visibleColumns,
       setVisibleColumns: (newColumns: string[]) => {
         onSetColumns(newColumns, hideTimeColumn);
       },
     }),
-    [displayedColumns, dataView, showTimeCol, hideTimeColumn, onSetColumns]
+    [visibleColumns, hideTimeColumn, onSetColumns]
   );
   const sorting = useMemo(() => {
     if (isSortEnabled) {
@@ -527,6 +587,10 @@ export const DiscoverGrid = ({
     [onUpdateRowHeight]
   );
 
+  const inMemory = useMemo(() => {
+    return isPlainRecord ? ({ level: 'sorting' } as EuiDataGridInMemory) : undefined;
+  }, [isPlainRecord]);
+
   const toolbarVisibility = useMemo(
     () =>
       defaultColumns
@@ -553,7 +617,9 @@ export const DiscoverGrid = ({
     onUpdateRowHeight,
   });
 
-  if (!rowCount && isLoading) {
+  const isRenderComplete = loadingState !== DataLoadingState.loading;
+
+  if (!rowCount && loadingState === DataLoadingState.loading) {
     return (
       <div className="euiDataGrid__loading">
         <EuiText size="xs" color="subdued">
@@ -569,7 +635,7 @@ export const DiscoverGrid = ({
     return (
       <div
         className="euiDataGrid__noResults"
-        data-render-complete={!isLoading}
+        data-render-complete={isRenderComplete}
         data-shared-item=""
         data-title={searchTitle}
         data-description={searchDescription}
@@ -606,7 +672,7 @@ export const DiscoverGrid = ({
       <span className="dscDiscoverGrid__inner">
         <div
           data-test-subj="discoverDocTable"
-          data-render-complete={!isLoading}
+          data-render-complete={isRenderComplete}
           data-shared-item=""
           data-title={searchTitle}
           data-description={searchDescription}
@@ -629,21 +695,22 @@ export const DiscoverGrid = ({
             sorting={sorting as EuiDataGridSorting}
             toolbarVisibility={toolbarVisibility}
             rowHeightsOptions={rowHeightsOptions}
-            inMemory={isPlainRecord ? { level: 'sorting' } : undefined}
+            inMemory={inMemory}
             gridStyle={GRID_STYLE}
           />
         </div>
-        {showDisclaimer && (
-          <p className="dscDiscoverGrid__footer" data-test-subj="discoverTableFooter">
-            <FormattedMessage
-              id="discover.gridSampleSize.limitDescription"
-              defaultMessage="Search results are limited to {sampleSize} documents. Add more search terms to narrow your search."
-              values={{
-                sampleSize,
-              }}
+        {loadingState !== DataLoadingState.loading &&
+          isPaginationEnabled && ( // we hide the footer for Surrounding Documents page
+            <DiscoverGridFooter
+              isLoadingMore={loadingState === DataLoadingState.loadingMore}
+              rowCount={rowCount}
+              sampleSize={sampleSize}
+              pageCount={pageCount}
+              pageIndex={paginationObj?.pageIndex}
+              totalHits={totalHits}
+              onFetchMoreRecords={onFetchMoreRecords}
             />
-          </p>
-        )}
+          )}
         {searchTitle && (
           <EuiScreenReaderOnly>
             <p id={String(randomId)}>

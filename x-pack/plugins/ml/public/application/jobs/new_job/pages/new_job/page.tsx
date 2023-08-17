@@ -227,8 +227,10 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   return (
     <Fragment>
       <MlPageHeader>
-        <FormattedMessage id="xpack.ml.newJob.page.createJob" defaultMessage="Create job" />:{' '}
-        {jobCreatorTitle}
+        <div data-test-subj={`mlPageJobWizardHeader-${jobCreator.type}`}>
+          <FormattedMessage id="xpack.ml.newJob.page.createJob" defaultMessage="Create job" />:{' '}
+          {jobCreatorTitle}
+        </div>
       </MlPageHeader>
 
       <div style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>

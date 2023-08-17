@@ -61,7 +61,7 @@
             "section": "def-common.IntegrationsServiceSetupDeps",
             "text": "IntegrationsServiceSetupDeps"
           },
-          "]>; setup: jest.MockInstance<Promise<void>, []>; stop: jest.MockInstance<Promise<void>, []>; } & ",
+          "], unknown>; setup: jest.MockInstance<Promise<void>, [], unknown>; stop: jest.MockInstance<Promise<void>, [], unknown>; } & ",
           {
             "pluginId": "@kbn/core-integrations-browser-mocks",
             "scope": "common",

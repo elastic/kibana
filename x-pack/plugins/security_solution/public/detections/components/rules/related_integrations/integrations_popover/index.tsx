@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import type { RelatedIntegrationArray } from '../../../../../../common/detection_engine/rule_schema';
+import type { RelatedIntegrationArray } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { IntegrationDescription } from '../integrations_description';
 import { useRelatedIntegrations } from '../use_related_integrations';
 

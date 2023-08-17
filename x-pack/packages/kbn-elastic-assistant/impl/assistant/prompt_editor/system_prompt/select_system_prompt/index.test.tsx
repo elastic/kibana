@@ -10,10 +10,23 @@ import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { Props, SelectSystemPrompt } from '.';
+import { TEST_IDS } from '../../../constants';
 
 const props: Props = {
+  allSystemPrompts: [
+    {
+      id: 'default-system-prompt',
+      content: 'default',
+      name: 'default',
+      promptType: 'system',
+      isDefault: true,
+      isNewConversationDefault: true,
+    },
+  ],
   conversation: undefined,
+  isSettingsModalVisible: false,
   selectedPrompt: undefined,
+  setIsSettingsModalVisible: jest.fn(),
 };
 
 const mockUseAssistantContext = {
@@ -51,13 +64,13 @@ describe('SelectSystemPrompt', () => {
   it('renders the prompt super select when isEditing is true', () => {
     const { getByTestId } = render(<SelectSystemPrompt {...props} isEditing={true} />);
 
-    expect(getByTestId('promptSuperSelect')).toBeInTheDocument();
+    expect(getByTestId(TEST_IDS.PROMPT_SUPERSELECT)).toBeInTheDocument();
   });
 
   it('does NOT render the prompt super select when isEditing is false', () => {
     const { queryByTestId } = render(<SelectSystemPrompt {...props} isEditing={false} />);
 
-    expect(queryByTestId('promptSuperSelect')).not.toBeInTheDocument();
+    expect(queryByTestId(TEST_IDS.PROMPT_SUPERSELECT)).not.toBeInTheDocument();
   });
 
   it('does NOT render the clear system prompt button when isEditing is true', () => {

@@ -126,9 +126,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    *           In the future, may require an incomming request to contain a specified header.
    * - internal. The route is internal and intended for internal access only.
    *
-   * If not declared, infers access from route path:
-   * - access =`internal` for '/internal' route path prefix
-   * - access = `public` for everything else
+   * Defaults to 'internal' If not declared,
    */
   access?: 'public' | 'internal';
 

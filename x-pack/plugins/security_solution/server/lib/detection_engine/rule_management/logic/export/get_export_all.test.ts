@@ -18,7 +18,7 @@ import { getThreatMock } from '../../../../../../common/detection_engine/schemas
 import {
   getOutputDetailsSampleWithExceptions,
   getSampleDetailsAsNdjson,
-} from '../../../../../../common/detection_engine/rule_management/mocks';
+} from '../../../../../../common/api/detection_engine/rule_management/mocks';
 
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
@@ -39,6 +39,7 @@ const connectors = [
     config: {},
     isPreconfigured: false,
     isDeprecated: false,
+    isSystemAction: false,
     referencedByCount: 1,
   },
   {
@@ -47,6 +48,7 @@ const connectors = [
     name: 'Email (preconfigured)',
     config: {},
     isPreconfigured: true,
+    isSystemAction: false,
     isDeprecated: false,
     referencedByCount: 1,
   },
@@ -134,6 +136,7 @@ describe('getExportAll', () => {
       note: '# Investigative notes',
       version: 1,
       exceptions_list: getListArrayMock(),
+      investigation_fields: [],
     });
     expect(detailsJson).toEqual({
       exported_exception_list_count: 1,
@@ -317,6 +320,7 @@ describe('getExportAll', () => {
       version: 1,
       revision: 0,
       exceptions_list: getListArrayMock(),
+      investigation_fields: [],
     });
     expect(detailsJson).toEqual({
       exported_exception_list_count: 1,

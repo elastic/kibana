@@ -25,10 +25,6 @@ import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type {
@@ -67,7 +63,6 @@ import {
   ipRangeFunction,
   ISearchOptions,
   kibana,
-  kibanaContext,
   kibanaFilterFunction,
   kibanaTimerangeFunction,
   kqlFunction,
@@ -94,7 +89,6 @@ import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
 import { SearchSessionService } from './session';
 import { registerBsearchRoute } from './routes/bsearch';
-import { getKibanaContext } from './expressions/kibana_context';
 import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
 import { eqlSearchStrategyProvider } from './strategies/eql_search';
 import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
@@ -109,7 +103,6 @@ export interface SearchServiceSetupDependencies {
   bfetch: BfetchServerSetup;
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
-  taskManager?: TaskManagerSetupContract;
   security?: SecurityPluginSetup;
 }
 
@@ -117,7 +110,6 @@ export interface SearchServiceSetupDependencies {
 export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
   indexPatterns: DataViewsServerPluginStart;
-  taskManager?: TaskManagerStartContract;
 }
 
 /** @internal */
@@ -133,6 +125,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private sessionService: SearchSessionService;
   private asScoped!: ISearchStart['asScoped'];
   private searchAsInternalUser!: ISearchStrategy;
+  private rollupsEnabled: boolean = false;
 
   constructor(
     private initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -147,7 +140,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { bfetch, expressions, usageCollection, taskManager, security }: SearchServiceSetupDependencies
+    { bfetch, expressions, usageCollection, security }: SearchServiceSetupDependencies
   ): ISearchSetup {
     core.savedObjects.registerType(searchSessionSavedObjectType);
     const usage = usageCollection ? usageProvider(core) : undefined;
@@ -233,7 +226,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(luceneFunction);
     expressions.registerFunction(kqlFunction);
     expressions.registerFunction(kibanaTimerangeFunction);
-    expressions.registerFunction(getKibanaContext({ getStartServices: core.getStartServices }));
     expressions.registerFunction(fieldFunction);
     expressions.registerFunction(numericalRangeFunction);
     expressions.registerFunction(rangeFunction);
@@ -244,7 +236,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(removeFilterFunction);
     expressions.registerFunction(selectFilterFunction);
     expressions.registerFunction(phraseFilterFunction);
-    expressions.registerType(kibanaContext);
+
     expressions.registerType(esRawResponse);
     expressions.registerType(eqlRawResponse);
 
@@ -264,12 +256,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       registerSearchStrategy: this.registerSearchStrategy,
       usage,
       searchSource: this.searchSourceService.setup(),
+      enableRollups: () => (this.rollupsEnabled = true),
     };
   }
 
   public start(
     core: CoreStart,
-    { fieldFormats, indexPatterns, taskManager }: SearchServiceStartDependencies
+    { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
     const { elasticsearch, savedObjects, uiSettings } = core;
 
@@ -281,7 +274,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       indexPatterns,
     });
 
-    this.asScoped = this.asScopedProvider(core);
+    this.asScoped = this.asScopedProvider(core, this.rollupsEnabled);
     return {
       aggs,
       searchAsInternalUser: this.searchAsInternalUser,
@@ -519,7 +512,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return deps.searchSessionsClient.extend(sessionId, expires);
   };
 
-  private asScopedProvider = (core: CoreStart) => {
+  private asScopedProvider = (core: CoreStart, rollupsEnabled: boolean = false) => {
     const { elasticsearch, savedObjects, uiSettings } = core;
     const getSessionAsScoped = this.sessionService.asScopedProvider(core);
     return (request: KibanaRequest): IScopedSearchClient => {
@@ -533,6 +526,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           uiSettings.asScopedToClient(savedObjectsClient)
         ),
         request,
+        rollupsEnabled,
       };
       return {
         search: <

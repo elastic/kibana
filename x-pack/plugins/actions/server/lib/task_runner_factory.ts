@@ -9,29 +9,32 @@ import { v4 as uuidv4 } from 'uuid';
 import { pick } from 'lodash';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import {
-  Logger,
   CoreKibanaRequest,
-  IBasePath,
-  SavedObject,
-  Headers,
   FakeRawRequest,
-  SavedObjectReference,
+  Headers,
+  IBasePath,
   ISavedObjectsRepository,
+  Logger,
+  SavedObject,
+  SavedObjectReference,
 } from '@kbn/core/server';
-import { RunContext } from '@kbn/task-manager-plugin/server';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import {
+  LoadIndirectParamsResult,
+  RunContext,
   throwRetryableError,
   throwUnrecoverableError,
-} from '@kbn/task-manager-plugin/server/task_running';
-import { ActionExecutorContract } from './action_executor';
+} from '@kbn/task-manager-plugin/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { LoadedIndirectParams } from '@kbn/task-manager-plugin/server/task';
+import { ActionExecutorContract, ActionInfo } from './action_executor';
 import {
-  ActionTaskParams,
-  ActionTypeRegistryContract,
-  SpaceIdToNamespaceFunction,
-  ActionTypeExecutorResult,
   ActionTaskExecutorParams,
+  ActionTaskParams,
+  ActionTypeExecutorResult,
+  ActionTypeRegistryContract,
   isPersistedActionTask,
+  RawAction,
+  SpaceIdToNamespaceFunction,
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import {
@@ -52,6 +55,16 @@ export interface TaskRunnerContext {
   basePathService: IBasePath;
   savedObjectsRepository: ISavedObjectsRepository;
 }
+
+export interface ActionData extends LoadedIndirectParams<RawAction> {
+  indirectParams: RawAction;
+  actionInfo: ActionInfo;
+  taskParams: TaskParams;
+}
+
+export type ActionDataResult<T extends LoadedIndirectParams> = LoadIndirectParamsResult<T>;
+
+type TaskParams = Omit<SavedObject<ActionTaskParams>, 'id' | 'type'>;
 
 export class TaskRunnerFactory {
   private isInitialized = false;
@@ -89,14 +102,54 @@ export class TaskRunnerFactory {
     const taskInfo = {
       scheduled: taskInstance.runAt,
       attempts: taskInstance.attempts,
+      numSkippedRuns: taskInstance.numSkippedRuns,
     };
     const actionExecutionId = uuidv4();
     const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
 
-    return {
-      async run() {
-        const { spaceId } = actionTaskExecutorParams;
+    let actionData: ActionDataResult<ActionData>;
 
+    return {
+      async loadIndirectParams(): Promise<ActionDataResult<ActionData>> {
+        try {
+          const taskParams = await getActionTaskParams(
+            actionTaskExecutorParams,
+            encryptedSavedObjectsClient,
+            spaceIdToNamespace
+          );
+
+          const { spaceId } = actionTaskExecutorParams;
+          const request = getFakeRequest(taskParams.attributes.apiKey);
+          const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
+
+          const actionInfo = await actionExecutor.getActionInfoInternal(
+            taskParams.attributes.actionId,
+            request,
+            namespace.namespace
+          );
+          actionData = {
+            data: {
+              indirectParams: actionInfo.rawAction,
+              taskParams,
+              actionInfo,
+            },
+          };
+          return actionData;
+        } catch (error) {
+          actionData = { error };
+          return { error };
+        }
+      },
+      async run() {
+        if (!actionData) {
+          actionData = await this.loadIndirectParams();
+        }
+        if (actionData.error) {
+          return throwRetryableError(actionData.error, true);
+        }
+
+        const { spaceId } = actionTaskExecutorParams;
+        const { taskParams, actionInfo } = actionData.data;
         const {
           attributes: {
             actionId,
@@ -108,11 +161,8 @@ export class TaskRunnerFactory {
             relatedSavedObjects,
           },
           references,
-        } = await getActionTaskParams(
-          actionTaskExecutorParams,
-          encryptedSavedObjectsClient,
-          spaceIdToNamespace
-        );
+        } = taskParams;
+
         const path = addSpaceIdToPath('/', spaceId);
 
         const request = getFakeRequest(apiKey);
@@ -126,6 +176,7 @@ export class TaskRunnerFactory {
             isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
             request,
             taskInfo,
+            actionInfo,
             executionId,
             consumer,
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
@@ -221,16 +272,14 @@ function getFakeRequest(apiKey?: string) {
 
   // Since we're using API keys and accessing elasticsearch can only be done
   // via a request, we're faking one with the proper authorization headers.
-  const fakeRequest = CoreKibanaRequest.from(fakeRawRequest);
-
-  return fakeRequest;
+  return CoreKibanaRequest.from(fakeRawRequest);
 }
 
 async function getActionTaskParams(
   executorParams: ActionTaskExecutorParams,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   spaceIdToNamespace: SpaceIdToNamespaceFunction
-): Promise<Omit<SavedObject<ActionTaskParams>, 'id' | 'type'>> {
+): Promise<TaskParams> {
   const { spaceId } = executorParams;
   const namespace = spaceIdToNamespace(spaceId);
   if (isPersistedActionTask(executorParams)) {
@@ -240,7 +289,6 @@ async function getActionTaskParams(
         executorParams.actionTaskParamsId,
         { namespace }
       );
-
     const {
       attributes: { relatedSavedObjects },
       references,

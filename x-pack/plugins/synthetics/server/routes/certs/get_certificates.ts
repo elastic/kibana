@@ -6,16 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import {
   getAllMonitors,
   processMonitors,
 } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { monitorAttributes } from '../../../common/types/saved_objects';
-import { getCerts } from '../../legacy_uptime/lib/requests/get_certs';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { CertResult, GetCertsParams } from '../../../common/runtime_types';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
+import { getSyntheticsCerts } from '../../queries/get_certs';
 
 export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
   { data: CertResult },
@@ -48,6 +48,15 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       filter: `${monitorAttributes}.${AlertConfigKey.STATUS_ENABLED}: true`,
     });
 
+    if (monitors.length === 0) {
+      return {
+        data: {
+          certs: [],
+          total: 0,
+        },
+      };
+    }
+
     const { enabledMonitorQueryIds } = await processMonitors(
       monitors,
       server,
@@ -55,7 +64,7 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       syntheticsMonitorClient
     );
 
-    const data = await getCerts({
+    const data = await getSyntheticsCerts({
       ...queryParams,
       uptimeEsClient,
       monitorIds: enabledMonitorQueryIds,

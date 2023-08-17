@@ -12,6 +12,7 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "allow_reading_invalid_state": true,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -22,6 +23,7 @@ describe('config validation', () => {
         },
         "max_attempts": 3,
         "max_workers": 10,
+        "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,
         "monitored_stats_health_verbose_log": Object {
           "enabled": false,
@@ -39,6 +41,11 @@ describe('config validation', () => {
         },
         "poll_interval": 3000,
         "request_capacity": 1000,
+        "requeue_invalid_tasks": Object {
+          "delay": 3000,
+          "enabled": false,
+          "max_attempts": 100,
+        },
         "unsafe": Object {
           "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],
@@ -64,6 +71,7 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "allow_reading_invalid_state": true,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -74,6 +82,7 @@ describe('config validation', () => {
         },
         "max_attempts": 3,
         "max_workers": 10,
+        "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,
         "monitored_stats_health_verbose_log": Object {
           "enabled": false,
@@ -91,6 +100,11 @@ describe('config validation', () => {
         },
         "poll_interval": 3000,
         "request_capacity": 1000,
+        "requeue_invalid_tasks": Object {
+          "delay": 3000,
+          "enabled": false,
+          "max_attempts": 100,
+        },
         "unsafe": Object {
           "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],
@@ -114,6 +128,7 @@ describe('config validation', () => {
     };
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "allow_reading_invalid_state": true,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -124,6 +139,7 @@ describe('config validation', () => {
         },
         "max_attempts": 3,
         "max_workers": 10,
+        "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,
         "monitored_stats_health_verbose_log": Object {
           "enabled": false,
@@ -146,6 +162,11 @@ describe('config validation', () => {
         },
         "poll_interval": 3000,
         "request_capacity": 1000,
+        "requeue_invalid_tasks": Object {
+          "delay": 3000,
+          "enabled": false,
+          "max_attempts": 100,
+        },
         "unsafe": Object {
           "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],

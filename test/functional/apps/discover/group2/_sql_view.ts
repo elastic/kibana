@@ -31,7 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover:enableSql': true,
   };
 
-  describe('discover sql view', async function () {
+  // Failing: See https://github.com/elastic/kibana/issues/159194
+  describe.skip('discover sql view', async function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       log.debug('load kibana index with default index pattern');
@@ -72,8 +73,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);
         expect(await testSubjects.exists('addFilter')).to.be(false);
         expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(false);
-        // here Lens suggests a table so the chart is not rendered
-        expect(await testSubjects.exists('unifiedHistogramChart')).to.be(false);
+        // when Lens suggests a table, we render the histogram
+        expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
         expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(true);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(false);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);

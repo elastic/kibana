@@ -17,7 +17,7 @@ import {
   EuiAccordion,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { HeaderMenu } from '@kbn/securitysolution-exception-list-components';
@@ -73,12 +73,10 @@ interface ExceptionsListCardProps {
   readOnly: boolean;
 }
 const buttonCss = css`
-  // Ask KIBANA Team why Emotion is not working fully under xpack
-  width: 100%;
   z-index: 100;
-  span {
+  .euiAccordion__buttonContent {
     cursor: pointer;
-    display: block;
+    width: 100%;
   }
 `;
 const ExceptionPanel = styled(EuiPanel)`
@@ -146,7 +144,10 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
         <EuiFlexItem>
           <EuiPanel hasShadow={false}>
             <EuiAccordion
-              buttonProps={{ css: buttonCss }}
+              // Note: this uses `className` instead of the `css` prop, because a plugin
+              // cannot be set up for styled-components and `@emotion/react` at the same time
+              // @see https://github.com/elastic/eui/discussions/6828#discussioncomment-6076157
+              buttonProps={{ className: buttonCss }}
               id={openAccordionId}
               arrowDisplay="none"
               onToggle={() => setToggleAccordion(!toggleAccordion)}

@@ -7,7 +7,7 @@
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
-import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import type { BulkActionErrorResponse, BulkActionResponse, PerformBulkActionProps } from '../api';
 import { performBulkAction } from '../api';
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/constants';
@@ -17,6 +17,7 @@ import { useInvalidateFetchRuleManagementFiltersQuery } from './use_fetch_rule_m
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_upgrade_review_query';
 import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
+import { useInvalidateFetchCoverageOverviewQuery } from './use_fetch_coverage_overview';
 
 export const BULK_ACTION_MUTATION_KEY = ['POST', DETECTION_ENGINE_RULES_BULK_ACTION];
 
@@ -35,6 +36,7 @@ export const useBulkActionMutation = (
     useInvalidateFetchPrebuiltRulesInstallReviewQuery();
   const invalidateFetchPrebuiltRulesUpgradeReviewQuery =
     useInvalidateFetchPrebuiltRulesUpgradeReviewQuery();
+  const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
   const updateRulesCache = useUpdateRulesCache();
 
   return useMutation<
@@ -60,6 +62,7 @@ export const useBulkActionMutation = (
         case BulkActionType.enable:
         case BulkActionType.disable: {
           invalidateFetchRuleByIdQuery();
+          invalidateFetchCoverageOverviewQuery();
           if (updatedRules) {
             // We have a list of updated rules, no need to invalidate all
             updateRulesCache(updatedRules);
@@ -76,10 +79,12 @@ export const useBulkActionMutation = (
           invalidateFetchPrebuiltRulesStatusQuery();
           invalidateFetchPrebuiltRulesInstallReviewQuery();
           invalidateFetchPrebuiltRulesUpgradeReviewQuery();
+          invalidateFetchCoverageOverviewQuery();
           break;
         case BulkActionType.duplicate:
           invalidateFindRulesQuery();
           invalidateFetchRuleManagementFilters();
+          invalidateFetchCoverageOverviewQuery();
           break;
         case BulkActionType.edit:
           if (updatedRules) {
@@ -91,6 +96,7 @@ export const useBulkActionMutation = (
           }
           invalidateFetchRuleByIdQuery();
           invalidateFetchRuleManagementFilters();
+          invalidateFetchCoverageOverviewQuery();
           break;
       }
 

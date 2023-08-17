@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { CaseAssignees } from '../api';
-import { MAX_ASSIGNEES_PER_CASE, MAX_CATEGORY_LENGTH } from '../constants';
+import Boom from '@hapi/boom';
 
-export const isInvalidTag = (value: string) => value.trim() === '';
+import type { CaseUserActionService } from '../../server/services';
+import { MAX_ASSIGNEES_PER_CASE, MAX_USER_ACTIONS_PER_CASE } from '../constants';
+import type { CaseAssignees } from '../types/domain';
 
 export const areTotalAssigneesInvalid = (assignees?: CaseAssignees): boolean => {
   if (assignees == null) {
@@ -18,8 +19,24 @@ export const areTotalAssigneesInvalid = (assignees?: CaseAssignees): boolean => 
   return assignees.length > MAX_ASSIGNEES_PER_CASE;
 };
 
-export const isCategoryFieldInvalidString = (category?: string | null): boolean =>
-  category?.trim().length === 0;
+export const validateMaxUserActions = async ({
+  caseId,
+  userActionService,
+  userActionsToAdd,
+}: {
+  caseId: string;
+  userActionService: CaseUserActionService;
+  userActionsToAdd: number;
+}) => {
+  const result = await userActionService.getMultipleCasesUserActionsTotal({
+    caseIds: [caseId],
+  });
 
-export const isCategoryFieldTooLong = (category?: string | null): boolean =>
-  category != null && category.length > MAX_CATEGORY_LENGTH;
+  const totalUserActions = result[caseId] ?? 0;
+
+  if (totalUserActions + userActionsToAdd > MAX_USER_ACTIONS_PER_CASE) {
+    throw Boom.badRequest(
+      `The case with id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+    );
+  }
+};

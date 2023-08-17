@@ -11,13 +11,13 @@ export function SvlObltOnboardingPageProvider({ getService }: FtrProviderContext
   const testSubjects = getService('testSubjects');
 
   return {
-    async assertSkipButtonExists() {
-      await testSubjects.existOrFail('obltOnboardingHomeSkipButton');
+    async assertQuickstartBadgeExists() {
+      await testSubjects.existOrFail('obltOnboardingHomeQuickstartBadge');
     },
 
-    async skipOnboarding() {
-      await testSubjects.click('obltOnboardingHomeSkipButton');
-      await testSubjects.missingOrFail('obltOnboardingHomeSkipButton');
+    async goToStreamLogFiles() {
+      await testSubjects.click('obltOnboardingHomeStartLogFileStream');
+      await testSubjects.missingOrFail('obltOnboardingHomeStartLogFileStream');
     },
   };
 }

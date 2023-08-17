@@ -8,6 +8,7 @@
 import { ReactElement } from 'react';
 import { combineLatest, Observable, ReplaySubject, Subject } from 'rxjs';
 import { map, startWith, tap } from 'rxjs/operators';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-category-validator';
 import {
   basicJobValidation,
   basicDatafeedValidation,
@@ -24,7 +25,7 @@ import {
   JobExistsResult,
   GroupsExistResult,
 } from './validators';
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../common/constants/categorization_job';
+
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 // delay start of validation to allow the user to make changes

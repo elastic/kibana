@@ -1350,7 +1350,15 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", \"rows\" | \"columns\">; column: number; value: any[]; }; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
+              ", \"rows\" | \"columns\">; cells: { column: number; row: number; }[]; relation?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.BooleanRelation",
+                "text": "BooleanRelation"
+              },
+              " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
             ],
             "path": "src/plugins/charts/public/index.ts",
             "deprecated": false,
@@ -1626,28 +1634,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "charts",
-        "id": "def-public.truncatedColorSchemas",
-        "type": "Array",
-        "tags": [],
-        "label": "truncatedColorSchemas",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "charts",
-            "scope": "common",
-            "docId": "kibChartsPluginApi",
-            "section": "def-common.ColorSchema",
-            "text": "ColorSchema"
-          },
-          "[]"
-        ],
-        "path": "src/plugins/charts/common/static/color_maps/truncated_color_maps.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
       }
     ],
     "objects": [
@@ -1832,19 +1818,6 @@
             ]
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "charts",
-        "id": "def-public.truncatedColorMaps",
-        "type": "Object",
-        "tags": [],
-        "label": "truncatedColorMaps",
-        "description": [],
-        "path": "src/plugins/charts/common/static/color_maps/truncated_color_maps.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
         "initialIsOpen": false
       },
       {
@@ -3380,15 +3353,28 @@
     "misc": [
       {
         "parentPluginId": "charts",
+        "id": "def-common.AllowedChartOverrides",
+        "type": "Type",
+        "tags": [],
+        "label": "AllowedChartOverrides",
+        "description": [],
+        "signature": [
+          "{ chart?: { description?: string | undefined; title?: string | undefined; } | undefined; }"
+        ],
+        "path": "src/plugins/charts/common/static/overrides/settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "charts",
         "id": "def-common.AllowedSettingsOverrides",
         "type": "Type",
         "tags": [],
         "label": "AllowedSettingsOverrides",
         "description": [],
         "signature": [
-          "{ settings?: { tooltip?: ",
-          "TooltipSettings",
-          " | undefined; debug?: boolean | undefined; theme?: ",
+          "{ settings?: { debug?: boolean | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -3611,28 +3597,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "charts",
-        "id": "def-common.truncatedColorSchemas",
-        "type": "Array",
-        "tags": [],
-        "label": "truncatedColorSchemas",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "charts",
-            "scope": "common",
-            "docId": "kibChartsPluginApi",
-            "section": "def-common.ColorSchema",
-            "text": "ColorSchema"
-          },
-          "[]"
-        ],
-        "path": "src/plugins/charts/common/static/color_maps/truncated_color_maps.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
       }
     ],
     "objects": [
@@ -3817,19 +3781,6 @@
             ]
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "charts",
-        "id": "def-common.truncatedColorMaps",
-        "type": "Object",
-        "tags": [],
-        "label": "truncatedColorMaps",
-        "description": [],
-        "path": "src/plugins/charts/common/static/color_maps/truncated_color_maps.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
         "initialIsOpen": false
       },
       {

@@ -328,8 +328,11 @@ type SettingsOverride = Record<
       };
     }
 >;
+type ChartOverride = Record<'chart', { title: string; description: string }>;
 
-export type AllOverrides = Partial<XYOverride & PieOverride & SettingsOverride & GaugeOverride>;
+export type AllOverrides = Partial<
+  XYOverride & PieOverride & SettingsOverride & GaugeOverride & ChartOverride
+>;
 
 export function OverridesMenu({
   currentAttributes,
@@ -350,7 +353,6 @@ export function OverridesMenu({
           onClick={() => setOverridesPopoverOpen(!overridesPopoverOpen)}
           iconType="arrowDown"
           iconSide="right"
-          isDisabled={!isSupportedChart(currentAttributes)}
         >
           Overrides{' '}
           <EuiNotificationBadge color={hasOverridesEnabled ? 'accent' : 'subdued'}>
@@ -463,6 +465,16 @@ export function OverridesMenu({
             controlLabel="Enable border color"
           />
         ) : null}
+        <OverrideSwitch
+          override={{
+            chart: { title: 'Custom title', description: 'Custom description here' },
+          }}
+          value={overrides}
+          setOverrideValue={setOverrides}
+          rowLabel="Custom title"
+          controlLabel="Enable custom title"
+          helpText={`This override enables custom titles at the visualization level`}
+        />
       </div>
     </EuiPopover>
   );

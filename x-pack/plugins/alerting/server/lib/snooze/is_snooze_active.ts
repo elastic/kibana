@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { RRule, Weekday } from 'rrule';
+import { RRule, Weekday } from '@kbn/rrule';
 import { RuleSnoozeSchedule } from '../../types';
-import { parseByWeekday } from '../rrule';
-import { utcToLocalUtc, localUtcToUtc } from './timezone_helpers';
 
 const MAX_TIMESTAMP = 8640000000000000;
 
@@ -32,32 +30,24 @@ export function isSnoozeActive(snooze: RuleSnoozeSchedule) {
     };
 
   // Check to see if now is during a recurrence of the snooze
-
-  const { tzid, ...restRRule } = rRule;
-  const startDate = utcToLocalUtc(new Date(rRule.dtstart), tzid);
-  const nowDate = utcToLocalUtc(new Date(now), tzid);
-
   try {
     const rRuleOptions = {
-      ...restRRule,
-      dtstart: startDate,
-      until: rRule.until ? utcToLocalUtc(new Date(rRule.until), tzid) : null,
-      wkst: rRule.wkst ? Weekday.fromStr(rRule.wkst) : null,
-      byweekday: rRule.byweekday ? parseByWeekday(rRule.byweekday) : null,
+      ...rRule,
+      dtstart: new Date(rRule.dtstart),
+      until: rRule.until ? new Date(rRule.until) : null,
+      byweekday: rRule.byweekday ?? null,
+      wkst: rRule.wkst ? Weekday[rRule.wkst] : null,
     };
 
     const recurrenceRule = new RRule(rRuleOptions);
-    const lastOccurrence = recurrenceRule.before(nowDate, true);
+    const lastOccurrence = recurrenceRule.before(new Date(now));
+
     if (!lastOccurrence) return null;
     // Check if the current recurrence has been skipped manually
     if (snooze.skipRecurrences?.includes(lastOccurrence.toISOString())) return null;
     const lastOccurrenceEndTime = lastOccurrence.getTime() + duration;
-    if (nowDate.getTime() < lastOccurrenceEndTime)
-      return {
-        lastOccurrence,
-        snoozeEndTime: localUtcToUtc(new Date(lastOccurrenceEndTime), tzid),
-        id,
-      };
+    if (now < lastOccurrenceEndTime)
+      return { lastOccurrence, snoozeEndTime: new Date(lastOccurrenceEndTime), id };
   } catch (e) {
     throw new Error(`Failed to process RRule ${rRule}: ${e}`);
   }

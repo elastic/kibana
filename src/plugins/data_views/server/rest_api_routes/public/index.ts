@@ -17,6 +17,7 @@ import * as getRoutes from './get_data_view';
 import * as getAllRoutes from './get_data_views';
 import * as hasRoutes from './has_user_data_view';
 import * as updateRoutes from './update_data_view';
+import { swapReferencesRoute } from './swap_references';
 
 const routes = [
   fieldRoutes.registerUpdateFieldsRoute,
@@ -45,6 +46,8 @@ const routes = [
   updateRoutes.registerUpdateDataViewRoute,
   updateRoutes.registerUpdateDataViewRouteLegacy,
   ...Object.values(scriptedRoutes),
+  swapReferencesRoute({ previewRoute: false }),
+  swapReferencesRoute({ previewRoute: true }),
 ];
 
 export { routes };

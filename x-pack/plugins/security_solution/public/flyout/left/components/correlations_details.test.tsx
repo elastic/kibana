@@ -11,16 +11,17 @@ import { useTimelineEventsDetails } from '../../../timelines/containers/details'
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useCorrelations, type UseCorrelationsResult } from '../../shared/hooks/use_correlations';
 import { CorrelationsDetails } from './correlations_details';
-import { type CasesByAlertId, CaseStatuses } from '@kbn/cases-plugin/common/api';
+import { type GetRelatedCasesByAlertResponse } from '@kbn/cases-plugin/common';
 import type { SelectedDataView } from '../../../common/store/sourcerer/model';
 import { TestProviders } from '../../../common/mock';
 import { LeftPanelContext } from '../context';
+import { CaseStatuses } from '@kbn/cases-components';
 
 jest.mock('../../../timelines/containers/details');
 jest.mock('../../../common/containers/sourcerer');
 jest.mock('../../shared/hooks/use_correlations');
 
-const mockCasesByAlertId: CasesByAlertId = [
+const mockCasesByAlertId: GetRelatedCasesByAlertResponse = [
   {
     id: '123',
     title: 'Mock Case',
@@ -54,6 +55,7 @@ const contextValue: LeftPanelContext = {
   scopeId: '',
   browserFields: null,
   searchHit: undefined,
+  investigationFields: [],
 };
 
 const renderCorrelationDetails = () => {

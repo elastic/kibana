@@ -174,7 +174,7 @@ describe('xsrf post-auth handler', () => {
         path: '/some-path',
         kibanaRouteOptions: {
           xsrfRequired: false,
-          access: 'public',
+          access: 'internal',
         },
       });
 

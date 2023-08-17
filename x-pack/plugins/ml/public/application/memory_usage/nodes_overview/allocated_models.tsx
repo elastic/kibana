@@ -122,13 +122,27 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       },
     },
     {
-      field: 'node.throughput_last_minute',
-      name: i18n.translate(
-        'xpack.ml.trainedModels.nodesList.modelsList.throughputLastMinuteHeader',
-        {
-          defaultMessage: 'Throughput',
-        }
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.ml.trainedModels.nodesList.modelsList.throughputLastMinuteTooltip',
+            {
+              defaultMessage: 'The number of requests processed in the last 1 minute.',
+            }
+          )}
+        >
+          <span>
+            {i18n.translate(
+              'xpack.ml.trainedModels.nodesList.modelsList.throughputLastMinuteHeader',
+              {
+                defaultMessage: 'Throughput',
+              }
+            )}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
       ),
+      field: 'node.throughput_last_minute',
       width: '100px',
       truncateText: false,
       'data-test-subj': 'mlAllocatedModelsTableThroughput',
@@ -218,6 +232,16 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       'data-test-subj': 'mlAllocatedModelsTableNumberOfPendingRequests',
       render: (v: AllocatedModel) => {
         return v.node.number_of_pending_requests;
+      },
+    },
+    {
+      name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.errorCountHeader', {
+        defaultMessage: 'Errors',
+      }),
+      width: '60px',
+      'data-test-subj': 'mlAllocatedModelsTableErrorCount',
+      render: (v: AllocatedModel) => {
+        return v.node.error_count ?? 0;
       },
     },
   ].filter((v) => !hideColumns.includes(v.id!));

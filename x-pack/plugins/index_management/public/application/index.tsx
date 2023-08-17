@@ -35,12 +35,12 @@ export const renderApp = (
     return () => undefined;
   }
 
-  const { i18n, docLinks, notifications, application, executionContext, overlays } = core;
+  const { i18n, docLinks, notifications, application, executionContext, overlays, theme } = core;
   const { Context: I18nContext } = i18n;
   const { services, history, setBreadcrumbs, uiSettings, settings, kibanaVersion, theme$ } =
     dependencies;
 
-  // uiSettings is required by the CodeEditor component used to edit runtime field Painless scripts.
+  // theme is required by the CodeEditor component used to edit runtime field Painless scripts.
   const { Provider: KibanaReactContextProvider } =
     createKibanaReactContext<KibanaReactContextServices>({
       application,
@@ -49,6 +49,7 @@ export const renderApp = (
       kibanaVersion: {
         get: () => kibanaVersion,
       },
+      theme,
     });
 
   const componentTemplateProviderValues = {
@@ -96,6 +97,7 @@ interface KibanaReactContextServices {
   kibanaVersion: {
     get: () => SemVer;
   };
+  theme: CoreStart['theme'];
 }
 
 // We override useKibana() from the react plugin to return a typed version for this app

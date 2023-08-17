@@ -19,3 +19,18 @@ If there's a particular endpoint you're worried about, select it to view its
 
 [role="screenshot"]
 image::apm/images/apm-traces.png[Example view of the Traces overview in APM app in Kibana]
+
+[float]
+[[trace-explorer]]
+==== Trace explorer
+
+preview::[]
+
+**Trace explorer** is an experimental top-level search tool that allows you to query your traces using <<kuery-query,Kibana Query Language (KQL)>> or {ref}/eql.html[Event Query Language (EQL)].
+
+Curate your own custom queries, or use the <<service-maps,**Service Map**>> to find and select edges to automatically generate queries based on your selection:
+
+[role="screenshot"]
+image::apm/images/trace-explorer.png[Trace explorer]
+
+Enable **Trace explorer** in <<apm-labs,APM Labs>> or in <<observability-apm-trace-explorer-tab,{kib} advanced settings>>.

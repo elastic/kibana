@@ -480,7 +480,7 @@ export class DataRecognizer {
       indexPatternName === undefined ? moduleConfig.defaultIndexPattern : indexPatternName;
     this._indexPatternId = await this._getIndexPatternId(this._indexPatternName);
 
-    // the module's jobs contain custom URLs which require an index patten id
+    // the module's jobs contain custom URLs which require an index pattern id
     // but there is no corresponding data view, throw an error
     if (this._indexPatternId === undefined && this._doJobUrlsContainIndexPatternId(moduleConfig)) {
       throw Boom.badRequest(
@@ -488,7 +488,7 @@ export class DataRecognizer {
       );
     }
 
-    // the module's saved objects require an index patten id
+    // the module's saved objects require an index pattern id
     // but there is no corresponding data view, throw an error
     if (
       this._indexPatternId === undefined &&

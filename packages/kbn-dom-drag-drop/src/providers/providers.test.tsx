@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { mount } from 'enzyme';
-import { RootDragDropProvider, DragContext } from '.';
+import { RootDragDropProvider, useDragDropContext } from '.';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 
@@ -16,11 +16,11 @@ describe('RootDragDropProvider', () => {
   test('reuses contexts for each render', () => {
     const contexts: Array<{}> = [];
     const TestComponent = ({ name }: { name: string }) => {
-      const context = useContext(DragContext);
+      const context = useDragDropContext();
       contexts.push(context);
       return (
         <div data-test-subj="test-component">
-          {name} {!!context.dragging}
+          {name} {!!context[0].dragging}
         </div>
       );
     };

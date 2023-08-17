@@ -9,8 +9,8 @@ import fs from 'fs';
 import mustache from 'mustache';
 import { join } from 'path';
 import { assertNever } from '@elastic/eui';
+import { CaseStatuses, CaseSeverity } from '../../../../../common/types/domain';
 import type { CaseSavedObjectTransformed } from '../../../../common/types/case';
-import { CaseStatuses, CaseSeverity } from '../../../../../common/api';
 import { getTemplateFilePath } from '../utils';
 
 const TAG_LIMIT = 3;
@@ -79,6 +79,7 @@ export const assigneesTemplateRenderer = async (
         ? `${caseData.attributes.description.slice(0, DESCRIPTION_LIMIT)}...`
         : caseData.attributes.description,
     url: caseUrl,
+    currentYear: new Date().getUTCFullYear(),
   });
 
   return template;

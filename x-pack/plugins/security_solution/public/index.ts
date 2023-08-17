@@ -6,9 +6,12 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
+
 import { Plugin } from './plugin';
 import type { PluginSetup, PluginStart } from './types';
 export type { TimelineModel } from './timelines/store/timeline/model';
+export type { LinkItem } from './common/links';
+
 export type {
   UpsellingService,
   PageUpsellings,

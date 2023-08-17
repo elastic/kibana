@@ -6,8 +6,8 @@
  */
 import type { ReactEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Redirect, Switch, useLocation, useParams, useHistory } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect, useLocation, useParams, useHistory } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import styled from 'styled-components';
 import {
@@ -732,7 +732,7 @@ export function Detail() {
       ) : isLoading || !packageInfo ? (
         <Loading />
       ) : (
-        <Switch>
+        <Routes>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_overview}>
             <OverviewPage
               packageInfo={packageInfo}
@@ -756,7 +756,7 @@ export function Detail() {
             <DocumentationPage packageInfo={packageInfo} integration={integrationInfo?.name} />
           </Route>
           <Redirect to={INTEGRATIONS_ROUTING_PATHS.integration_details_overview} />
-        </Switch>
+        </Routes>
       )}
     </WithHeaderLayout>
   );

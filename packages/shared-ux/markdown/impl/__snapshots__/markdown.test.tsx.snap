@@ -16,7 +16,7 @@ exports[`shared ux markdown component renders for editor 1`] = `
       >
         <button
           aria-label="Bold"
-          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="euiMarkdownEditorToolbarButton"
           type="button"
         >
@@ -33,7 +33,7 @@ exports[`shared ux markdown component renders for editor 1`] = `
       >
         <button
           aria-label="Italic"
-          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="euiMarkdownEditorToolbarButton"
           type="button"
         >
@@ -53,7 +53,7 @@ exports[`shared ux markdown component renders for editor 1`] = `
       >
         <button
           aria-label="Unordered list"
-          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="euiMarkdownEditorToolbarButton"
           type="button"
         >
@@ -70,7 +70,7 @@ exports[`shared ux markdown component renders for editor 1`] = `
       >
         <button
           aria-label="Ordered list"
-          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="euiMarkdownEditorToolbarButton"
           type="button"
         >
@@ -87,7 +87,7 @@ exports[`shared ux markdown component renders for editor 1`] = `
       >
         <button
           aria-label="Task list"
-          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="euiMarkdownEditorToolbarButton"
           type="button"
         >
@@ -107,7 +107,7 @@ exports[`shared ux markdown component renders for editor 1`] = `
       >
         <button
           aria-label="Quote"
-          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="euiMarkdownEditorToolbarButton"
           type="button"
         >
@@ -124,7 +124,7 @@ exports[`shared ux markdown component renders for editor 1`] = `
       >
         <button
           aria-label="Code"
-          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="euiMarkdownEditorToolbarButton"
           type="button"
         >
@@ -141,7 +141,7 @@ exports[`shared ux markdown component renders for editor 1`] = `
       >
         <button
           aria-label="Link"
-          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="euiMarkdownEditorToolbarButton"
           type="button"
         >
@@ -161,7 +161,7 @@ exports[`shared ux markdown component renders for editor 1`] = `
       >
         <button
           aria-label="Tooltip"
-          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="euiMarkdownEditorToolbarButton"
           type="button"
         >
@@ -175,20 +175,19 @@ exports[`shared ux markdown component renders for editor 1`] = `
       </span>
     </div>
     <button
-      class="euiButtonEmpty euiButtonEmpty--small css-wvaqcf-empty-text"
+      class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-text"
       data-test-subj="markdown_editor_preview_button"
       type="button"
     >
       <span
-        class="euiButtonContent euiButtonEmpty__content"
+        class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
       >
         <span
-          class="euiButtonContent__icon"
           color="inherit"
           data-euiicon-type="eye"
         />
         <span
-          class="euiButtonEmpty__text"
+          class="eui-textTruncate euiButtonEmpty__text"
         >
           Preview
         </span>
@@ -210,7 +209,7 @@ exports[`shared ux markdown component renders for editor 1`] = `
         id="generated-id"
         placeholder=""
         rows="6"
-        style="height:100%;max-height:"
+        style="height:100%"
       />
       <div
         class="euiMarkdownEditorFooter"
@@ -223,7 +222,7 @@ exports[`shared ux markdown component renders for editor 1`] = `
         >
           <button
             aria-label="Show markdown help"
-            class="euiButtonIcon euiButtonIcon--small euiMarkdownEditorFooter__helpButton emotion-euiButtonIcon-empty-text-hoverStyles"
+            class="euiButtonIcon euiMarkdownEditorFooter__helpButton emotion-euiButtonIcon-s-empty-text"
             type="button"
           >
             <span

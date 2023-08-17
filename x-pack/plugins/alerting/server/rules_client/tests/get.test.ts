@@ -211,6 +211,83 @@ describe('get()', () => {
                                                                             `);
   });
 
+  test('gets rule with actions using system connectors', async () => {
+    const rulesClient = new RulesClient(rulesClientParams);
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            actionRef: 'system_action:system_action-id',
+            params: {},
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    const result = await rulesClient.get({ id: '1' });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+          Object {
+            "group": "default",
+            "id": "system_action-id",
+            "params": Object {},
+          },
+        ],
+        "alertTypeId": "123",
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "id": "1",
+        "notifyWhen": "onActiveAlert",
+        "params": Object {
+          "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "snoozeSchedule": Array [],
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
+                                                                                                                  Array [
+                                                                                                                    "alert",
+                                                                                                                    "1",
+                                                                                                                  ]
+                                                                            `);
+  });
+
   test('should call useSavedObjectReferences.injectReferences if defined for rule type', async () => {
     const injectReferencesFn = jest.fn().mockReturnValue({
       bar: true,

@@ -7,12 +7,9 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
-
-import { NotFoundPage } from './404';
 import { SecurityApp } from './app';
 import type { RenderAppProps } from './types';
+import { AppRoutes } from './app_routes';
 
 export const renderApp = ({
   element,
@@ -37,14 +34,7 @@ export const renderApp = ({
       theme$={theme$}
     >
       <ApplicationUsageTrackingProvider>
-        <Switch>
-          {subPluginRoutes.map((route, index) => {
-            return <Route key={`route-${index}`} {...route} />;
-          })}
-          <Route>
-            <NotFoundPage />
-          </Route>
-        </Switch>
+        <AppRoutes subPluginRoutes={subPluginRoutes} services={services} />
       </ApplicationUsageTrackingProvider>
     </SecurityApp>,
     element

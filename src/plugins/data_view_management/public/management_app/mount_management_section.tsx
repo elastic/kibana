@@ -8,15 +8,13 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch, Redirect } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n-react';
 import { StartServicesAccessor } from '@kbn/core/public';
-
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import {
   IndexPatternTableWithRouter,
@@ -41,7 +39,18 @@ export async function mountManagementSection(
   params: ManagementAppMountParams
 ) {
   const [
-    { application, chrome, uiSettings, settings, notifications, overlays, http, docLinks, theme },
+    {
+      application,
+      chrome,
+      uiSettings,
+      settings,
+      notifications,
+      overlays,
+      http,
+      docLinks,
+      theme,
+      i18n: coreI18n,
+    },
     {
       data,
       dataViewFieldEditor,
@@ -84,31 +93,27 @@ export async function mountManagementSection(
   };
 
   ReactDOM.render(
-    <KibanaContextProvider services={deps}>
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <Router history={params.history}>
-            <CompatRouter>
-              <Switch>
-                <Route path={['/create']}>
-                  <IndexPatternTableWithRouter canSave={canSave} showCreateDialog={true} />
-                </Route>
-                <Route path={['/dataView/:id/field/:fieldName', '/dataView/:id/create-field/']}>
-                  <CreateEditFieldContainer />
-                </Route>
-                <Route path={['/dataView/:id']}>
-                  <EditIndexPatternContainer />
-                </Route>
-                <Redirect path={'/patterns*'} to={'dataView*'} />
-                <Route path={['/']}>
-                  <IndexPatternTableWithRouter canSave={canSave} />
-                </Route>
-              </Switch>
-            </CompatRouter>
-          </Router>
-        </I18nProvider>
-      </KibanaThemeProvider>
-    </KibanaContextProvider>,
+    <KibanaRenderContextProvider theme={theme} i18n={coreI18n}>
+      <KibanaContextProvider services={deps}>
+        <Router history={params.history}>
+          <Routes>
+            <Route path={['/create']}>
+              <IndexPatternTableWithRouter canSave={canSave} showCreateDialog={true} />
+            </Route>
+            <Route path={['/dataView/:id/field/:fieldName', '/dataView/:id/create-field/']}>
+              <CreateEditFieldContainer />
+            </Route>
+            <Route path={['/dataView/:id']}>
+              <EditIndexPatternContainer />
+            </Route>
+            <Redirect path={'/patterns*'} to={'dataView*'} />
+            <Route path={['/']}>
+              <IndexPatternTableWithRouter canSave={canSave} />
+            </Route>
+          </Routes>
+        </Router>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>,
     params.element
   );
 

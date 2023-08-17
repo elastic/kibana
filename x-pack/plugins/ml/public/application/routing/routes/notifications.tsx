@@ -42,7 +42,7 @@ export const notificationsRouteFactory = (
 });
 
 const PageWrapper: FC = () => {
-  const { context } = useRouteResolver('full', ['canGetJobs'], {
+  const { context } = useRouteResolver('full', ['canGetMlInfo'], {
     getMlNodeCount,
     loadMlServerInfo,
   });

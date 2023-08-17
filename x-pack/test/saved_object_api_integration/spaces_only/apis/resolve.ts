@@ -41,10 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
     return createTestDefinitions(testCases, false, { spaceId });
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/156998, https://github.com/elastic/kibana/issues/156922, https://github.com/elastic/kibana/issues/156921
-  // Also, https://github.com/elastic/kibana/issues/158918
-  // esArchiver fails with no_shard_available_action_exception after deleting indexes
-  describe.skip('_resolve', () => {
+  describe('_resolve', () => {
     getTestScenarios().spaces.forEach(({ spaceId }) => {
       const tests = createTests(spaceId);
       addTests(`within the ${spaceId} space`, { spaceId, tests });

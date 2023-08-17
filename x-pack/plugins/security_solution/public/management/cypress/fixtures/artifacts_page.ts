@@ -192,29 +192,26 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         },
         {
           type: 'click',
-          customSelector: 'button[title="agent.type"]',
-        },
-        {
-          type: 'click',
-          selector: 'fieldAutocompleteComboBox',
-        },
-        {
-          type: 'click',
-          customSelector: 'button[title="agent.type"]',
+          customSelector: 'button[title="@timestamp"]',
         },
         {
           type: 'click',
           selector: 'valuesAutocompleteMatch',
         },
         {
+          type: 'input',
+          selector: 'valuesAutocompleteMatch',
+          value: '1234',
+        },
+        {
           type: 'click',
-          customSelector: 'button[title="endpoint"]',
+          selector: 'eventFilters-form-description-input',
         },
       ],
       checkResults: [
         {
           selector: 'EventFiltersListPage-card-criteriaConditions-condition',
-          value: 'AND agent.typeIS endpoint',
+          value: 'AND @timestampIS 1234',
         },
       ],
     },

@@ -6,8 +6,8 @@
  */
 
 import type { Agent } from '@kbn/fleet-plugin/common';
+import type { PolicyData } from '../../../../../common/endpoint/types';
 import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
-import { ENDPOINT_VM_NAME } from '../../tasks/common';
 import {
   createAgentPolicyTask,
   getAgentByHostName,
@@ -16,6 +16,7 @@ import {
 } from '../../tasks/fleet';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { login } from '../../tasks/login';
+import { loadPage } from '../../tasks/common';
 import {
   AGENT_HOSTNAME_CELL,
   TABLE_ROW_ACTIONS,
@@ -26,18 +27,56 @@ import {
   FLEET_REASSIGN_POLICY_MODAL,
   FLEET_REASSIGN_POLICY_MODAL_CONFIRM_BUTTON,
 } from '../../screens/fleet';
+import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
+import { createEndpointHost } from '../../tasks/create_endpoint_host';
+import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
+import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
 describe('Endpoints page', () => {
-  const endpointHostname = Cypress.env(ENDPOINT_VM_NAME);
+  let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+  let policy: PolicyData;
+  let createdHost: CreateAndEnrollEndpointHostResponse;
+
+  before(() => {
+    getEndpointIntegrationVersion().then((version) => {
+      createAgentPolicyTask(version).then((data) => {
+        indexedPolicy = data;
+        policy = indexedPolicy.integrationPolicies[0];
+
+        return enableAllPolicyProtections(policy.id).then(() => {
+          // Create and enroll a new Endpoint host
+          return createEndpointHost(policy.policy_id).then((host) => {
+            createdHost = host as CreateAndEnrollEndpointHostResponse;
+          });
+        });
+      });
+    });
+  });
+
+  after(() => {
+    if (createdHost) {
+      cy.task('destroyEndpointHost', createdHost);
+    }
+
+    if (indexedPolicy) {
+      cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+    }
+
+    if (createdHost) {
+      deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
+    }
+  });
 
   beforeEach(() => {
     login();
   });
 
   it('Shows endpoint on the list', () => {
-    cy.visit(APP_ENDPOINTS_PATH);
+    loadPage(APP_ENDPOINTS_PATH);
     cy.contains('Hosts running Elastic Defend').should('exist');
-    cy.getByTestSubj(AGENT_HOSTNAME_CELL).should('have.text', endpointHostname);
+    cy.getByTestSubj(AGENT_HOSTNAME_CELL)
+      .contains(createdHost.hostname)
+      .should('have.text', createdHost.hostname);
   });
 
   describe('Endpoint reassignment', () => {
@@ -45,7 +84,7 @@ describe('Endpoints page', () => {
     let initialAgentData: Agent;
 
     before(() => {
-      getAgentByHostName(endpointHostname).then((agentData) => {
+      getAgentByHostName(createdHost.hostname).then((agentData) => {
         initialAgentData = agentData;
       });
       getEndpointIntegrationVersion().then((version) => {
@@ -69,24 +108,24 @@ describe('Endpoints page', () => {
     });
 
     it('User can reassign a single endpoint to a different Agent Configuration', () => {
-      cy.visit(APP_ENDPOINTS_PATH);
+      loadPage(APP_ENDPOINTS_PATH);
       const hostname = cy
         .getByTestSubj(AGENT_HOSTNAME_CELL)
-        .filter(`:contains("${endpointHostname}")`);
+        .filter(`:contains("${createdHost.hostname}")`);
       const tableRow = hostname.parents('tr');
-      tableRow.getByTestSubj(TABLE_ROW_ACTIONS).click();
+      tableRow.findByTestSubj(TABLE_ROW_ACTIONS).click();
       cy.getByTestSubj(TABLE_ROW_ACTIONS_MENU).contains('Reassign agent policy').click();
       cy.getByTestSubj(FLEET_REASSIGN_POLICY_MODAL)
         .find('select')
         .select(response.agentPolicies[0].name);
       cy.getByTestSubj(FLEET_REASSIGN_POLICY_MODAL_CONFIRM_BUTTON).click();
       cy.getByTestSubj(AGENT_HOSTNAME_CELL)
-        .filter(`:contains("${endpointHostname}")`)
+        .filter(`:contains("${createdHost.hostname}")`)
         .should('exist');
       cy.getByTestSubj(AGENT_HOSTNAME_CELL)
-        .filter(`:contains("${endpointHostname}")`)
+        .filter(`:contains("${createdHost.hostname}")`)
         .parents('tr')
-        .getByTestSubj(AGENT_POLICY_CELL)
+        .findByTestSubj(AGENT_POLICY_CELL)
         .should('have.text', response.agentPolicies[0].name);
     });
   });
@@ -94,7 +133,7 @@ describe('Endpoints page', () => {
   it('should update endpoint policy on Endpoint', () => {
     const parseRevNumber = (revString: string) => Number(revString.match(/\d+/)?.[0]);
 
-    cy.visit(APP_ENDPOINTS_PATH);
+    loadPage(APP_ENDPOINTS_PATH);
 
     cy.getByTestSubj('policyListRevNo')
       .first()

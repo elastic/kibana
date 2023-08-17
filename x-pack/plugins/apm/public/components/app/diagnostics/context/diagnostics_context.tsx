@@ -6,6 +6,8 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
@@ -29,9 +31,26 @@ export function DiagnosticsContextProvider({
 }: {
   children: React.ReactChild;
 }) {
-  const { data, status, refetch } = useFetcher((callApmApi) => {
-    return callApmApi(`GET /internal/apm/diagnostics`);
-  }, []);
+  const {
+    query: { kuery, rangeFrom, rangeTo },
+  } = useApmParams('/diagnostics/*');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo, optional: true });
+  const { data, status, refetch } = useFetcher(
+    (callApmApi) => {
+      return callApmApi(`GET /internal/apm/diagnostics`, {
+        isCachable: false,
+        params: {
+          query: {
+            start,
+            end,
+            kuery,
+          },
+        },
+      });
+    },
+    [start, end, kuery]
+  );
 
   const [importedDiagnosticsBundle, setImportedDiagnosticsBundle] = useState<
     DiagnosticsBundle | undefined

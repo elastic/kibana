@@ -40,7 +40,7 @@ describe('IndexInvalidValues', () => {
           openCreateCaseFlyout={jest.fn()}
           patterns={[]}
           setLastChecked={jest.fn()}
-          theme={DARK_THEME}
+          baseTheme={DARK_THEME}
         />
       </TestProviders>
     );
@@ -69,7 +69,7 @@ describe('IndexInvalidValues', () => {
               openCreateCaseFlyout={jest.fn()}
               patterns={patterns}
               setLastChecked={jest.fn()}
-              theme={DARK_THEME}
+              baseTheme={DARK_THEME}
             />
           </TestProviders>
         );
@@ -95,7 +95,7 @@ describe('IndexInvalidValues', () => {
             openCreateCaseFlyout={jest.fn()}
             patterns={patterns}
             setLastChecked={jest.fn()}
-            theme={DARK_THEME}
+            baseTheme={DARK_THEME}
           />
         </TestProviders>
       );

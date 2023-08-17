@@ -27,7 +27,7 @@ export const EndpointResponseAction = React.memo((props: EndpointResponseActionP
         readDefaultValueOnForm={!props.item.isNew}
       />
 
-      <EndpointActionCallout basePath={paramsPath} />
+      <EndpointActionCallout basePath={paramsPath} editDisabled={props.editDisabled} />
 
       <CommentField
         basePath={paramsPath}

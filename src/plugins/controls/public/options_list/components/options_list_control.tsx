@@ -126,6 +126,7 @@ export const OptionsListControl = ({
   const button = (
     <div className="optionsList--filterBtnWrapper" ref={resizeRef}>
       <EuiFilterButton
+        badgeColor="success"
         iconType="arrowDown"
         isLoading={debouncedLoading}
         className={classNames('optionsList--filterBtn', {
@@ -156,15 +157,15 @@ export const OptionsListControl = ({
       <EuiPopover
         ownFocus
         button={button}
+        hasArrow={false}
         repositionOnScroll
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
         anchorPosition="downCenter"
         initialFocus={'[data-test-subj=optionsList-control-search-input]'}
-        className="optionsList__popoverOverride"
         closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
-        anchorClassName="optionsList__anchorOverride"
         aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
+        panelClassName="optionsList__popoverOverride"
       >
         <OptionsListPopover
           width={dimensions.width}

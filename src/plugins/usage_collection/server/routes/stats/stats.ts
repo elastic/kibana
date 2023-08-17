@@ -56,6 +56,7 @@ export function registerStatsRoute({
       options: {
         authRequired: !config.allowAnonymous,
         tags: ['api'], // ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page
+        access: 'public', // needs to be public to allow access from "system" users like metricbeat.
       },
       validate: {
         query: schema.object({
@@ -72,13 +73,13 @@ export function registerStatsRoute({
       const isExtended = requestQuery.extended === '' || requestQuery.extended;
       const isLegacy = requestQuery.legacy === '' || requestQuery.legacy;
 
-      let extended;
+      let extended = {};
       if (isExtended) {
         const core = await context.core;
-        const { asCurrentUser } = core.elasticsearch.client;
+        const { asInternalUser } = core.elasticsearch.client;
         // as of https://github.com/elastic/kibana/pull/151082, usage will always be an empty object.
 
-        const clusterUuid = await getClusterUuid(asCurrentUser);
+        const clusterUuid = await getClusterUuid(asInternalUser);
         const extendedClusterUuid = isLegacy ? { clusterUuid } : { cluster_uuid: clusterUuid };
         extended = {
           usage: {},

@@ -287,7 +287,6 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       FIELD(readOnly)[ConfigKey.TIMEOUT],
       FIELD(readOnly)[ConfigKey.ENABLED],
       FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
-      FIELD(readOnly)[AlertConfigKey.TLS_ENABLED],
     ],
     advanced: [DEFAULT_DATA_OPTIONS(readOnly), ICMP_ADVANCED(readOnly).requestConfig],
   },

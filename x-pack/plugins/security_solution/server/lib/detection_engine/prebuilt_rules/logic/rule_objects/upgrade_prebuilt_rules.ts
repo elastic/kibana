@@ -71,6 +71,7 @@ const upgradeRule = async (
 
     return createRules({
       rulesClient,
+      immutable: true,
       params: {
         ...rule,
         // Force the prepackaged rule to use the enabled state from the existing rule,

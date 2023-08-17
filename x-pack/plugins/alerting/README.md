@@ -99,7 +99,6 @@ The following table describes the properties of the `options` object.
 |isExportable|Whether the rule type is exportable from the Saved Objects Management UI.|boolean|
 |defaultScheduleInterval|(Optional) The default interval that will show up in the UI when creating a rule of this rule type.|boolean|
 |doesSetRecoveryContext|(Optional) Whether the rule type will set context variables for recovered alerts. Defaults to `false`. If this is set to true, context variables are made available for the recovery action group and executors will be provided with the ability to set recovery context.|boolean|
-|getSummarizedAlerts|(Optional) When developing a rule type, you can choose to implement this hook for retrieving summarized alerts based on execution UUID or time range. This hook will be invoked when an alert summary action is configured for the rule.|Function|
 |alerts|(Optional) Specify options for writing alerts as data documents for this rule type. This feature is currently under development so this field is optional but we will eventually make this a requirement of all rule types. For full details, see the alerts as data section below.|IRuleTypeAlerts|
 |autoRecoverAlerts|(Optional) Whether the framework should determine if alerts have recovered between rule runs. If not specified, the default value of `true` is used. |boolean|
 |getViewInAppRelativeUrl|(Optional) When developing a rule type, you can choose to implement this hook for generating a link back to the Kibana application that can be used in alert actions. If not specified, a generic link back to the Rule Management app is generated.|Function|
@@ -874,7 +873,7 @@ Below is an example of a rule that takes advantage of templating:
         "from": "example@elastic.co",
         "to": ["destination@elastic.co"],
         "subject": "A notification about {{context.server}}",
-        "body": "The server {{context.server}} has a CPU usage of {{state.cpuUsage}}%. This message for {{alertInstanceId}} was created by the rule {{alertId}} {{alertName}}."
+        "body": "The server {{context.server}} has a CPU usage of {{state.cpuUsage}}%. This message for {{alert.id}} was created by the rule {{rule.id}} {{rule.name}}."
       }
     }
   ]

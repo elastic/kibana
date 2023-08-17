@@ -7,9 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  copyToClipboard,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiButton,
+  EuiButtonIcon,
   EuiLink,
   EuiMarkdownFormat,
   EuiSpacer,
@@ -144,9 +146,24 @@ function ConfigurationValueColumn({
   }
 
   return (
-    <EuiText size="s" color="accent">
-      {value}
-    </EuiText>
+    <>
+      <EuiText size="s" color="accent">
+        {value}
+      </EuiText>
+      {value && (
+        <EuiButtonIcon
+          aria-label={i18n.translate(
+            'xpack.apm.onboarding.otel.column.value.copyIconText',
+            {
+              defaultMessage: 'Copy to clipboard',
+            }
+          )}
+          color="text"
+          iconType="copy"
+          onClick={() => copyToClipboard(value)}
+        />
+      )}
+    </>
   );
 }
 
@@ -196,6 +213,7 @@ export function OpenTelemetryInstructions({
   const columns: Array<EuiBasicTableColumn<ValuesType<typeof items>>> = [
     {
       field: 'setting',
+      width: '23%',
       name: i18n.translate(
         'xpack.apm.onboarding.config_otel.column.configSettings',
         {
@@ -205,6 +223,7 @@ export function OpenTelemetryInstructions({
     },
     {
       field: 'value',
+      width: '55%',
       name: i18n.translate(
         'xpack.apm.onboarding.config_otel.column.configValue',
         {

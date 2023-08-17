@@ -45,17 +45,17 @@ const ActionTypeFieldComponent = ({
   const fieldOptions = useMemo(
     () =>
       ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.map((name) => {
-        const isDisabled =
-          map(data.responseActions, 'params.command').includes(name) ||
-          !getRbacControl({
-            commandName: getUiCommand(name),
-            privileges: endpointPrivileges,
-          });
+        const missingRbac = !getRbacControl({
+          commandName: getUiCommand(name),
+          privileges: endpointPrivileges,
+        });
+        const commandAlreadyExists = map(data.responseActions, 'params.command').includes(name);
+        const isDisabled = commandAlreadyExists || missingRbac;
 
         return {
           value: name,
           inputDisplay: name,
-          dropdownDisplay: <EndpointActionText name={name} />,
+          dropdownDisplay: <EndpointActionText name={name} isDisabled={missingRbac} />,
           disabled: isDisabled,
           'data-test-subj': `command-type-${name}`,
         };
@@ -74,7 +74,7 @@ const ActionTypeFieldComponent = ({
         helpText: (
           <FormattedMessage
             id="xpack.securitySolution.responseActions.endpoint.commandDescription"
-            defaultMessage="Select an Endpoint response action. The response action only runs on hosts with Elastic Defend installed. {docs}"
+            defaultMessage="Select an endpoint response action. The response action only runs on hosts with Elastic Defend installed. {docs}"
             values={{
               docs: (
                 <EuiLink href={responseActions} target="_blank">
@@ -90,7 +90,7 @@ const ActionTypeFieldComponent = ({
               i18n.translate(
                 'xpack.securitySolution.responseActions.endpoint.validations.commandIsRequiredErrorMessage',
                 {
-                  defaultMessage: 'A command is required.',
+                  defaultMessage: 'Action is a required field.',
                 }
               )
             ),

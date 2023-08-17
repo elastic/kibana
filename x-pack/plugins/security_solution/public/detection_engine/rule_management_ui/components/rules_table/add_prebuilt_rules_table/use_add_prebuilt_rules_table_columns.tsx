@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonEmpty, EuiBadge, EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButtonEmpty, EuiBadge, EuiText, EuiLoadingSpinner, EuiLink } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
 import { PopoverItems } from '../../../../../common/components/popover_items';
@@ -15,23 +15,42 @@ import { IntegrationsPopover } from '../../../../../detections/components/rules/
 import { SeverityBadge } from '../../../../../detections/components/rules/severity_badge';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import type { Rule } from '../../../../rule_management/logic';
-import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
+import type { RuleInstallationInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { useUserData } from '../../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import type { AddPrebuiltRulesTableActions } from './add_prebuilt_rules_table_context';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
-import type { RuleSignatureId } from '../../../../../../common/detection_engine/rule_schema';
+import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { getNormalizedSeverity } from '../helpers';
 
 export type TableColumn = EuiBasicTableColumn<RuleInstallationInfoForReview>;
 
+interface RuleNameProps {
+  name: string;
+  ruleId: string;
+}
+
+const RuleName = ({ name, ruleId }: RuleNameProps) => {
+  const {
+    actions: { openFlyoutForRuleId },
+  } = useAddPrebuiltRulesTableContext();
+
+  return (
+    <EuiLink
+      onClick={() => {
+        openFlyoutForRuleId(ruleId);
+      }}
+    >
+      {name}
+    </EuiLink>
+  );
+};
+
 export const RULE_NAME_COLUMN: TableColumn = {
   field: 'name',
   name: i18n.COLUMN_RULE,
-  render: (value: RuleInstallationInfoForReview['name']) => (
-    <EuiText id={value} size="s">
-      {value}
-    </EuiText>
+  render: (value: RuleInstallationInfoForReview['name'], rule: RuleInstallationInfoForReview) => (
+    <RuleName name={value} ruleId={rule.rule_id} />
   ),
   sortable: true,
   truncateText: true,
@@ -85,14 +104,21 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 
 const createInstallButtonColumn = (
   installOneRule: AddPrebuiltRulesTableActions['installOneRule'],
-  loadingRules: RuleSignatureId[]
+  loadingRules: RuleSignatureId[],
+  isDisabled: boolean
 ): TableColumn => ({
   field: 'rule_id',
   name: '',
   render: (ruleId: RuleSignatureId) => {
     const isRuleInstalling = loadingRules.includes(ruleId);
+    const isInstallButtonDisabled = isRuleInstalling || isDisabled;
     return (
-      <EuiButtonEmpty size="s" disabled={isRuleInstalling} onClick={() => installOneRule(ruleId)}>
+      <EuiButtonEmpty
+        size="s"
+        disabled={isInstallButtonDisabled}
+        onClick={() => installOneRule(ruleId)}
+        data-test-subj={`installSinglePrebuiltRuleButton-${ruleId}`}
+      >
         {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : i18n.INSTALL_RULE_BUTTON}
       </EuiButtonEmpty>
     );
@@ -106,9 +132,11 @@ export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const {
-    state: { loadingRules },
+    state: { loadingRules, isRefetching, isUpgradingSecurityPackages },
     actions: { installOneRule },
   } = useAddPrebuiltRulesTableContext();
+
+  const isDisabled = isRefetching || isUpgradingSecurityPackages;
 
   return useMemo(
     () => [
@@ -135,8 +163,10 @@ export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
         truncateText: true,
         width: '12%',
       },
-      ...(hasCRUDPermissions ? [createInstallButtonColumn(installOneRule, loadingRules)] : []),
+      ...(hasCRUDPermissions
+        ? [createInstallButtonColumn(installOneRule, loadingRules, isDisabled)]
+        : []),
     ],
-    [hasCRUDPermissions, installOneRule, loadingRules, showRelatedIntegrations]
+    [hasCRUDPermissions, installOneRule, loadingRules, isDisabled, showRelatedIntegrations]
   );
 };

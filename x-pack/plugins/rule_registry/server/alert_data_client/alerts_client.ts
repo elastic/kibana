@@ -38,7 +38,7 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
 import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import { BrowserFields } from '../../common';
@@ -132,7 +132,7 @@ interface SingleSearchAfterAndAudit {
   aggs?: Record<string, any> | undefined;
   index?: string;
   _source?: string[] | undefined;
-  track_total_hits?: boolean | undefined;
+  track_total_hits?: boolean | number;
   size?: number | undefined;
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
   sort?: estypes.SortOptions[] | undefined;
@@ -966,7 +966,7 @@ export class AlertsClient {
     search_after?: Array<string | number>;
     size?: number;
     sort?: estypes.SortOptions[];
-    track_total_hits?: boolean;
+    track_total_hits?: boolean | number;
     _source?: string[];
   }) {
     try {
@@ -1085,7 +1085,7 @@ export class AlertsClient {
     indices: string[];
     metaFields: string[];
     allowNoIndex: boolean;
-  }): Promise<BrowserFields> {
+  }): Promise<{ browserFields: BrowserFields; fields: FieldDescriptor[] }> {
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
     const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
       pattern: indices,
@@ -1093,7 +1093,10 @@ export class AlertsClient {
       fieldCapsOptions: { allow_no_indices: allowNoIndex },
     });
 
-    return fieldDescriptorToBrowserFieldMapper(fields);
+    return {
+      browserFields: fieldDescriptorToBrowserFieldMapper(fields),
+      fields,
+    };
   }
 
   public async getAADFields({ ruleTypeId }: { ruleTypeId: string }) {

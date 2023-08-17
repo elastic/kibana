@@ -99,16 +99,18 @@ To filter your dashboard by your map bounds as you pan and zoom your map:
 
 A spatial filter narrows search results to documents that either intersect with, are within, or do not intersect with the specified geometry.
 
-You can create spatial filters in two ways:
-
-* Click the tool icon image:maps/images/tools_icon.png[], and then draw a shape, bounding box, or distance on the map to define the spatial filter.
-* Click *Filter by geometry* in a <<maps-vector-tooltip-locking, locked tooltip>>, and then use the feature's geometry for the spatial filter.
-
 Spatial filters have the following properties:
 
 * *Geometry label* enables you to provide a meaningful name for your spatial filter.
 * *Spatial relation* determines the {ref}/query-dsl-geo-shape-query.html#geo-shape-spatial-relations[spatial relation operator] to use at search time.
-* *Action* specifies whether to apply the filter to the current view or to a drilldown action. Only available when the map is a panel in a {kibana-ref}/dashboard.html[dashboard] with {kibana-ref}/drilldowns.html[drilldowns].
+* *Action* specifies whether to apply the filter to the current view or to a drilldown action. 
+
+NOTE: {kibana-ref}/drilldowns.html[Drilldowns] are available only if the map is a panel in a {kibana-ref}/dashboard.html[dashboard], and not within the Maps application.
+
+You can create spatial filters in two ways:
+
+* Click the tool icon image:maps/images/tools_icon.png[tool icon], and then draw a shape, bounding box, or distance on the map to define the spatial filter.
+* Click *Filter by geometry* in a <<maps-vector-tooltip-locking, locked tooltip>>, and then use the feature's geometry for the spatial filter.
 
 [role="screenshot"]
 image::maps/images/create_spatial_filter.png[]

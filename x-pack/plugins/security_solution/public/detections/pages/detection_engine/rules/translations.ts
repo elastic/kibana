@@ -400,13 +400,6 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_TITLE = i18n.translate(
   }
 );
 
-export const BATCH_ACTION_DELETE_SELECTED_IMMUTABLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deleteSelectedImmutableTitle',
-  {
-    defaultMessage: 'Selection contains immutable rules which cannot be deleted',
-  }
-);
-
 export const EXPORT_FILENAME = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.exportFilenameTitle',
   {
@@ -858,17 +851,24 @@ export const IMPORT_FAILED_DETAILED = (message: string) =>
     }
   );
 
-export const DELETE_CONFIRMATION_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationTitle',
+export const BULK_DELETE_CONFIRMATION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkDeleteConfirmationTitle',
   {
     defaultMessage: 'Confirm bulk deletion',
+  }
+);
+
+export const SINGLE_DELETE_CONFIRMATION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.singleDeleteConfirmationTitle',
+  {
+    defaultMessage: 'Confirm deletion',
   }
 );
 
 export const DELETE_CONFIRMATION_CONFIRM = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationConfirm',
   {
-    defaultMessage: 'Confirm',
+    defaultMessage: 'Delete',
   }
 );
 
@@ -876,14 +876,6 @@ export const DELETE_CONFIRMATION_CANCEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationCancel',
   {
     defaultMessage: 'Cancel',
-  }
-);
-
-export const DELETE_CONFIRMATION_BODY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationBody',
-  {
-    defaultMessage:
-      'This action will delete all rules that match current filter query. Click "Confirm" to continue.',
   }
 );
 
@@ -1154,13 +1146,6 @@ export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (
     }
   );
 
-export const RULE_PREVIEW_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.rulePreviewTitle',
-  {
-    defaultMessage: 'Rule preview',
-  }
-);
-
 export const CANCEL_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel',
   {
@@ -1223,5 +1208,12 @@ export const GO_BACK_TO_RULES_TABLE_BUTTON = i18n.translate(
   'xpack.securitySolution.addRules.goBackToRulesTableButton',
   {
     defaultMessage: 'Go back to installed Elastic rules',
+  }
+);
+
+export const RULE_UPDATES_DOCUMENTATION_LINK = i18n.translate(
+  'xpack.securitySolution.ruleUpdates.documentationLink',
+  {
+    defaultMessage: "See what's new in Prebuilt Security Detection Rules",
   }
 );

@@ -34,6 +34,7 @@ export const EPM_API_ROUTES = {
   DATA_STREAMS_PATTERN: `${EPM_API_ROOT}/data_streams`,
   INSTALL_FROM_REGISTRY_PATTERN: EPM_PACKAGES_ONE,
   INSTALL_BY_UPLOAD_PATTERN: EPM_PACKAGES_MANY,
+  CUSTOM_INTEGRATIONS_PATTERN: `${EPM_API_ROOT}/custom_integrations`,
   DELETE_PATTERN: EPM_PACKAGES_ONE,
   FILEPATH_PATTERN: `${EPM_PACKAGES_ONE}/{filePath*}`,
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
@@ -171,6 +172,7 @@ export const ENROLLMENT_API_KEY_ROUTES = {
 
 export const UNINSTALL_TOKEN_ROUTES = {
   LIST_PATTERN: `${API_ROOT}/uninstall_tokens`,
+  INFO_PATTERN: `${API_ROOT}/uninstall_tokens/{uninstallTokenId}`,
 };
 
 // Agents setup API routes

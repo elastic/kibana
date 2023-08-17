@@ -10,8 +10,8 @@ import { useToasts } from '../common/lib/kibana';
 import { usePostPushToService } from './use_post_push_to_service';
 import { pushedCase } from './mock';
 import * as api from './api';
-import type { CaseConnector } from '../../common/api';
-import { ConnectorTypes } from '../../common/api';
+import type { CaseConnector } from '../../common/types/domain';
+import { ConnectorTypes } from '../../common/types/domain';
 import { createAppMockRenderer } from '../common/mock';
 import type { AppMockRenderer } from '../common/mock';
 import { casesQueriesKeys } from './constants';
@@ -20,7 +20,6 @@ jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 describe('usePostPushToService', () => {
-  const abortCtrl = new AbortController();
   const connector = {
     id: '123',
     name: 'My connector',
@@ -69,7 +68,7 @@ describe('usePostPushToService', () => {
 
     await waitForNextUpdate();
 
-    expect(spy).toHaveBeenCalledWith(caseId, connector.id, abortCtrl.signal);
+    expect(spy).toHaveBeenCalledWith({ caseId, connectorId: connector.id });
   });
 
   it('shows a success toaster', async () => {

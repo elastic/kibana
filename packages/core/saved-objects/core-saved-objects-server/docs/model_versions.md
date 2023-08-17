@@ -1,5 +1,22 @@
 # savedObjects: Model Version API
 
+## Table of contents
+
+- [Introduction](#introduction)
+- [What are model versions trying to solve?](#what-are-model-versions-trying-to-solve)
+- [Defining model versions](#defining-model-versions)
+- [Structure of a model version](#structure-of-a-model-version)
+  - [changes](#changes)
+  - [schemas](#schemas)
+- [Examples](#use-case-examples) 
+  - [Adding a non-indexed field without default value](#adding-a-non-indexed-field-without-default-value) 
+  - [Adding an indexed field without default value](#adding-an-indexed-field-without-default-value)
+  - [Adding an indexed field with a default value](#adding-an-indexed-field-with-a-default-value)
+  - [Removing an existing field](#removing-an-existing-field)
+- [Limitations and edge cases in serverless environments](#limitations-and-edge-cases-in-serverless-environments)
+  - [Using the fields option of the find api](#using-the-fields-option-of-the-find-savedobjects-api)
+  - [Using update with dynamically backfilled fields](#using-update-with-dynamically-backfilled-fields)
+
 ## Introduction
 
 The modelVersion API is a new way to define transformations (*"migrations"*) for your savedObject types, and will 
@@ -203,7 +220,7 @@ let change: SavedObjectsModelMappingsDeprecationChange = {
 
 #### - data_backfill
 
-Used to populate fields (indexed or not) added in the same version
+Used to populate fields (indexed or not) added in the same version.
 
 *Usage example:*
 
@@ -211,14 +228,51 @@ Used to populate fields (indexed or not) added in the same version
 let change: SavedObjectsModelDataBackfillChange = {
   type: 'data_backfill',
   transform: (document) => {
-    document.attributes.someAddedField = 'defaultValue';
-    return { document };
+    return { attributes: { someAddedField: 'defaultValue' } };
   },
 };
 ```
 
 **note:** *Even if no check is performed to ensure it, this type of model change should only be used to 
            backfill newly introduced fields.*
+
+#### - data_removal
+
+Used to remove data (unset fields) from all documents of the type. 
+
+*Usage example:*
+
+```ts
+let change: SavedObjectsModelDataRemovalChange = {
+  type: 'data_removal',
+  attributePaths: ['someRootAttributes', 'some.nested.attribute'],
+};
+```
+
+**note:** *Due to backward compatibility, field utilization must be stopped in a prior release
+           before actual data removal (in case of rollback). Please refer to the field removal migration example
+           below in this document*
+
+#### - unsafe_transform
+
+Used to execute an arbitrary transformation function.
+
+*Usage example:*
+
+```ts
+let change: SavedObjectsModelUnsafeTransformChange = {
+  type: 'unsafe_transform',
+  transformFn: (document) => {
+    document.attributes.someAddedField = 'defaultValue';
+    return { document };
+  },
+};
+```
+
+**note:** *Using such transformations is potentially unsafe, given the migration system will have
+           no knowledge of which kind of operations will effectively be executed against the documents.
+           Those should only be used when there's no other way to cover one's migration needs.*
+           **Please reach out to the Core team if you think you need to use this, as you theoretically shouldn't.**
 
 ### schemas
 
@@ -519,8 +573,7 @@ let modelVersion2: SavedObjectsModelVersion = {
     {
       type: 'data_backfill',
       transform: (document) => {
-        document.attributes.dolly = 'default_value';
-        return { document };
+        return { attributes: { dolly: 'default_value' } };
       },
     },
     // define the mappings for the new field
@@ -577,8 +630,7 @@ const myType: SavedObjectsType = {
         {
           type: 'data_backfill',
           transform: (document) => {
-            document.attributes.dolly = 'default_value';
-            return { document };
+            return { attributes: { dolly: 'default_value' } };
           },
         },
         {
@@ -610,3 +662,299 @@ const myType: SavedObjectsType = {
 ```
 
 **Note:**  *if the field was non-indexed, we would just not use the `mappings_addition` change or update the mappings (as done in example 1)*
+
+### Removing an existing field
+
+We are currently in model version 1, and our type has 2 indexed fields defined: `kept` and `removed`.
+
+The definition of the type at version 1 would look like:
+
+```ts
+const myType: SavedObjectsType = {
+  name: 'test',
+  namespaceType: 'single',
+  switchToModelVersionAt: '8.10.0',
+  modelVersions: {
+    // initial (and current) model version
+    1: {
+      changes: [],
+      schemas: {
+        // FC schema defining the known fields (indexed or not) for this version
+        forwardCompatibility: schema.object(
+          { kept: schema.string(), removed: schema.string() },
+          { unknowns: 'ignore' } // note the `unknown: ignore` which is how we're evicting the unknown fields
+        ),
+        // schema that will be used to validate input during `create` and `bulkCreate`
+        create:  schema.object(
+          { kept: schema.string(), removed: schema.string() },
+        )
+      },
+    },
+  },
+  mappings: {
+    properties: {
+      kept: { type: 'text' },
+      removed: { type: 'text' },
+    },
+  },
+};
+```
+
+From here, say we want to remove the `removed` field, as our application doesn't need it anymore since a recent change.
+
+The first thing to understand here is the impact toward backward compatibility:
+Say that Kibana version `X` was still using this field, and that we stopped utilizing the field in version `X+1`.
+
+We can't remove the data in version `X+1`, as we need to be able to rollback to the prior version at **any time**. 
+If we were to delete the data of this `removed` field during the upgrade to version `X+1`, and if then, for any reason,
+we'd need to rollback to version `X`,  it would cause a data loss, as version `X` was still using this field, but it would
+no longer present in our document after the rollback.
+
+Which is why we need to perform any field removal as a 2-step operation:
+- release `X`: Kibana still utilize the field
+- release `X+1`: Kibana no longer utilize the field, but the data is still present in the documents
+- release `X+2`: The data is effectively deleted from the documents.
+
+That way, any prior-version rollback (`X+2` to `X+1` **or** `X+1` to `X` is safe in term of data integrity)
+
+The main question then, is what's the best way of having our application layer simply ignore this `removed` field during version `X+1`,
+as we don't want this field (now non-utilized) to be returned from the persistence layer, as it could "pollute" the higher-layers
+where the field is effectively no longer used or even known.
+
+This can easily be done by introducing a new version and using the `forwardCompatibility` schema to "shallow" the field.
+
+The `X+1` model version would look like:
+
+```ts
+// the new model version ignoring the `removed` field
+let modelVersion2: SavedObjectsModelVersion = {
+  changes: [],
+  schemas: {
+    forwardCompatibility: schema.object(
+      { kept: schema.string() }, // `removed` is no longer defined here
+      { unknowns: 'ignore' }
+    ),
+    create:  schema.object(
+      { kept: schema.string() }, // `removed` is no longer defined here
+    )
+  },
+};
+```
+
+The full type definition after the addition of the new model version:
+
+```ts
+const myType: SavedObjectsType = {
+  name: 'test',
+  namespaceType: 'single',
+  switchToModelVersionAt: '8.10.0',
+  modelVersions: {
+    // initial (and current) model version
+    1: {
+      changes: [],
+      schemas: {
+        // FC schema defining the known fields (indexed or not) for this version
+        forwardCompatibility: schema.object(
+          { kept: schema.string(), removed: schema.string() },
+          { unknowns: 'ignore' } // note the `unknown: ignore` which is how we're evicting the unknown fields
+        ),
+        // schema that will be used to validate input during `create` and `bulkCreate`
+        create:  schema.object(
+          { kept: schema.string(), removed: schema.string() },
+        )
+      },
+    },
+    2: {
+      changes: [],
+      schemas: {
+        forwardCompatibility: schema.object(
+          { kept: schema.string() }, // `removed` is no longer defined here
+          { unknowns: 'ignore' }
+        ),
+        create:  schema.object(
+          { kept: schema.string() }, // `removed` is no longer defined here
+        )
+      },
+    }
+  },
+  mappings: {
+    properties: {
+      kept: { type: 'text' },
+      removed: { type: 'text' },
+    },
+  },
+};
+```
+
+then, in a **later** release, we can then deploy the change that will effectively remove the data from the documents:
+
+```ts
+// the new model version ignoring the `removed` field
+let modelVersion3: SavedObjectsModelVersion = {
+  changes: [ // define a data_removal change to delete the field
+    {
+      type: 'data_removal',
+      removedAttributePaths: ['removed']
+    }
+  ],
+  schemas: {
+    forwardCompatibility: schema.object(
+      { kept: schema.string() }, 
+      { unknowns: 'ignore' }
+    ),
+    create:  schema.object(
+      { kept: schema.string() }, 
+    )
+  },
+};
+```
+
+The full type definition after the data removal would look like:
+
+```ts
+const myType: SavedObjectsType = {
+  name: 'test',
+  namespaceType: 'single',
+  switchToModelVersionAt: '8.10.0',
+  modelVersions: {
+    // initial (and current) model version
+    1: {
+      changes: [],
+      schemas: {
+        // FC schema defining the known fields (indexed or not) for this version
+        forwardCompatibility: schema.object(
+          { kept: schema.string(), removed: schema.string() },
+          { unknowns: 'ignore' } // note the `unknown: ignore` which is how we're evicting the unknown fields
+        ),
+        // schema that will be used to validate input during `create` and `bulkCreate`
+        create:  schema.object(
+          { kept: schema.string(), removed: schema.string() },
+        )
+      },
+    },
+    2: {
+      changes: [],
+      schemas: {
+        forwardCompatibility: schema.object(
+          { kept: schema.string() }, // `removed` is no longer defined here
+          { unknowns: 'ignore' }
+        ),
+        create:  schema.object(
+          { kept: schema.string() }, // `removed` is no longer defined here
+        )
+      },
+    },
+    3: {
+      changes: [ // define a data_removal change to delete the field
+        {
+          type: 'data_removal',
+          removedAttributePaths: ['removed']
+        }
+      ],
+      schemas: {
+        forwardCompatibility: schema.object(
+          { kept: schema.string() },
+          { unknowns: 'ignore' }
+        ),
+        create:  schema.object(
+          { kept: schema.string() },
+        )
+      },
+    }
+  },
+  mappings: {
+    properties: {
+      kept: { type: 'text' },
+      removed: { type: 'text' },
+    },
+  },
+};
+```
+
+## Limitations and edge cases in serverless environments
+
+The serverless environment, and the fact that upgrade in such environments are performed in a way
+where, at some point, the old and new version of the application are living in cohabitation, leads 
+to some particularities regarding the way the SO APIs works, and to some limitations / edge case
+that we need to document
+
+### Using the `fields` option of the `find` savedObjects API
+
+By default, the `find` API (as any other SO API returning documents) will migrate all documents before
+returning them, to ensure that documents can be used by both versions during a cohabitation (e.g an old
+node searching for documents already migrated, or a new node searching for documents not yet migrated).
+
+However, when using the `fields` option of the `find` API, the documents can't be migrated, as some
+model version changes can't be applied against a partial set of attributes. For this reason, when the
+`fields` option is provided, the documents returned from `find` will **not** be migrated.
+
+Which is why, when using this option, the API consumer needs to make sure that *all* the fields passed
+to the `fields` option **were already present in the prior model version**. Otherwise, it may lead to inconsistencies
+during upgrades, where newly introduced or backfilled fields may not necessarily appear in the documents returned
+from the `search` API when the option is used.
+
+### Using `update` with dynamically backfilled fields
+
+The savedObjects `update` API is effectively a partial update (using Elasticsearch's `_update` under the hood),
+allowing API consumers to only specify the subset of fields they want to update to new values, without having to
+provide the full list of attributes (the unchanged ones). We're also not changing the `version` of the document
+during updates, even when the instance performing the operation doesn't know about the current model version
+of the document (e.g an old node during an upgrade).
+
+If this was fine before zero downtime upgrades, there is an edge case in serverless when this API is used
+to update fields that are the "source" of another field's backfill that can potentially lead to data becoming inconsistent.
+
+For example, imagine that:
+
+1. In model version 1, we have some `index (number)` field.
+
+2. In model version 2, we introduce a `odd (boolean)` field that is backfilled with the following function:
+
+```ts
+let change: SavedObjectsModelDataBackfillChange = {
+  type: 'data_backfill',
+  backfillFn: (doc, ctx) => {
+    return { attributes: { odd: doc.attributes.index % 2 === 1 } };
+  },
+};
+```
+
+3. During the cohabitation period (upgrade), an instance of the new version of Kibana creates a document 
+
+E.g with the following attributes:
+
+```ts
+const newDocAttributes = {
+  index: 12,
+  odd: false,
+}
+```
+
+4. Then an instance of the old version of Kibana updates the `index` field of this document
+
+Which could occur either while being still in the cohabitation period, or in case of rollback:
+
+```ts
+savedObjectClient.update('type', 'id', {
+  index: 11,
+});
+```
+
+We will then be in a situation where our data is **inconsistent**, as the value of the `odd` field wasn't recomputed:
+
+```json
+{
+  index: 11,
+  odd: false,
+}
+```
+
+The long term solution for that is implementing [backward-compatible updates](https://github.com/elastic/kibana/issues/152807), however
+this won't be done for the MVP, so the workaround for now is to avoid situations where this edge case can occur.
+
+It can be avoided by either:
+
+1. Not having backfill functions depending on the value of the existing fields (*recommended*)
+
+2. Not performing update operations impacting fields that are used as "source" for backfill functions
+   (*note*: both the previous and next version of Kibana must follow this rule then)

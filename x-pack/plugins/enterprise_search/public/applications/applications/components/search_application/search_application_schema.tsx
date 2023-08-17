@@ -353,7 +353,7 @@ export const SearchApplicationSchema: React.FC = () => {
         {hasSchemaConflicts && (
           <EuiCallOut
             title={i18n.translate(
-              'xpack.enterpriseSearch.content.applications.schema.conflictsCallOut.title',
+              'xpack.enterpriseSearch.searchApplications.searchApplication.schema.conflictsCallOut.title',
               { defaultMessage: 'Potential field mapping issues found' }
             )}
             iconType="error"
@@ -361,14 +361,14 @@ export const SearchApplicationSchema: React.FC = () => {
           >
             <p>
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.applications.schema.conflictsCallOut.description"
+                id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.conflictsCallOut.description"
                 defaultMessage="Schema field type conflicts can be resolved by navigating to the source index directly and updating the field type of the conflicting field(s) to match that of the other source indices."
               />
             </p>
             {!onlyShowConflicts && (
               <EuiButton color="danger" fill onClick={toggleOnlyShowConflicts}>
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.content.applications.schema.conflictsCallOut.button"
+                  id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.conflictsCallOut.button"
                   defaultMessage="View conflicts"
                 />
               </EuiButton>

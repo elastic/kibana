@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/discover-log-explorer-plugin",
+  "owner": "@elastic/infra-monitoring-ui",
+  "description": "This plugin exposes and registers Logs+ features.",
+  "plugin": {
+    "id": "discoverLogExplorer",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "discoverLogExplorer"],
+    "requiredPlugins": ["data", "dataViews", "discover", "fleet", "kibanaReact", "kibanaUtils", "controls", "embeddable"],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}

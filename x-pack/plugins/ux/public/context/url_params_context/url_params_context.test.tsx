@@ -10,8 +10,8 @@ import { mount } from 'enzyme';
 import { History, Location } from 'history';
 import moment from 'moment-timezone';
 import * as React from 'react';
-import { MemoryRouter, Router } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
+import { MemoryRouter, Router } from '@kbn/shared-ux-router';
+
 import type { UrlParams } from './types';
 import { UrlParamsContext, UrlParamsProvider } from './url_params_context';
 
@@ -165,27 +165,25 @@ describe('UrlParamsContext', () => {
 
     const wrapper = mount(
       <Router history={history}>
-        <CompatRouter>
-          <UrlParamsProvider>
-            <UrlParamsContext.Consumer>
-              {({ urlParams, refreshTimeRange }) => {
-                return (
-                  <React.Fragment>
-                    <span id="data">{JSON.stringify(urlParams, null, 2)}</span>
-                    <button
-                      onClick={() =>
-                        refreshTimeRange({
-                          rangeFrom: 'now-1d/d',
-                          rangeTo: 'now-1d/d',
-                        })
-                      }
-                    />
-                  </React.Fragment>
-                );
-              }}
-            </UrlParamsContext.Consumer>
-          </UrlParamsProvider>
-        </CompatRouter>
+        <UrlParamsProvider>
+          <UrlParamsContext.Consumer>
+            {({ urlParams, refreshTimeRange }) => {
+              return (
+                <React.Fragment>
+                  <span id="data">{JSON.stringify(urlParams, null, 2)}</span>
+                  <button
+                    onClick={() =>
+                      refreshTimeRange({
+                        rangeFrom: 'now-1d/d',
+                        rangeTo: 'now-1d/d',
+                      })
+                    }
+                  />
+                </React.Fragment>
+              );
+            }}
+          </UrlParamsContext.Consumer>
+        </UrlParamsProvider>
       </Router>
     );
 

@@ -38,7 +38,11 @@ import {
   DeprecatedRowRenderer,
   TimelineItem,
 } from '@kbn/timelines-plugin/common';
-import { useDataGridColumnsCellActions } from '@kbn/cell-actions';
+import {
+  useDataGridColumnsCellActions,
+  UseDataGridColumnsCellActionsProps,
+} from '@kbn/cell-actions';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { DataTableModel, DataTableState } from '../../store/data_table/types';
 
 import { getColumnHeader, getColumnHeaders } from './column_headers/helpers';
@@ -93,6 +97,7 @@ interface BaseDataTableProps {
   rowHeightsOptions?: EuiDataGridRowHeightsOptions;
   isEventRenderedView?: boolean;
   getFieldBrowser: GetFieldBrowser;
+  getFieldSpec: (fieldName: string) => FieldSpec | undefined;
   cellActionsTriggerId?: string;
 }
 
@@ -132,6 +137,7 @@ const memoizedGetColumnHeaders: (
   isEventRenderedView: boolean
 ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
+// eslint-disable-next-line react/display-name
 export const DataTableComponent = React.memo<DataTableProps>(
   ({
     additionalControls,
@@ -151,6 +157,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
     rowHeightsOptions,
     isEventRenderedView = false,
     getFieldBrowser,
+    getFieldSpec,
     cellActionsTriggerId,
     ...otherProps
   }) => {
@@ -327,36 +334,38 @@ export const DataTableComponent = React.memo<DataTableProps>(
       [dispatch, id]
     );
 
-    const columnsCellActionsProps = useMemo(() => {
-      const columnsCellActionData = !cellActionsTriggerId
-        ? []
-        : columnHeaders.map((column) => ({
-            // TODO use FieldSpec object instead of column
-            field: {
-              name: column.id,
-              type: column.type ?? 'keyword',
-              aggregatable: column.aggregatable ?? false,
-              searchable: column.searchable ?? false,
-              esTypes: column.esTypes ?? [],
-              subType: column.subType,
-            },
-            values: data.map(
-              ({ data: columnData }) =>
-                columnData.find((rowData) => rowData.field === column.id)?.value
-            ),
-          }));
+    const cellActionsMetadata = useMemo(() => ({ scopeId: id }), [id]);
+    const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
+      () =>
+        cellActionsTriggerId
+          ? columnHeaders.map(
+              (column) =>
+                getFieldSpec(column.id) ?? {
+                  name: column.id,
+                  type: '', // When type is an empty string all cell actions are incompatible
+                  aggregatable: false,
+                  searchable: false,
+                }
+            )
+          : undefined,
+      [cellActionsTriggerId, columnHeaders, getFieldSpec]
+    );
 
-      return {
-        triggerId: cellActionsTriggerId || '',
-        data: columnsCellActionData,
-        metadata: {
-          scopeId: id,
-        },
-        dataGridRef,
-      };
-    }, [columnHeaders, cellActionsTriggerId, id, data]);
+    const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
+      (fieldName, rowIndex) => {
+        const pageIndex = rowIndex % data.length;
+        return data[pageIndex].data.find((rowData) => rowData.field === fieldName)?.value;
+      },
+      [data]
+    );
 
-    const columnsCellActions = useDataGridColumnsCellActions(columnsCellActionsProps);
+    const columnsCellActions = useDataGridColumnsCellActions({
+      triggerId: cellActionsTriggerId,
+      fields: cellActionsFields,
+      getCellValue,
+      metadata: cellActionsMetadata,
+      dataGridRef,
+    });
 
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>
@@ -469,5 +478,3 @@ export const DataTableComponent = React.memo<DataTableProps>(
     );
   }
 );
-
-DataTableComponent.displayName = 'DataTableComponent';

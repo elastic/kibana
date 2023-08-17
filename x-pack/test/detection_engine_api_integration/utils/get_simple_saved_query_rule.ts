@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedQueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import type { SavedQueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 /**
  * This is a typical simple saved_query rule for e2e testing

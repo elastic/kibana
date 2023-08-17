@@ -9,6 +9,7 @@ import React from 'react';
 import moment from 'moment';
 import { Direction, EuiBasicTable } from '@elastic/eui';
 import { Cert, CertMonitor, CertResult } from '../../../../../common/runtime_types';
+import { useDateFormat } from '../../../../hooks/use_date_format';
 import { CertStatus } from './cert_status';
 import { CertMonitors } from './cert_monitors';
 import * as labels from './translations';
@@ -46,10 +47,7 @@ interface Props {
 }
 
 export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onChange }) => {
-  const onTableChange = (newVal: Partial<Props>) => {
-    onChange(newVal.page as Page, newVal.sort as CertSort);
-  };
-
+  const dateFormatter = useDateFormat();
   const pagination = {
     pageIndex: page.index,
     pageSize: page.size,
@@ -84,7 +82,7 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
       name: labels.VALID_UNTIL_COL,
       field: 'not_after',
       sortable: true,
-      render: (value: string) => moment(value).format('L LT'),
+      render: dateFormatter,
     },
     {
       name: labels.AGE_COL,
@@ -105,7 +103,9 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
       columns={columns}
       items={certificates?.certs ?? []}
       pagination={pagination}
-      onChange={onTableChange}
+      onChange={(newVal) => {
+        onChange(newVal.page as Page, newVal.sort as CertSort);
+      }}
       sorting={{
         sort: {
           field: sort.field,

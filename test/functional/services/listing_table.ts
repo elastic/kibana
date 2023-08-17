@@ -39,12 +39,18 @@ export class ListingTableService extends FtrService {
   }
 
   /**
+   * Set search input value on landing page
+   */
+  public async setSearchFilterValue(value: string) {
+    const searchFilter = await this.getSearchFilter();
+    searchFilter.type(value);
+  }
+
+  /**
    * Clears search input on landing page
    */
   public async clearSearchFilter() {
-    const searchFilter = await this.getSearchFilter();
-    await searchFilter.clearValue();
-    await searchFilter.click();
+    this.testSubjects.click('clearSearchButton');
   }
 
   private async getAllItemsNamesOnCurrentPage(): Promise<string[]> {
@@ -254,6 +260,10 @@ export class ListingTableService extends FtrService {
    */
   public async clickNewButton(): Promise<void> {
     await this.testSubjects.click('newItemButton');
+  }
+
+  public async isShowingEmptyPromptCreateNewButton(): Promise<void> {
+    await this.testSubjects.existOrFail('newItemButton');
   }
 
   public async onListingPage(appName: AppName) {

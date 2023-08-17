@@ -72,9 +72,9 @@ export class AssetDetailsEmbeddable extends Embeddable<AssetDetailsEmbeddableInp
           <div style={{ width: '100%' }}>
             <LazyAssetDetailsWrapper
               activeTabId={this.input.activeTabId}
-              currentTimeRange={this.input.currentTimeRange}
-              node={this.input.node}
-              nodeType={this.input.nodeType}
+              dateRange={this.input.dateRange}
+              asset={this.input.asset}
+              assetType={this.input.assetType}
               overrides={this.input.overrides}
               renderMode={this.input.renderMode}
               tabs={this.input.tabs}

@@ -19,6 +19,7 @@ import {
 import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 import { getIgnoreGlobalFilterIcon } from '../../../shared_components/ignore_global_filter/data_view_picker_icon';
 import type {
   VisualizationLayerHeaderContentProps,
@@ -96,13 +97,20 @@ function AnnotationsLayerHeader({
       }
       indicator={
         hasUnsavedChanges && (
-          <EuiIconTip
-            content={i18n.translate('xpack.lens.xyChart.unsavedChanges', {
-              defaultMessage: 'Unsaved changes',
-            })}
-            type="dot"
-            color={euiThemeVars.euiColorSuccess}
-          />
+          <div
+            css={css`
+              padding-bottom: 3px;
+              padding-left: 4px;
+            `}
+          >
+            <EuiIconTip
+              content={i18n.translate('xpack.lens.xyChart.unsavedChanges', {
+                defaultMessage: 'Unsaved changes',
+              })}
+              type="dot"
+              color={euiThemeVars.euiColorSuccess}
+            />
+          </div>
         )
       }
     />
@@ -227,6 +235,7 @@ const DataLayerHeaderTrigger = function ({
       onClick={onClick}
       fullWidth
       size="s"
+      textProps={{ style: { lineHeight: '100%' } }}
     >
       <>
         <EuiIcon type={currentVisType.icon} />

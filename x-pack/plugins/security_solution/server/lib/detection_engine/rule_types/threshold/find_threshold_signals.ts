@@ -17,7 +17,7 @@ import type { ESBoolQuery } from '../../../../../common/typed_json';
 import type {
   ThresholdNormalized,
   TimestampOverride,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { singleSearchAfter } from '../utils/single_search_after';
 import {
   buildThresholdMultiBucketAggregation,

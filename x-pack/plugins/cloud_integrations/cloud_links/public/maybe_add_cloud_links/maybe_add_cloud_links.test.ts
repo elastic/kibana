@@ -14,9 +14,10 @@ import { maybeAddCloudLinks } from './maybe_add_cloud_links';
 describe('maybeAddCloudLinks', () => {
   it('should skip if cloud is disabled', async () => {
     const security = securityMock.createStart();
+    const core = coreMock.createStart();
     maybeAddCloudLinks({
+      core,
       security,
-      chrome: coreMock.createStart().chrome,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: false },
     });
     // Since there's a promise, let's wait for the next tick
@@ -29,10 +30,11 @@ describe('maybeAddCloudLinks', () => {
     security.authc.getCurrentUser.mockResolvedValue(
       securityMock.createMockAuthenticatedUser({ elastic_cloud_user: true })
     );
-    const chrome = coreMock.createStart().chrome;
+    const core = coreMock.createStart();
+    const { chrome } = core;
     maybeAddCloudLinks({
       security,
-      chrome,
+      core,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
     });
     // Since there's a promise, let's wait for the next tick
@@ -49,21 +51,44 @@ describe('maybeAddCloudLinks', () => {
       ]
     `);
     expect(security.navControlService.addUserMenuLinks).toHaveBeenCalledTimes(1);
-    expect(security.navControlService.addUserMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(security.navControlService.addUserMenuLinks.mock.calls[0][0]).toMatchSnapshot([
+      {
+        href: 'profile-url',
+        iconType: 'user',
+        label: 'Profile',
+        order: 100,
+        setAsProfile: true,
+      },
+      {
+        href: 'billing-url',
+        iconType: 'visGauge',
+        label: 'Billing',
+        order: 200,
+      },
+      {
+        href: 'organization-url',
+        iconType: 'gear',
+        label: 'Organization',
+        order: 300,
+      },
+      expect.any(Object),
+    ]);
+
+    expect(chrome.setHelpMenuLinks).toHaveBeenCalledTimes(1);
+    expect(chrome.setHelpMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Array [
           Object {
-            "href": "profile-url",
-            "iconType": "user",
-            "label": "Edit profile",
-            "order": 100,
-            "setAsProfile": true,
+            "href": "https://www.elastic.co/guide/en/index.html",
+            "title": "Documentation",
           },
           Object {
-            "href": "organization-url",
-            "iconType": "gear",
-            "label": "Account & Billing",
-            "order": 200,
+            "href": "https://www.elastic.co/support",
+            "title": "Support",
+          },
+          Object {
+            "href": "https://www.elastic.co/products/kibana/feedback?blade=kibanafeedback",
+            "title": "Give feedback",
           },
         ],
       ]
@@ -73,10 +98,11 @@ describe('maybeAddCloudLinks', () => {
   it('when cloud enabled and it fails to fetch the user, it sets the links', async () => {
     const security = securityMock.createStart();
     security.authc.getCurrentUser.mockRejectedValue(new Error('Something went terribly wrong'));
-    const chrome = coreMock.createStart().chrome;
+    const core = coreMock.createStart();
+    const { chrome } = core;
     maybeAddCloudLinks({
       security,
-      chrome,
+      core,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
     });
     // Since there's a promise, let's wait for the next tick
@@ -93,21 +119,43 @@ describe('maybeAddCloudLinks', () => {
       ]
     `);
     expect(security.navControlService.addUserMenuLinks).toHaveBeenCalledTimes(1);
-    expect(security.navControlService.addUserMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(security.navControlService.addUserMenuLinks.mock.calls[0][0]).toMatchSnapshot([
+      {
+        href: 'profile-url',
+        iconType: 'user',
+        label: 'Profile',
+        order: 100,
+        setAsProfile: true,
+      },
+      {
+        href: 'billing-url',
+        iconType: 'visGauge',
+        label: 'Billing',
+        order: 200,
+      },
+      {
+        href: 'organization-url',
+        iconType: 'gear',
+        label: 'Organization',
+        order: 300,
+      },
+      expect.any(Object),
+    ]);
+    expect(chrome.setHelpMenuLinks).toHaveBeenCalledTimes(1);
+    expect(chrome.setHelpMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Array [
           Object {
-            "href": "profile-url",
-            "iconType": "user",
-            "label": "Edit profile",
-            "order": 100,
-            "setAsProfile": true,
+            "href": "https://www.elastic.co/guide/en/index.html",
+            "title": "Documentation",
           },
           Object {
-            "href": "organization-url",
-            "iconType": "gear",
-            "label": "Account & Billing",
-            "order": 200,
+            "href": "https://www.elastic.co/support",
+            "title": "Support",
+          },
+          Object {
+            "href": "https://www.elastic.co/products/kibana/feedback?blade=kibanafeedback",
+            "title": "Give feedback",
           },
         ],
       ]
@@ -119,10 +167,11 @@ describe('maybeAddCloudLinks', () => {
     security.authc.getCurrentUser.mockResolvedValue(
       securityMock.createMockAuthenticatedUser({ elastic_cloud_user: false })
     );
-    const chrome = coreMock.createStart().chrome;
+    const core = coreMock.createStart();
+    const { chrome } = core;
     maybeAddCloudLinks({
       security,
-      chrome,
+      core,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
     });
     // Since there's a promise, let's wait for the next tick
@@ -130,5 +179,6 @@ describe('maybeAddCloudLinks', () => {
     expect(security.authc.getCurrentUser).toHaveBeenCalledTimes(1);
     expect(chrome.setCustomNavLink).not.toHaveBeenCalled();
     expect(security.navControlService.addUserMenuLinks).not.toHaveBeenCalled();
+    expect(chrome.setHelpMenuLinks).not.toHaveBeenCalledTimes(1);
   });
 });

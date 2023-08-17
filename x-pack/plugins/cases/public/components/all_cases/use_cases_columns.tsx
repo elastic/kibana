@@ -26,9 +26,9 @@ import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
+import type { ActionConnector } from '../../../common/types/domain';
+import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui/types';
-import type { ActionConnector } from '../../../common/api';
-import { CaseStatuses, CaseSeverity } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
@@ -240,10 +240,11 @@ export const useCasesColumns = ({
     sortable: true,
     render: (category: CaseUI['category']) => {
       if (category != null) {
-        return category;
+        return <span data-test-subj={`case-table-column-category-${category}`}>{category}</span>;
       }
       return getEmptyTagValue();
     },
+    width: '100px',
   });
 
   if (filterStatus === CaseStatuses.closed) {
@@ -342,6 +343,7 @@ export const useCasesColumns = ({
       }
       return getEmptyTagValue();
     },
+    width: '90px',
   });
 
   if (isSelectorView) {

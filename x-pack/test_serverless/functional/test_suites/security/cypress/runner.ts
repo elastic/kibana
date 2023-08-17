@@ -5,36 +5,20 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
-import { withProcRunner } from '@kbn/dev-proc-runner';
-
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export async function SecuritySolutionCypressTestRunner(
   { getService }: FtrProviderContext,
-  command: string
+  envVars?: Record<string, string>
 ) {
-  const log = getService('log');
+  const config = getService('config');
 
-  await withProcRunner(log, async (procs) => {
-    await procs.run('cypress', {
-      cmd: 'yarn',
-      args: [command],
-      cwd: resolve(__dirname),
-      env: {
-        ...process.env,
-      },
-      wait: true,
-    });
-  });
-}
-
-export async function SecuritySolutionServerlessVisualTestRunner(context: FtrProviderContext) {
-  return SecuritySolutionCypressTestRunner(context, 'cypress:open');
-}
-
-export async function SecuritySolutionServerlessHeadlessTestRunner(context: FtrProviderContext) {
-  return SecuritySolutionCypressTestRunner(context, 'cypress:run');
+  return {
+    FORCE_COLOR: '1',
+    ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
+    ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
+    ...envVars,
+  };
 }

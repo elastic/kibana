@@ -6,6 +6,7 @@
  */
 
 import type {
+  AnalyticsServiceStart,
   ApplicationStart,
   ChromeStart,
   DocLinksStart,
@@ -15,16 +16,17 @@ import type {
   NotificationsStart,
   OverlayStart,
   SavedObjectsStart,
+  ScopedHistory,
   ThemeServiceStart,
 } from '@kbn/core/public';
 import type { SavedObjectsStart as SavedObjectsPluginStart } from '@kbn/saved-objects-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { ScopedHistory } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -38,6 +40,7 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { GetMlSharedImportsReturnType } from '../shared_imports';
 
 export interface AppDependencies {
+  analytics: AnalyticsServiceStart;
   application: ApplicationStart;
   charts: ChartsPluginStart;
   chrome: ChromeStart;
@@ -64,6 +67,7 @@ export interface AppDependencies {
   usageCollection?: UsageCollectionStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   settings: SettingsStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 export const useAppDependencies = () => {

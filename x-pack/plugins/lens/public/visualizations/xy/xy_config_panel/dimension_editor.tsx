@@ -9,8 +9,8 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
-import { ColorPicker } from '@kbn/visualization-ui-components/public';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { ColorPicker } from '@kbn/visualization-ui-components';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import { State, XYState, XYDataLayerConfig, YConfig, YAxisMode } from '../types';
 import { FormatFactory } from '../../../../common/types';
@@ -122,6 +122,12 @@ export function DataDimensionEditor(
   }
 
   const isHorizontal = isHorizontalChart(state.layers);
+  const disabledMessage = Boolean(!localLayer.collapseFn && localLayer.splitAccessor)
+    ? i18n.translate('xpack.lens.xyChart.colorPicker.tooltip.disabled', {
+        defaultMessage:
+          'You are unable to apply custom colors to individual series when the layer includes a "Break down by" field.',
+      })
+    : undefined;
 
   return (
     <>
@@ -129,7 +135,7 @@ export function DataDimensionEditor(
         {...props}
         overwriteColor={overwriteColor}
         defaultColor={assignedColor}
-        disabled={Boolean(!localLayer.collapseFn && localLayer.splitAccessor)}
+        disabledMessage={disabledMessage}
         setConfig={setConfig}
       />
 

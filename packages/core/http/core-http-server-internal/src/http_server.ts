@@ -587,6 +587,7 @@ export class HttpServer {
         },
       },
       options: {
+        app: { access: 'public' },
         auth: false,
         cache: {
           privacy: 'public',
@@ -606,7 +607,7 @@ export class HttpServer {
 
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
-      access: route.options.access ?? (route.path.startsWith('/internal') ? 'internal' : 'public'),
+      access: route.options.access ?? 'internal',
     };
     // Log HTTP API target consumer.
     optionsLogger.debug(

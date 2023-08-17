@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ESFilter } from '@kbn/es-types';
 
-import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
+import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis';
 
 export function rangeQuery(
   start?: number,
@@ -29,11 +29,7 @@ export function rangeQuery(
   ];
 }
 
-export function getFilters({
-  start,
-  end,
-  timeFieldName,
-}: AiopsExplainLogRateSpikesSchema): ESFilter[] {
+export function getFilters({ start, end, timeFieldName }: AiopsLogRateAnalysisSchema): ESFilter[] {
   const filters: ESFilter[] = [];
 
   if (timeFieldName !== '') {

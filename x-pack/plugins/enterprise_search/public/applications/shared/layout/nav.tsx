@@ -20,7 +20,7 @@ import {
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   ESRE_PLUGIN,
-  SEARCH_EXPERIENCES_PLUGIN,
+  VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 import { SEARCH_APPLICATIONS_PATH, SearchApplicationViewTabs } from '../../applications/routes';
@@ -55,6 +55,14 @@ export const useEnterpriseSearchNav = () => {
           }),
         },
         {
+          id: 'vectorSearch',
+          name: VECTOR_SEARCH_PLUGIN.NAME,
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: VECTOR_SEARCH_PLUGIN.URL,
+          }),
+        },
+        {
           id: 'esre',
           name: i18n.translate('xpack.enterpriseSearch.nav.esreTitle', {
             defaultMessage: 'ESRE',
@@ -62,16 +70,6 @@ export const useEnterpriseSearchNav = () => {
           ...generateNavLink({
             shouldNotCreateHref: true,
             to: ESRE_PLUGIN.URL,
-          }),
-        },
-        {
-          id: 'searchExperiences',
-          name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
-            defaultMessage: 'Search Experiences',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: SEARCH_EXPERIENCES_PLUGIN.URL,
           }),
         },
       ],
@@ -141,7 +139,7 @@ export const useEnterpriseSearchNav = () => {
     ...(productAccess.hasAppSearchAccess || productAccess.hasWorkplaceSearchAccess
       ? [
           {
-            id: 'standaloneExperiences',
+            id: 'enterpriseSearch',
             items: [
               ...(productAccess.hasAppSearchAccess
                 ? [
@@ -172,8 +170,8 @@ export const useEnterpriseSearchNav = () => {
                   ]
                 : []),
             ],
-            name: i18n.translate('xpack.enterpriseSearch.nav.standaloneExperiencesTitle', {
-              defaultMessage: 'Standalone Experiences',
+            name: i18n.translate('xpack.enterpriseSearch.nav.title', {
+              defaultMessage: 'Enterprise Search',
             }),
           },
         ]
@@ -213,13 +211,16 @@ export const useEnterpriseSearchApplicationNav = (
           }),
           items: [
             {
-              id: 'enterpriseSearchApplicationPreview',
-              name: i18n.translate('xpack.enterpriseSearch.nav.searchApplication.previewTitle', {
-                defaultMessage: 'Search Preview',
-              }),
+              id: 'enterpriseSearchApplicationDocsExplorer',
+              name: i18n.translate(
+                'xpack.enterpriseSearch.nav.searchApplication.docsExplorerTitle',
+                {
+                  defaultMessage: 'Docs Explorer',
+                }
+              ),
               ...generateNavLink({
                 shouldNotCreateHref: true,
-                to: `${searchApplicationPath}/${SearchApplicationViewTabs.PREVIEW}`,
+                to: `${searchApplicationPath}/${SearchApplicationViewTabs.DOCS_EXPLORER}`,
               }),
             },
             {

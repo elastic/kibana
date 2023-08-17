@@ -24,9 +24,9 @@
       "dataViewFieldEditor",
       "dataViewEditor",
       "expressions",
-      "unifiedFieldList",
       "unifiedSearch",
-      "unifiedHistogram"
+      "unifiedHistogram",
+      "contentManagement",
     ],
     "optionalPlugins": [
       "home",
@@ -35,15 +35,10 @@
       "spaces",
       "triggersActionsUi",
       "savedObjectsTaggingOss",
-      "lens"
+      "lens",
+      "serverless"
     ],
-    "requiredBundles": [
-      "kibanaUtils",
-      "kibanaReact",
-      "unifiedSearch"
-    ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch"],
+    "extraPublicDirs": ["common"]
   }
 }

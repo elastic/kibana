@@ -7,8 +7,6 @@
 
 /* eslint-disable no-continue */
 
-/* eslint-disable react/display-name */
-
 import React, { memo, useMemo, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -59,23 +57,21 @@ export const EventDetail = memo(function EventDetail({
   eventCategory: string;
 }) {
   const isEventLoading = useSelector((state: State) =>
-    selectors.isCurrentRelatedEventLoading(state.analyzer.analyzerById[id])
+    selectors.isCurrentRelatedEventLoading(state.analyzer[id])
   );
-  const isTreeLoading = useSelector((state: State) =>
-    selectors.isTreeLoading(state.analyzer.analyzerById[id])
-  );
+  const isTreeLoading = useSelector((state: State) => selectors.isTreeLoading(state.analyzer[id]));
   const processEvent = useSelector((state: State) =>
-    nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer.analyzerById[id])(nodeID))
+    nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(nodeID))
   );
   const nodeStatus = useSelector((state: State) =>
-    selectors.nodeDataStatus(state.analyzer.analyzerById[id])(nodeID)
+    selectors.nodeDataStatus(state.analyzer[id])(nodeID)
   );
 
   const isNodeDataLoading = nodeStatus === 'loading';
   const isLoading = isEventLoading || isTreeLoading || isNodeDataLoading;
 
   const event = useSelector((state: State) =>
-    selectors.currentRelatedEventData(state.analyzer.analyzerById[id])
+    selectors.currentRelatedEventData(state.analyzer[id])
   );
 
   return isLoading ? (
@@ -101,6 +97,7 @@ export const EventDetail = memo(function EventDetail({
  * This view presents a detailed view of all the available data for a related event, split and titled by the "section"
  * it appears in the underlying ResolverEvent
  */
+// eslint-disable-next-line react/display-name
 const EventDetailContents = memo(function ({
   id,
   nodeID,
@@ -249,13 +246,10 @@ function EventDetailBreadcrumbs({
   breadcrumbEventCategory: string;
 }) {
   const countByCategory = useSelector((state: State) =>
-    selectors.relatedEventCountOfTypeForNode(state.analyzer.analyzerById[id])(
-      nodeID,
-      breadcrumbEventCategory
-    )
+    selectors.relatedEventCountOfTypeForNode(state.analyzer[id])(nodeID, breadcrumbEventCategory)
   );
   const relatedEventCount: number | undefined = useSelector((state: State) =>
-    selectors.relatedEventTotalCount(state.analyzer.analyzerById[id])(nodeID)
+    selectors.relatedEventTotalCount(state.analyzer[id])(nodeID)
   );
   const nodesLinkNavProps = useLinkProps(id, {
     panelView: 'nodes',
@@ -358,6 +352,7 @@ const StyledFlexTitle = memo(styled('h3')`
   font-size: 1.2em;
 `);
 
+// eslint-disable-next-line react/display-name
 const TitleHr = memo(() => {
   return <EuiHorizontalRule margin="none" size="half" />;
 });

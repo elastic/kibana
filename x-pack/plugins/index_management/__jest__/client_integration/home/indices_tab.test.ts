@@ -225,9 +225,11 @@ describe('<IndexManagementHome />', () => {
       ]);
       httpRequestsMockHelpers.setReloadIndicesResponse({ indexNames: [indexNameA, indexNameB] });
 
-      testBed = await setup(httpSetup);
-      const { component, find } = testBed;
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
 
+      const { component, find } = testBed;
       component.update();
 
       find('indexTableIndexNameLink').at(0).simulate('click');
@@ -268,7 +270,9 @@ describe('<IndexManagementHome />', () => {
     });
 
     test('should be able to open a closed index', async () => {
-      testBed = await setup(httpSetup);
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
       const { component, find, actions } = testBed;
 
       component.update();

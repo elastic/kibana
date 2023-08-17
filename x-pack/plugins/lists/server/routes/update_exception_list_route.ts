@@ -7,14 +7,14 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  UpdateExceptionListSchemaDecoded,
-  exceptionListSchema,
-  updateExceptionListSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
+import {
+  UpdateExceptionListRequestDecoded,
+  updateExceptionListRequest,
+  updateExceptionListResponse,
+} from '../../common/api';
 
 import {
   buildRouteValidation,
@@ -32,9 +32,9 @@ export const updateExceptionListRoute = (router: ListsPluginRouter): void => {
       path: EXCEPTION_LIST_URL,
       validate: {
         body: buildRouteValidation<
-          typeof updateExceptionListSchema,
-          UpdateExceptionListSchemaDecoded
-        >(updateExceptionListSchema),
+          typeof updateExceptionListRequest,
+          UpdateExceptionListRequestDecoded
+        >(updateExceptionListRequest),
       },
     },
     async (context, request, response) => {
@@ -79,7 +79,7 @@ export const updateExceptionListRoute = (router: ListsPluginRouter): void => {
               statusCode: 404,
             });
           } else {
-            const [validated, errors] = validate(list, exceptionListSchema);
+            const [validated, errors] = validate(list, updateExceptionListResponse);
             if (errors != null) {
               return siemResponse.error({ body: errors, statusCode: 500 });
             } else {

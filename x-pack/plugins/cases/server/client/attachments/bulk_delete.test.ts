@@ -9,9 +9,32 @@ import { loggerMock } from '@kbn/logging-mocks';
 import pReflect from 'p-reflect';
 import type { File } from '@kbn/files-plugin/common';
 import { FileNotFoundError } from '@kbn/files-plugin/server/file_service/errors';
-import { retrieveFilesIgnoringNotFound } from './bulk_delete';
+import { bulkDeleteFileAttachments, retrieveFilesIgnoringNotFound } from './bulk_delete';
+import { MAX_DELETE_FILES } from '../../../common/constants';
+import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 
 describe('bulk_delete', () => {
+  describe('bulkDeleteFileAttachments', () => {
+    describe('errors', () => {
+      const casesClient = createCasesClientMock();
+      const clientArgs = createCasesClientMockArgs();
+
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it(`throws 400 when trying to delete more than ${MAX_DELETE_FILES} files at a time`, async () => {
+        const fileIds = new Array(MAX_DELETE_FILES + 1).fill('fake-ids');
+
+        await expect(
+          bulkDeleteFileAttachments({ caseId: 'mock-id', fileIds }, clientArgs, casesClient)
+        ).rejects.toThrowError(
+          'Failed to delete file attachments for case: mock-id: Error: The length of the field ids is too long. Array must be of length <= 10'
+        );
+      });
+    });
+  });
+
   describe('retrieveFilesIgnoringNotFound', () => {
     const mockLogger = loggerMock.create();
 

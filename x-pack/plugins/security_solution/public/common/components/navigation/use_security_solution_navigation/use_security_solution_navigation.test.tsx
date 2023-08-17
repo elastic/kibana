@@ -9,9 +9,8 @@ import { renderHook } from '@testing-library/react-hooks';
 import { BehaviorSubject } from 'rxjs';
 import { useSecuritySolutionNavigation } from './use_security_solution_navigation';
 
-const mockSetBreadcrumbs = jest.fn();
 jest.mock('../breadcrumbs', () => ({
-  useBreadcrumbs: () => mockSetBreadcrumbs,
+  useBreadcrumbsNav: () => jest.fn(),
 }));
 
 const mockIsSidebarEnabled$ = new BehaviorSubject(true);

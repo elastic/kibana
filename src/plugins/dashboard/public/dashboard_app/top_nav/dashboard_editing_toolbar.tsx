@@ -9,22 +9,13 @@
 import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { IconType, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 
-import {
-  AddFromLibraryButton,
-  IconButton,
-  IconButtonGroup,
-  Toolbar,
-  ToolbarButton,
-} from '@kbn/shared-ux-button-toolbar';
+import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 
-import {
-  getCreateVisualizationButtonTitle,
-  getQuickCreateButtonGroupLegend,
-} from '../_dashboard_app_strings';
+import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
 import { EditorMenu } from './editor_menu';
 import { useDashboardAPI } from '../dashboard_app';
 import { pluginServices } from '../../services/plugin_services';
@@ -37,8 +28,8 @@ export function DashboardEditingToolbar() {
     usageCollection,
     data: { search },
     notifications: { toasts },
-    embeddable: { getStateTransfer, getEmbeddableFactory },
-    visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
+    embeddable: { getStateTransfer },
+    visualizations: { getAliases: getVisTypeAliases },
   } = pluginServices.getServices();
   const { euiTheme } = useEuiTheme();
 
@@ -47,13 +38,6 @@ export function DashboardEditingToolbar() {
   const stateTransferService = getStateTransfer();
 
   const lensAlias = getVisTypeAliases().find(({ name }) => name === 'lens');
-  const quickButtonVisTypes: Array<
-    { type: 'vis'; visType: string } | { type: 'embeddable'; embeddableType: string }
-  > = [
-    { type: 'vis', visType: 'markdown' },
-    { type: 'embeddable', embeddableType: 'image' },
-    { type: 'vis', visType: 'maps' },
-  ];
 
   const trackUiMetric = usageCollection.reportUiCounter?.bind(
     usageCollection,
@@ -121,62 +105,12 @@ export function DashboardEditingToolbar() {
     [trackUiMetric, dashboard, toasts]
   );
 
-  const getVisTypeQuickButton = (
-    quickButtonForType: typeof quickButtonVisTypes[0]
-  ): IconButton | undefined => {
-    if (quickButtonForType.type === 'vis') {
-      const visTypeName = quickButtonForType.visType;
-      const visType =
-        getVisualization(visTypeName) ||
-        getVisTypeAliases().find(({ name }) => name === visTypeName);
-
-      if (visType) {
-        if ('aliasPath' in visType) {
-          const { name, icon, title } = visType as VisTypeAlias;
-          return {
-            label: title,
-            iconType: icon,
-            onClick: createNewVisType(visType as VisTypeAlias),
-            'data-test-subj': `dashboardQuickButton${name}`,
-          };
-        } else {
-          const { name, icon, title, titleInWizard } = visType as BaseVisType & { icon: IconType };
-          return {
-            label: titleInWizard || title,
-            iconType: icon,
-            onClick: createNewVisType(visType as BaseVisType),
-            'data-test-subj': `dashboardQuickButton${name}`,
-          };
-        }
-      }
-    } else {
-      const embeddableType = quickButtonForType.embeddableType;
-      const embeddableFactory = getEmbeddableFactory(embeddableType);
-      if (embeddableFactory) {
-        return {
-          label: embeddableFactory.getDisplayName(),
-          iconType: embeddableFactory.getIconType(),
-          onClick: () => {
-            if (embeddableFactory) {
-              createNewEmbeddable(embeddableFactory);
-            }
-          },
-          'data-test-subj': `dashboardQuickButton${embeddableType}`,
-        };
-      }
-    }
-  };
-
-  const quickButtons: IconButton[] = quickButtonVisTypes.reduce((accumulator, type) => {
-    const button = getVisTypeQuickButton(type);
-    return button ? [...accumulator, button] : accumulator;
-  }, [] as IconButton[]);
-
   const extraButtons = [
     <EditorMenu createNewVisType={createNewVisType} createNewEmbeddable={createNewEmbeddable} />,
     <AddFromLibraryButton
       onClick={() => dashboard.addFromLibrary()}
-      data-test-subj="dashboardAddPanelButton"
+      size="s"
+      data-test-subj="dashboardAddFromLibraryButton"
     />,
   ];
   if (dashboard.controlGroup) {
@@ -195,13 +129,11 @@ export function DashboardEditingToolbar() {
             <ToolbarButton
               type="primary"
               iconType="lensApp"
+              size="s"
               onClick={createNewVisType(lensAlias)}
               label={getCreateVisualizationButtonTitle()}
               data-test-subj="dashboardAddNewPanelButton"
             />
-          ),
-          iconButtonGroup: (
-            <IconButtonGroup buttons={quickButtons} legend={getQuickCreateButtonGroupLegend()} />
           ),
           extraButtons,
         }}

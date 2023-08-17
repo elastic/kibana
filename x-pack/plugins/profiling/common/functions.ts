@@ -5,6 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
+import { sumBy } from 'lodash';
 import { createFrameGroupID, FrameGroupID } from './frame_group';
 import {
   createStackFrameMetadata,
@@ -30,23 +31,36 @@ interface TopNFunctionAndFrameGroup {
 type TopNFunction = Pick<
   TopNFunctionAndFrameGroup,
   'Frame' | 'CountExclusive' | 'CountInclusive'
-> & { Id: string; Rank: number };
+> & {
+  Id: string;
+  Rank: number;
+};
 
 export interface TopNFunctions {
   TotalCount: number;
   TopN: TopNFunction[];
   SamplingRate: number;
+  selfCPU: number;
+  totalCPU: number;
 }
 
-export function createTopNFunctions(
-  events: Map<StackTraceID, number>,
-  stackTraces: Map<StackTraceID, StackTrace>,
-  stackFrames: Map<StackFrameID, StackFrame>,
-  executables: Map<FileID, Executable>,
-  startIndex: number,
-  endIndex: number,
-  samplingRate: number
-): TopNFunctions {
+export function createTopNFunctions({
+  endIndex,
+  events,
+  executables,
+  samplingRate,
+  stackFrames,
+  stackTraces,
+  startIndex,
+}: {
+  endIndex: number;
+  events: Map<StackTraceID, number>;
+  executables: Map<FileID, Executable>;
+  samplingRate: number;
+  stackFrames: Map<StackFrameID, StackFrame>;
+  stackTraces: Map<StackTraceID, StackTrace>;
+  startIndex: number;
+}): TopNFunctions {
   // The `count` associated with a frame provides the total number of
   // traces in which that node has appeared at least once. However, a
   // frame may appear multiple times in a trace, and thus to avoid
@@ -143,17 +157,28 @@ export function createTopNFunctions(
     endIndex = topN.length;
   }
 
-  const framesAndCountsAndIds = topN.slice(startIndex, endIndex).map((frameAndCount, i) => ({
-    Rank: i + 1,
-    Frame: frameAndCount.Frame,
-    CountExclusive: frameAndCount.CountExclusive,
-    CountInclusive: frameAndCount.CountInclusive,
-    Id: frameAndCount.FrameGroupID,
-  }));
+  const framesAndCountsAndIds = topN.slice(startIndex, endIndex).map((frameAndCount, i) => {
+    const countExclusive = frameAndCount.CountExclusive;
+    const countInclusive = frameAndCount.CountInclusive;
+
+    return {
+      Rank: i + 1,
+      Frame: frameAndCount.Frame,
+      CountExclusive: countExclusive,
+      CountInclusive: countInclusive,
+      Id: frameAndCount.FrameGroupID,
+    };
+  });
+
+  const sumSelfCPU = sumBy(framesAndCountsAndIds, 'CountExclusive');
+  const sumTotalCPU = sumBy(framesAndCountsAndIds, 'CountInclusive');
+
   return {
     TotalCount: totalCount,
     TopN: framesAndCountsAndIds,
     SamplingRate: samplingRate,
+    selfCPU: sumSelfCPU,
+    totalCPU: sumTotalCPU,
   };
 }
 
@@ -161,16 +186,20 @@ export enum TopNFunctionSortField {
   Rank = 'rank',
   Frame = 'frame',
   Samples = 'samples',
-  ExclusiveCPU = 'exclusiveCPU',
-  InclusiveCPU = 'inclusiveCPU',
+  SelfCPU = 'selfCPU',
+  TotalCPU = 'totalCPU',
   Diff = 'diff',
+  AnnualizedCo2 = 'annualizedCo2',
+  AnnualizedDollarCost = 'annualizedDollarCost',
 }
 
 export const topNFunctionSortFieldRt = t.union([
   t.literal(TopNFunctionSortField.Rank),
   t.literal(TopNFunctionSortField.Frame),
   t.literal(TopNFunctionSortField.Samples),
-  t.literal(TopNFunctionSortField.ExclusiveCPU),
-  t.literal(TopNFunctionSortField.InclusiveCPU),
+  t.literal(TopNFunctionSortField.SelfCPU),
+  t.literal(TopNFunctionSortField.TotalCPU),
   t.literal(TopNFunctionSortField.Diff),
+  t.literal(TopNFunctionSortField.AnnualizedCo2),
+  t.literal(TopNFunctionSortField.AnnualizedDollarCost),
 ]);

@@ -19,7 +19,6 @@ import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common'
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DISCOVER_APP_TARGET, LOGS_APP_TARGET } from '../common/constants';
-import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
@@ -39,7 +38,6 @@ import {
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
 import { InventoryViewsService } from './services/inventory_views';
-import { LogViewsService } from './services/log_views';
 import { MetricsExplorerViewsService } from './services/metrics_explorer_views';
 import { TelemetryService } from './services/telemetry';
 import {
@@ -56,7 +54,6 @@ import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
   private inventoryViews: InventoryViewsService;
-  private logViews: LogViewsService;
   private metricsExplorerViews: MetricsExplorerViewsService;
   private telemetry: TelemetryService;
   private locators?: InfraLocators;
@@ -68,10 +65,6 @@ export class Plugin implements InfraClientPluginClass {
     this.config = context.config.get();
 
     this.inventoryViews = new InventoryViewsService();
-    this.logViews = new LogViewsService({
-      messageFields:
-        this.config.sources?.default?.fields?.message ?? defaultLogViewsStaticConfig.messageFields,
-    });
     this.metricsExplorerViews = new MetricsExplorerViewsService();
     this.telemetry = new TelemetryService();
     this.appTarget = this.config.logs.app_target;
@@ -104,6 +97,10 @@ export class Plugin implements InfraClientPluginClass {
       appName: 'infra_metrics',
       hasData: createMetricsHasData(core.getStartServices),
       fetchData: createMetricsFetchData(core.getStartServices),
+    });
+
+    pluginsSetup.logsShared.logViews.setLogViewsStaticConfig({
+      messageFields: this.config.sources?.default?.fields?.message,
     });
 
     const startDep$AndHostViewFlag$ = combineLatest([
@@ -342,12 +339,6 @@ export class Plugin implements InfraClientPluginClass {
       http: core.http,
     });
 
-    const logViews = this.logViews.start({
-      http: core.http,
-      dataViews: plugins.dataViews,
-      search: plugins.data.search,
-    });
-
     const metricsExplorerViews = this.metricsExplorerViews.start({
       http: core.http,
     });
@@ -356,7 +347,6 @@ export class Plugin implements InfraClientPluginClass {
 
     const startContract: InfraClientStartExports = {
       inventoryViews,
-      logViews,
       metricsExplorerViews,
       telemetry,
       locators: this.locators!,

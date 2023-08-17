@@ -29,7 +29,7 @@ exports[`Intro component renders correctly 1`] = `
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <button
-              class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-s-base-danger"
+              class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-danger"
               data-test-subj="savedObjectEditDelete"
               type="button"
             >
@@ -48,7 +48,7 @@ exports[`Intro component renders correctly 1`] = `
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <a
-              class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-s-base-primary"
+              class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
               data-test-subj="savedObjectEditViewInApp"
               href="/some-url"
               rel="noreferrer"

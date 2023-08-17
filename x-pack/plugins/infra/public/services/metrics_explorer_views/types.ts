@@ -7,9 +7,12 @@
 
 import { HttpStart } from '@kbn/core/public';
 import {
-  MetricsExplorerView,
-  MetricsExplorerViewAttributes,
-} from '../../../common/metrics_explorer_views';
+  FindMetricsExplorerViewResponsePayload,
+  CreateMetricsExplorerViewResponsePayload,
+  UpdateMetricsExplorerViewResponsePayload,
+  GetMetricsExplorerViewResponsePayload,
+} from '../../../common/http_api';
+import { MetricsExplorerViewAttributes } from '../../../common/metrics_explorer_views';
 
 export type MetricsExplorerViewsServiceSetup = void;
 
@@ -22,14 +25,16 @@ export interface MetricsExplorerViewsServiceStartDeps {
 }
 
 export interface IMetricsExplorerViewsClient {
-  findMetricsExplorerViews(): Promise<MetricsExplorerView[]>;
-  getMetricsExplorerView(metricsExplorerViewId: string): Promise<MetricsExplorerView>;
+  findMetricsExplorerViews(): Promise<FindMetricsExplorerViewResponsePayload['data']>;
+  getMetricsExplorerView(
+    metricsExplorerViewId: string
+  ): Promise<GetMetricsExplorerViewResponsePayload>;
   createMetricsExplorerView(
     metricsExplorerViewAttributes: Partial<MetricsExplorerViewAttributes>
-  ): Promise<MetricsExplorerView>;
+  ): Promise<CreateMetricsExplorerViewResponsePayload>;
   updateMetricsExplorerView(
     metricsExplorerViewId: string,
     metricsExplorerViewAttributes: Partial<MetricsExplorerViewAttributes>
-  ): Promise<MetricsExplorerView>;
+  ): Promise<UpdateMetricsExplorerViewResponsePayload>;
   deleteMetricsExplorerView(metricsExplorerViewId: string): Promise<null>;
 }

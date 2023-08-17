@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
 import {
   FLYOUT_HEADER_CHAT_BUTTON_TEST_ID,
@@ -20,10 +21,8 @@ import { DOCUMENT_DETAILS } from './translations';
 import moment from 'moment-timezone';
 import { useDateFormat, useTimeZone } from '../../../common/lib/kibana';
 import { mockDataFormattedForFieldBrowser, mockGetFieldsData } from '../mocks/mock_context';
-import { AssistantProvider } from '@kbn/elastic-assistant';
-import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { useAssistant } from '../hooks/use_assistant';
+import { TestProvidersComponent } from '../../../common/mock';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../hooks/use_assistant');
@@ -32,31 +31,18 @@ moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
-const actionTypeRegistry = actionTypeRegistryMock.create();
-const mockGetInitialConversations = jest.fn(() => ({}));
-const mockGetComments = jest.fn(() => []);
-const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
+
+const flyoutContextValue = {} as unknown as ExpandableFlyoutContext;
 
 const renderHeader = (contextValue: RightPanelContext) =>
   render(
-    <AssistantProvider
-      actionTypeRegistry={actionTypeRegistry}
-      augmentMessageCodeBlocks={jest.fn()}
-      baseAllow={[]}
-      baseAllowReplacement={[]}
-      defaultAllow={[]}
-      defaultAllowReplacement={[]}
-      getComments={mockGetComments}
-      getInitialConversations={mockGetInitialConversations}
-      setConversations={jest.fn()}
-      setDefaultAllow={jest.fn()}
-      setDefaultAllowReplacement={jest.fn()}
-      http={mockHttp}
-    >
-      <RightPanelContext.Provider value={contextValue}>
-        <HeaderTitle />
-      </RightPanelContext.Provider>
-    </AssistantProvider>
+    <TestProvidersComponent>
+      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+        <RightPanelContext.Provider value={contextValue}>
+          <HeaderTitle flyoutIsExpandable={true} />
+        </RightPanelContext.Provider>
+      </ExpandableFlyoutContext.Provider>
+    </TestProvidersComponent>
   );
 
 describe('<HeaderTitle />', () => {
@@ -66,7 +52,7 @@ describe('<HeaderTitle />', () => {
     jest.mocked(useAssistant).mockReturnValue({ showAssistant: true, promptContextId: '' });
   });
 
-  it('should render mitre attack information', () => {
+  it('should render component', () => {
     const contextValue = {
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),

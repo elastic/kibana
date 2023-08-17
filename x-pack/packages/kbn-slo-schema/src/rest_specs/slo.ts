@@ -7,11 +7,16 @@
 
 import * as t from 'io-ts';
 import {
+  allOrAnyString,
+  apmTransactionDurationIndicatorSchema,
+  apmTransactionErrorRateIndicatorSchema,
   budgetingMethodSchema,
   dateType,
+  durationType,
+  histogramIndicatorSchema,
   historicalSummarySchema,
   indicatorSchema,
-  indicatorTypesArraySchema,
+  indicatorTypesSchema,
   kqlCustomIndicatorSchema,
   metricCustomIndicatorSchema,
   objectiveSchema,
@@ -22,9 +27,6 @@ import {
   summarySchema,
   tagsSchema,
   timeWindowSchema,
-  apmTransactionErrorRateIndicatorSchema,
-  apmTransactionDurationIndicatorSchema,
-  durationType,
   timeWindowTypeSchema,
 } from '../schema';
 
@@ -38,7 +40,12 @@ const createSLOParamsSchema = t.type({
       budgetingMethod: budgetingMethodSchema,
       objective: objectiveSchema,
     }),
-    t.partial({ id: sloIdSchema, settings: optionalSettingsSchema, tags: tagsSchema }),
+    t.partial({
+      id: sloIdSchema,
+      settings: optionalSettingsSchema,
+      tags: tagsSchema,
+      groupBy: allOrAnyString,
+    }),
   ]),
 });
 
@@ -60,19 +67,17 @@ const deleteSLOParamsSchema = t.type({
   }),
 });
 
-const getSLOParamsSchema = t.type({
-  path: t.type({
-    id: sloIdSchema,
-  }),
-});
-
 const sortDirectionSchema = t.union([t.literal('asc'), t.literal('desc')]);
-const sortBySchema = t.union([t.literal('creationTime'), t.literal('indicatorType')]);
+const sortBySchema = t.union([
+  t.literal('error_budget_consumed'),
+  t.literal('error_budget_remaining'),
+  t.literal('sli_value'),
+  t.literal('status'),
+]);
 
 const findSLOParamsSchema = t.partial({
   query: t.partial({
-    name: t.string,
-    indicatorTypes: indicatorTypesArraySchema,
+    kqlQuery: t.string,
     page: t.string,
     perPage: t.string,
     sortBy: sortBySchema,
@@ -80,25 +85,45 @@ const findSLOParamsSchema = t.partial({
   }),
 });
 
-const sloResponseSchema = t.type({
-  id: sloIdSchema,
-  name: t.string,
-  description: t.string,
-  indicator: indicatorSchema,
-  timeWindow: timeWindowSchema,
-  budgetingMethod: budgetingMethodSchema,
-  objective: objectiveSchema,
-  revision: t.number,
-  settings: settingsSchema,
-  enabled: t.boolean,
-  tags: tagsSchema,
-  createdAt: dateType,
-  updatedAt: dateType,
-});
+const sloResponseSchema = t.intersection([
+  t.type({
+    id: sloIdSchema,
+    name: t.string,
+    description: t.string,
+    indicator: indicatorSchema,
+    timeWindow: timeWindowSchema,
+    budgetingMethod: budgetingMethodSchema,
+    objective: objectiveSchema,
+    revision: t.number,
+    settings: settingsSchema,
+    enabled: t.boolean,
+    tags: tagsSchema,
+    groupBy: allOrAnyString,
+    createdAt: dateType,
+    updatedAt: dateType,
+  }),
+  t.partial({
+    instanceId: allOrAnyString,
+  }),
+]);
 
 const sloWithSummaryResponseSchema = t.intersection([
   sloResponseSchema,
   t.type({ summary: summarySchema }),
+]);
+
+const getSLOQuerySchema = t.partial({
+  query: t.partial({
+    instanceId: allOrAnyString,
+  }),
+});
+const getSLOParamsSchema = t.intersection([
+  t.type({
+    path: t.type({
+      id: sloIdSchema,
+    }),
+  }),
+  getSLOQuerySchema,
 ]);
 
 const getSLOResponseSchema = sloWithSummaryResponseSchema;
@@ -116,6 +141,7 @@ const updateSLOParamsSchema = t.type({
     objective: objectiveSchema,
     settings: optionalSettingsSchema,
     tags: tagsSchema,
+    groupBy: allOrAnyString,
   }),
 });
 
@@ -133,11 +159,15 @@ const findSLOResponseSchema = t.type({
 });
 
 const fetchHistoricalSummaryParamsSchema = t.type({
-  body: t.type({ sloIds: t.array(sloIdSchema) }),
+  body: t.type({ list: t.array(t.type({ sloId: sloIdSchema, instanceId: allOrAnyString })) }),
 });
-const fetchHistoricalSummaryResponseSchema = t.record(
-  sloIdSchema,
-  t.array(historicalSummarySchema)
+
+const fetchHistoricalSummaryResponseSchema = t.array(
+  t.type({
+    sloId: sloIdSchema,
+    instanceId: allOrAnyString,
+    data: t.array(historicalSummarySchema),
+  })
 );
 
 const getSLODiagnosisParamsSchema = t.type({
@@ -157,6 +187,7 @@ const getSLOBurnRatesResponseSchema = t.type({
 const getSLOBurnRatesParamsSchema = t.type({
   path: t.type({ id: t.string }),
   body: t.type({
+    instanceId: allOrAnyString,
     windows: t.array(
       t.type({
         name: t.string,
@@ -166,6 +197,15 @@ const getSLOBurnRatesParamsSchema = t.type({
   }),
 });
 
+const getSLOInstancesParamsSchema = t.type({
+  path: t.type({ id: t.string }),
+});
+
+const getSLOInstancesResponseSchema = t.type({
+  groupBy: t.string,
+  instances: t.array(t.string),
+});
+
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
@@ -173,6 +213,7 @@ type CreateSLOInput = t.OutputOf<typeof createSLOParamsSchema.props.body>; // Ra
 type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>; // Parsed payload used by the backend
 type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>; // Raw response sent to the frontend
 
+type GetSLOParams = t.TypeOf<typeof getSLOQuerySchema.props.query>;
 type GetSLOResponse = t.OutputOf<typeof getSLOResponseSchema>;
 
 type ManageSLOParams = t.TypeOf<typeof manageSLOParamsSchema.props.path>;
@@ -189,18 +230,19 @@ type FetchHistoricalSummaryResponse = t.OutputOf<typeof fetchHistoricalSummaryRe
 type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
 
 type GetPreviewDataParams = t.TypeOf<typeof getPreviewDataParamsSchema.props.body>;
-type GetPreviewDataResponse = t.TypeOf<typeof getPreviewDataResponseSchema>;
+type GetPreviewDataResponse = t.OutputOf<typeof getPreviewDataResponseSchema>;
 
-type APMTransactionErrorRateIndicatorSchema = t.TypeOf<
-  typeof apmTransactionErrorRateIndicatorSchema
->;
-type APMTransactionDurationIndicatorSchema = t.TypeOf<typeof apmTransactionDurationIndicatorSchema>;
+type GetSLOInstancesResponse = t.OutputOf<typeof getSLOInstancesResponseSchema>;
+
 type GetSLOBurnRatesResponse = t.OutputOf<typeof getSLOBurnRatesResponseSchema>;
-type BudgetingMethod = t.TypeOf<typeof budgetingMethodSchema>;
-type TimeWindow = t.TypeOf<typeof timeWindowTypeSchema>;
-
+type BudgetingMethod = t.OutputOf<typeof budgetingMethodSchema>;
+type TimeWindow = t.OutputOf<typeof timeWindowTypeSchema>;
+type IndicatorType = t.OutputOf<typeof indicatorTypesSchema>;
 type Indicator = t.OutputOf<typeof indicatorSchema>;
+type APMTransactionErrorRateIndicator = t.OutputOf<typeof apmTransactionErrorRateIndicatorSchema>;
+type APMTransactionDurationIndicator = t.OutputOf<typeof apmTransactionDurationIndicatorSchema>;
 type MetricCustomIndicator = t.OutputOf<typeof metricCustomIndicatorSchema>;
+type HistogramIndicator = t.OutputOf<typeof histogramIndicatorSchema>;
 type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
 
 export {
@@ -222,6 +264,8 @@ export {
   updateSLOResponseSchema,
   getSLOBurnRatesParamsSchema,
   getSLOBurnRatesResponseSchema,
+  getSLOInstancesParamsSchema,
+  getSLOInstancesResponseSchema,
 };
 export type {
   BudgetingMethod,
@@ -232,6 +276,7 @@ export type {
   FindSLOResponse,
   GetPreviewDataParams,
   GetPreviewDataResponse,
+  GetSLOParams,
   GetSLOResponse,
   FetchHistoricalSummaryParams,
   FetchHistoricalSummaryResponse,
@@ -242,11 +287,14 @@ export type {
   UpdateSLOInput,
   UpdateSLOParams,
   UpdateSLOResponse,
-  APMTransactionDurationIndicatorSchema,
-  APMTransactionErrorRateIndicatorSchema,
+  APMTransactionDurationIndicator,
+  APMTransactionErrorRateIndicator,
   GetSLOBurnRatesResponse,
+  GetSLOInstancesResponse,
+  IndicatorType,
   Indicator,
   MetricCustomIndicator,
+  HistogramIndicator,
   KQLCustomIndicator,
   TimeWindow,
 };

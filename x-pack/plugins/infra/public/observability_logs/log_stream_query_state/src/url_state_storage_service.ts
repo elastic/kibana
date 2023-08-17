@@ -16,9 +16,11 @@ import {
   defaultFilterStateKey,
   defaultPositionStateKey,
   DEFAULT_REFRESH_INTERVAL,
-  getTimeRangeStartFromTime,
+} from '@kbn/logs-shared-plugin/common';
+import {
   getTimeRangeEndFromTime,
-} from '../../../../common/log_views';
+  getTimeRangeStartFromTime,
+} from '../../../../common/url_state_storage_service';
 import { minimalTimeKeyRT } from '../../../../common/time';
 import { datemathStringRT } from '../../../utils/datemath';
 import { createPlainError, formatErrors } from '../../../../common/runtime_types';

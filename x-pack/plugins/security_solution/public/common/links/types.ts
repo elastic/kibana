@@ -8,8 +8,13 @@
 import type { Capabilities } from '@kbn/core/types';
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 import type { IconType } from '@elastic/eui';
+import type {
+  SecurityPageName,
+  NavigationLink as GenericNavigationLink,
+  LinkCategory as GenericLinkCategory,
+  LinkCategories as GenericLinkCategories,
+} from '@kbn/security-solution-navigation';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import type { SecurityPageName } from '../../../common/constants';
 import type { UpsellingService } from '../lib/upsellings';
 import type { RequiredCapabilities } from '../lib/capabilities';
 
@@ -22,13 +27,6 @@ export interface LinksPermissions {
   upselling: UpsellingService;
   license?: ILicense;
 }
-
-export interface LinkCategory {
-  label: string;
-  linkIds: readonly SecurityPageName[];
-}
-
-export type LinkCategories = Readonly<LinkCategory[]>;
 
 export interface LinkItem {
   /**
@@ -120,6 +118,10 @@ export interface LinkItem {
    */
   sideNavDisabled?: boolean;
   /**
+   * Icon that is displayed on the side navigation menu.
+   */
+  sideNavIcon?: IconType;
+  /**
    * Disables the state query string in the URL. Defaults to false.
    */
   skipUrlState?: boolean;
@@ -134,24 +136,12 @@ export interface LinkItem {
 }
 
 export type AppLinkItems = Readonly<LinkItem[]>;
+export type AppLinksSwitcher = (appLinks: AppLinkItems) => AppLinkItems;
 
 export type LinkInfo = Omit<LinkItem, 'links'>;
 export type NormalizedLink = LinkInfo & { parentId?: SecurityPageName };
 export type NormalizedLinks = Partial<Record<SecurityPageName, NormalizedLink>>;
 
-export interface NavigationLink {
-  categories?: LinkCategories;
-  description?: string;
-  disabled?: boolean;
-  icon?: IconType;
-  id: SecurityPageName;
-  links?: NavigationLink[];
-  image?: string;
-  title: string;
-  skipUrlState?: boolean;
-  unauthorized?: boolean;
-  isBeta?: boolean;
-  betaOptions?: {
-    text: string;
-  };
-}
+export type NavigationLink = GenericNavigationLink<SecurityPageName>;
+export type LinkCategory = GenericLinkCategory<SecurityPageName>;
+export type LinkCategories = GenericLinkCategories<SecurityPageName>;

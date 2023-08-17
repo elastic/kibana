@@ -31,30 +31,21 @@ const mockGetActions = jest.fn(async () => actions);
 jest.mock('../context/cell_actions_context', () => ({
   useCellActionsContext: () => ({ getActions: mockGetActions }),
 }));
-const values1 = ['0.0', '0.1', '0.2', '0.3'];
-const field1 = {
-  name: 'column1',
-  type: 'string',
-  searchable: true,
-  aggregatable: true,
+const fieldValues: Record<string, string[]> = {
+  column1: ['0.0', '0.1', '0.2', '0.3'],
+  column2: ['1.0', '1.1', '1.2', '1.3'],
 };
-
-const values2 = ['1.0', '1.1', '1.2', '1.3'];
-const field2 = {
-  name: 'column2',
-
-  type: 'string',
-  searchable: true,
-  aggregatable: true,
-};
+const mockGetCellValue = jest.fn(
+  (field: string, rowIndex: number) => fieldValues[field]?.[rowIndex % fieldValues[field].length]
+);
+const field1 = { name: 'column1', type: 'text', searchable: true, aggregatable: true };
+const field2 = { name: 'column2', type: 'keyword', searchable: true, aggregatable: true };
 const columns = [{ id: field1.name }, { id: field2.name }];
 
 const mockCloseCellPopover = jest.fn();
 const useDataGridColumnsCellActionsProps: UseDataGridColumnsCellActionsProps = {
-  data: [
-    { field: field1, values: values1 },
-    { field: field2, values: values2 },
-  ],
+  fields: [field1, field2],
+  getCellValue: mockGetCellValue,
   triggerId: 'testTriggerId',
   metadata: { some: 'value' },
   dataGridRef: {
@@ -101,11 +92,29 @@ describe('useDataGridColumnsCellActions', () => {
     const { result } = renderHook(useDataGridColumnsCellActions, {
       initialProps: useDataGridColumnsCellActionsProps,
     });
-
     await act(async () => {
       const cellAction = renderCellAction(result.current[0][0]);
       expect(cellAction.getByTestId('dataGridColumnCellAction-loading')).toBeInTheDocument();
     });
+  });
+
+  it('should call getCellValue with the proper params', async () => {
+    const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
+      initialProps: useDataGridColumnsCellActionsProps,
+    });
+
+    await waitForNextUpdate();
+
+    renderCellAction(result.current[0][0], { rowIndex: 0 });
+    renderCellAction(result.current[0][1], { rowIndex: 1 });
+    renderCellAction(result.current[1][0], { rowIndex: 0 });
+    renderCellAction(result.current[1][1], { rowIndex: 1 });
+
+    expect(mockGetCellValue).toHaveBeenCalledTimes(4);
+    expect(mockGetCellValue).toHaveBeenCalledWith(field1.name, 0);
+    expect(mockGetCellValue).toHaveBeenCalledWith(field1.name, 1);
+    expect(mockGetCellValue).toHaveBeenCalledWith(field2.name, 0);
+    expect(mockGetCellValue).toHaveBeenCalledWith(field2.name, 1);
   });
 
   it('should render the cell actions', async () => {
@@ -156,7 +165,7 @@ describe('useDataGridColumnsCellActions', () => {
         expect.objectContaining({
           data: [
             {
-              value: values1[1],
+              value: fieldValues[field1.name][1],
               field: {
                 name: field1.name,
                 type: field1.type,
@@ -179,7 +188,7 @@ describe('useDataGridColumnsCellActions', () => {
         expect.objectContaining({
           data: [
             {
-              value: values2[2],
+              value: fieldValues[field2.name][2],
               field: {
                 name: field2.name,
                 type: field2.type,
@@ -204,12 +213,14 @@ describe('useDataGridColumnsCellActions', () => {
 
     cellAction.getByTestId(`dataGridColumnCellAction-${action1.id}`).click();
 
+    expect(mockGetCellValue).toHaveBeenCalledWith(field1.name, 25);
+
     await waitFor(() => {
       expect(action1.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           data: [
             {
-              value: values1[1],
+              value: fieldValues[field1.name][1],
               field: {
                 name: field1.name,
                 type: field1.type,
@@ -242,7 +253,7 @@ describe('useDataGridColumnsCellActions', () => {
     const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
       initialProps: {
         ...useDataGridColumnsCellActionsProps,
-        data: [],
+        fields: [],
       },
     });
 
@@ -256,7 +267,7 @@ describe('useDataGridColumnsCellActions', () => {
     const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
       initialProps: {
         ...useDataGridColumnsCellActionsProps,
-        data: undefined,
+        fields: undefined,
       },
     });
 

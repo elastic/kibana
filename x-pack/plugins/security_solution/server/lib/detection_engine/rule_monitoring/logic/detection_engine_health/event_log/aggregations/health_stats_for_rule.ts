@@ -13,7 +13,7 @@ import type {
   RuleHealthSnapshot,
   RuleHealthStatsOverInterval,
   StatsHistory,
-} from '../../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { RawData } from '../../../utils/normalization';
 
 import * as f from '../../../event_log/event_log_fields';
