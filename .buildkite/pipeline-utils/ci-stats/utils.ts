@@ -101,7 +101,6 @@ export async function getAllTestFilesForConfigs(configPaths: string[]): Promise<
     configPaths.map(async (configPath) => {
       const config = await readConfig(EMPTY_ARGV, configPath, true, null, 0, true);
       console.log(config);
-      config.projectConfig.preset = undefined;
 
       const searchSource = new SearchSource(
         await Runtime.createContext(config.projectConfig, {
