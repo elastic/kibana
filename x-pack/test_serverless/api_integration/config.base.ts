@@ -30,13 +30,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       },
       testFiles: options.testFiles,
       junit: options.junit,
-      suiteTags: {
-        include: options.suiteTags?.include,
-        exclude: [
-          ...(svlSharedConfig.get('suiteTags').exclude || []),
-          ...(options.suiteTags?.exclude || []),
-        ],
-      },
+      suiteTags: options.suiteTags,
     };
   };
 }
