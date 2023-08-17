@@ -10,7 +10,7 @@ import {
   ALERT_ACTION_GROUP,
   ALERT_EVALUATION_VALUES,
   ALERT_REASON,
-  ALERT_GROUPINGS,
+  ALERT_GROUPS,
 } from '@kbn/rule-data-utils';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { isEqual } from 'lodash';
@@ -58,7 +58,7 @@ export type MetricThresholdAlertState = AlertState; // no specific instance stat
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type MetricThresholdAlertContext = {
   alertDetailsUrl: string;
-  groupings?: object;
+  groups?: object;
   reason?: string;
   timestamp: string; // ISO string
   value?: Array<number | null> | null;
@@ -82,7 +82,7 @@ type MetricThresholdAlert = Alert<
   MetricThresholdAllowedActionGroups
 >;
 
-export type Groupings = Array<{
+export type Groups = Array<{
   field: string;
   value: string;
 }>;
@@ -93,7 +93,7 @@ type MetricThresholdAlertFactory = (
   actionGroup: MetricThresholdActionGroup,
   additionalContext?: AdditionalContext | null,
   evaluationValues?: Array<number | null>,
-  groupings?: Groupings
+  groups?: Groups
 ) => MetricThresholdAlert;
 
 export const createMetricThresholdExecutor = ({
@@ -148,7 +148,7 @@ export const createMetricThresholdExecutor = ({
       actionGroup,
       additionalContext,
       evaluationValues,
-      groupings
+      groups
     ) =>
       alertWithLifecycle({
         id,
@@ -156,7 +156,7 @@ export const createMetricThresholdExecutor = ({
           [ALERT_REASON]: reason,
           [ALERT_ACTION_GROUP]: actionGroup,
           [ALERT_EVALUATION_VALUES]: evaluationValues,
-          [ALERT_GROUPINGS]: groupings,
+          [ALERT_GROUPS]: groups,
           ...flattenAdditionalContext(additionalContext),
         },
       });
@@ -314,7 +314,7 @@ export const createMetricThresholdExecutor = ({
             alertsLocator,
             basePath.publicBaseUrl
           ),
-          groupings: groupByKeysObjectMapping[group],
+          groups: groupByKeysObjectMapping[group],
           reason,
           timestamp,
           value: alertResults.map((result, index) => {
@@ -355,7 +355,7 @@ export const createMetricThresholdExecutor = ({
           alertsLocator,
           basePath.publicBaseUrl
         ),
-        groupings: groupByKeysObjectForRecovered[recoveredAlertId],
+        groups: groupByKeysObjectForRecovered[recoveredAlertId],
         timestamp: startedAt.toISOString(),
         ...additionalContext,
       });
