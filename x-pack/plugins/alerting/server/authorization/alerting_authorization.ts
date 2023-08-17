@@ -411,7 +411,7 @@ export class AlertingAuthorization {
       const { username, hasAllRequested, privileges } = await checkPrivileges({
         kibana: [...privilegeToRuleType.keys()],
       });
-      console.log(ruleTypesAuthorized);
+
       return {
         username,
         hasAllRequested,

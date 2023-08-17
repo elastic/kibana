@@ -18,7 +18,7 @@ export const allowedExperimentalValues = Object.freeze({
   ruleStatusFilter: true,
   rulesDetailLogs: true,
   ruleUseExecutionStatus: false,
-  ruleKqlBar: true,
+  ruleKqlBar: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
