@@ -50,9 +50,13 @@ export const deleteListIndexRoute = (router: ListsPluginRouter): void => {
         const listDataStreamExists = await lists.getListDataStreamExists();
         const listItemDataStreamExists = await lists.getListItemDataStreamExists();
 
-
         // return early if no data stream or indices exist
-        if (!listDataStreamExists && !listItemDataStreamExists && !listIndexExists && !listItemIndexExists) {
+        if (
+          !listDataStreamExists &&
+          !listItemDataStreamExists &&
+          !listIndexExists &&
+          !listItemIndexExists
+        ) {
           return siemResponse.error({
             body: `index and data stream: "${lists.getListName()}" and "${lists.getListItemName()}" does not exist`,
             statusCode: 404,
