@@ -13,11 +13,11 @@ import { resolve } from 'path';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
-import { ES_P12_PASSWORD } from '@kbn/dev-utils';
+import { ES_P12_PASSWORD, ES_P12_PATH } from '@kbn/dev-utils';
 
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
-import { ESS_OPERATOR_USERS, ESS_SERVICE_TOKENS } from '../paths';
+import { ESS_OPERATOR_USERS_PATH, ESS_SERVICE_TOKENS_PATH } from '../paths';
 
 interface BaseOptions {
   tag?: string;
@@ -125,21 +125,25 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 
   ['xpack.ml.enabled', 'true'],
 
-  ['xpack.security.enabled', 'false'],
-];
+  //   ['xpack.security.enabled', 'false'],
+  // ];
 
-const SERVERLESS_SSL_ESARGS: Array<[string, string]> = [
+  // const SERVERLESS_SSL_ESARGS: Array<[string, string]> = [
   ['xpack.security.enabled', 'true'],
+
+  // ['xpack.security.http.ssl.enabled', 'true'],
+
+  // ['xpack.security.http.ssl.keystore.path', `${ESS_CONFIG_PATH}certs/elasticsearch.p12`],
+
+  // ['xpack.security.http.ssl.keystore.password', ES_P12_PASSWORD],
+
+  // ['xpack.security.http.ssl.verification_mode', 'certificate'],
 
   ['xpack.security.transport.ssl.enabled', 'true'],
 
-  ['xpack.security.transport.ssl.key', `${ESS_CONFIG_PATH}certs/elasticsearch.key`],
+  ['xpack.security.transport.ssl.keystore.path', `${ESS_CONFIG_PATH}certs/elasticsearch.p12`],
 
-  ['xpack.security.transport.ssl.key_passphrase', ES_P12_PASSWORD],
-
-  ['xpack.security.transport.ssl.certificate', `${ESS_CONFIG_PATH}certs/elasticsearch.crt`],
-
-  ['xpack.security.transport.ssl.certificate_authorities', `${ESS_CONFIG_PATH}certs/ca.crt`],
+  ['xpack.security.transport.ssl.keystore.password', ES_P12_PASSWORD],
 
   ['xpack.security.transport.ssl.verification_mode', 'certificate'],
 
@@ -339,7 +343,6 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
   const { basePath, clean } = options;
 
   const volumePath = resolve(basePath, 'stateless');
-  const certs = resolve(basePath, 'certs');
 
   log.info(chalk.bold(`Checking for local serverless ES object store at ${volumePath}`));
   log.indent(4);
@@ -369,13 +372,13 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     `${basePath}:/objectstore:z`,
 
     '--volume',
-    `${certs}:${ESS_CONFIG_PATH}certs:z`,
+    `${ES_P12_PATH}:${ESS_CONFIG_PATH}certs/elasticsearch.p12:z`,
 
     '--volume',
-    `${ESS_OPERATOR_USERS}:${ESS_CONFIG_PATH}operator_users.yml`,
+    `${ESS_OPERATOR_USERS_PATH}:${ESS_CONFIG_PATH}operator_users.yml`,
 
     '--volume',
-    `${ESS_SERVICE_TOKENS}:${ESS_CONFIG_PATH}service_tokens`,
+    `${ESS_SERVICE_TOKENS_PATH}:${ESS_CONFIG_PATH}service_tokens`,
   ];
 }
 
