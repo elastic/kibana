@@ -40,7 +40,7 @@ import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionChart } from './components/expression_chart';
 import { ExpressionRow } from './components/expression_row';
-import { MetricsExplorerKueryBar } from './components/kuery_bar';
+import { RuleFlyoutKueryBar } from '../rule_kql_filter/kuery_bar';
 import { MetricsExplorerGroupBy } from './components/group_by';
 import { MetricsExplorerOptions } from './hooks/use_metrics_explorer_options';
 
@@ -336,6 +336,13 @@ export default function Expressions(props: Props) {
     );
   }
 
+  const placeHolder = i18n.translate(
+    'xpack.observability.threshold.rule.homePage.toolbar.kqlSearchFieldPlaceholder',
+    {
+      defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
+    }
+  );
+
   return (
     <>
       <EuiTitle size="xs">
@@ -366,7 +373,8 @@ export default function Expressions(props: Props) {
         </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <MetricsExplorerKueryBar
+      <RuleFlyoutKueryBar
+        placeholder={placeHolder}
         derivedIndexPattern={derivedIndexPattern}
         onChange={debouncedOnFilterChange}
         onSubmit={onFilterChange}

@@ -6,31 +6,71 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { REASON_DETAILS_TEST_ID, REASON_TITLE_TEST_ID } from './test_ids';
-import { ALERT_REASON_TITLE, DOCUMENT_REASON_TITLE } from './translations';
+import React, { useCallback, useMemo } from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { getField } from '../../shared/utils';
+import { AlertReasonPreviewPanel, PreviewPanelKey } from '../../preview';
+import {
+  REASON_DETAILS_PREVIEW_BUTTON_TEST_ID,
+  REASON_DETAILS_TEST_ID,
+  REASON_TITLE_TEST_ID,
+} from './test_ids';
+import {
+  ALERT_REASON_DETAILS_TEXT,
+  ALERT_REASON_TITLE,
+  DOCUMENT_REASON_TITLE,
+  PREVIEW_ALERT_REASON_DETAILS,
+} from './translations';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
-import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
-import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { useRightPanelContext } from '../context';
 
 /**
  * Displays the information provided by the rowRenderer. Supports multiple types of documents.
  */
 export const Reason: FC = () => {
-  const { dataAsNestedObject, dataFormattedForFieldBrowser } = useRightPanelContext();
+  const { eventId, indexName, scopeId, dataFormattedForFieldBrowser, getFieldsData } =
+    useRightPanelContext();
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const alertReason = getField(getFieldsData(ALERT_REASON));
 
-  const renderer = useMemo(
-    () =>
-      dataAsNestedObject != null
-        ? getRowRenderer({ data: dataAsNestedObject, rowRenderers: defaultRowRenderers })
-        : null,
-    [dataAsNestedObject]
+  const { openPreviewPanel } = useExpandableFlyoutContext();
+  const openRulePreview = useCallback(() => {
+    openPreviewPanel({
+      id: PreviewPanelKey,
+      path: { tab: AlertReasonPreviewPanel },
+      params: {
+        id: eventId,
+        indexName,
+        scopeId,
+        banner: {
+          title: PREVIEW_ALERT_REASON_DETAILS,
+          backgroundColor: 'warning',
+          textColor: 'warning',
+        },
+      },
+    });
+  }, [eventId, openPreviewPanel, indexName, scopeId]);
+
+  const viewPreview = useMemo(
+    () => (
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          size="s"
+          iconType="expand"
+          onClick={openRulePreview}
+          iconSide="right"
+          data-test-subj={REASON_DETAILS_PREVIEW_BUTTON_TEST_ID}
+        >
+          {ALERT_REASON_DETAILS_TEXT}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    ),
+    [openRulePreview]
   );
 
-  if (!dataFormattedForFieldBrowser || !dataAsNestedObject || !renderer) {
+  if (!dataFormattedForFieldBrowser) {
     return null;
   }
 
@@ -38,17 +78,21 @@ export const Reason: FC = () => {
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem data-test-subj={REASON_TITLE_TEST_ID}>
         <EuiTitle size="xxs">
-          <h5>{isAlert ? ALERT_REASON_TITLE : DOCUMENT_REASON_TITLE}</h5>
+          <h5>
+            {isAlert ? (
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem>
+                  <h5>{ALERT_REASON_TITLE}</h5>
+                </EuiFlexItem>
+                {viewPreview}
+              </EuiFlexGroup>
+            ) : (
+              DOCUMENT_REASON_TITLE
+            )}
+          </h5>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem data-test-subj={REASON_DETAILS_TEST_ID}>
-        {renderer.renderRow({
-          contextId: 'event-details',
-          data: dataAsNestedObject,
-          isDraggable: false,
-          scopeId: 'global',
-        })}
-      </EuiFlexItem>
+      <EuiFlexItem data-test-subj={REASON_DETAILS_TEST_ID}>{alertReason}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
