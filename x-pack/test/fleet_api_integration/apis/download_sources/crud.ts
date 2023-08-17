@@ -70,7 +70,6 @@ export default function (providerContext: FtrProviderContext) {
             name: 'Elastic Artifacts',
             is_default: true,
             host: 'https://artifacts.elastic.co/downloads/',
-            proxy_id: null,
           },
         });
       });
