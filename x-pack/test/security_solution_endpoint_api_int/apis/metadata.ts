@@ -44,7 +44,8 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
 
   describe('test metadata apis', () => {
-    describe('list endpoints GET route', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/151854
+    describe.skip('list endpoints GET route', () => {
       const numberOfHostsInFixture = 2;
       let agent1Timestamp: number;
       let agent2Timestamp: number;

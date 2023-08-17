@@ -5,36 +5,53 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
+  EuiHighlight,
   EuiPopover,
+  EuiSelectable,
+  EuiSelectableOption,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
-import { FunctionDefinition } from '../../../common/types';
+import type { FunctionDefinition } from '../../../common/types';
+import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
+
+interface FunctionListOption {
+  label: string;
+  searchableLabel: string;
+}
 
 export function FunctionListPopover({
-  functions,
-  selectedFunction,
+  selectedFunctionName,
   onSelectFunction,
+  disabled,
 }: {
-  functions: FunctionDefinition[];
-  selectedFunction?: FunctionDefinition;
-  onSelectFunction: (func: FunctionDefinition) => void;
+  selectedFunctionName?: string;
+  onSelectFunction: (func: string) => void;
+  disabled: boolean;
 }) {
+  const { getFunctions } = useObservabilityAIAssistantChatService();
+  const functions = getFunctions();
+
+  const filterRef = useRef<HTMLInputElement | null>(null);
+
+  const [functionOptions, setFunctionOptions] = useState<
+    Array<EuiSelectableOption<FunctionListOption>>
+  >(mapFunctions({ functions, selectedFunctionName }));
+
   const [isFunctionListOpen, setIsFunctionListOpen] = useState(false);
 
   const handleClickFunctionList = () => {
     setIsFunctionListOpen(!isFunctionListOpen);
   };
 
-  const handleSelectFunction = (func: FunctionDefinition) => {
+  const handleSelectFunction = (func: EuiSelectableOption<FunctionListOption>) => {
     setIsFunctionListOpen(false);
-    onSelectFunction(func);
+    onSelectFunction(func.label);
   };
 
   useEffect(() => {
@@ -51,6 +68,42 @@ export function FunctionListPopover({
     };
   }, []);
 
+  useEffect(() => {
+    if (isFunctionListOpen && filterRef.current) {
+      filterRef.current.focus();
+    }
+  }, [isFunctionListOpen]);
+
+  useEffect(() => {
+    const options = mapFunctions({ functions, selectedFunctionName });
+    if (options.length !== functionOptions.length) {
+      setFunctionOptions(options);
+    }
+  }, [functionOptions.length, functions, selectedFunctionName]);
+
+  const renderFunctionOption = (
+    option: EuiSelectableOption<FunctionListOption>,
+    searchValue: string
+  ) => {
+    return (
+      <>
+        <EuiText size="s">
+          <p>
+            <strong>
+              <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>{' '}
+            </strong>
+          </p>
+        </EuiText>
+        <EuiSpacer size="xs" />
+        <EuiText size="s">
+          <p style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>
+            <EuiHighlight search={searchValue}>{option.searchableLabel || ''}</EuiHighlight>
+          </p>
+        </EuiText>
+      </>
+    );
+  };
+
   return (
     <EuiPopover
       anchorPosition="downLeft"
@@ -60,33 +113,73 @@ export function FunctionListPopover({
           iconSide="right"
           size="xs"
           onClick={handleClickFunctionList}
+          disabled={disabled}
         >
-          {selectedFunction
-            ? selectedFunction.options.name
-            : i18n.translate('xpack.observabilityAiAssistant.prompt.callFunction', {
+          {selectedFunctionName
+            ? selectedFunctionName
+            : i18n.translate('xpack.observabilityAiAssistant.prompt.functionList.callFunction', {
                 defaultMessage: 'Call function',
               })}
         </EuiButtonEmpty>
       }
       closePopover={handleClickFunctionList}
+      css={{ maxWidth: 400 }}
       panelPaddingSize="none"
       isOpen={isFunctionListOpen}
     >
-      <EuiContextMenuPanel size="s">
-        {functions.map((func) => (
-          <EuiContextMenuItem key={func.options.name} onClick={() => handleSelectFunction(func)}>
-            <EuiText size="s">
-              <p>
-                <strong>{func.options.name}</strong>
-              </p>
-            </EuiText>
-            <EuiSpacer size="xs" />
-            <EuiText size="s">
-              <p>{func.options.description}</p>
-            </EuiText>
-          </EuiContextMenuItem>
-        ))}
-      </EuiContextMenuPanel>
+      <EuiSelectable
+        aria-label={i18n.translate(
+          'xpack.observabilityAiAssistant.prompt.functionList.functionList',
+          {
+            defaultMessage: 'Function list',
+          }
+        )}
+        listProps={{
+          isVirtualized: false,
+          showIcons: false,
+        }}
+        options={functionOptions}
+        renderOption={renderFunctionOption}
+        searchable
+        searchProps={{
+          'data-test-subj': 'searchFiltersList',
+          inputRef: (node) => (filterRef.current = node),
+          placeholder: i18n.translate('xpack.observabilityAiAssistant.prompt.functionList.filter', {
+            defaultMessage: 'Filter',
+          }),
+        }}
+        singleSelection
+        onChange={(options) => {
+          const selectedFunction = options.filter((fn) => fn.checked !== 'off');
+          if (selectedFunction && selectedFunction.length === 1) {
+            handleSelectFunction({ ...selectedFunction[0], checked: 'on' });
+          }
+        }}
+      >
+        {(list, search) => (
+          <div style={{ overflow: 'hidden' }}>
+            {search}
+            <div style={{ width: 500, height: 350, overflowY: 'scroll' }}>{list}</div>
+          </div>
+        )}
+      </EuiSelectable>
     </EuiPopover>
   );
+}
+
+function mapFunctions({
+  functions,
+  selectedFunctionName,
+}: {
+  functions: FunctionDefinition[];
+  selectedFunctionName: string | undefined;
+}) {
+  return functions.map((func) => ({
+    label: func.options.name,
+    searchableLabel: func.options.descriptionForUser,
+    checked:
+      func.options.name === selectedFunctionName
+        ? ('on' as EuiSelectableOptionCheckedType)
+        : ('off' as EuiSelectableOptionCheckedType),
+  }));
 }

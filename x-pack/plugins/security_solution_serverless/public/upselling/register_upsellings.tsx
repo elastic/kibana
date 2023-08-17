@@ -15,37 +15,19 @@ import type {
   MessageUpsellings,
   UpsellingMessageId,
 } from '@kbn/security-solution-plugin/public/common/lib/upsellings/types';
-import React, { lazy } from 'react';
+import React from 'react';
 import { EndpointPolicyProtectionsLazy } from './sections/endpoint_management';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';
-import investigationGuideUpselling from './pages/investigation_guide_upselling';
-
-const ThreatIntelligencePaywallLazy = lazy(async () => {
-  const ThreatIntelligencePaywall = (await import('./pages/threat_intelligence_paywall')).default;
-
-  return {
-    default: () => <ThreatIntelligencePaywall requiredPLI={AppFeatureKey.threatIntelligence} />,
-  };
-});
-
-const OsqueryResponseActionsUpsellingSectionlLazy = lazy(async () => {
-  const OsqueryResponseActionsUpsellingSection = (
-    await import('./pages/osquery_automated_response_actions')
-  ).default;
-
-  return {
-    default: () => (
-      <OsqueryResponseActionsUpsellingSection
-        requiredPLI={AppFeatureKey.osqueryAutomatedResponseActions}
-      />
-    ),
-  };
-});
+import { investigationGuideUpselling } from './messages/investigation_guide_upselling';
+import {
+  OsqueryResponseActionsUpsellingSectionLazy,
+  ThreatIntelligencePaywallLazy,
+} from './lazy_upselling';
 
 interface UpsellingsConfig {
   pli: AppFeatureKey;
-  component: React.LazyExoticComponent<React.ComponentType>;
+  component: React.ComponentType;
 }
 
 interface UpsellingsMessageConfig {
@@ -94,42 +76,35 @@ export const registerUpsellings = (
     {}
   );
 
-  upselling.registerPages(upsellingPagesToRegister);
-  upselling.registerSections(upsellingSectionsToRegister);
-  upselling.registerMessages(upsellingMessagesToRegister);
+  upselling.setPages(upsellingPagesToRegister);
+  upselling.setSections(upsellingSectionsToRegister);
+  upselling.setMessages(upsellingMessagesToRegister);
 };
 
 // Upsellings for entire pages, linked to a SecurityPageName
 export const upsellingPages: UpsellingPages = [
-  // Sample code for registering a Upselling page
-  // Make sure the component is lazy loaded `const GenericUpsellingPageLazy = lazy(() => import('./pages/generic_upselling_page'));`
-  // {
-  //   pageName: SecurityPageName.entityAnalytics,
-  //   pli: AppFeatureKey.advancedInsights,
-  //   component: () => <GenericUpsellingPageLazy requiredPLI={AppFeatureKey.advancedInsights} />,
-  // },
+  // It is highly advisable to make use of lazy loaded components to minimize bundle size.
   {
     pageName: SecurityPageName.threatIntelligence,
     pli: AppFeatureKey.threatIntelligence,
-    component: ThreatIntelligencePaywallLazy,
+    component: () => (
+      <ThreatIntelligencePaywallLazy requiredPLI={AppFeatureKey.threatIntelligence} />
+    ),
   },
 ];
 
 // Upsellings for sections, linked by arbitrary ids
 export const upsellingSections: UpsellingSections = [
-  // Sample code for registering a Upselling section
-  // Make sure the component is lazy loaded `const GenericUpsellingSectionLazy = lazy(() => import('./pages/generic_upselling_section'));`
-  // {
-  //   id: 'entity_analytics_panel',
-  //   pli: AppFeatureKey.advancedInsights,
-  //   component: () => <GenericUpsellingSectionLazy requiredPLI={AppFeatureKey.advancedInsights} />,
-  // },
+  // It is highly advisable to make use of lazy loaded components to minimize bundle size.
   {
     id: 'osquery_automated_response_actions',
     pli: AppFeatureKey.osqueryAutomatedResponseActions,
-    component: OsqueryResponseActionsUpsellingSectionlLazy,
+    component: () => (
+      <OsqueryResponseActionsUpsellingSectionLazy
+        requiredPLI={AppFeatureKey.osqueryAutomatedResponseActions}
+      />
+    ),
   },
-
   {
     id: 'endpointPolicyProtections',
     pli: AppFeatureKey.endpointPolicyProtections,

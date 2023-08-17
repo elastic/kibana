@@ -12,8 +12,7 @@ const EUI_HEADER_HEIGHT = '96px';
 const PANEL_LEFT_OFFSET = '249px';
 const PANEL_WIDTH = '270px';
 
-export const panelClass = 'solutionSideNavPanel';
-
+export const panelClassName = 'solutionSideNavPanel';
 export const SolutionSideNavPanelStyles = (
   euiTheme: EuiThemeComputed<{}>,
   { $bottomOffset, $topOffset }: { $bottomOffset?: string; $topOffset?: string } = {}
@@ -75,6 +74,10 @@ export const SolutionSideNavPanelLinksGroupStyles = (euiTheme: EuiThemeComputed<
   padding-right: 0;
 `;
 
+export const accordionButtonClassName = 'solutionSideNavPanelAccordion__button';
 export const SolutionSideNavCategoryAccordionStyles = (euiTheme: EuiThemeComputed<{}>) => css`
-  margin-bottom: ${euiTheme.size.s};
+  .${accordionButtonClassName} {
+    font-weight: ${euiTheme.font.weight.bold};
+    ${euiFontSize({ euiTheme } as UseEuiTheme<{}>, 'xs')}
+  }}
 `;
