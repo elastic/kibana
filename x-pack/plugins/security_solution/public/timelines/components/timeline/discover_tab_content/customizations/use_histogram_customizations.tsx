@@ -17,13 +17,13 @@ import { useCallback } from 'react';
 import { DiscoverInTimelineTrigger } from '../../../../../actions/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 
-type WithPreventableEvent<T> = T & {
+export type WithPreventableEvent<T> = T & {
   preventDefault(): void;
 };
 
-type CustomClickTriggerEvent = WithPreventableEvent<
-  ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']
->;
+export type ClickTriggerEventData = ClickTriggerEvent['data'] | MultiClickTriggerEvent['data'];
+
+type CustomClickTriggerEvent = WithPreventableEvent<ClickTriggerEventData>;
 
 const isClickTriggerEvent = (
   e: CustomClickTriggerEvent
@@ -65,6 +65,7 @@ export const useHistogramCustomization = () => {
       if (filters && !Array.isArray(filters)) {
         filters = [filters];
       }
+
       if (filters && filters.length > 0) {
         const applyFilterTrigger = uiActions.getTrigger(
           DiscoverInTimelineTrigger.HISTOGRAM_TRIGGER
@@ -80,11 +81,7 @@ export const useHistogramCustomization = () => {
   );
 
   const onBrushEndCallback: UnifiedHistogramContainerProps['onBrushEnd'] = useCallback(
-    (
-      data: BrushTriggerEvent['data'] & {
-        preventDefault: () => void;
-      }
-    ) => {
+    (data: WithPreventableEvent<BrushTriggerEvent['data']>) => {
       discoverDataService.query.timefilter.timefilter.setTime({
         from: new Date(data.range[0]).toISOString(),
         to: new Date(data.range[1]).toISOString(),

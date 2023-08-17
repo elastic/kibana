@@ -5,6 +5,12 @@
  * 2.0.
  */
 
-describe('useSearchBarCustomization', () => {
-  it('should custom search component on calling customizations', () => {});
-});
+import styled from '@emotion/styled';
+
+export const EmbeddedDiscoverContainer = styled.div`
+  width: 100%;
+  height: 100%;
+  overflow: scroll;
+  display: grid,
+  place-items: center
+`;

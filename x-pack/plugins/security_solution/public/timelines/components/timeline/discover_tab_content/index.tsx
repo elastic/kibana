@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { CustomizationCallback } from '@kbn/discover-plugin/public/customizations/types';
-import styled, { createGlobalStyle } from 'styled-components';
+import { createGlobalStyle } from 'styled-components';
 import type { ScopedHistory } from '@kbn/core/public';
 import type { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import type { Subscription } from 'rxjs';
@@ -18,19 +18,12 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useDiscoverState } from './use_discover_state';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSetDiscoverCustomizationCallbacks } from './customizations/use_set_discover_customizations';
+import { EmbeddedDiscoverContainer } from './styles';
 
 const HideSearchSessionIndicatorBreadcrumbIcon = createGlobalStyle`
   [data-test-subj='searchSessionIndicator'] {
     display: none;
   }
-`;
-
-const EmbeddedDiscoverContainer = styled.div`
-  width: 100%;
-  height: 100%;
-  overflow: scroll;
-  display: grid,
-  place-items: center
 `;
 
 export const DiscoverTabContent = () => {
