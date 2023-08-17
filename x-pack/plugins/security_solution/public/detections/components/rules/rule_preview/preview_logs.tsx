@@ -42,7 +42,7 @@ const addLogs = (
   allLogs: SortedLogs[]
 ) => (logs.length ? [{ startedAt, logs, duration }, ...allLogs] : allLogs);
 
-export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = ({
+export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = React.memo(({
   logs,
   hasNoiseWarning,
   isAborted,
@@ -71,7 +71,9 @@ export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = ({
       </LogAccordion>
     </>
   );
-};
+});
+
+PreviewLogsComponent.displayName = 'PreviewLogs';
 
 const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError, children }) => {
   const firstLog = logs[0];

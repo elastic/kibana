@@ -69,7 +69,7 @@ interface PreviewHistogramProps {
 
 const DEFAULT_HISTOGRAM_HEIGHT = 300;
 
-export const PreviewHistogram = ({
+export const PreviewHistogram = React.memo(({
   previewId,
   addNoiseWarning,
   spaceId,
@@ -261,4 +261,6 @@ export const PreviewHistogram = ({
       />
     </>
   );
-};
+});
+
+PreviewHistogram.displayName = 'PreviewHistogram';
