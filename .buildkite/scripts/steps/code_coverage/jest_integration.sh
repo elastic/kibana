@@ -5,6 +5,8 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/steps/code_coverage/util.sh
 
+echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
+
 is_test_execution_step
 
 .buildkite/scripts/bootstrap.sh
