@@ -110,12 +110,13 @@ async function getSampleDatasetStatus(
 
   for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
     const dataIndexConfig = sampleDataset.dataIndices[i];
-    const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
+    const index = createIndexName(sampleDataset.id, dataIndexConfig.id, sampleDataset.index);
     try {
       const indexExists = await elasticsearch.client.asCurrentUser.indices.exists({
         index,
       });
       if (!indexExists) {
+        console.log('--1---', index, indexExists);
         return { status: NOT_INSTALLED };
       }
 
@@ -123,6 +124,8 @@ async function getSampleDatasetStatus(
         index,
       });
       if (count.count === 0) {
+        console.log('--2---', index, count.count);
+
         return { status: NOT_INSTALLED };
       }
     } catch (err) {

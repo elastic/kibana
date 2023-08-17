@@ -37,7 +37,7 @@ export interface SampleDataSet {
   description: string;
   id: string;
   name: string;
-  overviewDashboard: string;
+  overviewDashboard?: string;
   previewImagePath: string;
   darkPreviewImagePath?: string;
   iconPath?: string;
