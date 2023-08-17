@@ -157,6 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should add a comma after the triple quoted strings', async () => {
         await PageObjects.console.enterText(`{\n\t"query": {\n\t\t"term": """some data"""`);
         await PageObjects.console.pressEnter();
+        await PageObjects.console.sleepForDebouncePeriod();
         await PageObjects.console.promptAutocomplete();
         await PageObjects.console.pressEnter();
 
