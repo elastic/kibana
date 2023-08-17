@@ -825,7 +825,7 @@
             "label": "cloudLinks",
             "description": [],
             "signature": [
-              "{ userAndRoles?: { title: string; href: string; } | undefined; performance?: { title: string; href: string; } | undefined; billingAndSub?: { title: string; href: string; } | undefined; }"
+              "{ userAndRoles?: { title: string; href: string; } | undefined; performance?: { title: string; href: string; } | undefined; billingAndSub?: { title: string; href: string; } | undefined; deployment?: { title: string; href: string; } | undefined; }"
             ],
             "path": "packages/shared-ux/chrome/navigation/types/index.ts",
             "deprecated": false,

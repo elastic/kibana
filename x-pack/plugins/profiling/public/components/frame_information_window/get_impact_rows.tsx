@@ -28,22 +28,7 @@ export function getImpactRows({
   totalSeconds: number;
   isApproximate: boolean;
 }) {
-  const {
-    percentage,
-    percentageNoChildren,
-    coreSeconds,
-    annualizedCoreSeconds,
-    coreSecondsNoChildren,
-    co2,
-    co2NoChildren,
-    annualizedCo2,
-    annualizedCo2NoChildren,
-    dollarCost,
-    dollarCostNoChildren,
-    annualizedDollarCost,
-    annualizedDollarCostNoChildren,
-    annualizedCoreSecondsNoChildren,
-  } = calculateImpactEstimates({
+  const { selfCPU, totalCPU } = calculateImpactEstimates({
     countInclusive,
     countExclusive,
     totalSamples,
@@ -53,11 +38,11 @@ export function getImpactRows({
   const impactRows = [
     {
       label: <CPULabelWithHint type="total" labelSize="s" iconSize="s" />,
-      value: asPercentage(percentage),
+      value: asPercentage(totalCPU.percentage),
     },
     {
       label: <CPULabelWithHint type="self" labelSize="s" iconSize="s" />,
-      value: asPercentage(percentageNoChildren),
+      value: asPercentage(selfCPU.percentage),
     },
     {
       label: i18n.translate('xpack.profiling.flameGraphInformationWindow.samplesInclusiveLabel', {
@@ -76,28 +61,28 @@ export function getImpactRows({
         'xpack.profiling.flameGraphInformationWindow.coreSecondsInclusiveLabel',
         { defaultMessage: 'Core-seconds' }
       ),
-      value: asDuration(coreSeconds),
+      value: asDuration(totalCPU.coreSeconds),
     },
     {
       label: i18n.translate(
         'xpack.profiling.flameGraphInformationWindow.coreSecondsExclusiveLabel',
         { defaultMessage: 'Core-seconds (excl. children)' }
       ),
-      value: asDuration(coreSecondsNoChildren),
+      value: asDuration(selfCPU.coreSeconds),
     },
     {
       label: i18n.translate(
         'xpack.profiling.flameGraphInformationWindow.annualizedCoreSecondsInclusiveLabel',
         { defaultMessage: 'Annualized core-seconds' }
       ),
-      value: asDuration(annualizedCoreSeconds),
+      value: asDuration(totalCPU.annualizedCoreSeconds),
     },
     {
       label: i18n.translate(
         'xpack.profiling.flameGraphInformationWindow.annualizedCoreSecondsExclusiveLabel',
         { defaultMessage: 'Annualized core-seconds (excl. children)' }
       ),
-      value: asDuration(annualizedCoreSecondsNoChildren),
+      value: asDuration(selfCPU.annualizedCoreSeconds),
     },
     {
       label: i18n.translate(
@@ -106,56 +91,56 @@ export function getImpactRows({
           defaultMessage: 'CO2 emission',
         }
       ),
-      value: asWeight(co2),
+      value: asWeight(totalCPU.co2),
     },
     {
       label: i18n.translate(
         'xpack.profiling.flameGraphInformationWindow.co2EmissionExclusiveLabel',
         { defaultMessage: 'CO2 emission (excl. children)' }
       ),
-      value: asWeight(co2NoChildren),
+      value: asWeight(selfCPU.co2),
     },
     {
       label: i18n.translate(
         'xpack.profiling.flameGraphInformationWindow.annualizedCo2InclusiveLabel',
         { defaultMessage: 'Annualized CO2' }
       ),
-      value: asWeight(annualizedCo2),
+      value: asWeight(totalCPU.annualizedCo2),
     },
     {
       label: i18n.translate(
         'xpack.profiling.flameGraphInformationWindow.annualizedCo2ExclusiveLabel',
         { defaultMessage: 'Annualized CO2 (excl. children)' }
       ),
-      value: asWeight(annualizedCo2NoChildren),
+      value: asWeight(selfCPU.annualizedCo2),
     },
     {
       label: i18n.translate(
         'xpack.profiling.flameGraphInformationWindow.dollarCostInclusiveLabel',
         { defaultMessage: 'Dollar cost' }
       ),
-      value: asCost(dollarCost),
+      value: asCost(totalCPU.dollarCost),
     },
     {
       label: i18n.translate(
         'xpack.profiling.flameGraphInformationWindow.dollarCostExclusiveLabel',
         { defaultMessage: 'Dollar cost (excl. children)' }
       ),
-      value: asCost(dollarCostNoChildren),
+      value: asCost(selfCPU.dollarCost),
     },
     {
       label: i18n.translate(
         'xpack.profiling.flameGraphInformationWindow.annualizedDollarCostInclusiveLabel',
         { defaultMessage: 'Annualized dollar cost' }
       ),
-      value: asCost(annualizedDollarCost),
+      value: asCost(totalCPU.annualizedDollarCost),
     },
     {
       label: i18n.translate(
         'xpack.profiling.flameGraphInformationWindow.annualizedDollarCostExclusiveLabel',
         { defaultMessage: 'Annualized dollar cost (excl. children)' }
       ),
-      value: asCost(annualizedDollarCostNoChildren),
+      value: asCost(selfCPU.annualizedDollarCost),
     },
   ];
 
