@@ -144,7 +144,7 @@ describe('rule helpers', () => {
         threat: getThreatMock(),
         timestampOverride: 'event.ingested',
         timestampOverrideFallbackDisabled: false,
-        investigationFields: { fields: [] },
+        investigationFields: [],
       };
       const scheduleRuleStepData = { from: '0s', interval: '5m' };
       const ruleActionsStepData = {

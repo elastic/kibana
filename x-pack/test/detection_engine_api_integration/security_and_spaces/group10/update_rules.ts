@@ -846,12 +846,12 @@ export default ({ getService }: FtrProviderContext) => {
         it('should overwrite investigation_fields value on update - non additive', async () => {
           await createRule(supertest, log, {
             ...getSimpleRule('rule-1'),
-            investigation_fields: ['blob', 'boop'],
+            investigation_fields: { fields: ['blob', 'boop'] },
           });
 
           const ruleUpdate = {
             ...getSimpleRuleUpdate('rule-1'),
-            investigation_fields: ['foo', 'bar'],
+            investigation_fields: { fields: ['foo', 'bar'] },
           };
 
           const { body } = await supertest
@@ -860,7 +860,27 @@ export default ({ getService }: FtrProviderContext) => {
             .send(ruleUpdate)
             .expect(200);
 
-          expect(body.investigation_fields).to.eql(['foo', 'bar']);
+          expect(body.investigation_fields.fields).to.eql(['foo', 'bar']);
+        });
+
+        it('should unset investigation_fields', async () => {
+          await createRule(supertest, log, {
+            ...getSimpleRule('rule-1'),
+            investigation_fields: { fields: ['blob', 'boop'] },
+          });
+
+          const ruleUpdate = {
+            ...getSimpleRuleUpdate('rule-1'),
+            investigation_fields: undefined,
+          };
+
+          const { body } = await supertest
+            .put(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(ruleUpdate)
+            .expect(200);
+
+          expect(body.investigation_fields).to.eql(undefined);
         });
       });
     });

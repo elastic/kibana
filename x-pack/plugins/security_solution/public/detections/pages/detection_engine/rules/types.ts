@@ -99,7 +99,6 @@ export interface AboutStepRule {
   threatIndicatorPath?: string;
   threat: Threats;
   note: string;
-  investigationFields?: InvestigationFields;
 }
 
 export interface AboutStepRuleDetails {
