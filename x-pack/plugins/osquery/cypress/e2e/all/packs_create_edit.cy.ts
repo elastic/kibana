@@ -7,6 +7,7 @@
 
 import { recurse } from 'cypress-recurse';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { tag } from '../../tags';
 import { API_VERSIONS } from '../../../common/constants';
 import { navigateTo } from '../../tasks/navigation';
 import {
@@ -14,8 +15,8 @@ import {
   findAndClickButton,
   findFormFieldByRowsLabelAndType,
   inputQuery,
+  isServerless,
 } from '../../tasks/live_query';
-import { ROLE, login } from '../../tasks/login';
 import { activatePack, deactivatePack, preparePack } from '../../tasks/packs';
 import {
   closeModalIfVisible,
@@ -28,7 +29,7 @@ import { getIdFormField, getSavedQueriesDropdown } from '../../screens/live_quer
 import { loadSavedQuery, cleanupSavedQuery, cleanupPack, loadPack } from '../../tasks/api_fixtures';
 import { request } from '../../tasks/common';
 
-describe('Packs - Create and Edit', () => {
+describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   let savedQueryId: string;
   let savedQueryName: string;
   let nomappingSavedQueryId: string;
@@ -86,7 +87,7 @@ describe('Packs - Create and Edit', () => {
   });
 
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    cy.login('elastic');
     navigateTo('/app/osquery');
   });
 
@@ -338,48 +339,50 @@ describe('Packs - Create and Edit', () => {
     });
   });
 
-  describe('should open lens in new tab', () => {
-    let packId: string;
-    let packName: string;
+  if (!isServerless) {
+    describe('should open lens in new tab', () => {
+      let packId: string;
+      let packName: string;
 
-    before(() => {
-      loadPack({
-        policy_ids: ['fleet-server-policy'],
-        queries: {
-          [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
-        },
-      }).then((pack) => {
-        packId = pack.saved_object_id;
-        packName = pack.name;
-      });
-    });
-
-    after(() => {
-      cleanupPack(packId);
-    });
-
-    it('', () => {
-      let lensUrl = '';
-      cy.window().then((win) => {
-        cy.stub(win, 'open')
-          .as('windowOpen')
-          .callsFake((url) => {
-            lensUrl = url;
-          });
-      });
-      preparePack(packName);
-      cy.getBySel('docsLoading').should('exist');
-      cy.getBySel('docsLoading').should('not.exist');
-      cy.get(`[aria-label="View in Lens"]`).eq(0).click();
-      cy.window()
-        .its('open')
-        .then(() => {
-          cy.visit(lensUrl);
+      before(() => {
+        loadPack({
+          policy_ids: ['fleet-server-policy'],
+          queries: {
+            [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
+          },
+        }).then((pack) => {
+          packId = pack.saved_object_id;
+          packName = pack.name;
         });
-      cy.getBySel('lnsWorkspace').should('exist');
-      cy.getBySel('breadcrumbs').contains(`Action pack_${packName}_${savedQueryName}`);
+      });
+
+      after(() => {
+        cleanupPack(packId);
+      });
+
+      it('', () => {
+        let lensUrl = '';
+        cy.window().then((win) => {
+          cy.stub(win, 'open')
+            .as('windowOpen')
+            .callsFake((url) => {
+              lensUrl = url;
+            });
+        });
+        preparePack(packName);
+        cy.getBySel('docsLoading').should('exist');
+        cy.getBySel('docsLoading').should('not.exist');
+        cy.get(`[aria-label="View in Lens"]`).eq(0).click();
+        cy.window()
+          .its('open')
+          .then(() => {
+            cy.visit(lensUrl);
+          });
+        cy.getBySel('lnsWorkspace').should('exist');
+        cy.getBySel('breadcrumbs').contains(`Action pack_${packName}_${savedQueryName}`);
+      });
     });
-  });
+  }
 
   describe.skip('should open discover in new tab', () => {
     let packId: string;

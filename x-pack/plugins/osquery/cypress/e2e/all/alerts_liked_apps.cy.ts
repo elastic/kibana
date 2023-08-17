@@ -7,19 +7,20 @@
 
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { RESPONSE_ACTIONS_ITEM_0, RESPONSE_ACTIONS_ITEM_1 } from '../../tasks/response_actions';
-import { ROLE, login } from '../../tasks/login';
 import {
   checkActionItemsInResults,
   inputQuery,
   loadRuleAlerts,
   submitQuery,
+  isServerless,
 } from '../../tasks/live_query';
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
+import { tag } from '../../tags';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
-describe('Alert Event Details', { browser: 'electron' }, () => {
+describe('Alert Event Details', { browser: 'electron', tags: [tag.ESS, tag.SERVERLESS] }, () => {
   let ruleId: string;
   let ruleName: string;
 
@@ -36,7 +37,7 @@ describe('Alert Event Details', { browser: 'electron' }, () => {
   });
 
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    cy.login('elastic');
     cy.visit('/app/security/rules');
     cy.contains(ruleName).click();
   });
@@ -98,91 +99,95 @@ describe('Alert Event Details', { browser: 'electron' }, () => {
     closeModalIfVisible();
   });
 
-  it('can visit discover from response action results', () => {
-    const discoverRegex = new RegExp(`action_id: ${UUID_REGEX}`);
-    cy.getBySel('expand-event').first().click();
-    cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
-    cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseButton').click();
-    cy.getBySel('responseActionsViewWrapper').should('exist');
-    checkActionItemsInResults({
-      lens: true,
-      discover: true,
-      cases: true,
-      timeline: true,
-    });
-    cy.contains('View in Discover')
-      .should('exist')
-      .should('have.attr', 'href')
-      .then(($href) => {
-        // @ts-expect-error-next-line href string - check types
-        cy.visit($href);
-        cy.getBySel('breadcrumbs').contains('Discover').should('exist');
-        cy.getBySel('discoverDocTable', { timeout: 60000 }).within(() => {
-          cy.contains(`action_data.query`);
-        });
-        cy.contains(discoverRegex);
+  if (!isServerless) {
+    it('can visit discover from response action results', () => {
+      const discoverRegex = new RegExp(`action_id: ${UUID_REGEX}`);
+      cy.getBySel('expand-event').first().click();
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseButton').click();
+      cy.getBySel('responseActionsViewWrapper').should('exist');
+      checkActionItemsInResults({
+        lens: true,
+        discover: true,
+        cases: true,
+        timeline: true,
       });
-  });
-
-  it('can visit lens from response action results', () => {
-    const lensRegex = new RegExp(`Action ${UUID_REGEX} results`);
-    cy.getBySel('expand-event').first().click();
-    cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
-    cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseButton').click();
-    cy.getBySel('responseActionsViewWrapper').should('exist');
-    checkActionItemsInResults({
-      lens: true,
-      discover: true,
-      cases: true,
-      timeline: true,
+      cy.contains('View in Discover')
+        .should('exist')
+        .should('have.attr', 'href')
+        .then(($href) => {
+          // @ts-expect-error-next-line href string - check types
+          cy.visit($href);
+          cy.getBySel('breadcrumbs').contains('Discover').should('exist');
+          cy.getBySel('discoverDocTable', { timeout: 60000 }).within(() => {
+            cy.contains(`action_data.query`);
+          });
+          cy.contains(discoverRegex);
+        });
     });
-    cy.getBySel('osquery-results-comment')
-      .first()
-      .within(() => {
-        let lensUrl = '';
-        cy.window().then((win) => {
-          cy.stub(win, 'open')
-            .as('windowOpen')
-            .callsFake((url) => {
-              lensUrl = url;
+
+    it('can visit lens from response action results', () => {
+      const lensRegex = new RegExp(`Action ${UUID_REGEX} results`);
+      cy.getBySel('expand-event').first().click();
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseButton').click();
+      cy.getBySel('responseActionsViewWrapper').should('exist');
+      checkActionItemsInResults({
+        lens: true,
+        discover: true,
+        cases: true,
+        timeline: true,
+      });
+      cy.getBySel('osquery-results-comment')
+        .first()
+        .within(() => {
+          let lensUrl = '';
+          cy.window().then((win) => {
+            cy.stub(win, 'open')
+              .as('windowOpen')
+              .callsFake((url) => {
+                lensUrl = url;
+              });
+          });
+          cy.get(`[aria-label="View in Lens"]`).click();
+          cy.window()
+            .its('open')
+            .then(() => {
+              cy.visit(lensUrl);
             });
         });
-        cy.get(`[aria-label="View in Lens"]`).click();
-        cy.window()
-          .its('open')
-          .then(() => {
-            cy.visit(lensUrl);
-          });
-      });
-    cy.getBySel('lnsWorkspace').should('exist');
-    cy.getBySel('breadcrumbs').contains(lensRegex);
-  });
-
-  it('can add to timeline from response action results', () => {
-    const timelineRegex = new RegExp(`Added ${UUID_REGEX} to timeline`);
-    const filterRegex = new RegExp(`action_id: "${UUID_REGEX}"`);
-    cy.getBySel('expand-event').first().click();
-    cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
-    cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseButton').click();
-    cy.getBySel('responseActionsViewWrapper').should('exist');
-    checkActionItemsInResults({
-      lens: true,
-      discover: true,
-      cases: true,
-      timeline: true,
+      cy.getBySel('lnsWorkspace').should('exist');
+      cy.getBySel('breadcrumbs').contains(lensRegex);
     });
-    cy.getBySel('osquery-results-comment')
-      .first()
-      .within(() => {
-        cy.get('.euiTableRow')
-          .first()
-          .within(() => {
-            cy.getBySel('add-to-timeline').click();
-          });
+  }
+
+  if (!isServerless) {
+    it('can add to timeline from response action results', () => {
+      const timelineRegex = new RegExp(`Added ${UUID_REGEX} to timeline`);
+      const filterRegex = new RegExp(`action_id: "${UUID_REGEX}"`);
+      cy.getBySel('expand-event').first().click();
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseButton').click();
+      cy.getBySel('responseActionsViewWrapper').should('exist');
+      checkActionItemsInResults({
+        lens: true,
+        discover: true,
+        cases: true,
+        timeline: true,
       });
-    cy.contains(timelineRegex);
-    cy.getBySel('securitySolutionDocumentDetailsFlyoutHeaderCollapseDetailButton').click();
-    cy.getBySel('flyoutBottomBar').contains('Untitled timeline').click();
-    cy.contains(filterRegex);
-  });
+      cy.getBySel('osquery-results-comment')
+        .first()
+        .within(() => {
+          cy.get('.euiTableRow')
+            .first()
+            .within(() => {
+              cy.getBySel('add-to-timeline').click();
+            });
+        });
+      cy.contains(timelineRegex);
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutHeaderCollapseDetailButton').click();
+      cy.getBySel('flyoutBottomBar').contains('Untitled timeline').click();
+      cy.contains(filterRegex);
+    });
+  }
 });

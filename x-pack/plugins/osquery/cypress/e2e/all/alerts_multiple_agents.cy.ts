@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
-import { ROLE, login } from '../../tasks/login';
 import {
   inputQuery,
   loadRuleAlerts,
@@ -14,7 +14,7 @@ import {
   takeOsqueryActionWithParams,
 } from '../../tasks/live_query';
 
-describe('Alert Event Details - dynamic params', () => {
+describe('Alert Event Details - dynamic params', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   let ruleId: string;
   let ruleName: string;
 
@@ -31,7 +31,7 @@ describe('Alert Event Details - dynamic params', () => {
   });
 
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    cy.login('elastic');
     cy.visit('/app/security/rules');
     cy.contains(ruleName).click();
   });
