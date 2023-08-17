@@ -125,10 +125,10 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 
   ['xpack.ml.enabled', 'true'],
 
-  ['xpack.security.enabled', 'false'],
-];
+  //   ['xpack.security.enabled', 'false'],
+  // ];
 
-const SERVERLESS_SSL_ESARGS: Array<[string, string]> = [
+  // const SERVERLESS_SSL_ESARGS: Array<[string, string]> = [
   ['xpack.security.enabled', 'true'],
 
   ['xpack.security.http.ssl.enabled', 'true'],
@@ -372,7 +372,7 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     `${basePath}:/objectstore:z`,
 
     '--volume',
-    `${ES_P12_PATH}:${ESS_CONFIG_PATH}certs/elasticsearch.p12:z`,
+    `${ES_P12_PATH}:${ESS_CONFIG_PATH}certs/elasticsearch.p12`,
 
     '--volume',
     `${ESS_OPERATOR_USERS_PATH}:${ESS_CONFIG_PATH}operator_users.yml`,
