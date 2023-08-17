@@ -47,7 +47,6 @@ export class MlCapabilitiesService {
   private _capabilitiesObs$ = this._capabilities$.asObservable();
 
   private _isPlatinumOrTrialLicense$ = new BehaviorSubject<boolean | null>(null);
-
   private _mlFeatureEnabledInSpace$ = new BehaviorSubject<boolean | null>(null);
 
   public capabilities$ = this._capabilities$.pipe(distinctUntilChanged(isEqual));
@@ -156,6 +155,7 @@ export function checkGetManagementMlJobsResolver({
           if (isManageML === true) {
             return resolve();
           } else {
+            // reject with possible reasons why capabilities are false
             return reject({
               capabilities,
               isPlatinumOrTrialLicense: mlCapabilities.isPlatinumOrTrialLicense(),
