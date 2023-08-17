@@ -28,7 +28,7 @@ const rollupIndexPatternListName = i18n.translate(
   }
 );
 
-const isRollup = (indexPatternType: string = '') => {
+export const isRollup = (indexPatternType: string = '') => {
   return indexPatternType === 'rollup';
 };
 

@@ -15,6 +15,7 @@ import {
   TAB_SOURCE_FILTERS,
   TAB_RELATIONSHIPS,
 } from '../constants';
+import { isRollup } from '../../utils';
 
 function filterByName(items: DataViewField[], filter: string) {
   const lowercaseFilter = (filter || '').toLowerCase();
@@ -93,7 +94,7 @@ export function getTabs(
     'data-test-subj': 'tab-indexedFields',
   });
 
-  if (indexPattern.type !== 'rollup' && scriptedFieldsEnabled) {
+  if (!isRollup(indexPattern.type) && scriptedFieldsEnabled) {
     tabs.push({
       name: getTitle('scripted', filteredCount, totalCount),
       id: TAB_SCRIPTED_FIELDS,
