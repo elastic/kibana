@@ -24,7 +24,7 @@ metadata:
       url: https://www.elastic.co/guide/en/kibana/current/index.html
 
 spec:
-  type: service
+  type: monorepo
   owner: group:kibana-tech-leads
   lifecycle: production
 
@@ -54,15 +54,17 @@ spec:
       provider_settings:
         trigger_mode: none
       teams:
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
         security-engineering-productivity:
-          access_level: MANAGE_BUILD_AND_READ
+          access_level: BUILD_AND_READ
         fleet:
-          access_level: MANAGE_BUILD_AND_READ
+          access_level: BUILD_AND_READ
         kibana-tech-leads:
-          access_level: MANAGE_BUILD_AND_READ
+          access_level: BUILD_AND_READ
         kibana-core:
-          access_level: MANAGE_BUILD_AND_READ
+          access_level: BUILD_AND_READ
         cloud-tooling:
-          access_level: MANAGE_BUILD_AND_READ
+          access_level: BUILD_AND_READ
         everyone:
           access_level: READ_ONLY
