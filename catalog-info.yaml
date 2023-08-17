@@ -50,11 +50,11 @@ spec:
       description: Pipeline that tests the service integration in various environments
     spec:
       repository: elastic/kibana
-      pipeline_file: ./.buildkite/pipelines/pipeline.kibana_tests.yaml
+      pipeline_file: ./.buildkite/pipelines/pipeline.kibana-tests.yaml
       provider_settings:
         trigger_mode: none
       teams:
-        security:
+        security-engineering-productivity:
           access_level: MANAGE_BUILD_AND_READ
         fleet:
           access_level: MANAGE_BUILD_AND_READ
