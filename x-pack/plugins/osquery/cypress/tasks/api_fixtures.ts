@@ -86,6 +86,7 @@ export const cleanupSavedQuery = (id: string) => {
     headers: {
       'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
+    failOnStatusCode: false,
   });
 };
 
@@ -148,9 +149,23 @@ export const loadRule = (includeResponseActions = false) =>
         'winlogbeat-*',
         '-*elastic-cloud-logs-*',
       ],
-      filters: [],
+      filters: [
+        {
+          meta: {
+            disabled: false,
+            negate: true,
+            alias: null,
+            key: 'host.name',
+            field: 'host.name',
+            params: { query: 'dev-fleet-server.8220' },
+            type: 'phrase',
+          },
+          query: { match_phrase: { 'host.name': 'dev-fleet-server.8220' } },
+          $state: { store: 'appState' },
+        },
+      ],
       language: 'kuery',
-      query: 'NOT host.name: "dev-fleet-server.8220"',
+      query: '_id:*',
       author: [],
       false_positives: [],
       references: [],

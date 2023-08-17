@@ -27,9 +27,11 @@ export const getInstalledIntegration = async (kbnClient: KbnClient, integrationN
   return item;
 };
 
-export const createAgentPolicy = async (kbnClient: KbnClient, log: ToolingLog) => {
-  const agentPolicyName = 'Osquery policy';
-
+export const createAgentPolicy = async (
+  kbnClient: KbnClient,
+  log: ToolingLog,
+  agentPolicyName = 'Osquery policy'
+) => {
   log.info(`Creating "${agentPolicyName}" agent policy`);
 
   const {
