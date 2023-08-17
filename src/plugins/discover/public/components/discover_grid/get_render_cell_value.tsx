@@ -9,7 +9,6 @@
 import React, { Fragment, useContext, useEffect, useMemo } from 'react';
 import classnames from 'classnames';
 import { i18n } from '@kbn/i18n';
-import { EuiDelayRender, EuiLoadingSpinner } from '@elastic/eui';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
@@ -29,6 +28,7 @@ import type {
 } from '@kbn/discover-utils/types';
 import { MAX_DOC_FIELDS_DISPLAYED, formatFieldValue, formatHit } from '@kbn/discover-utils';
 import { CodeEditor } from '@kbn/code-editor';
+import { XJsonLang } from '@kbn/monaco';
 import { DiscoverGridContext } from './discover_grid_context';
 import { defaultMonacoEditorWidth } from './constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -190,6 +190,8 @@ function renderPopoverContent({
     />
   );
   if (useTopLevelObjectColumns || field?.type === '_source') {
+    const valueRaw = getJSON(columnId, row, useTopLevelObjectColumns);
+    const valueFormatted = JSON.stringify(valueRaw, null, 2);
     return (
       <EuiFlexGroup
         gutterSize="none"
@@ -203,20 +205,28 @@ function renderPopoverContent({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <React.Suspense
-            fallback={
-              <EuiDelayRender>
-                <EuiLoadingSpinner />
-              </EuiDelayRender>
-            }
-          >
-            <CodeEditor
-              languageId="json"
-              value={JSON.stringify(getJSON(columnId, row, useTopLevelObjectColumns), null, 2)}
-              width={defaultMonacoEditorWidth}
-              height={200}
-            />
-          </React.Suspense>
+          <CodeEditor
+            languageId={XJsonLang.ID}
+            value={valueFormatted}
+            width={defaultMonacoEditorWidth}
+            height={200}
+            options={{
+              automaticLayout: true,
+              fontSize: 12,
+              lineNumbers: 'off',
+              minimap: {
+                enabled: false,
+              },
+              overviewRulerBorder: false,
+              readOnly: true,
+              scrollbar: {
+                alwaysConsumeMouseWheel: false,
+              },
+              scrollBeyondLastLine: false,
+              wordWrap: 'on',
+              wrappingIndent: 'indent',
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

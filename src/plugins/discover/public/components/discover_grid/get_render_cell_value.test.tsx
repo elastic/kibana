@@ -285,36 +285,43 @@ describe('Discover grid cell rendering', function () {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <Suspense
-            fallback={
-              <EuiDelayRender
-                delay={500}
-              >
-                <EuiLoadingSpinner />
-              </EuiDelayRender>
-            }
-          >
-            <lazy
-              height={200}
-              json={
-                Object {
-                  "_id": "1",
-                  "_index": "test",
-                  "_score": 1,
-                  "_source": Object {
-                    "bytes": 100,
-                    "extension": ".gz",
-                  },
-                  "highlight": Object {
-                    "extension": Array [
-                      "@kibana-highlighted-field.gz@/kibana-highlighted-field",
-                    ],
-                  },
-                }
+          <CodeEditor
+            height={200}
+            languageId="xjson"
+            options={
+              Object {
+                "automaticLayout": true,
+                "fontSize": 12,
+                "lineNumbers": "off",
+                "minimap": Object {
+                  "enabled": false,
+                },
+                "overviewRulerBorder": false,
+                "readOnly": true,
+                "scrollBeyondLastLine": false,
+                "scrollbar": Object {
+                  "alwaysConsumeMouseWheel": false,
+                },
+                "wordWrap": "on",
+                "wrappingIndent": "indent",
               }
-              width={370}
-            />
-          </Suspense>
+            }
+            value="{
+        \\"_id\\": \\"1\\",
+        \\"_index\\": \\"test\\",
+        \\"_score\\": 1,
+        \\"_source\\": {
+          \\"bytes\\": 100,
+          \\"extension\\": \\".gz\\"
+        },
+        \\"highlight\\": {
+          \\"extension\\": [
+            \\"@kibana-highlighted-field.gz@/kibana-highlighted-field\\"
+          ]
+        }
+      }"
+            width={370}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     `);
