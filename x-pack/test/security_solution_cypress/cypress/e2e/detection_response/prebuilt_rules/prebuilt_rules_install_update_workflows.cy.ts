@@ -25,8 +25,7 @@ import {
   createAndInstallMockedPrebuiltRules,
 } from '../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { SECURITY_DETECTIONS_RULES_URL } from '../../../urls/navigation';
+import { login, visitSecurityDetectionRulesPage } from '../../../tasks/login';
 import {
   addElasticRulesButtonClick,
   assertRuleAvailableForInstallAndInstallOne,
@@ -50,7 +49,7 @@ describe(
       deleteAlertsAndRules();
       cy.task('esArchiverResetKibana');
 
-      visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+      visitSecurityDetectionRulesPage();
     });
 
     describe('Installation of prebuilt rules package via Fleet', () => {

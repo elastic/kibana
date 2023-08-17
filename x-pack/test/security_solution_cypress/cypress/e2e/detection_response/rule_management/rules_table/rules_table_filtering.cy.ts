@@ -8,14 +8,12 @@
 import { tag } from '../../../../tags';
 
 import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { login, visitSecurityDetectionRulesPage } from '../../../../tasks/login';
 import {
   expectRulesWithExecutionStatus,
   filterByExecutionStatus,
   expectNumberOfRulesShownOnPage,
 } from '../../../../tasks/rule_filters';
-
-import { SECURITY_DETECTIONS_RULES_URL } from '../../../../urls/navigation';
 
 import { createRule, waitForRulesToFinishExecution } from '../../../../tasks/api_calls/rules';
 import {
@@ -23,7 +21,7 @@ import {
   createIndex,
   createDocument,
 } from '../../../../tasks/api_calls/elasticsearch';
-
+import { disableAutoRefresh } from '../../../../tasks/alerts_detection_rules';
 import { getNewRule } from '../../../../objects/rule';
 
 describe('Rules table: filtering', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
@@ -82,7 +80,8 @@ describe('Rules table: filtering', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
       waitForRulesToFinishExecution(['successful_rule', 'warning_rule', 'failed_rule'], new Date());
 
-      visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+      visitSecurityDetectionRulesPage();
+      disableAutoRefresh();
 
       // Initial table state - before filtering by status
       expectNumberOfRulesShownOnPage(3);

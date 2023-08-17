@@ -20,6 +20,7 @@ import {
   expectManagementTableRules,
   selectAllRules,
   getRulesManagementTableRows,
+  disableAutoRefresh,
 } from '../../../../../tasks/alerts_detection_rules';
 
 import {
@@ -37,9 +38,8 @@ import {
   getDetails,
   assertDetailsNotExist,
 } from '../../../../../tasks/rule_details';
-import { login, visitWithoutDateRange } from '../../../../../tasks/login';
+import { login, visitSecurityDetectionRulesPage } from '../../../../../tasks/login';
 
-import { SECURITY_DETECTIONS_RULES_URL } from '../../../../../urls/navigation';
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules, postDataView } from '../../../../../tasks/common';
 
@@ -126,7 +126,8 @@ describe(
         })
       );
 
-      visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+      visitSecurityDetectionRulesPage();
+      disableAutoRefresh();
 
       expectManagementTableRules([
         'New Rule Test 1',
@@ -247,61 +248,66 @@ describe(
   }
 );
 
-describe('Bulk editing index patterns of rules with index patterns and rules with a data view', () => {
-  before(() => {
-    cleanKibana();
-  });
-
-  beforeEach(() => {
-    login();
-    deleteAlertsAndRules();
-    cy.task('esArchiverResetKibana');
-
-    postDataView(DATA_VIEW_ID);
-
-    createRule(
-      getNewRule({ name: 'with dataview', index: [], data_view_id: DATA_VIEW_ID, rule_id: '1' })
-    );
-    createRule(getNewRule({ name: 'no data view', index: ['test-index-1-*'], rule_id: '2' }));
-
-    visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-
-    expectManagementTableRules(['with dataview', 'no data view']);
-  });
-
-  it('Add index patterns to custom rules: one rule is updated, one rule is skipped', () => {
-    selectAllRules();
-
-    openBulkEditAddIndexPatternsForm();
-    typeIndexPatterns(expectedIndexPatterns);
-    submitBulkEditForm();
-
-    waitForBulkEditActionToFinish({
-      updatedCount: 1,
-      skippedCount: 1,
-      showDataViewsWarning: true,
+describe(
+  'Bulk editing index patterns of rules with index patterns and rules with a data view',
+  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  () => {
+    before(() => {
+      cleanKibana();
     });
 
-    // check if rule still has data view and index patterns field does not exist
-    goToTheRuleDetailsOf('with dataview');
-    getDetails(DATA_VIEW_DETAILS).contains(DATA_VIEW_ID);
-    assertDetailsNotExist(INDEX_PATTERNS_DETAILS);
-  });
+    beforeEach(() => {
+      login();
+      deleteAlertsAndRules();
+      cy.task('esArchiverResetKibana');
 
-  it('Add index patterns to custom rules when overwrite data view checkbox is checked: all rules are updated', () => {
-    selectAllRules();
+      postDataView(DATA_VIEW_ID);
 
-    openBulkEditAddIndexPatternsForm();
-    typeIndexPatterns(expectedIndexPatterns);
-    checkOverwriteDataViewCheckbox();
-    submitBulkEditForm();
+      createRule(
+        getNewRule({ name: 'with dataview', index: [], data_view_id: DATA_VIEW_ID, rule_id: '1' })
+      );
+      createRule(getNewRule({ name: 'no data view', index: ['test-index-1-*'], rule_id: '2' }));
 
-    waitForBulkEditActionToFinish({
-      updatedCount: 2,
+      visitSecurityDetectionRulesPage();
+      disableAutoRefresh();
+
+      expectManagementTableRules(['with dataview', 'no data view']);
     });
 
-    // check if rule still has data view and index patterns field does not exist
-    goToRuleDetails();
-    assertDetailsNotExist(DATA_VIEW_DETAILS);
-  });
-});
+    it('Add index patterns to custom rules: one rule is updated, one rule is skipped', () => {
+      selectAllRules();
+
+      openBulkEditAddIndexPatternsForm();
+      typeIndexPatterns(expectedIndexPatterns);
+      submitBulkEditForm();
+
+      waitForBulkEditActionToFinish({
+        updatedCount: 1,
+        skippedCount: 1,
+        showDataViewsWarning: true,
+      });
+
+      // check if rule still has data view and index patterns field does not exist
+      goToTheRuleDetailsOf('with dataview');
+      getDetails(DATA_VIEW_DETAILS).contains(DATA_VIEW_ID);
+      assertDetailsNotExist(INDEX_PATTERNS_DETAILS);
+    });
+
+    it('Add index patterns to custom rules when overwrite data view checkbox is checked: all rules are updated', () => {
+      selectAllRules();
+
+      openBulkEditAddIndexPatternsForm();
+      typeIndexPatterns(expectedIndexPatterns);
+      checkOverwriteDataViewCheckbox();
+      submitBulkEditForm();
+
+      waitForBulkEditActionToFinish({
+        updatedCount: 2,
+      });
+
+      // check if rule still has data view and index patterns field does not exist
+      goToRuleDetails();
+      assertDetailsNotExist(DATA_VIEW_DETAILS);
+    });
+  }
+);

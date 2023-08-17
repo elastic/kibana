@@ -11,6 +11,7 @@ import {
   goToTheRuleDetailsOf,
   expectManagementTableRules,
   selectAllRules,
+  disableAutoRefresh,
 } from '../../../../../tasks/alerts_detection_rules';
 import {
   duplicateSelectedRulesWithoutExceptions,
@@ -18,9 +19,8 @@ import {
   duplicateSelectedRulesWithNonExpiredExceptions,
 } from '../../../../../tasks/rules_bulk_actions';
 import { goToExceptionsTab, viewExpiredExceptionItems } from '../../../../../tasks/rule_details';
-import { login, visitWithoutDateRange } from '../../../../../tasks/login';
+import { login, visitSecurityDetectionRulesPage } from '../../../../../tasks/login';
 
-import { SECURITY_DETECTIONS_RULES_URL } from '../../../../../urls/navigation';
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import {
   cleanKibana,
@@ -100,7 +100,8 @@ describe('Detection rules, bulk duplicate', { tags: [tag.ESS, tag.SERVERLESS] },
       ]);
     });
 
-    visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+    visitSecurityDetectionRulesPage();
+    disableAutoRefresh();
   });
 
   it('Duplicates rules', () => {
