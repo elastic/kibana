@@ -26,7 +26,9 @@
 export {};
 
 import 'cypress-react-selector';
-// import './coverage';
+import registerCypressGrep from '@cypress/grep';
+
+registerCypressGrep();
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
