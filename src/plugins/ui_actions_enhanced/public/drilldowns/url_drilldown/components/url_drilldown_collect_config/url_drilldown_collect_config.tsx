@@ -23,12 +23,10 @@ import './index.scss';
 import {
   txtUrlTemplateSyntaxHelpLinkText,
   txtUrlTemplateLabel,
-  txtUrlTemplateOpenInNewTab,
   txtUrlTemplateAdditionalOptions,
-  txtUrlTemplateEncodeUrl,
-  txtUrlTemplateEncodeDescription,
 } from './i18n';
 import { VariablePopover } from '../variable_popover';
+import { UrlDrilldownOptionsComponent } from './lazy';
 
 export interface UrlDrilldownCollectConfigProps {
   config: UrlDrilldownConfig;
@@ -114,31 +112,12 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps>
       >
         <EuiSpacer size={'s'} />
         <EuiPanel color="subdued" borderRadius="none" hasShadow={false} style={{ border: 'none' }}>
-          <EuiFormRow hasChildLabel={false}>
-            <EuiSwitch
-              id="openInNewTab"
-              name="openInNewTab"
-              label={txtUrlTemplateOpenInNewTab}
-              checked={config.openInNewTab}
-              onChange={() => onConfig({ ...config, openInNewTab: !config.openInNewTab })}
-              data-test-subj="urlDrilldownOpenInNewTab"
-            />
-          </EuiFormRow>
-          <EuiFormRow hasChildLabel={false} fullWidth>
-            <EuiSwitch
-              id="encodeUrl"
-              name="encodeUrl"
-              label={
-                <>
-                  {txtUrlTemplateEncodeUrl}
-                  <EuiSpacer size={'s'} />
-                  <EuiTextColor color="subdued">{txtUrlTemplateEncodeDescription}</EuiTextColor>
-                </>
-              }
-              checked={config.encodeUrl ?? true}
-              onChange={() => onConfig({ ...config, encodeUrl: !(config.encodeUrl ?? true) })}
-            />
-          </EuiFormRow>
+          <UrlDrilldownOptionsComponent
+            options={config}
+            onOptionChange={(change) => {
+              onConfig({ ...config, ...change });
+            }}
+          />
         </EuiPanel>
       </EuiAccordion>
     </>

@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-export type UrlDrilldownConfig = {
-  url: { format?: 'handlebars_v1'; template: string };
+export type UrlDrilldownOptions = {
   openInNewTab: boolean;
   encodeUrl?: boolean;
 };
+
+export type UrlDrilldownConfig = {
+  url: { format?: 'handlebars_v1'; template: string };
+} & UrlDrilldownOptions;
 
 /**
  * URL drilldown has 3 sources for variables: global, context and event variables

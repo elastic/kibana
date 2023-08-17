@@ -7,6 +7,7 @@
  */
 
 import * as React from 'react';
+import { UrlDrilldownOptionsProps } from './url_drilldown_options';
 import type { UrlDrilldownCollectConfigProps } from './url_drilldown_collect_config';
 
 const UrlDrilldownCollectConfigLazy = React.lazy(() =>
@@ -21,6 +22,20 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps>
   return (
     <React.Suspense fallback={null}>
       <UrlDrilldownCollectConfigLazy {...props} />
+    </React.Suspense>
+  );
+};
+
+const UrlDrilldownOptionsComponentLazy = React.lazy(() =>
+  import('./url_drilldown_options').then(({ UrlDrilldownOptionsComponent }) => ({
+    default: UrlDrilldownOptionsComponent,
+  }))
+);
+
+export const UrlDrilldownOptionsComponent: React.FC<UrlDrilldownOptionsProps> = (props) => {
+  return (
+    <React.Suspense fallback={null}>
+      <UrlDrilldownOptionsComponentLazy {...props} />
     </React.Suspense>
   );
 };

@@ -7,7 +7,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   EuiForm,
@@ -28,8 +28,8 @@ import {
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import {
-  UrlDrilldownCollectConfig,
-  UrlDrilldownConfig,
+  UrlDrilldownOptions,
+  UrlDrilldownOptionsComponent,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import {
   withSuspense,
@@ -71,13 +71,15 @@ export const NavigationEmbeddableLinkEditor = ({
   const [defaultLinkLabel, setDefaultLinkLabel] = useState<string | undefined>();
   const [currentLinkLabel, setCurrentLinkLabel] = useState<string>(link?.label ?? '');
   const [linkDestination, setLinkDestination] = useState<string | undefined>(link?.destination);
-  const [linkOptions, setLinkOptions] = useState<DashboardDrilldownOptions>({
+  const [linkOptions, setLinkOptions] = useState<DashboardDrilldownOptions | UrlDrilldownOptions>({
     openInNewTab: false,
     useCurrentDateRange: true,
     useCurrentFilters: true,
   });
 
-  // | UrlDrilldownConfig
+  // useEffect(() => {
+  //   console.log(linkOptions);
+  // }, [linkOptions]);
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
     return ([DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE] as NavigationLinkType[]).map((type) => {
@@ -197,12 +199,15 @@ export const NavigationEmbeddableLinkEditor = ({
           <EuiFormRow label={'Options'}>
             {selectedLinkType === DASHBOARD_LINK_TYPE ? (
               <DashboardDrilldownOptionsComponent
-                options={linkOptions}
+                options={linkOptions as DashboardDrilldownOptions}
                 onOptionChange={(change) => setLinkOptions({ ...linkOptions, ...change })}
               />
             ) : (
               // <UrlDrilldownCollectConfig />
-              <>Config</>
+              <UrlDrilldownOptionsComponent
+                options={linkOptions as UrlDrilldownOptions}
+                onOptionChange={(change) => setLinkOptions({ ...linkOptions, ...change })}
+              />
             )}
           </EuiFormRow>
         </EuiForm>
