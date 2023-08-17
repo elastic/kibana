@@ -218,7 +218,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.skip('SQL mode', () => {
+    describe('SQL mode', () => {
       const type = 'sql';
 
       beforeEach(async () => {
