@@ -372,7 +372,7 @@ describe('RuleDataClient', () => {
           await delay();
 
           await expect(() => writer.bulk({})).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"error writing to index: something went wrong!"`
+            `"something went wrong!"`
           );
           expect(logger.error).toHaveBeenNthCalledWith(
             1,

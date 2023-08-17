@@ -234,7 +234,8 @@ export class RuleDataClient implements IRuleDataClient {
             // TODO: #160572 - add support for version conflict errors, in case alert was updated
             // some other way between the time it was fetched and the time it was updated.
             if (response.body.errors) {
-              throw new errors.ResponseError(response);
+              const error = new errors.ResponseError(response);
+              this.options.logger.error(error);
             }
             return response;
           } else {
@@ -242,7 +243,7 @@ export class RuleDataClient implements IRuleDataClient {
           }
         } catch (error) {
           this.options.logger.error(`error writing to index: ${error.message}`, error);
-          throw new Error(`error writing to index: ${error.message}`, { cause: error });
+          throw error;
         }
       },
     };

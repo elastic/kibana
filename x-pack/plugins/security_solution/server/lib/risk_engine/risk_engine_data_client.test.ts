@@ -80,16 +80,16 @@ jest.spyOn(transforms, 'createTransform').mockResolvedValue(Promise.resolve());
 jest.spyOn(transforms, 'startTransform').mockResolvedValue(Promise.resolve());
 
 describe('RiskEngineDataClient', () => {
-  let riskEngineDataClient: RiskEngineDataClient;
-  let mockSavedObjectClient: ReturnType<typeof savedObjectsClientMock.create>;
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-  const totalFieldsLimit = 1000;
-
   for (const useDataStreamForAlerts of [false, true]) {
     const label = useDataStreamForAlerts ? 'data streams' : 'aliases';
 
     describe(`using ${label} for alert indices`, () => {
+      let riskEngineDataClient: RiskEngineDataClient;
+      let mockSavedObjectClient: ReturnType<typeof savedObjectsClientMock.create>;
+      let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+      const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+      const totalFieldsLimit = 1000;
+
       beforeEach(() => {
         logger = loggingSystemMock.createLogger();
         mockSavedObjectClient = savedObjectsClientMock.create();
@@ -129,7 +129,7 @@ describe('RiskEngineDataClient', () => {
         it('should initialize risk engine resources', async () => {
           await riskEngineDataClient.initializeResources({ namespace: 'default' });
 
-          expect(getDataStreamAdapter).toHaveBeenCalledWith({ useDataStreamForAlerts: false });
+          expect(getDataStreamAdapter).toHaveBeenCalledWith({ useDataStreamForAlerts });
 
           expect(createOrUpdateIlmPolicy).toHaveBeenCalledWith({
             logger,
@@ -517,7 +517,7 @@ describe('RiskEngineDataClient', () => {
       describe('initializeResources error', () => {
         it('should handle errors during initialization', async () => {
           const error = new Error('There error');
-          (createOrUpdateIndexTemplate as jest.Mock).mockRejectedValue(error);
+          (createOrUpdateComponentTemplate as jest.Mock).mockRejectedValueOnce(error);
 
           try {
             await riskEngineDataClient.initializeResources({ namespace: 'default' });
