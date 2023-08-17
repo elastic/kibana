@@ -6,7 +6,6 @@
  */
 
 import React, { ReactNode } from 'react';
-import { css } from '@emotion/react';
 import { compact } from 'lodash';
 import { EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
