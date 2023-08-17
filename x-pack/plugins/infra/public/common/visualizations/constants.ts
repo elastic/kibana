@@ -11,6 +11,7 @@ import {
   diskIOWrite,
   diskReadThroughput,
   diskWriteThroughput,
+  diskSpaceAvailability,
   diskSpaceAvailable,
   diskSpaceUsage,
   logRate,
@@ -28,6 +29,7 @@ export const hostLensFormulas = {
   diskIOWrite,
   diskReadThroughput,
   diskWriteThroughput,
+  diskSpaceAvailability,
   diskSpaceAvailable,
   diskSpaceUsage,
   hostCount,
@@ -40,3 +42,4 @@ export const hostLensFormulas = {
 };
 
 export const HOST_METRICS_DOC_HREF = 'https://ela.st/docs-infra-host-metrics';
+export const HOST_METRICS_DOTTED_LINES_DOC_HREF = 'https://ela.st/docs-infra-why-dotted';

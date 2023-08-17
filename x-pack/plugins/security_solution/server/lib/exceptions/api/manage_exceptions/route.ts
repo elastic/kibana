@@ -4,30 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+
 import { v4 as uuidv4 } from 'uuid';
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { IKibanaResponse } from '@kbn/core/server';
 
+import { CreateSharedExceptionListRequest } from '../../../../../common/api/detection_engine';
 import { SHARED_EXCEPTION_LIST_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-
-/**
- * URL path parameters of the API route.
- */
-export const CreateSharedExceptionListRequestParams = t.exact(
-  t.type({
-    name: t.string,
-    description: t.string,
-  })
-);
-export type CreateSharedExceptionListRequestParams = t.TypeOf<
-  typeof CreateSharedExceptionListRequestParams
->;
-
-export type CreateSharedExceptionListRequestParamsDecoded = CreateSharedExceptionListRequestParams;
 
 export const createSharedExceptionListRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
@@ -35,9 +21,9 @@ export const createSharedExceptionListRoute = (router: SecuritySolutionPluginRou
       path: SHARED_EXCEPTION_LIST_URL,
       validate: {
         body: buildRouteValidation<
-          typeof CreateSharedExceptionListRequestParams,
-          CreateSharedExceptionListRequestParams
-        >(CreateSharedExceptionListRequestParams),
+          typeof CreateSharedExceptionListRequest,
+          CreateSharedExceptionListRequest
+        >(CreateSharedExceptionListRequest),
       },
       options: {
         tags: ['access:securitySolution'],

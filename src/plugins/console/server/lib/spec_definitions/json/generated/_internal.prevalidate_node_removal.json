@@ -1,18 +1,15 @@
 {
   "_internal.prevalidate_node_removal": {
-    "url_params": {
-      "names": [],
-      "ids": [],
-      "external_ids": [],
-      "master_timeout": "",
-      "timeout": ""
-    },
     "methods": [
       "POST"
     ],
     "patterns": [
       "_internal/prevalidate_node_removal"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/prevalidate-node-removal-api.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/prevalidate-node-removal-api.html",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
   }
 }

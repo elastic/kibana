@@ -1,11 +1,21 @@
 {
   "synonyms.put": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "PUT"
     ],
     "patterns": [
       "_synonyms/{synonyms_set}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/put-synonyms.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/put-synonyms-set.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

@@ -206,6 +206,8 @@ export function DifferentialTopNFunctionsView() {
                 state.status === AsyncStatus.Loading ||
                 comparisonState.status === AsyncStatus.Loading
               }
+              baselineDuration={totalSeconds}
+              comparisonDuration={totalComparisonSeconds}
             />
           </EuiPanel>
         </EuiFlexItem>
@@ -236,13 +238,11 @@ export function DifferentialTopNFunctionsView() {
                   <TopNFunctionsGrid
                     ref={comparisonGridRef}
                     topNFunctions={comparisonState.data}
-                    comparisonTopNFunctions={state.data}
-                    totalSeconds={
-                      comparisonTimeRange.inSeconds.end - comparisonTimeRange.inSeconds.start
-                    }
-                    isDifferentialView={true}
                     baselineScaleFactor={isNormalizedByTime ? comparisonTime : comparison}
+                    comparisonTopNFunctions={state.data}
                     comparisonScaleFactor={isNormalizedByTime ? baselineTime : baseline}
+                    totalSeconds={totalSeconds}
+                    isDifferentialView={true}
                     onFrameClick={handleOnFrameClick}
                     onScroll={handleComparisonGridScroll}
                     showDiffColumn
