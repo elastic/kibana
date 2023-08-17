@@ -329,8 +329,7 @@ export function resolveEsArgs(
   }
 
   if (options.password) {
-    // esArgs.set('ELASTIC_PASSWORD', options.password);
-    // esArgs.set('bootstrap.password', options.password);
+    esArgs.set('ELASTIC_PASSWORD', options.password);
   }
 
   return Array.from(esArgs).flatMap((e) => ['--env', e.join('=')]);
