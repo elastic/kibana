@@ -39,7 +39,7 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
     version: await getLatestAvailableAgentVersion(kbnClient),
   });
 
-  new FleetManager(log).setup();
+  await new FleetManager(log).setup();
 
   const policyEnrollmentKey = await createAgentPolicy(kbnClient, log);
 
