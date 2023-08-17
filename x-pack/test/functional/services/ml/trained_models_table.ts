@@ -356,7 +356,7 @@ export function TrainedModelsTableProvider(
       const editFieldMapButton = await testSubjects.find(
         'mlTrainedModelsInferencePipelineFieldMapEditButton'
       );
-      editFieldMapButton.click();
+      await editFieldMapButton.click();
       await this.setTrainedModelsInferenceFlyoutCustomEditorValues(
         'mlTrainedModelsInferencePipelineFieldMapEdit',
         JSON.stringify(values.editedFieldMap)
@@ -486,7 +486,7 @@ export function TrainedModelsTableProvider(
         await testSubjects.existOrFail('mlTrainedModelsInferenceReviewAndCreateStepSuccessCallout');
       });
       const closeButton = await testSubjects.find('mlTrainedModelsInferencePipelineCloseButton');
-      closeButton.click();
+      await closeButton.click();
     }
 
     public async deleteModel(modelId: string) {
