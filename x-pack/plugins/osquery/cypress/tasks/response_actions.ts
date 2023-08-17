@@ -44,8 +44,8 @@ export const checkOsqueryResponseActionsPermissions = (enabled: boolean) => {
     cy.getBySel('edit-rule-actions-tab').click();
     cy.contains('Response actions are run on each rule execution.');
     cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
-    cy.getBySel(ENDPOINT_RESPONSE_ACTION_ADD_BUTTON).click();
     if (enabled) {
+      cy.getBySel(ENDPOINT_RESPONSE_ACTION_ADD_BUTTON).click();
       cy.contains('Query is a required field');
       cy.contains('Select an endpoint response action.');
     } else {
