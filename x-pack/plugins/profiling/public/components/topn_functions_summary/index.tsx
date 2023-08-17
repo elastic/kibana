@@ -7,7 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { calculateImpactEstimates } from '../../../common/calculate_impact_estimates';
 import { TopNFunctions } from '../../../common/functions';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
@@ -20,6 +21,8 @@ interface Props {
   baselineScaleFactor?: number;
   comparisonScaleFactor?: number;
   isLoading: boolean;
+  baselineDuration: number;
+  comparisonDuration: number;
 }
 
 const ESTIMATED_VALUE_LABEL = i18n.translate('xpack.profiling.diffTopNFunctions.estimatedValue', {
@@ -29,32 +32,65 @@ const ESTIMATED_VALUE_LABEL = i18n.translate('xpack.profiling.diffTopNFunctions.
 export function TopNFunctionsSummary({
   baselineTopNFunctions,
   comparisonTopNFunctions,
-  baselineScaleFactor,
-  comparisonScaleFactor,
+  baselineScaleFactor = 1,
+  comparisonScaleFactor = 1,
   isLoading,
+  baselineDuration,
+  comparisonDuration,
 }: Props) {
-  const totalSamplesDiff = calculateBaseComparisonDiff({
-    baselineValue: baselineTopNFunctions?.TotalCount || 0,
-    baselineScaleFactor,
-    comparisonValue: comparisonTopNFunctions?.TotalCount || 0,
-    comparisonScaleFactor,
-  });
+  const baselineScaledTotalSamples = baselineTopNFunctions
+    ? baselineTopNFunctions.TotalCount * baselineScaleFactor
+    : 0;
 
-  const co2EmissionDiff = calculateBaseComparisonDiff({
-    baselineValue: baselineTopNFunctions?.impactEstimates?.annualizedCo2 || 0,
-    baselineScaleFactor,
-    comparisonValue: comparisonTopNFunctions?.impactEstimates?.annualizedCo2 || 0,
-    comparisonScaleFactor,
-    formatValue: asWeight,
-  });
+  const comparisonScaledTotalSamples = comparisonTopNFunctions
+    ? comparisonTopNFunctions.TotalCount * comparisonScaleFactor
+    : 0;
 
-  const costImpactDiff = calculateBaseComparisonDiff({
-    baselineValue: baselineTopNFunctions?.impactEstimates?.annualizedDollarCost || 0,
-    baselineScaleFactor,
-    comparisonValue: comparisonTopNFunctions?.impactEstimates?.annualizedDollarCost || 0,
-    comparisonScaleFactor,
-    formatValue: asCost,
-  });
+  const { co2EmissionDiff, costImpactDiff, totalSamplesDiff } = useMemo(() => {
+    const baseImpactEstimates = baselineTopNFunctions
+      ? // Do NOT scale values here. This is intended to show the exact values spent throughout the year
+        calculateImpactEstimates({
+          countExclusive: baselineTopNFunctions.selfCPU,
+          countInclusive: baselineTopNFunctions.totalCPU,
+          totalSamples: baselineTopNFunctions.TotalCount,
+          totalSeconds: baselineDuration,
+        })
+      : undefined;
+
+    const comparisonImpactEstimates = comparisonTopNFunctions
+      ? // Do NOT scale values here. This is intended to show the exact values spent throughout the year
+        calculateImpactEstimates({
+          countExclusive: comparisonTopNFunctions.selfCPU,
+          countInclusive: comparisonTopNFunctions.totalCPU,
+          totalSamples: comparisonTopNFunctions.TotalCount,
+          totalSeconds: comparisonDuration,
+        })
+      : undefined;
+
+    return {
+      totalSamplesDiff: calculateBaseComparisonDiff({
+        baselineValue: baselineScaledTotalSamples || 0,
+        comparisonValue: comparisonScaledTotalSamples || 0,
+      }),
+      co2EmissionDiff: calculateBaseComparisonDiff({
+        baselineValue: baseImpactEstimates?.totalSamples?.annualizedCo2 || 0,
+        comparisonValue: comparisonImpactEstimates?.totalSamples.annualizedCo2 || 0,
+        formatValue: asWeight,
+      }),
+      costImpactDiff: calculateBaseComparisonDiff({
+        baselineValue: baseImpactEstimates?.totalSamples.annualizedDollarCost || 0,
+        comparisonValue: comparisonImpactEstimates?.totalSamples.annualizedDollarCost || 0,
+        formatValue: asCost,
+      }),
+    };
+  }, [
+    baselineDuration,
+    baselineScaledTotalSamples,
+    baselineTopNFunctions,
+    comparisonDuration,
+    comparisonScaledTotalSamples,
+    comparisonTopNFunctions,
+  ]);
 
   const data = [
     {
@@ -62,14 +98,16 @@ export function TopNFunctionsSummary({
         defaultMessage: '{label} overall performance by',
         values: {
           label:
-            isLoading || totalSamplesDiff.percentDiffDelta === undefined
+            isLoading ||
+            totalSamplesDiff.percentDiffDelta === undefined ||
+            totalSamplesDiff.label === undefined
               ? 'Gained/Lost'
               : totalSamplesDiff?.percentDiffDelta > 0
               ? 'Lost'
               : 'Gained',
         },
       }) as string,
-      baseValue: totalSamplesDiff.label || '',
+      baseValue: totalSamplesDiff.label || '0%',
       baseIcon: totalSamplesDiff.icon,
       baseColor: totalSamplesDiff.color,
       titleHint: ESTIMATED_VALUE_LABEL,

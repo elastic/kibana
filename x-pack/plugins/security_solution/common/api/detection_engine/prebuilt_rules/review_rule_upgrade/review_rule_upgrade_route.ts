@@ -28,6 +28,7 @@ export interface RuleUpgradeInfoForReview {
   id: RuleObjectId;
   rule_id: RuleSignatureId;
   rule: DiffableRule;
+  target_rule: DiffableRule;
   diff: PartialRuleDiff;
   revision: number;
 }
