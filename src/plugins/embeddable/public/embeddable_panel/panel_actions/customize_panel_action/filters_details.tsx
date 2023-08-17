@@ -39,7 +39,7 @@ export const filterDetailsActionStrings = {
     }),
 };
 
-export interface FiltersDetailsProps {
+interface FiltersDetailsProps {
   embeddable: IEmbeddable;
   editMode: boolean;
   onEdit: () => void;
@@ -57,14 +57,14 @@ export function FiltersDetails({ embeddable, editMode, onEdit }: FiltersDetailsP
   );
 
   useMount(() => {
-    if (!isFilterableEmbeddable(embeddable)) {
+    if (!(embeddable as FilterableEmbeddable).getFilters || !(embeddable as FilterableEmbeddable).getQuery) {
       setIsLoading(false);
       return;
     }
 
     Promise.all([
-      (embeddable as IEmbeddable & FilterableEmbeddable).getFilters(),
-      (embeddable as IEmbeddable & FilterableEmbeddable).getQuery(),
+      (embeddable as FilterableEmbeddable).getFilters(),
+      (embeddable as FilterableEmbeddable).getQuery(),
     ]).then(([embeddableFilters, embeddableQuery]) => {
       setFilters(embeddableFilters);
       if (embeddableQuery) {
