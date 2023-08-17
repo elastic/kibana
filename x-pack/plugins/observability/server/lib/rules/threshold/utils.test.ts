@@ -71,47 +71,46 @@ describe('validateKQLStringFilter', () => {
 });
 
 describe('getFormattedGroupBy', () => {
-  const data = [
-    // groupBy, groupSet, output
-    [undefined, new Set(), {}],
-    [
-      ['host.name', 'host.mac', 'tags', 'container.name'],
-      new Set([
-        'host-0,00-00-5E-00-53-23,event-0,container-name',
-        'host-0,00-00-5E-00-53-23,group-0,container-name',
-        'host-0,00-00-5E-00-53-24,event-0,container-name',
-        'host-0,00-00-5E-00-53-24,group-0,container-name',
-      ]),
-      {
-        'host-0,00-00-5E-00-53-23,event-0,container-name': [
-          { field: 'host.name', value: 'host-0' },
-          { field: 'host.mac', value: '00-00-5E-00-53-23' },
-          { field: 'tags', value: 'event-0' },
-          { field: 'container.name', value: 'container-name' },
-        ],
-        'host-0,00-00-5E-00-53-23,group-0,container-name': [
-          { field: 'host.name', value: 'host-0' },
-          { field: 'host.mac', value: '00-00-5E-00-53-23' },
-          { field: 'tags', value: 'group-0' },
-          { field: 'container.name', value: 'container-name' },
-        ],
-        'host-0,00-00-5E-00-53-24,event-0,container-name': [
-          { field: 'host.name', value: 'host-0' },
-          { field: 'host.mac', value: '00-00-5E-00-53-24' },
-          { field: 'tags', value: 'event-0' },
-          { field: 'container.name', value: 'container-name' },
-        ],
-        'host-0,00-00-5E-00-53-24,group-0,container-name': [
-          { field: 'host.name', value: 'host-0' },
-          { field: 'host.mac', value: '00-00-5E-00-53-24' },
-          { field: 'tags', value: 'group-0' },
-          { field: 'container.name', value: 'container-name' },
-        ],
-      },
-    ],
-  ];
+  it('should format groupBy correctly for empty input', () => {
+    expect(getFormattedGroupBy(undefined, new Set<string>())).toEqual({});
+  });
 
-  test.each(data)('getFormattedGroupBy(%o, %o): %o', (groupBy: any, groupSet: any, output: any) => {
-    expect(getFormattedGroupBy(groupBy, groupSet)).toEqual(output);
+  it('should format groupBy correctly for multiple groups', () => {
+    expect(
+      getFormattedGroupBy(
+        ['host.name', 'host.mac', 'tags', 'container.name'],
+        new Set([
+          'host-0,00-00-5E-00-53-23,event-0,container-name',
+          'host-0,00-00-5E-00-53-23,group-0,container-name',
+          'host-0,00-00-5E-00-53-24,event-0,container-name',
+          'host-0,00-00-5E-00-53-24,group-0,container-name',
+        ])
+      )
+    ).toEqual({
+      'host-0,00-00-5E-00-53-23,event-0,container-name': [
+        { field: 'host.name', value: 'host-0' },
+        { field: 'host.mac', value: '00-00-5E-00-53-23' },
+        { field: 'tags', value: 'event-0' },
+        { field: 'container.name', value: 'container-name' },
+      ],
+      'host-0,00-00-5E-00-53-23,group-0,container-name': [
+        { field: 'host.name', value: 'host-0' },
+        { field: 'host.mac', value: '00-00-5E-00-53-23' },
+        { field: 'tags', value: 'group-0' },
+        { field: 'container.name', value: 'container-name' },
+      ],
+      'host-0,00-00-5E-00-53-24,event-0,container-name': [
+        { field: 'host.name', value: 'host-0' },
+        { field: 'host.mac', value: '00-00-5E-00-53-24' },
+        { field: 'tags', value: 'event-0' },
+        { field: 'container.name', value: 'container-name' },
+      ],
+      'host-0,00-00-5E-00-53-24,group-0,container-name': [
+        { field: 'host.name', value: 'host-0' },
+        { field: 'host.mac', value: '00-00-5E-00-53-24' },
+        { field: 'tags', value: 'group-0' },
+        { field: 'container.name', value: 'container-name' },
+      ],
+    });
   });
 });

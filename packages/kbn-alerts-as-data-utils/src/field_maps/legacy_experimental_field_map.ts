@@ -28,6 +28,11 @@ export const legacyExperimentalFieldMap = {
     required: false,
     array: true,
   },
+  [`${ALERT_GROUPINGS}`]: {
+    type: 'object',
+    array: true,
+    required: false,
+  },
   [`${ALERT_GROUPINGS}.field`]: {
     type: 'keyword',
     array: false,
