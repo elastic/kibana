@@ -714,27 +714,34 @@ describe('Discover grid cell rendering', function () {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <Suspense
-            fallback={
-              <EuiDelayRender
-                delay={500}
-              >
-                <EuiLoadingSpinner />
-              </EuiDelayRender>
-            }
-          >
-            <lazy
-              height={200}
-              json={
-                Object {
-                  "object.value": Array [
-                    100,
-                  ],
-                }
+          <CodeEditor
+            height={200}
+            languageId="xjson"
+            options={
+              Object {
+                "automaticLayout": true,
+                "fontSize": 12,
+                "lineNumbers": "off",
+                "minimap": Object {
+                  "enabled": false,
+                },
+                "overviewRulerBorder": false,
+                "readOnly": true,
+                "scrollBeyondLastLine": false,
+                "scrollbar": Object {
+                  "alwaysConsumeMouseWheel": false,
+                },
+                "wordWrap": "on",
+                "wrappingIndent": "indent",
               }
-              width={370}
-            />
-          </Suspense>
+            }
+            value="{
+        \\"object.value\\": [
+          100
+        ]
+      }"
+            width={370}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     `);
