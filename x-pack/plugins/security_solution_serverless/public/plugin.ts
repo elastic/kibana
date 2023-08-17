@@ -40,7 +40,6 @@ export class SecuritySolutionServerlessPlugin
     _core: CoreSetup,
     setupDeps: SecuritySolutionServerlessPluginSetupDeps
   ): SecuritySolutionServerlessPluginSetup {
-    registerUpsellings(setupDeps.securitySolution.upselling, this.config.productTypes);
     setupDeps.securitySolution.setAppLinksSwitcher(projectAppLinksSwitcher);
 
     return {};
@@ -55,6 +54,7 @@ export class SecuritySolutionServerlessPlugin
 
     const services = createServices(core, startDeps);
 
+    registerUpsellings(securitySolution.getUpselling(), this.config.productTypes);
     securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services, productTypes));
 
     configureNavigation(services, this.config);

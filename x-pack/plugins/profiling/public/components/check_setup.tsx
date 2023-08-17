@@ -21,7 +21,7 @@ import { useHistory } from 'react-router-dom';
 import { AsyncStatus, useAsync } from '../hooks/use_async';
 import { useAutoAbortedHttpClient } from '../hooks/use_auto_aborted_http_client';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
-import { NoDataTabs } from '../views/no_data_view';
+import { AddDataTabs } from '../views/add_data_view';
 import { useLicenseContext } from './contexts/license/use_license_context';
 import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
 import { LicensePrompt } from './license_prompt';
@@ -209,7 +209,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     // when there's no data redirect the user to the add data instructions page
     router.push('/add-data-instructions', {
       path: {},
-      query: { selectedTab: NoDataTabs.Kubernetes },
+      query: { selectedTab: AddDataTabs.Kubernetes },
     });
     return null;
   }
