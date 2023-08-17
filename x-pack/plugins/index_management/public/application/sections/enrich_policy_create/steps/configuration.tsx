@@ -65,13 +65,7 @@ export const ConfigurationStep = ({ onNext }: Props) => {
 
       <EuiSpacer />
 
-      <EuiButton
-        fill
-        color="primary"
-        iconSide="right"
-        iconType="arrowRight"
-        onClick={onNext}
-      >
+      <EuiButton fill color="primary" iconSide="right" iconType="arrowRight" onClick={onNext}>
         <FormattedMessage
           id="xpack.idxMgmt.enrichPolicies.create.stepConfiguration.nextButtonLabel"
           defaultMessage="Next"

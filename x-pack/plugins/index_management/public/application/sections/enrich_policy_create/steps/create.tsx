@@ -8,10 +8,19 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiDescriptionList, EuiDescriptionListTitle, EuiDescriptionListDescription, EuiText, EuiTabbedContent, EuiSpacer, EuiCodeBlock } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiText,
+  EuiTabbedContent,
+  EuiSpacer,
+  EuiCodeBlock,
+} from '@elastic/eui';
 import type { SerializedEnrichPolicy } from '../../../../../common';
 
-const SummaryTab = ({ policy } : { policy: SerializedEnrichPolicy }) => {
+const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
   // Beyond a certain point, highlighting the syntax will bog down performance to unacceptable
   // levels. This way we prevent that happening for very large requests.
   const language = policy.query && policy?.query.length < 60000 ? 'json' : undefined;
@@ -142,7 +151,7 @@ export const CreateStep = ({ onSubmit }: Props) => {
       name: i18n.translate('xpack.idxMgmt.enrichPolicies.create.stepCreate.requestTabTitle', {
         defaultMessage: 'Request',
       }),
-      content: <RequestTab request="match_all_query {}" />
+      content: <RequestTab request="match_all_query {}" />,
     },
   ];
 
@@ -152,11 +161,7 @@ export const CreateStep = ({ onSubmit }: Props) => {
 
       <EuiSpacer />
 
-      <EuiButton
-        fill
-        color="primary"
-        onClick={onSubmit}
-      >
+      <EuiButton fill color="primary" onClick={onSubmit}>
         <FormattedMessage
           id="xpack.idxMgmt.enrichPolicies.create.stepCreate.createButtonLabel"
           defaultMessage="Create policy"
