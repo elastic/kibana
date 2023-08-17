@@ -93,6 +93,7 @@ export interface RuleEventLogListCommonProps {
   initialPageSize?: number;
   hasRuleNames?: boolean;
   hasAllSpaceSwitch?: boolean;
+  filteredRuleTypes?: string[];
   setHeaderActions?: (components?: React.ReactNode[]) => void;
 }
 
@@ -114,6 +115,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     hasRuleNames = false,
     hasAllSpaceSwitch = false,
     setHeaderActions,
+    filteredRuleTypes,
   } = props;
 
   const { uiSettings, notifications } = useKibana().services;
@@ -211,6 +213,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     page: pagination.pageIndex,
     perPage: pagination.pageSize,
     namespaces,
+    ruleTypeIds: filteredRuleTypes,
     onError,
   });
 
@@ -713,6 +716,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           message={searchText}
           refreshToken={internalRefreshToken}
           namespaces={namespaces}
+          filteredRuleTypes={filteredRuleTypes}
         />
         <EuiSpacer />
       </EuiFlexItem>

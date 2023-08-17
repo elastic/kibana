@@ -15,6 +15,7 @@ const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) =
 export interface GlobalRuleEventLogListProps {
   setHeaderActions?: RuleEventLogListCommonProps['setHeaderActions'];
   localStorageKey?: RuleEventLogListCommonProps['localStorageKey'];
+  filteredRuleTypes?: RuleEventLogListCommonProps['filteredRuleTypes'];
 }
 
 const GLOBAL_EVENT_LOG_LIST_STORAGE_KEY =
@@ -30,7 +31,7 @@ const REFRESH_TOKEN = {
 };
 
 export const GlobalRuleEventLogList = (props: GlobalRuleEventLogListProps) => {
-  const { setHeaderActions, localStorageKey } = props;
+  const { setHeaderActions, localStorageKey, filteredRuleTypes } = props;
   const { spaces } = useKibana().services;
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -48,6 +49,7 @@ export const GlobalRuleEventLogList = (props: GlobalRuleEventLogListProps) => {
         hasRuleNames={true}
         hasAllSpaceSwitch={true}
         localStorageKey={localStorageKey || GLOBAL_EVENT_LOG_LIST_STORAGE_KEY}
+        filteredRuleTypes={filteredRuleTypes}
         setHeaderActions={setHeaderActions}
       />
     </SpacesContextWrapper>
