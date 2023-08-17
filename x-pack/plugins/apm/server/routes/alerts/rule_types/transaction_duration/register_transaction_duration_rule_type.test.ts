@@ -283,4 +283,70 @@ describe('registerTransactionDurationRuleType', () => {
       transactionName: 'tx-java',
     });
   });
+
+  it('sends alert when rule is configured with a filter query', async () => {
+    const { services, dependencies, executor, scheduleActions } =
+      createRuleTypeMocks();
+
+    registerTransactionDurationRuleType(dependencies);
+
+    services.scopedClusterClient.asCurrentUser.search.mockResponse({
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 2,
+        },
+      },
+      aggregations: {
+        series: {
+          buckets: [
+            {
+              key: ['opbeans-java', 'development', 'request'],
+              avgLatency: {
+                value: 5500000,
+              },
+            },
+          ],
+        },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
+
+    const params = {
+      threshold: 3000,
+      windowSize: 5,
+      windowUnit: 'm',
+      transactionType: undefined,
+      serviceName: undefined,
+      aggregationType: 'avg',
+      kqlFilter: 'service.name: opbeans-java and transaction.type: request',
+      groupBy: ['service.name', 'service.environment', 'transaction.type'],
+    };
+
+    await executor({ params });
+    expect(scheduleActions).toHaveBeenCalledTimes(1);
+    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
+      alertDetailsUrl: expect.stringContaining(
+        'http://localhost:5601/eyr/app/observability/alerts/'
+      ),
+      environment: 'development',
+      interval: `5 mins`,
+      reason:
+        'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: development, type: request. Alert when > 3.0 s.',
+      transactionType: 'request',
+      serviceName: 'opbeans-java',
+      threshold: 3000,
+      triggerValue: '5,500 ms',
+      viewInAppUrl:
+        'http://localhost:5601/eyr/app/apm/services/opbeans-java?transactionType=request&environment=development',
+    });
+  });
 });
