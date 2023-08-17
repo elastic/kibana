@@ -106,3 +106,9 @@ xpack.alerting.rules.run.ruleTypeOverrides:
     timeout: 1m
 xpack.alerting.rules.minimumScheduleInterval.enforce: true
 xpack.actions.run.maxAttempts: 10
+
+
+# Disables ESQL in advanced settings (hides it from the UI)
+uiSettings:
+  overrides:
+    "discover:enableESQL": false
