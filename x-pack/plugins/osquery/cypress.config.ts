@@ -45,6 +45,7 @@ export default defineCypressConfig({
     grepFilterSpecs: true,
     grepTags: '@ess',
   },
+  numTestsKeptInMemory: 3,
 
   e2e: {
     specPattern: './cypress/e2e/**/*.cy.ts',

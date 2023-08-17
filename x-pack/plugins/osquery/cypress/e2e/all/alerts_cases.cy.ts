@@ -73,6 +73,8 @@ describe('Alert Event Details - Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () 
       cy.getBySel('osquery-action-item').click();
       cy.contains('Run a set of queries in a pack').wait(500).click();
       cy.getBySel('select-live-pack').within(() => {
+        // had issues on CI where element dissapeared so now adding additional click
+        cy.getBySel('comboBoxInput').click();
         cy.getBySel('comboBoxInput').type(`${packName}{downArrow}{enter}`);
       });
       submitQuery();
