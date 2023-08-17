@@ -59,12 +59,6 @@ export const useLensSuggestions = ({
 
   const [allSuggestions, setAllSuggestions] = useState(suggestions.allSuggestions);
   const currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
-  const interval = useMemo(() => {
-    if (timeRange) {
-      return computeInterval(timeRange, data);
-    }
-    return undefined;
-  }, [data, timeRange]);
   const suggestionDeps = useRef(getSuggestionDeps({ dataView, query, columns }));
 
   const histogramSuggestion = useMemo(() => {
@@ -74,8 +68,9 @@ export const useLensSuggestions = ({
       query &&
       isOfAggregateQueryType(query) &&
       getAggregateQueryMode(query) === 'esql' &&
-      interval
+      timeRange
     ) {
+      const interval = computeInterval(timeRange, data);
       const language = getAggregateQueryMode(query);
       const histogramQuery = `${query[language]} | eval uniqueName = 1
         | EVAL timestamp=DATE_TRUNC(${dataView.timeFieldName}, ${interval}) | stats rows = count(uniqueName) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${interval}\``;
@@ -108,7 +103,7 @@ export const useLensSuggestions = ({
       }
       return undefined;
     }
-  }, [currentSuggestion, dataView, interval, lensSuggestionsApi, query]);
+  }, [currentSuggestion, dataView, query, timeRange, data, lensSuggestionsApi]);
 
   useEffect(() => {
     const newSuggestionsDeps = getSuggestionDeps({ dataView, query, columns });
@@ -131,7 +126,7 @@ export const useLensSuggestions = ({
   return {
     allSuggestions,
     currentSuggestion: histogramSuggestion ?? currentSuggestion,
-    suggestionUnsupported: !currentSuggestion && !histogramSuggestion && !dataView.isTimeBased(),
+    suggestionUnsupported: !currentSuggestion && !histogramSuggestion && isPlainRecord,
     isOnHistogramMode: Boolean(histogramSuggestion),
   };
 };
