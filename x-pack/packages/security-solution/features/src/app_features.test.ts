@@ -6,7 +6,7 @@
  */
 
 import { AppFeatures } from '.';
-import type { AppFeatureKeys, ExperimentalFeatures } from '../../../common';
+import type { AppFeatureKeys, ExperimentalFeatures } from '@kbn/security-solution-plugin/common';
 import type { PluginSetupContract } from '@kbn/features-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
@@ -48,32 +48,41 @@ const CASES_APP_FEATURE_CONFIG = {
   },
 };
 
-jest.mock('./security_kibana_features', () => {
+jest.mock('@kbn/security-solution-plugin/server/lib/app_features/security_kibana_features', () => {
   return {
     getSecurityBaseKibanaFeature: jest.fn(() => SECURITY_BASE_CONFIG),
     getSecurityBaseKibanaSubFeatureIds: jest.fn(() => ['subFeature1']),
     getSecurityAppFeaturesConfig: jest.fn(() => SECURITY_APP_FEATURE_CONFIG),
   };
 });
-jest.mock('./security_kibana_sub_features', () => {
-  return {
-    securitySubFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
-  };
-});
+jest.mock(
+  '@kbn/security-solution-plugin/server/lib/app_features/security_kibana_sub_features',
+  () => {
+    return {
+      securitySubFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
+    };
+  }
+);
 
-jest.mock('./security_cases_kibana_features', () => {
-  return {
-    getCasesBaseKibanaFeature: jest.fn(() => CASES_BASE_CONFIG),
-    getCasesBaseKibanaSubFeatureIds: jest.fn(() => ['subFeature1']),
-    getCasesAppFeaturesConfig: jest.fn(() => CASES_APP_FEATURE_CONFIG),
-  };
-});
+jest.mock(
+  '@kbn/security-solution-plugin/server/lib/app_features/security_cases_kibana_features',
+  () => {
+    return {
+      getCasesBaseKibanaFeature: jest.fn(() => CASES_BASE_CONFIG),
+      getCasesBaseKibanaSubFeatureIds: jest.fn(() => ['subFeature1']),
+      getCasesAppFeaturesConfig: jest.fn(() => CASES_APP_FEATURE_CONFIG),
+    };
+  }
+);
 
-jest.mock('./security_cases_kibana_sub_features', () => {
-  return {
-    casesSubFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
-  };
-});
+jest.mock(
+  '@kbn/security-solution-plugin/server/lib/app_features/security_cases_kibana_sub_features',
+  () => {
+    return {
+      casesSubFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
+    };
+  }
+);
 
 describe('AppFeatures', () => {
   it('should register enabled kibana features', () => {
