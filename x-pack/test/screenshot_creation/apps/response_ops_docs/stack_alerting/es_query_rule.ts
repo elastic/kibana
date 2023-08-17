@@ -8,6 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const browser = getService('browser');
   const commonScreenshots = getService('commonScreenshots');
   const find = getService('find');
   const rules = getService('rules');
@@ -15,6 +16,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
   const screenshotDirectories = ['response_ops_docs', 'stack_alerting'];
   const ruleName = 'test query rule';
+  // const queryJson =
+  // `{\n` +
+  // `"query":{\n` +
+  // `"bool" : {\n` +
+  // `"filter": [{\n` +
+  // `"term": {\n` +
+  // `"host.keyword": "www.elastic.co"\n`;
 
   describe('elasticsearch query rule', function () {
     it('create rule screenshot', async () => {
@@ -35,6 +43,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('closePopover');
       await commonScreenshots.takeScreenshot(
         'rule-types-es-query-conditions',
+        screenshotDirectories,
+        1400,
+        1500
+      );
+      // Test a query
+      const queryJsonEditor = await testSubjects.find('queryJsonEditor');
+      await queryJsonEditor.clearValue();
+      await testSubjects.setValue('queryJsonEditor', '{\n"query":{\n"match_all":{\n}\n}\n', {
+        clearWithKeyboard: true,
+      });
+      // await testSubjects.setValue('queryJsonEditor', queryJson);
+      await testSubjects.click('forLastExpression');
+      await testSubjects.setValue('timeWindowSizeNumber', '1');
+      await testSubjects.setValue('timeWindowUnitSelect', 'day');
+      await browser.pressKeys(browser.keys.ESCAPE);
+      await testSubjects.click('testQuery');
+      await testSubjects.scrollIntoView('selectIndexExpression');
+      await commonScreenshots.takeScreenshot(
+        'rule-types-es-query-valid',
         screenshotDirectories,
         1400,
         1500
