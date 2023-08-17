@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const UPGRADE_LICENSE_MESSAGE = (requiredLicense: string) =>
-  i18n.translate('xpack.securitySolutionEss.paywall.upgradeMessage', {
+  i18n.translate('securitySolutionPackages.entityAnalytics.paywall.upgradeLicenseMessage', {
     defaultMessage: 'This feature is available with {requiredLicense} or higher subscription',
     values: {
       requiredLicense,
@@ -16,7 +16,7 @@ export const UPGRADE_LICENSE_MESSAGE = (requiredLicense: string) =>
   });
 
 export const UPGRADE_PRODUCT_MESSAGE = (requiredProduct: string) =>
-  i18n.translate('xpack.securitySolutionEss.paywall.upgradeMessage', {
+  i18n.translate('securitySolutionPackages.entityAnalytics.paywall.upgradeProductMessage', {
     defaultMessage: 'Entity Analytics is available with {requiredProduct} subscriptions',
     values: {
       requiredProduct,
@@ -24,7 +24,7 @@ export const UPGRADE_PRODUCT_MESSAGE = (requiredProduct: string) =>
   });
 
 export const UPGRADE_BUTTON = (requiredLicenseOrProduct: string) =>
-  i18n.translate('xpack.securitySolutionEss.paywall.upgradeButton', {
+  i18n.translate('securitySolutionPackages.entityAnalytics.paywall.upgradeButton', {
     defaultMessage: 'Upgrade to {requiredLicenseOrProduct}',
     values: {
       requiredLicenseOrProduct,
@@ -32,14 +32,14 @@ export const UPGRADE_BUTTON = (requiredLicenseOrProduct: string) =>
   });
 
 export const ENTITY_ANALYTICS_LICENSE_DESC = i18n.translate(
-  'xpack.securitySolutionEss.entityAnalytics.pageDesc',
+  'securitySolutionPackages.entityAnalytics.pageDesc',
   {
     defaultMessage: 'Detect threats from users and hosts within your network with Entity Analytics',
   }
 );
 
 export const ENTITY_ANALYTICS_TITLE = i18n.translate(
-  'xpack.securitySolutionEss.navigation.entityAnalytics',
+  'securitySolutionPackages.entityAnalytics.navigation',
   {
     defaultMessage: 'Entity Analytics',
   }
