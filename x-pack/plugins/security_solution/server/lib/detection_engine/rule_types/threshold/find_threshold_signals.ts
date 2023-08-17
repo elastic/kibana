@@ -107,21 +107,19 @@ export const findThresholdSignals = async ({
         secondaryTimestamp,
       });
 
-      if (searchResultHasAggs<ThresholdMultiBucketAggregationResult>(searchResult)) {
-        searchAfterResults.searchDurations.push(searchDuration);
-        if (!isEmpty(searchErrors)) {
-          searchAfterResults.searchErrors.push(...searchErrors);
-          sortKeys = undefined; // this will eject us out of the loop
-          // if a search failure occurs on a secondary iteration,
-          // we will return early.
-        } else {
-          const thresholdTerms = searchResult.aggregations?.thresholdTerms;
-          sortKeys = thresholdTerms?.after_key;
+      searchAfterResults.searchDurations.push(searchDuration);
+      if (!isEmpty(searchErrors)) {
+        searchAfterResults.searchErrors.push(...searchErrors);
+        sortKeys = undefined; // this will eject us out of the loop
+        // if a search failure occurs on a secondary iteration,
+        // we will return early.
+      } else if (searchResultHasAggs<ThresholdMultiBucketAggregationResult>(searchResult)) {
+        const thresholdTerms = searchResult.aggregations?.thresholdTerms;
+        sortKeys = thresholdTerms?.after_key;
 
-          buckets.push(
-            ...((searchResult.aggregations?.thresholdTerms.buckets as ThresholdBucket[]) ?? [])
-          );
-        }
+        buckets.push(
+          ...((searchResult.aggregations?.thresholdTerms.buckets as ThresholdBucket[]) ?? [])
+        );
       } else {
         throw new Error('Aggregations were missing on threshold rule search result');
       }
@@ -147,16 +145,10 @@ export const findThresholdSignals = async ({
       secondaryTimestamp,
     });
 
-    if (searchResultHasAggs<ThresholdSingleBucketAggregationResult>(searchResult)) {
-      if (!isEmpty(searchErrors)) {
-        searchAfterResults.searchDurations.push(searchDuration);
-        searchAfterResults.searchErrors.push(...searchErrors);
-        // if a search failure occurs on a secondary iteration,
-        // we will return early.
-      }
-      searchAfterResults.searchDurations.push(searchDuration);
-      searchAfterResults.searchErrors.push(...searchErrors);
+    searchAfterResults.searchDurations.push(searchDuration);
+    searchAfterResults.searchErrors.push(...searchErrors);
 
+    if (searchResultHasAggs<ThresholdSingleBucketAggregationResult>(searchResult)) {
       const docCount = searchResult.hits.total.value;
       if (
         docCount >= threshold.value &&
@@ -174,7 +166,10 @@ export const findThresholdSignals = async ({
             : {}),
         });
       }
-    } else if (!searchResultHasAggs(searchResult) && isEmpty(searchErrors)) {
+    } else if (
+      !searchResultHasAggs<ThresholdSingleBucketAggregationResult>(searchResult) &&
+      isEmpty(searchErrors)
+    ) {
       throw new Error('Aggregations were missing on threshold rule search result');
     }
   }

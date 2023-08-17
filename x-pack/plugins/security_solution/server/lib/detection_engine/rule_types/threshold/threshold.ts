@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -135,8 +136,6 @@ export const thresholdExecutor = async ({
       aggregatableTimestampField,
     });
 
-    // Build and index new alerts
-
     const createResult = await bulkCreateThresholdSignals({
       buckets,
       completeRule,
@@ -152,7 +151,10 @@ export const thresholdExecutor = async ({
       ruleExecutionLogger,
     });
 
-    addToSearchAfterReturn({ current: result, next: createResult });
+    addToSearchAfterReturn({
+      current: result,
+      next: { ...createResult, success: createResult.success && isEmpty(searchErrors) },
+    });
 
     result.errors.push(...previousSearchErrors);
     result.errors.push(...searchErrors);
