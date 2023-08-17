@@ -6,7 +6,6 @@
  */
 import {
   ApmUsername,
-  APM_TEST_PASSWORD,
   // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { format, UrlObject } from 'url';
@@ -16,6 +15,7 @@ import type {
   APIReturnType,
   APIClientRequestParamsOf,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { kbnTestConfig } from '@kbn/test';
 import type { APIEndpoint } from '@kbn/apm-plugin/server';
 import { formatRequest } from '@kbn/server-route-repository';
 import { InheritedFtrProviderContext } from '../../../../services';
@@ -105,7 +105,7 @@ async function getApmApiClient({
 }) {
   const url = format({
     ...kibanaServer,
-    auth: `${username}:${APM_TEST_PASSWORD}`,
+    auth: `${username}:${kbnTestConfig.getUrlParts().password}`,
   });
 
   return createApmApiClient(supertest(url));
