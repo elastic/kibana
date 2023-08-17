@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { RegisterFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { callApmApi } from '../../services/rest/create_call_apm_api';
+import { callApmApi } from '../services/rest/create_call_apm_api';
 
 export function registerGetApmServiceSummaryFunction({
   registerFunction,
@@ -18,13 +19,18 @@ export function registerGetApmServiceSummaryFunction({
       name: 'get_apm_service_summary',
       contexts: ['apm'],
       description: `Gets a summary of a single service, including: the language, service version, 
-deployments, and the infrastructure that it is running in, for instance on how 
+deployments, the environments, and the infrastructure that it is running in, for instance on how 
 many pods, and a list of its downstream dependencies. It also returns active 
 alerts and anomalies.`,
-      descriptionForUser: `Gets a summary of a single service, including: the language, service version, 
-deployments, and the infrastructure that it is running in, for instance on how 
+      descriptionForUser: i18n.translate(
+        'xpack.apm.observabilityAiAssistant.functions.registerGetApmServiceSummary.descriptionForUser',
+        {
+          defaultMessage: `Gets a summary of a single service, including: the language, service version, 
+deployments, the environments, and the infrastructure that it is running in, for instance on how 
 many pods, and a list of its downstream dependencies. It also returns active 
 alerts and anomalies.`,
+        }
+      ),
       parameters: {
         type: 'object',
         properties: {
