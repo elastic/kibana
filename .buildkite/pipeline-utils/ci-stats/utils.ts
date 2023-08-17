@@ -96,9 +96,11 @@ export async function getAllTestFilesForConfigs(configPaths: string[]): Promise<
     _: [],
   };
 
+  console.log('Running all config resolution');
   return Promise.all(
     configPaths.map(async (configPath) => {
-      const config = await readConfig(EMPTY_ARGV, configPath);
+      const config = await readConfig(EMPTY_ARGV, configPath, true, null, 0, true);
+      console.log(config);
       config.projectConfig.preset = undefined;
 
       const searchSource = new SearchSource(
