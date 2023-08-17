@@ -125,19 +125,19 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 
   ['xpack.ml.enabled', 'true'],
 
-  //   ['xpack.security.enabled', 'false'],
-  // ];
+  ['xpack.security.enabled', 'false'],
+];
 
-  // const SERVERLESS_SSL_ESARGS: Array<[string, string]> = [
+const SERVERLESS_SSL_ESARGS: Array<[string, string]> = [
   ['xpack.security.enabled', 'true'],
 
-  // ['xpack.security.http.ssl.enabled', 'true'],
+  ['xpack.security.http.ssl.enabled', 'true'],
 
-  // ['xpack.security.http.ssl.keystore.path', `${ESS_CONFIG_PATH}certs/elasticsearch.p12`],
+  ['xpack.security.http.ssl.keystore.path', `${ESS_CONFIG_PATH}certs/elasticsearch.p12`],
 
-  // ['xpack.security.http.ssl.keystore.password', ES_P12_PASSWORD],
+  ['xpack.security.http.ssl.keystore.password', ES_P12_PASSWORD],
 
-  // ['xpack.security.http.ssl.verification_mode', 'certificate'],
+  ['xpack.security.http.ssl.verification_mode', 'certificate'],
 
   ['xpack.security.transport.ssl.enabled', 'true'],
 
