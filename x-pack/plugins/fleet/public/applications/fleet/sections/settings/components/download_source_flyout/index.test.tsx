@@ -16,7 +16,7 @@ function renderFlyout(downloadSource?: DownloadSource) {
   const renderer = createFleetTestRendererMock();
 
   const comp = renderer.render(
-    <EditDownloadSourceFlyout downloadSource={downloadSource} onClose={() => {}} />
+    <EditDownloadSourceFlyout downloadSource={downloadSource} onClose={() => {}} proxies={[]} />
   );
 
   return { comp };

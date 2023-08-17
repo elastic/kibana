@@ -35,10 +35,13 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
 
   const hostInput = useInput(downloadSource?.host ?? '', validateHost);
 
+  const proxyIdInput = useInput(downloadSource?.proxy_id ?? '', () => undefined);
+
   const inputs = {
     nameInput,
     hostInput,
     defaultDownloadSourceInput,
+    proxyIdInput,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -61,6 +64,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
         name: nameInput.value.trim(),
         host: hostInput.value.trim(),
         is_default: defaultDownloadSourceInput.value,
+        proxy_id: proxyIdInput.value || null,
       };
 
       if (downloadSource) {
@@ -100,6 +104,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     nameInput.value,
     notifications.toasts,
     onSuccess,
+    proxyIdInput.value,
     validate,
   ]);
 
