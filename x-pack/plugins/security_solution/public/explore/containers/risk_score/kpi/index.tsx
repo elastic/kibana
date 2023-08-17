@@ -25,6 +25,7 @@ import { useSearchStrategy } from '../../../../common/containers/use_search_stra
 import type { InspectResponse } from '../../../../types';
 import type { inputsModel } from '../../../../common/store';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 interface RiskScoreKpi {
   error: unknown;
@@ -52,10 +53,11 @@ export const useRiskScoreKpi = ({
   const { addError } = useAppToasts();
   const spaceId = useSpaceId();
   const featureEnabled = useMlCapabilities().isPlatinumOrTrialLicense;
+  const isNewRiskScoreModuleAvailable = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
   const defaultIndex = spaceId
     ? riskEntity === RiskScoreEntity.host
-      ? getHostRiskIndex(spaceId)
-      : getUserRiskIndex(spaceId)
+      ? getHostRiskIndex(spaceId, true, isNewRiskScoreModuleAvailable)
+      : getUserRiskIndex(spaceId, true, isNewRiskScoreModuleAvailable)
     : undefined;
 
   const { loading, result, search, refetch, inspect, error } =
