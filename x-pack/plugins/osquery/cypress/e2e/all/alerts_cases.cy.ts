@@ -23,7 +23,7 @@ import {
 } from '../../tasks/live_query';
 import { generateRandomStringName, interceptCaseId } from '../../tasks/integrations';
 import { tag } from '../../tags';
-describe('Alert Event Details - Cases', () => {
+describe('Alert Event Details - Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   let ruleId: string;
   let ruleName: string;
   let packId: string;
@@ -90,8 +90,7 @@ describe('Alert Event Details - Cases', () => {
     });
   });
 
-  // Strange case with new flyout as soc_manager (not visible), but with 'elastic' we see discover and lens so for now skipped, to investigate
-  describe('Case', { tags: [tag.ESS] }, () => {
+  describe('Case', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     let caseId: string;
 
     before(() => {
