@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APM_TEST_PASSWORD } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import {
   ApmSynthtraceEsClient,
   ApmSynthtraceKibanaClient,
@@ -13,7 +14,7 @@ import {
   InfraSynthtraceEsClient,
   LogLevel,
 } from '@kbn/apm-synthtrace';
-import { FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
+import { FtrConfigProviderContext } from '@kbn/test';
 import url from 'url';
 import { FtrProviderContext as InheritedFtrProviderContext } from '../../ftr_provider_context';
 import { InheritedServices } from './types';
@@ -63,7 +64,7 @@ export default async function createTestConfig({
         const kibanaServerUrlWithAuth = url
           .format({
             ...url.parse(kibanaServerUrl),
-            auth: `elastic:${kbnTestConfig.getUrlParts().password}`,
+            auth: `elastic:${APM_TEST_PASSWORD}`,
           })
           .slice(0, -1);
 
