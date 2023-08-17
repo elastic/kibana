@@ -24,6 +24,11 @@ import type {
   CreateChatCompletionResponseChoicesInner,
 } from 'openai';
 import type { Observable } from 'rxjs';
+import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
+import type {
+  DataViewsPublicPluginSetup,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
 import type {
   ContextDefinition,
   FunctionDefinition,
@@ -89,12 +94,16 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   security: SecurityPluginSetup;
   features: FeaturesPluginSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
+  lens: LensPublicSetup;
+  dataViews: DataViewsPublicPluginSetup;
 }
 export interface ObservabilityAIAssistantPluginStartDependencies {
   security: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
   features: FeaturesPluginStart;
+  lens: LensPublicStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 export interface ConfigSchema {}
