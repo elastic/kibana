@@ -7,14 +7,16 @@
 
 import { AccessorOptions, OptionsWithInjectedValues } from '..';
 
-export interface GetHostsOptions extends AccessorOptions {
+export interface GetServicesOptions extends AccessorOptions {
   from: string;
   to: string;
+  parent?: string;
 }
-export type GetHostsOptionsInjected = OptionsWithInjectedValues<GetHostsOptions>;
+export type GetServicesOptionsInjected = OptionsWithInjectedValues<GetServicesOptions>;
 
-export interface HostIdentifier {
+export interface ServiceIdentifier {
   'asset.ean': string;
   'asset.id': string;
   'asset.name'?: string;
+  'service.environment'?: string;
 }
