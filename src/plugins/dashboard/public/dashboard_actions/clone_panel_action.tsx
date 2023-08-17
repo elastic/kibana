@@ -110,7 +110,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
       'data-test-subj': 'addObjectToContainerSuccess',
     });
 
-    const { otherPanels, newPanel: placeholderPanelState } = createPanelState(
+    const { otherPanels, newPanel } = createPanelState(
       clonedPanelState,
       dashboard.getInput().panels,
       placePanelBeside,
@@ -126,7 +126,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
     dashboard.updateInput({
       panels: {
         ...otherPanels,
-        [placeholderPanelState.explicitInput.id]: placeholderPanelState,
+        [newPanel.explicitInput.id]: newPanel,
       },
     });
   }
