@@ -28,6 +28,8 @@ import {
   verifyDockerInstalled,
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
+import { ES_P12_PATH } from '@kbn/dev-utils';
+import { ESS_OPERATOR_USERS_PATH, ESS_SERVICE_TOKENS_PATH } from '../paths';
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');
@@ -294,6 +296,43 @@ describe('resolveEsArgs()', () => {
       ]
     `);
   });
+
+  test('should add SSL args and enable security when SSL is passed', () => {
+    const esArgs = resolveEsArgs([...defaultEsArgs, ['xpack.security.enabled', 'false']], {
+      ssl: true,
+    });
+
+    expect(esArgs).toHaveLength(24);
+    expect(esArgs).not.toEqual(expect.arrayContaining(['xpack.security.enabled=false']));
+    expect(esArgs).toMatchInlineSnapshot(`
+      Array [
+        "--env",
+        "foo=bar",
+        "--env",
+        "qux=zip",
+        "--env",
+        "xpack.security.enabled=true",
+        "--env",
+        "xpack.security.http.ssl.enabled=true",
+        "--env",
+        "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
+        "--env",
+        "xpack.security.http.ssl.keystore.password=storepass",
+        "--env",
+        "xpack.security.http.ssl.verification_mode=certificate",
+        "--env",
+        "xpack.security.transport.ssl.enabled=true",
+        "--env",
+        "xpack.security.transport.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
+        "--env",
+        "xpack.security.transport.ssl.keystore.password=storepass",
+        "--env",
+        "xpack.security.transport.ssl.verification_mode=certificate",
+        "--env",
+        "xpack.security.operator_privileges.enabled=true",
+      ]
+    `);
+  });
 });
 
 describe('setupServerlessVolumes()', () => {
@@ -332,6 +371,22 @@ describe('setupServerlessVolumes()', () => {
 
     volumeCmdTest(volumeCmd);
     expect(existsSync(`${serverlessObjectStorePath}/cluster_state/lease`)).toBe(false);
+  });
+
+  test('should add SSL volumes when ssl is passed', async () => {
+    mockFs(existingObjectStore);
+
+    const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath, ssl: true });
+
+    expect(volumeCmd).toHaveLength(8);
+    expect(
+      [
+        `${baseEsPath}:/objectstore:z`,
+        ES_P12_PATH,
+        ESS_OPERATOR_USERS_PATH,
+        ESS_SERVICE_TOKENS_PATH,
+      ].every((path) => volumeCmd.some((cmd) => cmd.includes(path)))
+    ).toBe(true);
   });
 });
 

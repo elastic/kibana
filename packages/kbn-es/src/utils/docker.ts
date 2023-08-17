@@ -23,6 +23,7 @@ interface BaseOptions {
   tag?: string;
   image?: string;
   port?: number;
+  ssl?: boolean;
 }
 
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
@@ -125,10 +126,10 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 
   ['xpack.ml.enabled', 'true'],
 
-  //   ['xpack.security.enabled', 'false'],
-  // ];
+  ['xpack.security.enabled', 'false'],
+];
 
-  // const SERVERLESS_SSL_ESARGS: Array<[string, string]> = [
+const DEFAULT_SSL_ESARGS: Array<[string, string]> = [
   ['xpack.security.enabled', 'true'],
 
   ['xpack.security.http.ssl.enabled', 'true'],
@@ -318,10 +319,17 @@ export function resolveEsArgs(
   defaultEsArgs: Array<[string, string]>,
   options: ServerlessOptions | DockerOptions
 ) {
+  const { esArgs: customEsArgs, password, ssl } = options;
   const esArgs = new Map(defaultEsArgs);
 
-  if (options.esArgs) {
-    const args = typeof options.esArgs === 'string' ? [options.esArgs] : options.esArgs;
+  if (ssl) {
+    DEFAULT_SSL_ESARGS.forEach((arg) => {
+      esArgs.set(arg[0], arg[1]);
+    });
+  }
+
+  if (customEsArgs) {
+    const args = typeof customEsArgs === 'string' ? [customEsArgs] : customEsArgs;
 
     args.forEach((arg) => {
       const [key, ...value] = arg.split('=');
@@ -329,19 +337,22 @@ export function resolveEsArgs(
     });
   }
 
-  if (options.password) {
-    esArgs.set('ELASTIC_PASSWORD', options.password);
+  if (password) {
+    esArgs.set('ELASTIC_PASSWORD', password);
   }
 
   return Array.from(esArgs).flatMap((e) => ['--env', e.join('=')]);
+}
+
+function getESp12Volume() {
+  return ['--volume', `${ES_P12_PATH}:${ESS_CONFIG_PATH}certs/elasticsearch.p12`];
 }
 
 /**
  * Setup local volumes for Serverless ES
  */
 export async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
-  const { basePath, clean } = options;
-
+  const { basePath, clean, ssl } = options;
   const volumePath = resolve(basePath, 'stateless');
 
   log.info(chalk.bold(`Checking for local serverless ES object store at ${volumePath}`));
@@ -367,19 +378,19 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 
   log.indent(-4);
 
-  return [
-    '--volume',
-    `${basePath}:/objectstore:z`,
+  return ['--volume', `${basePath}:/objectstore:z`].concat(
+    ssl
+      ? [
+          ...getESp12Volume(),
 
-    '--volume',
-    `${ES_P12_PATH}:${ESS_CONFIG_PATH}certs/elasticsearch.p12`,
+          '--volume',
+          `${ESS_OPERATOR_USERS_PATH}:${ESS_CONFIG_PATH}operator_users.yml`,
 
-    '--volume',
-    `${ESS_OPERATOR_USERS_PATH}:${ESS_CONFIG_PATH}operator_users.yml`,
-
-    '--volume',
-    `${ESS_SERVICE_TOKENS_PATH}:${ESS_CONFIG_PATH}service_tokens`,
-  ];
+          '--volume',
+          `${ESS_SERVICE_TOKENS_PATH}:${ESS_CONFIG_PATH}service_tokens`,
+        ]
+      : []
+  );
 }
 
 /**
@@ -498,6 +509,7 @@ export function resolveDockerCmd(options: DockerOptions, image: string = DOCKER_
   return DOCKER_BASE_CMD.concat(
     resolveEsArgs(DEFAULT_DOCKER_ESARGS, options),
     resolvePort(options),
+    options.ssl ? getESp12Volume() : [],
     image
   );
 }
