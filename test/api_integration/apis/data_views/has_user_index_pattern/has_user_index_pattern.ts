@@ -71,6 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
         });
 
+        // TESTING FLAKINESS
         it('should return true if has user index pattern without data', async () => {
           await supertest
             .post(config.path)
