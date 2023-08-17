@@ -3012,7 +3012,7 @@
                 "section": "def-common.FieldSpec",
                 "text": "FieldSpec"
               },
-              " | undefined) => void; setDataViewId: (payload: string | undefined) => void; setErrorMessage: (payload: string | undefined) => void; setLoading: (payload: boolean) => void; setMinMax: (payload: { min: string; max: string; }) => void; publishFilters: (payload: ",
+              " | undefined) => void; setDataViewId: (payload: string | undefined) => void; setErrorMessage: (payload: string | undefined) => void; setLoading: (payload: boolean) => void; setMinMax: (payload: { min?: number | undefined; max?: number | undefined; }) => void; publishFilters: (payload: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",

@@ -80,6 +80,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
         getPipeline('.buildkite/pipelines/pull_request/security_solution_explore.yml')
       );
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/defend_workflows.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/osquery_cypress.yml'));
     }
 
     if (
@@ -200,7 +201,8 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
-    uploadPipeline(pipeline.join('\n'));
+    // remove duplicated steps
+    uploadPipeline([...new Set(pipeline)].join('\n'));
   } catch (ex) {
     console.error('PR pipeline generation error', ex.message);
     process.exit(1);
