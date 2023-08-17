@@ -70,7 +70,8 @@
     "@kbn/serverless",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
-    "@kbn/code-editor"
+    "@kbn/code-editor",
+    "@kbn/monaco"
   ],
   "exclude": [
     "target/**/*"
