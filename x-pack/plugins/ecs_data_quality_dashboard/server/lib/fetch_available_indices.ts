@@ -15,5 +15,7 @@ interface Result {
   };
 }
 
-export const fetchAvailableIndices = (esClient: ElasticsearchClient, indexPattern: string) =>
-  esClient.search<AggregateName, Result>(getRequestBody(indexPattern));
+export const fetchAvailableIndices = (
+  esClient: ElasticsearchClient,
+  params: { indexPattern: string; startDate: string; endDate: string }
+) => esClient.search<AggregateName, Result>(getRequestBody(params));

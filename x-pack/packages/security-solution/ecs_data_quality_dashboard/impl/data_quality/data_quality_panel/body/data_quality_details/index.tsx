@@ -27,6 +27,7 @@ import { useDataQualityContext } from '../../data_quality_context';
 export interface Props {
   addSuccessToast: (toast: { title: string }) => void;
   canUserCreateAndReadCases: () => boolean;
+  endDate?: string;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   getGroupByFieldsOnClick: (
@@ -54,6 +55,7 @@ export interface Props {
   patternIndexNames: Record<string, string[]>;
   patternRollups: Record<string, PatternRollup>;
   patterns: string[];
+  startDate?: string;
   theme?: PartialTheme;
   baseTheme: Theme;
   updatePatternIndexNames: ({
@@ -69,6 +71,7 @@ export interface Props {
 const DataQualityDetailsComponent: React.FC<Props> = ({
   addSuccessToast,
   canUserCreateAndReadCases,
+  endDate,
   formatBytes,
   formatNumber,
   getGroupByFieldsOnClick,
@@ -78,6 +81,7 @@ const DataQualityDetailsComponent: React.FC<Props> = ({
   patternIndexNames,
   patternRollups,
   patterns,
+  startDate,
   theme,
   baseTheme,
   updatePatternIndexNames,
@@ -109,6 +113,7 @@ const DataQualityDetailsComponent: React.FC<Props> = ({
       <IndicesDetails
         addSuccessToast={addSuccessToast}
         canUserCreateAndReadCases={canUserCreateAndReadCases}
+        endDate={endDate}
         formatBytes={formatBytes}
         formatNumber={formatNumber}
         getGroupByFieldsOnClick={getGroupByFieldsOnClick}
@@ -122,6 +127,7 @@ const DataQualityDetailsComponent: React.FC<Props> = ({
         patternRollups={patternRollups}
         selectedIndex={selectedIndex}
         setSelectedIndex={setSelectedIndex}
+        startDate={startDate}
         updatePatternIndexNames={updatePatternIndexNames}
         updatePatternRollup={updatePatternRollup}
       />

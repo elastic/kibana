@@ -19,7 +19,15 @@ export interface UseStats {
   loading: boolean;
 }
 
-export const useStats = (pattern: string): UseStats => {
+export const useStats = ({
+  endDate,
+  pattern,
+  startDate,
+}: {
+  endDate?: string | null;
+  pattern: string;
+  startDate?: string | null;
+}): UseStats => {
   const { httpFetch, isILMAvailable } = useDataQualityContext();
   const [stats, setStats] = useState<Record<string, IndicesStatsIndicesStats> | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +47,8 @@ export const useStats = (pattern: string): UseStats => {
             signal: abortController.signal,
             query: {
               isILMAvailable,
+              startDate,
+              endDate,
             },
           }
         );
@@ -62,7 +72,7 @@ export const useStats = (pattern: string): UseStats => {
     return () => {
       abortController.abort();
     };
-  }, [httpFetch, isILMAvailable, pattern, setError]);
+  }, [endDate, httpFetch, isILMAvailable, pattern, setError, startDate]);
 
   return { stats, error, loading };
 };

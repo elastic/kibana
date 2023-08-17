@@ -62,6 +62,7 @@ const EMPTY_INDEX_NAMES: string[] = [];
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
   canUserCreateAndReadCases: () => boolean;
+  endDate?: string;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   getGroupByFieldsOnClick: (
@@ -91,6 +92,7 @@ interface Props {
   patternRollup: PatternRollup | undefined;
   selectedIndex: SelectedIndex | null;
   setSelectedIndex: (selectedIndex: SelectedIndex | null) => void;
+  startDate?: string;
   theme?: PartialTheme;
   baseTheme: Theme;
   updatePatternIndexNames: ({
@@ -106,6 +108,7 @@ interface Props {
 const PatternComponent: React.FC<Props> = ({
   addSuccessToast,
   canUserCreateAndReadCases,
+  endDate,
   formatBytes,
   formatNumber,
   getGroupByFieldsOnClick,
@@ -117,6 +120,7 @@ const PatternComponent: React.FC<Props> = ({
   patternRollup,
   selectedIndex,
   setSelectedIndex,
+  startDate,
   theme,
   baseTheme,
   updatePatternIndexNames,
@@ -128,7 +132,11 @@ const PatternComponent: React.FC<Props> = ({
   const [pageIndex, setPageIndex] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(MIN_PAGE_SIZE);
 
-  const { error: statsError, loading: loadingStats, stats } = useStats(pattern);
+  const {
+    error: statsError,
+    loading: loadingStats,
+    stats,
+  } = useStats({ pattern, startDate, endDate });
   const { error: ilmExplainError, loading: loadingIlmExplain, ilmExplain } = useIlmExplain(pattern);
 
   const loading = useMemo(
@@ -228,9 +236,10 @@ const PatternComponent: React.FC<Props> = ({
   );
 
   useEffect(() => {
-    if (shouldCreateIndexNames({ indexNames, stats, ilmExplain, isILMAvailable })) {
+    const newIndexNames = getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable });
+    if (shouldCreateIndexNames({ indexNames, ilmExplain, isILMAvailable, newIndexNames })) {
       updatePatternIndexNames({
-        indexNames: getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable }),
+        indexNames: newIndexNames,
         pattern,
       });
     }

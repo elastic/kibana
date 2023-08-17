@@ -9,7 +9,7 @@ import type {
   IlmExplainLifecycleLifecycleExplain,
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { orderBy } from 'lodash/fp';
+import { isEqual, orderBy } from 'lodash/fp';
 
 import type { IndexSummaryTableItem } from '../summary_table/helpers';
 import type {
@@ -181,16 +181,18 @@ export const shouldCreateIndexNames = ({
   ilmExplain,
   indexNames,
   isILMAvailable,
-  stats,
+  newIndexNames,
 }: {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
   indexNames: string[] | undefined;
   isILMAvailable: boolean;
-  stats: Record<string, IndicesStatsIndicesStats> | null;
-}): boolean =>
-  indexNames == null &&
-  stats != null &&
-  ((isILMAvailable && ilmExplain != null) || !isILMAvailable);
+  newIndexNames: string[];
+}): boolean => {
+  return (
+    !isEqual(newIndexNames, indexNames) &&
+    ((isILMAvailable && ilmExplain != null) || !isILMAvailable)
+  );
+};
 
 export const shouldCreatePatternRollup = ({
   error,

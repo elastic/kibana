@@ -7,7 +7,15 @@
 
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 
-export const getRequestBody = (indexPattern: string): SearchRequest => ({
+export const getRequestBody = ({
+  indexPattern,
+  startDate = 'now-7d/d',
+  endDate = 'now/d',
+}: {
+  indexPattern: string;
+  startDate: string;
+  endDate: string;
+}): SearchRequest => ({
   index: indexPattern,
   aggs: {
     index: {
@@ -25,8 +33,8 @@ export const getRequestBody = (indexPattern: string): SearchRequest => ({
           range: {
             '@timestamp': {
               format: 'strict_date_optional_time',
-              gt: 'now-7d/d',
-              lte: 'now/d',
+              gt: startDate,
+              lte: endDate,
             },
           },
         },

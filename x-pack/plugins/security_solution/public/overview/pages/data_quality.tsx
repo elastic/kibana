@@ -15,7 +15,7 @@ import {
   INDEX_LIFECYCLE_MANAGEMENT_PHASES,
   SELECT_ONE_OR_MORE_ILM_PHASES,
 } from '@kbn/ecs-data-quality-dashboard';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption, OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiComboBox,
   EuiFormControlLayout,
@@ -25,6 +25,7 @@ import {
   EuiText,
   EuiToolTip,
   useGeneratedHtmlId,
+  EuiSuperDatePicker,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -155,6 +156,16 @@ const DataQualityComponent: React.FC = () => {
   const { signalIndexName, loading: isSignalIndexNameLoading } = useSignalIndex();
   const { isILMAvailable$, cases } = useKibana().services;
   const isILMAvailable = useObservable(isILMAvailable$);
+
+  const [startDate, setStartTime] = useState('now-7d');
+  const [endDate, setEndTime] = useState('now');
+  const onTimeChange = ({ start, end, isInvalid }: OnTimeChangeProps) => {
+    if (!isInvalid) {
+      setStartTime(start);
+      setEndTime(end);
+    }
+  };
+
   const alertsAndSelectedPatterns = useMemo(
     () =>
       signalIndexName != null ? [signalIndexName, ...selectedPatterns] : [...selectedPatterns],
@@ -251,13 +262,18 @@ const DataQualityComponent: React.FC = () => {
                 </FormControlLayout>
               </EuiToolTip>
             )}
+            {!isILMAvailable && (
+              <EuiSuperDatePicker start={startDate} end={endDate} onTimeChange={onTimeChange} />
+            )}
           </HeaderPage>
 
           <DataQualityPanel
             addSuccessToast={addSuccessToast}
+            baseTheme={baseTheme}
             canUserCreateAndReadCases={canUserCreateAndReadCases}
             defaultBytesFormat={defaultBytesFormat}
             defaultNumberFormat={defaultNumberFormat}
+            endDate={endDate}
             getGroupByFieldsOnClick={getGroupByFieldsOnClick}
             reportDataQualityCheckAllCompleted={reportDataQualityCheckAllCompleted}
             reportDataQualityIndexChecked={reportDataQualityIndexChecked}
@@ -269,7 +285,7 @@ const DataQualityComponent: React.FC = () => {
             openCreateCaseFlyout={openCreateCaseFlyout}
             patterns={alertsAndSelectedPatterns}
             setLastChecked={setLastChecked}
-            baseTheme={baseTheme}
+            startDate={startDate}
             theme={theme}
           />
         </SecuritySolutionPageWrapper>

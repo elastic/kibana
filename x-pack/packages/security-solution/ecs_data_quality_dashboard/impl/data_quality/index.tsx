@@ -29,6 +29,7 @@ interface Props {
   canUserCreateAndReadCases: () => boolean;
   defaultNumberFormat: string;
   defaultBytesFormat: string;
+  endDate?: string;
   getGroupByFieldsOnClick: (
     elements: Array<
       | FlameElementEvent
@@ -58,6 +59,7 @@ interface Props {
   reportDataQualityIndexChecked?: ReportDataQualityIndexChecked;
   reportDataQualityCheckAllCompleted?: ReportDataQualityCheckAllCompleted;
   setLastChecked: (lastChecked: string) => void;
+  startDate?: string;
   theme?: PartialTheme;
   baseTheme: Theme;
 }
@@ -69,6 +71,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   canUserCreateAndReadCases,
   defaultBytesFormat,
   defaultNumberFormat,
+  endDate,
   getGroupByFieldsOnClick,
   httpFetch,
   ilmPhases,
@@ -80,6 +83,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   reportDataQualityIndexChecked,
   reportDataQualityCheckAllCompleted,
   setLastChecked,
+  startDate,
   theme,
 }) => {
   const formatBytes = useCallback(
@@ -108,6 +112,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
       <Body
         addSuccessToast={addSuccessToast}
         canUserCreateAndReadCases={canUserCreateAndReadCases}
+        endDate={endDate}
         formatBytes={formatBytes}
         formatNumber={formatNumber}
         getGroupByFieldsOnClick={getGroupByFieldsOnClick}
@@ -117,6 +122,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
         openCreateCaseFlyout={openCreateCaseFlyout}
         patterns={patterns}
         setLastChecked={setLastChecked}
+        startDate={startDate}
         theme={theme}
         baseTheme={baseTheme}
       />

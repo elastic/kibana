@@ -35,27 +35,41 @@ export const getIndexStatsRoute = (router: IRouter) => {
         const decodedIndexName = decodeURIComponent(request.params.pattern);
 
         const stats = await fetchStats(client, decodedIndexName);
-
-        if (request.query.isILMAvailable === true) {
+        const { isILMAvailable, startDate, endDate } = request.query;
+        if (isILMAvailable === true) {
           return response.ok({
             body: stats.indices,
           });
+        } else {
+          if (startDate && endDate) {
+            const decodedStartDate = decodeURIComponent(startDate);
+            const decodedEndDate = decodeURIComponent(endDate);
+
+            const indices = await fetchAvailableIndices(esClient, {
+              indexPattern: decodedIndexName,
+              startDate: decodedStartDate,
+              endDate: decodedEndDate,
+            });
+            const availableIndices = indices?.aggregations?.index?.buckets?.reduce(
+              (acc: Record<string, IndicesStatsIndicesStats>, { key }: { key: string }) => {
+                if (stats.indices?.[key]) {
+                  acc[key] = stats.indices?.[key];
+                }
+                return acc;
+              },
+              {}
+            );
+
+            return response.ok({
+              body: availableIndices,
+            });
+          } else {
+            return resp.error({
+              body: `startDate and endDate are required`,
+              statusCode: 403,
+            });
+          }
         }
-
-        const indices = await fetchAvailableIndices(esClient, decodedIndexName);
-        const availableIndices = indices?.aggregations?.index?.buckets?.reduce(
-          (acc: Record<string, IndicesStatsIndicesStats>, { key }: { key: string }) => {
-            if (stats.indices?.[key]) {
-              acc[key] = stats.indices?.[key];
-            }
-            return acc;
-          },
-          {}
-        );
-
-        return response.ok({
-          body: availableIndices,
-        });
       } catch (err) {
         const error = transformError(err);
         return resp.error({
