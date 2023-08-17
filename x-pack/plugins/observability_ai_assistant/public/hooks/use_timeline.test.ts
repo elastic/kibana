@@ -21,6 +21,18 @@ type HookProps = Parameters<typeof useTimeline>[0];
 
 const WAIT_OPTIONS = { timeout: 1500 };
 
+jest.mock('./use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      notifications: {
+        toasts: {
+          addError: jest.fn(),
+        },
+      },
+    },
+  }),
+}));
+
 describe('useTimeline', () => {
   let hookResult: RenderHookResult<HookProps, UseTimelineResult, Renderer<HookProps>>;
 
@@ -120,7 +132,7 @@ describe('useTimeline', () => {
           canCopy: true,
           canEdit: false,
           canRegenerate: true,
-          canGiveFeedback: true,
+          canGiveFeedback: false,
         },
         role: MessageRole.Assistant,
         content: 'Goodbye',
@@ -242,7 +254,7 @@ describe('useTimeline', () => {
           loading: false,
           actions: {
             canRegenerate: true,
-            canGiveFeedback: true,
+            canGiveFeedback: false,
           },
         });
       });
@@ -364,10 +376,13 @@ describe('useTimeline', () => {
                   canCopy: true,
                   canEdit: false,
                   canRegenerate: true,
-                  canGiveFeedback: true,
+                  canGiveFeedback: false,
                 },
                 content: 'Regenerated',
+                currentUser: undefined,
+                function_call: undefined,
                 id: expect.any(String),
+                element: undefined,
                 loading: false,
                 title: '',
                 role: MessageRole.Assistant,

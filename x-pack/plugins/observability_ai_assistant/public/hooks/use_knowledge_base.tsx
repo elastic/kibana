@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import { useMemo, useState } from 'react';
 import { AbortableAsyncState, useAbortableAsync } from './use_abortable_async';
@@ -52,6 +51,17 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
           })
           .then(() => {
             status.refresh();
+            toasts.addSuccess({
+              title: i18n.translate('xpack.observabilityAiAssistant.knowledgeBaseReadyTitle', {
+                defaultMessage: 'Knowledge base is ready',
+              }),
+              text: i18n.translate(
+                'xpack.observabilityAiAssistant.knowledgeBaseReadyContentReload',
+                {
+                  defaultMessage: 'A page reload is needed to be able to use it.',
+                }
+              ),
+            });
           })
           .catch((error) => {
             setInstallError(error);
