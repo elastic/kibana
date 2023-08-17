@@ -86,6 +86,10 @@ export const esqlToOptions = (
 
   const options = (data?.columns ?? [])
     .filter(({ meta }) => {
+      // if fieldType absent, we do not filter columns by type
+      if (!fieldType) {
+        return true
+      }
       return fieldType === meta.type;
     })
     .map(({ id }) => ({ label: id }));
