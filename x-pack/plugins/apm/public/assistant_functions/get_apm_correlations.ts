@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { RegisterFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { CorrelationsEventType } from '../../../common/assistant/constants';
-import { callApmApi } from '../../services/rest/create_call_apm_api';
+import { CorrelationsEventType } from '../../common/assistant/constants';
+import { callApmApi } from '../services/rest/create_call_apm_api';
 
 export function registerGetApmCorrelationsFunction({
   registerFunction,
@@ -28,11 +29,16 @@ export function registerGetApmCorrelationsFunction({
       ALWAYS put a field value in double quotes. Best: event.outcome:\"failure\". 
       Wrong: event.outcome:'failure'. This is very important! ONLY use this function 
       if you have something to compare it to.`,
-      descriptionForUser: `Get field values that are more prominent in the foreground set than the 
+      descriptionForUser: i18n.translate(
+        'xpack.apm.observabilityAiAssistant.functions.registerGetApmCorrelationsFunction.descriptionForUser',
+        {
+          defaultMessage: `Get field values that are more prominent in the foreground set than the 
       background set. This can be useful in determining what attributes (like 
       error.message, service.node.name or transaction.name) are contributing to for 
       instance a higher latency. Another option is a time-based comparison, where you 
       compare before and after a change point.`,
+        }
+      ),
       parameters: {
         type: 'object',
         properties: {
