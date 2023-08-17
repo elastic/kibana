@@ -6,33 +6,149 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiFieldText, EuiForm, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { EuiButton, EuiCode, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
+import { useForm, Form, fieldValidators, FormSchema, FIELD_TYPES, UseField, TextField, SelectField, JsonEditorField } from '../../../../shared_imports';
 
 interface Props {
   onNext: () => void;
 }
 
+export const configurationFormSchema: FormSchema = {
+  name: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.dateDetectionFieldLabel', {
+      defaultMessage: 'Policy name',
+    }),
+    type: FIELD_TYPES.TEXT,
+    validations: [
+      {
+        validator: fieldValidators.emptyField(
+          i18n.translate(
+            'xpack.ingestPipelines.pipelineEditor.inferenceForm.patternRequiredError',
+            {
+              defaultMessage: 'A policy name value is required.',
+            }
+          )
+        ),
+      },
+    ],
+  },
+
+  policyType: {
+    type: FIELD_TYPES.SELECT,
+    label: i18n.translate(
+      'xpack.ingestPipelines.pipelineEditor.enrichForm.shapeRelationFieldLabel',
+      {
+        defaultMessage: 'Policy type',
+      }
+    ),
+    validations: [
+      {
+        validator: fieldValidators.emptyField(
+          i18n.translate(
+            'xpack.ingestPipelines.pipelineEditor.inferenceForm.typeRequiredError',
+            {
+              defaultMessage: 'A policy type value is required.',
+            }
+          )
+        ),
+      },
+    ],
+  },
+
+  query: {
+    label: i18n.translate('xpack.ingestPipelines.form.metaFieldLabel', {
+      defaultMessage: 'Query (optional)',
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.form.metaHelpText"
+        defaultMessage="Defaults to: {code}"
+        values={{
+          code: <EuiCode>{JSON.stringify({ match_all: {} })}</EuiCode>,
+        }}
+      />
+    ),
+    validations: [
+      {
+        validator: fieldValidators.isJsonField(
+          i18n.translate('xpack.ingestPipelines.form.validation.metaJsonError', {
+            defaultMessage: 'The input is not valid.',
+          }),
+          { allowEmptyString: true }
+        ),
+      },
+    ],
+  },
+};
+
+const defaultValue = {
+};
+
 export const ConfigurationStep = ({ onNext }: Props) => {
   const [editorValue, setEditorValue] = useState('');
 
-  return (
-    <EuiForm component="form">
-      <EuiFormRow label="Policy name">
-        <EuiFieldText name="name" />
-      </EuiFormRow>
+  const { form } = useForm({
+    defaultValue,
+    schema: configurationFormSchema,
+    id: 'configurationForm',
+  });
 
-      <EuiFormRow label="Policy type">
-        <EuiSelect
-          onChange={() => {}}
-          options={[
-            { value: 'match', text: 'Match' },
-            { value: 'geo_match', text: 'Geo match' },
-            { value: 'range', text: 'Range' },
-          ]}
-        />
-      </EuiFormRow>
+  const onSubmit = async () => {
+    await form.validate();
+
+    if (!form.isValid) {
+      return;
+    }
+
+    console.log('onSubmit', form.getFormData());
+  };
+
+  return (
+    <Form
+      form={form}
+      isInvalid={form.isSubmitted && !form.isValid}
+      error={form.getErrors()}
+    >
+      <UseField
+        path="name"
+        component={TextField}
+        componentProps={{ fullWidth: false }}
+      />
+
+      <UseField
+        path="policyType"
+        component={SelectField}
+        componentProps={{
+          fullWidth: false,
+          euiFieldProps: {
+            options: [
+              {
+                value: 'match',
+                text: i18n.translate(
+                  'xpack.ingestPipelines.pipelineEditor.enrichForm.matchOption',
+                  { defaultMessage: 'Match' }
+                ),
+              },
+              {
+                value: 'geo_match',
+                text: i18n.translate(
+                  'xpack.ingestPipelines.pipelineEditor.enrichFrom.geoMatchOption',
+                  { defaultMessage: 'Geo match' }
+                ),
+              },
+              {
+                value: 'range',
+                text: i18n.translate(
+                  'xpack.ingestPipelines.pipelineEditor.enrichFrom.rangeOption',
+                  { defaultMessage: 'range' }
+                ),
+              },
+            ],
+          },
+        }}
+      />
 
       <EuiFormRow label="Source indices">
         <EuiSelect
@@ -46,31 +162,41 @@ export const ConfigurationStep = ({ onNext }: Props) => {
         />
       </EuiFormRow>
 
-      <EuiFormRow label="Query (optional)">
-        <CodeEditor
-          languageId="json"
-          isCopyable
-          allowFullScreen
-          data-test-subj="queryEditor"
-          value={editorValue}
-          onChange={(value) => setEditorValue(value)}
-          height={300}
-          options={{
-            lineNumbers: 'off',
-            tabSize: 2,
-            automaticLayout: true,
-          }}
-        />
-      </EuiFormRow>
+      <UseField
+        path="query"
+        component={JsonEditorField}
+        componentProps={{
+          fullWidth: false,
+          codeEditorProps: {
+            height: '300px',
+            allowFullScreen: true,
+            'aria-label': i18n.translate('xpack.ingestPipelines.form.metaAriaLabel', {
+              defaultMessage: 'query field data editor',
+            }),
+            options: {
+              lineNumbers: 'off',
+              tabSize: 2,
+              automaticLayout: true,
+            }
+          },
+        }}
+      />
 
       <EuiSpacer />
 
-      <EuiButton fill color="primary" iconSide="right" iconType="arrowRight" onClick={onNext}>
+      <EuiButton
+        fill
+        color="primary"
+        iconSide="right"
+        iconType="arrowRight"
+        disabled={form.isValid === false}
+        onClick={onSubmit}
+      >
         <FormattedMessage
           id="xpack.idxMgmt.enrichPolicies.create.stepConfiguration.nextButtonLabel"
           defaultMessage="Next"
         />
       </EuiButton>
-    </EuiForm>
+    </Form>
   );
 };

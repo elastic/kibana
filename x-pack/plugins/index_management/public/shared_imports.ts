@@ -50,6 +50,9 @@ export {
 export {
   getFormRow,
   Field,
+  FormRow,
+  TextField,
+  SelectField,
   ToggleField,
   JsonEditorField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
