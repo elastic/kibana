@@ -6,20 +6,8 @@
  * Side Public License, v 1.
  */
 
-export {
-  createRootWithSettings,
-  getSupertest,
-  createRoot,
-  createRootWithCorePlugins,
-  createTestServers,
-  createServerlessES,
-  request,
-} from './src';
-
-export type {
-  HttpMethod,
-  TestElasticsearchUtils,
-  TestKibanaUtils,
-  TestUtils,
-  TestServerlessESUtils,
-} from './src';
+module.exports = {
+  preset: '@kbn/test/jest_integration_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/saved-objects/core-saved-objects-migration-server-internal'],
+};
