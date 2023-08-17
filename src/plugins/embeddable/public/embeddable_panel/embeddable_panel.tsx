@@ -33,16 +33,8 @@ import {
 } from './use_select_from_embeddable';
 import { EmbeddablePanelError } from './embeddable_panel_error';
 import { core, embeddableStart, inspector } from '../kibana_services';
-import {
-  ViewMode,
-  EmbeddableErrorHandler,
-  EmbeddableOutput,
-  EmbeddableFactoryNotFoundError,
-} from '../lib';
+import { ViewMode, EmbeddableErrorHandler, EmbeddableOutput } from '../lib';
 import { EmbeddablePanelHeader } from './panel_header/embeddable_panel_header';
-import { HelloWorldEmbeddable, HELLO_WORLD_EMBEDDABLE } from '../tests/fixtures';
-import { HelloWorldContainer } from '../lib/test_samples';
-import { v4 } from 'uuid';
 
 const getEventStatus = (output: EmbeddableOutput): EmbeddablePhase => {
   if (!isNil(output.error)) {
