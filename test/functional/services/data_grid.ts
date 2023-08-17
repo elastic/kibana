@@ -206,9 +206,12 @@ export class DataGridService extends FtrService {
     const testSubj = options.isAnchorRow
       ? '~docTableExpandToggleColumnAnchor'
       : '~docTableExpandToggleColumn';
-    // can be as the second column (Discover page) and the first column (Surrounding Documents page)
+    // can be in the second column (Discover page) and in the first column (Surrounding Documents page)
+    const firstCell = row[0];
     const toggle =
-      (await row[1].findByTestSubject(testSubj)) || (await row[0].findByTestSubject(testSubj));
+      (await firstCell.getAttribute('data-gridcell-column-id')) === 'openDetails'
+        ? await firstCell.findByTestSubject(testSubj)
+        : await row[1].findByTestSubject(testSubj);
 
     await toggle.scrollIntoViewIfNecessary();
     await toggle.click();
