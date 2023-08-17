@@ -106,11 +106,8 @@ export function MobileStats({
     {
       color: euiTheme.eui.euiColorLightestShade,
       title: i18n.translate('xpack.apm.mobile.metrics.crash.rate', {
-        defaultMessage: 'Crash Rate',
+        defaultMessage: 'Crashes',
       }),
-      // subtitle: i18n.translate('xpack.apm.mobile.coming.soon', {
-      //   defaultMessage: 'Coming Soon',
-      // }),
       icon: getIcon('bug'),
       value: data?.currentPeriod?.crashes?.value ?? NaN,
       valueFormatter: (value: number) =>
