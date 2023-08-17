@@ -32,6 +32,9 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
   const supertest = getService('supertestWithoutAuth');
   const retry = getService('retry');
   const config = getService('config');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+
 
 
   return {
@@ -136,19 +139,22 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
 
       return (body as ReportingJobResponse).job.id;
     },
-
-    // reportingAPI.generateCsv from generate_csv_discover.ts 
+    async initEcommerce(){
+      const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
+      await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await kibanaServer.importExport.load(ecommerceSOPath);
+    },
    async generateCsv(
       job: JobParamsCSV,
       username = 'test_user',
       password =  'changeme'
     ) {
       const jobParams = rison.encode(job);
-  
       return await supertest
-        .post(`/api/reporting/generate/csv_searchsource`)
+        .post(`/${INTERNAL_ROUTES.GENERATE_PREFIX}/csv_searchsource`)
         .auth(username, password)
-        .set('kbn-xsrf', 'xxx')
+        .set(...API_HEADER)
+        .set(...INTERNAL_HEADER)
         .send({ jobParams });
     },
     async getCompletedJobOutput(downloadReportPath: string){
@@ -174,7 +180,8 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
           const response = await supertest
             .get(downloadReportPath)
             .responseType('blob')
-            .set('kbn-xsrf', 'xxx');
+            .set(...API_HEADER)
+            .set(...INTERNAL_HEADER)
 
           if (response.status === 503) {
             log.debug(`Report at path ${downloadReportPath} is pending`);

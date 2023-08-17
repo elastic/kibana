@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import expect from '@kbn/expect';
 import { ReportApiJSON } from '@kbn/reporting-plugin/common/types';
@@ -14,9 +13,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 // the archived data holds a report created by test_user
 const TEST_USERNAME = 'test_user';
 const TEST_USER_PASSWORD = 'changeme';
-const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
-const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
-
 
 export default ({ getService }: FtrProviderContext) => {
     const esArchiver = getService('esArchiver');
@@ -39,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
       
       it(`exported CSV file matches snapshot`, async () => {
-  
+        await reportingAPI.initEcommerce();
         const fromTime = '2019-06-20T00:00:00.000Z';
         const toTime = '2019-06-24T00:00:00.000Z';
   
