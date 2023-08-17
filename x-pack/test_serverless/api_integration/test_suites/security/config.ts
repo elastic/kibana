@@ -9,12 +9,7 @@ import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'security',
-  testFiles: [
-    require.resolve('../common'),
-    require.resolve('./fleet'),
-    require.resolve('./snapshot_telemetry'),
-    require.resolve('./cases'),
-  ],
+  testFiles: [require.resolve('../common'), require.resolve('.')],
   junit: {
     reportName: 'Serverless Security API Integration Tests',
   },

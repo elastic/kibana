@@ -8,6 +8,10 @@
 import { createTestConfig } from '../../config.base';
 import { services } from './apm_api_integration/common/services';
 
+/**
+ * Make sure to create a MKI deployment with custom Kibana image, that includes feature flags arguments
+ * This tests most likely will fail on default MKI project
+ */
 export default createTestConfig({
   serverlessProject: 'oblt',
   junit: {
@@ -17,6 +21,6 @@ export default createTestConfig({
   services,
   // add feature flags
   kbnServerArgs: ['--xpack.observability.unsafe.thresholdRule.enabled=true'],
-  // import only tests that require feature flags
-  testFiles: [require.resolve('./threshold_rule')],
+  // load tests in the index file
+  testFiles: [require.resolve('./index.feature_flags.ts')],
 });

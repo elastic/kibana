@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-/**
- * FTR config should have at list 1 test suite, otherwise the run will failure on CI
- */
-export default function () {
-  describe('Search Feature flag demo suite', function () {
-    it('should be removed soon', () => {});
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Serverless observability API - feature flags', function () {
+    loadTestFile(require.resolve('./threshold_rule'));
   });
 }

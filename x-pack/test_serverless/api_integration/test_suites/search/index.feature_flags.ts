@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-/**
- * FTR config should have at list 1 test suite, otherwise the run will failure on CI
- */
 export default function () {
-  describe('Security Feature flag demo suite', function () {
-    it('should be removed soon', () => {});
+  describe('Serverless search API - feature flags', function () {
+    // add tests that require feature flags, defined in config.feature_flags.ts
+    // loadTestFile(require.resolve(<path_to_test_file>));
   });
 }

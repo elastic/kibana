@@ -7,6 +7,10 @@
 
 import { createTestConfig } from '../../config.base';
 
+/**
+ * Make sure to create a MKI deployment with custom Kibana image, that includes feature flags arguments
+ * This tests most likely will fail on default MKI project
+ */
 export default createTestConfig({
   serverlessProject: 'es',
   junit: {
@@ -15,6 +19,6 @@ export default createTestConfig({
   suiteTags: { exclude: ['skipSvlSearch'] },
   // add feature flags
   kbnServerArgs: [],
-  // import only tests that require feature flags
-  testFiles: [require.resolve('./feature_flag_test_suite_template')],
+  // load tests in the index file
+  testFiles: [require.resolve('./index.feature_flags.ts')],
 });
