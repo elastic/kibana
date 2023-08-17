@@ -30,7 +30,7 @@ import { buildEditFieldButton } from './build_edit_field_button';
 
 const openDetails = {
   id: 'openDetails',
-  width: 24,
+  width: 32,
   headerCellRender: () => (
     <EuiScreenReaderOnly>
       <span>
@@ -62,7 +62,7 @@ export function getLeadControlColumns(canSetExpandedDoc: boolean) {
   if (!canSetExpandedDoc) {
     return [select];
   }
-  return [openDetails, select];
+  return [select, openDetails];
 }
 
 function buildEuiGridColumn({

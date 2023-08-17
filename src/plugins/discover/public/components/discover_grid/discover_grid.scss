@@ -4,31 +4,6 @@
   height: 100%;
   overflow: hidden;
   border-radius: $euiBorderRadius;
-
-  .euiDataGrid__controls {
-    border: none;
-    border-bottom: $euiBorderThin;
-  }
-
-  .euiDataGridRowCell.euiDataGridRowCell--firstColumn {
-    border-left: none;
-    padding: 0;
-  }
-
-  .euiDataGridRowCell.euiDataGridRowCell--lastColumn {
-    border-right: none;
-  }
-
-  .dscDiscoverGrid__table .euiDataGridRowCell:first-of-type,
-  .dscDiscoverGrid__table .euiDataGrid--headerShade.euiDataGrid--bordersAll .euiDataGridHeaderCell:first-of-type {
-    border-left: none;
-    border-right: none;
-  }
-
-  .euiDataGridRowCell:last-of-type,
-  .euiDataGridHeaderCell:last-of-type {
-    border-right: none;
-  }
 }
 
 .dscDiscoverGrid__cellValue {
@@ -57,6 +32,29 @@
   flex-direction: column;
   flex-wrap: nowrap;
   height: 100%;
+
+  .euiDataGrid__controls {
+    border: none;
+    border-bottom: $euiBorderThin;
+  }
+
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'] {
+    padding: $euiSizeS 0 0 $euiSizeS;
+  }
+
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='openDetails'] {
+    padding: $euiSizeXS 0 0 $euiSizeXS;
+  }
+
+  .dscDiscoverGrid__table .euiDataGridRowCell:first-of-type {
+    border-left: none;
+    border-right: none;
+  }
+
+  .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover,
+  .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover .euiDataGridRowCell__contentByHeight + .euiDataGridRowCell__expandActions {
+    background-color: tintOrShade($euiColorLightShade, 50%, 0);
+  }
 }
 
 .dscDiscoverGrid__table {
