@@ -79,10 +79,10 @@ export const wrapGroupedEsqlAlerts = ({
       ]);
 
       const document = rowToDocument(results.columns, row);
-    // TODO: make it good looking
-    delete document._id;
-    delete document._version;
-    delete document._index;
+      // TODO: make it good looking
+      delete document._id;
+      delete document._version;
+      delete document._index;
 
       const baseAlert: BaseFieldsLatest = buildBulkBody(
         spaceId,
