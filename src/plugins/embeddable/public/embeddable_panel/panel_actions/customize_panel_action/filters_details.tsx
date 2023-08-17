@@ -26,7 +26,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { FilterableEmbeddable, IEmbeddable, isFilterableEmbeddable } from '../../..';
+import { IEmbeddable } from '../../../lib/embeddables';
+import { isFilterableEmbeddable } from '../../../lib/filterable_embeddable';
 
 export const filterDetailsActionStrings = {
   getQueryTitle: () =>
@@ -57,32 +58,31 @@ export function FiltersDetails({ embeddable, editMode, onEdit }: FiltersDetailsP
   );
 
   useMount(() => {
-    if (!(embeddable as FilterableEmbeddable).getFilters || !(embeddable as FilterableEmbeddable).getQuery) {
+    if (!isFilterableEmbeddable(embeddable)) {
       setIsLoading(false);
       return;
     }
 
-    Promise.all([
-      (embeddable as FilterableEmbeddable).getFilters(),
-      (embeddable as FilterableEmbeddable).getQuery(),
-    ]).then(([embeddableFilters, embeddableQuery]) => {
-      setFilters(embeddableFilters);
-      if (embeddableQuery) {
-        if (isOfQueryType(embeddableQuery)) {
-          if (typeof embeddableQuery.query === 'string') {
-            setQueryString(embeddableQuery.query);
+    Promise.all([embeddable.getFilters(), embeddable.getQuery()]).then(
+      ([embeddableFilters, embeddableQuery]) => {
+        setFilters(embeddableFilters);
+        if (embeddableQuery) {
+          if (isOfQueryType(embeddableQuery)) {
+            if (typeof embeddableQuery.query === 'string') {
+              setQueryString(embeddableQuery.query);
+            } else {
+              setQueryString(JSON.stringify(embeddableQuery.query, null, 2));
+            }
           } else {
-            setQueryString(JSON.stringify(embeddableQuery.query, null, 2));
+            const language = getAggregateQueryMode(embeddableQuery);
+            setQueryLanguage(language);
+            setQueryString(embeddableQuery[language as keyof AggregateQuery]);
+            setDisableEditButton(true);
           }
-        } else {
-          const language = getAggregateQueryMode(embeddableQuery);
-          setQueryLanguage(language);
-          setQueryString(embeddableQuery[language as keyof AggregateQuery]);
-          setDisableEditButton(true);
         }
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    });
+    );
   });
 
   return (
