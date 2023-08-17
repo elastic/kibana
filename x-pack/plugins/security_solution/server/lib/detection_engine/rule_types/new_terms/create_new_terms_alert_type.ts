@@ -142,7 +142,7 @@ export const createNewTermsAlertType = (
         name: 'historyWindowStart',
       });
 
-      let afterKey;
+      let afterKey: Record<string, string | number | null> | undefined;
 
       const result = createSearchAfterReturnType();
 
