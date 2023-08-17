@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
+  const browser = getService('browser');
   const from = 'Jan 1, 2019 @ 00:00:00.000';
   const to = 'Jan 1, 2019 @ 23:59:59.999';
 
@@ -25,7 +26,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/date_nanos_mixed'
       );
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'timestamp-*' });
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'timestamp-*',
+        hideAnnouncements: true, // should be enough vertical space to render rows
+      });
+      await browser.setWindowSize(1200, 900);
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_mixed']);
       await PageObjects.common.setTime({ from, to });
       await PageObjects.common.navigateToApp('discover');
