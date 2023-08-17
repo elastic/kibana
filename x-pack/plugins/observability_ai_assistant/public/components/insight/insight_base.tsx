@@ -21,6 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { AssistantAvatar } from '../assistant_avatar';
+import { TechnicalPreviewBadge } from '../technical_preview_badge';
 
 export interface InsightBaseProps {
   title: string;
@@ -116,6 +117,9 @@ export function InsightBase({
                   </EuiPopover>
                 </EuiFlexItem>
               ) : null}
+              <EuiFlexItem>
+                <TechnicalPreviewBadge />
+              </EuiFlexItem>
             </EuiFlexGroup>
           ) : null
         }
