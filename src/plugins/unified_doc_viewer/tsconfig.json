@@ -20,7 +20,8 @@
     "@kbn/field-formats-plugin",
     "@kbn/core-ui-settings-browser",
     "@kbn/ebt-tools",
-    "@kbn/core"
+    "@kbn/core",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": [
     "target/**/*",
