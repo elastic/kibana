@@ -48,7 +48,7 @@ export const RepositoryEmptyPrompt: React.FunctionComponent = () => {
           </p>
         </>
       }
-      data-test-subj="emptyPrompt"
+      data-test-subj="snapshotListEmpty"
     />
   );
 };

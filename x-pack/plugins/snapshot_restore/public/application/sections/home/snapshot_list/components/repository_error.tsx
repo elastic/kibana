@@ -16,7 +16,8 @@ export const RepositoryError: React.FunctionComponent = () => {
   const history = useHistory();
   return (
     <EuiPageTemplate.EmptyPrompt
-      iconType="managementApp"
+      color="danger"
+      iconType="warning"
       data-test-subj="repositoryErrorsPrompt"
       title={
         <h1 data-test-subj="title">
