@@ -40,6 +40,7 @@ export const PolicyList: React.FunctionComponent = () => {
     const { statusCode, message } = error ? error : { statusCode: '', message: '' };
     return (
       <EuiPageTemplate.EmptyPrompt
+        color="danger"
         title={
           <h2>
             <FormattedMessage

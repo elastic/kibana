@@ -55,6 +55,7 @@ export const EditPolicy: React.FunctionComponent<RouteComponentProps<RouterProps
     const { statusCode, message } = error ? error : { statusCode: '', message: '' };
     return (
       <EuiPageTemplate.EmptyPrompt
+        color="danger"
         title={
           <h2>
             <FormattedMessage
