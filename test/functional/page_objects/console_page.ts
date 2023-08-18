@@ -587,8 +587,9 @@ export class ConsolePageObject extends FtrService {
     await closeButton.click();
   }
 
-  public async sleepForDebouncePeriod(duration: number = 100) {
-    await this.common.sleep(duration);
+  public async sleepForDebouncePeriod(milliseconds: number = 100) {
+    await this.retry.waitFor('pinging JS engine', () => this.browser.execute('return true;'));
+    await this.common.sleep(milliseconds);
   }
 
   async setAutocompleteTrace(flag: boolean) {
