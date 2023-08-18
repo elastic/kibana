@@ -25,7 +25,11 @@ import {
   buildKueryNodeFilter,
   getAndValidateCommonBulkOptions,
 } from '../../../../rules_client/common';
-import { BulkOptions, BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
+import {
+  BulkOptions,
+  BulkOperationError,
+  RulesClientContext,
+} from '../../../../rules_client/types';
 
 export const bulkDeleteRules = async (context: RulesClientContext, options: BulkOptions) => {
   const { ids, filter } = getAndValidateCommonBulkOptions(options);
