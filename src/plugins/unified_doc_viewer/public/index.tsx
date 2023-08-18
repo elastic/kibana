@@ -6,9 +6,24 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import { EuiDelayRender, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { UnifiedDocViewerPublicPlugin } from './plugin';
 
-export { LazyJsonCodeEditor } from './components';
+const LazyJsonCodeEditor = React.lazy(
+  () => import('./components/json_code_editor/json_code_editor')
+);
+
+export const JsonCodeEditor = withSuspense(
+  LazyJsonCodeEditor,
+  <EuiDelayRender delay={300}>
+    <EuiPanel color="transparent" paddingSize="s">
+      <EuiLoadingSpinner size="m" />
+    </EuiPanel>
+  </EuiDelayRender>
+);
+
 export { getDocViewsRegistry, setDocViewsRegistry } from './plugin';
 export { useEsDocSearch, useUnifiedDocViewerServices } from './hooks';
 
