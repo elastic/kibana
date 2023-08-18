@@ -152,16 +152,25 @@ export const loadRule = (includeResponseActions = false) =>
       filters: [
         {
           meta: {
+            type: 'custom',
             disabled: false,
-            negate: true,
+            negate: false,
             alias: null,
-            key: 'host.name',
-            field: 'host.name',
-            params: { query: 'dev-fleet-server.8220' },
-            type: 'phrase',
+            key: 'query',
+            value: '{"bool":{"must_not":{"wildcard":{"host.name":"dev-fleet-server.*"}}}}',
           },
-          query: { match_phrase: { 'host.name': 'dev-fleet-server.8220' } },
-          $state: { store: 'appState' },
+          query: {
+            bool: {
+              must_not: {
+                wildcard: {
+                  'host.name': 'dev-fleet-server.*',
+                },
+              },
+            },
+          },
+          $state: {
+            store: 'appState',
+          },
         },
       ],
       language: 'kuery',
