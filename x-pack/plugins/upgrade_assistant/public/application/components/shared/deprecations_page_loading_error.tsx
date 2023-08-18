@@ -23,6 +23,7 @@ export const DeprecationsPageLoadingError: FunctionComponent<Props> = ({
   <EuiPageTemplate.EmptyPrompt
     color="danger"
     iconType="warning"
+    data-test-subj="deprecationsPageLoadingError"
     title={
       <h2>
         {i18n.translate('xpack.upgradeAssistant.deprecationsPageLoadingError.title', {

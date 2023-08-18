@@ -49,6 +49,7 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
   if (missingManageSpacesPrivilege) {
     return (
       <NotAuthorizedSection
+        dataTestSubj="missingKibanaPrivilegesMessage"
         title={
           <FormattedMessage
             id="xpack.upgradeAssistant.app.deniedPrivilegeTitle"
@@ -86,7 +87,7 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
             />
           </p>
         }
-        data-test-subj="emptyPrompt"
+        data-test-subj="isUpgradingMessage"
       />
     );
   }
@@ -111,7 +112,7 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
             />
           </p>
         }
-        data-test-subj="emptyPrompt"
+        data-test-subj="isUpgradeCompleteMessage"
       />
     );
   }
