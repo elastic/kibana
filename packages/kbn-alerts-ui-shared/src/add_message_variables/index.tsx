@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import './add_message_variables.scss';
-import { TruncatedText } from '../../common/truncated_text';
+import { TruncatedText } from './truncated_text';
 import * as i18n from './translations';
 
 interface Props {

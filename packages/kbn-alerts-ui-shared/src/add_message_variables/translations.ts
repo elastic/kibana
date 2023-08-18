@@ -8,63 +8,63 @@
 import { i18n } from '@kbn/i18n';
 
 export const LOADING_VARIABLES = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.loadingMessage',
+  'xpack.alertsUIShared.components.addMessageVariables.loadingMessage',
   {
     defaultMessage: 'Loading variables',
   }
 );
 
 export const NO_VARIABLES_FOUND = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.noVariablesFound',
+  'xpack.alertsUIShared.components.addMessageVariables.noVariablesFound',
   {
     defaultMessage: 'No variables found',
   }
 );
 
 export const NO_VARIABLES_AVAILABLE = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.noVariablesAvailable',
+  'xpack.alertsUIShared.components.addMessageVariables.noVariablesAvailable',
   {
     defaultMessage: 'No variables available',
   }
 );
 
 export const DEPRECATED_VARIABLES_ARE_SHOWN = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.deprecatedVariablesAreShown',
+  'xpack.alertsUIShared.components.addMessageVariables.deprecatedVariablesAreShown',
   {
     defaultMessage: 'Deprecated variables are shown',
   }
 );
 
 export const DEPRECATED_VARIABLES_ARE_HIDDEN = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.deprecatedVariablesAreHidden',
+  'xpack.alertsUIShared.components.addMessageVariables.deprecatedVariablesAreHidden',
   {
     defaultMessage: 'Deprecated variables are hidden',
   }
 );
 
 export const HIDE = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.hideDeprecatedVariables',
+  'xpack.alertsUIShared.components.addMessageVariables.hideDeprecatedVariables',
   {
     defaultMessage: 'Hide',
   }
 );
 
 export const SHOW_ALL = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.showAllDeprecatedVariables',
+  'xpack.alertsUIShared.components.addMessageVariables.showAllDeprecatedVariables',
   {
     defaultMessage: 'Show all',
   }
 );
 
 export const ADD_VARIABLE_POPOVER_BUTTON = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.addVariablePopoverButton',
+  'xpack.alertsUIShared.components.addMessageVariables.addVariablePopoverButton',
   {
     defaultMessage: 'Add variable',
   }
 );
 
 export const ADD_VARIABLE_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.addRuleVariableTitle',
+  'xpack.alertsUIShared.components.addMessageVariables.addRuleVariableTitle',
   {
     defaultMessage: 'Add variable',
   }

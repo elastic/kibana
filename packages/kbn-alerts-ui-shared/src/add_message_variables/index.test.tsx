@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
-import { AddMessageVariables } from './add_message_variables';
+import { AddMessageVariables } from '.';
 
 describe('AddMessageVariables', () => {
   test('it renders variables and filter bar', async () => {

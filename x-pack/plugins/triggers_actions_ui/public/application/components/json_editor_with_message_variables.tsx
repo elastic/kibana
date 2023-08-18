@@ -16,7 +16,7 @@ import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 import { ActionVariable } from '@kbn/alerting-plugin/common';
-import { AddMessageVariables } from './add_message_variables';
+import { AddMessageVariables } from '@kbn/alerts-ui-shared';
 import { templateActionVariable } from '../lib';
 
 const NO_EDITOR_ERROR_TITLE = i18n.translate(

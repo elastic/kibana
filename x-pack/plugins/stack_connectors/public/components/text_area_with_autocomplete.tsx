@@ -18,12 +18,11 @@ import {
   useEuiTheme,
   useEuiBackgroundColor,
 } from '@elastic/eui';
-import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { Properties } from 'csstype';
 import { filterSuggestions } from '../lib/filter_suggestions_for_autocomplete';
 import { AddMessageVariables } from '@kbn/alerts-ui-shared';
-import { templateActionVariable } from '../lib';
+import { templateActionVariable } from '../lib/template_action_variable';
 
 export interface TextAreaWithAutocompleteProps {
   editAction: (property: string, value: any, index: number) => void;
