@@ -368,6 +368,22 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.ISearchEmbeddable.hasTimeRange",
+            "type": "Function",
+            "tags": [],
+            "label": "hasTimeRange",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/discover/public/embeddable/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
