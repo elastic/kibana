@@ -158,7 +158,7 @@ describe('Diagnostics', () => {
 function importBundle() {
   cy.visitKibana('/app/apm/diagnostics/import-export');
   cy.get('#file-picker').selectFile(
-    './cypress/e2e/power_user/diagnostics/apm-diagnostics-8.8.0-1687436214804.json'
+    './cypress/e2e/diagnostics/apm-diagnostics-8.8.0-1687436214804.json'
   );
 }
 
