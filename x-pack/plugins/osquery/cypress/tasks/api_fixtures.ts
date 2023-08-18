@@ -113,6 +113,7 @@ export const cleanupPack = (id: string, space = 'default') => {
     headers: {
       'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
+    failOnStatusCode: false,
   });
 };
 
@@ -229,6 +230,7 @@ export const cleanupRule = (id: string) => {
     headers: {
       'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
+    failOnStatusCode: false,
   });
 };
 
