@@ -16,9 +16,11 @@ export const checkIndexStatus = async (
   postureType?: PostureTypes,
   retentionTime?: number
 ): Promise<IndexStatus> => {
+
   const query =
     !postureType || postureType === 'all' || postureType === 'vuln_mgmt'
       ? {
+        bool:{
           must: {
             range: {
               '@timestamp': {
@@ -27,6 +29,7 @@ export const checkIndexStatus = async (
               },
             },
           },
+        },
         }
       : {
           bool: {
@@ -47,7 +50,6 @@ export const checkIndexStatus = async (
             },
           },
         };
-
   try {
     const queryResult = await esClient.search({
       index,
