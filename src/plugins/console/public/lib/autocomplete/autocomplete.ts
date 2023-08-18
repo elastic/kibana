@@ -138,7 +138,7 @@ export function getCurrentMethodAndTokenPaths(
           }
         }
         if (!t) {
-          // oops we run out.. we don't know what's up return null;
+          tracer(`paren.rparen: oops we run out.. we don't know what's up return null`);
           return {};
         }
         continue;
@@ -152,7 +152,7 @@ export function getCurrentMethodAndTokenPaths(
           }
         }
         if (!t) {
-          // oops we run out.. we don't know what's up return null;
+          tracer(`paren.rparen: oops we run out.. we don't know what's up return null`);
           return {};
         }
         continue;
@@ -190,7 +190,9 @@ export function getCurrentMethodAndTokenPaths(
   }
 
   if (walkedSomeBody && (!bodyTokenPath || bodyTokenPath.length === 0) && !forceEndOfUrl) {
-    // we had some content and still no path -> the cursor is position after a closed body -> no auto complete
+    tracer(
+      'we had some content and still no path -> the cursor is position after a closed body -> no auto complete'
+    );
     return {};
   }
 
@@ -580,6 +582,7 @@ export default function ({
     //  context.updatedForToken.row = pos.row; // extend
 
     context.autoCompleteType = getAutoCompleteType(pos);
+    tracer('autocomplete type:', context.autoCompleteType);
     switch (context.autoCompleteType) {
       case 'path':
         addPathAutoCompleteSetToContext(context, pos);
@@ -596,6 +599,7 @@ export default function ({
       default:
         return null;
     }
+    tracer('autocomplete set:', context.autoCompleteSet);
 
     const isMappingsFetchingInProgress =
       context.autoCompleteType === 'body' && !!context.asyncResultsState?.isLoading;
@@ -1063,12 +1067,12 @@ export default function ({
     pos: Position
   ) {
     let currentToken = editor.getTokenAt(pos)!;
-    tracer('has started evaluating current token=%o', currentToken);
+    tracer('has started evaluating current token:', currentToken);
 
     if (!currentToken) {
       if (pos.lineNumber === 1) {
         lastEvaluatedToken = null;
-        tracer('not activating autocomplete due to invalid current token at line 1');
+        tracer('not starting autocomplete due to invalid current token at line 1');
         return;
       }
       currentToken = { position: { column: 0, lineNumber: 0 }, value: '', type: '' }; // empty row
@@ -1086,13 +1090,13 @@ export default function ({
         nextToken.position.lineNumber = pos.lineNumber;
         lastEvaluatedToken = nextToken;
       }
-      tracer('not activating autocomplete due to empty current token');
+      tracer('not starting autocomplete due to empty current token');
       return;
     }
 
     if (!lastEvaluatedToken) {
       lastEvaluatedToken = currentToken;
-      tracer('not activating autocomplete due to invalid last evaluated token');
+      tracer('not starting autocomplete due to invalid last evaluated token');
       return; // wait for the next typing.
     }
 
@@ -1129,13 +1133,14 @@ export default function ({
       lastEvaluatedToken.position.lineNumber !== currentToken.position.lineNumber ||
       lastEvaluatedToken.value === currentToken.value
     ) {
-      // not on the same place or nothing changed, cache and wait for the next time
-      lastEvaluatedToken = currentToken;
       tracer(
-        'not activating autocomplete because the change indicates not key types but a click around the editor, last evaluated token=%o current token=%o',
+        'not starting autocomplete because the change can be considered a click, last evaluated token:',
         lastEvaluatedToken,
+        'current token:',
         currentToken
       );
+      // not on the same place or nothing changed, cache and wait for the next time
+      lastEvaluatedToken = currentToken;
       return;
     }
 
@@ -1149,13 +1154,14 @@ export default function ({
       case 'comment.punctuation':
       case 'comment.block':
       case 'UNKNOWN':
-        tracer('not activating autocomplete for current token type=%o', currentToken.type);
+        tracer('not starting autocomplete for current token type:', currentToken.type);
         return;
     }
 
     tracer(
-      'activating autocomplete, last evaluated token=%o current token=%o',
+      'starting autocomplete, last evaluated token:',
       lastEvaluatedToken,
+      'current token:',
       currentToken
     );
     lastEvaluatedToken = currentToken;
@@ -1165,7 +1171,7 @@ export default function ({
 
   function editorChangeListener() {
     const position = editor.getCurrentPosition();
-    tracer('editor changed, position=%o', position);
+    tracer('editor changed, position:', position);
     if (position && !editor.isCompleterActive()) {
       tracer('will start evaluating current token');
       evaluateCurrentTokenAfterAChange(position);
@@ -1257,11 +1263,13 @@ export default function ({
       const context = getAutoCompleteContext(editor, position);
 
       if (!context) {
+        tracer('zero suggestions due to invalid autocomplete context');
         callback(null, []);
       } else {
         if (!context.asyncResultsState?.isLoading) {
           const terms = getTerms(context, context.autoCompleteSet!);
           const suggestions = getSuggestions(terms);
+          tracer(suggestions?.length ?? 0, 'suggestions');
           callback(null, suggestions);
         }
 
@@ -1274,6 +1282,7 @@ export default function ({
 
           context.asyncResultsState.results.then((r) => {
             const asyncSuggestions = getSuggestions(getTerms(context, r));
+            tracer(asyncSuggestions?.length ?? 0, 'async suggestions');
             callback(null, asyncSuggestions);
             annotationControls.removeAnnotation();
           });

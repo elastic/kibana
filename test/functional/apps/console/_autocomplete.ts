@@ -20,15 +20,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('console autocomplete feature', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
-      await PageObjects.console.setAutocompleteTrace(true);
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
       // Ensure that the text area can be interacted with
       await PageObjects.console.closeHelpIfExists();
       await PageObjects.console.clearTextArea();
+      log.debug('setAutocompleteTrace true');
+      await PageObjects.console.setAutocompleteTrace(true);
     });
 
     after(async () => {
+      log.debug('setAutocompleteTrace false');
       await PageObjects.console.setAutocompleteTrace(false);
     });
 
@@ -44,13 +46,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('anti-regression watchdogs', () => {
       beforeEach(async () => {
-        await PageObjects.console.setAutocompleteTrace(true);
         await PageObjects.console.clearTextArea();
         await PageObjects.console.pressEnter();
-      });
-
-      afterEach(async () => {
-        await PageObjects.console.setAutocompleteTrace(false);
       });
 
       it('should suppress auto-complete on arrow keys', async () => {
@@ -138,7 +135,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('with a missing comma in query', () => {
       const LINE_NUMBER = 4;
       beforeEach(async () => {
-        await PageObjects.console.setAutocompleteTrace(true);
         await PageObjects.console.clearTextArea();
         await PageObjects.console.enterRequest();
         await PageObjects.console.pressEnter();
@@ -205,14 +201,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ];
 
       beforeEach(async () => {
-        await PageObjects.console.setAutocompleteTrace(true);
         await PageObjects.console.clearTextArea();
         await PageObjects.console.enterRequest('\n POST _snapshot/test_repo');
         await PageObjects.console.pressEnter();
-      });
-
-      afterEach(async () => {
-        await PageObjects.console.setAutocompleteTrace(false);
       });
 
       await asyncForEach(CONDITIONAL_TEMPLATES, async ({ type, template }) => {
