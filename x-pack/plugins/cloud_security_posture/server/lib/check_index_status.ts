@@ -16,20 +16,19 @@ export const checkIndexStatus = async (
   postureType?: PostureTypes,
   retentionTime?: number
 ): Promise<IndexStatus> => {
-
   const query =
     !postureType || postureType === 'all' || postureType === 'vuln_mgmt'
       ? {
-        bool:{
-          must: {
-            range: {
-              '@timestamp': {
-                gte: `now-${retentionTime}h/h`,
-                lte: 'now/h',
+          bool: {
+            must: {
+              range: {
+                '@timestamp': {
+                  gte: `now-${retentionTime}h/h`,
+                  lte: 'now/h',
+                },
               },
             },
           },
-        },
         }
       : {
           bool: {
