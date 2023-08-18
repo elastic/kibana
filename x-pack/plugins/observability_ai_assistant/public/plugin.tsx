@@ -17,7 +17,6 @@ import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { registerFunctions } from './functions';
 import { createService } from './service/create_service';
 import type {
   ConfigSchema,
@@ -101,8 +100,10 @@ export class ObservabilityAIAssistantPlugin
       enabled: coreStart.application.capabilities.observabilityAIAssistant.show === true,
     }));
 
-    service.register(({ signal, registerContext, registerFunction }) => {
-      return registerFunctions({
+    service.register(async ({ signal, registerContext, registerFunction }) => {
+      const mod = await import('./functions');
+
+      return mod.registerFunctions({
         service,
         signal,
         pluginsStart,

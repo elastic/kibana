@@ -149,4 +149,67 @@ describe('schedule_notification_actions', () => {
       })
     );
   });
+
+  describe('formatAlertsForNotificationActions', () => {
+    it('should properly format alerts with the field represented as an object followed by similar dotted field', () => {
+      const signals = [
+        {
+          'kibana.alert.uuid': '1',
+          user: {
+            risk: {
+              calculated_level: 'Unknown',
+              calculated_score_norm: 5,
+            },
+          },
+          'user.name': 'my-user',
+        },
+      ];
+      expect(formatAlertsForNotificationActions(signals)).toEqual([
+        {
+          kibana: {
+            alert: {
+              uuid: '1',
+            },
+          },
+          user: {
+            risk: {
+              calculated_level: 'Unknown',
+              calculated_score_norm: 5,
+            },
+            name: 'my-user',
+          },
+        },
+      ]);
+    });
+    it('should properly format alerts with the dotted field followed by similar field represented as an object', () => {
+      const signals = [
+        {
+          'kibana.alert.uuid': '1',
+          'user.name': 'my-user',
+          user: {
+            risk: {
+              calculated_level: 'Unknown',
+              calculated_score_norm: 5,
+            },
+          },
+        },
+      ];
+      expect(formatAlertsForNotificationActions(signals)).toEqual([
+        {
+          kibana: {
+            alert: {
+              uuid: '1',
+            },
+          },
+          user: {
+            risk: {
+              calculated_level: 'Unknown',
+              calculated_score_norm: 5,
+            },
+            name: 'my-user',
+          },
+        },
+      ]);
+    });
+  });
 });
