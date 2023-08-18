@@ -21,8 +21,8 @@ import {
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { Properties } from 'csstype';
-import { filterSuggestions } from '../lib/filter_suggestions_for_autocomplete';
 import { AddMessageVariables } from '@kbn/alerts-ui-shared';
+import { filterSuggestions } from '../lib/filter_suggestions_for_autocomplete';
 import { templateActionVariable } from '../lib';
 
 export interface TextAreaWithAutocompleteProps {
