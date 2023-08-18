@@ -265,7 +265,7 @@ describe('ALL - Packs', () => {
 
         cy.contains('Partial deployment (shards)').click();
         cy.getBySel('packShardsForm-0').within(() => {
-          cy.getBySel('shards-field-policy').type(`${DEFAULT_POLICY}{downArrow}{enter}`);
+          cy.getBySel('shards-field-policy').type(`${DEFAULT_POLICY}{downArrow}{downArrow}{enter}`);
           cy.get('#shardsPercentage0').type('{backspace}{backspace}5');
         });
         cy.getBySel('packShardsForm-1').within(() => {
