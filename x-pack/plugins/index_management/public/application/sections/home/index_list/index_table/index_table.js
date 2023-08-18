@@ -435,49 +435,43 @@ export class IndexTable extends Component {
     const hasContent = !indicesLoading && !indicesError;
 
     if (!hasContent) {
-      const renderNoContent = () => {
-        if (indicesLoading) {
-          return (
-            <PageLoading>
-              <FormattedMessage
-                id="xpack.idxMgmt.indexTable.loadingIndicesDescription"
-                defaultMessage="Loading indices…"
-              />
-            </PageLoading>
-          );
-        }
+      if (indicesLoading) {
+        return (
+          <PageLoading>
+            <FormattedMessage
+              id="xpack.idxMgmt.indexTable.loadingIndicesDescription"
+              defaultMessage="Loading indices…"
+            />
+          </PageLoading>
+        );
+      }
 
-        if (indicesError) {
-          if (indicesError.status === 403) {
-            return (
-              <PageError
-                title={
-                  <FormattedMessage
-                    id="xpack.idxMgmt.pageErrorForbidden.title"
-                    defaultMessage="You do not have permissions to use Index Management"
-                  />
-                }
-              />
-            );
-          }
-
+      if (indicesError) {
+        if (indicesError.status === 403) {
           return (
             <PageError
               title={
                 <FormattedMessage
-                  id="xpack.idxMgmt.indexTable.serverErrorTitle"
-                  defaultMessage="Error loading indices"
+                  id="xpack.idxMgmt.pageErrorForbidden.title"
+                  defaultMessage="You do not have permissions to use Index Management"
                 />
               }
-              error={indicesError.body}
             />
           );
         }
-      };
 
-      return (
-        {renderNoContent()}
-      );
+        return (
+          <PageError
+            title={
+              <FormattedMessage
+                id="xpack.idxMgmt.indexTable.serverErrorTitle"
+                defaultMessage="Error loading indices"
+              />
+            }
+            error={indicesError.body}
+          />
+        );
+      }
     }
 
     const { selectedIndicesMap } = this.state;
