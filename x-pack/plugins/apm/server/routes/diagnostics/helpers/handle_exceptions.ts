@@ -6,10 +6,7 @@
  */
 import { errors } from '@elastic/elasticsearch';
 
-export async function handle403Exception<T>(
-  promise: Promise<T>,
-  defaultValue: unknown
-) {
+export async function handleExceptions<T>(promise: Promise<T>) {
   try {
     return await promise;
   } catch (error) {
@@ -18,13 +15,13 @@ export async function handle403Exception<T>(
       error.meta.statusCode === 403
     ) {
       console.error(`Suppressed insufficient access error: ${error.message}}`);
-      return defaultValue as T;
+      return;
     }
 
     console.error(
       `Unhandled error: ${error.message} ${JSON.stringify(error)}}`
     );
 
-    throw error;
+    return;
   }
 }
