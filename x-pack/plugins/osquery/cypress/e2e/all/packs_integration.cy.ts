@@ -284,7 +284,7 @@ describe('ALL - Packs', () => {
           },
         }).then((response) => {
           const shardPolicy = response.body.items.find(
-            (policy: PackagePolicy) => policy.name === `Policy for ${OSQUERY_POLICY}`
+            (policy: PackagePolicy) => policy.name === `Policy for ${DEFAULT_POLICY}`
           );
 
           expect(shardPolicy?.inputs[0].config?.osquery.value.packs[shardPack]).to.deep.equal({
