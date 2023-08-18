@@ -1067,7 +1067,13 @@ export default function ({
     pos: Position
   ) {
     let currentToken = editor.getTokenAt(pos)!;
-    tracer('has started evaluating current token:', currentToken);
+    tracer(
+      'has started evaluating current token: {type:',
+      currentToken?.type,
+      ', value:',
+      currentToken?.value,
+      '}'
+    );
 
     if (!currentToken) {
       if (pos.lineNumber === 1) {
@@ -1134,10 +1140,23 @@ export default function ({
       lastEvaluatedToken.value === currentToken.value
     ) {
       tracer(
-        'not starting autocomplete because the change can be considered a click, last evaluated token:',
-        lastEvaluatedToken,
-        'current token:',
-        currentToken
+        'not starting autocomplete because the change can be considered a click, last evaluated token: {type:',
+        lastEvaluatedToken.type,
+        ', value:',
+        lastEvaluatedToken.value,
+        ', position:{lineNumber:',
+        lastEvaluatedToken.position.lineNumber,
+        ', column:',
+        lastEvaluatedToken.position.column,
+        '}} current token:{type:',
+        currentToken.type,
+        ', value:',
+        currentToken.value,
+        ', position:{lineNumber:',
+        currentToken.position.lineNumber,
+        ', column:',
+        currentToken.position.column,
+        '}}'
       );
       // not on the same place or nothing changed, cache and wait for the next time
       lastEvaluatedToken = currentToken;
@@ -1159,10 +1178,23 @@ export default function ({
     }
 
     tracer(
-      'starting autocomplete, last evaluated token:',
-      lastEvaluatedToken,
-      'current token:',
-      currentToken
+      'starting autocomplete, last evaluated token: {type:',
+      lastEvaluatedToken.type,
+      ', value:',
+      lastEvaluatedToken.value,
+      ', position:{lineNumber:',
+      lastEvaluatedToken.position.lineNumber,
+      ', column:',
+      lastEvaluatedToken.position.column,
+      '}} current token:{type:',
+      currentToken.type,
+      ', value:',
+      currentToken.value,
+      ', position:{lineNumber:',
+      currentToken.position.lineNumber,
+      ', column:',
+      currentToken.position.column,
+      '}}'
     );
     lastEvaluatedToken = currentToken;
     editor.execCommand('startAutocomplete');
@@ -1171,7 +1203,13 @@ export default function ({
 
   function editorChangeListener() {
     const position = editor.getCurrentPosition();
-    tracer('editor changed, position:', position);
+    tracer(
+      'editor changed, position: {lineNumber:',
+      position.lineNumber,
+      ', column:',
+      position.column,
+      '}'
+    );
     if (position && !editor.isCompleterActive()) {
       tracer('will start evaluating current token');
       evaluateCurrentTokenAfterAChange(position);
