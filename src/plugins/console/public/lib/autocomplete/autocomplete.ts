@@ -42,6 +42,13 @@ function isUrlParamsToken(token: { type: string } | null) {
   }
 }
 
+const tracer = (...args) => {
+  if (window.autocomplete_trace) {
+    // eslint-disable-next-line no-console
+    console.log.call(console, ...args);
+  }
+};
+
 /**
  * Get the method and token paths for a specific position in the current editor buffer.
  *
@@ -1056,10 +1063,12 @@ export default function ({
     pos: Position
   ) {
     let currentToken = editor.getTokenAt(pos)!;
+    tracer('has started evaluating current token=%o', currentToken);
 
     if (!currentToken) {
       if (pos.lineNumber === 1) {
         lastEvaluatedToken = null;
+        tracer('not activating autocomplete due to invalid current token at line 1');
         return;
       }
       currentToken = { position: { column: 0, lineNumber: 0 }, value: '', type: '' }; // empty row
@@ -1077,11 +1086,13 @@ export default function ({
         nextToken.position.lineNumber = pos.lineNumber;
         lastEvaluatedToken = nextToken;
       }
+      tracer('not activating autocomplete due to empty current token');
       return;
     }
 
     if (!lastEvaluatedToken) {
       lastEvaluatedToken = currentToken;
+      tracer('not activating autocomplete due to invalid last evaluated token');
       return; // wait for the next typing.
     }
 
@@ -1120,6 +1131,11 @@ export default function ({
     ) {
       // not on the same place or nothing changed, cache and wait for the next time
       lastEvaluatedToken = currentToken;
+      tracer(
+        'not activating autocomplete because the change indicates not key types but a click around the editor, last evaluated token=%o current token=%o',
+        lastEvaluatedToken,
+        currentToken
+      );
       return;
     }
 
@@ -1133,9 +1149,15 @@ export default function ({
       case 'comment.punctuation':
       case 'comment.block':
       case 'UNKNOWN':
+        tracer('not activating autocomplete for current token type=%o', currentToken.type);
         return;
     }
 
+    tracer(
+      'activating autocomplete, last evaluated token=%o current token=%o',
+      lastEvaluatedToken,
+      currentToken
+    );
     lastEvaluatedToken = currentToken;
     editor.execCommand('startAutocomplete');
   },
@@ -1143,7 +1165,9 @@ export default function ({
 
   function editorChangeListener() {
     const position = editor.getCurrentPosition();
+    tracer('editor changed, position=%o', position);
     if (position && !editor.isCompleterActive()) {
+      tracer('will start evaluating current token');
       evaluateCurrentTokenAfterAChange(position);
     }
   }

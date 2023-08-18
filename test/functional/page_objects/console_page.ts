@@ -16,6 +16,7 @@ export class ConsolePageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly browser = this.ctx.getService('browser');
 
   public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
     const lines = await editor.findAllByClassName('ace_line_group');
@@ -143,7 +144,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async isAutocompleteVisible() {
-    const element = await this.find.byCssSelector('.ace_autocomplete');
+    const element = await this.find.byCssSelector('.ace_autocomplete').catch(() => null);
     if (!element) return false;
 
     const attribute = await element.getAttribute('style');
@@ -587,7 +588,13 @@ export class ConsolePageObject extends FtrService {
     await closeButton.click();
   }
 
-  public async sleepForDebouncePeriod(duration: number = 100 * 2) {
+  public async sleepForDebouncePeriod(duration: number = 100) {
     await this.common.sleep(duration);
+  }
+
+  async setAutocompleteTrace(flag: boolean) {
+    await this.browser.execute((f: boolean) => {
+      (window as any).autocomplete_trace = f;
+    }, flag);
   }
 }
