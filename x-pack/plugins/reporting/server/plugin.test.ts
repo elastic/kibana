@@ -24,8 +24,6 @@ import {
 } from './test_helpers';
 import type { ReportingSetupDeps } from './types';
 
-jest.mock('./lib/export_types_registry');
-
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
 describe('Reporting Plugin', () => {
@@ -37,10 +35,6 @@ describe('Reporting Plugin', () => {
   let pluginStart: ReportingInternalStart;
   let logger: jest.Mocked<Logger>;
   let plugin: ReportingPlugin;
-
-  beforeAll(() => {
-    ExportTypesRegistry.prototype.getAll = jest.fn(() => []);
-  });
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -98,10 +92,15 @@ describe('Reporting Plugin', () => {
   });
 
   describe('config and export types registration', () => {
+    jest.mock('./lib/export_types_registry');
+    ExportTypesRegistry.prototype.getAll = jest.fn(() => []); // code breaks if getAll returns undefined
     let registerSpy: jest.SpyInstance;
 
     beforeEach(async () => {
       registerSpy = jest.spyOn(ExportTypesRegistry.prototype, 'register');
+      pluginSetup = createMockPluginSetup({}) as unknown as ReportingSetupDeps;
+      pluginStart = await createMockPluginStart(coreStart, configSchema);
+      plugin = new ReportingPlugin(initContext);
     });
 
     it('expect all report types to be in registry', async () => {
@@ -130,7 +129,6 @@ describe('Reporting Plugin', () => {
       coreStart = coreMock.createStart();
       pluginSetup = createMockPluginSetup({}) as unknown as ReportingSetupDeps;
       pluginStart = await createMockPluginStart(coreStart, configSchema);
-
       plugin = new ReportingPlugin(initContext);
 
       // check the spy function was called with CSV
