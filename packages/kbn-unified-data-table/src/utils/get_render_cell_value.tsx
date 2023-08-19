@@ -42,7 +42,10 @@ export const getRenderCellValueFn =
     closePopover: () => void,
     fieldFormats: FieldFormatsStart,
     maxEntries: number,
-    externalCustomRenderers?: Record<string, (props: EuiDataGridCellValueElementProps) => React.ReactNode>
+    externalCustomRenderers?: Record<
+      string,
+      (props: EuiDataGridCellValueElementProps) => React.ReactNode
+    >
   ) =>
   ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
     const row = rows ? rows[rowIndex] : undefined;
@@ -52,10 +55,13 @@ export const getRenderCellValueFn =
 
     if (externalCustomRenderers && externalCustomRenderers[columnId]) {
       return externalCustomRenderers[columnId]({
-        rowIndex, columnId, isDetails, setCellProps,
+        rowIndex,
+        columnId,
+        isDetails,
+        setCellProps,
         isExpandable: false,
         isExpanded: false,
-        colIndex: 0
+        colIndex: 0,
       });
     }
 

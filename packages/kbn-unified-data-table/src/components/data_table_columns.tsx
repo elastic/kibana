@@ -155,7 +155,7 @@ function buildEuiGridColumn({
       ],
     },
     cellActions,
-    visibleCellActions, 
+    visibleCellActions,
   };
 
   if (column.id === dataView.timeFieldName) {
