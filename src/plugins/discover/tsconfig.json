@@ -69,7 +69,8 @@
     "@kbn/content-management-plugin",
     "@kbn/serverless",
     "@kbn/react-kibana-mount",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/unified-data-table"
   ],
   "exclude": [
     "target/**/*"
