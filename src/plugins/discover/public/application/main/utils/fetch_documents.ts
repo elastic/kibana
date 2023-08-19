@@ -36,20 +36,25 @@ export const fetchDocuments = (
     searchSource.setOverwriteDataViewType(undefined);
   }
   const dataView = searchSource.getField('index')!;
+  const isFetchingMore = Boolean(searchSource.getField('searchAfter'));
 
   const executionContext = {
-    description: 'fetch documents',
+    description: isFetchingMore ? 'fetch more documents' : 'fetch documents',
   };
 
   const fetch$ = searchSource
     .fetch$({
       abortSignal: abortController.signal,
-      sessionId: searchSessionId,
+      sessionId: isFetchingMore ? undefined : searchSessionId,
       inspector: {
         adapter: inspectorAdapters.requests,
-        title: i18n.translate('discover.inspectorRequestDataTitleDocuments', {
-          defaultMessage: 'Documents',
-        }),
+        title: isFetchingMore // TODO: show it as a separate request in Inspect flyout
+          ? i18n.translate('discover.inspectorRequestDataTitleMoreDocuments', {
+              defaultMessage: 'More documents',
+            })
+          : i18n.translate('discover.inspectorRequestDataTitleDocuments', {
+              defaultMessage: 'Documents',
+            }),
         description: i18n.translate('discover.inspectorRequestDescriptionDocument', {
           defaultMessage: 'This request queries Elasticsearch to fetch the documents.',
         }),

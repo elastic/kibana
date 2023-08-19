@@ -9,12 +9,12 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { UserEntityOverview } from './user_entity_overview';
 import { useRiskScore } from '../../../explore/containers/risk_score';
-
+import { useFirstLastSeen } from '../../../common/containers/use_first_last_seen';
 import {
-  ENTITIES_USER_OVERVIEW_IP_TEST_ID,
+  ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID,
+  ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID,
   ENTITIES_USER_OVERVIEW_LINK_TEST_ID,
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
-  TECHNICAL_PREVIEW_ICON_TEST_ID,
 } from './test_ids';
 import { useObservedUserDetails } from '../../../explore/users/containers/users/observed_details';
 import { mockContextValue } from '../mocks/mock_right_panel_context';
@@ -25,11 +25,13 @@ import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 
 const userName = 'user';
-const ip = '10.200.000.000';
+const domain = 'n54bg2lfc7';
+const lastSeen = '2022-04-08T18:35:45.064Z';
+const lastSeenText = 'Apr 8, 2022 @ 18:35:45.064';
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.;000Z';
 const selectedPatterns = 'alerts';
-const userData = { host: { ip: [ip] } };
+const userData = { user: { domain: [domain] } };
 const riskLevel = [{ user: { risk: { calculated_level: 'Medium' } } }];
 
 const panelContextValue = {
@@ -61,9 +63,12 @@ jest.mock('../../../explore/users/containers/users/observed_details');
 const mockUseRiskScore = useRiskScore as jest.Mock;
 jest.mock('../../../explore/containers/risk_score');
 
+const mockUseFirstLastSeen = useFirstLastSeen as jest.Mock;
+jest.mock('../../../common/containers/use_first_last_seen');
+
 describe('<UserEntityOverview />', () => {
   describe('license is valid', () => {
-    it('should render ip addresses and user risk classification', () => {
+    it('should render user domain and user risk classification', () => {
       mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
 
@@ -75,8 +80,7 @@ describe('<UserEntityOverview />', () => {
         </TestProviders>
       );
 
-      expect(getByTestId(ENTITIES_USER_OVERVIEW_IP_TEST_ID)).toHaveTextContent(ip);
-      expect(getByTestId(TECHNICAL_PREVIEW_ICON_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID)).toHaveTextContent(domain);
       expect(getByTestId(ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID)).toHaveTextContent('Medium');
     });
 
@@ -91,16 +95,17 @@ describe('<UserEntityOverview />', () => {
           </RightPanelContext.Provider>
         </TestProviders>
       );
-      expect(getByTestId(ENTITIES_USER_OVERVIEW_IP_TEST_ID)).toHaveTextContent('—');
-      expect(getByTestId(TECHNICAL_PREVIEW_ICON_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID)).toHaveTextContent('—');
       expect(getByTestId(ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID)).toHaveTextContent('Unknown');
     });
   });
 
   describe('license is not valid', () => {
-    it('should render ip but not user risk classification', () => {
+    it('should render domain and last seen', () => {
       mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: false });
+      mockUseFirstLastSeen.mockReturnValue([false, { lastSeen }]);
+
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
           <RightPanelContext.Provider value={panelContextValue}>
@@ -109,14 +114,17 @@ describe('<UserEntityOverview />', () => {
         </TestProviders>
       );
 
-      expect(getByTestId(ENTITIES_USER_OVERVIEW_IP_TEST_ID)).toHaveTextContent(ip);
+      expect(getByTestId(ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID)).toHaveTextContent(domain);
+      expect(getByTestId(ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID)).toHaveTextContent(lastSeenText);
       expect(queryByTestId(ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID)).not.toBeInTheDocument();
     });
 
     it('should render correctly if returned data is null', () => {
       mockUseUserDetails.mockReturnValue([false, { userDetails: null }]);
       mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: false });
-      const { getByTestId, queryByTestId } = render(
+      mockUseFirstLastSeen.mockReturnValue([false, { lastSeen: null }]);
+
+      const { getByTestId } = render(
         <TestProviders>
           <RightPanelContext.Provider value={panelContextValue}>
             <UserEntityOverview userName={userName} />
@@ -124,8 +132,8 @@ describe('<UserEntityOverview />', () => {
         </TestProviders>
       );
 
-      expect(getByTestId(ENTITIES_USER_OVERVIEW_IP_TEST_ID)).toHaveTextContent('—');
-      expect(queryByTestId(TECHNICAL_PREVIEW_ICON_TEST_ID)).not.toBeInTheDocument();
+      expect(getByTestId(ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID)).toHaveTextContent('—');
+      expect(getByTestId(ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID)).toHaveTextContent('—');
     });
 
     it('should navigate to left panel entities tab when clicking on title', () => {
