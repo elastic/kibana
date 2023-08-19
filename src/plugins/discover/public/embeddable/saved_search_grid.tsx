@@ -5,11 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState, memo } from 'react';
+import React, { memo, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
-import { UnifiedDataTable } from '@kbn/unified-data-table';
+import {
+  DataLoadingState as DiscoverGridLoadingState,
+  UnifiedDataTable,
+} from '@kbn/unified-data-table';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import './saved_search_grid.scss';
 import { SavedSearch } from '@kbn/saved-search-plugin/common';
@@ -17,7 +20,7 @@ import { DiscoverGridFlyout } from '../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 
 export interface DiscoverGridEmbeddableProps extends UnifiedDataTableProps {
-  totalHitCount: number;
+  totalHitCount?: number;
   query?: AggregateQuery | Query;
   interceptedWarnings?: SearchResponseInterceptedWarning[];
   onAddColumn: (column: string) => void;
@@ -34,12 +37,13 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   return (
     <SavedSearchEmbeddableBase
       totalHitCount={props.totalHitCount}
-      isLoading={props.isLoading}
+      isLoading={props.loadingState === DiscoverGridLoadingState.loading}
       dataTestSubj="embeddedSavedSearchDocTable"
       interceptedWarnings={props.interceptedWarnings}
     >
       <DataGridMemoized
         {...gridProps}
+        totalHits={props.totalHitCount}
         setExpandedDoc={setExpandedDoc}
         expandedDoc={expandedDoc}
         getDocumentView={(displayedRows: DataTableRecord[], displayedColumns: string[]) => {

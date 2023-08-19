@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { UnifiedDataTable } from './src/components/data_table';
+export { UnifiedDataTable, DataLoadingState } from './src/components/data_table';
 export type { UnifiedDataTableProps } from './src/components/data_table';
 export { getDisplayedColumns } from './src/utils/columns';
 

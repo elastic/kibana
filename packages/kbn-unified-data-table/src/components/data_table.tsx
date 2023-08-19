@@ -42,6 +42,7 @@ import { getShouldShowFieldHandler, DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/di
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UnifiedDataTableSettings, ValueToStringConverter } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -57,6 +58,13 @@ import {
   GRID_STYLE,
   toolbarVisibility as toolbarVisibilityDefaults,
 } from '../constants';
+import { DiscoverGridFooter } from './data_table_footer';
+
+export enum DataLoadingState {
+  loading = 'loading',
+  loadingMore = 'loadingMore',
+  loaded = 'loaded',
+}
 
 const themeDefault = { darkMode: false };
 
@@ -89,7 +97,7 @@ export interface UnifiedDataTableProps {
   /**
    * Determines if data is currently loaded
    */
-  isLoading: boolean;
+  loadingState: DataLoadingState;
   /**
    * Function to add a filter in the grid cell or document flyout
    */
@@ -113,7 +121,7 @@ export interface UnifiedDataTableProps {
   /**
    * The max size of the documents returned by Elasticsearch
    */
-  sampleSize?: number;
+  sampleSize: number;
   /**
    * Function to set the expanded document, which is displayed in a flyout
    */
@@ -197,6 +205,7 @@ export interface UnifiedDataTableProps {
     dataViewFieldEditor: DataViewFieldEditorStart;
     toastNotifications: ToastsStart;
     storage: Storage;
+    data: DataPublicPluginStart;
   };
   getDocumentView?: (
     displayedRows: DataTableRecord[],
@@ -206,6 +215,14 @@ export interface UnifiedDataTableProps {
   showMultiFields?: boolean;
   maxDocFieldsDisplayed?: number;
   externalControlColumns?: EuiDataGridControlColumn[];
+  /**
+   * Number total hits from ES
+   */
+  totalHits?: number;
+  /**
+   * To fetch more
+   */
+  onFetchMoreRecords?: () => void;
   externalAdditionalControls?: React.ReactNode;
   rowsPerPageOptions?: number[];
   /**
@@ -227,6 +244,7 @@ export interface UnifiedDataTableProps {
     (props: EuiDataGridCellValueElementProps) => React.ReactNode
   >;
 }
+
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
 const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
@@ -236,7 +254,7 @@ export const UnifiedDataTable = ({
   columnsIds,
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
   dataView,
-  isLoading,
+  loadingState,
   onFilter,
   onResize,
   onSetColumns,
@@ -263,6 +281,8 @@ export const UnifiedDataTable = ({
   services,
   renderCustomGridBody,
   trailingControlColumns,
+  totalHits,
+  onFetchMoreRecords,
   getDocumentView,
   setExpandedDoc,
   expandedDoc,
@@ -275,7 +295,8 @@ export const UnifiedDataTable = ({
   visibleCellActions,
   externalCustomRenderers,
 }: UnifiedDataTableProps) => {
-  const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage } = services;
+  const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
+    services;
   const { darkMode } = useObservable(services.theme?.theme$ ?? of(themeDefault), themeDefault);
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
@@ -397,8 +418,6 @@ export const UnifiedDataTable = ({
     onUpdateRowsPerPage,
   ]);
 
-  const isOnLastPage = paginationObj ? paginationObj.pageIndex === pageCount - 1 : false;
-
   useEffect(() => {
     setPagination((paginationData) =>
       paginationData.pageSize === currentPageSize
@@ -460,7 +479,6 @@ export const UnifiedDataTable = ({
   /**
    * Render variables
    */
-  const showDisclaimer = sampleSize && rowCount === sampleSize && isOnLastPage;
   const randomId = useMemo(() => htmlIdGenerator()(), []);
   const closeFieldEditor = useRef<() => void | undefined>();
 
@@ -657,7 +675,9 @@ export const UnifiedDataTable = ({
     configRowHeight,
   });
 
-  if (!rowCount && isLoading) {
+  const isRenderComplete = loadingState !== DataLoadingState.loading;
+
+  if (!rowCount && loadingState === DataLoadingState.loading) {
     return (
       <div className="euiDataGrid__loading">
         <EuiText size="xs" color="subdued">
@@ -673,7 +693,7 @@ export const UnifiedDataTable = ({
     return (
       <div
         className="euiDataGrid__noResults"
-        data-render-complete={!isLoading}
+        data-render-complete={isRenderComplete}
         data-shared-item=""
         data-title={searchTitle}
         data-description={searchDescription}
@@ -696,7 +716,7 @@ export const UnifiedDataTable = ({
       <span className="udtDataTable__inner">
         <div
           data-test-subj="discoverDocTable"
-          data-render-complete={!isLoading}
+          data-render-complete={isRenderComplete}
           data-shared-item=""
           data-title={searchTitle}
           data-description={searchDescription}
@@ -729,17 +749,20 @@ export const UnifiedDataTable = ({
             trailingControlColumns={trailingControlColumns}
           />
         </div>
-        {showDisclaimer && (
-          <p className="udtDataTable__footer" data-test-subj="unifiedDataTableFooter">
-            <FormattedMessage
-              id="unifiedDataTable.gridSampleSize.limitDescription"
-              defaultMessage="Search results are limited to {sampleSize} documents. Add more search terms to narrow your search."
-              values={{
-                sampleSize,
-              }}
+        {loadingState !== DataLoadingState.loading &&
+          isPaginationEnabled && ( // we hide the footer for Surrounding Documents page
+            <DiscoverGridFooter
+              isLoadingMore={loadingState === DataLoadingState.loadingMore}
+              rowCount={rowCount}
+              sampleSize={sampleSize}
+              pageCount={pageCount}
+              pageIndex={paginationObj?.pageIndex}
+              totalHits={totalHits}
+              onFetchMoreRecords={onFetchMoreRecords}
+              data={data}
+              fieldFormats={fieldFormats}
             />
-          </p>
-        )}
+          )}
         {searchTitle && (
           <EuiScreenReaderOnly>
             <p id={String(randomId)}>

@@ -38,7 +38,7 @@ function getProps() {
     ariaLabelledBy: '',
     columnsIds: [],
     dataView: dataViewMock,
-    isLoading: false,
+    loadingState: DataLoadingState.loaded,
     expandedDoc: undefined,
     onAddColumn: jest.fn(),
     onFilter: jest.fn(),

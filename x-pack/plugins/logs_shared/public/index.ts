@@ -53,7 +53,7 @@ export const LogColumnHeader = dynamic(
   () => import('./components/logging/log_text_stream/column_headers')
 );
 export const LogColumnHeadersWrapper = dynamic(
-  () => import('./components/logging/log_text_stream/column_headers')
+  () => import('./components/logging/log_text_stream/column_headers_wrapper')
 );
 export const LogEntryColumn = dynamic(
   () => import('./components/logging/log_text_stream/log_entry_column')
@@ -68,7 +68,7 @@ export const LogEntryMessageColumn = dynamic(
   () => import('./components/logging/log_text_stream/log_entry_message_column')
 );
 export const LogEntryRowWrapper = dynamic(
-  () => import('./components/logging/log_text_stream/log_entry_row')
+  () => import('./components/logging/log_text_stream/log_entry_row_wrapper')
 );
 export const LogEntryTimestampColumn = dynamic(
   () => import('./components/logging/log_text_stream/log_entry_timestamp_column')

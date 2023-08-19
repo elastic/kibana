@@ -21,13 +21,13 @@ import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SearchResponseWarnings } from '@kbn/search-response-warnings';
-import { UnifiedDataTable, useColumns } from '@kbn/unified-data-table';
+import { DataLoadingState, UnifiedDataTable, useColumns } from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
+  HIDE_ANNOUNCEMENTS,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
-  HIDE_ANNOUNCEMENTS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
@@ -49,6 +49,7 @@ import {
 } from '../../../../components/discover_grid_flyout';
 import { DocViewer } from '../../../../services/doc_views/components/doc_viewer';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
+import { useFetchMoreRecords } from './use_fetch_more_records';
 
 const containerStyles = css`
   position: relative;
@@ -155,6 +156,11 @@ function DiscoverDocumentsComponent({
   const isEmptyDataResult =
     isTextBasedQuery || !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
+
+  const { isMoreDataLoading, totalHits, onFetchMoreRecords } = useFetchMoreRecords({
+    isTextBasedQuery,
+    stateContainer,
+  });
 
   const {
     columns: currentColumns,
@@ -278,7 +284,13 @@ function DiscoverDocumentsComponent({
                 columnsIds={currentColumns}
                 expandedDoc={expandedDoc}
                 dataView={dataView}
-                isLoading={isDataLoading}
+                loadingState={
+                  isDataLoading
+                    ? DataLoadingState.loading
+                    : isMoreDataLoading
+                    ? DataLoadingState.loadingMore
+                    : DataLoadingState.loaded
+                }
                 rows={rows}
                 sort={(sort as SortOrder[]) || []}
                 sampleSize={sampleSize}
@@ -317,6 +329,8 @@ function DiscoverDocumentsComponent({
                   );
                 }}
                 services={services}
+                totalHits={totalHits}
+                onFetchMoreRecords={onFetchMoreRecords}
               />
             </CellActionsProvider>
           </div>

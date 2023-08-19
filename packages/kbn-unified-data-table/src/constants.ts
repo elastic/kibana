@@ -8,6 +8,8 @@
 import { EuiDataGridStyle } from '@elastic/eui';
 
 export const DEFAULT_ROWS_PER_PAGE = 100;
+export const MAX_LOADED_GRID_ROWS = 10000;
+
 export const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, DEFAULT_ROWS_PER_PAGE, 250, 500];
 
 export const defaultMonacoEditorWidth = 370;
