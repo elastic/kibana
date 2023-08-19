@@ -47,23 +47,34 @@ export const getRenderCellValueFn =
       (props: EuiDataGridCellValueElementProps) => React.ReactNode
     >
   ) =>
-  ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
+  ({
+    rowIndex,
+    columnId,
+    isDetails,
+    setCellProps,
+    colIndex,
+    isExpandable,
+    isExpanded,
+  }: EuiDataGridCellValueElementProps) => {
+    if (!!externalCustomRenderers && !!externalCustomRenderers[columnId]) {
+      return (
+        <>
+          {externalCustomRenderers[columnId]({
+            rowIndex,
+            columnId,
+            isDetails,
+            setCellProps,
+            isExpandable,
+            isExpanded,
+            colIndex,
+          })}
+        </>
+      );
+    }
     const row = rows ? rows[rowIndex] : undefined;
 
     const field = dataView.fields.getByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);
-
-    if (externalCustomRenderers && externalCustomRenderers[columnId]) {
-      return externalCustomRenderers[columnId]({
-        rowIndex,
-        columnId,
-        isDetails,
-        setCellProps,
-        isExpandable: false,
-        isExpanded: false,
-        colIndex: 0,
-      });
-    }
 
     useEffect(() => {
       if (row?.isAnchor) {
@@ -156,7 +167,7 @@ export const getRenderCellValueFn =
 function getInnerColumns(fields: Record<string, unknown[]>, columnId: string) {
   return Object.fromEntries(
     Object.entries(fields).filter(([key]) => {
-      return key.indexOf(`${columnId}.`) === 0;
+      return key.startsWith(`${columnId}.`);
     })
   );
 }
@@ -269,7 +280,7 @@ function getTopLevelObjectPairs(
     const formatter = subField
       ? dataView.getFormatterForField(subField)
       : { convert: (v: unknown, ...rest: unknown[]) => String(v) };
-    const formatted = (values as unknown[])
+    const formatted = values
       .map((val: unknown) =>
         formatter.convert(val, 'html', {
           field: subField,

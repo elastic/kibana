@@ -77,15 +77,6 @@ const build = (hit: EsHitRecord) => buildDataTableRecord(hit, dataViewMock);
 
 describe('Unified data table cell rendering', function () {
   it('renders bytes column correctly', () => {
-    /*
-dataView: DataView,
-    rows: DataTableRecord[] | undefined,
-    useNewFieldsApi: boolean,
-    shouldShowFieldHandler: ShouldShowFieldInTableHandler,
-    closePopover: () => void,
-    fieldFormats: FieldFormatsStart,
-    maxEntries: number
-    */
     const DataTableCellValue = getRenderCellValueFn(
       dataViewMock,
       rowsSource.map(build),
