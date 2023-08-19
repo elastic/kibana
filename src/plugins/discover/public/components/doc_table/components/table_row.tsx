@@ -14,6 +14,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
 import type {
   DataTableRecord,
+  DocViewFilterFn,
   EsHitRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
@@ -22,7 +23,6 @@ import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '@kbn/dis
 import { DocViewRenderProps } from '../../../services/doc_views/doc_views_types';
 import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../utils/row_formatter';
-import { DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
 import { TableRowDetails } from './table_row_details';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 

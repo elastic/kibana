@@ -35,3 +35,18 @@ export interface DataTableRecord {
    */
   isAnchor?: boolean;
 }
+
+export interface FieldMapping {
+  filterable?: boolean;
+  scripted?: boolean;
+  rowCount?: number;
+  type: string;
+  name: string;
+  displayName?: string;
+}
+
+export type DocViewFilterFn = (
+  mapping: FieldMapping | string | undefined,
+  value: unknown,
+  mode: '+' | '-'
+) => void;

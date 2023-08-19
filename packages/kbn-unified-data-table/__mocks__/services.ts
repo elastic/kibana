@@ -8,7 +8,6 @@
 import { of } from 'rxjs';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import { chromeServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
@@ -96,7 +95,6 @@ export function createServicesMock() {
         updateTagsReferences: jest.fn(),
       },
     },
-    savedSearch: savedSearchPluginMock.createStartContract(),
     dataViews: jest.fn(),
     locator: {
       useUrl: jest.fn(() => ''),

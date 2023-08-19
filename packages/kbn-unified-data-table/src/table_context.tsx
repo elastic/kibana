@@ -8,8 +8,7 @@
 
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { DocViewFilterFn } from '@kbn/discover-plugin/public';
+import type { DataTableRecord, DocViewFilterFn } from '@kbn/discover-utils/types';
 import type { ValueToStringConverter } from './types';
 
 export interface DataTableContext {

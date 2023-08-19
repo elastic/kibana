@@ -12,11 +12,11 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Filter } from '@kbn/es-query';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord, DocViewFilterFn } from '@kbn/discover-utils/types';
 import { SHOW_MULTIFIELDS, getShouldShowFieldHandler } from '@kbn/discover-utils';
 import { TableHeader } from './components/table_header/table_header';
 import { TableRow } from './components/table_row';
-import { DocViewFilterFn, DocViewRenderProps } from '../../services/doc_views/doc_views_types';
+import { DocViewRenderProps } from '../../services/doc_views/doc_views_types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export interface DocTableProps {

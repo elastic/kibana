@@ -29,15 +29,13 @@ import {
   EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DocViewFilterFn } from '@kbn/discover-plugin/public';
-import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   useDataGridColumnsCellActions,
   type UseDataGridColumnsCellActionsProps,
 } from '@kbn/cell-actions';
 import type { ToastsStart, IUiSettingsClient, HttpStart } from '@kbn/core/public';
 import { Serializable } from '@kbn/utility-types';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord, DocViewFilterFn } from '@kbn/discover-utils/types';
 import { getShouldShowFieldHandler, DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -59,6 +57,8 @@ import {
   toolbarVisibility as toolbarVisibilityDefaults,
 } from '../constants';
 import { DiscoverGridFooter } from './data_table_footer';
+
+export type SortOrder = [string, string];
 
 export enum DataLoadingState {
   loading = 'loading',

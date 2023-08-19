@@ -8,22 +8,7 @@
 
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import type { DataTableRecord, IgnoredReason } from '@kbn/discover-utils/types';
-
-export interface FieldMapping {
-  filterable?: boolean;
-  scripted?: boolean;
-  rowCount?: number;
-  type: string;
-  name: string;
-  displayName?: string;
-}
-
-export type DocViewFilterFn = (
-  mapping: FieldMapping | string | undefined,
-  value: unknown,
-  mode: '+' | '-'
-) => void;
+import type { DataTableRecord, IgnoredReason, DocViewFilterFn } from '@kbn/discover-utils/types';
 
 export interface DocViewRenderProps {
   hit: DataTableRecord;

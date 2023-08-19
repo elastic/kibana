@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
-import type { DocViewFilterFn } from '@kbn/discover-plugin/public';
+import type { DocViewFilterFn } from '@kbn/discover-utils/types';
 import { ExpandButton } from './discover_grid_expand_button';
 import { UnifiedDataTableSettings } from '../types';
 import type { ValueToStringConverter } from '../types';
@@ -161,18 +161,15 @@ function buildEuiGridColumn({
   if (column.id === dataView.timeFieldName) {
     const timeFieldName = dataViewField?.customLabel ?? dataView.timeFieldName;
     const primaryTimeAriaLabel = i18n.translate(
-      'unifiedDataTable.docTable.tableHeader.timeFieldIconTooltipAriaLabel',
+      'unifiedDataTable.tableHeader.timeFieldIconTooltipAriaLabel',
       {
         defaultMessage: '{timeFieldName} - this field represents the time that events occurred.',
         values: { timeFieldName },
       }
     );
-    const primaryTimeTooltip = i18n.translate(
-      'unifiedDataTable.docTable.tableHeader.timeFieldIconTooltip',
-      {
-        defaultMessage: 'This field represents the time that events occurred.',
-      }
-    );
+    const primaryTimeTooltip = i18n.translate('unifiedDataTable.tableHeader.timeFieldIconTooltip', {
+      defaultMessage: 'This field represents the time that events occurred.',
+    });
 
     column.display = (
       <div aria-label={primaryTimeAriaLabel}>

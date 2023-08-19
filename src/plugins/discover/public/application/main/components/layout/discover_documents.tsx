@@ -19,7 +19,7 @@ import { css } from '@emotion/react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord, DocViewFilterFn } from '@kbn/discover-utils/types';
 import { SearchResponseWarnings } from '@kbn/search-response-warnings';
 import { DataLoadingState, UnifiedDataTable, useColumns } from '@kbn/unified-data-table';
 import {
@@ -33,7 +33,6 @@ import {
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { FetchStatus } from '../../../types';
 import { RecordRawType } from '../../services/discover_data_state_container';
 import { DiscoverStateContainer } from '../../services/discover_state';

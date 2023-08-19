@@ -11,4 +11,6 @@ export type {
   EsHitRecord,
   IgnoredReason,
   ShouldShowFieldInTableHandler,
+  DocViewFilterFn,
+  FieldMapping,
 } from './src/types';

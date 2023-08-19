@@ -8,11 +8,11 @@
 
 import React from 'react';
 import { DataViewField } from '@kbn/data-views-plugin/public';
+import type { DocViewFilterFn } from '@kbn/discover-utils/types';
 import { DocViewTableRowBtnFilterRemove } from './table_row_btn_filter_remove';
 import { DocViewTableRowBtnFilterExists } from './table_row_btn_filter_exists';
 import { DocViewTableRowBtnToggleColumn } from './table_row_btn_toggle_column';
 import { DocViewTableRowBtnFilterAdd } from './table_row_btn_filter_add';
-import { DocViewFilterFn } from '../../../doc_views_types';
 
 interface TableActionsProps {
   field: string;

@@ -13,7 +13,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord, DocViewFilterFn } from '@kbn/discover-utils/types';
 import {
   type SearchResponseInterceptedWarning,
   SearchResponseWarnings,
@@ -23,7 +23,6 @@ import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
 import { getDefaultRowsPerPage } from '../../../common/constants';
 import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
-import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { AppState } from './services/context_state';
 import { SurrDocType } from './services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
