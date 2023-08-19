@@ -29,26 +29,6 @@
   .euiDataGridHeaderCell:last-of-type {
     border-right: none;
   }
-
-  .udtTimeline [data-gridcell-column-id|='select'] {
-    border-right: none;
-  }
-  .udtTimeline [data-gridcell-column-id|='openDetails'] .euiDataGridRowCell__contentByHeight {
-    margin-top: 3px;
-  }
-
-  .udtTimeline [data-gridcell-column-id|='select'] .euiDataGridRowCell__contentByHeight {
-    margin-top: 5px;
-  }
-
-  .udtTimeline .euiDataGridRowCell--lastColumn.euiDataGridRowCell--controlColumn {
-    background-color: white;
-  }
-
-  .udtTimeline .siemEventsTable__trSupplement--summary {
-    background-color: #f7f8fc;
-    border-radius: 8px;
-  }
 }
 
 .udtDataTable__cellValue {

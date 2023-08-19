@@ -26,6 +26,7 @@ import {
   EuiDataGridInMemory,
   EuiDataGridControlColumn,
   EuiDataGridCustomBodyProps,
+  EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DocViewFilterFn } from '@kbn/discover-plugin/public';
@@ -37,8 +38,7 @@ import {
 import type { ToastsStart, IUiSettingsClient, HttpStart } from '@kbn/core/public';
 import { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { getShouldShowFieldHandler } from '@kbn/discover-utils';
-import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
+import { getShouldShowFieldHandler, DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
@@ -221,6 +221,11 @@ export interface UnifiedDataTableProps {
    */
   renderCustomGridBody?: (args: EuiDataGridCustomBodyProps) => React.ReactNode;
   trailingControlColumns?: EuiDataGridControlColumn[];
+  visibleCellActions?: number;
+  externalCustomRenderers?: Record<
+    string,
+    (props: EuiDataGridCellValueElementProps) => React.ReactNode
+  >;
 }
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
@@ -267,6 +272,8 @@ export const UnifiedDataTable = ({
   externalControlColumns,
   externalAdditionalControls,
   rowsPerPageOptions,
+  visibleCellActions,
+  externalCustomRenderers,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage } = services;
   const { darkMode } = useObservable(services.theme?.theme$ ?? of(themeDefault), themeDefault);
@@ -315,6 +322,36 @@ export const UnifiedDataTable = ({
       });
     },
     [displayedRows, dataView, fieldFormats]
+  );
+
+  const unifiedDataTableContextValue = useMemo(
+    () => ({
+      expanded: expandedDoc,
+      setExpanded: setExpandedDoc,
+      rows: displayedRows,
+      onFilter,
+      dataView,
+      isDarkMode: darkMode,
+      selectedDocs: usedSelectedDocs,
+      setSelectedDocs: (newSelectedDocs: React.SetStateAction<string[]>) => {
+        setSelectedDocs(newSelectedDocs);
+        if (isFilterActive && newSelectedDocs.length === 0) {
+          setIsFilterActive(false);
+        }
+      },
+      valueToStringConverter,
+    }),
+    [
+      darkMode,
+      dataView,
+      displayedRows,
+      expandedDoc,
+      isFilterActive,
+      onFilter,
+      setExpandedDoc,
+      usedSelectedDocs,
+      valueToStringConverter,
+    ]
   );
 
   /**
@@ -406,7 +443,8 @@ export const UnifiedDataTable = ({
         shouldShowFieldHandler,
         () => dataGridRef.current?.closeCellPopover(),
         services.fieldFormats,
-        maxDocFieldsDisplayed
+        maxDocFieldsDisplayed,
+        externalCustomRenderers
       ),
     [
       dataView,
@@ -415,6 +453,7 @@ export const UnifiedDataTable = ({
       shouldShowFieldHandler,
       maxDocFieldsDisplayed,
       services.fieldFormats,
+      externalCustomRenderers,
     ]
   );
 
@@ -452,7 +491,7 @@ export const UnifiedDataTable = ({
   );
 
   const visibleColumns = useMemo(
-    () => getVisibleColumns(displayedColumns, dataView, showTimeCol) as string[],
+    () => getVisibleColumns(displayedColumns, dataView, showTimeCol),
     [dataView, displayedColumns, showTimeCol]
   );
 
@@ -504,6 +543,7 @@ export const UnifiedDataTable = ({
         valueToStringConverter,
         onFilter,
         editField,
+        visibleCellActions,
       }),
     [
       onFilter,
@@ -520,6 +560,7 @@ export const UnifiedDataTable = ({
       dataViewFieldEditor,
       valueToStringConverter,
       editField,
+      visibleCellActions,
     ]
   );
 
@@ -547,8 +588,7 @@ export const UnifiedDataTable = ({
     return { columns: sortingColumns, onSort: () => {} };
   }, [isSortEnabled, sortingColumns, isPlainRecord, inmemorySortingColumns, onTableSort]);
 
-  const DocumentView = getDocumentView;
-  const canSetExpandedDoc = Boolean(setExpandedDoc && !!DocumentView);
+  const canSetExpandedDoc = Boolean(setExpandedDoc && !!getDocumentView);
 
   const internalControlColumns = useMemo(
     () =>
@@ -576,7 +616,7 @@ export const UnifiedDataTable = ({
 
   const showDisplaySelector = useMemo(
     () =>
-      !!onUpdateRowHeight
+      onUpdateRowHeight
         ? {
             allowDensity: false,
             allowRowHeight: true,
@@ -652,24 +692,7 @@ export const UnifiedDataTable = ({
   }
 
   return (
-    <UnifiedDataTableContext.Provider
-      value={{
-        expanded: expandedDoc,
-        setExpanded: setExpandedDoc,
-        rows: displayedRows,
-        onFilter,
-        dataView,
-        isDarkMode: darkMode,
-        selectedDocs: usedSelectedDocs,
-        setSelectedDocs: (newSelectedDocs) => {
-          setSelectedDocs(newSelectedDocs);
-          if (isFilterActive && newSelectedDocs.length === 0) {
-            setIsFilterActive(false);
-          }
-        },
-        valueToStringConverter,
-      }}
-    >
+    <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
       <span className="udtDataTable__inner">
         <div
           data-test-subj="discoverDocTable"
@@ -736,10 +759,7 @@ export const UnifiedDataTable = ({
             </p>
           </EuiScreenReaderOnly>
         )}
-        {setExpandedDoc &&
-          expandedDoc &&
-          getDocumentView &&
-          getDocumentView(displayedRows, displayedColumns)}
+        {canSetExpandedDoc && expandedDoc && getDocumentView!(displayedRows, displayedColumns)}
       </span>
     </UnifiedDataTableContext.Provider>
   );

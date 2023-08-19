@@ -41,13 +41,23 @@ export const getRenderCellValueFn =
     shouldShowFieldHandler: ShouldShowFieldInTableHandler,
     closePopover: () => void,
     fieldFormats: FieldFormatsStart,
-    maxEntries: number
+    maxEntries: number,
+    externalCustomRenderers?: Record<string, (props: EuiDataGridCellValueElementProps) => React.ReactNode>
   ) =>
   ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
     const row = rows ? rows[rowIndex] : undefined;
 
     const field = dataView.fields.getByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);
+
+    if (externalCustomRenderers && externalCustomRenderers[columnId]) {
+      return externalCustomRenderers[columnId]({
+        rowIndex, columnId, isDetails, setCellProps,
+        isExpandable: false,
+        isExpanded: false,
+        colIndex: 0
+      });
+    }
 
     useEffect(() => {
       if (row?.isAnchor) {

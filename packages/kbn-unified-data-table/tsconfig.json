@@ -1,17 +1,32 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
-    "types": [
-      "jest",
-      "node"
-    ]
+    "outDir": "target/types"
   },
-  "include": [
-    "**/*.ts",
-  ],
+  "include": ["*.ts", "src/**/*", "__mocks__/**/*.ts"],
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/data-views-plugin",
+    "@kbn/discover-utils",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/saved-search-plugin",
+    "@kbn/discover-plugin",
+    "@kbn/search-response-warnings",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n-react",
+    "@kbn/ui-theme",
+    "@kbn/field-types",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/cell-actions",
+    "@kbn/utility-types",
+    "@kbn/data-view-field-editor-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/react-kibana-context-common",
+    "@kbn/data-plugin",
+    "@kbn/core",
+  ]
 }

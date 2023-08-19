@@ -79,6 +79,7 @@ function buildEuiGridColumn({
   onFilter,
   editField,
   columnCellActions,
+  visibleCellActions,
 }: {
   columnName: string;
   columnWidth: number | undefined;
@@ -93,6 +94,7 @@ function buildEuiGridColumn({
   onFilter?: DocViewFilterFn;
   editField?: (fieldName: string) => void;
   columnCellActions?: EuiDataGridColumnCellAction[];
+  visibleCellActions?: number;
 }) {
   const dataViewField = dataView.getFieldByName(columnName);
   const editFieldButton =
@@ -153,6 +155,7 @@ function buildEuiGridColumn({
       ],
     },
     cellActions,
+    visibleCellActions, 
   };
 
   if (column.id === dataView.timeFieldName) {
@@ -202,6 +205,7 @@ export function getEuiGridColumns({
   valueToStringConverter,
   onFilter,
   editField,
+  visibleCellActions,
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
@@ -219,6 +223,7 @@ export function getEuiGridColumns({
   valueToStringConverter: ValueToStringConverter;
   onFilter: DocViewFilterFn;
   editField?: (fieldName: string) => void;
+  visibleCellActions?: number;
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
 
@@ -237,6 +242,7 @@ export function getEuiGridColumns({
       rowsCount,
       onFilter,
       editField,
+      visibleCellActions,
     })
   );
 }
