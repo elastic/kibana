@@ -60,9 +60,9 @@ import {
   buildDataTableRecord,
 } from '@kbn/discover-utils';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
-import { VIEW_MODE, DISABLE_SHARD_FAILURE_WARNING } from '../../common/constants';
 import type { UnifiedDataTableSettings } from '@kbn/unified-data-table';
 import { columnActions } from '@kbn/unified-data-table';
+import { VIEW_MODE, DISABLE_SHARD_FAILURE_WARNING } from '../../common/constants';
 import type { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import type { DiscoverServices } from '../build_services';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
