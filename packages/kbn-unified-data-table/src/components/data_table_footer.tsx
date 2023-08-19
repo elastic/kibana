@@ -16,7 +16,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { MAX_LOADED_GRID_ROWS } from '../constants';
 
-export interface DiscoverGridFooterProps {
+export interface UnifiedDataTableFooterProps {
   isLoadingMore?: boolean;
   rowCount: number;
   sampleSize: number;
@@ -28,7 +28,7 @@ export interface DiscoverGridFooterProps {
   fieldFormats: FieldFormatsStart;
 }
 
-export const DiscoverGridFooter: React.FC<DiscoverGridFooterProps> = (props) => {
+export const UnifiedDataTableFooter: React.FC<UnifiedDataTableFooterProps> = (props) => {
   const {
     isLoadingMore,
     rowCount,
@@ -65,7 +65,7 @@ export const DiscoverGridFooter: React.FC<DiscoverGridFooterProps> = (props) => 
   if (onFetchMoreRecords && typeof isLoadingMore === 'boolean') {
     if (rowCount <= MAX_LOADED_GRID_ROWS - sampleSize) {
       return (
-        <DiscoverGridFooterContainer hasButton={true} {...props}>
+        <UnifiedDataTableFooterContainer hasButton={true} {...props}>
           <EuiToolTip
             content={
               isRefreshIntervalOn
@@ -91,26 +91,26 @@ export const DiscoverGridFooter: React.FC<DiscoverGridFooterProps> = (props) => 
               />
             </EuiButtonEmpty>
           </EuiToolTip>
-        </DiscoverGridFooterContainer>
+        </UnifiedDataTableFooterContainer>
       );
     }
 
-    return <DiscoverGridFooterContainer hasButton={false} {...props} />;
+    return <UnifiedDataTableFooterContainer hasButton={false} {...props} />;
   }
 
   if (rowCount < totalHits) {
     // show only a message for embeddable
-    return <DiscoverGridFooterContainer hasButton={false} {...props} />;
+    return <UnifiedDataTableFooterContainer hasButton={false} {...props} />;
   }
 
   return null;
 };
 
-interface DiscoverGridFooterContainerProps extends DiscoverGridFooterProps {
+interface UnifiedDataTableFooterContainerProps extends UnifiedDataTableFooterProps {
   hasButton: boolean;
 }
 
-const DiscoverGridFooterContainer: React.FC<DiscoverGridFooterContainerProps> = ({
+const UnifiedDataTableFooterContainer: React.FC<UnifiedDataTableFooterContainerProps> = ({
   hasButton,
   rowCount,
   children,

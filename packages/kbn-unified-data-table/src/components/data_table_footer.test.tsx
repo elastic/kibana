@@ -9,52 +9,51 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { DiscoverGridFooter } from './discover_grid_footer';
-import { discoverServiceMock } from '../../__mocks__/services';
+import { UnifiedDataTableFooter } from './data_table_footer';
+import { servicesMock } from '../../__mocks__/services';
 
-describe('DiscoverGridFooter', function () {
+describe('UnifiedDataTableFooter', function () {
   it('should not render anything when not on the last page', async () => {
     const component = mountWithIntl(
-      <KibanaContextProvider services={discoverServiceMock}>
-        <DiscoverGridFooter
-          pageCount={5}
-          pageIndex={0}
-          sampleSize={500}
-          totalHits={1000}
-          rowCount={500}
-        />
-      </KibanaContextProvider>
+      <UnifiedDataTableFooter
+        pageCount={5}
+        pageIndex={0}
+        sampleSize={500}
+        totalHits={1000}
+        rowCount={500}
+        data={servicesMock.data}
+        fieldFormats={servicesMock.fieldFormats}
+      />
     );
     expect(component.isEmptyRender()).toBe(true);
   });
 
   it('should not render anything yet when all rows shown', async () => {
     const component = mountWithIntl(
-      <KibanaContextProvider services={discoverServiceMock}>
-        <DiscoverGridFooter
-          pageCount={5}
-          pageIndex={4}
-          sampleSize={500}
-          totalHits={500}
-          rowCount={500}
-        />
-      </KibanaContextProvider>
+      <UnifiedDataTableFooter
+        pageCount={5}
+        pageIndex={4}
+        sampleSize={500}
+        totalHits={500}
+        rowCount={500}
+        data={servicesMock.data}
+        fieldFormats={servicesMock.fieldFormats}
+      />
     );
     expect(component.isEmptyRender()).toBe(true);
   });
 
   it('should render a message for the last page', async () => {
     const component = mountWithIntl(
-      <KibanaContextProvider services={discoverServiceMock}>
-        <DiscoverGridFooter
-          pageCount={5}
-          pageIndex={4}
-          sampleSize={500}
-          totalHits={1000}
-          rowCount={500}
-        />
-      </KibanaContextProvider>
+      <UnifiedDataTableFooter
+        pageCount={5}
+        pageIndex={4}
+        sampleSize={500}
+        totalHits={1000}
+        rowCount={500}
+        data={servicesMock.data}
+        fieldFormats={servicesMock.fieldFormats}
+      />
     );
     expect(findTestSubject(component, 'discoverTableFooter').text()).toBe(
       'Search results are limited to 500 documents. Add more search terms to narrow your search.'
@@ -66,17 +65,17 @@ describe('DiscoverGridFooter', function () {
     const mockLoadMore = jest.fn();
 
     const component = mountWithIntl(
-      <KibanaContextProvider services={discoverServiceMock}>
-        <DiscoverGridFooter
-          pageCount={5}
-          pageIndex={4}
-          sampleSize={500}
-          totalHits={1000}
-          rowCount={500}
-          isLoadingMore={false}
-          onFetchMoreRecords={mockLoadMore}
-        />
-      </KibanaContextProvider>
+      <UnifiedDataTableFooter
+        pageCount={5}
+        pageIndex={4}
+        sampleSize={500}
+        totalHits={1000}
+        rowCount={500}
+        isLoadingMore={false}
+        onFetchMoreRecords={mockLoadMore}
+        data={servicesMock.data}
+        fieldFormats={servicesMock.fieldFormats}
+      />
     );
     expect(findTestSubject(component, 'discoverTableFooter').text()).toBe(
       'Search results are limited to 500 documents.Load more'
@@ -94,17 +93,17 @@ describe('DiscoverGridFooter', function () {
     const mockLoadMore = jest.fn();
 
     const component = mountWithIntl(
-      <KibanaContextProvider services={discoverServiceMock}>
-        <DiscoverGridFooter
-          pageCount={5}
-          pageIndex={4}
-          sampleSize={500}
-          totalHits={1000}
-          rowCount={500}
-          isLoadingMore={true}
-          onFetchMoreRecords={mockLoadMore}
-        />
-      </KibanaContextProvider>
+      <UnifiedDataTableFooter
+        pageCount={5}
+        pageIndex={4}
+        sampleSize={500}
+        totalHits={1000}
+        rowCount={500}
+        isLoadingMore={true}
+        onFetchMoreRecords={mockLoadMore}
+        data={servicesMock.data}
+        fieldFormats={servicesMock.fieldFormats}
+      />
     );
     expect(findTestSubject(component, 'discoverTableFooter').text()).toBe(
       'Search results are limited to 500 documents.Load more'
@@ -121,15 +120,15 @@ describe('DiscoverGridFooter', function () {
 
   it('should render a message when max total limit is reached', async () => {
     const component = mountWithIntl(
-      <KibanaContextProvider services={discoverServiceMock}>
-        <DiscoverGridFooter
-          pageCount={100}
-          pageIndex={99}
-          sampleSize={500}
-          totalHits={11000}
-          rowCount={10000}
-        />
-      </KibanaContextProvider>
+      <UnifiedDataTableFooter
+        pageCount={100}
+        pageIndex={99}
+        sampleSize={500}
+        totalHits={11000}
+        rowCount={10000}
+        data={servicesMock.data}
+        fieldFormats={servicesMock.fieldFormats}
+      />
     );
     expect(findTestSubject(component, 'discoverTableFooter').text()).toBe(
       'Search results are limited to 10000 documents. Add more search terms to narrow your search.'

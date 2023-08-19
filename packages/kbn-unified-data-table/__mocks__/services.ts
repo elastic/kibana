@@ -15,6 +15,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LocalStorageMock } from './local_storage_mock';
 import { IUiSettingsClient, ToastsStart } from '@kbn/core/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 export function createServicesMock() {
   const expressionsPlugin = expressionsPluginMock.createStartContract();
@@ -47,6 +48,8 @@ export function createServicesMock() {
   };
 
   corePluginMock.theme = theme;
+
+  const dataPlugin = dataPluginMock.createStartContract();
 
   return {
     core: corePluginMock,
@@ -103,6 +106,7 @@ export function createServicesMock() {
     },
     contextLocator: { getRedirectUrl: jest.fn(() => '') },
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
+    data: dataPlugin,
   };
 }
 

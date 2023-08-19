@@ -7,15 +7,13 @@
  */
 
 import { getStateColumnActions } from './columns';
-import { configMock } from '../../../__mocks__/config';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { dataViewsMock } from '../../__mocks__/data_views';
 import { Capabilities } from '@kbn/core/types';
-import { DiscoverAppState } from '../../../application/main/services/discover_app_state_container';
+import { dataViewsMock } from '../../../__mocks__/data_views';
 
 function getStateColumnAction(
-  state: DiscoverAppState,
-  setAppState: (state: Partial<DiscoverAppState>) => void
+  state: { columns?: string[]; sort?: string[][] },
+  setAppState: (columns: string[], sort?: string[][]) => void
 ) {
   return getStateColumnActions({
     capabilities: {
@@ -23,7 +21,6 @@ function getStateColumnAction(
         save: false,
       },
     } as unknown as Capabilities,
-    config: configMock,
     dataView: dataViewMock,
     dataViews: dataViewsMock,
     useNewFieldsApi: true,

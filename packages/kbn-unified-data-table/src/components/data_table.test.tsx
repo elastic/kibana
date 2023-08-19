@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { buildDataViewMock, deepMockedFields, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { UnifiedDataTable, UnifiedDataTableProps } from './data_table';
+import { DataLoadingState, UnifiedDataTable, UnifiedDataTableProps } from './data_table';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { servicesMock } from '../../__mocks__/services';
 import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
@@ -30,7 +30,7 @@ export const dataViewMock = buildDataViewMock({
   timeFieldName: '@timestamp',
 });
 
-function getProps() {
+function getProps(): UnifiedDataTableProps {
   const services = servicesMock;
   services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn().mockReturnValue(true);
 
@@ -40,9 +40,7 @@ function getProps() {
     dataView: dataViewMock,
     loadingState: DataLoadingState.loaded,
     expandedDoc: undefined,
-    onAddColumn: jest.fn(),
     onFilter: jest.fn(),
-    onRemoveColumn: jest.fn(),
     onResize: jest.fn(),
     onSetColumns: jest.fn(),
     onSort: jest.fn(),
@@ -56,13 +54,14 @@ function getProps() {
     sort: [],
     useNewFieldsApi: true,
     services: {
-      core: services.core,
       fieldFormats: services.fieldFormats,
       addBasePath: jest.fn(),
       uiSettings: services.uiSettings,
       dataViewFieldEditor: services.dataViewFieldEditor,
       toastNotifications: services.toastNotifications,
       storage: services.storage,
+      data: services.data,
+      theme: services.theme,
     },
   };
 }

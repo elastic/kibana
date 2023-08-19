@@ -56,7 +56,7 @@ import {
   GRID_STYLE,
   toolbarVisibility as toolbarVisibilityDefaults,
 } from '../constants';
-import { DiscoverGridFooter } from './data_table_footer';
+import { UnifiedDataTableFooter } from './data_table_footer';
 
 export type SortOrder = [string, string];
 
@@ -751,7 +751,7 @@ export const UnifiedDataTable = ({
         </div>
         {loadingState !== DataLoadingState.loading &&
           isPaginationEnabled && ( // we hide the footer for Surrounding Documents page
-            <DiscoverGridFooter
+            <UnifiedDataTableFooter
               isLoadingMore={loadingState === DataLoadingState.loadingMore}
               rowCount={rowCount}
               sampleSize={sampleSize}
