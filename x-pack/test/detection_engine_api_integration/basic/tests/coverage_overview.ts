@@ -342,7 +342,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('returns response filtered by enabled and disabled rules equal to response if enabled and disabled are not set', async () => {
+        it('returns all rules if both enabled and disabled filters are specified in the request', async () => {
           const expectedRule1 = await createRule(supertest, log, {
             ...getSimpleRule('rule-1'),
             name: 'Disabled rule',
