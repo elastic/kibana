@@ -1287,8 +1287,8 @@ x-pack/test/security_solution_cypress/runner.ts @elastic/security-engineering-pr
 x-pack/test/security_solution_cypress/serverless_config.ts @elastic/security-engineering-productivity
 
 ## Security Solution sub teams - adaptive-workload-protection
-x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/sec-cloudnative-integrations
-x-pack/plugins/security_solution/public/kubernetes @elastic/sec-cloudnative-integrations
+x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/kibana-cloud-security-posture
+x-pack/plugins/security_solution/public/kubernetes @elastic/kibana-cloud-security-posture
 
 ## Security Solution sub teams - Protections Experience
 x-pack/plugins/security_solution/public/threat_intelligence @elastic/protections-experience
@@ -1300,8 +1300,8 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_response_actions @elastic/security-defend-workflows
 
 # Cloud Defend
-/x-pack/plugins/cloud_defend/ @elastic/sec-cloudnative-integrations
-/x-pack/plugins/security_solution/public/cloud_defend @elastic/sec-cloudnative-integrations
+/x-pack/plugins/cloud_defend/ @elastic/kibana-cloud-security-posture
+/x-pack/plugins/security_solution/public/cloud_defend @elastic/kibana-cloud-security-posture
 
 # Cloud Security Posture
 /x-pack/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
