@@ -78,6 +78,12 @@ const ObservabilityMetricsAlertOptional = rt.partial({
         value: schemaStringOrNumber,
         values: schemaStringOrNumberArray,
       }),
+      groups: rt.array(
+        rt.partial({
+          field: schemaString,
+          value: schemaString,
+        })
+      ),
     }),
   }),
 });
