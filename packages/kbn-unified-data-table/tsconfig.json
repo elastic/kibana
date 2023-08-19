@@ -31,5 +31,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/monaco",
     "@kbn/code-editor",
+    "@kbn/config",
   ]
 }
