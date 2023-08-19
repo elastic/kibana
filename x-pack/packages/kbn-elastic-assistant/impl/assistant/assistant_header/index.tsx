@@ -80,7 +80,11 @@ export const AssistantHeader: React.FC<Props> = ({
         justifyContent={'spaceBetween'}
       >
         <EuiFlexItem grow={false}>
-          <AssistantTitle {...currentTitle} docLinks={docLinks} />
+          <AssistantTitle
+            {...currentTitle}
+            docLinks={docLinks}
+            selectedConversation={currentConversation}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem
