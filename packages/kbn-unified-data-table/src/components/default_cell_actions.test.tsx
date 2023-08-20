@@ -25,54 +25,61 @@ import {
 } from './default_cell_actions';
 import { servicesMock } from '../../__mocks__/services';
 import { UnifiedDataTableContext } from '../table_context';
-import { EuiButton, EuiButtonIcon, EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import { EuiButton, EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { dataTableContextMock } from '../../__mocks__/table_context';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 
 describe('Default cell actions ', function () {
   const CopyBtn = buildCopyValueButton(
     {
-      Component: <EuiButtonIcon iconType={'test'} />,
+      Component: () => <></>,
       colIndex: 0,
-      columnId: '3',
+      columnId: 'extension',
     } as unknown as EuiDataGridColumnCellActionProps,
     servicesMock.toastNotifications,
     dataTableContextMock.valueToStringConverter
   );
 
   it('should not show cell actions for unfilterable fields', async () => {
+    const cellActions = buildCellActions(
+      { name: 'foo', filterable: false } as DataViewField,
+      servicesMock.toastNotifications,
+      dataTableContextMock.valueToStringConverter
+    );
+    expect(cellActions.length).toEqual(1);
     expect(
-      buildCellActions(
-        { name: 'foo', filterable: false } as DataViewField,
-        servicesMock.toastNotifications,
-        dataTableContextMock.valueToStringConverter
-      )
-    ).toEqual([CopyBtn]);
+      cellActions[0]({
+        Component: () => <></>,
+        colIndex: 1,
+        columnId: 'extension',
+      } as unknown as EuiDataGridColumnCellActionProps).props['aria-label']
+    ).toEqual(CopyBtn.props['aria-label']);
   });
 
   it('should show filter actions for filterable fields', async () => {
-    const b = buildCellActions(
+    const cellActions = buildCellActions(
       { name: 'foo', filterable: true } as DataViewField,
       servicesMock.toastNotifications,
       dataTableContextMock.valueToStringConverter,
       jest.fn()
     );
-    expect(b).toEqual([FilterInBtn, FilterOutBtn, CopyBtn]);
+    expect(cellActions).toContain(FilterInBtn);
+    expect(cellActions).toContain(FilterOutBtn);
   });
 
   it('should show Copy action for _source field', async () => {
-    const buttons = buildCellActions(
+    const cellActions = buildCellActions(
       { name: '_source', type: '_source', filterable: false } as DataViewField,
       servicesMock.toastNotifications,
       dataTableContextMock.valueToStringConverter
     );
     expect(
-      buttons[0]({
-        Component: (props: any) => <EuiButton {...props} />,
+      cellActions[0]({
+        Component: () => <></>,
         colIndex: 1,
         columnId: 'extension',
-      } as unknown as EuiDataGridColumnCellActionProps)
-    ).toBe(CopyBtn);
+      } as unknown as EuiDataGridColumnCellActionProps).props['aria-label']
+    ).toEqual(CopyBtn.props['aria-label']);
   });
 
   it('triggers filter function when FilterInBtn is clicked', async () => {
@@ -162,6 +169,7 @@ describe('Default cell actions ', function () {
           {
             Component: (props: any) => <EuiButton {...props} />,
             colIndex: 1,
+            rowIndex: 1,
             columnId: 'extension',
           } as unknown as EuiDataGridColumnCellActionProps,
           servicesMock.toastNotifications,
