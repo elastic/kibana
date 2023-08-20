@@ -30,6 +30,7 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
+import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -306,7 +307,7 @@ function DiscoverDocumentsComponent({
                 rowHeightState={rowHeight}
                 onUpdateRowHeight={onUpdateRowHeight}
                 isPlainRecord={isTextBasedQuery}
-                rowsPerPageState={rowsPerPage}
+                rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
                 onUpdateRowsPerPage={onUpdateRowsPerPage}
                 onFieldEdited={onFieldEdited}
                 renderDocumentView={(

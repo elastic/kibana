@@ -62,7 +62,11 @@ import {
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import type { UnifiedDataTableSettings } from '@kbn/unified-data-table';
 import { columnActions } from '@kbn/unified-data-table';
-import { VIEW_MODE, DISABLE_SHARD_FAILURE_WARNING } from '../../common/constants';
+import {
+  VIEW_MODE,
+  DISABLE_SHARD_FAILURE_WARNING,
+  getDefaultRowsPerPage,
+} from '../../common/constants';
 import type { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import type { DiscoverServices } from '../build_services';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
@@ -585,7 +589,10 @@ export class SavedSearchEmbeddable
     searchProps.sharedItemTitle = this.panelTitle;
     searchProps.searchTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || savedSearch.rowHeight;
-    searchProps.rowsPerPageState = this.input.rowsPerPage || savedSearch.rowsPerPage;
+    searchProps.rowsPerPageState =
+      this.input.rowsPerPage ||
+      savedSearch.rowsPerPage ||
+      getDefaultRowsPerPage(this.services.uiSettings);
     searchProps.filters = savedSearch.searchSource.getField('filter') as Filter[];
     searchProps.savedSearchId = savedSearch.id;
 
