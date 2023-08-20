@@ -17,6 +17,7 @@
       "logsShared",
       "inspector",
       "licensing",
+      "infra",
       "metricsData",
       "observability",
       "observabilityShared",
