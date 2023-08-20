@@ -18,7 +18,7 @@ describe('ALL - Timelines', () => {
     cy.getBySel('flyoutBottomBar').within(() => {
       cy.getBySel('flyoutOverlay').click();
     });
-    cy.getBySel('timelineQueryInput').type('_id:*{enter}');
+    cy.getBySel('timelineQueryInput').type('NOT host.name: "dev-fleet-server.8220"{enter}');
     // Filter out alerts
     cy.getBySel('timeline-sourcerer-trigger').click();
     cy.getBySel('sourcerer-advanced-options-toggle').click();
