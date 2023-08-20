@@ -14,7 +14,7 @@ const createActionsConfigMock = () => {
     isActionTypeEnabled: jest.fn().mockReturnValue(true),
     ensureHostnameAllowed: jest.fn().mockReturnValue({}),
     ensureUriAllowed: jest.fn().mockReturnValue({}),
-    ensureActionTypeEnabled: jest.fn().mockReturnValue({}),
+    ensureActionTypeEnabledInConfig: jest.fn().mockReturnValue({}),
     getSSLSettings: jest.fn().mockReturnValue({
       verificationMode: 'full',
     }),

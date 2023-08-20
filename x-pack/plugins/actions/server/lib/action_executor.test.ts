@@ -107,6 +107,7 @@ test('successfully executes', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -250,6 +251,7 @@ test('successfully executes when http_request source is specified', async () => 
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -402,6 +404,7 @@ test('successfully executes when saved_object source is specified', async () => 
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -560,6 +563,7 @@ test('successfully executes with preconfigured connector', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -685,6 +689,7 @@ test('successfully executes with system connector', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: '.cases',
     name: 'Cases',
+    enabled: true,
     minimumLicenseRequired: 'platinum',
     supportedFeatureIds: ['alerting'],
     isSystemActionType: true,
@@ -813,6 +818,7 @@ test('successfully authorize system actions', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: '.cases',
     name: 'Cases',
+    enabled: true,
     minimumLicenseRequired: 'platinum',
     supportedFeatureIds: ['alerting'],
     getKibanaPrivileges: () => ['test/create'],
@@ -841,6 +847,7 @@ test('pass the params to the actionTypeRegistry when authorizing system actions'
   const actionType: jest.Mocked<ActionType> = {
     id: '.cases',
     name: 'Cases',
+    enabled: true,
     minimumLicenseRequired: 'platinum',
     supportedFeatureIds: ['alerting'],
     getKibanaPrivileges: () => ['test/create'],
@@ -877,6 +884,7 @@ test('does not authorize non system actions', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -899,6 +907,7 @@ test('successfully executes as a task', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -949,6 +958,7 @@ test('provides empty config when config and / or secrets is empty', async () => 
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -983,6 +993,7 @@ test('throws an error when config is invalid', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -1021,6 +1032,7 @@ test('returns an error when connector is invalid', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -1060,6 +1072,7 @@ test('throws an error when params is invalid', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -1107,6 +1120,7 @@ test('throws an error if actionType is not enabled', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -1141,6 +1155,7 @@ test('should not throws an error if actionType is preconfigured', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -1193,6 +1208,7 @@ test('should not throws an error if actionType is system action', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: '.cases',
     name: 'Cases',
+    enabled: true,
     minimumLicenseRequired: 'platinum',
     supportedFeatureIds: ['alerting'],
     isSystemActionType: true,
@@ -1284,6 +1300,7 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -1432,6 +1449,7 @@ test('should not throw error if action is system action and isESOCanEncrypt is f
   const actionType: jest.Mocked<ActionType> = {
     id: '.cases',
     name: 'Cases',
+    enabled: true,
     minimumLicenseRequired: 'platinum',
     supportedFeatureIds: ['alerting'],
     isSystemActionType: true,
@@ -1841,6 +1859,7 @@ test('does not fetches actionInfo if passed as param', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -1902,6 +1921,7 @@ function setupActionExecutorMock(actionTypeId = 'test') {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {

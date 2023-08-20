@@ -36,7 +36,7 @@ export interface ActionsConfigurationUtilities {
   isActionTypeEnabled: (actionType: string) => boolean;
   ensureHostnameAllowed: (hostname: string) => void;
   ensureUriAllowed: (uri: string) => void;
-  ensureActionTypeEnabled: (actionType: string) => void;
+  ensureActionTypeEnabledInConfig: (actionType: string) => void;
   getSSLSettings: () => SSLSettings;
   getProxySettings: () => undefined | ProxySettings;
   getResponseSettings: () => ResponseSettings;
@@ -195,7 +195,7 @@ export function getActionsConfigurationUtilities(
         throw new Error(allowListErrorMessage(AllowListingField.hostname, hostname));
       }
     },
-    ensureActionTypeEnabled(actionType: string) {
+    ensureActionTypeEnabledInConfig(actionType: string) {
       if (!isActionTypeEnabled(actionType)) {
         throw new ActionTypeDisabledError(disabledActionTypeErrorMessage(actionType), 'config');
       }

@@ -70,6 +70,7 @@ export function getConnectorType({
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
+    enabled: true,
     name: i18n.translate('xpack.stackConnectors.slack.title', {
       defaultMessage: 'Slack',
     }),

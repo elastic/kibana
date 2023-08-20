@@ -178,6 +178,7 @@ describe('create()', () => {
       actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
+        enabled: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -219,6 +220,7 @@ describe('create()', () => {
       actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
+        enabled: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -268,6 +270,7 @@ describe('create()', () => {
       actionTypeRegistry.register({
         id: savedObjectCreateResult.attributes.actionTypeId,
         name: 'My action type',
+        enabled: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -312,6 +315,7 @@ describe('create()', () => {
       actionTypeRegistry.register({
         id: savedObjectCreateResult.attributes.actionTypeId,
         name: 'My action type',
+        enabled: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -370,6 +374,7 @@ describe('create()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -420,6 +425,7 @@ describe('create()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -454,6 +460,7 @@ describe('create()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -497,11 +504,16 @@ describe('create()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
         config: {
-          schema: schema.object({ a: schema.boolean(), b: schema.boolean(), c: schema.boolean() }),
+          schema: schema.object({
+            a: schema.boolean(),
+            b: schema.boolean(),
+            c: schema.boolean(),
+          }),
         },
         secrets: { schema: schema.object({}) },
         params: { schema: schema.object({}) },
@@ -635,6 +647,7 @@ describe('create()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -675,6 +688,7 @@ describe('create()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -705,6 +719,7 @@ describe('create()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -769,6 +784,7 @@ describe('create()', () => {
     actionTypeRegistry.register({
       id: '.cases',
       name: 'Cases',
+      enabled: true,
       minimumLicenseRequired: 'platinum',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -2475,6 +2491,7 @@ describe('update()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -2584,6 +2601,7 @@ describe('update()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -2663,6 +2681,7 @@ describe('update()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -2735,6 +2754,7 @@ describe('update()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -2774,6 +2794,7 @@ describe('update()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -2812,11 +2833,16 @@ describe('update()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
         config: {
-          schema: schema.object({ a: schema.boolean(), b: schema.boolean(), c: schema.boolean() }),
+          schema: schema.object({
+            a: schema.boolean(),
+            b: schema.boolean(),
+            c: schema.boolean(),
+          }),
         },
         secrets: { schema: schema.object({}) },
         params: { schema: schema.object({}) },
@@ -2901,6 +2927,7 @@ describe('update()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -3136,6 +3163,7 @@ describe('execute()', () => {
       actionTypeRegistry.register({
         id: '.cases',
         name: 'Cases',
+        enabled: true,
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['alerting'],
         getKibanaPrivileges: () => ['test/create'],
@@ -3201,6 +3229,7 @@ describe('execute()', () => {
       actionTypeRegistry.register({
         id: '.cases',
         name: 'Cases',
+        enabled: true,
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['alerting'],
         getKibanaPrivileges: () => ['test/create'],
@@ -3265,6 +3294,7 @@ describe('execute()', () => {
       actionTypeRegistry.register({
         id: '.cases',
         name: 'Cases',
+        enabled: true,
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['alerting'],
         getKibanaPrivileges,
@@ -3598,6 +3628,7 @@ describe('listType()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -3611,6 +3642,7 @@ describe('listType()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type-2',
       name: 'My action type 2',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['cases'],
       validate: {
@@ -3641,6 +3673,7 @@ describe('listType()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -3654,6 +3687,7 @@ describe('listType()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type-2',
       name: 'My action type 2',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['cases'],
       validate: {
@@ -3667,6 +3701,7 @@ describe('listType()', () => {
     actionTypeRegistry.register({
       id: '.cases',
       name: 'Cases',
+      enabled: true,
       minimumLicenseRequired: 'platinum',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -3708,6 +3743,7 @@ describe('listType()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -3721,6 +3757,7 @@ describe('listType()', () => {
     actionTypeRegistry.register({
       id: '.cases',
       name: 'Cases',
+      enabled: true,
       minimumLicenseRequired: 'platinum',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -3761,6 +3798,7 @@ describe('isActionTypeEnabled()', () => {
   const fooActionType: ActionType = {
     id: 'foo',
     name: 'Foo',
+    enabled: true,
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {

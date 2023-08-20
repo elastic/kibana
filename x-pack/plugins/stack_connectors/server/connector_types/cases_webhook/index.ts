@@ -42,6 +42,7 @@ export function getConnectorType(): ConnectorType<
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
+    enabled: true,
     name: i18n.NAME,
     validate: {
       config: {

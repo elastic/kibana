@@ -62,6 +62,7 @@ export function getActionType(): TorqActionType {
   return {
     id: ActionTypeId,
     minimumLicenseRequired: 'gold',
+    enabled: true,
     name: i18n.translate('xpack.stackConnectors.torqTitle', {
       defaultMessage: 'Torq',
     }),

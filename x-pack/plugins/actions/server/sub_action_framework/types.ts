@@ -72,6 +72,7 @@ export type Validators<Config, Secrets> = Array<
 export interface SubActionConnectorType<Config, Secrets> {
   id: string;
   name: string;
+  enabled: boolean;
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
   schema: {

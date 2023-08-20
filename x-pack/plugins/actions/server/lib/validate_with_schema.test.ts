@@ -33,6 +33,7 @@ test('should validate when there are no validators', () => {
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -53,6 +54,7 @@ test('should validate when validators return incoming value', () => {
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     executor,
@@ -92,6 +94,7 @@ test('should validate when validators return different values', () => {
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     executor,
@@ -134,6 +137,7 @@ test('should throw with expected error when validators fail', () => {
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     executor,
@@ -175,6 +179,7 @@ test('should work with @kbn/config-schema', () => {
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     executor,
@@ -211,6 +216,7 @@ test('should validate when custom validator is defined', () => {
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     executor,
@@ -259,6 +265,7 @@ test('should throw an error when custom validators fail', () => {
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     executor,
@@ -299,6 +306,7 @@ describe('validateConnectors', () => {
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     executor,

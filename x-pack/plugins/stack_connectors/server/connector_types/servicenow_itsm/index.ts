@@ -72,6 +72,7 @@ export function getServiceNowITSMConnectorType(): ServiceNowConnectorType<
   return {
     id: ServiceNowITSMConnectorTypeId,
     minimumLicenseRequired: 'platinum',
+    enabled: true,
     name: i18n.SERVICENOW_ITSM,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,

@@ -113,6 +113,7 @@ export function getConnectorType(): WebhookConnectorType {
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
+    enabled: true,
     name: i18n.translate('xpack.stackConnectors.webhook.title', {
       defaultMessage: 'Webhook',
     }),

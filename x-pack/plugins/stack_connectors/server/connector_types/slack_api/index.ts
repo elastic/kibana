@@ -47,6 +47,7 @@ export const getConnectorType = (): SlackApiConnectorType => {
         schema: SlackApiParamsSchema,
       },
     },
+    enabled: true,
     renderParameterTemplates,
     executor: async (execOptions: SlackApiExecutorOptions) => await slackApiExecutor(execOptions),
   };

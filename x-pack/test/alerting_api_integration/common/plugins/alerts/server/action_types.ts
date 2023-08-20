@@ -22,6 +22,7 @@ export function defineActionTypes(
   const noopActionType: ActionType = {
     id: 'test.noop',
     name: 'Test: Noop',
+    enabled: true,
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -37,6 +38,7 @@ export function defineActionTypes(
   const throwActionType: ActionType = {
     id: 'test.throw',
     name: 'Test: Throw',
+    enabled: true,
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -52,6 +54,7 @@ export function defineActionTypes(
   const cappedActionType: ActionType = {
     id: 'test.capped',
     name: 'Test: Capped',
+    enabled: true,
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -105,6 +108,7 @@ function getIndexRecordActionType() {
   const result: ActionType<ConfigType, SecretsType, ParamsType> = {
     id: 'test.index-record',
     name: 'Test: Index Record',
+    enabled: true,
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -152,6 +156,7 @@ function getDelayedActionType() {
   const result: ActionType<ConfigType, SecretsType, ParamsType> = {
     id: 'test.delayed',
     name: 'Test: Delayed',
+    enabled: true,
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -186,6 +191,7 @@ function getFailingActionType() {
   const result: ActionType<{}, {}, ParamsType> = {
     id: 'test.failing',
     name: 'Test: Failing',
+    enabled: true,
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -223,6 +229,7 @@ function getRateLimitedActionType() {
   const result: ActionType<{}, {}, ParamsType> = {
     id: 'test.rate-limit',
     name: 'Test: Rate Limit',
+    enabled: true,
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     maxAttempts: 2,
@@ -264,6 +271,7 @@ function getNoAttemptsRateLimitedActionType() {
   const result: ActionType<{}, {}, ParamsType> = {
     id: 'test.no-attempts-rate-limit',
     name: 'Test: Rate Limit',
+    enabled: true,
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     maxAttempts: 0,
@@ -308,6 +316,7 @@ function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
   const result: ActionType<{}, {}, ParamsType> = {
     id: 'test.authorization',
     name: 'Test: Authorization',
+    enabled: true,
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -392,6 +401,7 @@ function getExcludedActionType() {
   const result: ActionType<{}, {}, {}, void> = {
     id: 'test.excluded',
     name: 'Test: Excluded',
+    enabled: true,
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -410,6 +420,7 @@ function getSystemActionType() {
   const result: ActionType<{}, {}, {}> = {
     id: 'test.system-action',
     name: 'Test system action',
+    enabled: true,
     minimumLicenseRequired: 'platinum',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -436,6 +447,7 @@ function getSystemActionTypeWithKibanaPrivileges() {
   const result: ActionType<{}, {}, { index?: string; reference?: string }> = {
     id: 'test.system-action-kibana-privileges',
     name: 'Test system action with kibana privileges',
+    enabled: true,
     minimumLicenseRequired: 'platinum',
     supportedFeatureIds: ['alerting'],
     /**

@@ -24,6 +24,7 @@ describe('Registration', () => {
   const connector = {
     id: '.test',
     name: 'Test',
+    enabled: true,
     minimumLicenseRequired: 'basic' as const,
     supportedFeatureIds: ['alerting'],
     schema: {
@@ -54,6 +55,7 @@ describe('Registration', () => {
     expect(actionTypeRegistry.register).toHaveBeenCalledWith({
       id: connector.id,
       name: connector.name,
+      enabled: true,
       minimumLicenseRequired: connector.minimumLicenseRequired,
       supportedFeatureIds: connector.supportedFeatureIds,
       validate: expect.anything(),

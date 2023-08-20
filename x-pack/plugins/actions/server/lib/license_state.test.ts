@@ -61,6 +61,7 @@ describe('isLicenseValidForActionType', () => {
   const fooActionType: ActionType = {
     id: 'foo',
     name: 'Foo',
+    enabled: true,
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
@@ -162,6 +163,7 @@ describe('ensureLicenseForActionType()', () => {
   const fooActionType: ActionType = {
     id: 'foo',
     name: 'Foo',
+    enabled: true,
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {

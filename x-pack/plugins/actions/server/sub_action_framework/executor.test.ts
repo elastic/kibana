@@ -34,6 +34,7 @@ describe('Executor', () => {
     const connector = {
       id: '.test',
       name: 'Test',
+      enabled: true,
       minimumLicenseRequired: 'basic' as const,
       supportedFeatureIds: ['alerting'],
       schema: {

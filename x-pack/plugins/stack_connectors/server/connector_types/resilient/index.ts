@@ -52,6 +52,7 @@ export function getConnectorType(): ConnectorType<
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'platinum',
+    enabled: true,
     name: i18n.NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,

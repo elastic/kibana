@@ -26,6 +26,7 @@ export const getOpsgenieConnectorType = (): SubActionConnectorType<Config, Secre
   return {
     Service: OpsgenieConnector,
     minimumLicenseRequired: 'platinum',
+    enabled: true,
     name: i18n.OPSGENIE_NAME,
     id: OpsgenieConnectorTypeId,
     schema: { config: ConfigSchema, secrets: SecretsSchema },

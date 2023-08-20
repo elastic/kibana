@@ -196,6 +196,7 @@ describe('Actions Plugin', () => {
         pluginSetup.registerType({
           id: '.cases',
           name: 'Cases',
+          enabled: true,
           minimumLicenseRequired: 'platinum',
           supportedFeatureIds: ['alerting'],
           validate: {
@@ -268,6 +269,7 @@ describe('Actions Plugin', () => {
       const sampleActionType: ActionType = {
         id: 'test',
         name: 'test',
+        enabled: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -346,6 +348,53 @@ describe('Actions Plugin', () => {
 
         expect(pluginSetup.isPreconfiguredConnector('preconfiguredServerLog')).toEqual(true);
         expect(pluginSetup.isPreconfiguredConnector('anotherConnectorId')).toEqual(false);
+      });
+    });
+
+    describe('setConnectorTypeEnabled', () => {
+      function setup(config: ActionsConfig) {
+        context = coreMock.createPluginInitializerContext<ActionsConfig>(config);
+        plugin = new ActionsPlugin(context);
+        coreSetup = coreMock.createSetup();
+        pluginsSetup = {
+          taskManager: taskManagerMock.createSetup(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
+          licensing: licensingMock.createSetup(),
+          eventLog: eventLogMock.createSetup(),
+          usageCollection: usageCollectionPluginMock.createSetupContract(),
+          features: featuresPluginMock.createSetup(),
+        };
+      }
+
+      it('should set connector type enabled', async () => {
+        setup(getConfig());
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        const coreStart = coreMock.createStart();
+        const pluginsStart = {
+          licensing: licensingMock.createStart(),
+          taskManager: taskManagerMock.createStart(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+          eventLog: eventLogMock.createStart(),
+        };
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        pluginSetup.registerType({
+          id: '.server-log',
+          name: 'Server log',
+          enabled: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        });
+        pluginSetup.setConnectorTypeEnabled({ id: '.server-log', enabled: false });
+        expect(pluginStart.isActionTypeEnabled('.server-log')).toBeFalsy();
       });
     });
   });
@@ -454,6 +503,7 @@ describe('Actions Plugin', () => {
           pluginSetup.registerType({
             id: '.server-log',
             name: 'Server log',
+            enabled: true,
             minimumLicenseRequired: 'basic',
             supportedFeatureIds: ['alerting'],
             validate: {
@@ -480,6 +530,7 @@ describe('Actions Plugin', () => {
           pluginSetup.registerType({
             id: '.index',
             name: 'ES Index',
+            enabled: true,
             minimumLicenseRequired: 'basic',
             supportedFeatureIds: ['alerting'],
             validate: {
@@ -533,6 +584,7 @@ describe('Actions Plugin', () => {
           pluginSetup.registerType({
             id: '.cases',
             name: 'Cases',
+            enabled: true,
             minimumLicenseRequired: 'platinum',
             supportedFeatureIds: ['alerting'],
             validate: {
@@ -595,6 +647,7 @@ describe('Actions Plugin', () => {
           pluginSetup.registerType({
             id: 'test.system-action',
             name: 'Test',
+            enabled: true,
             minimumLicenseRequired: 'platinum',
             supportedFeatureIds: ['alerting'],
             validate: {
@@ -619,6 +672,7 @@ describe('Actions Plugin', () => {
       const actionType: ActionType = {
         id: 'my-action-type',
         name: 'My action type',
+        enabled: true,
         minimumLicenseRequired: 'gold',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -647,6 +701,7 @@ describe('Actions Plugin', () => {
       const actionType: ActionType = {
         id: 'my-action-type',
         name: 'My action type',
+        enabled: true,
         minimumLicenseRequired: 'gold',
         supportedFeatureIds: ['alerting'],
         validate: {

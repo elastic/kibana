@@ -232,33 +232,35 @@ describe('isActionTypeEnabled', () => {
   });
 });
 
-describe('ensureActionTypeEnabled', () => {
+describe('ensureActionTypeEnabledInConfig', () => {
   test('does not throw when any actionType is allowed', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
       allowedHosts: [],
       enabledActionTypes: ['ignore', EnabledActionTypes.Any],
     };
-    expect(getActionsConfigurationUtilities(config).ensureActionTypeEnabled('foo')).toBeUndefined();
+    expect(
+      getActionsConfigurationUtilities(config).ensureActionTypeEnabledInConfig('foo')
+    ).toBeUndefined();
   });
 
   test('throws when no actionType is not allowed', () => {
     const config: ActionsConfig = defaultActionsConfig;
     expect(() =>
-      getActionsConfigurationUtilities(config).ensureActionTypeEnabled('foo')
+      getActionsConfigurationUtilities(config).ensureActionTypeEnabledInConfig('foo')
     ).toThrowErrorMatchingInlineSnapshot(
       `"action type \\"foo\\" is not enabled in the Kibana config xpack.actions.enabledActionTypes"`
     );
   });
 
-  test('throws when actionType is not enabled', () => {
+  test('throws when actionType is not enabled in config', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
       allowedHosts: [],
       enabledActionTypes: ['ignore'],
     };
     expect(() =>
-      getActionsConfigurationUtilities(config).ensureActionTypeEnabled('foo')
+      getActionsConfigurationUtilities(config).ensureActionTypeEnabledInConfig('foo')
     ).toThrowErrorMatchingInlineSnapshot(
       `"action type \\"foo\\" is not enabled in the Kibana config xpack.actions.enabledActionTypes"`
     );
@@ -270,7 +272,9 @@ describe('ensureActionTypeEnabled', () => {
       allowedHosts: [],
       enabledActionTypes: ['ignore', 'foo'],
     };
-    expect(getActionsConfigurationUtilities(config).ensureActionTypeEnabled('foo')).toBeUndefined();
+    expect(
+      getActionsConfigurationUtilities(config).ensureActionTypeEnabledInConfig('foo')
+    ).toBeUndefined();
   });
 });
 

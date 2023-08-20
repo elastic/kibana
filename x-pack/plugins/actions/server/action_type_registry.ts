@@ -12,7 +12,12 @@ import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { rawConnectorSchema } from './raw_connector_schema';
 import { ActionType as CommonActionType, areValidFeatures } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
-import { getActionTypeFeatureUsageName, TaskRunnerFactory, ILicenseState } from './lib';
+import {
+  getActionTypeFeatureUsageName,
+  TaskRunnerFactory,
+  ILicenseState,
+  ActionTypeDisabledError,
+} from './lib';
 import {
   ActionType,
   InMemoryConnector,
@@ -59,7 +64,19 @@ export class ActionTypeRegistry {
    * Throws error if action type is not enabled.
    */
   public ensureActionTypeEnabled(id: string) {
-    this.actionsConfigUtils.ensureActionTypeEnabled(id);
+    if (!this.get(id).enabled) {
+      throw new ActionTypeDisabledError(
+        i18n.translate('xpack.actions.disabledActionTypeInRegistryError', {
+          defaultMessage: 'action type "{actionType}" is disabled in action type registry',
+          values: {
+            actionType: id,
+          },
+        }),
+        'disabled_in_registry'
+      );
+    }
+
+    this.actionsConfigUtils.ensureActionTypeEnabledInConfig(id);
     // Important to happen last because the function will notify of feature usage at the
     // same time and it shouldn't notify when the action type isn't enabled
     this.licenseState.ensureLicenseForActionType(this.get(id));
@@ -74,7 +91,8 @@ export class ActionTypeRegistry {
   ) {
     return (
       this.actionsConfigUtils.isActionTypeEnabled(id) &&
-      this.licenseState.isLicenseValidForActionType(this.get(id), options).isValid === true
+      this.licenseState.isLicenseValidForActionType(this.get(id), options).isValid &&
+      this.get(id).enabled
     );
   }
 
@@ -248,5 +266,9 @@ export class ActionTypeRegistry {
 
   public getAllTypes(): string[] {
     return [...this.list().map(({ id }) => id)];
+  }
+
+  public setEnabled({ id, enabled }: { id: string; enabled: boolean }) {
+    this.get(id).enabled = enabled;
   }
 }

@@ -71,6 +71,7 @@ export function getServiceNowSIRConnectorType(): ServiceNowConnectorType<
   return {
     id: ServiceNowSIRConnectorTypeId,
     minimumLicenseRequired: 'platinum',
+    enabled: true,
     name: i18n.SERVICENOW_SIR,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,

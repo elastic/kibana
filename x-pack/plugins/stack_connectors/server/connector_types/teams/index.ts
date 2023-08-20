@@ -62,6 +62,7 @@ export function getConnectorType(): TeamsConnectorType {
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
+    enabled: true,
     name: i18n.translate('xpack.stackConnectors.teams.title', {
       defaultMessage: 'Microsoft Teams',
     }),

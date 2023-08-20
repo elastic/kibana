@@ -12,6 +12,7 @@ import { ensureSufficientLicense } from './ensure_sufficient_license';
 const sampleActionType: ActionType = {
   id: 'test',
   name: 'test',
+  enabled: true,
   minimumLicenseRequired: 'basic',
   supportedFeatureIds: ['alerting'],
   validate: {

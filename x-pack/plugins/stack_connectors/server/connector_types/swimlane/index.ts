@@ -44,6 +44,7 @@ export function getConnectorType(): ConnectorType<
   return {
     id: '.swimlane',
     minimumLicenseRequired: 'gold',
+    enabled: true,
     name: i18n.translate('xpack.stackConnectors.swimlane.title', {
       defaultMessage: 'Swimlane',
     }),

@@ -12,7 +12,8 @@ export type ActionTypeDisabledReason =
   | 'config'
   | 'license_unavailable'
   | 'license_invalid'
-  | 'license_expired';
+  | 'license_expired'
+  | 'disabled_in_registry';
 
 export class ActionTypeDisabledError extends Error implements ErrorThatHandlesItsOwnResponse {
   public readonly reason: ActionTypeDisabledReason;

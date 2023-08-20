@@ -52,6 +52,7 @@ export function getConnectorType(): ServerLogConnectorType {
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'basic',
+    enabled: true,
     name: i18n.translate('xpack.stackConnectors.serverLog.title', {
       defaultMessage: 'Server log',
     }),

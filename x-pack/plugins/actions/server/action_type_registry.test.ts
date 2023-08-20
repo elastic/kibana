@@ -72,6 +72,7 @@ describe('actionTypeRegistry', () => {
       actionTypeRegistry.register<{}, {}, {}, void>({
         id: 'my-action-type',
         name: 'My action type',
+        enabled: true,
         minimumLicenseRequired: 'gold',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -105,6 +106,7 @@ describe('actionTypeRegistry', () => {
       const myType: ActionType = {
         id: 'my-action-type',
         name: 'My action type',
+        enabled: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -125,6 +127,7 @@ describe('actionTypeRegistry', () => {
       actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
+        enabled: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -138,6 +141,7 @@ describe('actionTypeRegistry', () => {
         actionTypeRegistry.register({
           id: 'my-action-type',
           name: 'My action type',
+          enabled: true,
           minimumLicenseRequired: 'basic',
           supportedFeatureIds: ['alerting'],
           validate: {
@@ -158,6 +162,7 @@ describe('actionTypeRegistry', () => {
         actionTypeRegistry.register({
           id: 'my-action-type',
           name: 'My action type',
+          enabled: true,
           minimumLicenseRequired: 'basic',
           supportedFeatureIds: [],
           validate: {
@@ -178,6 +183,7 @@ describe('actionTypeRegistry', () => {
         actionTypeRegistry.register({
           id: 'my-action-type',
           name: 'My action type',
+          enabled: true,
           minimumLicenseRequired: 'basic',
           supportedFeatureIds: ['foo'],
           validate: {
@@ -197,6 +203,7 @@ describe('actionTypeRegistry', () => {
       actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
+        enabled: true,
         minimumLicenseRequired: 'gold',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -217,6 +224,7 @@ describe('actionTypeRegistry', () => {
       actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
+        enabled: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -236,6 +244,7 @@ describe('actionTypeRegistry', () => {
         actionTypeRegistry.register({
           id: 'my-action-type',
           name: 'My action type',
+          enabled: true,
           minimumLicenseRequired: 'basic',
           supportedFeatureIds: ['alerting'],
           isSystemActionType: true,
@@ -256,6 +265,7 @@ describe('actionTypeRegistry', () => {
         actionTypeRegistry.register({
           id: 'my-action-type',
           name: 'My action type',
+          enabled: true,
           minimumLicenseRequired: 'basic',
           supportedFeatureIds: ['alerting'],
           getKibanaPrivileges: jest.fn(),
@@ -271,6 +281,24 @@ describe('actionTypeRegistry', () => {
         `"Kibana privilege authorization is only supported for system action types"`
       );
     });
+
+    test('can register a disabled action type', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register<{}, {}, {}, void>({
+        id: 'my-disabled-action-type',
+        name: 'My action type',
+        enabled: false,
+        minimumLicenseRequired: 'gold',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        executor,
+      });
+      expect(actionTypeRegistry.get('my-disabled-action-type').enabled).toBeFalsy();
+    });
   });
 
   describe('get()', () => {
@@ -279,6 +307,7 @@ describe('actionTypeRegistry', () => {
       actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
+        enabled: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -292,6 +321,7 @@ describe('actionTypeRegistry', () => {
       expect(validate).toBeDefined();
       expect(rest).toMatchInlineSnapshot(`
       Object {
+        "enabled": true,
         "executor": [Function],
         "id": "my-action-type",
         "minimumLicenseRequired": "basic",
@@ -318,6 +348,7 @@ describe('actionTypeRegistry', () => {
       actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
+        enabled: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -350,6 +381,7 @@ describe('actionTypeRegistry', () => {
       actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
+        enabled: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -362,6 +394,7 @@ describe('actionTypeRegistry', () => {
       actionTypeRegistry.register({
         id: 'another-action-type',
         name: 'My action type',
+        enabled: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['cases'],
         validate: {
@@ -395,6 +428,7 @@ describe('actionTypeRegistry', () => {
       actionTypeRegistry.register({
         id: 'test.system-action',
         name: 'Cases',
+        enabled: true,
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -434,6 +468,7 @@ describe('actionTypeRegistry', () => {
       actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
+        enabled: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -453,6 +488,7 @@ describe('actionTypeRegistry', () => {
     const fooActionType: ActionType = {
       id: 'foo',
       name: 'Foo',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -531,12 +567,10 @@ describe('actionTypeRegistry', () => {
       expect(actionTypeRegistry.isActionTypeEnabled('foo')).toEqual(false);
     });
 
-    test('should return false when isActionTypeEnabled is true and isLicenseValidForActionType is false', async () => {
+    test('should return false when isActionTypeEnabled is true and isLicenseValidForActionType is true but disabled in the registry', async () => {
       mockedActionsConfig.isActionTypeEnabled.mockReturnValue(true);
-      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({
-        isValid: false,
-        reason: 'invalid',
-      });
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      actionTypeRegistry.setEnabled({ id: 'foo', enabled: false });
       expect(actionTypeRegistry.isActionTypeEnabled('foo')).toEqual(false);
     });
   });
@@ -546,6 +580,7 @@ describe('actionTypeRegistry', () => {
     const fooActionType: ActionType = {
       id: 'foo',
       name: 'Foo',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -565,7 +600,7 @@ describe('actionTypeRegistry', () => {
 
     test('should call ensureActionTypeEnabled of the action config', async () => {
       actionTypeRegistry.ensureActionTypeEnabled('foo');
-      expect(mockedActionsConfig.ensureActionTypeEnabled).toHaveBeenCalledWith('foo');
+      expect(mockedActionsConfig.ensureActionTypeEnabledInConfig).toHaveBeenCalledWith('foo');
     });
 
     test('should call ensureLicenseForActionType on the license state', async () => {
@@ -574,7 +609,7 @@ describe('actionTypeRegistry', () => {
     });
 
     test('should throw when ensureActionTypeEnabled throws', async () => {
-      mockedActionsConfig.ensureActionTypeEnabled.mockImplementation(() => {
+      mockedActionsConfig.ensureActionTypeEnabledInConfig.mockImplementation(() => {
         throw new Error('Fail');
       });
       expect(() =>
@@ -590,6 +625,15 @@ describe('actionTypeRegistry', () => {
         actionTypeRegistry.ensureActionTypeEnabled('foo')
       ).toThrowErrorMatchingInlineSnapshot(`"Fail"`);
     });
+
+    test('should throw when action type is disabled in the registry', async () => {
+      actionTypeRegistry.setEnabled({ id: 'foo', enabled: false });
+      expect(() =>
+        actionTypeRegistry.ensureActionTypeEnabled('foo')
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"action type \\"foo\\" is disabled in action type registry"`
+      );
+    });
   });
 
   describe('isActionExecutable()', () => {
@@ -597,6 +641,7 @@ describe('actionTypeRegistry', () => {
     const fooActionType: ActionType = {
       id: 'foo',
       name: 'Foo',
+      enabled: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
@@ -629,6 +674,13 @@ describe('actionTypeRegistry', () => {
         notifyUsage: true,
       });
     });
+
+    test('should return false when the action type is disabled in the registry', async () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      actionTypeRegistry.setEnabled({ id: 'foo', enabled: false });
+      const result = actionTypeRegistry.isActionExecutable('123', 'foo', { notifyUsage: true });
+      expect(result).toBe(false);
+    });
   });
 
   describe('getAllTypes()', () => {
@@ -644,6 +696,7 @@ describe('actionTypeRegistry', () => {
       registry.register({
         id: 'foo',
         name: 'Foo',
+        enabled: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -667,6 +720,7 @@ describe('actionTypeRegistry', () => {
       registry.register({
         id: 'test.system-action',
         name: 'Cases',
+        enabled: true,
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -690,6 +744,7 @@ describe('actionTypeRegistry', () => {
       registry.register({
         id: 'foo',
         name: 'Foo',
+        enabled: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -725,6 +780,7 @@ describe('actionTypeRegistry', () => {
       registry.register({
         id: 'test.system-action',
         name: 'Cases',
+        enabled: true,
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['alerting'],
         getKibanaPrivileges: () => ['test/create'],
@@ -747,6 +803,7 @@ describe('actionTypeRegistry', () => {
       registry.register({
         id: 'test.system-action',
         name: 'Cases',
+        enabled: true,
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -768,6 +825,7 @@ describe('actionTypeRegistry', () => {
       registry.register({
         id: 'foo',
         name: 'Foo',
+        enabled: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         validate: {
@@ -789,6 +847,7 @@ describe('actionTypeRegistry', () => {
       registry.register({
         id: 'test.system-action',
         name: 'Cases',
+        enabled: true,
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['alerting'],
         getKibanaPrivileges,
@@ -803,6 +862,41 @@ describe('actionTypeRegistry', () => {
 
       registry.getSystemActionKibanaPrivileges('test.system-action', { foo: 'bar' });
       expect(getKibanaPrivileges).toHaveBeenCalledWith({ params: { foo: 'bar' } });
+    });
+  });
+
+  describe('setEnabled', () => {
+    let actionTypeRegistry: ActionTypeRegistry;
+    const fooActionType: ActionType = {
+      id: 'foo',
+      name: 'Foo',
+      enabled: true,
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor: async (options) => {
+        return { status: 'ok', actionId: options.actionId };
+      },
+    };
+
+    beforeAll(() => {
+      actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(fooActionType);
+    });
+    test('should set action type enabled false', async () => {
+      actionTypeRegistry.setEnabled({ id: 'foo', enabled: false });
+      const actionType = actionTypeRegistry.get('foo');
+      expect(actionType.enabled).toBe(false);
+    });
+
+    test('should set action type enabled true', async () => {
+      actionTypeRegistry.setEnabled({ id: 'foo', enabled: false });
+      const actionType = actionTypeRegistry.get('foo');
+      expect(actionType.enabled).toBe(false);
     });
   });
 });

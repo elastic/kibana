@@ -62,6 +62,7 @@ export function getServiceNowITOMConnectorType(): ServiceNowConnectorType<
     id: ServiceNowITOMConnectorTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.SERVICENOW_ITOM,
+    enabled: true,
     supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     validate: {
       config: {

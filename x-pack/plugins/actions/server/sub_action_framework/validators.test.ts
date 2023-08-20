@@ -24,6 +24,7 @@ describe('Validators', () => {
     const connector = {
       id: '.test',
       name: 'Test',
+      enabled: true,
       minimumLicenseRequired: 'basic' as const,
       supportedFeatureIds: ['alerting'],
       schema: {
@@ -43,6 +44,7 @@ describe('Validators', () => {
     const connector: SubActionConnectorType<TestConfig, TestSecrets> = {
       id: '.test',
       name: 'Test',
+      enabled: true,
       minimumLicenseRequired: 'basic' as const,
       supportedFeatureIds: ['alerting'],
       schema: {

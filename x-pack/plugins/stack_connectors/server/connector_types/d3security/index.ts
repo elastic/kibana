@@ -25,6 +25,7 @@ export function getConnectorType(): D3SecurityConnectorType {
   return {
     id: D3_SECURITY_CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
+    enabled: true,
     name: D3_SECURITY_TITLE,
     Service: D3SecurityConnector,
     supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],

@@ -14,6 +14,7 @@ describe('transform connector for export', () => {
   const connectorType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
+    enabled: true,
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     executor: jest.fn(),

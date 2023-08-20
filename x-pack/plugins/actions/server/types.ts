@@ -142,6 +142,7 @@ export interface ActionType<
   id: string;
   name: string;
   maxAttempts?: number;
+  enabled: boolean;
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
   validate: {

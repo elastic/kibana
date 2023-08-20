@@ -100,10 +100,11 @@ export interface FixtureStartDeps {
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   public setup(core: CoreSetup<FixtureStartDeps>, { features, actions }: FixtureSetupDeps) {
-    // this action is specifically NOT enabled in ../../config.ts
+    // this action is specifically NOT enabled in ../../config.ts (but enabled in the registry)
     const notEnabledActionType: ActionType = {
       id: 'test.not-enabled',
       name: 'Test: Not Enabled',
+      enabled: true,
       minimumLicenseRequired: 'gold',
       supportedFeatureIds: ['alerting'],
       validate: {

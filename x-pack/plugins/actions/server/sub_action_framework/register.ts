@@ -50,6 +50,7 @@ export const register = <Config extends ActionTypeConfig, Secrets extends Action
   actionTypeRegistry.register<Config, Secrets, ExecutorParams, unknown>({
     id: connector.id,
     name: connector.name,
+    enabled: connector.enabled,
     minimumLicenseRequired: connector.minimumLicenseRequired,
     supportedFeatureIds: connector.supportedFeatureIds,
     validate: validators,

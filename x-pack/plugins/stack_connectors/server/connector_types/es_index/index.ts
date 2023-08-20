@@ -74,6 +74,7 @@ export function getConnectorType(): ESIndexConnectorType {
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'basic',
+    enabled: true,
     name: i18n.translate('xpack.stackConnectors.esIndex.title', {
       defaultMessage: 'Index',
     }),

@@ -222,6 +222,7 @@ export function getConnectorType(params: GetConnectorTypeParams): EmailConnector
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
+    enabled: true,
     name: i18n.translate('xpack.stackConnectors.email.title', {
       defaultMessage: 'Email',
     }),
