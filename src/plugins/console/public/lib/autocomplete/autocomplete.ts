@@ -1073,7 +1073,7 @@ export default function ({
     pos: Position
   ) {
     let currentToken = editor.getTokenAt(pos)!;
-    tracer('has started evaluating current token,', currentToken);
+    tracer('has started evaluating current token', currentToken);
 
     if (!currentToken) {
       if (pos.lineNumber === 1) {
@@ -1123,9 +1123,8 @@ export default function ({
     ) {
       // do not suppress autocomplete for a single character following method in URL
     } else if (
-      (lastEvaluatedToken.position.column ?? 0) < currentToken.position.column &&
-      (lastEvaluatedToken.position.lineNumber ?? currentToken.position.lineNumber) ===
-        currentToken.position.lineNumber &&
+      lastEvaluatedToken.position.column < currentToken.position.column &&
+      lastEvaluatedToken.position.lineNumber === currentToken.position.lineNumber &&
       !lastEvaluatedToken.type &&
       currentToken.type === 'method' &&
       currentToken.value.length === 1
@@ -1140,7 +1139,7 @@ export default function ({
       lastEvaluatedToken.value === currentToken.value
     ) {
       tracer(
-        'not starting autocomplete since the change looks like a click,',
+        'not starting autocomplete since the change looks like a click',
         lastEvaluatedToken,
         '->',
         currentToken
@@ -1160,11 +1159,11 @@ export default function ({
       case 'comment.punctuation':
       case 'comment.block':
       case 'UNKNOWN':
-        tracer('not starting autocomplete for current token type:', currentToken.type);
+        tracer('not starting autocomplete for current token type', currentToken.type);
         return;
     }
 
-    tracer('starting autocomplete,', lastEvaluatedToken, '->', currentToken);
+    tracer('starting autocomplete', lastEvaluatedToken, '->', currentToken);
     lastEvaluatedToken = currentToken;
     editor.execCommand('startAutocomplete');
   },
@@ -1172,7 +1171,7 @@ export default function ({
 
   function editorChangeListener() {
     const position = editor.getCurrentPosition();
-    tracer('editor changed,', position);
+    tracer('editor changed', position);
     if (position && !editor.isCompleterActive()) {
       tracer('will start evaluating current token');
       evaluateCurrentTokenAfterAChange(position);
