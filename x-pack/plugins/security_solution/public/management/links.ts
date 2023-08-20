@@ -31,7 +31,7 @@ import {
   ENDPOINTS,
   EVENT_FILTERS,
   HOST_ISOLATION_EXCEPTIONS,
-  SETTINGS,
+  MANAGE,
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
   TRUSTED_APPLICATIONS,
@@ -49,7 +49,6 @@ import { IconPipeline } from '../common/icons/pipeline';
 import { IconSavedObject } from '../common/icons/saved_object';
 import { IconDashboards } from '../common/icons/dashboards';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
-
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 
 const categories = [
@@ -77,21 +76,21 @@ const categories = [
     label: i18n.translate('xpack.securitySolution.appLinks.category.cloudSecurity', {
       defaultMessage: 'Cloud Security',
     }),
-    linkIds: [cloudDefendLink.id],
+    linkIds: [SecurityPageName.cloudDefendPolicies],
   },
 ];
 
 export const links: LinkItem = {
   id: SecurityPageName.administration,
-  title: SETTINGS,
+  title: MANAGE,
   path: MANAGE_PATH,
   skipUrlState: true,
   hideTimeline: true,
   globalNavPosition: 8,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.settings', {
-      defaultMessage: 'Settings',
+    i18n.translate('xpack.securitySolution.appLinks.manage', {
+      defaultMessage: 'Manage',
     }),
   ],
   categories,
@@ -177,7 +176,9 @@ export const links: LinkItem = {
       path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
       skipUrlState: true,
       hideTimeline: true,
+      capabilities: [`${SERVER_APP_ID}.entity-analytics`],
       experimentalKey: 'riskScoringRoutesEnabled',
+      licenseType: 'platinum',
     },
     {
       id: SecurityPageName.responseActionsHistory,

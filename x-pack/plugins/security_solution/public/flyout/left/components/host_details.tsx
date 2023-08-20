@@ -12,17 +12,17 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiInMemoryTable,
-  EuiHorizontalRule,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
   EuiIcon,
+  EuiPanel,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../common/search_strategy/security_solution/related_entities/related_users';
 import type { RiskSeverity } from '../../../../common/search_strategy';
-import { EntityPanel } from '../../right/components/entity_panel';
 import { HostOverview } from '../../../overview/components/host_overview';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
@@ -50,6 +50,7 @@ import { HOST_DETAILS_TEST_ID, HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID } from '
 import { ENTITY_RISK_CLASSIFICATION } from '../../../explore/components/risk_score/translations';
 import { USER_RISK_TOOLTIP } from '../../../explore/users/components/all_users/translations';
 import * as i18n from './translations';
+import { useHasSecurityCapability } from '../../../helper_hooks';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
 const RELATED_USERS_ID = 'entities-hosts-related-users';
@@ -77,7 +78,10 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
   // create a unique, but stable (across re-renders) query id
   const hostDetailsQueryId = useMemo(() => `${HOST_DETAILS_ID}-${uuid()}`, []);
   const relatedUsersQueryId = useMemo(() => `${RELATED_USERS_ID}-${uuid()}`, []);
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+  const isEntityAnalyticsAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
+
   const narrowDateRange = useCallback(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
@@ -151,7 +155,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
           );
         },
       },
-      ...(isPlatinumOrTrialLicense
+      ...(isEntityAnalyticsAuthorized
         ? [
             {
               field: 'risk',
@@ -176,7 +180,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
           ]
         : []),
     ],
-    [isPlatinumOrTrialLicense]
+    [isEntityAnalyticsAuthorized]
   );
 
   const relatedUsersCount = useMemo(
@@ -203,15 +207,16 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
   return (
     <>
       <EuiTitle size="xs">
-        <h4>{i18n.HOSTS_TITLE}</h4>
+        <h4>{i18n.HOST_TITLE}</h4>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EntityPanel
-        title={hostName}
-        iconType={'storage'}
-        expandable={true}
-        expanded={true}
-        headerContent={relatedUsersCount}
+      <ExpandablePanel
+        header={{
+          title: hostName,
+          iconType: 'storage',
+          headerContent: relatedUsersCount,
+        }}
+        expand={{ expandable: true, expandedOnFirstRender: true }}
         data-test-subj={HOST_DETAILS_TEST_ID}
       >
         <EuiTitle size="xxs">
@@ -245,42 +250,44 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
             />
           )}
         </AnomalyTableProvider>
-        <EuiHorizontalRule margin="m" />
-        <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <h5>{i18n.RELATED_USERS_TITLE}</h5>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={i18n.RELATED_USERS_TOOL_TIP}>
-              <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <RelatedUsersManage
-          id={relatedUsersQueryId}
-          inspect={inspectRelatedUsers}
-          loading={isRelatedUsersLoading}
-          setQuery={setQuery}
-          deleteQuery={deleteQuery}
-          refetch={refetchRelatedUsers}
-        >
-          <EuiInMemoryTable
-            columns={relatedUsersColumns}
-            items={relatedUsers}
+        <EuiPanel hasBorder={true}>
+          <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxs">
+                <h5>{i18n.RELATED_USERS_TITLE}</h5>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18n.RELATED_USERS_TOOL_TIP}>
+                <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <RelatedUsersManage
+            id={relatedUsersQueryId}
+            inspect={inspectRelatedUsers}
             loading={isRelatedUsersLoading}
-            data-test-subj={HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID}
-            pagination={pagination}
-          />
-          <InspectButton
-            queryId={relatedUsersQueryId}
-            title={i18n.RELATED_USERS_TITLE}
-            inspectIndex={0}
-          />
-        </RelatedUsersManage>
-      </EntityPanel>
+            setQuery={setQuery}
+            deleteQuery={deleteQuery}
+            refetch={refetchRelatedUsers}
+          >
+            <EuiInMemoryTable
+              columns={relatedUsersColumns}
+              items={relatedUsers}
+              loading={isRelatedUsersLoading}
+              data-test-subj={HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID}
+              pagination={pagination}
+            />
+            <InspectButton
+              queryId={relatedUsersQueryId}
+              title={i18n.RELATED_USERS_TITLE}
+              inspectIndex={0}
+            />
+          </RelatedUsersManage>
+        </EuiPanel>
+      </ExpandablePanel>
     </>
   );
 };

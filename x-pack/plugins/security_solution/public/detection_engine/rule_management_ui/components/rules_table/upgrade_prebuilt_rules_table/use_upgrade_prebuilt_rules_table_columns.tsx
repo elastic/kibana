@@ -6,11 +6,11 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBadge, EuiButtonEmpty, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
-import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
-import type { RuleSignatureId } from '../../../../../../common/detection_engine/rule_schema';
+import type { RuleUpgradeInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
@@ -25,13 +25,32 @@ import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_ta
 
 export type TableColumn = EuiBasicTableColumn<RuleUpgradeInfoForReview>;
 
+interface RuleNameProps {
+  name: string;
+  ruleId: string;
+}
+
+const RuleName = ({ name, ruleId }: RuleNameProps) => {
+  const {
+    actions: { openFlyoutForRuleId },
+  } = useUpgradePrebuiltRulesTableContext();
+
+  return (
+    <EuiLink
+      onClick={() => {
+        openFlyoutForRuleId(ruleId);
+      }}
+    >
+      {name}
+    </EuiLink>
+  );
+};
+
 const RULE_NAME_COLUMN: TableColumn = {
   field: 'rule.name',
   name: i18n.COLUMN_RULE,
-  render: (value: RuleUpgradeInfoForReview['rule']['name']) => (
-    <EuiText id={value} size="s">
-      {value}
-    </EuiText>
+  render: (value: RuleUpgradeInfoForReview['rule']['name'], rule: RuleUpgradeInfoForReview) => (
+    <RuleName name={value} ruleId={rule.rule.rule_id} />
   ),
   sortable: true,
   truncateText: true,
@@ -98,6 +117,7 @@ const createUpgradeButtonColumn = (
         size="s"
         disabled={isUpgradeButtonDisabled}
         onClick={() => upgradeOneRule(ruleId)}
+        data-test-subj={`upgradeSinglePrebuiltRuleButton-${ruleId}`}
       >
         {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : i18n.UPDATE_RULE_BUTTON}
       </EuiButtonEmpty>

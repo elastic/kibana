@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../../../../common/detection_engine/rule_schema';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleVersions } from '../../logic/diff/calculate_rule_diff';
 import type { PrebuiltRuleAsset } from '../rule_assets/prebuilt_rule_asset';
 

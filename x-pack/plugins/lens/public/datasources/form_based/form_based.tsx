@@ -23,7 +23,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import { EuiButton } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { type DraggingIdentifier } from '@kbn/dom-drag-drop';
-import { DimensionTrigger } from '@kbn/visualization-ui-components/public';
+import { DimensionTrigger } from '@kbn/visualization-ui-components';
 import memoizeOne from 'memoize-one';
 import type {
   DatasourceDimensionEditorProps,
@@ -69,6 +69,7 @@ import {
   isColumnInvalid,
   cloneLayer,
   getNotifiableFeatures,
+  getUnsupportedOperationsWarningMessage,
 } from './utils';
 import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
@@ -134,6 +135,27 @@ function getSortingHint(column: GenericIndexPatternColumn, dataView?: IndexPatte
     return column.dataType;
   }
 }
+
+export const removeColumn: Datasource<FormBasedPrivateState>['removeColumn'] = ({
+  prevState,
+  layerId,
+  columnId,
+  indexPatterns,
+}) => {
+  const indexPattern = indexPatterns?.[prevState.layers[layerId]?.indexPatternId];
+  if (!indexPattern) {
+    throw new Error('indexPatterns is not passed to the function');
+  }
+  return mergeLayer({
+    state: prevState,
+    layerId,
+    newLayer: deleteColumn({
+      layer: prevState.layers[layerId],
+      columnId,
+      indexPattern,
+    }),
+  });
+};
 
 export function columnToOperation(
   column: GenericIndexPatternColumn,
@@ -300,18 +322,7 @@ export function getFormBasedDatasource({
       return Object.keys(state?.layers);
     },
 
-    removeColumn({ prevState, layerId, columnId, indexPatterns }) {
-      const indexPattern = indexPatterns[prevState.layers[layerId]?.indexPatternId];
-      return mergeLayer({
-        state: prevState,
-        layerId,
-        newLayer: deleteColumn({
-          layer: prevState.layers[layerId],
-          columnId,
-          indexPattern,
-        }),
-      });
-    },
+    removeColumn,
 
     initializeDimension(
       state,
@@ -539,10 +550,6 @@ export function getFormBasedDatasource({
           {...otherProps}
         />
       );
-    },
-
-    canCloseDimensionEditor: (state) => {
-      return !state.isDimensionClosePrevented;
     },
 
     getDropProps,
@@ -795,6 +802,7 @@ export function getFormBasedDatasource({
           core.docLinks,
           setState
         ),
+        ...getUnsupportedOperationsWarningMessage(state, frameDatasourceAPI, core.docLinks),
       ];
 
       const infoMessages = getNotifiableFeatures(state, frameDatasourceAPI, visualizationInfo);

@@ -11,6 +11,7 @@ import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server'
 import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 export interface ProfilingPluginSetupDeps {
   observability: ObservabilityPluginSetup;
@@ -18,6 +19,7 @@ export interface ProfilingPluginSetupDeps {
   cloud: CloudSetup;
   fleet: FleetSetupContract;
   spaces?: SpacesPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface ProfilingPluginStartDeps {
@@ -34,3 +36,5 @@ export interface ProfilingPluginSetup {}
 export interface ProfilingPluginStart {}
 
 export type ProfilingRequestHandlerContext = CustomRequestHandlerContext<{}>;
+
+export type TelemetryUsageCounter = ReturnType<UsageCollectionSetup['createUsageCounter']>;

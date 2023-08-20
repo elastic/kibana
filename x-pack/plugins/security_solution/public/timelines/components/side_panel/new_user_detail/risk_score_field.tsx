@@ -25,10 +25,10 @@ export const RiskScoreField = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { fontSize: xsFontSize } = useEuiFontSize('xs');
-  const { data: userRisk, isLicenseValid: isRiskLicenseValid } = riskScoreState;
+  const { data: userRisk, isAuthorized: isRiskScoreAuthorized } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
 
-  if (!isRiskLicenseValid) {
+  if (!isRiskScoreAuthorized) {
     return null;
   }
 

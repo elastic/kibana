@@ -8,7 +8,7 @@ import React from 'react';
 import type { FC } from 'react';
 
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import type { WarningSchema } from '../../../../../common/detection_engine/schemas/response';
+import type { WarningSchema } from '../../../../../common/api/detection_engine';
 import { useKibana } from '../../../lib/kibana/kibana_react';
 import * as i18n from '../translations';
 

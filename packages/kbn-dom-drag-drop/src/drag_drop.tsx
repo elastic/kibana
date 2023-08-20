@@ -628,21 +628,6 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
 
   const mainTargetProps = getProps(dropTypes && dropTypes[0]);
 
-  const extraDropStyles = useMemo(() => {
-    const extraDrops = dropTypes && dropTypes.length && dropTypes.slice(1);
-    if (!extraDrops || !extraDrops.length) {
-      return;
-    }
-
-    const height = extraDrops.length * 40;
-    const minHeight = height - (mainTargetRef.current?.clientHeight || 40);
-    const clipPath = `polygon(100% 0px, 100% ${height - minHeight}px, 0 100%, 0 0)`;
-    return {
-      clipPath,
-      height,
-    };
-  }, [dropTypes]);
-
   return (
     <div
       data-test-subj={`${dataTestSubjPrefix}Container`}
@@ -658,32 +643,25 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
         children={children}
       />
       {dropTypes && dropTypes.length > 1 && (
-        <>
-          <div
-            className="domDragDrop__diamondPath"
-            style={extraDropStyles}
-            onDragEnter={dragEnter}
-          />
-          <EuiFlexGroup
-            gutterSize="none"
-            direction="column"
-            data-test-subj={`${dataTestSubjPrefix}ExtraDrops`}
-            className={classNames('domDragDrop__extraDrops', {
-              'domDragDrop__extraDrops-visible': isInZone || activeDropTarget?.id === value.id,
-            })}
-          >
-            {dropTypes.slice(1).map((dropType) => {
-              const dropChildren = getCustomDropTarget?.(dropType);
-              return dropChildren ? (
-                <EuiFlexItem key={dropType} className="domDragDrop__extraDropWrapper">
-                  <SingleDropInner {...getProps(dropType, dropChildren)}>
-                    {dropChildren}
-                  </SingleDropInner>
-                </EuiFlexItem>
-              ) : null;
-            })}
-          </EuiFlexGroup>
-        </>
+        <EuiFlexGroup
+          gutterSize="none"
+          direction="column"
+          data-test-subj={`${dataTestSubjPrefix}ExtraDrops`}
+          className={classNames('domDragDrop__extraDrops', {
+            'domDragDrop__extraDrops-visible': isInZone || activeDropTarget?.id === value.id,
+          })}
+        >
+          {dropTypes.slice(1).map((dropType) => {
+            const dropChildren = getCustomDropTarget?.(dropType);
+            return dropChildren ? (
+              <EuiFlexItem key={dropType} className="domDragDrop__extraDropWrapper">
+                <SingleDropInner {...getProps(dropType, dropChildren)}>
+                  {dropChildren}
+                </SingleDropInner>
+              </EuiFlexItem>
+            ) : null;
+          })}
+        </EuiFlexGroup>
       )}
     </div>
   );

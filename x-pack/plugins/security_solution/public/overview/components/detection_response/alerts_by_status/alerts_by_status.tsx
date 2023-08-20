@@ -63,7 +63,7 @@ import { useAlertsByStatusVisualizationData } from './use_alerts_by_status_visua
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from './types';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
-import type { Status } from '../../../../../common/detection_engine/schemas/common';
+import type { Status } from '../../../../../common/api/detection_engine';
 import { getAlertsByStatusAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_by_status_donut';
 
 const StyledFlexItem = styled(EuiFlexItem)`

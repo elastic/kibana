@@ -111,8 +111,6 @@ You can interact with the dashboard data using controls that allow you to apply 
 . From the *Manufacturer* dropdown, select *Gnomehouse*.
 
 . From the *Category* dropdown, select *Women's Clothing*.
-
-. Click *Apply changes*.
 +
 [role="screenshot"]
 image::images/sampleDataFilter_dashboard_8.6.0.png[The [eCommerce] Revenue Dashboard that shows only the women's clothing data from the Gnomehouse manufacturer]

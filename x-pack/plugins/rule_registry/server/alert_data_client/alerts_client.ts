@@ -132,7 +132,7 @@ interface SingleSearchAfterAndAudit {
   aggs?: Record<string, any> | undefined;
   index?: string;
   _source?: string[] | undefined;
-  track_total_hits?: boolean | undefined;
+  track_total_hits?: boolean | number;
   size?: number | undefined;
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
   sort?: estypes.SortOptions[] | undefined;
@@ -966,7 +966,7 @@ export class AlertsClient {
     search_after?: Array<string | number>;
     size?: number;
     sort?: estypes.SortOptions[];
-    track_total_hits?: boolean;
+    track_total_hits?: boolean | number;
     _source?: string[];
   }) {
     try {

@@ -8,10 +8,10 @@
 import { Stream } from 'stream';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { exportListItemQuerySchema } from '@kbn/securitysolution-io-ts-list-types';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
+import { exportListItemRequestQuery } from '../../common/api';
 
 import { buildRouteValidation, buildSiemResponse } from './utils';
 
@@ -25,7 +25,7 @@ export const exportListItemRoute = (router: ListsPluginRouter): void => {
       },
       path: `${LIST_ITEM_URL}/_export`,
       validate: {
-        query: buildRouteValidation(exportListItemQuerySchema),
+        query: buildRouteValidation(exportListItemRequestQuery),
       },
     },
     async (context, request, response) => {

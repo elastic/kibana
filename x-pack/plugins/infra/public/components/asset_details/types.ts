@@ -7,27 +7,19 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { LogViewReference } from '@kbn/logs-shared-plugin/common';
+import { TimeRange } from '@kbn/es-query';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
-import type { InfraAssetMetricType, SnapshotCustomMetricInput } from '../../../common/http_api';
 
-export type CloudProvider = 'gcp' | 'aws' | 'azure' | 'unknownProvider';
-type HostMetrics = Record<InfraAssetMetricType, number | null>;
-
-interface HostMetadata {
-  os?: string | null;
+interface Metadata {
   ip?: string | null;
-  servicesOnHost?: number | null;
-  title: { name: string; cloudProvider?: CloudProvider | null };
-  id: string;
 }
-export type HostNodeRow = HostMetadata &
-  HostMetrics & {
-    name: string;
-  };
+export type Asset = Metadata & {
+  id: string;
+  name: string;
+};
 
 export enum FlyoutTabIds {
   OVERVIEW = 'overview',
-  METRICS = 'metrics',
   METADATA = 'metadata',
   PROCESSES = 'processes',
   ANOMALIES = 'anomalies',
@@ -39,16 +31,10 @@ export enum FlyoutTabIds {
 
 export type TabIds = `${FlyoutTabIds}`;
 
-export interface StringDateRange {
-  from: string;
-  to: string;
-  mode?: 'absolute' | 'relative' | undefined;
-}
-
 export interface TabState {
   overview?: {
-    dateRange: StringDateRange;
-    dataView?: DataView;
+    metricsDataView?: DataView;
+    logsDataView?: DataView;
   };
   metadata?: {
     query?: string;
@@ -59,11 +45,6 @@ export interface TabState {
   };
   anomalies?: {
     onClose?: () => void;
-  };
-  metrics?: {
-    accountId?: string;
-    region?: string;
-    customMetrics?: SnapshotCustomMetricInput[];
   };
   alertRule?: {
     onCreateRuleClick?: () => void;
@@ -79,11 +60,11 @@ export interface TabState {
 
 export interface FlyoutProps {
   closeFlyout: () => void;
-  showInFlyout: true;
+  mode: 'flyout';
 }
 
 export interface FullPageProps {
-  showInFlyout: false;
+  mode: 'page';
 }
 
 export type RenderMode = FlyoutProps | FullPageProps;
@@ -91,19 +72,14 @@ export type RenderMode = FlyoutProps | FullPageProps;
 export interface Tab {
   id: FlyoutTabIds;
   name: string;
-  'data-test-subj': string;
 }
 
 export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices';
 
 export interface AssetDetailsProps {
-  node: HostNodeRow;
-  nodeType: InventoryItemType;
-  currentTimeRange: {
-    interval: string;
-    from: number;
-    to: number;
-  };
+  asset: Asset;
+  assetType: InventoryItemType;
+  dateRange: TimeRange;
   tabs: Tab[];
   activeTabId?: TabIds;
   overrides?: TabState;

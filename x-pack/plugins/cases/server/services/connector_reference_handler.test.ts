@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NONE_CONNECTOR_ID } from '../../common/api';
+import { NONE_CONNECTOR_ID } from '../../common/constants';
 import { ConnectorReferenceHandler } from './connector_reference_handler';
 
 describe('ConnectorReferenceHandler', () => {

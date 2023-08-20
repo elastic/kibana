@@ -27,6 +27,7 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import { TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
+import { JobMap } from '../data_frame_analytics/pages/job_map';
 import type { ModelItemFull } from './models_list';
 import { ModelPipelines } from './pipelines';
 import { AllocatedModels } from '../memory_usage/nodes_overview/allocated_models';
@@ -419,6 +420,29 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
             },
           ]
         : []),
+      {
+        id: 'models_map',
+        'data-test-subj': 'mlTrainedModelsMap',
+        name: (
+          <FormattedMessage
+            id="xpack.ml.trainedModels.modelsList.expandedRow.modelsMapLabel"
+            defaultMessage="Models map"
+          />
+        ),
+        content: (
+          <div data-test-subj={'mlTrainedModelDetailsContent'}>
+            <EuiSpacer size={'s'} />
+            <EuiFlexItem css={{ height: 300 }}>
+              <JobMap
+                analyticsId={undefined}
+                modelId={item.model_id}
+                forceRefresh={false}
+                defaultHeight={200}
+              />
+            </EuiFlexItem>
+          </div>
+        ),
+      },
     ];
   }, [
     analyticsConfig,
@@ -430,6 +454,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     pipelines,
     restMetaData,
     stats,
+    item.model_id,
   ]);
 
   const initialSelectedTab =

@@ -6,12 +6,12 @@
  */
 
 import { partition } from 'lodash';
-import type { BulkGetAttachmentsResponse, CommentAttributes } from '../../../common/api';
+import type { BulkGetAttachmentsResponse } from '../../../common/types/api';
 import {
-  decodeWithExcessOrThrow,
-  BulkGetAttachmentsResponseRt,
   BulkGetAttachmentsRequestRt,
-} from '../../../common/api';
+  BulkGetAttachmentsResponseRt,
+} from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 import { flattenCommentSavedObjects } from '../../common/utils';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '../types';
@@ -22,8 +22,9 @@ import type { CasesClient } from '../client';
 import type { AttachmentSavedObject, SOWithErrors } from '../../common/types';
 import { partitionByCaseAssociation } from '../../common/partitioning';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
+import type { AttachmentAttributes } from '../../../common/types/domain';
 
-type AttachmentSavedObjectWithErrors = Array<SOWithErrors<CommentAttributes>>;
+type AttachmentSavedObjectWithErrors = Array<SOWithErrors<AttachmentAttributes>>;
 
 /**
  * Retrieves multiple attachments by id.
@@ -86,7 +87,7 @@ interface PartitionedAttachments {
 
 const partitionAttachments = (
   caseId: string,
-  attachments: BulkOptionalAttributes<CommentAttributes>
+  attachments: BulkOptionalAttributes<AttachmentAttributes>
 ): PartitionedAttachments => {
   const [attachmentsWithoutErrors, errors] = partitionBySOError(attachments.saved_objects);
   const [caseAttachments, invalidAssociationAttachments] = partitionByCaseAssociation(
@@ -101,7 +102,7 @@ const partitionAttachments = (
   };
 };
 
-const partitionBySOError = (attachments: Array<OptionalAttributes<CommentAttributes>>) =>
+const partitionBySOError = (attachments: Array<OptionalAttributes<AttachmentAttributes>>) =>
   partition(
     attachments,
     (attachment) => attachment.error == null && attachment.attributes != null

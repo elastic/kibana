@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { FirstLastSeenRequestOptions } from '../../../../../common/search_strategy/security_solution/first_last_seen';
-import { createQueryFilterClauses } from '../../../../utils/build_query';
+import type { FirstLastSeenRequestOptions } from '../../../../../common/api/search_strategy/first_seen_last_seen/first_seen_last_seen';
 
-export const buildFirstOrLastSeenQuery = ({
-  field,
-  value,
-  defaultIndex,
-  order,
-  filterQuery,
-}: FirstLastSeenRequestOptions) => {
+import { createQueryFilterClauses } from '../../../../utils/build_query';
+import { parseOptions } from './parse_options';
+
+export const buildFirstOrLastSeenQuery = (options: unknown) => {
+  const { field, value, defaultIndex, order, filterQuery }: FirstLastSeenRequestOptions =
+    parseOptions(options);
+
   const filter = [...createQueryFilterClauses(filterQuery), { term: { [field]: value } }];
 
   const dslQuery = {

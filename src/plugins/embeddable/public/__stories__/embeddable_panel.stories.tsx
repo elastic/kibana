@@ -113,7 +113,6 @@ const HelloWorldEmbeddablePanel = forwardRef<
         getActions={getActions}
         hideHeader={hideHeader}
         showShadow={showShadow}
-        theme={{ theme$ }}
       />
     );
   }

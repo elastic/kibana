@@ -15,7 +15,7 @@ import {
   DropType,
   DropTargetSwapDuplicateCombine,
 } from '@kbn/dom-drag-drop';
-import { EmptyDimensionButton as EmptyDimensionButtonInner } from '@kbn/visualization-ui-components/public';
+import { EmptyDimensionButton as EmptyDimensionButtonInner } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { isDraggedField } from '../../../../utils';

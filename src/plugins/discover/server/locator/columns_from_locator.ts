@@ -9,12 +9,9 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { getSavedSearch } from '@kbn/saved-search-plugin/server';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
 import { LocatorServicesDeps } from '.';
-import {
-  DiscoverAppLocatorParams,
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  SEARCH_FIELDS_FROM_SOURCE,
-} from '../../common';
+import { DiscoverAppLocatorParams } from '../../common';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');

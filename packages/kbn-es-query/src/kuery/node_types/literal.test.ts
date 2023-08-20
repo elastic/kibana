@@ -31,16 +31,34 @@ describe('kuery node types', () => {
     });
 
     describe('toKqlExpression', () => {
-      test('quoted', () => {
+      test('unquoted', () => {
         const node = buildNode('foo');
         const result = toKqlExpression(node);
         expect(result).toBe('foo');
       });
 
-      test('unquoted', () => {
+      test('quoted', () => {
         const node = buildNode('foo', true);
         const result = toKqlExpression(node);
         expect(result).toBe('"foo"');
+      });
+
+      test('reserved chars', () => {
+        const node = buildNode('():<>"*');
+        const result = toKqlExpression(node);
+        expect(result).toBe('\\(\\)\\:\\<\\>\\"\\*');
+      });
+
+      test('reserved keywords', () => {
+        const node = buildNode('foo and bar not baz or qux');
+        const result = toKqlExpression(node);
+        expect(result).toBe('foo \\and bar \\not baz \\or qux');
+      });
+
+      test('quoted with escaped quotes', () => {
+        const node = buildNode(`I said, "Hello."`, true);
+        const result = toKqlExpression(node);
+        expect(result).toBe(`"I said, \\"Hello.\\""`);
       });
     });
   });

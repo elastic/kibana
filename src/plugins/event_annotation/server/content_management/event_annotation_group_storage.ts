@@ -15,7 +15,9 @@ import type {
   SavedObjectsFindOptions,
 } from '@kbn/core-saved-objects-api-server';
 
-import { EVENT_ANNOTATION_GROUP_TYPE } from '../../common';
+import { getMSearch, type GetMSearchType } from '@kbn/content-management-utils';
+
+import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { cmServicesDefinition } from '../../common/content_management/cm_services';
 import type {
   EventAnnotationGroupSavedObjectAttributes,
@@ -96,7 +98,20 @@ export class EventAnnotationGroupStorage
   implements
     ContentStorage<EventAnnotationGroupSavedObject, PartialEventAnnotationGroupSavedObject>
 {
-  constructor() {}
+  mSearch: GetMSearchType<EventAnnotationGroupSavedObject>;
+  constructor() {
+    this.mSearch = getMSearch<EventAnnotationGroupSavedObject, EventAnnotationGroupSearchOut>({
+      savedObjectType: SO_TYPE,
+      cmServicesDefinition,
+      allowedSavedObjectAttributes: [
+        'title',
+        'description',
+        'ignoreGlobalFilters',
+        'annotations',
+        'dataViewSpec',
+      ],
+    });
+  }
 
   async get(ctx: StorageContext, id: string): Promise<EventAnnotationGroupGetOut> {
     const {

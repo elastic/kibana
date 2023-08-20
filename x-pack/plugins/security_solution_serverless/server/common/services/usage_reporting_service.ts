@@ -15,7 +15,7 @@ export class UsageReportingService {
   public async reportUsage(records: UsageRecord[]): Promise<Response> {
     return fetch(USAGE_SERVICE_USAGE_URL, {
       method: 'post',
-      body: JSON.stringify([records]),
+      body: JSON.stringify(records),
       headers: { 'Content-Type': 'application/json' },
     });
   }

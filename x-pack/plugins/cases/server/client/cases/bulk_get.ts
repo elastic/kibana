@@ -7,16 +7,10 @@
 
 import { partition } from 'lodash';
 
-import type {
-  CasesBulkGetResponse,
-  CasesBulkGetRequest,
-  CaseAttributes,
-} from '../../../common/api';
-import {
-  CasesBulkGetRequestRt,
-  decodeWithExcessOrThrow,
-  CasesBulkGetResponseRt,
-} from '../../../common/api';
+import type { CaseAttributes } from '../../../common/types/domain';
+import type { CasesBulkGetRequest, CasesBulkGetResponse } from '../../../common/types/api';
+import { CasesBulkGetResponseRt, CasesBulkGetRequestRt } from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject } from '../../common/utils';
 import type { CasesClientArgs } from '../types';

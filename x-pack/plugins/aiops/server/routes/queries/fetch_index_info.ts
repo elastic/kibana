@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
+import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
@@ -27,7 +27,7 @@ const SUPPORTED_ES_FIELD_TYPES = [
 ];
 
 export const getRandomDocsRequest = (
-  params: AiopsExplainLogRateSpikesSchema
+  params: AiopsLogRateAnalysisSchema
 ): estypes.SearchRequest => ({
   ...getRequestBase(params),
   body: {
@@ -48,7 +48,7 @@ export const getRandomDocsRequest = (
 
 export const fetchIndexInfo = async (
   esClient: ElasticsearchClient,
-  params: AiopsExplainLogRateSpikesSchema,
+  params: AiopsLogRateAnalysisSchema,
   abortSignal?: AbortSignal
 ): Promise<{ fieldCandidates: string[]; totalDocCount: number }> => {
   const { index } = params;

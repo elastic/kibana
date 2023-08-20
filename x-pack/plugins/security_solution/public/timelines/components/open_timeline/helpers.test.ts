@@ -41,7 +41,7 @@ import moment from 'moment';
 import sinon from 'sinon';
 import type { KueryFilterQueryKind } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
+import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
 import {
   mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,

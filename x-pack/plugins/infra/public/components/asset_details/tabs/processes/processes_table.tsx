@@ -155,7 +155,7 @@ export const ProcessesTable = ({
 
   return (
     <>
-      <EuiTable data-test-subj="infraProcessesTable" responsive={false}>
+      <EuiTable data-test-subj="infraAssetDetailsProcessesTable" responsive={false}>
         <EuiTableHeader>
           <EuiTableHeaderCell width={24} />
           {columns.map((column) => (
@@ -213,7 +213,7 @@ const ProcessesTableBody = ({ items, currentTime }: TableBodyProps) => (
           {column.render ? column.render(item[column.field], currentTime) : item[column.field]}
         </EuiTableRowCell>
       ));
-      return <ProcessRow cells={cells} item={item} key={`row-${i}`} supportCopilot={true} />;
+      return <ProcessRow cells={cells} item={item} key={`row-${i}`} supportAIAssistant={true} />;
     })}
   </>
 );

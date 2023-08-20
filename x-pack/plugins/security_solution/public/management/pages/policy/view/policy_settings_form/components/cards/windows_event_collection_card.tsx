@@ -8,8 +8,8 @@
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import type { EventFormOption } from './event_collection_card';
-import { EventCollectionCard } from './event_collection_card';
+import type { EventFormOption } from '../event_collection_card';
+import { EventCollectionCard } from '../event_collection_card';
 import type { PolicyFormComponentCommonProps } from '../../types';
 
 const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.WINDOWS>> = [
@@ -84,7 +84,7 @@ const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.WINDOWS>> = [
   },
 ];
 
-type WindowsEventCollectionCardProps = PolicyFormComponentCommonProps;
+export type WindowsEventCollectionCardProps = PolicyFormComponentCommonProps;
 
 export const WindowsEventCollectionCard = memo<WindowsEventCollectionCardProps>((props) => {
   return (

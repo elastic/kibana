@@ -10,5 +10,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless common UI', function () {
     loadTestFile(require.resolve('./home_page'));
+    loadTestFile(require.resolve('./management'));
+
+    // platform security
+    loadTestFile(require.resolve('./security/navigation/avatar_menu'));
+
+    // Management
+    loadTestFile(require.resolve('./index_management'));
   });
 }

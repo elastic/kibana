@@ -16,4 +16,4 @@ export {
 export type { ExpandableFlyoutApi } from './src/context';
 
 export type { ExpandableFlyoutProps } from './src';
-export type { FlyoutPanel } from './src/types';
+export type { FlyoutPanelProps, PanelPath } from './src/types';
