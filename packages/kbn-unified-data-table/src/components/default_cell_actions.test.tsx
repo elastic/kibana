@@ -22,7 +22,7 @@ import {
   FilterOutBtn,
   buildCellActions,
   buildCopyValueButton,
-} from './discover_grid_cell_actions';
+} from './default_cell_actions';
 import { servicesMock } from '../../__mocks__/services';
 import { UnifiedDataTableContext } from '../table_context';
 import { EuiButton, EuiButtonIcon, EuiDataGridColumnCellActionProps } from '@elastic/eui';
