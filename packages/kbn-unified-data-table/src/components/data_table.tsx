@@ -267,7 +267,7 @@ export const UnifiedDataTable = ({
   showTimeCol,
   showFullScreenButton = true,
   sort,
-  useNewFieldsApi = true,
+  useNewFieldsApi,
   isSortEnabled = true,
   isPaginationEnabled = true,
   cellActionsTriggerId,
@@ -458,11 +458,11 @@ export const UnifiedDataTable = ({
       getRenderCellValueFn(
         dataView,
         displayedRows,
-        useNewFieldsApi,
         shouldShowFieldHandler,
         () => dataGridRef.current?.closeCellPopover(),
         services.fieldFormats,
         maxDocFieldsDisplayed,
+        useNewFieldsApi,
         externalCustomRenderers
       ),
     [

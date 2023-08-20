@@ -16,3 +16,9 @@ export enum FetchStatus {
 }
 
 export type DiscoverDisplayMode = 'embedded' | 'standalone';
+
+export interface RecordsFetchResponse {
+  records: DataTableRecord[];
+  textBasedQueryColumns?: DatatableColumn[];
+  interceptedWarnings?: SearchResponseInterceptedWarning[];
+}

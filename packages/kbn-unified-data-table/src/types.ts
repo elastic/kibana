@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
-
 /**
  * User configurable state of data grid, persisted in saved search
  */
@@ -26,9 +22,3 @@ export type ValueToStringConverter = (
   columnId: string,
   options?: { compatibleWithCSV?: boolean }
 ) => { formattedString: string; withFormula: boolean };
-
-export interface RecordsFetchResponse {
-  records: DataTableRecord[];
-  textBasedQueryColumns?: DatatableColumn[];
-  interceptedWarnings?: SearchResponseInterceptedWarning[];
-}
