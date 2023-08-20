@@ -8,6 +8,9 @@
 
 import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
+import Blipp from 'blipp';
+import Vision from '@hapi/vision';
+import HapiSwagger from 'hapi-swagger';
 import url from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -211,7 +214,23 @@ export class HttpServer {
     const listenerOptions = getListenerOptions(config);
     this.config = config;
     this.server = createServer(serverOptions, listenerOptions);
-    await this.server.register([HapiStaticFiles]);
+    const swaggerOptions = {
+      info: {
+        title: 'Test API Documentation',
+        version: '1.0.0',
+      },
+      debug: true,
+      basePath: '/api/',
+    };
+    await this.server.register([
+      HapiStaticFiles,
+      Vision,
+      Blipp,
+      {
+        plugin: HapiSwagger,
+        options: swaggerOptions,
+      },
+    ]);
     if (config.compression.brotli.enabled) {
       await this.server.register({
         plugin: Brok,
@@ -601,7 +620,7 @@ export class HttpServer {
     const optionsLogger = this.log.get('options');
     this.log.debug(`registering route handler for [${route.path}]`);
     // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
-    const validate = isSafeMethod(route.method) ? undefined : { payload: true };
+    let validate = isSafeMethod(route.method) ? undefined : { payload: true };
     const { authRequired, tags, body = {}, timeout } = route.options;
     const { accepts: allow, maxBytes, output, parse } = body;
 
@@ -615,6 +634,14 @@ export class HttpServer {
         route.path
       }]`
     );
+
+    if (route.path === '/api/core/capabilities') {
+      if (!validate) {
+        validate = {};
+      }
+      validate.query = route.validate.query.getSchema();
+      // validate = route.validate;
+    }
 
     this.server!.route({
       handler: route.handler,
