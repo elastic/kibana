@@ -583,6 +583,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async closeHistory() {
+    // start to sleep after confirming JS engine responds
     const closeButton = await this.testSubjects.find('consoleHistoryCloseButton');
     await closeButton.click();
   }

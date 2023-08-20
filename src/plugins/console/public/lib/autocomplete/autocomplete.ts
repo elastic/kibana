@@ -45,7 +45,12 @@ function isUrlParamsToken(token: { type: string } | null) {
 const tracer = (...args) => {
   if (window.autocomplete_trace) {
     // eslint-disable-next-line no-console
-    console.log.call(console, ...args);
+    console.log.call(
+      console,
+      ..._.map(args, (arg) => {
+        return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+      })
+    );
   }
 };
 
@@ -191,7 +196,9 @@ export function getCurrentMethodAndTokenPaths(
 
   if (walkedSomeBody && (!bodyTokenPath || bodyTokenPath.length === 0) && !forceEndOfUrl) {
     tracer(
-      'we had some content and still no path -> the cursor is position after a closed body -> no auto complete'
+      'we had some content and still no path',
+      '-> the cursor is position after a closed body',
+      '-> no auto complete'
     );
     return {};
   }
@@ -582,7 +589,6 @@ export default function ({
     //  context.updatedForToken.row = pos.row; // extend
 
     context.autoCompleteType = getAutoCompleteType(pos);
-    tracer('autocomplete type:', context.autoCompleteType);
     switch (context.autoCompleteType) {
       case 'path':
         addPathAutoCompleteSetToContext(context, pos);
@@ -599,13 +605,13 @@ export default function ({
       default:
         return null;
     }
-    tracer('autocomplete set:', context.autoCompleteSet);
 
     const isMappingsFetchingInProgress =
       context.autoCompleteType === 'body' && !!context.asyncResultsState?.isLoading;
 
     if (!context.autoCompleteSet && !isMappingsFetchingInProgress) {
-      return null; // nothing to do..
+      tracer('nothing to do..', context);
+      return null;
     }
 
     addReplacementInfoToContext(context, pos);
@@ -1067,13 +1073,7 @@ export default function ({
     pos: Position
   ) {
     let currentToken = editor.getTokenAt(pos)!;
-    tracer(
-      'has started evaluating current token: {type:',
-      currentToken?.type,
-      ', value:',
-      currentToken?.value,
-      '}'
-    );
+    tracer('has started evaluating current token,', currentToken);
 
     if (!currentToken) {
       if (pos.lineNumber === 1) {
@@ -1140,23 +1140,10 @@ export default function ({
       lastEvaluatedToken.value === currentToken.value
     ) {
       tracer(
-        'not starting autocomplete because the change can be considered a click, last evaluated token: {type:',
-        lastEvaluatedToken.type,
-        ', value:',
-        lastEvaluatedToken.value,
-        ', position:{lineNumber:',
-        lastEvaluatedToken.position.lineNumber,
-        ', column:',
-        lastEvaluatedToken.position.column,
-        '}} current token:{type:',
-        currentToken.type,
-        ', value:',
-        currentToken.value,
-        ', position:{lineNumber:',
-        currentToken.position.lineNumber,
-        ', column:',
-        currentToken.position.column,
-        '}}'
+        'not starting autocomplete since the change looks like a click,',
+        lastEvaluatedToken,
+        '->',
+        currentToken
       );
       // not on the same place or nothing changed, cache and wait for the next time
       lastEvaluatedToken = currentToken;
@@ -1177,25 +1164,7 @@ export default function ({
         return;
     }
 
-    tracer(
-      'starting autocomplete, last evaluated token: {type:',
-      lastEvaluatedToken.type,
-      ', value:',
-      lastEvaluatedToken.value,
-      ', position:{lineNumber:',
-      lastEvaluatedToken.position.lineNumber,
-      ', column:',
-      lastEvaluatedToken.position.column,
-      '}} current token:{type:',
-      currentToken.type,
-      ', value:',
-      currentToken.value,
-      ', position:{lineNumber:',
-      currentToken.position.lineNumber,
-      ', column:',
-      currentToken.position.column,
-      '}}'
-    );
+    tracer('starting autocomplete,', lastEvaluatedToken, '->', currentToken);
     lastEvaluatedToken = currentToken;
     editor.execCommand('startAutocomplete');
   },
@@ -1203,13 +1172,7 @@ export default function ({
 
   function editorChangeListener() {
     const position = editor.getCurrentPosition();
-    tracer(
-      'editor changed, position: {lineNumber:',
-      position.lineNumber,
-      ', column:',
-      position.column,
-      '}'
-    );
+    tracer('editor changed,', position);
     if (position && !editor.isCompleterActive()) {
       tracer('will start evaluating current token');
       evaluateCurrentTokenAfterAChange(position);
