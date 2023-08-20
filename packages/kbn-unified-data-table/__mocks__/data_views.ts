@@ -13,7 +13,7 @@ import { dataViewWithTimefieldMock } from './data_view_with_timefield';
 
 export const dataViewMockList = [dataViewMock, dataViewComplexMock, dataViewWithTimefieldMock];
 
-export function createDiscoverDataViewsMock() {
+export function createDataViewsMock() {
   return {
     getCache: async () => {
       return [dataViewMock];
@@ -42,4 +42,4 @@ export function createDiscoverDataViewsMock() {
   } as unknown as jest.Mocked<DataViewsContract>;
 }
 
-export const dataViewsMock = createDiscoverDataViewsMock();
+export const dataViewsMock = createDataViewsMock();

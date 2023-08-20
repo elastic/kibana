@@ -128,7 +128,7 @@ describe('document selection', () => {
       expect(contextMock.setSelectedDocs).toHaveBeenCalledWith([]);
     });
   });
-  describe('DiscoverGridDocumentToolbarBtn', () => {
+  describe('DataTableDocumentToolbarBtn', () => {
     test('it renders a button clickable button', () => {
       const props = {
         isFilterActive: false,

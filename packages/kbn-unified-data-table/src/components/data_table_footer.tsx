@@ -61,7 +61,7 @@ export const UnifiedDataTableFooter: React.FC<UnifiedDataTableFooterProps> = (pr
     return null;
   }
 
-  // allow to fetch more records on Discover page
+  // allow to fetch more records for UnifiedDataTable
   if (onFetchMoreRecords && typeof isLoadingMore === 'boolean') {
     if (rowCount <= MAX_LOADED_GRID_ROWS - sampleSize) {
       return (
