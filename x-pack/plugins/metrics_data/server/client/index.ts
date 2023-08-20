@@ -17,15 +17,16 @@ import {
 } from '../saved_objects/metrics_data_source';
 
 export class MetricsDataClient {
+  private readonly defaultSavedObjectId = 'default';
   private getDefaultMetricIndices: DefaultMetricIndicesHandler = null;
 
   async getMetricIndices(options: GetMetricIndicesOptions): Promise<string> {
     if (!this.getDefaultMetricIndices) {
-      throw new Error('missing fallback');
+      throw new Error('Missing getMetricsIndices fallback');
     }
 
     const metricIndices = await options.savedObjectsClient
-      .get<MetricsDataSavedObject>(metricsDataSourceSavedObjectName, options.savedObjectId)
+      .get<MetricsDataSavedObject>(metricsDataSourceSavedObjectName, this.defaultSavedObjectId)
       .then(({ attributes }) => attributes.metricIndices)
       .catch((err) => {
         if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
@@ -43,7 +44,7 @@ export class MetricsDataClient {
       {
         metricIndices: options.metricIndices,
       },
-      { id: options.savedObjectId, overwrite: true }
+      { id: this.defaultSavedObjectId, overwrite: true }
     );
     return object;
   }

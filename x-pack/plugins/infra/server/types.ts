@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
-  CustomRequestHandlerContext,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { CoreSetup, CustomRequestHandlerContext } from '@kbn/core/server';
 import type { SearchRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
@@ -37,10 +33,6 @@ export interface InfraPluginSetup {
 export interface InfraPluginStart {
   inventoryViews: InventoryViewsServiceStart;
   metricsExplorerViews: MetricsExplorerViewsServiceStart;
-  getMetricIndices: (
-    savedObjectsClient: SavedObjectsClientContract,
-    sourceId?: string
-  ) => Promise<string>;
 }
 
 export type MlSystem = ReturnType<MlPluginSetup['mlSystemProvider']>;

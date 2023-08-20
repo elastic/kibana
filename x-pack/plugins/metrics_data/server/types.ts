@@ -14,7 +14,6 @@ export interface MetricsDataPluginSetup {
 }
 
 export interface GetMetricIndicesOptions {
-  savedObjectId: string;
   savedObjectsClient: SavedObjectsClientContract;
 }
 

@@ -102,7 +102,6 @@ export class InfraSources {
     );
     const metricAlias = await this.libs.metricsClient.getMetricIndices({
       savedObjectsClient,
-      savedObjectId: sourceId,
     });
     sourceConfiguration.configuration.metricAlias = metricAlias;
     return sourceConfiguration;
@@ -149,7 +148,6 @@ export class InfraSources {
 
     await this.libs.metricsClient.updateMetricIndices({
       savedObjectsClient,
-      savedObjectId: sourceId,
       metricIndices: newSourceConfiguration.metricAlias,
     });
 
@@ -206,7 +204,6 @@ export class InfraSources {
 
     await this.libs.metricsClient.updateMetricIndices({
       savedObjectsClient,
-      savedObjectId: sourceId,
       metricIndices: updatedSourceConfiguration.configuration.metricAlias!,
     });
 

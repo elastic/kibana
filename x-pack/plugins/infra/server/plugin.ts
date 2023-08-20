@@ -42,7 +42,6 @@ import {
 import { InfraFieldsDomain } from './lib/domains/fields_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
-import { makeGetMetricIndices } from './lib/metrics/make_get_metric_indices';
 import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
 import { inventoryViewSavedObjectType, metricsExplorerViewSavedObjectType } from './saved_objects';
@@ -161,7 +160,7 @@ export class InfraServerPlugin
     metricsClient.setDefaultMetricIndicesHandler(async (options: GetMetricIndicesOptions) => {
       const sourceConfiguration = await sources.getInfraSourceConfiguration(
         options.savedObjectsClient,
-        options.savedObjectId
+        'default'
       );
       return sourceConfiguration.configuration.metricAlias;
     });
@@ -284,7 +283,6 @@ export class InfraServerPlugin
     return {
       inventoryViews,
       metricsExplorerViews,
-      getMetricIndices: makeGetMetricIndices(this.libs.sources),
     };
   }
 

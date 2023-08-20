@@ -27,7 +27,6 @@ const createInfraSetupMock = () => {
 
 const createInfraStartMock = () => {
   const infraStartMock: jest.Mocked<InfraPluginStart> = {
-    getMetricIndices: jest.fn(),
     inventoryViews: createInventoryViewsServiceStartMock(),
     metricsExplorerViews: createMetricsExplorerViewsServiceStartMock(),
   };
