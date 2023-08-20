@@ -8,8 +8,8 @@ source .buildkite/scripts/steps/functional/common_cypress.sh
 export JOB=kibana-serverless-security-cypress
 export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
-echo "--- Security Serverless Cypress"
+echo "--- Security Serverless Cypress Tests"
 
-cd x-pack/test_serverless/functional/test_suites/security/cypress
+cd x-pack/plugins/security_solution_cypress
 
-yarn cypress:run; status=$?; yarn junit:merge && exit $status
+yarn cypress:run:serverless; status=$?; yarn junit:merge && exit $status

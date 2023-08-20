@@ -90,6 +90,7 @@ export const entityAnalyticsLinks: LinkItem = {
   path: ENTITY_ANALYTICS_PATH,
   capabilities: [`${SERVER_APP_ID}.show`],
   isBeta: false,
+  licenseType: 'platinum',
   globalSearchKeywords: [ENTITY_ANALYTICS],
 };
 
