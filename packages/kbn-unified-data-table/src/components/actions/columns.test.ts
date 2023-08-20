@@ -36,10 +36,12 @@ describe('Test column actions', () => {
     const actions = getStateColumnAction({}, setAppState);
 
     actions.onAddColumn('_score');
-    expect(setAppState).toHaveBeenCalledWith({ columns: ['_score'], sort: [['_score', 'desc']] });
+    expect(setAppState).toHaveBeenCalledWith(['_score'], [['_score', 'desc']]);
+    setAppState.mockClear();
     actions.onAddColumn('test');
-    expect(setAppState).toHaveBeenCalledWith({ columns: ['test'] });
+    expect(setAppState).toHaveBeenCalledWith(['test'], undefined);
   });
+
   test('getStateColumnActions with columns and sort in state', () => {
     const setAppState = jest.fn();
     const actions = getStateColumnAction(
@@ -48,32 +50,19 @@ describe('Test column actions', () => {
     );
 
     actions.onAddColumn('_score');
-    expect(setAppState).toHaveBeenCalledWith({
-      columns: ['first', 'second', '_score'],
-      sort: [['first', 'desc']],
-    });
+    expect(setAppState).toHaveBeenCalledWith(['first', 'second', '_score'], [['first', 'desc']]);
     setAppState.mockClear();
     actions.onAddColumn('third');
-    expect(setAppState).toHaveBeenCalledWith({
-      columns: ['first', 'second', 'third'],
-      sort: [['first', 'desc']],
-    });
+    expect(setAppState).toHaveBeenCalledWith(['first', 'second', 'third'], [['first', 'desc']]);
     setAppState.mockClear();
     actions.onRemoveColumn('first');
-    expect(setAppState).toHaveBeenCalledWith({
-      columns: ['second'],
-      sort: [],
-    });
+    expect(setAppState).toHaveBeenCalledWith(['second'], []);
     setAppState.mockClear();
     actions.onSetColumns(['first', 'second', 'third'], true);
-    expect(setAppState).toHaveBeenCalledWith({
-      columns: ['first', 'second', 'third'],
-    });
+    expect(setAppState).toHaveBeenCalledWith(['first', 'second', 'third']);
     setAppState.mockClear();
 
     actions.onMoveColumn('second', 0);
-    expect(setAppState).toHaveBeenCalledWith({
-      columns: ['second', 'first'],
-    });
+    expect(setAppState).toHaveBeenCalledWith(['second', 'first']);
   });
 });

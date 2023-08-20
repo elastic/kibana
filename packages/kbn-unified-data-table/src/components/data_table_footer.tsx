@@ -124,7 +124,7 @@ const UnifiedDataTableFooterContainer: React.FC<UnifiedDataTableFooterContainerP
 
   return (
     <p
-      data-test-subj="discoverTableFooter"
+      data-test-subj="unifiedDataTableFooter"
       css={css`
         display: flex;
         flex-direction: row;

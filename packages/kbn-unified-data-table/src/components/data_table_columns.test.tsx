@@ -86,6 +86,7 @@ describe('Data table columns', function () {
                   "id": "extension",
                   "isSortable": false,
                   "schema": "string",
+                  "visibleCellActions": undefined,
                 },
                 Object {
                   "actions": Object {
@@ -130,6 +131,7 @@ describe('Data table columns', function () {
                   "id": "message",
                   "isSortable": false,
                   "schema": "string",
+                  "visibleCellActions": undefined,
                 },
               ]
           `);
@@ -219,6 +221,7 @@ describe('Data table columns', function () {
             "initialWidth": 210,
             "isSortable": true,
             "schema": "datetime",
+            "visibleCellActions": undefined,
           },
           Object {
             "actions": Object {
@@ -268,6 +271,7 @@ describe('Data table columns', function () {
             "id": "extension",
             "isSortable": false,
             "schema": "string",
+            "visibleCellActions": undefined,
           },
           Object {
             "actions": Object {
@@ -315,6 +319,7 @@ describe('Data table columns', function () {
             "id": "message",
             "isSortable": false,
             "schema": "string",
+            "visibleCellActions": undefined,
           },
         ]
       `);
@@ -404,6 +409,7 @@ describe('Data table columns', function () {
             "initialWidth": 210,
             "isSortable": true,
             "schema": "datetime",
+            "visibleCellActions": undefined,
           },
           Object {
             "actions": Object {
@@ -453,6 +459,7 @@ describe('Data table columns', function () {
             "id": "extension",
             "isSortable": true,
             "schema": "string",
+            "visibleCellActions": undefined,
           },
           Object {
             "actions": Object {
@@ -500,6 +507,7 @@ describe('Data table columns', function () {
             "id": "message",
             "isSortable": true,
             "schema": "string",
+            "visibleCellActions": undefined,
           },
         ]
       `);

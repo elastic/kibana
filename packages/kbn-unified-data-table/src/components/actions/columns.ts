@@ -73,7 +73,7 @@ export function getStateColumnActions({
 }) {
   function onAddColumn(columnName: string) {
     popularizeField(dataView, columnName, dataViews, capabilities);
-    const nextColumns = addColumn(columns || [], columnName, useNewFieldsApi);
+    const nextColumns = addColumn(columns ?? [], columnName, useNewFieldsApi);
     const nextSort = columnName === '_score' && !sort?.length ? [['_score', defaultOrder]] : sort;
     setAppState(nextColumns, nextSort);
   }

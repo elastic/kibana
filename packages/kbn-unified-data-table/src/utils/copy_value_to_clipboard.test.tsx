@@ -39,6 +39,10 @@ describe('copyValueToClipboard', () => {
       },
       writable: true,
     });
+    Object.defineProperty(window, 'sessionStorage', {
+      value: { clear: jest.fn() },
+      writable: true,
+    });
   });
 
   afterAll(() => {

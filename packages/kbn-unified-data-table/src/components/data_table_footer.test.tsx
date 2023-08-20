@@ -11,19 +11,22 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { servicesMock } from '../../__mocks__/services';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 describe('UnifiedDataTableFooter', function () {
   it('should not render anything when not on the last page', async () => {
     const component = mountWithIntl(
-      <UnifiedDataTableFooter
-        pageCount={5}
-        pageIndex={0}
-        sampleSize={500}
-        totalHits={1000}
-        rowCount={500}
-        data={servicesMock.data}
-        fieldFormats={servicesMock.fieldFormats}
-      />
+      <KibanaContextProvider services={servicesMock}>
+        <UnifiedDataTableFooter
+          pageCount={5}
+          pageIndex={0}
+          sampleSize={500}
+          totalHits={1000}
+          rowCount={500}
+          data={servicesMock.data}
+          fieldFormats={servicesMock.fieldFormats}
+        />
+      </KibanaContextProvider>
     );
     expect(component.isEmptyRender()).toBe(true);
   });
@@ -55,7 +58,7 @@ describe('UnifiedDataTableFooter', function () {
         fieldFormats={servicesMock.fieldFormats}
       />
     );
-    expect(findTestSubject(component, 'discoverTableFooter').text()).toBe(
+    expect(findTestSubject(component, 'unifiedDataTableFooter').text()).toBe(
       'Search results are limited to 500 documents. Add more search terms to narrow your search.'
     );
     expect(findTestSubject(component, 'dscGridSampleSizeFetchMoreLink').exists()).toBe(false);
@@ -77,7 +80,7 @@ describe('UnifiedDataTableFooter', function () {
         fieldFormats={servicesMock.fieldFormats}
       />
     );
-    expect(findTestSubject(component, 'discoverTableFooter').text()).toBe(
+    expect(findTestSubject(component, 'unifiedDataTableFooter').text()).toBe(
       'Search results are limited to 500 documents.Load more'
     );
 
@@ -105,7 +108,7 @@ describe('UnifiedDataTableFooter', function () {
         fieldFormats={servicesMock.fieldFormats}
       />
     );
-    expect(findTestSubject(component, 'discoverTableFooter').text()).toBe(
+    expect(findTestSubject(component, 'unifiedDataTableFooter').text()).toBe(
       'Search results are limited to 500 documents.Load more'
     );
 
@@ -130,7 +133,7 @@ describe('UnifiedDataTableFooter', function () {
         fieldFormats={servicesMock.fieldFormats}
       />
     );
-    expect(findTestSubject(component, 'discoverTableFooter').text()).toBe(
+    expect(findTestSubject(component, 'unifiedDataTableFooter').text()).toBe(
       'Search results are limited to 10000 documents. Add more search terms to narrow your search.'
     );
   });

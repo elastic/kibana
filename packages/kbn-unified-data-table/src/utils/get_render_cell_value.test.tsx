@@ -13,10 +13,38 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { CodeEditorProps, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
+
+  const CodeEditorMock = (props: CodeEditorProps) => (
+    <input
+      data-test-subj={'mockCodeEditor'}
+      data-value={props.value}
+      value={props.value}
+      onChange={jest.fn()}
+    />
+  );
+
+  return {
+    ...original,
+    CodeEditor: CodeEditorMock,
+  };
+});
+
+window.matchMedia = jest.fn().mockImplementation((query) => {
+  return {
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+  };
+});
 
 const mockServices = {
   settings: {
@@ -124,7 +152,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"dscDiscoverGrid__cellPopoverValue eui-textBreakWord\\">100</span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-9sj1hz-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"udtDataTable__cellPopoverValue eui-textBreakWord\\">100</span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-9sj1hz-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
   });
 
@@ -151,7 +179,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"dscDiscoverGrid__cellPopoverValue eui-textBreakWord\\">100</span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-9sj1hz-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"udtDataTable__cellPopoverValue eui-textBreakWord\\">100</span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-9sj1hz-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
     findTestSubject(component, 'docTableClosePopover').simulate('click');
     expect(closePopoverMockFn).toHaveBeenCalledTimes(1);
@@ -180,7 +208,7 @@ describe('Unified data table cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiDescriptionList
-        className="dscDiscoverGrid__descriptionList dscDiscoverGrid__cellValue"
+        className="udtDataTable__descriptionList udtDataTable__cellValue"
         compressed={true}
         type="inline"
       >
@@ -188,7 +216,7 @@ describe('Unified data table cell rendering', function () {
           extension
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="dscDiscoverGrid__descriptionListDescription"
+          className="udtDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": ".gz",
@@ -199,7 +227,7 @@ describe('Unified data table cell rendering', function () {
           bytesDisplayName
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="dscDiscoverGrid__descriptionListDescription"
+          className="udtDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": 100,
@@ -210,7 +238,7 @@ describe('Unified data table cell rendering', function () {
           _index
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="dscDiscoverGrid__descriptionListDescription"
+          className="udtDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": "test",
@@ -221,7 +249,7 @@ describe('Unified data table cell rendering', function () {
           _score
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="dscDiscoverGrid__descriptionListDescription"
+          className="udtDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": 1,
@@ -255,7 +283,7 @@ describe('Unified data table cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiFlexGroup
-        className="dscDiscoverGrid__cellPopover"
+        className="udtDataTable__cellPopover"
         direction="column"
         gutterSize="none"
         justifyContent="flexEnd"
@@ -331,7 +359,7 @@ describe('Unified data table cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiDescriptionList
-        className="dscDiscoverGrid__descriptionList dscDiscoverGrid__cellValue"
+        className="udtDataTable__descriptionList udtDataTable__cellValue"
         compressed={true}
         type="inline"
       >
@@ -339,7 +367,7 @@ describe('Unified data table cell rendering', function () {
           extension
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="dscDiscoverGrid__descriptionListDescription"
+          className="udtDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": Array [
@@ -352,7 +380,7 @@ describe('Unified data table cell rendering', function () {
           bytesDisplayName
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="dscDiscoverGrid__descriptionListDescription"
+          className="udtDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": Array [
@@ -365,7 +393,7 @@ describe('Unified data table cell rendering', function () {
           _index
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="dscDiscoverGrid__descriptionListDescription"
+          className="udtDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": "test",
@@ -376,7 +404,7 @@ describe('Unified data table cell rendering', function () {
           _score
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="dscDiscoverGrid__descriptionListDescription"
+          className="udtDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": 1,
@@ -411,7 +439,7 @@ describe('Unified data table cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiDescriptionList
-        className="dscDiscoverGrid__descriptionList dscDiscoverGrid__cellValue"
+        className="udtDataTable__descriptionList udtDataTable__cellValue"
         compressed={true}
         type="inline"
       >
@@ -419,7 +447,7 @@ describe('Unified data table cell rendering', function () {
           extension
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="dscDiscoverGrid__descriptionListDescription"
+          className="udtDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": Array [
@@ -432,7 +460,7 @@ describe('Unified data table cell rendering', function () {
           bytesDisplayName
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="dscDiscoverGrid__descriptionListDescription"
+          className="udtDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": Array [
@@ -445,7 +473,7 @@ describe('Unified data table cell rendering', function () {
           _index
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="dscDiscoverGrid__descriptionListDescription"
+          className="udtDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": "test",
@@ -456,7 +484,7 @@ describe('Unified data table cell rendering', function () {
           _score
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="dscDiscoverGrid__descriptionListDescription"
+          className="udtDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": 1,
@@ -490,7 +518,7 @@ describe('Unified data table cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiFlexGroup
-        className="dscDiscoverGrid__cellPopover"
+        className="udtDataTable__cellPopover"
         direction="column"
         gutterSize="none"
         justifyContent="flexEnd"
@@ -571,7 +599,7 @@ describe('Unified data table cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiDescriptionList
-        className="dscDiscoverGrid__descriptionList dscDiscoverGrid__cellValue"
+        className="udtDataTable__descriptionList udtDataTable__cellValue"
         compressed={true}
         type="inline"
       >
@@ -579,7 +607,7 @@ describe('Unified data table cell rendering', function () {
           object.value
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="dscDiscoverGrid__descriptionListDescription"
+          className="udtDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": "100",
@@ -614,7 +642,7 @@ describe('Unified data table cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiDescriptionList
-        className="dscDiscoverGrid__descriptionList dscDiscoverGrid__cellValue"
+        className="udtDataTable__descriptionList udtDataTable__cellValue"
         compressed={true}
         type="inline"
       >
@@ -622,7 +650,7 @@ describe('Unified data table cell rendering', function () {
           object.value
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="dscDiscoverGrid__descriptionListDescription"
+          className="udtDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": "100",
@@ -657,7 +685,7 @@ describe('Unified data table cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiFlexGroup
-        className="dscDiscoverGrid__cellPopover"
+        className="udtDataTable__cellPopover"
         direction="column"
         gutterSize="none"
         justifyContent="flexEnd"
@@ -754,7 +782,7 @@ describe('Unified data table cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <span
-        className="dscDiscoverGrid__cellValue"
+        className="udtDataTable__cellValue"
         dangerouslySetInnerHTML={
           Object {
             "__html": Array [
@@ -788,7 +816,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<span class=\\"dscDiscoverGrid__cellValue\\">-</span>"`
+      `"<span class=\\"udtDataTable__cellValue\\">-</span>"`
     );
   });
 
@@ -814,7 +842,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<span class=\\"dscDiscoverGrid__cellValue\\">-</span>"`
+      `"<span class=\\"udtDataTable__cellValue\\">-</span>"`
     );
   });
 
@@ -854,7 +882,7 @@ describe('Unified data table cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <span
-        className="dscDiscoverGrid__cellValue"
+        className="udtDataTable__cellValue"
         dangerouslySetInnerHTML={
           Object {
             "__html": Array [
@@ -884,7 +912,7 @@ describe('Unified data table cell rendering', function () {
       >
         <EuiFlexItem>
           <span
-            className="dscDiscoverGrid__cellPopoverValue eui-textBreakWord"
+            className="udtDataTable__cellPopoverValue eui-textBreakWord"
             dangerouslySetInnerHTML={
               Object {
                 "__html": Array [
