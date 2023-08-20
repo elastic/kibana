@@ -124,7 +124,8 @@
     "visualizationUiComponents": "packages/kbn-visualization-ui-components",
     "unifiedSearch": "src/plugins/unified_search",
     "unifiedFieldList": "packages/kbn-unified-field-list",
-    "unifiedHistogram": "src/plugins/unified_histogram"
+    "unifiedHistogram": "src/plugins/unified_histogram",
+    "unifiedDataTable": "packages/kbn-unified-data-table"
   },
   "translations": []
 }

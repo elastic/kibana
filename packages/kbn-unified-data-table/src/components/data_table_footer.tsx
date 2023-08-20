@@ -69,7 +69,7 @@ export const UnifiedDataTableFooter: React.FC<UnifiedDataTableFooterProps> = (pr
           <EuiToolTip
             content={
               isRefreshIntervalOn
-                ? i18n.translate('discover.gridSampleSize.fetchMoreLinkDisabledTooltip', {
+                ? i18n.translate('unifiedDataTable.gridSampleSize.fetchMoreLinkDisabledTooltip', {
                     defaultMessage: 'To load more the refresh interval needs to be disabled first',
                   })
                 : undefined
@@ -86,7 +86,7 @@ export const UnifiedDataTableFooter: React.FC<UnifiedDataTableFooterProps> = (pr
               `}
             >
               <FormattedMessage
-                id="discover.gridSampleSize.fetchMoreLinkLabel"
+                id="unifiedDataTable.gridSampleSize.fetchMoreLinkLabel"
                 defaultMessage="Load more"
               />
             </EuiButtonEmpty>
@@ -142,7 +142,7 @@ const UnifiedDataTableFooterContainer: React.FC<UnifiedDataTableFooterContainerP
       <span>
         {hasButton ? (
           <FormattedMessage
-            id="discover.gridSampleSize.lastPageDescription"
+            id="unifiedDataTable.gridSampleSize.lastPageDescription"
             defaultMessage="Search results are limited to {rowCount} documents."
             values={{
               rowCount: formattedRowCount,
@@ -150,7 +150,7 @@ const UnifiedDataTableFooterContainer: React.FC<UnifiedDataTableFooterContainerP
           />
         ) : (
           <FormattedMessage
-            id="discover.gridSampleSize.limitDescription"
+            id="unifiedDataTable.gridSampleSize.limitDescription"
             defaultMessage="Search results are limited to {sampleSize} documents. Add more search terms to narrow your search."
             values={{
               sampleSize: formattedRowCount,

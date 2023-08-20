@@ -207,7 +207,7 @@ export interface UnifiedDataTableProps {
     storage: Storage;
     data: DataPublicPluginStart;
   };
-  getDocumentView?: (
+  renderDocumentView?: (
     displayedRows: DataTableRecord[],
     displayedColumns: string[]
   ) => JSX.Element | undefined;
@@ -283,7 +283,7 @@ export const UnifiedDataTable = ({
   trailingControlColumns,
   totalHits,
   onFetchMoreRecords,
-  getDocumentView,
+  renderDocumentView,
   setExpandedDoc,
   expandedDoc,
   configRowHeight,
@@ -606,7 +606,7 @@ export const UnifiedDataTable = ({
     return { columns: sortingColumns, onSort: () => {} };
   }, [isSortEnabled, sortingColumns, isPlainRecord, inmemorySortingColumns, onTableSort]);
 
-  const canSetExpandedDoc = Boolean(setExpandedDoc && !!getDocumentView);
+  const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
   const internalControlColumns = useMemo(
     () =>
@@ -782,7 +782,7 @@ export const UnifiedDataTable = ({
             </p>
           </EuiScreenReaderOnly>
         )}
-        {canSetExpandedDoc && expandedDoc && getDocumentView!(displayedRows, displayedColumns)}
+        {canSetExpandedDoc && expandedDoc && renderDocumentView!(displayedRows, displayedColumns)}
       </span>
     </UnifiedDataTableContext.Provider>
   );

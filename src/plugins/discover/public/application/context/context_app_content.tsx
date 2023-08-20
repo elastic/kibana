@@ -181,7 +181,10 @@ export function ContextAppContent({
               setExpandedDoc={setExpandedDoc}
               onFilter={addFilter}
               onSetColumns={onSetColumns}
-              getDocumentView={(displayedRows: DataTableRecord[], displayedColumns: string[]) => {
+              renderDocumentView={(
+                displayedRows: DataTableRecord[],
+                displayedColumns: string[]
+              ) => {
                 return (
                   expandedDoc && (
                     <DiscoverGridFlyout

@@ -309,7 +309,10 @@ function DiscoverDocumentsComponent({
                 rowsPerPageState={rowsPerPage}
                 onUpdateRowsPerPage={onUpdateRowsPerPage}
                 onFieldEdited={onFieldEdited}
-                getDocumentView={(displayedRows: DataTableRecord[], displayedColumns: string[]) => {
+                renderDocumentView={(
+                  displayedRows: DataTableRecord[],
+                  displayedColumns: string[]
+                ) => {
                   return (
                     expandedDoc &&
                     getDiscoverDetails({

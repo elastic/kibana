@@ -46,7 +46,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         totalHits={props.totalHitCount}
         setExpandedDoc={setExpandedDoc}
         expandedDoc={expandedDoc}
-        getDocumentView={(displayedRows: DataTableRecord[], displayedColumns: string[]) => {
+        renderDocumentView={(displayedRows: DataTableRecord[], displayedColumns: string[]) => {
           return (
             expandedDoc && (
               <DiscoverGridFlyout

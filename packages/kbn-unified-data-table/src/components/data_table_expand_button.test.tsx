@@ -9,7 +9,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { ExpandButton } from './discover_grid_expand_button';
+import { ExpandButton } from './data_table_expand_button';
 import { UnifiedDataTableContext } from '../table_context';
 import { dataTableContextMock } from '../../__mocks__/table_context';
 

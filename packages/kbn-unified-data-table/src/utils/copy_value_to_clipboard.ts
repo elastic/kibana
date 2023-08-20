@@ -13,12 +13,12 @@ import type { ValueToStringConverter } from '../types';
 import { convertNameToString } from './convert_value_to_string';
 
 const WARNING_FOR_FORMULAS = i18n.translate(
-  'discover.grid.copyEscapedValueWithFormulasToClipboardWarningText',
+  'unifiedDataTable.copyEscapedValueWithFormulasToClipboardWarningText',
   {
     defaultMessage: 'Values may contain formulas that are escaped.',
   }
 );
-const COPY_FAILED_ERROR_MESSAGE = i18n.translate('discover.grid.copyFailedErrorText', {
+const COPY_FAILED_ERROR_MESSAGE = i18n.translate('unifiedDataTable.copyFailedErrorText', {
   defaultMessage: 'Unable to copy to clipboard in this browser',
 });
 
@@ -46,7 +46,7 @@ export const copyValueToClipboard = ({
     return null;
   }
 
-  const toastTitle = i18n.translate('discover.grid.copyValueToClipboard.toastTitle', {
+  const toastTitle = i18n.translate('unifiedDataTable.copyValueToClipboard.toastTitle', {
     defaultMessage: 'Copied to clipboard',
   });
 
@@ -105,7 +105,7 @@ export const copyColumnValuesToClipboard = async ({
     return null;
   }
 
-  const toastTitle = i18n.translate('discover.grid.copyColumnValuesToClipboard.toastTitle', {
+  const toastTitle = i18n.translate('unifiedDataTable.copyColumnValuesToClipboard.toastTitle', {
     defaultMessage: 'Values of "{column}" column copied to clipboard',
     values: { column: columnDisplayName },
   });
@@ -143,7 +143,7 @@ export const copyColumnNameToClipboard = ({
     return null;
   }
 
-  const toastTitle = i18n.translate('discover.grid.copyColumnNameToClipboard.toastTitle', {
+  const toastTitle = i18n.translate('unifiedDataTable.copyColumnNameToClipboard.toastTitle', {
     defaultMessage: 'Copied to clipboard',
   });
 

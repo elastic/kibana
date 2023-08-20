@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", "src/**/*", "__mocks__/**/*.ts"],
+  "include": ["*.ts", "**/*.tsx", "src/**/*", "__mocks__/**/*.ts"],
   "exclude": [
     "target/**/*"
   ],
