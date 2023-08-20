@@ -179,7 +179,7 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
       findFormFieldByRowsLabelAndType(
         'Scheduled agent policies (optional)',
-        'fleet server {downArrow} {enter}'
+        `${DEFAULT_POLICY} {downArrow} {enter}`
       );
       findAndClickButton('Update pack');
       closeModalIfVisible();
@@ -212,7 +212,7 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
         },
       }).then((response) => {
         const item = response.body.items.find(
-          (policy: PackagePolicy) => policy.policy_id === 'fleet-server-policy'
+          (policy: PackagePolicy) => policy.name === `Policy for ${DEFAULT_POLICY}`
         );
 
         expect(item?.inputs[0].config?.osquery.value.packs[packName].queries).to.deep.equal(
@@ -269,15 +269,24 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     let packName: string;
 
     before(() => {
-      loadPack({
-        policy_ids: ['fleet-server-policy'],
-        queries: {
-          [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
+      request<{ items: PackagePolicy[] }>({
+        url: '/internal/osquery/fleet_wrapper/package_policies',
+        headers: {
+          'Elastic-Api-Version': API_VERSIONS.internal.v1,
         },
-      }).then((pack) => {
-        packId = pack.saved_object_id;
-        packName = pack.name;
-      });
+      })
+        .then((response) =>
+          loadPack({
+            policy_ids: [response.body.items[0].policy_id],
+            queries: {
+              [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
+            },
+          })
+        )
+        .then((pack) => {
+          packId = pack.saved_object_id;
+          packName = pack.name;
+        });
     });
 
     after(() => {
@@ -311,15 +320,24 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     let packName: string;
 
     before(() => {
-      loadPack({
-        policy_ids: ['fleet-server-policy'],
-        queries: {
-          [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
+      request<{ items: PackagePolicy[] }>({
+        url: '/internal/osquery/fleet_wrapper/package_policies',
+        headers: {
+          'Elastic-Api-Version': API_VERSIONS.internal.v1,
         },
-      }).then((pack) => {
-        packId = pack.saved_object_id;
-        packName = pack.name;
-      });
+      })
+        .then((response) =>
+          loadPack({
+            policy_ids: [response.body.items[0].policy_id],
+            queries: {
+              [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
+            },
+          })
+        )
+        .then((pack) => {
+          packId = pack.saved_object_id;
+          packName = pack.name;
+        });
     });
 
     after(() => {
@@ -345,15 +363,28 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       let packName: string;
 
       before(() => {
-        loadPack({
-          policy_ids: ['fleet-server-policy'],
-          queries: {
-            [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
+        request<{ items: PackagePolicy[] }>({
+          url: '/internal/osquery/fleet_wrapper/package_policies',
+          headers: {
+            'Elastic-Api-Version': API_VERSIONS.internal.v1,
           },
-        }).then((pack) => {
-          packId = pack.saved_object_id;
-          packName = pack.name;
-        });
+        })
+          .then((response) =>
+            loadPack({
+              policy_ids: [response.body.items[0].policy_id],
+              queries: {
+                [savedQueryName]: {
+                  ecs_mapping: {},
+                  interval: 3600,
+                  query: 'select * from uptime;',
+                },
+              },
+            })
+          )
+          .then((pack) => {
+            packId = pack.saved_object_id;
+            packName = pack.name;
+          });
       });
 
       after(() => {
@@ -389,15 +420,24 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     let packName: string;
 
     before(() => {
-      loadPack({
-        policy_ids: ['fleet-server-policy'],
-        queries: {
-          [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
+      request<{ items: PackagePolicy[] }>({
+        url: '/internal/osquery/fleet_wrapper/package_policies',
+        headers: {
+          'Elastic-Api-Version': API_VERSIONS.internal.v1,
         },
-      }).then((pack) => {
-        packId = pack.saved_object_id;
-        packName = pack.name;
-      });
+      })
+        .then((response) =>
+          loadPack({
+            policy_ids: [response.body.items[0].policy_id],
+            queries: {
+              [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
+            },
+          })
+        )
+        .then((pack) => {
+          packId = pack.saved_object_id;
+          packName = pack.name;
+        });
     });
 
     after(() => {
@@ -433,15 +473,24 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     let packName: string;
 
     before(() => {
-      loadPack({
-        policy_ids: ['fleet-server-policy'],
-        queries: {
-          [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
+      request<{ items: PackagePolicy[] }>({
+        url: '/internal/osquery/fleet_wrapper/package_policies',
+        headers: {
+          'Elastic-Api-Version': API_VERSIONS.internal.v1,
         },
-      }).then((pack) => {
-        packId = pack.saved_object_id;
-        packName = pack.name;
-      });
+      })
+        .then((response) =>
+          loadPack({
+            policy_ids: [response.body.items[0].policy_id],
+            queries: {
+              [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
+            },
+          })
+        )
+        .then((pack) => {
+          packId = pack.saved_object_id;
+          packName = pack.name;
+        });
     });
 
     after(() => {
@@ -460,15 +509,24 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     let packName: string;
 
     before(() => {
-      loadPack({
-        policy_ids: ['fleet-server-policy'],
-        queries: {
-          [savedQueryName]: { ecs_mapping: {}, interval: 60, query: 'select * from uptime;' },
+      request<{ items: PackagePolicy[] }>({
+        url: '/internal/osquery/fleet_wrapper/package_policies',
+        headers: {
+          'Elastic-Api-Version': API_VERSIONS.internal.v1,
         },
-      }).then((pack) => {
-        packId = pack.saved_object_id;
-        packName = pack.name;
-      });
+      })
+        .then((response) =>
+          loadPack({
+            policy_ids: [response.body.items[0].policy_id],
+            queries: {
+              [savedQueryName]: { ecs_mapping: {}, interval: 60, query: 'select * from uptime;' },
+            },
+          })
+        )
+        .then((pack) => {
+          packId = pack.saved_object_id;
+          packName = pack.name;
+        });
     });
 
     after(() => {
@@ -518,15 +576,24 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     let packName: string;
 
     before(() => {
-      loadPack({
-        policy_ids: ['fleet-server-policy'],
-        queries: {
-          [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
+      request<{ items: PackagePolicy[] }>({
+        url: '/internal/osquery/fleet_wrapper/package_policies',
+        headers: {
+          'Elastic-Api-Version': API_VERSIONS.internal.v1,
         },
-      }).then((pack) => {
-        packId = pack.saved_object_id;
-        packName = pack.name;
-      });
+      })
+        .then((response) =>
+          loadPack({
+            policy_ids: [response.body.items[0].policy_id],
+            queries: {
+              [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
+            },
+          })
+        )
+        .then((pack) => {
+          packId = pack.saved_object_id;
+          packName = pack.name;
+        });
     });
 
     after(() => {
@@ -555,15 +622,24 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     let packName: string;
 
     before(() => {
-      loadPack({
-        policy_ids: ['fleet-server-policy'],
-        queries: {
-          [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
+      request<{ items: PackagePolicy[] }>({
+        url: '/internal/osquery/fleet_wrapper/package_policies',
+        headers: {
+          'Elastic-Api-Version': API_VERSIONS.internal.v1,
         },
-      }).then((pack) => {
-        packId = pack.saved_object_id;
-        packName = pack.name;
-      });
+      })
+        .then((response) =>
+          loadPack({
+            policy_ids: [response.body.items[0].policy_id],
+            queries: {
+              [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
+            },
+          })
+        )
+        .then((pack) => {
+          packId = pack.saved_object_id;
+          packName = pack.name;
+        });
     });
 
     after(() => {
@@ -612,14 +688,23 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     let packName: string;
 
     before(() => {
-      loadPack({
-        policy_ids: ['fleet-server-policy'],
-        queries: {
-          [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
+      request<{ items: PackagePolicy[] }>({
+        url: '/internal/osquery/fleet_wrapper/package_policies',
+        headers: {
+          'Elastic-Api-Version': API_VERSIONS.internal.v1,
         },
-      }).then((pack) => {
-        packName = pack.name;
-      });
+      })
+        .then((response) =>
+          loadPack({
+            policy_ids: [response.body.items[0].policy_id],
+            queries: {
+              [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
+            },
+          })
+        )
+        .then((pack) => {
+          packName = pack.name;
+        });
     });
 
     it('', () => {
