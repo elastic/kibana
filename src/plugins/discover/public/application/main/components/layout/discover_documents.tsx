@@ -281,7 +281,7 @@ function DiscoverDocumentsComponent({
             >
               <DataGridMemoized
                 ariaLabelledBy="documentsAriaLabel"
-                columnsIds={currentColumns}
+                columns={currentColumns}
                 expandedDoc={expandedDoc}
                 dataView={dataView}
                 loadingState={

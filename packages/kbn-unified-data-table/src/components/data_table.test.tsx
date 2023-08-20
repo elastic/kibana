@@ -36,7 +36,7 @@ function getProps(): UnifiedDataTableProps {
 
   return {
     ariaLabelledBy: '',
-    columnsIds: [],
+    columns: [],
     dataView: dataViewMock,
     loadingState: DataLoadingState.loaded,
     expandedDoc: undefined,
@@ -207,7 +207,7 @@ describe('UnifiedDataTable', () => {
     it('should render the edit field button if onFieldEdited is provided', async () => {
       const component = await getComponent({
         ...getProps(),
-        columnsIds: ['message'],
+        columns: ['message'],
         onFieldEdited: jest.fn(),
       });
       expect(findTestSubject(component, 'dataGridHeaderCellActionGroup-message').exists()).toBe(
@@ -223,7 +223,7 @@ describe('UnifiedDataTable', () => {
     it('should not render the edit field button if onFieldEdited is not provided', async () => {
       const component = await getComponent({
         ...getProps(),
-        columnsIds: ['message'],
+        columns: ['message'],
       });
       expect(findTestSubject(component, 'dataGridHeaderCellActionGroup-message').exists()).toBe(
         false
@@ -240,7 +240,7 @@ describe('UnifiedDataTable', () => {
     it('should call useDataGridColumnsCellActions with empty params when no cellActionsTriggerId is provided', async () => {
       await getComponent({
         ...getProps(),
-        columnsIds: ['message'],
+        columns: ['message'],
         onFieldEdited: jest.fn(),
       });
       expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
@@ -255,7 +255,7 @@ describe('UnifiedDataTable', () => {
     it('should call useDataGridColumnsCellActions properly when cellActionsTriggerId defined', async () => {
       await getComponent({
         ...getProps(),
-        columnsIds: ['message'],
+        columns: ['message'],
         onFieldEdited: jest.fn(),
         cellActionsTriggerId: 'test',
       });
@@ -276,7 +276,7 @@ describe('UnifiedDataTable', () => {
     it('should enable in memory sorting with plain records', async () => {
       const component = await getComponent({
         ...getProps(),
-        columnsIds: ['message'],
+        columns: ['message'],
         isPlainRecord: true,
       });
 

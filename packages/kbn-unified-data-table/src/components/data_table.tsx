@@ -85,7 +85,7 @@ export interface UnifiedDataTableProps {
   /**
    * Determines ids of the columns which are displayed
    */
-  columnsIds: string[];
+  columns: string[];
   /**
    * If set, the given document is displayed in a flyout
    */
@@ -251,7 +251,7 @@ const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
 
 export const UnifiedDataTable = ({
   ariaLabelledBy,
-  columnsIds,
+  columns,
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
   dataView,
   loadingState,
@@ -301,7 +301,7 @@ export const UnifiedDataTable = ({
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
-  const displayedColumns = getDisplayedColumns(columnsIds, dataView);
+  const displayedColumns = getDisplayedColumns(columns, dataView);
   const defaultColumns = displayedColumns.includes('_source');
   const usedSelectedDocs = useMemo(() => {
     if (!selectedDocs.length || !rows?.length) {

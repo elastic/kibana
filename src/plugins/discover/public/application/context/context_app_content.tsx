@@ -165,7 +165,7 @@ export function ContextAppContent({
           <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
             <DiscoverGridMemoized
               ariaLabelledBy="surDocumentsAriaLabel"
-              columnsIds={columns}
+              columns={columns}
               rows={rows}
               dataView={dataView}
               expandedDoc={expandedDoc}
