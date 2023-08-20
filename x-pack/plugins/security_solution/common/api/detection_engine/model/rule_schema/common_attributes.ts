@@ -269,7 +269,7 @@ export const RelatedIntegrationArray = t.array(RelatedIntegration);
  * export const InvestigationFields = t.intersection([
  * t.exact(
  *   t.type({
- *     fields: NonEmptyArray(t.string),
+ *     fields: NonEmptyArray(NonEmptyString),
  *   })
  * ),
  * t.exact(
@@ -283,6 +283,6 @@ export const RelatedIntegrationArray = t.array(RelatedIntegration);
 export type InvestigationFields = t.TypeOf<typeof InvestigationFields>;
 export const InvestigationFields = t.exact(
   t.type({
-    fields: NonEmptyArray(t.string),
+    fields: NonEmptyArray(NonEmptyString),
   })
 );
