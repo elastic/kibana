@@ -29,7 +29,6 @@
     "@kbn/saved-objects-plugin",
     "@kbn/es-query",
     "@kbn/discover-utils",
-    "@kbn/unified-data-table",
   ],
   "exclude": [
     "target/**/*",

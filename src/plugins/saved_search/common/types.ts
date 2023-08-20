@@ -8,9 +8,16 @@
 
 import type { ISearchSource, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
-import type { UnifiedDataTableSettingsColumn } from '@kbn/unified-data-table';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import { VIEW_MODE } from '.';
+
+export interface DiscoverGridSettings {
+  columns?: Record<string, DiscoverGridSettingsColumn>;
+}
+
+export interface DiscoverGridSettingsColumn {
+  width?: number;
+}
 
 /** @internal **/
 export interface SavedSearchAttributes {
@@ -19,7 +26,7 @@ export interface SavedSearchAttributes {
   columns: string[];
   description: string;
   grid: {
-    columns?: Record<string, UnifiedDataTableSettingsColumn>;
+    columns?: Record<string, DiscoverGridSettingsColumn>;
   };
   hideChart: boolean;
   isTextBasedQuery: boolean;
@@ -52,7 +59,7 @@ export interface SavedSearch {
   description?: string;
   tags?: string[] | undefined;
   grid?: {
-    columns?: Record<string, UnifiedDataTableSettingsColumn>;
+    columns?: Record<string, DiscoverGridSettingsColumn>;
   };
   hideChart?: boolean;
   viewMode?: VIEW_MODE;
