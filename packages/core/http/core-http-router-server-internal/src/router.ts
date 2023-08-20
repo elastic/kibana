@@ -8,7 +8,6 @@
 
 import type { Request, ResponseToolkit } from '@hapi/hapi';
 import apm from 'elastic-apm-node';
-import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import {
   isUnauthorizedError as isElasticsearchUnauthorizedError,
@@ -173,9 +172,9 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
           path: getRouteFullPath(this.routerPath, route.path),
           options: {
             ...validOptions(method, route),
-            validate: route.validate
+            validate: route.validate,
           },
-          validate: route.validate
+          validate: route.validate,
         });
       };
 
