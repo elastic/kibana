@@ -13,7 +13,6 @@
     "@kbn/discover-utils",
     "@kbn/kibana-utils-plugin",
     "@kbn/expressions-plugin",
-    "@kbn/search-response-warnings",
     "@kbn/test-jest-helpers",
     "@kbn/i18n-react",
     "@kbn/ui-theme",
