@@ -7,11 +7,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { uniq, debounce } from 'lodash';
-import {
-  EuiFormRow,
-  EuiComboBox,
-  EuiComboBoxOptionOption
-} from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { getMatchingIndices } from '../../../../services/api';
 import type { FieldHook } from '../../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../../shared_imports';
@@ -26,7 +22,6 @@ interface Props {
   [key: string]: any;
 }
 
-
 const getIndexOptions = async (patternString: string) => {
   const options: IOption[] = [];
 
@@ -34,7 +29,7 @@ const getIndexOptions = async (patternString: string) => {
     return options;
   }
 
-  const { data } = (await getMatchingIndices(patternString));
+  const { data } = await getMatchingIndices(patternString);
   const matchingIndices = data.indices;
 
   if (matchingIndices.length) {
@@ -56,20 +51,19 @@ const getIndexOptions = async (patternString: string) => {
   return options;
 };
 
-
-export const IndicesSelector = ({
-  field,
-  ...rest
-}: Props) => {
+export const IndicesSelector = ({ field, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const [indexOptions, setIndexOptions] = useState<IOption[]>([]);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
 
-  const onSearchChange = useCallback(debounce(async (search: string) => {
-    setIsIndiciesLoading(true);
-    setIndexOptions(await getIndexOptions(search));
-    setIsIndiciesLoading(false);
-  }, 400), [setIsIndiciesLoading, setIndexOptions]);
+  const onSearchChange = useCallback(
+    debounce(async (search: string) => {
+      setIsIndiciesLoading(true);
+      setIndexOptions(await getIndexOptions(search));
+      setIsIndiciesLoading(false);
+    }, 400),
+    [setIsIndiciesLoading, setIndexOptions]
+  );
 
   return (
     <EuiFormRow
@@ -92,9 +86,7 @@ export const IndicesSelector = ({
           };
         })}
         onChange={async (selected: EuiComboBoxOptionOption[]) => {
-          field.setValue(
-            selected.map((aSelected) => aSelected.value) as string[]
-          );
+          field.setValue(selected.map((aSelected) => aSelected.value) as string[]);
         }}
         onSearchChange={onSearchChange}
         onBlur={() => {

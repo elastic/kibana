@@ -28,7 +28,11 @@ export {
   EuiCodeEditor,
 } from '@kbn/es-ui-shared-plugin/public';
 
-export type { FormSchema, FieldConfig, FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+export type {
+  FormSchema,
+  FieldConfig,
+  FieldHook,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export {
   FIELD_TYPES,

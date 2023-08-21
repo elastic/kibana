@@ -7,13 +7,12 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RouteDependencies } from '../../../types';
 import { addInternalBasePath } from '..';
 import { enrichPoliciesActions } from '../../../lib/enrich_policies';
 import { serializeAsESPolicy } from '../../../lib/enrich_policies';
 import type { SerializedEnrichPolicy } from '../../../../common';
-
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export const validationSchema = schema.object({
   name: schema.string(),
@@ -84,7 +83,10 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
   );
 
   router.post(
-    { path: addInternalBasePath('/enrich_policies/get_matching_indices'), validate: { body: getMatchingIndicesSchema } },
+    {
+      path: addInternalBasePath('/enrich_policies/get_matching_indices'),
+      validate: { body: getMatchingIndicesSchema },
+    },
     async (context, request, response) => {
       const { pattern } = request.body;
       const client = (await context.core).elasticsearch.client as IScopedClusterClient;
