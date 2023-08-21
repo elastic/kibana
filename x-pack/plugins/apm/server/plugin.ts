@@ -86,6 +86,7 @@ export class APMPlugin
     ) {
       createApmTelemetry({
         core,
+        getApmIndices: plugins.apmDataAccess.getApmIndices,
         usageCollector: plugins.usageCollection,
         taskManager: plugins.taskManager,
         logger: this.logger,
@@ -133,9 +134,9 @@ export class APMPlugin
 
     const apmIndicesPromise = (async () => {
       const coreStart = await getCoreStart();
-      const pluginStart = await getPluginStart();
       const soClient = await getInternalSavedObjectsClient(coreStart);
-      return pluginStart.apmDataAccess.getApmIndices(soClient);
+      const { getApmIndices } = plugins.apmDataAccess;
+      return getApmIndices(soClient);
     })();
 
     // This if else block will go away in favour of removing Home Tutorial Integration
@@ -179,21 +180,21 @@ export class APMPlugin
       kibanaVersion: this.initContext.env.packageInfo.version,
     });
 
-    core.getStartServices().then(([, pluginStart]) => {
-      if (plugins.alerting) {
-        registerApmRuleTypes({
-          getApmIndices: pluginStart.apmDataAccess.getApmIndices,
-          alerting: plugins.alerting,
-          basePath: core.http.basePath,
-          apmConfig: currentConfig,
-          logger: this.logger!.get('rule'),
-          ml: plugins.ml,
-          observability: plugins.observability,
-          ruleDataClient,
-          alertsLocator: plugins.share.url.locators.get(alertsLocatorID),
-        });
-      }
-    });
+    const { getApmIndices } = plugins.apmDataAccess;
+
+    if (plugins.alerting) {
+      registerApmRuleTypes({
+        getApmIndices,
+        alerting: plugins.alerting,
+        basePath: core.http.basePath,
+        apmConfig: currentConfig,
+        logger: this.logger!.get('rule'),
+        ml: plugins.ml,
+        observability: plugins.observability,
+        ruleDataClient,
+        alertsLocator: plugins.share.url.locators.get(alertsLocatorID),
+      });
+    }
 
     registerFleetPolicyCallbacks({
       logger: this.logger,

@@ -17,8 +17,7 @@ export type ApmIndexSettingsResponse = Array<{
 export async function getApmIndexSettings(
   resources: APMRouteHandlerResources
 ): Promise<ApmIndexSettingsResponse> {
-  const { apmIndicesFromConfigFile } =
-    await resources.plugins.apmDataAccess.start();
+  const { apmIndicesFromConfigFile } = resources.plugins.apmDataAccess.setup;
 
   const soClient = (await resources.context.core).savedObjects.client;
   const apmIndicesSavedObject = await getApmIndicesSavedObject(soClient);

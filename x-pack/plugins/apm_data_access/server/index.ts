@@ -9,9 +9,6 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { ApmDataAccessPlugin } from './plugin';
 
-export type APMDataAccessConfig = TypeOf<typeof configSchema>;
-export type APMIndices = APMDataAccessConfig['indices'];
-
 const configSchema = schema.object({
   indices: schema.object({
     transaction: schema.string({ defaultValue: 'traces-apm*,apm-*' }), // TODO: remove apm-* pattern in 9.0
@@ -73,6 +70,8 @@ export const config: PluginConfigDescriptor<APMDataAccessConfig> = {
 
   schema: configSchema,
 };
+export type APMDataAccessConfig = TypeOf<typeof configSchema>;
+export type APMIndices = APMDataAccessConfig['indices'];
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ApmDataAccessPlugin(initializerContext);
