@@ -10,7 +10,6 @@ import {
   VALUE_LIST_CLOSE_BUTTON,
   VALUE_LIST_DELETE_BUTTON,
   VALUE_LIST_EXPORT_BUTTON,
-  VALUE_LIST_FILES,
   VALUE_LIST_FILE_PICKER,
   VALUE_LIST_FILE_UPLOAD_BUTTON,
   VALUE_LIST_TYPE_SELECTOR,
@@ -73,9 +72,14 @@ export const exportValueList = (): Cypress.Chainable<JQuery<HTMLElement>> => {
 
 /**
  * Given an array of value lists this will delete them all using Cypress Request and the lists REST API
+ *
+ * If a list doesn't exist it ignores the error.
+ *
  * Ref: https://www.elastic.co/guide/en/security/current/lists-api-delete-container.html
  */
-const deleteValueLists = (lists: string[]): Array<Cypress.Chainable<Cypress.Response<unknown>>> => {
+export const deleteValueLists = (
+  lists: string[]
+): Array<Cypress.Chainable<Cypress.Response<unknown>>> => {
   return lists.map((list) => deleteValueList(list));
 };
 
@@ -88,6 +92,7 @@ const deleteValueList = (list: string): Cypress.Chainable<Cypress.Response<unkno
     method: 'DELETE',
     url: `api/lists?id=${list}`,
     headers: { 'kbn-xsrf': 'delete-lists', 'x-elastic-internal-origin': 'security-solution' },
+    failOnStatusCode: false,
   });
 };
 
@@ -148,30 +153,4 @@ export const importValueList = (
   testSuggestions: string[] | undefined = undefined
 ) => {
   return cy.fixture<string>(file).then((data) => uploadListItemData(file, type, data));
-};
-
-/**
- * If you are on the value lists from the UI, this will loop over all the HTML elements
- * that have action-delete-value-list-${list_name} and delete all of those value lists
- * using Cypress Request and the lists REST API.
- * If the UI does not contain any value based lists this will not fail. If the UI does
- * contain value based lists but the backend does not return a success on DELETE then this
- * will cause errors.
- * Ref: https://www.elastic.co/guide/en/security/current/lists-api-delete-container.html
- */
-export const deleteAllValueListsFromUI = (): Array<
-  Cypress.Chainable<Cypress.Response<unknown>>
-> => {
-  const lists = Cypress.$(VALUE_LIST_FILES)
-    .toArray()
-    .reduce<string[]>((accum, $el) => {
-      const attribute = $el.getAttribute('data-test-subj');
-      if (attribute != null) {
-        const list = attribute.substr('data-test-subj-value-list'.length);
-        return [...accum, list];
-      } else {
-        return accum;
-      }
-    }, []);
-  return deleteValueLists(lists);
 };

@@ -3179,22 +3179,6 @@
             "path": "src/plugins/saved_objects/public/saved_object/helpers/confirm_modal_promise.tsx"
           },
           {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/customize_panel_action/customize_panel_action.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/customize_panel_action/customize_panel_action.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx"
-          },
-          {
             "plugin": "dataViewEditor",
             "path": "src/plugins/data_view_editor/public/shared_imports.ts"
           },
@@ -3213,6 +3197,14 @@
           {
             "plugin": "unifiedSearch",
             "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx"
           },
           {
             "plugin": "visualizations",
