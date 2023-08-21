@@ -36,17 +36,19 @@ export const clickOnFilterIn = () => {
 };
 
 export const clickOnFilterOut = () => {
-  cy.get(FILTER_IN).should('be.visible');
+  cy.get(FILTER_OUT).should('be.visible');
   cy.get(FILTER_OUT).first().realClick();
 };
 
 export const clickOnAddToTimeline = () => {
   cy.get(`${ADD_TO_TIMELINE} ${EUI_ICON_IS_LOADING}`).should('not.exist');
-  cy.get(ADD_TO_TIMELINE).first().click();
+  cy.get(ADD_TO_TIMELINE).should('be.visible');
+  cy.get(ADD_TO_TIMELINE).first().realClick();
 };
 
 export const clickOnShowTopN = () => {
-  cy.get(SHOW_TOP_FIELD).first().click();
+  cy.get(SHOW_TOP_FIELD).should('be.visible');
+  cy.get(SHOW_TOP_FIELD).first().realClick();
 };
 
 export const clickOnCopyValue = () => {
