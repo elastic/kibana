@@ -9,6 +9,7 @@
 import Fs from 'fs';
 import globby from 'globby';
 import path from 'path';
+import { getPrChanges } from '#pipeline-utils';
 
 export const getRequiredEnv = (name: string) => {
   const value = process.env[name];
@@ -99,6 +100,9 @@ export async function getAllTestFilesForConfigs(configPaths: string[]): Promise<
   return allTestFiles;
 }
 
-export function intersection(arr1: string[], arr2: string[]) {
-  return arr1.filter((a1) => arr2.includes(a1));
+export async function isUnitTestOnlyChange(jestConfigList: string[]) {
+  const allJestTestFiles = await getAllTestFilesForConfigs(jestConfigList);
+  const allChangedFiles = (await getPrChanges()).map((t) => t.filename);
+
+  return allChangedFiles.every((changedFile) => allJestTestFiles.includes(changedFile));
 }

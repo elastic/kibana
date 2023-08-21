@@ -17,16 +17,14 @@ import { CiStatsClient, SourceDescriptor, TestGroupRunOrderResponse } from './cl
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import {
-  getAllTestFilesForConfigs,
   getFloatFromEnv,
   getIntFromEnv,
   getListFromEnv,
   getRequiredEnv,
   getTrackedBranch,
-  intersection,
   isObj,
+  isUnitTestOnlyChange,
 } from './utils';
-import { getPrChanges } from '../github';
 
 type RunGroup = TestGroupRunOrderResponse['types'][0];
 
@@ -78,18 +76,15 @@ export async function pickTestGroupRunOrder() {
     throw new Error('unable to find any unit, integration, or FTR configs');
   }
 
-  const allJestTestFiles = await getAllTestFilesForConfigs(jestUnitConfigs);
-  const allChangedFiles = (await getPrChanges()).map((t) => t.filename);
-  const changedTestFiles = intersection(allJestTestFiles, allChangedFiles);
-
-  console.log('--- All jest configs listed');
-  console.log({
-    allJestTestFiles,
-    allChangedFiles,
-    changedTestFiles,
-  });
-
-  throw new Error('STOP HERE!');
+  if (await isUnitTestOnlyChange(jestUnitConfigs)) {
+    console.log('test configuration only contains jest test changes, skipping integration/FTR');
+    jestIntegrationConfigs.length = 0;
+    ftrConfigsByQueue.clear();
+  } else {
+    console.log("normally wouldn't, but this is a test, skipping integration/FTR");
+    jestIntegrationConfigs.length = 0;
+    ftrConfigsByQueue.clear();
+  }
 
   const runOrderConfig = buildRunOrderConfig({
     jestUnitConfigs,
