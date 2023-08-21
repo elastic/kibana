@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { CoreStart } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
+
 import { I18nProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+import ReactDOM from 'react-dom';
+import React from 'react';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ServerlessSearchContext } from './hooks/use_kibana';
 
 export async function renderApp(
@@ -20,7 +23,7 @@ export async function renderApp(
   core: CoreStart,
   services: ServerlessSearchContext
 ) {
-  const { ElasticsearchOverview } = await import('./components/overview');
+  const { ConnectorsOverview } = await import('./components/connectors_overview');
   const queryClient = new QueryClient();
   ReactDOM.render(
     <KibanaThemeProvider theme={core.theme}>
@@ -28,7 +31,7 @@ export async function renderApp(
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools initialIsOpen={false} />
           <I18nProvider>
-            <ElasticsearchOverview />
+            <ConnectorsOverview />
           </I18nProvider>
         </QueryClientProvider>
       </KibanaContextProvider>

@@ -72,6 +72,12 @@ const navigationTree: NavigationTreeDefinition = {
                 defaultMessage: 'Alerts',
               }),
             },
+            {
+              link: 'serverlessConnectors',
+              title: i18n.translate('xpack.serverlessSearch.nav.connectors', {
+                defaultMessage: 'Connectors',
+              }),
+            },
           ],
         },
         {

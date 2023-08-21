@@ -74,6 +74,9 @@ export const callEnterpriseSearchConfigAPI = async ({
   }, config.accessCheckTimeout);
 
   try {
+    if (!config.host || !config.canDeployEntSearch) {
+      return {};
+    }
     const enterpriseSearchUrl = encodeURI(`${config.host}${ENDPOINT}`);
     const options = {
       headers: {

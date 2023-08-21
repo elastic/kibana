@@ -102,6 +102,8 @@ export function DiscoverMainRoute({
   });
 
   const checkData = useCallback(async () => {
+    setShowNoDataPage(true);
+    return false;
     try {
       if (savedSearchId) {
         return true; // bypass NoData screen

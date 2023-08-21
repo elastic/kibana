@@ -64,6 +64,25 @@ export class ServerlessSearchPlugin
         return await renderApp(element, coreStart, { userProfile, ...services });
       },
     });
+
+    core.application.register({
+      id: 'serverlessConnectors',
+      title: i18n.translate('xpack.serverlessSearch.app.connectors.title', {
+        defaultMessage: 'Connectors',
+      }),
+      appRoute: '/app/connectors',
+      async mount({ element }: AppMountParameters) {
+        const { renderApp } = await import('./application/connectors');
+        const [coreStart, services] = await core.getStartServices();
+        const { security } = services;
+        docLinks.setDocLinks(coreStart.docLinks.links);
+
+        const userProfile = await security.userProfiles.getCurrent();
+
+        return await renderApp(element, coreStart, { userProfile, ...services });
+      },
+    });
+
     return {};
   }
 
