@@ -228,12 +228,12 @@ export const LOG_PATTERN_ANALYSIS_DESC = i18n.translate(
 export const CHANGE_POINT_DETECTIONS_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.changePointDetections.title',
   {
-    defaultMessage: 'Change point detections',
+    defaultMessage: 'Change point detection',
   }
 );
 export const CHANGE_POINT_DETECTIONS_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.changePointDetections.desc',
   {
-    defaultMessage: 'Change point detections page',
+    defaultMessage: 'Change point detection page',
   }
 );
