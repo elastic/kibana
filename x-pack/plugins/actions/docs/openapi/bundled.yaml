@@ -2549,8 +2549,6 @@ components:
           type: string
           description: The display name for the connector.
         secrets:
-          type: object
-          description: The secrets object containing the necessary fields for authentication.
           $ref: '#/components/schemas/secrets_properties_slack_api'
     update_connector_request_slack_webhook:
       title: Update Slack connector request
@@ -2563,8 +2561,6 @@ components:
           type: string
           description: The display name for the connector.
         secrets:
-          type: object
-          description: The secrets object containing the necessary fields for authentication.
           $ref: '#/components/schemas/secrets_properties_slack_webhook'
     update_connector_request_swimlane:
       title: Update Swimlane connector request
