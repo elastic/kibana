@@ -63,7 +63,7 @@ import type {
   CreateRuleOptions,
   CreateQueryRuleAdditionalOptions,
 } from './lib/detection_engine/rule_types/types';
-
+// eslint-disable-next-line no-restricted-imports
 import {
   legacyRulesNotificationAlertType,
   legacyIsNotificationAlertExecutor,
@@ -96,7 +96,6 @@ import {
   ENDPOINT_SEARCH_STRATEGY,
 } from '../common/endpoint/constants';
 
-// import { AppFeatures } from './lib/app_features';
 import { AppFeaturesService } from './lib/app_features_service/app_features_service';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
