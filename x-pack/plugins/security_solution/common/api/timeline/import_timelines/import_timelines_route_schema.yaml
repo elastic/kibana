@@ -53,9 +53,9 @@ paths:
                   - data
 
         400:
-          description: Indicates the import of timelines was unsuccessful.
+          description: Indicates the import of timelines was unsuccessful because of an invalid file extension.
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -65,10 +65,22 @@ paths:
                     type: string
                   statusCode:
                     type: number
+
+        404:
+          description: Indicates that we were unable to locate the saved object client necessary to handle the import.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  statusCode:
+                    type: number
         409:
           description: Indicates the import of timelines was unsuccessful.
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:

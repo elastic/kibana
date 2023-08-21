@@ -70,7 +70,7 @@ paths:
                 required:
                   - data
         405:
-          description: Indicates that the HTTP method is not allowed.
+          description: Indicates that there was an error in the timeline creation.
           content:
             application/json:
               schema:

@@ -46,3 +46,14 @@ paths:
               schema:
                 type: string
                 description: NDJSON of the exported timelines
+        400:
+          description: Indicates that the export size limit was exceeded
+          content:
+            application/ndjson:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number
