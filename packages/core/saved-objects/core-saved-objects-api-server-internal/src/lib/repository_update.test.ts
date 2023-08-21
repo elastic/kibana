@@ -661,7 +661,7 @@ describe('SavedObjectsRepository', () => {
         ).rejects.toThrowError(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
-        expect(client.update).not.toHaveBeenCalled();
+        expect(client.index).not.toHaveBeenCalled();
       });
 
       it(`does not throw when there is a different error from preflightCheckForCreate`, async () => {

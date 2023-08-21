@@ -46,21 +46,25 @@ export const performUpdate = async <T>(
     throw error;
   }
 
+  const maxAttempts = options.version ? 1 : 1 + DEFAULT_RETRY_COUNT;
+
   // handle retryOnConflict manually by reattempting the operation in case of conflict errors
-  let retryCount = options.version ? 0 : DEFAULT_RETRY_COUNT;
   let response: SavedObjectsUpdateResponse<T>;
-  do {
+  for (let currentAttempt = 1; currentAttempt <= maxAttempts; currentAttempt++) {
     try {
       response = await executeUpdate(updateParams, apiContext);
       break;
     } catch (e) {
-      if (SavedObjectsErrorHelpers.isConflictError(e) && retryCount > 0) {
-        retryCount--;
+      if (
+        SavedObjectsErrorHelpers.isConflictError(e) &&
+        e.retryableConflict &&
+        currentAttempt < maxAttempts
+      ) {
         continue;
       }
       throw e;
     }
-  } while (retryCount > 0);
+  }
 
   return response!;
 };
@@ -202,6 +206,10 @@ export const executeUpdate = async <T>(
         // see "404s from missing index" above
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
+      if (SavedObjectsErrorHelpers.isConflictError(err)) {
+        // flag the error as being caused by an update conflict
+        err.retryableConflict = true;
+      }
       throw err;
     });
     if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
@@ -283,6 +291,10 @@ export const executeUpdate = async <T>(
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
         // see "404s from missing index" above
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+      if (SavedObjectsErrorHelpers.isConflictError(err)) {
+        // flag the error as being caused by an update conflict
+        err.retryableConflict = true;
       }
       throw err;
     });
