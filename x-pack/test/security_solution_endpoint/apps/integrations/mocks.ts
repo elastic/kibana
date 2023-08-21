@@ -423,7 +423,7 @@ export const getArtifactsListTestsData = () => [
         {
           selector: 'blocklistPage-card-criteriaConditions',
           value:
-            'OSIS Windows\nAND file.pathIS ONE OF\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
+            'OSIS Windows\nAND file.path.caselessIS ONE OF\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
         },
         {
           selector: 'blocklistPage-card-header-title',
@@ -499,7 +499,7 @@ export const getArtifactsListTestsData = () => [
               {
                 field: 'file.path',
                 operator: 'included',
-                type: 'exact_cased_any',
+                type: 'exact_caseless_any',
                 value: ['c:\\randomFolder\\randomFile.exe', ' c:\\randomFolder\\randomFile2.exe'],
               },
             ],
