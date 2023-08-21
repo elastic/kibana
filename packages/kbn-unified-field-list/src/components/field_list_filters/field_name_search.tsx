@@ -52,6 +52,7 @@ export const FieldNameSearch: React.FC<FieldNameSearchProps> = ({
       placeholder={searchPlaceholder}
       value={nameFilter}
       append={append}
+      compressed={true}
     />
   );
 };

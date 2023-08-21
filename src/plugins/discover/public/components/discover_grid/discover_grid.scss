@@ -121,14 +121,14 @@
 .dscDiscoverGrid__descriptionListTitle {
   font-weight: bold;
   background: transparent!important;
-  padding: 0 4px 0 0!important;
+  padding: 0 5px 0 0!important;
   margin: 0!important;
 }
 
 .dscDiscoverGrid__descriptionListDescription {
   word-break: break-all;
   white-space: normal;
-  padding: 0 4px 0 0!important;
+  padding: 0 10px 0 0!important;
 
   // Special handling for images coming from the image field formatter
   img {

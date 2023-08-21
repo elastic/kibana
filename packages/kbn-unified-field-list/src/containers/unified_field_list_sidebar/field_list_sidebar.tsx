@@ -303,6 +303,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
                   }
                   onClick={() => onEditField()}
                   size="s"
+                  className="kbnToolbarButton"
                 >
                   {i18n.translate('unifiedFieldList.fieldListSidebar.addFieldButtonLabel', {
                     defaultMessage: 'Add a field',

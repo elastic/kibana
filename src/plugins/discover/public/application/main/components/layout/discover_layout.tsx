@@ -264,37 +264,41 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         />
         <EuiFlexGroup className="dscPageBody__contents" gutterSize="none">
           <EuiFlexItem grow={false}>
-            <SidebarMemoized
-              documents$={stateContainer.dataState.data$.documents$}
-              onAddField={onAddColumn}
-              columns={currentColumns}
-              onAddFilter={!isPlainRecord ? onAddFilter : undefined}
-              onRemoveField={onRemoveColumn}
-              onChangeDataView={stateContainer.actions.onChangeDataView}
-              selectedDataView={dataView}
-              isClosed={isSidebarClosed}
-              trackUiMetric={trackUiMetric}
-              onFieldEdited={onFieldEdited}
-              onDataViewCreated={stateContainer.actions.onDataViewCreated}
-              availableFields$={stateContainer.dataState.data$.availableFields$}
-            />
+            <EuiPanel paddingSize="none" hasShadow={false}>
+              <SidebarMemoized
+                documents$={stateContainer.dataState.data$.documents$}
+                onAddField={onAddColumn}
+                columns={currentColumns}
+                onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+                onRemoveField={onRemoveColumn}
+                onChangeDataView={stateContainer.actions.onChangeDataView}
+                selectedDataView={dataView}
+                isClosed={isSidebarClosed}
+                trackUiMetric={trackUiMetric}
+                onFieldEdited={onFieldEdited}
+                onDataViewCreated={stateContainer.actions.onDataViewCreated}
+                availableFields$={stateContainer.dataState.data$.availableFields$}
+              />
+            </EuiPanel>
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>
             <EuiFlexItem grow={false} style={{ borderRight: '1px solid #D3DAE6' }}>
-              <div style={{ padding: '1em 6px' }}>
-                <EuiButtonIcon
-                  iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
-                  iconSize="m"
-                  size="xs"
-                  onClick={toggleSidebarCollapse}
-                  data-test-subj="collapseSideBarButton"
-                  aria-controls="discover-sidebar"
-                  aria-expanded={isSidebarClosed ? 'false' : 'true'}
-                  aria-label={i18n.translate('discover.toggleSidebarAriaLabel', {
-                    defaultMessage: 'Toggle sidebar',
-                  })}
-                />
-              </div>
+              <EuiPanel paddingSize="none" hasShadow={false}>
+                <div style={{ padding: '1em 6px' }}>
+                  <EuiButtonIcon
+                    iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
+                    iconSize="m"
+                    size="xs"
+                    onClick={toggleSidebarCollapse}
+                    data-test-subj="collapseSideBarButton"
+                    aria-controls="discover-sidebar"
+                    aria-expanded={isSidebarClosed ? 'false' : 'true'}
+                    aria-label={i18n.translate('discover.toggleSidebarAriaLabel', {
+                      defaultMessage: 'Toggle sidebar',
+                    })}
+                  />
+                </div>
+              </EuiPanel>
             </EuiFlexItem>
           </EuiHideFor>
           <EuiFlexItem className="dscPageContent__wrapper">
