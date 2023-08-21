@@ -93,7 +93,7 @@ describe('Alert Event Details - Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () 
   });
 
   // verify why calling new action doesnt add to response actions list
-  describe.skip('Case', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  describe('Case', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     let caseId: string;
 
     before(() => {
