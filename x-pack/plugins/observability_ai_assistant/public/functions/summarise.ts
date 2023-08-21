@@ -73,6 +73,7 @@ export function registerSummarisationFunction({
               is_correction: isCorrection,
               confidence,
               public: isPublic,
+              labels: {},
             },
           },
           signal,

@@ -170,9 +170,11 @@ export class KnowledgeBaseService {
     query: string;
     user: { name: string };
     namespace: string;
-  }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
+  }): Promise<{ entries: Array<Pick<KnowledgeBaseEntry, 'text' | 'id'>> }> => {
     try {
-      const response = await this.dependencies.esClient.search<KnowledgeBaseEntry>({
+      const response = await this.dependencies.esClient.search<
+        Pick<KnowledgeBaseEntry, 'text' | 'id'>
+      >({
         index: this.dependencies.resources.aliases.kb,
         query: {
           bool: {

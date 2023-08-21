@@ -57,7 +57,9 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
   options: {
     tags: ['access:ai_assistant'],
   },
-  handler: async (resources): Promise<{ entries: KnowledgeBaseEntry[] }> => {
+  handler: async (
+    resources
+  ): Promise<{ entries: Array<Pick<KnowledgeBaseEntry, 'text' | 'id'>> }> => {
     const client = await resources.service.getClient({ request: resources.request });
 
     if (!client) {
@@ -77,6 +79,7 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
       confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
       is_correction: toBooleanRt,
       public: toBooleanRt,
+      labels: t.record(t.string, t.string),
     }),
   }),
   options: {
@@ -95,6 +98,7 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
       is_correction: isCorrection,
       text,
       public: isPublic,
+      labels,
     } = resources.params.body;
 
     return client.summarise({
@@ -104,6 +108,7 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
         is_correction: isCorrection,
         text,
         public: isPublic,
+        labels,
       },
     });
   },

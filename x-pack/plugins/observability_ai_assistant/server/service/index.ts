@@ -13,7 +13,6 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { once } from 'lodash';
-import { KnowledgeBaseEntry } from '../../common/types';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import { ObservabilityAIAssistantClient } from './client';
 import { conversationComponentTemplate } from './conversation_component_template';
