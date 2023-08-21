@@ -4,11 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Request } from '@hapi/hapi';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
-import { CoreKibanaRequest } from '@kbn/core/server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import {
   AlertingAuthorizationClientFactory,
@@ -18,7 +15,6 @@ import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 jest.mock('./authorization/alerting_authorization');
 
-const savedObjectsClient = savedObjectsClientMock.create();
 const features = featuresPluginMock.createStart();
 
 const securityPluginSetup = securityMock.createSetup();
@@ -32,23 +28,6 @@ const alertingAuthorizationClientFactoryParams: jest.Mocked<AlertingAuthorizatio
     features,
   };
 
-const fakeRequest = {
-  app: {},
-  headers: {},
-  getBasePath: () => '',
-  path: '/',
-  route: { settings: {} },
-  url: {
-    href: '/',
-  },
-  raw: {
-    req: {
-      url: '/',
-    },
-  },
-  getSavedObjectsClient: () => savedObjectsClient,
-} as unknown as Request;
-
 beforeEach(() => {
   jest.resetAllMocks();
 });
@@ -60,7 +39,7 @@ test('creates an alerting authorization client with proper constructor arguments
     securityPluginStart,
     ...alertingAuthorizationClientFactoryParams,
   });
-  const request = CoreKibanaRequest.from(fakeRequest);
+  const request = mockRouter.createKibanaRequest();
 
   factory.create(request);
 
@@ -78,7 +57,7 @@ test('creates an alerting authorization client with proper constructor arguments
 test('creates an alerting authorization client with proper constructor arguments', async () => {
   const factory = new AlertingAuthorizationClientFactory();
   factory.initialize(alertingAuthorizationClientFactoryParams);
-  const request = CoreKibanaRequest.from(fakeRequest);
+  const request = mockRouter.createKibanaRequest();
 
   factory.create(request);
 
