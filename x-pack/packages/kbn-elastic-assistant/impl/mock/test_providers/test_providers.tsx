@@ -15,7 +15,7 @@ import { ThemeProvider } from 'styled-components';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
-import { Conversation } from '../../assistant_context/types';
+import { AssistantAvailability, Conversation } from '../../assistant_context/types';
 
 interface Props {
   children: React.ReactNode;
@@ -34,6 +34,12 @@ export const TestProvidersComponent: React.FC<Props> = ({
   getInitialConversations = mockGetInitialConversations,
   providerContext,
 }) => {
+  const mockAssistantAvailability: AssistantAvailability = {
+    hasAssistantPrivilege: false,
+    hasConnectorsAllPrivilege: true,
+    hasConnectorsReadPrivilege: true,
+    isAssistantEnabled: true,
+  };
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockGetComments = jest.fn(() => []);
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
@@ -56,6 +62,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
         <QueryClientProvider client={queryClient}>
           <AssistantProvider
             actionTypeRegistry={actionTypeRegistry}
+            assistantAvailability={mockAssistantAvailability}
             augmentMessageCodeBlocks={jest.fn().mockReturnValue([])}
             baseAllow={[]}
             baseAllowReplacement={[]}
