@@ -7,6 +7,7 @@
 
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { internalAccess } from '@kbn/reporting-plugin/common/constants';
 import React from 'react';
 import { JobId, JobSummary } from '../../common/types';
 
@@ -20,7 +21,7 @@ export const DownloadButton = ({ getUrl, job }: Props) => {
     <EuiButton
       size="s"
       data-test-subj="downloadCompletedReportButton"
-      href={getUrl(`${job.id}?elasticInternalOrigin=true`)}
+      href={getUrl(`${job.id}?${internalAccess}`)}
       target="_blank"
     >
       <FormattedMessage

@@ -13,6 +13,7 @@ import { stringify } from 'query-string';
 import { buildKibanaPath } from '../../../common/build_kibana_path';
 import {
   getRedirectAppPath,
+  internalAccess,
   INTERNAL_ROUTES,
   PUBLIC_ROUTES,
   REPORTING_MANAGEMENT_HOME,
@@ -98,7 +99,7 @@ export class ReportingAPIClient implements IReportingAPI {
    */
   public getReportURL(jobId: string) {
     const downloadLink = this.http.basePath.prepend(
-      `${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${jobId}?elasticInternalOrigin=true`
+      `${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${jobId}?${internalAccess}`
     );
 
     return downloadLink;
