@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { recurse } from 'cypress-recurse';
+import { TOP_N_CONTAINER } from '../../../screens/network/flows';
 import { FIELDS_BROWSER_BTN } from '../../../screens/rule_details';
 import { getNewRule } from '../../../objects/rule';
 import {
@@ -54,12 +56,20 @@ describe(`Event Rendered View`, () => {
 
   it('Hover Action TopN in event summary column', () => {
     showHoverActionsEventRenderedView(ALERT_RENDERER_HOST_NAME);
-    cy.get(HOVER_ACTIONS.SHOW_TOP).trigger('click');
+    recurse(
+      () => {
+        // some times clicking once is not enough
+        // so this block clicks TopN hover actions till TopN container is visible
+        cy.get(HOVER_ACTIONS.SHOW_TOP).trigger('click');
+        return cy.root();
+      },
+      ($root) => $root.find(TOP_N_CONTAINER).is(':visible')
+    );
     cy.get(TOP_N_ALERT_HISTOGRAM).should('be.visible');
     cy.get(SHOW_TOP_N_HEADER).first().should('have.text', 'Top host.name');
     cy.get(XY_CHART).should('be.visible');
     cy.get(TOP_N_CONTAINER_CLOSE_BTN).trigger('click');
-    cy.get(XY_CHART).should('not.be.visible');
+    cy.get(XY_CHART).should('not.exist');
   });
 
   /*
