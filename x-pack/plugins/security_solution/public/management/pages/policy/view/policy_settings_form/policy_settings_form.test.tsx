@@ -66,7 +66,7 @@ describe('Endpoint Policy Settings Form', () => {
 
   describe('and when policy protections are not available', () => {
     beforeEach(() => {
-      upsellingService.registerSections({
+      upsellingService.setSections({
         endpointPolicyProtections: () => <div data-test-subj="paywall">{'pay up!'}</div>,
       });
     });
