@@ -19,8 +19,8 @@ describe('calculateImpactEstimates', () => {
       percentage: 0.1,
       coreSeconds: 50,
       annualizedCoreSeconds: 1752000,
-      co2: 0.000036853930555555546,
-      annualizedCo2: 1.2913617266666664,
+      co2: 0.00006265168194444443,
+      annualizedCo2: 2.1953149353333328,
       dollarCost: 0.0005902777777777778,
       annualizedDollarCost: 20.683333333333334,
     });
@@ -29,8 +29,8 @@ describe('calculateImpactEstimates', () => {
       percentage: 0.05,
       coreSeconds: 25,
       annualizedCoreSeconds: 876000,
-      co2: 0.000018426965277777773,
-      annualizedCo2: 0.6456808633333332,
+      co2: 0.000031325840972222215,
+      annualizedCo2: 1.0976574676666664,
       dollarCost: 0.0002951388888888889,
       annualizedDollarCost: 10.341666666666667,
     });
@@ -39,12 +39,13 @@ describe('calculateImpactEstimates', () => {
       percentage: 1,
       coreSeconds: 500,
       annualizedCoreSeconds: 17520000,
-      co2: 0.00036853930555555555,
-      annualizedCo2: 12.913617266666666,
+      co2: 0.0006265168194444444,
+      annualizedCo2: 21.95314935333333,
       dollarCost: 0.0059027777777777785,
       annualizedDollarCost: 206.83333333333337,
     });
   });
+
   it('calculates impact', () => {
     const { selfCPU, totalCPU, totalSamples } = calculateImpactEstimates({
       countExclusive: 1000,
@@ -57,8 +58,8 @@ describe('calculateImpactEstimates', () => {
       percentage: 0.1,
       coreSeconds: 50,
       annualizedCoreSeconds: 1752000,
-      co2: 0.000036853930555555546,
-      annualizedCo2: 1.2913617266666664,
+      co2: 0.00006265168194444443,
+      annualizedCo2: 2.1953149353333328,
       dollarCost: 0.0005902777777777778,
       annualizedDollarCost: 20.683333333333334,
     });
@@ -67,8 +68,8 @@ describe('calculateImpactEstimates', () => {
       percentage: 0.1,
       coreSeconds: 50,
       annualizedCoreSeconds: 1752000,
-      co2: 0.000036853930555555546,
-      annualizedCo2: 1.2913617266666664,
+      co2: 0.00006265168194444443,
+      annualizedCo2: 2.1953149353333328,
       dollarCost: 0.0005902777777777778,
       annualizedDollarCost: 20.683333333333334,
     });
@@ -77,8 +78,8 @@ describe('calculateImpactEstimates', () => {
       percentage: 1,
       coreSeconds: 500,
       annualizedCoreSeconds: 17520000,
-      co2: 0.00036853930555555555,
-      annualizedCo2: 12.913617266666666,
+      co2: 0.0006265168194444444,
+      annualizedCo2: 21.95314935333333,
       dollarCost: 0.0059027777777777785,
       annualizedDollarCost: 206.83333333333337,
     });

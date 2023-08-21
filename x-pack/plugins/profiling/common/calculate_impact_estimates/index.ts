@@ -15,6 +15,9 @@ const PER_CORE_WATT = 7;
 // Reference: https://www.cloudcarbonfootprint.org/docs/methodology/#appendix-v-grid-emissions-factors
 const CO2_PER_KWH = 0.379069;
 
+// The assumed PUE of the datacenter (1.7 is likely to be an on-prem value).
+const DATACENTER_PUE = 1.7;
+
 // The cost of an x86 CPU core per hour, in US$.
 // (ARM is 60% less based graviton 3 data, see https://aws.amazon.com/ec2/graviton/)
 const CORE_COST_PER_HOUR = 0.0425;
@@ -64,7 +67,7 @@ function calculateImpact({
   const coreSeconds = totalCoreSeconds * percentage;
   const annualizedCoreSeconds = coreSeconds * annualizedScaleUp;
   const coreHours = coreSeconds / (60 * 60);
-  const co2 = ((PER_CORE_WATT * coreHours) / 1000.0) * CO2_PER_KWH;
+  const co2 = ((PER_CORE_WATT * coreHours) / 1000.0) * CO2_PER_KWH * DATACENTER_PUE;
   const annualizedCo2 = co2 * annualizedScaleUp;
   const dollarCost = coreHours * CORE_COST_PER_HOUR;
   const annualizedDollarCost = dollarCost * annualizedScaleUp;
