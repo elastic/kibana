@@ -3650,8 +3650,6 @@
             "description": "The display name for the connector."
           },
           "secrets": {
-            "type": "object",
-            "description": "The secrets object containing the necessary fields for authentication.",
             "$ref": "#/components/schemas/secrets_properties_slack_api"
           }
         }
@@ -3669,8 +3667,6 @@
             "description": "The display name for the connector."
           },
           "secrets": {
-            "type": "object",
-            "description": "The secrets object containing the necessary fields for authentication.",
             "$ref": "#/components/schemas/secrets_properties_slack_webhook"
           }
         }
