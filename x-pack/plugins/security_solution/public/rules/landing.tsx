@@ -31,12 +31,12 @@ const CREATE_RULE_BUTTON = i18n.translate('xpack.securitySolution.rules.landing.
   defaultMessage: 'Create rule',
 });
 
-export const RulesLandingHeader: React.FC = () => {
+const RulesLandingHeader: React.FC = () => {
   const [{ canUserCRUD }] = useUserData();
   useReadonlyHeader(READ_ONLY_BADGE_TOOLTIP);
 
   return (
-    <EuiFlexGroup gutterSize="none" direction="row" data-test-subj="ruleLandingHeader">
+    <EuiFlexGroup gutterSize="none" direction="row">
       <EuiFlexItem>
         <Title title={RULES_PAGE_TITLE} />
       </EuiFlexItem>
@@ -45,7 +45,6 @@ export const RulesLandingHeader: React.FC = () => {
           deepLinkId={SecurityPageName.rulesCreate}
           iconType="plusInCircle"
           isDisabled={!hasUserCRUDPermission(canUserCRUD)}
-          data-test-subj="createRuleBtn"
         >
           {CREATE_RULE_BUTTON}
         </SecuritySolutionLinkButton>
