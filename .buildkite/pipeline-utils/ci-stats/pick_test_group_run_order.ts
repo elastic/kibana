@@ -76,12 +76,9 @@ export async function pickTestGroupRunOrder() {
     throw new Error('unable to find any unit, integration, or FTR configs');
   }
 
-  if (await isUnitTestOnlyChange(jestUnitConfigs)) {
+  const shouldOnlyRunUnitTests = (await isUnitTestOnlyChange(jestUnitConfigs)) || true;
+  if (shouldOnlyRunUnitTests) {
     console.log('test configuration only contains jest test changes, skipping integration/FTR');
-    jestIntegrationConfigs.length = 0;
-    ftrConfigsByQueue.clear();
-  } else {
-    console.log("normally wouldn't, but this is a test, skipping integration/FTR");
     jestIntegrationConfigs.length = 0;
     ftrConfigsByQueue.clear();
   }
@@ -96,9 +93,23 @@ export async function pickTestGroupRunOrder() {
   console.log('test run order is determined by builds:');
   console.dir(sources, { depth: Infinity, maxArrayLength: Infinity });
 
+  const defaultRunGroup = (type: string): RunGroup => {
+    return {
+      groups: [],
+      count: 0,
+      queue: defaultQueue,
+      type,
+      namesWithoutDurations: [],
+    };
+  };
+
   const unitTestGroup = getRunGroup(bk, types, UNIT_TYPE);
-  const integrationTestGroup = getRunGroup(bk, types, INTEGRATION_TYPE);
-  const functionalTestGroup = getRunGroups(bk, types, FUNCTIONAL_TYPE);
+  const integrationTestGroup = shouldOnlyRunUnitTests
+    ? defaultRunGroup(INTEGRATION_TYPE)
+    : getRunGroup(bk, types, INTEGRATION_TYPE);
+  const functionalTestGroup = shouldOnlyRunUnitTests
+    ? [defaultRunGroup(FUNCTIONAL_TYPE)]
+    : getRunGroups(bk, types, FUNCTIONAL_TYPE);
 
   const { functionalGroups, ftrRunOrder } = calculateFtrGroupsFromQueues(
     ftrConfigsByQueue,
