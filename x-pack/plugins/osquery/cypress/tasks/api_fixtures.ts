@@ -86,6 +86,7 @@ export const cleanupSavedQuery = (id: string) => {
     headers: {
       'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
+    failOnStatusCode: false,
   });
 };
 
@@ -112,6 +113,7 @@ export const cleanupPack = (id: string, space = 'default') => {
     headers: {
       'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
+    failOnStatusCode: false,
   });
 };
 
@@ -148,7 +150,30 @@ export const loadRule = (includeResponseActions = false) =>
         'winlogbeat-*',
         '-*elastic-cloud-logs-*',
       ],
-      filters: [],
+      filters: [
+        {
+          meta: {
+            type: 'custom',
+            disabled: false,
+            negate: false,
+            alias: null,
+            key: 'query',
+            value: '{"bool":{"must_not":{"wildcard":{"host.name":"dev-fleet-server.*"}}}}',
+          },
+          query: {
+            bool: {
+              must_not: {
+                wildcard: {
+                  'host.name': 'dev-fleet-server.*',
+                },
+              },
+            },
+          },
+          $state: {
+            store: 'appState',
+          },
+        },
+      ],
       language: 'kuery',
       query: '_id:*',
       author: [],
@@ -205,6 +230,7 @@ export const cleanupRule = (id: string) => {
     headers: {
       'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
+    failOnStatusCode: false,
   });
 };
 
@@ -229,6 +255,7 @@ export const cleanupCase = (id: string) => {
     method: 'DELETE',
     url: '/api/cases',
     qs: { ids: JSON.stringify([id]) },
+    failOnStatusCode: false,
   });
 };
 

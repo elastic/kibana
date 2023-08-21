@@ -140,7 +140,7 @@ const setupKnowledgeBaseRoute = createObservabilityAIAssistantServerRoute({
       idleSocket: 20 * 60 * 1000, // 20 minutes
     },
   },
-  handler: async (resources): Promise<void> => {
+  handler: async (resources): Promise<{}> => {
     const client = await resources.service.getClient({ request: resources.request });
 
     if (!client) {
@@ -148,6 +148,8 @@ const setupKnowledgeBaseRoute = createObservabilityAIAssistantServerRoute({
     }
 
     await client.setupKnowledgeBase();
+
+    return {};
   },
 });
 
