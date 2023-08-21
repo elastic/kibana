@@ -41,7 +41,7 @@ describe('ALL - Packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     { tags: [tag.ESS] },
     () => {
       beforeEach(() => {
-        cy.login('soc_manager');
+        cy.login('elastic');
       });
       const AGENT_POLICY_NAME = `PackTest` + generateRandomStringName(1)[0];
       const REMOVING_PACK = 'removing-pack' + generateRandomStringName(1)[0];
@@ -176,7 +176,7 @@ describe('ALL - Packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
   describe('Global packs', { tags: [tag.ESS] }, () => {
     beforeEach(() => {
-      cy.login('soc_manager');
+      cy.login('elastic');
       navigateTo('/app/osquery/packs');
     });
 
