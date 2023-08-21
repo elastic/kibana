@@ -8,7 +8,7 @@
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { fetchFindLatestPackageOrThrow } from '@kbn/fleet-plugin/server/services/epm/registry';
-import { getCollectorPolicy } from './fleet_policies';
+import { getCollectorPolicy, getSymbolizerPolicy } from './fleet_policies';
 
 export interface SetupDataCollectionInstructions {
   collector: {
@@ -21,22 +21,31 @@ export interface SetupDataCollectionInstructions {
   profilerAgent: {
     version: string;
   };
+
+  stackVersion: string;
 }
 
 export async function getSetupInstructions({
   packagePolicyClient,
   soClient,
   apmServerHost,
+  stackVersion,
 }: {
   packagePolicyClient: PackagePolicyClient;
   soClient: SavedObjectsClientContract;
   apmServerHost?: string;
+  stackVersion: string;
 }): Promise<SetupDataCollectionInstructions> {
   const profilerAgent = await fetchFindLatestPackageOrThrow('profiler_agent', { prerelease: true });
   const collectorPolicy = await getCollectorPolicy({ packagePolicyClient, soClient });
+  const symbolizerPolicy = await getSymbolizerPolicy({ packagePolicyClient, soClient });
 
   if (!collectorPolicy) {
     throw new Error('Could not find Collector policy');
+  }
+
+  if (!symbolizerPolicy) {
+    throw new Error('Could not find Symbolizer policy');
   }
 
   const collectorVars = collectorPolicy.inputs[0].vars;
@@ -54,5 +63,6 @@ export async function getSetupInstructions({
     profilerAgent: {
       version: profilerAgent.version,
     },
+    stackVersion,
   };
 }

@@ -6,79 +6,75 @@
  */
 
 import type { Response } from 'node-fetch';
-
-import type { CoreSetup, ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
-import type {
-  ConcreteTaskInstance,
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
-
-import type { UsageRecord } from '../types';
 import { usageReportingService } from '../common/services';
+import type {
+  MeteringCallback,
+  SecurityUsageReportingTaskStartContract,
+  SecurityUsageReportingTaskSetupContract,
+  UsageRecord,
+} from '../types';
+import type { ServerlessSecurityConfig } from '../config';
 
 const SCOPE = ['serverlessSecurity'];
 const TIMEOUT = '1m';
 
 export const VERSION = '1.0.0';
 
-type MeteringCallback = (metringCallbackInput: MeteringCallbackInput) => UsageRecord[];
-
-export interface MeteringCallbackInput {
-  esClient: ElasticsearchClient;
-  lastSuccessfulReport: Date;
-}
-
-export interface CloudSecurityUsageReportingTaskSetupContract {
-  taskType: string;
-  taskTitle: string;
-  meteringCallback: MeteringCallback;
-  logFactory: LoggerFactory;
-  core: CoreSetup;
-  taskManager: TaskManagerSetupContract;
-}
-
-export interface SecurityMetadataTaskStartContract {
-  taskType: string;
-  interval: string;
-  version: string;
-  taskManager: TaskManagerStartContract;
-}
-
 export class SecurityUsageReportingTask {
-  private logger: Logger;
   private wasStarted: boolean = false;
+  private cloudSetup: CloudSetup;
+  private taskType: string;
+  private version: string;
+  private logger: Logger;
+  private abortController = new AbortController();
+  private config: ServerlessSecurityConfig;
 
-  constructor(setupContract: CloudSecurityUsageReportingTaskSetupContract) {
-    const { taskType, taskTitle, logFactory, core, taskManager, meteringCallback } = setupContract;
+  constructor(setupContract: SecurityUsageReportingTaskSetupContract) {
+    const {
+      core,
+      logFactory,
+      config,
+      taskManager,
+      cloudSetup,
+      taskType,
+      taskTitle,
+      version,
+      meteringCallback,
+    } = setupContract;
 
-    this.logger = logFactory.get(this.getTaskId(taskType));
-    taskManager.registerTaskDefinitions({
-      [taskType]: {
-        title: taskTitle,
-        timeout: TIMEOUT,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-          return {
-            run: async () => {
-              return this.runTask(taskInstance, core, meteringCallback);
-            },
-            // TODO
-            cancel: async () => {},
-          };
+    this.cloudSetup = cloudSetup;
+    this.taskType = taskType;
+    this.version = version;
+    this.logger = logFactory.get(this.taskId);
+    this.config = config;
+
+    try {
+      taskManager.registerTaskDefinitions({
+        [taskType]: {
+          title: taskTitle,
+          timeout: TIMEOUT,
+          createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+            return {
+              run: async () => {
+                return this.runTask(taskInstance, core, meteringCallback);
+              },
+              cancel: async () => {},
+            };
+          },
         },
-      },
-    });
+      });
+      this.logger.info(`Scheduled task successfully ${taskTitle}`);
+    } catch (err) {
+      this.logger.error(`Failed to setup task ${taskType}, ${err} `);
+    }
   }
 
-  public start = async ({
-    taskManager,
-    taskType,
-    interval,
-    version,
-  }: SecurityMetadataTaskStartContract) => {
+  public start = async ({ taskManager, interval }: SecurityUsageReportingTaskStartContract) => {
     if (!taskManager) {
-      this.logger.error('missing required service during start');
       return;
     }
 
@@ -86,8 +82,8 @@ export class SecurityUsageReportingTask {
 
     try {
       await taskManager.ensureScheduled({
-        id: this.getTaskId(taskType),
-        taskType,
+        id: this.taskId,
+        taskType: this.taskType,
         scope: SCOPE,
         schedule: {
           interval,
@@ -95,7 +91,7 @@ export class SecurityUsageReportingTask {
         state: {
           lastSuccessfulReport: null,
         },
-        params: { version },
+        params: { version: this.version },
       });
     } catch (e) {
       this.logger.debug(`Error scheduling task, received ${e.message}`);
@@ -112,27 +108,55 @@ export class SecurityUsageReportingTask {
       this.logger.debug('[runTask()] Aborted. Task not started yet');
       return;
     }
-
     // Check that this task is current
-    if (taskInstance.id !== this.getTaskId(taskInstance.taskType)) {
+    if (taskInstance.id !== this.taskId) {
       // old task, die
       throwUnrecoverableError(new Error('Outdated task version'));
     }
 
     const [{ elasticsearch }] = await core.getStartServices();
-
     const esClient = elasticsearch.client.asInternalUser;
+
     const lastSuccessfulReport = taskInstance.state.lastSuccessfulReport;
 
-    const usageRecords = meteringCallback({ esClient, lastSuccessfulReport });
+    let usageRecords: UsageRecord[] = [];
+    try {
+      usageRecords = await meteringCallback({
+        esClient,
+        cloudSetup: this.cloudSetup,
+        logger: this.logger,
+        taskId: this.taskId,
+        lastSuccessfulReport,
+        abortController: this.abortController,
+        config: this.config,
+      });
+    } catch (err) {
+      this.logger.error(`failed to retrieve usage records: ${JSON.stringify(err)}`);
+      return;
+    }
+
+    this.logger.debug(`received usage records: ${JSON.stringify(usageRecords)}`);
 
     let usageReportResponse: Response | undefined;
 
-    try {
-      usageReportResponse = await usageReportingService.reportUsage(usageRecords);
-    } catch (e) {
-      this.logger.warn(JSON.stringify(e));
+    if (usageRecords.length !== 0) {
+      try {
+        usageReportResponse = await usageReportingService.reportUsage(usageRecords);
+
+        if (!usageReportResponse.ok) {
+          const errorResponse = await usageReportResponse.json();
+          this.logger.error(`API error ${usageReportResponse.status}, ${errorResponse}`);
+          return;
+        }
+
+        this.logger.info(
+          `usage records report was sent successfully: ${usageReportResponse.status}, ${usageReportResponse.statusText}`
+        );
+      } catch (err) {
+        this.logger.error(`Failed to send usage records report ${JSON.stringify(err)} `);
+      }
     }
+
     const state = {
       lastSuccessfulReport:
         usageReportResponse?.status === 201 ? new Date() : taskInstance.state.lastSuccessfulReport,
@@ -140,7 +164,7 @@ export class SecurityUsageReportingTask {
     return { state };
   };
 
-  private getTaskId = (taskType: string): string => {
-    return `${taskType}:${VERSION}`;
-  };
+  private get taskId() {
+    return `${this.taskType}:${this.version}`;
+  }
 }

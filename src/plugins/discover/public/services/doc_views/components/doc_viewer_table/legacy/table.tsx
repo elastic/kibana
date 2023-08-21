@@ -11,13 +11,13 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { getFieldIconType } from '@kbn/unified-field-list/src/utils/field_types/get_field_icon_type';
 import {
+  SHOW_MULTIFIELDS,
   formatFieldValue,
   getIgnoredReason,
   getShouldShowFieldHandler,
   isNestedFieldParent,
 } from '@kbn/discover-utils';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
-import { SHOW_MULTIFIELDS } from '../../../../../../common';
 import { DocViewRenderProps, FieldRecordLegacy } from '../../../doc_views_types';
 import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
 

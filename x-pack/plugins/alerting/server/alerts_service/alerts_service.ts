@@ -35,7 +35,8 @@ import {
   createConcreteWriteIndex,
   installWithTimeout,
 } from './lib';
-import { type LegacyAlertsClientParams, type AlertRuleData, AlertsClient } from '../alerts_client';
+import type { LegacyAlertsClientParams, AlertRuleData } from '../alerts_client';
+import { AlertsClient } from '../alerts_client';
 import { IAlertsClient } from '../alerts_client/types';
 
 export const TOTAL_FIELDS_LIMIT = 2500;
@@ -176,7 +177,11 @@ export class AlertsService implements IAlertsService {
         }
       }
 
-      this.resourceInitializationHelper.retry(opts.ruleType.alerts, opts.namespace, initPromise);
+      this.resourceInitializationHelper.retry(
+        opts.ruleType.alerts as IRuleTypeAlerts,
+        opts.namespace,
+        initPromise
+      );
 
       const retryResult = await this.resourceInitializationHelper.getInitializedContext(
         opts.ruleType.alerts.context,
@@ -197,13 +202,6 @@ export class AlertsService implements IAlertsService {
           `Resource installation for "${opts.ruleType.alerts.context}" succeeded after retry`
         );
       }
-    }
-
-    if (!opts.ruleType.alerts.shouldWrite) {
-      this.options.logger.debug(
-        `Resources registered and installed for ${opts.ruleType.alerts.context} context but "shouldWrite" is set to false.`
-      );
-      return null;
     }
 
     // TODO - when we replace the LegacyAlertsClient, we will need to decide whether to

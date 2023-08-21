@@ -10,7 +10,6 @@ import {
   DefaultNavigation,
   NavigationKibanaProvider,
   type NavigationTreeDefinition,
-  getPresets,
 } from '@kbn/shared-ux-chrome-navigation';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -40,7 +39,7 @@ const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
             defaultMessage: 'Dev Tools',
           }),
-          children: getPresets('devtools').children[0].children,
+          children: [{ link: 'dev_tools:console' }, { link: 'dev_tools:searchprofiler' }],
         },
         {
           id: 'explore',
@@ -83,16 +82,14 @@ const navigationTree: NavigationTreeDefinition = {
           children: [
             {
               title: i18n.translate('xpack.serverlessSearch.nav.content.indices', {
-                defaultMessage: 'Indices',
+                defaultMessage: 'Index Management',
               }),
-              // TODO: this will be updated to a new Indices page
               link: 'management:index_management',
             },
             {
               title: i18n.translate('xpack.serverlessSearch.nav.content.pipelines', {
                 defaultMessage: 'Pipelines',
               }),
-              // TODO: this will be updated to a new Pipelines page
               link: 'management:ingest_pipelines',
             },
             {
@@ -117,10 +114,6 @@ const navigationTree: NavigationTreeDefinition = {
         },
       ],
     },
-    {
-      type: 'navGroup',
-      ...getPresets('ml'),
-    },
   ],
   footer: [
     {
@@ -139,6 +132,13 @@ const navigationTree: NavigationTreeDefinition = {
               link: 'management',
               title: i18n.translate('xpack.serverlessSearch.nav.mngt', {
                 defaultMessage: 'Management',
+              }),
+            },
+            {
+              id: 'cloudLinkDeployment',
+              cloudLink: 'deployment',
+              title: i18n.translate('xpack.serverlessSearch.nav.performance', {
+                defaultMessage: 'Performance',
               }),
             },
             {

@@ -10,15 +10,14 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useGetCaseUsers } from '../../../containers/use_get_case_users';
 import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
-import type { CaseSeverity } from '../../../../common/api';
-import type { CaseUsers, UseFetchAlertData } from '../../../../common/ui/types';
-import type { CaseUI, CaseStatuses } from '../../../../common';
+import type { CaseSeverity, CaseStatuses } from '../../../../common/types/domain';
+import type { UseFetchAlertData } from '../../../../common/ui/types';
+import type { CaseUI } from '../../../../common';
 import { EditConnector } from '../../edit_connector';
 import type { CasesNavigation } from '../../links';
 import { StatusActionButton } from '../../status/button';
@@ -33,46 +32,12 @@ import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_use
 import { AssignUsers } from './assign_users';
 import { UserActionsActivityBar } from '../../user_actions_activity_bar';
 import type { Assignee } from '../../user_profiles/types';
-import { convertToCaseUserWithProfileInfo } from '../../user_profiles/user_converter';
 import type { UserActivityParams } from '../../user_actions_activity_bar/types';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { CaseViewTabs } from '../case_view_tabs';
 import { Description } from '../../description';
 import { EditCategory } from './edit_category';
-
-const buildUserProfilesMap = (users?: CaseUsers): Map<string, UserProfileWithAvatar> => {
-  const userProfiles = new Map();
-
-  if (!users) {
-    return userProfiles;
-  }
-
-  for (const user of [
-    ...users.assignees,
-    ...users.participants,
-    users.reporter,
-    ...users.unassignedUsers,
-  ]) {
-    /**
-     * If the user has a valid profile UID and a valid username
-     * then the backend successfully fetched the user profile
-     * information from the security plugin. Checking only for the
-     * profile UID is not enough as a user can use our API to add
-     * an assignee with a non existing UID.
-     */
-    if (user.uid != null && user.user.username != null) {
-      userProfiles.set(user.uid, {
-        uid: user.uid,
-        user: user.user,
-        data: {
-          avatar: user.avatar,
-        },
-      });
-    }
-  }
-
-  return userProfiles;
-};
+import { parseCaseUsers } from '../../utils';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -107,7 +72,10 @@ export const CaseViewActivity = ({
 
   const { data: caseUsers, isLoading: isLoadingCaseUsers } = useGetCaseUsers(caseData.id);
 
-  const userProfiles = buildUserProfilesMap(caseUsers);
+  const { userProfiles, reporterAsArray } = parseCaseUsers({
+    caseUsers,
+    createdBy: caseData.createdBy,
+  });
 
   const assignees = useMemo(
     () => caseData.assignees.map((assignee) => assignee.uid),
@@ -202,11 +170,6 @@ export const CaseViewActivity = ({
 
   const showConnectorSidebar =
     pushToServiceAuthorized && caseConnectors && supportedActionConnectors;
-
-  const reporterAsArray =
-    caseUsers?.reporter != null
-      ? [caseUsers.reporter]
-      : [convertToCaseUserWithProfileInfo(caseData.createdBy)];
 
   const isLoadingDescription = isLoading && loadingKey === 'description';
 

@@ -7,7 +7,8 @@
 
 import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
   Comparator,
@@ -145,8 +146,9 @@ export async function registerMetricInventoryThresholdRuleType(
         },
       ],
     },
-    getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
     alerts: MetricsRulesTypeAlertDefinition,
     fieldsForAAD: O11Y_AAD_FIELDS,
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
   });
 }

@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
@@ -33,7 +34,11 @@ export const getRuleExecutionResultsRoute = (router: SecuritySolutionPluginRoute
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (
+      context,
+      request,
+      response
+    ): Promise<IKibanaResponse<GetRuleExecutionResultsResponse>> => {
       const { ruleId } = request.params;
       const {
         start,
@@ -63,9 +68,7 @@ export const getRuleExecutionResultsRoute = (router: SecuritySolutionPluginRoute
           sortOrder,
         });
 
-        const responseBody: GetRuleExecutionResultsResponse = executionResultsResponse;
-
-        return response.ok({ body: responseBody });
+        return response.ok({ body: executionResultsResponse });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

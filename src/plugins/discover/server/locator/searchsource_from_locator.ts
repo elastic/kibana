@@ -11,6 +11,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { getSavedSearch } from '@kbn/saved-search-plugin/server';
+import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { LocatorServicesDeps } from '.';
 import { DiscoverAppLocatorParams } from '../../common';
 import { getSortForSearchSource } from '../../common/utils/sorting';
@@ -147,7 +148,13 @@ export function searchSourceFromLocatorFactory(services: LocatorServicesDeps) {
 
     // Inject sort
     if (savedSearch.sort) {
-      const sort = getSortForSearchSource(savedSearch.sort as Array<[string, string]>, index);
+      const defaultSortDir = await services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING);
+
+      const sort = getSortForSearchSource({
+        sort: savedSearch.sort as Array<[string, string]>,
+        dataView: index,
+        defaultSortDir,
+      });
       searchSource.setField('sort', sort);
     }
 

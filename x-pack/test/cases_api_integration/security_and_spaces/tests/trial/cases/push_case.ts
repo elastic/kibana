@@ -10,7 +10,7 @@
 import http from 'http';
 
 import expect from '@kbn/expect';
-import { CaseStatuses, CommentType, User } from '@kbn/cases-plugin/common/api';
+import { CaseStatuses, AttachmentType, User } from '@kbn/cases-plugin/common/types/domain';
 import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
 import { CaseConnector } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -54,6 +54,7 @@ import {
 } from '../../../../common/lib/api';
 import {
   globalRead,
+  noCasesConnectors,
   noKibanaPrivileges,
   obsOnlyRead,
   obsSecRead,
@@ -646,7 +647,7 @@ export default ({ getService }: FtrProviderContext): void => {
               alertId: signalID,
               index: defaultSignalsIndex,
               rule: { id: 'test-rule-id', name: 'test-index-id' },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
             },
           });
@@ -660,7 +661,7 @@ export default ({ getService }: FtrProviderContext): void => {
               alertId: signalID2,
               index: defaultSignalsIndex,
               rule: { id: 'test-rule-id', name: 'test-index-id' },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
             },
           });
@@ -839,6 +840,24 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           expect(theCase.status).to.eql('open');
+        });
+
+        it('should return 403 when the user does not have access to push', async () => {
+          const { postedCase } = await createCaseWithConnector({
+            supertest,
+            serviceNowSimulatorURL,
+            actionsRemover,
+            configureReq: { owner: 'testNoCasesConnectorFixture' },
+            createCaseReq: { ...getPostCaseRequest(), owner: 'testNoCasesConnectorFixture' },
+          });
+
+          await pushCase({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            connectorId: postedCase.connector.id,
+            expectedHttpCode: 403,
+            auth: { user: noCasesConnectors, space: null },
+          });
         });
       });
     });

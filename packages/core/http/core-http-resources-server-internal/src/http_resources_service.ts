@@ -85,12 +85,21 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
         route: RouteConfig<P, Q, B, 'get'>,
         handler: HttpResourcesRequestHandler<P, Q, B, Context>
       ) => {
-        return router.get<P, Q, B>(route, (context, request, response) => {
-          return handler(context as Context, request, {
-            ...response,
-            ...this.createResponseToolkit(deps, context, request, response),
-          });
-        });
+        return router.get<P, Q, B>(
+          {
+            ...route,
+            options: {
+              access: 'public',
+              ...route.options,
+            },
+          },
+          (context, request, response) => {
+            return handler(context as Context, request, {
+              ...response,
+              ...this.createResponseToolkit(deps, context, request, response),
+            });
+          }
+        );
       },
     };
   }

@@ -73,9 +73,13 @@ import {
   TimestampField,
   TimestampOverride,
   TimestampOverrideFallbackDisabled,
+  RuleCustomHighlightedFieldArray,
 } from '../../../../common/api/detection_engine/model/rule_schema';
 
-import type { PatchRuleRequestBody } from '../../../../common/api/detection_engine/rule_management';
+import type {
+  CoverageOverviewFilter,
+  PatchRuleRequestBody,
+} from '../../../../common/api/detection_engine/rule_management';
 import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
 import type {
   RuleCreateProps,
@@ -198,6 +202,7 @@ export const RuleSchema = t.intersection([
     version: RuleVersion,
     execution_summary: RuleExecutionSummary,
     alert_suppression: AlertSuppression,
+    investigation_fields: RuleCustomHighlightedFieldArray,
   }),
 ]);
 
@@ -268,6 +273,11 @@ export interface FetchRuleProps {
 
 export interface FetchRuleSnoozingProps {
   ids: string[];
+  signal?: AbortSignal;
+}
+
+export interface FetchCoverageOverviewProps {
+  filter: CoverageOverviewFilter;
   signal?: AbortSignal;
 }
 

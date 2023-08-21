@@ -11,28 +11,18 @@ import { navTabsHostDetails } from '../../../../explore/hosts/pages/details/nav_
 import { HostsTableType } from '../../../../explore/hosts/store/model';
 import { TabNavigationComponent } from './tab_navigation';
 import type { TabNavigationProps } from './types';
+import { mockGetUrlForApp } from '@kbn/security-solution-navigation/mocks/context';
+
+jest.mock('@kbn/security-solution-navigation/src/context');
+
+mockGetUrlForApp.mockImplementation(
+  (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path}`
+);
 
 const mockUseRouteSpy = jest.fn();
 jest.mock('../../../utils/route/use_route_spy', () => ({
   useRouteSpy: () => mockUseRouteSpy(),
 }));
-jest.mock('../../link_to');
-jest.mock('../../../lib/kibana/kibana_react', () => {
-  const originalModule = jest.requireActual('../../../lib/kibana/kibana_react');
-  return {
-    ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
-      services: {
-        application: {
-          getUrlForApp: (appId: string, options?: { path?: string }) =>
-            `/app/${appId}${options?.path}`,
-          navigateToApp: jest.fn(),
-        },
-      },
-    }),
-    useUiSetting$: jest.fn().mockReturnValue([]),
-  };
-});
 
 const SEARCH_QUERY = '?search=test';
 

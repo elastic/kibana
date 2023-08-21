@@ -9,7 +9,6 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import type { ExportRulesRequestQueryDecoded } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   ExportRulesRequestBody,
   ExportRulesRequestQuery,
@@ -32,9 +31,7 @@ export const exportRulesRoute = (
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_export`,
       validate: {
-        query: buildRouteValidation<typeof ExportRulesRequestQuery, ExportRulesRequestQueryDecoded>(
-          ExportRulesRequestQuery
-        ),
+        query: buildRouteValidation(ExportRulesRequestQuery),
         body: buildRouteValidation(ExportRulesRequestBody),
       },
       options: {

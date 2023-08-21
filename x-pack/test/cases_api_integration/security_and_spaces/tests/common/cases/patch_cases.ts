@@ -9,8 +9,13 @@ import expect from '@kbn/expect';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
-import { CaseSeverity, Cases, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
-import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
+import {
+  AttachmentType,
+  Cases,
+  CaseSeverity,
+  CaseStatuses,
+  ConnectorTypes,
+} from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
@@ -845,7 +850,7 @@ export default ({ getService }: FtrProviderContext): void => {
               alertId: signalID,
               index: defaultSignalsIndex,
               rule: { id: 'test-rule-id', name: 'test-index-id' },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
             },
           });
@@ -864,7 +869,7 @@ export default ({ getService }: FtrProviderContext): void => {
               alertId: signalID2,
               index: defaultSignalsIndex,
               rule: { id: 'test-rule-id', name: 'test-index-id' },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
             },
           });
@@ -990,7 +995,7 @@ export default ({ getService }: FtrProviderContext): void => {
               alertId: signalIDInFirstIndex,
               index: defaultSignalsIndex,
               rule: { id: 'test-rule-id', name: 'test-index-id' },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
             },
           });
@@ -1002,7 +1007,7 @@ export default ({ getService }: FtrProviderContext): void => {
               alertId: signalIDInSecondIndex,
               index: signalsIndex2,
               rule: { id: 'test-rule-id', name: 'test-index-id' },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
             },
           });
@@ -1113,7 +1118,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: 'id',
                 name: 'name',
               },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
             },
           });
@@ -1172,7 +1177,7 @@ export default ({ getService }: FtrProviderContext): void => {
             params: {
               alertId: alert._id,
               index: alert._index,
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               rule: {
                 id: 'id',
                 name: 'name',
@@ -1232,7 +1237,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: 'id',
                 name: 'name',
               },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
             },
           });
@@ -1300,7 +1305,7 @@ export default ({ getService }: FtrProviderContext): void => {
             params: {
               alertId: alert._id,
               index: alert._index,
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               rule: {
                 id: 'id',
                 name: 'name',

@@ -23,6 +23,9 @@ import { SecurityPlugin } from './plugin';
 export type {
   CreateAPIKeyParams,
   CreateAPIKeyResult,
+  CreateRestAPIKeyParams,
+  CreateRestAPIKeyWithKibanaPrivilegesParams,
+  CreateCrossClusterAPIKeyParams,
   InvalidateAPIKeysParams,
   InvalidateAPIKeyResult,
   GrantAPIKeyResult,
