@@ -321,6 +321,22 @@ describe('TextExpansionCalloutLogic', () => {
           message: 'Mocked error message',
         });
       });
+
+      it('returns extracted error for fetch', () => {
+        FetchTextExpansionModelApiLogic.actions.apiError(error);
+        expect(TextExpansionCalloutLogic.values.textExpansionError).toStrictEqual({
+          title: 'Error fetching ELSER model',
+          message: 'Mocked error message',
+        });
+      });
+
+      it('returns extracted error for start', () => {
+        StartTextExpansionModelApiLogic.actions.apiError(error);
+        expect(TextExpansionCalloutLogic.values.textExpansionError).toStrictEqual({
+          title: 'Error starting ELSER deployment',
+          message: 'Mocked error message',
+        });
+      });
     });
 
     describe('isModelDownloadInProgress', () => {
