@@ -97,21 +97,17 @@ export const DashboardsLandingPage = () => {
     [getSecuritySolutionUrl]
   );
 
-  const getHref = useCallback(
-    (id: string | undefined) =>
-      getSecuritySolutionUrl({
-        deepLinkId: SecurityPageName.dashboards,
-        path: id ?? 'create',
-      }),
-    [getSecuritySolutionUrl]
-  );
-
   const goToDashboard = useCallback(
     (dashboardId: string | undefined) => {
       track(METRIC_TYPE.CLICK, TELEMETRY_EVENT.DASHBOARD);
-      navigateTo({ url: getHref(dashboardId) });
+      navigateTo({
+        url: getSecuritySolutionUrl({
+          deepLinkId: SecurityPageName.dashboards,
+          path: dashboardId ?? 'create',
+        }),
+      });
     },
-    [getHref, navigateTo]
+    [getSecuritySolutionUrl, navigateTo]
   );
 
   const securityTags = useSecurityTags();

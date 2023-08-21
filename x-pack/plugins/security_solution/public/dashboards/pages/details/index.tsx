@@ -7,7 +7,6 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
-import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { useParams } from 'react-router-dom';
@@ -16,7 +15,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { ViewMode } from '@kbn/embeddable-plugin/common';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { useCapabilities, useKibana } from '../../../common/lib/kibana';
+import { useCapabilities } from '../../../common/lib/kibana';
 import { DashboardViewPromptState } from '../../hooks/use_dashboard_view_prompt_state';
 import { DashboardRenderer } from '../../components/dashboard_renderer';
 import { StatusPrompt } from '../../components/status_prompt';
@@ -26,15 +25,11 @@ import { FiltersGlobal } from '../../../common/components/filters_global';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { HeaderPage } from '../../../common/components/header_page';
-import { DASHBOARD_NOT_FOUND_TITLE } from './translations';
 import { inputsSelectors } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { DashboardToolBar } from '../../components/dashboard_tool_bar';
-import { fetchTags, isManagedTag } from '../../../common/containers/tags/api';
-import { REQUEST_NAMES, useFetch } from '../../../common/hooks/use_fetch';
-import { CREATE_DASHBOARD_TITLE } from '../translations';
 
-type DashboardDetails = Record<string, string>;
+import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
 
 interface DashboardViewProps {
   initialViewMode: ViewMode;
@@ -45,7 +40,6 @@ const dashboardViewFlexGroupStyle = { minHeight: `calc(100vh - 140px)` };
 const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   initialViewMode,
 }: DashboardViewProps) => {
-  const { savedObjectsTagging } = useKibana().services;
   const { fromStr, toStr, from, to } = useDeepEqualSelector((state) =>
     pick(['fromStr', 'toStr', 'from', 'to'], inputsSelectors.globalTimeRangeSelector(state))
   );
@@ -58,7 +52,6 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
   const { indexPattern } = useSourcererDataView();
-  const [dashboardContainer, setDashboardContainer] = useState<DashboardAPI>();
 
   const { show: canReadDashboard, showWriteControls } =
     useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
@@ -66,56 +59,20 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
     () => (canReadDashboard ? null : DashboardViewPromptState.NoReadPermission),
     [canReadDashboard]
   );
-  const [dashboardDetails, setDashboardDetails] = useState<DashboardDetails | undefined>();
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
-  const [isManaged, setIsManaged] = useState(false);
-  const { fetch: fetchDashboardTags, data: dashboardTags } = useFetch(
-    REQUEST_NAMES.FETCH_DASHBOARD_TAGS,
-    fetchTags
-  );
   const { detailName: savedObjectId } = useParams<{ detailName?: string }>();
-
+  const {
+    dashboard: { container: dashboardContainer, details: dashboardDetails, isManaged },
+    handleDashboardLoaded,
+  } = useDashboardRenderer(savedObjectId);
   const onDashboardToolBarLoad = useCallback((mode: ViewMode) => {
     setViewMode(mode);
   }, []);
-  const onDashboardContainerLoaded = useCallback(
-    (dashboard: DashboardAPI) => {
-      if (!savedObjectId) {
-        setDashboardDetails({ title: CREATE_DASHBOARD_TITLE });
-        return;
-      }
-
-      if (dashboard) {
-        const title = dashboard.getTitle().trim();
-        if (title) {
-          setDashboardDetails({ title });
-        } else {
-          setDashboardDetails({ title: DASHBOARD_NOT_FOUND_TITLE });
-        }
-      }
-    },
-    [savedObjectId]
-  );
-
-  const handleDashboardLoaded = useCallback(
-    async (container: DashboardAPI) => {
-      setDashboardContainer(container);
-      onDashboardContainerLoaded(container);
-      const tagIds = container?.getExplicitInput().tags;
-      if (savedObjectsTagging) {
-        await fetchDashboardTags({ tagIds, savedObjectsTaggingClient: savedObjectsTagging.client });
-        if (dashboardTags?.some(isManagedTag)) {
-          setIsManaged(true);
-        }
-      }
-    },
-    [dashboardTags, fetchDashboardTags, onDashboardContainerLoaded, savedObjectsTagging]
-  );
 
   const dashboardExists = useMemo(() => dashboardDetails != null, [dashboardDetails]);
   const shouldShowControl =
     savedObjectId && dashboardExists
-      ? dashboardContainer && !isManaged && showWriteControls
+      ? dashboardContainer && showWriteControls && !isManaged
       : dashboardContainer && showWriteControls;
 
   return (
