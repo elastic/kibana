@@ -28,7 +28,7 @@ export default defineCypressConfig({
     setupNodeEvents: (on, config) => {
       // Reuse data loaders from endpoint management cypress setup
       setupEndpointDataLoaders(on, config);
-      setupUserDataLoader(on, config);
+      setupUserDataLoader(on, config, {});
     },
   },
 });
