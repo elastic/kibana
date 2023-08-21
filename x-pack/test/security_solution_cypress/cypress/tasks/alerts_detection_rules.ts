@@ -58,7 +58,7 @@ import {
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
-import { REST_ACTIONS_BUTTON, RULE_NAME_HEADER } from '../screens/rule_details';
+import { POPOVER_ACTIONS_TRIGGER_BUTTON, RULE_NAME_HEADER } from '../screens/rule_details';
 import { EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
 import { LOADING_INDICATOR } from '../screens/security_header';
 import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
@@ -95,7 +95,7 @@ export const duplicateFirstRule = () => {
  */
 export const duplicateRuleFromMenu = () => {
   cy.get(LOADING_INDICATOR).should('not.exist');
-  cy.get(REST_ACTIONS_BUTTON).click({ force: true });
+  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click({ force: true });
   cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).should('be.visible');
 
   // Because of a fade effect and fast clicking this can produce more than one click
@@ -121,7 +121,7 @@ export const deleteFirstRule = () => {
 };
 
 export const deleteRuleFromDetailsPage = () => {
-  cy.get(REST_ACTIONS_BUTTON).click();
+  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click();
   cy.get(RULE_DETAILS_DELETE_BTN).click();
   cy.get(RULE_DETAILS_DELETE_BTN).should('not.exist');
   cy.get(CONFIRM_DELETE_RULE_BTN).click();
