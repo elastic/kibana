@@ -22,11 +22,10 @@ export async function mountManagementSection(
   coreSetup: CoreSetup,
   coreStart: CoreStart,
   license$: Observable<ILicense>,
-  pollConfig: ClientConfigType['poll'],
+  config: ClientConfigType,
   apiClient: ReportingAPIClient,
   urlService: SharePluginSetup['url'],
   params: ManagementAppMountParams,
-  configAllowsImages: boolean
 ) {
   render(
     <I18nProvider>
@@ -43,11 +42,10 @@ export async function mountManagementSection(
             <ReportListing
               toasts={coreSetup.notifications.toasts}
               license$={license$}
-              pollConfig={pollConfig}
+              config={config}
               redirect={coreStart.application.navigateToApp}
               navigateToUrl={coreStart.application.navigateToUrl}
               urlService={urlService}
-              configAllowsImages={configAllowsImages}
             />
           </IlmPolicyStatusContextProvider>
         </InternalApiClientProvider>

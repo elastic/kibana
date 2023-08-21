@@ -155,8 +155,6 @@ export class ReportingPublicPlugin
     const usesUiCapabilities = !this.config.roles.enabled;
 
     const apiClient = this.getApiClient(core.http, core.uiSettings);
-    const configAllowsImages =
-      this.config.export_types.pdf.enabled || this.config.export_types.png.enabled;
 
     home.featureCatalogue.register({
       id: 'reporting',
@@ -191,11 +189,10 @@ export class ReportingPublicPlugin
           core,
           start,
           license$,
-          this.config.poll,
+          this.config,
           apiClient,
           share.url,
           params,
-          configAllowsImages
         );
 
         return () => {

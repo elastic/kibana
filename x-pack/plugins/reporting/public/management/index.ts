@@ -16,13 +16,12 @@ export interface ListingProps {
   apiClient: ReportingAPIClient;
   capabilities: ApplicationStart['capabilities'];
   license$: LicensingPluginStart['license$'];
-  pollConfig: ClientConfigType['poll'];
+  config: ClientConfigType;
   redirect: ApplicationStart['navigateToApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
   toasts: ToastsSetup;
   urlService: SharePluginSetup['url'];
   ilmPolicyContextValue: UseIlmPolicyStatusReturn;
-  configAllowsImages: boolean;
 }
 
 export { ReportListing } from './report_listing';
