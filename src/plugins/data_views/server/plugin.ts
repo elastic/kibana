@@ -15,6 +15,7 @@ import { getIndexPatternLoad } from './expressions';
 import { registerIndexPatternsUsageCollector } from './register_index_pattern_usage_collection';
 import { createScriptedFieldsDeprecationsConfig } from './deprecations';
 import { DATA_VIEW_SAVED_OBJECT_TYPE, LATEST_VERSION } from '../common';
+import type { ClientConfigType } from '../common/types';
 import {
   DataViewsServerPluginSetup,
   DataViewsServerPluginStart,
@@ -22,11 +23,6 @@ import {
   DataViewsServerPluginStartDependencies,
 } from './types';
 import { DataViewsStorage } from './content_management';
-
-// duped, change
-interface ClientConfigType {
-  scriptedFieldsEnabled?: boolean;
-}
 
 export class DataViewsServerPlugin
   implements
