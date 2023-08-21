@@ -38,9 +38,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Scripted fields tab is missing', async () => {
       await PageObjects.common.navigateToUrl('management', 'kibana/dataViews', {
-        shouldUseHashForSubUrl: true,
+        shouldUseHashForSubUrl: false,
       });
-      // await testSubjects.click('app-card-dataViews');
       await testSubjects.click('detail-link-basic_index');
       await testSubjects.exists('tab-indexedFields');
       await testSubjects.missingOrFail('tab-scriptedFields');
