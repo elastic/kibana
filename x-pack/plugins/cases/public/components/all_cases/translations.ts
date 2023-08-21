@@ -34,13 +34,15 @@ export const SHOWING_SELECTED_CASES = (totalRules: number) =>
 export const SHOWING_CASES = (totalCases: number, pageSize: number) =>
   i18n.translate('xpack.cases.caseTable.showingCasesTitle', {
     values: { totalCases, pageSize },
-    defaultMessage: 'Showing {pageSize} of {totalCases} {totalCases, plural, =1 {case} other {cases}}',
+    defaultMessage:
+      'Showing {pageSize} of {totalCases} {totalCases, plural, =1 {case} other {cases}}',
   });
 
 export const MAX_CASES = (totalCases: number) =>
   i18n.translate('xpack.cases.caseTable.maxCases', {
     values: { totalCases },
-    defaultMessage: 'The results were capped at {totalCases} to maintain performance. Try limiting your search to reduce the results.',
+    defaultMessage:
+      'The results were capped at {totalCases} to maintain performance. Try limiting your search to reduce the results.',
   });
 
 export const DISMISS = i18n.translate('xpack.cases.caseTable.dismiss', {

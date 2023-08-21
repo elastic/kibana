@@ -9,6 +9,7 @@ import type { FunctionComponent } from 'react';
 import { css } from '@emotion/react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import React, { useCallback, useState } from 'react';
+import type { Pagination } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
@@ -17,7 +18,6 @@ import {
   EuiPopover,
   EuiText,
   useEuiTheme,
-  Pagination,
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
@@ -50,7 +50,10 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
     const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
-    const toggleWarning = useCallback(() => setIsMessageDismissed(!isMessageDismissed), [isMessageDismissed]);
+    const toggleWarning = useCallback(
+      () => setIsMessageDismissed(!isMessageDismissed),
+      [isMessageDismissed]
+    );
 
     const onRefresh = useCallback(() => {
       deselectCases();
@@ -76,20 +79,44 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
 
     const visibleCases = totalCases > pagination.pageSize ? pagination.pageSize : totalCases;
 
-    const hasReachedMaxCases = totalCases >= MAX_DOCS_PER_PAGE && (pagination.pageSize * (pagination.pageIndex + 1)) >= MAX_DOCS_PER_PAGE;
+    const hasReachedMaxCases =
+      totalCases >= MAX_DOCS_PER_PAGE &&
+      pagination.pageSize * (pagination.pageIndex + 1) >= MAX_DOCS_PER_PAGE;
 
     const isDoNotShowAgainSelected = localStorageWarning && localStorageWarning === true;
 
     const renderMaxLimitWarning = (): React.ReactNode => (
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={false}>
-          <EuiText color="default" size="m" css={css`margin-top: 4px;`}>{i18n.MAX_CASES(totalCases)}</EuiText>
+          <EuiText
+            color="default"
+            size="m"
+            css={css`
+              margin-top: 4px;
+            `}
+          >
+            {i18n.MAX_CASES(totalCases)}
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="s" color="warning" onClick={toggleWarning}>{i18n.DISMISS}</EuiButtonEmpty>
+          <EuiButtonEmpty
+            size="s"
+            color="warning"
+            data-test-subj="dismiss-warning"
+            onClick={toggleWarning}
+          >
+            {i18n.DISMISS}
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="s" color="warning" onClick={handleNotShowAgain}>{i18n.NOT_SHOW_AGAIN}</EuiButtonEmpty>
+          <EuiButtonEmpty
+            size="s"
+            color="warning"
+            data-test-subj="do-not-show-warning"
+            onClick={handleNotShowAgain}
+          >
+            {i18n.NOT_SHOW_AGAIN}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -174,23 +201,22 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
         </EuiFlexGroup>
         {modals}
         {flyouts}
-        {hasReachedMaxCases && !isMessageDismissed && !isDoNotShowAgainSelected
-          ? (
-            <>
-              <EuiSpacer size="m" />
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiCallOut
-                    title={renderMaxLimitWarning()}
-                    color="warning"
-                    size="s"
-                    data-test-subj="all-cases-maximum-limit-warning"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
+        {hasReachedMaxCases && !isMessageDismissed && !isDoNotShowAgainSelected ? (
+          <>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiCallOut
+                  title={renderMaxLimitWarning()}
+                  color="warning"
+                  size="s"
+                  data-test-subj="all-cases-maximum-limit-warning"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
       </>
     );
   }

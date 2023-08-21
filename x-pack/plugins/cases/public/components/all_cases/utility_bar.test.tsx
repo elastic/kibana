@@ -23,6 +23,7 @@ import { CasesTableUtilityBar } from './utility_bar';
 describe('Severity form field', () => {
   let appMockRender: AppMockRenderer;
   const deselectCases = jest.fn();
+  const localStorageKey = 'cases.testAppId.utilityBar.hideMaxLimitWarning';
 
   const props = {
     totalCases: 5,
@@ -32,7 +33,7 @@ describe('Severity form field', () => {
       pageIndex: 1,
       pageSize: 10,
       totalItemCount: 5,
-    }
+    },
   };
 
   beforeEach(() => {
@@ -55,8 +56,8 @@ describe('Severity form field', () => {
       pagination: {
         ...props.pagination,
         totalItemCount: 20,
-      }
-    }
+      },
+    };
     appMockRender.render(<CasesTableUtilityBar {...updatedProps} />);
     expect(screen.getByText('Showing 10 of 20 cases')).toBeInTheDocument();
     expect(screen.getByText('Selected 1 case')).toBeInTheDocument();
@@ -70,8 +71,8 @@ describe('Severity form field', () => {
         ...props.pagination,
         pageIndex: 2,
         totalItemCount: 20,
-      }
-    }
+      },
+    };
     appMockRender.render(<CasesTableUtilityBar {...updatedProps} />);
     expect(screen.getByText('Showing 10 of 20 cases')).toBeInTheDocument();
     expect(screen.getByText('Selected 1 case')).toBeInTheDocument();
@@ -86,51 +87,43 @@ describe('Severity form field', () => {
         pageSize: 10,
         pageIndex: 1,
         totalItemCount: 0,
-      }
-    }
+      },
+    };
     appMockRender.render(<CasesTableUtilityBar {...updatedProps} />);
     expect(screen.getByText('Showing 0 of 0 cases')).toBeInTheDocument();
   });
 
   it('opens the bulk actions correctly', async () => {
-    const result = appMockRender.render(<CasesTableUtilityBar {...props} />);
+    appMockRender.render(<CasesTableUtilityBar {...props} />);
 
-    act(() => {
-      userEvent.click(result.getByTestId('case-table-bulk-actions-link-icon'));
-    });
+    userEvent.click(screen.getByTestId('case-table-bulk-actions-link-icon'));
 
     await waitFor(() => {
-      expect(result.getByTestId('case-table-bulk-actions-context-menu'));
+      expect(screen.getByTestId('case-table-bulk-actions-context-menu'));
     });
   });
 
   it('closes the bulk actions correctly', async () => {
-    const result = appMockRender.render(<CasesTableUtilityBar {...props} />);
+    appMockRender.render(<CasesTableUtilityBar {...props} />);
 
-    act(() => {
-      userEvent.click(result.getByTestId('case-table-bulk-actions-link-icon'));
-    });
+    userEvent.click(screen.getByTestId('case-table-bulk-actions-link-icon'));
 
     await waitFor(() => {
-      expect(result.getByTestId('case-table-bulk-actions-context-menu'));
+      expect(screen.getByTestId('case-table-bulk-actions-context-menu'));
     });
 
-    act(() => {
-      userEvent.click(result.getByTestId('case-table-bulk-actions-link-icon'));
-    });
+    userEvent.click(screen.getByTestId('case-table-bulk-actions-link-icon'));
 
     await waitFor(() => {
-      expect(result.queryByTestId('case-table-bulk-actions-context-menu')).toBeFalsy();
+      expect(screen.queryByTestId('case-table-bulk-actions-context-menu')).toBeFalsy();
     });
   });
 
   it('refresh correctly', async () => {
-    const result = appMockRender.render(<CasesTableUtilityBar {...props} />);
+    appMockRender.render(<CasesTableUtilityBar {...props} />);
     const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
 
-    act(() => {
-      userEvent.click(result.getByTestId('all-cases-refresh-link-icon'));
-    });
+    userEvent.click(screen.getByTestId('all-cases-refresh-link-icon'));
 
     await waitFor(() => {
       expect(deselectCases).toHaveBeenCalled();
@@ -142,30 +135,30 @@ describe('Severity form field', () => {
 
   it('does not show the bulk actions without update & delete permissions', async () => {
     appMockRender = createAppMockRenderer({ permissions: noCasesPermissions() });
-    const result = appMockRender.render(<CasesTableUtilityBar {...props} />);
+    appMockRender.render(<CasesTableUtilityBar {...props} />);
 
-    expect(result.queryByTestId('case-table-bulk-actions-link-icon')).toBeFalsy();
+    expect(screen.queryByTestId('case-table-bulk-actions-link-icon')).toBeFalsy();
   });
 
   it('does show the bulk actions with only delete permissions', async () => {
     appMockRender = createAppMockRenderer({ permissions: onlyDeleteCasesPermission() });
-    const result = appMockRender.render(<CasesTableUtilityBar {...props} />);
+    appMockRender.render(<CasesTableUtilityBar {...props} />);
 
-    expect(result.getByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
+    expect(screen.getByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
   });
 
   it('does show the bulk actions with update permissions', async () => {
     appMockRender = createAppMockRenderer({ permissions: writeCasesPermissions() });
-    const result = appMockRender.render(<CasesTableUtilityBar {...props} />);
+    appMockRender.render(<CasesTableUtilityBar {...props} />);
 
-    expect(result.getByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
+    expect(screen.getByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
   });
 
   it('does not show the bulk actions if there are not selected cases', async () => {
-    const result = appMockRender.render(<CasesTableUtilityBar {...props} selectedCases={[]} />);
+    appMockRender.render(<CasesTableUtilityBar {...props} selectedCases={[]} />);
 
-    expect(result.queryByTestId('case-table-bulk-actions-link-icon')).toBeFalsy();
-    expect(result.queryByText('Showing 0 cases')).toBeFalsy();
+    expect(screen.queryByTestId('case-table-bulk-actions-link-icon')).toBeFalsy();
+    expect(screen.queryByText('Showing 0 cases')).toBeFalsy();
   });
 
   describe('Maximum number of cases', () => {
@@ -174,21 +167,30 @@ describe('Severity form field', () => {
       selectedCaseS: [],
       totalCases: MAX_DOCS_PER_PAGE,
       pagination: {
-       ...props.pagination,
+        ...props.pagination,
         totalItemCount: MAX_DOCS_PER_PAGE,
-      }
+      },
     };
 
-    const allCasesPageSize = [10,25,50,100];
+    const allCasesPageSize = [10, 25, 50, 100];
 
     it.each(allCasesPageSize)(
       `does not show warning when totalCases = ${MAX_DOCS_PER_PAGE} but pageSize(%s) * pageIndex + 1 < ${MAX_DOCS_PER_PAGE}`,
       (size) => {
-        const newPageIndex = (MAX_DOCS_PER_PAGE / size) - 2;
+        const newPageIndex = MAX_DOCS_PER_PAGE / size - 2;
 
-        console.log({size, newPageIndex})
-        appMockRender.render(<CasesTableUtilityBar{...{...newProps, pagination: {...newProps.pagination, pageSize: size, pageIndex: newPageIndex}}}/>);
-        expect(screen.getByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)).toBeInTheDocument();
+        appMockRender.render(
+          <CasesTableUtilityBar
+            {...{
+              ...newProps,
+              pagination: { ...newProps.pagination, pageSize: size, pageIndex: newPageIndex },
+            }}
+          />
+        );
+
+        expect(
+          screen.getByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)
+        ).toBeInTheDocument();
         expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
       }
     );
@@ -196,11 +198,20 @@ describe('Severity form field', () => {
     it.each(allCasesPageSize)(
       `shows warning when totalCases = ${MAX_DOCS_PER_PAGE} but pageSize(%s) * pageIndex + 1 = ${MAX_DOCS_PER_PAGE}`,
       (size) => {
-        const newPageIndex = (MAX_DOCS_PER_PAGE / size) - 1;
+        const newPageIndex = MAX_DOCS_PER_PAGE / size - 1;
 
-        console.log({size, newPageIndex})
-        appMockRender.render(<CasesTableUtilityBar{...{...newProps, pagination: {...newProps.pagination, pageSize: size, pageIndex: newPageIndex}}}/>);
-        expect(screen.getByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)).toBeInTheDocument();
+        appMockRender.render(
+          <CasesTableUtilityBar
+            {...{
+              ...newProps,
+              pagination: { ...newProps.pagination, pageSize: size, pageIndex: newPageIndex },
+            }}
+          />
+        );
+
+        expect(
+          screen.getByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)
+        ).toBeInTheDocument();
         expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
       }
     );
@@ -210,11 +221,112 @@ describe('Severity form field', () => {
       (size) => {
         const newPageIndex = MAX_DOCS_PER_PAGE / size;
 
-        console.log({size, newPageIndex})
-        appMockRender.render(<CasesTableUtilityBar{...{...newProps, pagination: {...newProps.pagination, pageSize: size, pageIndex: newPageIndex}}}/>);
-        expect(screen.getByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)).toBeInTheDocument();
+        appMockRender.render(
+          <CasesTableUtilityBar
+            {...{
+              ...newProps,
+              pagination: { ...newProps.pagination, pageSize: size, pageIndex: newPageIndex },
+            }}
+          />
+        );
+
+        expect(
+          screen.getByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)
+        ).toBeInTheDocument();
         expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
       }
     );
+
+    it('should show dismiss and do not show again buttons correctly', () => {
+      appMockRender.render(
+        <CasesTableUtilityBar
+          {...{
+            ...newProps,
+            pagination: { ...newProps.pagination, pageSize: 100, pageIndex: 100 },
+          }}
+        />
+      );
+
+      expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
+      expect(screen.getByTestId('dismiss-warning')).toBeInTheDocument();
+
+      expect(screen.getByTestId('do-not-show-warning')).toBeInTheDocument();
+    });
+
+    it('should dismiss warning correctly', () => {
+      appMockRender.render(
+        <CasesTableUtilityBar
+          {...{
+            ...newProps,
+            pagination: { ...newProps.pagination, pageSize: 100, pageIndex: 100 },
+          }}
+        />
+      );
+
+      expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
+      expect(screen.getByTestId('dismiss-warning')).toBeInTheDocument();
+
+      userEvent.click(screen.getByTestId('dismiss-warning'));
+
+      expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
+    });
+
+    describe('do not show button', () => {
+      beforeAll(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.clearAllTimers();
+      });
+
+      afterAll(() => {
+        jest.useRealTimers();
+        sessionStorage.removeItem(localStorageKey);
+      });
+
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should set storage key correctly', () => {
+        appMockRender.render(
+          <CasesTableUtilityBar
+            {...{
+              ...newProps,
+              pagination: { ...newProps.pagination, pageSize: 100, pageIndex: 100 },
+            }}
+          />
+        );
+
+        expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
+        expect(screen.getByTestId('do-not-show-warning')).toBeInTheDocument();
+
+        expect(localStorage.getItem(localStorageKey)).toBe(null);
+      });
+
+      it('should hide warning correctly when do not show button clicked', () => {
+        appMockRender.render(
+          <CasesTableUtilityBar
+            {...{
+              ...newProps,
+              pagination: { ...newProps.pagination, pageSize: 100, pageIndex: 100 },
+            }}
+          />
+        );
+
+        expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
+        expect(screen.getByTestId('do-not-show-warning')).toBeInTheDocument();
+
+        userEvent.click(screen.getByTestId('do-not-show-warning'));
+
+        act(() => {
+          jest.advanceTimersByTime(1000);
+        });
+
+        expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
+        expect(localStorage.getItem(localStorageKey)).toBe('true');
+      });
+    });
   });
 });
