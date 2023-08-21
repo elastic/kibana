@@ -18,7 +18,6 @@ import { CiStatsClient, SourceDescriptor, TestGroupRunOrderResponse } from './cl
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import {
   getAllTestFilesForConfigs,
-  getChangedFileList,
   getFloatFromEnv,
   getIntFromEnv,
   getListFromEnv,
@@ -27,6 +26,7 @@ import {
   intersection,
   isObj,
 } from './utils';
+import { getPrChanges } from '../github';
 
 type RunGroup = TestGroupRunOrderResponse['types'][0];
 
@@ -79,7 +79,7 @@ export async function pickTestGroupRunOrder() {
   }
 
   const allJestTestFiles = await getAllTestFilesForConfigs(jestUnitConfigs);
-  const allChangedFiles = getChangedFileList();
+  const allChangedFiles = (await getPrChanges()).map((t) => t.filename);
   const changedTestFiles = intersection(allJestTestFiles, allChangedFiles);
 
   console.log('--- All jest configs listed');

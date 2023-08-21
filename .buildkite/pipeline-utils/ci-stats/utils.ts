@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { execSync } from 'child_process';
 import Fs from 'fs';
 import globby from 'globby';
 import path from 'path';
@@ -75,18 +74,6 @@ export function getTrackedBranch(): string {
 
 export function isObj(x: unknown): x is Record<string, unknown> {
   return typeof x === 'object' && x !== null;
-}
-
-export function getChangedFileList(): string[] {
-  const targetBranch = getTrackedBranch();
-
-  console.log('remotes', execSync('git remote -v').toString());
-
-  const gitDiffOutput = execSync(`git diff HEAD..${targetBranch} --name-only`).toString().trim();
-
-  const changedFiles = gitDiffOutput.split('\n').map((line) => line.trim());
-
-  return changedFiles;
 }
 
 export async function getAllTestFilesForConfigs(configPaths: string[]): Promise<string[]> {
