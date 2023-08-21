@@ -10,7 +10,7 @@ import type {
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
-import type { Filter, KueryNode } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { IsoWeekday } from './iso_weekdays';
 import { RuleNotifyWhenType } from './rule_notify_when_type';
 import { RuleSnooze } from './rule_snooze_type';
