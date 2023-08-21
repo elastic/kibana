@@ -13,19 +13,19 @@ import { EuiSpacer } from '@elastic/eui';
 
 import { CrawlCustomSettingsFlyoutCrawlDepthPanel } from './crawl_custom_settings_flyout_crawl_depth_panel';
 import { MultiCrawlScheduler } from './crawl_custom_settings_flyout_crawl_scheduler';
+import { CrawlCustomSettingsFlyoutDomainConfigLogic } from './crawl_custom_settings_flyout_domain_config_logic';
 import { CrawlCustomSettingsFlyoutDomainsPanel } from './crawl_custom_settings_flyout_domains_panel';
-import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 import { CrawlCustomSettingsFlyoutMultiCrawlLogic } from './crawl_custom_settings_flyout_multi_crawl_logic';
 import { CrawlCustomSettingsFlyoutSeedUrlsPanel } from './crawl_custom_settings_flyout_seed_urls_panel';
 
 export const CrawlCustomSettingsFlyoutMultiCrawlScheduling: React.FC = () => {
-  const { domainUrls, multiCrawlerEntryPointUrls, multiCrawlerSitemapUrls } = useValues(
-    CrawlCustomSettingsFlyoutLogic
-  );
+  const { domainUrls } = useValues(CrawlCustomSettingsFlyoutDomainConfigLogic);
 
   const {
     crawlerConfigurations,
     crawlerConfigActiveTab,
+    multiCrawlerEntryPointUrls,
+    multiCrawlerSitemapUrls,
     index: crawlerIndex,
   } = useValues(CrawlCustomSettingsFlyoutMultiCrawlLogic);
 
