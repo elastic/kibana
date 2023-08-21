@@ -3,7 +3,7 @@
 
 experimental[]
 
-Core packages have well defined boundaries, have a single responsibility, and are organized by domain. Core packages follow a specific naming schema, according to what the contain:
+Core packages have well defined boundaries, have a single responsibility, and are organized by domain. Core packages follow a specific naming schema, according to what they contain:
 
 For example, core capapability packages are:
 
