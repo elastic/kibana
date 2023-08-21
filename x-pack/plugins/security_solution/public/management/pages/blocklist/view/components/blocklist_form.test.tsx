@@ -225,6 +225,38 @@ describe('blocklist form', () => {
     userEvent.click(screen.getByRole('option', { name: /path/i }));
     const expected = createOnChangeArgs({
       item: createItem({
+        entries: [createEntry('file.path.caseless', [])],
+      }),
+    });
+    expect(onChangeSpy).toHaveBeenCalledWith(expected);
+  });
+
+  it('should correctly create `file.path.caseless` when Mac OS is selected', async () => {
+    render(createProps({ item: createItem({ os_types: [OperatingSystem.MAC] }) }));
+    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Mac');
+
+    userEvent.click(screen.getByTestId('blocklist-form-field-select'));
+    await waitForEuiPopoverOpen();
+    userEvent.click(screen.getByRole('option', { name: /path/i }));
+    const expected = createOnChangeArgs({
+      item: createItem({
+        os_types: [OperatingSystem.MAC],
+        entries: [createEntry('file.path.caseless', [])],
+      }),
+    });
+    expect(onChangeSpy).toHaveBeenCalledWith(expected);
+  });
+
+  it('should correctly create `file.path` when Linux is selected', async () => {
+    render(createProps({ item: createItem({ os_types: [OperatingSystem.LINUX] }) }));
+    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Linux');
+
+    userEvent.click(screen.getByTestId('blocklist-form-field-select'));
+    await waitForEuiPopoverOpen();
+    userEvent.click(screen.getByRole('option', { name: /path/i }));
+    const expected = createOnChangeArgs({
+      item: createItem({
+        os_types: [OperatingSystem.LINUX],
         entries: [createEntry('file.path', [])],
       }),
     });
