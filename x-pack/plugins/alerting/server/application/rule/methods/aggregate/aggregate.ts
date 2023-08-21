@@ -6,19 +6,14 @@
  */
 
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AlertingAuthorizationEntity } from '../../authorization';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { buildKueryNodeFilter } from '../common';
-import { alertingAuthorizationFilterOpts } from '../common/constants';
-import { RulesClientContext } from '../types';
-import { RawRule, AggregateOptions } from '../../types';
-import { validateRuleAggregationFields } from '../lib/validate_rule_aggregation_fields';
-
-export interface AggregateParams<AggregationResult> {
-  options?: AggregateOptions;
-  aggs: Record<keyof AggregationResult, AggregationsAggregationContainer>;
-}
+import { AlertingAuthorizationEntity } from '../../../../authorization';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { buildKueryNodeFilter } from '../../../../rules_client/common';
+import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
+import { RulesClientContext } from '../../../../rules_client/types';
+import { RawRule } from '../../../../types';
+import { validateRuleAggregationFields } from '../../../../rules_client/lib/validate_rule_aggregation_fields';
+import type { AggregateParams } from './types';
 
 export async function aggregate<T = Record<string, unknown>>(
   context: RulesClientContext,

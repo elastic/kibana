@@ -117,19 +117,6 @@ export interface RuleAction {
   alertsFilter?: AlertsFilter;
 }
 
-export interface AggregateOptions {
-  search?: string;
-  defaultSearchOperator?: 'AND' | 'OR';
-  searchFields?: string[];
-  hasReference?: {
-    type: string;
-    id: string;
-  };
-  filter?: string | KueryNode;
-  page?: number;
-  perPage?: number;
-}
-
 export interface RuleAggregationFormattedResult {
   ruleExecutionStatus: { [status: string]: number };
   ruleLastRunOutcome: { [status: string]: number };

@@ -33,7 +33,7 @@ import {
   GetRuleExecutionKPIParams,
 } from './methods/get_execution_kpi';
 import { find, FindParams } from './methods/find';
-import { aggregate, AggregateParams } from './methods/aggregate';
+import { AggregateParams, aggregate } from '../application/rule/methods/aggregate';
 import { deleteRule } from './methods/delete';
 import { update, UpdateOptions } from './methods/update';
 import { bulkDeleteRules } from './methods/bulk_delete';

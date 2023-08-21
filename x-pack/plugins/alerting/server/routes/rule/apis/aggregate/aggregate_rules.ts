@@ -7,8 +7,8 @@
 
 import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { AggregateOptions } from '../../../../application/rule/methods/aggregate';
 import {
-  AggregateOptions,
   DefaultRuleAggregationResult,
   formatDefaultAggregationResult,
   getDefaultRuleAggregation,
