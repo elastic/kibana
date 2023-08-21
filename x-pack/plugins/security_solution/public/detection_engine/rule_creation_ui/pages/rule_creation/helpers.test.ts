@@ -23,7 +23,6 @@ import type {
   DefineStepRule,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import {
-  getTimeTypeValue,
   formatDefineStepData,
   formatScheduleStepData,
   formatAboutStepData,
@@ -43,56 +42,6 @@ import { getThreatMock } from '../../../../../common/detection_engine/schemas/ty
 import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 
 describe('helpers', () => {
-  describe('getTimeTypeValue', () => {
-    test('returns timeObj with value 0 if no time value found', () => {
-      const result = getTimeTypeValue('m');
-
-      expect(result).toEqual({ unit: 'm', value: 0 });
-    });
-
-    test('returns timeObj with unit set to default unit value of "ms" if no expected time type found', () => {
-      const result = getTimeTypeValue('5l');
-
-      expect(result).toEqual({ unit: 'ms', value: 5 });
-    });
-
-    test('returns timeObj with unit of s and value 5 when time is 5s ', () => {
-      const result = getTimeTypeValue('5s');
-
-      expect(result).toEqual({ unit: 's', value: 5 });
-    });
-
-    test('returns timeObj with unit of m and value 5 when time is 5m ', () => {
-      const result = getTimeTypeValue('5m');
-
-      expect(result).toEqual({ unit: 'm', value: 5 });
-    });
-
-    test('returns timeObj with unit of h and value 5 when time is 5h ', () => {
-      const result = getTimeTypeValue('5h');
-
-      expect(result).toEqual({ unit: 'h', value: 5 });
-    });
-
-    test('returns timeObj with value of 5 when time is float like 5.6m ', () => {
-      const result = getTimeTypeValue('5m');
-
-      expect(result).toEqual({ unit: 'm', value: 5 });
-    });
-
-    test('returns timeObj with value of 0 and unit of "ms" if random string passed in', () => {
-      const result = getTimeTypeValue('random');
-
-      expect(result).toEqual({ unit: 'ms', value: 0 });
-    });
-
-    test('returns timeObj with unit of d and value 5 when time is 5d ', () => {
-      const result = getTimeTypeValue('5d');
-
-      expect(result).toEqual({ unit: 'd', value: 5 });
-    });
-  });
-
   describe('filterEmptyThreats', () => {
     let mockThreat: Threat;
 
