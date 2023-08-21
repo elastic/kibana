@@ -7,8 +7,8 @@
 
 import type { Observable } from 'rxjs';
 
-import type { GetAllSpacesPurpose, GetSpaceResult, Space } from '../common';
 import type { SpacesApiUi } from './ui_api';
+import type { GetAllSpacesPurpose, GetSpaceResult, Space } from '../common';
 
 /**
  * The structure for all of the space data that must be loaded for share-to-space components to function.

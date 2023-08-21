@@ -18,7 +18,6 @@ import React from 'react';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { I18nProvider } from '@kbn/i18n-react';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import {
   Container,
@@ -41,7 +40,8 @@ import {
 import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -165,6 +165,10 @@ export class SavedSearchEmbeddable
     });
   }
 
+  private getCurrentTitle() {
+    return this.input.hidePanelTitles ? '' : this.input.title ?? this.savedSearch?.title ?? '';
+  }
+
   private async initializeSavedSearch(input: SearchInput) {
     try {
       const unwrapResult = await this.attributeService.unwrapAttributes(input);
@@ -178,7 +182,7 @@ export class SavedSearchEmbeddable
         unwrapResult
       );
 
-      this.panelTitle = this.savedSearch.title ?? '';
+      this.panelTitle = this.getCurrentTitle();
 
       await this.initializeOutput();
 
@@ -201,7 +205,7 @@ export class SavedSearchEmbeddable
     const dataView = savedSearch.searchSource.getField('index');
     const indexPatterns = dataView ? [dataView] : [];
     const input = this.getInput();
-    const title = input.hidePanelTitles ? '' : input.title ?? savedSearch.title;
+    const title = this.getCurrentTitle();
     const description = input.hidePanelTitles ? '' : input.description ?? savedSearch.description;
     const savedObjectId = (input as SearchByReferenceInput).savedObjectId;
     const locatorParams = getDiscoverLocatorParams({ input, savedSearch });
@@ -276,7 +280,7 @@ export class SavedSearchEmbeddable
       useNewFieldsApi,
       {
         sampleSize: this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
-        defaultSort: this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
+        sortDir: this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
       }
     );
 
@@ -639,21 +643,22 @@ export class SavedSearchEmbeddable
       Array.isArray(searchProps.columns)
     ) {
       ReactDOM.render(
-        <I18nProvider>
-          <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
-            <KibanaContextProvider services={searchProps.services}>
-              <FieldStatisticsTable
-                dataView={searchProps.dataView}
-                columns={searchProps.columns}
-                savedSearch={savedSearch}
-                filters={this.input.filters}
-                query={this.input.query}
-                onAddFilter={searchProps.onFilter}
-                searchSessionId={this.input.searchSessionId}
-              />
-            </KibanaContextProvider>
-          </KibanaThemeProvider>
-        </I18nProvider>,
+        <KibanaRenderContextProvider
+          theme={searchProps.services.core.theme}
+          i18n={searchProps.services.core.i18n}
+        >
+          <KibanaContextProvider services={searchProps.services}>
+            <FieldStatisticsTable
+              dataView={searchProps.dataView}
+              columns={searchProps.columns}
+              savedSearch={savedSearch}
+              filters={this.input.filters}
+              query={this.input.query}
+              onAddFilter={searchProps.onFilter}
+              searchSessionId={this.input.searchSessionId}
+            />
+          </KibanaContextProvider>
+        </KibanaRenderContextProvider>,
         domNode
       );
 
@@ -678,15 +683,16 @@ export class SavedSearchEmbeddable
       const { getTriggerCompatibleActions } = searchProps.services.uiActions;
 
       ReactDOM.render(
-        <I18nProvider>
-          <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
-            <KibanaContextProvider services={searchProps.services}>
-              <CellActionsProvider getTriggerCompatibleActions={getTriggerCompatibleActions}>
-                <SavedSearchEmbeddableComponent {...props} />
-              </CellActionsProvider>
-            </KibanaContextProvider>
-          </KibanaThemeProvider>
-        </I18nProvider>,
+        <KibanaRenderContextProvider
+          theme={searchProps.services.core.theme}
+          i18n={searchProps.services.core.i18n}
+        >
+          <KibanaContextProvider services={searchProps.services}>
+            <CellActionsProvider getTriggerCompatibleActions={getTriggerCompatibleActions}>
+              <SavedSearchEmbeddableComponent {...props} />
+            </CellActionsProvider>
+          </KibanaContextProvider>
+        </KibanaRenderContextProvider>,
         domNode
       );
 
@@ -763,5 +769,9 @@ export class SavedSearchEmbeddable
 
     this.subscription?.unsubscribe();
     this.abortController?.abort();
+  }
+
+  public hasTimeRange() {
+    return this.getTimeRange() !== undefined;
   }
 }
