@@ -140,9 +140,6 @@ const uploadPipeline = (pipelineContent: string | object) => {
       !GITHUB_PR_LABELS.includes('ci:skip-cypress-osquery')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/osquery_cypress.yml'));
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_serverless_osquery_cypress.yml')
-      );
     }
 
     if (await doAnyChangesMatch([/^x-pack\/plugins\/exploratory_view/])) {
