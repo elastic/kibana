@@ -64,6 +64,7 @@ describe('ES search strategy', () => {
       },
     },
     searchSessionsClient: createSearchSessionsClientMock(),
+    rollupsEnabled: true,
   } as unknown as SearchStrategyDependencies;
   const mockLegacyConfig$ = new BehaviorSubject<any>({
     elasticsearch: {
@@ -232,6 +233,31 @@ describe('ES search strategy', () => {
         const { method, path } = mockApiCaller.mock.calls[0][0];
         expect(method).toBe('POST');
         expect(path).toBe('/foo-%E7%A8%8B/_rollup_search');
+      });
+
+      it("doesn't call the rollup API if the index is a rollup type BUT rollups are disabled", async () => {
+        mockApiCaller.mockResolvedValueOnce(mockRollupResponse);
+        mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
+
+        const params = { index: 'foo-程', body: { query: {} } };
+        const esSearch = await enhancedEsSearchStrategyProvider(
+          mockLegacyConfig$,
+          mockSearchConfig,
+          mockLogger
+        );
+
+        await esSearch
+          .search(
+            {
+              indexType: 'rollup',
+              params,
+            },
+            {},
+            { ...mockDeps, rollupsEnabled: false }
+          )
+          .toPromise();
+
+        expect(mockApiCaller).toBeCalledTimes(0);
       });
     });
 

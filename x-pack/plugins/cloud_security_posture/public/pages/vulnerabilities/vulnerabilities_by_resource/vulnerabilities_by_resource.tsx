@@ -109,7 +109,7 @@ const VulnerabilitiesByResourceDataGrid = ({
       if (isFetching) return null;
       if (!resourceVulnerabilityRow?.resource?.id) return null;
 
-      if (columnId === vulnerabilitiesByResourceColumns.resource_id) {
+      if (columnId === vulnerabilitiesByResourceColumns.resourceId) {
         return (
           <Link
             to={generatePath(findingsNavigation.resource_vulnerabilities.path, {
@@ -122,7 +122,7 @@ const VulnerabilitiesByResourceDataGrid = ({
           </Link>
         );
       }
-      if (columnId === vulnerabilitiesByResourceColumns.resource_name) {
+      if (columnId === vulnerabilitiesByResourceColumns.resourceName) {
         return <>{resourceVulnerabilityRow?.resource?.name}</>;
       }
       if (columnId === vulnerabilitiesByResourceColumns.region) {

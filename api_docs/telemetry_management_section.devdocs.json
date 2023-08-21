@@ -141,7 +141,25 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "telemetryManagementSection",
+        "id": "def-common.SEARCH_TERMS",
+        "type": "Array",
+        "tags": [],
+        "label": "SEARCH_TERMS",
+        "description": [
+          "\nThese are the terms provided to Advanced Settings that map to this section. When searching,\nAdvanced Settings will match against these terms to show or hide the section."
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/plugins/telemetry_management_section/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

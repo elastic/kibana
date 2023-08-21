@@ -12,10 +12,10 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
+import { defineUpdateApiKeyRoutes } from './update';
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
-import { defineUpdateApiKeyRoutes } from './update';
 
 describe('Update API Key route', () => {
   function getMockContext(

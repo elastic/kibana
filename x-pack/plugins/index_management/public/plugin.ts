@@ -11,7 +11,7 @@ import SemVer from 'semver/classes/semver';
 import { CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 
-import { ExtensionsService } from './services';
+import { ExtensionsService, PublicApiService } from './services';
 
 import {
   IndexManagementPluginSetup,
@@ -39,6 +39,8 @@ export class IndexMgmtUIPlugin {
     const {
       ui: { enabled: isIndexManagementUiEnabled },
       enableIndexActions,
+      enableLegacyTemplates,
+      dev: { enableIndexDetailsPage },
     } = this.ctx.config.get<ClientConfigType>();
 
     if (isIndexManagementUiEnabled) {
@@ -50,20 +52,23 @@ export class IndexMgmtUIPlugin {
         order: 0,
         mount: async (params) => {
           const { mountManagementSection } = await import('./application/mount_management_section');
-          return mountManagementSection(
+          return mountManagementSection({
             coreSetup,
             usageCollection,
             params,
-            this.extensionsService,
-            Boolean(fleet),
+            extensionsService: this.extensionsService,
+            isFleetEnabled: Boolean(fleet),
             kibanaVersion,
-            enableIndexActions
-          );
+            enableIndexActions,
+            enableLegacyTemplates,
+            enableIndexDetailsPage,
+          });
         },
       });
     }
 
     return {
+      apiService: new PublicApiService(coreSetup.http),
       extensionsService: this.extensionsService.setup(),
     };
   }
