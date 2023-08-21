@@ -21,7 +21,7 @@ export default function canvasCustomElementTest({
   const kibanaServer = getService('kibanaServer');
   const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
 
-  describe.only('custom elements', function () {
+  describe('custom elements', function () {
     this.tags('skipFirefox');
 
     before(async () => {
