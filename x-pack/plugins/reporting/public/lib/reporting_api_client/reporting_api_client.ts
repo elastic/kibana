@@ -98,7 +98,7 @@ export class ReportingAPIClient implements IReportingAPI {
    */
   public getReportURL(jobId: string) {
     const downloadLink = this.http.basePath.prepend(
-      `${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${jobId}`
+      `${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${jobId}?elasticInternalOrigin=true`
     );
 
     return downloadLink;

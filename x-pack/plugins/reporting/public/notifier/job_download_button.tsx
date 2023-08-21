@@ -11,8 +11,8 @@ import React from 'react';
 import { JobId, JobSummary } from '../../common/types';
 
 interface Props {
-  getUrl: (jobId: JobId) => string;
   job: JobSummary;
+  getUrl: (jobId: JobId) => string;
 }
 
 export const DownloadButton = ({ getUrl, job }: Props) => {
@@ -20,7 +20,7 @@ export const DownloadButton = ({ getUrl, job }: Props) => {
     <EuiButton
       size="s"
       data-test-subj="downloadCompletedReportButton"
-      href={getUrl(job.id)}
+      href={getUrl(`${job.id}?elasticInternalOrigin=true`)}
       target="_blank"
     >
       <FormattedMessage
