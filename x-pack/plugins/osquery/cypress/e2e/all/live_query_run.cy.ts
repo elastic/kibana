@@ -25,7 +25,7 @@ import {
 import { getAdvancedButton } from '../../screens/integrations';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 
-describe('ALL - Live Query run custom and saved', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
+describe('ALL - Live Query run custom and saved', { tags: [tag.ESS] }, () => {
   let savedQueryId: string;
   let savedQueryName: string;
 
