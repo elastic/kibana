@@ -21,8 +21,8 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import { DEFAULT_REFRESH_SETTING } from '../constants';
-import { isValidRequest, errorMap } from '../utils';
+import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from '../constants';
+import { isValidRequest } from '../utils';
 import { getCurrentTime, getSavedObjectFromSource, mergeForUpdate } from './utils';
 import type { ApiExecutionContext } from './types';
 
@@ -34,16 +34,40 @@ export interface PerformUpdateParams<T = unknown> {
 }
 
 export const performUpdate = async <T>(
+  updateParams: PerformUpdateParams<T>,
+  apiContext: ApiExecutionContext
+): Promise<SavedObjectsUpdateResponse<T>> => {
+  const { type, id, options } = updateParams;
+  const { allowedTypes } = apiContext;
+
+  // check request is valid
+  const { validRequest, error } = isValidRequest({ allowedTypes, type, id });
+  if (!validRequest && error) {
+    throw error;
+  }
+
+  // handle retryOnConflict manually by reattempting the operation in case of conflict errors
+  let retryCount = options.version ? 0 : DEFAULT_RETRY_COUNT;
+  let response: SavedObjectsUpdateResponse<T>;
+  do {
+    try {
+      response = await executeUpdate(updateParams, apiContext);
+      break;
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isConflictError(e) && retryCount > 0) {
+        retryCount--;
+        continue;
+      }
+      throw e;
+    }
+  } while (retryCount > 0);
+
+  return response!;
+};
+
+export const executeUpdate = async <T>(
   { id, type, attributes, options }: PerformUpdateParams<T>,
-  {
-    registry,
-    helpers,
-    allowedTypes,
-    client,
-    serializer,
-    extensions = {},
-    logger,
-  }: ApiExecutionContext
+  { registry, helpers, client, serializer, extensions = {}, logger }: ApiExecutionContext
 ): Promise<SavedObjectsUpdateResponse<T>> => {
   const {
     common: commonHelper,
@@ -55,18 +79,11 @@ export const performUpdate = async <T>(
   const { securityExtension } = extensions;
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
 
-  // check request is valid
-  const { validRequest, error } = isValidRequest({ allowedTypes, type, id });
-  if (!validRequest && error) {
-    throw error;
-  }
-
   const {
     version,
     references,
     upsert,
     refresh = DEFAULT_REFRESH_SETTING,
-    // retryOnConflict = version ? 0 : DEFAULT_RETRY_COUNT,
     migrationVersionCompatibility,
   } = options;
 
@@ -100,13 +117,7 @@ export const performUpdate = async <T>(
 
   // doc not in namespace, or doc not found but we're not upserting => throw 404
   if (docOutsideNamespace || (docNotFound && !upsert)) {
-    throw errorMap(
-      logger,
-      'saved_object_not_found',
-      SavedObjectsErrorHelpers.createGenericNotFoundError(type, id),
-      type,
-      id
-    );
+    throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
   }
 
   if (upsert && preflightDocNSResult?.checkResult === 'not_found') {
@@ -129,12 +140,9 @@ export const performUpdate = async <T>(
     try {
       migrated = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;
     } catch (migrateStorageDocError) {
-      throw errorMap(
-        logger,
-        'saved object migrateStorageDocument error',
+      throw SavedObjectsErrorHelpers.decorateGeneralError(
         migrateStorageDocError,
-        type,
-        id
+        'Failed to migrate document to the latest version.'
       );
     }
   }

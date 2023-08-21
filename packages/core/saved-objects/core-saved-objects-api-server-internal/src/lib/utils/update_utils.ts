@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsErrorHelpers, DecoratedError } from '@kbn/core-saved-objects-server';
-import { Logger } from 'elastic-apm-node';
-import { PreflightNSResult, PreflightDocResult } from '../apis/helpers';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 /**
  * Downward compatible update control flow helpers
@@ -26,50 +24,6 @@ export const updateProgressData: Record<string, unknown> = {
   finalResponse: {},
 };
 
-export interface UpdateErrorMap<E = DecoratedError | Error | unknown> {
-  errorType: string;
-  error: E;
-}
-
-/**
- * Collects to throw as they generate
- * Strictly speaking, we should be throwing as early as possible.
- * @param logger
- * @param errorType
- * @param error
- * @returns error
- */
-export function errorMap(
-  logger: Logger,
-  errorType: string,
-  error: DecoratedError | Error,
-  type?: string,
-  id?: string
-) {
-  let errorToReturn: DecoratedError | Error;
-  switch (errorType) {
-    case 'bad request':
-      logger.info(`Cannot perform update request`);
-      errorToReturn = error;
-      break;
-    case 'saved_object_not_found':
-      logger.info(`Saved object not found, ${error}`);
-      SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-      errorToReturn = SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-
-      break;
-    case 'saved object migrateStorageDocument error':
-      logger.info(`Saved object migrateStorageDocument, ${error}`);
-      errorToReturn = SavedObjectsErrorHelpers.decorateGeneralError(
-        error,
-        'Failed to migrate document to the latest version.'
-      );
-    default:
-      logger.info(`unknown error`);
-      errorToReturn = error;
-  }
-  return errorToReturn;
-}
 export const isValidRequest = ({
   allowedTypes,
   type,
@@ -92,41 +46,4 @@ export const isValidRequest = ({
     : {
         validRequest: true,
       };
-};
-export interface CanPerformUpdateParams<T = unknown> {
-  logger: Logger;
-  type: string;
-  id: string;
-  namespace?: string;
-  upsert: T | undefined;
-  preflightCheckNamespacesForUpdateResult: PreflightNSResult;
-  preflightGetDocForUpdateResult: PreflightDocResult;
-}
-export const canPerformUpdate = (params: CanPerformUpdateParams) => {
-  const {
-    upsert,
-    type,
-    id,
-    preflightCheckNamespacesForUpdateResult: namespaceResult,
-    preflightGetDocForUpdateResult: getResult,
-    logger,
-  } = params;
-  // validating if an update (directly update or create the object instead) can be done, based on if the doc exists or not
-  // extract into canUpdate and canUpsert method instead where it mustn't be possible for BOTH to be true. It's either an update existing thing or create non-existing thing
-  // can perform request START
-  if (
-    (!namespaceResult.checkSkipped && // multinamespace objects
-      (namespaceResult?.checkResult === 'found_outside_namespace' || // can't create an object that already exists
-        (!upsert && namespaceResult?.checkResult === 'not_found'))) || // can't update an object
-    // this check is slightly different and actually versifies if we can do the update or upsert request
-    (namespaceResult.checkSkipped && // non-multinamespace objects
-      !upsert &&
-      getResult.checkDocFound === 'not_found')
-  ) {
-    return errorMap(
-      logger,
-      'not_found',
-      SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)
-    );
-  }
 };

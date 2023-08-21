@@ -9,11 +9,4 @@
 export { decorateEsError } from './decorate_es_error';
 export { getRootFields, includedFields } from './included_fields';
 export { createRepositoryHelpers } from './create_helpers';
-export {
-  type CanPerformUpdateParams,
-  type UpdateErrorMap,
-  updateProgressData,
-  canPerformUpdate,
-  isValidRequest,
-  errorMap,
-} from './update_utils';
+export { updateProgressData, isValidRequest } from './update_utils';
