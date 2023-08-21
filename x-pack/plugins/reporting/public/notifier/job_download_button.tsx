@@ -21,7 +21,7 @@ export const DownloadButton = ({ getUrl, job }: Props) => {
     <EuiButton
       size="s"
       data-test-subj="downloadCompletedReportButton"
-      href={getUrl(`${job.id}?${ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM}`)}
+      href={getUrl(`${job.id}?${ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM}=true`)}
       target="_blank"
     >
       <FormattedMessage
