@@ -16,10 +16,11 @@ import { useLicense } from '../../hooks/use_license';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
-import { AutoRefreshButton } from './components/auto_refresh_button';
+import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
 import { HeaderTitle } from './components/header_title';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
 import { paths } from '../../../common/locators/paths';
+import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 export function SlosPage() {
@@ -34,7 +35,8 @@ export function SlosPage() {
   const { isInitialLoading, isLoading, isError, sloList } = useFetchSloList();
   const { total } = sloList || { total: 0 };
 
-  const [isAutoRefreshing, setIsAutoRefreshing] = useState<boolean>(true);
+  const { storeAutoRefreshState, getAutoRefreshState } = useAutoRefreshStorage();
+  const [isAutoRefreshing, setIsAutoRefreshing] = useState<boolean>(getAutoRefreshState());
 
   useBreadcrumbs([
     {
@@ -57,6 +59,7 @@ export function SlosPage() {
 
   const handleToggleAutoRefresh = () => {
     setIsAutoRefreshing(!isAutoRefreshing);
+    storeAutoRefreshState(!isAutoRefreshing);
   };
 
   if (isInitialLoading) {
