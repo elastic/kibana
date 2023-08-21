@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { isPlainObject } from 'lodash';
-import { set } from '@kbn/safer-lodash-set';
 import {
   SavedObjectsErrorHelpers,
   type SavedObject,
@@ -18,15 +16,15 @@ import {
   decodeRequestVersion,
   encodeHitVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
-import {
+import type {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
-import { getCurrentTime, getSavedObjectFromSource } from './utils';
-import { ApiExecutionContext } from './types';
 import { isValidRequest, errorMap } from '../utils';
+import { getCurrentTime, getSavedObjectFromSource, mergeForUpdate } from './utils';
+import type { ApiExecutionContext } from './types';
 
 export interface PerformUpdateParams<T = unknown> {
   type: string;
@@ -117,7 +115,7 @@ export const performUpdate = async <T>(
     await preflightHelper.preflightCheckForUpsertAliasConflict(type, id, namespace);
   }
 
-  // MIGRATE (AND DECRYPT) EXISTING DOC IF THERE IS ONE START.
+  // MIGRATE EXISTING DOC IF THERE IS ONE START.
   // For implementations, see https://github.com/elastic/kibana/pull/158251/files#diff-d95c8ca5c3f61caa523ceed8ae8665eb34d0fcd198e85870286d0c8c2ddbcef4R242
   let migrated: SavedObject<T>;
   if (preflightDocResult.checkDocFound === 'found') {
@@ -139,7 +137,6 @@ export const performUpdate = async <T>(
         id
       );
     }
-    // migrated = await encryptionHelper.optionallyDecryptAndRedactSingleResult(migrated, undefined);
   }
   // END ALL PRE_CLIENT CALL CHECKS && MIGRATE EXISTING DOC;
 
@@ -233,20 +230,10 @@ export const performUpdate = async <T>(
     // UPSERT CASE END
   } else {
     // UPDATE CASE START
-
     // at this point, we already know 1. the document exists 2. we're not doing an upsert
-    // so we can safely process with the "standard" update sequence.
+    // therefor we can safely process with the "standard" update sequence.
 
-    // Doc already exists, we use both the attributes from the main request body and any extra ones from upsert.
-    // We need to ignore duplicate attribute fields if given in both attributes and upsert
-    // DO CLIENT_SIDE UPDATE DOC: I'm assuming that if we reach this point, there hasn't been an error
-
-    // const updatedAttributes = merge(migrated!.attributes, attributes); // PGA: commented for shallow merge for now.
-    // const updatedAttributes = {
-    //   ...migrated!.attributes,
-    //   ...(await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, attributes)),
-    // };
-    const updatedAttributes = recursiveMerge(
+    const updatedAttributes = mergeForUpdate(
       { ...migrated!.attributes },
       await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, attributes)
     );
@@ -272,7 +259,7 @@ export const performUpdate = async <T>(
       index: commonHelper.getIndexForType(type),
       refresh,
       body: docToSend._source,
-      // using version from the source doc is not provided to avoid erasing changes
+      // using version from the source doc if not provided as option to avoid erasing changes in case of concurrent calls
       ...decodeRequestVersion(version || migrated!.version),
       require_alias: true,
     };
@@ -332,16 +319,4 @@ export const performUpdate = async <T>(
     authorizationResult?.typeMap,
     shouldPerformUpsert ? upsert : attributes
   );
-};
-
-const recursiveMerge = (target: Record<string, any>, value: any, keys: string[] = []) => {
-  if (isPlainObject(value) && Object.keys(value).length > 0) {
-    for (const [subKey, subVal] of Object.entries(value)) {
-      recursiveMerge(target, subVal, [...keys, subKey]);
-    }
-  } else if (keys.length > 0 && value !== undefined) {
-    set(target, keys, value);
-  }
-
-  return target;
 };
