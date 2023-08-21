@@ -76,7 +76,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
         dropdownDisplay: (
           <EuiFlexGroup gutterSize="none" key={ADD_NEW_CONNECTOR}>
             <EuiFlexItem grow={true}>
-              <EuiButtonEmpty iconType="plus" size="xs">
+              <EuiButtonEmpty href="#" iconType="plus" size="xs">
                 {i18n.ADD_NEW_CONNECTOR}
               </EuiButtonEmpty>
             </EuiFlexItem>

@@ -21,11 +21,13 @@ import {
 } from '../../../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { HelloWorldContainer } from '../../../lib/test_samples/embeddables/hello_world_container';
 import { embeddablePluginMock } from '../../../mocks';
+import { EditPanelAction } from '../edit_panel_action/edit_panel_action';
 
 let container: Container;
 let embeddable: ContactCardEmbeddable;
 const overlays = overlayServiceMock.createStartContract();
 const theme = themeServiceMock.createStartContract();
+const editPanelActionMock = { execute: jest.fn() } as unknown as EditPanelAction;
 
 function createHelloWorldContainer(input = { id: '123', panels: {} }) {
   const { setup, doStart } = embeddablePluginMock.createInstance();
@@ -57,7 +59,7 @@ beforeAll(async () => {
 });
 
 test('execute should open flyout', async () => {
-  const customizePanelAction = new CustomizePanelAction(overlays, theme);
+  const customizePanelAction = new CustomizePanelAction(overlays, theme, editPanelActionMock);
   const spy = jest.spyOn(overlays, 'openFlyout');
   await customizePanelAction.execute({ embeddable });
 
