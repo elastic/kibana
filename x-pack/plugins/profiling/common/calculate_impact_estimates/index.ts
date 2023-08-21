@@ -7,13 +7,16 @@
 
 const ANNUAL_SECONDS = 60 * 60 * 24 * 365;
 
-// The assumed amortized per-core average power consumption.
-const PER_CORE_WATT = 40;
+// The assumed amortized per-core average power consumption (based on 100% CPU Utilization).
+// Reference: https://www.cloudcarbonfootprint.org/docs/methodology/#appendix-i-energy-coefficients
+const PER_CORE_WATT = 7;
 
-// The assumed CO2 emissions per KWH (sourced from www.eia.gov)
-const CO2_PER_KWH = 0.92;
+// The assumed CO2 emissions in kg per kWh.
+// Reference: https://www.cloudcarbonfootprint.org/docs/methodology/#appendix-v-grid-emissions-factors
+const CO2_PER_KWH = 0.379069;
 
-// The cost of a CPU core per hour, in dollars
+// The cost of an x86 CPU core per hour, in US$.
+// (ARM is 60% less based graviton 3 data, see https://aws.amazon.com/ec2/graviton/)
 const CORE_COST_PER_HOUR = 0.0425;
 
 export function calculateImpactEstimates({

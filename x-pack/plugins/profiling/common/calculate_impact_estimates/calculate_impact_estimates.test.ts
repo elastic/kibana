@@ -16,31 +16,31 @@ describe('calculateImpactEstimates', () => {
     });
 
     expect(totalCPU).toEqual({
-      annualizedCo2: 17.909333333333336,
-      annualizedCoreSeconds: 1752000,
-      annualizedDollarCost: 20.683333333333334,
-      co2: 0.0005111111111111112,
-      coreSeconds: 50,
-      dollarCost: 0.0005902777777777778,
       percentage: 0.1,
+      coreSeconds: 50,
+      annualizedCoreSeconds: 1752000,
+      co2: 0.000036853930555555546,
+      annualizedCo2: 1.2913617266666664,
+      dollarCost: 0.0005902777777777778,
+      annualizedDollarCost: 20.683333333333334,
     });
 
     expect(selfCPU).toEqual({
-      annualizedCo2: 8.954666666666668,
-      annualizedCoreSeconds: 876000,
-      annualizedDollarCost: 10.341666666666667,
-      co2: 0.0002555555555555556,
-      coreSeconds: 25,
-      dollarCost: 0.0002951388888888889,
       percentage: 0.05,
+      coreSeconds: 25,
+      annualizedCoreSeconds: 876000,
+      co2: 0.000018426965277777773,
+      annualizedCo2: 0.6456808633333332,
+      dollarCost: 0.0002951388888888889,
+      annualizedDollarCost: 10.341666666666667,
     });
 
     expect(totalSamples).toEqual({
       percentage: 1,
       coreSeconds: 500,
       annualizedCoreSeconds: 17520000,
-      co2: 0.005111111111111111,
-      annualizedCo2: 179.09333333333333,
+      co2: 0.00036853930555555555,
+      annualizedCo2: 12.913617266666666,
       dollarCost: 0.0059027777777777785,
       annualizedDollarCost: 206.83333333333337,
     });
@@ -54,31 +54,31 @@ describe('calculateImpactEstimates', () => {
     });
 
     expect(totalCPU).toEqual({
-      annualizedCo2: 17.909333333333336,
-      annualizedCoreSeconds: 1752000,
-      annualizedDollarCost: 20.683333333333334,
-      co2: 0.0005111111111111112,
-      coreSeconds: 50,
-      dollarCost: 0.0005902777777777778,
       percentage: 0.1,
+      coreSeconds: 50,
+      annualizedCoreSeconds: 1752000,
+      co2: 0.000036853930555555546,
+      annualizedCo2: 1.2913617266666664,
+      dollarCost: 0.0005902777777777778,
+      annualizedDollarCost: 20.683333333333334,
     });
 
     expect(selfCPU).toEqual({
-      annualizedCo2: 17.909333333333336,
-      annualizedCoreSeconds: 1752000,
-      annualizedDollarCost: 20.683333333333334,
-      co2: 0.0005111111111111112,
-      coreSeconds: 50,
-      dollarCost: 0.0005902777777777778,
       percentage: 0.1,
+      coreSeconds: 50,
+      annualizedCoreSeconds: 1752000,
+      co2: 0.000036853930555555546,
+      annualizedCo2: 1.2913617266666664,
+      dollarCost: 0.0005902777777777778,
+      annualizedDollarCost: 20.683333333333334,
     });
 
     expect(totalSamples).toEqual({
       percentage: 1,
       coreSeconds: 500,
       annualizedCoreSeconds: 17520000,
-      co2: 0.005111111111111111,
-      annualizedCo2: 179.09333333333333,
+      co2: 0.00036853930555555555,
+      annualizedCo2: 12.913617266666666,
       dollarCost: 0.0059027777777777785,
       annualizedDollarCost: 206.83333333333337,
     });
