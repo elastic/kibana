@@ -104,7 +104,7 @@ export const getStatusForIndexName = (indexName: string, status?: BaseCspSetupSt
 export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePackagePolicy) => {
   const enabledInput = packagePolicy.inputs.find((i) => i.enabled);
   const credentialType: AwsCredentialsType | undefined =
-    enabledInput?.streams?.[0].vars?.['aws.credentials.type'].value;
+    enabledInput?.streams?.[0].vars?.['aws.credentials.type']?.value;
 
   if (credentialType) {
     const credsToKeep = AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP[credentialType];
