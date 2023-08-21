@@ -80,6 +80,8 @@ export function isObj(x: unknown): x is Record<string, unknown> {
 export function getChangedFileList(): string[] {
   const targetBranch = getTrackedBranch();
 
+  console.log('remotes', execSync('git remote -v').toString());
+
   const gitDiffOutput = execSync(`git diff HEAD..${targetBranch} --name-only`).toString().trim();
 
   const changedFiles = gitDiffOutput.split('\n').map((line) => line.trim());
@@ -89,16 +91,19 @@ export function getChangedFileList(): string[] {
 
 export async function getAllTestFilesForConfigs(configPaths: string[]): Promise<string[]> {
   const allRoots = configPaths.map((configPath) => {
-    return configPath.replace('/jest.config.js', '');
+    return configPath.replace('/jest.config.js', '/');
   });
 
   const allTestFiles = allRoots
     .map((testRoot) => {
       const testFiles = globby
-        .sync(['*.test.ts', '*.test.tsx', '*.test.js', '*.test.jsx', '!*integration*'], {
-          cwd: testRoot,
-          onlyFiles: true,
-        })
+        .sync(
+          ['**/*.test.ts', '**/*.test.tsx', '**/*.test.js', '**/*.test.jsx', '!**/*integration*'],
+          {
+            cwd: testRoot,
+            onlyFiles: true,
+          }
+        )
         .map((fileName) => path.join(testRoot, fileName));
       return testFiles || [];
     })
