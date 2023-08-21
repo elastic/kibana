@@ -21,15 +21,14 @@ export default function canvasCustomElementTest({
   const kibanaServer = getService('kibanaServer');
   const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
 
-  describe('custom elements', function () {
+  describe.only('custom elements', function () {
     this.tags('skipFirefox');
 
     before(async () => {
       await kibanaServer.importExport.load(archive);
       // load test workpad
-      await PageObjects.common.navigateToApp('canvas', {
-        path: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1',
-      });
+      await PageObjects.canvas.goToListingPage();
+      await PageObjects.canvas.loadFirstWorkpad('Test Workpad');
     });
 
     after(async () => {
