@@ -34,7 +34,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
     afterEach(() => objectRemover.removeAll());
 
     it('should aggregate when there are no alerts', async () => {
-      const response = await supertest.get(
+      const response = await supertest.post(
         `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`
       );
       expect(response.status).to.eql(200);
@@ -119,7 +119,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
       await Promise.all(errorAlertIds.map((id) => getEventLogWithRetry(id)));
 
       await retry.try(async () => {
-        const response = await supertest.get(
+        const response = await supertest.post(
           `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`
         );
 
@@ -172,7 +172,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
           })
         );
 
-        const response = await supertest.get(
+        const response = await supertest.post(
           `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`
         );
 

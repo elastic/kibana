@@ -59,6 +59,5 @@ export async function aggregate<T = Record<string, unknown>>(
     aggs,
   });
 
-  // params.
   return result.aggregations!;
 }

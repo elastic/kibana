@@ -6,7 +6,6 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import {
   AggregateOptions,
@@ -14,31 +13,15 @@ import {
   formatDefaultAggregationResult,
   getDefaultRuleAggregation,
   RuleAggregationFormattedResult,
-} from '../../common';
-import { ILicenseState } from '../lib';
-import { RewriteResponseCase, RewriteRequestCase, verifyAccessAndContext } from './lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import { trackLegacyTerminology } from './lib/track_legacy_terminology';
-
-// config definition
-const querySchema = schema.object({
-  search: schema.maybe(schema.string()),
-  default_search_operator: schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
-    defaultValue: 'OR',
-  }),
-  search_fields: schema.maybe(schema.arrayOf(schema.string())),
-  has_reference: schema.maybe(
-    // use nullable as maybe is currently broken
-    // in config-schema
-    schema.nullable(
-      schema.object({
-        type: schema.string(),
-        id: schema.string(),
-      })
-    )
-  ),
-  filter: schema.maybe(schema.string()),
-});
+} from '../../../../../common';
+import { ILicenseState } from '../../../../lib';
+import { RewriteResponseCase, RewriteRequestCase, verifyAccessAndContext } from '../../../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { trackLegacyTerminology } from '../../../lib/track_legacy_terminology';
+import {
+  aggregateRulesRequestBodySchemaV1,
+  AggregateRulesRequestBodyV1,
+} from '../../../../../common/routes/rule/apis/aggregate';
 
 const rewriteQueryReq: RewriteRequestCase<AggregateOptions> = ({
   default_search_operator: defaultSearchOperator,
@@ -78,18 +61,19 @@ export const aggregateRulesRoute = (
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
       validate: {
-        body: querySchema,
+        body: aggregateRulesRequestBodySchemaV1,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
+        const body: AggregateRulesRequestBodyV1 = req.body;
         const options = rewriteQueryReq({
-          ...req.body,
-          has_reference: req.body.has_reference || undefined,
+          ...body,
+          has_reference: body.has_reference || undefined,
         });
         trackLegacyTerminology(
-          [req.body.search, req.body.search_fields].filter(Boolean) as string[],
+          [body.search, body.search_fields].filter(Boolean) as string[],
           usageCounter
         );
         const aggregateResult = await rulesClient.aggregate<DefaultRuleAggregationResult>({

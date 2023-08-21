@@ -7,22 +7,22 @@
 
 import { aggregateRulesRoute } from './aggregate_rules';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { verifyApiAccess } from '../lib/license_api_access';
-import { mockHandlerArguments } from './_mock_handler_arguments';
-import { rulesClientMock } from '../rules_client.mock';
-import { trackLegacyTerminology } from './lib/track_legacy_terminology';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { verifyApiAccess } from '../../../../lib/license_api_access';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { rulesClientMock } from '../../../../rules_client.mock';
+import { trackLegacyTerminology } from '../../../lib/track_legacy_terminology';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
 const rulesClient = rulesClientMock.create();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-jest.mock('../lib/license_api_access', () => ({
+jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
-jest.mock('./lib/track_legacy_terminology', () => ({
+jest.mock('../../../lib/track_legacy_terminology', () => ({
   trackLegacyTerminology: jest.fn(),
 }));
 
@@ -134,7 +134,7 @@ describe('aggregateRulesRoute', () => {
 
     aggregateRulesRoute(router, licenseState);
 
-    const [config, handler] = router.get.mock.calls[0];
+    const [config, handler] = router.post.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rules/_aggregate"`);
 
@@ -143,7 +143,7 @@ describe('aggregateRulesRoute', () => {
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
       {
-        query: {
+        body: {
           default_search_operator: 'AND',
         },
       },
@@ -279,14 +279,14 @@ describe('aggregateRulesRoute', () => {
 
     aggregateRulesRoute(router, licenseState);
 
-    const [, handler] = router.get.mock.calls[0];
+    const [, handler] = router.post.mock.calls[0];
 
     rulesClient.aggregate.mockResolvedValueOnce(aggregateResult);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
       {
-        query: {
+        body: {
           default_search_operator: 'OR',
         },
       }
@@ -307,12 +307,12 @@ describe('aggregateRulesRoute', () => {
 
     aggregateRulesRoute(router, licenseState);
 
-    const [, handler] = router.get.mock.calls[0];
+    const [, handler] = router.post.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
       {},
       {
-        query: {},
+        body: {},
       },
       ['ok']
     );
@@ -326,7 +326,7 @@ describe('aggregateRulesRoute', () => {
     const router = httpServiceMock.createRouter();
 
     aggregateRulesRoute(router, licenseState, mockUsageCounter);
-    const [, handler] = router.get.mock.calls[0];
+    const [, handler] = router.post.mock.calls[0];
 
     rulesClient.aggregate.mockResolvedValueOnce(aggregateResult);
 
@@ -334,7 +334,7 @@ describe('aggregateRulesRoute', () => {
       { rulesClient },
       {
         params: {},
-        query: {
+        body: {
           search_fields: ['alertTypeId:1', 'message:foo'],
           search: 'alertTypeId:2',
         },
