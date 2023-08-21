@@ -9,7 +9,7 @@ import { resolve } from 'path';
 import { format as formatUrl } from 'url';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
+import { esTestConfig, kbnTestConfig, kibanaServiceAccount } from '@kbn/test';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 
 export default async () => {
@@ -43,8 +43,7 @@ export default async () => {
             Object.entries(servers.elasticsearch).filter(([key]) => key.toLowerCase() !== 'auth')
           )
         )}`,
-        `--elasticsearch.username=${kibanaServerTestUser.username}`,
-        `--elasticsearch.password=${kibanaServerTestUser.password}`,
+        `--elasticsearch.serviceAccountToken=${kibanaServiceAccount.token}`,
         '--telemetry.sendUsageTo=staging',
         `--logging.appenders.deprecation=${JSON.stringify({
           type: 'console',
