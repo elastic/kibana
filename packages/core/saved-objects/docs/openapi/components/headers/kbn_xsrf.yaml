@@ -3,8 +3,4 @@ schema:
 in: header
 name: kbn-xsrf
 description: Cross-site request forgery protection
-<<<<<<< HEAD
 required: true
-=======
-required: true
->>>>>>> 6061fa36a2b (passed validation)
