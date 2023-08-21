@@ -9,7 +9,7 @@ import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form
 import { FIELD_TYPES, VALIDATION_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { ConnectorTypeFields } from '../../../common/types/domain';
-import type { CasePostRequest } from '../../../common/api';
+import type { CasePostRequest } from '../../../common/types/api';
 import {
   MAX_TITLE_LENGTH,
   MAX_DESCRIPTION_LENGTH,

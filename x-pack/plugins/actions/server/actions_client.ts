@@ -133,6 +133,15 @@ export interface UpdateOptions {
   action: ActionUpdate;
 }
 
+interface GetAllOptions {
+  includeSystemActions?: boolean;
+}
+
+interface ListTypesOptions {
+  featureId?: string;
+  includeSystemActionTypes?: boolean;
+}
+
 export class ActionsClient {
   private readonly logger: Logger;
   private readonly kibanaIndices: string[];
@@ -238,6 +247,7 @@ export class ActionsClient {
 
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const configurationUtilities = this.actionTypeRegistry.getUtils();
+
     const validatedActionTypeConfig = validateConfig(actionType, config, {
       configurationUtilities,
     });
@@ -394,7 +404,13 @@ export class ActionsClient {
   /**
    * Get an action
    */
-  public async get({ id }: { id: string }): Promise<ActionResult> {
+  public async get({
+    id,
+    throwIfSystemAction = true,
+  }: {
+    id: string;
+    throwIfSystemAction?: boolean;
+  }): Promise<ActionResult> {
     try {
       await this.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
@@ -409,6 +425,19 @@ export class ActionsClient {
     }
 
     const foundInMemoryConnector = this.inMemoryConnectors.find((connector) => connector.id === id);
+
+    /**
+     * Getting system connector is not allowed
+     * if throwIfSystemAction is set to true.
+     * Default behavior is to throw
+     */
+    if (
+      foundInMemoryConnector !== undefined &&
+      foundInMemoryConnector.isSystemAction &&
+      throwIfSystemAction
+    ) {
+      throw Boom.notFound(`Connector ${id} not found`);
+    }
 
     if (foundInMemoryConnector !== undefined) {
       this.auditLogger?.log(
@@ -452,7 +481,9 @@ export class ActionsClient {
   /**
    * Get all actions with in-memory connectors
    */
-  public async getAll(): Promise<FindActionResult[]> {
+  public async getAll({ includeSystemActions = false }: GetAllOptions = {}): Promise<
+    FindActionResult[]
+  > {
     try {
       await this.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
@@ -483,9 +514,13 @@ export class ActionsClient {
       )
     );
 
+    const inMemoryConnectorsFiltered = includeSystemActions
+      ? this.inMemoryConnectors
+      : this.inMemoryConnectors.filter((connector) => !connector.isSystemAction);
+
     const mergedResult = [
       ...savedObjectsActions,
-      ...this.inMemoryConnectors.map((inMemoryConnector) => ({
+      ...inMemoryConnectorsFiltered.map((inMemoryConnector) => ({
         id: inMemoryConnector.id,
         actionTypeId: inMemoryConnector.actionTypeId,
         name: inMemoryConnector.name,
@@ -500,7 +535,13 @@ export class ActionsClient {
   /**
    * Get bulk actions with in-memory list
    */
-  public async getBulk(ids: string[]): Promise<ActionResult[]> {
+  public async getBulk({
+    ids,
+    throwIfSystemAction = true,
+  }: {
+    ids: string[];
+    throwIfSystemAction?: boolean;
+  }): Promise<ActionResult[]> {
     try {
       await this.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
@@ -522,6 +563,15 @@ export class ActionsClient {
       const action = this.inMemoryConnectors.find(
         (inMemoryConnector) => inMemoryConnector.id === actionId
       );
+
+      /**
+       * Getting system connector is not allowed
+       * if throwIfSystemAction is set to true.
+       * Default behavior is to throw
+       */
+      if (action !== undefined && action.isSystemAction && throwIfSystemAction) {
+        throw Boom.notFound(`Connector ${action.id} not found`);
+      }
 
       if (action !== undefined) {
         actionResults.push(action);
@@ -823,8 +873,21 @@ export class ActionsClient {
     return this.ephemeralExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
 
-  public async listTypes(featureId?: string): Promise<ActionType[]> {
-    return this.actionTypeRegistry.list(featureId);
+  /**
+   * Return all available action types
+   * expect system action types
+   */
+  public async listTypes({
+    featureId,
+    includeSystemActionTypes = false,
+  }: ListTypesOptions = {}): Promise<ActionType[]> {
+    const actionTypes = this.actionTypeRegistry.list(featureId);
+
+    const filteredActionTypes = includeSystemActionTypes
+      ? actionTypes
+      : actionTypes.filter((actionType) => !Boolean(actionType.isSystemActionType));
+
+    return filteredActionTypes;
   }
 
   public isActionTypeEnabled(

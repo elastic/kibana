@@ -9,13 +9,16 @@ import { extname } from 'path';
 
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { importExceptionsResponseSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { ImportQuerySchemaDecoded, importQuerySchema } from '@kbn/securitysolution-io-ts-types';
 
 import type { ListsPluginRouter } from '../types';
 import { ConfigType } from '../config';
+import {
+  ImportExceptionsRequestQueryDecoded,
+  importExceptionsRequestQuery,
+  importExceptionsResponse,
+} from '../../common/api';
 
 import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 
@@ -37,9 +40,10 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
       path: `${EXCEPTION_LIST_URL}/_import`,
       validate: {
         body: schema.any(), // validation on file object is accomplished later in the handler.
-        query: buildRouteValidation<typeof importQuerySchema, ImportQuerySchemaDecoded>(
-          importQuerySchema
-        ),
+        query: buildRouteValidation<
+          typeof importExceptionsRequestQuery,
+          ImportExceptionsRequestQueryDecoded
+        >(importExceptionsRequestQuery),
       },
     },
     async (context, request, response) => {
@@ -63,7 +67,7 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
           overwrite: request.query.overwrite,
         });
 
-        const [validated, errors] = validate(importsSummary, importExceptionsResponseSchema);
+        const [validated, errors] = validate(importsSummary, importExceptionsResponse);
 
         if (errors != null) {
           return siemResponse.error({ body: errors, statusCode: 500 });

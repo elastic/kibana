@@ -16,6 +16,7 @@ import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exceptio
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
+import type { FormatAlert } from '@kbn/alerting-plugin/server/types';
 import {
   checkPrivilegesFromEsClient,
   getExceptions,
@@ -71,6 +72,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     ruleExecutionLoggerFactory,
     version,
     isPreview,
+    experimentalFeatures,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -79,6 +81,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
       logger,
       formatAlert: formatAlertForNotificationActions,
     });
+
     return persistenceRuleType({
       ...type,
       cancelAlertsOnRuleTimeout: false,
@@ -338,7 +341,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const bulkCreate = bulkCreateFactory(
               alertWithPersistence,
               refresh,
-              ruleExecutionLogger
+              ruleExecutionLogger,
+              experimentalFeatures
             );
 
             const alertTimestampOverride = isPreview ? startedAt : undefined;
@@ -515,6 +519,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
         useLegacyAlerts: true,
         isSpaceAware: true,
         secondaryAlias: config.signalsIndex,
+        formatAlert: formatAlertForNotificationActions as unknown as FormatAlert<never>,
       },
     });
   };

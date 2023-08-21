@@ -1,0 +1,73 @@
+post:
+  summary: Creates a runtime field.
+  operationId: createRuntimeField 
+  description: >
+    This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+  tags:
+    - data views
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            data_view_id:
+              description: The ID of the data view.
+              type: string
+              required: true
+            space_id:
+              description: An identifier for the space. If space_id is not provided in the URL, the default space is used.
+              type: string
+              required: false
+        examples:
+          createRuntimeFieldRequest:
+            $ref: '../components/examples/create_runtime_field_request.yaml'
+
+put:
+  summary: Create or update an existing runtime field.
+  operationId: updateRuntimeField 
+  description: >
+    This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+  tags:
+    - data views
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            data_view_id:
+              description: The ID of the data view.
+              type: string
+              required: true
+            space_id:
+              description: An identifier for the space. If space_id is not provided in the URL, the default space is used.
+              type: string
+              required: false
+        examples:
+          updateRuntimeFieldRequest:
+            $ref: '../components/examples/create_runtime_field_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/examples/create_runtime_field_response.yaml'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
+  servers:
+    - url: https://localhost:5601
+
+servers:
+  - url: https://localhost:5601

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { CommentType } from '../../../common/api';
+import { AttachmentType } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import type { CommentUI } from '../../containers/types';
+import type { AttachmentUI } from '../../containers/types';
 import { isUserActionTypeSupported, getManualAlertIdsWithNoRuleId } from './helpers';
 
-const comments: CommentUI[] = [
+const comments: AttachmentUI[] = [
   {
-    type: CommentType.alert,
+    type: AttachmentType.alert,
     alertId: 'alert-id-1',
     index: 'alert-index-1',
     id: 'comment-id',
@@ -30,7 +30,7 @@ const comments: CommentUI[] = [
     owner: SECURITY_SOLUTION_OWNER,
   },
   {
-    type: CommentType.alert,
+    type: AttachmentType.alert,
     alertId: 'alert-id-2',
     index: 'alert-index-2',
     id: 'comment-id',

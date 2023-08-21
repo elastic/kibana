@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Rule } from 'eslint';
+import type { Rule } from 'eslint';
 import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
 import * as T from '@babel/types';
 import { ImportType } from '@kbn/import-resolver';

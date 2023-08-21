@@ -9,13 +9,13 @@ import {
   getCaseFindUserActionsUrl,
   getCaseUserActionUrl,
   getCaseUserActionStatsUrl,
-  GetCaseUsersResponse,
   getCaseUsersUrl,
 } from '@kbn/cases-plugin/common/api';
 import {
   CaseUserActionDeprecatedResponse,
   CaseUserActionsDeprecatedResponse,
   CaseUserActionStatsResponse,
+  GetCaseUsersResponse,
   UserActionFindRequest,
   UserActionFindResponse,
 } from '@kbn/cases-plugin/common/types/api';

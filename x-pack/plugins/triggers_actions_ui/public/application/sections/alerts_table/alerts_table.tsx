@@ -308,17 +308,32 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     if (shouldHighlightRowCheck) {
       mappedRowClasses = alerts.reduce<NonNullable<EuiDataGridStyle['rowClasses']>>(
         (rowClasses, alert, index) => {
+          if (props.gridStyle?.stripes && index % 2 !== 0) {
+            // manually add stripes if props.gridStyle.stripes is true because presence of rowClasses
+            // overrides the props.gridStyle.stripes option. And rowClasses will always be there.
+            // Adding strips only on even rows. It will be replace by alertsTableHighlightedRow if
+            // shouldHighlightRow is correct
+            rowClasses[index + pagination.pageIndex * pagination.pageSize] =
+              'euiDataGridRow--striped';
+          }
           if (shouldHighlightRowCheck(alert)) {
             rowClasses[index + pagination.pageIndex * pagination.pageSize] =
               'alertsTableHighlightedRow';
           }
+
           return rowClasses;
         },
         {}
       );
     }
     return mappedRowClasses;
-  }, [props.shouldHighlightRow, alerts, pagination.pageIndex, pagination.pageSize]);
+  }, [
+    props.shouldHighlightRow,
+    alerts,
+    pagination.pageIndex,
+    pagination.pageSize,
+    props.gridStyle,
+  ]);
 
   const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
 

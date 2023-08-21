@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LimitWarningsEuiCallOut } from './styles';
@@ -18,6 +16,7 @@ const lineageLimitMessage = (
   />
 );
 
+// eslint-disable-next-line react/display-name
 const LineageTitleMessage = React.memo(function ({ numberOfEntries }: { numberOfEntries: number }) {
   return (
     <FormattedMessage
@@ -31,6 +30,7 @@ const LineageTitleMessage = React.memo(function ({ numberOfEntries }: { numberOf
 /**
  * Limit warning for hitting a limit of nodes in the tree
  */
+// eslint-disable-next-line react/display-name
 export const LimitWarning = React.memo(function ({ numberDisplayed }: { numberDisplayed: number }) {
   return (
     <LimitWarningsEuiCallOut

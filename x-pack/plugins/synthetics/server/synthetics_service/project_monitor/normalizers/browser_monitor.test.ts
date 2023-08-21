@@ -11,7 +11,6 @@ import {
   Locations,
   LocationStatus,
   ProjectMonitor,
-  PrivateLocation,
 } from '../../../../common/runtime_types';
 import {
   DEFAULT_FIELDS,
@@ -19,6 +18,7 @@ import {
   PROFILES_MAP,
 } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
+import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 
 describe('browser normalizers', () => {
   describe('normalize push monitors', () => {
@@ -48,7 +48,7 @@ describe('browser normalizers', () => {
         status: LocationStatus.GA,
       },
     ];
-    const privateLocations: PrivateLocation[] = [
+    const privateLocations: PrivateLocationAttributes[] = [
       {
         id: 'germany',
         label: 'Germany',

@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import type { ChromeNavLinks, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import { APP_UI_ID, SecurityPageName } from '@kbn/security-solution-plugin/common';
-import { combineLatest, skipWhile, debounceTime } from 'rxjs';
+import type { ChromeProjectNavigationNode, NodeDefinition } from '@kbn/core-chrome-browser';
+import { defaultNavigation as mlDefaultNav } from '@kbn/default-nav-ml';
+import { defaultNavigation as devToolsDefaultNav } from '@kbn/default-nav-devtools';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 import type { Services } from '../common/services';
-import type { ProjectNavigationLink } from './links/types';
+import type { ProjectNavigationLink, ProjectPageName } from './links/types';
+import { getNavLinkIdFromProjectPageName } from './links/util';
+import { ExternalPageName } from './links/constants';
 
 // We need to hide breadcrumbs for some pages (tabs) because they appear duplicated.
 // These breadcrumbs are incorrectly processed as trailing breadcrumbs in SecuritySolution, because of `SpyRoute` architecture limitations.
 // They are navLinks tree with a SecurityPageName, so they should be treated as leading breadcrumbs in ESS as well.
 // TODO: Improve the breadcrumbs logic in `use_breadcrumbs_nav` to avoid this workaround.
-const HIDDEN_BREADCRUMBS = new Set<SecurityPageName>([
+const HIDDEN_BREADCRUMBS = new Set<ProjectPageName>([
   SecurityPageName.networkDns,
   SecurityPageName.networkHttp,
   SecurityPageName.networkTls,
@@ -33,54 +36,98 @@ const HIDDEN_BREADCRUMBS = new Set<SecurityPageName>([
 ]);
 
 export const subscribeNavigationTree = (services: Services): void => {
-  const { chrome, serverless, getProjectNavLinks$ } = services;
+  const { serverless, getProjectNavLinks$ } = services;
 
-  combineLatest([
-    getProjectNavLinks$().pipe(skipWhile((navLink) => navLink.length === 0)),
-    chrome.navLinks.getNavLinks$().pipe(skipWhile((chromeNavLinks) => chromeNavLinks.length === 0)),
-  ])
-    .pipe(debounceTime(100)) // avoid multiple calls in a short time
-    .subscribe(([projectNavLinks]) => {
-      // The root link is temporary until the issue about having multiple links at first level is solved.
-      // TODO: Assign the navigationTree nodes when the issue is solved:
-      // const navigationTree = formatChromeProjectNavNodes(chrome.navLinks, projectNavLinks),
-      const navigationTree: ChromeProjectNavigationNode[] = [
-        {
-          id: 'root',
-          title: 'Root',
-          path: ['root'],
-          breadcrumbStatus: 'hidden',
-          children: formatChromeProjectNavNodes(chrome.navLinks, projectNavLinks, ['root']),
-        },
-      ];
-      serverless.setNavigation({ navigationTree });
-    });
+  const formatChromeProjectNavNodes = getFormatChromeProjectNavNodes(services);
+
+  // projectNavLinks$ updates when chrome.navLinks changes, no need to subscribe chrome.navLinks.getNavLinks$() again.
+  getProjectNavLinks$().subscribe((projectNavLinks) => {
+    const navigationTree = formatChromeProjectNavNodes(projectNavLinks);
+    serverless.setNavigation({ navigationTree });
+  });
 };
 
-const formatChromeProjectNavNodes = (
-  chromeNavLinks: ChromeNavLinks,
-  projectNavLinks: ProjectNavigationLink[],
-  path: string[] = []
-): ChromeProjectNavigationNode[] =>
-  projectNavLinks.reduce<ChromeProjectNavigationNode[]>((navNodes, navLink) => {
-    const { id: deepLinkId, appId = APP_UI_ID, links, title } = navLink;
+// Closure to access the up to date chrome.navLinks from services
+export const getFormatChromeProjectNavNodes = (services: Services) => {
+  const formatChromeProjectNavNodes = (
+    projectNavLinks: ProjectNavigationLink[],
+    path: string[] = []
+  ): ChromeProjectNavigationNode[] => {
+    const { chrome } = services;
+    return projectNavLinks.reduce<ChromeProjectNavigationNode[]>((navNodes, navLink) => {
+      const { id, title, links } = navLink;
+      const navLinkId = getNavLinkIdFromProjectPageName(id);
 
-    const id = deepLinkId ? `${appId}:${deepLinkId}` : appId;
-
-    if (chromeNavLinks.has(id)) {
-      const breadcrumbHidden = appId === APP_UI_ID && HIDDEN_BREADCRUMBS.has(deepLinkId);
-      const link: ChromeProjectNavigationNode = {
-        id,
-        title,
-        path: [...path, id],
-        deepLink: chromeNavLinks.get(id),
-        ...(breadcrumbHidden && { breadcrumbStatus: 'hidden' }),
-      };
-
-      if (links?.length) {
-        link.children = formatChromeProjectNavNodes(chromeNavLinks, links, link.path);
+      if (chrome.navLinks.has(navLinkId)) {
+        const breadcrumbHidden = HIDDEN_BREADCRUMBS.has(id);
+        const link: ChromeProjectNavigationNode = {
+          id: navLinkId,
+          title,
+          path: [...path, navLinkId],
+          deepLink: chrome.navLinks.get(navLinkId),
+          ...(breadcrumbHidden && { breadcrumbStatus: 'hidden' }),
+        };
+        // check default navigation for children
+        const defaultChildrenNav = getDefaultChildrenNav(id, link);
+        if (defaultChildrenNav) {
+          link.children = defaultChildrenNav;
+        } else if (links?.length) {
+          link.children = formatChromeProjectNavNodes(links, link.path);
+        }
+        navNodes.push(link);
       }
-      navNodes.push(link);
+      return navNodes;
+    }, []);
+  };
+
+  const getDefaultChildrenNav = (
+    id: ProjectPageName,
+    link: ChromeProjectNavigationNode
+  ): ChromeProjectNavigationNode[] | undefined => {
+    if (id === SecurityPageName.mlLanding) {
+      return processDefaultNav(mlDefaultNav.children, link.path);
     }
-    return navNodes;
-  }, []);
+    if (id === ExternalPageName.devTools) {
+      return processDefaultNav(devToolsDefaultNav.children, link.path);
+    }
+    return undefined;
+  };
+
+  const processDefaultNav = (
+    children: NodeDefinition[],
+    path: string[]
+  ): ChromeProjectNavigationNode[] => {
+    const { chrome } = services;
+    return children.reduce<ChromeProjectNavigationNode[]>((navNodes, node) => {
+      const id = node.id ?? node.link;
+      if (!id) {
+        return navNodes;
+      }
+      if (id === 'root') {
+        if (node.children) {
+          navNodes.push(...processDefaultNav(node.children, path));
+        }
+        return navNodes;
+      }
+      const navNode: ChromeProjectNavigationNode = {
+        id,
+        title: node.title || '',
+        path: [...path, id],
+      };
+      if (chrome.navLinks.has(id)) {
+        const deepLink = chrome.navLinks.get(id);
+        navNode.deepLink = deepLink;
+        if (!navNode.title) {
+          navNode.title = deepLink?.title || '';
+        }
+      }
+      if (node.children?.length) {
+        navNode.children = processDefaultNav(node.children, navNode.path);
+      }
+      navNodes.push(navNode);
+      return navNodes;
+    }, []);
+  };
+
+  return formatChromeProjectNavNodes;
+};

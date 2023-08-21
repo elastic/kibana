@@ -6,6 +6,7 @@
  */
 import { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { RouteContext } from '../../types';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import { FailedPolicyUpdate } from '../../../synthetics_service/private_location/synthetics_private_location';
@@ -14,7 +15,6 @@ import {
   EncryptedSyntheticsMonitorAttributes,
   HeartbeatConfig,
   MonitorFields,
-  PrivateLocation,
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../../../common/runtime_types';
@@ -59,7 +59,7 @@ async function syncUpdatedMonitors({
   routeContext,
   monitorsToUpdate,
 }: {
-  privateLocations: PrivateLocation[];
+  privateLocations: PrivateLocationAttributes[];
   spaceId: string;
   routeContext: RouteContext;
   monitorsToUpdate: MonitorConfigUpdate[];
@@ -92,7 +92,7 @@ export const syncEditedMonitorBulk = async ({
 }: {
   monitorsToUpdate: MonitorConfigUpdate[];
   routeContext: RouteContext;
-  privateLocations: PrivateLocation[];
+  privateLocations: PrivateLocationAttributes[];
   spaceId: string;
 }) => {
   const { server } = routeContext;

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiSpacer } from '@elastic/eui';
+import { EuiSelectableMessage, EuiIcon, EuiSpacer } from '@elastic/eui';
 
 import { OptionsListStrings } from './options_list_strings';
 
@@ -17,19 +17,16 @@ export const OptionsListPopoverEmptyMessage = ({
   showOnlySelected: boolean;
 }) => {
   return (
-    <span
-      className="euiFilterSelect__note"
+    <EuiSelectableMessage
       data-test-subj={`optionsList-control-${
         showOnlySelected ? 'selectionsEmptyMessage' : 'noSelectionsMessage'
       }`}
     >
-      <span className="euiFilterSelect__noteContent">
-        <EuiIcon type="minusInCircle" />
-        <EuiSpacer size="xs" />
-        {showOnlySelected
-          ? OptionsListStrings.popover.getSelectionsEmptyMessage()
-          : OptionsListStrings.popover.getEmptyMessage()}
-      </span>
-    </span>
+      <EuiIcon type="minusInCircle" />
+      <EuiSpacer size="xs" />
+      {showOnlySelected
+        ? OptionsListStrings.popover.getSelectionsEmptyMessage()
+        : OptionsListStrings.popover.getEmptyMessage()}
+    </EuiSelectableMessage>
   );
 };

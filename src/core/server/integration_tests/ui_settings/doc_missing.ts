@@ -13,6 +13,8 @@ export const docMissingSuite = (savedObjectsIndex: string) => () => {
   beforeEach(async () => {
     const { esClient } = getServices();
 
+    await esClient.indices.refresh({ index: savedObjectsIndex });
+
     // delete all docs from kibana index to ensure savedConfig is not found
     await esClient.deleteByQuery({
       index: savedObjectsIndex,

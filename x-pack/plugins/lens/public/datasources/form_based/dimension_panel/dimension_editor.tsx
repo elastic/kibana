@@ -1224,7 +1224,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
             !isFullscreen &&
             selectedColumn &&
             (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
-              <FormatSelector selectedColumn={selectedColumn} onChange={onFormatChange} />
+              <FormatSelector
+                selectedColumn={selectedColumn}
+                onChange={onFormatChange}
+                docLinks={props.core.docLinks}
+              />
             ) : null}
           </>
         </div>

@@ -22,6 +22,7 @@ export interface FilterBadgeProps {
   valueLabel: string;
   hideAlias?: boolean;
   filterLabelStatus: FilterLabelStatus;
+  readOnly?: boolean;
 }
 
 function FilterBadge({
@@ -30,6 +31,7 @@ function FilterBadge({
   valueLabel,
   hideAlias,
   filterLabelStatus,
+  readOnly,
   ...rest
 }: FilterBadgeProps) {
   const { euiTheme } = useEuiTheme();
@@ -53,7 +55,7 @@ function FilterBadge({
     <EuiBadge
       className={badgePaddingCss(euiTheme)}
       color="hollow"
-      iconType="cross"
+      iconType={readOnly ? 'cross' : undefined}
       iconSide="right"
       {...rest}
     >

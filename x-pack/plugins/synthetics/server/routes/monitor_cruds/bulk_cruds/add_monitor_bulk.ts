@@ -10,6 +10,7 @@ import { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import { v4 as uuidV4 } from 'uuid';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { SyntheticsServerSetup } from '../../../types';
 import { RouteContext } from '../../types';
 import { deleteMonitorIfCreated } from '../add_monitor';
@@ -21,7 +22,6 @@ import {
   ConfigKey,
   EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
-  PrivateLocation,
   ServiceLocationErrors,
   SyntheticsMonitor,
 } from '../../../../common/runtime_types';
@@ -61,10 +61,10 @@ export const syncNewMonitorBulk = async ({
 }: {
   routeContext: RouteContext;
   normalizedMonitors: SyntheticsMonitor[];
-  privateLocations: PrivateLocation[];
+  privateLocations: PrivateLocationAttributes[];
   spaceId: string;
 }) => {
-  const { server, savedObjectsClient, syntheticsMonitorClient, request } = routeContext;
+  const { server, savedObjectsClient, syntheticsMonitorClient } = routeContext;
   let newMonitors: CreatedMonitors | null = null;
 
   const monitorsToCreate = normalizedMonitors.map((monitor) => {
@@ -88,7 +88,6 @@ export const syncNewMonitorBulk = async ({
       }),
       syntheticsMonitorClient.addMonitors(
         monitorsToCreate,
-        request,
         savedObjectsClient,
         privateLocations,
         spaceId

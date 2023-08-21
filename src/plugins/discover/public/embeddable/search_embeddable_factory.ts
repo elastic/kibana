@@ -7,20 +7,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   EmbeddableFactoryDefinition,
   Container,
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-
-import type { TimeRange } from '@kbn/es-query';
-
-import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
-import { SearchInput, SearchOutput } from './types';
+import type { SearchByReferenceInput } from '@kbn/saved-search-plugin/public';
+import type { SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
-import { SavedSearchEmbeddable } from './saved_search_embeddable';
-import { DiscoverServices } from '../build_services';
+import type { SavedSearchEmbeddable } from './saved_search_embeddable';
+import type { DiscoverServices } from '../build_services';
+import { inject, extract } from '../../common/embeddable';
 
 export interface StartServices {
   executeTriggerActions: UiActionsStart['executeTriggerActions'];
@@ -38,6 +36,8 @@ export class SearchEmbeddableFactory
     type: 'search',
     getIconForSavedObject: () => 'discoverApp',
   };
+  public readonly inject = inject;
+  public readonly extract = extract;
 
   constructor(
     private getStartServices: () => Promise<StartServices>,
@@ -60,42 +60,36 @@ export class SearchEmbeddableFactory
 
   public createFromSavedObject = async (
     savedObjectId: string,
-    input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
+    input: SearchByReferenceInput,
     parent?: Container
   ): Promise<SavedSearchEmbeddable | ErrorEmbeddable> => {
-    const services = await this.getDiscoverServices();
-    const filterManager = services.filterManager;
-    const url = getSavedSearchUrl(savedObjectId);
-    const editUrl = services.addBasePath(`/app/discover${url}`);
-    try {
-      const savedSearch = await services.savedSearch.get(savedObjectId);
+    if (!input.savedObjectId) {
+      input.savedObjectId = savedObjectId;
+    }
 
-      const dataView = savedSearch.searchSource.getField('index');
+    return this.create(input, parent);
+  };
+
+  public async create(input: SearchInput, parent?: Container) {
+    try {
+      const services = await this.getDiscoverServices();
       const { executeTriggerActions } = await this.getStartServices();
       const { SavedSearchEmbeddable: SavedSearchEmbeddableClass } = await import(
         './saved_search_embeddable'
       );
+
       return new SavedSearchEmbeddableClass(
         {
-          savedSearch,
-          editUrl,
-          editPath: url,
-          filterManager,
-          editable: services.capabilities.discover.save as boolean,
-          indexPatterns: dataView ? [dataView] : [],
+          editable: Boolean(services.capabilities.discover.save),
           services,
+          executeTriggerActions,
         },
         input,
-        executeTriggerActions,
         parent
       );
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
       return new ErrorEmbeddable(e, input, parent);
     }
-  };
-
-  public async create(input: SearchInput) {
-    return new ErrorEmbeddable('Saved searches can only be created from a saved object', input);
   }
 }

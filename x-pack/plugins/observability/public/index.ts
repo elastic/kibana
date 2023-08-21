@@ -89,7 +89,6 @@ export { calculateTimeRangeBucketSize } from './pages/overview/helpers/calculate
 
 export { convertTo } from '../common/utils/formatters/duration';
 export { formatAlertEvaluationValue } from './utils/format_alert_evaluation_value';
-
-export { CoPilotPrompt } from './components/co_pilot_prompt';
-export { useCoPilot } from './hooks/use_co_pilot';
-export { CoPilotContextProvider } from './context/co_pilot_context';
+export { WithKueryAutocompletion } from './components/rule_kql_filter/with_kuery_autocompletion';
+export { AutocompleteField } from './components/rule_kql_filter/autocomplete_field';
+export { RuleFlyoutKueryBar } from './components/rule_kql_filter/kuery_bar';

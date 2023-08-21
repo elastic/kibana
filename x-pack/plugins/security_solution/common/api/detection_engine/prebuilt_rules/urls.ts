@@ -21,6 +21,3 @@ export const REVIEW_RULE_UPGRADE_URL = `${NEW_BASE_URL}/upgrade/_review` as cons
 export const PERFORM_RULE_UPGRADE_URL = `${NEW_BASE_URL}/upgrade/_perform` as const;
 export const REVIEW_RULE_INSTALLATION_URL = `${NEW_BASE_URL}/installation/_review` as const;
 export const PERFORM_RULE_INSTALLATION_URL = `${NEW_BASE_URL}/installation/_perform` as const;
-
-// Helper endpoints for development and testing. Should be removed later.
-export const GENERATE_ASSETS_URL = `${NEW_BASE_URL}/_generate_assets` as const;
