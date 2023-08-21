@@ -6,5 +6,5 @@ steps:
     env:
       QG_PIPELINE_LOCATION: ".buildkite/pipelines/quality-gates"
     command: "make -C /agent run-environment-tests"
-    agent:
+    agents:
       image: "docker.elastic.co/ci-agent-images/quality-gate-seedling:0.0.2"
