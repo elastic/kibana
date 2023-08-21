@@ -9,7 +9,17 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiCode, EuiSpacer } from '@elastic/eui';
-import { useForm, Form, fieldValidators, FormSchema, FIELD_TYPES, UseField, TextField, SelectField, JsonEditorField } from '../../../../shared_imports';
+import {
+  useForm,
+  Form,
+  fieldValidators,
+  FormSchema,
+  FIELD_TYPES,
+  UseField,
+  TextField,
+  SelectField,
+  JsonEditorField,
+} from '../../../../shared_imports';
 
 import { IndicesSelector } from './components/indices_selector';
 import { useCreatePolicyContext, DraftPolicy } from '../create_policy_context';

@@ -17,11 +17,7 @@ export interface Context {
 
 export const CreatePolicyContext = createContext<Context>({} as any);
 
-export const CreatePolicyContextProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+export const CreatePolicyContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [draft, updateDraft] = useState<DraftPolicy>({});
 
   const contextValue = {
@@ -29,7 +25,9 @@ export const CreatePolicyContextProvider = ({
     updateDraft,
   };
 
-  return <CreatePolicyContext.Provider value={contextValue}>{children}</CreatePolicyContext.Provider>;
+  return (
+    <CreatePolicyContext.Provider value={contextValue}>{children}</CreatePolicyContext.Provider>
+  );
 };
 
 export const useCreatePolicyContext = () => {

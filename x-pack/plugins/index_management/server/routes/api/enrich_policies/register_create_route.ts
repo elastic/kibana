@@ -106,7 +106,10 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
   );
 
   router.post(
-    { path: addInternalBasePath('/enrich_policies/get_fields_from_indices'), validate: { body: getFieldsFromIndicesSchema } },
+    {
+      path: addInternalBasePath('/enrich_policies/get_fields_from_indices'),
+      validate: { body: getFieldsFromIndicesSchema },
+    },
     async (context, request, response) => {
       const { indices } = request.body;
       const client = (await context.core).elasticsearch.client as IScopedClusterClient;
