@@ -20,6 +20,7 @@
     "@kbn/saved-objects-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/saved-objects-plugin",
+    "@kbn/utility-types",
   ],
   "exclude": ["target/**/*"]
 }
