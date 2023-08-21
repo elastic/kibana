@@ -42,7 +42,6 @@ declare global {
       env?: {
         ftrConfig: SecuritySolutionDescribeBlockFtrConfig;
       };
-      tags?: string | string[];
     }
 
     interface Chainable {

@@ -6,7 +6,7 @@ source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/steps/functional/common_cypress.sh
 
 .buildkite/scripts/bootstrap.sh
-.buildkite/scripts/download_build_artifacts.sh
+node scripts/build_kibana_platform_plugins.js
 
 export JOB=kibana-osquery-cypress-serverless
 
