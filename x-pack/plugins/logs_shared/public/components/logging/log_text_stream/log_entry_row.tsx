@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import {
   useUiTracker,
@@ -29,8 +28,8 @@ import { iconColumnId, LogEntryColumn, LogEntryColumnWidths } from './log_entry_
 import { LogEntryContextMenu } from './log_entry_context_menu';
 import { LogEntryFieldColumn } from './log_entry_field_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';
+import { LogEntryRowWrapper } from './log_entry_row_wrapper';
 import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
-import { highlightedContentStyle, hoveredContentStyle, monospaceTextStyle } from './text_styles';
 
 const MENU_LABEL = i18n.translate('xpack.logsShared.logEntryItemView.logEntryActionsMenuToolTip', {
   defaultMessage: 'View actions for line',
@@ -85,7 +84,6 @@ export const LogEntryRow = memo(
 
     const setItemIsHovered = useCallback(() => setIsHovered(true), []);
     const setItemIsNotHovered = useCallback(() => setIsHovered(false), []);
-
     const openFlyout = useCallback(
       () => openFlyoutWithItem?.(logEntry.id),
       [openFlyoutWithItem, logEntry.id]
@@ -263,26 +261,5 @@ export const LogEntryRow = memo(
   }
 );
 
-interface LogEntryRowWrapperProps {
-  scale: TextScale;
-  isHighlighted?: boolean;
-}
-
-export const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
-  role: 'row',
-}))<LogEntryRowWrapperProps>`
-  align-items: stretch;
-  color: ${(props) => props.theme.eui.euiTextColor};
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  overflow: hidden;
-
-  ${(props) => monospaceTextStyle(props.scale)};
-  ${(props) => (props.isHighlighted ? highlightedContentStyle : '')}
-
-  &:hover {
-    ${hoveredContentStyle}
-  }
-`;
+// eslint-disable-next-line import/no-default-export
+export default LogEntryRow;
