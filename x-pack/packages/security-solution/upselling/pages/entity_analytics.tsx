@@ -68,7 +68,7 @@ const EntityAnalyticsUpsellingComponent = ({
     ? i18n.UPGRADE_LICENSE_MESSAGE(requiredLicense)
     : i18n.UPGRADE_PRODUCT_MESSAGE(requiredProduct ?? '');
 
-  const requiredLicenseOrProduct = requiredProduct ?? requiredLicense ?? '';
+  const requiredProductOrLicense = requiredProduct ?? requiredLicense ?? '';
 
   return (
     <KibanaPageTemplate restrictWidth={false} contentBorder={false} grow={true}>
@@ -78,7 +78,7 @@ const EntityAnalyticsUpsellingComponent = ({
         <PaywallDiv>
           <StyledEuiCard
             data-test-subj="platinumCard"
-            betaBadgeProps={{ label: requiredLicenseOrProduct }}
+            betaBadgeProps={{ label: requiredProductOrLicense }}
             icon={<EuiIcon size="xl" type="lock" />}
             display="subdued"
             title={
@@ -100,7 +100,7 @@ const EntityAnalyticsUpsellingComponent = ({
                   {subscriptionUrl && (
                     <div>
                       <EuiButton onClick={goToSubscription} fill>
-                        {i18n.UPGRADE_BUTTON(requiredLicenseOrProduct)}
+                        {i18n.UPGRADE_BUTTON(requiredProductOrLicense)}
                       </EuiButton>
                     </div>
                   )}
