@@ -138,8 +138,6 @@ export const viewRecentCaseAndCheckResults = () => {
   checkResults();
 };
 
-export const isServerless = Cypress.env('grepTags').includes('@serverless');
-
 export const checkActionItemsInResults = ({
   lens,
   discover,
