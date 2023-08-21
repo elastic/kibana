@@ -27,8 +27,6 @@ import { useAppDependencies } from '../app_dependencies';
 
 import { TRANSFORM_ERROR_TYPE } from '../common/transform';
 
-export type GetTransforms = (forceRefresh?: boolean) => void;
-
 interface UseGetTransformsResponse {
   tableRows: TransformListRow[];
   transformIdsWithoutConfig?: string[];

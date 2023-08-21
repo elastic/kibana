@@ -26,7 +26,7 @@ import {
   TRANSFORM_STATE,
 } from '../../../../common/constants';
 
-import { useDocumentationLinks } from '../../hooks/use_documentation_links';
+import { useDocumentationLinks } from '../../hooks';
 import { useDeleteTransforms, useGetTransforms } from '../../hooks';
 import { RedirectToCreateTransform } from '../../common/navigation';
 import { AuthorizationContext, PrivilegesWrapper } from '../../lib/authorization';

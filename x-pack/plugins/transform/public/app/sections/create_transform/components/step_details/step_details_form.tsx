@@ -42,7 +42,7 @@ import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
-import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
+import { useDocumentationLinks, useGetTransforms } from '../../../../hooks';
 import { SearchItems } from '../../../../hooks/use_search_items';
 import { useApi } from '../../../../hooks/use_api';
 import { StepDetailsTimeField } from './step_details_time_field';
@@ -90,7 +90,6 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const [destinationIngestPipeline, setDestinationIngestPipeline] = useState<string>(
       defaults.destinationIngestPipeline
     );
-    const [transformIds, setTransformIds] = useState<TransformId[]>([]);
     const [indexNames, setIndexNames] = useState<EsIndexName[]>([]);
     const [ingestPipelineNames, setIngestPipelineNames] = useState<string[]>([]);
 
@@ -127,6 +126,27 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
 
     const { overlays, theme } = useAppDependencies();
     const api = useApi();
+
+    const { error, data } = useGetTransforms();
+    const transformIds = data?.tableRows.map((d) => d.id) ?? [];
+
+    useEffect(() => {
+      if (isHttpFetchError(error)) {
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
+            defaultMessage: 'An error occurred getting the existing transform IDs:',
+          }),
+          text: toMountPoint(
+            <ToastNotificationText
+              overlays={overlays}
+              theme={theme}
+              text={getErrorMessage(error)}
+            />,
+            { theme$: theme.theme$ }
+          ),
+        });
+      }
+    }, [error, overlays, theme, toastNotifications]);
 
     // fetch existing transform IDs and indices once for form validation
     useEffect(() => {
@@ -165,26 +185,6 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               { theme$: theme.theme$ }
             ),
           });
-        }
-
-        const resp = await api.getTransforms();
-
-        if (isHttpFetchError(resp)) {
-          toastNotifications.addDanger({
-            title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
-              defaultMessage: 'An error occurred getting the existing transform IDs:',
-            }),
-            text: toMountPoint(
-              <ToastNotificationText
-                overlays={overlays}
-                theme={theme}
-                text={getErrorMessage(resp)}
-              />,
-              { theme$: theme.theme$ }
-            ),
-          });
-        } else {
-          setTransformIds(resp.transforms.map((transform) => transform.id));
         }
 
         const [indices, ingestPipelines] = await Promise.all([

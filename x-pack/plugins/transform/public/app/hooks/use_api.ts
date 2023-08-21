@@ -16,7 +16,6 @@ import {
   ReauthorizeTransformsRequestSchema,
   ReauthorizeTransformsResponseSchema,
 } from '../../../common/api_schemas/reauthorize_transforms';
-import type { GetTransformsAuditMessagesResponseSchema } from '../../../common/api_schemas/audit_messages';
 import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
@@ -42,7 +41,6 @@ import type {
   ScheduleNowTransformsResponseSchema,
 } from '../../../common/api_schemas/schedule_now_transforms';
 import type {
-  GetTransformNodesResponseSchema,
   GetTransformsResponseSchema,
   PostTransformsPreviewRequestSchema,
   PostTransformsPreviewResponseSchema,
@@ -68,22 +66,11 @@ export interface FieldHistogramRequestConfig {
   type?: KBN_FIELD_TYPES;
 }
 
-interface FetchOptions {
-  asSystemRequest?: boolean;
-}
-
 export const useApi = () => {
   const { http } = useAppDependencies();
 
   return useMemo(
     () => ({
-      async getTransformNodes(): Promise<GetTransformNodesResponseSchema | IHttpFetchError> {
-        try {
-          return await http.get(addInternalBasePath(`transforms/_nodes`), { version: '1' });
-        } catch (e) {
-          return e;
-        }
-      },
       async getTransform(
         transformId: TransformId
       ): Promise<GetTransformsResponseSchema | IHttpFetchError> {
@@ -95,35 +82,11 @@ export const useApi = () => {
           return e;
         }
       },
-      async getTransforms(
-        fetchOptions: FetchOptions = {}
-      ): Promise<GetTransformsResponseSchema | IHttpFetchError> {
-        try {
-          return await http.get(addInternalBasePath(`transforms`), {
-            ...fetchOptions,
-            version: '1',
-          });
-        } catch (e) {
-          return e;
-        }
-      },
       async getTransformStats(
         transformId: TransformId
       ): Promise<GetTransformsStatsResponseSchema | IHttpFetchError> {
         try {
           return await http.get(addInternalBasePath(`transforms/${transformId}/_stats`), {
-            version: '1',
-          });
-        } catch (e) {
-          return e;
-        }
-      },
-      async getTransformsStats(
-        fetchOptions: FetchOptions = {}
-      ): Promise<GetTransformsStatsResponseSchema | IHttpFetchError> {
-        try {
-          return await http.get(addInternalBasePath(`transforms/_stats`), {
-            ...fetchOptions,
             version: '1',
           });
         } catch (e) {
@@ -235,25 +198,6 @@ export const useApi = () => {
         try {
           return await http.post(addInternalBasePath(`schedule_now_transforms`), {
             body: JSON.stringify(transformsInfo),
-            version: '1',
-          });
-        } catch (e) {
-          return e;
-        }
-      },
-      async getTransformAuditMessages(
-        transformId: TransformId,
-        sortField: string,
-        sortDirection: 'asc' | 'desc'
-      ): Promise<
-        { messages: GetTransformsAuditMessagesResponseSchema; total: number } | IHttpFetchError
-      > {
-        try {
-          return await http.get(addInternalBasePath(`transforms/${transformId}/messages`), {
-            query: {
-              sortField,
-              sortDirection,
-            },
             version: '1',
           });
         } catch (e) {

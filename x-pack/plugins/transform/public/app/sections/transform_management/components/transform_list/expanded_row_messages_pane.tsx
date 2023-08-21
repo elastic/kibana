@@ -6,7 +6,6 @@
  */
 
 import React, { MouseEvent, useState, type FC } from 'react';
-import { useQuery } from '@tanstack/react-query';
 
 import {
   formatDate,
@@ -17,22 +16,15 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 
-import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 
-import type { GetTransformsAuditMessagesResponseSchema } from '../../../../../../common/api_schemas/audit_messages';
-import {
-  addInternalBasePath,
-  DEFAULT_MAX_AUDIT_MESSAGE_SIZE,
-  TIME_FORMAT,
-  TRANSFORM_REACT_QUERY_KEYS,
-} from '../../../../../../common/constants';
+import { DEFAULT_MAX_AUDIT_MESSAGE_SIZE, TIME_FORMAT } from '../../../../../../common/constants';
 import { TransformMessage } from '../../../../../../common/types/messages';
 
-import { useAppDependencies } from '../../../../app_dependencies';
 import { JobIcon } from '../../../../components/job_icon';
 import { useRefreshTransformList } from '../../../../common';
+import { useGetTransformAuditMessages } from '../../../../hooks';
 
 interface ExpandedRowMessagesPaneProps {
   transformId: string;
@@ -44,8 +36,6 @@ interface Sorting {
 }
 
 export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ transformId }) => {
-  const { http } = useAppDependencies();
-
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sorting, setSorting] = useState<{ sort: Sorting }>({
@@ -55,28 +45,10 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
     },
   });
 
-  const { isLoading, error, data } = useQuery<
-    GetTransformsAuditMessagesResponseSchema,
-    IHttpFetchError
-  >(
-    [
-      TRANSFORM_REACT_QUERY_KEYS.TRANSFORMS_LIST,
-      transformId,
-      sorting.sort.field,
-      sorting.sort.direction,
-    ],
-    async ({ signal }) =>
-      await http.get<GetTransformsAuditMessagesResponseSchema>(
-        addInternalBasePath(`transforms/${transformId}/messages`),
-        {
-          query: {
-            sortField: sorting.sort.field,
-            sortDirection: sorting.sort.direction,
-          },
-          version: '1',
-          signal,
-        }
-      )
+  const { isLoading, error, data } = useGetTransformAuditMessages(
+    transformId,
+    sorting.sort.field,
+    sorting.sort.direction
   );
   const messages = data?.messages ?? [];
   const msgCount = data?.total ?? 0;

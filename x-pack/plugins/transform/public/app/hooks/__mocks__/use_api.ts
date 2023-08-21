@@ -12,7 +12,6 @@ import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 
 import type { TransformId } from '../../../../common/types/transform';
 import type { FieldHistogramsResponseSchema } from '../../../../common/api_schemas/field_histograms';
-import type { GetTransformsAuditMessagesResponseSchema } from '../../../../common/api_schemas/audit_messages';
 import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
@@ -53,15 +52,9 @@ const apiFactory = () => ({
   ): Promise<GetTransformsResponseSchema | IHttpFetchError> {
     return Promise.resolve({ count: 0, transforms: [] });
   },
-  async getTransforms(): Promise<GetTransformsResponseSchema | IHttpFetchError> {
-    return Promise.resolve({ count: 0, transforms: [] });
-  },
   async getTransformStats(
     transformId: TransformId
   ): Promise<GetTransformsStatsResponseSchema | IHttpFetchError> {
-    return Promise.resolve({ count: 0, transforms: [] });
-  },
-  async getTransformsStats(): Promise<GetTransformsStatsResponseSchema | IHttpFetchError> {
     return Promise.resolve({ count: 0, transforms: [] });
   },
   async createTransform(
@@ -126,12 +119,6 @@ const apiFactory = () => ({
   ): Promise<StopTransformsResponseSchema | IHttpFetchError> {
     return Promise.resolve({});
   },
-  async getTransformAuditMessages(
-    transformId: TransformId
-  ): Promise<GetTransformsAuditMessagesResponseSchema | IHttpFetchError> {
-    return Promise.resolve({ messages: [], total: 0 });
-  },
-
   async getEsIndices(): Promise<EsIndex[] | IHttpFetchError> {
     return Promise.resolve([]);
   },

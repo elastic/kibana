@@ -6,6 +6,8 @@
  */
 
 export { useApi } from './use_api';
+export { useDocumentationLinks } from './use_documentation_links';
+export { useGetTransformAuditMessages } from './use_get_transform_audit_messages';
 export { useGetTransforms } from './use_get_transforms';
 export { useDeleteTransforms, useDeleteIndexAndTargetIndex } from './use_delete_transform';
 export { useResetTransforms } from './use_reset_transform';
