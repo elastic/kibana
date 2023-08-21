@@ -148,7 +148,6 @@ describe('MaintenanceWindowCallout', () => {
       { wrapper: TestProviders }
     );
 
-    // @ts-expect-error Jest types are incomplete in packages
     expect(await findByText('Maintenance window is running')).toBeInTheDocument();
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
@@ -161,7 +160,7 @@ describe('MaintenanceWindowCallout', () => {
     const { container } = render(<MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />, {
       wrapper: TestProviders,
     });
-    // @ts-expect-error Jest types are incomplete in packages
+
     expect(container).toBeEmptyDOMElement();
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
@@ -172,7 +171,7 @@ describe('MaintenanceWindowCallout', () => {
     const { container } = render(<MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />, {
       wrapper: TestProviders,
     });
-    // @ts-expect-error Jest types are incomplete in packages
+
     expect(container).toBeEmptyDOMElement();
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
@@ -234,7 +233,7 @@ describe('MaintenanceWindowCallout', () => {
     const { container } = render(<MaintenanceWindowCallout kibanaServices={servicesMock} />, {
       wrapper: TestProviders,
     });
-    // @ts-expect-error Jest types are incomplete in packages
+
     expect(container).toBeEmptyDOMElement();
   });
 
@@ -255,7 +254,7 @@ describe('MaintenanceWindowCallout', () => {
     const { findByText } = render(<MaintenanceWindowCallout kibanaServices={servicesMock} />, {
       wrapper: TestProviders,
     });
-    // @ts-expect-error Jest types are incomplete in packages
+
     expect(await findByText('Maintenance window is running')).toBeInTheDocument();
   });
 });
