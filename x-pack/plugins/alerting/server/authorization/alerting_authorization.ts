@@ -429,7 +429,7 @@ export class AlertingAuthorization {
                 if (authorized && privilegeToRuleType.has(privilege)) {
                   const [ruleType, feature, hasPrivileges, isAuthorizedAtProducerLevel] =
                     privilegeToRuleType.get(privilege)!;
-                  if ((featuresIds && featuresIds.has(feature)) || featuresIds === undefined) {
+                  if (fIds.has(feature)) {
                     ruleType.authorizedConsumers[feature] = mergeHasPrivileges(
                       hasPrivileges,
                       ruleType.authorizedConsumers[feature]
