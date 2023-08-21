@@ -13,6 +13,7 @@ import {
   COPY_ALERT_FLYOUT_LINK,
   JSON_TEXT,
   OVERVIEW_RULE,
+  SUMMARY_VIEW,
   TABLE_CONTAINER,
   TABLE_ROWS,
 } from '../../../screens/alerts_details';
@@ -61,7 +62,7 @@ describe('Alert details flyout', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     before(() => {
       cleanKibana();
       cy.task('esArchiverLoad', 'unmapped_fields');
-      createRule(getUnmappedRule());
+      createRule({ ...getUnmappedRule(), investigation_options: { fields: ['event.kind'] } });
     });
 
     beforeEach(() => {
@@ -74,6 +75,13 @@ describe('Alert details flyout', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
     after(() => {
       cy.task('esArchiverUnload', 'unmapped_fields');
+    });
+
+    it('should display user and system defined highlighted fields', () => {
+      cy.get(SUMMARY_VIEW)
+        .should('be.visible')
+        .and('contain.text', 'event.kind')
+        .and('contain.text', 'Rule type');
     });
 
     it('should display the unmapped field on the JSON view', () => {

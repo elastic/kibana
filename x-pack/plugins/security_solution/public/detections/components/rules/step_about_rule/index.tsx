@@ -239,7 +239,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             />
             <EuiSpacer size="l" />
             <UseField
-              path="investigationFields"
+              path="investigationOptions"
               component={MultiSelectFieldsAutocomplete}
               componentProps={{
                 browserFields: indexPattern.fields,

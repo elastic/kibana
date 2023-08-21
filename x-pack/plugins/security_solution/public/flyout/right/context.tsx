@@ -59,7 +59,7 @@ export interface RightPanelContext {
   /**
    * User defined fields to highlight (defined on the rule)
    */
-  investigationFields: string[];
+  investigationOptions: string[];
   /**
    * Promise to trigger a data refresh
    */
@@ -117,7 +117,7 @@ export const RightPanelProvider = ({
             dataAsNestedObject,
             dataFormattedForFieldBrowser,
             searchHit,
-            investigationFields: maybeRule?.investigation_fields?.fields ?? [],
+            investigationOptions: maybeRule?.investigation_options?.fields ?? [],
             refetchFlyoutData,
             getFieldsData,
           }

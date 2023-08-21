@@ -154,7 +154,7 @@ describe('AlertSummaryView', () => {
     });
     const renderProps = {
       ...props,
-      investigationFields: ['custom.field'],
+      investigationOptions: ['custom.field'],
       data: [
         ...mockData,
         { category: 'custom', field: 'custom.field', values: ['blob'], originalValue: 'blob' },

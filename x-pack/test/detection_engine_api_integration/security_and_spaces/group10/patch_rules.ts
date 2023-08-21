@@ -427,16 +427,16 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('investigation_fields', () => {
-        it('should overwrite investigation_fields value on patch - non additive', async () => {
+      describe('investigation_options', () => {
+        it('should overwrite investigation_options value on patch - non additive', async () => {
           await createRule(supertest, log, {
             ...getSimpleRule('rule-1'),
-            investigation_fields: { fields: ['blob', 'boop'] },
+            investigation_options: { fields: ['blob', 'boop'] },
           });
 
           const rulePatch = {
             rule_id: 'rule-1',
-            investigation_fields: { fields: ['foo', 'bar'] },
+            investigation_options: { fields: ['foo', 'bar'] },
           };
 
           const { body } = await supertest
@@ -445,18 +445,18 @@ export default ({ getService }: FtrProviderContext) => {
             .send(rulePatch)
             .expect(200);
 
-          expect(body.investigation_fields.fields).to.eql(['foo', 'bar']);
+          expect(body.investigation_options.fields).to.eql(['foo', 'bar']);
         });
 
         it('should allow field to be unset', async () => {
           await createRule(supertest, log, {
             ...getSimpleRule('rule-1'),
-            investigation_fields: { fields: ['blob', 'boop'] },
+            investigation_options: { fields: ['blob', 'boop'] },
           });
 
           const rulePatch = {
             rule_id: 'rule-1',
-            investigation_fields: undefined,
+            investigation_options: undefined,
           };
 
           const { body } = await supertest
@@ -465,13 +465,13 @@ export default ({ getService }: FtrProviderContext) => {
             .send(rulePatch)
             .expect(200);
 
-          expect(body.investigation_fields).to.eql(undefined);
+          expect(body.investigation_options).to.eql(undefined);
         });
 
-        it('should not unset investigation_fields if not specified in patch', async () => {
+        it('should not unset investigation_options if not specified in patch', async () => {
           await createRule(supertest, log, {
             ...getSimpleRule('rule-1'),
-            investigation_fields: { fields: ['blob', 'boop'] },
+            investigation_options: { fields: ['blob', 'boop'] },
           });
 
           const rulePatch = {
@@ -485,7 +485,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(rulePatch)
             .expect(200);
 
-          expect(body.investigation_fields.fields).to.eql(['blob', 'boop']);
+          expect(body.investigation_options.fields).to.eql(['blob', 'boop']);
         });
       });
     });

@@ -266,7 +266,7 @@ export const RelatedIntegrationArray = t.array(RelatedIntegration);
  * configuration states such as `override` - where a user might say if they want only these fields to
  * display, or if they want these fields + the fields we select. When expanding this field, it may look
  * something like:
- * export const InvestigationFields = t.intersection([
+ * export const investigationOptions = t.intersection([
  * t.exact(
  *   t.type({
  *     fields: NonEmptyArray(NonEmptyString),
@@ -280,8 +280,8 @@ export const RelatedIntegrationArray = t.array(RelatedIntegration);
  * ]);
  *
  */
-export type InvestigationFields = t.TypeOf<typeof InvestigationFields>;
-export const InvestigationFields = t.exact(
+export type InvestigationOptions = t.TypeOf<typeof InvestigationOptions>;
+export const InvestigationOptions = t.exact(
   t.type({
     fields: NonEmptyArray(NonEmptyString),
   })

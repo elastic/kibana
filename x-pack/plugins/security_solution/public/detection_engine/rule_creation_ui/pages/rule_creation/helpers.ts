@@ -485,7 +485,7 @@ export const formatAboutStepData = (
   const {
     author,
     falsePositives,
-    investigationFields,
+    investigationOptions,
     references,
     riskScore,
     severity,
@@ -502,7 +502,7 @@ export const formatAboutStepData = (
 
   const detectionExceptionLists =
     exceptionsList != null ? exceptionsList.filter((list) => list.type !== 'endpoint') : [];
-  const isInvestigationFieldsEmpty = investigationFields.every((item) => isEmpty(item.trim()));
+  const isinvestigationOptionsEmpty = investigationOptions.every((item) => isEmpty(item.trim()));
 
   const resp = {
     author: author.filter((item) => !isEmpty(item)),
@@ -526,7 +526,9 @@ export const formatAboutStepData = (
       : {}),
     false_positives: falsePositives.filter((item) => !isEmpty(item)),
     references: references.filter((item) => !isEmpty(item)),
-    investigation_fields: isInvestigationFieldsEmpty ? undefined : { fields: investigationFields },
+    investigation_options: isinvestigationOptionsEmpty
+      ? undefined
+      : { fields: investigationOptions },
     risk_score: riskScore.value,
     risk_score_mapping: riskScore.isMappingChecked
       ? riskScore.mapping.filter((m) => m.field != null && m.field !== '')

@@ -25,6 +25,7 @@ import {
   deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleAsNdjson,
+  getRuleAsNdjson,
   getSimpleRuleOutput,
   getThresholdRuleForSignalTesting,
   getWebHookAction,
@@ -1813,6 +1814,19 @@ export default ({ getService }: FtrProviderContext): void => {
             action_connectors_warnings: [],
           });
         });
+      });
+
+      it('should import a rule with "investigation_options', async () => {
+        await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach(
+            'file',
+            getRuleAsNdjson([{ ...getSimpleRule(), investigation_options: { fields: ['foo'] } }]),
+            'rules.ndjson'
+          )
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(200);
       });
     });
   });

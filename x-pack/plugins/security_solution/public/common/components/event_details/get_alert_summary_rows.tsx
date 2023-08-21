@@ -293,13 +293,13 @@ export const getSummaryRows = ({
   eventId,
   isDraggable = false,
   isReadOnly = false,
-  investigationFields,
+  investigationOptions,
 }: {
   data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
   scopeId: string;
   eventId: string;
-  investigationFields?: string[];
+  investigationOptions?: string[];
   isDraggable?: boolean;
   isReadOnly?: boolean;
 }) => {
@@ -320,7 +320,7 @@ export const getSummaryRows = ({
     eventCategories,
     eventCode,
     eventRuleType,
-    highlightedFieldsOverride: investigationFields ?? [],
+    highlightedFieldsOverride: investigationOptions ?? [],
   });
 
   return data != null
