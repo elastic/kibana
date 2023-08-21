@@ -155,7 +155,7 @@ export const ProcessesTable = ({
 
   return (
     <>
-      <EuiTable data-test-subj="infraProcessesTable" responsive={false}>
+      <EuiTable data-test-subj="infraAssetDetailsProcessesTable" responsive={false}>
         <EuiTableHeader>
           <EuiTableHeaderCell width={24} />
           {columns.map((column) => (

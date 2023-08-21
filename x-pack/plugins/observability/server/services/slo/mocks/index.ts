@@ -45,7 +45,7 @@ const createSLORepositoryMock = (): jest.Mocked<SLORepository> => {
 
 const createSummaryClientMock = (): jest.Mocked<SummaryClient> => {
   return {
-    fetchSummary: jest.fn(),
+    computeSummary: jest.fn(),
   };
 };
 

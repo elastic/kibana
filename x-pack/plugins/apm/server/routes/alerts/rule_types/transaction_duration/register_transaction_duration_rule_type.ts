@@ -6,14 +6,19 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import {
   asDuration,
   formatDurationFromTimeUnitChar,
   getAlertDetailsUrl,
+  observabilityPaths,
   ProcessorEvent,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
-import { termQuery } from '@kbn/observability-plugin/server';
+import {
+  getParsedFilterQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -134,6 +139,21 @@ export function registerTransactionDurationRuleType({
         searchAggregatedTransactions
       );
 
+      const termFilterQuery = !ruleParams.kqlFilter
+        ? [
+            ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
+              queryEmptyString: false,
+            }),
+            ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
+              queryEmptyString: false,
+            }),
+            ...termQuery(TRANSACTION_NAME, ruleParams.transactionName, {
+              queryEmptyString: false,
+            }),
+            ...environmentQuery(ruleParams.environment),
+          ]
+        : [];
+
       const searchParams = {
         index,
         body: {
@@ -152,16 +172,8 @@ export function registerTransactionDurationRuleType({
                 ...getDocumentTypeFilterForTransactions(
                   searchAggregatedTransactions
                 ),
-                ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
-                  queryEmptyString: false,
-                }),
-                ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
-                  queryEmptyString: false,
-                }),
-                ...termQuery(TRANSACTION_NAME, ruleParams.transactionName, {
-                  queryEmptyString: false,
-                }),
-                ...environmentQuery(ruleParams.environment),
+                ...termFilterQuery,
+                ...getParsedFilterQuery(ruleParams.kqlFilter),
               ] as QueryDslQueryContainer[],
             },
           },
@@ -298,6 +310,8 @@ export function registerTransactionDurationRuleType({
       return { state: {} };
     },
     alerts: ApmRuleTypeAlertDefinition,
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
   });
 
   alerting.registerType(ruleType);

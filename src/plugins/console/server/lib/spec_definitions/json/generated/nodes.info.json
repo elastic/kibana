@@ -1,36 +1,35 @@
 {
   "nodes.info": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "flat_settings": "__flag__",
-      "timeout": ""
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "GET"
     ],
     "patterns": [
       "_nodes",
-      "_nodes/{nodes}",
-      "_nodes/{metrics}",
-      "_nodes/{nodes}/{metrics}"
+      "_nodes/{node_id}",
+      "_nodes/{metric}",
+      "_nodes/{node_id}/{metric}"
     ],
-    "url_components": {
-      "nodes": null,
-      "metrics": [
-        "_all",
-        "_none",
-        "aggregations",
-        "http",
-        "indices",
-        "ingest",
-        "jvm",
-        "os",
-        "plugins",
-        "process",
-        "settings",
-        "thread_pool",
-        "transport"
-      ]
-    },
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-nodes-info.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cluster-nodes-info.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

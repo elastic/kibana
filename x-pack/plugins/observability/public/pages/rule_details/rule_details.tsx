@@ -32,12 +32,13 @@ import {
   RULE_DETAILS_ALERTS_TAB,
   RULE_DETAILS_TAB_URL_STORAGE_KEY,
 } from './constants';
-import { paths } from '../../routes/paths';
+import { paths } from '../../../common/locators/paths';
 import {
   defaultTimeRange,
   getDefaultAlertSummaryTimeRange,
 } from '../../utils/alert_summary_widget';
 import type { AlertStatus } from '../../../common/typings';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 export type TabId = typeof RULE_DETAILS_ALERTS_TAB | typeof RULE_DETAILS_EXECUTION_TAB;
 
@@ -217,6 +218,7 @@ export function RuleDetailsPage() {
         ],
       }}
     >
+      <HeaderMenu />
       <EuiFlexGroup wrap gutterSize="m">
         <EuiFlexItem style={{ minWidth: 350 }}>
           <RuleStatusPanel

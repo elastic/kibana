@@ -49,7 +49,9 @@ export class IndexActionsContextMenu extends Component {
     this.setState({ isActionConfirmed });
   };
   panels({ services: { extensionsService }, core: { getUrlForApp } }) {
-    const { enableIndexActions } = this.context;
+    const {
+      config: { enableIndexActions },
+    } = this.context;
 
     const {
       closeIndices,

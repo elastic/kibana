@@ -16,7 +16,8 @@ export const policyFactory = (
   cloud = false,
   licenseUid = '',
   clusterUuid = '',
-  clusterName = ''
+  clusterName = '',
+  serverless = false
 ): PolicyConfig => {
   return {
     meta: {
@@ -25,6 +26,7 @@ export const policyFactory = (
       cluster_uuid: clusterUuid,
       cluster_name: clusterName,
       cloud,
+      serverless,
     },
     windows: {
       events: {
@@ -51,7 +53,7 @@ export const policyFactory = (
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
-        reputation_service: false,
+        reputation_service: cloud, // Defaults to true if on cloud
         supported: true,
       },
       popup: {
@@ -96,7 +98,7 @@ export const policyFactory = (
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
-        reputation_service: false,
+        reputation_service: cloud, // Defaults to true if on cloud
         supported: true,
       },
       memory_protection: {
@@ -138,7 +140,7 @@ export const policyFactory = (
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
-        reputation_service: false,
+        reputation_service: cloud, // Defaults to true if on cloud
         supported: true,
       },
       memory_protection: {
