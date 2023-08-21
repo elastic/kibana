@@ -79,7 +79,7 @@ image::images/stepcurve.gif[An short video displaying the three new chart option
 [discrete]
 ==== Significance (significant terms)
 
-This new ranking method in the top values breakdown displays data by significance (significant terms). It helps you identify the key and most crucial terms for a specific query. It’s a powerful way to find anomalies in your data with multiple use cases. Refer to the {ref}/search-aggregations-bucket-significantterms-aggregation.html[Simple terms aggregation] documentation to learn more.
+This new ranking method in the top values breakdown displays data by significance (significant terms). It helps you identify the key and most crucial terms for a specific query. It’s a powerful way to find anomalies in your data with multiple use cases. Refer to the {ref}/search-aggregations-bucket-significantterms-aggregation.html[Significant terms aggregation] documentation to learn more.
 This is not just based on the most popular terms in a set. When calculating significant terms, {es} looks for significant changes in popularity of a specific term between two sets of data. A foreground set (the data returned by a query) and a background set (the data in our indices). This is supported on all charts. 
 
 [role="screenshot"]
