@@ -49,80 +49,89 @@ export const ProductSelector: React.FC = () => {
 
   return (
     <>
-      <EnterpriseSearchOverviewPageTemplate restrictWidth grow offset={0}>
-        <SetPageChrome />
-        <SendTelemetry action="viewed" metric="overview" />
+      <EnterpriseSearchOverviewPageTemplate restrictWidth grow offset={0} customPageSections>
         <TrialCallout />
         <EuiPageTemplate.Section alignment="top" className="entSearchProductSelectorHeader">
           <EuiText color="ghost">
             <WelcomeBanner userProfile={userProfile} image={headerImage} showDescription={false} />
           </EuiText>
         </EuiPageTemplate.Section>
-        <EuiSpacer size="xl" />
-        <EuiTitle>
-          <h4>
-            {i18n.translate('xpack.enterpriseSearch.productSelector.overview.title', {
-              defaultMessage: 'Ingest your content',
-            })}
-          </h4>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        <EuiText>
-          <p>
-            {i18n.translate('xpack.enterpriseSearch.productSelector.overview.description', {
-              defaultMessage:
-                'The first step in building your search experience is to create a search-optimized Elasticsearch index and import your content into it. Elasticsearch offers several user-friendly options you can choose from that best match your technical expertise and data sources.',
-            })}
-          </p>
-        </EuiText>
 
-        <EuiSpacer size="xl" />
-        <IngestionSelector />
-        <EuiSpacer />
-        {showErrorConnecting && (
-          <>
-            <SendTelemetry action="error" metric="cannot_connect" />
-            <ErrorStateCallout />
-          </>
-        )}
-        <EuiSpacer size="xl" />
+        <EuiPageTemplate.Section>
+          <SetPageChrome />
+          <SendTelemetry action="viewed" metric="overview" />
+        </EuiPageTemplate.Section>
 
-        <EuiTitle>
-          <h4>
-            {i18n.translate('xpack.enterpriseSearch.productSelector.overview.createCustom.title', {
-              defaultMessage: 'Create a custom search experience',
-            })}
-          </h4>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        <EuiText>
-          <p>
-            {i18n.translate(
-              'xpack.enterpriseSearch.productSelector.overview.createCustom.description',
-              {
+        <EuiPageTemplate.Section>
+          <EuiSpacer size="xl" />
+          <EuiTitle>
+            <h4>
+              {i18n.translate('xpack.enterpriseSearch.productSelector.overview.title', {
+                defaultMessage: 'Ingest your content',
+              })}
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="l" />
+          <EuiText>
+            <p>
+              {i18n.translate('xpack.enterpriseSearch.productSelector.overview.description', {
                 defaultMessage:
-                  "Once your index is created and populated, you'll be ready to use the full power of Elasticsearch. Build search applications using our out-of-the-box tools and programming language clients, all backed by a robust set of APIs.",
-              }
-            )}
-          </p>
-        </EuiText>
+                  'The first step in building your search experience is to create a search-optimized Elasticsearch index and import your content into it. Elasticsearch offers several user-friendly options you can choose from that best match your technical expertise and data sources.',
+              })}
+            </p>
+          </EuiText>
 
-        <EuiSpacer size="xl" />
-
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem>
-            <ElasticsearchProductCard />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EnterpriseSearchProductCard />
-          </EuiFlexItem>
-          {!config.host && config.canDeployEntSearch && (
-            <EuiFlexItem>
-              <SetupGuideCta />
-            </EuiFlexItem>
+          <EuiSpacer size="xl" />
+          <IngestionSelector />
+          <EuiSpacer />
+          {showErrorConnecting && (
+            <>
+              <SendTelemetry action="error" metric="cannot_connect" />
+              <ErrorStateCallout />
+            </>
           )}
-        </EuiFlexGroup>
-        <Chat />
+          <EuiSpacer size="xl" />
+
+          <EuiTitle>
+            <h4>
+              {i18n.translate(
+                'xpack.enterpriseSearch.productSelector.overview.createCustom.title',
+                {
+                  defaultMessage: 'Create a custom search experience',
+                }
+              )}
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="l" />
+          <EuiText>
+            <p>
+              {i18n.translate(
+                'xpack.enterpriseSearch.productSelector.overview.createCustom.description',
+                {
+                  defaultMessage:
+                    "Once your index is created and populated, you'll be ready to use the full power of Elasticsearch. Build search applications using our out-of-the-box tools and programming language clients, all backed by a robust set of APIs.",
+                }
+              )}
+            </p>
+          </EuiText>
+
+          <EuiSpacer size="xl" />
+
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem>
+              <ElasticsearchProductCard />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EnterpriseSearchProductCard />
+            </EuiFlexItem>
+            {!config.host && config.canDeployEntSearch && (
+              <EuiFlexItem>
+                <SetupGuideCta />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          <Chat />
+        </EuiPageTemplate.Section>
       </EnterpriseSearchOverviewPageTemplate>
     </>
   );
