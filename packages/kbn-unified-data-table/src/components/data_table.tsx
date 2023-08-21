@@ -157,7 +157,7 @@ export interface UnifiedDataTableProps {
   /**
    * How the data is fetched
    */
-  useNewFieldsApi?: boolean;
+  useNewFieldsApi: boolean;
   /**
    * Manage pagination control
    */
@@ -458,11 +458,11 @@ export const UnifiedDataTable = ({
       getRenderCellValueFn(
         dataView,
         displayedRows,
+        useNewFieldsApi,
         shouldShowFieldHandler,
         () => dataGridRef.current?.closeCellPopover(),
         services.fieldFormats,
         maxDocFieldsDisplayed,
-        useNewFieldsApi,
         externalCustomRenderers
       ),
     [

@@ -76,12 +76,8 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     dataView,
     dataViews,
     useNewFieldsApi,
-    setAppState: (newColumns: string[], newSort?: string[][]) => {
-      if (newSort) {
-        stateContainer.setAppState({ columns: newColumns, sort: newSort });
-      } else {
-        stateContainer.setAppState({ columns: newColumns });
-      }
+    setAppState: (newState: { columns: string[]; sort?: string[][] }) => {
+      stateContainer.setAppState(newState);
     },
     columns: appState.columns,
     sort: appState.sort,

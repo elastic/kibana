@@ -13,7 +13,7 @@ import { dataViewsMock } from '../../../__mocks__/data_views';
 
 function getStateColumnAction(
   state: { columns?: string[]; sort?: string[][] },
-  setAppState: (columns: string[], sort?: string[][]) => void
+  setAppState: (state: { columns: string[]; sort?: string[][] }) => void
 ) {
   return getStateColumnActions({
     capabilities: {

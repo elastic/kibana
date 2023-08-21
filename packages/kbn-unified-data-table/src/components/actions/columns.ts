@@ -66,16 +66,16 @@ export function getStateColumnActions({
   dataView: DataView;
   dataViews: DataViewsContract;
   useNewFieldsApi: boolean;
-  setAppState: (columns: string[], sort?: string[][]) => void;
+  setAppState: (state: { columns: string[]; sort?: string[][] }) => void;
   columns?: string[];
   sort: string[][] | undefined;
   defaultOrder?: string;
 }) {
   function onAddColumn(columnName: string) {
     popularizeField(dataView, columnName, dataViews, capabilities);
-    const nextColumns = addColumn(columns ?? [], columnName, useNewFieldsApi);
+    const nextColumns = addColumn(columns || [], columnName, useNewFieldsApi);
     const nextSort = columnName === '_score' && !sort?.length ? [['_score', defaultOrder]] : sort;
-    setAppState(nextColumns, nextSort);
+    setAppState({ columns: nextColumns, sort: nextSort });
   }
 
   function onRemoveColumn(columnName: string) {
@@ -83,12 +83,12 @@ export function getStateColumnActions({
     const nextColumns = removeColumn(columns || [], columnName, useNewFieldsApi);
     // The state's sort property is an array of [sortByColumn,sortDirection]
     const nextSort = sort && sort.length ? sort.filter((subArr) => subArr[0] !== columnName) : [];
-    setAppState(nextColumns, nextSort);
+    setAppState({ columns: nextColumns, sort: nextSort });
   }
 
   function onMoveColumn(columnName: string, newIndex: number) {
     const nextColumns = moveColumn(columns || [], columnName, newIndex);
-    setAppState(nextColumns);
+    setAppState({ columns: nextColumns });
   }
 
   function onSetColumns(nextColumns: string[], hideTimeColumn: boolean) {
@@ -98,7 +98,7 @@ export function getStateColumnActions({
         ? (nextColumns || []).slice(1)
         : nextColumns;
 
-    setAppState(actualColumns);
+    setAppState({ columns: actualColumns });
   }
   return {
     onAddColumn,

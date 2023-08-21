@@ -18,7 +18,7 @@ interface UseColumnsProps {
   dataView: DataView;
   dataViews: DataViewsContract;
   useNewFieldsApi: boolean;
-  setAppState: (columns: string[], sort?: string[][]) => void;
+  setAppState: (state: { columns: string[]; sort?: string[][] }) => void;
   columns?: string[];
   sort?: string[][];
   defaultOrder?: string;

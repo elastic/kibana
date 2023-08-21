@@ -37,11 +37,11 @@ export const getRenderCellValueFn =
   (
     dataView: DataView,
     rows: DataTableRecord[] | undefined,
+    useNewFieldsApi: boolean,
     shouldShowFieldHandler: ShouldShowFieldInTableHandler,
     closePopover: () => void,
     fieldFormats: FieldFormatsStart,
     maxEntries: number,
-    useNewFieldsApi?: boolean,
     externalCustomRenderers?: Record<
       string,
       (props: EuiDataGridCellValueElementProps) => React.ReactNode

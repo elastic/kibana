@@ -134,12 +134,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
     dataViews,
-    setAppState: (newColumns: string[], newSort?: string[][]) => {
-      if (newSort) {
-        stateContainer.appState.update({ columns: newColumns, sort: newSort });
-      } else {
-        stateContainer.appState.update({ columns: newColumns });
-      }
+    setAppState: (newState: { columns: string[]; sort?: string[][] }) => {
+      stateContainer.appState.update(newState);
     },
     useNewFieldsApi,
     columns,
