@@ -131,6 +131,7 @@ export const ModelsList: FC<Props> = ({
 
   const { displayErrorToast } = useToastNotificationService();
 
+  const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<ModelItem[]>([]);
   const [selectedModels, setSelectedModels] = useState<ModelItem[]>([]);
@@ -183,7 +184,6 @@ export const ModelsList: FC<Props> = ({
     try {
       const response = await trainedModelsApiService.getTrainedModels(undefined, {
         with_pipelines: true,
-        size: 1000,
       });
 
       const newItems: ModelItem[] = [];
@@ -235,6 +235,7 @@ export const ModelsList: FC<Props> = ({
         })
       );
     }
+    setIsInitialized(true);
     setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemIdToExpandedRowMap]);
@@ -267,7 +268,7 @@ export const ModelsList: FC<Props> = ({
     try {
       if (models) {
         const { trained_model_stats: modelsStatsResponse } =
-          await trainedModelsApiService.getTrainedModelStats(models.map((m) => m.model_id));
+          await trainedModelsApiService.getTrainedModelStats();
 
         const groupByModelId = groupBy(modelsStatsResponse, 'model_id');
 
@@ -595,6 +596,8 @@ export const ModelsList: FC<Props> = ({
       });
     return [...items, ...notDownloaded];
   }, [items]);
+
+  if (!isInitialized) return null;
 
   return (
     <>
