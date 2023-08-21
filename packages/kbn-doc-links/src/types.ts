@@ -587,6 +587,9 @@ export interface DocLinks {
   };
   readonly serverlessSearch: {
     readonly integrations: string;
+    readonly gettingStartedExplore: string;
+    readonly gettingStartedIngest: string;
+    readonly gettingStartedSearch: string;
   };
   readonly synthetics: {
     readonly featureRoles: string;

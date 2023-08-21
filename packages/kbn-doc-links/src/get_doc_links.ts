@@ -824,7 +824,10 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       rubyGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}ruby-apis-getting-started`,
     },
     serverlessSearch: {
-      integrations: `${ELASTIC_WEBSITE_URL}/integrations`,
+      integrations: `${ELASTIC_WEBSITE_URL}integrations`,
+      gettingStartedExplore: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started-explore`,
+      gettingStartedIngest: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started-ingest`,
+      gettingStartedSearch: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started-search`,
     },
     synthetics: {
       featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,

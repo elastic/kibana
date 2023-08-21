@@ -30,6 +30,7 @@ import type {
 } from '@kbn/search-api-panels';
 
 import { PLUGIN_ID } from '../../../common';
+import { docLinks } from '../../../common/doc_links';
 import { IndexData, FetchIndicesResult } from '../../../common/types';
 import { FETCH_INDICES_PATH } from '../routes';
 import { API_KEY_PLACEHOLDER, ELASTICSEARCH_URL_PLACEHOLDER } from '../constants';
@@ -47,7 +48,7 @@ const NoIndicesContent = () => (
         defaultMessage="Don't have an index yet? {getStartedLink}"
         values={{
           getStartedLink: (
-            <EuiLink href="#" external>
+            <EuiLink href={docLinks.gettingStartedIngest} external>
               {i18n.translate(
                 'xpack.serverlessSearch.content.indexingApi.clientPanel.noIndices.getStartedLink',
                 { defaultMessage: 'Get started' }
@@ -102,7 +103,6 @@ const IndicesContent = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiStat
-            // TODO: format count based on locale
             title={selectedIndex ? selectedIndex.count.toLocaleString() : '--'}
             titleColor="primary"
             description={i18n.translate(
@@ -234,7 +234,7 @@ export const ElasticsearchIndexingApi = () => {
                       'xpack.serverlessSearch.content.indexingApi.ingestDocsLink',
                       { defaultMessage: 'Ingestion documentation' }
                     ),
-                    href: '#', // TODO: get doc links ?
+                    href: docLinks.gettingStartedIngest,
                   },
                 ]
           }
