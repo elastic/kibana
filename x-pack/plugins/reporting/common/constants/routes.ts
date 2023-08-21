@@ -25,7 +25,7 @@ export const INTERNAL_ROUTES = {
   DOWNLOAD_CSV: prefixInternalPath + '/generate/immediate/csv_searchsource',
   GENERATE_PREFIX: prefixInternalPath + '/generate', // exportTypeId is added to the final path
 };
-export const internalAccess = 'elasticInternalOrigin=true';
+
 const prefixPublicPath = '/api/reporting';
 export const PUBLIC_ROUTES = {
   /**
