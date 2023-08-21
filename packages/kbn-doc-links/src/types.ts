@@ -49,6 +49,7 @@ export interface DocLinks {
   };
   readonly console: {
     readonly guide: string;
+    readonly serverlessGuide: string;
   };
   readonly dashboard: {
     readonly guide: string;
@@ -568,6 +569,21 @@ export interface DocLinks {
   readonly searchUI: {
     readonly appSearch: string;
     readonly elasticsearch: string;
+  };
+  readonly serverlessClients: {
+    readonly goApiReference: string;
+    readonly goGettingStarted: string;
+    readonly httpApis: string;
+    readonly httpApiReferences: string;
+    readonly jsApiReference: string;
+    readonly jsGettingStarted: string;
+    readonly phpApiReference: string;
+    readonly phpGettingStarted: string;
+    readonly pythonApiReference: string;
+    readonly pythonGettingStarted: string;
+    readonly pythonReferences: string;
+    readonly rubyApiReference: string;
+    readonly rubyGettingStarted: string;
   };
   readonly serverlessSearch: {
     readonly integrations: string;

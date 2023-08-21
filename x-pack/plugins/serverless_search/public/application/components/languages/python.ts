@@ -12,6 +12,7 @@ import { INDEX_NAME_PLACEHOLDER } from '../../constants';
 
 export const pythonDefinition: LanguageDefinition = {
   advancedConfig: docLinks.pythonAdvancedConfig,
+  apiReference: docLinks.pythonApiReference,
   basicConfig: docLinks.pythonBasicConfig,
   buildSearchQuery: `client.search(index="books", q="snow")`,
   configureClient: ({ url, apiKey }) => `from elasticsearch import Elasticsearch

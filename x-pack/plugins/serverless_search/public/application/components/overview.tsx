@@ -391,8 +391,7 @@ export const ElasticsearchOverview = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <FooterIcon
-              // TODO: update with real link
-              href="https://www.elastic.co/kibana/feedback"
+              href={docLinks.kibanaFeedback}
               imgSrc={`${assetBasePath}feedback_icon.png`}
               title={i18n.translate('xpack.serverlessSearch.footer.feedback.title', {
                 defaultMessage: 'Give feedback',
