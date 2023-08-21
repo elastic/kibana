@@ -22,6 +22,7 @@ export interface ListingProps {
   toasts: ToastsSetup;
   urlService: SharePluginSetup['url'];
   ilmPolicyContextValue: UseIlmPolicyStatusReturn;
+  configAllowsImages: boolean;
 }
 
 export { ReportListing } from './report_listing';

@@ -23,6 +23,7 @@ import { ReportingAPIClient, DiagnoseResponse } from '../../lib/reporting_api_cl
 
 interface Props {
   apiClient: ReportingAPIClient;
+  configAllowsImages: boolean;
 }
 
 type ResultStatus = 'danger' | 'incomplete' | 'complete';
@@ -50,7 +51,7 @@ const initialState: State = {
   success: true,
 };
 
-export const ReportDiagnostic = ({ apiClient }: Props) => {
+export const ReportDiagnostic = ({ apiClient, configAllowsImages }: Props) => {
   const [state, setStateBase] = useState(initialState);
   const setState = (s: Partial<typeof state>) =>
     setStateBase({
@@ -169,13 +170,17 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
   }
   return (
     <div>
-      {flyout}
-      <EuiButtonEmpty size="xs" flush="left" onClick={showFlyout}>
-        <FormattedMessage
-          id="xpack.reporting.listing.diagnosticButton"
-          defaultMessage="Run screenshot diagnostics"
-        />
-      </EuiButtonEmpty>
+      {configAllowsImages && (
+        <div>
+          {flyout}
+          <EuiButtonEmpty size="xs" flush="left" onClick={showFlyout}>
+            <FormattedMessage
+              id="xpack.reporting.listing.diagnosticButton"
+              defaultMessage="Run screenshot diagnostics"
+            />
+          </EuiButtonEmpty>
+        </div>
+      )}
     </div>
   );
 };

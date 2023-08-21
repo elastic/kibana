@@ -25,7 +25,8 @@ export async function mountManagementSection(
   pollConfig: ClientConfigType['poll'],
   apiClient: ReportingAPIClient,
   urlService: SharePluginSetup['url'],
-  params: ManagementAppMountParams
+  params: ManagementAppMountParams,
+  configAllowsImages: boolean
 ) {
   render(
     <I18nProvider>
@@ -46,6 +47,7 @@ export async function mountManagementSection(
               redirect={coreStart.application.navigateToApp}
               navigateToUrl={coreStart.application.navigateToUrl}
               urlService={urlService}
+              configAllowsImages={configAllowsImages}
             />
           </IlmPolicyStatusContextProvider>
         </InternalApiClientProvider>

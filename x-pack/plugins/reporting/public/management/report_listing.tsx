@@ -81,7 +81,8 @@ class ReportListingUi extends Component<Props, State> {
   }
 
   public render() {
-    const { ilmPolicyContextValue, urlService, navigateToUrl, capabilities } = this.props;
+    const { ilmPolicyContextValue, urlService, navigateToUrl, capabilities, configAllowsImages } =
+      this.props;
     const ilmLocator = urlService.locators.get('ILM_LOCATOR_ID');
     const hasIlmPolicy = ilmPolicyContextValue.status !== 'policy-not-found';
     const showIlmPolicyLink = Boolean(ilmLocator && hasIlmPolicy);
@@ -120,7 +121,10 @@ class ReportListingUi extends Component<Props, State> {
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <ReportDiagnostic apiClient={this.props.apiClient} />
+            <ReportDiagnostic
+              configAllowsImages={configAllowsImages}
+              apiClient={this.props.apiClient}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </>
