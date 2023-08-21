@@ -8,15 +8,24 @@
 import React, { useState, useCallback } from 'react';
 import { uniq, debounce } from 'lodash';
 import {
+  EuiFormRow,
   EuiComboBox,
   EuiComboBoxOptionOption
 } from '@elastic/eui';
 import { getMatchingIndices } from '../../../../services/api';
+import type { FieldHook } from '../../../../../shared_imports';
+import { getFieldValidityAndErrorMessage } from '../../../../../shared_imports';
 
 interface IOption {
   label: string;
   options: Array<{ value: string; label: string; key?: string }>;
 }
+
+interface Props {
+  field: FieldHook;
+  [key: string]: any;
+}
+
 
 const getIndexOptions = async (patternString: string) => {
   const options: IOption[] = [];
@@ -47,8 +56,12 @@ const getIndexOptions = async (patternString: string) => {
   return options;
 };
 
-export const IndicesSelector = () => {
-  const [selectedIndices, setSelectedIndices] = useState<string[]>([]);
+
+export const IndicesSelector = ({
+  field,
+  ...rest
+}: Props) => {
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const [indexOptions, setIndexOptions] = useState<IOption[]>([]);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
 
@@ -59,30 +72,37 @@ export const IndicesSelector = () => {
   }, 400), [setIsIndiciesLoading, setIndexOptions]);
 
   return (
-    <>
+    <EuiFormRow
+      label={field.label}
+      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
+      error={errorMessage}
+      isInvalid={isInvalid}
+      fullWidth
+      {...rest}
+    >
       <EuiComboBox
         async
         isLoading={isIndiciesLoading}
         noSuggestions={!indexOptions.length}
         options={indexOptions}
-        selectedOptions={(selectedIndices || []).map((anIndex: string) => {
+        selectedOptions={(field.value || []).map((anIndex: string) => {
           return {
             label: anIndex,
             value: anIndex,
           };
         })}
         onChange={async (selected: EuiComboBoxOptionOption[]) => {
-          setSelectedIndices(
+          field.setValue(
             selected.map((aSelected) => aSelected.value) as string[]
           );
         }}
         onSearchChange={onSearchChange}
         onBlur={() => {
-          if (selectedIndices.length === 0) {
-            setSelectedIndices([]);
+          if (field.value.length === 0) {
+            field.setValue([]);
           }
         }}
       />
-    </>
+    </EuiFormRow>
   );
 };

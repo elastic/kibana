@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiCode, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCode, EuiSpacer } from '@elastic/eui';
 import { useForm, Form, fieldValidators, FormSchema, FIELD_TYPES, UseField, TextField, SelectField, JsonEditorField } from '../../../../shared_imports';
 import { IndicesSelector } from './components/indices_selector';
 
@@ -55,8 +55,23 @@ export const configurationFormSchema: FormSchema = {
     ],
   },
 
+  sourceIndices: {
+    label: i18n.translate('xpack.ingestPipelines.form.sourceIndicesFieldLabel', {
+      defaultMessage: 'Source indices',
+    }),
+    validations: [
+      {
+        validator: fieldValidators.emptyField(
+          i18n.translate('xpack.ingestPipelines.pipelineEditor.circleForm.errorDistanceError', {
+            defaultMessage: 'At least one source index is required.',
+          })
+        ),
+      },
+    ],
+  },
+
   query: {
-    label: i18n.translate('xpack.ingestPipelines.form.metaFieldLabel', {
+    label: i18n.translate('xpack.ingestPipelines.form.queryFieldLabel', {
       defaultMessage: 'Query (optional)',
     }),
     helpText: (
@@ -137,9 +152,10 @@ export const ConfigurationStep = ({ onNext }: Props) => {
         }}
       />
 
-      <EuiFormRow label="Source indices">
-        <IndicesSelector />
-      </EuiFormRow>
+      <UseField
+        path="sourceIndices"
+        component={IndicesSelector}
+      />
 
       <UseField
         path="query"
