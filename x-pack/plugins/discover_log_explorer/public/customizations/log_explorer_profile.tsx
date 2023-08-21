@@ -31,9 +31,8 @@ export const createLogExplorerProfileCustomizations =
     // Lazy load dependencies
     const logExplorerMachineModuleLoadable = import('../state_machines/log_explorer_profile');
 
-    const [{ initializeLogExplorerProfileStateService, waitForState }] = await Promise.all([
-      logExplorerMachineModuleLoadable,
-    ]);
+    const { initializeLogExplorerProfileStateService, waitForState } =
+      await logExplorerMachineModuleLoadable;
 
     const logExplorerProfileStateService = initializeLogExplorerProfileStateService({
       stateContainer,
