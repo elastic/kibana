@@ -4,35 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 describe('Functions page', () => {
-  const start = '2023-04-18T00:00:00.000Z';
-  const end = '2023-04-18T00:05:00.000Z';
+  const rangeFrom = '2023-04-18T00:00:00.000Z';
+  const rangeTo = '2023-04-18T00:05:00.000Z';
 
   beforeEach(() => {
     cy.loginAsElastic();
   });
 
   it('opens /topN page when navigating to /functions page', () => {
-    cy.visitKibana('/app/profiling/functions', start, end);
+    cy.visitKibana('/app/profiling/functions', { rangeFrom, rangeTo });
     cy.url().should('include', '/app/profiling/functions/topn');
   });
 
   it('shows TopN functions and Differential TopN functions', () => {
-    cy.visitKibana('/app/profiling/functions', start, end);
+    cy.visitKibana('/app/profiling/functions', { rangeFrom, rangeTo });
     cy.contains('TopN functions');
     cy.contains('Differential TopN functions');
   });
 
   it('validates values in the table', () => {
     cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
-    cy.visitKibana('/app/profiling/functions', start, end);
+    cy.visitKibana('/app/profiling/functions', { rangeFrom, rangeTo });
     cy.wait('@getTopNFunctions');
     const firstRowSelector = '[data-grid-row-index="0"] > [data-test-subj="dataGridRowCell"]';
     cy.get(firstRowSelector).eq(1).contains('1');
@@ -46,7 +40,7 @@ describe('Functions page', () => {
 
   it('shows function details when action button is clicked on the table ', () => {
     cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
-    cy.visitKibana('/app/profiling/functions', start, end);
+    cy.visitKibana('/app/profiling/functions', { rangeFrom, rangeTo });
     cy.wait('@getTopNFunctions');
     const firstRowSelector =
       '[data-grid-row-index="0"] > [data-test-subj="dataGridRowCell"] .euiButtonIcon';

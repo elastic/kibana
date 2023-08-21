@@ -13,6 +13,13 @@ declare namespace Cypress {
     }): Cypress.Chainable<Cypress.Response<any>>;
     loginAsElastic(): Cypress.Chainable<Cypress.Response<any>>;
     getByTestSubj(selector: string): Chainable<JQuery<Element>>;
-    visitKibana(url: string, rangeFrom?: string, rangeTo?: string): void;
+    visitKibana(
+      url: string,
+      query?: {
+        rangeFrom?: string;
+        rangeTo?: string;
+        [key: string]: string | undefined;
+      }
+    ): void;
   }
 }

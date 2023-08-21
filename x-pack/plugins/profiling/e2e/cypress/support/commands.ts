@@ -42,10 +42,10 @@ Cypress.Commands.add('getByTestSubj', (selector: string) => {
   return cy.get(`[data-test-subj="${selector}"]`);
 });
 
-Cypress.Commands.add('visitKibana', (url: string, rangeFrom?: string, rangeTo?: string) => {
+Cypress.Commands.add('visitKibana', (url, query) => {
   const urlPath = URL.format({
     pathname: url,
-    query: { rangeFrom, rangeTo },
+    query,
   });
 
   cy.visit(urlPath);

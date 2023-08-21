@@ -94,6 +94,7 @@ export function TopNFunctionsSummary({
 
   const data = [
     {
+      id: 'overallPerformance',
       title: i18n.translate('xpack.profiling.diffTopNFunctions.summary.performance', {
         defaultMessage: '{label} overall performance by',
         values: {
@@ -113,6 +114,7 @@ export function TopNFunctionsSummary({
       titleHint: ESTIMATED_VALUE_LABEL,
     },
     {
+      id: 'annualizedCo2',
       title: i18n.translate('xpack.profiling.diffTopNFunctions.summary.co2', {
         defaultMessage: 'Annualized CO2 emission impact',
       }) as string,
@@ -124,6 +126,7 @@ export function TopNFunctionsSummary({
       titleHint: ESTIMATED_VALUE_LABEL,
     },
     {
+      id: 'annualizedCost',
       title: i18n.translate('xpack.profiling.diffTopNFunctions.summary.cost', {
         defaultMessage: 'Annualized cost impact',
       }) as string,
@@ -135,6 +138,7 @@ export function TopNFunctionsSummary({
       titleHint: ESTIMATED_VALUE_LABEL,
     },
     {
+      id: 'totalNumberOfSamples',
       title: i18n.translate('xpack.profiling.diffTopNFunctions.summary.samples', {
         defaultMessage: 'Total number of samples',
       }) as string,

@@ -12,15 +12,15 @@
  */
 
 describe('Home page', () => {
-  const start = '2023-04-18T00:00:00.000Z';
-  const end = '2023-04-18T00:05:00.000Z';
+  const rangeFrom = '2023-04-18T00:00:00.000Z';
+  const rangeTo = '2023-04-18T00:05:00.000Z';
 
   beforeEach(() => {
     cy.loginAsElastic();
   });
 
   it('navigates through the tabs', () => {
-    cy.visitKibana('/app/profiling', start, end);
+    cy.visitKibana('/app/profiling', { rangeFrom, rangeTo });
     cy.url().should('include', '/app/profiling/stacktraces/threads');
     cy.get('[role="tablist"]').within(() => {
       cy.contains('Traces').click();
