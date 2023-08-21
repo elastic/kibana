@@ -285,36 +285,26 @@ describe('Discover grid cell rendering', function () {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <Suspense
-            fallback={
-              <EuiDelayRender
-                delay={500}
-              >
-                <EuiLoadingSpinner />
-              </EuiDelayRender>
-            }
-          >
-            <lazy
-              height={200}
-              json={
-                Object {
-                  "_id": "1",
-                  "_index": "test",
-                  "_score": 1,
-                  "_source": Object {
-                    "bytes": 100,
-                    "extension": ".gz",
-                  },
-                  "highlight": Object {
-                    "extension": Array [
-                      "@kibana-highlighted-field.gz@/kibana-highlighted-field",
-                    ],
-                  },
-                }
+          <ForwardRef
+            height={200}
+            json={
+              Object {
+                "_id": "1",
+                "_index": "test",
+                "_score": 1,
+                "_source": Object {
+                  "bytes": 100,
+                  "extension": ".gz",
+                },
+                "highlight": Object {
+                  "extension": Array [
+                    "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+                  ],
+                },
               }
-              width={370}
-            />
-          </Suspense>
+            }
+            width={370}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     `);
@@ -527,41 +517,31 @@ describe('Discover grid cell rendering', function () {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <Suspense
-            fallback={
-              <EuiDelayRender
-                delay={500}
-              >
-                <EuiLoadingSpinner />
-              </EuiDelayRender>
-            }
-          >
-            <lazy
-              height={200}
-              json={
-                Object {
-                  "_id": "1",
-                  "_index": "test",
-                  "_score": 1,
-                  "_source": undefined,
-                  "fields": Object {
-                    "bytes": Array [
-                      100,
-                    ],
-                    "extension": Array [
-                      ".gz",
-                    ],
-                  },
-                  "highlight": Object {
-                    "extension": Array [
-                      "@kibana-highlighted-field.gz@/kibana-highlighted-field",
-                    ],
-                  },
-                }
+          <ForwardRef
+            height={200}
+            json={
+              Object {
+                "_id": "1",
+                "_index": "test",
+                "_score": 1,
+                "_source": undefined,
+                "fields": Object {
+                  "bytes": Array [
+                    100,
+                  ],
+                  "extension": Array [
+                    ".gz",
+                  ],
+                },
+                "highlight": Object {
+                  "extension": Array [
+                    "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+                  ],
+                },
               }
-              width={370}
-            />
-          </Suspense>
+            }
+            width={370}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     `);
@@ -701,27 +681,17 @@ describe('Discover grid cell rendering', function () {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <Suspense
-            fallback={
-              <EuiDelayRender
-                delay={500}
-              >
-                <EuiLoadingSpinner />
-              </EuiDelayRender>
-            }
-          >
-            <lazy
-              height={200}
-              json={
-                Object {
-                  "object.value": Array [
-                    100,
-                  ],
-                }
+          <ForwardRef
+            height={200}
+            json={
+              Object {
+                "object.value": Array [
+                  100,
+                ],
               }
-              width={370}
-            />
-          </Suspense>
+            }
+            width={370}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     `);
