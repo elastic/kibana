@@ -49,7 +49,7 @@ export class ReportingNotifierStreamHandler {
     private notifications: NotificationsSetup,
     private apiClient: ReportingAPIClient,
     private theme: ThemeServiceStart,
-    private docLinks: DocLinksStart,
+    private docLinks: DocLinksStart
   ) {}
 
   /*
