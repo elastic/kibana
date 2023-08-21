@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { ErrorType } from '@kbn/ml-error-utils';
+import { type MlGetTrainedModelsRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
@@ -28,6 +29,8 @@ import { TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import { modelsProvider } from '../models/model_management';
+
+export const DEFAULT_TRAINED_MODELS_PAGE_SIZE = 10000;
 
 export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization) {
   /**
@@ -60,11 +63,10 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
           const { modelId } = request.params;
           const { with_pipelines: withPipelines, ...query } = request.query;
           const body = await mlClient.getTrainedModels({
-            // @ts-expect-error @elastic-elasticsearch not sure why this is an error, size is a number
-            size: 1000,
             ...query,
             ...(modelId ? { model_id: modelId } : {}),
-          });
+            size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
+          } as MlGetTrainedModelsRequest);
           // model_type is missing
           // @ts-ignore
           const result = body.trained_model_configs as TrainedModelConfigResponse[];
@@ -152,7 +154,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       },
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
-          const body = await mlClient.getTrainedModelsStats();
+          const body = await mlClient.getTrainedModelsStats({
+            size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
+          });
           return response.ok({
             body,
           });
