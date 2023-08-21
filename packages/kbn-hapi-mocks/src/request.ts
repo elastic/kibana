@@ -18,6 +18,11 @@ export const createRequestMock = (customization: DeepPartial<Request> = {}): Req
     formatUrl(Object.assign({ pathname, path, href: path }, customization.url)),
     'http://localhost'
   );
+  if (customization.query) {
+    Object.entries(customization.query).forEach(([key, value]) => {
+      url.searchParams.set(key, value);
+    });
+  }
 
   return merge(
     {},
