@@ -19,7 +19,7 @@ const mockUseRuleWithFallback = useRuleWithFallback as jest.Mock;
 jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 
 describe('<InvestigationGuideButton />', () => {
-  it('should render investigation guide button corerctly', () => {
+  it('should render investigation guide button correctly', () => {
     mockUseRuleWithFallback.mockReturnValue({ rule: { note: 'test note' } });
     const { getByTestId } = render(
       <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>

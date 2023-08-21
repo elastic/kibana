@@ -27,6 +27,7 @@ import { getTimeZone } from '../../utils/get_time_zone';
 import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enabled';
 import { observabilityFeatureId } from '../../../common';
 import { paths } from '../../../common/locators/paths';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -122,7 +123,9 @@ export function AlertDetails() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <PageTitle alert={alert} />,
+        pageTitle: (
+          <PageTitle alert={alert} dataTestSubj={rule?.ruleTypeId || 'alertDetailsPageTitle'} />
+        ),
         rightSideItems: [
           <CasesContext
             owner={[observabilityFeatureId]}
@@ -137,6 +140,7 @@ export function AlertDetails() {
       }}
       data-test-subj="alertDetails"
     >
+      <HeaderMenu />
       <AlertSummary alertSummaryFields={summaryFields} />
       <EuiSpacer size="l" />
       {AlertDetailsAppSection && rule && (

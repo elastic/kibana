@@ -629,17 +629,6 @@
       }
     }
   },
-  "search": {
-    "dynamic": false,
-    "properties": {
-      "title": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      }
-    }
-  },
   "alert": {
     "dynamic": false,
     "properties": {
@@ -928,6 +917,17 @@
       "legacyIndexPatternRef": {
         "type": "text",
         "index": false
+      }
+    }
+  },
+  "search": {
+    "dynamic": false,
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
       }
     }
   },
@@ -1505,6 +1505,9 @@
       },
       "prerelease_integrations_enabled": {
         "type": "boolean"
+      },
+      "secret_storage_requirements_met": {
+        "type": "boolean"
       }
     }
   },
@@ -1657,6 +1660,9 @@
       "auth_type": {
         "type": "keyword"
       },
+      "connection_type": {
+        "type": "keyword"
+      },
       "username": {
         "type": "keyword"
       },
@@ -1742,6 +1748,12 @@
         "type": "text"
       },
       "broker_buffer_size": {
+        "type": "integer"
+      },
+      "required_acks": {
+        "type": "integer"
+      },
+      "channel_buffer_size": {
         "type": "integer"
       }
     }
@@ -1950,6 +1962,9 @@
         "type": "boolean"
       },
       "host": {
+        "type": "keyword"
+      },
+      "proxy_id": {
         "type": "keyword"
       }
     }

@@ -12,7 +12,7 @@ import { Action, ActionType } from './actions';
 
 const rightPanel1: FlyoutPanelProps = {
   id: 'right1',
-  path: ['path'],
+  path: { tab: 'tab' },
 };
 const leftPanel1: FlyoutPanelProps = {
   id: 'left1',
@@ -25,7 +25,7 @@ const previewPanel1: FlyoutPanelProps = {
 
 const rightPanel2: FlyoutPanelProps = {
   id: 'right2',
-  path: ['path'],
+  path: { tab: 'tab' },
 };
 const leftPanel2: FlyoutPanelProps = {
   id: 'left2',

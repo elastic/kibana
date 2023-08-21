@@ -8,16 +8,19 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
+import { ObservabilityOnboardingPluginSetupDeps } from '../../../../plugin';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useKibanaNavigation } from '../../../../hooks/use_kibana_navigation';
 import {
   ElasticAgentPlatform,
   getElasticAgentSetupCommand,
@@ -34,9 +37,16 @@ import {
 } from '../../../shared/step_panel';
 import { ApiKeyBanner } from './api_key_banner';
 import { BackButton } from './back_button';
+import { getDiscoverNavigationParams } from '../../utils';
+import { WindowsInstallStep } from '../../../shared/windows_install_step';
+import { TroubleshootingLink } from '../../../shared/troubleshooting_link';
 
 export function InstallElasticAgent() {
-  const { navigateToKibanaUrl } = useKibanaNavigation();
+  const {
+    services: {
+      discover: { locator },
+    },
+  } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
   const { goBack, goToStep, getState, setState } = useWizard();
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
@@ -45,8 +55,10 @@ export function InstallElasticAgent() {
   function onInspect() {
     goToStep('inspect');
   }
-  function onContinue() {
-    navigateToKibanaUrl('/app/logs/stream');
+  async function onContinue() {
+    await locator?.navigate(
+      getDiscoverNavigationParams([wizardState.datasetName])
+    );
   }
 
   function onAutoDownloadConfig() {
@@ -259,6 +271,24 @@ export function InstallElasticAgent() {
           </p>
         </EuiText>
         <EuiSpacer size="m" />
+        {wizardState.integrationName && (
+          <>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.integrationSuccessCallout.title',
+                {
+                  defaultMessage: '{integrationName} integration installed.',
+                  values: {
+                    integrationName: wizardState.integrationName,
+                  },
+                }
+              )}
+              color="success"
+              iconType="check"
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         {apiKeyEncoded && onboardingId ? (
           <ApiKeyBanner
             payload={{ apiKeyEncoded, onboardingId }}
@@ -299,7 +329,10 @@ export function InstallElasticAgent() {
                 { defaultMessage: 'Windows' }
               ),
               id: 'windows',
-              isDisabled: true,
+              disableSteps: true,
+              children: (
+                <WindowsInstallStep docsLink="https://www.elastic.co/guide/en/observability/current/logs-stream.html" />
+              ),
             },
           ]}
           onSelectPlatform={(id) => setElasticAgentPlatform(id)}
@@ -340,6 +373,8 @@ export function InstallElasticAgent() {
           appendedSteps={[getCheckLogsStep()]}
         />
       </StepPanelContent>
+      <EuiHorizontalRule />
+      <TroubleshootingLink />
     </StepPanel>
   );
 }

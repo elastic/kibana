@@ -20,18 +20,19 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { SearchResponseWarnings } from '@kbn/search-response-warnings';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
+  HIDE_ANNOUNCEMENTS,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
-  HIDE_ANNOUNCEMENTS,
 } from '@kbn/discover-utils';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
-import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
+import { DataLoadingState, DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
 import { FetchStatus } from '../../../types';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { RecordRawType } from '../../services/discover_data_state_container';
@@ -45,6 +46,7 @@ import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid/discover_grid_flyout';
 import { DocViewer } from '../../../../services/doc_views/components/doc_viewer';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
+import { useFetchMoreRecords } from './use_fetch_more_records';
 
 const containerStyles = css`
   position: relative;
@@ -55,7 +57,7 @@ const progressStyle = css`
 `;
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
-const DataGridMemoized = React.memo(DiscoverGrid);
+const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
 // export needs for testing
 export const onResize = (
@@ -133,6 +135,11 @@ function DiscoverDocumentsComponent({
     isTextBasedQuery || !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
+  const { isMoreDataLoading, totalHits, onFetchMoreRecords } = useFetchMoreRecords({
+    isTextBasedQuery,
+    stateContainer,
+  });
+
   const {
     columns: currentColumns,
     onAddColumn,
@@ -203,6 +210,13 @@ function DiscoverDocumentsComponent({
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
         </h2>
       </EuiScreenReaderOnly>
+      {!!documentState.interceptedWarnings?.length && (
+        <SearchResponseWarnings
+          variant="callout"
+          interceptedWarnings={documentState.interceptedWarnings}
+          data-test-subj="dscInterceptedWarningsCallout"
+        />
+      )}
       {isLegacy && rows && rows.length && (
         <>
           {!hideAnnouncements && <DocumentExplorerCallout />}
@@ -237,12 +251,18 @@ function DiscoverDocumentsComponent({
             <CellActionsProvider
               getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
             >
-              <DataGridMemoized
+              <DiscoverGridMemoized
                 ariaLabelledBy="documentsAriaLabel"
                 columns={currentColumns}
                 expandedDoc={expandedDoc}
                 dataView={dataView}
-                isLoading={isDataLoading}
+                loadingState={
+                  isDataLoading
+                    ? DataLoadingState.loading
+                    : isMoreDataLoading
+                    ? DataLoadingState.loadingMore
+                    : DataLoadingState.loaded
+                }
                 rows={rows}
                 sort={(sort as SortOrder[]) || []}
                 sampleSize={sampleSize}
@@ -269,6 +289,8 @@ function DiscoverDocumentsComponent({
                 savedSearchId={savedSearch.id}
                 DocumentView={DiscoverGridFlyout}
                 services={services}
+                totalHits={totalHits}
+                onFetchMoreRecords={onFetchMoreRecords}
               />
             </CellActionsProvider>
           </div>
