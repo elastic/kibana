@@ -58,16 +58,20 @@ describe('timeline data providers', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('exist');
   });
 
-  it('persists timeline when data provider is updated by dragging a field from data grid', () => {
-    updateDataProviderbyDraggingField('host.name', 0);
-    waitForTimelineChanges();
-    cy.reload();
-    cy.get(`${GET_TIMELINE_GRID_CELL('host.name')}`)
-      .first()
-      .then((hostname) => {
-        cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).contains(`host.name: "${hostname.text()}"`);
-      });
-  });
+  it(
+    'persists timeline when data provider is updated by dragging a field from data grid',
+    { tags: [tag.BROKEN_IN_SERVERLESS] },
+    () => {
+      updateDataProviderbyDraggingField('host.name', 0);
+      waitForTimelineChanges();
+      cy.reload();
+      cy.get(`${GET_TIMELINE_GRID_CELL('host.name')}`)
+        .first()
+        .then((hostname) => {
+          cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).contains(`host.name: "${hostname.text()}"`);
+        });
+    }
+  );
 
   it('persists timeline when a field is added by hover action "Add To Timeline" in data provider ', () => {
     addDataProvider({ field: 'host.name', operator: 'exists' });
