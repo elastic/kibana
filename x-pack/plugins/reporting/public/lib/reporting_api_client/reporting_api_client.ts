@@ -217,6 +217,8 @@ export class ReportingAPIClient implements IReportingAPI {
   public getManagementLink: ManagementLinkFn = () =>
     this.http.basePath.prepend(REPORTING_MANAGEMENT_HOME);
 
+  public getDownloadLink = (jobId: JobId) => this.getReportURL(jobId);
+
   public getServerBasePath = () => this.http.basePath.serverBasePath;
 
   public verifyBrowser() {
