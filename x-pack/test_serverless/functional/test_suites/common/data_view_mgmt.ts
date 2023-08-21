@@ -18,6 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('Data View Management', function () {
+    let dataViewId = '';
+
     before(async () => {
       await esArchiver.load(archivePath);
 
@@ -32,9 +34,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
       expect(response.status).toBe(200);
+      dataViewId = response.body.data_view.id;
     });
 
-    after(async () => await esArchiver.unload(archivePath));
+    after(async () => {
+      await esArchiver.unload(archivePath);
+      await supertest.delete(`${DATA_VIEW_PATH}/${dataViewId}`).set('kbn-xsrf', 'some-xsrf-token');
+    });
 
     it('Scripted fields tab is missing', async () => {
       await PageObjects.common.navigateToUrl('management', 'kibana/dataViews', {
