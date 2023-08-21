@@ -1505,6 +1505,9 @@
       },
       "prerelease_integrations_enabled": {
         "type": "boolean"
+      },
+      "secret_storage_requirements_met": {
+        "type": "boolean"
       }
     }
   },
@@ -1959,6 +1962,9 @@
         "type": "boolean"
       },
       "host": {
+        "type": "keyword"
+      },
+      "proxy_id": {
         "type": "keyword"
       }
     }

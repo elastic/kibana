@@ -9207,6 +9207,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "securitySolution:enableExpandableFlyout": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "securitySolution:enableCcsWarning": {
           "type": "boolean",
           "_meta": {
@@ -9859,6 +9865,12 @@
           }
         },
         "observability:apmTraceExplorerTab": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmEnableProfilingIntegration": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."

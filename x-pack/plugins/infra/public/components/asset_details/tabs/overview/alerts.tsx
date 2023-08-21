@@ -6,7 +6,7 @@
  */
 import React, { useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPopover, EuiIcon, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
@@ -16,21 +16,21 @@ import type { InventoryItemType } from '../../../../../common/inventory_models/t
 import { findInventoryFields } from '../../../../../common/inventory_models';
 import { createAlertsEsQuery } from '../../../../common/alerts/create_alerts_es_query';
 import { infraAlertFeatureIds } from '../../../../pages/metrics/hosts/components/tabs/config';
-
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { LinkToAlertsRule } from '../../links/link_to_alerts';
 import { LinkToAlertsPage } from '../../links/link_to_alerts_page';
 import { AlertFlyout } from '../../../../alerting/inventory/components/alert_flyout';
 import { useBoolean } from '../../../../hooks/use_boolean';
 import { ALERT_STATUS_ALL } from '../../../../common/alerts/constants';
+import { Popover } from '../common/popover';
 
 export const AlertsSummaryContent = ({
-  nodeName,
-  nodeType,
+  assetName,
+  assetType,
   dateRange,
 }: {
-  nodeName: string;
-  nodeType: InventoryItemType;
+  assetName: string;
+  assetType: InventoryItemType;
   dateRange: TimeRange;
 }) => {
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
@@ -39,10 +39,10 @@ export const AlertsSummaryContent = ({
     () =>
       createAlertsEsQuery({
         dateRange,
-        hostNodeNames: [nodeName],
+        hostNodeNames: [assetName],
         status: ALERT_STATUS_ALL,
       }),
-    [nodeName, dateRange]
+    [assetName, dateRange]
   );
 
   return (
@@ -56,8 +56,8 @@ export const AlertsSummaryContent = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LinkToAlertsPage
-            nodeName={nodeName}
-            queryField={`${nodeType}.name`}
+            assetName={assetName}
+            queryField={`${assetType}.name`}
             dateRange={dateRange}
           />
         </EuiFlexItem>
@@ -65,8 +65,8 @@ export const AlertsSummaryContent = ({
       <EuiSpacer size="s" />
       <MemoAlertSummaryWidget alertsQuery={alertsEsQueryByStatus} dateRange={dateRange} />
       <AlertFlyout
-        filter={`${findInventoryFields(nodeType).name}: "${nodeName}"`}
-        nodeType={nodeType}
+        filter={`${findInventoryFields(assetType).name}: "${assetName}"`}
+        nodeType={assetType}
         setVisible={toggleAlertFlyout}
         visible={isAlertFlyoutVisible}
       />
@@ -107,12 +107,10 @@ const MemoAlertSummaryWidget = React.memo(
 );
 
 const AlertsSectionTitle = () => {
-  const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
-
   return (
-    <EuiFlexGroup gutterSize="xs">
+    <EuiFlexGroup gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiTitle data-test-subj="assetDetailsAlertsTitle" size="xxs">
+        <EuiTitle data-test-subj="infraAssetDetailsAlertsTitle" size="xxs">
           <h5>
             <FormattedMessage
               id="xpack.infra.assetDetails.overview.alertsSectionTitle"
@@ -122,21 +120,9 @@ const AlertsSectionTitle = () => {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiPopover
-          button={
-            <EuiIcon
-              data-test-subj="assetDetailsAlertsPopoverButton"
-              type="iInCircle"
-              onClick={togglePopover}
-            />
-          }
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          repositionOnScroll
-          anchorPosition="upCenter"
-        >
+        <Popover icon="iInCircle" data-test-subj="infraAssetDetailsAlertsPopoverButton">
           <AlertsTooltipContent />
-        </EuiPopover>
+        </Popover>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

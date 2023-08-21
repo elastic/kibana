@@ -75,11 +75,8 @@ const uploadPipeline = (pipelineContent: string | object) => {
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution.yml'));
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution_investigations.yml'),
-        getPipeline('.buildkite/pipelines/pull_request/security_solution_explore.yml')
-      );
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/defend_workflows.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/osquery_cypress.yml'));
     }
 
     if (
@@ -170,6 +167,10 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_cloud.yml'));
     }
 
+    if (GITHUB_PR_LABELS.includes('ci:build-serverless-image')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/artifacts_container_image.yml'));
+    }
+
     if (
       (await doAnyChangesMatch([/.*stor(ies|y).*/])) ||
       GITHUB_PR_LABELS.includes('ci:build-storybooks')
@@ -196,7 +197,8 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
-    uploadPipeline(pipeline.join('\n'));
+    // remove duplicated steps
+    uploadPipeline([...new Set(pipeline)].join('\n'));
   } catch (ex) {
     console.error('PR pipeline generation error', ex.message);
     process.exit(1);

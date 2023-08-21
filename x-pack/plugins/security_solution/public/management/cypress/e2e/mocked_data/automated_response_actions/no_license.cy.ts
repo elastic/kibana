@@ -6,6 +6,7 @@
  */
 
 import { generateRandomStringName } from '@kbn/osquery-plugin/cypress/tasks/integrations';
+import { disableExpandableFlyoutAdvancedSettings } from '../../../tasks/common';
 import { APP_ALERTS_PATH } from '../../../../../../common/constants';
 import { closeAllToasts } from '../../../tasks/toasts';
 import { fillUpNewRule } from '../../../tasks/response_actions';
@@ -39,6 +40,7 @@ describe('No License', { env: { ftrConfig: { license: 'basic' } } }, () => {
     const [endpointAgentId, endpointHostname] = generateRandomStringName(2);
     before(() => {
       login();
+      disableExpandableFlyoutAdvancedSettings();
       indexEndpointRuleAlerts({
         endpointAgentId,
         endpointHostname,

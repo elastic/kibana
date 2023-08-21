@@ -16,6 +16,7 @@ import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integratio
 import { navigateTo } from '../../tasks/navigation';
 import { loadPack, loadRule, cleanupRule, cleanupPack } from '../../tasks/api_fixtures';
 import { preparePack } from '../../tasks/packs';
+import { DEFAULT_POLICY } from '../../screens/fleet';
 
 describe('Alert Test', () => {
   let packName: string;
@@ -65,7 +66,7 @@ describe('Alert Test', () => {
       cy.contains(`Edit ${packName}`);
       findFormFieldByRowsLabelAndType(
         'Scheduled agent policies (optional)',
-        'fleet server {downArrow}{enter}'
+        `${DEFAULT_POLICY} {downArrow}{enter}`
       );
       findAndClickButton('Update pack');
       closeModalIfVisible();
@@ -97,6 +98,7 @@ describe('Alert Test', () => {
       cy.getBySel('expand-event').first().click();
 
       cy.wait(500);
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutInvestigationGuideButton').click();
       cy.contains('Get processes').click();
     });
 

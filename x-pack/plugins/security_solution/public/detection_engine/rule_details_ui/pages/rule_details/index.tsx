@@ -22,7 +22,6 @@ import type { Filter } from '@kbn/es-query';
 import { i18n as i18nTranslate } from '@kbn/i18n';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { noop, omit } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -53,7 +52,6 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
-import { FormattedDate } from '../../../../common/components/formatted_date';
 import {
   getDetectionEngineUrl,
   getRuleDetailsTabUrl,
@@ -81,6 +79,7 @@ import {
   getStepsData,
   redirectToDetections,
 } from '../../../../detections/pages/detection_engine/rules/helpers';
+import { CreatedBy, UpdatedBy } from '../../../../detections/components/rules/rule_info';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
@@ -468,33 +467,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     () =>
       rule ? (
         [
-          <FormattedMessage
-            id="xpack.securitySolution.detectionEngine.ruleDetails.ruleCreationDescription"
-            defaultMessage="Created by: {by} on {date}"
-            values={{
-              by: rule?.created_by ?? i18n.UNKNOWN,
-              date: (
-                <FormattedDate
-                  value={rule?.created_at ?? new Date().toISOString()}
-                  fieldName="createdAt"
-                />
-              ),
-            }}
-          />,
+          <CreatedBy createdBy={rule?.created_by} createdAt={rule?.created_at} />,
           rule?.updated_by != null ? (
-            <FormattedMessage
-              id="xpack.securitySolution.detectionEngine.ruleDetails.ruleUpdateDescription"
-              defaultMessage="Updated by: {by} on {date}"
-              values={{
-                by: rule?.updated_by ?? i18n.UNKNOWN,
-                date: (
-                  <FormattedDate
-                    value={rule?.updated_at ?? new Date().toISOString()}
-                    fieldName="updatedAt"
-                  />
-                ),
-              }}
-            />
+            <UpdatedBy updatedBy={rule?.updated_by} updatedAt={rule?.updated_at} />
           ) : (
             ''
           ),

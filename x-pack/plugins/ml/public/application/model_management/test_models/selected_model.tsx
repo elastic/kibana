@@ -25,6 +25,7 @@ import { useMlApiContext } from '../../contexts/kibana';
 import { InferenceInputForm } from './models/inference_input_form';
 import { InferrerType } from './models';
 import { INPUT_TYPE } from './models/inference_base';
+import { TextExpansionInference } from './models/text_expansion';
 
 interface Props {
   model: estypes.MlTrainedModelConfig;
@@ -42,22 +43,18 @@ export const SelectedModel: FC<Props> = ({ model, inputType, deploymentId }) => 
       switch (taskType) {
         case SUPPORTED_PYTORCH_TASKS.NER:
           return new NerInference(trainedModels, model, inputType, deploymentId);
-          break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION:
           return new TextClassificationInference(trainedModels, model, inputType, deploymentId);
-          break;
         case SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION:
           return new ZeroShotClassificationInference(trainedModels, model, inputType, deploymentId);
-          break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING:
           return new TextEmbeddingInference(trainedModels, model, inputType, deploymentId);
-          break;
         case SUPPORTED_PYTORCH_TASKS.FILL_MASK:
           return new FillMaskInference(trainedModels, model, inputType, deploymentId);
-          break;
         case SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING:
           return new QuestionAnsweringInference(trainedModels, model, inputType, deploymentId);
-          break;
+        case SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION:
+          return new TextExpansionInference(trainedModels, model, inputType, deploymentId);
         default:
           break;
       }
