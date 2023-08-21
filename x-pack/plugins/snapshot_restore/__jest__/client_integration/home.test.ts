@@ -454,13 +454,13 @@ describe('<SnapshotRestoreHome />', () => {
       test('should display an empty prompt', () => {
         const { exists } = testBed;
 
-        expect(exists('emptyPrompt')).toBe(true);
+        expect(exists('snapshotListEmpty')).toBe(true);
       });
 
       test('should invite the user to first register a repository', () => {
         const { find, exists } = testBed;
-        expect(find('emptyPrompt.title').text()).toBe('Start by registering a repository');
-        expect(exists('emptyPrompt.registerRepositoryButton')).toBe(true);
+        expect(find('snapshotListEmpty.title').text()).toBe('Start by registering a repository');
+        expect(exists('snapshotListEmpty.registerRepositoryButton')).toBe(true);
       });
     });
 
