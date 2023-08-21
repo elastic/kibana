@@ -17,7 +17,6 @@
     "@kbn/features-plugin",
     "@kbn/core-logging-server-mocks",
     "@kbn/utility-types",
-    "@kbn/security-solution-plugin",
   ],
   "exclude": ["target/**/*"]
 }
