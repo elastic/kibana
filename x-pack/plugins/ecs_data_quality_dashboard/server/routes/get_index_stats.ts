@@ -69,7 +69,7 @@ export const getIndexStatsRoute = (router: IRouter) => {
           } else {
             return resp.error({
               body: i18n.translate(
-                'securitySolutionPackages.ecsDataQualityDashboard.getIndexStats.dateRangeRequiredErrorMessage',
+                'xpack.ecsDataQualityDashboard.getIndexStats.dateRangeRequiredErrorMessage',
                 {
                   defaultMessage: 'startDate and endDate are required',
                 }
