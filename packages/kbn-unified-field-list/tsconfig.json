@@ -28,6 +28,7 @@
     "@kbn/dom-drag-drop",
     "@kbn/shared-ux-utility",
     "@kbn/discover-utils",
+    "@kbn/ebt-tools",
   ],
   "exclude": ["target/**/*"]
 }
