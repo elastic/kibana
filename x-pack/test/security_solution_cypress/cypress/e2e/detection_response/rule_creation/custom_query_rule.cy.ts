@@ -352,14 +352,11 @@ describe('Custom query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, ()
       const expectedEditedtags = rule.tags?.join('');
       const expectedEditedIndexPatterns = rule.index;
 
-      before(() => {
+      beforeEach(() => {
+        login();
         deleteAlertsAndRules();
         deleteConnectors();
         createRule(getExistingRule({ rule_id: 'rule1', enabled: true }));
-      });
-
-      beforeEach(() => {
-        login();
         visit(DETECTIONS_RULE_MANAGEMENT_URL);
       });
 

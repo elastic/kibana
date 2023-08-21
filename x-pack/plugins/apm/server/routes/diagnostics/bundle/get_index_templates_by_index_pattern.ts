@@ -110,6 +110,8 @@ async function handleInvalidIndexTemplateException<T>(promise: Promise<T>) {
       return [];
     }
 
-    throw error;
+    console.error(`Suppressed unknown exception: ${error.message}`);
+
+    return [];
   }
 }
