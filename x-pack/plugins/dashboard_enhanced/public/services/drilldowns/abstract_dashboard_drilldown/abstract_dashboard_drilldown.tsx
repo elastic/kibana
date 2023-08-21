@@ -55,9 +55,7 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
     CollectConfigProps<Config, BaseActionFactoryContext>
   >;
 
-  public readonly CollectConfig: React.FC<
-    CollectConfigProps<DrilldownConfig, BaseActionFactoryContext>
-  >;
+  public readonly CollectConfig: React.FC<CollectConfigProps<Config, BaseActionFactoryContext>>;
 
   public readonly createConfig = () => ({
     dashboardId: '',

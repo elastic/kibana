@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public/';
+import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
 import { UiActionsEnhancedBaseActionFactoryContext } from '@kbn/ui-actions-enhanced-plugin/public';
 
 export type FactoryContext = UiActionsEnhancedBaseActionFactoryContext;

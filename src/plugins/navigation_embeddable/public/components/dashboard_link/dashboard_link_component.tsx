@@ -11,14 +11,17 @@ import useAsync from 'react-use/lib/useAsync';
 import React, { useMemo, useState } from 'react';
 
 import { EuiButtonEmpty, EuiListGroupItem, EuiToolTip } from '@elastic/eui';
+import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
-  NavigationEmbeddableLink,
-  NavigationLayoutType,
   NAV_VERTICAL_LAYOUT,
+  NavigationLayoutType,
+  NavigationEmbeddableLink,
+  DEFAULT_DASHBOARD_LINK_OPTIONS,
 } from '../../../common/content_management';
 import { fetchDashboard } from './dashboard_link_tools';
+import { clickLink } from '../../services/link_service';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { useNavigationEmbeddable } from '../../embeddable/navigation_embeddable';
 
@@ -108,8 +111,18 @@ export const DashboardLinkComponent = ({
       onClick={
         link.destination === parentDashboardId
           ? undefined
-          : () => {
+          : (event) => {
               // TODO: As part of https://github.com/elastic/kibana/issues/154381, connect to drilldown
+              const options = link.options as DashboardDrilldownOptions;
+              clickLink(navEmbeddable, {
+                ...link,
+                options: {
+                  ...DEFAULT_DASHBOARD_LINK_OPTIONS,
+                  ...options,
+                  openInNewTab:
+                    options.openInNewTab || event.ctrlKey || event.metaKey || event.shiftKey,
+                },
+              });
             }
       }
       label={
