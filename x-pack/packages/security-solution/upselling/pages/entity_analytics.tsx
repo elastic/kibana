@@ -33,7 +33,7 @@ const PaywallDiv = styled.div`
       width: auto;
     }
   }
-  .platinumCardDescription {
+  .paywallCardDescription {
     padding: 0 15%;
   }
 `;
@@ -64,9 +64,9 @@ const EntityAnalyticsUpsellingComponent = ({
     throw new Error('requiredProduct or requiredLicense must be defined');
   }
 
-  const upgradeMessage = requiredLicense
-    ? i18n.UPGRADE_LICENSE_MESSAGE(requiredLicense)
-    : i18n.UPGRADE_PRODUCT_MESSAGE(requiredProduct ?? '');
+  const upgradeMessage = requiredProduct
+    ? i18n.UPGRADE_PRODUCT_MESSAGE(requiredProduct)
+    : i18n.UPGRADE_LICENSE_MESSAGE(requiredLicense ?? '');
 
   const requiredProductOrLicense = requiredProduct ?? requiredLicense ?? '';
 
@@ -77,7 +77,6 @@ const EntityAnalyticsUpsellingComponent = ({
         <EuiSpacer size="xl" />
         <PaywallDiv>
           <StyledEuiCard
-            data-test-subj="platinumCard"
             betaBadgeProps={{ label: requiredProductOrLicense }}
             icon={<EuiIcon size="xl" type="lock" />}
             display="subdued"
@@ -89,7 +88,12 @@ const EntityAnalyticsUpsellingComponent = ({
             description={false}
             paddingSize="xl"
           >
-            <EuiFlexGroup className="platinumCardDescription" direction="column" gutterSize="none">
+            <EuiFlexGroup
+              data-test-subj="paywallCardDescription"
+              className="paywallCardDescription"
+              direction="column"
+              gutterSize="none"
+            >
               <EuiText>
                 <EuiFlexItem>
                   <p>
