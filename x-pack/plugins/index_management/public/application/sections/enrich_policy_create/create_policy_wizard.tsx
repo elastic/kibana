@@ -9,6 +9,7 @@ import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSteps, EuiStepStatus, EuiPageSection } from '@elastic/eui';
 
+import { CreatePolicyContextProvider } from './create_policy_context';
 import { ConfigurationStep, FieldSelectionStep, CreateStep } from './steps';
 
 const CONFIGURATION = 1;
@@ -56,8 +57,10 @@ export const CreatePolicyWizard = () => {
   );
 
   return (
-    <EuiPageSection restrictWidth>
-      <EuiSteps steps={stepDefinitions} />
-    </EuiPageSection>
+    <CreatePolicyContextProvider context={{ draftPolicy: {} }}>
+      <EuiPageSection restrictWidth>
+        <EuiSteps steps={stepDefinitions} />
+      </EuiPageSection>
+    </CreatePolicyContextProvider>
   );
 };

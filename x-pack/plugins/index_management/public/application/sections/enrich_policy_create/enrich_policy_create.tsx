@@ -14,22 +14,6 @@ import { breadcrumbService } from '../../services/breadcrumbs';
 
 import { CreatePolicyWizard } from './create_policy_wizard';
 
-export enum Section {
-  Indices = 'indices',
-  DataStreams = 'data_streams',
-  IndexTemplates = 'templates',
-  ComponentTemplates = 'component_templates',
-  EnrichPolicies = 'enrich_policies',
-}
-
-export const homeSections = [
-  Section.Indices,
-  Section.DataStreams,
-  Section.IndexTemplates,
-  Section.ComponentTemplates,
-  Section.EnrichPolicies,
-];
-
 export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('enrichPolicyCreate');

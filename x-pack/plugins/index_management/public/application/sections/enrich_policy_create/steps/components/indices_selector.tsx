@@ -56,14 +56,11 @@ export const IndicesSelector = ({ field, ...rest }: Props) => {
   const [indexOptions, setIndexOptions] = useState<IOption[]>([]);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
 
-  const onSearchChange = useCallback(
-    debounce(async (search: string) => {
-      setIsIndiciesLoading(true);
-      setIndexOptions(await getIndexOptions(search));
-      setIsIndiciesLoading(false);
-    }, 400),
-    [setIsIndiciesLoading, setIndexOptions]
-  );
+  const onSearchChange = useCallback(debounce(async (search: string) => {
+    setIsIndiciesLoading(true);
+    setIndexOptions(await getIndexOptions(search));
+    setIsIndiciesLoading(false);
+  }, 400), [setIsIndiciesLoading, setIndexOptions, field]);
 
   return (
     <EuiFormRow

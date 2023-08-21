@@ -9,18 +9,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiCode, EuiSpacer } from '@elastic/eui';
-import {
-  useForm,
-  Form,
-  fieldValidators,
-  FormSchema,
-  FIELD_TYPES,
-  UseField,
-  TextField,
-  SelectField,
-  JsonEditorField,
-} from '../../../../shared_imports';
+import { useForm, Form, fieldValidators, FormSchema, FIELD_TYPES, UseField, TextField, SelectField, JsonEditorField } from '../../../../shared_imports';
+
 import { IndicesSelector } from './components/indices_selector';
+import { useCreatePolicyContext, DraftPolicy } from '../create_policy_context';
 
 interface Props {
   onNext: () => void;
@@ -106,11 +98,11 @@ export const configurationFormSchema: FormSchema = {
   },
 };
 
-const defaultValue = {};
-
 export const ConfigurationStep = ({ onNext }: Props) => {
+  const { draft, updateDraft } = useCreatePolicyContext();
+
   const { form } = useForm({
-    defaultValue,
+    defaultValue: draft,
     schema: configurationFormSchema,
     id: 'configurationForm',
   });
@@ -122,7 +114,14 @@ export const ConfigurationStep = ({ onNext }: Props) => {
       return;
     }
 
-    console.log('onSubmit', form.getFormData());
+    // Update draft state with the data of the form
+    updateDraft((prevDraft: DraftPolicy) => ({
+      ...prevDraft,
+      ...form.getFormData(),
+    }));
+
+    // And then navigate to the next step
+    onNext();
   };
 
   return (

@@ -29,6 +29,10 @@ export const validationSchema = schema.object({
 
 const getMatchingIndicesSchema = schema.object({ pattern: schema.string() }, { unknowns: 'allow' });
 
+const getFieldsFromIndicesSchema = schema.object({
+  indices: schema.arrayOf(schema.string()),
+});
+
 interface IndicesAggs extends estypes.AggregationsMultiBucketAggregateBase {
   buckets: Array<{ key: unknown }>;
 }
@@ -95,6 +99,32 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
         const indices = await getIndices(client, pattern);
 
         return response.ok({ body: { indices } });
+      } catch (error) {
+        return handleEsError({ error, response });
+      }
+    }
+  );
+
+  router.post(
+    { path: addInternalBasePath('/enrich_policies/get_fields_from_indices'), validate: { body: getFieldsFromIndicesSchema } },
+    async (context, request, response) => {
+      const { indices } = request.body;
+      const client = (await context.core).elasticsearch.client as IScopedClusterClient;
+
+      try {
+        const fieldsResponse = await client.asCurrentUser.fieldCaps(
+          {
+            index: indices,
+            fields: ['*'],
+            allow_no_indices: true,
+            ignore_unavailable: true,
+          },
+          { ignore: [404], meta: true }
+        );
+
+        const json = fieldsResponse.statusCode === 404 ? { fields: [] } : fieldsResponse.body;
+
+        return response.ok({ body: json });
       } catch (error) {
         return handleEsError({ error, response });
       }

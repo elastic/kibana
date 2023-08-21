@@ -13,4 +13,5 @@ export interface SerializedEnrichPolicy {
   sourceIndices: string[];
   matchField: string;
   enrichFields: string[];
+  query?: string;
 }

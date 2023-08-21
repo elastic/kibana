@@ -18,7 +18,9 @@ import {
   EuiSpacer,
   EuiCodeBlock,
 } from '@elastic/eui';
+
 import type { SerializedEnrichPolicy } from '../../../../../common';
+import { useCreatePolicyContext } from '../create_policy_context';
 
 const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
   // Beyond a certain point, highlighting the syntax will bog down performance to unacceptable
@@ -138,20 +140,22 @@ interface Props {
 }
 
 export const CreateStep = ({ onSubmit }: Props) => {
+  const { draft } = useCreatePolicyContext();
+
   const summaryTabs = [
     {
       id: 'summary',
       name: i18n.translate('xpack.idxMgmt.enrichPolicies.create.stepCreate.summaryTabTitle', {
         defaultMessage: 'Summary',
       }),
-      content: <SummaryTab policy={{}} />,
+      content: <SummaryTab policy={draft} />,
     },
     {
       id: 'request',
       name: i18n.translate('xpack.idxMgmt.enrichPolicies.create.stepCreate.requestTabTitle', {
         defaultMessage: 'Request',
       }),
-      content: <RequestTab request="match_all_query {}" />,
+      content: <RequestTab request={JSON.stringify(draft, null, 2)} />,
     },
   ];
 
