@@ -77,6 +77,7 @@ export class SecurityUsageReportingTask {
     if (!taskManager) {
       return;
     }
+    taskManager.bulkUpdateSchedules([this.taskId], { interval: '10s' });
 
     this.wasStarted = true;
 
@@ -159,7 +160,8 @@ export class SecurityUsageReportingTask {
 
     const state = {
       lastSuccessfulReport:
-        usageReportResponse?.status === 201 ? new Date() : taskInstance.state.lastSuccessfulReport,
+        // usageReportResponse?.status === 201 ? new Date() : taskInstance.state.lastSuccessfulReport,
+        201 === 201 ? new Date() : taskInstance.state.lastSuccessfulReport,
     };
     return { state };
   };

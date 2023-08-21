@@ -11,18 +11,19 @@ import {
   KSPM_POLICY_TEMPLATE,
   CNVM_POLICY_TEMPLATE,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { CLOUD_SECURITY_TASK_TYPE, getCloudProductTier } from './cloud_security_metering';
+import { getCloudProductTier } from './cloud_security_metering';
 import { getCloudSecurityUsageRecord } from './cloud_security_metering_task';
 
 import type { ServerlessSecurityConfig } from '../config';
-import type { PostureType } from './types';
+import type { CloudSecuritySolutions } from './types';
 import type { ProductTier } from '../../common/product';
+import { CLOUD_SECURITY_TASK_TYPE } from './constants';
 
 const mockEsClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const chance = new Chance();
 
-const postureTypes: PostureType[] = [
+const postureTypes: CloudSecuritySolutions[] = [
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
   CNVM_POLICY_TEMPLATE,
@@ -49,7 +50,7 @@ describe('getCloudSecurityUsageRecord', () => {
       logger,
       taskId,
       lastSuccessfulReport: new Date(),
-      postureType,
+      cloudSecuritySolution: postureType,
       tier,
     });
 
@@ -87,7 +88,7 @@ describe('getCloudSecurityUsageRecord', () => {
         logger,
         taskId,
         lastSuccessfulReport: new Date(),
-        postureType,
+        cloudSecuritySolution: postureType,
         tier,
       });
 
@@ -128,7 +129,7 @@ describe('getCloudSecurityUsageRecord', () => {
       logger,
       taskId,
       lastSuccessfulReport: new Date(),
-      postureType,
+      cloudSecuritySolution: postureType,
       tier,
     });
 
@@ -151,7 +152,7 @@ describe('getCloudSecurityUsageRecord', () => {
       logger,
       taskId,
       lastSuccessfulReport: new Date(),
-      postureType,
+      cloudSecuritySolution: postureType,
       tier,
     });
 
