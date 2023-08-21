@@ -1,10 +1,4 @@
 soc_manager:
-  indices:
-    - names:
-        - logs-*
-      privileges:
-        - read
-        - write
   applications:
     - application: discover
       privileges:
