@@ -26,7 +26,7 @@ import {
   RawRuleAlertsFilter,
 } from '../types';
 import { AlertingAuthorization } from '../authorization';
-import { AlertingRulesConfig } from '../config';
+import { AlertingConfig, AlertingRulesConfig } from '../config';
 
 export type {
   BulkEditOperation,
@@ -55,6 +55,7 @@ export interface RulesClientContext {
   readonly authorization: AlertingAuthorization;
   readonly ruleTypeRegistry: RuleTypeRegistry;
   readonly minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
+  readonly maxScheduledPerMinute: AlertingConfig['maxScheduledPerMinute'];
   readonly minimumScheduleIntervalInMs: number;
   readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   readonly getActionsClient: () => Promise<ActionsClient>;

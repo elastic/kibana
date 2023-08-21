@@ -65,6 +65,7 @@ export const configSchema = schema.object({
   }),
   enableFrameworkAlerts: schema.boolean({ defaultValue: true }),
   cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
+  maxScheduledPerMinute: schema.number({ defaultValue: 10000 }),
   rules: rulesSchema,
 });
 
