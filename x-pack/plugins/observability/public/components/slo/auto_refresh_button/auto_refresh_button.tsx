@@ -10,20 +10,14 @@ import { i18n } from '@kbn/i18n';
 
 interface Props {
   isAutoRefreshing: boolean;
-  dataTestSubj?: string;
   disabled?: boolean;
   onClick: () => void;
 }
 
-export function AutoRefreshButton({
-  dataTestSubj = 'autoRefreshButton',
-  disabled,
-  isAutoRefreshing,
-  onClick,
-}: Props) {
+export function AutoRefreshButton({ disabled, isAutoRefreshing, onClick }: Props) {
   return isAutoRefreshing ? (
     <EuiButtonEmpty
-      data-test-subj={dataTestSubj}
+      data-test-subj="autoRefreshButton"
       disabled={disabled}
       iconSide="left"
       iconType="pause"
@@ -35,7 +29,7 @@ export function AutoRefreshButton({
     </EuiButtonEmpty>
   ) : (
     <EuiButtonEmpty
-      data-test-subj={dataTestSubj}
+      data-test-subj="autoRefreshButton"
       disabled={disabled}
       iconSide="left"
       iconType="play"
