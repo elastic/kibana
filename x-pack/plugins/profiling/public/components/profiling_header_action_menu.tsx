@@ -12,7 +12,7 @@ import { useHistory } from 'react-router-dom';
 import url from 'url';
 import { ObservabilityAIAssistantActionMenuItem } from '@kbn/observability-ai-assistant-plugin/public';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
-import { NoDataTabs } from '../views/no_data_view';
+import { AddDataTabs } from '../views/add_data_view';
 
 export function ProfilingHeaderActionMenu() {
   const router = useProfilingRouter();
@@ -48,7 +48,7 @@ export function ProfilingHeaderActionMenu() {
       </EuiHeaderLink>
       <EuiHeaderLink
         href={router.link('/add-data-instructions', {
-          query: { selectedTab: NoDataTabs.Kubernetes },
+          query: { selectedTab: AddDataTabs.Kubernetes },
         })}
         color="primary"
       >
