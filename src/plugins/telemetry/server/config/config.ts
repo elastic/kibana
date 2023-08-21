@@ -35,7 +35,7 @@ const configSchema = schema.object({
   }),
   appendServerlessChannelsSuffix: offeringBasedSchema({
     serverless: schema.literal(true),
-    fullyManaged: schema.literal(false),
+    traditional: schema.literal(false),
     options: { defaultValue: schema.contextRef('serverless') },
   }),
   // Used for extra enrichment of telemetry

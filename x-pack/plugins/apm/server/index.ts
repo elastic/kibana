@@ -18,7 +18,7 @@ const disabledOnServerless = offeringBasedSchema({
   serverless: schema.boolean({
     defaultValue: false,
   }),
-  fullyManaged: schema.oneOf([schema.literal(true)], { defaultValue: true }),
+  traditional: schema.oneOf([schema.literal(true)], { defaultValue: true }),
 });
 
 // All options should be documented in the APM configuration settings: https://github.com/elastic/kibana/blob/main/docs/settings/apm-settings.asciidoc

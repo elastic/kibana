@@ -28,7 +28,7 @@ export const ConfigSchema = schema.object({
   maxSpaces: schema.number({ defaultValue: 1000 }),
   allowFeatureVisibility: offeringBasedSchema({
     serverless: schema.literal(false),
-    fullyManaged: schema.boolean({
+    traditional: schema.boolean({
       validate: (rawValue) => {
         // This setting should not be configurable on-prem to avoid bugs when e.g. existing spaces
         // have feature visibility customized but admins would be unable to change them back if the

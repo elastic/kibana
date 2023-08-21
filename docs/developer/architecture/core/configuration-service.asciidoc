@@ -213,7 +213,7 @@ export const config = {
 };
 ----
 
-For Serverless vs. Fully Managed configuration, you are encouraged to use the `offeringBasedSchema` helper:
+For Serverless vs. Traditional configuration, you are encouraged to use the `offeringBasedSchema` helper:
 
 [source,js]
 ----

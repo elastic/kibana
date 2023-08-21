@@ -86,11 +86,11 @@ const EncryptionKeySchema = schema.conditional(
 const RolesSchema = schema.object({
   enabled: offeringBasedSchema({
     serverless: schema.boolean({ defaultValue: false }),
-    fullyManaged: schema.boolean({ defaultValue: true }),
+    traditional: schema.boolean({ defaultValue: true }),
   }), // true: use ES API for access control (deprecated in 7.x). false: use Kibana API for application features (8.0)
   allow: offeringBasedSchema({
     serverless: schema.arrayOf(schema.string(), { defaultValue: [] }),
-    fullyManaged: schema.arrayOf(schema.string(), { defaultValue: ['reporting_user'] }),
+    traditional: schema.arrayOf(schema.string(), { defaultValue: ['reporting_user'] }),
   }),
 });
 
@@ -116,14 +116,14 @@ const ExportTypeSchema = schema.object({
   png: schema.object({
     enabled: offeringBasedSchema({
       serverless: schema.boolean({ defaultValue: false }),
-      fullyManaged: schema.boolean({ defaultValue: true }),
+      traditional: schema.boolean({ defaultValue: true }),
     }),
   }),
   // Pdf reports are disabled in serverless
   pdf: schema.object({
     enabled: offeringBasedSchema({
       serverless: schema.boolean({ defaultValue: false }),
-      fullyManaged: schema.boolean({ defaultValue: true }),
+      traditional: schema.boolean({ defaultValue: true }),
     }),
   }),
 });

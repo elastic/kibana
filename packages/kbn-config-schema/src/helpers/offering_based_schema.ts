@@ -10,23 +10,23 @@ import { schema } from '../..';
 import { Type, TypeOptions } from '../types';
 
 /**
- * Helper to apply different validations depending on whether Kibana is running the Serverless or Fully Managed offering.
+ * Helper to apply different validations depending on whether Kibana is running the Serverless or Traditional offering.
  *
  * @example Only allow the setting on Serverless
  * const config = schema.object({
  *   myProp: offeringBasedSchema({ serverless: schema.boolean({ defaultValue: true }) }),
  * });
  *
- * @example Only allow the setting on Fully Managed
+ * @example Only allow the setting on Traditional
  * const config = schema.object({
  *   myProp: offeringBasedSchema({ fullyManaged: schema.boolean({ defaultValue: true }) }),
  * });
  *
- * @example Fixed value on Fully Managed, configurable on Serverless
+ * @example Fixed value on Traditional, configurable on Serverless
  * const config = schema.object({
  *   myProp: offeringBasedSchema({
  *     serverless: schema.boolean({ defaultValue: true }),
- *     fullyManaged: schema.literal(false), // this can be skipped if users can't specify it in the config
+ *     traditional: schema.literal(false), // this can be skipped if users can't specify it in the config
  *     options: { defaultValue: false },
  *   }),
  * });
@@ -35,25 +35,25 @@ import { Type, TypeOptions } from '../types';
  * const config = schema.object({
  *   myProp: offeringBasedSchema({
  *     serverless: schema.boolean({ defaultValue: true }),
- *     fullyManaged: schema.boolean({ defaultValue: false }),
+ *     traditional: schema.boolean({ defaultValue: false }),
  *   }),
  * });
  *
  * @param opts.serverless The validation to apply in the Serverless offering. If not provided, it doesn't allow the setting to be set in this offering.
- * @param opts.fullyManaged The validation to apply in the Fully Managed offering. If not provided, it doesn't allow the setting to be set in this offering.
+ * @param opts.traditional The validation to apply in the Traditional offering. If not provided, it doesn't allow the setting to be set in this offering.
  * @param opts.options Any options to pass down in the types.
  */
 export function offeringBasedSchema<V>(opts: {
   serverless?: Type<V>;
-  fullyManaged?: Type<V>;
+  traditional?: Type<V>;
   options?: TypeOptions<V>;
 }) {
-  const { serverless = schema.never(), fullyManaged = schema.never(), options } = opts;
+  const { serverless = schema.never(), traditional = schema.never(), options } = opts;
   return schema.conditional(
     schema.contextRef('serverless'),
     true,
     serverless,
-    fullyManaged,
+    traditional,
     options
   );
 }

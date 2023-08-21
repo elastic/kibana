@@ -40,9 +40,9 @@ describe('Helper: offeringBasedSchema()', () => {
     });
   });
 
-  describe('Example: Only allow the setting on Fully Managed', () => {
+  describe('Example: Only allow the setting on Traditional', () => {
     const validation = schema.object({
-      myProp: offeringBasedSchema({ fullyManaged: schema.boolean({ defaultValue: true }) }),
+      myProp: offeringBasedSchema({ traditional: schema.boolean({ defaultValue: true }) }),
     });
 
     test('it uses the non-serverless validation when the context is not present', () => {
@@ -70,7 +70,7 @@ describe('Helper: offeringBasedSchema()', () => {
     });
   });
 
-  describe('Example: Fixed setting on Fully Managed, configurable on Serverless', () => {
+  describe('Example: Fixed setting on Traditional, configurable on Serverless', () => {
     const validation = schema.object({
       myProp: offeringBasedSchema({
         serverless: schema.boolean({ defaultValue: true }),
@@ -103,11 +103,11 @@ describe('Helper: offeringBasedSchema()', () => {
     });
   });
 
-  describe('Example: Fixed setting on Fully Managed (though settable), configurable on Serverless', () => {
+  describe('Example: Fixed setting on Traditional (though settable), configurable on Serverless', () => {
     const validation = schema.object({
       myProp: offeringBasedSchema({
         serverless: schema.boolean({ defaultValue: true }),
-        fullyManaged: schema.literal(false),
+        traditional: schema.literal(false),
         options: { defaultValue: false },
       }),
     });
@@ -137,11 +137,11 @@ describe('Helper: offeringBasedSchema()', () => {
     });
   });
 
-  describe('Example: Fixed setting on Serverless (though settable), configurable on Fully Managed', () => {
+  describe('Example: Fixed setting on Serverless (though settable), configurable on Traditional', () => {
     const validation = schema.object({
       myProp: offeringBasedSchema({
         serverless: schema.literal(false),
-        fullyManaged: schema.boolean({ defaultValue: true }),
+        traditional: schema.boolean({ defaultValue: true }),
         options: { defaultValue: false },
       }),
     });
@@ -175,7 +175,7 @@ describe('Helper: offeringBasedSchema()', () => {
     const validation = schema.object({
       myProp: offeringBasedSchema({
         serverless: schema.boolean({ defaultValue: true }),
-        fullyManaged: schema.boolean({ defaultValue: false }),
+        traditional: schema.boolean({ defaultValue: false }),
       }),
     });
 
@@ -209,7 +209,7 @@ describe('Helper: offeringBasedSchema()', () => {
       myProp: offeringBasedSchema({
         serverless: schema.boolean({ defaultValue: true }),
         // @ts-expect-error
-        fullyManaged: schema.string({ defaultValue: 'not on serverless' }),
+        traditional: schema.string({ defaultValue: 'not on serverless' }),
       }),
     });
   });
