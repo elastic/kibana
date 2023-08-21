@@ -75,8 +75,7 @@ const createSearchFnMock = (nrOfHits: number) => {
 
 const dataViewMock = buildDataViewMock({ name: 'the-data-view', fields: deepMockedFields });
 
-// FLAKY: https://github.com/elastic/kibana/issues/162997
-describe.skip('saved search embeddable', () => {
+describe('saved search embeddable', () => {
   let mountpoint: HTMLDivElement;
   let servicesMock: jest.Mocked<DiscoverServices>;
 
@@ -325,8 +324,8 @@ describe.skip('saved search embeddable', () => {
   it('should not reload when the input title doesnt change', async () => {
     const search = jest.fn().mockReturnValue(getSearchResponse(1));
     const { embeddable } = createEmbeddable({ searchMock: search, customTitle: 'custom title' });
-    await waitOneTick();
     embeddable.reload = jest.fn();
+    await waitOneTick();
     embeddable.render(mountpoint);
     // wait for data fetching
     await waitOneTick();
@@ -340,8 +339,8 @@ describe.skip('saved search embeddable', () => {
   it('should reload when a different input title is set', async () => {
     const search = jest.fn().mockReturnValue(getSearchResponse(1));
     const { embeddable } = createEmbeddable({ searchMock: search, customTitle: 'custom title' });
-    await waitOneTick();
     embeddable.reload = jest.fn();
+    await waitOneTick();
     embeddable.render(mountpoint);
 
     await waitOneTick();
@@ -355,8 +354,8 @@ describe.skip('saved search embeddable', () => {
   it('should not reload and fetch when a input title matches the saved search title', async () => {
     const search = jest.fn().mockReturnValue(getSearchResponse(1));
     const { embeddable } = createEmbeddable({ searchMock: search });
-    await waitOneTick();
     embeddable.reload = jest.fn();
+    await waitOneTick();
     embeddable.render(mountpoint);
     await waitOneTick();
     embeddable.updateOutput({ title: 'saved search' });

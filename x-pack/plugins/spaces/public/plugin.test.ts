@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { advancedSettingsMock } from '@kbn/advanced-settings-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import {
@@ -62,29 +61,6 @@ describe('Spaces plugin', () => {
           showOnHomePage: false,
         })
       );
-    });
-
-    it('should register the advanced settings components if the advanced_settings plugin is available', () => {
-      const coreSetup = coreMock.createSetup();
-      const advancedSettings = advancedSettingsMock.createSetupContract();
-
-      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext());
-      plugin.setup(coreSetup, { advancedSettings });
-
-      expect(advancedSettings.component.register.mock.calls).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "advanced_settings_page_title",
-            [Function],
-            true,
-          ],
-          Array [
-            "advanced_settings_page_subtitle",
-            [Function],
-            true,
-          ],
-        ]
-      `);
     });
   });
 

@@ -279,7 +279,10 @@ export const useDiscoverHistogram = ({
         textBasedFetchComplete$.pipe(map(() => 'discover'))
       ).pipe(debounceTime(50));
     } else {
-      fetch$ = stateContainer.dataState.fetch$.pipe(map(() => 'discover'));
+      fetch$ = stateContainer.dataState.fetch$.pipe(
+        filter(({ options }) => !options.fetchMore), // don't update histogram for "Load more" in the grid
+        map(() => 'discover')
+      );
     }
 
     const subscription = fetch$.subscribe((source) => {
