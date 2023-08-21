@@ -1126,8 +1126,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should schedule actions for summary of alerts on a custom interval', async () => {
-      const testStart = new Date();
-
       actionId = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
@@ -1181,7 +1179,11 @@ export default function ({ getService }: FtrProviderContext) {
       ruleId = createdRule.id;
       expect(ruleId).not.to.be(undefined);
 
-      await waitForNumRuleRuns({ supertest, numOfRuns: 3, ruleId, esClient, testStart });
+      await runRule({
+        supertest,
+        ruleId,
+      });
+
       const resp = await waitForDocumentInIndex({
         esClient,
         indexName: ALERT_ACTION_INDEX,
