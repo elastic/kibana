@@ -5,76 +5,19 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type {
-  FormBasedPersistedState,
-  MetricVisualizationState,
-  PersistedIndexPatternLayer,
-  TypedLensByValueInput,
-  XYState,
-  FormulaPublicApi,
+  MetricLayerConfig,
   XYLayerConfig,
-} from '@kbn/lens-plugin/public';
+  XYReferenceLinesLayerConfig,
+} from '@kbn/lens-embeddable-utils';
 import { hostLensFormulas } from './constants';
-export type LensAttributes = TypedLensByValueInput['attributes'];
-
-// Attributes
-export type LensVisualizationState = XYState | MetricVisualizationState;
-
-export interface VisualizationAttributesBuilder {
-  build(): LensAttributes;
-}
-
-// Column
-export interface ChartColumn {
-  getData(
-    id: string,
-    baseLayer: PersistedIndexPatternLayer,
-    dataView: DataView
-  ): PersistedIndexPatternLayer;
-  getFormulaConfig(): FormulaConfig;
-}
-
-// Layer
-export type LensLayerConfig = XYLayerConfig | MetricVisualizationState;
-
-export interface ChartLayer<TLayerConfig extends LensLayerConfig> {
-  getName(): string | undefined;
-  getLayer(
-    layerId: string,
-    accessorId: string,
-    dataView: DataView
-  ): FormBasedPersistedState['layers'];
-  getReference(layerId: string, dataView: DataView): SavedObjectReference[];
-  getLayerConfig(layerId: string, acessorId: string): TLayerConfig;
-}
-
-// Chart
-export interface Chart<TVisualizationState extends LensVisualizationState> {
-  getTitle(): string;
-  getVisualizationType(): string;
-  getLayers(): FormBasedPersistedState['layers'];
-  getVisualizationState(): TVisualizationState;
-  getReferences(): SavedObjectReference[];
-  getDataView(): DataView;
-}
-export interface ChartConfig<
-  TLayer extends ChartLayer<LensLayerConfig> | Array<ChartLayer<LensLayerConfig>>
-> {
-  dataView: DataView;
-  layers: TLayer;
-  title?: string;
-}
-
-// Formula
-type LensFormula = Parameters<FormulaPublicApi['insertOrReplaceFormulaColumn']>[1];
-export type FormulaConfig = Omit<LensFormula, 'format' | 'formula'> & {
-  color?: string;
-  format: NonNullable<LensFormula['format']>;
-  value: string;
-};
 
 export type HostsLensFormulas = keyof typeof hostLensFormulas;
 export type HostsLensMetricChartFormulas = Exclude<HostsLensFormulas, 'diskIORead' | 'diskIOWrite'>;
 export type HostsLensLineChartFormulas = Exclude<HostsLensFormulas, 'hostCount'>;
+
+export type XYChartLayerParams =
+  | (XYLayerConfig & { type: 'visualization' })
+  | (XYReferenceLinesLayerConfig & { type: 'referenceLines' });
+
+export type MetricChartLayerParams = MetricLayerConfig & { type: 'visualization' };

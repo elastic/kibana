@@ -9,9 +9,9 @@ import { isValidHex } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { isValidSpaceIdentifier } from './space_identifier_utils';
 import { isReservedSpace } from '../../../common/is_reserved_space';
 import type { FormValues } from '../edit_space/manage_space_page';
-import { isValidSpaceIdentifier } from './space_identifier_utils';
 
 interface SpaceValidatorOptions {
   shouldValidate?: boolean;

@@ -19,7 +19,7 @@ export const aiopsLogRateAnalysisSchema = schema.object({
   baselineMax: schema.number(),
   deviationMin: schema.number(),
   deviationMax: schema.number(),
-  /** The index to query for log rate spikes */
+  /** The index to query for log rate analysis */
   index: schema.string(),
   /** Settings to override headers derived compression and flush fix */
   compressResponse: schema.maybe(schema.boolean()),

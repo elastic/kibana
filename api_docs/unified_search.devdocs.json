@@ -470,7 +470,7 @@
               },
               "[] | undefined; hiddenFilterPanelOptions?: ",
               "FilterPanelOption",
-              "[] | undefined; isRefreshPaused?: boolean | undefined; dateRangeFrom?: string | undefined; dateRangeTo?: string | undefined; showSaveQuery?: boolean | undefined; savedQuery?: ",
+              "[] | undefined; prependFilterBar?: React.ReactNode; isRefreshPaused?: boolean | undefined; dateRangeFrom?: string | undefined; dateRangeTo?: string | undefined; showSaveQuery?: boolean | undefined; savedQuery?: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -624,35 +624,12 @@
           {
             "parentPluginId": "unifiedSearch",
             "id": "def-public.ApplyGlobalFilterActionContext.embeddable",
-            "type": "Object",
+            "type": "Unknown",
             "tags": [],
             "label": "embeddable",
             "description": [],
             "signature": [
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.IEmbeddable",
-                "text": "IEmbeddable"
-              },
-              "<",
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.EmbeddableInput",
-                "text": "EmbeddableInput"
-              },
-              ", ",
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.EmbeddableOutput",
-                "text": "EmbeddableOutput"
-              },
-              ", any> | undefined"
+              "unknown"
             ],
             "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts",
             "deprecated": false,

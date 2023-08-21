@@ -25,20 +25,22 @@ export const PROFILING_FEEDBACK_LINK = 'https://ela.st/profiling-feedback';
 
 export function ProfilingAppPageTemplate({
   children,
-  tabs,
+  tabs = [],
   hideSearchBar = false,
   noDataConfig,
   restrictWidth = false,
   pageTitle = i18n.translate('xpack.profiling.appPageTemplate.pageTitle', {
     defaultMessage: 'Universal Profiling',
   }),
+  showBetaBadge = false,
 }: {
   children: React.ReactElement;
-  tabs: EuiPageHeaderContentProps['tabs'];
+  tabs?: EuiPageHeaderContentProps['tabs'];
   hideSearchBar?: boolean;
   noDataConfig?: NoDataPageProps;
   restrictWidth?: boolean;
   pageTitle?: React.ReactNode;
+  showBetaBadge?: boolean;
 }) {
   const {
     start: { observabilityShared },
@@ -73,15 +75,17 @@ export function ProfilingAppPageTemplate({
             <EuiFlexItem grow={false}>
               <h1>{pageTitle}</h1>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label="Beta"
-                color="hollow"
-                tooltipContent={i18n.translate('xpack.profiling.header.betaBadgeTooltip', {
-                  defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
-                })}
-              />
-            </EuiFlexItem>
+            {showBetaBadge && (
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label="Beta"
+                  color="hollow"
+                  tooltipContent={i18n.translate('xpack.profiling.header.betaBadgeTooltip', {
+                    defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
+                  })}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         ),
         tabs,

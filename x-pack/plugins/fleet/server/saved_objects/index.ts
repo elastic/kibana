@@ -25,6 +25,10 @@ import {
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
+import { migrateOutputEvictionsFromV8100, migrateOutputToV8100 } from './migrations/to_v8_10_0';
+
+import { migrateSyntheticsPackagePolicyToV8100 } from './migrations/synthetics/to_v8_10_0';
+
 import { migratePackagePolicyEvictionsFromV8100 } from './migrations/security_solution/to_v8_10_0';
 
 import {
@@ -86,6 +90,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         fleet_server_hosts: { type: 'keyword' },
         has_seen_add_data_notice: { type: 'boolean', index: false },
         prerelease_integrations_enabled: { type: 'boolean' },
+        secret_storage_requirements_met: { type: 'boolean' },
       },
     },
     migrations: {
@@ -175,6 +180,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         compression_level: { type: 'integer' },
         client_id: { type: 'keyword' },
         auth_type: { type: 'keyword' },
+        connection_type: { type: 'keyword' },
         username: { type: 'keyword' },
         password: { type: 'text', index: false },
         sasl: {
@@ -227,6 +233,29 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         broker_timeout: { type: 'integer' },
         broker_ack_reliability: { type: 'text' },
         broker_buffer_size: { type: 'integer' },
+        required_acks: { type: 'integer' },
+        channel_buffer_size: { type: 'integer' },
+      },
+    },
+    modelVersions: {
+      '1': {
+        changes: [
+          {
+            type: 'mappings_deprecation',
+            deprecatedMappings: [
+              'broker_ack_reliability',
+              'broker_buffer_size',
+              'channel_buffer_size',
+            ],
+          },
+          {
+            type: 'data_backfill',
+            backfillFn: migrateOutputToV8100,
+          },
+        ],
+        schemas: {
+          forwardCompatibility: migrateOutputEvictionsFromV8100,
+        },
       },
     },
     migrations: {
@@ -280,6 +309,10 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           {
             type: 'data_backfill',
             backfillFn: migratePackagePolicyToV8100,
+          },
+          {
+            type: 'data_backfill',
+            backfillFn: migrateSyntheticsPackagePolicyToV8100,
           },
         ],
         schemas: {
@@ -421,6 +454,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         name: { type: 'keyword' },
         is_default: { type: 'boolean' },
         host: { type: 'keyword' },
+        proxy_id: { type: 'keyword' },
       },
     },
   },
@@ -522,6 +556,24 @@ export function registerEncryptedSavedObjects(
       'config_yaml',
       'is_preconfigured',
       'proxy_id',
+      'version',
+      'key',
+      'compression',
+      'compression_level',
+      'client_id',
+      'auth_type',
+      'connection_type',
+      'username',
+      'sasl',
+      'partition',
+      'random',
+      'round_robin',
+      'hash',
+      'topics',
+      'headers',
+      'timeout',
+      'broker_timeout',
+      'required_acks',
     ]),
   });
   // Encrypted saved objects

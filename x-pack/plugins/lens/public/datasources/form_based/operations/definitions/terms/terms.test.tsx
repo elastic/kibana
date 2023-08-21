@@ -8,7 +8,14 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
-import { EuiButtonGroup, EuiComboBox, EuiFieldNumber, EuiSelect, EuiSwitch } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiFieldNumber,
+  EuiSelect,
+  EuiSwitch,
+} from '@elastic/eui';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
@@ -1225,7 +1232,7 @@ describe('terms', () => {
 
   describe('field input', () => {
     // @ts-expect-error
-    window['__react-beautiful-dnd-disable-dev-warnings'] = true; // issue with enzyme & react-beautiful-dnd throwing errors: https://github.com/atlassian/react-beautiful-dnd/issues/1593
+    window['__@hello-pangea/dnd-disable-dev-warnings'] = true; // issue with enzyme & @hello-pangea/dnd throwing errors: https://github.com/hello-pangea/dnd/issues/644
 
     const defaultFieldInputProps = {
       indexPattern: defaultProps.indexPattern,
@@ -2477,7 +2484,9 @@ describe('terms', () => {
       const functionComboBox = refEditor
         .find(EuiComboBox)
         .filter('[data-test-subj="indexPattern-reference-function"]');
-      const option = functionComboBox.prop('options')!.find(({ label }) => label === 'Average')!;
+      const option = functionComboBox
+        .prop('options')!
+        .find(({ label }: EuiComboBoxOptionOption) => label === 'Average')!;
 
       act(() => {
         functionComboBox.prop('onChange')!([option]);
@@ -2546,7 +2555,7 @@ describe('terms', () => {
 
       const option = fieldComboBox
         .prop('options')[0]
-        .options!.find(({ label }) => label === 'memory')!;
+        .options!.find(({ label }: EuiComboBoxOptionOption) => label === 'memory')!;
       act(() => {
         fieldComboBox.prop('onChange')!([option]);
       });
@@ -2627,7 +2636,9 @@ describe('terms', () => {
       const functionComboBox = comboBoxes.filter(
         '[data-test-subj="indexPattern-reference-function"]'
       );
-      const option = functionComboBox.prop('options')!.find(({ label }) => label === 'Average')!;
+      const option = functionComboBox
+        .prop('options')!
+        .find(({ label }: EuiComboBoxOptionOption) => label === 'Average')!;
       act(() => {
         functionComboBox.prop('onChange')!([option]);
       });

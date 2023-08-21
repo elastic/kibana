@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { RISK_SCORE_CALCULATION_URL } from '@kbn/security-solution-plugin/common/constants';
-import type { RiskScore } from '@kbn/security-solution-plugin/server/lib/risk_engine/types';
+import type { RiskScore } from '@kbn/security-solution-plugin/common/risk_engine';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { deleteAllAlerts, deleteAllRules } from '../../../utils';
@@ -123,7 +123,8 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
       });
 
-      describe('paging through calculationss', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/162736
+      describe.skip('paging through calculationss', () => {
         let documentId: string;
         beforeEach(async () => {
           documentId = uuidv4();

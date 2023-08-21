@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { VectorScoreBase, Vector } from '../types';
+import { VectorScoreBase } from '../../../../common/schemas';
+import { Vector } from '../types';
 
 export const getVectorScoreList = (vectorBaseScore: VectorScoreBase) => {
   const result: Vector[] = [];

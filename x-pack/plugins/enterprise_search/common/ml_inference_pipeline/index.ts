@@ -8,8 +8,6 @@
 import {
   IngestInferenceProcessor,
   IngestPipeline,
-  IngestRemoveProcessor,
-  IngestSetProcessor,
   MlTrainedModelConfig,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -57,7 +55,6 @@ export const generateMlInferencePipelineBody = ({
   model,
   pipelineName,
 }: MlInferencePipelineParams): MlInferencePipeline => {
-  const inferenceType = Object.keys(model.inference_config || {})[0];
   const pipelineDefinition: MlInferencePipeline = {
     description: description ?? '',
     processors: [],
@@ -67,7 +64,6 @@ export const generateMlInferencePipelineBody = ({
   pipelineDefinition.processors = [
     // Add remove and inference processors
     ...fieldMappings.flatMap(({ sourceField, targetField }) => {
-      const remove = getRemoveProcessorForInferenceType(targetField, inferenceType);
       const inference = getInferenceProcessor(
         sourceField,
         targetField,
@@ -79,11 +75,10 @@ export const generateMlInferencePipelineBody = ({
       return [
         {
           remove: {
-            field: getMlInferencePrefixedFieldName(targetField),
+            field: targetField,
             ignore_missing: true,
           },
         },
-        ...(remove ? [{ remove }] : []),
         { inference },
       ];
     }),
@@ -101,12 +96,6 @@ export const generateMlInferencePipelineBody = ({
         ],
       },
     },
-    // Add set processors
-    ...fieldMappings.flatMap(({ targetField }) => {
-      const set = getSetProcessorForInferenceType(targetField, inferenceType);
-
-      return set ? [{ set }] : [];
-    }),
   ];
 
   return pipelineDefinition;
@@ -144,49 +133,8 @@ export const getInferenceProcessor = (
         },
       },
     ],
-    target_field: getMlInferencePrefixedFieldName(targetField),
+    target_field: targetField,
   };
-};
-
-export const getSetProcessorForInferenceType = (
-  targetField: string,
-  inferenceType: string
-): IngestSetProcessor | undefined => {
-  let set: IngestSetProcessor | undefined;
-  if (inferenceType === SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION) {
-    set = {
-      copy_from: `${getMlInferencePrefixedFieldName(targetField)}.predicted_value`,
-      description: `Copy the predicted_value to '${targetField}' if the prediction_probability is greater than 0.5`,
-      field: targetField,
-      if: `ctx?.ml?.inference != null && ctx.ml.inference['${targetField}'] != null && ctx.ml.inference['${targetField}'].prediction_probability > 0.5`,
-      value: undefined,
-    };
-  } else if (inferenceType === SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING) {
-    set = {
-      copy_from: `${getMlInferencePrefixedFieldName(targetField)}.predicted_value`,
-      description: `Copy the predicted_value to '${targetField}'`,
-      field: targetField,
-      if: `ctx?.ml?.inference != null && ctx.ml.inference['${targetField}'] != null`,
-      value: undefined,
-    };
-  }
-
-  return set;
-};
-
-export const getRemoveProcessorForInferenceType = (
-  targetField: string,
-  inferenceType: string
-): IngestRemoveProcessor | undefined => {
-  if (
-    inferenceType === SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION ||
-    inferenceType === SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING
-  ) {
-    return {
-      field: targetField,
-      ignore_missing: true,
-    };
-  }
 };
 
 /**

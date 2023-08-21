@@ -12,10 +12,9 @@ import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { Position } from '@elastic/charts/dist/utils/common';
-import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useAbsoluteDate } from '../../../hooks';
 
 export const StepDurationPanel = ({
@@ -32,17 +31,11 @@ export const StepDurationPanel = ({
 
   const { monitor } = useSelectedMonitor();
 
-  const monitorId = useMonitorQueryId();
-
-  const selectedLocation = useSelectedLocation();
+  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
 
   const isBrowser = monitor?.type === 'browser';
 
-  if (!selectedLocation) {
-    return null;
-  }
-
-  if (!monitorId) {
+  if (!queryIdFilter) {
     return null;
   }
 
@@ -78,10 +71,8 @@ export const StepDurationPanel = ({
           {
             time,
             name: label,
-            reportDefinitions: {
-              'monitor.id': [monitorId],
-              'observer.geo.name': [selectedLocation?.label],
-            },
+            reportDefinitions: queryIdFilter,
+            filters: locationFilter,
             selectedMetricField:
               isBrowser && doBreakdown ? 'synthetics.step.duration.us' : 'monitor.duration.us',
             dataType: 'synthetics',

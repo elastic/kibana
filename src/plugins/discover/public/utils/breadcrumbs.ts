@@ -17,7 +17,7 @@ const getRootPath = ({ history }: DiscoverServices) => {
   return profile ? addProfile(rootPath, profile) : rootPath;
 };
 
-export function getRootBreadcrumbs({
+function getRootBreadcrumbs({
   breadcrumb,
   services,
 }: {
@@ -34,49 +34,44 @@ export function getRootBreadcrumbs({
   ];
 }
 
-export function getSavedSearchBreadcrumbs({
-  id,
-  services,
-}: {
-  id: string;
-  services: DiscoverServices;
-}) {
-  return [
-    ...getRootBreadcrumbs({ services }),
-    {
-      text: id,
-    },
-  ];
-}
-
 /**
  * Helper function to set the Discover's breadcrumb
  * if there's an active savedSearch, its title is appended
  */
-export function setBreadcrumbsTitle({
-  title,
+export function setBreadcrumbs({
+  rootBreadcrumbPath,
+  titleBreadcrumbText,
   services,
 }: {
-  title: string | undefined;
+  rootBreadcrumbPath?: string;
+  titleBreadcrumbText?: string;
   services: DiscoverServices;
 }) {
+  const rootBreadcrumbs = getRootBreadcrumbs({
+    breadcrumb: rootBreadcrumbPath,
+    services,
+  });
   const discoverBreadcrumbsTitle = i18n.translate('discover.discoverBreadcrumbTitle', {
     defaultMessage: 'Discover',
   });
 
-  if (title) {
-    services.chrome.setBreadcrumbs([
-      {
-        text: discoverBreadcrumbsTitle,
-        href: getRootPath(services),
-      },
-      { text: title },
-    ]);
+  if (services.serverless) {
+    // in serverless only set breadcrumbs for saved search title
+    // the root breadcrumbs are set automatically by the serverless navigation
+    if (titleBreadcrumbText) {
+      services.serverless.setBreadcrumbs([{ text: titleBreadcrumbText }]);
+    } else {
+      services.serverless.setBreadcrumbs([]);
+    }
   } else {
-    services.chrome.setBreadcrumbs([
-      {
-        text: discoverBreadcrumbsTitle,
-      },
-    ]);
+    if (titleBreadcrumbText) {
+      services.chrome.setBreadcrumbs([...rootBreadcrumbs, { text: titleBreadcrumbText }]);
+    } else {
+      services.chrome.setBreadcrumbs([
+        {
+          text: discoverBreadcrumbsTitle,
+        },
+      ]);
+    }
   }
 }
