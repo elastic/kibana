@@ -51,7 +51,7 @@ const baseKibanaFeature: BaseKibanaFeatureConfig = {
   category,
 };
 
-const priviledges = {
+const privileges = {
   privileges: {
     all: {
       api: ['api-read', 'api-write', 'test-capability'],
@@ -133,12 +133,6 @@ const securityKibanaSubFeatures = {
   securitySubFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
 };
 
-const securityCasesKibanaFeatures = {
-  getCasesBaseKibanaFeature: jest.fn(() => CASES_BASE_CONFIG),
-  getCasesBaseKibanaSubFeatureIds: jest.fn(() => ['subFeature1']),
-  getCasesAppFeaturesConfig: jest.fn(() => CASES_APP_FEATURE_CONFIG),
-};
-
 const securityCasesKibanaSubFeatures = {
   casesSubFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
 };
@@ -162,7 +156,7 @@ describe('AppFeatures', () => {
     expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
       ...baseKibanaFeature,
       ...SECURITY_APP_FEATURE_CONFIG.get('test-base-feature' as AppFeatureKey),
-      ...priviledges,
+      ...privileges,
       subFeatures: [{ baz: 'baz' }],
     });
   });
