@@ -104,10 +104,19 @@ const dataViews = {
   },
 };
 
+const charts = {
+  createStart() {
+    return {
+      activeCursor: false,
+    };
+  },
+};
+
 export const observabilityPublicPluginsStartMock = {
   createStart() {
     return {
       cases: mockCasesContract(),
+      charts: charts.createStart(),
       triggersActionsUi: triggersActionsUiStartMock.createStart(),
       data: data.createStart(),
       dataViews: dataViews.createStart(),

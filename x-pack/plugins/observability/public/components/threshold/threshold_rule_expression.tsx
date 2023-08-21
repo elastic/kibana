@@ -12,6 +12,7 @@ import {
   EuiCallOut,
   EuiCheckbox,
   EuiEmptyPrompt,
+  EuiFormErrorText,
   EuiFormRow,
   EuiIcon,
   EuiLink,
@@ -67,6 +68,7 @@ export default function Expressions(props: Props) {
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const [dataView, setDataView] = useState<DataView>();
+  const [dataViewTimeField, setDataViewTimeField] = useState<string>();
   const [searchSource, setSearchSource] = useState<ISearchSource>();
   const [paramsError, setParamsError] = useState<Error>();
   const derivedIndexPattern = useMemo<DataViewBase>(
@@ -99,6 +101,24 @@ export default function Expressions(props: Props) {
         setRuleParams('searchConfiguration', initialSearchConfiguration);
         setSearchSource(createdSearchSource);
         setDataView(createdSearchSource.getField('index'));
+
+        if (createdSearchSource.getField('index')) {
+          const timeFieldName = createdSearchSource.getField('index')?.timeFieldName;
+          if (!timeFieldName) {
+            setDataViewTimeField(
+              i18n.translate(
+                'xpack.observability.threshold.rule.alertFlyout.dataViewError.noTimestamp',
+                {
+                  defaultMessage: 'The selected data view does not have a timestamp field',
+                }
+              )
+            );
+          } else {
+            setDataViewTimeField(undefined);
+          }
+        } else {
+          setDataViewTimeField(undefined);
+        }
       } catch (error) {
         setParamsError(error);
       }
@@ -106,7 +126,7 @@ export default function Expressions(props: Props) {
 
     initSearchSource();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.search.searchSource, data.dataViews]);
+  }, [data.search.searchSource, data.dataViews, dataView]);
 
   const options = useMemo<MetricsExplorerOptions>(() => {
     if (metadata?.currentOptions?.metrics) {
@@ -356,6 +376,11 @@ export default function Expressions(props: Props) {
           onChangeMetaData({ ...metadata, adHocDataViewList });
         }}
       />
+      {dataViewTimeField && (
+        <EuiFormErrorText data-test-subj="thresholdRuleDataViewErrorNoTimestamp">
+          {dataViewTimeField}
+        </EuiFormErrorText>
+      )}
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h5>
