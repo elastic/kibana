@@ -68,7 +68,7 @@ export default function Expressions(props: Props) {
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const [dataView, setDataView] = useState<DataView>();
-  const [dataViewTimeField, setDataViewTimeField] = useState<string>();
+  const [dataViewTimeFieldError, setDataViewTimeFieldError] = useState<string>();
   const [searchSource, setSearchSource] = useState<ISearchSource>();
   const [paramsError, setParamsError] = useState<Error>();
   const derivedIndexPattern = useMemo<DataViewBase>(
@@ -105,19 +105,20 @@ export default function Expressions(props: Props) {
         if (createdSearchSource.getField('index')) {
           const timeFieldName = createdSearchSource.getField('index')?.timeFieldName;
           if (!timeFieldName) {
-            setDataViewTimeField(
+            setDataViewTimeFieldError(
               i18n.translate(
                 'xpack.observability.threshold.rule.alertFlyout.dataViewError.noTimestamp',
                 {
-                  defaultMessage: 'The selected data view does not have a timestamp field',
+                  defaultMessage:
+                    'The selected data view does not have a timestamp field, please select another data view.',
                 }
               )
             );
           } else {
-            setDataViewTimeField(undefined);
+            setDataViewTimeFieldError(undefined);
           }
         } else {
-          setDataViewTimeField(undefined);
+          setDataViewTimeFieldError(undefined);
         }
       } catch (error) {
         setParamsError(error);
@@ -383,9 +384,9 @@ export default function Expressions(props: Props) {
           onChangeMetaData({ ...metadata, adHocDataViewList });
         }}
       />
-      {dataViewTimeField && (
+      {dataViewTimeFieldError && (
         <EuiFormErrorText data-test-subj="thresholdRuleDataViewErrorNoTimestamp">
-          {dataViewTimeField}
+          {dataViewTimeFieldError}
         </EuiFormErrorText>
       )}
       <EuiSpacer size="l" />

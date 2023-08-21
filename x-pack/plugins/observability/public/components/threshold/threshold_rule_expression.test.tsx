@@ -176,10 +176,18 @@ describe('Expression', () => {
     const mockedSearchSource = {
       id: 'data_source',
       shouldOverwriteDataViewType: false,
+      requestStartHandlers: [],
+      inheritOptions: {},
+      history: [],
       fields: {
         index: mockedIndex,
       },
       getField: jest.fn(() => mockedDataView),
+      dependencies: {
+        aggs: {
+          types: {},
+        },
+      },
     };
     const kibanaMock = kibanaStartMock.startContract();
     useKibanaMock.mockReturnValue({
@@ -206,6 +214,8 @@ describe('Expression', () => {
     const { wrapper } = await setup(currentOptions);
     expect(
       wrapper.find(`[data-test-subj="thresholdRuleDataViewErrorNoTimestamp"]`).first().text()
-    ).toBe('The selected data view does not have a timestamp field');
+    ).toBe(
+      'The selected data view does not have a timestamp field, please select another data view.'
+    );
   });
 });
