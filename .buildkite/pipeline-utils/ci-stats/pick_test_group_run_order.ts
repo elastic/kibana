@@ -24,6 +24,7 @@ import {
   getListFromEnv,
   getRequiredEnv,
   getTrackedBranch,
+  intersection,
   isObj,
 } from './utils';
 
@@ -79,11 +80,13 @@ export async function pickTestGroupRunOrder() {
 
   const allJestTestFiles = await getAllTestFilesForConfigs(jestUnitConfigs);
   const allChangedFiles = getChangedFileList();
+  const changedTestFiles = intersection(allJestTestFiles, allChangedFiles);
 
   console.log('--- All jest configs listed');
   console.log({
     allJestTestFiles,
     allChangedFiles,
+    changedTestFiles,
   });
 
   throw new Error('STOP HERE!');

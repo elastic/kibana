@@ -8,8 +8,8 @@
 
 import { execSync } from 'child_process';
 import Fs from 'fs';
-
-import { getChangedFilesForRoots } from 'jest-changed-files';
+import globby from 'globby';
+import path from 'path';
 
 export const getRequiredEnv = (name: string) => {
   const value = process.env[name];
@@ -92,10 +92,21 @@ export async function getAllTestFilesForConfigs(configPaths: string[]): Promise<
     return configPath.replace('/jest.config.js', '');
   });
 
-  console.log({ allRoots });
+  const allTestFiles = allRoots
+    .map((testRoot) => {
+      const testFiles = globby
+        .sync(['*.test.ts', '*.test.tsx', '*.test.js', '*.test.jsx', '!*integration*'], {
+          cwd: testRoot,
+          onlyFiles: true,
+        })
+        .map((fileName) => path.join(testRoot, fileName));
+      return testFiles || [];
+    })
+    .flat();
 
-  const trackedBranch = getTrackedBranch();
-  const { changedFiles } = await getChangedFilesForRoots(allRoots, { changedSince: trackedBranch });
+  return allTestFiles;
+}
 
-  return [...changedFiles];
+export function intersection(arr1: string[], arr2: string[]) {
+  return arr1.filter((a1) => arr2.includes(a1));
 }
