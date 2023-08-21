@@ -8,12 +8,15 @@ info:
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
-tags:
-  - name: connectors
-    description: Connector APIs enable you to create and manage connectors.
 servers:
   - url: http://localhost:5601
     description: local
+security:
+  - basicAuth: []
+  - apiKeyAuth: []
+tags:
+  - name: connectors
+    description: Connector APIs enable you to create and manage connectors.
 paths:
   /s/{spaceId}/api/actions/connector:
     post:
@@ -3354,6 +3357,3 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/action_response_properties'
-security:
-  - basicAuth: []
-  - apiKeyAuth: []
