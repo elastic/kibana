@@ -586,10 +586,13 @@ export interface DocLinks {
     readonly rubyGettingStarted: string;
   };
   readonly serverlessSearch: {
-    readonly integrations: string;
     readonly gettingStartedExplore: string;
     readonly gettingStartedIngest: string;
     readonly gettingStartedSearch: string;
+    readonly integrations: string;
+    readonly integrationsBeats: string;
+    readonly integrationsConnectorClient: string;
+    readonly integrationsLogstash: string;
   };
   readonly synthetics: {
     readonly featureRoles: string;
