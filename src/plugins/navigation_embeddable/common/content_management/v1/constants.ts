@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { UrlDrilldownOptions } from '@kbn/ui-actions-enhanced-plugin/public';
-import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
+import { UrlDrilldownOptions } from '@kbn/ui-actions-enhanced-plugin/common';
+import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/common';
 
 /**
  * Link types

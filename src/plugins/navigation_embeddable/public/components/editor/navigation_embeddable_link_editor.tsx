@@ -26,16 +26,14 @@ import {
   EuiFlyoutHeader,
   EuiRadioGroupOption,
 } from '@elastic/eui';
+import { UrlDrilldownOptions } from '@kbn/ui-actions-enhanced-plugin/common';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
-import {
-  UrlDrilldownOptions,
-  UrlDrilldownOptionsComponent,
-} from '@kbn/ui-actions-enhanced-plugin/public';
+import { UrlDrilldownOptionsComponent } from '@kbn/ui-actions-enhanced-plugin/public';
 import {
   withSuspense,
-  DashboardDrilldownOptions,
   LazyDashboardDrilldownOptionsComponent,
 } from '@kbn/presentation-util-plugin/public';
+import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/common';
 
 import {
   NavigationLinkType,

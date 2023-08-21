@@ -44,7 +44,6 @@ export type {
 export type {
   UrlDrilldownConfig,
   UrlDrilldownGlobalScope,
-  UrlDrilldownOptions,
   UrlDrilldownScope,
 } from './drilldowns/url_drilldown';
 export {

@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type UrlDrilldownOptions = {
-  openInNewTab: boolean;
-  encodeUrl?: boolean;
-};
+import { UrlDrilldownOptions } from '../../../common';
 
 export type UrlDrilldownConfig = {
   url: { format?: 'handlebars_v1'; template: string };

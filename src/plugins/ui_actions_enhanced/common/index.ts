@@ -11,4 +11,5 @@ export type {
   SerializedAction,
   SerializedEvent,
   DynamicActionsState,
+  UrlDrilldownOptions,
 } from './types';

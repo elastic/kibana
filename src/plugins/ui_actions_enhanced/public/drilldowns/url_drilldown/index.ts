@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type {
-  UrlDrilldownConfig,
-  UrlDrilldownGlobalScope,
-  UrlDrilldownOptions,
-  UrlDrilldownScope,
-} from './types';
+export type { UrlDrilldownConfig, UrlDrilldownGlobalScope, UrlDrilldownScope } from './types';
 export { UrlDrilldownCollectConfig, UrlDrilldownOptionsComponent } from './components';
 export {
   validateUrlTemplate as urlDrilldownValidateUrlTemplate,

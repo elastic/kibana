@@ -9,7 +9,7 @@
 import { isQuery, isTimeRange } from '@kbn/data-plugin/common';
 import { Filter, isFilterPinned, Query, TimeRange } from '@kbn/es-query';
 import { EmbeddableInput, IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
+import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/common';
 
 import { DashboardAppLocatorParams } from './locator';
 
@@ -19,7 +19,7 @@ interface EmbeddableQueryInput extends EmbeddableInput {
   timeRange?: TimeRange;
 }
 
-export const getDashboardLocatorParams = (
+export const getEmbeddableParams = (
   source: IEmbeddable<EmbeddableQueryInput>,
   options: DashboardDrilldownOptions
 ): Partial<DashboardAppLocatorParams> => {

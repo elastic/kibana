@@ -11,7 +11,7 @@ import useAsync from 'react-use/lib/useAsync';
 import React, { useMemo, useState } from 'react';
 
 import { EuiButtonEmpty, EuiListGroupItem, EuiToolTip } from '@elastic/eui';
-import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
+import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/common';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
@@ -110,15 +110,18 @@ export const DashboardLinkComponent = ({
       })}
       onClick={
         link.destination === parentDashboardId
-          ? undefined
+          ? undefined // no `onClick` event should exist if the link points to the current dashboard
           : (event) => {
-              // TODO: As part of https://github.com/elastic/kibana/issues/154381, connect to drilldown
               const options = link.options as DashboardDrilldownOptions;
               clickLink(navEmbeddable, {
                 ...link,
                 options: {
                   ...DEFAULT_DASHBOARD_LINK_OPTIONS,
                   ...options,
+                  /**
+                   * the app state should be sent via URL if either (a) the `openInNewTab` setting is `true`
+                   * or if (b) the ctrl/shift/meta (command on Mac) key is pressed on click.
+                   */
                   openInNewTab:
                     options.openInNewTab || event.ctrlKey || event.metaKey || event.shiftKey,
                 },

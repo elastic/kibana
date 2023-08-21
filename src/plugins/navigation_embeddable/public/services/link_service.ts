@@ -9,12 +9,12 @@
 import {
   cleanEmptyKeys,
   DashboardAppLocatorParams,
-  getDashboardLocatorParams,
+  getEmbeddableParams,
 } from '@kbn/dashboard-plugin/public';
 import { isFilterPinned } from '@kbn/es-query';
 import { KibanaLocation } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
-import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
+import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/common';
 
 import {
   DASHBOARD_LINK_TYPE,
@@ -32,13 +32,11 @@ export const clickLink = async (
   if (link.type === DASHBOARD_LINK_TYPE) {
     const params: DashboardAppLocatorParams = {
       dashboardId: link.destination,
-      ...getDashboardLocatorParams(
+      ...getEmbeddableParams(
         embeddable,
         (link.options as DashboardDrilldownOptions) ?? DEFAULT_DASHBOARD_LINK_OPTIONS
       ),
     };
-
-    console.log(params);
 
     const locator = dashboardServices.locator; // TODO: Make this a generic locator that is coming from the dashboard container through some sort of getter
     if (locator) {

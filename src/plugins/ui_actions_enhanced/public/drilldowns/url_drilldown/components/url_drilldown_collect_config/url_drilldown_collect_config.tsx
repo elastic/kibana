@@ -7,15 +7,7 @@
  */
 
 import React, { useRef } from 'react';
-import {
-  EuiFormRow,
-  EuiLink,
-  EuiSwitch,
-  EuiAccordion,
-  EuiSpacer,
-  EuiPanel,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiFormRow, EuiLink, EuiAccordion, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { UrlTemplateEditor, UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { UrlDrilldownConfig } from '../../types';

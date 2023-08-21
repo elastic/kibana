@@ -8,10 +8,10 @@
 
 import React from 'react';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { DashboardDrilldownOptions } from '../types';
+import { DashboardDrilldownOptions } from '../../../common';
 import { dashboardDrilldownConfigStrings } from '../../i18n/dashboard_drilldown_config';
 
-interface DashboardDrilldownOptionsProps {
+export interface DashboardDrilldownOptionsProps {
   options: DashboardDrilldownOptions;
   onOptionChange: (newOptions: Partial<DashboardDrilldownOptions>) => void;
 }

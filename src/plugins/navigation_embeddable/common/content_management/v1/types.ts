@@ -11,8 +11,8 @@ import type {
   SavedObjectCreateOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
-import { UrlDrilldownOptions } from '@kbn/ui-actions-enhanced-plugin/public';
-import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
+import { UrlDrilldownOptions } from '@kbn/ui-actions-enhanced-plugin/common';
+import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/common';
 import { NavigationEmbeddableContentType } from '../../types';
 import {
   DASHBOARD_LINK_TYPE,

@@ -45,3 +45,13 @@ export {
   encode,
   parseDataUrl,
 } from './lib';
+
+/**
+ * Dashboard drilldown options, which are each controlled by a toggle
+ */
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DashboardDrilldownOptions = {
+  useCurrentFilters: boolean;
+  useCurrentDateRange: boolean;
+  openInNewTab: boolean;
+};

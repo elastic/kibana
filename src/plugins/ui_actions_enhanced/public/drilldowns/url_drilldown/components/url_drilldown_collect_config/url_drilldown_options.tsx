@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { EuiFormRow, EuiSpacer, EuiSwitch, EuiTextColor } from '@elastic/eui';
-import { UrlDrilldownOptions } from '../../types';
+import { UrlDrilldownOptions } from '../../../../../common';
 import {
   txtUrlTemplateEncodeDescription,
   txtUrlTemplateEncodeUrl,

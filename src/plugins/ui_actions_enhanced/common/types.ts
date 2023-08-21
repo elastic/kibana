@@ -8,6 +8,11 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 
+export type UrlDrilldownOptions = {
+  openInNewTab: boolean;
+  encodeUrl?: boolean;
+};
+
 export type BaseActionConfig = SerializableRecord;
 
 export type SerializedAction<Config extends BaseActionConfig = BaseActionConfig> = {

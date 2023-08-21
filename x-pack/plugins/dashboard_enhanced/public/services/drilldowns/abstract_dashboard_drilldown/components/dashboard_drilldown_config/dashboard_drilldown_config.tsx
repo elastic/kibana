@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  LazyDashboardDrilldownOptionsComponent,
   withSuspense,
+  LazyDashboardDrilldownOptionsComponent,
 } from '@kbn/presentation-util-plugin/public';
 
 import { DrilldownConfig } from '../../types';
