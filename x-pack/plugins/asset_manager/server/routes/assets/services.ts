@@ -22,45 +22,47 @@ import { getEsClientFromContext } from '../utils';
 
 const sizeRT = rt.union([inRangeFromStringRt(1, 100), createLiteralValueFromUndefinedRT(10)]);
 const assetDateRT = rt.union([dateRt, datemathStringRt]);
-const getHostAssetsQueryOptionsRT = rt.exact(
+const getServiceAssetsQueryOptionsRT = rt.exact(
   rt.partial({
     from: assetDateRT,
     to: assetDateRT,
     size: sizeRT,
+    parent: rt.string,
   })
 );
 
-export type GetHostAssetsQueryOptions = rt.TypeOf<typeof getHostAssetsQueryOptionsRT>;
+export type GetServiceAssetsQueryOptions = rt.TypeOf<typeof getServiceAssetsQueryOptionsRT>;
 
-export function hostsRoutes<T extends RequestHandlerContext>({
+export function servicesRoutes<T extends RequestHandlerContext>({
   router,
   assetAccessor,
 }: SetupRouteOptions<T>) {
-  // GET /assets/hosts
-  router.get<unknown, GetHostAssetsQueryOptions, unknown>(
+  // GET /assets/services
+  router.get<unknown, GetServiceAssetsQueryOptions, unknown>(
     {
-      path: `${ASSET_MANAGER_API_BASE}/assets/hosts`,
+      path: `${ASSET_MANAGER_API_BASE}/assets/services`,
       validate: {
-        query: createRouteValidationFunction(getHostAssetsQueryOptionsRT),
+        query: createRouteValidationFunction(getServiceAssetsQueryOptionsRT),
       },
     },
     async (context, req, res) => {
-      const { from = 'now-24h', to = 'now' } = req.query || {};
+      const { from = 'now-24h', to = 'now', parent } = req.query || {};
       const esClient = await getEsClientFromContext(context);
 
       try {
-        const response = await assetAccessor.getHosts({
+        const response = await assetAccessor.getServices({
           from: datemath.parse(from)!.toISOString(),
           to: datemath.parse(to)!.toISOString(),
+          parent,
           esClient,
         });
 
         return res.ok({ body: response });
       } catch (error: unknown) {
-        debug('Error while looking up HOST asset records', error);
+        debug('Error while looking up SERVICE asset records', error);
         return res.customError({
           statusCode: 500,
-          body: { message: 'Error while looking up host asset records - ' + `${error}` },
+          body: { message: 'Error while looking up service asset records - ' + `${error}` },
         });
       }
     }
