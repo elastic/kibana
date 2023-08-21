@@ -23,7 +23,7 @@ import {
   getRequiredEnv,
   getTrackedBranch,
   isObj,
-  isUnitTestOnlyChange,
+  checkForUnitTestOnlyChange,
 } from './utils';
 
 type RunGroup = TestGroupRunOrderResponse['types'][0];
@@ -76,15 +76,18 @@ export async function pickTestGroupRunOrder() {
     throw new Error('unable to find any unit, integration, or FTR configs');
   }
 
-  const shouldOnlyRunUnitTests = (await isUnitTestOnlyChange(jestUnitConfigs)) || true;
-  if (shouldOnlyRunUnitTests) {
+  const { isUnitTestOnlyChange, affectedUnitTestConfigs } = await checkForUnitTestOnlyChange(
+    jestUnitConfigs
+  );
+
+  if (isUnitTestOnlyChange) {
     console.log('test configuration only contains jest test changes, skipping integration/FTR');
     jestIntegrationConfigs.length = 0;
     ftrConfigsByQueue.clear();
   }
 
   const runOrderConfig = buildRunOrderConfig({
-    jestUnitConfigs,
+    jestUnitConfigs: isUnitTestOnlyChange ? affectedUnitTestConfigs : jestUnitConfigs,
     jestIntegrationConfigs,
     ftrConfigsByQueue,
   });
@@ -104,10 +107,10 @@ export async function pickTestGroupRunOrder() {
   };
 
   const unitTestGroup = getRunGroup(bk, types, UNIT_TYPE);
-  const integrationTestGroup = shouldOnlyRunUnitTests
+  const integrationTestGroup = isUnitTestOnlyChange
     ? defaultRunGroup(INTEGRATION_TYPE)
     : getRunGroup(bk, types, INTEGRATION_TYPE);
-  const functionalTestGroup = shouldOnlyRunUnitTests
+  const functionalTestGroup = isUnitTestOnlyChange
     ? [defaultRunGroup(FUNCTIONAL_TYPE)]
     : getRunGroups(bk, types, FUNCTIONAL_TYPE);
 

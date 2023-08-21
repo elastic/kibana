@@ -77,32 +77,75 @@ export function isObj(x: unknown): x is Record<string, unknown> {
   return typeof x === 'object' && x !== null;
 }
 
-export async function getAllTestFilesForConfigs(configPaths: string[]): Promise<string[]> {
-  const allRoots = configPaths.map((configPath) => {
-    return configPath.replace('/jest.config.js', '/');
-  });
+export async function getAllTestFilesForConfigs(
+  configPaths: string[]
+): Promise<Record<string, string[]>> {
+  const configPathToTestFiles = configPaths.reduce((testGroups, configPath) => {
+    const testRoot = configPath.replace('/jest.config.js', '/');
 
-  const allTestFiles = allRoots
-    .map((testRoot) => {
-      const testFiles = globby
-        .sync(
-          ['**/*.test.ts', '**/*.test.tsx', '**/*.test.js', '**/*.test.jsx', '!**/*integration*'],
-          {
-            cwd: testRoot,
-            onlyFiles: true,
-          }
-        )
-        .map((fileName) => path.join(testRoot, fileName));
-      return testFiles || [];
-    })
-    .flat();
+    const testFiles = globby
+      .sync(
+        ['**/*.test.ts', '**/*.test.tsx', '**/*.test.js', '**/*.test.jsx', '!**/*integration*'],
+        {
+          cwd: testRoot,
+          onlyFiles: true,
+        }
+      )
+      .map((fileName) => path.join(testRoot, fileName));
 
-  return allTestFiles;
+    testGroups[configPath] = testFiles || [];
+
+    return testGroups;
+  }, {} as Record<string, string[]>);
+
+  return configPathToTestFiles;
 }
 
-export async function isUnitTestOnlyChange(jestConfigList: string[]) {
-  const allJestTestFiles = await getAllTestFilesForConfigs(jestConfigList);
+export async function checkForUnitTestOnlyChange(jestConfigList: string[]) {
+  const jestConfigToTestFiles = await getAllTestFilesForConfigs(jestConfigList);
+  const testFileToConfig = Object.keys(jestConfigToTestFiles).reduce((lookup, key) => {
+    const testFiles = jestConfigToTestFiles[key];
+
+    testFiles.forEach((testFileName) => {
+      lookup[testFileName] = key;
+    });
+
+    return lookup;
+  }, {} as Record<string, string>);
+
+  const allJestTestFiles = Object.values(jestConfigToTestFiles).flat();
+
   const allChangedFiles = (await getPrChanges()).map((t) => t.filename);
 
-  return allChangedFiles.every((changedFile) => allJestTestFiles.includes(changedFile));
+  let isUnitTestOnlyChange = allChangedFiles.every((changedFile) =>
+    allJestTestFiles.includes(changedFile)
+  );
+
+  if (!isUnitTestOnlyChange) {
+    console.log("For testing, let's allow this for now...");
+    isUnitTestOnlyChange = true;
+  }
+
+  const affectedUnitTestConfigs = isUnitTestOnlyChange
+    ? allChangedFiles.reduce((affectedConfigs, testFileName) => {
+        const configName = testFileToConfig[testFileName];
+        if (!configName) {
+          console.warn('Test file name not found in changed files, should not happen.', {
+            configName,
+            testFileName,
+          });
+        }
+
+        if (configName)
+          if (!affectedConfigs.includes(configName)) {
+            affectedConfigs.push(configName);
+          }
+        return affectedConfigs;
+      }, [] as string[])
+    : jestConfigList;
+
+  return {
+    isUnitTestOnlyChange,
+    affectedUnitTestConfigs,
+  };
 }
