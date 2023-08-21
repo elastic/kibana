@@ -18,6 +18,7 @@ import {
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { useNavLink } from '../common/hooks/use_nav_links';
 
 export const ProjectSettingsRoute: React.FC = () => {
@@ -34,13 +35,15 @@ export const ProjectSettingsRoute: React.FC = () => {
   return (
     <KibanaPageTemplate restrictWidth={false} contentBorder={false} grow={true}>
       <KibanaPageTemplate.Section>
-        <EuiPageHeader pageTitle={title} />
-        <EuiSpacer size="l" />
-        <EuiSpacer size="xl" />
-        <LandingLinksIcons items={iconLinks} />
-        <EuiSpacer size="l" />
-        <EuiHorizontalRule />
-        <LandingLinksIconsCategoriesGroups links={links} categories={accordionCategories} />
+        <TrackApplicationView viewId={SecurityPageName.projectSettings}>
+          <EuiPageHeader pageTitle={title} />
+          <EuiSpacer size="l" />
+          <EuiSpacer size="xl" />
+          <LandingLinksIcons items={iconLinks} />
+          <EuiSpacer size="l" />
+          <EuiHorizontalRule />
+          <LandingLinksIconsCategoriesGroups links={links} categories={accordionCategories} />
+        </TrackApplicationView>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );

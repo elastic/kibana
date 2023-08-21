@@ -12,6 +12,7 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiCallOut, EuiPageHeader, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { LinkButton } from '@kbn/security-solution-navigation/links';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { useNavLink } from '../common/hooks/use_nav_links';
 import { ExternalPageName } from '../navigation/links/constants';
 
@@ -42,23 +43,25 @@ export const AssetsRoute: React.FC = () => {
   return (
     <KibanaPageTemplate restrictWidth={false} contentBorder={false} grow={true}>
       <KibanaPageTemplate.Section>
-        <EuiPageHeader pageTitle={title} />
-        <EuiSpacer size="l" />
-        <EuiSpacer size="xl" />
-        <LandingLinksIconsGroups items={links} />
-        <EuiSpacer size="l" />
-        <EuiSpacer size="l" />
-        <EuiCallOut
-          title={INTEGRATIONS_CALLOUT_TITLE}
-          color="primary"
-          iconType="cluster"
-          style={{ borderRadius: euiTheme.border.radius.medium }}
-        >
-          <p>{INTEGRATIONS_CALLOUT_DESCRIPTION}</p>
-          <LinkButton id={ExternalPageName.integrationsSecurity} fill>
-            {INTEGRATIONS_CALLOUT_BUTTON_TEXT}
-          </LinkButton>
-        </EuiCallOut>
+        <TrackApplicationView viewId={SecurityPageName.assets}>
+          <EuiPageHeader pageTitle={title} />
+          <EuiSpacer size="l" />
+          <EuiSpacer size="xl" />
+          <LandingLinksIconsGroups items={links} />
+          <EuiSpacer size="l" />
+          <EuiSpacer size="l" />
+          <EuiCallOut
+            title={INTEGRATIONS_CALLOUT_TITLE}
+            color="primary"
+            iconType="cluster"
+            style={{ borderRadius: euiTheme.border.radius.medium }}
+          >
+            <p>{INTEGRATIONS_CALLOUT_DESCRIPTION}</p>
+            <LinkButton id={ExternalPageName.integrationsSecurity} fill>
+              {INTEGRATIONS_CALLOUT_BUTTON_TEXT}
+            </LinkButton>
+          </EuiCallOut>
+        </TrackApplicationView>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
