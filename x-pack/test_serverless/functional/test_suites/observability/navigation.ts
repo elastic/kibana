@@ -29,9 +29,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       // check side nav links
       await svlCommonNavigation.sidenav.expectSectionOpen('observability_project_nav');
-      await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'observabilityOnboarding',
-      });
+      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'observabilityOnboarding' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'observabilityOnboarding',
       });
@@ -39,9 +37,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       // navigate to discover
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover:log-explorer' });
-      await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'discover:log-explorer',
-      });
+      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'discover:log-explorer' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'discover:log-explorer',
       });
@@ -60,15 +56,11 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
       await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'management' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'management',
-      });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ deepLinkId: 'management' });
 
       // navigate back to serverless oblt overview
       await svlCommonNavigation.breadcrumbs.clickHome();
-      await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'observabilityOnboarding',
-      });
+      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'observabilityOnboarding' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'observabilityOnboarding',
       });
@@ -103,9 +95,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     it('navigates to cases app', async () => {
-      await svlCommonNavigation.sidenav.clickLink({
-        deepLinkId: 'observability-overview:cases',
-      });
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
 
       await svlCommonNavigation.sidenav.expectLinkActive({
         deepLinkId: 'observability-overview:cases',
