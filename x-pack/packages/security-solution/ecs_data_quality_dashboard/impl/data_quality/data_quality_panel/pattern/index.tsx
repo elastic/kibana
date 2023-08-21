@@ -237,7 +237,7 @@ const PatternComponent: React.FC<Props> = ({
 
   useEffect(() => {
     const newIndexNames = getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable });
-    if (shouldCreateIndexNames({ indexNames, ilmExplain, isILMAvailable, newIndexNames })) {
+    if (shouldCreateIndexNames({ indexNames, ilmExplain, isILMAvailable, newIndexNames, stats })) {
       updatePatternIndexNames({
         indexNames: newIndexNames,
         pattern,

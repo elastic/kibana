@@ -467,17 +467,19 @@ describe('helpers', () => {
           ilmExplain: mockIlmExplain,
           indexNames: undefined,
           isILMAvailable,
+          newIndexNames: [],
           stats: mockStats,
         })
       ).toBe(true);
     });
 
-    test('returns true when `isILMAvailable` is false, and the required `stats` and `ilmExplain` are available', () => {
+    test('returns true when `isILMAvailable` is false, and the required `stats` is available,  and `ilmExplain` is not available', () => {
       expect(
         shouldCreateIndexNames({
           ilmExplain: null,
           indexNames: undefined,
           isILMAvailable: false,
+          newIndexNames: [],
           stats: mockStats,
         })
       ).toBe(true);
@@ -489,6 +491,7 @@ describe('helpers', () => {
           ilmExplain: mockIlmExplain,
           indexNames,
           isILMAvailable,
+          newIndexNames: indexNames,
           stats: mockStats,
         })
       ).toBe(false);
@@ -500,6 +503,7 @@ describe('helpers', () => {
           ilmExplain: mockIlmExplain,
           indexNames: undefined,
           isILMAvailable,
+          newIndexNames: [],
           stats: null,
         })
       ).toBe(false);
@@ -511,6 +515,7 @@ describe('helpers', () => {
           ilmExplain: null,
           indexNames: undefined,
           isILMAvailable,
+          newIndexNames: [],
           stats: mockStats,
         })
       ).toBe(false);
@@ -522,6 +527,7 @@ describe('helpers', () => {
           ilmExplain: null,
           indexNames: undefined,
           isILMAvailable,
+          newIndexNames: [],
           stats: null,
         })
       ).toBe(false);
@@ -533,6 +539,7 @@ describe('helpers', () => {
           ilmExplain: null,
           indexNames,
           isILMAvailable,
+          newIndexNames: [],
           stats: null,
         })
       ).toBe(false);

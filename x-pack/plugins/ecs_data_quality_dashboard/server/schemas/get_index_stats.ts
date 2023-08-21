@@ -14,6 +14,6 @@ export const GetIndexStatsParams = t.type({
 
 export const GetIndexStatsQuery = t.type({
   isILMAvailable: DefaultStringBooleanFalse,
-  startDate: t.union([t.string, t.null]),
-  endDate: t.union([t.string, t.null]),
+  startDate: t.union([t.string, t.null, t.undefined]),
+  endDate: t.union([t.string, t.null, t.undefined]),
 });

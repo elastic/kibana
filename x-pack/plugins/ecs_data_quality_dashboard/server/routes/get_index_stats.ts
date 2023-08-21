@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { i18n } from '@kbn/i18n';
 import { IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
-import { fetchStats } from '../lib';
+import { fetchStats, fetchAvailableIndices } from '../lib';
 import { buildResponse } from '../lib/build_response';
 import { GET_INDEX_STATS } from '../../common/constants';
 import { buildRouteValidation } from '../schemas/common';
 import { GetIndexStatsParams, GetIndexStatsQuery } from '../schemas/get_index_stats';
-import { fetchAvailableIndices } from '../lib/fetch_available_indices';
 
 export const getIndexStatsRoute = (router: IRouter) => {
   router.get(
@@ -41,6 +40,10 @@ export const getIndexStatsRoute = (router: IRouter) => {
             body: stats.indices,
           });
         } else {
+          /**
+           * If ILM is not available, we need to fetch the available indices with the given date range.
+           * `fetchAvailableIndices` returns indices that have data in the given date range.
+           */
           if (startDate && endDate) {
             const decodedStartDate = decodeURIComponent(startDate);
             const decodedEndDate = decodeURIComponent(endDate);
@@ -65,7 +68,12 @@ export const getIndexStatsRoute = (router: IRouter) => {
             });
           } else {
             return resp.error({
-              body: `startDate and endDate are required`,
+              body: i18n.translate(
+                'securitySolutionPackages.ecsDataQualityDashboard.getIndexStats.dateRangeRequiredErrorMessage',
+                {
+                  defaultMessage: 'startDate and endDate are required',
+                }
+              ),
               statusCode: 403,
             });
           }

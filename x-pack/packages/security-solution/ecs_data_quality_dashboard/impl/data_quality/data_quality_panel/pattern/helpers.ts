@@ -182,14 +182,17 @@ export const shouldCreateIndexNames = ({
   indexNames,
   isILMAvailable,
   newIndexNames,
+  stats,
 }: {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
   indexNames: string[] | undefined;
   isILMAvailable: boolean;
   newIndexNames: string[];
+  stats: Record<string, IndicesStatsIndicesStats> | null;
 }): boolean => {
   return (
     !isEqual(newIndexNames, indexNames) &&
+    stats != null &&
     ((isILMAvailable && ilmExplain != null) || !isILMAvailable)
   );
 };

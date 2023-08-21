@@ -32,6 +32,13 @@ const ContextWrapper: React.FC = ({ children }) => (
 );
 
 const pattern = 'auditbeat-*';
+const startDate = `now-7d`;
+const endDate = `now`;
+const params = {
+  pattern,
+  startDate,
+  endDate,
+};
 
 describe('useStats', () => {
   beforeEach(() => {
@@ -44,7 +51,7 @@ describe('useStats', () => {
     beforeEach(async () => {
       mockHttpFetch.mockResolvedValue(mockStatsGreenIndex);
 
-      const { result, waitForNextUpdate } = renderHook(() => useStats(pattern), {
+      const { result, waitForNextUpdate } = renderHook(() => useStats(params), {
         wrapper: ContextWrapper,
       });
       await waitForNextUpdate();
@@ -71,7 +78,7 @@ describe('useStats', () => {
     beforeEach(async () => {
       mockHttpFetch.mockRejectedValue(new Error(errorMessage));
 
-      const { result, waitForNextUpdate } = renderHook(() => useStats(pattern), {
+      const { result, waitForNextUpdate } = renderHook(() => useStats(params), {
         wrapper: ContextWrapper,
       });
       await waitForNextUpdate();
