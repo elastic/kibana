@@ -26,15 +26,18 @@ export const openHoverActions = () => {
 };
 
 export const mouseoverOnToOverflowItem = () => {
+  cy.get(OVERFLOW_ITEM).should('be.visible');
   cy.get(OVERFLOW_ITEM).first().realHover();
 };
 
 export const clickOnFilterIn = () => {
-  cy.get(FILTER_IN).first().click();
+  cy.get(FILTER_IN).should('be.visible');
+  cy.get(FILTER_IN).first().realClick();
 };
 
 export const clickOnFilterOut = () => {
-  cy.get(FILTER_OUT).first().click();
+  cy.get(FILTER_IN).should('be.visible');
+  cy.get(FILTER_OUT).first().realClick();
 };
 
 export const clickOnAddToTimeline = () => {
