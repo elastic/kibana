@@ -18,15 +18,12 @@ export const getSecurityAssistantAppFeaturesConfigurator =
   (enabledAppFeatureKeys: AppFeatureKeys) => (): AppFeaturesSecurityAssistantConfig => {
     const securityAssistantAppFeatureValues: AppFeatureKey[] =
       Object.values(AppFeatureAssistantKey);
-    const securityAssistantEnabledAppFeatureKeys = enabledAppFeatureKeys.filter((appFeatureKey) =>
+    const securityAssEnabledAppFeatureKeys = enabledAppFeatureKeys.filter((appFeatureKey) =>
       securityAssistantAppFeatureValues.includes(appFeatureKey)
     ) as AppFeatureAssistantKey[];
 
     return new Map(
-      securityAssistantEnabledAppFeatureKeys.map((key) => [
-        key,
-        securityAssistantAppFeaturesConfig[key],
-      ])
+      securityAssEnabledAppFeatureKeys.map((key) => [key, securityAssistantAppFeaturesConfig[key]])
     );
   };
 
@@ -46,7 +43,7 @@ const securityAssistantAppFeaturesConfig: Record<
   [AppFeatureAssistantKey.assistant]: {
     privileges: {
       all: {
-        ui: ['ai-assistant'],
+        ui: ['ai-assistant'], // Add cases connector UI privileges
       },
     },
   },
