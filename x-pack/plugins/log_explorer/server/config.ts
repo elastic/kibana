@@ -25,4 +25,7 @@ export const configSchema = schema.object({
 
 export const config: PluginConfigDescriptor<LogExplorerConfig> = {
   schema: configSchema,
+  deprecations: ({ unusedFromRoot }) => [
+    unusedFromRoot('xpack.discoverLogExplorer.featureFlags.deepLinkVisible', { level: 'warning' }),
+  ],
 };

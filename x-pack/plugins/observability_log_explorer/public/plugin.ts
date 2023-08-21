@@ -8,6 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { type ObservabilityLogExplorerConfig } from '../common/plugin_config';
+import { renderObservabilityLogExplorer } from './applications/observability_log_explorer';
 import type {
   ObservabilityLogExplorerPluginSetup,
   ObservabilityLogExplorerPluginStart,
@@ -24,17 +25,31 @@ export class ObservabilityLogExplorerPlugin
     this.config = context.config.get();
   }
 
-  public setup(core: CoreSetup, plugins: ObservabilityLogExplorerSetupDeps) {
+  public setup(
+    core: CoreSetup<ObservabilityLogExplorerStartDeps, ObservabilityLogExplorerPluginStart>,
+    pluginsSetup: ObservabilityLogExplorerSetupDeps
+  ) {
     core.application.register({
-      id: 'log-explorer',
+      id: 'observability-log-explorer',
       title: i18n.translate('xpack.observability_log_explorer.appTitle', {
         defaultMessage: 'Log Explorer',
       }),
-      mount(params) {
-        throw new Error('Function not implemented.');
+      mount: async (appMountParams) => {
+        const [coreStart, pluginsStart, ownPluginStart] = await core.getStartServices();
+
+        return renderObservabilityLogExplorer(
+          coreStart,
+          pluginsStart,
+          ownPluginStart,
+          appMountParams
+        );
       },
     });
+
+    return {};
   }
 
-  public start(core: CoreStart, plugins: ObservabilityLogExplorerStartDeps) {}
+  public start(core: CoreStart, plugins: ObservabilityLogExplorerStartDeps) {
+    return {};
+  }
 }

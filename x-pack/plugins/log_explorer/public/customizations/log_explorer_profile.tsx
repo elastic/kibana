@@ -14,7 +14,7 @@ import { dynamic } from '../utils/dynamic';
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
 const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
 
-interface CreateLogExplorerProfileCustomizationsDeps {
+export interface CreateLogExplorerProfileCustomizationsDeps {
   core: CoreStart;
   data: DataPublicPluginStart;
 }

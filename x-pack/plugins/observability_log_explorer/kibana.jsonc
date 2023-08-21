@@ -12,6 +12,7 @@
       "observabilityLogExplorer"
     ],
     "requiredPlugins": [
+      "data",
       "logExplorer",
     ],
     "optionalPlugins": [],

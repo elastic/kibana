@@ -6,10 +6,8 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { LOG_EXPLORER_PROFILE_ID } from '../common/constants';
 import { LogExplorerConfig } from '../common/plugin_config';
-import { createLogExplorerProfileCustomizations } from './customizations/log_explorer_profile';
-import { getLogExplorerDeepLink } from './deep_links';
+import { createLogExplorer } from './components/log_explorer';
 import {
   LogExplorerPluginSetup,
   LogExplorerPluginStart,
@@ -27,12 +25,16 @@ export class LogExplorerPlugin implements Plugin<LogExplorerPluginSetup, LogExpl
   public setup(core: CoreSetup, plugins: LogExplorerSetupDeps) {}
 
   public start(core: CoreStart, plugins: LogExplorerStartDeps) {
-    const { discover, data } = plugins;
+    const { data, discover } = plugins;
 
-    // TODO: replace with component export
-    discover.registerCustomizationProfile(LOG_EXPLORER_PROFILE_ID, {
-      customize: createLogExplorerProfileCustomizations({ core, data }),
-      deepLinks: [getLogExplorerDeepLink({ isVisible: this.config.featureFlags.deepLinkVisible })],
+    const LogExplorer = createLogExplorer({
+      core,
+      data,
+      discover,
     });
+
+    return {
+      LogExplorer,
+    };
   }
 }

@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { LogExplorerPluginStart } from '@kbn/log-explorer-plugin/public';
 
-export type ObservabilityLogExplorerPluginSetup = void;
-export type ObservabilityLogExplorerPluginStart = void;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ObservabilityLogExplorerPluginSetup {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ObservabilityLogExplorerPluginStart {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityLogExplorerSetupDeps {}
 
 export interface ObservabilityLogExplorerStartDeps {
+  data: DataPublicPluginStart;
   logExplorer: LogExplorerPluginStart;
 }
