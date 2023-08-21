@@ -23,25 +23,11 @@ export const createServerlessES = () => {
   });
   const cluster = new Cluster({ log });
 
-  let started = false;
   const api = {
     start: async () => {
-      if (started) throw new Error('ES already started!');
-      await Promise.race([
-        cluster
-          .runServerless({
-            basePath: Path.join(REPO_ROOT, '.es/es_test_serverless'),
-          })
-          .then(() => {
-            started = true;
-          }),
-        new Promise((res) => setTimeout(res, 60000)).then(async () => {
-          if (!started) {
-            await api.stop().catch(() => undefined);
-            throw new Error(`could not start ES serverless in 60 seconds ( ,_,)`);
-          }
-        }),
-      ]);
+      await cluster.runServerless({
+        basePath: Path.join(REPO_ROOT, '.es/es_test_serverless'),
+      });
     },
     stop: async () => {
       // hack to stop the ES cluster

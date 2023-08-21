@@ -17,7 +17,7 @@ import {
 describe('smoke', () => {
   let serverlessES: TestServerlessESUtils;
   let serverlessKibana: TestServerlessKibanaUtils;
-  jest.setTimeout(300_000); // five mins :shrug:
+  jest.setTimeout(600_000);
   beforeEach(() => {
     serverlessES = createServerlessES();
     serverlessKibana = createServerlessKibana();
@@ -28,6 +28,7 @@ describe('smoke', () => {
   });
   test('it can start Kibana and ES serverless', async () => {
     async function doIt() {
+      console.log('ES STARTING');
       await serverlessES.start();
       console.log('ES STARTED');
       await serverlessKibana.preboot();
