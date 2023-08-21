@@ -5,13 +5,19 @@
  * 2.0.
  */
 
+import { REPO_ROOT } from '@kbn/repo-info';
+import { findTestPluginPaths } from '@kbn/test';
+import { resolve } from 'path';
 import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'es',
-  testFiles: [require.resolve('../common'), require.resolve('.')],
+  testFiles: [require.resolve('.')],
   junit: {
-    reportName: 'Serverless Search Functional Tests',
+    reportName: 'Serverless Examples Functional Tests',
   },
-  suiteTags: { exclude: ['skipSvlSearch'] },
+  serverArgs: findTestPluginPaths([
+    resolve(REPO_ROOT, 'examples'),
+    resolve(REPO_ROOT, 'x-pack/examples'),
+  ]),
 });

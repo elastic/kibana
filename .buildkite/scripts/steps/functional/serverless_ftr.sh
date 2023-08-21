@@ -25,6 +25,10 @@ elif [[ "$SERVERLESS_ENVIRONMENT" == "security" ]]; then
     "x-pack/test_serverless/api_integration/test_suites/security/config.feature_flags.ts"
     "x-pack/test_serverless/functional/test_suites/security/config.ts"
   )
+elif [[ "$SERVERLESS_ENVIRONMENT" == "examples" ]]; then
+  SERVERLESS_CONFIGS=(
+    "x-pack/test_serverless/functional/test_suites/examples/config.ts"
+  )
 fi
 
 EXIT_CODE=0

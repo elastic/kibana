@@ -95,6 +95,19 @@ steps:
         - exit_status: '-1'
           limit: 3
 
+  - command: SERVERLESS_ENVIRONMENT=examples .buildkite/scripts/steps/functional/serverless_ftr.sh
+    label: 'Serverless Examples Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 40
+    soft_fail:
+      - exit_status: 10
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
   - command: .buildkite/scripts/steps/functional/security_serverless.sh
     label: 'Serverless Security Cypress Tests'
     agents:
