@@ -28,7 +28,7 @@ import { getIdFormField, getSavedQueriesDropdown } from '../../screens/live_quer
 import { loadSavedQuery, cleanupSavedQuery, cleanupPack, loadPack } from '../../tasks/api_fixtures';
 import { request } from '../../tasks/common';
 
-describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Packs - Create and Edit', () => {
   let savedQueryId: string;
   let savedQueryName: string;
   let nomappingSavedQueryId: string;
@@ -97,7 +97,7 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     cleanupSavedQuery(multipleMappingsSavedQueryId);
   });
 
-  describe('Check if result type is correct', () => {
+  describe('Check if result type is correct', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     let resultTypePackId: string;
 
     before(() => {
@@ -221,7 +221,7 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     });
   });
 
-  describe('Check if pack is created', () => {
+  describe('Check if pack is created', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     const packName = 'Pack-name' + generateRandomStringName(1)[0];
     let packId: string;
 
@@ -261,7 +261,7 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     });
   });
 
-  describe('to click the edit button and edit pack', () => {
+  describe('to click the edit button and edit pack', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     const newQueryName = 'new-query-name' + generateRandomStringName(1)[0];
 
     let packId: string;
@@ -314,47 +314,55 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     });
   });
 
-  describe('should trigger validation when saved query is being chosen', () => {
-    let packId: string;
-    let packName: string;
+  describe(
+    'should trigger validation when saved query is being chosen',
+    { tags: [tag.ESS, tag.SERVERLESS] },
+    () => {
+      let packId: string;
+      let packName: string;
 
-    before(() => {
-      request<{ items: PackagePolicy[] }>({
-        url: '/internal/osquery/fleet_wrapper/package_policies',
-        headers: {
-          'Elastic-Api-Version': API_VERSIONS.internal.v1,
-        },
-      })
-        .then((response) =>
-          loadPack({
-            policy_ids: [response.body.items[0].policy_id],
-            queries: {
-              [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
-            },
-          })
-        )
-        .then((pack) => {
-          packId = pack.saved_object_id;
-          packName = pack.name;
-        });
-    });
+      before(() => {
+        request<{ items: PackagePolicy[] }>({
+          url: '/internal/osquery/fleet_wrapper/package_policies',
+          headers: {
+            'Elastic-Api-Version': API_VERSIONS.internal.v1,
+          },
+        })
+          .then((response) =>
+            loadPack({
+              policy_ids: [response.body.items[0].policy_id],
+              queries: {
+                [savedQueryName]: {
+                  ecs_mapping: {},
+                  interval: 3600,
+                  query: 'select * from uptime;',
+                },
+              },
+            })
+          )
+          .then((pack) => {
+            packId = pack.saved_object_id;
+            packName = pack.name;
+          });
+      });
 
-    after(() => {
-      cleanupPack(packId);
-    });
+      after(() => {
+        cleanupPack(packId);
+      });
 
-    it('', () => {
-      preparePack(packName);
-      findAndClickButton('Edit');
-      findAndClickButton('Add query');
-      cy.contains('Attach next query');
-      cy.contains('ID must be unique').should('not.exist');
-      getSavedQueriesDropdown().type(`${savedQueryName}{downArrow}{enter}`);
-      cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
-      cy.contains('ID must be unique').should('exist');
-      cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
-    });
-  });
+      it('', () => {
+        preparePack(packName);
+        findAndClickButton('Edit');
+        findAndClickButton('Add query');
+        cy.contains('Attach next query');
+        cy.contains('ID must be unique').should('not.exist');
+        getSavedQueriesDropdown().type(`${savedQueryName}{downArrow}{enter}`);
+        cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
+        cy.contains('ID must be unique').should('exist');
+        cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
+      });
+    }
+  );
 
   describe('should open lens in new tab', { tags: [tag.ESS] }, () => {
     let packId: string;
@@ -465,7 +473,7 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     });
   });
 
-  describe('deactivate and activate pack', () => {
+  describe('deactivate and activate pack', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     let packId: string;
     let packName: string;
 
@@ -501,7 +509,7 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     });
   });
 
-  describe('should verify that packs are triggered', () => {
+  describe('should verify that packs are triggered', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     let packId: string;
     let packName: string;
 
@@ -568,7 +576,7 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     });
   });
 
-  describe('delete all queries in the pack', () => {
+  describe('delete all queries in the pack', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     let packId: string;
     let packName: string;
 
@@ -614,8 +622,82 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     });
   });
 
-  describe('enable changing saved queries and ecs_mappings', () => {
-    let packId: string;
+  describe(
+    'enable changing saved queries and ecs_mappings',
+    { tags: [tag.ESS, tag.SERVERLESS] },
+    () => {
+      let packId: string;
+      let packName: string;
+
+      before(() => {
+        request<{ items: PackagePolicy[] }>({
+          url: '/internal/osquery/fleet_wrapper/package_policies',
+          headers: {
+            'Elastic-Api-Version': API_VERSIONS.internal.v1,
+          },
+        })
+          .then((response) =>
+            loadPack({
+              policy_ids: [response.body.items[0].policy_id],
+              queries: {
+                [savedQueryName]: {
+                  ecs_mapping: {},
+                  interval: 3600,
+                  query: 'select * from uptime;',
+                },
+              },
+            })
+          )
+          .then((pack) => {
+            packId = pack.saved_object_id;
+            packName = pack.name;
+          });
+      });
+
+      after(() => {
+        cleanupPack(packId);
+      });
+
+      it('', () => {
+        preparePack(packName);
+        cy.contains(/^Edit$/).click();
+
+        findAndClickButton('Add query');
+
+        getSavedQueriesDropdown().type(`${multipleMappingsSavedQueryName} {downArrow} {enter}`);
+        cy.contains('Custom key/value pairs').should('exist');
+        cy.contains('Days of uptime').should('exist');
+        cy.contains('List of keywords used to tag each').should('exist');
+        cy.contains('Seconds of uptime').should('exist');
+        cy.contains('Client network address.').should('exist');
+        cy.contains('Total uptime seconds').should('exist');
+        cy.getBySel('ECSMappingEditorForm').should('have.length', 4);
+
+        getSavedQueriesDropdown().type(`${nomappingSavedQueryName} {downArrow} {enter}`);
+        cy.contains('Custom key/value pairs').should('not.exist');
+        cy.contains('Days of uptime').should('not.exist');
+        cy.contains('List of keywords used to tag each').should('not.exist');
+        cy.contains('Seconds of uptime').should('not.exist');
+        cy.contains('Client network address.').should('not.exist');
+        cy.contains('Total uptime seconds').should('not.exist');
+        cy.getBySel('ECSMappingEditorForm').should('have.length', 1);
+
+        getSavedQueriesDropdown().type(`${oneMappingSavedQueryName} {downArrow} {enter}`);
+        cy.contains('Name of the continent').should('exist');
+        cy.contains('Seconds of uptime').should('exist');
+        cy.getBySel('ECSMappingEditorForm').should('have.length', 2);
+
+        findAndClickButton('Save');
+        cy.react('CustomItemAction', {
+          props: { index: 0, item: { id: oneMappingSavedQueryName } },
+        }).click();
+        cy.contains('Name of the continent').should('exist');
+        cy.contains('Seconds of uptime').should('exist');
+      });
+    }
+  );
+
+  describe('to click delete button', { tags: [tag.ESS] }, () => {
     let packName: string;
 
     before(() => {
@@ -634,77 +716,11 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
           })
         )
         .then((pack) => {
-          packId = pack.saved_object_id;
           packName = pack.name;
         });
     });
 
-    after(() => {
-      cleanupPack(packId);
-    });
-
-    it('', () => {
-      preparePack(packName);
-      cy.contains(/^Edit$/).click();
-
-      findAndClickButton('Add query');
-
-      getSavedQueriesDropdown().type(`${multipleMappingsSavedQueryName} {downArrow} {enter}`);
-      cy.contains('Custom key/value pairs').should('exist');
-      cy.contains('Days of uptime').should('exist');
-      cy.contains('List of keywords used to tag each').should('exist');
-      cy.contains('Seconds of uptime').should('exist');
-      cy.contains('Client network address.').should('exist');
-      cy.contains('Total uptime seconds').should('exist');
-      cy.getBySel('ECSMappingEditorForm').should('have.length', 4);
-
-      getSavedQueriesDropdown().type(`${nomappingSavedQueryName} {downArrow} {enter}`);
-      cy.contains('Custom key/value pairs').should('not.exist');
-      cy.contains('Days of uptime').should('not.exist');
-      cy.contains('List of keywords used to tag each').should('not.exist');
-      cy.contains('Seconds of uptime').should('not.exist');
-      cy.contains('Client network address.').should('not.exist');
-      cy.contains('Total uptime seconds').should('not.exist');
-      cy.getBySel('ECSMappingEditorForm').should('have.length', 1);
-
-      getSavedQueriesDropdown().type(`${oneMappingSavedQueryName} {downArrow} {enter}`);
-      cy.contains('Name of the continent').should('exist');
-      cy.contains('Seconds of uptime').should('exist');
-      cy.getBySel('ECSMappingEditorForm').should('have.length', 2);
-
-      findAndClickButton('Save');
-      cy.react('CustomItemAction', {
-        props: { index: 0, item: { id: oneMappingSavedQueryName } },
-      }).click();
-      cy.contains('Name of the continent').should('exist');
-      cy.contains('Seconds of uptime').should('exist');
-    });
-  });
-
-  describe('to click delete button', () => {
-    let packName: string;
-
-    before(() => {
-      request<{ items: PackagePolicy[] }>({
-        url: '/internal/osquery/fleet_wrapper/package_policies',
-        headers: {
-          'Elastic-Api-Version': API_VERSIONS.internal.v1,
-        },
-      })
-        .then((response) =>
-          loadPack({
-            policy_ids: [response.body.items[0].policy_id],
-            queries: {
-              [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
-            },
-          })
-        )
-        .then((pack) => {
-          packName = pack.name;
-        });
-    });
-
-    it('', () => {
+    it('', { tags: [tag.ESS] }, () => {
       preparePack(packName);
       findAndClickButton('Edit');
       deleteAndConfirm('pack');

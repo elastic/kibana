@@ -36,7 +36,7 @@ import type {
 declare global {
   namespace Cypress {
     interface SuiteConfigOverrides {
-      env: {
+      env?: {
         ftrConfig: SecuritySolutionDescribeBlockFtrConfig;
       };
     }

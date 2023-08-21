@@ -31,8 +31,7 @@ import {
 } from '../../tasks/integrations';
 import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
 
-// TODO try to fix it for serverless too
-describe('ALL - Add Integration', { tags: [tag.ESS] }, () => {
+describe('ALL - Add Integration', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   let savedQueryId: string;
 
   before(() => {

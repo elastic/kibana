@@ -55,7 +55,7 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     numTestsKeptInMemory: 3,
     setupNodeEvents(on, config) {
-      setupUserDataLoader(on, config, roleDefinitions);
+      setupUserDataLoader(on, config, { roleDefinitions });
 
       return config;
     },

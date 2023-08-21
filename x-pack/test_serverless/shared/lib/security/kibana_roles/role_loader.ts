@@ -47,7 +47,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
     };
   }
 
-  async load(name: keyof R): Promise<LoadedRoleAndUser> {
+  async load(name: keyof R, additionalRoleName?: string): Promise<LoadedRoleAndUser> {
     const role = this.roles[name];
 
     if (!role) {
@@ -57,9 +57,12 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
     }
 
     const roleName = role.name;
-
+    const roleNames = [roleName];
+    if (additionalRoleName) {
+      roleNames.push(additionalRoleName);
+    }
     await this.createRole(role);
-    await this.createUser(roleName, 'changeme', [roleName, 'viewer']);
+    await this.createUser(roleName, 'changeme', roleNames);
 
     return {
       role: roleName,

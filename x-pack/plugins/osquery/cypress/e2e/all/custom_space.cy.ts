@@ -13,14 +13,16 @@ import {
   inputQuery,
   selectAllAgents,
   submitQuery,
-  isServerless,
 } from '../../tasks/live_query';
 import { loadSpace, loadPack, cleanupPack, cleanupSpace } from '../../tasks/api_fixtures';
 
-const spaces = isServerless ? ['default'] : ['default', 'custom-space'];
+const testSpaces = [
+  { name: 'default', tags: [tag.ESS, tag.SERVERLESS] },
+  { name: 'custom-spaces', tags: [tag.ESS] },
+];
 describe('ALL - Custom space', () => {
-  spaces.forEach((spaceName) => {
-    describe(`[${spaceName}]`, { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  testSpaces.forEach((space) => {
+    describe(`[${space.name}]`, { tags: space.tags }, () => {
       let packName: string;
       let packId: string;
       let spaceId: string;
