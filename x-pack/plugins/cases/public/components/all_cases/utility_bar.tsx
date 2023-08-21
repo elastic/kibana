@@ -76,11 +76,11 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
 
     const visibleCases = totalCases > pagination.pageSize ? pagination.pageSize : totalCases;
 
-    const hasReachedMaxCases = totalCases > MAX_DOCS_PER_PAGE && (pagination.pageSize * (pagination.pageIndex + 1)) >= MAX_DOCS_PER_PAGE;
+    const hasReachedMaxCases = totalCases >= MAX_DOCS_PER_PAGE && (pagination.pageSize * (pagination.pageIndex + 1)) >= MAX_DOCS_PER_PAGE;
 
     const isDoNotShowAgainSelected = localStorageWarning && localStorageWarning === true;
 
-    const renderMaxLengthWarning = (): React.ReactNode => (
+    const renderMaxLimitWarning = (): React.ReactNode => (
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiText color="default" size="m" css={css`margin-top: 4px;`}>{i18n.MAX_CASES(totalCases)}</EuiText>
@@ -181,10 +181,10 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
               <EuiFlexGroup>
                 <EuiFlexItem>
                   <EuiCallOut
-                    title={renderMaxLengthWarning()}
+                    title={renderMaxLimitWarning()}
                     color="warning"
                     size="s"
-                    data-test-subj="maximum-length-warning"
+                    data-test-subj="all-cases-maximum-limit-warning"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

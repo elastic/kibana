@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
+import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import {
   noCasesPermissions,
   onlyDeleteCasesPermission,
@@ -39,11 +40,56 @@ describe('Severity form field', () => {
   });
 
   it('renders', async () => {
-    const result = appMockRender.render(<CasesTableUtilityBar {...props} />);
-    expect(result.getByText('Showing 5 cases')).toBeInTheDocument();
-    expect(result.getByText('Selected 1 case')).toBeInTheDocument();
-    expect(result.getByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
-    expect(result.getByTestId('all-cases-refresh-link-icon')).toBeInTheDocument();
+    appMockRender.render(<CasesTableUtilityBar {...props} />);
+    expect(screen.getByText('Showing 5 of 5 cases')).toBeInTheDocument();
+    expect(screen.getByText('Selected 1 case')).toBeInTheDocument();
+    expect(screen.getByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
+    expect(screen.getByTestId('all-cases-refresh-link-icon')).toBeInTheDocument();
+    expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
+  });
+
+  it('renders showing cases correctly', async () => {
+    const updatedProps = {
+      ...props,
+      totalCases: 20,
+      pagination: {
+        ...props.pagination,
+        totalItemCount: 20,
+      }
+    }
+    appMockRender.render(<CasesTableUtilityBar {...updatedProps} />);
+    expect(screen.getByText('Showing 10 of 20 cases')).toBeInTheDocument();
+    expect(screen.getByText('Selected 1 case')).toBeInTheDocument();
+  });
+
+  it('renders showing cases correctly for second page', async () => {
+    const updatedProps = {
+      ...props,
+      totalCases: 20,
+      pagination: {
+        ...props.pagination,
+        pageIndex: 2,
+        totalItemCount: 20,
+      }
+    }
+    appMockRender.render(<CasesTableUtilityBar {...updatedProps} />);
+    expect(screen.getByText('Showing 10 of 20 cases')).toBeInTheDocument();
+    expect(screen.getByText('Selected 1 case')).toBeInTheDocument();
+  });
+
+  it('renders showing cases correctly when no cases available', async () => {
+    const updatedProps = {
+      totalCases: 0,
+      selectedCases: [],
+      deselectCases,
+      pagination: {
+        pageSize: 10,
+        pageIndex: 1,
+        totalItemCount: 0,
+      }
+    }
+    appMockRender.render(<CasesTableUtilityBar {...updatedProps} />);
+    expect(screen.getByText('Showing 0 of 0 cases')).toBeInTheDocument();
   });
 
   it('opens the bulk actions correctly', async () => {
@@ -120,5 +166,55 @@ describe('Severity form field', () => {
 
     expect(result.queryByTestId('case-table-bulk-actions-link-icon')).toBeFalsy();
     expect(result.queryByText('Showing 0 cases')).toBeFalsy();
+  });
+
+  describe('Maximum number of cases', () => {
+    const newProps = {
+      ...props,
+      selectedCaseS: [],
+      totalCases: MAX_DOCS_PER_PAGE,
+      pagination: {
+       ...props.pagination,
+        totalItemCount: MAX_DOCS_PER_PAGE,
+      }
+    };
+
+    const allCasesPageSize = [10,25,50,100];
+
+    it.each(allCasesPageSize)(
+      `does not show warning when totalCases = ${MAX_DOCS_PER_PAGE} but pageSize(%s) * pageIndex + 1 < ${MAX_DOCS_PER_PAGE}`,
+      (size) => {
+        const newPageIndex = (MAX_DOCS_PER_PAGE / size) - 2;
+
+        console.log({size, newPageIndex})
+        appMockRender.render(<CasesTableUtilityBar{...{...newProps, pagination: {...newProps.pagination, pageSize: size, pageIndex: newPageIndex}}}/>);
+        expect(screen.getByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)).toBeInTheDocument();
+        expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
+      }
+    );
+
+    it.each(allCasesPageSize)(
+      `shows warning when totalCases = ${MAX_DOCS_PER_PAGE} but pageSize(%s) * pageIndex + 1 = ${MAX_DOCS_PER_PAGE}`,
+      (size) => {
+        const newPageIndex = (MAX_DOCS_PER_PAGE / size) - 1;
+
+        console.log({size, newPageIndex})
+        appMockRender.render(<CasesTableUtilityBar{...{...newProps, pagination: {...newProps.pagination, pageSize: size, pageIndex: newPageIndex}}}/>);
+        expect(screen.getByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)).toBeInTheDocument();
+        expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
+      }
+    );
+
+    it.each(allCasesPageSize)(
+      `shows warning when totalCases = ${MAX_DOCS_PER_PAGE} but pageSize(%s) * pageIndex + 1 > ${MAX_DOCS_PER_PAGE}`,
+      (size) => {
+        const newPageIndex = MAX_DOCS_PER_PAGE / size;
+
+        console.log({size, newPageIndex})
+        appMockRender.render(<CasesTableUtilityBar{...{...newProps, pagination: {...newProps.pagination, pageSize: size, pageIndex: newPageIndex}}}/>);
+        expect(screen.getByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)).toBeInTheDocument();
+        expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
+      }
+    );
   });
 });
