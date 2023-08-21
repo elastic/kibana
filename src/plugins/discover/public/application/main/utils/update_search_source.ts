@@ -32,13 +32,17 @@ export function updateVolatileSearchSource(
   }
 ) {
   const { uiSettings, data } = services;
-  const usedSort = getSortForSearchSource(
+  const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+
+  const usedSort = getSortForSearchSource({
     sort,
     dataView,
-    uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
-  );
-  const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
-  searchSource.setField('trackTotalHits', true).setField('sort', usedSort);
+    defaultSortDir: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
+    includeTieBreaker: true,
+  });
+  searchSource.setField('sort', usedSort);
+
+  searchSource.setField('trackTotalHits', true);
 
   let filters = [...customFilters];
 
