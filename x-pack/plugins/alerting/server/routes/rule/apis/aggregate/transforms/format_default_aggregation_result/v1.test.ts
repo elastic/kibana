@@ -5,26 +5,7 @@
  * 2.0.
  */
 
-import {
-  getDefaultRuleAggregation,
-  formatDefaultAggregationResult,
-} from './default_rule_aggregation';
-
-describe('getDefaultRuleAggregation', () => {
-  it('should return aggregation with default maxTags', () => {
-    const result = getDefaultRuleAggregation();
-    expect(result.tags).toEqual({
-      terms: { field: 'alert.attributes.tags', order: { _key: 'asc' }, size: 50 },
-    });
-  });
-
-  it('should return aggregation with custom maxTags', () => {
-    const result = getDefaultRuleAggregation({ maxTags: 100 });
-    expect(result.tags).toEqual({
-      terms: { field: 'alert.attributes.tags', order: { _key: 'asc' }, size: 100 },
-    });
-  });
-});
+import { formatDefaultAggregationResult } from './v1';
 
 describe('formatDefaultAggregationResult', () => {
   it('should format aggregation result', () => {

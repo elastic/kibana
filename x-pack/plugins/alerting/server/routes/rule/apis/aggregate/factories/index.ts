@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export * from './aggregate';
-export * from './types';
+export { getDefaultRuleAggregation } from './get_default_rule_aggregation/latest';
+
+export { getDefaultRuleAggregation as getDefaultRuleAggregationV1 } from './get_default_rule_aggregation/v1';

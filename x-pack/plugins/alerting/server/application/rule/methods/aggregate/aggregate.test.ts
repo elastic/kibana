@@ -16,13 +16,11 @@ import { AlertingAuthorization } from '../../../../authorization/alerting_author
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
-import {
-  RecoveredActionGroup,
-  getDefaultRuleAggregation,
-  DefaultRuleAggregationResult,
-} from '../../../../../common';
+
 import { RegistryRuleType } from '../../../../rule_type_registry';
 import { fromKueryExpression, nodeTypes } from '@kbn/es-query';
+import { RecoveredActionGroup } from '../../../../../common';
+import { DefaultRuleAggregationResult } from './types';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();

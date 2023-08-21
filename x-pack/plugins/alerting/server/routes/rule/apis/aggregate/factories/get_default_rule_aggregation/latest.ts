@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './aggregate';
-export * from './types';
+export * from './v1';
