@@ -1,3 +1,35 @@
+soc_manager:
+  indices:
+    - names:
+        - logs-*
+      privileges:
+        - read
+        - write
+  applications:
+    - application: discover
+      privileges:
+        - all
+      resources: "*"
+    - application: visualize
+      privileges:
+        - read
+      resources: "*"
+    - application: observabilityCases
+      privileges:
+        - all
+      resources: "*"
+    - application: securitySolutionCases
+      privileges:
+        - all
+      resources: "*"
+    - application: infrastructure
+      privileges:
+        - read
+      resources: "*"
+    - application: indexPatterns
+      privileges:
+        - all
+      resources: "*"
 
 # custom roles for osquery lack of permission testing
 reader:
