@@ -7,8 +7,8 @@
 
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { internalAccess } from '@kbn/reporting-plugin/common/constants';
 import React from 'react';
+import { internalAccess } from '../../common/constants';
 import { JobId, JobSummary } from '../../common/types';
 
 interface Props {
