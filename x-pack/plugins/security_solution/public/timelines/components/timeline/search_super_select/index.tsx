@@ -13,8 +13,8 @@ import styled from 'styled-components';
 import type { OpenTimelineResult } from '../../open_timeline/types';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
-import type { TimelineTypeLiteral } from '../../../../../common/types/timeline/api';
-import { TimelineType } from '../../../../../common/types/timeline/api';
+import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
+import { TimelineType } from '../../../../../common/api/timeline';
 
 const StyledEuiInputPopover = styled(EuiInputPopover)`
   .rightArrowIcon {

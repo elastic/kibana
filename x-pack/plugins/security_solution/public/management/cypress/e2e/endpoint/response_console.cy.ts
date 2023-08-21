@@ -188,7 +188,8 @@ describe('Response console', () => {
     });
   });
 
-  describe('File operations: get-file and execute', () => {
+  // Broken until this is fixed: https://github.com/elastic/kibana/issues/162760
+  describe.skip('File operations: get-file and execute', () => {
     const homeFilePath = process.env.CI || true ? '/home/vagrant' : `/home/ubuntu`;
 
     const fileContent = 'This is a test file for the get-file command.';

@@ -12,7 +12,12 @@ import type {
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
 import { NavigationEmbeddableContentType } from '../../types';
-import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from './constants';
+import {
+  DASHBOARD_LINK_TYPE,
+  EXTERNAL_LINK_TYPE,
+  NAV_HORIZONTAL_LAYOUT,
+  NAV_VERTICAL_LAYOUT,
+} from './constants';
 
 export type NavigationEmbeddableCrudTypes = ContentManagementCrudTypes<
   NavigationEmbeddableContentType,
@@ -38,9 +43,12 @@ export interface NavigationEmbeddableLink {
   order: number;
 }
 
+export type NavigationLayoutType = typeof NAV_HORIZONTAL_LAYOUT | typeof NAV_VERTICAL_LAYOUT;
+
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type NavigationEmbeddableAttributes = {
   title: string;
   description?: string;
   links?: NavigationEmbeddableLink[];
+  layout?: NavigationLayoutType;
 };

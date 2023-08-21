@@ -30,7 +30,7 @@ import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { CanvasAppLocatorDefinition } from '../common/locator';
 import { SESSIONSTORAGE_LASTPATH, CANVAS_APP } from '../common/lib/constants';
@@ -68,7 +68,7 @@ export interface CanvasStartDeps {
   presentationUtil: PresentationUtilPluginStart;
   visualizations: VisualizationsStart;
   spaces?: SpacesPluginStart;
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 /**

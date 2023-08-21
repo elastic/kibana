@@ -23,7 +23,6 @@ import type { ChangeEvent, FocusEvent, FunctionComponent, HTMLProps } from 'reac
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
-import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
   Capabilities,
   DocLinksStart,
@@ -32,6 +31,7 @@ import type {
   NotificationsStart,
   ScopedHistory,
 } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
@@ -41,6 +41,11 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { DeleteRoleButton } from './delete_role_button';
+import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
+import { ReservedRoleBadge } from './reserved_role_badge';
+import type { RoleValidationResult } from './validate_role';
+import { RoleValidator } from './validate_role';
 import type { SecurityLicense } from '../../../../common/licensing';
 import type {
   BuiltinESPrivileges,
@@ -63,11 +68,6 @@ import type { IndicesAPIClient } from '../indices_api_client';
 import { KibanaPrivileges } from '../model';
 import type { PrivilegesAPIClient } from '../privileges_api_client';
 import type { RolesAPIClient } from '../roles_api_client';
-import { DeleteRoleButton } from './delete_role_button';
-import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
-import { ReservedRoleBadge } from './reserved_role_badge';
-import type { RoleValidationResult } from './validate_role';
-import { RoleValidator } from './validate_role';
 
 interface Props {
   action: 'edit' | 'clone';

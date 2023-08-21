@@ -22,8 +22,8 @@ import {
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { DashboardItem } from '../../embeddable/types';
-import { memoizedFetchDashboard, memoizedFetchDashboards } from './dashboard_link_tools';
-import { DashboardLinkEmbeddableStrings } from './dashboard_link_strings';
+import { DashboardLinkStrings } from './dashboard_link_strings';
+import { fetchDashboard, fetchDashboards } from './dashboard_link_tools';
 
 type DashboardComboBoxOption = EuiComboBoxOptionOption<DashboardItem>;
 
@@ -53,14 +53,23 @@ export const DashboardLinkDestinationPicker = ({
 
   useMount(async () => {
     if (initialSelection) {
-      const dashboard = await memoizedFetchDashboard(initialSelection);
-      onDestinationPicked(dashboard);
-      setSelectedOption([getDashboardItem(dashboard)]);
+      const dashboard = await fetchDashboard(initialSelection).catch(() => {
+        /**
+         * Swallow the error that is thrown, since this just means the selected dashboard was deleted and
+         * so we should treat this the same as "no previous selection."
+         */
+      });
+      if (dashboard) {
+        onDestinationPicked(dashboard);
+        setSelectedOption([getDashboardItem(dashboard)]);
+      } else {
+        onDestinationPicked(undefined);
+      }
     }
   });
 
   const { loading: loadingDashboardList, value: dashboardList } = useAsync(async () => {
-    const dashboards = await memoizedFetchDashboards({
+    const dashboards = await fetchDashboards({
       search: searchString,
       parentDashboardId,
       selectedDashboardId: initialSelection,
@@ -86,7 +95,7 @@ export const DashboardLinkDestinationPicker = ({
         <EuiFlexGroup gutterSize="s" alignItems="center" className={contentClassName}>
           {dashboardId === parentDashboardId && (
             <EuiFlexItem grow={false}>
-              <EuiBadge>{DashboardLinkEmbeddableStrings.getCurrentDashboardLabel()}</EuiBadge>
+              <EuiBadge>{DashboardLinkStrings.getCurrentDashboardLabel()}</EuiBadge>
             </EuiFlexItem>
           )}
           <EuiFlexItem className={'navEmbeddableLinkText'}>
@@ -108,8 +117,8 @@ export const DashboardLinkDestinationPicker = ({
       fullWidth
       className={'navEmbeddableDashboardPicker'}
       isLoading={loadingDashboardList}
-      aria-label={DashboardLinkEmbeddableStrings.getDashboardPickerAriaLabel()}
-      placeholder={DashboardLinkEmbeddableStrings.getDashboardPickerPlaceholder()}
+      aria-label={DashboardLinkStrings.getDashboardPickerAriaLabel()}
+      placeholder={DashboardLinkStrings.getDashboardPickerPlaceholder()}
       singleSelection={{ asPlainText: true }}
       options={dashboardList}
       onSearchChange={(searchValue) => {

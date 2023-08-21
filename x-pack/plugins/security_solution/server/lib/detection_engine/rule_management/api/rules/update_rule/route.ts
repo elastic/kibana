@@ -5,38 +5,39 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
+import type { UpdateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
+import {
+  UpdateRuleRequestBody,
+  validateUpdateRuleProps,
+} from '../../../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { validateUpdateRuleProps } from '../../../../../../../common/detection_engine/rule_management';
-import { RuleUpdateProps } from '../../../../../../../common/detection_engine/rule_schema';
-import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { SetupPlugins } from '../../../../../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { buildSiemResponse } from '../../../../routes/utils';
-
-import { getIdError } from '../../../utils/utils';
-import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
-import { updateRules } from '../../../logic/crud/update_rules';
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
-
 import { readRules } from '../../../logic/crud/read_rules';
+import { updateRules } from '../../../logic/crud/update_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
+import { getIdError } from '../../../utils/utils';
+import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
 
 export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.put(
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        body: buildRouteValidation(RuleUpdateProps),
+        body: buildRouteValidation(UpdateRuleRequestBody),
       },
       options: {
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<UpdateRuleResponse>> => {
       const siemResponse = buildSiemResponse(response);
       const validationErrors = validateUpdateRuleProps(request.body);
       if (validationErrors.length) {

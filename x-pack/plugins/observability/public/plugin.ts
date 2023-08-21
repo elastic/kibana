@@ -51,6 +51,10 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
+import {
+  ObservabilityAIAssistantPluginSetup,
+  ObservabilityAIAssistantPluginStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
@@ -70,9 +74,7 @@ import {
   OVERVIEW_PATH,
   RULES_PATH,
   SLOS_PATH,
-} from './routes/paths';
-import { createCoPilotService } from './context/co_pilot_context/create_co_pilot_service';
-import { type CoPilotService } from './typings/co_pilot';
+} from '../common/locators/paths';
 
 export interface ConfigSchema {
   unsafe: {
@@ -86,24 +88,23 @@ export interface ConfigSchema {
       uptime: {
         enabled: boolean;
       };
+      observability: {
+        enabled: boolean;
+      };
     };
     thresholdRule: {
       enabled: boolean;
     };
   };
   compositeSlo: { enabled: boolean };
-  aiAssistant?: {
-    enabled: boolean;
-    feedback: {
-      enabled: boolean;
-    };
-  };
 }
+
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
 export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   home?: HomePublicPluginSetup;
@@ -124,6 +125,7 @@ export interface ObservabilityPublicPluginsStart {
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   security: SecurityPluginStart;
   share: SharePluginStart;
@@ -149,8 +151,6 @@ export class Plugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
-
-  private coPilotService: CoPilotService | undefined;
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
@@ -343,12 +343,6 @@ export class Plugin
       )
     );
 
-    this.coPilotService = createCoPilotService({
-      enabled: !!config.aiAssistant?.enabled,
-      http: coreSetup.http,
-      trackingEnabled: !!config.aiAssistant?.feedback.enabled,
-    });
-
     return {
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
@@ -357,7 +351,6 @@ export class Plugin
       ruleDetailsLocator,
       sloDetailsLocator,
       sloEditLocator,
-      getCoPilotService: () => this.coPilotService!,
     };
   }
 
@@ -387,7 +380,6 @@ export class Plugin
     return {
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
-      getCoPilotService: () => this.coPilotService!,
     };
   }
 }

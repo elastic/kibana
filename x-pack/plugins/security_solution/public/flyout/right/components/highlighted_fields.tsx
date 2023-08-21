@@ -6,38 +6,68 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback } from 'react';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import React from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel, EuiTitle } from '@elastic/eui';
+import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
+import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import { HighlightedFieldsCell } from './highlighted_fields_cell';
+import {
+  CellActionsMode,
+  SecurityCellActions,
+  SecurityCellActionsTrigger,
+} from '../../../common/components/cell_actions';
+import type { UseHighlightedFieldsResult } from '../hooks/use_highlighted_fields';
 import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
-import { AlertSummaryView } from '../../../common/components/event_details/alert_summary_view';
-import { HIGHLIGHTED_FIELDS_TITLE } from './translations';
+import {
+  HIGHLIGHTED_FIELDS_FIELD_COLUMN,
+  HIGHLIGHTED_FIELDS_TITLE,
+  HIGHLIGHTED_FIELDS_VALUE_COLUMN,
+} from './translations';
 import { useRightPanelContext } from '../context';
-import { RightPanelKey, RightPanelTableTabPath } from '..';
+import { useHighlightedFields } from '../hooks/use_highlighted_fields';
+
+const columns: Array<EuiBasicTableColumn<UseHighlightedFieldsResult>> = [
+  {
+    field: 'field',
+    name: HIGHLIGHTED_FIELDS_FIELD_COLUMN,
+    'data-test-subj': 'fieldCell',
+    width: '125px',
+  },
+  {
+    field: 'description',
+    name: HIGHLIGHTED_FIELDS_VALUE_COLUMN,
+    'data-test-subj': 'valueCell',
+    render: (description: { field: string; values: string[] | null | undefined }) => (
+      <SecurityCellActions
+        data={{
+          field: description.field,
+          value: description.values,
+        }}
+        mode={CellActionsMode.HOVER_RIGHT}
+        triggerId={SecurityCellActionsTrigger.DEFAULT}
+        visibleCellActions={6}
+      >
+        <HighlightedFieldsCell values={description.values} field={description.field} />
+      </SecurityCellActions>
+    ),
+  },
+];
 
 /**
  * Component that displays the highlighted fields in the right panel under the Investigation section.
- * It leverages the existing {@link AlertSummaryView} component.
- * // TODO will require improvements https://github.com/elastic/security-team/issues/6428
  */
 export const HighlightedFields: FC = () => {
-  const { openRightPanel } = useExpandableFlyoutContext();
-  const { eventId, indexName, dataFormattedForFieldBrowser, browserFields, scopeId } =
-    useRightPanelContext();
+  const { dataFormattedForFieldBrowser } = useRightPanelContext();
+  const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const { rule: maybeRule } = useRuleWithFallback(ruleId);
 
-  const goToTableTab = useCallback(() => {
-    openRightPanel({
-      id: RightPanelKey,
-      path: RightPanelTableTabPath,
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    });
-  }, [eventId, indexName, openRightPanel, scopeId]);
+  const highlightedFields = useHighlightedFields({
+    dataFormattedForFieldBrowser,
+    investigationFields: maybeRule?.investigation_fields ?? [],
+  });
 
-  if (!dataFormattedForFieldBrowser || !browserFields || !eventId) {
+  if (!dataFormattedForFieldBrowser || highlightedFields.length === 0) {
     return null;
   }
 
@@ -50,16 +80,7 @@ export const HighlightedFields: FC = () => {
       </EuiFlexItem>
       <EuiFlexItem data-test-subj={HIGHLIGHTED_FIELDS_DETAILS_TEST_ID}>
         <EuiPanel hasBorder hasShadow={false}>
-          <AlertSummaryView // TODO consider using x-pack/plugins/security_solution/public/common/components/event_details/summary_view.tsx instead if the link to the table have to be removed
-            data={dataFormattedForFieldBrowser}
-            eventId={eventId}
-            browserFields={browserFields}
-            isDraggable={false}
-            scopeId={scopeId}
-            title={''}
-            isReadOnly={false} // TODO: set properly
-            goToTable={goToTableTab}
-          />
+          <EuiInMemoryTable items={highlightedFields} columns={columns} compressed />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

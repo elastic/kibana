@@ -44,6 +44,7 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
             hits,
           });
         }),
+        findById: jest.fn(),
         findByIds: jest.fn().mockImplementation(() =>
           Promise.resolve([
             {
@@ -73,5 +74,6 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
       },
       deleteDashboards: jest.fn(),
       checkForDuplicateDashboardTitle: jest.fn(),
+      updateDashboardMeta: jest.fn(),
     };
   };

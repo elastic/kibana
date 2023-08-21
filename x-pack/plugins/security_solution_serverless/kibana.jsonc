@@ -18,7 +18,9 @@
       "security",
       "securitySolution",
       "serverless",
-      "taskManager"
+      "taskManager",
+      "cloud",
+      "fleet"
     ],
     "optionalPlugins": [
       "securitySolutionEss"

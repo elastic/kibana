@@ -9,7 +9,7 @@ import type { NavigateToAppOptions } from '@kbn/core/public';
 import { useCallback } from 'react';
 import type { BulkActionResponse } from '..';
 import { APP_UI_ID } from '../../../../../common/constants';
-import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import { SecurityPageName } from '../../../../app/types';
 import { getEditRuleUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';

@@ -18,7 +18,7 @@ import { mlServicesMock } from '../../../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { createRuleRoute } from './route';
-import { getCreateRulesSchemaMock } from '../../../../../../../common/detection_engine/rule_schema/mocks';
+import { getCreateRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 

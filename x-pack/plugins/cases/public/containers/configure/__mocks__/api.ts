@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActionConnector, ActionTypeConnector } from '../../../../common/api';
+import type { ActionConnector, ActionTypeConnector } from '../../../../common/types/domain';
 
 import type { ApiProps } from '../../types';
 import type { CaseConfigure } from '../types';

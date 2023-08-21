@@ -65,7 +65,13 @@ export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
 
 export const CHANGE_CHECK_DEBOUNCE = 100;
 
+// ------------------------------------------------------------------
+// Content Management
+// ------------------------------------------------------------------
 export { CONTENT_ID as DASHBOARD_CONTENT_ID } from '../common/content_management/constants';
+
+export const DASHBOARD_CACHE_SIZE = 20; // only store a max of 20 dashboards
+export const DASHBOARD_CACHE_TTL = 1000 * 60 * 5; // time to live = 5 minutes
 
 // ------------------------------------------------------------------
 // Default State

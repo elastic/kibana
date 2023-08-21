@@ -67,11 +67,6 @@ export interface LensAppState extends EditorFrameState {
   annotationGroups: AnnotationGroups;
 }
 
-export type DispatchSetState = (state: Partial<LensAppState>) => {
-  payload: Partial<LensAppState>;
-  type: string;
-};
-
 export interface LensState {
   lens: LensAppState;
 }

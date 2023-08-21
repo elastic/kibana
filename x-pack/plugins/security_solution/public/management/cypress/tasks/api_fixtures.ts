@@ -6,7 +6,7 @@
  */
 
 import type { Case } from '@kbn/cases-plugin/common';
-import type { RuleResponse } from '../../../../common/detection_engine/rule_schema';
+import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { request } from './common';
 
 export const generateRandomStringName = (length: number) =>

@@ -12,7 +12,9 @@ import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { DeepPartial } from '@kbn/utility-types';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
+  SummarizedAlerts,
   AlertInstanceContext,
   AlertInstanceState,
   RuleAlertData,
@@ -24,8 +26,8 @@ import {
   IIndexPatternString,
 } from '../alerts_service/resource_installer_utils';
 import { CreateAlertsClientParams } from '../alerts_service/alerts_service';
+import type { AlertRule, SearchResult } from './types';
 import {
-  type AlertRule,
   IAlertsClient,
   InitializeExecutionOpts,
   ProcessAndLogAlertsOpts,
@@ -33,6 +35,7 @@ import {
   ReportedAlert,
   ReportedAlertData,
   UpdateableAlert,
+  GetSummarizedAlertsParams,
 } from './types';
 import {
   buildNewAlert,
@@ -40,6 +43,9 @@ import {
   buildUpdatedRecoveredAlert,
   buildRecoveredAlert,
   formatRule,
+  getHitsWithCount,
+  getLifecycleAlertsQueries,
+  getContinualAlertsQuery,
 } from './lib';
 
 // Term queries can take up to 10,000 terms
@@ -75,6 +81,7 @@ export class AlertsClient<
   };
 
   private rule: AlertRule = {};
+  private ruleType: UntypedNormalizedRuleType;
 
   private indexTemplateAndPattern: IIndexPatternString;
 
@@ -95,11 +102,15 @@ export class AlertsClient<
     });
     this.fetchedAlerts = { indices: {}, data: {} };
     this.rule = formatRule({ rule: this.options.rule, ruleType: this.options.ruleType });
+    this.ruleType = options.ruleType;
   }
 
   public async initializeExecution(opts: InitializeExecutionOpts) {
     await this.legacyAlertsClient.initializeExecution(opts);
 
+    if (!this.ruleType.alerts?.shouldWrite) {
+      return;
+    }
     // Get tracked alert UUIDs to query for
     // TODO - we can consider refactoring to store the previous execution UUID and query
     // for active and recovered alerts from the previous execution using that UUID
@@ -118,7 +129,7 @@ export class AlertsClient<
     }
 
     const queryByUuid = async (uuids: string[]) => {
-      return await this.search({
+      const result = await this.search({
         size: uuids.length,
         query: {
           bool: {
@@ -137,6 +148,7 @@ export class AlertsClient<
           },
         },
       });
+      return result.hits;
     };
 
     try {
@@ -160,17 +172,16 @@ export class AlertsClient<
     }
   }
 
-  public async search(queryBody: SearchRequest['body']) {
+  public async search(queryBody: SearchRequest['body']): Promise<SearchResult<AlertData>> {
     const esClient = await this.options.elasticsearchClientPromise;
-
     const {
-      hits: { hits },
+      hits: { hits, total },
     } = await esClient.search<Alert & AlertData>({
       index: this.indexTemplateAndPattern.pattern,
       body: queryBody,
     });
 
-    return hits;
+    return { hits, total };
   }
 
   public report(
@@ -248,6 +259,12 @@ export class AlertsClient<
   }
 
   public async persistAlerts() {
+    if (!this.ruleType.alerts?.shouldWrite) {
+      this.options.logger.debug(
+        `Resources registered and installed for ${this.ruleType.alerts?.context} context but "shouldWrite" is set to false.`
+      );
+      return;
+    }
     const currentTime = new Date().toISOString();
     const esClient = await this.options.elasticsearchClientPromise;
 
@@ -400,6 +417,61 @@ export class AlertsClient<
 
   public factory() {
     return this.legacyAlertsClient.factory();
+  }
+
+  public async getSummarizedAlerts({
+    ruleId,
+    spaceId,
+    excludedAlertInstanceIds,
+    alertsFilter,
+    start,
+    end,
+    executionUuid,
+  }: GetSummarizedAlertsParams): Promise<SummarizedAlerts> {
+    if (!ruleId || !spaceId) {
+      throw new Error(`Must specify both rule ID and space ID for AAD alert query.`);
+    }
+    const queryByExecutionUuid: boolean = !!executionUuid;
+    const queryByTimeRange: boolean = !!start && !!end;
+    // Either executionUuid or start/end dates must be specified, but not both
+    if (
+      (!queryByExecutionUuid && !queryByTimeRange) ||
+      (queryByExecutionUuid && queryByTimeRange)
+    ) {
+      throw new Error(`Must specify either execution UUID or time range for AAD alert query.`);
+    }
+
+    const getQueryParams = {
+      executionUuid,
+      start,
+      end,
+      ruleId,
+      excludedAlertInstanceIds,
+      alertsFilter,
+    };
+
+    const formatAlert = this.ruleType.alerts?.formatAlert;
+
+    const isLifecycleAlert = this.ruleType.autoRecoverAlerts ?? false;
+
+    if (isLifecycleAlert) {
+      const queryBodies = getLifecycleAlertsQueries(getQueryParams);
+      const responses = await Promise.all(queryBodies.map((queryBody) => this.search(queryBody)));
+
+      return {
+        new: getHitsWithCount(responses[0], formatAlert),
+        ongoing: getHitsWithCount(responses[1], formatAlert),
+        recovered: getHitsWithCount(responses[2], formatAlert),
+      };
+    }
+
+    const response = await this.search(getContinualAlertsQuery(getQueryParams));
+
+    return {
+      new: getHitsWithCount(response, formatAlert),
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
+    };
   }
 
   public client() {

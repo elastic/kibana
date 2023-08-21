@@ -20,7 +20,6 @@ export const embeddableServiceFactory: EmbeddableServiceFactory = () => {
     getEmbeddableFactory: pluginMock.getEmbeddableFactory,
     getStateTransfer: pluginMock.getStateTransfer,
     getAllMigrations: pluginMock.getAllMigrations,
-    EmbeddablePanel: pluginMock.EmbeddablePanel,
     telemetry: pluginMock.telemetry,
     extract: pluginMock.extract,
     inject: pluginMock.inject,

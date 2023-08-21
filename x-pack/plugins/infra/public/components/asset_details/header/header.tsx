@@ -17,6 +17,7 @@ import {
   useEuiMinBreakpoint,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { capitalize } from 'lodash';
 import { AssetDetailsProps, FlyoutTabIds, LinkOptions, Tab, TabIds } from '../types';
 import {
   LinkToApmServices,
@@ -26,25 +27,17 @@ import {
   TabToUptime,
 } from '../links';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
+import { useAssetDetailsStateContext } from '../hooks/use_asset_details_state';
+import { toTimestampRange } from '../utils';
 
-type Props = Pick<
-  AssetDetailsProps,
-  'currentTimeRange' | 'overrides' | 'node' | 'nodeType' | 'links' | 'tabs'
-> & {
+type Props = Pick<AssetDetailsProps, 'links' | 'tabs'> & {
   compact: boolean;
 };
 
 const APM_FIELD = 'host.hostname';
 
-export const Header = ({
-  nodeType = 'host',
-  node,
-  tabs = [],
-  links = [],
-  compact,
-  currentTimeRange,
-  overrides,
-}: Props) => {
+export const Header = ({ tabs = [], links = [], compact }: Props) => {
+  const { asset, assetType, overrides, dateRange: timeRange } = useAssetDetailsStateContext();
   const { euiTheme } = useEuiTheme();
   const { showTab, activeTabId } = useTabSwitcherContext();
 
@@ -54,23 +47,23 @@ export const Header = ({
 
   const tabLinkComponents = {
     [FlyoutTabIds.LINK_TO_APM]: (tab: Tab) => (
-      <TabToApmTraces nodeName={node.name} apmField={APM_FIELD} {...tab} />
+      <TabToApmTraces assetName={asset.name} apmField={APM_FIELD} {...tab} />
     ),
     [FlyoutTabIds.LINK_TO_UPTIME]: (tab: Tab) => (
-      <TabToUptime nodeName={node.name} nodeType={nodeType} nodeIp={node.ip} {...tab} />
+      <TabToUptime assetName={asset.name} assetType={assetType} nodeIp={asset.ip} {...tab} />
     ),
   };
 
   const topCornerLinkComponents: Record<LinkOptions, JSX.Element> = {
     nodeDetails: (
       <LinkToNodeDetails
-        nodeName={node.name}
-        nodeType={nodeType}
-        currentTime={currentTimeRange.to}
+        assetName={asset.name}
+        assetType={assetType}
+        currentTimestamp={toTimestampRange(timeRange).to}
       />
     ),
     alertRule: <LinkToAlertsRule onClick={overrides?.alertRule?.onCreateRuleClick} />,
-    apmServices: <LinkToApmServices nodeName={node.name} apmField={APM_FIELD} />,
+    apmServices: <LinkToApmServices assetName={asset.name} apmField={APM_FIELD} />,
   };
 
   const tabEntries = tabs.map(({ name, ...tab }) => {
@@ -85,6 +78,7 @@ export const Header = ({
     return (
       <EuiTab
         {...tab}
+        data-test-subj={`infraAssetDetails${capitalize(tab.id)}Tab`}
         key={tab.id}
         onClick={() => onTabClick(tab.id)}
         isSelected={tab.id === activeTabId}
@@ -110,7 +104,7 @@ export const Header = ({
           `}
         >
           <EuiTitle size={compact ? 'xs' : 'm'}>
-            {compact ? <h4>{node.name}</h4> : <h1>{node.name}</h1>}
+            {compact ? <h4>{asset.name}</h4> : <h1>{asset.name}</h1>}
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem

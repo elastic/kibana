@@ -10,7 +10,7 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   RuleObjectId,
   RuleResponse,
-} from '../../../../../../../common/detection_engine/rule_schema';
+} from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import { readRules } from '../../../../rule_management/logic/crud/read_rules';
 import { transform } from '../../../../rule_management/utils/utils';
 

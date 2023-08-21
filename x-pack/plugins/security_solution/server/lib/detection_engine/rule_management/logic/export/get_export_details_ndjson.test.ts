@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getRulesSchemaMock } from '../../../../../../common/detection_engine/rule_schema/mocks';
+import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 
 describe('getExportDetailsNdjson', () => {

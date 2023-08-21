@@ -49,7 +49,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/charts-plugin",
     "@kbn/lens-plugin",
-    "@kbn/core-saved-objects-common",
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
     "@kbn/shared-ux-router",
@@ -61,6 +60,7 @@
     "@kbn/discover-plugin",
     "@kbn/observability-alert-details",
     "@kbn/observability-shared-plugin",
+    "@kbn/observability-ai-assistant-plugin",
     "@kbn/ui-theme",
     "@kbn/ml-anomaly-utils",
     "@kbn/aiops-plugin",
@@ -68,6 +68,8 @@
     "@kbn/core-http-server",
     "@kbn/logs-shared-plugin",
     "@kbn/licensing-plugin",
+    "@kbn/aiops-utils",
+    "@kbn/lens-embeddable-utils"
   ],
   "exclude": ["target/**/*"]
 }

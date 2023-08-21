@@ -216,6 +216,7 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
             data-test-subj={TEST_IDS.SYSTEM_PROMPT_MODAL.PROMPT_TEXT}
             disabled={selectedSystemPrompt == null}
             onChange={handlePromptContentChange}
+            placeholder={i18n.SYSTEM_PROMPT_PROMPT_PLACEHOLDER}
             value={promptContent}
             compressed
             fullWidth

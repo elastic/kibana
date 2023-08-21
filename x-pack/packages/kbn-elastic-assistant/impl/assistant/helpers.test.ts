@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { getWelcomeConversation } from './helpers';
+import { getDefaultConnector, getBlockBotConversation } from './helpers';
 import { enterpriseMessaging } from './use_conversation/sample_conversations';
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 
-describe('getWelcomeConversation', () => {
+describe('getBlockBotConversation', () => {
   describe('isAssistantEnabled = false', () => {
     const isAssistantEnabled = false;
     it('When no conversation history, return only enterprise messaging', () => {
@@ -18,7 +19,7 @@ describe('getWelcomeConversation', () => {
         messages: [],
         apiConfig: {},
       };
-      const result = getWelcomeConversation(conversation, isAssistantEnabled);
+      const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages).toEqual(enterpriseMessaging);
       expect(result.messages.length).toEqual(1);
     });
@@ -40,7 +41,7 @@ describe('getWelcomeConversation', () => {
         ],
         apiConfig: {},
       };
-      const result = getWelcomeConversation(conversation, isAssistantEnabled);
+      const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(2);
     });
 
@@ -51,7 +52,7 @@ describe('getWelcomeConversation', () => {
         messages: enterpriseMessaging,
         apiConfig: {},
       };
-      const result = getWelcomeConversation(conversation, isAssistantEnabled);
+      const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(1);
       expect(result.messages).toEqual(enterpriseMessaging);
     });
@@ -74,7 +75,7 @@ describe('getWelcomeConversation', () => {
         ],
         apiConfig: {},
       };
-      const result = getWelcomeConversation(conversation, isAssistantEnabled);
+      const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(3);
     });
   });
@@ -88,7 +89,7 @@ describe('getWelcomeConversation', () => {
         messages: [],
         apiConfig: {},
       };
-      const result = getWelcomeConversation(conversation, isAssistantEnabled);
+      const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(3);
     });
     it('returns a conversation history with the welcome conversation appended', () => {
@@ -108,8 +109,85 @@ describe('getWelcomeConversation', () => {
         ],
         apiConfig: {},
       };
-      const result = getWelcomeConversation(conversation, isAssistantEnabled);
+      const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(4);
+    });
+  });
+
+  describe('getDefaultConnector', () => {
+    it('should return undefined if connectors array is undefined', () => {
+      const connectors = undefined;
+      const result = getDefaultConnector(connectors);
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined if connectors array is empty', () => {
+      const connectors: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>> =
+        [];
+      const result = getDefaultConnector(connectors);
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return the connector id if there is only one connector', () => {
+      const connectors: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>> = [
+        {
+          actionTypeId: '.gen-ai',
+          isPreconfigured: false,
+          isDeprecated: false,
+          referencedByCount: 0,
+          isMissingSecrets: false,
+          isSystemAction: false,
+          secrets: {},
+          id: 'c5f91dc0-2197-11ee-aded-897192c5d6f5',
+          name: 'OpenAI',
+          config: {
+            apiProvider: 'OpenAI',
+            apiUrl: 'https://api.openai.com/v1/chat/completions',
+          },
+        },
+      ];
+      const result = getDefaultConnector(connectors);
+
+      expect(result).toBe(connectors[0]);
+    });
+
+    it('should return undefined if there are multiple connectors', () => {
+      const connectors: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>> = [
+        {
+          actionTypeId: '.gen-ai',
+          isPreconfigured: false,
+          isDeprecated: false,
+          referencedByCount: 0,
+          isMissingSecrets: false,
+          isSystemAction: false,
+          secrets: {},
+          id: 'c5f91dc0-2197-11ee-aded-897192c5d6f5',
+          name: 'OpenAI',
+          config: {
+            apiProvider: 'OpenAI 1',
+            apiUrl: 'https://api.openai.com/v1/chat/completions',
+          },
+        },
+        {
+          actionTypeId: '.gen-ai',
+          isPreconfigured: false,
+          isDeprecated: false,
+          referencedByCount: 0,
+          isMissingSecrets: false,
+          isSystemAction: false,
+          secrets: {},
+          id: 'c7f91dc0-2197-11ee-aded-897192c5d633',
+          name: 'OpenAI',
+          config: {
+            apiProvider: 'OpenAI 2',
+            apiUrl: 'https://api.openai.com/v1/chat/completions',
+          },
+        },
+      ];
+      const result = getDefaultConnector(connectors);
+      expect(result).toBeUndefined();
     });
   });
 });

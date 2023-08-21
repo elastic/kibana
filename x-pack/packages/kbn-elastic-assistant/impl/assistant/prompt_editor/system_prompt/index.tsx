@@ -6,38 +6,50 @@
  */
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
+import { isEmpty } from 'lodash/fp';
 import { useAssistantContext } from '../../../assistant_context';
-import { Conversation, Prompt } from '../../../..';
+import { Conversation } from '../../../..';
 import * as i18n from './translations';
 import { SelectSystemPrompt } from './select_system_prompt';
 
 interface Props {
   conversation: Conversation | undefined;
+  editingSystemPromptId: string | undefined;
+  isSettingsModalVisible: boolean;
+  onSystemPromptSelectionChange: (systemPromptId: string | undefined) => void;
+  setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const SystemPromptComponent: React.FC<Props> = ({ conversation }) => {
+const SystemPromptComponent: React.FC<Props> = ({
+  conversation,
+  editingSystemPromptId,
+  isSettingsModalVisible,
+  onSystemPromptSelectionChange,
+  setIsSettingsModalVisible,
+}) => {
   const { allSystemPrompts } = useAssistantContext();
 
-  const [selectedPrompt, setSelectedPrompt] = useState<Prompt | undefined>(
-    allSystemPrompts?.find((p) => p.id === conversation?.apiConfig.defaultSystemPromptId) ??
-      allSystemPrompts?.[0]
-  );
-
-  useEffect(() => {
-    setSelectedPrompt(
-      allSystemPrompts?.find((p) => p.id === conversation?.apiConfig.defaultSystemPromptId) ??
-        allSystemPrompts?.[0]
-    );
-  }, [allSystemPrompts, conversation]);
+  const selectedPrompt = useMemo(() => {
+    if (editingSystemPromptId !== undefined) {
+      return (
+        allSystemPrompts?.find((p) => p.id === editingSystemPromptId) ??
+        allSystemPrompts?.find((p) => p.id === conversation?.apiConfig.defaultSystemPromptId)
+      );
+    } else {
+      return undefined;
+    }
+  }, [allSystemPrompts, conversation?.apiConfig.defaultSystemPromptId, editingSystemPromptId]);
 
   const [isEditing, setIsEditing] = React.useState<boolean>(false);
 
   const handleClearSystemPrompt = useCallback(() => {
-    setSelectedPrompt(undefined);
-  }, []);
+    if (conversation) {
+      onSystemPromptSelectionChange(undefined);
+    }
+  }, [conversation, onSystemPromptSelectionChange]);
 
   const handleEditSystemPrompt = useCallback(() => setIsEditing(true), []);
 
@@ -52,8 +64,11 @@ const SystemPromptComponent: React.FC<Props> = ({ conversation }) => {
           isClearable={true}
           isEditing={isEditing}
           isOpen={isEditing}
+          isSettingsModalVisible={isSettingsModalVisible}
+          onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           selectedPrompt={selectedPrompt}
           setIsEditing={setIsEditing}
+          setIsSettingsModalVisible={setIsSettingsModalVisible}
         />
       ) : (
         <EuiFlexGroup alignItems="flexStart" gutterSize="none">
@@ -70,7 +85,7 @@ const SystemPromptComponent: React.FC<Props> = ({ conversation }) => {
                 }
               `}
             >
-              {selectedPrompt?.content ?? ''}
+              {isEmpty(selectedPrompt?.content) ? i18n.EMPTY_PROMPT : selectedPrompt?.content}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

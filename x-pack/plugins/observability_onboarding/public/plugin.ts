@@ -23,6 +23,7 @@ import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
+import type { DiscoverSetup } from '@kbn/discover-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 
 export type ObservabilityOnboardingPluginSetup = void;
@@ -31,6 +32,7 @@ export type ObservabilityOnboardingPluginStart = void;
 export interface ObservabilityOnboardingPluginSetupDeps {
   data: DataPublicPluginSetup;
   observability: ObservabilityPublicSetup;
+  discover: DiscoverSetup;
 }
 
 export interface ObservabilityOnboardingPluginStartDeps {
@@ -52,10 +54,11 @@ export class ObservabilityOnboardingPlugin
     core: CoreSetup,
     plugins: ObservabilityOnboardingPluginSetupDeps
   ) {
+    const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
     const {
       ui: { enabled: isObservabilityOnboardingUiEnabled },
       serverless: { enabled: isServerlessEnabled },
-    } = this.ctx.config.get<ObservabilityOnboardingConfig>();
+    } = config;
 
     const pluginSetupDeps = plugins;
 
@@ -90,6 +93,7 @@ export class ObservabilityOnboardingPlugin
             deps: pluginSetupDeps,
             appMountParameters,
             corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
+            config,
           });
         },
       });

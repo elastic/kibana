@@ -293,78 +293,6 @@ describe('Enterprise Search Managed Indices', () => {
       mockRouter.shouldThrow(request);
     });
 
-    it('responds with 400 BAD REQUEST with both source/target AND pipeline_definition', async () => {
-      await mockRouter.callRoute({
-        body: {
-          model_id: 'my-model-id',
-          pipeline_name: 'my-pipeline-name',
-          source_field: 'my-source-field',
-          destination_field: 'my-dest-field',
-          pipeline_definition: {
-            processors: [],
-          },
-        },
-        params: { indexName: 'my-index-name' },
-      });
-
-      expect(mockRouter.response.customError).toHaveBeenCalledWith(
-        expect.objectContaining({
-          statusCode: 400,
-        })
-      );
-    });
-
-    it('responds with 400 BAD REQUEST with none of source/target/model OR pipeline_definition', async () => {
-      await mockRouter.callRoute({
-        body: {
-          pipeline_name: 'my-pipeline-name',
-        },
-        params: { indexName: 'my-index-name' },
-      });
-
-      expect(mockRouter.response.customError).toHaveBeenCalledWith(
-        expect.objectContaining({
-          statusCode: 400,
-        })
-      );
-    });
-
-    it('creates an ML inference pipeline from model and source_field', async () => {
-      (preparePipelineAndIndexForMlInference as jest.Mock).mockImplementationOnce(() => {
-        return Promise.resolve({
-          added_to_parent_pipeline: true,
-          created_pipeline: true,
-          mapping_updated: false,
-          pipeline_id: 'ml-inference-my-pipeline-name',
-        });
-      });
-
-      await mockRouter.callRoute({
-        params: { indexName: 'my-index-name' },
-        body: mockRequestBody,
-      });
-
-      expect(preparePipelineAndIndexForMlInference).toHaveBeenCalledWith(
-        'my-index-name',
-        mockRequestBody.pipeline_name,
-        undefined,
-        mockRequestBody.model_id,
-        mockRequestBody.source_field,
-        mockRequestBody.destination_field,
-        undefined,
-        undefined,
-        mockClient.asCurrentUser
-      );
-
-      expect(mockRouter.response.ok).toHaveBeenCalledWith({
-        body: {
-          created: 'ml-inference-my-pipeline-name',
-          mapping_updated: false,
-        },
-        headers: { 'content-type': 'application/json' },
-      });
-    });
-
     it('creates an ML inference pipeline from pipeline definition', async () => {
       (preparePipelineAndIndexForMlInference as jest.Mock).mockImplementationOnce(() => {
         return Promise.resolve({
@@ -379,10 +307,11 @@ describe('Enterprise Search Managed Indices', () => {
         params: { indexName: 'my-index-name' },
         body: {
           field_mappings: [],
+          model_id: mockRequestBody.model_id,
           pipeline_definition: {
             processors: [],
           },
-          pipeline_name: 'my-pipeline-name',
+          pipeline_name: mockRequestBody.pipeline_name,
         },
       });
 
@@ -392,11 +321,8 @@ describe('Enterprise Search Managed Indices', () => {
         {
           processors: [],
         },
-        undefined,
-        undefined,
-        undefined,
+        mockRequestBody.model_id,
         [],
-        undefined,
         mockClient.asCurrentUser
       );
 
@@ -983,7 +909,7 @@ describe('Enterprise Search Managed Indices', () => {
           attributes: {
             error_code: 'uncaught_exception',
           },
-          message: 'Enterprise Search encountered an error. Check Kibana Server logs for details.',
+          message: 'Search encountered an error. Check Kibana Server logs for details.',
         },
         statusCode: 502,
       });

@@ -164,7 +164,7 @@ const baseColumns = [
         )}
         tooltipContent={i18n.translate(
           'xpack.csp.findings.findingsTable.findingsTableColumn.ruleBenchmarkColumnTooltipLabel',
-          { defaultMessage: 'The benchmark(s) rules used to evaluate this resource came from' }
+          { defaultMessage: 'The benchmark used to evaluate this resource' }
         )}
       />
     ),

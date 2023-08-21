@@ -15,7 +15,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
+import { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import * as i18n from '../rules_table/translations';
 

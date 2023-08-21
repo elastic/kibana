@@ -6,11 +6,11 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { EndpointAppContext } from '../../types';
 import {
   GetPolicyResponseSchema,
   GetAgentPolicySummaryRequestSchema,
-} from '../../../../common/endpoint/schema/policy';
+} from '../../../../common/api/endpoint';
+import type { EndpointAppContext } from '../../types';
 import { getHostPolicyResponseHandler, getAgentPolicySummaryHandler } from './handlers';
 import {
   AGENT_POLICY_SUMMARY_ROUTE,

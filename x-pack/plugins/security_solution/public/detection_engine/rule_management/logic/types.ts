@@ -31,9 +31,9 @@ import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import type { RuleSnoozeSettings } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
-import type { WarningSchema } from '../../../../common/detection_engine/schemas/response';
-import { RuleExecutionSummary } from '../../../../common/detection_engine/rule_monitoring';
-import type { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring';
+import type { WarningSchema } from '../../../../common/api/detection_engine';
+import { RuleExecutionSummary } from '../../../../common/api/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '../../../../common/api/detection_engine/rule_monitoring';
 import {
   AlertSuppression,
   AlertsIndex,
@@ -73,15 +73,19 @@ import {
   TimestampField,
   TimestampOverride,
   TimestampOverrideFallbackDisabled,
-} from '../../../../common/detection_engine/rule_schema';
+  RuleCustomHighlightedFieldArray,
+} from '../../../../common/api/detection_engine/model/rule_schema';
 
-import type { PatchRuleRequestBody } from '../../../../common/detection_engine/rule_management';
-import { FindRulesSortField } from '../../../../common/detection_engine/rule_management';
+import type {
+  CoverageOverviewFilter,
+  PatchRuleRequestBody,
+} from '../../../../common/api/detection_engine/rule_management';
+import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
 import type {
   RuleCreateProps,
   RuleUpdateProps,
-} from '../../../../common/detection_engine/rule_schema';
-import { SortOrder } from '../../../../common/detection_engine/schemas/common';
+} from '../../../../common/api/detection_engine/model/rule_schema';
+import { SortOrder } from '../../../../common/api/detection_engine';
 
 /**
  * Params is an "record", since it is a type of RuleActionParams which is action templates.
@@ -198,6 +202,7 @@ export const RuleSchema = t.intersection([
     version: RuleVersion,
     execution_summary: RuleExecutionSummary,
     alert_suppression: AlertSuppression,
+    investigation_fields: RuleCustomHighlightedFieldArray,
   }),
 ]);
 
@@ -268,6 +273,11 @@ export interface FetchRuleProps {
 
 export interface FetchRuleSnoozingProps {
   ids: string[];
+  signal?: AbortSignal;
+}
+
+export interface FetchCoverageOverviewProps {
+  filter: CoverageOverviewFilter;
   signal?: AbortSignal;
 }
 

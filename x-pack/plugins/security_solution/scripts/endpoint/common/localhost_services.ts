@@ -7,14 +7,6 @@
 
 import { networkInterfaces } from 'node:os';
 
-const POSSIBLE_LOCALHOST_VALUES: readonly string[] = [
-  'localhost',
-  '127.0.0.1',
-  '0.0.0.0',
-  '::1',
-  '0000:0000:0000:0000:0000:0000:0000:0000',
-];
-
 export const getLocalhostRealIp = (): string => {
   for (const netInterfaceList of Object.values(networkInterfaces())) {
     if (netInterfaceList) {
@@ -30,8 +22,4 @@ export const getLocalhostRealIp = (): string => {
     }
   }
   return '0.0.0.0';
-};
-
-export const isLocalhost = (hostname: string): boolean => {
-  return POSSIBLE_LOCALHOST_VALUES.includes(hostname.toLowerCase());
 };

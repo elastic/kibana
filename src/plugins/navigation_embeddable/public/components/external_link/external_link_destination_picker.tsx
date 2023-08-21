@@ -10,7 +10,7 @@ import useMount from 'react-use/lib/useMount';
 import React, { useState } from 'react';
 
 import { EuiFieldText } from '@elastic/eui';
-import { ExternalLinkEmbeddableStrings } from './external_link_strings';
+import { ExternalLinkStrings } from './external_link_strings';
 
 // TODO: As part of https://github.com/elastic/kibana/issues/154381, replace this regex URL check with more robust url validation
 const isValidUrl =
@@ -39,7 +39,7 @@ export const ExternalLinkDestinationPicker = ({
     <div {...other}>
       <EuiFieldText
         value={currentUrl}
-        placeholder={ExternalLinkEmbeddableStrings.getPlaceholder()}
+        placeholder={ExternalLinkStrings.getPlaceholder()}
         isInvalid={!validUrl}
         onChange={(e) => {
           const url = e.target.value;

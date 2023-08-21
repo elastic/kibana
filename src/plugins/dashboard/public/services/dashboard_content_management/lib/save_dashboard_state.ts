@@ -31,6 +31,7 @@ import { DashboardStartDependencies } from '../../../plugin';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { DashboardCrudTypes, DashboardAttributes } from '../../../../common/content_management';
 import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
+import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 
 export const serializeControlGroupInput = (
   controlGroupInput: DashboardContainerInput['controlGroupInput']
@@ -200,6 +201,8 @@ export const saveDashboardState = async ({
       if (newId !== lastSavedId) {
         dashboardSessionStorage.clearState(lastSavedId);
         return { redirectRequired: true, id: newId };
+      } else {
+        dashboardContentManagementCache.deleteDashboard(newId); // something changed in an existing dashboard, so delete it from the cache so that it can be re-fetched
       }
     }
     return { id: newId };

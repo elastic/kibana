@@ -8,12 +8,14 @@
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { convertRulesFilterToKQL } from '../../../../../../../common/utils/kql';
-import type { CoverageOverviewRequestBody } from '../../../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/request_schema';
+import type {
+  CoverageOverviewRequestBody,
+  CoverageOverviewResponse,
+} from '../../../../../../../common/api/detection_engine';
 import {
   CoverageOverviewRuleSource,
   CoverageOverviewRuleActivity,
-} from '../../../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/request_schema';
-import type { CoverageOverviewResponse } from '../../../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/response_schema';
+} from '../../../../../../../common/api/detection_engine';
 import type { RuleParams } from '../../../../rule_schema';
 
 type CoverageOverviewRuleParams = Pick<RuleParams, 'threat'>;
@@ -31,16 +33,19 @@ export async function handleCoverageOverviewRequest({
   params: { filter },
   deps: { rulesClient },
 }: HandleCoverageOverviewRequestArgs): Promise<CoverageOverviewResponse> {
+  const activitySet = new Set(filter?.activity);
   const kqlFilter = filter
     ? convertRulesFilterToKQL({
         filter: filter.search_term,
         showCustomRules: filter.source?.includes(CoverageOverviewRuleSource.Custom) ?? false,
         showElasticRules: filter.source?.includes(CoverageOverviewRuleSource.Prebuilt) ?? false,
-        enabled: filter.activity?.includes(CoverageOverviewRuleActivity.Disabled)
-          ? false
-          : filter.activity?.includes(CoverageOverviewRuleActivity.Enabled)
-          ? true
-          : undefined,
+        enabled:
+          (activitySet.has(CoverageOverviewRuleActivity.Enabled) &&
+            activitySet.has(CoverageOverviewRuleActivity.Disabled)) ||
+          (!activitySet.has(CoverageOverviewRuleActivity.Enabled) &&
+            !activitySet.has(CoverageOverviewRuleActivity.Disabled))
+            ? undefined
+            : activitySet.has(CoverageOverviewRuleActivity.Enabled),
       })
     : undefined;
 

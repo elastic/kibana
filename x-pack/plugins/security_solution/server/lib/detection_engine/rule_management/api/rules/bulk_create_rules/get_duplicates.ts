@@ -6,7 +6,7 @@
  */
 
 import { countBy } from 'lodash/fp';
-import type { BulkCreateRulesRequestBody } from '../../../../../../../common/detection_engine/rule_management';
+import type { BulkCreateRulesRequestBody } from '../../../../../../../common/api/detection_engine/rule_management';
 
 export const getDuplicates = (
   ruleDefinitions: BulkCreateRulesRequestBody,

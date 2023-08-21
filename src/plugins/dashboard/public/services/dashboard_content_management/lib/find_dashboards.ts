@@ -8,6 +8,7 @@
 
 import { SavedObjectError, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 
+import { Reference } from '@kbn/content-management-utils';
 import {
   DashboardItem,
   DashboardCrudTypes,
@@ -15,6 +16,7 @@ import {
 } from '../../../../common/content_management';
 import { DashboardStartDependencies } from '../../../plugin';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
+import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 
 export interface SearchDashboardsArgs {
   contentManagement: DashboardStartDependencies['contentManagement'];
@@ -63,27 +65,45 @@ export async function searchDashboards({
 }
 
 export type FindDashboardsByIdResponse = { id: string } & (
-  | { status: 'success'; attributes: DashboardAttributes }
+  | { status: 'success'; attributes: DashboardAttributes; references: Reference[] }
   | { status: 'error'; error: SavedObjectError }
 );
+
+export async function findDashboardById(
+  contentManagement: DashboardStartDependencies['contentManagement'],
+  id: string
+): Promise<FindDashboardsByIdResponse> {
+  /** If the dashboard exists in the cache, then return the result from that */
+  const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
+  if (cachedDashboard) {
+    return {
+      id,
+      status: 'success',
+      attributes: cachedDashboard.item.attributes,
+    };
+  }
+  /** Otherwise, fetch the dashboard from the content management client, add it to the cache, and return the result */
+  const response = await contentManagement.client
+    .get<DashboardCrudTypes['GetIn'], DashboardCrudTypes['GetOut']>({
+      contentTypeId: DASHBOARD_CONTENT_ID,
+      id,
+    })
+    .then((result) => {
+      dashboardContentManagementCache.addDashboard(result);
+      return { id, status: 'success', attributes: result.item.attributes };
+    })
+    .catch((e) => ({ status: 'error', error: e.body, id }));
+
+  return response as FindDashboardsByIdResponse;
+}
 
 export async function findDashboardsByIds(
   contentManagement: DashboardStartDependencies['contentManagement'],
   ids: string[]
 ): Promise<FindDashboardsByIdResponse[]> {
-  const findPromises = ids.map((id) =>
-    contentManagement.client.get<DashboardCrudTypes['GetIn'], DashboardCrudTypes['GetOut']>({
-      contentTypeId: DASHBOARD_CONTENT_ID,
-      id,
-    })
-  );
+  const findPromises = ids.map((id) => findDashboardById(contentManagement, id));
   const results = await Promise.all(findPromises);
-
-  return results.map((result) => {
-    if (result.item.error) return { status: 'error', error: result.item.error, id: result.item.id };
-    const { attributes, id } = result.item;
-    return { id, status: 'success', attributes };
-  });
+  return results as FindDashboardsByIdResponse[];
 }
 
 export async function findDashboardIdByTitle(

@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { Subject } from 'rxjs';
-import { memoize } from 'lodash';
 import { skip, take, takeUntil } from 'rxjs/operators';
 
 import { withSuspense } from '@kbn/shared-ux-utility';
@@ -16,18 +15,17 @@ import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { coreServices } from '../services/kibana_services';
 import {
-  NavigationEmbeddableByReferenceInput,
   NavigationEmbeddableInput,
+  NavigationEmbeddableByReferenceInput,
 } from '../embeddable/types';
-import { memoizedFetchDashboards } from '../components/dashboard_link/dashboard_link_tools';
-import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
-import { NavigationEmbeddableLink } from '../../common/content_management';
+import { coreServices } from '../services/kibana_services';
 import { runSaveToLibrary } from '../content_management/save_to_library';
+import { NavigationEmbeddableLink, NavigationLayoutType } from '../../common/content_management';
+import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
 
 const LazyNavigationEmbeddablePanelEditor = React.lazy(
-  () => import('../components/navigation_embeddable_panel_editor')
+  () => import('../components/editor/navigation_embeddable_panel_editor')
 );
 
 const NavigationEmbeddablePanelEditor = withSuspense(
@@ -51,10 +49,14 @@ export async function openEditorFlyout(
   return new Promise((resolve, reject) => {
     const closed$ = new Subject<true>();
 
-    const onSaveToLibrary = async (newLinks: NavigationEmbeddableLink[]) => {
+    const onSaveToLibrary = async (
+      newLinks: NavigationEmbeddableLink[],
+      newLayout: NavigationLayoutType
+    ) => {
       const newAttributes = {
         ...attributes,
         links: newLinks,
+        layout: newLayout,
       };
       const updatedInput = (initialInput as NavigationEmbeddableByReferenceInput).savedObjectId
         ? await attributeService.wrapAttributes(newAttributes, true, initialInput)
@@ -67,12 +69,16 @@ export async function openEditorFlyout(
       editorFlyout.close();
     };
 
-    const onAddToDashboard = (newLinks: NavigationEmbeddableLink[]) => {
+    const onAddToDashboard = (
+      newLinks: NavigationEmbeddableLink[],
+      newLayout: NavigationLayoutType
+    ) => {
       const newInput: NavigationEmbeddableInput = {
         ...initialInput,
         attributes: {
           ...attributes,
           links: newLinks,
+          layout: newLayout,
         },
       };
       resolve(newInput);
@@ -98,6 +104,7 @@ export async function openEditorFlyout(
       toMountPoint(
         <NavigationEmbeddablePanelEditor
           initialLinks={attributes?.links}
+          initialLayout={attributes?.layout}
           onClose={onCancel}
           onSaveToLibrary={onSaveToLibrary}
           onAddToDashboard={onAddToDashboard}
@@ -115,8 +122,6 @@ export async function openEditorFlyout(
     );
 
     editorFlyout.onClose.then(() => {
-      // we should always re-fetch the dashboards when the editor is opened; so, clear the cache on close
-      memoizedFetchDashboards.cache = new memoize.Cache();
       closed$.next(true);
     });
   });

@@ -169,8 +169,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
             Object {
               "icon": "logstashInput",
               "navigateTo": Object {
-                "appId": "integrations",
-                "path": "/browse?q=log",
+                "appId": "observabilityOnboarding",
               },
               "order": 2,
               "solution": "observability",
@@ -196,8 +195,8 @@ exports[`guide cards snapshots should render all cards 1`] = `
             Object {
               "icon": "apmTrace",
               "navigateTo": Object {
-                "appId": "home",
-                "path": "#/tutorial/apm",
+                "appId": "apm",
+                "path": "/tutorial",
               },
               "order": 5,
               "solution": "observability",

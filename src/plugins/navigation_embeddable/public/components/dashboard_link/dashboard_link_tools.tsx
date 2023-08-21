@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isEmpty, memoize, filter } from 'lodash';
+import { isEmpty, filter } from 'lodash';
 import { DashboardItem } from '../../embeddable/types';
 
 import { dashboardServices } from '../../services/kibana_services';
@@ -19,26 +19,12 @@ import { dashboardServices } from '../../services/kibana_services';
 
 export const fetchDashboard = async (dashboardId: string): Promise<DashboardItem> => {
   const findDashboardsService = await dashboardServices.findDashboardsService();
-  const response = (await findDashboardsService.findByIds([dashboardId]))[0];
+  const response = await findDashboardsService.findById(dashboardId);
   if (response.status === 'error') {
-    throw new Error('failure'); // TODO: better error handling
+    throw new Error(response.error.message);
   }
   return response;
 };
-
-/**
- * Memoized fetch dashboard will only refetch the dashboard information if the given `dashboardId` changed between
- * calls; otherwise, it will use the cached dashboard, which may not take into account changes to the dashboard's title
- * description, etc. Be mindful when choosing the memoized version.
- */
-export const memoizedFetchDashboard = memoize(
-  async (dashboardId: string) => {
-    return await fetchDashboard(dashboardId);
-  },
-  (dashboardId) => {
-    return dashboardId;
-  }
-);
 
 /**
  * ----------------------------------
@@ -53,7 +39,7 @@ interface FetchDashboardsProps {
   selectedDashboardId?: string;
 }
 
-const fetchDashboards = async ({
+export const fetchDashboards = async ({
   search = '',
   size = 10,
   parentDashboardId,
@@ -81,7 +67,13 @@ const fetchDashboards = async ({
     }
 
     if (selectedDashboardId && selectedDashboardId !== parentDashboardId) {
-      dashboardList.unshift(await fetchDashboard(selectedDashboardId));
+      const selectedDashboard = await fetchDashboard(selectedDashboardId).catch(() => {
+        /**
+         * Swallow the error thrown, since this just means the selected dashboard was deleted and therefore
+         * it should not be added to the top of the dashboard list
+         */
+      });
+      if (selectedDashboard) dashboardList.unshift(await fetchDashboard(selectedDashboardId));
     }
   }
 
@@ -92,17 +84,3 @@ const fetchDashboards = async ({
 
   return simplifiedDashboardList;
 };
-
-export const memoizedFetchDashboards = memoize(
-  async ({ search, size, parentDashboardId, selectedDashboardId }: FetchDashboardsProps) => {
-    return await fetchDashboards({
-      search,
-      size,
-      parentDashboardId,
-      selectedDashboardId,
-    });
-  },
-  ({ search, size, parentDashboardId, selectedDashboardId }) => {
-    return [search, size, parentDashboardId, selectedDashboardId].join('|');
-  }
-);

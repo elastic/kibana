@@ -105,7 +105,30 @@ export const buildStateSubscribe =
       dataViewChanged ||
       queryChanged
     ) {
-      addLog('[appstate] subscribe triggers data fetching');
+      const logData = {
+        chartDisplayChanged: logEntry(chartDisplayChanged, hideChart, nextState.hideChart),
+        chartIntervalChanged: logEntry(chartIntervalChanged, interval, nextState.interval),
+        breakdownFieldChanged: logEntry(
+          breakdownFieldChanged,
+          breakdownField,
+          nextState.breakdownField
+        ),
+        docTableSortChanged: logEntry(docTableSortChanged, sort, nextState.sort),
+        dataViewChanged: logEntry(dataViewChanged, index, nextState.index),
+        queryChanged: logEntry(queryChanged, prevQuery, nextQuery),
+      };
+
+      addLog(
+        '[buildStateSubscribe] state changes triggers data fetching',
+        JSON.stringify(logData, null, 2)
+      );
+
       dataState.fetch();
     }
   };
+
+const logEntry = <T>(changed: boolean, prevState: T, nextState: T) => ({
+  changed,
+  prevState,
+  nextState,
+});

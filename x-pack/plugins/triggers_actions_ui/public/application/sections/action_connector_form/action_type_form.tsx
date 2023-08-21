@@ -85,7 +85,7 @@ export type ActionTypeFormProps = {
   recoveryActionGroup?: string;
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
   hideNotifyWhen?: boolean;
-  hasSummary?: boolean;
+  hasAlertsMappings?: boolean;
   minimumThrottleInterval?: [number | undefined, string];
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   defaultNotifyWhenValue?: RuleNotifyWhenType;
@@ -136,7 +136,7 @@ export const ActionTypeForm = ({
   recoveryActionGroup,
   hideNotifyWhen = false,
   defaultSummaryMessage,
-  hasSummary,
+  hasAlertsMappings,
   minimumThrottleInterval,
   notifyWhenSelectOptions,
   defaultNotifyWhenValue,
@@ -302,7 +302,7 @@ export const ActionTypeForm = ({
       frequency={actionItem.frequency}
       throttle={actionThrottle}
       throttleUnit={actionThrottleUnit}
-      hasSummary={hasSummary}
+      hasAlertsMappings={hasAlertsMappings}
       onNotifyWhenChange={useCallback(
         (notifyWhen) => {
           setActionFrequencyProperty('notifyWhen', notifyWhen, index);

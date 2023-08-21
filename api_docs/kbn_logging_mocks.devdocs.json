@@ -38,7 +38,7 @@
             "section": "def-common.LogMeta",
             "text": "LogMeta"
           },
-          " | undefined]>; debug: jest.MockInstance<void, [message: string, meta?: ",
+          " | undefined], unknown>; debug: jest.MockInstance<void, [message: string, meta?: ",
           {
             "pluginId": "@kbn/logging",
             "scope": "common",
@@ -46,7 +46,7 @@
             "section": "def-common.LogMeta",
             "text": "LogMeta"
           },
-          " | undefined]>; info: jest.MockInstance<void, [message: string, meta?: ",
+          " | undefined], unknown>; info: jest.MockInstance<void, [message: string, meta?: ",
           {
             "pluginId": "@kbn/logging",
             "scope": "common",
@@ -54,7 +54,7 @@
             "section": "def-common.LogMeta",
             "text": "LogMeta"
           },
-          " | undefined]>; warn: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
+          " | undefined], unknown>; warn: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
           {
             "pluginId": "@kbn/logging",
             "scope": "common",
@@ -62,7 +62,7 @@
             "section": "def-common.LogMeta",
             "text": "LogMeta"
           },
-          " | undefined]>; error: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
+          " | undefined], unknown>; error: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
           {
             "pluginId": "@kbn/logging",
             "scope": "common",
@@ -70,7 +70,7 @@
             "section": "def-common.LogMeta",
             "text": "LogMeta"
           },
-          " | undefined]>; fatal: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
+          " | undefined], unknown>; fatal: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
           {
             "pluginId": "@kbn/logging",
             "scope": "common",
@@ -78,11 +78,11 @@
             "section": "def-common.LogMeta",
             "text": "LogMeta"
           },
-          " | undefined]>; log: jest.MockInstance<void, [record: ",
+          " | undefined], unknown>; log: jest.MockInstance<void, [record: ",
           "LogRecord",
-          "]>; isLevelEnabled: jest.MockInstance<boolean, [level: ",
+          "], unknown>; isLevelEnabled: jest.MockInstance<boolean, [level: ",
           "LogLevelId",
-          "]>; get: jest.MockInstance<",
+          "], unknown>; get: jest.MockInstance<",
           {
             "pluginId": "@kbn/logging",
             "scope": "common",
@@ -90,7 +90,7 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          ", string[]>; } & ",
+          ", string[], unknown>; } & ",
           {
             "pluginId": "@kbn/logging",
             "scope": "common",
@@ -195,7 +195,7 @@
                     "section": "def-common.LogMeta",
                     "text": "LogMeta"
                   },
-                  " | undefined]>; debug: jest.MockInstance<void, [message: string, meta?: ",
+                  " | undefined], unknown>; debug: jest.MockInstance<void, [message: string, meta?: ",
                   {
                     "pluginId": "@kbn/logging",
                     "scope": "common",
@@ -203,7 +203,7 @@
                     "section": "def-common.LogMeta",
                     "text": "LogMeta"
                   },
-                  " | undefined]>; info: jest.MockInstance<void, [message: string, meta?: ",
+                  " | undefined], unknown>; info: jest.MockInstance<void, [message: string, meta?: ",
                   {
                     "pluginId": "@kbn/logging",
                     "scope": "common",
@@ -211,7 +211,7 @@
                     "section": "def-common.LogMeta",
                     "text": "LogMeta"
                   },
-                  " | undefined]>; warn: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
+                  " | undefined], unknown>; warn: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
                   {
                     "pluginId": "@kbn/logging",
                     "scope": "common",
@@ -219,7 +219,7 @@
                     "section": "def-common.LogMeta",
                     "text": "LogMeta"
                   },
-                  " | undefined]>; error: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
+                  " | undefined], unknown>; error: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
                   {
                     "pluginId": "@kbn/logging",
                     "scope": "common",
@@ -227,7 +227,7 @@
                     "section": "def-common.LogMeta",
                     "text": "LogMeta"
                   },
-                  " | undefined]>; fatal: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
+                  " | undefined], unknown>; fatal: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
                   {
                     "pluginId": "@kbn/logging",
                     "scope": "common",
@@ -235,11 +235,11 @@
                     "section": "def-common.LogMeta",
                     "text": "LogMeta"
                   },
-                  " | undefined]>; log: jest.MockInstance<void, [record: ",
+                  " | undefined], unknown>; log: jest.MockInstance<void, [record: ",
                   "LogRecord",
-                  "]>; isLevelEnabled: jest.MockInstance<boolean, [level: ",
+                  "], unknown>; isLevelEnabled: jest.MockInstance<boolean, [level: ",
                   "LogLevelId",
-                  "]>; get: jest.MockInstance<",
+                  "], unknown>; get: jest.MockInstance<",
                   {
                     "pluginId": "@kbn/logging",
                     "scope": "common",
@@ -247,7 +247,7 @@
                     "section": "def-common.Logger",
                     "text": "Logger"
                   },
-                  ", string[]>; } & ",
+                  ", string[], unknown>; } & ",
                   {
                     "pluginId": "@kbn/logging",
                     "scope": "common",
@@ -352,7 +352,7 @@
                     "section": "def-common.LogMeta",
                     "text": "LogMeta"
                   },
-                  " | undefined]>; debug: jest.MockInstance<void, [message: string, meta?: ",
+                  " | undefined], unknown>; debug: jest.MockInstance<void, [message: string, meta?: ",
                   {
                     "pluginId": "@kbn/logging",
                     "scope": "common",
@@ -360,7 +360,7 @@
                     "section": "def-common.LogMeta",
                     "text": "LogMeta"
                   },
-                  " | undefined]>; info: jest.MockInstance<void, [message: string, meta?: ",
+                  " | undefined], unknown>; info: jest.MockInstance<void, [message: string, meta?: ",
                   {
                     "pluginId": "@kbn/logging",
                     "scope": "common",
@@ -368,7 +368,7 @@
                     "section": "def-common.LogMeta",
                     "text": "LogMeta"
                   },
-                  " | undefined]>; warn: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
+                  " | undefined], unknown>; warn: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
                   {
                     "pluginId": "@kbn/logging",
                     "scope": "common",
@@ -376,7 +376,7 @@
                     "section": "def-common.LogMeta",
                     "text": "LogMeta"
                   },
-                  " | undefined]>; error: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
+                  " | undefined], unknown>; error: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
                   {
                     "pluginId": "@kbn/logging",
                     "scope": "common",
@@ -384,7 +384,7 @@
                     "section": "def-common.LogMeta",
                     "text": "LogMeta"
                   },
-                  " | undefined]>; fatal: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
+                  " | undefined], unknown>; fatal: jest.MockInstance<void, [errorOrMessage: string | Error, meta?: ",
                   {
                     "pluginId": "@kbn/logging",
                     "scope": "common",
@@ -392,11 +392,11 @@
                     "section": "def-common.LogMeta",
                     "text": "LogMeta"
                   },
-                  " | undefined]>; log: jest.MockInstance<void, [record: ",
+                  " | undefined], unknown>; log: jest.MockInstance<void, [record: ",
                   "LogRecord",
-                  "]>; isLevelEnabled: jest.MockInstance<boolean, [level: ",
+                  "], unknown>; isLevelEnabled: jest.MockInstance<boolean, [level: ",
                   "LogLevelId",
-                  "]>; get: jest.MockInstance<",
+                  "], unknown>; get: jest.MockInstance<",
                   {
                     "pluginId": "@kbn/logging",
                     "scope": "common",
@@ -404,7 +404,7 @@
                     "section": "def-common.Logger",
                     "text": "Logger"
                   },
-                  ", string[]>; } & ",
+                  ", string[], unknown>; } & ",
                   {
                     "pluginId": "@kbn/logging",
                     "scope": "common",

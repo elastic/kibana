@@ -43,6 +43,9 @@ export interface DashboardContentManagementService {
   loadDashboardState: (props: { id?: string }) => Promise<LoadDashboardReturn>;
   saveDashboardState: (props: SaveDashboardProps) => Promise<SaveDashboardReturn>;
   checkForDuplicateDashboardTitle: (meta: DashboardDuplicateTitleCheckProps) => Promise<boolean>;
+  updateDashboardMeta: (
+    props: Pick<DashboardContainerInput, 'id' | 'title' | 'description' | 'tags'>
+  ) => Promise<void>;
 }
 
 /**
@@ -92,6 +95,7 @@ export interface FindDashboardsService {
       'hasReference' | 'hasNoReference' | 'search' | 'size' | 'options'
     >
   ) => Promise<SearchDashboardsResponse>;
+  findById: (id: string) => Promise<FindDashboardsByIdResponse>;
   findByIds: (ids: string[]) => Promise<FindDashboardsByIdResponse[]>;
   findByTitle: (title: string) => Promise<{ id: string } | undefined>;
 }

@@ -8,6 +8,7 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+
 import { RISKY_HOSTS_DASHBOARD_TITLE, RISKY_USERS_DASHBOARD_TITLE } from '../constants';
 import { EnableRiskScore } from '../enable_risk_score';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -20,6 +21,7 @@ import * as i18n from './translations';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { RiskScoreOverTime } from '../risk_score_over_time';
 import { TopRiskScoreContributors } from '../top_risk_score_contributors';
+import { TopRiskScoreContributorsAlerts } from '../top_risk_score_contributors_alerts';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import {
   HostRiskScoreQueryId,
@@ -32,8 +34,9 @@ import type { UsersComponentsQueryProps } from '../../../users/pages/navigation/
 import type { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
 import { useDashboardHref } from '../../../../common/hooks/use_dashboard_href';
 import { RiskScoresNoDataDetected } from '../risk_score_onboarding/risk_score_no_data_detected';
-import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
-
+import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
+import { RiskScoreUpdatePanel } from '../../../../entity_analytics/components/risk_score_update_panel';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeL};
 `;
@@ -49,7 +52,6 @@ const RiskDetailsTabBodyComponent: React.FC<
     riskEntity: RiskScoreEntity;
   }
 > = ({ entityName, startDate, endDate, setQuery, deleteQuery, riskEntity }) => {
-  const RiskScoreUpsell = useUpsellingComponent('entity_analytics_panel');
   const queryId = useMemo(
     () =>
       riskEntity === RiskScoreEntity.host
@@ -57,6 +59,7 @@ const RiskDetailsTabBodyComponent: React.FC<
         : UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE,
     [riskEntity]
   );
+  const isNewRiskScoreModuleAvailable = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
 
   const severitySelectionRedux = useDeepEqualSelector((state: State) =>
     riskEntity === RiskScoreEntity.host
@@ -84,13 +87,16 @@ const RiskDetailsTabBodyComponent: React.FC<
     [entityName, riskEntity]
   );
 
-  const { data, loading, refetch, inspect, isDeprecated, isModuleEnabled } = useRiskScore({
-    filterQuery,
-    onlyLatest: false,
-    riskEntity,
-    skip: !overTimeToggleStatus && !contributorsToggleStatus,
-    timerange,
-  });
+  const { data, loading, refetch, inspect, isDeprecated, isModuleEnabled, isAuthorized } =
+    useRiskScore({
+      filterQuery,
+      onlyLatest: false,
+      riskEntity,
+      skip: !overTimeToggleStatus && !contributorsToggleStatus,
+      timerange,
+    });
+
+  const { data: riskScoreEngineStatus } = useRiskEngineStatus();
 
   const rules = useMemo(() => {
     const lastRiskItem = data && data.length > 0 ? data[data.length - 1] : null;
@@ -130,8 +136,12 @@ const RiskDetailsTabBodyComponent: React.FC<
     isDeprecated: isDeprecated && !loading,
   };
 
-  if (RiskScoreUpsell) {
-    return <RiskScoreUpsell />;
+  if (!isAuthorized) {
+    return <>{'TODO: Add RiskScore Upsell'}</>;
+  }
+
+  if (riskScoreEngineStatus?.isUpdateAvailable) {
+    return <RiskScoreUpdatePanel />;
   }
 
   if (status.isDisabled || status.isDeprecated) {
@@ -151,31 +161,47 @@ const RiskDetailsTabBodyComponent: React.FC<
 
   return (
     <>
-      <EuiFlexGroup direction="row">
-        <EuiFlexItem grow={2}>
-          <RiskScoreOverTime
-            from={startDate}
-            loading={loading}
-            queryId={queryId}
-            riskEntity={riskEntity}
-            riskScore={data}
-            title={i18n.RISK_SCORE_OVER_TIME(riskEntity)}
-            to={endDate}
-            toggleQuery={toggleOverTimeQuery}
-            toggleStatus={overTimeToggleStatus}
-          />
-        </EuiFlexItem>
+      {isNewRiskScoreModuleAvailable ? (
+        <StyledEuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            {data?.[0] && (
+              <TopRiskScoreContributorsAlerts
+                toggleStatus={contributorsToggleStatus}
+                toggleQuery={toggleContributorsQuery}
+                riskScore={data[0]}
+                riskEntity={riskEntity}
+                loading={loading}
+              />
+            )}
+          </EuiFlexItem>
+        </StyledEuiFlexGroup>
+      ) : (
+        <EuiFlexGroup direction="row">
+          <EuiFlexItem grow={2}>
+            <RiskScoreOverTime
+              from={startDate}
+              loading={loading}
+              queryId={queryId}
+              riskEntity={riskEntity}
+              riskScore={data}
+              title={i18n.RISK_SCORE_OVER_TIME(riskEntity)}
+              to={endDate}
+              toggleQuery={toggleOverTimeQuery}
+              toggleStatus={overTimeToggleStatus}
+            />
+          </EuiFlexItem>
 
-        <EuiFlexItem grow={1}>
-          <TopRiskScoreContributors
-            loading={loading}
-            queryId={queryId}
-            toggleStatus={contributorsToggleStatus}
-            toggleQuery={toggleContributorsQuery}
-            rules={rules}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <TopRiskScoreContributors
+              loading={loading}
+              queryId={queryId}
+              toggleStatus={contributorsToggleStatus}
+              toggleQuery={toggleContributorsQuery}
+              rules={rules}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
 
       <StyledEuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
@@ -190,6 +216,7 @@ const RiskDetailsTabBodyComponent: React.FC<
             {i18n.VIEW_DASHBOARD_BUTTON}
           </EuiButton>
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           <RiskInformationButtonEmpty riskEntity={riskEntity} />
         </EuiFlexItem>
