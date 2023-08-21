@@ -21,10 +21,6 @@ export interface PrevalenceOverviewRowProps {
    * */
   highlightedField: { name: string; values: string[] };
   /**
-   * This is a solution to allow the parent component to NOT render if all its row children are null
-   */
-  callbackIfNull: () => void;
-  /**
    *  Prefix data-test-subj because this component will be used in multiple places
    */
   ['data-test-subj']?: string;
@@ -32,12 +28,10 @@ export interface PrevalenceOverviewRowProps {
 
 /**
  * Retrieves the unique hosts for the field/value pair as well as the total number of unique hosts,
- * calculate the prevalence. If the prevalence is higher than 1, use the callback method to let the parent know
- * the row will render null.
+ * calculate the prevalence. If the prevalence is higher than 0.1, the row will render null.
  */
 export const PrevalenceOverviewRow: VFC<PrevalenceOverviewRowProps> = ({
   highlightedField,
-  callbackIfNull,
   'data-test-subj': dataTestSubj,
 }) => {
   const {
@@ -66,11 +60,6 @@ export const PrevalenceOverviewRow: VFC<PrevalenceOverviewRowProps> = ({
   // we do not want to render the row is the prevalence is Infinite, 0 or above the decided threshold
   const shouldNotRender =
     isFinite(prevalence) && (prevalence === 0 || prevalence > PERCENTAGE_THRESHOLD);
-
-  // callback to let the parent component aware of which rows are null (so it can hide itself completely if all are null)
-  if (!loading && (error || shouldNotRender)) {
-    callbackIfNull();
-  }
 
   return (
     <InsightsSummaryRow

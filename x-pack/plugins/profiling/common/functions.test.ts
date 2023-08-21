@@ -17,7 +17,7 @@ describe('TopN function operations', () => {
     const { events, stackTraces, stackFrames, executables, samplingRate } =
       decodeStackTraceResponse(response);
 
-    describe(`stacktraces from ${seconds} seconds and upsampled by ${upsampledBy}`, () => {
+    describe(`stacktraces upsampled by ${upsampledBy}`, () => {
       const maxTopN = 5;
       const topNFunctions = createTopNFunctions({
         events,
@@ -27,7 +27,6 @@ describe('TopN function operations', () => {
         startIndex: 0,
         endIndex: maxTopN,
         samplingRate,
-        totalSeconds: seconds,
       });
       const exclusiveCounts = topNFunctions.TopN.map((value) => value.CountExclusive);
 

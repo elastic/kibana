@@ -10,4 +10,4 @@ export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 echo "--- Explore Cypress Tests on Security Solution"
 
-yarn --cwd x-pack/plugins/security_solution cypress:explore:run
+yarn --cwd x-pack/test/security_solution_cypress cypress:explore:run:ess

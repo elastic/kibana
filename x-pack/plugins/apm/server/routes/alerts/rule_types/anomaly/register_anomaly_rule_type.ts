@@ -4,11 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { KibanaRequest } from '@kbn/core/server';
 import datemath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
-import { getAlertUrl, ProcessorEvent } from '@kbn/observability-plugin/common';
+import {
+  getAlertUrl,
+  observabilityPaths,
+  ProcessorEvent,
+} from '@kbn/observability-plugin/common';
 import { termQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -329,6 +335,8 @@ export function registerAnomalyRuleType({
         return { state: {} };
       },
       alerts: ApmRuleTypeAlertDefinition,
+      getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+        observabilityPaths.ruleDetails(rule.id),
     })
   );
 }

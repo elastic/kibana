@@ -14,22 +14,29 @@ import type { InventoryItemType } from '../../../../common/inventory_models/type
 import type { Tab } from '../types';
 
 export interface LinkToUptimeProps extends Tab {
-  nodeType: InventoryItemType;
-  nodeName: string;
+  assetType: InventoryItemType;
+  assetName: string;
   nodeIp?: string | null;
 }
 
-export const TabToUptime = ({ nodeType, nodeName, nodeIp, name, ...props }: LinkToUptimeProps) => {
+export const TabToUptime = ({
+  assetType,
+  assetName,
+  nodeIp,
+  name,
+  ...props
+}: LinkToUptimeProps) => {
   const { share } = useKibanaContextForPlugin().services;
   const { euiTheme } = useEuiTheme();
 
   return (
     <EuiTab
       {...props}
+      data-test-subj="infraAssetDetailsUptimeLinkTab"
       onClick={() =>
         share.url.locators
           .get(uptimeOverviewLocatorID)!
-          .navigate({ [nodeType]: nodeName, ip: nodeIp })
+          .navigate({ [assetType]: assetName, ip: nodeIp })
       }
     >
       <EuiIcon

@@ -10,18 +10,32 @@ import type { VFC } from 'react';
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import type { RightPanelPaths } from '.';
-import { tabs } from './tabs';
+import type { RightPanelTabsType } from './tabs';
 import { HeaderTitle } from './components/header_title';
 import { ExpandDetailButton } from './components/expand_detail_button';
 
 export interface PanelHeaderProps {
+  /**
+   * Id of the tab selected in the parent component to display its content
+   */
   selectedTabId: RightPanelPaths;
+  /**
+   * Callback to set the selected tab id in the parent component
+   * @param selected
+   */
   setSelectedTabId: (selected: RightPanelPaths) => void;
-  handleOnEventClosed?: () => void;
+  /**
+   * Tabs to display in the header
+   */
+  tabs: RightPanelTabsType;
+  /**
+   * If true, the expand detail button will be displayed
+   */
+  flyoutIsExpandable: boolean;
 }
 
 export const PanelHeader: VFC<PanelHeaderProps> = memo(
-  ({ selectedTabId, setSelectedTabId, handleOnEventClosed }) => {
+  ({ flyoutIsExpandable, selectedTabId, setSelectedTabId, tabs }) => {
     const onSelectedTabChanged = (id: RightPanelPaths) => setSelectedTabId(id);
     const renderTabs = tabs.map((tab, index) => (
       <EuiTab
@@ -38,20 +52,22 @@ export const PanelHeader: VFC<PanelHeaderProps> = memo(
       <EuiFlyoutHeader
         hasBorder
         css={css`
-          margin-bottom: -24px;
+          margin-bottom: ${flyoutIsExpandable ? '-24px' : '0px'};
         `}
       >
-        <div
-          // moving the buttons up in the header
-          css={css`
-            margin-top: -24px;
-            margin-left: -8px;
-          `}
-        >
-          <ExpandDetailButton />
-        </div>
+        {flyoutIsExpandable && (
+          <div
+            // moving the buttons up in the header
+            css={css`
+              margin-top: -24px;
+              margin-left: -8px;
+            `}
+          >
+            <ExpandDetailButton />
+          </div>
+        )}
         <EuiSpacer size="xs" />
-        <HeaderTitle />
+        <HeaderTitle flyoutIsExpandable={flyoutIsExpandable} />
         <EuiSpacer size="m" />
         <EuiTabs
           size="l"

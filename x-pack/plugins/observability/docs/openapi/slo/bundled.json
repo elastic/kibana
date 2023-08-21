@@ -1264,6 +1264,12 @@
       "error_budget": {
         "title": "Error budget",
         "type": "object",
+        "required": [
+          "initial",
+          "consumed",
+          "remaining",
+          "isEstimated"
+        ],
         "properties": {
           "initial": {
             "type": "number",
@@ -1291,6 +1297,11 @@
         "title": "Summary",
         "type": "object",
         "description": "The SLO computed data",
+        "required": [
+          "status",
+          "sliValue",
+          "errorBudget"
+        ],
         "properties": {
           "status": {
             "$ref": "#/components/schemas/summary_status"
@@ -1307,6 +1318,23 @@
       "slo_response": {
         "title": "SLO response",
         "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "indicator",
+          "timeWindow",
+          "budgetingMethod",
+          "objective",
+          "settings",
+          "revision",
+          "summary",
+          "enabled",
+          "groupBy",
+          "instanceId",
+          "createdAt",
+          "updatedAt"
+        ],
         "properties": {
           "id": {
             "description": "The identifier of the SLO.",

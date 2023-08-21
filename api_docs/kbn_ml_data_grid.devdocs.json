@@ -2145,7 +2145,9 @@
               "\nSetter function for the sorting columns."
             ],
             "signature": [
-              "(value: React.SetStateAction<{ id: string; direction: \"asc\" | \"desc\"; }[]>) => void"
+              "(value: React.SetStateAction<",
+              "EuiDataGridColumnSortingConfig",
+              "[]>) => void"
             ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
@@ -2293,7 +2295,8 @@
               "\nSorting columns."
             ],
             "signature": [
-              "{ id: string; direction: \"asc\" | \"desc\"; }[]"
+              "EuiDataGridColumnSortingConfig",
+              "[]"
             ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,

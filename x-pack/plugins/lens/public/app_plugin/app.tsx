@@ -93,6 +93,7 @@ export function App({
     dashboardFeatureFlag,
     locator,
     share,
+    serverless,
   } = lensAppServices;
 
   const saveAndExit = useRef<() => void>();
@@ -288,8 +289,18 @@ export function App({
         },
       });
     }
-    breadcrumbs.push({ text: currentDocTitle });
-    chrome.setBreadcrumbs(breadcrumbs);
+
+    const currentDocBreadcrumb: EuiBreadcrumb = { text: currentDocTitle };
+    breadcrumbs.push(currentDocBreadcrumb);
+    if (serverless?.setBreadcrumbs) {
+      // TODO: https://github.com/elastic/kibana/issues/163488
+      // for now, serverless breadcrumbs only set the title,
+      // the rest of the breadcrumbs are handled by the serverless navigation
+      // the serverless navigation is not yet aware of the byValue/originatingApp context
+      serverless.setBreadcrumbs(currentDocBreadcrumb);
+    } else {
+      chrome.setBreadcrumbs(breadcrumbs);
+    }
   }, [
     dashboardFeatureFlag.allowByValueEmbeddables,
     getOriginatingAppName,
@@ -300,6 +311,7 @@ export function App({
     isLinkedToOriginatingApp,
     persistedDoc,
     initialContext,
+    serverless,
   ]);
 
   const switchDatasource = useCallback(() => {

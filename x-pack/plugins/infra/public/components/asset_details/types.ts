@@ -13,7 +13,7 @@ import type { InventoryItemType } from '../../../common/inventory_models/types';
 interface Metadata {
   ip?: string | null;
 }
-export type Node = Metadata & {
+export type Asset = Metadata & {
   id: string;
   name: string;
 };
@@ -60,11 +60,11 @@ export interface TabState {
 
 export interface FlyoutProps {
   closeFlyout: () => void;
-  showInFlyout: true;
+  mode: 'flyout';
 }
 
 export interface FullPageProps {
-  showInFlyout: false;
+  mode: 'page';
 }
 
 export type RenderMode = FlyoutProps | FullPageProps;
@@ -72,14 +72,13 @@ export type RenderMode = FlyoutProps | FullPageProps;
 export interface Tab {
   id: FlyoutTabIds;
   name: string;
-  'data-test-subj': string;
 }
 
 export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices';
 
 export interface AssetDetailsProps {
-  node: Node;
-  nodeType: InventoryItemType;
+  asset: Asset;
+  assetType: InventoryItemType;
   dateRange: TimeRange;
   tabs: Tab[];
   activeTabId?: TabIds;

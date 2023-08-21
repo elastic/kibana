@@ -10,7 +10,7 @@ import { EuiPanel, EuiSkeletonText } from '@elastic/eui';
 import { uncategorizedLabel } from '../constants';
 
 export const DatasetSkeleton = () => (
-  <EuiPanel>
+  <EuiPanel data-test-subj="datasetSelectorSkeleton">
     <EuiSkeletonText lines={7} isLoading contentAriaLabel={uncategorizedLabel} />
   </EuiPanel>
 );

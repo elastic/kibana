@@ -16,6 +16,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
+import { EuiSwitchEvent } from '@elastic/eui';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { asPercent } from '../../../../../common/utils/formatters';
 import {
@@ -46,8 +47,9 @@ import {
   LoadingState,
   NoDataState,
 } from '../../ui_components/chart_preview/chart_preview_helper';
+import { ApmRuleKqlFilter } from '../../ui_components/apm_rule_kql_filter';
 
-export interface RuleParams {
+export interface ErrorRateRuleParams {
   windowSize?: number;
   windowUnit?: string;
   threshold?: number;
@@ -56,10 +58,12 @@ export interface RuleParams {
   transactionName?: string;
   environment?: string;
   groupBy?: string[] | undefined;
+  useKqlFilter?: boolean;
+  kqlFilter?: string;
 }
 
 export interface Props {
-  ruleParams: RuleParams;
+  ruleParams: ErrorRateRuleParams;
   metadata?: AlertMetadata;
   setRuleParams: (key: string, value: any) => void;
   setRuleProperty: (key: string, value: any) => void;
@@ -103,6 +107,7 @@ export function TransactionErrorRateRuleType(props: Props) {
                 start,
                 end,
                 groupBy: params.groupBy,
+                kqlFilter: params.kqlFilter,
               },
             },
           }
@@ -117,6 +122,7 @@ export function TransactionErrorRateRuleType(props: Props) {
       params.windowSize,
       params.windowUnit,
       params.groupBy,
+      params.kqlFilter,
     ]
   );
 
@@ -127,7 +133,7 @@ export function TransactionErrorRateRuleType(props: Props) {
     [setRuleParams]
   );
 
-  const fields = [
+  const filterFields = [
     <ServiceField
       currentValue={params.serviceName}
       onChange={(value) => {
@@ -159,6 +165,9 @@ export function TransactionErrorRateRuleType(props: Props) {
       onChange={(value) => setRuleParams('transactionName', value)}
       serviceName={params.serviceName}
     />,
+  ];
+
+  const criteriaFields = [
     <IsAboveField
       value={params.threshold}
       unit="%"
@@ -178,6 +187,11 @@ export function TransactionErrorRateRuleType(props: Props) {
         timeWindowUnit: [],
       }}
     />,
+  ];
+
+  const fields = [
+    ...(!ruleParams.useKqlFilter ? filterFields : []),
+    ...criteriaFields,
   ];
 
   const errorRateChartPreview = data?.errorRateChartPreview;
@@ -237,11 +251,31 @@ export function TransactionErrorRateRuleType(props: Props) {
     </>
   );
 
+  const onToggleKqlFilter = (e: EuiSwitchEvent) => {
+    setRuleParams('serviceName', undefined);
+    setRuleParams('transactionType', undefined);
+    setRuleParams('transactionName', undefined);
+    setRuleParams('environment', ENVIRONMENT_ALL.value);
+    setRuleParams('kqlFilter', undefined);
+    setRuleParams('useKqlFilter', e.target.checked);
+  };
+
+  const kqlFilter = (
+    <>
+      <ApmRuleKqlFilter
+        ruleParams={ruleParams}
+        setRuleParams={setRuleParams}
+        onToggleKqlFilter={onToggleKqlFilter}
+      />
+    </>
+  );
+
   return (
     <ApmRuleParamsContainer
       minimumWindowSize={{ value: 5, unit: TIME_UNITS.MINUTE }}
       fields={fields}
       groupAlertsBy={groupAlertsBy}
+      kqlFilter={kqlFilter}
       defaultParams={params}
       setRuleParams={setRuleParams}
       setRuleProperty={setRuleProperty}

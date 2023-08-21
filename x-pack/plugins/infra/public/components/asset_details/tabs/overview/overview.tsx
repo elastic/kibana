@@ -10,38 +10,23 @@ import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { findInventoryModel } from '../../../../../common/inventory_models';
-import { useMetadata } from '../../hooks/use_metadata';
-import { useSourceContext } from '../../../../containers/metrics_source';
 import { MetadataSummaryList } from './metadata_summary/metadata_summary_list';
 import { AlertsSummaryContent } from './alerts';
 import { KPIGrid } from './kpis/kpi_grid';
 import { MetricsGrid } from './metrics/metrics_grid';
-import { toTimestampRange } from '../../utils';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 
 export const Overview = () => {
-  const { node, nodeType, overrides, dateRange } = useAssetDetailsStateContext();
+  const { asset, assetType, overrides, dateRange, renderMode, metadataResponse } =
+    useAssetDetailsStateContext();
   const { logsDataView, metricsDataView } = overrides?.overview ?? {};
 
-  const inventoryModel = findInventoryModel(nodeType);
-  const { sourceId } = useSourceContext();
-  const {
-    loading: metadataLoading,
-    error: fetchMetadataError,
-    metadata,
-  } = useMetadata(
-    node.name,
-    nodeType,
-    inventoryModel.requiredMetrics,
-    sourceId,
-    toTimestampRange(dateRange)
-  );
+  const { metadataLoading, fetchMetadataError, metadata } = metadataResponse;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <KPIGrid nodeName={node.name} timeRange={dateRange} dataView={metricsDataView} />
+        <KPIGrid nodeName={asset.name} timeRange={dateRange} dataView={metricsDataView} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {fetchMetadataError ? (
@@ -59,7 +44,7 @@ export const Overview = () => {
               values={{
                 reload: (
                   <EuiLink
-                    data-test-subj="infraMetadataReloadPageLink"
+                    data-test-subj="infraAssetDetailsMetadataReloadPageLink"
                     onClick={() => window.location.reload()}
                   >
                     {i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.errorAction', {
@@ -71,12 +56,16 @@ export const Overview = () => {
             />
           </EuiCallOut>
         ) : (
-          <MetadataSummaryList metadata={metadata} metadataLoading={metadataLoading} />
+          <MetadataSummaryList
+            metadata={metadata}
+            metadataLoading={metadataLoading}
+            isCompactView={renderMode?.mode === 'flyout'}
+          />
         )}
         <SectionSeparator />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <AlertsSummaryContent nodeName={node.name} nodeType={nodeType} dateRange={dateRange} />
+        <AlertsSummaryContent assetName={asset.name} assetType={assetType} dateRange={dateRange} />
         <SectionSeparator />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -84,7 +73,7 @@ export const Overview = () => {
           timeRange={dateRange}
           logsDataView={logsDataView}
           metricsDataView={metricsDataView}
-          nodeName={node.name}
+          nodeName={asset.name}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

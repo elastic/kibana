@@ -26,7 +26,6 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
           `--xpack.alerting.enableFrameworkAlerts=true`,
-          '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.observability.unsafe.thresholdRule.enabled=true',
           '--server.publicBaseUrl=https://localhost:5601',
         ],

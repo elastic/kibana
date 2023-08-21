@@ -16,9 +16,9 @@ import type {
 } from '@kbn/features-plugin/server';
 import type { RecursiveReadonly, RecursiveReadonlyArray } from '@kbn/utility-types';
 
-import type { AuthenticatedUser } from '../../common/model';
 import type { AuthorizationServiceSetup } from './authorization_service';
 import type { CheckPrivilegesResponse } from './types';
+import type { AuthenticatedUser } from '../../common/model';
 
 export function disableUICapabilitiesFactory(
   request: KibanaRequest,

@@ -33,7 +33,8 @@
       "home",
       "share",
       "spaces",
-      "savedObjectsTaggingOss"
+      "savedObjectsTaggingOss",
+      "serverless"
     ],
     "requiredBundles": [
       "kibanaUtils",
