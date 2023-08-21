@@ -117,7 +117,7 @@ describe('ALL - Packs', () => {
       cy.contains('Edit').click();
       findFormFieldByRowsLabelAndType(
         'Scheduled agent policies (optional)',
-        'fleet server {downArrow}{enter}'
+        `${DEFAULT_POLICY} {downArrow}{enter}`
       );
       cy.contains('Update pack').click();
       cy.getBySel('confirmModalConfirmButton').click();
@@ -284,7 +284,7 @@ describe('ALL - Packs', () => {
           },
         }).then((response) => {
           const shardPolicy = response.body.items.find(
-            (policy: PackagePolicy) => policy.policy_id === 'fleet-server-policy'
+            (policy: PackagePolicy) => policy.name === `Policy for ${DEFAULT_POLICY}`
           );
 
           expect(shardPolicy?.inputs[0].config?.osquery.value.packs[shardPack]).to.deep.equal({

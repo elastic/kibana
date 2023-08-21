@@ -68,8 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
         });
 
-        // Failing: See https://github.com/elastic/kibana/issues/121051
-        describe.skip('dates', () => {
+        describe('dates', () => {
           it('should load elasticsearch index containing sample data with dates relative to current time', async () => {
             const resp = await es.search<{ timestamp: string }>({
               index: 'kibana_sample_data_flights',
