@@ -69,7 +69,7 @@ describe('ALL - Custom space', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
         }
       });
 
-      it('Discover should be opened in new tab in results table', () => {
+      it('Discover should be opened in new tab in results table', { tags: [tag.ESS] }, () => {
         cy.contains('New live query').click();
         selectAllAgents();
         inputQuery('select * from uptime;');
@@ -81,19 +81,17 @@ describe('ALL - Custom space', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
           cases: true,
           timeline: false,
         });
-        if (!isServerless) {
-          cy.contains('View in Discover')
-            .should('exist')
-            .should('have.attr', 'href')
-            .then(($href) => {
-              // @ts-expect-error-next-line href string - check types
-              cy.visit($href);
-              cy.getBySel('breadcrumbs').contains('Discover').should('exist');
-              cy.getBySel('discoverDocTable', { timeout: 60000 }).within(() => {
-                cy.contains('action_data.queryselect * from uptime');
-              });
+        cy.contains('View in Discover')
+          .should('exist')
+          .should('have.attr', 'href')
+          .then(($href) => {
+            // @ts-expect-error-next-line href string - check types
+            cy.visit($href);
+            cy.getBySel('breadcrumbs').contains('Discover').should('exist');
+            cy.getBySel('discoverDocTable', { timeout: 60000 }).within(() => {
+              cy.contains('action_data.queryselect * from uptime');
             });
-        }
+          });
       });
 
       it('runs packs normally', () => {

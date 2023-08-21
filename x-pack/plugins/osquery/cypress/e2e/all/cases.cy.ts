@@ -10,7 +10,6 @@ import {
   addLiveQueryToCase,
   checkActionItemsInResults,
   viewRecentCaseAndCheckResults,
-  isServerless,
 } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
 import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
@@ -28,37 +27,35 @@ describe('Add to Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     });
   });
 
-  describe('observability', () => {
+  describe('observability', { tags: [tag.ESS] }, () => {
     let caseId: string;
     let caseTitle: string;
-    if (!isServerless) {
-      before(() => {
-        loadCase('observability').then((caseInfo) => {
-          caseId = caseInfo.id;
-          caseTitle = caseInfo.title;
-        });
-        cy.login('elastic');
-        navigateTo('/app/osquery');
+    before(() => {
+      loadCase('observability').then((caseInfo) => {
+        caseId = caseInfo.id;
+        caseTitle = caseInfo.title;
       });
+      cy.login('elastic');
+      navigateTo('/app/osquery');
+    });
 
-      after(() => {
-        cleanupCase(caseId);
+    after(() => {
+      cleanupCase(caseId);
+    });
+
+    it('should add result a case and not have add to timeline in result', () => {
+      addLiveQueryToCase(liveQueryId, caseId);
+      cy.contains(`${caseTitle} has been updated`);
+      viewRecentCaseAndCheckResults();
+
+      cy.contains(liveQueryQuery);
+      checkActionItemsInResults({
+        lens: true,
+        discover: true,
+        cases: false,
+        timeline: false,
       });
-
-      it('should add result a case and not have add to timeline in result', () => {
-        addLiveQueryToCase(liveQueryId, caseId);
-        cy.contains(`${caseTitle} has been updated`);
-        viewRecentCaseAndCheckResults();
-
-        cy.contains(liveQueryQuery);
-        checkActionItemsInResults({
-          lens: true,
-          discover: true,
-          cases: false,
-          timeline: false,
-        });
-      });
-    }
+    });
   });
 
   describe('security', () => {

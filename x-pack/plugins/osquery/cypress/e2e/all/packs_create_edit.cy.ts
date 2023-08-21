@@ -15,7 +15,6 @@ import {
   findAndClickButton,
   findFormFieldByRowsLabelAndType,
   inputQuery,
-  isServerless,
 } from '../../tasks/live_query';
 import { activatePack, deactivatePack, preparePack } from '../../tasks/packs';
 import {
@@ -357,63 +356,61 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     });
   });
 
-  if (!isServerless) {
-    describe('should open lens in new tab', () => {
-      let packId: string;
-      let packName: string;
+  describe('should open lens in new tab', { tags: [tag.ESS] }, () => {
+    let packId: string;
+    let packName: string;
 
-      before(() => {
-        request<{ items: PackagePolicy[] }>({
-          url: '/internal/osquery/fleet_wrapper/package_policies',
-          headers: {
-            'Elastic-Api-Version': API_VERSIONS.internal.v1,
-          },
-        })
-          .then((response) =>
-            loadPack({
-              policy_ids: [response.body.items[0].policy_id],
-              queries: {
-                [savedQueryName]: {
-                  ecs_mapping: {},
-                  interval: 3600,
-                  query: 'select * from uptime;',
-                },
+    before(() => {
+      request<{ items: PackagePolicy[] }>({
+        url: '/internal/osquery/fleet_wrapper/package_policies',
+        headers: {
+          'Elastic-Api-Version': API_VERSIONS.internal.v1,
+        },
+      })
+        .then((response) =>
+          loadPack({
+            policy_ids: [response.body.items[0].policy_id],
+            queries: {
+              [savedQueryName]: {
+                ecs_mapping: {},
+                interval: 3600,
+                query: 'select * from uptime;',
               },
-            })
-          )
-          .then((pack) => {
-            packId = pack.saved_object_id;
-            packName = pack.name;
-          });
-      });
-
-      after(() => {
-        cleanupPack(packId);
-      });
-
-      it('', () => {
-        let lensUrl = '';
-        cy.window().then((win) => {
-          cy.stub(win, 'open')
-            .as('windowOpen')
-            .callsFake((url) => {
-              lensUrl = url;
-            });
+            },
+          })
+        )
+        .then((pack) => {
+          packId = pack.saved_object_id;
+          packName = pack.name;
         });
-        preparePack(packName);
-        cy.getBySel('docsLoading').should('exist');
-        cy.getBySel('docsLoading').should('not.exist');
-        cy.get(`[aria-label="View in Lens"]`).eq(0).click();
-        cy.window()
-          .its('open')
-          .then(() => {
-            cy.visit(lensUrl);
-          });
-        cy.getBySel('lnsWorkspace').should('exist');
-        cy.getBySel('breadcrumbs').contains(`Action pack_${packName}_${savedQueryName}`);
-      });
     });
-  }
+
+    after(() => {
+      cleanupPack(packId);
+    });
+
+    it('', () => {
+      let lensUrl = '';
+      cy.window().then((win) => {
+        cy.stub(win, 'open')
+          .as('windowOpen')
+          .callsFake((url) => {
+            lensUrl = url;
+          });
+      });
+      preparePack(packName);
+      cy.getBySel('docsLoading').should('exist');
+      cy.getBySel('docsLoading').should('not.exist');
+      cy.get(`[aria-label="View in Lens"]`).eq(0).click();
+      cy.window()
+        .its('open')
+        .then(() => {
+          cy.visit(lensUrl);
+        });
+      cy.getBySel('lnsWorkspace').should('exist');
+      cy.getBySel('breadcrumbs').contains(`Action pack_${packName}_${savedQueryName}`);
+    });
+  });
 
   describe.skip('should open discover in new tab', () => {
     let packId: string;
