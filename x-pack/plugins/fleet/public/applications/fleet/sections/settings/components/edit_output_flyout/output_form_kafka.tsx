@@ -87,7 +87,7 @@ export const OutputFormKafkaSection: React.FunctionComponent<Props> = (props) =>
             defaultMessage="Specify the URLs that your agents will use to connect to Kafka. {guideLink}."
             values={{
               guideLink: (
-                <EuiLink href={docLinks.links.fleet.settings} target="_blank" external>
+                <EuiLink href={docLinks.links.fleet.kafkaSettings} target="_blank" external>
                   <FormattedMessage
                     id="xpack.fleet.settings.kafkaUserGuideLink"
                     defaultMessage="Learn more"
