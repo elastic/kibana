@@ -17,7 +17,7 @@ const basePath = core.http.basePath.get(request);
 To have access to your plugin config, you _should_:
 
 * Declare plugin-specific `configPath` (will fallback to plugin `id`
-if not specified) in {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[`kibana.json`] manifest file.
+if not specified) in your plugin definition.
 * Export schema validation for the config from plugin's main file. Schema is
 mandatory. If a plugin reads from the config without schema declaration,
 `ConfigService` will throw an error.
