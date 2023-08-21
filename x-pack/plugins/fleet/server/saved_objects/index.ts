@@ -454,6 +454,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         name: { type: 'keyword' },
         is_default: { type: 'boolean' },
         host: { type: 'keyword' },
+        proxy_id: { type: 'keyword' },
       },
     },
   },

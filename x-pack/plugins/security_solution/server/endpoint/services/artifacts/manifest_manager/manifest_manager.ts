@@ -20,6 +20,8 @@ import type { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { AppFeatureKey } from '../../../../../common/types/app_features';
+import type { AppFeatures } from '../../../../lib/app_features';
 import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import type { ManifestSchema } from '../../../../../common/endpoint/schema/manifest';
 import { manifestDispatchSchema } from '../../../../../common/endpoint/schema/manifest';
@@ -97,6 +99,7 @@ export interface ManifestManagerContext {
   experimentalFeatures: ExperimentalFeatures;
   packagerTaskPackagePolicyUpdateBatchSize: number;
   esClient: ElasticsearchClient;
+  appFeatures: AppFeatures;
 }
 
 const getArtifactIds = (manifest: ManifestSchema) =>
@@ -118,6 +121,7 @@ export class ManifestManager {
   protected cachedExceptionsListsByOs: Map<string, ExceptionListItemSchema[]>;
   protected packagerTaskPackagePolicyUpdateBatchSize: number;
   protected esClient: ElasticsearchClient;
+  protected appFeatures: AppFeatures;
 
   constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
@@ -131,6 +135,7 @@ export class ManifestManager {
     this.packagerTaskPackagePolicyUpdateBatchSize =
       context.packagerTaskPackagePolicyUpdateBatchSize;
     this.esClient = context.esClient;
+    this.appFeatures = context.appFeatures;
   }
 
   /**
@@ -159,11 +164,19 @@ export class ManifestManager {
     schemaVersion: string;
   }): Promise<WrappedTranslatedExceptionList> {
     if (!this.cachedExceptionsListsByOs.has(`${listId}-${os}`)) {
-      const itemsByListId = await getAllItemsFromEndpointExceptionList({
-        elClient,
-        os,
-        listId,
-      });
+      let itemsByListId: ExceptionListItemSchema[] = [];
+      if (
+        (listId === ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID &&
+          this.appFeatures.isEnabled(AppFeatureKey.endpointResponseActions)) ||
+        (listId !== ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID &&
+          this.appFeatures.isEnabled(AppFeatureKey.endpointArtifactManagement))
+      ) {
+        itemsByListId = await getAllItemsFromEndpointExceptionList({
+          elClient,
+          os,
+          listId,
+        });
+      }
       this.cachedExceptionsListsByOs.set(`${listId}-${os}`, itemsByListId);
     }
 
