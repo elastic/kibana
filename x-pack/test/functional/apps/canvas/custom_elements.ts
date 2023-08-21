@@ -26,11 +26,9 @@ export default function canvasCustomElementTest({
 
     before(async () => {
       await kibanaServer.importExport.load(archive);
-      // open canvas home
-      await PageObjects.common.navigateToApp('canvas');
       // load test workpad
       await PageObjects.common.navigateToApp('canvas', {
-        hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1',
+        path: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1',
       });
     });
 
