@@ -30,7 +30,7 @@ import {
 import { schema } from '@kbn/config-schema';
 import { migrateLegacyActions } from '../../../../rules_client/lib';
 
-jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
+jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
     migrateLegacyActions: jest.fn(),
   };
@@ -41,7 +41,7 @@ jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
   resultedReferences: [],
 });
 
-jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
