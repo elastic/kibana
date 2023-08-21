@@ -121,6 +121,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
             errorCount: error ? 1 : 0,
             ilmPhase: getIlmPhase(ilmExplain[indexName]),
             indexId,
+            indexName,
             isCheckAll: true,
             numberOfDocuments: getDocsCount({ indexName, stats: updated[pattern].stats }),
             numberOfIncompatibleFields: getIndexIncompatible({
