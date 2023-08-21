@@ -114,7 +114,9 @@ export const getRenderCellValueFn =
         >
           {pairs.map(([key, value]) => (
             <Fragment key={key}>
-              <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="dscDiscoverGrid__descriptionListTitle">
+                {key}
+              </EuiDescriptionListTitle>
               <EuiDescriptionListDescription
                 className="dscDiscoverGrid__descriptionListDescription"
                 dangerouslySetInnerHTML={{ __html: value }}

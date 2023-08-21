@@ -8,6 +8,7 @@
 
 import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import classnames from 'classnames';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { of } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
@@ -62,6 +63,13 @@ import { convertValueToString } from '../../utils/convert_value_to_string';
 import { getRowsPerPageOptions, getDefaultRowsPerPage } from '../../utils/rows_per_page';
 
 const themeDefault = { darkMode: false };
+
+const cssOverride = css({
+  '.euiDataGrid--headerUnderline .euiDataGridHeaderCell': {
+    borderBottomWidth: '1px!important',
+    borderBottomColor: '#D3DAE6',
+  },
+});
 
 interface SortObj {
   id: string;
@@ -661,6 +669,7 @@ export const DiscoverGrid = ({
           data-description={searchDescription}
           data-document-number={displayedRows.length}
           className={classnames(className, 'dscDiscoverGrid__table')}
+          css={cssOverride}
         >
           <EuiDataGridMemoized
             aria-describedby={randomId}

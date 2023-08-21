@@ -32,7 +32,7 @@ discover-app {
 }
 
 .dscPageContent__wrapper {
-  padding: $euiSizeS $euiSizeS $euiSizeS 0;
+  padding: 0;
   overflow: hidden; // Ensures horizontal scroll of table
 
   @include euiBreakpoint('xs', 's') {
@@ -43,7 +43,7 @@ discover-app {
 .dscPageContent {
   position: relative;
   overflow: hidden;
-  border: $euiBorderThin;
+  // border: $euiBorderThin;
   height: 100%;
 }
 

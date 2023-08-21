@@ -46,6 +46,9 @@ const cssOverride = css({
       marginTop: 'auto',
     },
   },
+  '.euiDataGrid--headerUnderline .euiDataGridHeaderCell': {
+    borderBottomWidth: '1px!important',
+  },
 });
 
 export const DataGridTitle: FC<{ title: string }> = ({ title }) => (

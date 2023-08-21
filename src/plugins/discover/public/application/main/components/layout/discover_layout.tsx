@@ -15,7 +15,6 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPanel,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -263,7 +262,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           spaces={spaces}
           history={history}
         />
-        <EuiFlexGroup className="dscPageBody__contents" gutterSize="s">
+        <EuiFlexGroup className="dscPageBody__contents" gutterSize="none">
           <EuiFlexItem grow={false}>
             <SidebarMemoized
               documents$={stateContainer.dataState.data$.documents$}
@@ -281,9 +280,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>
-            <EuiFlexItem grow={false}>
-              <div>
-                <EuiSpacer size="s" />
+            <EuiFlexItem grow={false} style={{ borderRight: '1px solid #D3DAE6' }}>
+              <div style={{ padding: '1em 6px' }}>
                 <EuiButtonIcon
                   iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
                   iconSize="m"
