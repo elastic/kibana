@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback } from 'react';
+import React, { useCallback, memo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
