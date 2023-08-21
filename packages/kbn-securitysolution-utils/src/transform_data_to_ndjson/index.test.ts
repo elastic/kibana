@@ -20,6 +20,7 @@ const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE) => ({
   enabled: true,
   false_positives: ['false positive 1', 'false positive 2'],
   from: 'now-6m',
+  investigation_fields: ['custom.field1', 'custom.field2'],
   immutable: false,
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',

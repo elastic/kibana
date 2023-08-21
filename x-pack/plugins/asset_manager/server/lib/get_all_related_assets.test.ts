@@ -6,13 +6,13 @@
  */
 
 jest.mock('./get_assets', () => ({ getAssets: jest.fn() }));
-jest.mock('./get_related_assets', () => ({ getRelatedAssets: jest.fn() }));
+jest.mock('./get_indirectly_related_assets', () => ({ getIndirectlyRelatedAssets: jest.fn() }));
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { v4 as uuid } from 'uuid';
 import { AssetWithoutTimestamp } from '../../common/types_api';
 import { getAssets } from './get_assets'; // Mocked
-import { getRelatedAssets } from './get_related_assets'; // Mocked
+import { getIndirectlyRelatedAssets } from './get_indirectly_related_assets'; // Mocked
 import { getAllRelatedAssets } from './get_all_related_assets';
 
 const esClientMock = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
@@ -20,13 +20,14 @@ const esClientMock = elasticsearchClientMock.createScopedClusterClient().asCurre
 describe('getAllRelatedAssets', () => {
   beforeEach(() => {
     (getAssets as jest.Mock).mockReset();
-    (getRelatedAssets as jest.Mock).mockReset();
+    (getIndirectlyRelatedAssets as jest.Mock).mockReset();
   });
 
   it('throws if it cannot find the primary asset', async () => {
     const primaryAsset: AssetWithoutTimestamp = {
       'asset.ean': 'primary-which-does-not-exist',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
     };
 
@@ -34,7 +35,9 @@ describe('getAllRelatedAssets', () => {
     (getAssets as jest.Mock).mockResolvedValueOnce([]);
     // Ensure maxDistance is respected
     (getAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
-    (getRelatedAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
+    (getIndirectlyRelatedAssets as jest.Mock).mockRejectedValueOnce(
+      new Error('Should respect maxDistance')
+    );
 
     await expect(
       getAllRelatedAssets(esClientMock, {
@@ -53,16 +56,19 @@ describe('getAllRelatedAssets', () => {
     const primaryAssetWithoutParents: AssetWithoutTimestamp = {
       'asset.ean': 'primary-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [],
     };
 
     (getAssets as jest.Mock).mockResolvedValueOnce([primaryAssetWithoutParents]);
     // Distance 1
-    (getRelatedAssets as jest.Mock).mockResolvedValueOnce([]);
+    (getIndirectlyRelatedAssets as jest.Mock).mockResolvedValueOnce([]);
     // Ensure maxDistance is respected
     (getAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
-    (getRelatedAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
+    (getIndirectlyRelatedAssets as jest.Mock).mockRejectedValueOnce(
+      new Error('Should respect maxDistance')
+    );
 
     await expect(
       getAllRelatedAssets(esClientMock, {
@@ -80,14 +86,16 @@ describe('getAllRelatedAssets', () => {
 
   it('returns the primary and a directly referenced parent', async () => {
     const parentAsset: AssetWithoutTimestamp = {
-      'asset.ean': 'primary-ean',
+      'asset.ean': 'parent-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
     };
 
     const primaryAssetWithDirectParent: AssetWithoutTimestamp = {
       'asset.ean': 'primary-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [parentAsset['asset.ean']],
     };
@@ -96,10 +104,12 @@ describe('getAllRelatedAssets', () => {
     (getAssets as jest.Mock).mockResolvedValueOnce([primaryAssetWithDirectParent]);
     // Distance 1
     (getAssets as jest.Mock).mockResolvedValueOnce([parentAsset]);
-    (getRelatedAssets as jest.Mock).mockResolvedValueOnce([]);
+    (getIndirectlyRelatedAssets as jest.Mock).mockResolvedValueOnce([]);
     // Ensure maxDistance is respected
     (getAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
-    (getRelatedAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
+    (getIndirectlyRelatedAssets as jest.Mock).mockRejectedValueOnce(
+      new Error('Should respect maxDistance')
+    );
 
     await expect(
       getAllRelatedAssets(esClientMock, {
@@ -124,6 +134,7 @@ describe('getAllRelatedAssets', () => {
     const primaryAssetWithIndirectParent: AssetWithoutTimestamp = {
       'asset.ean': 'primary-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [],
     };
@@ -131,6 +142,7 @@ describe('getAllRelatedAssets', () => {
     const parentAsset: AssetWithoutTimestamp = {
       'asset.ean': 'primary-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.children': [primaryAssetWithIndirectParent['asset.ean']],
     };
@@ -139,10 +151,12 @@ describe('getAllRelatedAssets', () => {
     (getAssets as jest.Mock).mockResolvedValueOnce([primaryAssetWithIndirectParent]);
     // Distance 1
     (getAssets as jest.Mock).mockResolvedValueOnce([]);
-    (getRelatedAssets as jest.Mock).mockResolvedValueOnce([parentAsset]);
+    (getIndirectlyRelatedAssets as jest.Mock).mockResolvedValueOnce([parentAsset]);
     // Ensure maxDistance is respected
     (getAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
-    (getRelatedAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
+    (getIndirectlyRelatedAssets as jest.Mock).mockRejectedValueOnce(
+      new Error('Should respect maxDistance')
+    );
 
     await expect(
       getAllRelatedAssets(esClientMock, {
@@ -167,6 +181,7 @@ describe('getAllRelatedAssets', () => {
     const directlyReferencedParent: AssetWithoutTimestamp = {
       'asset.ean': 'directly-referenced-parent-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.children': [],
     };
@@ -174,6 +189,7 @@ describe('getAllRelatedAssets', () => {
     const primaryAsset: AssetWithoutTimestamp = {
       'asset.ean': 'primary-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [directlyReferencedParent['asset.ean']],
     };
@@ -181,6 +197,7 @@ describe('getAllRelatedAssets', () => {
     const indirectlyReferencedParent: AssetWithoutTimestamp = {
       'asset.ean': 'indirectly-referenced-parent-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.children': [primaryAsset['asset.ean']],
     };
@@ -189,10 +206,12 @@ describe('getAllRelatedAssets', () => {
     (getAssets as jest.Mock).mockResolvedValueOnce([primaryAsset]);
     // Distance 1
     (getAssets as jest.Mock).mockResolvedValueOnce([directlyReferencedParent]);
-    (getRelatedAssets as jest.Mock).mockResolvedValueOnce([indirectlyReferencedParent]);
+    (getIndirectlyRelatedAssets as jest.Mock).mockResolvedValueOnce([indirectlyReferencedParent]);
     // Ensure maxDistance is respected
     (getAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
-    (getRelatedAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
+    (getIndirectlyRelatedAssets as jest.Mock).mockRejectedValueOnce(
+      new Error('Should respect maxDistance')
+    );
 
     await expect(
       getAllRelatedAssets(esClientMock, {
@@ -221,12 +240,14 @@ describe('getAllRelatedAssets', () => {
     const parentAsset: AssetWithoutTimestamp = {
       'asset.ean': 'parent-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
     };
 
     const primaryAsset: AssetWithoutTimestamp = {
       'asset.ean': 'primary-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
     };
 
@@ -238,10 +259,12 @@ describe('getAllRelatedAssets', () => {
     // Distance 1
     (getAssets as jest.Mock).mockResolvedValueOnce([parentAsset]);
     // Code should filter out any directly referenced parent from the indirectly referenced parents query
-    (getRelatedAssets as jest.Mock).mockResolvedValueOnce([]);
+    (getIndirectlyRelatedAssets as jest.Mock).mockResolvedValueOnce([]);
     // Ensure maxDistance is respected
     (getAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
-    (getRelatedAssets as jest.Mock).mockRejectedValueOnce(new Error('Should respect maxDistance'));
+    (getIndirectlyRelatedAssets as jest.Mock).mockRejectedValueOnce(
+      new Error('Should respect maxDistance')
+    );
 
     await expect(
       getAllRelatedAssets(esClientMock, {
@@ -266,12 +289,14 @@ describe('getAllRelatedAssets', () => {
     const distance6Parent: AssetWithoutTimestamp = {
       'asset.ean': 'parent-5-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
     };
 
     const distance5Parent: AssetWithoutTimestamp = {
       'asset.ean': 'parent-5-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance6Parent['asset.ean']],
     };
@@ -279,6 +304,7 @@ describe('getAllRelatedAssets', () => {
     const distance4Parent: AssetWithoutTimestamp = {
       'asset.ean': 'parent-4-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance5Parent['asset.ean']],
     };
@@ -286,6 +312,7 @@ describe('getAllRelatedAssets', () => {
     const distance3Parent: AssetWithoutTimestamp = {
       'asset.ean': 'parent-3-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance4Parent['asset.ean']],
     };
@@ -293,6 +320,7 @@ describe('getAllRelatedAssets', () => {
     const distance2Parent: AssetWithoutTimestamp = {
       'asset.ean': 'parent-2-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance3Parent['asset.ean']],
     };
@@ -300,6 +328,7 @@ describe('getAllRelatedAssets', () => {
     const distance1Parent: AssetWithoutTimestamp = {
       'asset.ean': 'parent-1-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance2Parent['asset.ean']],
     };
@@ -307,12 +336,13 @@ describe('getAllRelatedAssets', () => {
     const primaryAsset: AssetWithoutTimestamp = {
       'asset.ean': 'primary-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance1Parent['asset.ean']],
     };
 
     // Only using directly referenced parents
-    (getRelatedAssets as jest.Mock).mockResolvedValue([]);
+    (getIndirectlyRelatedAssets as jest.Mock).mockResolvedValue([]);
 
     // Primary
     (getAssets as jest.Mock).mockResolvedValueOnce([primaryAsset]);
@@ -368,12 +398,14 @@ describe('getAllRelatedAssets', () => {
     const distance3Parent: AssetWithoutTimestamp = {
       'asset.ean': 'parent-3-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
     };
 
     const distance2Parent: AssetWithoutTimestamp = {
       'asset.ean': 'parent-2-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance3Parent['asset.ean']],
     };
@@ -381,6 +413,7 @@ describe('getAllRelatedAssets', () => {
     const distance1Parent: AssetWithoutTimestamp = {
       'asset.ean': 'parent-1-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance2Parent['asset.ean']],
     };
@@ -388,12 +421,13 @@ describe('getAllRelatedAssets', () => {
     const primaryAsset: AssetWithoutTimestamp = {
       'asset.ean': 'primary-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance1Parent['asset.ean']],
     };
 
     // Only using directly referenced parents
-    (getRelatedAssets as jest.Mock).mockResolvedValue([]);
+    (getIndirectlyRelatedAssets as jest.Mock).mockResolvedValue([]);
 
     // Primary
     (getAssets as jest.Mock).mockResolvedValueOnce([primaryAsset]);
@@ -435,30 +469,35 @@ describe('getAllRelatedAssets', () => {
     const distance2ParentA: AssetWithoutTimestamp = {
       'asset.ean': 'parent-2-ean-a',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
     };
 
     const distance2ParentB: AssetWithoutTimestamp = {
       'asset.ean': 'parent-2-ean-b',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
     };
 
     const distance2ParentC: AssetWithoutTimestamp = {
       'asset.ean': 'parent-2-ean-c',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
     };
 
     const distance2ParentD: AssetWithoutTimestamp = {
       'asset.ean': 'parent-2-ean-d',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
     };
 
     const distance1ParentA: AssetWithoutTimestamp = {
       'asset.ean': 'parent-1-ean-a',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance2ParentA['asset.ean'], distance2ParentB['asset.ean']],
     };
@@ -466,6 +505,7 @@ describe('getAllRelatedAssets', () => {
     const distance1ParentB: AssetWithoutTimestamp = {
       'asset.ean': 'parent-1-ean-b',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance2ParentC['asset.ean'], distance2ParentD['asset.ean']],
     };
@@ -473,12 +513,13 @@ describe('getAllRelatedAssets', () => {
     const primaryAsset: AssetWithoutTimestamp = {
       'asset.ean': 'primary-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance1ParentA['asset.ean'], distance1ParentB['asset.ean']],
     };
 
     // Only using directly referenced parents
-    (getRelatedAssets as jest.Mock).mockResolvedValue([]);
+    (getIndirectlyRelatedAssets as jest.Mock).mockResolvedValue([]);
 
     // Primary
     (getAssets as jest.Mock).mockResolvedValueOnce([primaryAsset]);

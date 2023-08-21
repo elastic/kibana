@@ -10,3 +10,4 @@ value:
   is_preconfigured: false
   is_deprecated: false
   is_missing_secrets: false
+  is_system_action: false
