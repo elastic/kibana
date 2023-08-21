@@ -293,6 +293,120 @@
         }
       ]
     },
+    "/api/data_views/data_view/{viewId}/runtime_field": {
+      "post": {
+        "summary": "Creates a runtime field.",
+        "operationId": "createRuntimeField",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "tags": [
+          "data views"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data_view_id": {
+                    "description": "The ID of the data view.",
+                    "type": "string",
+                    "required": true
+                  },
+                  "space_id": {
+                    "description": "An identifier for the space. If space_id is not provided in the URL, the default space is used.",
+                    "type": "string",
+                    "required": false
+                  }
+                }
+              },
+              "examples": {
+                "createRuntimeFieldRequest": {
+                  "$ref": "#/components/examples/create_runtime_field_request"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Create or update an existing runtime field.",
+        "operationId": "updateRuntimeField",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "tags": [
+          "data views"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data_view_id": {
+                    "description": "The ID of the data view.",
+                    "type": "string",
+                    "required": true
+                  },
+                  "space_id": {
+                    "description": "An identifier for the space. If space_id is not provided in the URL, the default space is used.",
+                    "type": "string",
+                    "required": false
+                  }
+                }
+              },
+              "examples": {
+                "updateRuntimeFieldRequest": {
+                  "$ref": "#/components/examples/create_runtime_field_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/create_runtime_field_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
     "/api/data_views/data_view/{viewId}/runtime_field/{fieldName}": {
       "get": {
         "summary": "Retrieves a runtime field.",
@@ -347,6 +461,99 @@
             }
           }
         }
+      },
+      "delete": {
+        "summary": "Delete a runtime field from a data view.",
+        "operationId": "deleteRuntimeField",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "tags": [
+          "data views"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/field_name"
+          },
+          {
+            "$ref": "#/components/parameters/view_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          },
+          "404": {
+            "description": "Object is not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Update an existing runtime field.",
+        "operationId": "updateRuntimeField",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "tags": [
+          "data views"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/field_name"
+          },
+          {
+            "$ref": "#/components/parameters/view_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data_view": {
+                    "type": "object"
+                  },
+                  "fields": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                }
+              },
+              "examples": {
+                "updateRuntimeFieldRequest": {
+                  "$ref": "#/components/examples/update_runtime_field_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
       },
       "servers": [
         {
@@ -1690,6 +1897,18 @@
           "refresh_fields": true
         }
       },
+      "create_runtime_field_request": {
+        "summary": "Create a runtime field.",
+        "value": {
+          "name": "runtimeFoo",
+          "runtimeField": {
+            "type": "long",
+            "script": {
+              "source": "emit(doc[\"foo\"].value)"
+            }
+          }
+        }
+      },
       "get_runtime_field_response": {
         "summary": "The get runtime field API returns a JSON object that contains information about the runtime field (`hour_of_day`) and the data view (`d3d7af60-4c81-11e8-b3d7-01146121b73d`).",
         "value": {
@@ -2308,6 +2527,16 @@
           }
         }
       },
+      "update_runtime_field_request": {
+        "summary": "Update an existing runtime field on a data view.",
+        "value": {
+          "runtimeField": {
+            "script": {
+              "source": "emit(doc[\"bar\"].value)"
+            }
+          }
+        }
+      },
       "get_default_data_view_response": {
         "summary": "The get default data view API returns the default data view identifier.",
         "value": {
@@ -2610,6 +2839,17 @@
             "description": "Reloads the data view fields after the data view is updated.",
             "default": false
           }
+        }
+      },
+      "create_runtime_field_response": {
+        "summary": "The API returns created runtime field object array and updated data view object.",
+        "value": {
+          "data_view": {
+            "...": null
+          },
+          "fields": [
+            "..."
+          ]
         }
       }
     }
