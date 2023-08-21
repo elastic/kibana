@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
+export type { JsonCodeEditorProps } from './components';
 export type { UnifiedDocViewerServices } from './hooks';

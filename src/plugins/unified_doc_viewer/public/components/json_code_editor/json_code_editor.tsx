@@ -11,7 +11,7 @@ import './json_code_editor.scss';
 import React from 'react';
 import { JsonCodeEditorCommon } from './json_code_editor_common';
 
-interface JsonCodeEditorProps {
+export interface JsonCodeEditorProps {
   json: Record<string, unknown>;
   width?: string | number;
   height?: string | number;

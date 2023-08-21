@@ -9,13 +9,14 @@
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { EuiDelayRender, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import type { JsonCodeEditorProps } from './components';
 import { UnifiedDocViewerPublicPlugin } from './plugin';
 
 const LazyJsonCodeEditor = React.lazy(
   () => import('./components/json_code_editor/json_code_editor')
 );
 
-export const JsonCodeEditor = withSuspense(
+export const JsonCodeEditor = withSuspense<JsonCodeEditorProps>(
   LazyJsonCodeEditor,
   <EuiDelayRender delay={300}>
     <EuiPanel color="transparent" paddingSize="s">
