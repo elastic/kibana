@@ -371,7 +371,7 @@ export class AlertingAuthorization {
       const ruleTypesWithAuthorization = Array.from(
         this.augmentWithAuthorizedConsumers(ruleTypes, {})
       );
-      const ruleTypesAuthorized: Set<RegistryRuleType> = new Set();
+      const ruleTypesAuthorized: Map<string, RegistryRuleType> = new Map();
       // map from privilege to ruleType which we can refer back to when analyzing the result
       // of checkPrivileges
       const privilegeToRuleType = new Map<
@@ -385,9 +385,11 @@ export class AlertingAuthorization {
         for (const ruleTypeId of featureDef?.alerting ?? []) {
           const ruleTypeAuth = ruleTypesWithAuthorization.find((rtwa) => rtwa.id === ruleTypeId);
           if (ruleTypeAuth) {
-            const { authorizedConsumers, hasAlertsMappings, hasFieldsForAAD, ...ruleType } =
-              ruleTypeAuth;
-            ruleTypesAuthorized.add(ruleType);
+            if (!ruleTypesAuthorized.has(ruleTypeId)) {
+              const { authorizedConsumers, hasAlertsMappings, hasFieldsForAAD, ...ruleType } =
+                ruleTypeAuth;
+              ruleTypesAuthorized.set(ruleTypeId, ruleType);
+            }
             for (const operation of operations) {
               privilegeToRuleType.set(
                 this.authorization!.actions.alerting.get(
@@ -419,7 +421,7 @@ export class AlertingAuthorization {
           hasAllRequested && featuresIds === undefined
             ? // has access to all features
               this.augmentWithAuthorizedConsumers(
-                ruleTypesAuthorized,
+                new Set(ruleTypesAuthorized.values()),
                 await this.allPossibleConsumers
               )
             : // only has some of the required privileges

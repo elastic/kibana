@@ -21,7 +21,6 @@ describe('createGetAlertIndicesAliasFn', () => {
   const mockedLicenseState: jest.Mocked<ILicenseState> = licenseStateMock.create();
   const taskManager = taskManagerMock.createSetup();
   const inMemoryMetrics = inMemoryMetricsMock.create();
-  // const alertsService = alertsServiceMock.create();
 
   const ruleTypeRegistryParams: ConstructorOptions = {
     logger,
