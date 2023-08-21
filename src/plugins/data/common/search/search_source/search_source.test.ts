@@ -652,6 +652,22 @@ describe('SearchSource', () => {
         const request = searchSource.getSearchRequestBody();
         expect(request.script_fields).toEqual({ hello: {}, world: {} });
       });
+
+      test('ignores scripted fields when scripted fields are disabled', async () => {
+        searchSource.setField('index', {
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: { hello: {}, world: {} },
+            docvalueFields: [],
+          }),
+        } as unknown as DataView);
+        searchSourceDependencies.scriptedFieldsEnabled = false;
+        searchSource.setField('fields', ['timestamp', '*']);
+
+        const request = searchSource.getSearchRequestBody();
+        expect(request.script_fields).toEqual({});
+      });
     });
 
     describe('handling for when specific fields are provided', () => {
