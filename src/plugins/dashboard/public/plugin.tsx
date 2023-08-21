@@ -67,7 +67,6 @@ import {
   SEARCH_SESSION_ID,
 } from './dashboard_constants';
 import { DashboardMountContextProps } from './dashboard_app/types';
-import { PlaceholderEmbeddableFactory } from './placeholder_embeddable';
 import type { FindDashboardsService } from './services/dashboard_content_management/types';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
@@ -220,9 +219,6 @@ export class DashboardPlugin
         dashboardContainerFactory.type,
         dashboardContainerFactory
       );
-
-      const placeholderFactory = new PlaceholderEmbeddableFactory();
-      embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
     });
 
     this.stopUrlTracking = () => {
