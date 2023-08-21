@@ -94,7 +94,7 @@
     "@dnd-kit/sortable": "^4.0.0",
     "@dnd-kit/utilities": "^2.0.0",
     "@elastic/apm-rum": "^5.14.0",
-    "@elastic/apm-rum-react": "^1.4.4",
+    "@elastic/apm-rum-react": "^2.0.0",
     "@elastic/charts": "59.1.0",
     "@elastic/datemath": "5.0.3",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@8.9.1-canary.1",

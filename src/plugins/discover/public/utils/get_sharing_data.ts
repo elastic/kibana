@@ -73,28 +73,35 @@ export async function getSharingData(
   const absoluteTimeFilter = data.query.timefilter.timefilter.createFilter(index);
   const relativeTimeFilter = data.query.timefilter.timefilter.createRelativeFilter(index);
   return {
-    getSearchSource: (absoluteTime?: boolean): SerializedSearchSourceFields => {
+    getSearchSource: ({
+      addGlobalTimeFilter,
+      absoluteTime,
+    }: {
+      addGlobalTimeFilter?: boolean;
+      absoluteTime?: boolean;
+    }): SerializedSearchSourceFields => {
       const timeFilter = absoluteTime ? absoluteTimeFilter : relativeTimeFilter;
+      if (addGlobalTimeFilter && timeFilter) {
+        // remove timeFilter from existing filter
+        if (Array.isArray(existingFilter)) {
+          existingFilter = existingFilter.filter(
+            (current) => !isEqualFilters(current, absoluteTimeFilter)
+          );
+        } else if (isEqualFilters(existingFilter, absoluteTimeFilter)) {
+          existingFilter = undefined;
+        }
 
-      // remove timeFilter from existing filter
-      if (Array.isArray(existingFilter)) {
-        existingFilter = existingFilter.filter(
-          (current) => !isEqualFilters(current, absoluteTimeFilter)
-        );
-      } else if (isEqualFilters(existingFilter, absoluteTimeFilter)) {
-        existingFilter = undefined;
+        if (existingFilter) {
+          existingFilter = Array.isArray(existingFilter)
+            ? [timeFilter, ...existingFilter]
+            : ([timeFilter, existingFilter] as Filter[]);
+        } else {
+          existingFilter = timeFilter;
+        }
       }
 
-      if (existingFilter && timeFilter) {
-        searchSource.setField(
-          'filter',
-          Array.isArray(existingFilter)
-            ? [timeFilter, ...existingFilter]
-            : ([timeFilter, existingFilter] as Filter[])
-        );
-      } else {
-        const filter = timeFilter || existingFilter;
-        searchSource.setField('filter', filter);
+      if (existingFilter) {
+        searchSource.setField('filter', existingFilter);
       }
 
       /*
