@@ -15,7 +15,7 @@ import type {
 import { isResetTransformsResponseSchema } from '../../../common/api_schemas/type_guards';
 import { getErrorMessage } from '../../../common/utils/errors';
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
-import { REFRESH_TRANSFORM_LIST_STATE, refreshTransformList$ } from '../common';
+import { useRefreshTransformList } from '../common';
 import { ToastNotificationText } from '../components';
 import { useApi } from './use_api';
 
@@ -23,6 +23,7 @@ type SuccessCountField = keyof Omit<ResetTransformStatus, 'destinationIndex'>;
 
 export const useResetTransforms = () => {
   const { overlays, theme } = useAppDependencies();
+  const refreshTransformList = useRefreshTransformList();
   const toastNotifications = useToastNotifications();
   const api = useApi();
 
@@ -107,6 +108,6 @@ export const useResetTransforms = () => {
       }
     }
 
-    refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
+    refreshTransformList();
   };
 };

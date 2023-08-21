@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
+import { TRANSFORM_REACT_QUERY_KEYS } from '../../../../../common/constants';
 import type { Privileges } from '../../../../../common/types/privileges';
 
 import {
@@ -54,7 +55,7 @@ export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) =
     error,
     data: privilegesData,
   } = useQuery<PrivilegesAndCapabilities, IHttpFetchError>(
-    ['transform-privileges-and-capabilities'],
+    [TRANSFORM_REACT_QUERY_KEYS.PRIVILEGES],
     async ({ signal }) => {
       return await http.fetch<PrivilegesAndCapabilities>(path, {
         version,

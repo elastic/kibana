@@ -17,13 +17,14 @@ import { isScheduleNowTransformsResponseSchema } from '../../../common/api_schem
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
-import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../common';
+import { useRefreshTransformList } from '../common';
 import { ToastNotificationText } from '../components';
 
 import { useApi } from './use_api';
 
 export const useScheduleNowTransforms = () => {
   const { overlays, theme } = useAppDependencies();
+  const refreshTransformList = useRefreshTransformList();
   const toastNotifications = useToastNotifications();
   const api = useApi();
 
@@ -79,6 +80,6 @@ export const useScheduleNowTransforms = () => {
       }
     }
 
-    refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
+    refreshTransformList();
   };
 };

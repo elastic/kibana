@@ -17,13 +17,14 @@ import { isStartTransformsResponseSchema } from '../../../common/api_schemas/typ
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
-import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../common';
+import { useRefreshTransformList } from '../common';
 import { ToastNotificationText } from '../components';
 
 import { useApi } from './use_api';
 
 export const useReauthorizeTransforms = () => {
   const { overlays, theme } = useAppDependencies();
+  const refreshTransformList = useRefreshTransformList();
   const toastNotifications = useToastNotifications();
   const api = useApi();
 
@@ -76,6 +77,6 @@ export const useReauthorizeTransforms = () => {
       }
     }
 
-    refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
+    refreshTransformList();
   };
 };

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import React, { MouseEventHandler, FC, useContext, useState } from 'react';
+import React, { type MouseEventHandler, type FC, useContext, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -34,7 +36,7 @@ import type { TransformId } from '../../../../../../common/types/transform';
 
 import {
   useRefreshTransformList,
-  TransformListRow,
+  type TransformListRow,
   TRANSFORM_LIST_COLUMN,
 } from '../../../../common';
 import { AuthorizationContext } from '../../../../lib/authorization';
@@ -74,6 +76,29 @@ import { useAlertRuleFlyout } from '../../../../../alerting/transform_alerting_f
 import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 import { StopActionModal } from '../action_stop/stop_action_modal';
 
+const ErrorMessage: FC<{ errorMessage: any }> = ({ errorMessage }) => (
+  <>
+    <EuiSpacer size="s" />
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="xpack.transform.list.errorPromptTitle"
+          defaultMessage="An error occurred getting the transform list"
+        />
+      }
+      color="danger"
+      iconType="error"
+    >
+      <p>
+        <small>
+          <pre>{JSON.stringify(errorMessage)}</pre>
+        </small>
+      </p>
+    </EuiCallOut>
+    <EuiSpacer size="s" />
+  </>
+);
+
 type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 
 function getItemIdToExpandedRowMap(
@@ -91,6 +116,8 @@ function getItemIdToExpandedRowMap(
 }
 
 interface TransformListProps {
+  errorMessage: any;
+  isLoading: boolean;
   onCreateTransform: MouseEventHandler<HTMLButtonElement>;
   transformNodes: number;
   transforms: TransformListRow[];
@@ -98,13 +125,14 @@ interface TransformListProps {
 }
 
 export const TransformList: FC<TransformListProps> = ({
+  errorMessage,
+  isLoading,
   onCreateTransform,
   transformNodes,
   transforms,
   transformsLoading,
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const { refresh } = useRefreshTransformList({ isLoading: setIsLoading });
+  const refreshTransformList = useRefreshTransformList();
   const { setEditAlertRule } = useAlertRuleFlyout();
 
   const [query, setQuery] = useState<Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]>();
@@ -142,11 +170,10 @@ export const TransformList: FC<TransformListProps> = ({
   const filteredTransforms =
     clauses.length > 0 ? filterTransforms(transforms, clauses) : transforms;
 
-  if (transforms.length === 0 && transformNodes === 0) {
-    return null;
-  }
+  const errorMessageInsert =
+    errorMessage !== null ? <ErrorMessage errorMessage={errorMessage} /> : null;
 
-  if (transforms.length === 0) {
+  if (transforms.length === 0 && errorMessage === null) {
     return (
       <EuiFlexGroup justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
@@ -319,7 +346,7 @@ export const TransformList: FC<TransformListProps> = ({
   const toolsRight = (
     <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
       <EuiFlexItem>
-        <RefreshTransformListButton onClick={refresh} isLoading={isLoading} />
+        <RefreshTransformListButton onClick={refreshTransformList} isLoading={isLoading} />
       </EuiFlexItem>
       <EuiFlexItem>
         <CreateTransformButton onClick={onCreateTransform} transformNodes={transformNodes} />
@@ -355,6 +382,7 @@ export const TransformList: FC<TransformListProps> = ({
       {/* Single Action Modals */}
       {singleActionModals}
 
+      {errorMessage !== null && errorMessageInsert}
       <EuiInMemoryTable
         allowNeutralSort={false}
         className="transform__TransformTable"

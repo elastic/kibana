@@ -32,6 +32,11 @@ const EXTERNAL_API_BASE_PATH = '/api/transform/';
 export const addInternalBasePath = (uri: string): string => `${INTERNAL_API_BASE_PATH}${uri}`;
 export const addExternalBasePath = (uri: string): string => `${EXTERNAL_API_BASE_PATH}${uri}`;
 
+export const TRANSFORM_REACT_QUERY_KEYS = {
+  PRIVILEGES: 'transform.privileges',
+  TRANSFORMS_LIST: 'transform.transforms_list',
+} as const;
+
 // In order to create a transform, the API requires the following privileges:
 // - transform_admin (builtin)
 //   - cluster privileges: manage_transform

@@ -16,7 +16,7 @@ import type {
 import { isDeleteTransformsResponseSchema } from '../../../common/api_schemas/type_guards';
 import { getErrorMessage } from '../../../common/utils/errors';
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
-import { REFRESH_TRANSFORM_LIST_STATE, refreshTransformList$, TransformListRow } from '../common';
+import { useRefreshTransformList, type TransformListRow } from '../common';
 import { ToastNotificationText } from '../components';
 import { useApi } from './use_api';
 import { indexService } from '../services/es_index_service';
@@ -120,6 +120,7 @@ type SuccessCountField = keyof Omit<DeleteTransformStatus, 'destinationIndex'>;
 
 export const useDeleteTransforms = () => {
   const { overlays, theme } = useAppDependencies();
+  const refreshTransformList = useRefreshTransformList();
   const toastNotifications = useToastNotifications();
   const api = useApi();
 
@@ -293,6 +294,6 @@ export const useDeleteTransforms = () => {
       }
     }
 
-    refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
+    refreshTransformList();
   };
 };

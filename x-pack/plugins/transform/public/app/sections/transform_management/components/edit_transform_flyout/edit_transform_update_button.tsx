@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { isPostTransformsUpdateResponseSchema } from '../../../../../../common/api_schemas/type_guards';
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
-import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../../common';
+import { useRefreshTransformList } from '../../../../common';
 import { useToastNotifications } from '../../../../app_dependencies';
 import { useApi } from '../../../../hooks/use_api';
 
@@ -26,6 +26,7 @@ interface EditTransformUpdateButtonProps {
 
 export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ closeFlyout }) => {
   const api = useApi();
+  const refreshTransformList = useRefreshTransformList();
   const toastNotifications = useToastNotifications();
 
   const requestConfig = useEditTransformFlyout('requestConfig');
@@ -51,7 +52,7 @@ export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ 
       })
     );
     closeFlyout();
-    refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
+    refreshTransformList();
   }
 
   return (

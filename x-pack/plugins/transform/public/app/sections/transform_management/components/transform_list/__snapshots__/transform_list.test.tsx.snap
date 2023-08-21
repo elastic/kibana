@@ -1,43 +1,67 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Transform: Transform List <TransformList /> Minimal initialization 1`] = `
-<EuiFlexGroup
-  justifyContent="spaceAround"
+<ContextProvider
+  value={false}
 >
-  <EuiFlexItem
-    grow={false}
+  <ContextProvider
+    value={
+      QueryClient {
+        "defaultOptions": Object {},
+        "logger": BufferedConsole {
+          "Console": [Function],
+          "_buffer": Array [],
+          "_counters": Object {},
+          "_groupDepth": 0,
+          "_timers": Object {},
+          "assert": [Function],
+          "clear": [Function],
+          "count": [Function],
+          "countReset": [Function],
+          "debug": [Function],
+          "dir": [Function],
+          "dirxml": [Function],
+          "error": [Function],
+          "group": [Function],
+          "groupCollapsed": [Function],
+          "groupEnd": [Function],
+          "info": [Function],
+          "log": [Function],
+          "table": [Function],
+          "time": [Function],
+          "timeEnd": [Function],
+          "timeLog": [Function],
+          "trace": [Function],
+          "warn": [Function],
+        },
+        "mountCount": 0,
+        "mutationCache": MutationCache {
+          "config": Object {},
+          "listeners": Set {},
+          "mutationId": 0,
+          "mutations": Array [],
+          "subscribe": [Function],
+        },
+        "mutationDefaults": Array [],
+        "queryCache": QueryCache {
+          "config": Object {},
+          "listeners": Set {},
+          "queries": Array [],
+          "queriesMap": Object {},
+          "subscribe": [Function],
+        },
+        "queryDefaults": Array [],
+      }
+    }
   >
-    <EuiSpacer
-      size="l"
+    <TransformList
+      errorMessage=""
+      isLoading={false}
+      onCreateTransform={[MockFunction]}
+      transformNodes={1}
+      transforms={Array []}
+      transformsLoading={false}
     />
-    <EuiPageContent_Deprecated
-      color="subdued"
-      horizontalPosition="center"
-      verticalPosition="center"
-    >
-      <EuiEmptyPrompt
-        actions={
-          Array [
-            <EuiButton
-              color="primary"
-              data-test-subj="transformCreateFirstButton"
-              fill={true}
-              isDisabled={true}
-              onClick={[MockFunction]}
-              size="m"
-            >
-              Create your first transform
-            </EuiButton>,
-          ]
-        }
-        data-test-subj="transformNoTransformsFound"
-        title={
-          <h2>
-            No transforms found
-          </h2>
-        }
-      />
-    </EuiPageContent_Deprecated>
-  </EuiFlexItem>
-</EuiFlexGroup>
+  </ContextProvider>
+</ContextProvider>
 `;

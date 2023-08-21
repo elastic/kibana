@@ -5,75 +5,70 @@
  * 2.0.
  */
 
+import { useQuery } from '@tanstack/react-query';
+
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { isDefined } from '@kbn/ml-is-defined';
+import { isGetTransformsStatsResponseSchema } from '../../../common/api_schemas/type_guards';
+import type {
+  GetTransformNodesResponseSchema,
+  GetTransformsResponseSchema,
+} from '../../../common/api_schemas/transforms';
 import {
-  isGetTransformNodesResponseSchema,
-  isGetTransformsResponseSchema,
-  isGetTransformsStatsResponseSchema,
-} from '../../../common/api_schemas/type_guards';
-import { TRANSFORM_MODE } from '../../../common/constants';
+  addInternalBasePath,
+  DEFAULT_REFRESH_INTERVAL_MS,
+  TRANSFORM_REACT_QUERY_KEYS,
+  TRANSFORM_MODE,
+} from '../../../common/constants';
 import { isTransformStats } from '../../../common/types/transform_stats';
 
-import {
-  type TransformListRow,
-  refreshTransformList$,
-  REFRESH_TRANSFORM_LIST_STATE,
-} from '../common';
+import { type TransformListRow } from '../common';
+import { useAppDependencies } from '../app_dependencies';
 
-import { useApi } from './use_api';
 import { TRANSFORM_ERROR_TYPE } from '../common/transform';
 
 export type GetTransforms = (forceRefresh?: boolean) => void;
 
-export const useGetTransforms = (
-  setTransforms: React.Dispatch<React.SetStateAction<TransformListRow[]>>,
-  setTransformNodes: React.Dispatch<React.SetStateAction<number>>,
-  setErrorMessage: React.Dispatch<React.SetStateAction<IHttpFetchError | undefined>>,
-  setTransformIdsWithoutConfig: React.Dispatch<React.SetStateAction<string[] | undefined>>,
-  setIsInitialized: React.Dispatch<React.SetStateAction<boolean>>,
-  blockRefresh: boolean
-): GetTransforms => {
-  const api = useApi();
+interface UseGetTransformsResponse {
+  tableRows: TransformListRow[];
+  transformIdsWithoutConfig?: string[];
+  transformNodes: number;
+}
 
-  let concurrentLoads = 0;
+export const useGetTransforms = () => {
+  const { http } = useAppDependencies();
 
-  const getTransforms = async (forceRefresh = false) => {
-    if (forceRefresh === true || blockRefresh === false) {
-      refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.LOADING);
-      concurrentLoads++;
+  return useQuery<UseGetTransformsResponse, IHttpFetchError>(
+    [TRANSFORM_REACT_QUERY_KEYS.TRANSFORMS_LIST],
+    async ({ signal }) => {
+      const update: UseGetTransformsResponse = {
+        tableRows: [],
+        transformNodes: 0,
+      };
 
-      if (concurrentLoads > 1) {
-        return;
-      }
-
-      const fetchOptions = { asSystemRequest: true };
-      const transformNodes = await api.getTransformNodes();
-      const transformConfigs = await api.getTransforms(fetchOptions);
-      const transformStats = await api.getTransformsStats(fetchOptions);
-
-      if (
-        !isGetTransformsResponseSchema(transformConfigs) ||
-        !isGetTransformsStatsResponseSchema(transformStats) ||
-        !isGetTransformNodesResponseSchema(transformNodes)
-      ) {
-        // An error is followed immediately by setting the state to idle.
-        // This way we're able to treat ERROR as a one-time-event like REFRESH.
-        refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.ERROR);
-        refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.IDLE);
-        setTransformNodes(0);
-        setTransforms([]);
-
-        setIsInitialized(true);
-
-        if (!isGetTransformsResponseSchema(transformConfigs)) {
-          setErrorMessage(transformConfigs);
-        } else if (!isGetTransformsStatsResponseSchema(transformStats)) {
-          setErrorMessage(transformStats);
+      const transformNodes = await http.get<GetTransformNodesResponseSchema>(
+        addInternalBasePath('transforms/_nodes'),
+        {
+          version: '1',
+          signal,
         }
+      );
 
-        return;
-      }
+      update.transformNodes = transformNodes.count;
+
+      const transformConfigs = await http.get<GetTransformsResponseSchema>(
+        addInternalBasePath('transforms'),
+        {
+          version: '1',
+          asSystemRequest: true,
+          signal,
+        }
+      );
+      const transformStats = await http.get(addInternalBasePath(`transforms/_stats`), {
+        version: '1',
+        asSystemRequest: true,
+        signal,
+      });
 
       // There might be some errors with fetching certain transforms
       // For example, when task exists and is running but the config is deleted
@@ -87,14 +82,11 @@ export const useGetTransforms = (
           })
           .filter(isDefined);
 
-        setTransformIdsWithoutConfig(
-          danglingTaskIdMatches.length > 0 ? danglingTaskIdMatches : undefined
-        );
-      } else {
-        setTransformIdsWithoutConfig(undefined);
+        update.transformIdsWithoutConfig =
+          danglingTaskIdMatches.length > 0 ? danglingTaskIdMatches : undefined;
       }
 
-      const tableRows = transformConfigs.transforms.reduce((reducedtableRows, config) => {
+      update.tableRows = transformConfigs.transforms.reduce((reducedtableRows, config) => {
         const stats = isGetTransformsStatsResponseSchema(transformStats)
           ? transformStats.transforms.find((d) => config.id === d.id)
           : undefined;
@@ -117,21 +109,10 @@ export const useGetTransforms = (
         return reducedtableRows;
       }, [] as TransformListRow[]);
 
-      setTransformNodes(transformNodes.count);
-      setTransforms(tableRows);
-      setErrorMessage(undefined);
-      setIsInitialized(true);
-      refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.IDLE);
-
-      concurrentLoads--;
-
-      if (concurrentLoads > 0) {
-        concurrentLoads = 0;
-        getTransforms(true);
-        return;
-      }
+      return update;
+    },
+    {
+      refetchInterval: DEFAULT_REFRESH_INTERVAL_MS,
     }
-  };
-
-  return getTransforms;
+  );
 };

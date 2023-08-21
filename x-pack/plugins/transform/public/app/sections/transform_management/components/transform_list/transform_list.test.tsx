@@ -7,6 +7,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { TransformList } from './transform_list';
 
@@ -15,13 +16,18 @@ jest.mock('../../../../app_dependencies');
 
 describe('Transform: Transform List <TransformList />', () => {
   test('Minimal initialization', () => {
+    const queryClient = new QueryClient();
     const wrapper = shallow(
-      <TransformList
-        onCreateTransform={jest.fn()}
-        transformNodes={1}
-        transforms={[]}
-        transformsLoading={false}
-      />
+      <QueryClientProvider client={queryClient}>
+        <TransformList
+          errorMessage={''}
+          isLoading={false}
+          onCreateTransform={jest.fn()}
+          transformNodes={1}
+          transforms={[]}
+          transformsLoading={false}
+        />
+      </QueryClientProvider>
     );
 
     expect(wrapper).toMatchSnapshot();

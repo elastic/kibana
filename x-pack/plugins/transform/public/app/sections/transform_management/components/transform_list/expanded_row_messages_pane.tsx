@@ -6,6 +6,7 @@
  */
 
 import React, { MouseEvent, useState, type FC } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import {
   formatDate,
@@ -15,15 +16,21 @@ import {
   EuiToolTip,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { euiLightVars as theme } from '@kbn/ui-theme';
 
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 
-import { DEFAULT_MAX_AUDIT_MESSAGE_SIZE, TIME_FORMAT } from '../../../../../../common/constants';
-import { isGetTransformsAuditMessagesResponseSchema } from '../../../../../../common/api_schemas/type_guards';
+import type { GetTransformsAuditMessagesResponseSchema } from '../../../../../../common/api_schemas/audit_messages';
+import {
+  addInternalBasePath,
+  DEFAULT_MAX_AUDIT_MESSAGE_SIZE,
+  TIME_FORMAT,
+  TRANSFORM_REACT_QUERY_KEYS,
+} from '../../../../../../common/constants';
 import { TransformMessage } from '../../../../../../common/types/messages';
 
-import { useApi } from '../../../../hooks/use_api';
+import { useAppDependencies } from '../../../../app_dependencies';
 import { JobIcon } from '../../../../components/job_icon';
 import { useRefreshTransformList } from '../../../../common';
 
@@ -37,11 +44,7 @@ interface Sorting {
 }
 
 export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ transformId }) => {
-  const [messages, setMessages] = useState<any[]>([]);
-  const [msgCount, setMsgCount] = useState<number>(0);
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const { http } = useAppDependencies();
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -52,58 +55,43 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
     },
   });
 
-  const api = useApi();
+  const { isLoading, error, data } = useQuery<
+    GetTransformsAuditMessagesResponseSchema,
+    IHttpFetchError
+  >(
+    [
+      TRANSFORM_REACT_QUERY_KEYS.TRANSFORMS_LIST,
+      transformId,
+      sorting.sort.field,
+      sorting.sort.direction,
+    ],
+    async ({ signal }) =>
+      await http.get<GetTransformsAuditMessagesResponseSchema>(
+        addInternalBasePath(`transforms/${transformId}/messages`),
+        {
+          query: {
+            sortField: sorting.sort.field,
+            sortDirection: sorting.sort.direction,
+          },
+          version: '1',
+          signal,
+        }
+      )
+  );
+  const messages = data?.messages ?? [];
+  const msgCount = data?.total ?? 0;
+  const errorMessage =
+    error !== null
+      ? i18n.translate('xpack.transform.transformList.transformDetails.messagesPane.errorMessage', {
+          defaultMessage: 'Messages could not be loaded',
+        })
+      : '';
 
-  const getMessagesFactory = (
-    sortField: keyof TransformMessage = 'timestamp',
-    sortDirection: 'asc' | 'desc' = 'desc'
-  ) => {
-    let concurrentLoads = 0;
-
-    return async function getMessages() {
-      concurrentLoads++;
-
-      if (concurrentLoads > 1) {
-        return;
-      }
-
-      setIsLoading(true);
-      const messagesResp = await api.getTransformAuditMessages(
-        transformId,
-        sortField,
-        sortDirection
-      );
-
-      if (!isGetTransformsAuditMessagesResponseSchema(messagesResp)) {
-        setIsLoading(false);
-        setErrorMessage(
-          i18n.translate(
-            'xpack.transform.transformList.transformDetails.messagesPane.errorMessage',
-            {
-              defaultMessage: 'Messages could not be loaded',
-            }
-          )
-        );
-        return;
-      }
-
-      setIsLoading(false);
-      setMessages(messagesResp.messages);
-      setMsgCount(messagesResp.total);
-
-      concurrentLoads--;
-
-      if (concurrentLoads > 0) {
-        concurrentLoads = 0;
-        getMessages();
-      }
-    };
-  };
-  const { refresh: refreshMessage } = useRefreshTransformList({ onRefresh: getMessagesFactory() });
+  const refreshTransformList = useRefreshTransformList();
 
   const columns = [
     {
-      name: refreshMessage ? (
+      name: refreshTransformList ? (
         <EuiToolTip
           content={i18n.translate('xpack.transform.transformList.refreshLabel', {
             defaultMessage: 'Refresh',
@@ -113,7 +101,7 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
             // TODO: Replace this with ML's blurButtonOnClick when it's moved to a shared package
             onClick={(e: MouseEvent<HTMLButtonElement>) => {
               (e.currentTarget as HTMLButtonElement).blur();
-              refreshMessage();
+              refreshTransformList();
             }}
             iconType="refresh"
             aria-label={i18n.translate('xpack.transform.transformList.refreshAriaLabel', {
@@ -192,12 +180,6 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
     setPageSize(size);
     if (sort) {
       setSorting({ sort });
-
-      // Since we only show 500 messages, if user wants oldest messages first
-      // we need to make sure we fetch them from elasticsearch
-      if (msgCount > DEFAULT_MAX_AUDIT_MESSAGE_SIZE) {
-        getMessagesFactory(sort.field, sort.direction)();
-      }
     }
   };
 
