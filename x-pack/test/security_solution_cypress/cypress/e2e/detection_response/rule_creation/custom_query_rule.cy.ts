@@ -85,7 +85,7 @@ import {
 import { deleteSelectedRules } from '../../../tasks/rules_bulk_actions';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../../tasks/common';
+import { deleteAlertsAndRules, deleteConnectors } from '../../../tasks/common';
 import { addEmailConnectorAndRuleAction } from '../../../tasks/common/rule_actions';
 import {
   createAndEnableRule,
@@ -111,16 +111,12 @@ import {
   waitForTheRuleToBeExecuted,
 } from '../../../tasks/create_new_rule';
 import { saveEditedRule } from '../../../tasks/edit_rule';
-import { login, visit } from '../../../tasks/login';
+import { login, visit, visitSecurityDetectionRulesPage } from '../../../tasks/login';
 import { enablesRule, getDetails } from '../../../tasks/rule_details';
 
-import { RULE_CREATION, DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
+import { RULE_CREATION } from '../../../urls/navigation';
 
 describe('Custom query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
     deleteAlertsAndRules();
   });
@@ -257,7 +253,7 @@ describe('Custom query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, ()
         );
         createRule(getExistingRule({ rule_id: 'rule3', name: 'Rule 1', enabled: false }));
         login();
-        visit(DETECTIONS_RULE_MANAGEMENT_URL);
+        visitSecurityDetectionRulesPage();
       });
 
       it('Deletes one rule', () => {
@@ -354,7 +350,7 @@ describe('Custom query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, ()
         deleteConnectors();
         createRule(getExistingRule({ rule_id: 'rule1', enabled: true }));
         login();
-        visit(DETECTIONS_RULE_MANAGEMENT_URL);
+        visitSecurityDetectionRulesPage();
       });
 
       it('Only modifies rule active status on enable/disable', () => {
