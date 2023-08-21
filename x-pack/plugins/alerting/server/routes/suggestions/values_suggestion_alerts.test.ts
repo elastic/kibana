@@ -13,7 +13,7 @@ import { Observable } from 'rxjs';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { rulesClientMock } from '../../rules_client.mock';
 import { mockHandlerArguments } from '../_mock_handler_arguments';
-import { registerRulesValueSuggestionsRoute } from './values_suggestion_rules';
+import { registerAlertsValueSuggestionsRoute } from './values_suggestion_alerts';
 
 jest.mock('@kbn/unified-search-plugin/server/autocomplete/terms_agg', () => {
   return {
@@ -27,11 +27,12 @@ jest.mock('../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
-describe('registerRulesValueSuggestionsRoute', () => {
+describe('registerAlertsValueSuggestionsRoute', () => {
   const rulesClient = rulesClientMock.create();
   let config$: Observable<ConfigSchema>;
 
   beforeEach(() => {
+    termsAggSuggestionsMock.mockClear();
     rulesClient.getSpaceId.mockReturnValue('space-x');
     config$ = dataPluginMock
       .createSetupContract()
@@ -42,12 +43,12 @@ describe('registerRulesValueSuggestionsRoute', () => {
   test('happy path route registered', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-
-    registerRulesValueSuggestionsRoute(router, licenseState, config$);
+    const getAlertIndicesAliasMock = jest.fn().mockReturnValue(['alert-index']);
+    registerAlertsValueSuggestionsRoute(router, licenseState, config$, getAlertIndicesAliasMock);
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/internal/rules/suggestions/values"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/alerts/suggestions/values"`);
 
     const mockRequest = httpServerMock.createKibanaRequest<never, never, never>({
       body: {
@@ -76,10 +77,10 @@ describe('registerRulesValueSuggestionsRoute', () => {
       expect.any(Object),
       expect.any(Object),
       expect.any(Object),
-      '.kibana_alerting_cases',
+      'alert-index',
       'alert.tags',
       'test-query',
-      [{ term: { namespaces: 'space-x' } }],
+      [{ term: { 'kibana.space_ids': 'space-x' } }],
       'test-field-meta',
       expect.any(Object)
     );
