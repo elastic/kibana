@@ -7,14 +7,11 @@
 
 import type { ComponentType } from 'react';
 import React, { memo } from 'react';
-import type { CoreStart } from '@kbn/core/public';
-import type { StartPlugins } from '../../../../../../../types';
 import { createFleetContextReduxStore } from './store';
 import { RenderContextProviders } from './render_context_providers';
+import type { FleetUiExtensionGetterOptions } from '../../types';
 
-interface WithSecurityContextProps<P extends {}> {
-  coreStart: CoreStart;
-  depsStart: Pick<StartPlugins, 'data' | 'fleet'>;
+interface WithSecurityContextProps<P extends {}> extends FleetUiExtensionGetterOptions {
   WrappedComponent: ComponentType<P>;
 }
 
@@ -30,6 +27,7 @@ interface WithSecurityContextProps<P extends {}> {
 export const withSecurityContext = <P extends {}>({
   coreStart,
   depsStart,
+  services: { upsellingService },
   WrappedComponent,
 }: WithSecurityContextProps<P>): ComponentType<P> => {
   let store: ReturnType<typeof createFleetContextReduxStore>; // created on first render
@@ -41,7 +39,11 @@ export const withSecurityContext = <P extends {}>({
     }
 
     return (
-      <RenderContextProviders store={store} depsStart={depsStart}>
+      <RenderContextProviders
+        store={store}
+        depsStart={depsStart}
+        upsellingService={upsellingService}
+      >
         <WrappedComponent {...props} />
       </RenderContextProviders>
     );

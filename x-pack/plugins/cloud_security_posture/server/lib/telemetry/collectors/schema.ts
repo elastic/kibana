@@ -153,6 +153,18 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       deployment_mode: { type: 'keyword' },
       created_at: { type: 'date' },
       agent_count: { type: 'long' },
+      account_type: { type: 'keyword' },
+    },
+  },
+  alerts_stats: {
+    type: 'array',
+    items: {
+      posture_type: { type: 'keyword' },
+      rules_count: { type: 'long' },
+      alerts_count: { type: 'long' },
+      alerts_open_count: { type: 'long' },
+      alerts_closed_count: { type: 'long' },
+      alerts_acknowledged_count: { type: 'long' },
     },
   },
 };

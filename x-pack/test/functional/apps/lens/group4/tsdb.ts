@@ -248,6 +248,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const indexPatterns = getService('indexPatterns');
   const esArchiver = getService('esArchiver');
+  const comboBox = getService('comboBox');
 
   const createDocs = async (
     esIndex: string,
@@ -310,7 +311,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.info(`Indexed ${res.items.length} test data docs.`);
   };
 
-  describe('lens tsdb', function () {
+  // Failing ES promotion: https://github.com/elastic/kibana/issues/163970
+  describe.skip('lens tsdb', function () {
     const tsdbIndex = 'kibana_sample_data_logstsdb';
     const tsdbDataView = tsdbIndex;
     const tsdbEsArchive = 'test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb';
@@ -383,7 +385,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('for rolled up metric (downsampled)', () => {
+      // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/163971
+      describe.skip('for rolled up metric (downsampled)', () => {
         it('defaults to average for rolled up metric', async () => {
           await PageObjects.lens.switchDataPanelIndexPattern(downsampleDataView.dataView);
           await PageObjects.lens.removeLayer();
@@ -545,6 +548,49 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         }
       }
+
+      describe('show time series dimension groups within breakdown', () => {
+        it('should show the time series dimension group on field picker when configuring a breakdown', async () => {
+          await PageObjects.lens.configureDimension({
+            dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+            operation: 'date_histogram',
+            field: '@timestamp',
+          });
+
+          await PageObjects.lens.configureDimension({
+            dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+            operation: 'min',
+            field: 'bytes_counter',
+          });
+
+          await PageObjects.lens.configureDimension({
+            dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
+            operation: 'terms',
+            keepOpen: true,
+          });
+
+          const list = await comboBox.getOptionsList('indexPattern-dimension-field');
+          expect(list).to.contain('Time series dimensions');
+          await PageObjects.lens.closeDimensionEditor();
+        });
+
+        it("should not show the time series dimension group on field picker if it's not a breakdown", async () => {
+          await PageObjects.lens.configureDimension({
+            dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+            operation: 'min',
+            field: 'bytes_counter',
+          });
+
+          await PageObjects.lens.configureDimension({
+            dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+            operation: 'date_histogram',
+            keepOpen: true,
+          });
+          const list = await comboBox.getOptionsList('indexPattern-dimension-field');
+          expect(list).to.not.contain('Time series dimensions');
+          await PageObjects.lens.closeDimensionEditor();
+        });
+      });
     });
 
     describe('Scenarios with changing stream type', () => {

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core/server';
-import { RuleCreateProps } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { CreateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
-import { validateCreateRuleProps } from '../../../../../../../common/api/detection_engine/rule_management';
+import {
+  CreateRuleRequestBody,
+  validateCreateRuleProps,
+} from '../../../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
@@ -31,7 +33,7 @@ export const createRuleRoute = (
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        body: buildRouteValidation(RuleCreateProps),
+        body: buildRouteValidation(CreateRuleRequestBody),
       },
       options: {
         tags: ['access:securitySolution'],

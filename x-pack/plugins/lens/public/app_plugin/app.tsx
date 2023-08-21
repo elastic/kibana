@@ -93,6 +93,7 @@ export function App({
     dashboardFeatureFlag,
     locator,
     share,
+    serverless,
   } = lensAppServices;
 
   const saveAndExit = useRef<() => void>();
@@ -188,7 +189,7 @@ export function App({
       ) {
         return actions.confirm(
           i18n.translate('xpack.lens.app.unsavedWorkMessage', {
-            defaultMessage: 'Leave Lens with unsaved work?',
+            defaultMessage: 'Leave with unsaved changes?',
           }),
           i18n.translate('xpack.lens.app.unsavedWorkTitle', {
             defaultMessage: 'Unsaved changes',
@@ -288,8 +289,18 @@ export function App({
         },
       });
     }
-    breadcrumbs.push({ text: currentDocTitle });
-    chrome.setBreadcrumbs(breadcrumbs);
+
+    const currentDocBreadcrumb: EuiBreadcrumb = { text: currentDocTitle };
+    breadcrumbs.push(currentDocBreadcrumb);
+    if (serverless?.setBreadcrumbs) {
+      // TODO: https://github.com/elastic/kibana/issues/163488
+      // for now, serverless breadcrumbs only set the title,
+      // the rest of the breadcrumbs are handled by the serverless navigation
+      // the serverless navigation is not yet aware of the byValue/originatingApp context
+      serverless.setBreadcrumbs(currentDocBreadcrumb);
+    } else {
+      chrome.setBreadcrumbs(breadcrumbs);
+    }
   }, [
     dashboardFeatureFlag.allowByValueEmbeddables,
     getOriginatingAppName,
@@ -300,6 +311,7 @@ export function App({
     isLinkedToOriginatingApp,
     persistedDoc,
     initialContext,
+    serverless,
   ]);
 
   const switchDatasource = useCallback(() => {
@@ -676,16 +688,16 @@ export function App({
       {isGoBackToVizEditorModalVisible && (
         <EuiConfirmModal
           maxWidth={600}
-          title={i18n.translate('xpack.lens.app.goBackModalTitle', {
-            defaultMessage: 'Discard changes?',
+          title={i18n.translate('xpack.lens.app.unsavedWorkTitle', {
+            defaultMessage: 'Unsaved changes',
           })}
           onCancel={() => setIsGoBackToVizEditorModalVisible(false)}
           onConfirm={navigateToVizEditor}
           cancelButtonText={i18n.translate('xpack.lens.app.goBackModalCancelBtn', {
             defaultMessage: 'Cancel',
           })}
-          confirmButtonText={i18n.translate('xpack.lens.app.goBackModalTitle', {
-            defaultMessage: 'Discard changes?',
+          confirmButtonText={i18n.translate('xpack.lens.app.unsavedWorkConfirmBtn', {
+            defaultMessage: 'Discard changes',
           })}
           buttonColor="danger"
           defaultFocusedButton="confirm"
@@ -693,7 +705,7 @@ export function App({
         >
           {i18n.translate('xpack.lens.app.goBackModalMessage', {
             defaultMessage:
-              'The changes you have made here are not backwards compatible with your original {contextOriginatingApp} visualization. Are you sure you want to discard these unsaved changes and return to {contextOriginatingApp}?',
+              'Your changes here won’t work with your original {contextOriginatingApp} visualization. Leave with unsaved changes and return to {contextOriginatingApp}?',
             values: { contextOriginatingApp },
           })}
         </EuiConfirmModal>

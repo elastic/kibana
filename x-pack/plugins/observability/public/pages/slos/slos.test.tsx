@@ -23,7 +23,7 @@ import { SlosPage } from './slos';
 import { emptySloList, sloList } from '../../data/slo/slo';
 import { historicalSummaryData } from '../../data/slo/historical_summary_data';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
-import { paths } from '../../routes/paths';
+import { paths } from '../../../common/locators/paths';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -67,6 +67,7 @@ const mockGetAddRuleFlyout = jest.fn().mockReturnValue(() => <div>Add rule flyou
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
+      theme: {},
       application: { navigateToUrl: mockNavigate },
       charts: chartPluginMock.createSetupContract(),
       data: {

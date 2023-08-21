@@ -40,6 +40,45 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
 
     registerRoutes(core, this.log);
     registerCaseFixtureFileKinds(deps.files);
+
+    /**
+     * Kibana features
+     */
+
+    deps.features.registerKibanaFeature({
+      id: 'testNoCasesConnectorFixture',
+      name: 'TestNoCasesConnectorFixture',
+      app: ['kibana'],
+      category: { id: 'cases-fixtures', label: 'Cases Fixtures' },
+      cases: ['testNoCasesConnectorFixture'],
+      privileges: {
+        all: {
+          api: [],
+          app: ['kibana'],
+          cases: {
+            create: ['testNoCasesConnectorFixture'],
+            read: ['testNoCasesConnectorFixture'],
+            update: ['testNoCasesConnectorFixture'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+        read: {
+          app: ['kibana'],
+          cases: {
+            read: ['testNoCasesConnectorFixture'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+      },
+    });
   }
 
   public start(core: CoreStart, plugins: FixtureStartDeps) {}

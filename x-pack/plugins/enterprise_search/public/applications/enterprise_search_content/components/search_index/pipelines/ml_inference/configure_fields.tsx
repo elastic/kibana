@@ -71,9 +71,14 @@ export const ConfigureFields: React.FC = () => {
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
       <EuiForm component="form">
-        {areInputsDisabled || <MultiFieldMapping />}
+        {areInputsDisabled || (
+          <>
+            <MultiFieldMapping />
+            <EuiSpacer size="s" />
+          </>
+        )}
         <SelectedFieldMappings isReadOnly={areInputsDisabled} />
         <InferenceConfiguration />
       </EuiForm>
