@@ -74,34 +74,6 @@ export const aggregateRulesRoute = (
   licenseState: ILicenseState,
   usageCounter?: UsageCounter
 ) => {
-  router.get(
-    {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
-      validate: {
-        query: querySchema,
-      },
-    },
-    router.handleLegacyErrors(
-      verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
-        const options = rewriteQueryReq({
-          ...req.query,
-          has_reference: req.query.has_reference || undefined,
-        });
-        trackLegacyTerminology(
-          [req.query.search, req.query.search_fields].filter(Boolean) as string[],
-          usageCounter
-        );
-        const aggregateResult = await rulesClient.aggregate<DefaultRuleAggregationResult>({
-          aggs: getDefaultRuleAggregation(),
-          options,
-        });
-        return res.ok({
-          body: rewriteBodyRes(formatDefaultAggregationResult(aggregateResult)),
-        });
-      })
-    )
-  );
   router.post(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
