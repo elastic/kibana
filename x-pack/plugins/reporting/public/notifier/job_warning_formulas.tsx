@@ -16,7 +16,7 @@ import { ReportLink } from './report_link';
 export const getWarningFormulasToast = (
   job: JobSummary,
   getReportLink: () => string,
-  getDownloadLink: (jobId: JobId) => string,
+  getReportURL: (jobId: JobId) => string,
   theme: ThemeServiceStart
 ): ToastInput => ({
   title: toMountPoint(
@@ -39,7 +39,7 @@ export const getWarningFormulasToast = (
       <p>
         <ReportLink getUrl={getReportLink} />
       </p>
-      <DownloadButton getUrl={getDownloadLink} job={job} />
+      <DownloadButton getUrl={getReportURL} job={job} />
     </>,
     { theme$: theme.theme$ }
   ),

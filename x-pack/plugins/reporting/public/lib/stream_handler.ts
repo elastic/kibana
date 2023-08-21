@@ -69,7 +69,7 @@ export class ReportingNotifierStreamHandler {
             getWarningFormulasToast(
               job,
               this.apiClient.getManagementLink,
-              this.apiClient.getDownloadLink,
+              this.apiClient.getReportURL,
               this.theme
             ),
             completedOptions
@@ -79,7 +79,7 @@ export class ReportingNotifierStreamHandler {
             getWarningMaxSizeToast(
               job,
               this.apiClient.getManagementLink,
-              this.apiClient.getDownloadLink,
+              this.apiClient.getReportURL,
               this.theme
             ),
             completedOptions
@@ -89,7 +89,7 @@ export class ReportingNotifierStreamHandler {
             getWarningToast(
               job,
               this.apiClient.getManagementLink,
-              this.apiClient.getDownloadLink,
+              this.apiClient.getReportURL,
               this.theme
             ),
             completedOptions
@@ -99,7 +99,7 @@ export class ReportingNotifierStreamHandler {
             getSuccessToast(
               job,
               this.apiClient.getManagementLink,
-              this.apiClient.getDownloadLink,
+              this.apiClient.getReportURL,
               this.theme
             ),
             completedOptions

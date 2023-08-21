@@ -20,7 +20,6 @@ import {
 } from '../../../common/constants';
 import {
   BaseParams,
-  DownloadReportFn,
   JobId,
   ManagementLinkFn,
   ReportApiJSON,
@@ -59,7 +58,6 @@ interface IReportingAPI {
 
   // Function props
   getManagementLink: ManagementLinkFn;
-  getDownloadLink: DownloadReportFn;
 
   // Diagnostic-related API calls
   verifyBrowser(): Promise<DiagnoseResponse>;
@@ -218,9 +216,6 @@ export class ReportingAPIClient implements IReportingAPI {
 
   public getManagementLink: ManagementLinkFn = () =>
     this.http.basePath.prepend(REPORTING_MANAGEMENT_HOME);
-
-  public getDownloadLink: DownloadReportFn = (jobId: JobId) =>
-    this.http.basePath.prepend(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${jobId}?${ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM}`);
 
   public getServerBasePath = () => this.http.basePath.serverBasePath;
 
