@@ -99,6 +99,39 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       );
     });
 
+    it('trims fields correctly while creating a case', async () => {
+      const titleWithSpace = 'This is a title with spaces       ';
+      const descriptionWithSpace =
+        'This is a case description with empty spaces at the end!!             ';
+      const categoryWithSpace = 'security        ';
+      const tagWithSpace = 'coke     ';
+
+      await cases.create.openCreateCasePage();
+      await cases.create.createCase({
+        title: titleWithSpace,
+        description: descriptionWithSpace,
+        tag: tagWithSpace,
+        severity: CaseSeverity.HIGH,
+        category: categoryWithSpace,
+      });
+
+      // validate title is trimmed
+      const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
+      expect(await title.getVisibleText()).equal(titleWithSpace.trim());
+
+      // validate description is trimmed
+      const description = await testSubjects.find('scrollable-markdown');
+      expect(await description.getVisibleText()).equal(descriptionWithSpace.trim());
+
+      // validate tag exists and is trimmed
+      const tag = await testSubjects.find(`tag-${tagWithSpace.trim()}`);
+      expect(await tag.getVisibleText()).equal(tagWithSpace.trim());
+
+      // validate category exists and is trimmed
+      const category = await testSubjects.find(`category-viewer-${categoryWithSpace.trim()}`);
+      expect(await category.getVisibleText()).equal(categoryWithSpace.trim());
+    });
+
     describe('Assignees', function () {
       before(async () => {
         await createUsersAndRoles(getService, users, roles);

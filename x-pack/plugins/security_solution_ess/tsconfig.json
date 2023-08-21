@@ -21,5 +21,8 @@
     "@kbn/kibana-react-plugin",
     "@kbn/security-solution-features",
     "@kbn/cases-plugin",
+    "@kbn/security-solution-navigation",
+    "@kbn/licensing-plugin",
+    "@kbn/shared-ux-page-kibana-template",
   ]
 }

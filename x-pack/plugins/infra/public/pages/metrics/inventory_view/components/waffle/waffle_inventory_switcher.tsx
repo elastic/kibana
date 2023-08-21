@@ -31,7 +31,7 @@ export const WaffleInventorySwitcher: React.FC = () => {
   } = useWaffleOptionsContext();
   const [isOpen, setIsOpen] = useState(false);
   const closePopover = useCallback(() => setIsOpen(false), []);
-  const openPopover = useCallback(() => setIsOpen(true), []);
+  const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
   const goToNodeType = useCallback(
     (targetNodeType: InventoryItemType) => {
       closePopover();
@@ -127,7 +127,7 @@ export const WaffleInventorySwitcher: React.FC = () => {
   const button = (
     <DropdownButton
       data-test-subj={'openInventorySwitcher'}
-      onClick={openPopover}
+      onClick={togglePopover}
       label={i18n.translate('xpack.infra.waffle.showLabel', { defaultMessage: 'Show' })}
       showKubernetesInfo={true}
     >

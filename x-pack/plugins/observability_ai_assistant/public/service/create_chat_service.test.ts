@@ -191,5 +191,32 @@ describe('createChatService', () => {
         aborted: true,
       });
     });
+
+    it('propagates an error if finish_reason == length', async () => {
+      respondWithChunks({
+        chunks: [
+          'data: {"id":"chatcmpl-7mna2SFmEAqdCTX5arxueoErLjmt1","object":"chat.completion.chunk","created":1691864686,"model":"gpt-4-0613","choices":[{"index":0,"delta":{"content":"roaming"},"finish_reason":null}]}\n',
+          'data: {"id":"chatcmpl-7mna2SFmEAqdCTX5arxueoErLjmt1","object":"chat.completion.chunk","created":1691864686,"model":"gpt-4-0613","choices":[{"index":0,"delta":{"content":" deer"},"finish_reason":null}]}\n',
+          'data: {"id":"chatcmpl-7mna2SFmEAqdCTX5arxueoErLjmt1","object":"chat.completion.chunk","created":1691864686,"model":"gpt-4-0613","choices":[{"index":0,"delta":{},"finish_reason":"length"}]}\n',
+        ],
+      });
+      const response$ = chat();
+
+      const value = await lastValueFrom(response$);
+
+      expect(value).toEqual({
+        aborted: false,
+        error: expect.any(Error),
+        message: {
+          role: 'assistant',
+          content: 'roaming deer',
+          function_call: {
+            name: '',
+            arguments: '',
+            trigger: 'assistant',
+          },
+        },
+      });
+    });
   });
 });
