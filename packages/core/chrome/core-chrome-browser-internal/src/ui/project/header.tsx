@@ -16,6 +16,8 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   htmlIdGenerator,
+  useEuiTheme,
+  EuiThemeComputed,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
@@ -46,12 +48,12 @@ import { ScreenReaderRouteAnnouncements, SkipToMainContent } from '../header/scr
 import { AppMenuBar } from './app_menu';
 import { ProjectNavigation } from './navigation';
 
-const headerCss = {
+const getHeaderCss = ({ size }: EuiThemeComputed) => ({
   logo: {
     container: css`
       display: inline-block;
       min-width: 56px; /* 56 = 40 + 8 + 8 */
-      padding: 0 8px;
+      padding: 0 ${size.s};
       cursor: pointer;
     `,
     logo: css`
@@ -68,9 +70,12 @@ const headerCss = {
     toggleNavButton: css`
       border-right: 1px solid #d3dae6;
       margin-left: -1px;
+      padding-right: ${size.xs};
     `,
   },
-};
+});
+
+type HeaderCss = ReturnType<typeof getHeaderCss>;
 
 const headerStrings = {
   logo: {
@@ -114,16 +119,17 @@ export interface Props {
 const LOCAL_STORAGE_IS_OPEN_KEY = 'PROJECT_NAVIGATION_OPEN' as const;
 const LOADING_DEBOUNCE_TIME = 80;
 
-const Logo = (
-  props: Pick<Props, 'application' | 'homeHref$' | 'loadingCount$' | 'prependBasePath'>
-) => {
+type LogoProps = Pick<Props, 'application' | 'homeHref$' | 'loadingCount$' | 'prependBasePath'> & {
+  logoCss: HeaderCss['logo'];
+};
+
+const Logo = (props: LogoProps) => {
   const loadingCount = useObservable(
     props.loadingCount$.pipe(debounceTime(LOADING_DEBOUNCE_TIME)),
     0
   );
 
   const homeHref = useObservable(props.homeHref$, '/app/home');
-  const { logo } = headerCss;
 
   let fullHref: string | undefined;
   if (homeHref) {
@@ -141,18 +147,18 @@ const Logo = (
   );
 
   return (
-    <span css={logo.container} data-test-subj="nav-header-logo">
+    <span css={props.logoCss.container} data-test-subj="nav-header-logo">
       {loadingCount === 0 ? (
         <EuiHeaderLogo
           iconType="logoElastic"
           onClick={navigateHome}
           href={fullHref}
-          css={logo}
+          css={props.logoCss}
           data-test-subj="globalLoadingIndicator-hidden"
           aria-label={headerStrings.logo.ariaLabel}
         />
       ) : (
-        <a onClick={navigateHome} href={fullHref} css={logo.spinner}>
+        <a onClick={navigateHome} href={fullHref} css={props.logoCss.spinner}>
           <EuiLoadingSpinner
             size="l"
             aria-hidden={false}
@@ -178,6 +184,9 @@ export const ProjectHeader = ({
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const headerActionMenuMounter = useHeaderActionMenuMounter(observables.actionMenu$);
   const projectsUrl = useObservable(observables.projectsUrl$);
+  const { euiTheme } = useEuiTheme();
+  const headerCss = getHeaderCss(euiTheme);
+  const { logo: logoCss } = headerCss;
 
   return (
     <>
@@ -228,6 +237,7 @@ export const ProjectHeader = ({
                   application={application}
                   homeHref$={observables.homeHref$}
                   loadingCount$={observables.loadingCount$}
+                  logoCss={logoCss}
                 />
               </EuiHeaderSectionItem>
 
