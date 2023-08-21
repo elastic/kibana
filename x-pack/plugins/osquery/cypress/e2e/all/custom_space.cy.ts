@@ -21,8 +21,8 @@ const testSpaces = [
   { name: 'custom-spaces', tags: [tag.ESS] },
 ];
 describe('ALL - Custom space', () => {
-  testSpaces.forEach((space) => {
-    describe(`[${space.name}]`, { tags: space.tags }, () => {
+  testSpaces.forEach((testSpace) => {
+    describe(`[${testSpace.name}]`, { tags: testSpace.tags }, () => {
       let packName: string;
       let packId: string;
       let spaceId: string;
@@ -30,7 +30,7 @@ describe('ALL - Custom space', () => {
       before(() => {
         cy.wrap(
           new Promise<string>((resolve) => {
-            if (spaceName !== 'default') {
+            if (testSpace.name !== 'default') {
               loadSpace().then((space) => {
                 spaceId = space.id;
                 resolve(spaceId);
@@ -66,7 +66,7 @@ describe('ALL - Custom space', () => {
 
       after(() => {
         cleanupPack(packId, spaceId);
-        if (spaceName !== 'default') {
+        if (testSpace.name !== 'default') {
           cleanupSpace(spaceId);
         }
       });
