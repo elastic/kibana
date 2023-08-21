@@ -58,14 +58,17 @@ describe('EcsMapping', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     cy.getBySel('savedQuerySelect').within(() => {
       cy.getBySel('comboBoxInput').type('processes_elastic{downArrow}{enter}');
     });
-    cy.react('EuiAccordionClass', {
-      props: { buttonContent: 'Advanced', forceState: 'open' },
-    }).should('exist');
-    cy.getBySel('advanced-accordion-content').within(() => {
-      cy.contains('Advanced').click();
-    });
-    cy.react('EuiAccordionClass', {
-      props: { buttonContent: 'Advanced', forceState: 'closed' },
-    }).should('exist');
+
+    cy.contains('Use the fields below to map results from this query to ECS fields.').should(
+      'be.visible'
+    );
+    cy.contains('Advanced').click();
+    cy.contains('Use the fields below to map results from this query to ECS fields.').should(
+      'not.be.visible'
+    );
+    cy.contains('Advanced').click();
+    cy.contains('Use the fields below to map results from this query to ECS fields.').should(
+      'be.visible'
+    );
   });
 });

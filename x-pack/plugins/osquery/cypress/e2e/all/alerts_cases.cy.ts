@@ -71,12 +71,9 @@ describe('Alert Event Details - Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () 
       cy.getBySel('expand-event').first().click({ force: true });
       cy.getBySel('take-action-dropdown-btn').click();
       cy.getBySel('osquery-action-item').click();
+      // here
       cy.contains('Run a set of queries in a pack').wait(500).click();
-      cy.getBySel('select-live-pack').within(() => {
-        // had issues on CI where element dissapeared so now adding additional click
-        cy.getBySel('comboBoxInput').click();
-        cy.getBySel('comboBoxInput').type(`${packName}{downArrow}{enter}`);
-      });
+      cy.getBySel('select-live-pack').type(`${packName}{downArrow}{enter}`);
       submitQuery();
       cy.get('[aria-label="Add to Case"]').first().click();
       cy.getBySel('cases-table-add-case-filter-bar').click();
