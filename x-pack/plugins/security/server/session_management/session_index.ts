@@ -97,7 +97,6 @@ export function getSessionIndexSettings({
       number_of_replicas: 0,
       auto_expand_replicas: '0-1',
       priority: 1000,
-      refresh_interval: '1s',
       hidden: true,
     },
     aliases: {
