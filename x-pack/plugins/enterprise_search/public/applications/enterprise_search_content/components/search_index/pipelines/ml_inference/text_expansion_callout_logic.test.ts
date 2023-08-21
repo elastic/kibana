@@ -321,7 +321,6 @@ describe('TextExpansionCalloutLogic', () => {
           message: 'Mocked error message',
         });
       });
-
       it('returns extracted error for fetch', () => {
         FetchTextExpansionModelApiLogic.actions.apiError(error);
         expect(TextExpansionCalloutLogic.values.textExpansionError).toStrictEqual({
@@ -329,7 +328,6 @@ describe('TextExpansionCalloutLogic', () => {
           message: 'Mocked error message',
         });
       });
-
       it('returns extracted error for start', () => {
         StartTextExpansionModelApiLogic.actions.apiError(error);
         expect(TextExpansionCalloutLogic.values.textExpansionError).toStrictEqual({
