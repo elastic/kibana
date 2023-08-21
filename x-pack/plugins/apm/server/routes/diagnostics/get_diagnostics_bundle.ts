@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 import { getDataStreams } from './bundle/get_data_streams';
 import { getNonDataStreamIndices } from './bundle/get_non_data_stream_indices';
@@ -85,7 +86,8 @@ export async function getDiagnosticsBundle({
     )) ?? [];
 
   const elasticsearchVersion =
-    (await handleExceptions(getElasticsearchVersion(esClient))) ?? 'N/A';
+    (await handleExceptions(getElasticsearchVersion(esClient))) ??
+    NOT_AVAILABLE_LABEL;
 
   return {
     created_at: new Date().toISOString(),
