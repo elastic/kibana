@@ -26,10 +26,16 @@ import {
 } from './security_cases_kibana_features';
 import { casesSubFeaturesMap } from './security_cases_kibana_sub_features';
 import { securitySubFeaturesMap } from './security_kibana_sub_features';
+import {
+  getAssistantBaseKibanaFeature,
+  getAssistantBaseKibanaSubFeatureIds,
+} from '../app_features/security_assistant_kibana_features';
+import { assistantSubFeaturesMap } from '../app_features/security_assistant_kibana_sub_features';
 
 export class AppFeaturesService {
   private securityAppFeatures: AppFeatures;
   private casesAppFeatures: AppFeatures;
+  private securityAssistantAppFeatures: AppFeatures;
   private appFeatures?: Set<AppFeatureKey>;
 
   constructor(
@@ -55,11 +61,22 @@ export class AppFeaturesService {
       securityCasesBaseKibanaFeature,
       securityCasesBaseKibanaSubFeatureIds
     );
+
+    // register security assistant Kibana features
+    const securityAssistantBaseKibanaFeature = getAssistantBaseKibanaFeature();
+    const securityAssistantBaseKibanaSubFeatureIds = getAssistantBaseKibanaSubFeatureIds();
+    this.securityAssistantAppFeatures = new AppFeatures(
+      this.logger,
+      assistantSubFeaturesMap,
+      securityAssistantBaseKibanaFeature,
+      securityAssistantBaseKibanaSubFeatureIds
+    );
   }
 
   public init(featuresSetup: FeaturesPluginSetup) {
     this.securityAppFeatures.init(featuresSetup);
     this.casesAppFeatures.init(featuresSetup);
+    this.securityAssistantAppFeatures.init(featuresSetup);
   }
 
   public setAppFeaturesConfigurator(configurator: AppFeaturesConfigurator) {
@@ -69,10 +86,14 @@ export class AppFeaturesService {
     const casesAppFeaturesConfig = configurator.cases();
     this.casesAppFeatures.setConfig(casesAppFeaturesConfig);
 
+    const securityAssistantAppFeaturesConfig = configurator.securityAssistant();
+    this.securityAssistantAppFeatures.setConfig(securityAssistantAppFeaturesConfig);
+
     this.appFeatures = new Set<AppFeatureKey>(
       Object.freeze([
         ...securityAppFeaturesConfig.keys(),
         ...casesAppFeaturesConfig.keys(),
+        ...securityAssistantAppFeaturesConfig.keys(),
       ]) as readonly AppFeatureKey[]
     );
   }

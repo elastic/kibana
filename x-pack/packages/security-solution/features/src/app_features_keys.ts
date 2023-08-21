@@ -56,10 +56,21 @@ export enum AppFeatureCasesKey {
   casesConnectors = 'cases_connectors',
 }
 
+export enum AppFeatureAssistantKey {
+  /**
+   * Enables Elastic AI Assistant
+   */
+  assistant = 'assistant',
+}
+
 // Merges the two enums.
-export const AppFeatureKey = { ...AppFeatureSecurityKey, ...AppFeatureCasesKey };
+export const AppFeatureKey = {
+  ...AppFeatureSecurityKey,
+  ...AppFeatureCasesKey,
+  ...AppFeatureAssistantKey,
+};
 // We need to merge the value and the type and export both to replicate how enum works.
-export type AppFeatureKey = AppFeatureSecurityKey | AppFeatureCasesKey;
+export type AppFeatureKey = AppFeatureSecurityKey | AppFeatureCasesKey | AppFeatureAssistantKey;
 
 export const ALL_APP_FEATURE_KEYS = Object.freeze(Object.values(AppFeatureKey));
 
@@ -82,4 +93,9 @@ export enum SecuritySubFeatureId {
 /** Sub-features IDs for Cases */
 export enum CasesSubFeatureId {
   deleteCases = 'deleteCasesSubFeature',
+}
+
+/** Sub-features IDs for Security Assistant */
+export enum AssistantSubFeatureId {
+  createConversation = 'createConversationSubFeature',
 }
