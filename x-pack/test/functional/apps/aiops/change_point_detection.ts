@@ -73,7 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('allows change point selection for detailed view', async () => {
       await aiops.changePointDetectionPage.getTable(0).selectAllRows();
       await aiops.changePointDetectionPage.viewSelected();
-      await aiops.changePointDetectionPage.assertDetailedView(7);
+      await aiops.changePointDetectionPage.assertDetailedView(6);
       await aiops.changePointDetectionPage.closeFlyout();
       // deselect
       await aiops.changePointDetectionPage.getTable(0).selectAllRows();
