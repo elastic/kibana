@@ -115,6 +115,7 @@ export const createMockConfigSchema = (
       pdf: { enabled: true },
       png: { enabled: true },
       csv: { enabled: true },
+      ...overrides.export_types,
     },
   } as ReportingConfigType;
 };
