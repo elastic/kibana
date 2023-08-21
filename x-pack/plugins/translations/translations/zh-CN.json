@@ -2349,7 +2349,6 @@
     "discover.docViews.table.tableTitle": "表",
     "discover.docViews.table.toggleColumnInTableButtonAriaLabel": "在表中切换列",
     "discover.docViews.table.toggleColumnInTableButtonTooltip": "在表中切换列",
-    "discover.docViews.table.toggleFieldDetails": "切换字段详细信息",
     "discover.docViews.table.unableToFilterForPresenceOfMetaFieldsTooltip": "无法筛选元数据字段是否存在",
     "discover.docViews.table.unableToFilterForPresenceOfScriptedFieldsTooltip": "无法筛选脚本字段是否存在",
     "discover.docViews.table.unindexedFieldsCanNotBeSearchedTooltip": "无法搜索未编入索引的字段或被忽略的值",
