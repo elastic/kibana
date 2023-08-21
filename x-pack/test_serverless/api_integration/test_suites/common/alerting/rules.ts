@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { padStart } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createIndexConnector,
@@ -895,6 +896,320 @@ export default function ({ getService }: FtrProviderContext) {
         indexName: ALERT_ACTION_INDEX,
       });
       expect(resp.hits.hits.length).to.be(1);
+    });
+
+    it('should schedule actions for summary of alerts per rule run', async () => {
+      actionId = await createIndexConnector({
+        supertest,
+        name: 'Index Connector: Alerting API test',
+        indexName: ALERT_ACTION_INDEX,
+      });
+      expect(actionId).not.to.be(undefined);
+
+      const createdRule = await createEsQueryRule({
+        supertest,
+        consumer: 'alerts',
+        name: 'always fire',
+        ruleTypeId: RULE_TYPE_ID,
+        params: {
+          size: 100,
+          thresholdComparator: '>',
+          threshold: [-1],
+          index: ['alert-test-data'],
+          timeField: 'date',
+          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+          timeWindowSize: 20,
+          timeWindowUnit: 's',
+        },
+        actions: [
+          {
+            group: 'query matched',
+            id: actionId,
+            params: {
+              documents: [
+                {
+                  all: '{{alerts.all.count}}',
+                  new: '{{alerts.new.count}}',
+                  newIds: '[{{#alerts.new.data}}{{kibana.alert.instance.id}},{{/alerts.new.data}}]',
+                  ongoing: '{{alerts.ongoing.count}}',
+                  ongoingIds:
+                    '[{{#alerts.ongoing.data}}{{kibana.alert.instance.id}},{{/alerts.ongoing.data}}]',
+                  recovered: '{{alerts.recovered.count}}',
+                  recoveredIds:
+                    '[{{#alerts.recovered.data}}{{kibana.alert.instance.id}},{{/alerts.recovered.data}}]',
+                },
+              ],
+            },
+            frequency: {
+              notify_when: 'onActiveAlert',
+              throttle: null,
+              summary: true,
+            },
+            alerts_filter: {
+              query: { kql: 'kibana.alert.rule.name:always fire', filters: [] },
+            },
+          },
+        ],
+      });
+      ruleId = createdRule.id;
+      expect(ruleId).not.to.be(undefined);
+
+      const resp = await waitForDocumentInIndex({
+        esClient,
+        indexName: ALERT_ACTION_INDEX,
+      });
+      expect(resp.hits.hits.length).to.be(1);
+
+      const document = resp.hits.hits[0];
+      expect(document._source).to.eql({
+        all: '1',
+        new: '1',
+        newIds: '[query matched,]',
+        ongoing: '0',
+        ongoingIds: '[]',
+        recovered: '0',
+        recoveredIds: '[]',
+      });
+    });
+
+    it('should filter alerts by kql', async () => {
+      actionId = await createIndexConnector({
+        supertest,
+        name: 'Index Connector: Alerting API test',
+        indexName: ALERT_ACTION_INDEX,
+      });
+      expect(actionId).not.to.be(undefined);
+
+      const createdRule = await createEsQueryRule({
+        supertest,
+        consumer: 'alerts',
+        name: 'always fire',
+        ruleTypeId: RULE_TYPE_ID,
+        params: {
+          size: 100,
+          thresholdComparator: '>',
+          threshold: [-1],
+          index: ['alert-test-data'],
+          timeField: 'date',
+          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+          timeWindowSize: 20,
+          timeWindowUnit: 's',
+        },
+        actions: [
+          {
+            group: 'query matched',
+            id: actionId,
+            params: {
+              documents: [
+                {
+                  all: '{{alerts.all.count}}',
+                  new: '{{alerts.new.count}}',
+                  newIds: '[{{#alerts.new.data}}{{kibana.alert.instance.id}},{{/alerts.new.data}}]',
+                  ongoing: '{{alerts.ongoing.count}}',
+                  ongoingIds:
+                    '[{{#alerts.ongoing.data}}{{kibana.alert.instance.id}},{{/alerts.ongoing.data}}]',
+                  recovered: '{{alerts.recovered.count}}',
+                  recoveredIds:
+                    '[{{#alerts.recovered.data}}{{kibana.alert.instance.id}},{{/alerts.recovered.data}}]',
+                },
+              ],
+            },
+            frequency: {
+              notify_when: 'onActiveAlert',
+              throttle: null,
+              summary: true,
+            },
+            alerts_filter: {
+              query: { kql: 'kibana.alert.instance.id:query matched', filters: [] },
+            },
+          },
+        ],
+      });
+      ruleId = createdRule.id;
+      expect(ruleId).not.to.be(undefined);
+
+      const resp = await waitForDocumentInIndex({
+        esClient,
+        indexName: ALERT_ACTION_INDEX,
+      });
+      expect(resp.hits.hits.length).to.be(1);
+
+      const document = resp.hits.hits[0];
+      expect(document._source).to.eql({
+        all: '1',
+        new: '1',
+        newIds: '[query matched,]',
+        ongoing: '0',
+        ongoingIds: '[]',
+        recovered: '0',
+        recoveredIds: '[]',
+      });
+    });
+
+    it('should filter alerts by hours', async () => {
+      const now = new Date();
+      now.setHours(now.getHours() + 1);
+      const hour = padStart(now.getUTCHours().toString(), 2, '0');
+      const minutes = padStart(now.getUTCMinutes().toString(), 2, '0');
+
+      const start = `${hour}:${minutes}`;
+      const end = `${hour}:${minutes}`;
+
+      await createIndex({ esClient, indexName: ALERT_ACTION_INDEX });
+
+      actionId = await createIndexConnector({
+        supertest,
+        name: 'Index Connector: Alerting API test',
+        indexName: ALERT_ACTION_INDEX,
+      });
+      expect(actionId).not.to.be(undefined);
+
+      const createdRule = await createEsQueryRule({
+        supertest,
+        consumer: 'alerts',
+        name: 'always fire',
+        ruleTypeId: RULE_TYPE_ID,
+        schedule: { interval: '1m' },
+        params: {
+          size: 100,
+          thresholdComparator: '>',
+          threshold: [-1],
+          index: ['alert-test-data'],
+          timeField: 'date',
+          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+          timeWindowSize: 20,
+          timeWindowUnit: 's',
+        },
+        actions: [
+          {
+            group: 'query matched',
+            id: actionId,
+            params: {
+              documents: [
+                {
+                  all: '{{alerts.all.count}}',
+                  new: '{{alerts.new.count}}',
+                  newIds: '[{{#alerts.new.data}}{{kibana.alert.instance.id}},{{/alerts.new.data}}]',
+                  ongoing: '{{alerts.ongoing.count}}',
+                  ongoingIds:
+                    '[{{#alerts.ongoing.data}}{{kibana.alert.instance.id}},{{/alerts.ongoing.data}}]',
+                  recovered: '{{alerts.recovered.count}}',
+                  recoveredIds:
+                    '[{{#alerts.recovered.data}}{{kibana.alert.instance.id}},{{/alerts.recovered.data}}]',
+                },
+              ],
+            },
+            frequency: {
+              notify_when: 'onActiveAlert',
+              throttle: null,
+              summary: true,
+            },
+            alerts_filter: {
+              timeframe: {
+                days: [1, 2, 3, 4, 5, 6, 7],
+                timezone: 'UTC',
+                hours: { start, end },
+              },
+            },
+          },
+        ],
+      });
+      ruleId = createdRule.id;
+      expect(ruleId).not.to.be(undefined);
+
+      // Should not have executed any action
+      const resp = await getDocumentsInIndex({
+        esClient,
+        indexName: ALERT_ACTION_INDEX,
+      });
+      expect(resp.hits.hits.length).to.be(0);
+    });
+
+    it('should schedule actions for summary of alerts on a custom interval', async () => {
+      const testStart = new Date();
+
+      actionId = await createIndexConnector({
+        supertest,
+        name: 'Index Connector: Alerting API test',
+        indexName: ALERT_ACTION_INDEX,
+      });
+      expect(actionId).not.to.be(undefined);
+
+      const createdRule = await createEsQueryRule({
+        supertest,
+        consumer: 'alerts',
+        name: 'always fire',
+        ruleTypeId: RULE_TYPE_ID,
+        schedule: { interval: '1m' },
+        params: {
+          size: 100,
+          thresholdComparator: '>',
+          threshold: [-1],
+          index: ['alert-test-data'],
+          timeField: 'date',
+          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+          timeWindowSize: 20,
+          timeWindowUnit: 's',
+        },
+        actions: [
+          {
+            group: 'query matched',
+            id: actionId,
+            params: {
+              documents: [
+                {
+                  all: '{{alerts.all.count}}',
+                  new: '{{alerts.new.count}}',
+                  newIds: '[{{#alerts.new.data}}{{kibana.alert.instance.id}},{{/alerts.new.data}}]',
+                  ongoing: '{{alerts.ongoing.count}}',
+                  ongoingIds:
+                    '[{{#alerts.ongoing.data}}{{kibana.alert.instance.id}},{{/alerts.ongoing.data}}]',
+                  recovered: '{{alerts.recovered.count}}',
+                  recoveredIds:
+                    '[{{#alerts.recovered.data}}{{kibana.alert.instance.id}},{{/alerts.recovered.data}}]',
+                },
+              ],
+            },
+            frequency: {
+              notify_when: 'onThrottleInterval',
+              throttle: '1m',
+              summary: true,
+            },
+          },
+        ],
+      });
+      ruleId = createdRule.id;
+      expect(ruleId).not.to.be(undefined);
+
+      await waitForNumRuleRuns({ supertest, numOfRuns: 3, ruleId, esClient, testStart });
+      const resp = await waitForDocumentInIndex({
+        esClient,
+        indexName: ALERT_ACTION_INDEX,
+        num: 2,
+      });
+      expect(resp.hits.hits.length).to.be(2);
+
+      const document = resp.hits.hits[0];
+      expect(document._source).to.eql({
+        all: '1',
+        new: '1',
+        newIds: '[query matched,]',
+        ongoing: '0',
+        ongoingIds: '[]',
+        recovered: '0',
+        recoveredIds: '[]',
+      });
+
+      const document1 = resp.hits.hits[1];
+      expect(document1._source).to.eql({
+        all: '1',
+        new: '0',
+        newIds: '[]',
+        ongoing: '1',
+        ongoingIds: '[query matched,]',
+        recovered: '0',
+        recoveredIds: '[]',
+      });
     });
   });
 }
