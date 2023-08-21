@@ -14,12 +14,10 @@ import { SvlObltOnboardingStreamLogFilePageProvider } from './svl_oblt_onboardin
 import { SvlObltOverviewPageProvider } from './svl_oblt_overview_page';
 import { SvlSearchLandingPageProvider } from './svl_search_landing_page';
 import { SvlSecLandingPageProvider } from './svl_sec_landing_page';
-import { SvlHeaderPageProvider } from './svl_header_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
 
-  header: SvlHeaderPageProvider,
   svlCommonPage: SvlCommonPageProvider,
   svlCommonNavigation: SvlCommonNavigationProvider,
   svlObltOnboardingPage: SvlObltOnboardingPageProvider,
