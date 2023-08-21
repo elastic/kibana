@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../../../tags';
-
 import {
   MODAL_CONFIRMATION_BTN,
   MODAL_CONFIRMATION_BODY,
@@ -74,9 +72,10 @@ import {
   assertDefaultValuesAreAppliedToScheduleFields,
 } from '../../../../../tasks/rules_bulk_actions';
 
+import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
+import { tag } from '../../../../../tags';
 import { hasIndexPatterns, getDetails } from '../../../../../tasks/rule_details';
 import { login, visitSecurityDetectionRulesPage } from '../../../../../tasks/login';
-
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../../../../tasks/api_calls/timelines';
 import {
@@ -95,8 +94,8 @@ import {
 } from '../../../../../objects/rule';
 
 import {
+  createAndInstallMockedPrebuiltRules,
   getAvailablePrebuiltRulesCount,
-  excessivelyInstallAllPrebuiltRules,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { setRowsPerPageTo, sortByTableColumn } from '../../../../../tasks/table_pagination';
 
@@ -161,6 +160,17 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
   });
 
   describe('Prerequisites', () => {
+    const PREBUILT_RULES = [
+      createRuleAssetSavedObject({
+        name: 'Prebuilt rule 1',
+        rule_id: 'rule_1',
+      }),
+      createRuleAssetSavedObject({
+        name: 'Prebuilt rule 2',
+        rule_id: 'rule_2',
+      }),
+    ];
+
     it('No rules selected', () => {
       openBulkActionsMenu();
 
@@ -171,7 +181,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
     });
 
     it('Only prebuilt rules selected', () => {
-      excessivelyInstallAllPrebuiltRules();
+      createAndInstallMockedPrebuiltRules({ rules: PREBUILT_RULES });
 
       // select Elastic(prebuilt) rules, check if we can't proceed further, as Elastic rules are not editable
       filterByElasticRules();
@@ -190,7 +200,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
 
     it('Prebuilt and custom rules selected: user proceeds with custom rules editing', () => {
       getRulesManagementTableRows().then((existedRulesRows) => {
-        excessivelyInstallAllPrebuiltRules();
+        createAndInstallMockedPrebuiltRules({ rules: PREBUILT_RULES });
 
         // modal window should show how many rules can be edit, how many not
         selectAllRules();
@@ -215,7 +225,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
     });
 
     it('Prebuilt and custom rules selected: user cancels action', () => {
-      excessivelyInstallAllPrebuiltRules();
+      createAndInstallMockedPrebuiltRules({ rules: PREBUILT_RULES });
 
       getRulesManagementTableRows().then((rows) => {
         // modal window should show how many rules can be edit, how many not
