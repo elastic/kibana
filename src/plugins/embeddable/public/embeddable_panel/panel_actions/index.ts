@@ -17,3 +17,4 @@ export {
 } from './customize_panel_action';
 export { EditPanelAction, ACTION_EDIT_PANEL } from './edit_panel_action/edit_panel_action';
 export { RemovePanelAction, REMOVE_PANEL_ACTION } from './remove_panel_action/remove_panel_action';
+export { tracksOverlays } from './track_overlays';

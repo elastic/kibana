@@ -8,29 +8,33 @@
 /* eslint-disable no-console */
 
 import datemath from '@elastic/datemath';
+import { errors } from '@elastic/elasticsearch';
+import { AxiosError } from 'axios';
 import yargs from 'yargs';
 import { initDiagnosticsBundle } from './diagnostics_bundle';
 
 const { argv } = yargs(process.argv.slice(2))
   .option('esHost', {
-    demandOption: true,
     type: 'string',
     description: 'Elasticsearch host name',
   })
   .option('kbHost', {
-    demandOption: true,
     type: 'string',
     description: 'Kibana host name',
   })
   .option('username', {
-    demandOption: true,
     type: 'string',
     description: 'Kibana host name',
   })
   .option('password', {
-    demandOption: true,
     type: 'string',
     description: 'Kibana host name',
+  })
+  .option('cloudId', {
+    type: 'string',
+  })
+  .option('apiKey', {
+    type: 'string',
   })
   .option('rangeFrom', {
     type: 'string',
@@ -48,9 +52,19 @@ const { argv } = yargs(process.argv.slice(2))
   })
   .help();
 
-const { esHost, kbHost, password, username, kuery } = argv;
+const { esHost, kbHost, password, username, kuery, apiKey, cloudId } = argv;
 const rangeFrom = argv.rangeFrom as unknown as number;
 const rangeTo = argv.rangeTo as unknown as number;
+
+if ((!esHost || !kbHost) && !cloudId) {
+  console.error('Either esHost and kbHost or cloudId must be provided');
+  process.exit(1);
+}
+
+if ((!username || !password) && !apiKey) {
+  console.error('Either username and password or apiKey must be provided');
+  process.exit(1);
+}
 
 if (rangeFrom) {
   console.log(`rangeFrom = ${new Date(rangeFrom).toISOString()}`);
@@ -64,6 +78,8 @@ initDiagnosticsBundle({
   esHost,
   kbHost,
   password,
+  apiKey,
+  cloudId,
   username,
   start: rangeFrom,
   end: rangeTo,
@@ -73,7 +89,20 @@ initDiagnosticsBundle({
     console.log(res);
   })
   .catch((err) => {
-    console.log(err);
+    process.exitCode = 1;
+    if (err instanceof AxiosError && err.response?.data) {
+      console.error(err.response.data);
+      return;
+    }
+
+    // @ts-expect-error
+    if (err instanceof errors.ResponseError && err.meta.body.error.reason) {
+      // @ts-expect-error
+      console.error(err.meta.body.error.reason);
+      return;
+    }
+
+    console.error(err);
   });
 
 function convertDate(dateString: string): number {

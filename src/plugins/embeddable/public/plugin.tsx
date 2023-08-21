@@ -23,6 +23,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { migrateToLatest, PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import {
   EmbeddableFactoryRegistry,
@@ -55,7 +56,7 @@ import {
 import { getAllMigrations } from '../common/lib/get_all_migrations';
 import { setTheme } from './services';
 import { setKibanaServices } from './kibana_services';
-import { CustomTimeRangeBadge } from './embeddable_panel/panel_actions';
+import { CustomTimeRangeBadge, EditPanelAction } from './embeddable_panel/panel_actions';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -65,6 +66,7 @@ export interface EmbeddableStartDependencies {
   uiActions: UiActionsStart;
   inspector: InspectorStart;
   usageCollection: UsageCollectionStart;
+  contentManagement: ContentManagementPublicStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
@@ -151,15 +153,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     const dateFormat = uiSettings.get(UI_SETTINGS.DATE_FORMAT);
     const commonlyUsedRanges = uiSettings.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
 
-    const timeRangeBadge = new CustomTimeRangeBadge(
-      overlays,
-      theme,
-      commonlyUsedRanges,
-      dateFormat
-    );
-
-    uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
-
     this.appListSubscription = core.application.applications$.subscribe((appList) => {
       this.appList = appList;
     });
@@ -170,6 +163,22 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       this.appList
     );
     this.isRegistryReady = true;
+
+    const editPanel = new EditPanelAction(
+      this.getEmbeddableFactory,
+      core.application,
+      this.stateTransferService
+    );
+
+    const timeRangeBadge = new CustomTimeRangeBadge(
+      overlays,
+      theme,
+      editPanel,
+      commonlyUsedRanges,
+      dateFormat
+    );
+
+    uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
 
     const commonContract: CommonEmbeddableStartContract = {
       getEmbeddableFactory: this

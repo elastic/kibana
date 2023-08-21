@@ -1726,6 +1726,27 @@
               {
                 "parentPluginId": "embeddable",
                 "id": "def-public.CustomizePanelAction.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "editPanel",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.EditPanelAction",
+                    "text": "EditPanelAction"
+                  }
+                ],
+                "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/customize_panel_action/customize_panel_action.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.CustomizePanelAction.Unnamed.$4",
                 "type": "Array",
                 "tags": [],
                 "label": "commonlyUsedRanges",
@@ -1741,7 +1762,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.CustomizePanelAction.Unnamed.$4",
+                "id": "def-public.CustomizePanelAction.Unnamed.$5",
                 "type": "string",
                 "tags": [],
                 "label": "dateFormat",
@@ -5714,7 +5735,7 @@
         "label": "openAddPanelFlyout",
         "description": [],
         "signature": [
-          "({ container, onAddPanel, }: { container: ",
+          "({ container, onAddPanel, onClose, }: { container: ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -5738,7 +5759,7 @@
             "section": "def-public.ContainerOutput",
             "text": "ContainerOutput"
           },
-          ">; onAddPanel?: ((id: string) => void) | undefined; }) => ",
+          ">; onAddPanel?: ((id: string) => void) | undefined; onClose?: (() => void) | undefined; }) => ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
             "scope": "common",
@@ -5756,7 +5777,7 @@
             "id": "def-public.openAddPanelFlyout.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  container,\n  onAddPanel,\n}",
+            "label": "{\n  container,\n  onAddPanel,\n  onClose,\n}",
             "description": [],
             "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx",
             "deprecated": false,
@@ -5830,6 +5851,22 @@
                   }
                 ],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.openAddPanelFlyout.$1.onClose",
+                "type": "Function",
+                "tags": [],
+                "label": "onClose",
+                "description": [],
+                "signature": [
+                  "(() => void) | undefined"
+                ],
+                "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
               }
             ]
           }
@@ -5882,6 +5919,39 @@
               "() => TFilterableEmbeddableInput"
             ],
             "path": "src/plugins/embeddable/public/lib/filterable_embeddable/should_fetch.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.tracksOverlays",
+        "type": "Function",
+        "tags": [],
+        "label": "tracksOverlays",
+        "description": [],
+        "signature": [
+          "(root: unknown) => root is TracksOverlays"
+        ],
+        "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/track_overlays.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.tracksOverlays.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "root",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/track_overlays.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -7542,6 +7612,26 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableStartDependencies.contentManagement",
+            "type": "Object",
+            "tags": [],
+            "label": "contentManagement",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "public",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-public.ContentManagementPublicStart",
+                "text": "ContentManagementPublicStart"
+              }
+            ],
+            "path": "src/plugins/embeddable/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.EmbeddableStartDependencies.savedObjectsManagement",
             "type": "Object",
             "tags": [],
@@ -9106,7 +9196,15 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", \"rows\" | \"columns\">; column: number; value: any[]; }; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
+              ", \"rows\" | \"columns\">; cells: { column: number; row: number; }[]; relation?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.BooleanRelation",
+                "text": "BooleanRelation"
+              },
+              " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
             ],
             "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,

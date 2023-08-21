@@ -23,7 +23,7 @@ import { SlosPage } from './slos';
 import { emptySloList, sloList } from '../../data/slo/slo';
 import { historicalSummaryData } from '../../data/slo/historical_summary_data';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
-import { paths } from '../../routes/paths';
+import { paths } from '../../../common/locators/paths';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -67,8 +67,23 @@ const mockGetAddRuleFlyout = jest.fn().mockReturnValue(() => <div>Add rule flyou
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
+      theme: {},
       application: { navigateToUrl: mockNavigate },
       charts: chartPluginMock.createSetupContract(),
+      data: {
+        dataViews: {
+          find: jest.fn().mockReturnValue([]),
+          get: jest.fn().mockReturnValue([]),
+        },
+      },
+      dataViews: {
+        create: jest.fn().mockResolvedValue(42),
+      },
+      docLinks: {
+        links: {
+          query: {},
+        },
+      },
       http: {
         basePath: {
           prepend: (url: string) => url,
@@ -87,12 +102,20 @@ const mockKibana = () => {
           },
         },
       },
+      storage: {
+        get: () => {},
+      },
       triggersActionsUi: { getAddRuleFlyout: mockGetAddRuleFlyout },
       uiSettings: {
         get: (settings: string) => {
           if (settings === 'dateFormat') return 'YYYY-MM-DD';
           if (settings === 'format:percent:defaultPattern') return '0.0%';
           return '';
+        },
+      },
+      unifiedSearch: {
+        autocomplete: {
+          hasQuerySuggestions: () => {},
         },
       },
     },

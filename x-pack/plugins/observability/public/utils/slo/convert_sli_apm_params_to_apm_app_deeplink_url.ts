@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ALL_VALUE } from '@kbn/slo-schema';
+
 interface Props {
   duration?: string;
   environment: string;
@@ -29,11 +31,11 @@ export function convertSliApmParamsToApmAppDeeplinkUrl({
   const qs = new URLSearchParams('comparisonEnabled=true');
 
   if (environment) {
-    qs.append('environment', environment === '*' ? 'ENVIRONMENT_ALL' : environment);
+    qs.append('environment', environment === ALL_VALUE ? 'ENVIRONMENT_ALL' : environment);
   }
 
   if (transactionType) {
-    qs.append('transactionType', transactionType === '*' ? '' : transactionType);
+    qs.append('transactionType', transactionType === ALL_VALUE ? '' : transactionType);
   }
 
   if (duration) {
@@ -42,7 +44,7 @@ export function convertSliApmParamsToApmAppDeeplinkUrl({
   }
 
   const kueryParams = [];
-  if (transactionName && transactionName !== '*') {
+  if (transactionName && transactionName !== ALL_VALUE) {
     kueryParams.push(`transaction.name : "${transactionName}"`);
   }
   if (filter && filter.length > 0) {

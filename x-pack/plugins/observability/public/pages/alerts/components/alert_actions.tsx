@@ -27,7 +27,7 @@ import { useKibana } from '../../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../../hooks/use_get_user_cases_permissions';
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
 import { parseAlert } from '../helpers/parse_alert';
-import { paths } from '../../../routes/paths';
+import { paths } from '../../../../common/locators/paths';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import type { ObservabilityRuleTypeRegistry } from '../../..';
 import type { ConfigSchema } from '../../../plugin';
@@ -248,7 +248,11 @@ export function AlertActions({
           isOpen={isPopoverOpen}
           panelPaddingSize="none"
         >
-          <EuiContextMenuPanel size="s" items={actionsMenuItems} />
+          <EuiContextMenuPanel
+            size="s"
+            items={actionsMenuItems}
+            data-test-subj="alertsTableActionsMenu"
+          />
         </EuiPopover>
       </EuiFlexItem>
     </>

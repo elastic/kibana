@@ -51,7 +51,7 @@ export const {
   removeOrClearLayer,
   cloneLayer,
   addLayer,
-  onDimensionDrop,
+  onDropToDimension,
   setLayerDefaultDimension,
   removeDimension,
   setIsLoadLibraryVisible,
@@ -70,15 +70,15 @@ export const makeConfigureStore = (
     ...getDefaultMiddleware({
       serializableCheck: {
         ignoredActionPaths: [
+          'payload.activeData',
           'payload.dataViews.indexPatterns',
           'payload.redirectCallback',
           'payload.history',
           'payload.newState.dataViews',
-          'lens.activeData',
-          'payload.source.filterOperations',
+          `payload.source.filterOperations`,
           'payload.target.filterOperations',
         ],
-        ignoredPaths: ['lens.dataViews.indexPatterns'],
+        ignoredPaths: ['lens.dataViews.indexPatterns', 'lens.activeData'],
       },
     }),
     initMiddleware(storeDeps),

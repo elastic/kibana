@@ -21,6 +21,7 @@ import type { RansomwareProtectionOSes } from '../../../../types';
 import { useLicense } from '../../../../../../../common/hooks/use_license';
 import { SettingLockedCard } from '../setting_locked_card';
 import { RelatedDetectionRulesCallout } from '../related_detection_rules_callout';
+import { useGetProtectionsUnavailableComponent } from '../../hooks/use_get_protections_unavailable_component';
 
 const RANSOMEWARE_OS_VALUES: Immutable<RansomwareProtectionOSes[]> = [
   PolicyOperatingSystem.windows,
@@ -38,6 +39,7 @@ export type RansomwareProtectionCardProps = PolicyFormComponentCommonProps;
 export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps>(
   ({ policy, onChange, mode, 'data-test-subj': dataTestSubj }) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const isProtectionsAllowed = !useGetProtectionsUnavailableComponent();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const protection = 'ransomware';
     const protectionLabel = i18n.translate(
@@ -46,6 +48,10 @@ export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps
         defaultMessage: 'Ransomware protections',
       }
     );
+
+    if (!isProtectionsAllowed) {
+      return null;
+    }
 
     if (!isPlatinumPlus) {
       return (

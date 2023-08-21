@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { RouteDefinitionParams } from '..';
 import { definePrivilegesRoutes } from './privileges';
 import { resetSessionPageRoutes } from './reset_session_page';
 import { defineRolesRoutes } from './roles';
 import { defineShareSavedObjectPermissionRoutes } from './spaces';
+import type { RouteDefinitionParams } from '..';
 
 export function defineAuthorizationRoutes(params: RouteDefinitionParams) {
   defineRolesRoutes(params);

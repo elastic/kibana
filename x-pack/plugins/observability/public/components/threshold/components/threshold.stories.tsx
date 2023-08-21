@@ -15,7 +15,7 @@ import { Props, Threshold as Component } from './threshold';
 
 export default {
   component: Component,
-  title: 'infra/alerting/Threshold',
+  title: 'app/Alerts/Threshold',
   decorators: [
     (Story) => (
       <div

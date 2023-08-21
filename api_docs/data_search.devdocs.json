@@ -3889,6 +3889,20 @@
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.SearchStrategyDependencies.rollupsEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rollupsEnabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/server/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -32458,10 +32472,6 @@
           {
             "plugin": "discover",
             "path": "src/plugins/discover/public/application/context/utils/fetch_hits_in_interval.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/get_es_query_search_after.ts"
           },
           {
             "plugin": "discover",

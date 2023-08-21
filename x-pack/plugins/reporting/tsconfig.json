@@ -39,6 +39,7 @@
     "@kbn/generate-csv",
     "@kbn/reporting-common",
     "@kbn/saved-search-plugin",
+    "@kbn/core-http-router-server-internal",
   ],
   "exclude": [
     "target/**/*",
