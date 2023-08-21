@@ -92,10 +92,6 @@ export const createIndex = ({
             // Kibana is unlikely to cross that limit.
             number_of_shards: 1,
             auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
-            // Set an explicit refresh interval so that we don't inherit the
-            // value from incorrectly configured index templates (not required
-            // after we adopt system indices)
-            refresh_interval: '1s',
             // Bump priority so that recovery happens before newer indices
             priority: 10,
             // Increase the fields limit beyond the default of 1000
