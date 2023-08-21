@@ -55,7 +55,7 @@ describe('ALL - Live Query Packs', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
   });
 
   beforeEach(() => {
-    cy.login('elastic');
+    cy.login('soc_manager');
     navigateTo('/app/osquery');
   });
 

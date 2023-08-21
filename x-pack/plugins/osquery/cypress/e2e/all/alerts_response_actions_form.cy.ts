@@ -49,7 +49,7 @@ describe(
         ruleId = data.id;
         ruleName = data.name;
       });
-      cy.login('elastic');
+      cy.login('soc_manager');
     });
     afterEach(() => {
       cleanupPack(packId);

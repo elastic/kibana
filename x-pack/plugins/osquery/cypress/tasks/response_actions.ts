@@ -32,7 +32,7 @@ export const checkOsqueryResponseActionsPermissions = (enabled: boolean) => {
   });
 
   beforeEach(() => {
-    cy.login('elastic');
+    cy.login('soc_manager');
   });
 
   it(`response actions should ${enabled ? 'be available ' : 'not be available'}`, () => {

@@ -42,7 +42,7 @@ describe('ALL - Add Integration', { tags: [tag.ESS] }, () => {
   });
 
   beforeEach(() => {
-    cy.login('elastic');
+    cy.login('soc_manager');
   });
 
   after(() => {

@@ -71,8 +71,8 @@ describe(`T1 and T2 analysts`, { tags: [tag.ESS, tag.SERVERLESS] }, () => {
         submitQuery();
         checkResults();
         checkActionItemsInResults({
-          lens: false,
-          discover: false,
+          lens: true,
+          discover: true,
           cases: true,
           timeline: false,
         });

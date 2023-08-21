@@ -18,9 +18,9 @@ import {
 import { loadSpace, loadPack, cleanupPack, cleanupSpace } from '../../tasks/api_fixtures';
 
 const spaces = isServerless ? ['default'] : ['default', 'custom-space'];
-describe('ALL - Custom space', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('ALL - Custom space', () => {
   spaces.forEach((spaceName) => {
-    describe(`[${spaceName}]`, () => {
+    describe(`[${spaceName}]`, { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       let packName: string;
       let packId: string;
       let spaceId: string;
@@ -58,7 +58,7 @@ describe('ALL - Custom space', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       });
 
       beforeEach(() => {
-        cy.login('elastic');
+        cy.login('soc_manager');
         navigateTo(`/s/${spaceId}/app/osquery`);
       });
 

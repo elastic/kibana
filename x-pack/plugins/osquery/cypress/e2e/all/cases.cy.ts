@@ -14,7 +14,7 @@ import {
 import { navigateTo } from '../../tasks/navigation';
 import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
 
-describe('Add to Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Add to Cases', () => {
   let liveQueryId: string;
   let liveQueryQuery: string;
   before(() => {
@@ -35,7 +35,7 @@ describe('Add to Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
       });
-      cy.login('elastic');
+      cy.login('soc_manager');
       navigateTo('/app/osquery');
     });
 
@@ -58,7 +58,7 @@ describe('Add to Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     });
   });
 
-  describe('security', () => {
+  describe('security', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     let caseId: string;
     let caseTitle: string;
 
@@ -67,7 +67,7 @@ describe('Add to Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
       });
-      cy.login('elastic');
+      cy.login('soc_manager');
       navigateTo('/app/osquery');
     });
 

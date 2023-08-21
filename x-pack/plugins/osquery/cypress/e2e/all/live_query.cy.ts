@@ -20,7 +20,7 @@ import { getAdvancedButton } from '../../screens/integrations';
 
 describe('ALL - Live Query', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
   beforeEach(() => {
-    cy.login('elastic');
+    cy.login('soc_manager');
     navigateTo('/app/osquery');
   });
 

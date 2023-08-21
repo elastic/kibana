@@ -100,7 +100,7 @@ export const toggleRuleOffAndOn = (ruleName: string) => {
 };
 
 export const loadRuleAlerts = (ruleName: string) => {
-  cy.login('elastic');
+  cy.login('soc_manager');
   cy.visit('/app/security/rules');
   cy.contains(ruleName).click();
   cy.getBySel('alertsTable').within(() => {

@@ -41,7 +41,7 @@ describe('ALL - Live Query run custom and saved', { tags: [tag.SERVERLESS, tag.E
   });
 
   beforeEach(() => {
-    cy.login('elastic');
+    cy.login('soc_manager');
     navigateTo('/app/osquery');
   });
 

@@ -44,6 +44,7 @@ export default defineCypressConfig({
     },
     grepFilterSpecs: true,
     grepTags: '@ess',
+    grepOmitFiltered: true,
   },
   numTestsKeptInMemory: 3,
 

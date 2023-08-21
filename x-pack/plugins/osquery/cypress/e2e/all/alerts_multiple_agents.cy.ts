@@ -31,7 +31,7 @@ describe('Alert Event Details - dynamic params', { tags: [tag.ESS, tag.SERVERLES
   });
 
   beforeEach(() => {
-    cy.login('elastic');
+    cy.login('soc_manager');
     cy.visit('/app/security/rules');
     cy.contains(ruleName).click();
   });

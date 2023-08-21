@@ -86,7 +86,7 @@ describe('Packs - Create and Edit', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   });
 
   beforeEach(() => {
-    cy.login('elastic');
+    cy.login('soc_manager');
     navigateTo('/app/osquery');
   });
 

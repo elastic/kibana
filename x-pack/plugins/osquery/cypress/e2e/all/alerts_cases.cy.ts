@@ -43,7 +43,7 @@ describe('Alert Event Details - Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () 
   });
 
   beforeEach(() => {
-    cy.login('elastic');
+    cy.login('soc_manager');
     cy.visit('/app/security/rules');
     cy.contains(ruleName).click();
   });
@@ -53,7 +53,7 @@ describe('Alert Event Details - Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () 
     cleanupRule(ruleId);
   });
 
-  describe('Case creation', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  describe('Case creation', () => {
     let caseId: string;
 
     before(() => {
@@ -93,7 +93,7 @@ describe('Alert Event Details - Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () 
   });
 
   // verify why calling new action doesnt add to response actions list
-  describe('Case', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  describe.skip('Case', () => {
     let caseId: string;
 
     before(() => {

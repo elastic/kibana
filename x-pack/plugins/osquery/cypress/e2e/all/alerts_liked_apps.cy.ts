@@ -36,7 +36,7 @@ describe('Alert Event Details', { browser: 'electron', tags: [tag.ESS, tag.SERVE
   });
 
   beforeEach(() => {
-    cy.login('elastic');
+    cy.login('soc_manager');
     cy.visit('/app/security/rules');
     cy.contains(ruleName).click();
   });
