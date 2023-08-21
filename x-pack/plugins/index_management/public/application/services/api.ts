@@ -337,3 +337,20 @@ export async function executeEnrichPolicy(policyName: string) {
 
   return result;
 }
+
+export async function getMatchingIndices(pattern: string) {
+  if (!pattern.startsWith('*')) {
+    pattern = `*${pattern}`;
+  }
+  if (!pattern.endsWith('*')) {
+    pattern = `${pattern}*`;
+  }
+
+  const result = sendRequest({
+    path: `${INTERNAL_API_BASE_PATH}/enrich_policies/get_matching_indices`,
+    method: 'post',
+    body: JSON.stringify({ pattern }),
+  });
+
+  return result;
+}

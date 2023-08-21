@@ -8,10 +8,12 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '..';
+import { addInternalBasePath } from '..';
 import { enrichPoliciesActions } from '../../../lib/enrich_policies';
 import { serializeAsESPolicy } from '../../../lib/enrich_policies';
 import type { SerializedEnrichPolicy } from '../../../../common';
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export const validationSchema = schema.object({
   name: schema.string(),
@@ -26,9 +28,46 @@ export const validationSchema = schema.object({
   query: schema.maybe(schema.any()),
 });
 
+const getMatchingIndicesSchema = schema.object({ pattern: schema.string() }, { unknowns: 'allow' });
+
+interface IndicesAggs extends estypes.AggregationsMultiBucketAggregateBase {
+  buckets: Array<{ key: unknown }>;
+}
+
+async function getIndices(dataClient: IScopedClusterClient, pattern: string, limit = 10) {
+  const response = await dataClient.asCurrentUser.search<unknown, { indices: IndicesAggs }>(
+    {
+      index: pattern,
+      body: {
+        size: 0,
+        aggs: {
+          indices: {
+            terms: {
+              field: '_index',
+              size: limit,
+            },
+          },
+        },
+      },
+    },
+    {
+      ignore: [404],
+      meta: true,
+    }
+  );
+
+  if (response.statusCode === 404 || !response.body.aggregations) {
+    return [];
+  }
+
+  const indices = response.body.aggregations.indices;
+
+  return indices.buckets ? indices.buckets.map((bucket) => bucket.key) : [];
+}
+
 export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
-    { path: addBasePath('/enrich_policies'), validate: { body: validationSchema } },
+    { path: addInternalBasePath('/enrich_policies'), validate: { body: validationSchema } },
     async (context, request, response) => {
       const client = (await context.core).elasticsearch.client as IScopedClusterClient;
 
@@ -38,6 +77,22 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
       try {
         const res = await enrichPoliciesActions.create(client, name, serializedPolicy);
         return response.ok({ body: res });
+      } catch (error) {
+        return handleEsError({ error, response });
+      }
+    }
+  );
+
+  router.post(
+    { path: addInternalBasePath('/enrich_policies/get_matching_indices'), validate: { body: getMatchingIndicesSchema } },
+    async (context, request, response) => {
+      const { pattern } = request.body;
+      const client = (await context.core).elasticsearch.client as IScopedClusterClient;
+
+      try {
+        const indices = await getIndices(client, pattern);
+
+        return response.ok({ body: { indices } });
       } catch (error) {
         return handleEsError({ error, response });
       }

@@ -5,21 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiCode, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
-import {
-  useForm,
-  Form,
-  fieldValidators,
-  FormSchema,
-  FIELD_TYPES,
-  UseField,
-  TextField,
-  SelectField,
-  JsonEditorField,
-} from '../../../../shared_imports';
+import { EuiButton, EuiCode, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { useForm, Form, fieldValidators, FormSchema, FIELD_TYPES, UseField, TextField, SelectField, JsonEditorField } from '../../../../shared_imports';
+import { IndicesSelector } from './components/indices_selector';
 
 interface Props {
   onNext: () => void;
@@ -93,8 +84,6 @@ export const configurationFormSchema: FormSchema = {
 const defaultValue = {};
 
 export const ConfigurationStep = ({ onNext }: Props) => {
-  const [editorValue, setEditorValue] = useState('');
-
   const { form } = useForm({
     defaultValue,
     schema: configurationFormSchema,
@@ -149,15 +138,7 @@ export const ConfigurationStep = ({ onNext }: Props) => {
       />
 
       <EuiFormRow label="Source indices">
-        <EuiSelect
-          hasNoInitialSelection
-          onChange={() => {}}
-          options={[
-            { value: 'option_one', text: 'Option one' },
-            { value: 'option_two', text: 'Option two' },
-            { value: 'option_three', text: 'Option three' },
-          ]}
-        />
+        <IndicesSelector />
       </EuiFormRow>
 
       <UseField
