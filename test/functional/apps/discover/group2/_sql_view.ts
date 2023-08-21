@@ -31,7 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover:enableSql': true,
   };
 
-  describe('discover sql view', async function () {
+  // Failing: See https://github.com/elastic/kibana/issues/159194
+  describe.skip('discover sql view', async function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       log.debug('load kibana index with default index pattern');

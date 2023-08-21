@@ -8,12 +8,15 @@ info:
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
-tags:
-  - name: connectors
-    description: Connector APIs enable you to create and manage connectors.
 servers:
   - url: http://localhost:5601
     description: local
+security:
+  - basicAuth: []
+  - apiKeyAuth: []
+tags:
+  - name: connectors
+    description: Connector APIs enable you to create and manage connectors.
 paths:
   /s/{spaceId}/api/actions/connector:
     post:
@@ -322,6 +325,8 @@ paths:
                       $ref: '#/components/schemas/is_missing_secrets'
                     is_preconfigured:
                       $ref: '#/components/schemas/is_preconfigured'
+                    is_system_action:
+                      $ref: '#/components/schemas/is_system_action'
                     name:
                       type: string
                       description: The display name for the connector.
@@ -1826,6 +1831,10 @@ components:
       type: boolean
       description: Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response.
       example: false
+    is_system_action:
+      type: boolean
+      description: Indicates whether the connector is used for system actions.
+      example: false
     connector_response_properties_cases_webhook:
       title: Connector request properties for a Webhook - Case Management connector
       type: object
@@ -1853,6 +1862,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -1883,6 +1894,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -1913,6 +1926,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -1943,6 +1958,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -1973,6 +1990,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2003,6 +2022,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2033,6 +2054,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2064,6 +2087,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2094,6 +2119,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2124,6 +2151,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2154,6 +2183,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2181,6 +2212,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2208,6 +2241,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2238,6 +2273,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2265,6 +2302,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2295,6 +2334,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2325,6 +2366,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2355,6 +2398,8 @@ components:
           $ref: '#/components/schemas/is_missing_secrets'
         is_preconfigured:
           $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
         name:
           type: string
           description: The display name for the connector.
@@ -2504,8 +2549,6 @@ components:
           type: string
           description: The display name for the connector.
         secrets:
-          type: object
-          description: The secrets object containing the necessary fields for authentication.
           $ref: '#/components/schemas/secrets_properties_slack_api'
     update_connector_request_slack_webhook:
       title: Update Slack connector request
@@ -2518,8 +2561,6 @@ components:
           type: string
           description: The display name for the connector.
         secrets:
-          type: object
-          description: The secrets object containing the necessary fields for authentication.
           $ref: '#/components/schemas/secrets_properties_slack_webhook'
     update_connector_request_swimlane:
       title: Update Swimlane connector request
@@ -3102,6 +3143,7 @@ components:
         is_preconfigured: false
         is_deprecated: false
         is_missing_secrets: false
+        is_system_action: false
     get_connector_response:
       summary: A list of connector types
       value:
@@ -3112,6 +3154,7 @@ components:
         is_preconfigured: false
         is_deprecated: false
         is_missing_secrets: false
+        is_system_action: false
     update_index_connector_request:
       summary: Update an index connector.
       value:
@@ -3127,6 +3170,7 @@ components:
           is_preconfigured: true
           is_deprecated: false
           referenced_by_count: 0
+          is_system_action: false
         - id: e07d0c80-8b8b-11ed-a780-3b746c987a81
           name: my-index-connector
           config:
@@ -3138,6 +3182,7 @@ components:
           is_deprecated: false
           referenced_by_count: 2
           is_missing_secrets: false
+          is_system_action: false
     get_connector_types_response:
       summary: A list of connector types
       value:
@@ -3358,6 +3403,3 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/action_response_properties'
-security:
-  - basicAuth: []
-  - apiKeyAuth: []

@@ -58,8 +58,15 @@ export async function getFullAgentPolicy(
     return null;
   }
 
-  const { outputs, proxies, dataOutput, fleetServerHosts, monitoringOutput, sourceUri } =
-    await fetchRelatedSavedObjects(soClient, agentPolicy);
+  const {
+    outputs,
+    proxies,
+    dataOutput,
+    fleetServerHosts,
+    monitoringOutput,
+    downloadSourceUri,
+    downloadSourceProxyUri,
+  } = await fetchRelatedSavedObjects(soClient, agentPolicy);
 
   // Build up an in-memory object for looking up Package Info, so we don't have
   // call `getPackageInfo` for every single policy, which incurs performance costs
@@ -118,7 +125,8 @@ export async function getFullAgentPolicy(
     revision: agentPolicy.revision,
     agent: {
       download: {
-        sourceURI: sourceUri,
+        sourceURI: downloadSourceUri,
+        ...(downloadSourceProxyUri ? { proxy_url: downloadSourceProxyUri } : {}),
       },
       monitoring:
         agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0

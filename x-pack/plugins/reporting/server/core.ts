@@ -226,22 +226,27 @@ export class ReportingCore {
    * only CSV export types should be registered in the export types registry for serverless
    */
   private getExportTypes(): ExportType[] {
+    const { csv, pdf, png } = this.config.export_types;
     const exportTypes = [];
-    if (!this.config.export_types.pdf.enabled || !this.config.export_types.png.enabled) {
+
+    if (csv.enabled) {
+      // NOTE: CsvSearchSourceExportType should be deprecated and replaced with V2 in the UI: https://github.com/elastic/kibana/issues/151190
       exportTypes.push(
         new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
       );
       exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
-    } else {
-      exportTypes.push(
-        new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
-      );
-      exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
-      exportTypes.push(new PdfExportType(this.core, this.config, this.logger, this.context));
-      exportTypes.push(new PngExportType(this.core, this.config, this.logger, this.context));
-      // deprecated export types for tests
-      exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
     }
+
+    if (pdf.enabled) {
+      // NOTE: PdfV1ExportType is deprecated and tagged for removal: https://github.com/elastic/kibana/issues/154601
+      exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
+      exportTypes.push(new PdfExportType(this.core, this.config, this.logger, this.context));
+    }
+
+    if (png.enabled) {
+      exportTypes.push(new PngExportType(this.core, this.config, this.logger, this.context));
+    }
+
     return exportTypes;
   }
 
