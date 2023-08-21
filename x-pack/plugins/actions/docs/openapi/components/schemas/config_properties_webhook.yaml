@@ -12,7 +12,7 @@ properties:
       The type of authentication to use: basic, SSL, or none.
   ca:
     type: string
-    # description: An encrypted version of the certificate authority file, which is used to sign and validate certificates.
+    description: A base64 encoded version of the certificate authority file, which is used to sign and validate certificates.
   certType:
     type: string
     description: >

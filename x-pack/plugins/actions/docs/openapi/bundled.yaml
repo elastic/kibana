@@ -1768,6 +1768,7 @@ components:
             The type of authentication to use: basic, SSL, or none.
         ca:
           type: string
+          description: A base64 encoded version of the certificate authority file, which is used to sign and validate certificates.
         certType:
           type: string
           description: |
@@ -1811,10 +1812,13 @@ components:
       properties:
         crt:
           type: string
+          description: If `authType` is `webhook-authentication-ssl` and `certType` is `ssl-crt-key`, it is a base64 encoded version of the CRT or CERT file.
         key:
           type: string
+          description: If `authType` is `webhook-authentication-ssl` and `certType` is `ssl-crt-key`, it is a base64 encoded version of the KEY file.
         pfx:
           type: string
+          description: If `authType` is `webhook-authentication-ssl` and `certType` is `ssl-pfx`, it is a base64 encoded version of the PFX or P12 file.
         password:
           type: string
           description: |
