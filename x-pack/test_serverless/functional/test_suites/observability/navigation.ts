@@ -14,7 +14,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const browser = getService('browser');
 
-  describe('navigation' + i, function () {
+  describe('navigation', function () {
     before(async () => {
       await svlObltNavigation.navigateToLandingPage();
     });
