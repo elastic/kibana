@@ -191,6 +191,37 @@ export const createCaseSavedObjectType = (
       category: {
         type: 'keyword',
       },
+      custom_fields: {
+        type: 'nested',
+        properties: {
+          key: {
+            type: 'keyword',
+          },
+          value: {
+            type: 'keyword',
+            fields: {
+              number: {
+                type: 'long',
+                ignore_malformed: true,
+              },
+              boolean: {
+                type: 'boolean',
+              },
+              string: {
+                type: 'text',
+              },
+              date: {
+                type: 'date',
+                ignore_malformed: true,
+              },
+              ip: {
+                type: 'ip',
+                ignore_malformed: true,
+              },
+            },
+          },
+        },
+      },
     },
   },
   migrations: caseMigrations,
