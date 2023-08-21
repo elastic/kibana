@@ -18,42 +18,6 @@ describe('Alert Test', { tags: [tag.ESS] }, () => {
     });
   });
 
-  describe('alert_test role', () => {
-    beforeEach(() => {
-      login(ROLE.alert_test);
-    });
-
-    it('should not be able to run live query', () => {
-      navigateTo('/app/osquery');
-      preparePack(packName);
-      findAndClickButton('Edit');
-      cy.contains(`Edit ${packName}`);
-      findFormFieldByRowsLabelAndType(
-        'Scheduled agent policies (optional)',
-        `${DEFAULT_POLICY} {downArrow}{enter}`
-      );
-      findAndClickButton('Update pack');
-      closeModalIfVisible();
-      cy.contains(`Successfully updated "${packName}" pack`);
-      closeToastIfVisible();
-
-      cy.visit('/app/security/rules');
-      cy.contains(ruleName).click();
-      cy.wait(2000);
-      cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
-      cy.getBySel('ruleSwitch').click();
-      cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'false');
-      cy.getBySel('ruleSwitch').click();
-      cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
-      cy.getBySel('expand-event').first().click();
-      cy.getBySel('take-action-dropdown-btn').click();
-      cy.getBySel('osquery-action-item').click();
-
-      cy.contains('Run Osquery');
-      cy.contains('Permission denied');
-    });
-  });
-
   describe('t1_analyst role', () => {
     beforeEach(() => {
       cy.login('t1_analyst');

@@ -27,6 +27,7 @@ export default defineCypressConfig({
     },
     grepFilterSpecs: true,
     grepTags: '@serverless --@brokenInServerless',
+    grepOmitFiltered: true,
   },
   numTestsKeptInMemory: 3,
   e2e: {

@@ -29,11 +29,7 @@ import {
   interceptAgentPolicyId,
   policyContainsIntegration,
 } from '../../tasks/integrations';
-import {
-  findAndClickButton,
-  findFormFieldByRowsLabelAndType,
-  isServerless,
-} from '../../tasks/live_query';
+import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
 
 // TODO try to fix it for serverless too
 describe('ALL - Add Integration', { tags: [tag.ESS] }, () => {
@@ -66,10 +62,6 @@ describe('ALL - Add Integration', { tags: [tag.ESS] }, () => {
     cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.LOGS}"]`).should('exist');
     cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGER}"]`).should('exist').click();
   });
-
-  if (isServerless) {
-    return;
-  }
 
   describe('Add and upgrade integration', { tags: [tag.ESS] }, () => {
     const oldVersion = '0.7.4';
