@@ -31,14 +31,14 @@ export const cloudSecurityMetringCallback = async ({
     const cloudSecuritySolutions: CloudSecuritySolutions[] = [CSPM, KSPM, CNVM, CLOUD_DEFEND];
 
     const cloudSecurityUsageRecords = await Promise.all(
-      cloudSecuritySolutions.map((postureType) =>
+      cloudSecuritySolutions.map((cloudSecuritySolution) =>
         getCloudSecurityUsageRecord({
           esClient,
           projectId,
           logger,
           taskId,
           lastSuccessfulReport,
-          cloudSecuritySolution: postureType,
+          cloudSecuritySolution,
           tier,
         })
       )
