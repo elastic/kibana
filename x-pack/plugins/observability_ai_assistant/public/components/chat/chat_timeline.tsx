@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import React, { ReactNode } from 'react';
+import { css } from '@emotion/react';
+import { compact } from 'lodash';
 import { EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { compact } from 'lodash';
-import React, { ReactNode } from 'react';
-import { type Message } from '../../../common';
-
-import type { Feedback } from '../feedback_buttons';
 import { ChatItem } from './chat_item';
+import type { Feedback } from '../feedback_buttons';
+import type { Message } from '../../../common';
 
 export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
@@ -50,7 +50,11 @@ export function ChatTimeline({
   onStopGenerating,
 }: ChatTimelineProps) {
   return (
-    <EuiCommentList>
+    <EuiCommentList
+      css={css`
+        padding-bottom: 32px;
+      `}
+    >
       {compact(
         items.map((item, index) =>
           !item.display.hide ? (
