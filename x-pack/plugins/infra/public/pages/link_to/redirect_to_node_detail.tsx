@@ -29,7 +29,7 @@ export const RedirectToNodeDetail = ({
     getToFromLocation(location)
   )('');
 
-  const queryParams = new URLSearchParams(`?${searchString}`);
+  const queryParams = new URLSearchParams(searchString);
 
   if (nodeType === 'host') {
     const assetName = getNodeNameFromLocation(location);
