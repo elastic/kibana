@@ -9,6 +9,7 @@ import type { AppFeatureKeys } from '@kbn/security-solution-features';
 import type { AppFeaturesConfigurator } from '@kbn/security-solution-plugin/server/lib/app_features_service/types';
 import { getCasesAppFeaturesConfigurator } from './cases_app_features_config';
 import { getSecurityAppFeaturesConfigurator } from './security_app_features_config';
+import { getSecurityAssistantAppFeaturesConfigurator } from './security_assistant_app_features_config';
 
 export const getProductAppFeaturesConfigurator = (
   enabledAppFeatureKeys: AppFeatureKeys
@@ -16,5 +17,6 @@ export const getProductAppFeaturesConfigurator = (
   return {
     security: getSecurityAppFeaturesConfigurator(enabledAppFeatureKeys),
     cases: getCasesAppFeaturesConfigurator(enabledAppFeatureKeys),
+    securityAssistant: getSecurityAssistantAppFeaturesConfigurator(enabledAppFeatureKeys),
   };
 };

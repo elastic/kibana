@@ -46,6 +46,7 @@ export class AppFeatures<T extends string = string, S extends string = string> {
         'Cannot sync kibana features as featuresSetup is not present. Did you call init?'
       );
     }
+
     const completeAppFeatureConfig = this.featureConfigMerger.mergeAppFeatureConfigs(
       this.baseKibanaFeature,
       this.baseKibanaSubFeatureIds,

@@ -5,84 +5,143 @@
  * 2.0.
  */
 
-import { AppFeatures } from '.';
-import type { AppFeatureKeys, ExperimentalFeatures } from '@kbn/security-solution-plugin/common';
 import type { PluginSetupContract } from '@kbn/features-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { AppFeatures } from './app_features';
+import type {
+  AppFeatureKey,
+  AppFeaturesConfig,
+  AppSubFeaturesMap,
+  BaseKibanaFeatureConfig,
+} from './types';
 
-const SECURITY_BASE_CONFIG = {
-  foo: 'foo',
+const category = {
+  id: 'security',
+  label: 'Security app category',
 };
 
-const SECURITY_APP_FEATURE_CONFIG = {
-  'test-base-feature': {
-    privileges: {
-      all: {
-        ui: ['test-capability'],
-        api: ['test-capability'],
+const baseKibanaFeature: BaseKibanaFeatureConfig = {
+  id: 'FEATURE_ID',
+  name: 'Base Feature',
+  order: 1100,
+  app: ['FEATURE_ID', 'kibana'],
+  catalogue: ['APP_ID'],
+  privileges: {
+    all: {
+      api: ['api-read', 'api-write'],
+      app: ['FEATURE_ID', 'kibana'],
+      catalogue: ['APP_ID'],
+      savedObject: {
+        all: [],
+        read: [],
       },
-      read: {
-        ui: ['test-capability'],
-        api: ['test-capability'],
+      ui: ['write', 'read'],
+    },
+    read: {
+      api: ['api-read'],
+      app: ['FEATURE_ID', 'kibana'],
+      catalogue: ['APP_ID'],
+      savedObject: {
+        all: [],
+        read: [],
       },
+      ui: ['read'],
+    },
+  },
+  category,
+};
+
+const priviledges = {
+  privileges: {
+    all: {
+      api: ['api-read', 'api-write', 'test-capability'],
+      app: ['FEATURE_ID', 'kibana'],
+      catalogue: ['APP_ID'],
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: ['write', 'read', 'test-capability'],
+    },
+    read: {
+      api: ['api-read', 'test-capability'],
+      app: ['FEATURE_ID', 'kibana'],
+      catalogue: ['APP_ID'],
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: ['read', 'test-capability'],
     },
   },
 };
+
+const SECURITY_APP_FEATURE_CONFIG: AppFeaturesConfig<string> = new Map();
+SECURITY_APP_FEATURE_CONFIG.set('test-base-feature' as AppFeatureKey, {
+  privileges: {
+    all: {
+      ui: ['test-capability'],
+      api: ['test-capability'],
+    },
+    read: {
+      ui: ['test-capability'],
+      api: ['test-capability'],
+    },
+  },
+});
 
 const CASES_BASE_CONFIG = {
-  bar: 'bar',
-};
-
-const CASES_APP_FEATURE_CONFIG = {
-  'test-cases-feature': {
-    privileges: {
-      all: {
-        ui: ['test-cases-capability'],
-        api: ['test-cases-capability'],
+  privileges: {
+    all: {
+      api: ['api-read', 'api-write', 'test-cases-capability'],
+      app: ['FEATURE_ID', 'kibana'],
+      catalogue: ['APP_ID'],
+      savedObject: {
+        all: [],
+        read: [],
       },
-      read: {
-        ui: ['test-cases-capability'],
-        api: ['test-cases-capability'],
+      ui: ['write', 'read', 'test-cases-capability'],
+    },
+    read: {
+      api: ['api-read', 'test-cases-capability'],
+      app: ['FEATURE_ID', 'kibana'],
+      catalogue: ['APP_ID'],
+      savedObject: {
+        all: [],
+        read: [],
       },
+      ui: ['read', 'test-cases-capability'],
     },
   },
 };
 
-jest.mock('@kbn/security-solution-plugin/server/lib/app_features/security_kibana_features', () => {
-  return {
-    getSecurityBaseKibanaFeature: jest.fn(() => SECURITY_BASE_CONFIG),
-    getSecurityBaseKibanaSubFeatureIds: jest.fn(() => ['subFeature1']),
-    getSecurityAppFeaturesConfig: jest.fn(() => SECURITY_APP_FEATURE_CONFIG),
-  };
+const CASES_APP_FEATURE_CONFIG: AppFeaturesConfig<string> = new Map();
+CASES_APP_FEATURE_CONFIG.set('test-cases-feature' as AppFeatureKey, {
+  privileges: {
+    all: {
+      ui: ['test-cases-capability'],
+      api: ['test-cases-capability'],
+    },
+    read: {
+      ui: ['test-cases-capability'],
+      api: ['test-cases-capability'],
+    },
+  },
 });
-jest.mock(
-  '@kbn/security-solution-plugin/server/lib/app_features/security_kibana_sub_features',
-  () => {
-    return {
-      securitySubFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
-    };
-  }
-);
 
-jest.mock(
-  '@kbn/security-solution-plugin/server/lib/app_features/security_cases_kibana_features',
-  () => {
-    return {
-      getCasesBaseKibanaFeature: jest.fn(() => CASES_BASE_CONFIG),
-      getCasesBaseKibanaSubFeatureIds: jest.fn(() => ['subFeature1']),
-      getCasesAppFeaturesConfig: jest.fn(() => CASES_APP_FEATURE_CONFIG),
-    };
-  }
-);
+const securityKibanaSubFeatures = {
+  securitySubFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
+};
 
-jest.mock(
-  '@kbn/security-solution-plugin/server/lib/app_features/security_cases_kibana_sub_features',
-  () => {
-    return {
-      casesSubFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
-    };
-  }
-);
+const securityCasesKibanaFeatures = {
+  getCasesBaseKibanaFeature: jest.fn(() => CASES_BASE_CONFIG),
+  getCasesBaseKibanaSubFeatureIds: jest.fn(() => ['subFeature1']),
+  getCasesAppFeaturesConfig: jest.fn(() => CASES_APP_FEATURE_CONFIG),
+};
+
+const securityCasesKibanaSubFeatures = {
+  casesSubFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
+};
 
 describe('AppFeatures', () => {
   it('should register enabled kibana features', () => {
@@ -91,18 +150,19 @@ describe('AppFeatures', () => {
       getKibanaFeatures: jest.fn(),
     } as unknown as PluginSetupContract;
 
-    const appFeatureKeys = ['test-base-feature'] as unknown as AppFeatureKeys;
-
     const appFeatures = new AppFeatures(
       loggingSystemMock.create().get('mock'),
-      [] as unknown as ExperimentalFeatures
+      securityKibanaSubFeatures.securitySubFeaturesMap as unknown as AppSubFeaturesMap<string>,
+      baseKibanaFeature,
+      ['subFeature1']
     );
     appFeatures.init(featuresSetup);
-    appFeatures.set(appFeatureKeys);
+    appFeatures.setConfig(SECURITY_APP_FEATURE_CONFIG);
 
     expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
-      ...SECURITY_BASE_CONFIG,
-      ...SECURITY_APP_FEATURE_CONFIG['test-base-feature'],
+      ...baseKibanaFeature,
+      ...SECURITY_APP_FEATURE_CONFIG.get('test-base-feature' as AppFeatureKey),
+      ...priviledges,
       subFeatures: [{ baz: 'baz' }],
     });
   });
@@ -112,19 +172,20 @@ describe('AppFeatures', () => {
       registerKibanaFeature: jest.fn(),
     } as unknown as PluginSetupContract;
 
-    const appFeatureKeys = ['test-cases-feature'] as unknown as AppFeatureKeys;
-
     const appFeatures = new AppFeatures(
       loggingSystemMock.create().get('mock'),
-      [] as unknown as ExperimentalFeatures
+      securityCasesKibanaSubFeatures.casesSubFeaturesMap as unknown as AppSubFeaturesMap<string>,
+      baseKibanaFeature,
+      ['subFeature1']
     );
     appFeatures.init(featuresSetup);
-    appFeatures.set(appFeatureKeys);
+    appFeatures.setConfig(CASES_APP_FEATURE_CONFIG);
 
     expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
-      ...CASES_BASE_CONFIG,
-      ...CASES_APP_FEATURE_CONFIG['test-cases-feature'],
+      ...baseKibanaFeature,
+      ...CASES_APP_FEATURE_CONFIG.get('test-cases-feature' as AppFeatureKey),
       subFeatures: [{ baz: 'baz' }],
+      ...CASES_BASE_CONFIG,
     });
   });
 });
