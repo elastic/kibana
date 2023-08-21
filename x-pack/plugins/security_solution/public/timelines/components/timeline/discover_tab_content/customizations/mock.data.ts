@@ -278,13 +278,6 @@ export const mockOnSingleValueFilterCallbackEventData: { data: ClickTriggerEvent
             count_column: 2,
           },
         ],
-        meta: {
-          type: 'esaggs',
-          source: 'security-solution-default',
-          statistics: {
-            totalCount: 2,
-          },
-        },
       },
       value: 1692264810000,
     },
@@ -413,13 +406,6 @@ export const mockOnSingleValueFilterCallbackEventData: { data: ClickTriggerEvent
             count_column: 2,
           },
         ],
-        meta: {
-          type: 'esaggs',
-          source: 'security-solution-default',
-          statistics: {
-            totalCount: 2,
-          },
-        },
       },
     },
   ],
