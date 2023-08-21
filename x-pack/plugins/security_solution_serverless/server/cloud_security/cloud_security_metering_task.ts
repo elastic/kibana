@@ -129,7 +129,6 @@ export const getSearchQueryByCloudSecuritySolution = (
       range: {
         '@timestamp': {
           gt: searchFrom.toISOString(),
-          // gt: 'now-720h',
         },
       },
     });
@@ -251,15 +250,13 @@ export const getCloudSecurityUsageRecord = async ({
 
     const periodSeconds = Math.floor((new Date().getTime() - searchFrom.getTime()) / 1000);
 
-    console.log({ lastSuccessfulReport });
-    console.log({ searchFrom });
-    console.log({ periodSeconds });
-
     const assetCountAggregations = await getAssetAggByCloudSecuritySolution(
       esClient,
       cloudSecuritySolution,
       searchFrom
     );
+
+    console.log({ assetCountAggregations });
 
     const usageRecords = await getUsageRecords(
       assetCountAggregations,
