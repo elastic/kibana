@@ -14,7 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  describe('outlier detection creation', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/142093
+  describe.skip('outlier detection creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
       await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier');
@@ -108,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
                   'Model memory limit',
                   '2mb',
                   'Version',
-                  '8.9.1',
+                  '8.9.2',
                 ],
               },
               {
