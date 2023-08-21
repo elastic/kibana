@@ -8,7 +8,6 @@
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { HttpServiceSetup } from '@kbn/core-http-server';
 import { PackageInfo } from '@kbn/core/server';
-import expect from '@kbn/expect';
 import type { Logger } from '@kbn/logging';
 import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import puppeteer from 'puppeteer';
@@ -124,21 +123,21 @@ describe('class Screenshots', () => {
   it('detects sufficient memory from cloud plugin', () => {
     const screenshotsInstance = getScreenshotsInstance();
     const hasInsufficient = screenshotsInstance.systemHasInsufficientMemory();
-    expect(hasInsufficient).to.be(false);
+    expect(hasInsufficient).toBe(false);
   });
 
   it('detects insufficient memory from cloud plugin', () => {
     mockCloudSetup = { isCloudEnabled: true, instanceSizeMb: 1000 } as unknown as CloudSetup;
     const screenshotsInstance = getScreenshotsInstance();
     const hasInsufficient = screenshotsInstance.systemHasInsufficientMemory();
-    expect(hasInsufficient).to.be(true);
+    expect(hasInsufficient).toBe(true);
   });
 
   it('ignores insufficient memory if cloud is not enabled', () => {
     mockCloudSetup = { isCloudEnabled: false, instanceSizeMb: 1000 } as unknown as CloudSetup;
     const screenshotsInstance = getScreenshotsInstance();
     const hasInsufficient = screenshotsInstance.systemHasInsufficientMemory();
-    expect(hasInsufficient).to.be(false);
+    expect(hasInsufficient).toBe(false);
   });
 
   describe('getScreenshots', () => {
@@ -163,11 +162,11 @@ describe('class Screenshots', () => {
 
       const observe = screenshotsInstance.getScreenshots(options);
       await firstValueFrom(observe).then((captureResult) => {
-        expect(captureResult.results[0].screenshots[0].data).to.eql(
+        expect(captureResult.results[0].screenshots[0].data).toEqual(
           Buffer.from(`you won't believe this one weird screenshot`, 'base64')
         );
-        expect(captureResult.results[0].renderErrors).to.be(undefined);
-        expect(captureResult.results[0].error).to.be(undefined);
+        expect(captureResult.results[0].renderErrors).toBe(undefined);
+        expect(captureResult.results[0].error).toBe(undefined);
       });
     });
 
@@ -196,9 +195,11 @@ describe('class Screenshots', () => {
 
       const observe = screenshotsInstance.getScreenshots(options);
       await firstValueFrom(observe).then((captureResult) => {
-        expect(captureResult.results[0].error?.message).to.be(
-          `Screenshotting encountered a timeout error: "open URL" took longer than 0.01 seconds. You may need` +
-            ` to increase "xpack.screenshotting.capture.timeouts.openUrl" in kibana.yml.`
+        expect(captureResult.results[0].error).toEqual(
+          new Error(
+            `Screenshotting encountered a timeout error: "open URL" took longer than 0.01 seconds.` +
+              ` You may need to increase "xpack.screenshotting.capture.timeouts.openUrl" in kibana.yml.`
+          )
         );
       });
     });

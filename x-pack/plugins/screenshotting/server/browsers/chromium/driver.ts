@@ -96,9 +96,9 @@ export class HeadlessChromiumDriver {
   readonly screenshottingError$ = this.screenshottingErrorSubject.asObservable();
 
   constructor(
-    private screenshotMode: ScreenshotModePluginSetup,
-    private config: ConfigType,
-    private basePath: string,
+    private readonly screenshotMode: ScreenshotModePluginSetup,
+    private readonly config: ConfigType,
+    private readonly basePath: string,
     private readonly page: Page
   ) {}
 
@@ -199,6 +199,7 @@ export class HeadlessChromiumDriver {
    * to issues. Ideally, timeout errors wouldn't occur because ES would return pre-loaded results data
    * statically.
    */
+  // FIXME test this
   private async injectScreenshottingErrorHeader(error: Error, containerSelector: string) {
     await this.page.evaluate(
       (selector: string, text: string) => {
