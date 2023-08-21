@@ -255,5 +255,21 @@ describe('Security Telemetry filters', () => {
         'kubernetes.pod.ip': '10-245-0-5',
       });
     });
+
+    it('copies over threat indicator fields', () => {
+      const event = {
+        not_event: 'much data, much wow',
+        'threat.feed.name': 'test_feed',
+        'threat.feed.reference': 'test',
+        'threat.feed.description': 'this is a test description',
+        'threat.feed.dashboard_id': '69c33c01-f856-42c6-b23f-4a6e1c98fe82',
+      };
+      expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
+        'threat.feed.name': 'test_feed',
+        'threat.feed.reference': 'test',
+        'threat.feed.description': 'this is a test description',
+        'threat.feed.dashboard_id': '69c33c01-f856-42c6-b23f-4a6e1c98fe82',
+      });
+    });
   });
 });
