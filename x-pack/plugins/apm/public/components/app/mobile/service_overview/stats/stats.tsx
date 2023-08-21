@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
+import { NOT_AVAILABLE_LABEL } from '@kbn/profiling-plugin/common';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 import {
   useFetcher,
@@ -109,7 +110,7 @@ export function MobileStats({
         defaultMessage: 'Crashes',
       }),
       icon: getIcon('bug'),
-      value: data?.currentPeriod?.crashes?.value ?? NaN,
+      value: data?.currentPeriod?.crashes?.value ?? NOT_AVAILABLE_LABEL,
       valueFormatter: (value: number) =>
         valueFormatter(Number(value.toPrecision(2))),
       trend: data?.currentPeriod?.crashes?.timeseries,
@@ -135,7 +136,7 @@ export function MobileStats({
         defaultMessage: 'Sessions',
       }),
       icon: getIcon('timeslider'),
-      value: data?.currentPeriod?.sessions?.value ?? NaN,
+      value: data?.currentPeriod?.sessions?.value ?? NOT_AVAILABLE_LABEL,
       valueFormatter: (value: number) => valueFormatter(value),
       trend: data?.currentPeriod?.sessions?.timeseries,
       extra: getComparisonValueFormatter(data?.previousPeriod.sessions?.value),
@@ -147,7 +148,7 @@ export function MobileStats({
         defaultMessage: 'HTTP requests',
       }),
       icon: getIcon('kubernetesPod'),
-      value: data?.currentPeriod?.requests?.value ?? NaN,
+      value: data?.currentPeriod?.requests?.value ?? NOT_AVAILABLE_LABEL,
       extra: getComparisonValueFormatter(data?.previousPeriod.requests?.value),
       valueFormatter: (value: number) => valueFormatter(value),
       trend: data?.currentPeriod?.requests?.timeseries,
