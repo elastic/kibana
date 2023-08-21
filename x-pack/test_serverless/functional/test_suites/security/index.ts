@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./ftr/landing_page'));
     loadTestFile(require.resolve('./ftr/navigation'));
     loadTestFile(require.resolve('./ftr/management'));
+    loadTestFile(require.resolve('./ftr/cases/attachment_framework'));
   });
 }

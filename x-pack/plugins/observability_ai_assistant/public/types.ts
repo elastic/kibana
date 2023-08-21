@@ -24,6 +24,11 @@ import type {
   CreateChatCompletionResponseChoicesInner,
 } from 'openai';
 import type { Observable } from 'rxjs';
+import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
+import type {
+  DataViewsPublicPluginSetup,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
 import type {
   ContextDefinition,
   FunctionDefinition,
@@ -49,13 +54,11 @@ export interface PendingMessage {
   error?: any;
 }
 
-export interface ObservabilityAIAssistantService {
-  isEnabled: () => boolean;
+export interface ObservabilityAIAssistantChatService {
   chat: (options: { messages: Message[]; connectorId: string }) => Observable<PendingMessage>;
-  callApi: ObservabilityAIAssistantAPIClient;
-  getCurrentUser: () => Promise<AuthenticatedUser>;
   getContexts: () => ContextDefinition[];
   getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
+  hasRenderFunction: (name: string) => boolean;
   executeFunction: (
     name: string,
     args: string | undefined,
@@ -63,13 +66,26 @@ export interface ObservabilityAIAssistantService {
   ) => Promise<{ content?: Serializable; data?: Serializable }>;
   renderFunction: (
     name: string,
-    response: { data?: Serializable; content?: Serializable }
+    args: string | undefined,
+    response: { data?: string; content?: string }
   ) => React.ReactNode;
 }
 
-export interface ObservabilityAIAssistantPluginStart extends ObservabilityAIAssistantService {
-  registerContext: RegisterContextDefinition;
+export type ChatRegistrationFunction = ({}: {
+  signal: AbortSignal;
   registerFunction: RegisterFunctionDefinition;
+  registerContext: RegisterContextDefinition;
+}) => Promise<void>;
+
+export interface ObservabilityAIAssistantService {
+  isEnabled: () => boolean;
+  callApi: ObservabilityAIAssistantAPIClient;
+  getCurrentUser: () => Promise<AuthenticatedUser>;
+  start: ({}: { signal: AbortSignal }) => Promise<ObservabilityAIAssistantChatService>;
+}
+
+export interface ObservabilityAIAssistantPluginStart extends ObservabilityAIAssistantService {
+  register: (fn: ChatRegistrationFunction) => void;
 }
 
 export interface ObservabilityAIAssistantPluginSetup {}
@@ -78,12 +94,16 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   security: SecurityPluginSetup;
   features: FeaturesPluginSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
+  lens: LensPublicSetup;
+  dataViews: DataViewsPublicPluginSetup;
 }
 export interface ObservabilityAIAssistantPluginStartDependencies {
   security: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
   features: FeaturesPluginStart;
+  lens: LensPublicStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 export interface ConfigSchema {}

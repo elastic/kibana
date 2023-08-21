@@ -31,6 +31,7 @@ describe('DataQualityPanel', () => {
             lastChecked={''}
             openCreateCaseFlyout={jest.fn()}
             patterns={[]}
+            reportDataQualityIndexChecked={jest.fn()}
             setLastChecked={jest.fn()}
             baseTheme={DARK_THEME}
           />
@@ -65,6 +66,7 @@ describe('DataQualityPanel', () => {
             lastChecked={''}
             openCreateCaseFlyout={jest.fn()}
             patterns={[]}
+            reportDataQualityIndexChecked={jest.fn()}
             setLastChecked={jest.fn()}
             baseTheme={DARK_THEME}
           />

@@ -45,6 +45,13 @@ export const RULE_SUMMARY_TEXT = i18n.translate(
   }
 );
 
+export const ALERT_REASON_DETAILS_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.alertReasonDetailsText',
+  {
+    defaultMessage: 'Show full reason',
+  }
+);
+
 /* About section */
 
 export const ABOUT_TITLE = i18n.translate(
@@ -64,6 +71,11 @@ export const RULE_DESCRIPTION_TITLE = i18n.translate(
 export const PREVIEW_RULE_DETAILS = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.previewRuleDetailsText',
   { defaultMessage: 'Preview rule details' }
+);
+
+export const PREVIEW_ALERT_REASON_DETAILS = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.previewAlertReasonDetailsText',
+  { defaultMessage: 'Preview alert reason' }
 );
 
 export const DOCUMENT_DESCRIPTION_TITLE = i18n.translate(
@@ -136,19 +148,6 @@ export const CORRELATIONS_TITLE = i18n.translate(
 export const PREVALENCE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.prevalenceTitle',
   { defaultMessage: 'Prevalence' }
-);
-
-export const TECHNICAL_PREVIEW_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.technicalPreviewTitle',
-  { defaultMessage: 'Technical Preview' }
-);
-
-export const TECHNICAL_PREVIEW_MESSAGE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.technicalPreviewMessage',
-  {
-    defaultMessage:
-      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-  }
 );
 
 export const THREAT_MATCH_DETECTED = i18n.translate(

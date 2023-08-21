@@ -17,6 +17,8 @@ export const errorCountParamsSchema = schema.object({
   environment: schema.string(),
   groupBy: schema.maybe(schema.arrayOf(schema.string())),
   errorGroupingKey: schema.maybe(schema.string()),
+  useKqlFilter: schema.maybe(schema.boolean()),
+  kqlFilter: schema.maybe(schema.string()),
 });
 
 export const transactionDurationParamsSchema = schema.object({
@@ -33,6 +35,8 @@ export const transactionDurationParamsSchema = schema.object({
   ]),
   environment: schema.string(),
   groupBy: schema.maybe(schema.arrayOf(schema.string())),
+  useKqlFilter: schema.maybe(schema.boolean()),
+  kqlFilter: schema.maybe(schema.string()),
 });
 
 export const anomalyParamsSchema = schema.object({
@@ -58,6 +62,8 @@ export const transactionErrorRateParamsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
   environment: schema.string(),
   groupBy: schema.maybe(schema.arrayOf(schema.string())),
+  useKqlFilter: schema.maybe(schema.boolean()),
+  kqlFilter: schema.maybe(schema.string()),
 });
 
 type ErrorCountParamsType = TypeOf<typeof errorCountParamsSchema>;

@@ -11,8 +11,9 @@ import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
 import { TestProviders } from '../../../common/mock';
 import { CorrelationsOverview } from './correlations_overview';
-import { LeftPanelInsightsTabPath, LeftPanelKey } from '../../left';
 import { useCorrelations } from '../../shared/hooks/use_correlations';
+import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
+import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import {
   INSIGHTS_CORRELATIONS_CONTENT_TEST_ID,
   INSIGHTS_CORRELATIONS_LOADING_TEST_ID,
@@ -154,7 +155,7 @@ describe('<CorrelationsOverview />', () => {
     getByTestId(INSIGHTS_CORRELATIONS_TITLE_LINK_TEST_ID).click();
     expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
       id: LeftPanelKey,
-      path: LeftPanelInsightsTabPath,
+      path: { tab: LeftPanelInsightsTab, subTab: CORRELATIONS_TAB_ID },
       params: {
         id: panelContextValue.eventId,
         indexName: panelContextValue.indexName,

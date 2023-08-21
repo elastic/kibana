@@ -207,6 +207,7 @@ export default ({ getService }: FtrProviderContext) => {
             risk_score_mapping: [],
             name: 'Simple Rule Query',
             query: 'user.name: root or user.name: admin',
+            investigation_fields: [],
             references: [],
             related_integrations: [],
             required_fields: [],

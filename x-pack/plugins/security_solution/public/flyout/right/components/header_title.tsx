@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { VFC } from 'react';
 import React, { memo } from 'react';
 import { NewChatById } from '@kbn/elastic-assistant';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
@@ -26,10 +26,17 @@ import { PreferenceFormattedDate } from '../../../common/components/formatted_da
 import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 import { ShareButton } from './share_button';
 
+export interface HeaderTitleProps {
+  /**
+   * If false, update the margin-top to compensate the fact that the expand detail button is not displayed
+   */
+  flyoutIsExpandable: boolean;
+}
+
 /**
  * Document details flyout right section header
  */
-export const HeaderTitle: FC = memo(() => {
+export const HeaderTitle: VFC<HeaderTitleProps> = memo(({ flyoutIsExpandable }) => {
   const { dataFormattedForFieldBrowser } = useRightPanelContext();
   const { isAlert, ruleName, timestamp, alertUrl } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
@@ -48,7 +55,7 @@ export const HeaderTitle: FC = memo(() => {
           justifyContent="flexEnd"
           gutterSize="none"
           css={css`
-            margin-top: -44px;
+            margin-top: ${flyoutIsExpandable ? '-44px' : '-28px'};
             padding: 0 25px;
           `}
         >

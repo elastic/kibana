@@ -20,5 +20,6 @@ export const mockContextValue: RightPanelContext = {
   browserFields: null,
   dataAsNestedObject: null,
   searchHit: undefined,
+  investigationFields: [],
   refetchFlyoutData: jest.fn(),
 };

@@ -24,8 +24,8 @@ paths:
     $ref: 'paths/api@data_views@data_view@{viewid}.yaml'
 #  '/api/data_views/data_view/{viewId}/fields':
 #    $ref: 'paths/api@data_views@data_view@{viewid}@fields.yaml'
-#  '/api/data_views/data_view/{viewId}/runtime_field':
-#    $ref: 'paths/api@data_views@data_view@{viewid}@runtime_field.yaml'
+  '/api/data_views/data_view/{viewId}/runtime_field':
+   $ref: 'paths/api@data_views@data_view@{viewid}@runtime_field.yaml'
   '/api/data_views/data_view/{viewId}/runtime_field/{fieldName}':
     $ref: 'paths/api@data_views@data_view@{viewid}@runtime_field@{fieldname}.yaml'
   '/api/data_views/default':

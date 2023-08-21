@@ -462,6 +462,36 @@ export const update = async (
   }
 };
 
+const trimCaseAttributes = (
+  updateCaseAttributes: Omit<CasePatchRequest, 'id' | 'version' | 'owner' | 'assignees'>
+) => {
+  let trimmedAttributes = { ...updateCaseAttributes };
+
+  if (updateCaseAttributes.title) {
+    trimmedAttributes = { ...trimmedAttributes, title: updateCaseAttributes.title.trim() };
+  }
+
+  if (updateCaseAttributes.description) {
+    trimmedAttributes = {
+      ...trimmedAttributes,
+      description: updateCaseAttributes.description.trim(),
+    };
+  }
+
+  if (updateCaseAttributes.category) {
+    trimmedAttributes = { ...trimmedAttributes, category: updateCaseAttributes.category.trim() };
+  }
+
+  if (updateCaseAttributes.tags) {
+    trimmedAttributes = {
+      ...trimmedAttributes,
+      tags: updateCaseAttributes.tags.map((tag: string) => tag.trim()),
+    };
+  }
+
+  return trimmedAttributes;
+};
+
 const createPatchCasesPayload = ({
   casesToUpdate,
   user,
@@ -478,19 +508,21 @@ const createPatchCasesPayload = ({
 
       const dedupedAssignees = dedupAssignees(assignees);
 
+      const trimmedCaseAttributes = trimCaseAttributes(updateCaseAttributes);
+
       return {
         caseId,
         originalCase,
         updatedAttributes: {
-          ...updateCaseAttributes,
+          ...trimmedCaseAttributes,
           ...(dedupedAssignees && { assignees: dedupedAssignees }),
           ...getClosedInfoForUpdate({
             user,
             closedDate: updatedDt,
-            status: updateCaseAttributes.status,
+            status: trimmedCaseAttributes.status,
           }),
           ...getDurationForUpdate({
-            status: updateCaseAttributes.status,
+            status: trimmedCaseAttributes.status,
             closedAt: updatedDt,
             createdAt: originalCase.attributes.created_at,
           }),

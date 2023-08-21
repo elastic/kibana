@@ -19,27 +19,43 @@ type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 export async function initDiagnosticsBundle({
   esHost,
   kbHost,
+  cloudId,
   username,
   password,
+  apiKey,
   start,
   end,
   kuery,
 }: {
-  esHost: string;
-  kbHost: string;
-  username: string;
-  password: string;
+  esHost?: string;
+  kbHost?: string;
+  cloudId?: string;
   start: number | undefined;
   end: number | undefined;
   kuery: string | undefined;
+  username?: string;
+  password?: string;
+  apiKey?: string;
 }) {
-  const esClient = new Client({ node: esHost, auth: { username, password } });
+  const auth = username && password ? { username, password } : undefined;
+  const apiKeyHeader = apiKey ? { Authorization: `ApiKey ${apiKey}` } : {};
+  const { kibanaHost } = parseCloudId(cloudId);
+
+  const esClient = new Client({
+    ...(esHost ? { node: esHost } : {}),
+    ...(cloudId ? { cloud: { id: cloudId } } : {}),
+    auth,
+    headers: { ...apiKeyHeader },
+  });
 
   const kibanaClient = axios.create({
-    baseURL: kbHost,
-    auth: { username, password },
+    baseURL: kbHost ?? kibanaHost,
+    auth,
+    // @ts-expect-error
+    headers: { 'kbn-xsrf': 'true', ...apiKeyHeader },
   });
   const apmIndices = await getApmIndices(kibanaClient);
+
   const bundle = await getDiagnosticsBundle({
     esClient,
     apmIndices,
@@ -98,4 +114,20 @@ async function getFleetPackageInfo(kibanaClient: AxiosInstance) {
 async function getKibanaVersion(kibanaClient: AxiosInstance) {
   const res = await kibanaClient.get('/api/status');
   return res.data.version.number;
+}
+
+function parseCloudId(cloudId?: string) {
+  if (!cloudId) {
+    return {};
+  }
+
+  const [instanceAlias, encodedString] = cloudId.split(':');
+  const decodedString = Buffer.from(encodedString, 'base64').toString('utf8');
+  const [hostname, esId, kbId] = decodedString.split('$');
+
+  return {
+    kibanaHost: `https://${kbId}.${hostname}`,
+    esHost: `https://${esId}.${hostname}`,
+    instanceAlias,
+  };
 }

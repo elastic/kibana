@@ -5,26 +5,39 @@
  * 2.0.
  */
 
-import { uniqueId } from 'lodash';
+import { merge, uniqueId } from 'lodash';
 import { MessageRole, Conversation, FunctionDefinition } from '../../common/types';
 import { ChatTimelineItem } from '../components/chat/chat_timeline';
-import { getSystemMessage } from '../service/get_system_message';
+import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
 
-type ChatItemBuildProps = Partial<ChatTimelineItem> & Pick<ChatTimelineItem, 'role'>;
+type ChatItemBuildProps = Omit<Partial<ChatTimelineItem>, 'actions' | 'display' | 'currentUser'> & {
+  actions?: Partial<ChatTimelineItem['actions']>;
+  display?: Partial<ChatTimelineItem['display']>;
+  currentUser?: Partial<ChatTimelineItem['currentUser']>;
+} & Pick<ChatTimelineItem, 'role'>;
 
 export function buildChatItem(params: ChatItemBuildProps): ChatTimelineItem {
-  return {
-    id: uniqueId(),
-    title: '',
-    canEdit: false,
-    canGiveFeedback: false,
-    canRegenerate: params.role === MessageRole.User,
-    currentUser: {
-      username: 'elastic',
+  return merge(
+    {
+      id: uniqueId(),
+      title: '',
+      actions: {
+        canCopy: true,
+        canEdit: false,
+        canGiveFeedback: false,
+        canRegenerate: params.role === MessageRole.Assistant,
+      },
+      display: {
+        collapsed: false,
+        hide: false,
+      },
+      currentUser: {
+        username: 'elastic',
+      },
+      loading: false,
     },
-    loading: false,
-    ...params,
-  };
+    params
+  );
 }
 
 export function buildSystemChatItem(params?: Omit<ChatItemBuildProps, 'role'>) {
@@ -38,7 +51,12 @@ export function buildChatInitItem() {
   return buildChatItem({
     role: MessageRole.User,
     title: 'started a conversation',
-    canRegenerate: false,
+    actions: {
+      canEdit: false,
+      canCopy: true,
+      canGiveFeedback: false,
+      canRegenerate: false,
+    },
   });
 }
 
@@ -46,7 +64,12 @@ export function buildUserChatItem(params?: Omit<ChatItemBuildProps, 'role'>) {
   return buildChatItem({
     role: MessageRole.User,
     content: "What's a function?",
-    canEdit: true,
+    actions: {
+      canCopy: true,
+      canEdit: true,
+      canGiveFeedback: false,
+      canRegenerate: true,
+    },
     ...params,
   });
 }
@@ -56,8 +79,12 @@ export function buildAssistantChatItem(params?: Omit<ChatItemBuildProps, 'role'>
     role: MessageRole.Assistant,
     content: `In computer programming and mathematics, a function is a fundamental concept that represents a relationship between input values and output values. It takes one or more input values (also known as arguments or parameters) and processes them to produce a result, which is the output of the function. The input values are passed to the function, and the function performs a specific set of operations or calculations on those inputs to produce the desired output.
     A function is often defined with a name, which serves as an identifier to call and use the function in the code. It can be thought of as a reusable block of code that can be executed whenever needed, and it helps in organizing code and making it more modular and maintainable.`,
-    canRegenerate: true,
-    canGiveFeedback: true,
+    actions: {
+      canCopy: true,
+      canEdit: false,
+      canRegenerate: true,
+      canGiveFeedback: true,
+    },
     ...params,
   });
 }
@@ -92,7 +119,7 @@ export function buildConversation(params?: Partial<Conversation>) {
       title: '',
       last_updated: '',
     },
-    messages: [getSystemMessage()],
+    messages: [getAssistantSetupMessage({ contexts: [] })],
     labels: {},
     numeric_labels: {},
     namespace: '',
@@ -106,6 +133,7 @@ export function buildFunction(): FunctionDefinition {
       name: 'elasticsearch',
       contexts: ['core'],
       description: 'Call Elasticsearch APIs on behalf of the user',
+      descriptionForUser: 'Call Elasticsearch APIs on behalf of the user',
       parameters: {
         type: 'object',
         properties: {
@@ -135,6 +163,7 @@ export function buildFunctionServiceSummary(): FunctionDefinition {
       contexts: ['core'],
       description:
         'Gets a summary of a single service, including: the language, service version, deployments, infrastructure, alerting, etc. ',
+      descriptionForUser: 'Get a summary for a single service.',
       parameters: {
         type: 'object',
       },

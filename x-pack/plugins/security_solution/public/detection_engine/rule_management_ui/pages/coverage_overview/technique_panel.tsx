@@ -11,7 +11,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
 import { coverageOverviewPanelWidth } from './constants';
 import { getCardBackgroundColor } from './helpers';
-import { CoverageOverviewPanelMetadata } from './shared_components/panel_metadata';
+import { CoverageOverviewPanelRuleStats } from './shared_components/panel_rule_stats';
 import * as i18n from './translations';
 
 export interface CoverageOverviewMitreTechniquePanelProps {
@@ -80,7 +80,7 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
         </EuiFlexItem>
         {isExpanded && (
           <EuiFlexItem grow={false}>
-            <CoverageOverviewPanelMetadata
+            <CoverageOverviewPanelRuleStats
               enabledRules={technique.enabledRules.length}
               disabledRules={technique.disabledRules.length}
             />

@@ -9,8 +9,8 @@ import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import React from 'react';
-import type { DropResult, ResponderProvided } from 'react-beautiful-dnd';
-import { DragDropContext } from 'react-beautiful-dnd';
+import type { DropResult, ResponderProvided } from '@hello-pangea/dnd';
+import { DragDropContext } from '@hello-pangea/dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import type { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';

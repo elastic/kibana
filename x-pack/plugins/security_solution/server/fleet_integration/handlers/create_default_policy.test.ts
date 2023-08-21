@@ -66,7 +66,7 @@ describe('Create Default Policy tests ', () => {
       const disabledButSupportedBehaviorProtection = {
         mode: ProtectionModes.off,
         supported: true,
-        reputation_service: false,
+        reputation_service: true,
       };
       expect(policy.windows.behavior_protection).toEqual(disabledButSupportedBehaviorProtection);
       expect(policy.mac.memory_protection).toEqual(disabledButSupported);
@@ -157,7 +157,7 @@ describe('Create Default Policy tests ', () => {
       const disabledButSupportedBehaviorProtection = {
         mode: ProtectionModes.off,
         supported: true,
-        reputation_service: false,
+        reputation_service: true,
       };
       expect(policy.windows.behavior_protection).toEqual(disabledButSupportedBehaviorProtection);
       expect(policy.mac.memory_protection).toEqual(disabledButSupported);
@@ -201,10 +201,12 @@ describe('Create Default Policy tests ', () => {
     it('Should return the default config when preset is EDR Complete', async () => {
       const config = createEndpointConfig({ preset: 'EDRComplete' });
       const policy = await createDefaultPolicyCallback(config);
-      const defaultPolicy = policyFactory();
+      const licenseType = 'platinum';
+      const isCloud = true;
+      const defaultPolicy = policyFactory(licenseType, isCloud);
       // update defaultPolicy w/ platinum license & cloud info
-      defaultPolicy.meta.license = 'platinum';
-      defaultPolicy.meta.cloud = true;
+      defaultPolicy.meta.license = licenseType;
+      defaultPolicy.meta.cloud = isCloud;
       expect(policy).toMatchObject(defaultPolicy);
     });
 

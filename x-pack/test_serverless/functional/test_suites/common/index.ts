@@ -14,5 +14,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
 
     // platform security
     loadTestFile(require.resolve('./security/navigation/avatar_menu'));
+
+    // Management
+    loadTestFile(require.resolve('./index_management'));
   });
 }
