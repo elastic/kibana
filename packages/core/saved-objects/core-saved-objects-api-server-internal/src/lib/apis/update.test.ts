@@ -8,30 +8,23 @@
 
 /* eslint-disable @typescript-eslint/no-shadow */
 
-import {
-  pointInTimeFinderMock,
-  mockGetCurrentTime,
-  mockPreflightCheckForCreate,
-  mockGetSearchDsl,
-} from './repository.test.mock';
+import { mockGetCurrentTime, mockPreflightCheckForCreate } from '../repository.test.mock';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 import {
   type SavedObjectUnsanitizedDoc,
   type SavedObjectReference,
   SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectsRepository } from './repository';
+import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   SavedObjectsSerializer,
   encodeHitVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { kibanaMigratorMock } from '../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-
+import { kibanaMigratorMock } from '../../mocks';
 import {
   NAMESPACE_AGNOSTIC_TYPE,
   MULTI_NAMESPACE_ISOLATED_TYPE,
@@ -50,7 +43,7 @@ import {
   createConflictErrorPayload,
   createGenericNotFoundErrorPayload,
   updateBWCSuccess,
-} from '../test_helpers/repository.test.common';
+} from '../../test_helpers/repository.test.common';
 
 describe('SavedObjectsRepository', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -75,7 +68,6 @@ describe('SavedObjectsRepository', () => {
   };
 
   beforeEach(() => {
-    pointInTimeFinderMock.mockClear();
     client = elasticsearchClientMock.createElasticsearchClient();
     migrator = kibanaMigratorMock.create();
     documentMigrator.prepareMigrations();
@@ -102,7 +94,6 @@ describe('SavedObjectsRepository', () => {
     });
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
-    mockGetSearchDsl.mockClear();
   });
   // ZDT IMPLEMENTATIONS
 
