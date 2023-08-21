@@ -26,7 +26,7 @@ export async function loadProfilingData({
   });
 
   const profilingData = fs.readFileSync(
-    `${esArchiversPath}/profiling-data-anonymized.json`,
+    `${esArchiversPath}/profiling_data_anonymized.json`,
     'utf8'
   );
 
