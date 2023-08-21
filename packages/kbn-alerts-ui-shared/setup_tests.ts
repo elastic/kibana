@@ -6,9 +6,5 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-alerts-ui-shared'],
-  setupFilesAfterEnv: ['<rootDir>/packages/kbn-cases-components/setup_tests.ts'],
-};
+// eslint-disable-next-line import/no-extraneous-dependencies
+import '@testing-library/jest-dom';

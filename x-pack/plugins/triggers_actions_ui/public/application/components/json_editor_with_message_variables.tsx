@@ -11,7 +11,6 @@ import { EuiFormRow, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { monaco, XJsonLang } from '@kbn/monaco';
 
-import './add_message_variables.scss';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 

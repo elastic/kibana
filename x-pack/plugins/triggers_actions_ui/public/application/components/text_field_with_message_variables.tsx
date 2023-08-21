@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
-import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from '@kbn/alerts-ui-shared';
 import { templateActionVariable } from '../lib';
