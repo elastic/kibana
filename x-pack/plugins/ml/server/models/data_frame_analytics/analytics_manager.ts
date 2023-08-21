@@ -38,6 +38,7 @@ import {
 } from './types';
 import type { MlClient } from '../../lib/ml_client';
 import { MlFeatures } from '../../types';
+import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../routes/trained_models';
 
 export class AnalyticsManager {
   private _trainedModels: estypes.MlTrainedModelConfig[] = [];
@@ -52,7 +53,9 @@ export class AnalyticsManager {
 
   private async initData() {
     const [models, jobs] = await Promise.all([
-      this._enabledFeatures.nlp ? this._mlClient.getTrainedModels() : { trained_model_configs: [] },
+      this._enabledFeatures.nlp
+        ? this._mlClient.getTrainedModels({ size: DEFAULT_TRAINED_MODELS_PAGE_SIZE })
+        : { trained_model_configs: [] },
       this._enabledFeatures.dfa
         ? this._mlClient.getDataFrameAnalytics({ size: 1000 })
         : { data_frame_analytics: [] },
