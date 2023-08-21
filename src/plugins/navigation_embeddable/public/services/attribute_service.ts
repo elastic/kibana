@@ -73,7 +73,6 @@ export function getNavigationEmbeddableAttributeService(): NavigationEmbeddableA
       } = await navigationEmbeddableClient.get(savedObjectId);
       if (savedObject.error) throw savedObject.error;
 
-      // TODO inject references
       const { attributes } = injectReferences(savedObject);
       return {
         attributes,
