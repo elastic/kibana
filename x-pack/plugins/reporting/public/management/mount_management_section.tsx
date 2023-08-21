@@ -25,7 +25,7 @@ export async function mountManagementSection(
   config: ClientConfigType,
   apiClient: ReportingAPIClient,
   urlService: SharePluginSetup['url'],
-  params: ManagementAppMountParams,
+  params: ManagementAppMountParams
 ) {
   render(
     <I18nProvider>

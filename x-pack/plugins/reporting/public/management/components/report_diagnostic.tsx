@@ -60,7 +60,8 @@ export const ReportDiagnostic = ({ apiClient, clientConfig }: Props) => {
       ...s,
     });
   const { isBusy, chromeStatus, isFlyoutVisible } = state;
-  const configAllowsImageReports =  clientConfig.export_types.pdf.enabled || clientConfig.export_types.png.enabled
+  const configAllowsImageReports =
+    clientConfig.export_types.pdf.enabled || clientConfig.export_types.png.enabled;
 
   const closeFlyout = () => setState({ ...initialState, isFlyoutVisible: false });
   const showFlyout = () => setState({ isFlyoutVisible: true });

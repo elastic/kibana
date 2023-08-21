@@ -192,7 +192,7 @@ export class ReportingPublicPlugin
           this.config,
           apiClient,
           share.url,
-          params,
+          params
         );
 
         return () => {

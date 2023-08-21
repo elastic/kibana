@@ -81,8 +81,15 @@ class ReportListingUi extends Component<Props, State> {
   }
 
   public render() {
-    const { apiClient, toasts, ilmPolicyContextValue, urlService, navigateToUrl, capabilities, config } =
-      this.props;
+    const {
+      apiClient,
+      toasts,
+      ilmPolicyContextValue,
+      urlService,
+      navigateToUrl,
+      capabilities,
+      config,
+    } = this.props;
     const ilmLocator = urlService.locators.get('ILM_LOCATOR_ID');
     const hasIlmPolicy = ilmPolicyContextValue.status !== 'policy-not-found';
     const showIlmPolicyLink = Boolean(ilmLocator && hasIlmPolicy);
@@ -121,10 +128,7 @@ class ReportListingUi extends Component<Props, State> {
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <ReportDiagnostic
-              clientConfig={config}
-              apiClient={apiClient}
-            />
+            <ReportDiagnostic clientConfig={config} apiClient={apiClient} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </>
@@ -503,7 +507,10 @@ class ReportListingUi extends Component<Props, State> {
 }
 
 export const ReportListing = (
-  props: Omit<Props, 'ilmPolicyContextValue' | 'intl' | 'apiClient' | 'capabilities' | 'configAllowsImages'>
+  props: Omit<
+    Props,
+    'ilmPolicyContextValue' | 'intl' | 'apiClient' | 'capabilities' | 'configAllowsImages'
+  >
 ) => {
   const ilmPolicyStatusValue = useIlmPolicyStatus();
   const { apiClient } = useInternalApiClient();
