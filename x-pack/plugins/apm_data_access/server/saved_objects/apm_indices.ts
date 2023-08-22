@@ -8,9 +8,14 @@
 import { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { updateApmOssIndexPaths } from './migrations/update_apm_oss_index_paths';
 
-export interface APMIndices {
+export const APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE = 'apm-indices';
+export const APM_INDEX_SETTINGS_SAVED_OBJECT_ID = 'apm-indices';
+
+export interface APMIndicesSavedObjectBody {
   apmIndices?: {
     error?: string;
     onboarding?: string;
@@ -21,8 +26,8 @@ export interface APMIndices {
   isSpaceAware?: boolean;
 }
 
-export const apmIndices: SavedObjectsType = {
-  name: 'apm-indices',
+export const apmIndicesSavedObjectDefinition: SavedObjectsType = {
+  name: APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
   hidden: false,
   namespaceType: 'single',
   mappings: {
@@ -33,7 +38,7 @@ export const apmIndices: SavedObjectsType = {
     importableAndExportable: true,
     icon: 'apmApp',
     getTitle: () =>
-      i18n.translate('xpack.apm.apmSettings.index', {
+      i18n.translate('xpack.apmDataAccess.apmSettings.index', {
         defaultMessage: 'APM Settings - Index',
       }),
   },
@@ -67,3 +72,20 @@ export const apmIndices: SavedObjectsType = {
     },
   },
 };
+
+export async function getApmIndicesSavedObject(savedObjectsClient: SavedObjectsClientContract) {
+  try {
+    const apmIndicesSavedObject = await savedObjectsClient.get<Partial<APMIndicesSavedObjectBody>>(
+      APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
+      APM_INDEX_SETTINGS_SAVED_OBJECT_ID
+    );
+    return apmIndicesSavedObject.attributes.apmIndices;
+  } catch (error) {
+    // swallow error if saved object does not exist
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return {};
+    }
+
+    throw error;
+  }
+}
