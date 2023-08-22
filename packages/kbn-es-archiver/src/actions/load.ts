@@ -38,6 +38,11 @@ const pipeline = (...streams: Readable[]) =>
     source.once('error', (error) => dest.destroy(error)).pipe(dest as any)
   );
 
+const logLoad = (generalName: string) => (log: ToolingLog) => (mappingsOrArchiveName: string) => {
+  log.info('[%s] Loading %j', generalName, mappingsOrArchiveName);
+  return mappingsOrArchiveName;
+};
+
 export async function loadAction({
   inputDir,
   skipExisting,
@@ -55,21 +60,21 @@ export async function loadAction({
   log: ToolingLog;
   kbnClient: KbnClient;
 }) {
-  const name = relative(REPO_ROOT, inputDir);
-  const stats = createStats(name, log);
-  const files = prioritizeMappings(await readDirectory(inputDir));
+  const archiveGeneralName = relative(REPO_ROOT, inputDir);
+  const stats = createStats(archiveGeneralName, log);
+  const mappingsFileAndArchive = prioritizeMappings(await readDirectory(inputDir));
   const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
 
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
   // across archives and properly skip docs from existing indexes
   const recordStream = concatStreamProviders(
-    files.map((filename) => () => {
-      log.info('[%s] Loading %j', name, filename);
+    mappingsFileAndArchive.map((mappingsOrArchiveName) => () => {
+      logLoad(archiveGeneralName)(log)(mappingsOrArchiveName);
 
       return pipeline(
-        createReadStream(resolve(inputDir, filename)),
-        ...createParseArchiveStreams({ gzip: isGzip(filename) })
+        createReadStream(resolve(inputDir, mappingsOrArchiveName)),
+        ...createParseArchiveStreams({ gzip: isGzip(mappingsOrArchiveName) })
       );
     }),
     { objectMode: true }
@@ -90,7 +95,7 @@ export async function loadAction({
   const indicesWithDocs: string[] = [];
   for (const [index, { docs }] of Object.entries(result)) {
     if (docs && docs.indexed > 0) {
-      log.info('[%s] Indexed %d docs into %j', name, docs.indexed, index);
+      log.info('[%s] Indexed %d docs into %j', archiveGeneralName, docs.indexed, index);
       indicesWithDocs.push(index);
     }
   }
@@ -108,12 +113,15 @@ export async function loadAction({
   // If we affected saved objects indices, we need to ensure they are migrated...
   if (Object.keys(result).some((k) => k.startsWith(MAIN_SAVED_OBJECT_INDEX))) {
     await migrateSavedObjectIndices(kbnClient);
-    log.debug('[%s] Migrated Kibana index after loading Kibana data', name);
+    log.debug('[%s] Migrated Kibana index after loading Kibana data', archiveGeneralName);
 
     if (kibanaPluginIds.includes('spaces')) {
       // WARNING affected by #104081. Assumes 'spaces' saved objects are stored in MAIN_SAVED_OBJECT_INDEX
       await createDefaultSpace({ client, index: MAIN_SAVED_OBJECT_INDEX });
-      log.debug(`[%s] Ensured that default space exists in ${MAIN_SAVED_OBJECT_INDEX}`, name);
+      log.debug(
+        `[%s] Ensured that default space exists in ${MAIN_SAVED_OBJECT_INDEX}`,
+        archiveGeneralName
+      );
     }
   }
 

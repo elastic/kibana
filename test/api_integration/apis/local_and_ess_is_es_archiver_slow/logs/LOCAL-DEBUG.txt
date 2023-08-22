@@ -1,0 +1,49 @@
+"λλλ Init Logging @ Aug 22, 2023, 2:45 PM"
+λ os.arch -> arm64
+λ os.platform -> darwin
+λ os.totalmem -> 34.4 GB
+λ os.freemem -> 126.1 MB
+λ CPU Count -> 10
+{
+  "archive": {
+    "name": "x-pack/test/functional/es_archives/logstash_functional",
+    "beforeLoadTimeStamp": "14:45:681",
+    "afterLoadTimeStamp": "14:45:818",
+    "diff": {
+      "milliseconds": 5137
+    }
+  }
+}
+{
+  "archive": {
+    "name": "test/functional/fixtures/es_archiver/many_fields",
+    "beforeLoadTimeStamp": "14:45:238",
+    "afterLoadTimeStamp": "14:45:291",
+    "diff": {
+      "milliseconds": 1053
+    }
+  }
+}
+{
+  "archive": {
+    "name": "x-pack/test/functional/es_archives/ml/farequote",
+    "beforeLoadTimeStamp": "14:45:585",
+    "afterLoadTimeStamp": "14:45:640",
+    "diff": {
+      "milliseconds": 10055
+    }
+  }
+}
+λλλ FINAL METRICS @ Aug 22, 2023, 2:46 PM
+
+x-pack/test/functional/es_archives/logstash_functional
+| LOCAL avg / min / max | 5.1 / 5.1 / 5.1 | Cell |
+
+
+test/functional/fixtures/es_archiver/many_fields
+| LOCAL avg / min / max | 1.1 / 1.1 / 1.1 | Cell |
+
+
+x-pack/test/functional/es_archives/ml/farequote
+| LOCAL avg / min / max | 10.1 / 10.1 / 10.1 | Cell |
+
