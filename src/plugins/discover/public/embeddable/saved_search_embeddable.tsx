@@ -770,4 +770,8 @@ export class SavedSearchEmbeddable
     this.subscription?.unsubscribe();
     this.abortController?.abort();
   }
+
+  public hasTimeRange() {
+    return this.getTimeRange() !== undefined;
+  }
 }
