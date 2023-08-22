@@ -24,44 +24,40 @@ export const CORRELATIONS_TAB_ID = 'correlations-details';
  * Correlations displayed in the document details expandable flyout left section under the Insights tab
  */
 export const CorrelationsDetails: React.FC = () => {
-  const { dataFormattedForFieldBrowser, dataAsNestedObject, eventId, scopeId } =
+  const { dataAsNestedObject, dataFormattedForFieldBrowser, eventId, getFieldsData, scopeId } =
     useLeftPanelContext();
 
-  const showAlertsByAncestry = useShowRelatedAlertsByAncestry({
-    dataFormattedForFieldBrowser,
+  const {
+    show: showAlertsByAncestry,
+    documentId,
+    indices,
+  } = useShowRelatedAlertsByAncestry({
+    getFieldsData,
     dataAsNestedObject,
-  });
-  const showAlertsBySession = useShowRelatedAlertsBySession({ dataFormattedForFieldBrowser });
-  const showSameSourceAlerts = useShowRelatedAlertsBySameSourceEvent({
     dataFormattedForFieldBrowser,
   });
+  const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
+    getFieldsData,
+  });
+  const { show: showAlertsBySession, entityId } = useShowRelatedAlertsBySession({ getFieldsData });
   const showCases = useShowRelatedCases();
 
   return (
     <>
-      {showAlertsByAncestry && (
-        <RelatedAlertsByAncestry
-          dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-          scopeId={scopeId}
-        />
+      {showAlertsByAncestry && documentId && indices && (
+        <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
       )}
 
       <EuiSpacer />
 
-      {showSameSourceAlerts && (
-        <RelatedAlertsBySameSourceEvent
-          dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-          scopeId={scopeId}
-        />
+      {showSameSourceAlerts && originalEventId && (
+        <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
       )}
 
       <EuiSpacer />
 
-      {showAlertsBySession && (
-        <RelatedAlertsBySession
-          dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-          scopeId={scopeId}
-        />
+      {showAlertsBySession && entityId && (
+        <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
       )}
 
       <EuiSpacer />

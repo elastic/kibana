@@ -6,23 +6,16 @@
  */
 
 import React from 'react';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { CORRELATIONS_SAME_SOURCE_ALERTS } from '../../shared/translations';
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
-import {
-  CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID,
-  CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID,
-} from './test_ids';
-import { AlertsTable } from './correlations_details_alerts_table';
-import { ExpandablePanel } from '../../shared/components/expandable_panel';
-
-const ICON = 'warning';
+import { CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID } from './test_ids';
+import { CorrelationsDetailsAlertsTable } from './correlations_details_alerts_table';
 
 export interface RelatedAlertsBySameSourceEventProps {
   /**
-   * An array of field objects with category and value
+   * Value of the kibana.alert.original_event.id field
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  originalEventId: string;
   /**
    * Maintain backwards compatibility // TODO remove when possible
    */
@@ -30,14 +23,14 @@ export interface RelatedAlertsBySameSourceEventProps {
 }
 
 /**
- *
+ * Show related alerts by same source event in an expandable panel with a table
  */
 export const RelatedAlertsBySameSourceEvent: React.VFC<RelatedAlertsBySameSourceEventProps> = ({
-  dataFormattedForFieldBrowser,
+  originalEventId,
   scopeId,
 }) => {
   const { loading, error, data, dataCount } = useFetchRelatedAlertsBySameSourceEvent({
-    dataFormattedForFieldBrowser,
+    originalEventId,
     scopeId,
   });
   const title = `${dataCount} ${CORRELATIONS_SAME_SOURCE_ALERTS(dataCount)}`;
@@ -47,24 +40,12 @@ export const RelatedAlertsBySameSourceEvent: React.VFC<RelatedAlertsBySameSource
   }
 
   return (
-    <ExpandablePanel
-      header={{
-        title,
-        iconType: ICON,
-      }}
-      content={{ error }}
-      expand={{
-        expandable: true,
-        expandedOnFirstRender: true,
-      }}
+    <CorrelationsDetailsAlertsTable
+      title={title}
+      loading={loading}
+      alertIds={data}
       data-test-subj={CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID}
-    >
-      <AlertsTable
-        loading={loading}
-        alertIds={data}
-        data-test-subj={CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID}
-      />
-    </ExpandablePanel>
+    />
   );
 };
 

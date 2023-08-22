@@ -6,23 +6,20 @@
  */
 
 import React from 'react';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { CorrelationsDetailsAlertsTable } from './correlations_details_alerts_table';
 import { CORRELATIONS_ANCESTRY_ALERTS } from '../../shared/translations';
-import { AlertsTable } from './correlations_details_alerts_table';
 import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
-import {
-  CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID,
-  CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID,
-} from './test_ids';
-import { ExpandablePanel } from '../../shared/components/expandable_panel';
-
-const ICON = 'warning';
+import { CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID } from './test_ids';
 
 export interface RelatedAlertsByAncestryProps {
   /**
-   * An array of field objects with category and value
+   * Value of the kibana.alert.ancestors.id field
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  documentId: string;
+  /**
+   * Values of the kibana.alert.rule.parameters.index field
+   */
+  indices: string[];
   /**
    * Maintain backwards compatibility // TODO remove when possible
    */
@@ -30,14 +27,16 @@ export interface RelatedAlertsByAncestryProps {
 }
 
 /**
- *
+ * Show related alerts by ancestry in an expandable panel with a table
  */
 export const RelatedAlertsByAncestry: React.VFC<RelatedAlertsByAncestryProps> = ({
-  dataFormattedForFieldBrowser,
+  documentId,
+  indices,
   scopeId,
 }) => {
   const { loading, error, data, dataCount } = useFetchRelatedAlertsByAncestry({
-    dataFormattedForFieldBrowser,
+    documentId,
+    indices,
     scopeId,
   });
   const title = `${dataCount} ${CORRELATIONS_ANCESTRY_ALERTS(dataCount)}`;
@@ -47,24 +46,12 @@ export const RelatedAlertsByAncestry: React.VFC<RelatedAlertsByAncestryProps> = 
   }
 
   return (
-    <ExpandablePanel
-      header={{
-        title,
-        iconType: ICON,
-      }}
-      content={{ error }}
-      expand={{
-        expandable: true,
-        expandedOnFirstRender: true,
-      }}
+    <CorrelationsDetailsAlertsTable
+      title={title}
+      loading={loading}
+      alertIds={data}
       data-test-subj={CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID}
-    >
-      <AlertsTable
-        loading={loading}
-        alertIds={data}
-        data-test-subj={CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID}
-      />
-    </ExpandablePanel>
+    />
   );
 };
 

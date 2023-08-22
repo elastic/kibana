@@ -15,9 +15,13 @@ import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_sh
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
 import {
+  CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID,
+  CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID,
+  CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID,
+  CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID,
 } from './test_ids';
 import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
@@ -55,9 +59,15 @@ describe('CorrelationsDetails', () => {
   });
 
   it('renders all sections', () => {
-    jest.mocked(useShowRelatedAlertsByAncestry).mockReturnValue(true);
-    jest.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue(true);
-    jest.mocked(useShowRelatedAlertsBySession).mockReturnValue(true);
+    jest
+      .mocked(useShowRelatedAlertsByAncestry)
+      .mockReturnValue({ show: true, documentId: 'documentId', indices: ['index1'] });
+    jest
+      .mocked(useShowRelatedAlertsBySameSourceEvent)
+      .mockReturnValue({ show: true, originalEventId: 'originalEventId' });
+    jest
+      .mocked(useShowRelatedAlertsBySession)
+      .mockReturnValue({ show: true, entityId: 'entityId' });
     jest.mocked(useShowRelatedCases).mockReturnValue(true);
 
     (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
@@ -87,16 +97,36 @@ describe('CorrelationsDetails', () => {
 
     const { getByTestId } = renderCorrelationDetails();
 
-    expect(getByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render no section', () => {
-    jest.mocked(useShowRelatedAlertsByAncestry).mockReturnValue(false);
-    jest.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue(false);
-    jest.mocked(useShowRelatedAlertsBySession).mockReturnValue(false);
+  it('should render no section if show values are false', () => {
+    jest
+      .mocked(useShowRelatedAlertsByAncestry)
+      .mockReturnValue({ show: false, documentId: 'documentId', indices: ['index1'] });
+    jest
+      .mocked(useShowRelatedAlertsBySameSourceEvent)
+      .mockReturnValue({ show: false, originalEventId: 'originalEventId' });
+    jest
+      .mocked(useShowRelatedAlertsBySession)
+      .mockReturnValue({ show: false, entityId: 'entityId' });
+    jest.mocked(useShowRelatedCases).mockReturnValue(false);
+
+    const { queryByTestId } = renderCorrelationDetails();
+
+    expect(queryByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should render no section if values are null', () => {
+    jest.mocked(useShowRelatedAlertsByAncestry).mockReturnValue({ show: true });
+    jest.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue({ show: true });
+    jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: true });
     jest.mocked(useShowRelatedCases).mockReturnValue(false);
 
     const { queryByTestId } = renderCorrelationDetails();

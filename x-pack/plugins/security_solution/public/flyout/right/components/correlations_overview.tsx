@@ -29,8 +29,14 @@ import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details'
  * and the SummaryPanel component for data rendering.
  */
 export const CorrelationsOverview: React.FC = () => {
-  const { eventId, indexName, dataAsNestedObject, dataFormattedForFieldBrowser, scopeId } =
-    useRightPanelContext();
+  const {
+    dataAsNestedObject,
+    dataFormattedForFieldBrowser,
+    eventId,
+    indexName,
+    getFieldsData,
+    scopeId,
+  } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutContext();
 
   const goToCorrelationsTab = useCallback(() => {
@@ -48,15 +54,20 @@ export const CorrelationsOverview: React.FC = () => {
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
 
-  const showCases = useShowRelatedCases();
-  const showAlertsByAncestry = useShowRelatedAlertsByAncestry({
-    dataFormattedForFieldBrowser,
+  const {
+    show: showAlertsByAncestry,
+    documentId,
+    indices,
+  } = useShowRelatedAlertsByAncestry({
+    getFieldsData,
     dataAsNestedObject,
-  });
-  const showSameSourceAlerts = useShowRelatedAlertsBySameSourceEvent({
     dataFormattedForFieldBrowser,
   });
-  const showAlertsBySession = useShowRelatedAlertsBySession({ dataFormattedForFieldBrowser });
+  const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
+    getFieldsData,
+  });
+  const { show: showAlertsBySession, entityId } = useShowRelatedAlertsBySession({ getFieldsData });
+  const showCases = useShowRelatedCases();
 
   return (
     <ExpandablePanel
@@ -68,23 +79,14 @@ export const CorrelationsOverview: React.FC = () => {
       data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID}
     >
       <EuiFlexGroup direction="column" gutterSize="none">
-        {showAlertsByAncestry && (
-          <RelatedAlertsByAncestry
-            dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-            scopeId={scopeId}
-          />
+        {showAlertsByAncestry && documentId && indices && (
+          <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
         )}
-        {showSameSourceAlerts && (
-          <RelatedAlertsBySameSourceEvent
-            dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-            scopeId={scopeId}
-          />
+        {showSameSourceAlerts && originalEventId && (
+          <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
         )}
-        {showAlertsBySession && (
-          <RelatedAlertsBySession
-            dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-            scopeId={scopeId}
-          />
+        {showAlertsBySession && entityId && (
+          <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
         )}
         {showCases && <RelatedCases eventId={eventId} />}
       </EuiFlexGroup>

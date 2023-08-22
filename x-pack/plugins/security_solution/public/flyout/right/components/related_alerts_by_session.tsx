@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
 import { CORRELATIONS_SESSION_ALERTS } from '../../shared/translations';
 import { InsightsSummaryRow } from './insights_summary_row';
@@ -16,9 +15,9 @@ const ICON = 'warning';
 
 export interface RelatedAlertsBySessionProps {
   /**
-   * An array of field objects with category and value
+   * Value of the process.entry_leader.entity_id field
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  entityId: string;
   /**
    * Maintain backwards compatibility // TODO remove when possible
    */
@@ -26,14 +25,14 @@ export interface RelatedAlertsBySessionProps {
 }
 
 /**
- *
+ * Show related alerts by session in summary row
  */
 export const RelatedAlertsBySession: React.VFC<RelatedAlertsBySessionProps> = ({
-  dataFormattedForFieldBrowser,
+  entityId,
   scopeId,
 }) => {
   const { loading, error, dataCount } = useFetchRelatedAlertsBySession({
-    dataFormattedForFieldBrowser,
+    entityId,
     scopeId,
   });
   const text = CORRELATIONS_SESSION_ALERTS(dataCount);

@@ -13,7 +13,6 @@ import {
 } from './test_ids';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_context';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
@@ -24,7 +23,7 @@ import {
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_session');
 jest.mock('../hooks/use_paginated_alerts');
 
-const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
+const entityId = 'entityId';
 const scopeId = 'scopeId';
 
 const TOGGLE_ICON = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(
@@ -73,10 +72,7 @@ describe('<RelatedAlertsBySession />', () => {
     });
 
     const { getByTestId } = render(
-      <RelatedAlertsBySession
-        dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-        scopeId={scopeId}
-      />
+      <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
     );
     expect(getByTestId(TOGGLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_ICON)).toBeInTheDocument();
@@ -90,12 +86,7 @@ describe('<RelatedAlertsBySession />', () => {
       error: true,
     });
 
-    const { container } = render(
-      <RelatedAlertsBySession
-        dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-        scopeId={scopeId}
-      />
-    );
+    const { container } = render(<RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />);
     expect(container).toBeEmptyDOMElement();
   });
 });

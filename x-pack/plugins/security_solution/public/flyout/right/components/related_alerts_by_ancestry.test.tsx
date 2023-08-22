@@ -13,13 +13,13 @@ import {
   SUMMARY_ROW_LOADING_TEST_ID,
   INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID,
 } from './test_ids';
-import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
 import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
 
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_ancestry');
 
-const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
+const documentId = 'documentId';
+const indices = ['indices'];
 const scopeId = 'scopeId';
 
 const ICON_TEST_ID = SUMMARY_ROW_ICON_TEST_ID(
@@ -41,10 +41,7 @@ describe('<RelatedAlertsByAncestry />', () => {
     });
 
     const { getByTestId } = render(
-      <RelatedAlertsByAncestry
-        dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-        scopeId={scopeId}
-      />
+      <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
     );
     expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
     const value = getByTestId(VALUE_TEST_ID);
@@ -61,10 +58,7 @@ describe('<RelatedAlertsByAncestry />', () => {
     });
 
     const { getByTestId } = render(
-      <RelatedAlertsByAncestry
-        dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-        scopeId={scopeId}
-      />
+      <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
     );
     expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
     const value = getByTestId(VALUE_TEST_ID);
@@ -79,10 +73,7 @@ describe('<RelatedAlertsByAncestry />', () => {
     });
 
     const { getByTestId } = render(
-      <RelatedAlertsByAncestry
-        dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-        scopeId={scopeId}
-      />
+      <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
     );
     expect(getByTestId(LOADING_TEST_ID)).toBeInTheDocument();
   });
@@ -94,10 +85,7 @@ describe('<RelatedAlertsByAncestry />', () => {
     });
 
     const { container } = render(
-      <RelatedAlertsByAncestry
-        dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-        scopeId={scopeId}
-      />
+      <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
     );
     expect(container).toBeEmptyDOMElement();
   });

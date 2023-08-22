@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
 import { CORRELATIONS_SAME_SOURCE_ALERTS } from '../../shared/translations';
 import { InsightsSummaryRow } from './insights_summary_row';
@@ -16,9 +15,9 @@ const ICON = 'warning';
 
 export interface RelatedAlertsBySameSourceEventProps {
   /**
-   * An array of field objects with category and value
+   * Value of the kibana.alert.original_event.id field
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  originalEventId: string;
   /**
    * Maintain backwards compatibility // TODO remove when possible
    */
@@ -26,14 +25,14 @@ export interface RelatedAlertsBySameSourceEventProps {
 }
 
 /**
- *
+ * Show related alerts by same source event in summary row
  */
 export const RelatedAlertsBySameSourceEvent: React.VFC<RelatedAlertsBySameSourceEventProps> = ({
-  dataFormattedForFieldBrowser,
+  originalEventId,
   scopeId,
 }) => {
   const { loading, error, dataCount } = useFetchRelatedAlertsBySameSourceEvent({
-    dataFormattedForFieldBrowser,
+    originalEventId,
     scopeId,
   });
   const text = CORRELATIONS_SAME_SOURCE_ALERTS(dataCount);

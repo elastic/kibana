@@ -7,10 +7,12 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID } from './test_ids';
+import {
+  CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID,
+  CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID,
+} from './test_ids';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
 import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_context';
 import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
@@ -21,7 +23,8 @@ import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_ancestry');
 jest.mock('../hooks/use_paginated_alerts');
 
-const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
+const documentId = 'documentId';
+const indices = ['index1'];
 const scopeId = 'scopeId';
 
 const TOGGLE_ICON = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(
@@ -44,7 +47,7 @@ describe('<RelatedAlertsByAncestry />', () => {
     });
     (usePaginatedAlerts as jest.Mock).mockReturnValue({
       loading: false,
-      erro: false,
+      error: false,
       data: [
         {
           _id: '1',
@@ -70,15 +73,12 @@ describe('<RelatedAlertsByAncestry />', () => {
     });
 
     const { getByTestId } = render(
-      <RelatedAlertsByAncestry
-        dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-        scopeId={scopeId}
-      />
+      <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
     );
     expect(getByTestId(TOGGLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_TEXT)).toBeInTheDocument();
-    expect(getByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render null if error', () => {
@@ -88,10 +88,7 @@ describe('<RelatedAlertsByAncestry />', () => {
     });
 
     const { container } = render(
-      <RelatedAlertsByAncestry
-        dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-        scopeId={scopeId}
-      />
+      <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
     );
     expect(container).toBeEmptyDOMElement();
   });

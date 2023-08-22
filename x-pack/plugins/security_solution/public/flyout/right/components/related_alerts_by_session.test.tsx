@@ -15,11 +15,10 @@ import {
 } from './test_ids';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
-import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
 
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_session');
 
-const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
+const entityId = 'entityId';
 const scopeId = 'scopeId';
 
 const ICON_TEST_ID = SUMMARY_ROW_ICON_TEST_ID(
@@ -41,10 +40,7 @@ describe('<RelatedAlertsBySession />', () => {
     });
 
     const { getByTestId } = render(
-      <RelatedAlertsBySession
-        dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-        scopeId={scopeId}
-      />
+      <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
     );
     expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
     const value = getByTestId(VALUE_TEST_ID);
@@ -61,10 +57,7 @@ describe('<RelatedAlertsBySession />', () => {
     });
 
     const { getByTestId } = render(
-      <RelatedAlertsBySession
-        dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-        scopeId={scopeId}
-      />
+      <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
     );
     expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
     const value = getByTestId(VALUE_TEST_ID);
@@ -79,10 +72,7 @@ describe('<RelatedAlertsBySession />', () => {
     });
 
     const { getByTestId } = render(
-      <RelatedAlertsBySession
-        dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-        scopeId={scopeId}
-      />
+      <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
     );
     expect(getByTestId(LOADING_TEST_ID)).toBeInTheDocument();
   });
@@ -93,12 +83,7 @@ describe('<RelatedAlertsBySession />', () => {
       error: true,
     });
 
-    const { container } = render(
-      <RelatedAlertsBySession
-        dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-        scopeId={scopeId}
-      />
-    );
+    const { container } = render(<RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />);
     expect(container).toBeEmptyDOMElement();
   });
 });

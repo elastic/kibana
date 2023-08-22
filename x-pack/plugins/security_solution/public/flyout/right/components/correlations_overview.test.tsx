@@ -73,7 +73,7 @@ const panelContextValue = {
   eventId: 'event id',
   indexName: 'indexName',
   browserFields: {},
-  dataFormattedForFieldBrowser: [],
+  getFieldsData: () => {},
   scopeId: 'scopeId',
 } as unknown as RightPanelContext;
 
@@ -87,6 +87,11 @@ const renderCorrelationsOverview = (contextValue: RightPanelContext) => (
 
 describe('<CorrelationsOverview />', () => {
   it('should render wrapper component', () => {
+    jest.mocked(useShowRelatedAlertsByAncestry).mockReturnValue({ show: false });
+    jest.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue({ show: false });
+    jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: false });
+    jest.mocked(useShowRelatedCases).mockReturnValue(false);
+
     const { getByTestId, queryByTestId } = render(renderCorrelationsOverview(panelContextValue));
     expect(queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
@@ -95,9 +100,15 @@ describe('<CorrelationsOverview />', () => {
   });
 
   it('should show component with all rows in expandable panel', () => {
-    jest.mocked(useShowRelatedAlertsByAncestry).mockReturnValue(true);
-    jest.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue(true);
-    jest.mocked(useShowRelatedAlertsBySession).mockReturnValue(true);
+    jest
+      .mocked(useShowRelatedAlertsByAncestry)
+      .mockReturnValue({ show: true, documentId: 'documentId', indices: ['index1'] });
+    jest
+      .mocked(useShowRelatedAlertsBySameSourceEvent)
+      .mockReturnValue({ show: true, originalEventId: 'originalEventId' });
+    jest
+      .mocked(useShowRelatedAlertsBySession)
+      .mockReturnValue({ show: true, entityId: 'entityId' });
     jest.mocked(useShowRelatedCases).mockReturnValue(true);
 
     (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
@@ -128,10 +139,29 @@ describe('<CorrelationsOverview />', () => {
     expect(getByTestId(RELATED_CASES_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should hide rows', () => {
-    jest.mocked(useShowRelatedAlertsByAncestry).mockReturnValue(false);
-    jest.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue(false);
-    jest.mocked(useShowRelatedAlertsBySession).mockReturnValue(false);
+  it('should hide rows if show values are false', () => {
+    jest
+      .mocked(useShowRelatedAlertsByAncestry)
+      .mockReturnValue({ show: false, documentId: 'documentId', indices: ['index1'] });
+    jest
+      .mocked(useShowRelatedAlertsBySameSourceEvent)
+      .mockReturnValue({ show: false, originalEventId: 'originalEventId' });
+    jest
+      .mocked(useShowRelatedAlertsBySession)
+      .mockReturnValue({ show: false, entityId: 'entityId' });
+    jest.mocked(useShowRelatedCases).mockReturnValue(false);
+
+    const { queryByTestId } = render(renderCorrelationsOverview(panelContextValue));
+    expect(queryByTestId(RELATED_ALERTS_BY_ANCESTRY_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(RELATED_ALERTS_BY_SESSION_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(RELATED_CASES_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should hide rows if values are null', () => {
+    jest.mocked(useShowRelatedAlertsByAncestry).mockReturnValue({ show: true });
+    jest.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue({ show: true });
+    jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: true });
     jest.mocked(useShowRelatedCases).mockReturnValue(false);
 
     const { queryByTestId } = render(renderCorrelationsOverview(panelContextValue));

@@ -181,7 +181,7 @@ export const ExpandablePanel: React.FC<ExpandablePanelPanelProps> = ({
   );
 
   return (
-    <EuiSplitPanel.Outer grow hasBorder data-test-subj={dataTestSubj}>
+    <EuiSplitPanel.Outer grow hasBorder>
       <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize={'xs'}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           {headerLeftSection}

@@ -13,13 +13,12 @@ import {
   SUMMARY_ROW_LOADING_TEST_ID,
   INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID,
 } from './test_ids';
-import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
 import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_event';
 
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_same_source_event');
 
-const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
+const originalEventId = 'originalEventId';
 const scopeId = 'scopeId';
 
 const ICON_TEST_ID = SUMMARY_ROW_ICON_TEST_ID(
@@ -41,10 +40,7 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
     });
 
     const { getByTestId } = render(
-      <RelatedAlertsBySameSourceEvent
-        dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-        scopeId={scopeId}
-      />
+      <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
     );
     expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
     const value = getByTestId(VALUE_TEST_ID);
@@ -61,10 +57,7 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
     });
 
     const { getByTestId } = render(
-      <RelatedAlertsBySameSourceEvent
-        dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-        scopeId={scopeId}
-      />
+      <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
     );
     expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
     const value = getByTestId(VALUE_TEST_ID);
@@ -79,10 +72,7 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
     });
 
     const { getByTestId } = render(
-      <RelatedAlertsBySameSourceEvent
-        dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-        scopeId={scopeId}
-      />
+      <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
     );
     expect(getByTestId(LOADING_TEST_ID)).toBeInTheDocument();
   });
@@ -94,10 +84,7 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
     });
 
     const { container } = render(
-      <RelatedAlertsBySameSourceEvent
-        dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-        scopeId={scopeId}
-      />
+      <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
     );
     expect(container).toBeEmptyDOMElement();
   });
