@@ -28,15 +28,14 @@ export const useUpdateTransform = (
   const toastNotifications = useToastNotifications();
 
   const mutation = useMutation({
-    mutationFn: () => {
-      return http.post<PostTransformsUpdateResponseSchema>(
+    mutationFn: () =>
+      http.post<PostTransformsUpdateResponseSchema>(
         addInternalBasePath(`transforms/${transformId}/_update`),
         {
           body: JSON.stringify(transformConfig),
           version: '1',
         }
-      );
-    },
+      ),
     onSuccess: () => {
       toastNotifications.addSuccess(
         i18n.translate('xpack.transform.transformList.editTransformSuccessMessage', {

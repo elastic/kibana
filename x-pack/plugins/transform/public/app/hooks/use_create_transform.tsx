@@ -45,18 +45,12 @@ export const useCreateTransform = (
   }
 
   const mutation = useMutation({
-    mutationFn: () => {
-      return http.put<PutTransformsResponseSchema>(
-        addInternalBasePath(`transforms/${transformId}`),
-        {
-          body: JSON.stringify(transformConfig),
-          version: '1',
-        }
-      );
-    },
-    onError: (error) => {
-      errorToast(error);
-    },
+    mutationFn: () =>
+      http.put<PutTransformsResponseSchema>(addInternalBasePath(`transforms/${transformId}`), {
+        body: JSON.stringify(transformConfig),
+        version: '1',
+      }),
+    onError: (error) => errorToast(error),
     onSuccess: (resp) => {
       if (resp.errors.length > 0) {
         errorToast(resp.errors.length === 1 ? resp.errors[0] : resp.errors);

@@ -29,13 +29,12 @@ export const useStopTransforms = () => {
   const toastNotifications = useToastNotifications();
 
   const mutation = useMutation({
-    mutationFn: (reqBody: StopTransformsRequestSchema) => {
-      return http.post<StopTransformsResponseSchema>(addInternalBasePath('stop_transforms'), {
+    mutationFn: (reqBody: StopTransformsRequestSchema) =>
+      http.post<StopTransformsResponseSchema>(addInternalBasePath('stop_transforms'), {
         body: JSON.stringify(reqBody),
         version: '1',
-      });
-    },
-    onError: (error) => {
+      }),
+    onError: (error) =>
       toastNotifications.addDanger({
         title: i18n.translate(
           'xpack.transform.transformList.stopTransformResponseSchemaErrorMessage',
@@ -47,8 +46,7 @@ export const useStopTransforms = () => {
           <ToastNotificationText overlays={overlays} theme={theme} text={getErrorMessage(error)} />,
           { theme$: theme.theme$ }
         ),
-      });
-    },
+      }),
     onSuccess: (results) => {
       for (const transformId in results) {
         // hasOwnProperty check to ensure only properties on object itself, and not its prototypes

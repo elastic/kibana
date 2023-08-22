@@ -28,16 +28,15 @@ export const useScheduleNowTransforms = () => {
   const toastNotifications = useToastNotifications();
 
   const mutation = useMutation({
-    mutationFn: (reqBody: ScheduleNowTransformsRequestSchema) => {
-      return http.post<ScheduleNowTransformsResponseSchema>(
+    mutationFn: (reqBody: ScheduleNowTransformsRequestSchema) =>
+      http.post<ScheduleNowTransformsResponseSchema>(
         addInternalBasePath('schedule_now_transforms'),
         {
           body: JSON.stringify(reqBody),
           version: '1',
         }
-      );
-    },
-    onError: (error) => {
+      ),
+    onError: (error) =>
       toastNotifications.addDanger({
         title: i18n.translate(
           'xpack.transform.stepCreateForm.scheduleNowTransformResponseSchemaErrorMessage',
@@ -50,8 +49,7 @@ export const useScheduleNowTransforms = () => {
           <ToastNotificationText overlays={overlays} theme={theme} text={getErrorMessage(error)} />,
           { theme$: theme.theme$ }
         ),
-      });
-    },
+      }),
     onSuccess: (results) => {
       for (const transformId in results) {
         // hasOwnProperty check to ensure only properties on object itself, and not its prototypes

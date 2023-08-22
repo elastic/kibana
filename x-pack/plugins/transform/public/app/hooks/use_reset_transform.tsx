@@ -30,13 +30,12 @@ export const useResetTransforms = () => {
   const toastNotifications = useToastNotifications();
 
   const mutation = useMutation({
-    mutationFn: (reqBody: ResetTransformsRequestSchema) => {
-      return http.post<ResetTransformsResponseSchema>(addInternalBasePath('reset_transforms'), {
+    mutationFn: (reqBody: ResetTransformsRequestSchema) =>
+      http.post<ResetTransformsResponseSchema>(addInternalBasePath('reset_transforms'), {
         body: JSON.stringify(reqBody),
         version: '1',
-      });
-    },
-    onError: (error) => {
+      }),
+    onError: (error) =>
       toastNotifications.addDanger({
         title: i18n.translate('xpack.transform.transformList.resetTransformGenericErrorMessage', {
           defaultMessage: 'An error occurred calling the API endpoint to reset transforms.',
@@ -50,8 +49,7 @@ export const useResetTransforms = () => {
           />,
           { theme$: theme.theme$ }
         ),
-      });
-    },
+      }),
     onSuccess: (results) => {
       const isBulk = Object.keys(results).length > 1;
       const successCount: Record<SuccessCountField, number> = {

@@ -28,13 +28,12 @@ export const useStartTransforms = () => {
   const toastNotifications = useToastNotifications();
 
   const mutation = useMutation({
-    mutationFn: (reqBody: StartTransformsRequestSchema) => {
-      return http.post<StartTransformsResponseSchema>(addInternalBasePath('start_transforms'), {
+    mutationFn: (reqBody: StartTransformsRequestSchema) =>
+      http.post<StartTransformsResponseSchema>(addInternalBasePath('start_transforms'), {
         body: JSON.stringify(reqBody),
         version: '1',
-      });
-    },
-    onError: (error) => {
+      }),
+    onError: (error) =>
       toastNotifications.addDanger({
         title: i18n.translate(
           'xpack.transform.stepCreateForm.startTransformResponseSchemaErrorMessage',
@@ -46,8 +45,7 @@ export const useStartTransforms = () => {
           <ToastNotificationText overlays={overlays} theme={theme} text={getErrorMessage(error)} />,
           { theme$: theme.theme$ }
         ),
-      });
-    },
+      }),
     onSuccess: (results) => {
       for (const transformId in results) {
         // hasOwnProperty check to ensure only properties on object itself, and not its prototypes

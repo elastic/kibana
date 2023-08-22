@@ -127,13 +127,12 @@ export const useDeleteTransforms = () => {
   const toastNotifications = useToastNotifications();
 
   const mutation = useMutation({
-    mutationFn: (reqBody: DeleteTransformsRequestSchema) => {
-      return http.post<DeleteTransformsResponseSchema>(addInternalBasePath('delete_transforms'), {
+    mutationFn: (reqBody: DeleteTransformsRequestSchema) =>
+      http.post<DeleteTransformsResponseSchema>(addInternalBasePath('delete_transforms'), {
         body: JSON.stringify(reqBody),
         version: '1',
-      });
-    },
-    onError: (error) => {
+      }),
+    onError: (error) =>
       toastNotifications.addDanger({
         title: i18n.translate('xpack.transform.transformList.deleteTransformGenericErrorMessage', {
           defaultMessage: 'An error occurred calling the API endpoint to delete transforms.',
@@ -147,8 +146,7 @@ export const useDeleteTransforms = () => {
           />,
           { theme$: theme.theme$ }
         ),
-      });
-    },
+      }),
     onSuccess: (results) => {
       const isBulk = Object.keys(results).length > 1;
       const successCount: Record<SuccessCountField, number> = {
@@ -303,5 +301,5 @@ export const useDeleteTransforms = () => {
     },
   });
 
-  return (reqBody: DeleteTransformsRequestSchema) => mutation.mutate(reqBody);
+  return mutation;
 };
