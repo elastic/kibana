@@ -12,15 +12,11 @@ import { pick } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
-import {
-  toMountPoint as toMountPointDeprecated,
-  wrapWithTheme,
-  KibanaContextProvider,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import type { AiopsPluginStartDeps } from '../../types';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -52,10 +48,9 @@ export async function showCategorizeFlyout(
         application,
         ...plugins,
       };
-      const datePickerDeps = {
+      const datePickerDeps: DatePickerDependencies = {
         ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
-        toMountPoint: toMountPointDeprecated,
-        wrapWithTheme,
+        i18n,
         uiSettingsKeys: UI_SETTINGS,
       };
 
