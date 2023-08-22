@@ -469,11 +469,10 @@ packages/kbn-lint-ts-projects-cli @elastic/kibana-operations
 x-pack/plugins/lists @elastic/security-detection-engine
 examples/locator_examples @elastic/kibana-app-services
 examples/locator_explorer @elastic/kibana-app-services
+x-pack/plugins/log_explorer @elastic/infra-monitoring-ui
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core
 x-pack/plugins/logs_shared @elastic/infra-monitoring-ui
-x-pack/plugins/log_explorer @elastic/infra-monitoring-ui
-x-pack/plugins/observablity_log_explorer @elastic/infra-monitoring-ui
 x-pack/plugins/logstash @elastic/logstash
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
@@ -522,6 +521,7 @@ packages/kbn-object-versioning @elastic/appex-sharedux
 x-pack/plugins/observability_ai_assistant @elastic/obs-ai-assistant
 x-pack/packages/observability/alert_details @elastic/actionable-observability
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
+x-pack/plugins/observability_log_explorer @elastic/infra-monitoring-ui
 x-pack/plugins/observability_onboarding @elastic/apm-ui
 x-pack/plugins/observability @elastic/actionable-observability
 x-pack/plugins/observability_shared @elastic/observability-ui
