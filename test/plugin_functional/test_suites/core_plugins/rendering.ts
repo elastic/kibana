@@ -187,7 +187,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.latestAgentVersionsUrl (string)',
         'xpack.apm.featureFlags.agentConfigurationAvailable (any)',
         'xpack.apm.featureFlags.configurableIndicesAvailable (any)',
-        'xpack.apm.featureFlags.fastRefreshAvailable (any)',
         'xpack.apm.featureFlags.infrastructureTabAvailable (any)',
         'xpack.apm.featureFlags.infraUiAvailable (any)',
         'xpack.apm.featureFlags.migrationToFleetAvailable (any)',
@@ -198,6 +197,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cases.files.allowedMimeTypes (array)',
         'xpack.cases.files.maxSize (number)',
         'xpack.cases.markdownPlugins.lens (boolean)',
+        'xpack.cases.stack.enabled (boolean)',
         'xpack.ccr.ui.enabled (boolean)',
         'xpack.cloud.base_url (string)',
         'xpack.cloud.cname (string)',
@@ -223,6 +223,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.profile_url (string)',
         'xpack.cloud.performance_url (string)',
         'xpack.cloud.users_and_roles_url (string)',
+        'xpack.cloud.projects_url (any)', // It's a string (any because schema.conditional)
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean)',
@@ -238,7 +239,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.graph.savePolicy (alternatives)',
         'xpack.ilm.ui.enabled (boolean)',
         'xpack.index_management.ui.enabled (boolean)',
-        'xpack.index_management.enableIndexActions (boolean)',
+        'xpack.index_management.enableIndexActions (any)',
+        'xpack.index_management.enableLegacyTemplates (any)',
+        'xpack.index_management.dev.enableIndexDetailsPage (boolean)',
         'xpack.infra.sources.default.fields.message (array)',
         /**
          * xpack.infra.logs is conditional and will resolve to an object of properties

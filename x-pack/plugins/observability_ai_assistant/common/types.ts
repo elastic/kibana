@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { Serializable } from '@kbn/utility-types';
+import type { FromSchema } from 'json-schema-to-ts';
+import type { JSONSchema } from 'json-schema-to-ts';
+import React from 'react';
 
 export enum MessageRole {
   System = 'system',
   Assistant = 'assistant',
   User = 'user',
   Function = 'function',
-  Event = 'event',
   Elastic = 'elastic',
 }
 
@@ -24,10 +25,10 @@ export interface Message {
     role: MessageRole;
     function_call?: {
       name: string;
-      args?: Serializable;
+      arguments?: string;
       trigger: MessageRole.Assistant | MessageRole.User | MessageRole.Elastic;
     };
-    data?: Serializable;
+    data?: string;
   };
 }
 
@@ -46,6 +47,7 @@ export interface Conversation {
   labels: Record<string, string>;
   numeric_labels: Record<string, number>;
   namespace: string;
+  public: boolean;
 }
 
 export type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
@@ -54,3 +56,63 @@ export type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation'
 
 export type ConversationCreateRequest = ConversationRequestBase;
 export type ConversationUpdateRequest = ConversationRequestBase & { conversation: { id: string } };
+
+export interface KnowledgeBaseEntry {
+  '@timestamp': string;
+  id: string;
+  text: string;
+  confidence: 'low' | 'medium' | 'high';
+  is_correction: boolean;
+  public: boolean;
+}
+
+export type CompatibleJSONSchema = Exclude<JSONSchema, boolean>;
+
+export interface ContextDefinition {
+  name: string;
+  description: string;
+}
+
+interface FunctionResponse {
+  content?: any;
+  data?: any;
+}
+
+interface FunctionOptions<TParameters extends CompatibleJSONSchema = CompatibleJSONSchema> {
+  name: string;
+  description: string;
+  descriptionForUser: string;
+  parameters: TParameters;
+  contexts: string[];
+}
+
+type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
+  options: { arguments: TArguments },
+  signal: AbortSignal
+) => Promise<TResponse>;
+
+type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
+  arguments: TArguments;
+  response: TResponse;
+}) => React.ReactNode;
+
+export interface FunctionDefinition {
+  options: FunctionOptions;
+  respond: (options: { arguments: any }, signal: AbortSignal) => Promise<FunctionResponse>;
+  render?: RenderFunction<any, any>;
+}
+
+export type RegisterContextDefinition = (options: ContextDefinition) => void;
+
+export type RegisterFunctionDefinition = <
+  TParameters extends CompatibleJSONSchema,
+  TResponse extends FunctionResponse,
+  TArguments = FromSchema<TParameters>
+>(
+  options: FunctionOptions<TParameters>,
+  respond: RespondFunction<TArguments, TResponse>,
+  render?: RenderFunction<TArguments, TResponse>
+) => void;
+
+export type ContextRegistry = Map<string, ContextDefinition>;
+export type FunctionRegistry = Map<string, FunctionDefinition>;

@@ -26,8 +26,14 @@ import type {
   ReviewRuleUpgradeResponseBody,
   ReviewRuleInstallationResponseBody,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
-import type { GetRuleManagementFiltersResponse } from '../../../../common/api/detection_engine/rule_management';
-import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../common/api/detection_engine/rule_management';
+import type {
+  CoverageOverviewResponse,
+  GetRuleManagementFiltersResponse,
+} from '../../../../common/api/detection_engine/rule_management';
+import {
+  RULE_MANAGEMENT_FILTERS_URL,
+  RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
+} from '../../../../common/api/detection_engine/rule_management';
 import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -53,16 +59,14 @@ import type {
   BulkActionEditPayload,
 } from '../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import { BulkActionType } from '../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
-import type {
-  PreviewResponse,
-  RuleResponse,
-} from '../../../../common/api/detection_engine/model/rule_schema';
+import type { PreviewResponse, RuleResponse } from '../../../../common/api/detection_engine';
 
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from '../../../detections/pages/detection_engine/rules/translations';
 import type {
   CreateRulesProps,
   ExportDocumentsProps,
+  FetchCoverageOverviewProps,
   FetchRuleProps,
   FetchRuleSnoozingProps,
   FetchRulesProps,
@@ -100,10 +104,15 @@ export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<Ru
  * @param rule RuleUpdateProps to be updated
  * @param signal to cancel request
  *
+ * @returns Promise<Rule> An updated rule
+ *
+ * In fact this function should return Promise<RuleResponse> but it'd require massive refactoring.
+ * It should be addressed as a part of OpenAPI schema adoption.
+ *
  * @throws An error if response is not OK
  */
-export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RuleResponse> =>
-  KibanaServices.get().http.fetch<RuleResponse>(DETECTION_ENGINE_RULES_URL, {
+export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<Rule> =>
+  KibanaServices.get().http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
     method: 'PUT',
     body: JSON.stringify(rule),
     signal,
@@ -194,6 +203,11 @@ export const fetchRules = async ({
  * @param id Rule ID's (not rule_id)
  * @param signal to cancel request
  *
+ * @returns Promise<Rule>
+ *
+ * In fact this function should return Promise<RuleResponse> but it'd require massive refactoring.
+ * It should be addressed as a part of OpenAPI schema adoption.
+ *
  * @throws An error if response is not OK
  */
 export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rule> =>
@@ -246,6 +260,18 @@ export const fetchConnectors = (
   signal?: AbortSignal
 ): Promise<Array<AsApiContract<ActionResult>>> =>
   KibanaServices.get().http.fetch(`${BASE_ACTION_API_PATH}/connectors`, { method: 'GET', signal });
+
+export const fetchCoverageOverview = async ({
+  filter,
+  signal,
+}: FetchCoverageOverviewProps): Promise<CoverageOverviewResponse> =>
+  KibanaServices.get().http.fetch<CoverageOverviewResponse>(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      filter,
+    }),
+    signal,
+  });
 
 export const fetchConnectorTypes = (signal?: AbortSignal): Promise<ActionType[]> =>
   KibanaServices.get().http.fetch(`${BASE_ACTION_API_PATH}/connector_types`, {

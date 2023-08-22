@@ -158,7 +158,7 @@ export class DataPublicPlugin
     uiActions.addTriggerAction(
       'MULTI_VALUE_CLICK_TRIGGER',
       createMultiValueClickActionDefinition(() => ({
-        filterManager: query.filterManager,
+        query,
       }))
     );
 

@@ -7,9 +7,11 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { RuleUpdateProps } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { UpdateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
-import { validateUpdateRuleProps } from '../../../../../../../common/api/detection_engine/rule_management';
+import {
+  UpdateRuleRequestBody,
+  validateUpdateRuleProps,
+} from '../../../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
@@ -29,7 +31,7 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        body: buildRouteValidation(RuleUpdateProps),
+        body: buildRouteValidation(UpdateRuleRequestBody),
       },
       options: {
         tags: ['access:securitySolution'],

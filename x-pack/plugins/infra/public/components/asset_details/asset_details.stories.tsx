@@ -22,42 +22,36 @@ const tabs: Tab[] = [
     name: i18n.translate('xpack.infra.nodeDetails.tabs.overview.title', {
       defaultMessage: 'Overview',
     }),
-    'data-test-subj': 'hostsView-flyout-tabs-overview',
   },
   {
     id: FlyoutTabIds.LOGS,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.logs', {
       defaultMessage: 'Logs',
     }),
-    'data-test-subj': 'hostsView-flyout-tabs-logs',
   },
   {
     id: FlyoutTabIds.METADATA,
     name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.metadata', {
       defaultMessage: 'Metadata',
     }),
-    'data-test-subj': 'hostsView-flyout-tabs-metadata',
   },
   {
     id: FlyoutTabIds.PROCESSES,
     name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.processes', {
       defaultMessage: 'Processes',
     }),
-    'data-test-subj': 'hostsView-flyout-tabs-processes',
   },
   {
     id: FlyoutTabIds.ANOMALIES,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.anomalies', {
       defaultMessage: 'Anomalies',
     }),
-    'data-test-subj': 'hostsView-flyout-tabs-anomalies',
   },
   {
     id: FlyoutTabIds.LINK_TO_APM,
     name: i18n.translate('xpack.infra.infra.nodeDetails.apmTabLabel', {
       defaultMessage: 'APM',
     }),
-    'data-test-subj': 'hostsView-flyout-apm-link',
   },
 ];
 
@@ -96,7 +90,7 @@ const FlyoutTemplate: Story<AssetDetailsProps> = (args) => {
         Open flyout
       </EuiButton>
       <div hidden={!isOpen}>
-        {isOpen && <AssetDetails {...args} renderMode={{ showInFlyout: true, closeFlyout }} />}
+        {isOpen && <AssetDetails {...args} renderMode={{ mode: 'flyout', closeFlyout }} />}
       </div>
     </div>
   );
@@ -107,7 +101,7 @@ export const Page = PageTemplate.bind({});
 export const Flyout = FlyoutTemplate.bind({});
 Flyout.args = {
   renderMode: {
-    showInFlyout: true,
+    mode: 'flyout',
     closeFlyout: () => {},
   },
 };

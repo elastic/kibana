@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { API_URLS } from '../../../../common/constants';
 import { SyntheticsHasIntegrationMonitorsResponse } from '../../../../common/types/integration_deprecation';
 import { apiService } from './utils';
 
 export const getHasIntegrationMonitors =
   async (): Promise<SyntheticsHasIntegrationMonitorsResponse> => {
-    return await apiService.get(SYNTHETICS_API_URLS.SYNTHETICS_HAS_INTEGRATION_MONITORS);
+    return await apiService.get(API_URLS.SYNTHETICS_HAS_INTEGRATION_MONITORS);
   };

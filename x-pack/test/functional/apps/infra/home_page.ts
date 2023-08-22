@@ -55,7 +55,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with metrics present', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/164164
+    describe.skip('with metrics present', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.common.navigateToApp('infraOps');
@@ -71,6 +72,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const documentTitle = await browser.getTitle();
         expect(documentTitle).to.contain('Inventory - Infrastructure - Observability - Elastic');
+      });
+
+      it('renders the inventory survey link', async () => {
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.infraHome.waitForLoading();
+
+        await pageObjects.infraHome.ensureInventoryFeedbackLinkIsVisible();
       });
 
       it('renders the kubernetes tour component and allows user to dismiss it without seeing it again', async () => {
@@ -190,6 +198,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.openTimeline();
         await pageObjects.infraHome.closeTimeline();
       });
+
+      it('toggles the inventory switcher', async () => {
+        await pageObjects.infraHome.toggleInventorySwitcher();
+      });
     });
 
     describe('alerts flyouts', () => {
@@ -209,7 +221,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.closeAlertFlyout();
       });
 
-      it('should open and close inventory alert flyout', async () => {
+      it('should open and close metrics threshold alert flyout', async () => {
         await pageObjects.infraHome.openMetricsThresholdAlertFlyout();
         await pageObjects.infraHome.closeAlertFlyout();
       });

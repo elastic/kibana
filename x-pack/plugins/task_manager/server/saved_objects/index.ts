@@ -50,6 +50,7 @@ export function setupSavedObjects(
                   'actions:.jira',
                   'actions:.resilient',
                   'actions:.teams',
+                  'actions:.sentinelone',
                 ],
               },
             },

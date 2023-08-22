@@ -9,11 +9,9 @@ import { v4 as uuidv4 } from 'uuid';
 import type SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type {
-  EcsRiskScore,
-  RiskScore,
-} from '@kbn/security-solution-plugin/server/lib/risk_engine/types';
-
+import type { EcsRiskScore, RiskScore } from '@kbn/security-solution-plugin/common/risk_engine';
+import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/risk_engine/saved_object';
+import type { KbnClient } from '@kbn/test';
 import {
   createRule,
   waitForSignalsToBePresent,
@@ -135,4 +133,103 @@ export const waitForRiskScoresToBePresent = async (
     'waitForRiskScoresToBePresent',
     log
   );
+};
+
+export const getRiskEngineConfigSO = async ({ kibanaServer }: { kibanaServer: KbnClient }) => {
+  const soResponse = await kibanaServer.savedObjects.find({
+    type: riskEngineConfigurationTypeName,
+  });
+
+  return soResponse?.saved_objects?.[0];
+};
+
+export const cleanRiskEngineConfig = async ({
+  kibanaServer,
+}: {
+  kibanaServer: KbnClient;
+}): Promise<void> => {
+  const so = await getRiskEngineConfigSO({ kibanaServer });
+  if (so) {
+    await kibanaServer.savedObjects.delete({
+      type: riskEngineConfigurationTypeName,
+      id: so.id,
+    });
+  }
+};
+
+export const legacyTransformIds = [
+  'ml_hostriskscore_pivot_transform_default',
+  'ml_hostriskscore_latest_transform_default',
+  'ml_userriskscore_pivot_transform_default',
+  'ml_userriskscore_latest_transform_default',
+];
+
+export const clearTransforms = async ({
+  es,
+  log,
+}: {
+  es: Client;
+  log: ToolingLog;
+}): Promise<void> => {
+  try {
+    await es.transform.deleteTransform({
+      transform_id: 'risk_score_latest_transform_default',
+      force: true,
+    });
+  } catch (e) {
+    log.error(`Error deleting risk_score_latest_transform_default: ${e.message}`);
+  }
+};
+
+export const clearLegacyTransforms = async ({
+  es,
+  log,
+}: {
+  es: Client;
+  log: ToolingLog;
+}): Promise<void> => {
+  const transforms = legacyTransformIds.map((transform) =>
+    es.transform.deleteTransform({
+      transform_id: transform,
+      force: true,
+    })
+  );
+  try {
+    await Promise.all(transforms);
+  } catch (e) {
+    log.error(`Error deleting legacy transforms: ${e.message}`);
+  }
+};
+
+export const createTransforms = async ({ es }: { es: Client }): Promise<void> => {
+  const transforms = legacyTransformIds.map((transform) =>
+    es.transform.putTransform({
+      transform_id: transform,
+      source: {
+        index: ['.alerts-security.alerts-default'],
+      },
+      dest: {
+        index: 'ml_host_risk_score_default',
+      },
+      pivot: {
+        group_by: {
+          'host.name': {
+            terms: {
+              field: 'host.name',
+            },
+          },
+        },
+        aggregations: {
+          '@timestamp': {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
+      },
+      settings: {},
+    })
+  );
+
+  await Promise.all(transforms);
 };

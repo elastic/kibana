@@ -215,7 +215,7 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 
 
 |{kib-repo}blob/{branch}/src/plugins/interactive_setup/README.md[interactiveSetup]
-|The plugin provides UI and APIs for the interactive setup mode.
+|This plugin provides UI and APIs for interactive setup mode a.k.a "enrollment flow".
 
 
 |{kib-repo}blob/{branch}/src/plugins/kibana_overview/README.md[kibanaOverview]
@@ -654,7 +654,7 @@ Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_ai_assistant/README.md[observabilityAIAssistant]
-|This plugin provides the Observability AI Assistant service and UI components.
+|This document gives an overview of the features of the Observability AI Assistant at the time of writing, and how to use them. At a high level, the Observability AI Assistant offers contextual insights, and a chat functionality that we enrich with function calling, allowing the LLM to hook into the user's data. We also allow the LLM to store things it considers new information as embeddings into Elasticsearch, and query this knowledge base when it decides it needs more information, using ELSER.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_onboarding/README.md[observabilityOnboarding]

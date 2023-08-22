@@ -87,6 +87,36 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('editable-title-cancel-btn');
       });
 
+      it('shows error when description is empty strings, trims the description value on submit', async () => {
+        await testSubjects.click('description-edit-icon');
+
+        await header.waitUntilLoadingHasFinished();
+
+        const editCommentTextArea = await find.byCssSelector(
+          '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
+        );
+
+        await header.waitUntilLoadingHasFinished();
+
+        await editCommentTextArea.focus();
+        await editCommentTextArea.clearValue();
+        await editCommentTextArea.type('   ');
+
+        const error = await find.byCssSelector('.euiFormErrorText');
+        expect(await error.getVisibleText()).equal('A description is required.');
+
+        await editCommentTextArea.type('Description with space     ');
+
+        await testSubjects.click('editable-save-markdown');
+        await header.waitUntilLoadingHasFinished();
+
+        const desc = await find.byCssSelector(
+          '[data-test-subj="description"] [data-test-subj="scrollable-markdown"]'
+        );
+
+        expect(await desc.getVisibleText()).equal('Description with space');
+      });
+
       it('adds a comment to a case', async () => {
         const commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
@@ -467,6 +497,56 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('description-unsaved-draft');
       });
 
+      it('should persist the draft of new comment while old comment is updated', async () => {
+        await cases.singleCase.addComment('my first comment');
+
+        let commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+
+        await commentArea.focus();
+        await commentArea.clearValue();
+        await commentArea.type('Test comment from automation');
+
+        await testSubjects.click('property-actions-user-action-ellipses');
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('property-actions-user-action-pencil');
+        await header.waitUntilLoadingHasFinished();
+
+        const editCommentTextArea = await find.byCssSelector(
+          '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
+        );
+
+        await header.waitUntilLoadingHasFinished();
+
+        await editCommentTextArea.focus();
+        await editCommentTextArea.type('Edited comment');
+
+        await testSubjects.click('editable-save-markdown');
+        await header.waitUntilLoadingHasFinished();
+
+        /**
+         * We need to wait for some time to
+         * give the localStorage a change to persist
+         * the comment. Otherwise, the test navigates to
+         * fast to the cases table and the comment is not
+         * persisted
+         */
+        await setTimeoutAsync(2000);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await browser.refresh();
+
+        await header.waitUntilLoadingHasFinished();
+
+        commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+
+        expect(await commentArea.getVisibleText()).to.be('Test comment from automation');
+      });
+
       /**
        * There is this bug https://github.com/elastic/kibana/issues/157280
        * where this test randomly reproduces thus making the test flaky.
@@ -724,12 +804,24 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.api.deleteAllCases();
       });
 
+      it('initially renders user actions list correctly', async () => {
+        expect(testSubjects.missingOrFail('cases-show-more-user-actions'));
+
+        const userActionsLists = await find.allByCssSelector(
+          '[data-test-subj="user-actions-list"]'
+        );
+
+        expect(userActionsLists).length(1);
+      });
+
       it('shows more actions on button click', async () => {
         await cases.api.generateUserActions({
           caseId: createdCase.id,
           caseVersion: createdCase.version,
           totalUpdates: 4,
         });
+
+        expect(testSubjects.missingOrFail('user-actions-loading'));
 
         await header.waitUntilLoadingHasFinished();
 

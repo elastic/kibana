@@ -9,6 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
+import { ALERT_EVALUATION_VALUE, ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
+
+import { expandFlattenedAlert } from '@kbn/alerting-plugin/server/alerts_client/lib';
+import { ALERT_TITLE, ALERT_EVALUATION_CONDITIONS } from './fields';
 import { ComparatorFns } from '../../../common';
 import {
   addMessages,
@@ -32,11 +36,11 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     spaceId,
     logger,
   } = options;
-  const { alertFactory, scopedClusterClient, searchSourceClient, share, dataViews } = services;
+  const { alertsClient, scopedClusterClient, searchSourceClient, share, dataViews } = services;
   const currentTimestamp = new Date().toISOString();
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
   const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
-  const alertLimit = alertFactory.alertLimit.getValue();
+  const alertLimit = alertsClient?.getAlertLimitValue();
   const compareFn = ComparatorFns.get(params.thresholdComparator);
   if (compareFn == null) {
     throw new Error(getInvalidComparatorError(params.thresholdComparator));
@@ -108,19 +112,29 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         ...(isGroupAgg ? { group: alertId } : {}),
       }),
     } as EsQueryRuleActionContext;
+
     const actionContext = addMessages({
       ruleName: name,
       baseContext: baseActiveContext,
       params,
       ...(isGroupAgg ? { group: alertId } : {}),
     });
-    const alert = alertFactory.create(
-      alertId === UngroupedGroupId && !isGroupAgg ? ConditionMetAlertInstanceId : alertId
-    );
-    alert
-      // store the params we would need to recreate the query that led to this alert instance
-      .replaceState({ latestTimestamp, dateStart, dateEnd })
-      .scheduleActions(ActionGroupId, actionContext);
+
+    const id = alertId === UngroupedGroupId && !isGroupAgg ? ConditionMetAlertInstanceId : alertId;
+
+    alertsClient!.report({
+      id,
+      actionGroup: ActionGroupId,
+      state: { latestTimestamp, dateStart, dateEnd },
+      context: actionContext,
+      payload: expandFlattenedAlert({
+        [ALERT_URL]: actionContext.link,
+        [ALERT_REASON]: actionContext.message,
+        [ALERT_TITLE]: actionContext.title,
+        [ALERT_EVALUATION_CONDITIONS]: actionContext.conditions,
+        [ALERT_EVALUATION_VALUE]: actionContext.value,
+      }),
+    });
     if (!isGroupAgg) {
       // update the timestamp based on the current search results
       const firstValidTimefieldSort = getValidTimefieldSort(
@@ -131,12 +145,11 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       }
     }
   }
+  alertsClient!.setAlertLimitReached(parsedResults.truncated);
 
-  alertFactory.alertLimit.setLimitReached(parsedResults.truncated);
-
-  const { getRecoveredAlerts } = alertFactory.done();
+  const { getRecoveredAlerts } = alertsClient!;
   for (const recoveredAlert of getRecoveredAlerts()) {
-    const alertId = recoveredAlert.getId();
+    const alertId = recoveredAlert.alert.getId();
     const baseRecoveryContext: EsQueryRuleActionContext = {
       title: name,
       date: currentTimestamp,
@@ -159,7 +172,17 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       isRecovered: true,
       ...(isGroupAgg ? { group: alertId } : {}),
     });
-    recoveredAlert.setContext(recoveryContext);
+    alertsClient?.setAlertData({
+      id: alertId,
+      context: recoveryContext,
+      payload: expandFlattenedAlert({
+        [ALERT_URL]: recoveryContext.link,
+        [ALERT_REASON]: recoveryContext.message,
+        [ALERT_TITLE]: recoveryContext.title,
+        [ALERT_EVALUATION_CONDITIONS]: recoveryContext.conditions,
+        [ALERT_EVALUATION_VALUE]: recoveryContext.value,
+      }),
+    });
   }
   return { state: { latestTimestamp } };
 }

@@ -73,7 +73,6 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
     [proxies]
   );
 
-  const isESOutput = inputs.typeInput.value === outputType.Elasticsearch;
   const { kafkaOutput: isKafkaOutputEnabled } = ExperimentalFeaturesService.get();
 
   const OUTPUT_TYPE_OPTIONS = [
@@ -249,6 +248,43 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
     }
   };
 
+  const renderTypeSpecificWarning = () => {
+    const isESOutput = inputs.typeInput.value === outputType.Elasticsearch;
+    const isKafkaOutput = inputs.typeInput.value === outputType.Kafka;
+    if (!isKafkaOutput && !isESOutput) {
+      return null;
+    }
+
+    const generateWarningMessage = () => {
+      switch (inputs.typeInput.value) {
+        case outputType.Kafka:
+          return i18n.translate('xpack.fleet.settings.editOutputFlyout.kafkaOutputTypeCallout', {
+            defaultMessage:
+              'Kafka output is currently not supported on Agents using the Elastic Defend integration.',
+          });
+        default:
+        case outputType.Elasticsearch:
+          return i18n.translate('xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout', {
+            defaultMessage:
+              'This output type currently does not support connectivity to a remote Elasticsearch cluster.',
+          });
+      }
+    };
+    return (
+      <>
+        <EuiSpacer size="xs" />
+        <EuiCallOut
+          data-test-subj={`settingsOutputsFlyout.${inputs.typeInput.value}OutputTypeCallout`}
+          title={generateWarningMessage()}
+          iconType="alert"
+          color="warning"
+          size="s"
+          heading="p"
+        />
+      </>
+    );
+  };
+
   return (
     <EuiFlyout maxWidth={FLYOUT_MAX_WIDTH} onClose={onClose}>
       <EuiFlyoutHeader hasBorder={true}>
@@ -350,24 +386,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                   }
                 )}
               />
-              {isESOutput && (
-                <>
-                  <EuiSpacer size="xs" />
-                  <EuiCallOut
-                    title={i18n.translate(
-                      'xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout',
-                      {
-                        defaultMessage:
-                          'This output type currently does not support connectivity to a remote Elasticsearch cluster.',
-                      }
-                    )}
-                    iconType="alert"
-                    color="warning"
-                    size="s"
-                    heading="p"
-                  />
-                </>
-              )}
+              {renderTypeSpecificWarning()}
             </>
           </EuiFormRow>
 

@@ -15,7 +15,12 @@ import {
   ALERT_RULE_NAME,
   EVENT_KIND,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import type { AfterKeys, IdentifierType, RiskWeights } from '../../../common/risk_engine';
+import type {
+  AfterKeys,
+  IdentifierType,
+  RiskWeights,
+  RiskScore,
+} from '../../../common/risk_engine';
 import { RiskCategories } from '../../../common/risk_engine';
 import { withSecuritySpan } from '../../utils/with_security_span';
 import { getAfterKeyForIdentifierType, getFieldForIdentifierAgg } from './helpers';
@@ -30,7 +35,6 @@ import type {
   CalculateRiskScoreAggregations,
   CalculateScoresParams,
   CalculateScoresResponse,
-  RiskScore,
   RiskScoreBucket,
 } from './types';
 

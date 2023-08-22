@@ -172,6 +172,24 @@ export interface CrawlScheduleFromServer {
 
 // Client
 
+export interface CrawlerCustomSchedule {
+  name: string;
+  customEntryPointUrls: string[];
+  customSitemapUrls: string[];
+  includeSitemapsInRobotsTxt: boolean;
+  maxCrawlDepth: number;
+  selectedDomainUrls: string[];
+  selectedEntryPointUrls: string[];
+  selectedSitemapUrls: string[];
+  interval: string; // interval has crontab syntax
+  enabled: boolean;
+}
+
+export enum CustomCrawlType {
+  ONE_TIME = 'one-time',
+  MULTIPLE = 'multiple',
+}
+
 export interface CrawlerDomain {
   auth: CrawlerAuth;
   availableDeduplicationFields: string[];

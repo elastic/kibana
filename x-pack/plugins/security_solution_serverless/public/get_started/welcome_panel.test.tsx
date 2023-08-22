@@ -20,9 +20,13 @@ jest.mock('@elastic/eui', () => {
 
 describe('WelcomePanel', () => {
   let result: RenderResult;
+  const props = {
+    totalActiveSteps: 3,
+    totalStepsLeft: 2,
+  };
 
   beforeEach(() => {
-    result = render(<WelcomePanel />);
+    result = render(<WelcomePanel {...props} />);
   });
 
   it('should render the welcome panel with project created header card', () => {
@@ -59,5 +63,12 @@ describe('WelcomePanel', () => {
     const { getByTestId } = result;
 
     expect(getByTestId('progressTrackerIcon')).toBeInTheDocument();
+  });
+
+  it('should render the project tracker card with the correct description', () => {
+    const { getByText } = result;
+
+    expect(getByText('1 of 3')).toBeInTheDocument();
+    expect(getByText('tasks completed')).toBeInTheDocument();
   });
 });

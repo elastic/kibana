@@ -9,7 +9,7 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import { ruleDetailsLocatorID } from '../../common';
-import { RULES_PATH } from '../routes/paths';
+import { RULES_PATH } from '../../common/locators/paths';
 import { ALL_ALERTS } from '../components/alert_search_bar/constants';
 import {
   RULE_DETAILS_ALERTS_TAB,

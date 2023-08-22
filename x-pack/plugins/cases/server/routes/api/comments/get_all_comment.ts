@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import type { attachmentDomainV1 } from '../../../../common/types/domain';
 
 /**
  * @deprecated since version 8.1.0
@@ -27,11 +28,12 @@ export const getAllCommentsRoute = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
+      const res: attachmentDomainV1.Attachments = await client.attachments.getAll({
+        caseID: request.params.case_id,
+      });
 
       return response.ok({
-        body: await client.attachments.getAll({
-          caseID: request.params.case_id,
-        }),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

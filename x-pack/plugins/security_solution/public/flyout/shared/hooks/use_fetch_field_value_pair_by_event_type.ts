@@ -10,12 +10,11 @@ import type { IEsSearchRequest } from '@kbn/data-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { createFetchData } from '../utils/fetch_data';
 import { useKibana } from '../../../common/lib/kibana';
-import { inputsSelectors } from '../../../common/store';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
 import type { RawResponse } from '../utils/fetch_data';
 
 const QUERY_KEY = 'FetchFieldValuePairByEventType';
+const DEFAULT_FROM = 'now-30d';
+const DEFAULT_TO = 'now';
 
 export enum EventKind {
   alert = 'alert',
@@ -39,10 +38,6 @@ export interface UseFetchFieldValuePairByEventTypeParams {
    * The highlighted field name and values
    * */
   highlightedField: { name: string; values: string[] };
-  /**
-   * True is the current timeline is active ('timeline-1')
-   */
-  isActiveTimelines: boolean;
   /**
    * Limit the search to include or exclude a specific value for the event.kind field
    * (alert, asset, enrichment, event, metric, state, pipeline_error, signal)
@@ -70,7 +65,6 @@ export interface UseFetchFieldValuePairByEventTypeResult {
  */
 export const useFetchFieldValuePairByEventType = ({
   highlightedField,
-  isActiveTimelines,
   type,
 }: UseFetchFieldValuePairByEventTypeParams): UseFetchFieldValuePairByEventTypeResult => {
   const {
@@ -79,11 +73,7 @@ export const useFetchFieldValuePairByEventType = ({
     },
   } = useKibana();
 
-  const timelineTime = useDeepEqualSelector((state) =>
-    inputsSelectors.timelineTimeRangeSelector(state)
-  );
-  const globalTime = useGlobalTime();
-  const { to, from } = isActiveTimelines ? timelineTime : globalTime;
+  const { from, to } = { from: DEFAULT_FROM, to: DEFAULT_TO };
 
   const { name, values } = highlightedField;
 

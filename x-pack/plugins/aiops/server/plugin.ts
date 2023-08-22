@@ -10,6 +10,7 @@ import { Subscription } from 'rxjs';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
+import { CASES_ATTACHMENT_CHANGE_POINT_CHART } from '../common/constants';
 import { isActiveLicense } from './lib/license';
 import {
   AiopsLicense,
@@ -53,6 +54,12 @@ export class AiopsPlugin
       defineLogRateAnalysisRoute(router, aiopsLicense, this.logger, coreStart);
       defineLogCategorizationRoutes(router, aiopsLicense);
     });
+
+    if (plugins.cases) {
+      plugins.cases.attachmentFramework.registerPersistableState({
+        id: CASES_ATTACHMENT_CHANGE_POINT_CHART,
+      });
+    }
 
     return {};
   }

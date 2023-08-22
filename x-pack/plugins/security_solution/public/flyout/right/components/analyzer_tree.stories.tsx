@@ -42,40 +42,68 @@ export const Default: Story<void> = () => {
   return wrapper(<AnalyzerTree {...defaultProps} statsNodes={mock.mockStatsNodes} />);
 };
 
-export const HasGrandparent: Story<void> = () => {
-  return wrapper(<AnalyzerTree {...defaultProps} statsNodes={mock.mockStatsNodesHasGrandparent} />);
+export const SingleNode: Story<void> = () => {
+  return wrapper(<AnalyzerTree {...defaultProps} statsNodes={[mock.mockStatsNode]} />);
 };
 
-export const HasParent: Story<void> = () => {
+export const ShowParent: Story<void> = () => {
   return wrapper(<AnalyzerTree {...defaultProps} statsNodes={mock.mockStatsNodesHasParent} />);
 };
 
-export const HasChildren: Story<void> = () => {
+export const ShowGrandparent: Story<void> = () => {
+  return wrapper(
+    <AnalyzerTree
+      {...defaultProps}
+      statsNodes={mock.mockStatsNodesHasGrandparent}
+      ancestorLevel={2}
+    />
+  );
+};
+
+export const HideGrandparent: Story<void> = () => {
+  return wrapper(
+    <AnalyzerTree
+      {...defaultProps}
+      statsNodes={mock.mockStatsNodesHasGrandparent}
+      ancestorLevel={1}
+    />
+  );
+};
+
+export const ShowChildren: Story<void> = () => {
   return wrapper(<AnalyzerTree {...defaultProps} statsNodes={mock.mockStatsNodesHasChildren} />);
 };
 
-export const HasMoreThanThreeChildren: Story<void> = () => {
+export const ShowOnlyOneChild: Story<void> = () => {
   return wrapper(
-    <AnalyzerTree {...defaultProps} statsNodes={mock.mockStatsNodesMoreThanThreeChildren} />
+    <AnalyzerTree
+      {...defaultProps}
+      statsNodes={mock.mockStatsNodesHasChildren}
+      childCountLimit={1}
+    />
   );
 };
 
-export const HasGrandChildren: Story<void> = () => {
-  return wrapper(
-    <AnalyzerTree {...defaultProps} statsNodes={mock.mockStatsNodesHasGrandchildren} />
-  );
+export const ShowGrandchildren: Story<void> = () => {
+  return wrapper(<AnalyzerTree {...defaultProps} statsNodes={mock.mockStatsNodesHasChildren} />);
 };
 
-export const SingleNode: Story<void> = () => {
-  return wrapper(<AnalyzerTree {...defaultProps} statsNodes={mock.mockStatsNodesSingleNode} />);
+export const HideGrandchildren: Story<void> = () => {
+  return wrapper(
+    <AnalyzerTree
+      {...defaultProps}
+      statsNodes={mock.mockStatsNodesHasChildren}
+      descendantLevel={1}
+    />
+  );
 };
 
 export const Loading: Story<void> = () => {
-  return wrapper(<AnalyzerTree loading={true} error={false} />);
+  return wrapper(<AnalyzerTree loading={true} error={false} descendantLevel={3} />);
 };
 
 export const Error: Story<void> = () => {
-  return wrapper(<AnalyzerTree loading={false} error={true} />);
+  return wrapper(<AnalyzerTree loading={false} error={true} descendantLevel={3} />);
 };
 
 export const Empty: Story<void> = () => {

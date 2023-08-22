@@ -292,7 +292,7 @@ export class ExecutionHandler<
                 alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
                 context: alert.getContext(),
                 actionId: action.id,
-                state: alert.getScheduledActionOptions()?.state || {},
+                state: alert.getState(),
                 kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
                 alertParams: this.rule.params,
                 actionParams: action.params,

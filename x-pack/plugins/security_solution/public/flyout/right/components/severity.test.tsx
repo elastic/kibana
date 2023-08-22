@@ -14,6 +14,7 @@ import {
 } from './test_ids';
 import { DocumentSeverity } from './severity';
 import { mockGetFieldsData } from '../mocks/mock_context';
+import { TestProviders } from '../../../common/mock';
 
 describe('<DocumentSeverity />', () => {
   it('should render severity information', () => {
@@ -22,9 +23,11 @@ describe('<DocumentSeverity />', () => {
     } as unknown as RightPanelContext;
 
     const { getByTestId } = render(
-      <RightPanelContext.Provider value={contextValue}>
-        <DocumentSeverity />
-      </RightPanelContext.Provider>
+      <TestProviders>
+        <RightPanelContext.Provider value={contextValue}>
+          <DocumentSeverity />
+        </RightPanelContext.Provider>
+      </TestProviders>
     );
 
     expect(getByTestId(FLYOUT_HEADER_SEVERITY_TITLE_TEST_ID)).toBeInTheDocument();

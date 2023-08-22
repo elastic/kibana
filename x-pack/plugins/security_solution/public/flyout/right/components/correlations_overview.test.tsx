@@ -9,16 +9,19 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
+import { TestProviders } from '../../../common/mock';
+import { CorrelationsOverview } from './correlations_overview';
+import { useCorrelations } from '../../shared/hooks/use_correlations';
+import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
+import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import {
   INSIGHTS_CORRELATIONS_CONTENT_TEST_ID,
   INSIGHTS_CORRELATIONS_LOADING_TEST_ID,
-  INSIGHTS_CORRELATIONS_TITLE_TEST_ID,
-  INSIGHTS_CORRELATIONS_VIEW_ALL_BUTTON_TEST_ID,
+  INSIGHTS_CORRELATIONS_TITLE_ICON_TEST_ID,
+  INSIGHTS_CORRELATIONS_TITLE_LINK_TEST_ID,
+  INSIGHTS_CORRELATIONS_TITLE_TEXT_TEST_ID,
+  INSIGHTS_CORRELATIONS_TOGGLE_ICON_TEST_ID,
 } from './test_ids';
-import { TestProviders } from '../../../common/mock';
-import { CorrelationsOverview } from './correlations_overview';
-import { LeftPanelInsightsTabPath, LeftPanelKey } from '../../left';
-import { useCorrelations } from '../../shared/hooks/use_correlations';
 
 jest.mock('../../shared/hooks/use_correlations');
 
@@ -38,8 +41,22 @@ const renderCorrelationsOverview = (contextValue: RightPanelContext) => (
   </TestProviders>
 );
 
-describe('<ThreatIntelligenceOverview />', () => {
-  it('should show component with all rows in summary panel', () => {
+describe('<CorrelationsOverview />', () => {
+  it('should render wrapper component', () => {
+    (useCorrelations as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+    });
+
+    const { getByTestId, queryByTestId } = render(renderCorrelationsOverview(panelContextValue));
+    expect(queryByTestId(INSIGHTS_CORRELATIONS_TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(INSIGHTS_CORRELATIONS_TITLE_LINK_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(INSIGHTS_CORRELATIONS_TITLE_ICON_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(INSIGHTS_CORRELATIONS_TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should show component with all rows in expandable panel', () => {
     (useCorrelations as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
@@ -53,7 +70,7 @@ describe('<ThreatIntelligenceOverview />', () => {
     });
 
     const { getByTestId } = render(renderCorrelationsOverview(panelContextValue));
-    expect(getByTestId(INSIGHTS_CORRELATIONS_TITLE_TEST_ID)).toHaveTextContent('Correlations');
+    expect(getByTestId(INSIGHTS_CORRELATIONS_TITLE_LINK_TEST_ID)).toHaveTextContent('Correlations');
     expect(getByTestId(INSIGHTS_CORRELATIONS_CONTENT_TEST_ID)).toHaveTextContent('1 related case');
     expect(getByTestId(INSIGHTS_CORRELATIONS_CONTENT_TEST_ID)).toHaveTextContent(
       '2 alerts related by ancestry'
@@ -64,7 +81,6 @@ describe('<ThreatIntelligenceOverview />', () => {
     expect(getByTestId(INSIGHTS_CORRELATIONS_CONTENT_TEST_ID)).toHaveTextContent(
       '4 alerts related by session'
     );
-    expect(getByTestId(INSIGHTS_CORRELATIONS_VIEW_ALL_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should hide row if data is missing', () => {
@@ -93,8 +109,8 @@ describe('<ThreatIntelligenceOverview />', () => {
       dataCount: 0,
     });
 
-    const { container } = render(renderCorrelationsOverview(panelContextValue));
-    expect(container).toBeEmptyDOMElement();
+    const { getByTestId } = render(renderCorrelationsOverview(panelContextValue));
+    expect(getByTestId(INSIGHTS_CORRELATIONS_CONTENT_TEST_ID)).toBeEmptyDOMElement();
   });
 
   it('should render loading if any rows are loading', () => {
@@ -136,10 +152,10 @@ describe('<ThreatIntelligenceOverview />', () => {
       </TestProviders>
     );
 
-    getByTestId(INSIGHTS_CORRELATIONS_VIEW_ALL_BUTTON_TEST_ID).click();
+    getByTestId(INSIGHTS_CORRELATIONS_TITLE_LINK_TEST_ID).click();
     expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
       id: LeftPanelKey,
-      path: LeftPanelInsightsTabPath,
+      path: { tab: LeftPanelInsightsTab, subTab: CORRELATIONS_TAB_ID },
       params: {
         id: panelContextValue.eventId,
         indexName: panelContextValue.indexName,

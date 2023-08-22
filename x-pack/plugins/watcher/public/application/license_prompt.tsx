@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiEmptyPrompt, EuiLink, EuiPageSection } from '@elastic/eui';
+import { EuiLink, EuiPageTemplate } from '@elastic/eui';
 import { LicenseManagementLocator } from '@kbn/license-management-plugin/public/locator';
 
 export const LicensePrompt = ({
@@ -41,20 +41,19 @@ export const LicensePrompt = ({
     </>
   );
   return (
-    <EuiPageSection alignment="center" color="danger">
-      <EuiEmptyPrompt
-        iconType="warning"
-        title={
-          <h1>
-            <FormattedMessage
-              id="xpack.watcher.app.licenseErrorTitle"
-              defaultMessage="License error"
-            />
-          </h1>
-        }
-        body={promptBody}
-        actions={[promptAction]}
-      />
-    </EuiPageSection>
+    <EuiPageTemplate.EmptyPrompt
+      iconType="warning"
+      color="danger"
+      title={
+        <h1>
+          <FormattedMessage
+            id="xpack.watcher.app.licenseErrorTitle"
+            defaultMessage="License error"
+          />
+        </h1>
+      }
+      body={promptBody}
+      actions={[promptAction]}
+    />
   );
 };

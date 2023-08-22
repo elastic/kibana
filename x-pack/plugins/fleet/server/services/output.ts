@@ -432,7 +432,7 @@ class OutputService {
 
     // ensure only default output exists
     if (data.is_default) {
-      if (defaultDataOutputId) {
+      if (defaultDataOutputId && defaultDataOutputId !== options?.id) {
         await this._updateDefaultOutput(
           soClient,
           defaultDataOutputId,
@@ -443,7 +443,7 @@ class OutputService {
     }
     if (data.is_default_monitoring) {
       const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soClient);
-      if (defaultMonitoringOutputId) {
+      if (defaultMonitoringOutputId && defaultMonitoringOutputId !== options?.id) {
         await this._updateDefaultOutput(
           soClient,
           defaultMonitoringOutputId,
@@ -493,7 +493,7 @@ class OutputService {
         data.compression_level = 4;
       }
       if (!output.client_id) {
-        data.client_id = 'Elastic Agent';
+        data.client_id = 'Elastic';
       }
       if (output.username && output.password && !output.sasl?.mechanism) {
         data.sasl = {
@@ -519,11 +519,9 @@ class OutputService {
       if (!output.broker_timeout) {
         data.broker_timeout = 10;
       }
-      if (!output.broker_ack_reliability) {
-        data.broker_ack_reliability = kafkaAcknowledgeReliabilityLevel.Commit;
-      }
-      if (!output.broker_buffer_size) {
-        data.broker_buffer_size = 256;
+      if (output.required_acks === null || output.required_acks === undefined) {
+        // required_acks can be 0
+        data.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
       }
     }
 
@@ -712,6 +710,7 @@ class OutputService {
       target.key = null;
       target.compression = null;
       target.compression_level = null;
+      target.connection_type = null;
       target.client_id = null;
       target.auth_type = null;
       target.username = null;
@@ -725,8 +724,8 @@ class OutputService {
       target.headers = null;
       target.timeout = null;
       target.broker_timeout = null;
-      target.broker_ack_reliability = null;
-      target.broker_buffer_size = null;
+      target.required_acks = null;
+      target.ssl = null;
     };
 
     // If the output type changed
@@ -766,7 +765,7 @@ class OutputService {
           updateData.compression_level = 4;
         }
         if (!data.client_id) {
-          updateData.client_id = 'Elastic Agent';
+          updateData.client_id = 'Elastic';
         }
         if (data.username && data.password && !data.sasl?.mechanism) {
           updateData.sasl = {
@@ -792,11 +791,9 @@ class OutputService {
         if (!data.broker_timeout) {
           updateData.broker_timeout = 10;
         }
-        if (!data.broker_ack_reliability) {
-          updateData.broker_ack_reliability = kafkaAcknowledgeReliabilityLevel.Commit;
-        }
-        if (!data.broker_buffer_size) {
-          updateData.broker_buffer_size = 256;
+        if (updateData.required_acks === null || updateData.required_acks === undefined) {
+          // required_acks can be 0
+          updateData.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
         }
       }
     }
@@ -806,6 +803,21 @@ class OutputService {
     } else if (data.ssl === null) {
       // Explicitly set to null to allow to delete the field
       updateData.ssl = null;
+    }
+
+    if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
+      if (!data.password) {
+        updateData.password = null;
+      }
+      if (!data.username) {
+        updateData.username = null;
+      }
+      if (!data.ssl) {
+        updateData.ssl = null;
+      }
+      if (!data.sasl) {
+        updateData.sasl = null;
+      }
     }
 
     // ensure only default output exists

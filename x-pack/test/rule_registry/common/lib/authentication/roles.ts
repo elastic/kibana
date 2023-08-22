@@ -191,6 +191,28 @@ export const securitySolutionOnlyAllSpacesAll: Role = {
   },
 };
 
+export const securitySolutionOnlyAllSpacesAllWithReadESIndices: Role = {
+  name: 'sec_only_all_spaces_all_with_read_es_indices',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const securitySolutionOnlyReadSpacesAll: Role = {
   name: 'sec_only_read_spaces_all',
   privileges: {
@@ -468,6 +490,7 @@ export const allRoles = [
   observabilityOnlyAll,
   observabilityOnlyRead,
   securitySolutionOnlyAllSpacesAll,
+  securitySolutionOnlyAllSpacesAllWithReadESIndices,
   securitySolutionOnlyReadSpacesAll,
   observabilityOnlyAllSpacesAll,
   logsOnlyAllSpacesAll,

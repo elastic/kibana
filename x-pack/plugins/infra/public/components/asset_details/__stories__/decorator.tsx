@@ -115,6 +115,9 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
       navigateToPrefilledEditor: () => {},
       stateHelperApi: () => new Promise(() => {}),
     },
+    telemetry: {
+      reportAssetDetailsFlyoutViewed: () => {},
+    },
   };
 
   return (

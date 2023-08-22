@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DocumentCountChartPoint } from './document_count_chart';
+import type { LogRateHistogramItem } from '@kbn/aiops-utils';
 import {
   RandomSamplerOption,
   RANDOM_SAMPLER_SELECT_OPTIONS,
@@ -108,7 +108,7 @@ export const DocumentCountContent: FC<Props> = ({
   if (timeRangeEarliest === undefined || timeRangeLatest === undefined)
     return <TotalCountHeader totalCount={totalCount} />;
 
-  let chartPoints: DocumentCountChartPoint[] = [];
+  let chartPoints: LogRateHistogramItem[] = [];
   if (documentCountStats.buckets !== undefined) {
     const buckets: Record<string, number> = documentCountStats?.buckets;
     chartPoints = Object.entries(buckets).map(([time, value]) => ({ time: +time, value }));

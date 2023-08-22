@@ -100,6 +100,8 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/unified-field-list",
     "@kbn/core-ui-settings-browser",
+    "@kbn/content-management-plugin",
     "@kbn/ml-in-memory-table",
+    "@kbn/presentation-util-plugin",
   ],
 }

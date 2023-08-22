@@ -452,6 +452,112 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-public.executeAction",
+        "type": "Function",
+        "tags": [],
+        "label": "executeAction",
+        "description": [],
+        "signature": [
+          "({\n  id,\n  params,\n  http,\n  signal,\n}: { id: string; http: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpSetup",
+            "text": "HttpSetup"
+          },
+          "; params: Record<string, unknown>; signal?: AbortSignal | undefined; }) => Promise<",
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.ActionTypeExecutorResult",
+            "text": "ActionTypeExecutorResult"
+          },
+          "<R>>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/execute.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.executeAction.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  id,\n  params,\n  http,\n  signal,\n}",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/execute.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.executeAction.$1.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/execute.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.executeAction.$1.http",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpBrowserPluginApi",
+                    "section": "def-common.HttpSetup",
+                    "text": "HttpSetup"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/execute.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.executeAction.$1.params",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ [x: string]: unknown; }"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/execute.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.executeAction.$1.signal",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal | undefined"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/execute.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-public.ForLastExpression",
         "type": "Function",
         "tags": [],
@@ -1429,7 +1535,7 @@
         "label": "TextAreaWithMessageVariables",
         "description": [],
         "signature": [
-          "({ messageVariables, paramsProperty, index, inputTargetValue, isDisabled, editAction, label, errors, }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ messageVariables, paramsProperty, index, inputTargetValue, isDisabled, editAction, label, errors, helpText, }: React.PropsWithChildren<Props>) => JSX.Element"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/components/text_area_with_message_variables.tsx",
         "deprecated": false,
@@ -1440,7 +1546,7 @@
             "id": "def-public.TextAreaWithMessageVariables.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  messageVariables,\n  paramsProperty,\n  index,\n  inputTargetValue,\n  isDisabled = false,\n  editAction,\n  label,\n  errors,\n}",
+            "label": "{\n  messageVariables,\n  paramsProperty,\n  index,\n  inputTargetValue,\n  isDisabled = false,\n  editAction,\n  label,\n  errors,\n  helpText,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<Props>"
@@ -4703,6 +4809,20 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeParamsExpressionProps.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "triggersActionsUi",
             "id": "def-public.RuleTypeParamsExpressionProps.ruleParams",

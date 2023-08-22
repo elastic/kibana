@@ -13,6 +13,7 @@ export interface ActionsUsage {
   alert_history_connector_enabled: boolean;
   count_total: number;
   count_by_type: Record<string, number>;
+  count_gen_ai_provider_types: Record<string, number>;
   count_active_total: number;
   count_active_alert_history_connectors: number;
   count_active_by_type: Record<string, number>;
@@ -33,6 +34,7 @@ export const byTypeSchema: MakeSchemaFrom<ActionsUsage>['count_by_type'] = {
   // Known actions:
   __email: { type: 'long' },
   __index: { type: 'long' },
+  ['__gen-ai']: { type: 'long' },
   __pagerduty: { type: 'long' },
   __swimlane: { type: 'long' },
   '__server-log': { type: 'long' },
@@ -42,6 +44,13 @@ export const byTypeSchema: MakeSchemaFrom<ActionsUsage>['count_by_type'] = {
   __jira: { type: 'long' },
   __resilient: { type: 'long' },
   __teams: { type: 'long' },
+};
+
+export const byGenAiProviderTypeSchema: MakeSchemaFrom<ActionsUsage>['count_by_type'] = {
+  DYNAMIC_KEY: { type: 'long' },
+  // Known providers:
+  ['Azure OpenAI']: { type: 'long' },
+  ['OpenAI']: { type: 'long' },
 };
 
 export const byServiceProviderTypeSchema: MakeSchemaFrom<ActionsUsage>['count_active_email_connectors_by_service_type'] =

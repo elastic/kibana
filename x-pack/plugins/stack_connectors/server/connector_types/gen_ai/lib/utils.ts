@@ -17,10 +17,15 @@ import {
   getRequestWithStreamOption as azureAiGetRequestWithStreamOption,
 } from './azure_openai_utils';
 
-export const sanitizeRequest = (provider: string, url: string, body: string): string => {
+export const sanitizeRequest = (
+  provider: string,
+  url: string,
+  body: string,
+  defaultModel?: string
+): string => {
   switch (provider) {
     case OpenAiProviderType.OpenAi:
-      return openAiSanitizeRequest(url, body);
+      return openAiSanitizeRequest(url, body, defaultModel!);
     case OpenAiProviderType.AzureAi:
       return azureAiSanitizeRequest(url, body);
     default:
@@ -28,21 +33,45 @@ export const sanitizeRequest = (provider: string, url: string, body: string): st
   }
 };
 
-export const getRequestWithStreamOption = (
-  provider: string,
+export function getRequestWithStreamOption(
+  provider: OpenAiProviderType.OpenAi,
+  url: string,
+  body: string,
+  stream: boolean,
+  defaultModel: string
+): string;
+
+export function getRequestWithStreamOption(
+  provider: OpenAiProviderType.AzureAi,
   url: string,
   body: string,
   stream: boolean
-): string => {
+): string;
+
+export function getRequestWithStreamOption(
+  provider: OpenAiProviderType,
+  url: string,
+  body: string,
+  stream: boolean,
+  defaultModel?: string
+): string;
+
+export function getRequestWithStreamOption(
+  provider: string,
+  url: string,
+  body: string,
+  stream: boolean,
+  defaultModel?: string
+): string {
   switch (provider) {
     case OpenAiProviderType.OpenAi:
-      return openAiGetRequestWithStreamOption(url, body, stream);
+      return openAiGetRequestWithStreamOption(url, body, stream, defaultModel!);
     case OpenAiProviderType.AzureAi:
       return azureAiGetRequestWithStreamOption(url, body, stream);
     default:
       return body;
   }
-};
+}
 
 export const getAxiosOptions = (
   provider: string,

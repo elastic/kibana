@@ -12,13 +12,13 @@ import React from 'react';
 
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
+import { UserProfile, useUserProfileForm } from './user_profile';
 import { UserProfileAPIClient } from '..';
 import type { UserProfileData } from '../../../common';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { UserAPIClient } from '../../management';
 import { securityMock } from '../../mocks';
 import { Providers } from '../account_management_app';
-import { UserProfile, useUserProfileForm } from './user_profile';
 
 const user = mockAuthenticatedUser();
 const coreStart = coreMock.createStart();

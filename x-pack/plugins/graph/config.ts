@@ -18,6 +18,12 @@ export const configSchema = schema.object({
     { defaultValue: 'configAndData' }
   ),
   canEditDrillDownUrls: schema.boolean({ defaultValue: true }),
+  enabled: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.maybe(schema.boolean({ defaultValue: true })),
+    schema.never()
+  ),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

@@ -21,8 +21,10 @@ import {
   kafkaAcknowledgeReliabilityLevel,
   kafkaAuthType,
   kafkaCompressionType,
+  kafkaConnectionType,
   kafkaPartitionType,
   kafkaSaslMechanism,
+  kafkaVerificationModes,
   outputType,
 } from '../../../../../../../common/constants';
 
@@ -57,6 +59,8 @@ import {
   validateKafkaHeaders,
   validateKafkaDefaultTopic,
   validateKafkaTopics,
+  validateKafkaClientId,
+  validateKafkaHosts,
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
 
@@ -87,7 +91,9 @@ export interface OutputFormInputsType {
   maxBatchBytes: ReturnType<typeof useNumberInput>;
   kafkaHostsInput: ReturnType<typeof useComboInput>;
   kafkaVersionInput: ReturnType<typeof useInput>;
+  kafkaVerificationModeInput: ReturnType<typeof useInput>;
   kafkaAuthMethodInput: ReturnType<typeof useRadioInput>;
+  kafkaConnectionTypeInput: ReturnType<typeof useRadioInput>;
   kafkaSaslMechanismInput: ReturnType<typeof useRadioInput>;
   kafkaAuthUsernameInput: ReturnType<typeof useInput>;
   kafkaAuthPasswordInput: ReturnType<typeof useInput>;
@@ -104,7 +110,6 @@ export interface OutputFormInputsType {
   kafkaCompressionCodecInput: ReturnType<typeof useInput>;
   kafkaBrokerTimeoutInput: ReturnType<typeof useInput>;
   kafkaBrokerReachabilityTimeoutInput: ReturnType<typeof useInput>;
-  kafkaBrokerChannelBufferSizeInput: ReturnType<typeof useInput>;
   kafkaBrokerAckReliabilityInput: ReturnType<typeof useInput>;
   kafkaKeyInput: ReturnType<typeof useInput>;
   kafkaSslCertificateInput: ReturnType<typeof useInput>;
@@ -278,13 +283,18 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const kafkaHostsInput = useComboInput(
     'kafkaHostsComboBox',
     output?.hosts ?? [],
-    validateESHosts,
+    validateKafkaHosts,
     isDisabled('hosts')
   );
 
   const kafkaAuthMethodInput = useRadioInput(
-    kafkaOutput?.auth_type ?? kafkaAuthType.Userpass,
+    kafkaOutput?.auth_type ?? kafkaAuthType.None,
     isDisabled('auth_type')
+  );
+
+  const kafkaConnectionTypeInput = useRadioInput(
+    kafkaOutput?.connection_type ?? kafkaConnectionType.Plaintext,
+    isDisabled('connection_type')
   );
 
   const kafkaAuthUsernameInput = useInput(
@@ -312,6 +322,12 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const kafkaSslKeyInput = useInput(
     kafkaOutput?.ssl?.key,
     kafkaAuthMethodInput.value === kafkaAuthType.Ssl ? validateSSLKey : undefined,
+    isSSLEditable
+  );
+
+  const kafkaVerificationModeInput = useInput(
+    kafkaOutput?.ssl?.verification_mode ?? kafkaVerificationModes.Full,
+    undefined,
     isSSLEditable
   );
 
@@ -360,8 +376,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
 
   const kafkaClientIdInput = useInput(
-    kafkaOutput?.client_id ?? 'Elastic agent',
-    undefined,
+    kafkaOutput?.client_id ?? 'Elastic',
+    validateKafkaClientId,
     isDisabled('client_id')
   );
 
@@ -392,16 +408,10 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     isDisabled('timeout')
   );
 
-  const kafkaBrokerChannelBufferSizeInput = useInput(
-    `${kafkaOutput?.broker_buffer_size ?? 256}`,
-    undefined,
-    isDisabled('broker_buffer_size')
-  );
-
   const kafkaBrokerAckReliabilityInput = useInput(
-    kafkaOutput?.broker_ack_reliability ?? kafkaAcknowledgeReliabilityLevel.Commit,
+    `${kafkaOutput?.required_acks ?? kafkaAcknowledgeReliabilityLevel.Commit}`,
     undefined,
-    isDisabled('broker_ack_reliability')
+    isDisabled('required_acks')
   );
 
   const kafkaKeyInput = useInput(kafkaOutput?.key, undefined, isDisabled('key'));
@@ -434,7 +444,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     maxBatchBytes,
     kafkaVersionInput,
     kafkaHostsInput,
+    kafkaVerificationModeInput,
     kafkaAuthMethodInput,
+    kafkaConnectionTypeInput,
     kafkaAuthUsernameInput,
     kafkaAuthPasswordInput,
     kafkaSaslMechanismInput,
@@ -449,7 +461,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaCompressionCodecInput,
     kafkaBrokerTimeoutInput,
     kafkaBrokerReachabilityTimeoutInput,
-    kafkaBrokerChannelBufferSizeInput,
     kafkaBrokerAckReliabilityInput,
     kafkaKeyInput,
     kafkaSslCertificateAuthoritiesInput,
@@ -467,6 +478,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     const kafkaHostsValid = kafkaHostsInput.validate();
     const kafkaUsernameValid = kafkaAuthUsernameInput.validate();
     const kafkaPasswordValid = kafkaAuthPasswordInput.validate();
+    const kafkaClientIDValid = kafkaClientIdInput.validate();
     const kafkaSslCertificateValid = kafkaSslCertificateInput.validate();
     const kafkaSslKeyValid = kafkaSslKeyInput.validate();
     const kafkaDefaultTopicValid = kafkaDefaultTopicInput.validate();
@@ -501,7 +513,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
         kafkaHeadersValid &&
         kafkaDefaultTopicValid &&
         kafkaTopicsValid &&
-        additionalYamlConfigValid
+        additionalYamlConfigValid &&
+        kafkaClientIDValid
       );
     } else {
       // validate ES
@@ -519,6 +532,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaHostsInput,
     kafkaAuthUsernameInput,
     kafkaAuthPasswordInput,
+    kafkaClientIdInput,
     kafkaSslCertificateInput,
     kafkaSslKeyInput,
     kafkaDefaultTopicInput,
@@ -582,7 +596,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
       const payload: NewOutput = (() => {
         const parseIntegerIfStringDefined = (value: string | undefined): number | undefined => {
           if (value !== undefined) {
-            const parsedInt = parseInt(value, 10); // Specify the base as 10 for decimal numbers
+            const parsedInt = parseInt(value, 10);
             if (!isNaN(parsedInt)) {
               return parsedInt;
             }
@@ -592,6 +606,10 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
 
         switch (typeInput.value) {
           case outputType.Kafka:
+            const definedCA = kafkaSslCertificateAuthoritiesInput.value.filter(
+              (val) => val !== ''
+            ).length;
+
             return {
               name: nameInput.value,
               type: outputType.Kafka,
@@ -599,18 +617,26 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               is_default: defaultOutputInput.value,
               is_default_monitoring: defaultMonitoringOutputInput.value,
               config_yaml: additionalYamlConfigInput.value,
-              ...(kafkaAuthMethodInput.value === kafkaAuthType.Ssl
+              ...(kafkaConnectionTypeInput.value !== kafkaConnectionType.Plaintext ||
+              kafkaAuthMethodInput.value !== kafkaAuthType.None
                 ? {
                     ssl: {
-                      certificate: kafkaSslCertificateInput.value,
-                      key: kafkaSslKeyInput.value,
-                      certificate_authorities: kafkaSslCertificateAuthoritiesInput.value.filter(
-                        (val) => val !== ''
-                      ),
+                      ...(definedCA
+                        ? {
+                            certificate_authorities:
+                              kafkaSslCertificateAuthoritiesInput.value.filter((val) => val !== ''),
+                          }
+                        : {}),
+                      ...(kafkaAuthMethodInput.value === kafkaAuthType.Ssl
+                        ? {
+                            certificate: kafkaSslCertificateInput.value,
+                            key: kafkaSslKeyInput.value,
+                          }
+                        : {}),
+                      verification_mode: kafkaVerificationModeInput.value,
                     },
                   }
                 : {}),
-
               proxy_id: proxyIdValue,
 
               client_id: kafkaClientIdInput.value || undefined,
@@ -626,8 +652,17 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
                 : {}),
 
               auth_type: kafkaAuthMethodInput.value,
-              ...(kafkaAuthUsernameInput.value ? { username: kafkaAuthUsernameInput.value } : {}),
-              ...(kafkaAuthPasswordInput.value ? { password: kafkaAuthPasswordInput.value } : {}),
+              ...(kafkaAuthMethodInput.value === kafkaAuthType.None
+                ? { connection_type: kafkaConnectionTypeInput.value }
+                : {}),
+              ...(kafkaAuthMethodInput.value === kafkaAuthType.Userpass &&
+              kafkaAuthUsernameInput.value
+                ? { username: kafkaAuthUsernameInput.value }
+                : {}),
+              ...(kafkaAuthMethodInput.value === kafkaAuthType.Userpass &&
+              kafkaAuthPasswordInput.value
+                ? { password: kafkaAuthPasswordInput.value }
+                : {}),
               ...(kafkaAuthMethodInput.value === kafkaAuthType.Userpass &&
               kafkaSaslMechanismInput.value
                 ? { sasl: { mechanism: kafkaSaslMechanismInput.value } }
@@ -665,10 +700,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               broker_timeout: parseIntegerIfStringDefined(
                 kafkaBrokerReachabilityTimeoutInput.value
               ),
-              broker_ack_reliability: kafkaBrokerAckReliabilityInput.value,
-              broker_buffer_size: parseIntegerIfStringDefined(
-                kafkaBrokerChannelBufferSizeInput.value
-              ),
+              required_acks: parseIntegerIfStringDefined(kafkaBrokerAckReliabilityInput.value),
               ...shipperParams,
             } as KafkaOutput;
           case outputType.Logstash:
@@ -752,6 +784,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     compressionLevelInput.value,
     loadBalanceEnabledInput.value,
     typeInput.value,
+    kafkaSslCertificateAuthoritiesInput.value,
     nameInput.value,
     kafkaHostsInput.value,
     defaultOutputInput.value,
@@ -760,12 +793,13 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaAuthMethodInput.value,
     kafkaSslCertificateInput.value,
     kafkaSslKeyInput.value,
-    kafkaSslCertificateAuthoritiesInput.value,
+    kafkaVerificationModeInput.value,
     kafkaClientIdInput.value,
     kafkaVersionInput.value,
     kafkaKeyInput.value,
     kafkaCompressionCodecInput.value,
     kafkaCompressionLevelInput.value,
+    kafkaConnectionTypeInput.value,
     kafkaAuthUsernameInput.value,
     kafkaAuthPasswordInput.value,
     kafkaSaslMechanismInput.value,
@@ -779,7 +813,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaBrokerTimeoutInput.value,
     kafkaBrokerReachabilityTimeoutInput.value,
     kafkaBrokerAckReliabilityInput.value,
-    kafkaBrokerChannelBufferSizeInput.value,
     logstashHostsInput.value,
     sslCertificateInput.value,
     sslKeyInput.value,
