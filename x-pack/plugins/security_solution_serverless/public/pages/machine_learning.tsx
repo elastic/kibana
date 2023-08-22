@@ -10,6 +10,7 @@ import { LandingLinksIconsCategories } from '@kbn/security-solution-navigation/l
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { useNavLink } from '../common/hooks/use_nav_links';
 
 export const MachineLearningRoute: React.FC = () => {
@@ -19,10 +20,12 @@ export const MachineLearningRoute: React.FC = () => {
   return (
     <KibanaPageTemplate restrictWidth={false} contentBorder={false} grow={true}>
       <KibanaPageTemplate.Section>
-        <EuiPageHeader pageTitle={title} />
-        <EuiSpacer size="l" />
-        <EuiSpacer size="xl" />
-        <LandingLinksIconsCategories links={links} categories={categories} />
+        <TrackApplicationView viewId={SecurityPageName.mlLanding}>
+          <EuiPageHeader pageTitle={title} />
+          <EuiSpacer size="l" />
+          <EuiSpacer size="xl" />
+          <LandingLinksIconsCategories links={links} categories={categories} />
+        </TrackApplicationView>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );

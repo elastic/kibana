@@ -41,7 +41,7 @@ export const LinkToApmServices = ({ assetName, apmField }: LinkToApmServicesProp
       >
         <FormattedMessage
           id="xpack.infra.hostsViewPage.flyout.viewApmServicesLinkLabel"
-          defaultMessage="View APM Services"
+          defaultMessage="APM Services"
         />
       </EuiButtonEmpty>
     </RedirectAppLinks>

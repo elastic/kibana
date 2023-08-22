@@ -8,52 +8,11 @@
 import React, { useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import type { Meta, Story } from '@storybook/react/types-6-0';
-import { i18n } from '@kbn/i18n';
 import { AssetDetails } from './asset_details';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
-import { FlyoutTabIds, Tab, type AssetDetailsProps } from './types';
+import { type AssetDetailsProps } from './types';
 import { DecorateWithKibanaContext } from './__stories__/decorator';
-import { assetDetailsState } from './__stories__/context/fixtures';
-
-const links: AssetDetailsProps['links'] = ['alertRule', 'nodeDetails', 'apmServices'];
-const tabs: Tab[] = [
-  {
-    id: FlyoutTabIds.OVERVIEW,
-    name: i18n.translate('xpack.infra.nodeDetails.tabs.overview.title', {
-      defaultMessage: 'Overview',
-    }),
-  },
-  {
-    id: FlyoutTabIds.LOGS,
-    name: i18n.translate('xpack.infra.nodeDetails.tabs.logs', {
-      defaultMessage: 'Logs',
-    }),
-  },
-  {
-    id: FlyoutTabIds.METADATA,
-    name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.metadata', {
-      defaultMessage: 'Metadata',
-    }),
-  },
-  {
-    id: FlyoutTabIds.PROCESSES,
-    name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.processes', {
-      defaultMessage: 'Processes',
-    }),
-  },
-  {
-    id: FlyoutTabIds.ANOMALIES,
-    name: i18n.translate('xpack.infra.nodeDetails.tabs.anomalies', {
-      defaultMessage: 'Anomalies',
-    }),
-  },
-  {
-    id: FlyoutTabIds.LINK_TO_APM,
-    name: i18n.translate('xpack.infra.infra.nodeDetails.apmTabLabel', {
-      defaultMessage: 'APM',
-    }),
-  },
-];
+import { assetDetailsProps } from './__stories__/context/fixtures';
 
 const stories: Meta<AssetDetailsProps> = {
   title: 'infra/Asset Details View',
@@ -61,16 +20,14 @@ const stories: Meta<AssetDetailsProps> = {
   component: AssetDetails,
   argTypes: {
     links: {
-      options: links,
+      options: assetDetailsProps.links,
       control: {
         type: 'inline-check',
       },
     },
   },
   args: {
-    ...assetDetailsState,
-    tabs,
-    links,
+    ...assetDetailsProps,
   },
 };
 
@@ -99,11 +56,5 @@ const FlyoutTemplate: Story<AssetDetailsProps> = (args) => {
 export const Page = PageTemplate.bind({});
 
 export const Flyout = FlyoutTemplate.bind({});
-Flyout.args = {
-  renderMode: {
-    mode: 'flyout',
-    closeFlyout: () => {},
-  },
-};
 
 export default stories;

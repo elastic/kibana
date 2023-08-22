@@ -1,7 +1,151 @@
 {
   "id": "observability",
   "client": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.AutocompleteField",
+        "type": "Class",
+        "tags": [],
+        "label": "AutocompleteField",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observability",
+            "scope": "public",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-public.AutocompleteField",
+            "text": "AutocompleteField"
+          },
+          " extends React.Component<AutocompleteFieldProps, AutocompleteFieldState, any>"
+        ],
+        "path": "x-pack/plugins/observability/public/components/rule_kql_filter/autocomplete_field/autocomplete_field.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.AutocompleteField.state",
+            "type": "Object",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/components/rule_kql_filter/autocomplete_field/autocomplete_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.AutocompleteField.state.areSuggestionsVisible",
+                "type": "boolean",
+                "tags": [],
+                "label": "areSuggestionsVisible",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/public/components/rule_kql_filter/autocomplete_field/autocomplete_field.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.AutocompleteField.state.isFocused",
+                "type": "boolean",
+                "tags": [],
+                "label": "isFocused",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/public/components/rule_kql_filter/autocomplete_field/autocomplete_field.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.AutocompleteField.state.selectedIndex",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "selectedIndex",
+                "description": [],
+                "signature": [
+                  "null"
+                ],
+                "path": "x-pack/plugins/observability/public/components/rule_kql_filter/autocomplete_field/autocomplete_field.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.AutocompleteField.render",
+            "type": "Function",
+            "tags": [],
+            "label": "render",
+            "description": [],
+            "signature": [
+              "() => JSX.Element"
+            ],
+            "path": "x-pack/plugins/observability/public/components/rule_kql_filter/autocomplete_field/autocomplete_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.AutocompleteField.componentDidMount",
+            "type": "Function",
+            "tags": [],
+            "label": "componentDidMount",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/observability/public/components/rule_kql_filter/autocomplete_field/autocomplete_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.AutocompleteField.componentDidUpdate",
+            "type": "Function",
+            "tags": [],
+            "label": "componentDidUpdate",
+            "description": [],
+            "signature": [
+              "(prevProps: AutocompleteFieldProps) => void"
+            ],
+            "path": "x-pack/plugins/observability/public/components/rule_kql_filter/autocomplete_field/autocomplete_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.AutocompleteField.componentDidUpdate.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "prevProps",
+                "description": [],
+                "signature": [
+                  "AutocompleteFieldProps"
+                ],
+                "path": "x-pack/plugins/observability/public/components/rule_kql_filter/autocomplete_field/autocomplete_field.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
       {
         "parentPluginId": "observability",
@@ -705,6 +849,39 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.RuleFlyoutKueryBar",
+        "type": "Function",
+        "tags": [],
+        "label": "RuleFlyoutKueryBar",
+        "description": [],
+        "signature": [
+          "({\n  derivedIndexPattern,\n  onSubmit,\n  onChange,\n  value,\n  placeholder,\n  curryLoadSuggestions = defaultCurryLoadSuggestions,\n  compressed,\n}: Props) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability/public/components/rule_kql_filter/kuery_bar.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.RuleFlyoutKueryBar.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  derivedIndexPattern,\n  onSubmit,\n  onChange,\n  value,\n  placeholder,\n  curryLoadSuggestions = defaultCurryLoadSuggestions,\n  compressed,\n}",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/plugins/observability/public/components/rule_kql_filter/kuery_bar.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.toQuery",
         "type": "Function",
         "tags": [],
@@ -814,6 +991,52 @@
         "trackAdoption": false,
         "children": [],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.WithKueryAutocompletion",
+        "type": "Function",
+        "tags": [],
+        "label": "WithKueryAutocompletion",
+        "description": [],
+        "signature": [
+          "React.FunctionComponent<Omit<WithKueryAutocompletionLifecycleProps, \"kibana\">>"
+        ],
+        "path": "x-pack/plugins/observability/public/components/rule_kql_filter/with_kuery_autocompletion.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.WithKueryAutocompletion.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.WithKueryAutocompletion.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
@@ -7238,6 +7461,41 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-server.getParsedFilterQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getParsedFilterQuery",
+        "description": [],
+        "signature": [
+          "(filter: string | undefined) => ",
+          "QueryDslQueryContainer",
+          "[]"
+        ],
+        "path": "x-pack/plugins/observability/server/utils/get_parsed_filtered_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.getParsedFilterQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability/server/utils/get_parsed_filtered_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],

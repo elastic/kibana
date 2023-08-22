@@ -37,8 +37,14 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.dropbox,
   },
+  github: {
+    docsUrl: docLinks.connectorsGithub,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.github,
+  },
   gmail: {
-    docsUrl: '', // TODO
+    docsUrl: docLinks.connectorsGmail,
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.gmail,
@@ -85,6 +91,12 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.network_drive,
   },
+  onedrive: {
+    docsUrl: docLinks.connectorsOneDrive,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.onedrive,
+  },
   oracle: {
     docsUrl: docLinks.connectorsOracle,
     externalAuthDocsUrl:
@@ -104,18 +116,24 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.amazon_s3,
   },
+  salesforce: {
+    docsUrl: docLinks.connectorsSalesforce,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.salesforce,
+  },
   servicenow: {
     docsUrl: docLinks.connectorsServiceNow,
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.servicenow,
   },
-  sharepoint: {
+  sharepoint_server: {
     docsUrl: docLinks.connectorsSharepoint,
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.sharepoint,
-    platinumOnly: true,
+    platinumOnly: false,
   },
   sharepoint_online: {
     docsUrl: docLinks.connectorsSharepointOnline,
@@ -125,11 +143,11 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     platinumOnly: true,
   },
   slack: {
-    docsUrl: '', // TODO
+    docsUrl: docLinks.connectorsSlack,
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.slack,
-    platinumOnly: true,
+    platinumOnly: false,
   },
 };
 

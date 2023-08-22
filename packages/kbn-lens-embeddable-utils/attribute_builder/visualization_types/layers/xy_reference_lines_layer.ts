@@ -15,9 +15,9 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { ChartLayer, StaticValueConfig, StaticChartColumn } from '../../types';
 import { getDefaultReferences } from '../../utils';
-import { ReferenceLineColumn } from './columns/reference_line';
+import { StaticColumn } from './columns/static';
 
-interface XYReferenceLinesLayerConfig {
+export interface XYReferenceLinesLayerConfig {
   data: StaticValueConfig[];
   /**
    * It is possible to define a specific dataView for the layer. It will override the global chart one
@@ -28,7 +28,7 @@ interface XYReferenceLinesLayerConfig {
 export class XYReferenceLinesLayer implements ChartLayer<XYReferenceLineLayerConfig> {
   private column: StaticChartColumn[];
   constructor(private layerConfig: XYReferenceLinesLayerConfig) {
-    this.column = layerConfig.data.map((p) => new ReferenceLineColumn(p));
+    this.column = layerConfig.data.map((p) => new StaticColumn(p));
   }
 
   getName(): string | undefined {

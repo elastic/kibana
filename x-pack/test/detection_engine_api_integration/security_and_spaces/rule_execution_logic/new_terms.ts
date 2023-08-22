@@ -198,6 +198,7 @@ export default ({ getService }: FtrProviderContext) => {
           history_window_start: '2019-01-19T20:42:00.000Z',
           index: ['auditbeat-*'],
           language: 'kuery',
+          investigation_fields: [],
         },
         'kibana.alert.rule.actions': [],
         'kibana.alert.rule.author': [],

@@ -33,6 +33,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       expect(element).to.not.be(null);
 
       await notInstalledVulnerabilities.navigateToAction('cnvm-not-installed-action');
+
       await PageObjects.common.waitUntilUrlIncludes('add-integration/vuln_mgmt');
     });
 
@@ -43,6 +44,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       expect(element).to.not.be(null);
 
       await notInstalledCSP.navigateToAction('cspm-not-installed-action');
+
       await PageObjects.common.waitUntilUrlIncludes('add-integration/cspm');
     });
 
