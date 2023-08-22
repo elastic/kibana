@@ -12,6 +12,7 @@ import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { waitForIndexStatus } from '@kbn/core-saved-objects-migration-server-internal';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { METRICSET_NAME, PROCESSOR_EVENT } from '../../../common/es_fields/apm';
 import { Environment } from '../../../common/environment_rt';
@@ -20,7 +21,6 @@ import { withApmSpan } from '../../utils/with_apm_span';
 import { MlClient } from '../helpers/get_ml_client';
 import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
 import { getAnomalyDetectionJobs } from './get_anomaly_detection_jobs';
-import { ApmIndicesConfig } from '../../routes/settings/apm_indices/get_apm_indices';
 
 const DEFAULT_TIMEOUT = '60s';
 
@@ -33,7 +33,7 @@ export async function createAnomalyDetectionJobs({
 }: {
   mlClient?: MlClient;
   esClient: ElasticsearchClient;
-  indices: ApmIndicesConfig;
+  indices: APMIndices;
   environments: Environment[];
   logger: Logger;
 }) {
