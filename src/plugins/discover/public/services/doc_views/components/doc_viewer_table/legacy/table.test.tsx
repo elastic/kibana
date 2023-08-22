@@ -166,25 +166,21 @@ describe('DocViewTable at Discover', () => {
       expect(rowComponent.length).toBe(1);
     });
 
-    (
-      [
-        'addInclusiveFilterButton',
-        'toggleColumnButton',
-        'underscoreWarning',
-      ] as const
-    ).forEach((element) => {
-      const elementExist = check[element];
+    (['addInclusiveFilterButton', 'toggleColumnButton', 'underscoreWarning'] as const).forEach(
+      (element) => {
+        const elementExist = check[element];
 
-      if (typeof elementExist === 'boolean') {
-        const btn = findTestSubject(rowComponent, element, '^=');
+        if (typeof elementExist === 'boolean') {
+          const btn = findTestSubject(rowComponent, element, '^=');
 
-        it(`renders ${element} for '${check._property}' correctly`, () => {
-          const disabled = btn.length ? btn.props().disabled : true;
-          const clickAble = btn.length && !disabled ? true : false;
-          expect(clickAble).toBe(elementExist);
-        });
+          it(`renders ${element} for '${check._property}' correctly`, () => {
+            const disabled = btn.length ? btn.props().disabled : true;
+            const clickAble = btn.length && !disabled ? true : false;
+            expect(clickAble).toBe(elementExist);
+          });
+        }
       }
-    });
+    );
   });
 });
 

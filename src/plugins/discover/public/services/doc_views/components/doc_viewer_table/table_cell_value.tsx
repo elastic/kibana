@@ -92,14 +92,13 @@ export const TableFieldValue = ({
   rawValue,
   ignoreReason,
 }: TableFieldValueProps) => {
-
   const valueClassName = classNames({
     // eslint-disable-next-line @typescript-eslint/naming-convention
     kbnDocViewer__value: true,
   });
   return (
     <Fragment>
-      {(ignoreReason) && (
+      {ignoreReason && (
         <EuiFlexGroup gutterSize="s">
           {ignoreReason && (
             <EuiFlexItem grow={false}>
