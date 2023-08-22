@@ -15,7 +15,7 @@ import { formatFieldValue } from './format_value';
 
 const formattedHitCache = new WeakMap<SearchHit, FormattedHit>();
 
-type FormattedHit = Array<readonly [fieldName: string, formattedValue: string]>;
+type FormattedHit = Array<readonly [fieldName: string, formattedValue: string, type?: string]>;
 
 /**
  * Returns a formatted document in form of key/value pairs of the fields name and a formatted value.
@@ -41,8 +41,11 @@ export function formatHit(
   // Flatten the object using the flattenHit implementation we use across Discover for flattening documents.
   const flattened = hit.flattened;
 
-  const highlightPairs: Array<[fieldName: string, formattedValue: string]> = [];
-  const sourcePairs: Array<[fieldName: string, formattedValue: string]> = [];
+  const highlightPairs: Array<
+    [fieldName: string, formattedValue: string, type: string | undefined]
+  > = [];
+  const sourcePairs: Array<[fieldName: string, formattedValue: string, type: string | undefined]> =
+    [];
 
   // Add each flattened field into the corresponding array for highlighted or other fields,
   // depending on whether the original hit had a highlight for it. That way we can later
@@ -59,14 +62,15 @@ export function formatHit(
       dataView,
       dataView.fields.getByName(key)
     );
+    const type = dataView.fields.getByName(key)?.type;
     // If the field was a mapped field, we validate it against the fieldsToShow list, if not
     // we always include it into the result.
     if (displayKey) {
       if (shouldShowFieldHandler(key)) {
-        pairs.push([displayKey, formattedValue]);
+        pairs.push([displayKey, formattedValue, type]);
       }
     } else {
-      pairs.push([key, formattedValue]);
+      pairs.push([key, formattedValue, type]);
     }
   });
   const pairs = [...highlightPairs, ...sourcePairs];

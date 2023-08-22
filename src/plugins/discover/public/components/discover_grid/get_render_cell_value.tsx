@@ -27,6 +27,7 @@ import type {
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
 import { MAX_DOC_FIELDS_DISPLAYED, formatFieldValue, formatHit } from '@kbn/discover-utils';
+import { FieldIcon } from '@kbn/react-field';
 import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
@@ -112,9 +113,14 @@ export const getRenderCellValueFn =
           compressed
           className={classnames('dscDiscoverGrid__descriptionList', CELL_CLASS)}
         >
-          {pairs.map(([key, value]) => (
+          {pairs.map(([key, value, type]) => (
             <Fragment key={key}>
               <EuiDescriptionListTitle className="dscDiscoverGrid__descriptionListTitle">
+                {type && (
+                  <>
+                    <FieldIcon type={type} label={type} size={'s'} className={'eui-alignMiddle'} />{' '}
+                  </>
+                )}
                 {key}
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription
