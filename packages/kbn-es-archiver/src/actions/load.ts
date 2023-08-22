@@ -72,7 +72,7 @@ export async function loadAction({
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
   // across archives and properly skip docs from existing indexes
-  const recordStream = concatStreamProviders(
+  const recordsFromMappingsAndArchiveOrdered = concatStreamProviders(
     mappingsFileAndArchive.map((mappingsOrArchiveName) => () => {
       return pipeline(
         pipe(mappingsOrArchiveName, logLoad(archiveGeneralName)(log), resDir, createReadStream),
@@ -86,7 +86,7 @@ export async function loadAction({
   progress.activate(log);
 
   await createPromiseFromStreams([
-    recordStream,
+    recordsFromMappingsAndArchiveOrdered,
     createCreateIndexStream({ client, stats, skipExisting, docsOnly, log }),
     createIndexDocRecordsStream(client, stats, progress, useCreate),
   ]);
