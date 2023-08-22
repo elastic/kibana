@@ -32,7 +32,7 @@ export function createIndexDocRecordsStreamSvrLess(
   client: Client,
   stats: Stats,
   useCreate: boolean = false
-) {
+): Writable {
   async function indexDocs(docs: any[]) {
     const operation = useCreate === true ? BulkOperation.Create : BulkOperation.Index;
     const ops = new WeakMap<any, any>();

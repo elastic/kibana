@@ -25,10 +25,8 @@ import {
   readDirectory,
   createParseArchiveStreams,
   createCreateIndexStream,
-  // createIndexDocRecordsStream,
   createIndexDocRecordsStreamSvrLess,
   migrateSavedObjectIndices,
-  // Progress,
   createDefaultSpace,
 } from '../lib';
 
@@ -80,22 +78,14 @@ export async function loadAction({
       ...createParseArchiveStreams({ gzip: isGzip(eitherMappingsFileOrArchiveFileName) })
     );
 
-  const recordsFromMappingsAndArchiveOrdered = concatStreamProviders(
-    prioritizeMappings(await readDirectory(inputDir)).map(uniteLazy),
-    { objectMode: true }
-  );
-
-  // const progress = new Progress();
-  // progress.activate(log);
-
   await createPromiseFromStreams([
-    recordsFromMappingsAndArchiveOrdered,
+    concatStreamProviders(prioritizeMappings(await readDirectory(inputDir)).map(uniteLazy), {
+      objectMode: true,
+    }),
     createCreateIndexStream({ client, stats, skipExisting, docsOnly, log }),
-    // createIndexDocRecordsStream(client, stats, progress, useCreate),
     createIndexDocRecordsStreamSvrLess(client, stats, useCreate),
   ]);
 
-  // progress.deactivate();
   const result = stats.toJSON();
 
   const indicesWithDocs: string[] = [];
