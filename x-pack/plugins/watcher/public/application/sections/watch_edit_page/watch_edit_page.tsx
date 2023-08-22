@@ -11,6 +11,7 @@ import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { EuiPageTemplate } from '@elastic/eui';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { BaseWatch } from '../../../../common/types/watch_types';
 import { getPageErrorCode, PageError, SectionLoading } from '../../components';
@@ -149,12 +150,14 @@ export const WatchEditPage = ({
 
   if (!watch) {
     return (
-      <SectionLoading>
-        <FormattedMessage
-          id="xpack.watcher.sections.watchEdit.loadingWatchDescription"
-          defaultMessage="Loading watch…"
-        />
-      </SectionLoading>
+      <EuiPageTemplate.EmptyPrompt>
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.watcher.sections.watchEdit.loadingWatchDescription"
+            defaultMessage="Loading watch…"
+          />
+        </SectionLoading>
+      </EuiPageTemplate.EmptyPrompt>
     );
   }
 
