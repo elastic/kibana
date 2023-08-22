@@ -893,7 +893,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "refreshListBouncer",
-            "description": [],
+            "description": [
+              "Flag to force a new fetch of the table items. Whenever it changes, the `findItems()` will be called."
+            ],
             "signature": [
               "boolean | undefined"
             ],

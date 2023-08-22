@@ -21,6 +21,7 @@ import {
   RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
+  IRuleTypeAlerts,
 } from './types';
 import {
   RecoveredActionGroup,
@@ -300,7 +301,7 @@ export class RuleTypeRegistry {
       },
     });
     if (this.alertsService && ruleType.alerts) {
-      this.alertsService.register(ruleType.alerts);
+      this.alertsService.register(ruleType.alerts as IRuleTypeAlerts);
     }
 
     // No need to notify usage on basic alert types
@@ -378,7 +379,6 @@ export class RuleTypeRegistry {
             defaultScheduleInterval,
             doesSetRecoveryContext,
             alerts,
-            getSummarizedAlerts,
             fieldsForAAD,
           },
         ]: [string, UntypedNormalizedRuleType]) => ({
@@ -399,8 +399,8 @@ export class RuleTypeRegistry {
             name,
             minimumLicenseRequired
           ).isValid,
-          hasGetSummarizedAlerts: !!getSummarizedAlerts,
           hasFieldsForAAD: Boolean(fieldsForAAD),
+          hasAlertsMappings: !!alerts,
           ...(alerts ? { alerts } : {}),
         })
       )

@@ -122,6 +122,7 @@ describe('Monitor Detail Flyout', () => {
           unit: 'm',
         },
         tags: ['prod'],
+        config_id: 'test-id',
       },
       refetch: jest.fn(),
     });

@@ -3121,11 +3121,11 @@
                     "section": "def-common.SavedObjectsPitParams",
                     "text": "SavedObjectsPitParams"
                   },
-                  " | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; sortOrder?: ",
+                  " | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortOrder?: ",
                   "SortOrder",
                   " | undefined; searchAfter?: ",
                   "SortResults",
-                  " | undefined; hasReference?: ",
+                  " | undefined; rootSearchFields?: string[] | undefined; hasReference?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
@@ -3885,6 +3885,20 @@
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"
+            ],
+            "path": "src/plugins/data/server/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.SearchStrategyDependencies.rollupsEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rollupsEnabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
@@ -32458,10 +32472,6 @@
           {
             "plugin": "discover",
             "path": "src/plugins/discover/public/application/context/utils/fetch_hits_in_interval.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/get_es_query_search_after.ts"
           },
           {
             "plugin": "discover",

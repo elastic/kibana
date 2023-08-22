@@ -14,17 +14,13 @@ import {
   useIsWithinMaxBreakpoint,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageBody,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
+  EuiPageTemplate,
   EuiPanel,
   EuiProgress,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -37,6 +33,7 @@ import {
 import { useStorage } from '@kbn/ml-local-storage';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { kbnTypeToSupportedType } from '../../../common/util/field_types_utils';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import {
@@ -59,7 +56,6 @@ import {
   DataVisualizerIndexBasedAppState,
   DataVisualizerIndexBasedPageUrlState,
 } from '../../types/index_data_visualizer_state';
-import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../types/combined_query';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
@@ -173,8 +169,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   );
 
   const { services } = useDataVisualizerKibana();
-  const { notifications, uiSettings, data } = services;
-  const { toasts } = notifications;
+  const { uiSettings, data } = services;
 
   const [dataVisualizerListState, setDataVisualizerListState] =
     usePageUrlState<DataVisualizerIndexBasedPageUrlState>(
@@ -188,26 +183,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   );
 
   const { currentDataView, currentSessionId, getAdditionalLinks } = dataVisualizerProps;
-
-  useEffect(() => {
-    if (!currentDataView.isTimeBased()) {
-      toasts.addWarning({
-        title: i18n.translate(
-          'xpack.dataVisualizer.index.dataViewNotBasedOnTimeSeriesNotificationTitle',
-          {
-            defaultMessage: 'The data view {dataViewTitle} is not based on a time series',
-            values: { dataViewTitle: currentDataView.title },
-          }
-        ),
-        text: i18n.translate(
-          'xpack.dataVisualizer.index.dataViewNotBasedOnTimeSeriesNotificationDescription',
-          {
-            defaultMessage: 'Anomaly detection only runs over time-based indices',
-          }
-        ),
-      });
-    }
-  }, [currentDataView, toasts]);
 
   const dataViewFields: DataViewField[] = currentDataView.fields;
 
@@ -518,59 +493,62 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   });
 
   return (
-    <EuiPageBody data-test-subj="dataVisualizerIndexPage" paddingSize="none" panelled={false}>
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem>
-          <EuiPageContentHeader data-test-subj="dataVisualizerPageHeader" css={dvPageHeader}>
-            <EuiPageContentHeaderSection>
-              <EuiFlexGroup
-                data-test-subj="dataViewTitleHeader"
-                direction="row"
-                alignItems="center"
-                css={{ padding: `${euiTheme.euiSizeS} 0`, marginRight: `${euiTheme.euiSize}` }}
-              >
-                <EuiTitle size={'s'}>
-                  <h2>{currentDataView.getName()}</h2>
-                </EuiTitle>
-                <DataVisualizerDataViewManagement
-                  currentDataView={currentDataView}
-                  useNewFieldsApi={true}
-                />
-              </EuiFlexGroup>
-            </EuiPageContentHeaderSection>
+    <EuiPageTemplate
+      offset={0}
+      restrictWidth={false}
+      bottomBorder={false}
+      grow={false}
+      data-test-subj="dataVisualizerIndexPage"
+      paddingSize="none"
+      panelled={true}
+    >
+      <EuiPageTemplate.Section>
+        <EuiPageTemplate.Header data-test-subj="dataVisualizerPageHeader" css={dvPageHeader}>
+          <EuiFlexGroup
+            data-test-subj="dataViewTitleHeader"
+            direction="row"
+            alignItems="center"
+            css={{ padding: `${euiTheme.euiSizeS} 0`, marginRight: `${euiTheme.euiSize}` }}
+          >
+            <EuiTitle size={'s'}>
+              <h2>{currentDataView.getName()}</h2>
+            </EuiTitle>
+            <DataVisualizerDataViewManagement
+              currentDataView={currentDataView}
+              useNewFieldsApi={true}
+            />
+          </EuiFlexGroup>
 
-            {isWithinLargeBreakpoint ? <EuiSpacer size="m" /> : null}
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexEnd"
-              gutterSize="s"
-              data-test-subj="dataVisualizerTimeRangeSelectorSection"
-            >
-              {hasValidTimeField ? (
-                <EuiFlexItem grow={false}>
-                  <FullTimeRangeSelector
-                    frozenDataPreference={frozenDataPreference}
-                    setFrozenDataPreference={setFrozenDataPreference}
-                    dataView={currentDataView}
-                    query={undefined}
-                    disabled={false}
-                    timefilter={timefilter}
-                  />
-                </EuiFlexItem>
-              ) : null}
+          {isWithinLargeBreakpoint ? <EuiSpacer size="m" /> : null}
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexEnd"
+            gutterSize="s"
+            data-test-subj="dataVisualizerTimeRangeSelectorSection"
+          >
+            {hasValidTimeField ? (
               <EuiFlexItem grow={false}>
-                <DatePickerWrapper
-                  isAutoRefreshOnly={!hasValidTimeField}
-                  showRefresh={!hasValidTimeField}
-                  width="full"
+                <FullTimeRangeSelector
+                  frozenDataPreference={frozenDataPreference}
+                  setFrozenDataPreference={setFrozenDataPreference}
+                  dataView={currentDataView}
+                  query={undefined}
+                  disabled={false}
+                  timefilter={timefilter}
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageContentHeader>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiPageContentBody>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <DatePickerWrapper
+                isAutoRefreshOnly={!hasValidTimeField}
+                showRefresh={!hasValidTimeField}
+                width="full"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageTemplate.Header>
+        <EuiSpacer size="m" />
+
         <EuiFlexGroup gutterSize="m" direction={isWithinLargeBreakpoint ? 'column' : 'row'}>
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder>
@@ -643,7 +621,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPageContentBody>
-    </EuiPageBody>
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
   );
 };

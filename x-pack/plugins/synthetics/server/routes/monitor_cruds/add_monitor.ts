@@ -19,15 +19,15 @@ import { triggerTestNow } from '../synthetics_service/test_now_monitor';
 import { SyntheticsServerSetup } from '../../types';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { formatKibanaNamespace } from '../../synthetics_service/formatters/private_formatters';
-import { getSyntheticsPrivateLocations } from '../../saved_objects/private_locations';
 import {
   ConfigKey,
   MonitorFields,
   SyntheticsMonitor,
-  EncryptedSyntheticsMonitor,
-  PrivateLocation,
+  EncryptedSyntheticsMonitorAttributes,
 } from '../../../common/runtime_types';
+import { formatKibanaNamespace } from '../../synthetics_service/formatters/private_formatters';
+import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import {
   DEFAULT_FIELDS,
@@ -37,6 +37,7 @@ import { validateMonitor } from './monitor_validation';
 import { sendTelemetryEvents, formatTelemetryEvent } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import { deleteMonitor } from './delete_monitor';
+import { mapSavedObjectToMonitor } from './helper';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -71,7 +72,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
     const normalizedMonitor = validationResult.decodedMonitor;
 
-    const privateLocations: PrivateLocation[] = await getPrivateLocations(
+    const privateLocations: PrivateLocationAttributes[] = await getPrivateLocationsForMonitor(
       savedObjectsClient,
       normalizedMonitor
     );
@@ -96,7 +97,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       initDefaultAlerts(newMonitor.attributes.name, routeContext);
       setupGettingStarted(newMonitor.id, routeContext);
 
-      return response.ok({ body: newMonitor });
+      return response.ok({ body: mapSavedObjectToMonitor(newMonitor) });
     } catch (getErr) {
       server.logger.error(getErr);
       if (SavedObjectsErrorHelpers.isForbiddenError(getErr)) {
@@ -120,7 +121,7 @@ export const createNewSavedObjectMonitor = async ({
   savedObjectsClient: SavedObjectsClientContract;
   normalizedMonitor: SyntheticsMonitor;
 }) => {
-  return await savedObjectsClient.create<EncryptedSyntheticsMonitor>(
+  return await savedObjectsClient.create<EncryptedSyntheticsMonitorAttributes>(
     syntheticsMonitorType,
     formatSecrets({
       ...normalizedMonitor,
@@ -171,12 +172,12 @@ export const syncNewMonitor = async ({
   id?: string;
   normalizedMonitor: SyntheticsMonitor;
   routeContext: RouteContext;
-  privateLocations: PrivateLocation[];
+  privateLocations: PrivateLocationAttributes[];
 }) => {
-  const { savedObjectsClient, server, syntheticsMonitorClient, request, spaceId } = routeContext;
+  const { savedObjectsClient, server, syntheticsMonitorClient, spaceId } = routeContext;
   const newMonitorId = id ?? uuidV4();
 
-  let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitor> | null = null;
+  let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitorAttributes> | null = null;
   const monitorWithNamespace = hydrateMonitorFields({
     normalizedMonitor,
     routeContext,
@@ -192,7 +193,6 @@ export const syncNewMonitor = async ({
 
     const syncErrorsPromise = syntheticsMonitorClient.addMonitors(
       [{ monitor: monitorWithNamespace as MonitorFields, id: newMonitorId }],
-      request,
       savedObjectsClient,
       privateLocations,
       spaceId
@@ -249,7 +249,7 @@ export const deleteMonitorIfCreated = async ({
 }) => {
   const { server, savedObjectsClient } = routeContext;
   try {
-    const encryptedMonitor = await savedObjectsClient.get<EncryptedSyntheticsMonitor>(
+    const encryptedMonitor = await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
       syntheticsMonitorType,
       newMonitorId
     );
@@ -267,7 +267,7 @@ export const deleteMonitorIfCreated = async ({
   }
 };
 
-export const getPrivateLocations = async (
+export const getPrivateLocationsForMonitor = async (
   soClient: SavedObjectsClientContract,
   normalizedMonitor: SyntheticsMonitor
 ) => {
@@ -276,7 +276,7 @@ export const getPrivateLocations = async (
   if (hasPrivateLocation.length === 0) {
     return [];
   }
-  return await getSyntheticsPrivateLocations(soClient);
+  return await getPrivateLocations(soClient);
 };
 
 export const getMonitorNamespace = (

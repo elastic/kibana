@@ -418,6 +418,111 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     }),
     serviceType: 'confluence',
   },
+  dropbox: {
+    configuration: {
+      path: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: 'Path to fetch files/folders',
+        options: [],
+        order: 1,
+        required: false,
+        sensitive: false,
+        tooltip: 'This configurable field is ignored when Advanced Sync Rules are used.',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '/',
+      },
+      app_key: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: 'App key',
+        options: [],
+        order: 2,
+        placeholder: '',
+        required: true,
+        sensitive: true,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      app_secret: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: 'App secret',
+        options: [],
+        order: 3,
+        required: true,
+        sensitive: true,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      refresh_token: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: 'Refresh token',
+        options: [],
+        order: 4,
+        required: true,
+        sensitive: true,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      retry_count: {
+        default_value: 3,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: 'Retries per request',
+        options: [],
+        order: 5,
+        required: false,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: 3,
+      },
+      concurrent_downloads: {
+        default_value: 100,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: 'Maximum concurrent downloads',
+        options: [],
+        order: 6,
+        required: false,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: 100,
+      },
+    },
+    features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
+    },
+    name: i18n.translate('xpack.enterpriseSearch.nativeConnectors.dropbox.name', {
+      defaultMessage: 'Dropbox',
+    }),
+    serviceType: 'dropbox',
+  },
   jira: {
     configuration: {
       data_source: {
@@ -1490,6 +1595,110 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     }),
     serviceType: 'postgresql',
   },
+  servicenow: {
+    configuration: {
+      url: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: 'Service URL',
+        options: [],
+        order: 1,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: 'http://127.0.0.1:9318',
+      },
+      username: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTAREA,
+        label: 'Username',
+        options: [],
+        order: 2,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      password: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: 'Password',
+        options: [],
+        order: 3,
+        required: true,
+        sensitive: true,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      services: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTAREA,
+        label: 'Comma-separated list of services',
+        options: [],
+        order: 4,
+        required: true,
+        sensitive: false,
+        tooltip: 'List of services is ignored when Advanced Sync Rules are used.',
+        type: FieldType.LIST,
+        ui_restrictions: [],
+        validations: [],
+        value: '*',
+      },
+      retry_count: {
+        default_value: 3,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: 'Retries per request',
+        options: [],
+        order: 5,
+        required: false,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: 3,
+      },
+      concurrent_downloads: {
+        default_value: 10,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: 'Maximum concurrent downloads',
+        options: [],
+        order: 6,
+        required: false,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: 10,
+      },
+    },
+    features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
+    },
+    name: i18n.translate('xpack.enterpriseSearch.nativeConnectors.servicenow.name', {
+      defaultMessage: 'ServiceNow',
+    }),
+    serviceType: 'servicenow',
+  },
   sharepoint_online: {
     configuration: {
       tenant_id: {
@@ -1652,14 +1861,19 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
-      fetch_users_by_site: {
-        default_value: false,
-        depends_on: [{ field: 'use_document_level_security', value: true }],
+      fetch_drive_item_permissions: {
+        default_value: true,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
         display: DisplayType.TOGGLE,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUsersBySiteLabel',
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchDriveItemPermissionsLabel',
           {
-            defaultMessage: 'Discover users by site membership',
+            defaultMessage: 'Fetch drive item permissions',
           }
         ),
         options: [],
@@ -1667,16 +1881,109 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUsersBySiteTooltip',
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchDriveItemPermissionsTooltip',
           {
             defaultMessage:
-              'When syncing only a small subset of sites, it can be more efficient to only fetch users who have access to those sites. This becomes increasingly inefficient the more sites (and the more users) concerned.',
+              'Enable this option to fetch drive item specific permissions. This setting can increase sync time.',
           }
         ),
         type: FieldType.BOOLEAN,
         ui_restrictions: [],
         validations: [],
-        value: false,
+        value: true,
+      },
+      fetch_unique_page_permissions: {
+        default_value: true,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUniquePagePermissionsLabel',
+          {
+            defaultMessage: 'Fetch unique page permissions',
+          }
+        ),
+        options: [],
+        order: 9,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUniquePagePermissionsTooltip',
+          {
+            defaultMessage:
+              'Enable this option to fetch unique page permissions. This setting can increase sync time. If this setting is disabled a page will inherit permissions from its parent site.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
+      fetch_unique_list_permissions: {
+        default_value: true,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUniqueListPermissionsLabel',
+          {
+            defaultMessage: 'Fetch unique list permissions',
+          }
+        ),
+        options: [],
+        order: 10,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUniqueListPermissionsTooltip',
+          {
+            defaultMessage:
+              'Enable this option to fetch unique list permissions. This setting can increase sync time. If this setting is disabled a list will inherit permissions from its parent site.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
+      fetch_unique_list_item_permissions: {
+        default_value: true,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUniqueListItemPermissionsLabel',
+          {
+            defaultMessage: 'Fetch unique list item permissions',
+          }
+        ),
+        options: [],
+        order: 11,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUniqueListItemPermissionsTooltip',
+          {
+            defaultMessage:
+              'Enable this option to fetch unique list item permissions. This setting can increase sync time. If this setting is disabled a list item will inherit permissions from its parent site.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
       },
     },
     features: {

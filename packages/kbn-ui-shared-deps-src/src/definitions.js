@@ -72,7 +72,7 @@ const externals = {
   '@elastic/eui/dist/eui_charts_theme': '__kbnSharedDeps__.ElasticEuiChartsTheme',
 
   // transient dep of eui
-  'react-beautiful-dnd': '__kbnSharedDeps__.ReactBeautifulDnD',
+  '@hello-pangea/dnd': '__kbnSharedDeps__.HelloPangeaDnd',
   lodash: '__kbnSharedDeps__.Lodash',
   'lodash/fp': '__kbnSharedDeps__.LodashFp',
   fflate: '__kbnSharedDeps__.Fflate',

@@ -83,6 +83,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // what types of config settings can be exposed to the browser.
         // When plugin owners make a change that exposes additional config values, the changes will be reflected in this test assertion.
         // Ensure that your change does not unintentionally expose any sensitive values!
+        'console.autocompleteDefinitions.endpointsAvailability (alternatives)',
         'console.ui.enabled (boolean)',
         'dashboard.allowByValueEmbeddables (boolean)',
         'unifiedSearch.autocomplete.querySuggestions.enabled (boolean)',
@@ -196,6 +197,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cases.files.allowedMimeTypes (array)',
         'xpack.cases.files.maxSize (number)',
         'xpack.cases.markdownPlugins.lens (boolean)',
+        'xpack.cases.stack.enabled (boolean)',
         'xpack.ccr.ui.enabled (boolean)',
         'xpack.cloud.base_url (string)',
         'xpack.cloud.cname (string)',
@@ -219,6 +221,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.organization_url (string)',
         'xpack.cloud.billing_url (string)',
         'xpack.cloud.profile_url (string)',
+        'xpack.cloud.performance_url (string)',
+        'xpack.cloud.users_and_roles_url (string)',
+        'xpack.cloud.projects_url (any)', // It's a string (any because schema.conditional)
+        // can't be used to infer urls or customer id from the outside
+        'xpack.cloud.serverless.project_id (string)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean)',
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean)',
         'xpack.fleet.agents.enabled (boolean)',
@@ -232,7 +239,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.graph.savePolicy (alternatives)',
         'xpack.ilm.ui.enabled (boolean)',
         'xpack.index_management.ui.enabled (boolean)',
-        'xpack.index_management.enableIndexActions (boolean)',
+        'xpack.index_management.enableIndexActions (any)',
+        'xpack.index_management.enableLegacyTemplates (any)',
+        'xpack.index_management.dev.enableIndexDetailsPage (boolean)',
         'xpack.infra.sources.default.fields.message (array)',
         /**
          * xpack.infra.logs is conditional and will resolve to an object of properties
@@ -273,13 +282,16 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.upgrade_assistant.featureSet.mlSnapshots (boolean)',
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean)',
         'xpack.upgrade_assistant.ui.enabled (boolean)',
-        'xpack.observability.aiAssistant.enabled (boolean)',
-        'xpack.observability.aiAssistant.feedback.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean)',
+        'xpack.observability.unsafe.alertDetails.observability.enabled (boolean)',
         'xpack.observability.unsafe.thresholdRule.enabled (boolean)',
         'xpack.observability_onboarding.ui.enabled (boolean)',
+        /**
+         * xpack.discoverLogExplorer.featureFlags is conditional and will never resolve if used in non-serverless environment
+         */
+        'xpack.discoverLogExplorer.featureFlags.deepLinkVisible (any)',
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's

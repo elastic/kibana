@@ -345,7 +345,7 @@ export class TaskStore {
    */
   public async remove(id: string): Promise<void> {
     try {
-      await this.savedObjectsRepository.delete('task', id);
+      await this.savedObjectsRepository.delete('task', id, { refresh: false });
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -361,7 +361,7 @@ export class TaskStore {
   public async bulkRemove(taskIds: string[]): Promise<SavedObjectsBulkDeleteResponse> {
     try {
       const savedObjectsToDelete = taskIds.map((taskId) => ({ id: taskId, type: 'task' }));
-      return await this.savedObjectsRepository.bulkDelete(savedObjectsToDelete);
+      return await this.savedObjectsRepository.bulkDelete(savedObjectsToDelete, { refresh: false });
     } catch (e) {
       this.errors$.next(e);
       throw e;

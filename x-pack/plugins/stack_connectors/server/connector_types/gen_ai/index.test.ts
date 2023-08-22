@@ -11,7 +11,7 @@ import axios from 'axios';
 import { configValidator, getConnectorType } from '.';
 import { GenAiConfig, GenAiSecrets } from '../../../common/gen_ai/types';
 import { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { OpenAiProviderType } from '../../../common/gen_ai/constants';
+import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/gen_ai/constants';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -44,6 +44,7 @@ describe('Generative AI Connector', () => {
       const config: GenAiConfig = {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         apiProvider: OpenAiProviderType.OpenAi,
+        defaultModel: DEFAULT_OPENAI_MODEL,
       };
 
       expect(configValidator(config, { configurationUtilities })).toEqual(config);
@@ -53,6 +54,7 @@ describe('Generative AI Connector', () => {
       const config: GenAiConfig = {
         apiUrl: 'example.com/do-something',
         apiProvider: OpenAiProviderType.OpenAi,
+        defaultModel: DEFAULT_OPENAI_MODEL,
       };
       expect(() => {
         configValidator(config, { configurationUtilities });
@@ -64,7 +66,8 @@ describe('Generative AI Connector', () => {
     test('config validation failed when the OpenAI API provider is empty', () => {
       const config: GenAiConfig = {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
-        apiProvider: '',
+        apiProvider: '' as OpenAiProviderType,
+        defaultModel: DEFAULT_OPENAI_MODEL,
       };
       expect(() => {
         configValidator(config, { configurationUtilities });
@@ -76,7 +79,8 @@ describe('Generative AI Connector', () => {
     test('config validation failed when the OpenAI API provider is invalid', () => {
       const config: GenAiConfig = {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
-        apiProvider: 'bad-one',
+        apiProvider: 'bad-one' as OpenAiProviderType,
+        defaultModel: DEFAULT_OPENAI_MODEL,
       };
       expect(() => {
         configValidator(config, { configurationUtilities });
@@ -96,6 +100,7 @@ describe('Generative AI Connector', () => {
       const config: GenAiConfig = {
         apiUrl: 'http://mylisteningserver.com:9200/endpoint',
         apiProvider: OpenAiProviderType.OpenAi,
+        defaultModel: DEFAULT_OPENAI_MODEL,
       };
 
       expect(() => {

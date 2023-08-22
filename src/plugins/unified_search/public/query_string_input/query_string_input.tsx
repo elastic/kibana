@@ -32,7 +32,11 @@ import type { Query } from '@kbn/es-query';
 import { DataPublicPluginStart, getQueryLog } from '@kbn/data-plugin/public';
 import { type DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
-import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '@kbn/data-plugin/common';
+import {
+  getFieldSubtypeNested,
+  KIBANA_USER_QUERY_LANGUAGE_KEY,
+  KQL_TELEMETRY_ROUTE_LATEST_VERSION,
+} from '@kbn/data-plugin/common';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -592,7 +596,8 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
     // UI component's change handler.
-    this.props.deps.http.post('/api/kibana/kql_opt_in_stats', {
+    this.props.deps.http.post('/internal/kql_opt_in_stats', {
+      version: KQL_TELEMETRY_ROUTE_LATEST_VERSION,
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 

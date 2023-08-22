@@ -8,7 +8,7 @@
 
 import React, { ReactElement } from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { dataViewMock } from '../../../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
 import { TopNavMenu, TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { Query } from '@kbn/es-query';
@@ -18,6 +18,7 @@ import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock'
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import type { SearchBarCustomization, TopNavCustomization } from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
+import { useDiscoverCustomization } from '../../../../customizations';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -28,6 +29,9 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   }),
 }));
 
+const MockCustomSearchBar: typeof mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu =
+  () => <div data-test-subj="custom-search-bar" />;
+
 const mockTopNavCustomization: TopNavCustomization = {
   id: 'top_nav',
 };
@@ -37,24 +41,16 @@ const mockSearchBarCustomization: SearchBarCustomization = {
   CustomDataViewPicker: jest.fn(() => <div data-test-subj="custom-data-view-picker" />),
 };
 
+const mockSearchBarCustomizationWithCustomSearchBar: SearchBarCustomization = {
+  id: 'search_bar',
+  CustomSearchBar: MockCustomSearchBar,
+};
+
 let mockUseCustomizations = false;
 
 jest.mock('../../../../customizations', () => ({
   ...jest.requireActual('../../../../customizations'),
-  useDiscoverCustomization: jest.fn((id: DiscoverCustomizationId) => {
-    if (!mockUseCustomizations) {
-      return undefined;
-    }
-
-    switch (id) {
-      case 'top_nav':
-        return mockTopNavCustomization;
-      case 'search_bar':
-        return mockSearchBarCustomization;
-      default:
-        throw new Error(`Unknown customization id: ${id}`);
-    }
-  }),
+  useDiscoverCustomization: jest.fn(),
 }));
 
 function getProps(savePermissions = true): DiscoverTopNavProps {
@@ -79,6 +75,21 @@ describe('Discover topnav component', () => {
     mockTopNavCustomization.getMenuItems = undefined;
     mockUseCustomizations = false;
     jest.clearAllMocks();
+
+    (useDiscoverCustomization as jest.Mock).mockImplementation((id: DiscoverCustomizationId) => {
+      if (!mockUseCustomizations) {
+        return undefined;
+      }
+
+      switch (id) {
+        case 'top_nav':
+          return mockTopNavCustomization;
+        case 'search_bar':
+          return mockSearchBarCustomization;
+        default:
+          throw new Error(`Unknown customization id: ${id}`);
+      }
+    });
   });
 
   test('generated config of TopNavMenu config is correct when discover save permissions are assigned', () => {
@@ -175,6 +186,23 @@ describe('Discover topnav component', () => {
   });
 
   describe('search bar customization', () => {
+    it('should render custom Search Bar', () => {
+      (useDiscoverCustomization as jest.Mock).mockImplementation((id: DiscoverCustomizationId) => {
+        if (id === 'search_bar') {
+          return mockSearchBarCustomizationWithCustomSearchBar;
+        }
+      });
+
+      const props = getProps();
+      const component = mountWithIntl(
+        <DiscoverMainProvider value={props.stateContainer}>
+          <DiscoverTopNav {...props} />
+        </DiscoverMainProvider>
+      );
+
+      expect(component.find({ 'data-test-subj': 'custom-search-bar' })).toHaveLength(1);
+    });
+
     it('should render CustomDataViewPicker', () => {
       mockUseCustomizations = true;
       const props = getProps();

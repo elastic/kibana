@@ -19,11 +19,11 @@ import * as Rx from 'rxjs';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
+import { NavControlPopover } from './nav_control_popover';
 import type { Space } from '../../common';
 import { SpaceAvatarInternal } from '../space_avatar/space_avatar_internal';
 import type { SpacesManager } from '../spaces_manager';
 import { spacesManagerMock } from '../spaces_manager/mocks';
-import { NavControlPopover } from './nav_control_popover';
 
 const mockSpaces = [
   {

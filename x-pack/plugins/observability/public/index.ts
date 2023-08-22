@@ -70,6 +70,7 @@ export { observabilityFeatureId, observabilityAppId } from '../common';
 
 export { useTimeBuckets } from './hooks/use_time_buckets';
 export { createUseRulesLink } from './hooks/create_use_rules_link';
+export { useSummaryTimeRange } from './hooks/use_summary_time_range';
 
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 
@@ -88,7 +89,6 @@ export { calculateTimeRangeBucketSize } from './pages/overview/helpers/calculate
 
 export { convertTo } from '../common/utils/formatters/duration';
 export { formatAlertEvaluationValue } from './utils/format_alert_evaluation_value';
-
-export { CoPilotPrompt } from './components/co_pilot_prompt';
-export { useCoPilot } from './hooks/use_co_pilot';
-export { CoPilotContextProvider } from './context/co_pilot_context';
+export { WithKueryAutocompletion } from './components/rule_kql_filter/with_kuery_autocompletion';
+export { AutocompleteField } from './components/rule_kql_filter/autocomplete_field';
+export { RuleFlyoutKueryBar } from './components/rule_kql_filter/kuery_bar';

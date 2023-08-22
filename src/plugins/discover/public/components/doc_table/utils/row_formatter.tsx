@@ -9,11 +9,10 @@
 import React, { Fragment } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { formatHit } from '../../../utils/format_hit';
-import type { DataTableRecord } from '../../../types';
+import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
+import { formatHit } from '@kbn/discover-utils';
 
 import './row_formatter.scss';
-import { type ShouldShowFieldInTableHandler } from '../../../utils/get_should_show_field_handler';
 
 interface Props {
   defPairs: Array<readonly [string, string]>;

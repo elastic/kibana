@@ -1403,192 +1403,6 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-server.BulkEditOptionsFilter",
-        "type": "Interface",
-        "tags": [],
-        "label": "BulkEditOptionsFilter",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "alerting",
-            "scope": "server",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-server.BulkEditOptionsFilter",
-            "text": "BulkEditOptionsFilter"
-          },
-          "<Params>"
-        ],
-        "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.BulkEditOptionsFilter.filter",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "filter",
-            "description": [],
-            "signature": [
-              "string | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.KueryNode",
-                "text": "KueryNode"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.BulkEditOptionsFilter.operations",
-            "type": "Array",
-            "tags": [],
-            "label": "operations",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "alerting",
-                "scope": "server",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-server.BulkEditOperation",
-                "text": "BulkEditOperation"
-              },
-              "[]"
-            ],
-            "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.BulkEditOptionsFilter.paramsModifier",
-            "type": "Function",
-            "tags": [],
-            "label": "paramsModifier",
-            "description": [],
-            "signature": [
-              "RuleParamsModifier",
-              "<Params> | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.BulkEditOptionsFilter.shouldIncrementRevision",
-            "type": "Function",
-            "tags": [],
-            "label": "shouldIncrementRevision",
-            "description": [],
-            "signature": [
-              "ShouldIncrementRevision",
-              "<Params> | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-server.BulkEditOptionsIds",
-        "type": "Interface",
-        "tags": [],
-        "label": "BulkEditOptionsIds",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "alerting",
-            "scope": "server",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-server.BulkEditOptionsIds",
-            "text": "BulkEditOptionsIds"
-          },
-          "<Params>"
-        ],
-        "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.BulkEditOptionsIds.ids",
-            "type": "Array",
-            "tags": [],
-            "label": "ids",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.BulkEditOptionsIds.operations",
-            "type": "Array",
-            "tags": [],
-            "label": "operations",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "alerting",
-                "scope": "server",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-server.BulkEditOperation",
-                "text": "BulkEditOperation"
-              },
-              "[]"
-            ],
-            "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.BulkEditOptionsIds.paramsModifier",
-            "type": "Function",
-            "tags": [],
-            "label": "paramsModifier",
-            "description": [],
-            "signature": [
-              "RuleParamsModifier",
-              "<Params> | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.BulkEditOptionsIds.shouldIncrementRevision",
-            "type": "Function",
-            "tags": [],
-            "label": "shouldIncrementRevision",
-            "description": [],
-            "signature": [
-              "ShouldIncrementRevision",
-              "<Params> | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
         "id": "def-server.BulkOperationError",
         "type": "Interface",
         "tags": [],
@@ -1720,109 +1534,78 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-server.GetSummarizedAlertsFnOpts",
+        "id": "def-server.GetViewInAppRelativeUrlFnOpts",
         "type": "Interface",
         "tags": [],
-        "label": "GetSummarizedAlertsFnOpts",
+        "label": "GetViewInAppRelativeUrlFnOpts",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.GetViewInAppRelativeUrlFnOpts",
+            "text": "GetViewInAppRelativeUrlFnOpts"
+          },
+          "<Params>"
+        ],
         "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
-            "id": "def-server.GetSummarizedAlertsFnOpts.start",
-            "type": "Object",
-            "tags": [],
-            "label": "start",
-            "description": [],
-            "signature": [
-              "Date | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.GetSummarizedAlertsFnOpts.end",
-            "type": "Object",
-            "tags": [],
-            "label": "end",
-            "description": [],
-            "signature": [
-              "Date | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.GetSummarizedAlertsFnOpts.executionUuid",
-            "type": "string",
-            "tags": [],
-            "label": "executionUuid",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.GetSummarizedAlertsFnOpts.ruleId",
-            "type": "string",
-            "tags": [],
-            "label": "ruleId",
-            "description": [],
-            "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.GetSummarizedAlertsFnOpts.spaceId",
-            "type": "string",
-            "tags": [],
-            "label": "spaceId",
-            "description": [],
-            "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.GetSummarizedAlertsFnOpts.excludedAlertInstanceIds",
-            "type": "Array",
-            "tags": [],
-            "label": "excludedAlertInstanceIds",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.GetSummarizedAlertsFnOpts.alertsFilter",
+            "id": "def-server.GetViewInAppRelativeUrlFnOpts.rule",
             "type": "CompoundType",
             "tags": [],
-            "label": "alertsFilter",
+            "label": "rule",
             "description": [],
             "signature": [
+              "Pick<",
               {
                 "pluginId": "alerting",
                 "scope": "common",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-common.AlertsFilter",
-                "text": "AlertsFilter"
+                "section": "def-common.SanitizedRule",
+                "text": "SanitizedRule"
               },
-              " | null | undefined"
+              "<Params>, \"id\"> & Omit<Partial<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.SanitizedRule",
+                "text": "SanitizedRule"
+              },
+              "<Params>>, \"viewInAppRelativeUrl\">"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.GetViewInAppRelativeUrlFnOpts.start",
+            "type": "number",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.GetViewInAppRelativeUrlFnOpts.end",
+            "type": "number",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -1838,6 +1621,16 @@
         "tags": [],
         "label": "IRuleTypeAlerts",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.IRuleTypeAlerts",
+            "text": "IRuleTypeAlerts"
+          },
+          "<AlertData>"
+        ],
         "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1946,6 +1739,23 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.IRuleTypeAlerts.formatAlert",
+            "type": "Function",
+            "tags": [],
+            "label": "formatAlert",
+            "description": [
+              "\nOptional function to format each alert in summarizedAlerts right after fetching them."
+            ],
+            "signature": [
+              "FormatAlert",
+              "<AlertData> | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -2737,7 +2547,7 @@
             "label": "snoozeSchedule",
             "description": [],
             "signature": [
-              "Readonly<{ id?: string | undefined; skipRecurrences?: string[] | undefined; } & { duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 6 | 5 | 4 | 3 | 1 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | undefined; bymonth?: number[] | undefined; bysetpos?: number[] | undefined; } & { dtstart: string; tzid: string; bymonthday: number[]; byyearday: number[]; byweekno: number[]; byhour: number[]; byminute: number[]; bysecond: number[]; }>; }>[] | undefined"
+              "Readonly<{ id?: string | undefined; skipRecurrences?: string[] | undefined; } & { duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 6 | 5 | 4 | 3 | 1 | undefined; until?: string | undefined; byweekday?: (string | number)[] | undefined; bymonth?: number[] | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; bysetpos?: number[] | undefined; } & { dtstart: string; tzid: string; bymonthday: number[]; byyearday: number[]; byweekno: number[]; byhour: number[]; byminute: number[]; bysecond: number[]; }>; }>[] | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
@@ -3268,10 +3078,6 @@
                 "path": "x-pack/plugins/stack_alerts/server/rule_types/geo_containment/executor.ts"
               },
               {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/executor.ts"
-              },
-              {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/server/alert_rules/common.ts"
               },
@@ -3493,7 +3299,7 @@
                 "section": "def-common.FieldSpec",
                 "text": "FieldSpec"
               },
-              "[]>; getFieldsForIndexPattern: (indexPattern: ",
+              "[]>; getExistingIndices: (indices: string[]) => Promise<string[]>; getFieldsForIndexPattern: (indexPattern: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4051,21 +3857,6 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-server.RuleType.getSummarizedAlerts",
-            "type": "Function",
-            "tags": [],
-            "label": "getSummarizedAlerts",
-            "description": [],
-            "signature": [
-              "GetSummarizedAlertsFn",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
             "id": "def-server.RuleType.alerts",
             "type": "Object",
             "tags": [],
@@ -4079,7 +3870,7 @@
                 "section": "def-server.IRuleTypeAlerts",
                 "text": "IRuleTypeAlerts"
               },
-              " | undefined"
+              "<AlertData> | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -4321,57 +4112,9 @@
         "label": "BulkEditOperation",
         "description": [],
         "signature": [
-          "{ operation: \"delete\" | \"add\" | \"set\"; field: \"tags\"; value: string[]; } | { operation: \"add\" | \"set\"; field: \"actions\"; value: ",
-          "NormalizedAlertAction",
-          "[]; } | { operation: \"set\"; field: \"schedule\"; value: ",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.IntervalSchedule",
-            "text": "IntervalSchedule"
-          },
-          "; } | { operation: \"set\"; field: \"throttle\"; value: string | null | undefined; } | { operation: \"set\"; field: \"notifyWhen\"; value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null | undefined; } | { operation: \"set\"; field: \"snoozeSchedule\"; value: ",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.RuleSnoozeSchedule",
-            "text": "RuleSnoozeSchedule"
-          },
-          "; } | { operation: \"delete\"; field: \"snoozeSchedule\"; value?: string[] | undefined; } | { operation: \"set\"; field: \"apiKey\"; value?: undefined; }"
+          "Readonly<{} & { value: string[]; operation: \"delete\" | \"add\" | \"set\"; field: \"tags\"; }> | Readonly<{} & { value: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; uuid?: string | undefined; } & { id: string; params: Record<string, any>; group: string; }>[]; operation: \"add\" | \"set\"; field: \"actions\"; }> | Readonly<{} & { value: Readonly<{} & { interval: string; }>; operation: \"set\"; field: \"schedule\"; }> | Readonly<{} & { value: string | null; operation: \"set\"; field: \"throttle\"; }> | Readonly<{} & { value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; operation: \"set\"; field: \"notifyWhen\"; }> | Readonly<{} & { value: Readonly<{ id?: string | undefined; } & { duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 3 | 1 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonthday?: number[] | undefined; bymonth?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }>; operation: \"set\"; field: \"snoozeSchedule\"; }> | Readonly<{ value?: string[] | undefined; } & { operation: \"delete\"; field: \"snoozeSchedule\"; }> | Readonly<{} & { operation: \"set\"; field: \"apiKey\"; }>"
         ],
-        "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-server.BulkEditOptions",
-        "type": "Type",
-        "tags": [],
-        "label": "BulkEditOptions",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "alerting",
-            "scope": "server",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-server.BulkEditOptionsFilter",
-            "text": "BulkEditOptionsFilter"
-          },
-          "<Params> | ",
-          {
-            "pluginId": "alerting",
-            "scope": "server",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-server.BulkEditOptionsIds",
-            "text": "BulkEditOptionsIds"
-          },
-          "<Params>"
-        ],
-        "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
+        "path": "x-pack/plugins/alerting/server/application/rule/methods/bulk_edit/types/bulk_edit_rules_options.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4774,38 +4517,10 @@
             "text": "RuleTypeParams"
           },
           ">(options: ",
-          {
-            "pluginId": "alerting",
-            "scope": "server",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-server.BulkEditOptions",
-            "text": "BulkEditOptions"
-          },
-          "<Params>) => Promise<{ rules: ",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.SanitizedRule",
-            "text": "SanitizedRule"
-          },
-          "<Params>[]; skipped: ",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.BulkActionSkipResult",
-            "text": "BulkActionSkipResult"
-          },
-          "[]; errors: ",
-          {
-            "pluginId": "alerting",
-            "scope": "server",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-server.BulkOperationError",
-            "text": "BulkOperationError"
-          },
-          "[]; total: number; }>; bulkEnableRules: (options: ",
+          "BulkEditOptions",
+          "<Params>) => Promise<",
+          "BulkEditResult",
+          "<Params>>; bulkEnableRules: (options: ",
           "BulkOptions",
           ") => Promise<{ errors: ",
           {
@@ -10477,7 +10192,7 @@
         "signature": [
           "Omit<",
           "Options",
-          ", \"dtstart\" | \"until\" | \"wkst\" | \"byweekday\"> & { dtstart: string; byweekday?: (string | number)[] | undefined; wkst?: ",
+          ", \"dtstart\" | \"until\" | \"byweekday\" | \"wkst\"> & { dtstart: string; byweekday?: (string | number)[] | undefined; wkst?: ",
           {
             "pluginId": "@kbn/rrule",
             "scope": "common",

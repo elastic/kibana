@@ -51,7 +51,7 @@ export const connectorTypesRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
         return res.ok({
-          body: rewriteBodyRes(await actionsClient.listTypes(req.query?.feature_id)),
+          body: rewriteBodyRes(await actionsClient.listTypes({ featureId: req.query?.feature_id })),
         });
       })
     )

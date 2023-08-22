@@ -62,7 +62,7 @@ export class ServerlessSearchPlugin
       registerIndicesRoutes(dependencies);
     });
 
-    pluginsSetup.ml.setFeaturesEnabled({ ad: false, dfa: false, nlp: true });
+    pluginsSetup.ml.setFeaturesEnabled({ ad: false, dfa: false, nlp: false });
     return {};
   }
 

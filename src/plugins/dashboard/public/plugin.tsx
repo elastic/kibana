@@ -51,6 +51,7 @@ import type {
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
@@ -107,6 +108,7 @@ export interface DashboardStartDependencies {
   usageCollection?: UsageCollectionStart;
   visualizations: VisualizationsStart;
   customBranding: CustomBrandingStart;
+  serverless?: ServerlessPluginStart;
 }
 
 export interface DashboardSetup {

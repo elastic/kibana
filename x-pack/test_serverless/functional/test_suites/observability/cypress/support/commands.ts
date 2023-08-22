@@ -7,8 +7,8 @@
 import 'cypress-real-events/support';
 import 'cypress-axe';
 
-Cypress.Commands.add('loginAsElasticUser', () => {
-  cy.visit('/', {
+Cypress.Commands.add('loginAsElasticUser', (path?: string) => {
+  cy.visit(path ?? '/', {
     auth: {
       username: 'elastic',
       password: 'changeme',
@@ -17,5 +17,5 @@ Cypress.Commands.add('loginAsElasticUser', () => {
 });
 
 Cypress.Commands.add('getByTestSubj', (selector: string) => {
-  return cy.get(`[data-test-subj="${selector}"]`);
+  return cy.get(`[data-test-subj*="${selector}"]`);
 });

@@ -19,6 +19,9 @@ import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 
+import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { UpsellingProvider } from '../common/components/upselling_provider';
+import { useAssistantTelemetry } from '../assistant/use_assistant_telemetry';
 import { getComments } from '../assistant/get_comments';
 import { augmentMessageCodeBlocks, LOCAL_STORAGE_KEY } from '../assistant/helpers';
 import { useConversationStore } from '../assistant/use_conversation_store';
@@ -57,13 +60,15 @@ const StartAppComponent: FC<StartAppComponent> = ({
   store,
   theme$,
 }) => {
+  const services = useKibana().services;
   const {
     i18n,
     application: { capabilities },
     http,
     triggersActionsUi: { actionTypeRegistry },
     uiActions,
-  } = useKibana().services;
+    upselling,
+  } = services;
 
   const { conversations, setConversations } = useConversationStore();
   const { defaultAllow, defaultAllowReplacement, setDefaultAllow, setDefaultAllowReplacement } =
@@ -78,6 +83,9 @@ const StartAppComponent: FC<StartAppComponent> = ({
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
 
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = useKibana().services.docLinks;
+
+  const assistantTelemetry = useAssistantTelemetry();
+
   return (
     <EuiErrorBoundary>
       <i18n.Context>
@@ -88,6 +96,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
                 <AssistantProvider
                   actionTypeRegistry={actionTypeRegistry}
                   augmentMessageCodeBlocks={augmentMessageCodeBlocks}
+                  assistantTelemetry={assistantTelemetry}
                   defaultAllow={defaultAllow}
                   defaultAllowReplacement={defaultAllowReplacement}
                   docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
@@ -108,19 +117,23 @@ const StartAppComponent: FC<StartAppComponent> = ({
                   <MlCapabilitiesProvider>
                     <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                       <ManageUserInfo>
-                        <ReactQueryClientProvider>
-                          <CellActionsProvider
-                            getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
-                          >
-                            <PageRouter
-                              history={history}
-                              onAppLeave={onAppLeave}
-                              setHeaderActionMenu={setHeaderActionMenu}
+                        <NavigationProvider core={services}>
+                          <ReactQueryClientProvider>
+                            <CellActionsProvider
+                              getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
                             >
-                              {children}
-                            </PageRouter>
-                          </CellActionsProvider>
-                        </ReactQueryClientProvider>
+                              <UpsellingProvider upsellingService={upselling}>
+                                <PageRouter
+                                  history={history}
+                                  onAppLeave={onAppLeave}
+                                  setHeaderActionMenu={setHeaderActionMenu}
+                                >
+                                  {children}
+                                </PageRouter>
+                              </UpsellingProvider>
+                            </CellActionsProvider>
+                          </ReactQueryClientProvider>
+                        </NavigationProvider>
                       </ManageUserInfo>
                     </UserPrivilegesProvider>
                   </MlCapabilitiesProvider>

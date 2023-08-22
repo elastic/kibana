@@ -12,31 +12,13 @@ import { JourneyStep } from '../../../../common/runtime_types/ping/synthetics';
 
 export interface GetJourneyStepsParams {
   checkGroup: string;
-  syntheticEventTypes?: string | string[];
 }
-
-const defaultEventTypes = [
-  'cmd/status',
-  'journey/browserconsole',
-  'step/end',
-  'step/screenshot',
-  'step/screenshot_ref',
-];
-
-export const formatSyntheticEvents = (eventTypes?: string | string[]) => {
-  if (!eventTypes) {
-    return defaultEventTypes;
-  } else {
-    return Array.isArray(eventTypes) ? eventTypes : [eventTypes];
-  }
-};
 
 type ResultType = JourneyStep & { '@timestamp': string };
 
 export const getJourneySteps = async ({
   uptimeEsClient,
   checkGroup,
-  syntheticEventTypes,
 }: GetJourneyStepsParams & {
   uptimeEsClient: UptimeEsClient;
 }): Promise<JourneyStep[]> => {
@@ -46,7 +28,13 @@ export const getJourneySteps = async ({
         filter: [
           {
             terms: {
-              'synthetics.type': formatSyntheticEvents(syntheticEventTypes),
+              'synthetics.type': [
+                'cmd/status',
+                'journey/browserconsole',
+                'step/end',
+                'step/screenshot',
+                'step/screenshot_ref',
+              ],
             },
           },
           {

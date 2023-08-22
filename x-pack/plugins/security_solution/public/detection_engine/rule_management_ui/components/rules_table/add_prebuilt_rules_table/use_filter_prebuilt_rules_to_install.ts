@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
+import type { RuleInstallationInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { FilterOptions } from '../../../../rule_management/logic/types';
 
 export type AddPrebuiltRulesTableFilterOptions = Pick<FilterOptions, 'filter' | 'tags'>;

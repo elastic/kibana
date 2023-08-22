@@ -178,20 +178,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('and has authorization to manage endpoint security', () => {
       for (const eventFilterApiCall of eventFilterCalls) {
-        it(`should error on [${eventFilterApiCall.method}] if invalid field`, async () => {
-          const body = eventFilterApiCall.getBody({});
-
-          body.entries[0].field = 'some.invalid.field';
-
-          await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
-            .set('kbn-xsrf', 'true')
-            .send(body)
-            .expect(400)
-            .expect(anEndpointArtifactError)
-            .expect(anErrorMessageWith(/invalid field: some\.invalid\.field/));
-        });
-
         it(`should error on [${eventFilterApiCall.method}] if more than one OS is set`, async () => {
           const body = eventFilterApiCall.getBody({ os_types: ['linux', 'windows'] });
 

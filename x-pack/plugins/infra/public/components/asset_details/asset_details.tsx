@@ -7,10 +7,17 @@
 
 import React from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody } from '@elastic/eui';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import type { AssetDetailsProps, RenderMode } from './types';
 import { Content } from './content/content';
 import { Header } from './header/header';
-import { TabSwitcherProvider } from './hooks/use_tab_switcher';
+import { TabSwitcherProvider, useTabSwitcherContext } from './hooks/use_tab_switcher';
+import {
+  AssetDetailsStateProvider,
+  useAssetDetailsStateContext,
+} from './hooks/use_asset_details_state';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
+import { ASSET_DETAILS_FLYOUT_COMPONENT_NAME } from './constants';
 
 interface ContentTemplateProps {
   header: React.ReactElement;
@@ -19,8 +26,27 @@ interface ContentTemplateProps {
 }
 
 const ContentTemplate = ({ header, body, renderMode }: ContentTemplateProps) => {
-  return renderMode.showInFlyout ? (
-    <EuiFlyout onClose={renderMode.closeFlyout} ownFocus={false}>
+  const { assetType } = useAssetDetailsStateContext();
+  const { initialActiveTabId } = useTabSwitcherContext();
+  const {
+    services: { telemetry },
+  } = useKibanaContextForPlugin();
+
+  useEffectOnce(() => {
+    telemetry.reportAssetDetailsFlyoutViewed({
+      componentName: ASSET_DETAILS_FLYOUT_COMPONENT_NAME,
+      assetType,
+      tabId: initialActiveTabId,
+    });
+  });
+
+  return renderMode.mode === 'flyout' ? (
+    <EuiFlyout
+      onClose={renderMode.closeFlyout}
+      ownFocus={false}
+      data-component-name={ASSET_DETAILS_FLYOUT_COMPONENT_NAME}
+      data-asset-type={assetType}
+    >
       <EuiFlyoutHeader hasBorder>{header}</EuiFlyoutHeader>
       <EuiFlyoutBody>{body}</EuiFlyoutBody>
     </EuiFlyout>
@@ -33,47 +59,39 @@ const ContentTemplate = ({ header, body, renderMode }: ContentTemplateProps) => 
 };
 
 export const AssetDetails = ({
-  node,
-  currentTimeRange,
+  asset,
+  dateRange,
   activeTabId,
   overrides,
   onTabsStateChange,
   tabs = [],
   links = [],
-  nodeType = 'host',
+  assetType = 'host',
   renderMode = {
-    showInFlyout: false,
+    mode: 'page',
   },
 }: AssetDetailsProps) => {
   return (
-    <TabSwitcherProvider
-      initialActiveTabId={tabs.length > 0 ? activeTabId ?? tabs[0].id : undefined}
-      onTabsStateChange={onTabsStateChange}
+    <AssetDetailsStateProvider
+      state={{
+        asset,
+        assetType,
+        overrides,
+        onTabsStateChange,
+        dateRange,
+        renderMode,
+      }}
     >
-      <ContentTemplate
-        header={
-          <Header
-            node={node}
-            nodeType={nodeType}
-            currentTimeRange={currentTimeRange}
-            compact={renderMode.showInFlyout}
-            tabs={tabs}
-            links={links}
-            overrides={overrides}
-          />
-        }
-        body={
-          <Content
-            node={node}
-            nodeType={nodeType}
-            currentTimeRange={currentTimeRange}
-            overrides={overrides}
-            onTabsStateChange={onTabsStateChange}
-          />
-        }
-        renderMode={renderMode}
-      />
-    </TabSwitcherProvider>
+      <TabSwitcherProvider
+        initialActiveTabId={tabs.length > 0 ? activeTabId ?? tabs[0].id : undefined}
+      >
+        <ContentTemplate
+          header={<Header compact={renderMode.mode === 'flyout'} tabs={tabs} links={links} />}
+          body={<Content />}
+          renderMode={renderMode}
+        />
+      </TabSwitcherProvider>
+    </AssetDetailsStateProvider>
   );
 };
 

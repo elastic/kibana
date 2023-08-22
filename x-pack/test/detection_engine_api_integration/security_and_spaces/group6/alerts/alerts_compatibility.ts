@@ -19,7 +19,7 @@ import {
   SavedQueryRuleCreateProps,
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   createRule,
   createSignalsIndex,
@@ -337,6 +337,7 @@ export default ({ getService }: FtrProviderContext) => {
             max_signals: 100,
             risk_score_mapping: [],
             severity_mapping: [],
+            investigation_fields: [],
             threat: [],
             to: 'now',
             references: [],
@@ -512,6 +513,7 @@ export default ({ getService }: FtrProviderContext) => {
             related_integrations: [],
             required_fields: [],
             setup: '',
+            investigation_fields: [],
           },
           'kibana.alert.rule.actions': [],
           'kibana.alert.rule.created_by': 'elastic',

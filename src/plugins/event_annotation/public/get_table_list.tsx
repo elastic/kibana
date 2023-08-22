@@ -14,10 +14,10 @@ import { type TableListTabParentProps } from '@kbn/content-management-tabbed-tab
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { QueryInputServices } from '@kbn/visualization-ui-components/public';
+import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import type { EventAnnotationServiceType } from './event_annotation_service/types';
-import { EventAnnotationGroupTableList } from './components/table_list';
+import { EventAnnotationGroupTableList } from '@kbn/event-annotation-components';
+import type { EventAnnotationServiceType } from '.';
 
 export interface EventAnnotationListingPageServices {
   core: CoreStart;

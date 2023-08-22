@@ -114,6 +114,9 @@ export const ManagementApp = ({
     sections,
     cardsNavigationConfig,
     kibanaVersion: dependencies.kibanaVersion,
+    landingPageRedirect,
+    navigateToUrl: dependencies.coreStart.application.navigateToUrl,
+    basePath: dependencies.coreStart.http.basePath,
   };
 
   return (
@@ -134,9 +137,6 @@ export const ManagementApp = ({
                 setBreadcrumbs={setBreadcrumbsScoped}
                 onAppMounted={onAppMounted}
                 sections={sections}
-                landingPageRedirect={landingPageRedirect}
-                navigateToUrl={dependencies.coreStart.application.navigateToUrl}
-                basePath={dependencies.coreStart.http.basePath}
               />
             </KibanaPageTemplate>
           </KibanaThemeProvider>

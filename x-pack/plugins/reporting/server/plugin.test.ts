@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { PDF_REPORT_TYPE_V2, PNG_REPORT_TYPE_V2 } from '../common/constants/report_types';
 import type { ReportingCore, ReportingInternalStart } from './core';
 import { ReportingPlugin } from './plugin';
 import {
@@ -79,5 +80,51 @@ describe('Reporting Plugin', () => {
       ]
     `);
     expect(logger.error).toHaveBeenCalledTimes(2);
+  });
+  describe('config and export types registry validation', () => {
+    it('expect image reporting to be in registry by default', async () => {
+      // wait for the setup phase background work
+      plugin.setup(coreSetup, pluginSetup);
+      await new Promise(setImmediate);
+
+      // create a way for an error to happen
+      const reportingCore = (plugin as unknown as { reportingCore: ReportingCore }).reportingCore;
+
+      // wait for the startup phase background work
+      plugin.start(coreStart, pluginStart);
+      await new Promise(setImmediate);
+      expect(reportingCore.getExportTypesRegistry().getById(PDF_REPORT_TYPE_V2)).toHaveProperty(
+        'id',
+        PDF_REPORT_TYPE_V2
+      );
+      expect(reportingCore.getExportTypesRegistry().getById(PNG_REPORT_TYPE_V2)).toHaveProperty(
+        'id',
+        PNG_REPORT_TYPE_V2
+      );
+    });
+    it('expect pdf to not be in registry if config does not enable it', async () => {
+      configSchema = { ...createMockConfigSchema(), export_types: { pdf: { enabled: false } } };
+      initContext = coreMock.createPluginInitializerContext(configSchema);
+      coreSetup = coreMock.createSetup(configSchema);
+      coreStart = coreMock.createStart();
+      pluginSetup = createMockPluginSetup({}) as unknown as ReportingSetupDeps;
+      pluginStart = await createMockPluginStart(coreStart, configSchema);
+
+      plugin = new ReportingPlugin(initContext);
+      // wait for the setup phase background work
+      plugin.setup(coreSetup, pluginSetup);
+      await new Promise(setImmediate);
+
+      // create a way for an error to happen
+      const reportingCore = (plugin as unknown as { reportingCore: ReportingCore }).reportingCore;
+
+      // wait for the startup phase background work
+      plugin.start(coreStart, pluginStart);
+      await new Promise(setImmediate);
+      const checkPdf = () => reportingCore.getExportTypesRegistry().getById(PDF_REPORT_TYPE_V2);
+      const checkPng = () => reportingCore.getExportTypesRegistry().getById(PNG_REPORT_TYPE_V2);
+      expect(checkPdf).toThrowError(`Unknown id ${PDF_REPORT_TYPE_V2}`);
+      expect(checkPng).toThrowError(`Unknown id ${PNG_REPORT_TYPE_V2}`);
+    });
   });
 });

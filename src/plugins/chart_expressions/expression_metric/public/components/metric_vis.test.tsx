@@ -971,6 +971,11 @@ describe('MetricVisComponent', function () {
   });
 
   it('should report render complete', () => {
+    jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+      cb(0);
+      return 0;
+    });
+
     const renderCompleteSpy = jest.fn();
     const component = shallow(
       <MetricVis
@@ -995,6 +1000,8 @@ describe('MetricVisComponent', function () {
     component.find(Settings).props().onRenderChange!(true);
 
     expect(renderCompleteSpy).toHaveBeenCalledTimes(1);
+
+    (window.requestAnimationFrame as jest.Mock).mockRestore();
   });
 
   it('should convert null values to NaN', () => {
@@ -1414,6 +1421,18 @@ describe('MetricVisComponent', function () {
       expect(mockDeserialize).toHaveBeenCalledWith({
         id: 'duration',
         params: { outputFormat: 'humanizePrecise', outputPrecision: 1, useShortSuffix: false },
+      });
+    });
+
+    it('does not override duration configuration at visualization level when set', () => {
+      getFormattedMetrics(394.2393, 983123.984, {
+        id: 'duration',
+        params: { formatOverride: true, outputFormat: 'asSeconds' },
+      });
+      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledWith({
+        id: 'duration',
+        params: { formatOverride: true, outputFormat: 'asSeconds' },
       });
     });
 

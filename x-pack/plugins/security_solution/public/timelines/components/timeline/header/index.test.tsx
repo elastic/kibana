@@ -16,7 +16,7 @@ import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
 import { TimelineHeader } from '.';
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
+import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 import { waitFor } from '@testing-library/react';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;

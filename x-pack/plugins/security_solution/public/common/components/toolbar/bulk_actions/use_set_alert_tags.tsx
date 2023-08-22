@@ -8,7 +8,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCallback, useEffect, useRef } from 'react';
-import type { AlertTags } from '../../../../../common/detection_engine/schemas/common';
+import type { AlertTags } from '../../../../../common/api/detection_engine';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import * as i18n from './translations';
 import { setAlertTags } from '../../../containers/alert_tags/api';

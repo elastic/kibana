@@ -132,7 +132,7 @@ export const ConnectorConfiguration: React.FC = () => {
                       <EuiText size="s">
                         <FormattedMessage
                           id="xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.description.thirdParagraph"
-                          defaultMessage="In this step, you will need to clone or fork the repository, and copy the generated API key and connector ID to the associated {link}. The connector ID will identify this connector to Enterprise Search. The service type will determine which type of data source the connector is configured for."
+                          defaultMessage="In this step, you will need to clone or fork the repository, and copy the generated API key and connector ID to the associated {link}. The connector ID will identify this connector to Search. The service type will determine which type of data source the connector is configured for."
                           values={{
                             link: (
                               <EuiLink
@@ -151,15 +151,15 @@ export const ConnectorConfiguration: React.FC = () => {
                       </EuiText>
                       <EuiSpacer />
                       <EuiCodeBlock fontSize="m" paddingSize="m" color="dark" isCopyable>
-                        {`${
+                        {`connectors:
+  -
+    connector_id: "${index.connector.id}"
+    service_type: "${index.connector.service_type || 'changeme'}"${
                           apiKeyData?.encoded
-                            ? `elasticsearch:
-  api_key: "${apiKeyData?.encoded}"
-`
+                            ? `
+    api_key: "${apiKeyData?.encoded}"`
                             : ''
-                        }connector_id: "${index.connector.id}"
-service_type: "${index.connector.service_type || 'changeme'}"
-`}
+                        }`}
                       </EuiCodeBlock>
                       <EuiSpacer />
                       <EuiText size="s">
@@ -203,7 +203,7 @@ service_type: "${index.connector.service_type || 'changeme'}"
                             'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.waitingForConnectorText',
                             {
                               defaultMessage:
-                                'Your connector has not connected to Enterprise Search. Troubleshoot your configuration and refresh the page.',
+                                'Your connector has not connected to Search. Troubleshoot your configuration and refresh the page.',
                             }
                           )}
                           <EuiSpacer size="s" />
@@ -229,7 +229,7 @@ service_type: "${index.connector.service_type || 'changeme'}"
                             'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.connectorConnected',
                             {
                               defaultMessage:
-                                'Your connector {name} has connected to Enterprise Search successfully.',
+                                'Your connector {name} has connected to Search successfully.',
                               values: { name: index.connector.name },
                             }
                           )}

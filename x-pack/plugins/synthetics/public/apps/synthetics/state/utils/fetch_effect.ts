@@ -102,7 +102,7 @@ export function fetchEffectFactory<T, R, S, F>(
         }
 
         if (typeof onSuccess === 'function') {
-          onSuccess?.(response as R);
+          onSuccess(response as R);
         } else if (onSuccess && typeof onSuccess === 'string') {
           kibanaService.core.notifications.toasts.addSuccess(onSuccess);
         }

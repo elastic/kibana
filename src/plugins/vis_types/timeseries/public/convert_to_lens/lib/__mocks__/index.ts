@@ -28,7 +28,6 @@ export const createSeries = (partialSeries?: Partial<Series>): Series => ({
   stacked: 'none',
   time_range_mode: 'entire_time_range',
   value_template: '{{value}}',
-  seperate_axis: 0,
   series_index_pattern: { id: 'test' },
   series_max_bars: 0,
   steps: 0,

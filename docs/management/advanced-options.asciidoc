@@ -198,7 +198,7 @@ to be displayed).
 
 [[timepicker-refreshintervaldefaults]]`timepicker:refreshIntervalDefaults`::
 The default refresh interval for the time filter. Example:
-`{ "display": "15 seconds", "pause": true, "value": 15000 }`.
+`{ "pause": true, "value": 15000 }`.
 
 [[timepicker-timedefaults]]`timepicker:timeDefaults`::
 The default selection in the time filter.
@@ -393,6 +393,26 @@ value is 10000.
 [[apm-enable-service-overview]]`apm:enableServiceOverview`::
 When enabled, displays the *Overview* tab for services in *APM*.
 
+[[apm-agent-explorer]]`observability:apmAgentExplorerView`::
+beta:[] Enables the Agent explorer view.
+
+[[apm-aws-price]]`observability:apmAWSLambdaPriceFactor`::
+Set the price per Gb-second for your AWS Lambda functions.
+
+[[apm-aws-request]]`observability:apmAWSLambdaRequestCostPerMillion`::
+Set the AWS Lambda cost per million requests.
+
+[[apm-continuous-rollups]]`observability:apmEnableContinuousRollups`::
+beta:[] When continuous rollups is enabled, the UI will select metrics with the appropriate resolution.
+On larger time ranges, lower resolution metrics will be used, which will improve loading times.
+
+[[apm-enable-service-metrics]]`observability:apmEnableServiceMetrics`::
+beta:[] Enables the usage of service transaction metrics, which are low cardinality metrics that can be used by certain views like the service inventory for faster loading times.
+
+[[observability-apm-labs]]`observability:apmLabsButton`::
+Enable or disable the APM Labs button -- a quick way to enable and disable technical preview features in APM.
+See <<apm-labs>> to learn more.
+
 [[observability-apm-critical-path]]`observability:apmEnableCriticalPath`::
 When enabled, displays the critical path of a trace.
 
@@ -401,8 +421,17 @@ preview:[] When enabled, uses progressive loading of some APM views.
 Data may be requested with a lower sampling rate first, with lower accuracy but faster response times,
 while the unsampled data loads in the background.
 
+[[observability-apm-max-groups]]`observability:apmServiceGroupMaxNumberOfServices`::
+Limit the number of services in a given service group.
+
 [[observability-apm-optimized-sort]]`observability:apmServiceInventoryOptimizedSorting`::
 preview:[] Sorts services without anomaly detection rules on the APM Service inventory page by service name.
+
+[[observability-default-service-env]]`observability:apmDefaultServiceEnvironment`::
+Set the default environment for the APM app. When left empty, data from all environments will be displayed by default.
+
+[[observability-apm-enable-profiling]]`observability:apmEnableProfilingIntegration`::
+Enable the Universal Profiling integration in APM.
 
 [[observability-enable-aws-lambda-metrics]]`observability:enableAwsLambdaMetrics`::
 preview:[] Display Amazon Lambda metrics in the service metrics tab.

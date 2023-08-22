@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import {
   formatDurationFromTimeUnitChar,
   getAlertUrl,
+  observabilityPaths,
   ProcessorEvent,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
@@ -17,7 +19,10 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
-import { termQuery } from '@kbn/observability-plugin/server';
+import {
+  getParsedFilterQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { firstValueFrom } from 'rxjs';
@@ -83,6 +88,7 @@ export function registerErrorCountRuleType({
           apmActionVariables.serviceName,
           apmActionVariables.transactionName,
           apmActionVariables.errorGroupingKey,
+          apmActionVariables.errorGroupingName,
           apmActionVariables.threshold,
           apmActionVariables.triggerValue,
           apmActionVariables.viewInAppUrl,
@@ -116,6 +122,18 @@ export function registerErrorCountRuleType({
           savedObjectsClient,
         });
 
+        const termFilterQuery = !ruleParams.kqlFilter
+          ? [
+              ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
+                queryEmptyString: false,
+              }),
+              ...termQuery(ERROR_GROUP_ID, ruleParams.errorGroupingKey, {
+                queryEmptyString: false,
+              }),
+              ...environmentQuery(ruleParams.environment),
+            ]
+          : [];
+
         const searchParams = {
           index: indices.error,
           body: {
@@ -132,13 +150,8 @@ export function registerErrorCountRuleType({
                     },
                   },
                   { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
-                  ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
-                    queryEmptyString: false,
-                  }),
-                  ...termQuery(ERROR_GROUP_ID, ruleParams.errorGroupingKey, {
-                    queryEmptyString: false,
-                  }),
-                  ...environmentQuery(ruleParams.environment),
+                  ...termFilterQuery,
+                  ...getParsedFilterQuery(ruleParams.kqlFilter),
                 ],
               },
             },
@@ -253,6 +266,8 @@ export function registerErrorCountRuleType({
         return { state: {} };
       },
       alerts: ApmRuleTypeAlertDefinition,
+      getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+        observabilityPaths.ruleDetails(rule.id),
     })
   );
 }

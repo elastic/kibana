@@ -8,20 +8,16 @@
 import type {
   CoreSetup,
   DocLinksServiceSetup,
-  FakeRawRequest,
-  Headers,
   IBasePath,
   IClusterClient,
   KibanaRequest,
   Logger,
   PackageInfo,
   PluginInitializerContext,
-  SavedObjectsClientContract,
   SavedObjectsServiceStart,
   StatusServiceSetup,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
-import { CoreKibanaRequest, ServiceStatusLevels } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -34,7 +30,7 @@ import {
   ScreenshottingStart,
 } from '@kbn/screenshotting-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -42,15 +38,22 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
-import { filter, first, map, switchMap, take } from 'rxjs/operators';
+import { map, switchMap, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
-import { checkLicense, getExportTypesRegistry } from './lib';
+import { CsvSearchSourceExportType } from './export_types/csv_searchsource';
+import { CsvV2ExportType } from './export_types/csv_v2';
+import { PdfV1ExportType } from './export_types/printable_pdf';
+import { PdfExportType } from './export_types/printable_pdf_v2';
+import { PngExportType } from './export_types/png_v2';
+import { checkLicense, ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
 import type { PdfScreenshotOptions, PngScreenshotOptions, ReportingPluginRouter } from './types';
+import { CsvSearchSourceImmediateExportType } from './export_types/csv_searchsource_immediate';
+import { ExportType } from './export_types/common';
 
 export interface ReportingInternalSetup {
   basePath: Pick<IBasePath, 'set'>;
@@ -102,11 +105,11 @@ export class ReportingCore {
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps each are done
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
   private deprecatedAllowedRoles: string[] | false = false; // DEPRECATED. If `false`, the deprecated features have been disableed
-  private exportTypesRegistry = getExportTypesRegistry();
   private executeTask: ExecuteReportTask;
   private monitorTask: MonitorReportsTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
+  private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
 
@@ -121,6 +124,9 @@ export class ReportingCore {
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
 
+    this.getExportTypes().forEach((et) => {
+      this.exportTypesRegistry.register(et);
+    });
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
     this.monitorTask = new MonitorReportsTask(this, config, this.logger);
@@ -128,6 +134,8 @@ export class ReportingCore {
     this.getContract = () => ({
       usesUiCapabilities: () => config.roles.enabled === false,
       registerExportTypes: (id) => id,
+      getScreenshots: this.getScreenshots.bind(this),
+      getSpaceId: this.getSpaceId.bind(this),
     });
 
     this.executing = new Set();
@@ -144,6 +152,10 @@ export class ReportingCore {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
 
+    this.exportTypesRegistry.getAll().forEach((et) => {
+      et.setup(setupDeps);
+    });
+
     const { executeTask, monitorTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
       [executeTask.TYPE]: executeTask.getTaskDefinition(),
@@ -158,7 +170,9 @@ export class ReportingCore {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
 
-    await this.assertKibanaIsAvailable();
+    this.exportTypesRegistry.getAll().forEach((et) => {
+      et.start({ ...startDeps, reporting: this.getContract() });
+    });
 
     const { taskManager } = startDeps;
     const { executeTask, monitorTask } = this;
@@ -172,17 +186,6 @@ export class ReportingCore {
 
   public getKibanaShutdown$(): Rx.Observable<void> {
     return this.kibanaShuttingDown$.pipe(take(1));
-  }
-
-  private async assertKibanaIsAvailable(): Promise<void> {
-    const { status } = this.getPluginSetupDeps();
-
-    await status.overall$
-      .pipe(
-        filter((current) => current.level === ServiceStatusLevels.available),
-        first()
-      )
-      .toPromise();
   }
 
   /*
@@ -216,6 +219,30 @@ export class ReportingCore {
   public setConfig(config: ReportingConfigType) {
     this.config = config;
     this.pluginSetup$.next(true);
+  }
+
+  /**
+   * Validate export types with config settings
+   * only CSV export types should be registered in the export types registry for serverless
+   */
+  private getExportTypes(): ExportType[] {
+    const exportTypes = [];
+    if (!this.config.export_types.pdf.enabled || !this.config.export_types.png.enabled) {
+      exportTypes.push(
+        new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
+      );
+      exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
+    } else {
+      exportTypes.push(
+        new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
+      );
+      exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
+      exportTypes.push(new PdfExportType(this.core, this.config, this.logger, this.context));
+      exportTypes.push(new PngExportType(this.core, this.config, this.logger, this.context));
+      // deprecated export types for tests
+      exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
+    }
+    return exportTypes;
   }
 
   /**
@@ -335,63 +362,6 @@ export class ReportingCore {
     return this.pluginSetupDeps;
   }
 
-  private async getSavedObjectsClient(request: KibanaRequest) {
-    const { savedObjects } = await this.getPluginStartDeps();
-    return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
-  }
-
-  public async getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
-    const { uiSettings: uiSettingsService } = await this.getPluginStartDeps();
-    const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
-    return scopedUiSettingsService;
-  }
-
-  public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
-    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
-    if (spacesService) {
-      const spaceId = spacesService?.getSpaceId(request);
-
-      if (spaceId !== DEFAULT_SPACE_ID) {
-        logger.info(`Request uses Space ID: ${spaceId}`);
-        return spaceId;
-      } else {
-        logger.debug(`Request uses default Space`);
-      }
-    }
-  }
-
-  public getFakeRequest(
-    headers: Headers,
-    spaceId: string | undefined,
-    logger = this.logger
-  ): KibanaRequest {
-    const rawRequest: FakeRawRequest = {
-      headers,
-      path: '/',
-    };
-    const fakeRequest = CoreKibanaRequest.from(rawRequest);
-
-    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
-    if (spacesService) {
-      if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-        logger.info(`Generating request for space: ${spaceId}`);
-        this.getPluginSetupDeps().basePath.set(fakeRequest, `/s/${spaceId}`);
-      }
-    }
-
-    return fakeRequest;
-  }
-
-  public async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
-    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
-    const spaceId = this.getSpaceId(request, logger);
-    if (spacesService && spaceId) {
-      logger.info(`Creating UI Settings Client for space: ${spaceId}`);
-    }
-    const savedObjectsClient = await this.getSavedObjectsClient(request);
-    return await this.getUiSettingsServiceFactory(savedObjectsClient);
-  }
-
   public async getDataViewsService(request: KibanaRequest) {
     const { savedObjects } = await this.getPluginStartDeps();
     const savedObjectsClient = savedObjects.getScopedClient(request);
@@ -410,6 +380,20 @@ export class ReportingCore {
   public async getEsClient() {
     const startDeps = await this.getPluginStartDeps();
     return startDeps.esClient;
+  }
+
+  public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
+    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
+    if (spacesService) {
+      const spaceId = spacesService?.getSpaceId(request);
+
+      if (spaceId !== DEFAULT_SPACE_ID) {
+        logger.info(`Request uses Space ID: ${spaceId}`);
+        return spaceId;
+      } else {
+        logger.debug(`Request uses default Space`);
+      }
+    }
   }
 
   public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult>;
@@ -446,5 +430,19 @@ export class ReportingCore {
   public getEventLogger(report: IReport, task?: { id: string }) {
     const ReportingEventLogger = reportingEventLoggerFactory(this.logger);
     return new ReportingEventLogger(report, task);
+  }
+
+  public async getCsvSearchSourceImmediate() {
+    const startDeps = await this.getPluginStartDeps();
+
+    const csvImmediateExport = new CsvSearchSourceImmediateExportType(
+      this.core,
+      this.config,
+      this.logger,
+      this.context
+    );
+    csvImmediateExport.setup(this.getPluginSetupDeps());
+    csvImmediateExport.start({ ...startDeps, reporting: this.getContract() });
+    return csvImmediateExport;
   }
 }

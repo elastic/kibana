@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import { map } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom, zip } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import type {
+  GetLiveQueryResultsRequestQuerySchema,
+  GetLiveQueryResultsRequestParamsSchema,
+} from '../../../common/api';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import type {
@@ -20,6 +24,10 @@ import type {
 import { OsqueryQueries } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { getActionResponses } from './utils';
+import {
+  getLiveQueryResultsRequestParamsSchema,
+  getLiveQueryResultsRequestQuerySchema,
+} from '../../../common/api';
 
 export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerContext>) => {
   router.versioned
@@ -33,25 +41,14 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: schema.object(
-              {
-                kql: schema.maybe(schema.string()),
-                page: schema.maybe(schema.number()),
-                pageSize: schema.maybe(schema.number()),
-                sort: schema.maybe(schema.string()),
-                sortOrder: schema.maybe(
-                  schema.oneOf([schema.literal('asc'), schema.literal('desc')])
-                ),
-              },
-              { unknowns: 'allow' }
-            ),
-            params: schema.object(
-              {
-                id: schema.string(),
-                actionId: schema.string(),
-              },
-              { unknowns: 'allow' }
-            ),
+            query: buildRouteValidation<
+              typeof getLiveQueryResultsRequestQuerySchema,
+              GetLiveQueryResultsRequestQuerySchema
+            >(getLiveQueryResultsRequestQuerySchema),
+            params: buildRouteValidation<
+              typeof getLiveQueryResultsRequestParamsSchema,
+              GetLiveQueryResultsRequestParamsSchema
+            >(getLiveQueryResultsRequestParamsSchema),
           },
         },
       },

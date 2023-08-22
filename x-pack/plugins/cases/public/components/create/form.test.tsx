@@ -11,7 +11,7 @@ import { act, render, within, fireEvent } from '@testing-library/react';
 import { waitFor } from '@testing-library/dom';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
-import { NONE_CONNECTOR_ID } from '../../../common/api';
+import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { connectorsMock } from '../../containers/mock';
@@ -24,18 +24,18 @@ import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { TestProviders } from '../../common/mock';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
 
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../containers/configure/use_configure');
 jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
-jest.mock('../app/use_available_owners', () => ({
-  useAvailableCasesOwners: () => ['securitySolution', 'observability'],
-}));
+jest.mock('../app/use_available_owners');
 
 const useGetTagsMock = useGetTags as jest.Mock;
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
+const useAvailableOwnersMock = useAvailableCasesOwners as jest.Mock;
 
 const initialCaseValue: FormProps = {
   description: '',
@@ -77,6 +77,7 @@ describe('CreateCaseForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    useAvailableOwnersMock.mockReturnValue(['securitySolution', 'observability']);
     useGetTagsMock.mockReturnValue({ data: ['test'] });
     useGetConnectorsMock.mockReturnValue({ isLoading: false, data: connectorsMock });
     useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
@@ -136,6 +137,18 @@ describe('CreateCaseForm', () => {
     expect(wrapper.find(`[data-test-subj="caseConnectors"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="categories-list"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="caseOwnerSelector"]`).exists()).toBeTruthy();
+  });
+
+  it('does not render solution picker when only one owner is available', async () => {
+    useAvailableOwnersMock.mockReturnValue(['securitySolution']);
+
+    const wrapper = mount(
+      <MockHookWrapperComponent>
+        <CreateCaseForm {...casesFormProps} />
+      </MockHookWrapperComponent>
+    );
+
+    expect(wrapper.find(`[data-test-subj="caseOwnerSelector"]`).exists()).toBeFalsy();
   });
 
   it('hides the sync alerts toggle', () => {

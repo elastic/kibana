@@ -46,9 +46,12 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             ...('sort' in request ? { sort: request.sort } : {}),
             ...('actionId' in request ? { actionId: request.actionId } : {}),
             ...('agentId' in request ? { agentId: request.agentId } : {}),
-            componentTemplateExists: exists,
           } as StrategyRequestType<T>;
-          const dsl = queryFactory.buildDsl(strictRequest);
+
+          const dsl = queryFactory.buildDsl({
+            ...strictRequest,
+            componentTemplateExists: exists,
+          } as StrategyRequestType<T>);
           // use internal user for searching .fleet* indices
           es =
             dsl.index?.includes('fleet') || dsl.index?.includes('logs-osquery_manager.action')

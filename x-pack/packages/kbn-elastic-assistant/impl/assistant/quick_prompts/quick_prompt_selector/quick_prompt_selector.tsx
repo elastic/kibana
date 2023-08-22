@@ -138,14 +138,24 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
       return (
         <EuiFlexGroup
           alignItems="center"
-          justifyContent="spaceBetween"
           className={'parentFlexGroup'}
+          component={'span'}
+          justifyContent="spaceBetween"
         >
-          <EuiFlexItem grow={false}>
-            <EuiHealth color={color}>
-              <span className={contentClassName}>
-                <EuiHighlight search={searchValue}>{label}</EuiHighlight>
-              </span>
+          <EuiFlexItem
+            component={'span'}
+            grow={false}
+            css={css`
+              width: calc(100% - 60px);
+            `}
+          >
+            <EuiHealth
+              color={color}
+              css={css`
+                overflow: hidden;
+              `}
+            >
+              <EuiHighlight search={searchValue}>{label}</EuiHighlight>
             </EuiHealth>
           </EuiFlexItem>
           {!value?.isDefault && (

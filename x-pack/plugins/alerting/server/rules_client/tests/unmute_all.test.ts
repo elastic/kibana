@@ -135,7 +135,7 @@ describe('unmuteAll()', () => {
         operation: 'unmuteAll',
         ruleTypeId: 'myType',
       });
-      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'execute' });
     });
 
     test('throws when user is not authorised to unmuteAll this type of alert', async () => {

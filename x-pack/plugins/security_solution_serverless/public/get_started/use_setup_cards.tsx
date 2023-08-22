@@ -9,12 +9,22 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
-import type { ActiveCards, CardId, SectionId, StepId } from './types';
+import type {
+  ActiveSections,
+  CardId,
+  ExpandedCardSteps,
+  OnCardClicked,
+  OnStepButtonClicked,
+  OnStepClicked,
+  SectionId,
+  StepId,
+} from './types';
 
 import { CardItem } from './card_item';
 import { getSections } from './sections';
+import type { ProductLine } from '../../common/product';
 
-export const useSetUpCardSections = ({
+export const useSetUpSections = ({
   euiTheme,
   shadow = '',
 }: {
@@ -23,30 +33,43 @@ export const useSetUpCardSections = ({
 }) => {
   const setUpCards = useCallback(
     ({
-      onStepClicked,
+      activeProducts,
+      activeSections,
+      expandedCardSteps,
       finishedSteps,
-      activeCards,
+      onCardClicked,
+      onStepButtonClicked,
+      onStepClicked,
       sectionId,
     }: {
-      onStepClicked: (params: { stepId: StepId; cardId: CardId; sectionId: SectionId }) => void;
+      activeProducts: Set<ProductLine>;
+      activeSections: ActiveSections | null;
+      expandedCardSteps: ExpandedCardSteps;
       finishedSteps: Record<CardId, Set<StepId>>;
-      activeCards: ActiveCards | null;
+      onCardClicked: OnCardClicked;
+      onStepButtonClicked: OnStepButtonClicked;
+      onStepClicked: OnStepClicked;
       sectionId: SectionId;
     }) => {
-      const section = activeCards?.[sectionId];
+      const section = activeSections?.[sectionId];
       return section
         ? Object.values(section)?.map<React.ReactNode>((cardItem) => (
             <EuiFlexItem key={cardItem.id}>
               <CardItem
+                activeProducts={activeProducts}
+                activeStepIds={cardItem.activeStepIds}
+                cardId={cardItem.id}
                 data-test-subj={cardItem.id}
+                expandedCardSteps={expandedCardSteps}
+                euiTheme={euiTheme}
+                finishedSteps={finishedSteps}
+                onCardClicked={onCardClicked}
+                onStepButtonClicked={onStepButtonClicked}
+                onStepClicked={onStepClicked}
+                sectionId={sectionId}
+                shadow={shadow}
                 stepsLeft={cardItem.stepsLeft}
                 timeInMins={cardItem.timeInMins}
-                sectionId={sectionId}
-                cardId={cardItem.id}
-                shadow={shadow}
-                euiTheme={euiTheme}
-                onStepClicked={onStepClicked}
-                finishedSteps={finishedSteps}
               />
             </EuiFlexItem>
           ))
@@ -57,20 +80,32 @@ export const useSetUpCardSections = ({
 
   const setUpSections = useCallback(
     ({
-      onStepClicked,
+      activeProducts,
+      activeSections,
+      expandedCardSteps,
       finishedSteps,
-      activeCards,
+      onCardClicked,
+      onStepButtonClicked,
+      onStepClicked,
     }: {
-      onStepClicked: (params: { stepId: StepId; cardId: CardId; sectionId: SectionId }) => void;
+      activeProducts: Set<ProductLine>;
+      activeSections: ActiveSections | null;
+      expandedCardSteps: ExpandedCardSteps;
       finishedSteps: Record<CardId, Set<StepId>>;
-      activeCards: ActiveCards | null;
+      onCardClicked: OnCardClicked;
+      onStepButtonClicked: OnStepButtonClicked;
+      onStepClicked: OnStepClicked;
     }) =>
       getSections().reduce<React.ReactNode[]>((acc, currentSection) => {
         const cardNodes = setUpCards({
-          sectionId: currentSection.id,
-          onStepClicked,
+          activeProducts,
+          activeSections,
+          expandedCardSteps,
           finishedSteps,
-          activeCards,
+          onCardClicked,
+          onStepButtonClicked,
+          onStepClicked,
+          sectionId: currentSection.id,
         });
         if (cardNodes && cardNodes.length > 0) {
           acc.push(

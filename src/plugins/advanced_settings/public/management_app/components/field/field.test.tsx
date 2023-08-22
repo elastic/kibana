@@ -21,12 +21,6 @@ jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn(),
 }));
 
-jest.mock('@kbn/kibana-react-plugin/public/theme/use_theme', () => ({
-  useKibanaTheme: jest.fn(() => {
-    return { darkMode: false };
-  }),
-}));
-
 const defaults = {
   requiresPageReload: false,
   readOnly: false,

@@ -14,7 +14,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { DocViewRenderProps } from '../../../doc_views_types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../../build_services';
-import { buildDataTableRecord } from '../../../../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 
 const services = {
   uiSettings: {

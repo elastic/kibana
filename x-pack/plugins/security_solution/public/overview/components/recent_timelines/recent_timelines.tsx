@@ -22,7 +22,7 @@ import type {
   OpenTimelineResult,
 } from '../../../timelines/components/open_timeline/types';
 import { WithHoverActions } from '../../../common/components/with_hover_actions';
-import { TimelineType } from '../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../common/api/timeline';
 
 import { RecentTimelineCounts } from './counts';
 import * as i18n from './translations';

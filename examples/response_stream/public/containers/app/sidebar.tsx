@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiPageSideBar_Deprecated as EuiPageSideBar, EuiSideNav } from '@elastic/eui';
+import { EuiPageSidebar, EuiSideNav } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { routes } from '../../routes';
 
@@ -15,7 +15,7 @@ export const Sidebar: React.FC = () => {
   const history = useHistory();
 
   return (
-    <EuiPageSideBar>
+    <EuiPageSidebar>
       <EuiSideNav
         items={routes.map(({ id, title, items }) => ({
           id,
@@ -29,6 +29,6 @@ export const Sidebar: React.FC = () => {
           })),
         }))}
       />
-    </EuiPageSideBar>
+    </EuiPageSidebar>
   );
 };

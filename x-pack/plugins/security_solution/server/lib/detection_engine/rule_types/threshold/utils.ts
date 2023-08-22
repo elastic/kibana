@@ -10,7 +10,40 @@ import { v5 as uuidv5 } from 'uuid';
 import type {
   ThresholdNormalized,
   ThresholdWithCardinality,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleRangeTuple } from '../types';
+import type { ThresholdSignalHistory, ThresholdAlertState } from './types';
+
+/**
+ * Returns a new signal history based on what the previous
+ * threshold rule state had stored and what the current rule
+ * run tuple timestamp is.
+ *
+ * This is used to determine which terms buckets over
+ * which periods of time are to be used in the search after
+ *
+ * @param state ThresholdAlertState
+ * @param signalHistory ThresholdSignalHistory
+ * @param tuple RuleRangeTuple
+ * @returns ThresholdSignalHistory
+ */
+export const getSignalHistory = (
+  state: ThresholdAlertState,
+  signalHistory: ThresholdSignalHistory,
+  tuple: RuleRangeTuple
+): ThresholdSignalHistory => {
+  if (state.initialized) {
+    return Object.entries(signalHistory).reduce((acc, [hash, entry]) => {
+      if (entry.lastSignalTimestamp > tuple.from.valueOf()) {
+        acc[hash] = entry;
+        return acc;
+      } else {
+        return acc;
+      }
+    }, {} as ThresholdSignalHistory);
+  }
+  return signalHistory;
+};
 
 export const shouldFilterByCardinality = (
   threshold: ThresholdNormalized

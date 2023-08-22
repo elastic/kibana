@@ -100,6 +100,7 @@ function isValid(itemValidation: ItemValidation): boolean {
   return !Object.values(itemValidation).some((errors) => Object.keys(errors).length);
 }
 
+// eslint-disable-next-line react/display-name
 export const BlockListForm = memo<ArtifactFormComponentProps>(
   ({ item, policies, policiesIsLoading, onChange, mode }) => {
     const [visited, setVisited] = useState<{ name: boolean; value: boolean }>({

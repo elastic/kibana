@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import {
   DataQualityPanel,
   DATA_QUALITY_SUBTITLE,
@@ -49,6 +49,10 @@ import {
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as i18n from './translations';
+import type {
+  ReportDataQualityCheckAllCompletedParams,
+  ReportDataQualityIndexCheckedParams,
+} from '../../common/lib/telemetry';
 
 const LOCAL_STORAGE_KEY = 'dataQualityDashboardLastChecked';
 
@@ -133,6 +137,9 @@ const DataQualityComponent: React.FC = () => {
   const httpFetch = KibanaServices.get().http.fetch;
   const { baseTheme, theme } = useThemes();
   const toasts = useToasts();
+  const {
+    services: { telemetry },
+  } = useKibana();
   const addSuccessToast = useCallback(
     (toast: { title: string }) => {
       toasts.addSuccess(toast);
@@ -193,15 +200,29 @@ const DataQualityComponent: React.FC = () => {
     ({ comments, headerContent }: { comments: string[]; headerContent?: React.ReactNode }) => {
       const attachments: Array<{
         comment: string;
-        type: CommentType.user;
+        type: AttachmentType.user;
       }> = comments.map((x) => ({
         comment: x,
-        type: CommentType.user,
+        type: AttachmentType.user,
       }));
 
       createCaseFlyout.open({ attachments, headerContent });
     },
     [createCaseFlyout]
+  );
+
+  const reportDataQualityIndexChecked = useCallback(
+    (params: ReportDataQualityIndexCheckedParams) => {
+      telemetry.reportDataQualityIndexChecked(params);
+    },
+    [telemetry]
+  );
+
+  const reportDataQualityCheckAllCompleted = useCallback(
+    (params: ReportDataQualityCheckAllCompletedParams) => {
+      telemetry.reportDataQualityCheckAllCompleted(params);
+    },
+    [telemetry]
   );
 
   if (isSourcererLoading || isSignalIndexNameLoading) {
@@ -235,6 +256,8 @@ const DataQualityComponent: React.FC = () => {
             defaultBytesFormat={defaultBytesFormat}
             defaultNumberFormat={defaultNumberFormat}
             getGroupByFieldsOnClick={getGroupByFieldsOnClick}
+            reportDataQualityCheckAllCompleted={reportDataQualityCheckAllCompleted}
+            reportDataQualityIndexChecked={reportDataQualityIndexChecked}
             httpFetch={httpFetch}
             ilmPhases={ilmPhases}
             isAssistantEnabled={hasAssistantPrivilege}

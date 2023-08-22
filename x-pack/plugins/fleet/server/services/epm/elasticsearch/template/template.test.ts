@@ -1227,6 +1227,9 @@ describe('EPM template', () => {
         template: {
           settings: { index: {} },
           mappings: { properties: {} },
+          lifecycle: {
+            data_retention: '7d',
+          },
         },
       } as any);
 
@@ -1247,6 +1250,16 @@ describe('EPM template', () => {
       const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
       expect(putMappingsCall).toHaveLength(1);
       expect(putMappingsCall[0]).toBe('test-non-replicated');
+
+      const putDatastreamLifecycleCalls = esClient.transport.request.mock.calls;
+      expect(putDatastreamLifecycleCalls).toHaveLength(1);
+      expect(putDatastreamLifecycleCalls[0][0]).toEqual({
+        method: 'PUT',
+        path: '_data_stream/test-non-replicated/_lifecycle',
+        body: {
+          data_retention: '7d',
+        },
+      });
     });
   });
 });

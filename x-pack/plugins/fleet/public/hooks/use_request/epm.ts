@@ -105,6 +105,13 @@ export const useGetPackageInfoByKeyQuery = (
     ignoreUnverified?: boolean;
     prerelease?: boolean;
     full?: boolean;
+  },
+  // Additional options for the useQuery hook
+  queryOptions: {
+    // If enabled is false, the query will not be fetched
+    enabled?: boolean;
+  } = {
+    enabled: true,
   }
 ) => {
   const confirmOpenUnverified = useConfirmOpenUnverified();
@@ -112,15 +119,18 @@ export const useGetPackageInfoByKeyQuery = (
     options?.ignoreUnverified
   );
 
-  const response = useQuery<GetInfoResponse, RequestError>([pkgName, pkgVersion, options], () =>
-    sendRequestForRq<GetInfoResponse>({
-      path: epmRouteService.getInfoPath(pkgName, pkgVersion),
-      method: 'get',
-      query: {
-        ...options,
-        ...(ignoreUnverifiedQueryParam && { ignoreUnverified: ignoreUnverifiedQueryParam }),
-      },
-    })
+  const response = useQuery<GetInfoResponse, RequestError>(
+    [pkgName, pkgVersion, options],
+    () =>
+      sendRequestForRq<GetInfoResponse>({
+        path: epmRouteService.getInfoPath(pkgName, pkgVersion),
+        method: 'get',
+        query: {
+          ...options,
+          ...(ignoreUnverifiedQueryParam && { ignoreUnverified: ignoreUnverifiedQueryParam }),
+        },
+      }),
+    { enabled: queryOptions.enabled }
   );
 
   const confirm = async () => {

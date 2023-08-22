@@ -9,7 +9,8 @@ import moment from 'moment';
 import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
-export function useDateFormat(): (timestamp?: string) => string {
+export type DateFormatter = (timestamp?: string) => string;
+export function useDateFormat(): DateFormatter {
   const kibanaLocale = i18n.getLocale();
   const clientLocale = navigator.language;
 

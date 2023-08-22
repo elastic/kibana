@@ -11,10 +11,10 @@ import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import {
   ConfigKey,
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   SyntheticsMonitorWithId,
-  SyntheticsMonitorWithSecrets,
+  SyntheticsMonitorWithSecretsAttributes,
 } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
@@ -68,7 +68,7 @@ export const deleteMonitor = async ({
   routeContext: RouteContext;
   monitorId: string;
 }) => {
-  const { spaceId, savedObjectsClient, server, syntheticsMonitorClient, request } = routeContext;
+  const { spaceId, savedObjectsClient, server, syntheticsMonitorClient } = routeContext;
   const { logger, telemetry, stackVersion } = server;
 
   const { monitor, monitorWithSecret } = await getMonitorToDelete(
@@ -92,7 +92,6 @@ export const deleteMonitor = async ({
         /* Type cast encrypted saved objects to decrypted saved objects for delete flow only.
          * Deletion does not require all monitor fields */
       ] as SyntheticsMonitorWithId[],
-      request,
       savedObjectsClient,
       spaceId
     );
@@ -146,7 +145,7 @@ const getMonitorToDelete = async (
 
   try {
     const monitor =
-      await encryptedSOClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+      await encryptedSOClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
         syntheticsMonitorType,
         monitorId,
         {
@@ -166,7 +165,10 @@ const getMonitorToDelete = async (
     });
   }
 
-  const monitor = await soClient.get<EncryptedSyntheticsMonitor>(syntheticsMonitorType, monitorId);
+  const monitor = await soClient.get<EncryptedSyntheticsMonitorAttributes>(
+    syntheticsMonitorType,
+    monitorId
+  );
   return { monitor, withSecrets: false };
 };
 
@@ -176,11 +178,14 @@ const restoreDeletedMonitor = async ({
   normalizedMonitor,
 }: {
   monitorId: string;
-  normalizedMonitor: SyntheticsMonitorWithSecrets;
+  normalizedMonitor: SyntheticsMonitorWithSecretsAttributes;
   savedObjectsClient: SavedObjectsClientContract;
 }) => {
   try {
-    await savedObjectsClient.get<EncryptedSyntheticsMonitor>(syntheticsMonitorType, monitorId);
+    await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
+      syntheticsMonitorType,
+      monitorId
+    );
   } catch (e) {
     if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
       await savedObjectsClient.create(syntheticsMonitorType, normalizedMonitor, {

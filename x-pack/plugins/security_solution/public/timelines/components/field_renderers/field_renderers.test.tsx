@@ -29,20 +29,14 @@ import { mockData } from '../../../explore/network/components/details/mock';
 import type { AutonomousSystem } from '../../../../common/search_strategy';
 import { FlowTarget } from '../../../../common/search_strategy';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
+import { mockGetUrlForApp } from '@kbn/security-solution-navigation/mocks/context';
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/lib/kibana/kibana_react', () => {
-  return {
-    useKibana: () => ({
-      services: {
-        application: {
-          getUrlForApp: (appId: string, options?: { path?: string; deepLinkId?: boolean }) =>
-            `${appId}/${options?.deepLinkId ?? ''}${options?.path ?? ''}`,
-        },
-      },
-    }),
-  };
-});
+jest.mock('@kbn/security-solution-navigation/src/context');
+mockGetUrlForApp.mockImplementation(
+  (appId: string, options?: { path?: string; deepLinkId?: boolean }) =>
+    `${appId}/${options?.deepLinkId ?? ''}${options?.path ?? ''}`
+);
 
 jest.mock('../../../common/hooks/use_get_field_spec');
 

@@ -8,13 +8,18 @@
 import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
 import { Conversation } from '../../..';
 import { AssistantSettings, CONVERSATIONS_TAB } from './assistant_settings';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 
 interface Props {
+  defaultConnectorId?: string;
+  defaultProvider?: OpenAiProviderType;
+  isSettingsModalVisible: boolean;
   selectedConversation: Conversation;
+  setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
   isDisabled?: boolean;
 }
@@ -23,9 +28,16 @@ interface Props {
  * Gear button that opens the assistant settings modal
  */
 export const AssistantSettingsButton: React.FC<Props> = React.memo(
-  ({ isDisabled = false, selectedConversation, setSelectedConversationId }) => {
-    const { isSettingsModalVisible, setIsSettingsModalVisible, setSelectedSettingsTab } =
-      useAssistantContext();
+  ({
+    defaultConnectorId,
+    defaultProvider,
+    isDisabled = false,
+    isSettingsModalVisible,
+    setIsSettingsModalVisible,
+    selectedConversation,
+    setSelectedConversationId,
+  }) => {
+    const { setSelectedSettingsTab } = useAssistantContext();
 
     // Modal control functions
     const cleanupAndCloseModal = useCallback(() => {
@@ -60,6 +72,8 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
 
         {isSettingsModalVisible && (
           <AssistantSettings
+            defaultConnectorId={defaultConnectorId}
+            defaultProvider={defaultProvider}
             selectedConversation={selectedConversation}
             setSelectedConversationId={setSelectedConversationId}
             onClose={handleCloseModal}

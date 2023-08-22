@@ -9,16 +9,9 @@ import Boom from '@hapi/boom';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { Case, CasePostRequest } from '../../../common/api';
-import {
-  CaseRt,
-  ActionTypes,
-  CasePostRequestRt,
-  CaseSeverity,
-  decodeWithExcessOrThrow,
-} from '../../../common/api';
-import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
-import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
+import type { Case } from '../../../common/types/domain';
+import { CaseSeverity, UserActionTypes, CaseRt } from '../../../common/types/domain';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -26,6 +19,8 @@ import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
+import type { CasePostRequest } from '../../../common/types/api';
+import { CasePostRequestRt } from '../../../common/types/api';
 
 /**
  * Creates a new case.
@@ -66,23 +61,29 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
       licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
     }
 
-    if (areTotalAssigneesInvalid(query.assignees)) {
-      throw Boom.badRequest(
-        `You cannot assign more than ${MAX_ASSIGNEES_PER_CASE} assignees to a case.`
-      );
-    }
+    /**
+     * Trim title, category, description and tags before saving to ES
+     */
+
+    const trimmedQuery = {
+      ...query,
+      title: query.title.trim(),
+      description: query.description.trim(),
+      category: query.category?.trim() ?? null,
+      tags: query.tags?.map((tag) => tag.trim()) ?? [],
+    };
 
     const newCase = await caseService.postNewCase({
       attributes: transformNewCase({
         user,
-        newCase: query,
+        newCase: trimmedQuery,
       }),
       id: savedObjectID,
       refresh: false,
     });
 
     await userActionService.creator.createUserAction({
-      type: ActionTypes.create_case,
+      type: UserActionTypes.create_case,
       caseId: newCase.id,
       user,
       payload: {

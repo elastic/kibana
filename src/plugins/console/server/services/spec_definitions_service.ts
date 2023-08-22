@@ -12,33 +12,33 @@ import { basename, join } from 'path';
 import normalizePath from 'normalize-path';
 import { readFileSync } from 'fs';
 
-import { AUTOCOMPLETE_DEFINITIONS_FOLDER } from '../../common/constants';
+import { EndpointDefinition, EndpointDescription, EndpointsAvailability } from '../../common/types';
+import {
+  AUTOCOMPLETE_DEFINITIONS_FOLDER,
+  GENERATED_SUBFOLDER,
+  MANUAL_SUBFOLDER,
+  OVERRIDES_SUBFOLDER,
+} from '../../common/constants';
 import { jsSpecLoaders } from '../lib';
 
-interface EndpointDescription {
-  methods?: string[];
-  patterns?: string | string[];
-  url_params?: Record<string, unknown>;
-  data_autocomplete_rules?: Record<string, unknown>;
-  url_components?: Record<string, unknown>;
-  priority?: number;
+export interface SpecDefinitionsDependencies {
+  endpointsAvailability: EndpointsAvailability;
 }
 
 export class SpecDefinitionsService {
   private readonly name = 'es';
 
   private readonly globalRules: Record<string, any> = {};
-  private readonly endpoints: Record<string, any> = {};
-  private readonly extensionSpecFilePaths: string[] = [];
+  private readonly endpoints: Record<string, EndpointDescription> = {};
 
-  private hasLoadedSpec = false;
+  private hasLoadedDefinitions = false;
 
   public addGlobalAutocompleteRules(parentNode: string, rules: unknown) {
     this.globalRules[parentNode] = rules;
   }
 
   public addEndpointDescription(endpoint: string, description: EndpointDescription = {}) {
-    let copiedDescription: { patterns?: string; url_params?: Record<string, unknown> } = {};
+    let copiedDescription: EndpointDescription = {};
     if (this.endpoints[endpoint]) {
       copiedDescription = { ...this.endpoints[endpoint] };
     }
@@ -51,7 +51,7 @@ export class SpecDefinitionsService {
       | undefined;
 
     _.each(description.patterns || [], function (p) {
-      if (p.indexOf('{indices}') >= 0) {
+      if (p.indexOf('{index}') >= 0) {
         urlParamsDef = urlParamsDef || {};
         urlParamsDef.ignore_unavailable = '__flag__';
         urlParamsDef.allow_no_indices = '__flag__';
@@ -82,63 +82,86 @@ export class SpecDefinitionsService {
     };
   }
 
-  public addExtensionSpecFilePath(path: string) {
-    this.extensionSpecFilePaths.push(path);
-  }
-
-  public setup() {
-    return {
-      addExtensionSpecFilePath: this.addExtensionSpecFilePath.bind(this),
-    };
-  }
-
-  public start() {
-    if (!this.hasLoadedSpec) {
-      this.loadJsonSpec();
-      this.loadJSSpec();
-      this.hasLoadedSpec = true;
+  public start({ endpointsAvailability }: SpecDefinitionsDependencies) {
+    if (!this.hasLoadedDefinitions) {
+      this.loadJsonDefinitions(endpointsAvailability);
+      this.loadJSDefinitions();
+      this.hasLoadedDefinitions = true;
     } else {
       throw new Error('Service has already started!');
     }
   }
 
-  private loadJSONSpecInDir(dirname: string) {
+  private loadJSONDefinitionsFiles() {
     // we need to normalize paths otherwise they don't work on windows, see https://github.com/elastic/kibana/issues/151032
-    const generatedFiles = globby.sync(normalizePath(join(dirname, 'generated', '*.json')));
-    const overrideFiles = globby.sync(normalizePath(join(dirname, 'overrides', '*.json')));
+    const generatedFiles = globby.sync(
+      normalizePath(join(AUTOCOMPLETE_DEFINITIONS_FOLDER, GENERATED_SUBFOLDER, '*.json'))
+    );
+    const overrideFiles = globby.sync(
+      normalizePath(join(AUTOCOMPLETE_DEFINITIONS_FOLDER, OVERRIDES_SUBFOLDER, '*.json'))
+    );
+    const manualFiles = globby.sync(
+      normalizePath(join(AUTOCOMPLETE_DEFINITIONS_FOLDER, MANUAL_SUBFOLDER, '*.json'))
+    );
 
-    return generatedFiles.reduce((acc, file) => {
+    // definitions files contain only 1 definition per endpoint name { "endpointName": { endpointDescription }}
+    // all endpoints need to be merged into 1 object with endpoint names as keys and endpoint definitions as values
+    const jsonDefinitions = {} as Record<string, EndpointDescription>;
+    generatedFiles.forEach((file) => {
       const overrideFile = overrideFiles.find((f) => basename(f) === basename(file));
-      const loadedSpec: Record<string, EndpointDescription> = JSON.parse(
-        readFileSync(file, 'utf8')
-      );
+      const loadedDefinition: EndpointDefinition = JSON.parse(readFileSync(file, 'utf8'));
       if (overrideFile) {
-        merge(loadedSpec, JSON.parse(readFileSync(overrideFile, 'utf8')));
+        merge(loadedDefinition, JSON.parse(readFileSync(overrideFile, 'utf8')));
       }
-      Object.entries(loadedSpec).forEach(([key, value]) => {
-        if (acc[key]) {
-          // add time to remove key collision
-          acc[`${key}${Date.now()}`] = value;
-        } else {
-          acc[key] = value;
-        }
-      });
-      return acc;
-    }, {} as Record<string, EndpointDescription>);
+      this.addToJsonDefinitions({ loadedDefinition, jsonDefinitions });
+    });
+
+    // add manual definitions
+    manualFiles.forEach((file) => {
+      const loadedDefinition: EndpointDefinition = JSON.parse(readFileSync(file, 'utf8'));
+      this.addToJsonDefinitions({ loadedDefinition, jsonDefinitions });
+    });
+    return jsonDefinitions;
   }
 
-  private loadJsonSpec() {
-    const result = this.loadJSONSpecInDir(AUTOCOMPLETE_DEFINITIONS_FOLDER);
-    this.extensionSpecFilePaths.forEach((extensionSpecFilePath) => {
-      merge(result, this.loadJSONSpecInDir(extensionSpecFilePath));
+  private addToJsonDefinitions({
+    loadedDefinition,
+    jsonDefinitions,
+  }: {
+    loadedDefinition: EndpointDefinition;
+    jsonDefinitions: Record<string, EndpointDescription>;
+  }) {
+    // iterate over EndpointDefinition for a safe and easy access to the only property in this object
+    Object.entries(loadedDefinition).forEach(([endpointName, endpointDescription]) => {
+      // endpoints should all have unique names, but in case that happens unintentionally
+      // don't silently overwrite the definition but create a new unique endpoint name
+      if (jsonDefinitions[endpointName]) {
+        // add time to create a unique key
+        jsonDefinitions[`${endpointName}${Date.now()}`] = endpointDescription;
+      } else {
+        jsonDefinitions[endpointName] = endpointDescription;
+      }
     });
+    return jsonDefinitions;
+  }
+
+  private loadJsonDefinitions(endpointsAvailability: string) {
+    const result = this.loadJSONDefinitionsFiles();
 
     Object.keys(result).forEach((endpoint) => {
-      this.addEndpointDescription(endpoint, result[endpoint]);
+      const description = result[endpoint];
+      const addEndpoint =
+        // If the 'availability' property doesn't exist, display the endpoint by default
+        !description.availability ||
+        (endpointsAvailability === 'stack' && description.availability.stack) ||
+        (endpointsAvailability === 'serverless' && description.availability.serverless);
+      if (addEndpoint) {
+        this.addEndpointDescription(endpoint, description);
+      }
     });
   }
 
-  private loadJSSpec() {
+  private loadJSDefinitions() {
     jsSpecLoaders.forEach((addJsSpec) => addJsSpec(this));
   }
 }

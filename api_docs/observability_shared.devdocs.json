@@ -595,7 +595,7 @@
         "label": "noCasesPermissions",
         "description": [],
         "signature": [
-          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; }"
+          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; }"
         ],
         "path": "x-pack/plugins/observability_shared/public/utils/cases_permissions.ts",
         "deprecated": false,
@@ -1429,9 +1429,9 @@
         "signature": [
           "() => ",
           {
-            "pluginId": "kibanaReact",
+            "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
-            "docId": "kibKibanaReactPluginApi",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           }
@@ -2354,7 +2354,7 @@
         "signature": [
           "Pick<",
           "KibanaPageTemplateProps",
-          ", \"children\" | \"paddingSize\" | \"data-test-subj\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
+          ", \"children\" | \"data-test-subj\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
@@ -2423,7 +2423,7 @@
           "ObservabilityPageTemplateDependencies",
           ", \"isSidebarEnabled$\"> & Pick<",
           "KibanaPageTemplateProps",
-          ", \"children\" | \"paddingSize\" | \"data-test-subj\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
+          ", \"children\" | \"data-test-subj\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
@@ -2811,7 +2811,7 @@
         "signature": [
           "\"agent\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2826,7 +2826,7 @@
         "signature": [
           "\"agent.name\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2841,7 +2841,7 @@
         "signature": [
           "\"agent.version\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2871,7 +2871,7 @@
         "signature": [
           "\"client.geo\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2886,7 +2886,7 @@
         "signature": [
           "\"client.geo.country_iso_code\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2901,7 +2901,7 @@
         "signature": [
           "\"client.geo.country_name\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2916,7 +2916,7 @@
         "signature": [
           "\"cloud\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2931,7 +2931,7 @@
         "signature": [
           "\"cloud.availability_zone\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2946,7 +2946,7 @@
         "signature": [
           "\"cloud.machine.type\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2961,7 +2961,7 @@
         "signature": [
           "\"cloud.provider\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2976,7 +2976,7 @@
         "signature": [
           "\"cloud.region\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2991,7 +2991,7 @@
         "signature": [
           "\"transaction.experience.cls\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3006,7 +3006,7 @@
         "signature": [
           "\"container.id\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3021,7 +3021,7 @@
         "signature": [
           "\"destination.address\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3036,7 +3036,7 @@
         "signature": [
           "\"error.culprit\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3051,7 +3051,7 @@
         "signature": [
           "\"error.exception.handled\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3066,7 +3066,7 @@
         "signature": [
           "\"error.exception.message\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3081,7 +3081,7 @@
         "signature": [
           "\"error.exception.type\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3096,7 +3096,7 @@
         "signature": [
           "\"error.grouping_key\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3111,7 +3111,7 @@
         "signature": [
           "\"error.log.level\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3126,7 +3126,7 @@
         "signature": [
           "\"error.log.message\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3141,7 +3141,7 @@
         "signature": [
           "\"error.page.url\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3156,7 +3156,7 @@
         "signature": [
           "\"event.outcome\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3171,7 +3171,7 @@
         "signature": [
           "\"transaction.marks.agent.firstContentfulPaint\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3186,7 +3186,7 @@
         "signature": [
           "\"transaction.experience.fid\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3201,7 +3201,7 @@
         "signature": [
           "\"host\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3216,7 +3216,7 @@
         "signature": [
           "\"host.hostname\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3231,7 +3231,7 @@
         "signature": [
           "\"host.os.platform\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3246,7 +3246,7 @@
         "signature": [
           "\"http.request.method\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3261,7 +3261,7 @@
         "signature": [
           "\"http.response.status_code\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3276,7 +3276,7 @@
         "signature": [
           "\"kubernetes\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3291,7 +3291,7 @@
         "signature": [
           "\"labels.name\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3306,7 +3306,7 @@
         "signature": [
           "\"transaction.marks.agent.largestContentfulPaint\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3321,7 +3321,7 @@
         "signature": [
           "\"system.process.cgroup.memory.mem.limit.bytes\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3336,7 +3336,7 @@
         "signature": [
           "\"system.process.cgroup.memory.mem.usage.bytes\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3351,7 +3351,7 @@
         "signature": [
           "\"jvm.gc.count\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3366,7 +3366,7 @@
         "signature": [
           "\"jvm.gc.time\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3381,7 +3381,7 @@
         "signature": [
           "\"jvm.memory.heap.committed\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3396,7 +3396,7 @@
         "signature": [
           "\"jvm.memory.heap.max\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3411,7 +3411,7 @@
         "signature": [
           "\"jvm.memory.heap.used\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3426,7 +3426,7 @@
         "signature": [
           "\"jvm.memory.non_heap.committed\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3441,7 +3441,7 @@
         "signature": [
           "\"jvm.memory.non_heap.max\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3456,7 +3456,7 @@
         "signature": [
           "\"jvm.memory.non_heap.used\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3471,7 +3471,7 @@
         "signature": [
           "\"jvm.thread.count\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3486,7 +3486,7 @@
         "signature": [
           "\"system.process.cpu.total.norm.pct\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3501,7 +3501,7 @@
         "signature": [
           "\"system.cpu.total.norm.pct\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3516,7 +3516,7 @@
         "signature": [
           "\"system.cpu.usage\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3531,7 +3531,7 @@
         "signature": [
           "\"system.memory.actual.free\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3546,7 +3546,7 @@
         "signature": [
           "\"system.memory.usage\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3561,7 +3561,22 @@
         "signature": [
           "\"system.memory.total\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.NETWORK_TIMINGS_FIELDS",
+        "type": "Array",
+        "tags": [],
+        "label": "NETWORK_TIMINGS_FIELDS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/plugins/observability_shared/common/field_names/synthetics.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3606,7 +3621,7 @@
         "signature": [
           "\"observer.hostname\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3621,7 +3636,7 @@
         "signature": [
           "\"observer.listening\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3636,7 +3651,7 @@
         "signature": [
           "\"observer.version_major\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3651,7 +3666,7 @@
         "signature": [
           "\"parent.id\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3666,7 +3681,7 @@
         "signature": [
           "\"kubernetes.pod.name\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3681,7 +3696,7 @@
         "signature": [
           "\"processor.event\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3696,7 +3711,7 @@
         "signature": [
           "\"profile.alloc_objects.count\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3711,7 +3726,7 @@
         "signature": [
           "\"profile.alloc_space.bytes\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3726,7 +3741,7 @@
         "signature": [
           "\"profile.cpu.ns\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3741,7 +3756,7 @@
         "signature": [
           "\"profile.duration\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3756,7 +3771,7 @@
         "signature": [
           "\"profile.id\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3771,7 +3786,7 @@
         "signature": [
           "\"profile.inuse_objects.count\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3786,7 +3801,7 @@
         "signature": [
           "\"profile.inuse_space.bytes\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3801,7 +3816,7 @@
         "signature": [
           "\"profile.samples.count\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3816,7 +3831,7 @@
         "signature": [
           "\"profile.stack\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3831,7 +3846,7 @@
         "signature": [
           "\"profile.top.id\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3846,7 +3861,7 @@
         "signature": [
           "\"profile.wall.us\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3861,7 +3876,7 @@
         "signature": [
           "\"service\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3876,7 +3891,7 @@
         "signature": [
           "\"service.environment\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3891,7 +3906,7 @@
         "signature": [
           "\"service.framework.name\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3906,7 +3921,7 @@
         "signature": [
           "\"service.framework.version\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3921,7 +3936,7 @@
         "signature": [
           "\"service.language.name\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3936,7 +3951,7 @@
         "signature": [
           "\"service.language.version\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3951,7 +3966,7 @@
         "signature": [
           "\"service.name\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3966,7 +3981,7 @@
         "signature": [
           "\"service.node.name\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3981,7 +3996,7 @@
         "signature": [
           "\"service.runtime.name\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3996,7 +4011,7 @@
         "signature": [
           "\"service.runtime.version\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4011,7 +4026,7 @@
         "signature": [
           "\"service.version\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4041,7 +4056,7 @@
         "signature": [
           "\"span.action\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4056,7 +4071,7 @@
         "signature": [
           "\"span.destination.service.resource\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4071,7 +4086,7 @@
         "signature": [
           "\"span.destination.service.response_time.count\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4086,7 +4101,7 @@
         "signature": [
           "\"span.destination.service.response_time.sum.us\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4101,7 +4116,7 @@
         "signature": [
           "\"span.duration.us\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4116,7 +4131,7 @@
         "signature": [
           "\"span.id\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4131,7 +4146,7 @@
         "signature": [
           "\"span.name\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4146,7 +4161,7 @@
         "signature": [
           "\"span.self_time.sum.us\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4161,7 +4176,7 @@
         "signature": [
           "\"span.subtype\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4176,7 +4191,127 @@
         "signature": [
           "\"span.type\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SYNTHETICS_BLOCKED_TIMINGS",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_BLOCKED_TIMINGS",
+        "description": [],
+        "signature": [
+          "\"synthetics.payload.timings.blocked\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/field_names/synthetics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SYNTHETICS_CONNECT_TIMINGS",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_CONNECT_TIMINGS",
+        "description": [],
+        "signature": [
+          "\"synthetics.payload.timings.connect\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/field_names/synthetics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SYNTHETICS_DNS_TIMINGS",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_DNS_TIMINGS",
+        "description": [],
+        "signature": [
+          "\"synthetics.payload.timings.dns\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/field_names/synthetics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SYNTHETICS_RECEIVE_TIMINGS",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_RECEIVE_TIMINGS",
+        "description": [],
+        "signature": [
+          "\"synthetics.payload.timings.receive\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/field_names/synthetics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SYNTHETICS_SEND_TIMINGS",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_SEND_TIMINGS",
+        "description": [],
+        "signature": [
+          "\"synthetics.payload.timings.send\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/field_names/synthetics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SYNTHETICS_SSL_TIMINGS",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_SSL_TIMINGS",
+        "description": [],
+        "signature": [
+          "\"synthetics.payload.timings.ssl\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/field_names/synthetics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SYNTHETICS_TOTAL_TIMINGS",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_TOTAL_TIMINGS",
+        "description": [],
+        "signature": [
+          "\"synthetics.payload.timings.total\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/field_names/synthetics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SYNTHETICS_WAIT_TIMINGS",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_WAIT_TIMINGS",
+        "description": [],
+        "signature": [
+          "\"synthetics.payload.timings.wait\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/field_names/synthetics.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4191,7 +4326,7 @@
         "signature": [
           "\"transaction.experience.tbt\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4206,7 +4341,7 @@
         "signature": [
           "\"trace.id\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4221,7 +4356,7 @@
         "signature": [
           "\"transaction.marks.agent.domInteractive\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4236,7 +4371,7 @@
         "signature": [
           "\"transaction.duration.us\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4251,7 +4386,7 @@
         "signature": [
           "\"transaction.duration.histogram\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4266,7 +4401,7 @@
         "signature": [
           "\"transaction.id\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4281,7 +4416,7 @@
         "signature": [
           "\"transaction.name\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4296,7 +4431,7 @@
         "signature": [
           "\"transaction.page.url\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4311,7 +4446,7 @@
         "signature": [
           "\"transaction.result\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4326,7 +4461,7 @@
         "signature": [
           "\"transaction.root\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4341,7 +4476,7 @@
         "signature": [
           "\"transaction.sampled\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4356,7 +4491,7 @@
         "signature": [
           "\"transaction.marks.agent.timeToFirstByte\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4371,7 +4506,7 @@
         "signature": [
           "\"transaction.type\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4386,7 +4521,7 @@
         "signature": [
           "\"url.full\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4401,7 +4536,7 @@
         "signature": [
           "\"url.full\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4416,7 +4551,7 @@
         "signature": [
           "\"user_agent.device.name\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4431,7 +4566,7 @@
         "signature": [
           "\"user_agent.name\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4446,7 +4581,7 @@
         "signature": [
           "\"user_agent.original\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4461,7 +4596,7 @@
         "signature": [
           "\"user_agent.os.name\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4476,7 +4611,7 @@
         "signature": [
           "\"user_agent.os.version\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4491,7 +4626,7 @@
         "signature": [
           "\"user_agent.version\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4506,7 +4641,7 @@
         "signature": [
           "\"user.id\""
         ],
-        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

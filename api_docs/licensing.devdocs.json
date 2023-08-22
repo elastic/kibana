@@ -811,6 +811,10 @@
               "path": "x-pack/plugins/security/public/plugin.tsx"
             },
             {
+              "plugin": "aiops",
+              "path": "x-pack/plugins/aiops/public/plugin.tsx"
+            },
+            {
               "plugin": "licenseManagement",
               "path": "x-pack/plugins/license_management/public/plugin.ts"
             },

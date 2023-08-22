@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataProviderType } from '../../../../common/types/timeline/api';
+import { DataProviderType } from '../../../../common/api/timeline';
 
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import {

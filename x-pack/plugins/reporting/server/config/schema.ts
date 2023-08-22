@@ -84,8 +84,18 @@ const EncryptionKeySchema = schema.conditional(
 );
 
 const RolesSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }), // true: use ES API for access control (deprecated in 7.x). false: use Kibana API for application features (8.0)
-  allow: schema.arrayOf(schema.string(), { defaultValue: ['reporting_user'] }),
+  enabled: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.boolean({ defaultValue: false }),
+    schema.boolean({ defaultValue: true })
+  ), // true: use ES API for access control (deprecated in 7.x). false: use Kibana API for application features (8.0)
+  allow: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.arrayOf(schema.string(), { defaultValue: [] }),
+    schema.arrayOf(schema.string(), { defaultValue: ['reporting_user'] })
+  ),
 });
 
 // Browser side polling: job completion notifier, management table auto-refresh
@@ -101,6 +111,31 @@ const PollSchema = schema.object({
   }),
 });
 
+const ExportTypeSchema = schema.object({
+  // Csv reports are enabled in all offerings
+  csv: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
+  // Png reports are disabled in serverless
+  png: schema.object({
+    enabled: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.boolean({ defaultValue: false }),
+      schema.boolean({ defaultValue: true })
+    ),
+  }),
+  // Pdf reports are disabled in serverless
+  pdf: schema.object({
+    enabled: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.boolean({ defaultValue: false }),
+      schema.boolean({ defaultValue: true })
+    ),
+  }),
+});
+
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   kibanaServer: KibanaServerSchema,
@@ -110,6 +145,7 @@ export const ConfigSchema = schema.object({
   encryptionKey: EncryptionKeySchema,
   roles: RolesSchema,
   poll: PollSchema,
+  export_types: ExportTypeSchema,
 });
 
 export type ReportingConfigType = TypeOf<typeof ConfigSchema>;

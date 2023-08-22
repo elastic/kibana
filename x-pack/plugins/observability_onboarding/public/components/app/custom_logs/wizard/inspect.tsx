@@ -6,28 +6,21 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import {
   StepPanel,
   StepPanelContent,
   StepPanelFooter,
 } from '../../../shared/step_panel';
 import { useWizard } from '.';
+import { BackButton } from './back_button';
 
 export function Inspect() {
   const { goBack, getState, getPath, getUsage } = useWizard();
   return (
     <StepPanel
       title="Inspect wizard"
-      panelFooter={
-        <StepPanelFooter
-          items={[
-            <EuiButton color="text" onClick={goBack}>
-              Back
-            </EuiButton>,
-          ]}
-        />
-      }
+      panelFooter={<StepPanelFooter items={[<BackButton onBack={goBack} />]} />}
     >
       <StepPanelContent>
         <EuiTitle size="s">

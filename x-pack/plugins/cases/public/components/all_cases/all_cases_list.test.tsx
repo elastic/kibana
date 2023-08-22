@@ -23,7 +23,7 @@ import {
 import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
 
 import { SortFieldCase, StatusAll } from '../../../common/ui/types';
-import { CaseSeverity, CaseStatuses } from '../../../common/api';
+import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { useKibana } from '../../common/lib/kibana';

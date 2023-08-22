@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
 import semver from 'semver';
 import { isEqual, isEmpty, chunk, keyBy } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -223,23 +222,13 @@ export class ManifestManager {
     osOptions: BuildArtifactsForOsOptions
   ): Promise<Record<string, InternalArtifactCompleteSchema[]>> {
     const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
-    await pMap(
-      allPolicyIds,
-      async (policyId) => {
-        for (const os of supportedOSs) {
-          policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
-          policySpecificArtifacts[policyId].push(
-            await this.buildArtifactsForOs({ os, policyId, ...osOptions })
-          );
-        }
-      },
-      {
-        concurrency: 5,
-        /** When set to false, instead of stopping when a promise rejects, it will wait for all the promises to
-         * settle and then reject with an aggregated error containing all the errors from the rejected promises. */
-        stopOnError: false,
+    for (const policyId of allPolicyIds)
+      for (const os of supportedOSs) {
+        policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
+        policySpecificArtifacts[policyId].push(
+          await this.buildArtifactsForOs({ os, policyId, ...osOptions })
+        );
       }
-    );
 
     return policySpecificArtifacts;
   }

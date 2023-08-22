@@ -8,20 +8,21 @@
 
 import { mockReadFile } from './plugin_manifest_parser.test.mocks';
 
-import { PluginDiscoveryErrorType } from './plugin_discovery_error';
-
 import { resolve } from 'path';
+import type { PackageInfo } from '@kbn/config';
+import { PluginDiscoveryErrorType } from './plugin_discovery_error';
 import { parseManifest } from './plugin_manifest_parser';
 
 const pluginPath = resolve('path', 'existent-dir');
 const pluginManifestPath = resolve(pluginPath, 'kibana.json');
-const packageInfo = {
+const packageInfo: PackageInfo = {
   branch: 'master',
   buildNum: 1,
   buildSha: '',
   version: '7.0.0-alpha1',
   dist: false,
   buildDate: new Date('2023-05-15T23:12:09.000Z'),
+  buildFlavor: 'traditional',
 };
 
 afterEach(() => {

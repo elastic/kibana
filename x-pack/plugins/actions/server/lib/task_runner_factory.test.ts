@@ -20,7 +20,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { ActionTypeDisabledError } from './errors';
-import { actionsClientMock } from '../mocks';
+import { actionsAuthorizationMock } from '../mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { IN_MEMORY_METRICS } from '../monitoring';
 import { pick } from 'lodash';
@@ -106,15 +106,17 @@ const services = {
   log: jest.fn(),
   savedObjectsClient: savedObjectsClientMock.create(),
 };
+
 const actionExecutorInitializerParams = {
   logger: loggingSystemMock.create().get(),
   getServices: jest.fn().mockReturnValue(services),
   actionTypeRegistry,
-  getActionsClientWithRequest: jest.fn(async () => actionsClientMock.create()),
+  getActionsAuthorizationWithRequest: jest.fn().mockReturnValue(actionsAuthorizationMock.create()),
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   eventLogger,
   inMemoryConnectors: [],
 };
+
 const taskRunnerFactoryInitializerParams = {
   spaceIdToNamespace,
   actionTypeRegistry,

@@ -587,6 +587,7 @@ export class HttpServer {
         },
       },
       options: {
+        app: { access: 'public' },
         auth: false,
         cache: {
           privacy: 'public',

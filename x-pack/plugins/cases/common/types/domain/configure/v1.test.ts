@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorTypes } from '../../../api';
+import { ConnectorTypes } from '../connector/v1';
 import { ConfigurationAttributesRt, ConfigurationRt } from './v1';
 
 describe('configure', () => {

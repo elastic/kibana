@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../../../common/constants';
-import type { FindRulesRequestQueryDecoded } from '../../../../../../../common/detection_engine/rule_management';
+import type { FindRulesResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   FindRulesRequestQuery,
   validateFindRulesRequestQuery,
-} from '../../../../../../../common/detection_engine/rule_management';
+} from '../../../../../../../common/api/detection_engine/rule_management';
 
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';
@@ -26,15 +26,13 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
     {
       path: DETECTION_ENGINE_RULES_URL_FIND,
       validate: {
-        query: buildRouteValidation<typeof FindRulesRequestQuery, FindRulesRequestQueryDecoded>(
-          FindRulesRequestQuery
-        ),
+        query: buildRouteValidation(FindRulesRequestQuery),
       },
       options: {
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<FindRulesResponse>> => {
       const siemResponse = buildSiemResponse(response);
 
       const validationErrors = validateFindRulesRequestQuery(request.query);

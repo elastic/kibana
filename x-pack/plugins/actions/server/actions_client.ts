@@ -133,6 +133,15 @@ export interface UpdateOptions {
   action: ActionUpdate;
 }
 
+interface GetAllOptions {
+  includeSystemActions?: boolean;
+}
+
+interface ListTypesOptions {
+  featureId?: string;
+  includeSystemActionTypes?: boolean;
+}
+
 export class ActionsClient {
   private readonly logger: Logger;
   private readonly kibanaIndices: string[];
@@ -197,7 +206,7 @@ export class ActionsClient {
     const id = options?.id || SavedObjectsUtils.generateId();
 
     try {
-      await this.authorization.ensureAuthorized('create', actionTypeId);
+      await this.authorization.ensureAuthorized({ operation: 'create', actionTypeId });
     } catch (error) {
       this.auditLogger?.log(
         connectorAuditEvent({
@@ -238,6 +247,7 @@ export class ActionsClient {
 
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const configurationUtilities = this.actionTypeRegistry.getUtils();
+
     const validatedActionTypeConfig = validateConfig(actionType, config, {
       configurationUtilities,
     });
@@ -286,7 +296,7 @@ export class ActionsClient {
    */
   public async update({ id, action }: UpdateOptions): Promise<ActionResult> {
     try {
-      await this.authorization.ensureAuthorized('update');
+      await this.authorization.ensureAuthorized({ operation: 'update' });
 
       const foundInMemoryConnector = this.inMemoryConnectors.find(
         (connector) => connector.id === id
@@ -394,9 +404,15 @@ export class ActionsClient {
   /**
    * Get an action
    */
-  public async get({ id }: { id: string }): Promise<ActionResult> {
+  public async get({
+    id,
+    throwIfSystemAction = true,
+  }: {
+    id: string;
+    throwIfSystemAction?: boolean;
+  }): Promise<ActionResult> {
     try {
-      await this.authorization.ensureAuthorized('get');
+      await this.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
       this.auditLogger?.log(
         connectorAuditEvent({
@@ -409,6 +425,19 @@ export class ActionsClient {
     }
 
     const foundInMemoryConnector = this.inMemoryConnectors.find((connector) => connector.id === id);
+
+    /**
+     * Getting system connector is not allowed
+     * if throwIfSystemAction is set to true.
+     * Default behavior is to throw
+     */
+    if (
+      foundInMemoryConnector !== undefined &&
+      foundInMemoryConnector.isSystemAction &&
+      throwIfSystemAction
+    ) {
+      throw Boom.notFound(`Connector ${id} not found`);
+    }
 
     if (foundInMemoryConnector !== undefined) {
       this.auditLogger?.log(
@@ -452,9 +481,11 @@ export class ActionsClient {
   /**
    * Get all actions with in-memory connectors
    */
-  public async getAll(): Promise<FindActionResult[]> {
+  public async getAll({ includeSystemActions = false }: GetAllOptions = {}): Promise<
+    FindActionResult[]
+  > {
     try {
-      await this.authorization.ensureAuthorized('get');
+      await this.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
       this.auditLogger?.log(
         connectorAuditEvent({
@@ -483,9 +514,13 @@ export class ActionsClient {
       )
     );
 
+    const inMemoryConnectorsFiltered = includeSystemActions
+      ? this.inMemoryConnectors
+      : this.inMemoryConnectors.filter((connector) => !connector.isSystemAction);
+
     const mergedResult = [
       ...savedObjectsActions,
-      ...this.inMemoryConnectors.map((inMemoryConnector) => ({
+      ...inMemoryConnectorsFiltered.map((inMemoryConnector) => ({
         id: inMemoryConnector.id,
         actionTypeId: inMemoryConnector.actionTypeId,
         name: inMemoryConnector.name,
@@ -500,9 +535,15 @@ export class ActionsClient {
   /**
    * Get bulk actions with in-memory list
    */
-  public async getBulk(ids: string[]): Promise<ActionResult[]> {
+  public async getBulk({
+    ids,
+    throwIfSystemAction = true,
+  }: {
+    ids: string[];
+    throwIfSystemAction?: boolean;
+  }): Promise<ActionResult[]> {
     try {
-      await this.authorization.ensureAuthorized('get');
+      await this.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
       ids.forEach((id) =>
         this.auditLogger?.log(
@@ -522,6 +563,15 @@ export class ActionsClient {
       const action = this.inMemoryConnectors.find(
         (inMemoryConnector) => inMemoryConnector.id === actionId
       );
+
+      /**
+       * Getting system connector is not allowed
+       * if throwIfSystemAction is set to true.
+       * Default behavior is to throw
+       */
+      if (action !== undefined && action.isSystemAction && throwIfSystemAction) {
+        throw Boom.notFound(`Connector ${action.id} not found`);
+      }
 
       if (action !== undefined) {
         actionResults.push(action);
@@ -569,7 +619,7 @@ export class ActionsClient {
     configurationUtilities: ActionsConfigurationUtilities
   ) {
     // Verify that user has edit access
-    await this.authorization.ensureAuthorized('update');
+    await this.authorization.ensureAuthorized({ operation: 'update' });
 
     // Verify that token url is allowed by allowed hosts config
     try {
@@ -660,7 +710,7 @@ export class ActionsClient {
    */
   public async delete({ id }: { id: string }) {
     try {
-      await this.authorization.ensureAuthorized('delete');
+      await this.authorization.ensureAuthorized({ operation: 'delete' });
 
       const foundInMemoryConnector = this.inMemoryConnectors.find(
         (connector) => connector.id === id
@@ -718,6 +768,21 @@ export class ActionsClient {
     return await this.unsecuredSavedObjectsClient.delete('action', id);
   }
 
+  private getSystemActionKibanaPrivileges(connectorId: string, params?: ExecuteOptions['params']) {
+    const inMemoryConnector = this.inMemoryConnectors.find(
+      (connector) => connector.id === connectorId
+    );
+
+    const additionalPrivileges = inMemoryConnector?.isSystemAction
+      ? this.actionTypeRegistry.getSystemActionKibanaPrivileges(
+          inMemoryConnector.actionTypeId,
+          params
+        )
+      : [];
+
+    return additionalPrivileges;
+  }
+
   public async execute({
     actionId,
     params,
@@ -730,7 +795,8 @@ export class ActionsClient {
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
-      await this.authorization.ensureAuthorized('execute');
+      const additionalPrivileges = this.getSystemActionKibanaPrivileges(actionId, params);
+      await this.authorization.ensureAuthorized({ operation: 'execute', additionalPrivileges });
     } else {
       trackLegacyRBACExemption('execute', this.usageCounter);
     }
@@ -751,7 +817,13 @@ export class ActionsClient {
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
-      await this.authorization.ensureAuthorized('execute');
+      /**
+       * For scheduled executions the additional authorization check
+       * for system actions (kibana privileges) will be performed
+       * inside the ActionExecutor at execution time
+       */
+
+      await this.authorization.ensureAuthorized({ operation: 'execute' });
     } else {
       trackLegacyRBACExemption('enqueueExecution', this.usageCounter);
     }
@@ -765,12 +837,18 @@ export class ActionsClient {
         sources.push(option.source);
       }
     });
+
     const authCounts = await getBulkAuthorizationModeBySource(
       this.unsecuredSavedObjectsClient,
       sources
     );
     if (authCounts[AuthorizationMode.RBAC] > 0) {
-      await this.authorization.ensureAuthorized('execute');
+      /**
+       * For scheduled executions the additional authorization check
+       * for system actions (kibana privileges) will be performed
+       * inside the ActionExecutor at execution time
+       */
+      await this.authorization.ensureAuthorized({ operation: 'execute' });
     }
     if (authCounts[AuthorizationMode.Legacy] > 0) {
       trackLegacyRBACExemption(
@@ -788,15 +866,28 @@ export class ActionsClient {
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
-      await this.authorization.ensureAuthorized('execute');
+      await this.authorization.ensureAuthorized({ operation: 'execute' });
     } else {
       trackLegacyRBACExemption('ephemeralEnqueuedExecution', this.usageCounter);
     }
     return this.ephemeralExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
 
-  public async listTypes(featureId?: string): Promise<ActionType[]> {
-    return this.actionTypeRegistry.list(featureId);
+  /**
+   * Return all available action types
+   * expect system action types
+   */
+  public async listTypes({
+    featureId,
+    includeSystemActionTypes = false,
+  }: ListTypesOptions = {}): Promise<ActionType[]> {
+    const actionTypes = this.actionTypeRegistry.list(featureId);
+
+    const filteredActionTypes = includeSystemActionTypes
+      ? actionTypes
+      : actionTypes.filter((actionType) => !Boolean(actionType.isSystemActionType));
+
+    return filteredActionTypes;
   }
 
   public isActionTypeEnabled(
@@ -831,7 +922,7 @@ export class ActionsClient {
 
     const authorizationTuple = {} as KueryNode;
     try {
-      await this.authorization.ensureAuthorized('get');
+      await this.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
       this.auditLogger?.log(
         connectorAuditEvent({
@@ -891,7 +982,7 @@ export class ActionsClient {
 
     const authorizationTuple = {} as KueryNode;
     try {
-      await this.authorization.ensureAuthorized('get');
+      await this.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
       this.auditLogger?.log(
         connectorAuditEvent({

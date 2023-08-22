@@ -11,16 +11,6 @@ import type { HttpResources, IBasePath, Logger } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { SecurityLicense } from '../../common';
-import type { AnalyticsServiceSetup } from '../analytics';
-import type { AnonymousAccessServiceStart } from '../anonymous_access';
-import type { InternalAuthenticationServiceStart } from '../authentication';
-import type { AuthorizationServiceSetupInternal } from '../authorization';
-import type { ConfigType } from '../config';
-import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import type { Session } from '../session_management';
-import type { SecurityRouter } from '../types';
-import type { UserProfileServiceStartInternal } from '../user_profile';
 import { defineAnalyticsRoutes } from './analytics';
 import { defineAnonymousAccessRoutes } from './anonymous_access';
 import { defineApiKeysRoutes } from './api_keys';
@@ -34,6 +24,16 @@ import { defineSessionManagementRoutes } from './session_management';
 import { defineUserProfileRoutes } from './user_profile';
 import { defineUsersRoutes } from './users';
 import { defineViewRoutes } from './views';
+import type { SecurityLicense } from '../../common';
+import type { AnalyticsServiceSetup } from '../analytics';
+import type { AnonymousAccessServiceStart } from '../anonymous_access';
+import type { InternalAuthenticationServiceStart } from '../authentication';
+import type { AuthorizationServiceSetupInternal } from '../authorization';
+import type { ConfigType } from '../config';
+import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import type { Session } from '../session_management';
+import type { SecurityRouter } from '../types';
+import type { UserProfileServiceStartInternal } from '../user_profile';
 
 /**
  * Describes parameters used to define HTTP routes.

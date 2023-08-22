@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ZodError } from 'zod';
+
 import type { FirstLastSeenRequestOptions } from '../../../../../common/search_strategy';
 import { Direction } from '../../../../../common/search_strategy';
 import * as buildQuery from './query.first_or_last_seen.dsl';
@@ -65,6 +67,39 @@ describe('firstLastSeen search strategy', () => {
           mockSearchStrategyLastSeenResponse
         );
         expect(result).toMatchObject(formattedSearchStrategyLastResponse);
+      });
+
+      test('should throw an error when parse fails', async () => {
+        try {
+          await firstOrLastSeen.parse(
+            { invalidOption: 'key' } as unknown as FirstLastSeenRequestOptions,
+            mockSearchStrategyLastSeenResponse
+          );
+        } catch (error: unknown) {
+          if (!(error instanceof ZodError)) {
+            throw error;
+          }
+
+          expect(error).not.toBeUndefined();
+          expect(error.flatten()).toMatchInlineSnapshot(`
+            Object {
+              "fieldErrors": Object {
+                "field": Array [
+                  "Required",
+                ],
+                "order": Array [
+                  "Required",
+                ],
+                "value": Array [
+                  "Required",
+                ],
+              },
+              "formErrors": Array [],
+            }
+          `);
+        }
+
+        expect.assertions(2);
       });
     });
   });

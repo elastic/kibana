@@ -8,6 +8,6 @@ source .buildkite/scripts/steps/functional/common_cypress.sh
 export JOB=kibana-security-solution-chrome
 export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
-echo "--- Security Solution tests (Chrome)"
+echo "--- Security Solution Cypress tests (Chrome)"
 
-yarn --cwd x-pack/plugins/security_solution cypress:run
+yarn --cwd x-pack/test/security_solution_cypress cypress:run:ess

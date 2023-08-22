@@ -42,6 +42,7 @@ import {
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import type { RequestFixtureOptions, RouterMock } from '@kbn/core-http-router-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/server/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import type { VersionedRouteConfig, AddVersionOpts } from '@kbn/core-http-server';
@@ -70,6 +71,7 @@ import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { EndpointFleetServicesFactory } from './services/fleet';
 import { createLicenseServiceMock } from '../../common/license/mocks';
 import { createFeatureUsageServiceMock } from './services/feature_usage/mocks';
+import { createAppFeaturesMock } from '../lib/app_features/mocks';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -162,6 +164,8 @@ export const createMockEndpointAppContextServiceStartContract =
       },
       savedObjectsStart
     );
+    const experimentalFeatures = config.experimentalFeatures;
+    const appFeatures = createAppFeaturesMock(undefined, experimentalFeatures, undefined, logger);
 
     packagePolicyService.list.mockImplementation(async (_, options) => {
       return {
@@ -206,10 +210,12 @@ export const createMockEndpointAppContextServiceStartContract =
       cases: casesMock,
       cloud: cloudMock.createSetup(),
       featureUsageService: createFeatureUsageServiceMock(),
-      experimentalFeatures: createMockConfig().experimentalFeatures,
+      experimentalFeatures,
       messageSigningService: createMessageSigningServiceMock(),
       actionCreateService: undefined,
       createFleetActionsClient: jest.fn((_) => fleetActionsClientMock),
+      esClient: elasticsearchClientMock.createElasticsearchClient(),
+      appFeatures,
     };
   };
 

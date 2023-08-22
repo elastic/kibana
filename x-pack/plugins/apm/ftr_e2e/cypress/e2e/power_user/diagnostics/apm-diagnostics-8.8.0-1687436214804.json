@@ -1,13 +1,46 @@
 {
   "created_at": "2023-06-22T12:16:54.010Z",
+  "diagnosticsPrivileges": {
+    "index": {
+      "apm-*": {
+        "read": true
+      },
+      "logs-apm*": {
+        "read": true
+      },
+      "metrics-apm*": {
+        "read": true
+      },
+      "remote_cluster:apm-*": {
+        "read": true
+      },
+      "remote_cluster:logs-apm*": {
+        "read": true
+      },
+      "remote_cluster:metrics-apm*": {
+        "read": true
+      },
+      "remote_cluster:traces-apm*": {
+        "read": true
+      },
+      "traces-apm*": {
+        "read": true
+      }
+    },
+    "cluster": {
+      "read_pipeline": true,
+      "manage_index_templates": true,
+      "monitor": true
+    },
+    "hasAllPrivileges": true
+  },
   "elasticsearchVersion": "8.8.0",
   "esResponses": {
     "fieldCaps": {
       "fields": {
         "service.name": {
           "keyword": {
-            "type": "keyword",
-            "metadata_field": false,
+            "type": "keyword",            "metadata_field": false,
             "searchable": true,
             "aggregatable": true
           }

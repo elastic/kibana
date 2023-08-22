@@ -25,7 +25,7 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: 
   const { triggersActionsUI } = useContext(TriggerActionsContext);
 
   const { inventoryPrefill } = useAlertPrefillContext();
-  const { customMetrics } = inventoryPrefill;
+  const { customMetrics = [] } = inventoryPrefill ?? {};
   const onCloseFlyout = useCallback(() => setVisible(false), [setVisible]);
   const AddAlertFlyout = useMemo(
     () =>

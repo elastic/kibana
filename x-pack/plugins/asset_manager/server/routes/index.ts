@@ -10,9 +10,14 @@ import { SetupRouteOptions } from './types';
 import { pingRoute } from './ping';
 import { assetsRoutes } from './assets';
 import { sampleAssetsRoutes } from './sample_assets';
+import { hostsRoutes } from './assets/hosts';
 
-export function setupRoutes<T extends RequestHandlerContext>({ router }: SetupRouteOptions<T>) {
-  pingRoute<T>({ router });
-  assetsRoutes<T>({ router });
-  sampleAssetsRoutes<T>({ router });
+export function setupRoutes<T extends RequestHandlerContext>({
+  router,
+  assetAccessor,
+}: SetupRouteOptions<T>) {
+  pingRoute<T>({ router, assetAccessor });
+  assetsRoutes<T>({ router, assetAccessor });
+  sampleAssetsRoutes<T>({ router, assetAccessor });
+  hostsRoutes<T>({ router, assetAccessor });
 }

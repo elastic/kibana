@@ -76,7 +76,7 @@ module.exports = {
 
   // A list of paths to snapshot serializer modules Jest should use for snapshot testing
   snapshotSerializers: [
-    '<rootDir>/src/plugins/kibana_react/public/util/test_helpers/react_mount_serializer.ts',
+    '<rootDir>/packages/react/kibana_mount/test_helpers/react_mount_serializer.ts',
     'enzyme-to-json/serializer',
     '<rootDir>/packages/kbn-test/src/jest/setup/emotion.js',
   ],

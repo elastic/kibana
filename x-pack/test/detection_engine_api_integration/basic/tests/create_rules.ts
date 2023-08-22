@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -76,6 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
           author: [],
           created_by: 'elastic',
           description: 'Simple Rule Query',
+          investigation_fields: [],
           enabled: true,
           false_positives: [],
           from: 'now-6m',

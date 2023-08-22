@@ -14,6 +14,7 @@ import {
 } from './data_formatting';
 import { MimeType, FriendlyFlyoutLabels, FriendlyTimingLabels, Timings, Metadata } from './types';
 import { WaterfallDataEntry } from './types';
+import type { DateFormatter } from '../../../../../../hooks/use_date_format';
 import { mockMoment } from '../../../../utils/formatting/test_helpers';
 import { NetworkEvent } from '../../../../../../../common/runtime_types';
 
@@ -231,12 +232,14 @@ describe('Palettes', () => {
 });
 
 describe('getSeriesAndDomain', () => {
+  let mockDateFormatter: DateFormatter;
   beforeEach(() => {
     mockMoment();
+    mockDateFormatter = (dateStr?: string) => (dateStr ? moment(dateStr).format() : '');
   });
 
   it('formats series timings', () => {
-    const actual = getSeriesAndDomain(networkItems);
+    const actual = getSeriesAndDomain(networkItems, false, mockDateFormatter);
     expect(actual.series).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -409,7 +412,7 @@ describe('getSeriesAndDomain', () => {
   });
 
   it('handles series formatting when only total timing values are available', () => {
-    const { series } = getSeriesAndDomain(networkItemsWithoutFullTimings);
+    const { series } = getSeriesAndDomain(networkItemsWithoutFullTimings, false, mockDateFormatter);
     expect(series).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -536,7 +539,7 @@ describe('getSeriesAndDomain', () => {
   });
 
   it('handles series formatting when there is no timing information available', () => {
-    const { series } = getSeriesAndDomain(networkItemsWithoutAnyTimings);
+    const { series } = getSeriesAndDomain(networkItemsWithoutAnyTimings, false, mockDateFormatter);
     expect(series).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -555,7 +558,7 @@ describe('getSeriesAndDomain', () => {
   });
 
   it('handles formatting when there is no timing information available', () => {
-    const actual = getSeriesAndDomain(networkItemsWithoutAnyTimings);
+    const actual = getSeriesAndDomain(networkItemsWithoutAnyTimings, false, mockDateFormatter);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "domain": Object {
@@ -636,7 +639,11 @@ describe('getSeriesAndDomain', () => {
   });
 
   it('handles formatting when the timings object is undefined', () => {
-    const { series } = getSeriesAndDomain(networkItemsWithoutTimingsObject);
+    const { series } = getSeriesAndDomain(
+      networkItemsWithoutTimingsObject,
+      false,
+      mockDateFormatter
+    );
     expect(series).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -653,7 +660,11 @@ describe('getSeriesAndDomain', () => {
   });
 
   it('handles formatting when mime type is not mapped to a specific mime type bucket', () => {
-    const { series } = getSeriesAndDomain(networkItemsWithUnknownMimeType);
+    const { series } = getSeriesAndDomain(
+      networkItemsWithUnknownMimeType,
+      false,
+      mockDateFormatter
+    );
     /* verify that raw mime type appears in the tooltip config and that
      * the colour is mapped to mime type other */
     const contentDownloadingConfigItem = series.find((item: WaterfallDataEntry) => {
@@ -682,7 +693,7 @@ describe('getSeriesAndDomain', () => {
     [FriendlyFlyoutLabels[Metadata.ResourceSize], '1.000 KB'],
     [FriendlyFlyoutLabels[Metadata.IP], '104.18.8.22'],
   ])('handles metadata details formatting', (name, value) => {
-    const { metadata } = getSeriesAndDomain(networkItems);
+    const { metadata } = getSeriesAndDomain(networkItems, false, mockDateFormatter);
     const metadataEntry = metadata[0];
     expect(
       metadataEntry.details.find((item) => item.value === value && item.name === name)
@@ -690,7 +701,7 @@ describe('getSeriesAndDomain', () => {
   });
 
   it('handles metadata headers formatting', () => {
-    const { metadata } = getSeriesAndDomain(networkItems);
+    const { metadata } = getSeriesAndDomain(networkItems, false, mockDateFormatter);
     const metadataEntry = metadata[0];
     metadataEntry.requestHeaders?.forEach((header) => {
       expect(header).toEqual({ name: header.name, value: header.value });
@@ -701,7 +712,7 @@ describe('getSeriesAndDomain', () => {
   });
 
   it('handles certificate formatting', () => {
-    const { metadata } = getSeriesAndDomain([networkItems[0]]);
+    const { metadata } = getSeriesAndDomain([networkItems[0]], false, mockDateFormatter);
     const metadataEntry = metadata[0];
     expect(metadataEntry.certificates).toEqual([
       { name: 'Issuer', value: networkItems[0].certificates?.issuer },
@@ -715,13 +726,15 @@ describe('getSeriesAndDomain', () => {
   });
   it('counts the total number of highlighted items', () => {
     // only one CSS file in this array of network Items
-    const actual = getSeriesAndDomain(networkItems, false, '', ['stylesheet']);
+    const actual = getSeriesAndDomain(networkItems, false, mockDateFormatter, '', ['stylesheet']);
     expect(actual.totalHighlightedRequests).toBe(1);
   });
 
   it('adds isHighlighted to waterfall entry when filter matches', () => {
     // only one CSS file in this array of network Items
-    const { series } = getSeriesAndDomain(networkItems, false, '', ['stylesheet']);
+    const { series } = getSeriesAndDomain(networkItems, false, mockDateFormatter, '', [
+      'stylesheet',
+    ]);
     series.forEach((item) => {
       if (item.x === 0) {
         expect(item.config.isHighlighted).toBe(true);
@@ -733,7 +746,7 @@ describe('getSeriesAndDomain', () => {
 
   it('adds isHighlighted to waterfall entry when query matches', () => {
     // only the second item matches this query
-    const { series } = getSeriesAndDomain(networkItems, false, 'director', []);
+    const { series } = getSeriesAndDomain(networkItems, false, mockDateFormatter, 'director', []);
     series.forEach((item) => {
       if (item.x === 1) {
         expect(item.config.isHighlighted).toBe(true);

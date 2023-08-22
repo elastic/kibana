@@ -21,7 +21,6 @@ elif [[ "$SERVERLESS_ENVIRONMENT" == "security" ]]; then
   SERVERLESS_CONFIGS=(
     "x-pack/test_serverless/api_integration/test_suites/security/config.ts"
     "x-pack/test_serverless/functional/test_suites/security/config.ts"
-    "x-pack/test_serverless/functional/test_suites/security/cypress/config_headless.ts"
   )
 fi
 

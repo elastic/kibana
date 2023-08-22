@@ -11,18 +11,53 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
+  EuiText,
   useEuiTheme,
+  EuiSplitPanel,
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
+import { has } from 'lodash';
 import {
-  PREVIEW_SECTION,
   PREVIEW_SECTION_BACK_BUTTON,
   PREVIEW_SECTION_CLOSE_BUTTON,
+  PREVIEW_SECTION_HEADER,
+  PREVIEW_SECTION,
 } from './test_ids';
 import { useExpandableFlyoutContext } from '../..';
 import { BACK_BUTTON, CLOSE_BUTTON } from './translations';
+
+export interface PreviewBanner {
+  /**
+   * Optional title to be shown
+   */
+  title?: string;
+  /**
+   * Optional string for background color
+   */
+  backgroundColor?:
+    | 'primary'
+    | 'plain'
+    | 'warning'
+    | 'accent'
+    | 'success'
+    | 'danger'
+    | 'transparent'
+    | 'subdued';
+  /**
+   * Optional string for text color
+   */
+  textColor?: string;
+}
+
+/**
+ * Type guard to check the passed object is of preview banner type
+ * @param banner passed from panel params
+ * @returns a boolean to indicate whether the banner passed is a preview banner
+ */
+export const isPreviewBanner = (banner: unknown): banner is PreviewBanner => {
+  return has(banner, 'title') || has(banner, 'backgroundColor') || has(banner, 'textColor');
+};
 
 interface PreviewSectionProps {
   /**
@@ -37,6 +72,10 @@ interface PreviewSectionProps {
    * Display the back button in the header
    */
   showBackButton: boolean;
+  /**
+   * Preview banner shown at the top of preview panel
+   */
+  banner?: PreviewBanner;
 }
 
 /**
@@ -47,6 +86,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
   component,
   showBackButton,
   width,
+  banner,
 }: PreviewSectionProps) => {
   const { euiTheme } = useEuiTheme();
   const { closePreviewPanel, previousPreviewPanel } = useExpandableFlyoutContext();
@@ -83,40 +123,38 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
   );
 
   return (
-    <>
-      <div
+    <div
+      css={css`
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: ${left};
+        z-index: 1000;
+      `}
+    >
+      <EuiSplitPanel.Outer
         css={css`
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          right: 0;
-          left: ${left};
-          background-color: ${euiTheme.colors.shadow};
-          opacity: 0.5;
+          margin: ${euiTheme.size.xs};
+          height: 99%;
+          box-shadow: 0px 0px 5px 5px ${euiTheme.colors.darkShade};
         `}
-      />
-      <div
-        css={css`
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          right: 0;
-          left: ${left};
-          z-index: 1000;
-        `}
+        className="eui-yScroll"
+        data-test-subj={PREVIEW_SECTION}
       >
-        <EuiPanel
-          css={css`
-            margin: ${euiTheme.size.xs};
-            height: 100%;
-          `}
-          data-test-subj={PREVIEW_SECTION}
-        >
+        {isPreviewBanner(banner) && (
+          <EuiSplitPanel.Inner grow={false} color={banner.backgroundColor} paddingSize="none">
+            <EuiText textAlign="center" color={banner.textColor} size="s">
+              {banner.title}
+            </EuiText>
+          </EuiSplitPanel.Inner>
+        )}
+        <EuiSplitPanel.Inner grow={false} paddingSize="s" data-test-subj={PREVIEW_SECTION_HEADER}>
           {header}
-          {component}
-        </EuiPanel>
-      </div>
-    </>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner paddingSize="none">{component}</EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
+    </div>
   );
 };
 

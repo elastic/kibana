@@ -7,8 +7,8 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { uniq } from 'lodash/fp';
-import type { SetAlertTagsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_alert_tags_schema';
-import { setAlertTagsSchema } from '../../../../../common/detection_engine/schemas/request/set_alert_tags_schema';
+import type { SetAlertTagsRequestBodyDecoded } from '../../../../../common/api/detection_engine/alert_tags';
+import { setAlertTagsRequestBody } from '../../../../../common/api/detection_engine/alert_tags';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
   DEFAULT_ALERTS_INDEX,
@@ -23,8 +23,8 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
     {
       path: DETECTION_ENGINE_ALERT_TAGS_URL,
       validate: {
-        body: buildRouteValidation<typeof setAlertTagsSchema, SetAlertTagsSchemaDecoded>(
-          setAlertTagsSchema
+        body: buildRouteValidation<typeof setAlertTagsRequestBody, SetAlertTagsRequestBodyDecoded>(
+          setAlertTagsRequestBody
         ),
       },
       options: {
