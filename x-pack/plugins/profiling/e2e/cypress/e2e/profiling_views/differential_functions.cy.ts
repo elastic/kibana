@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-describe('Functions page', () => {
+describe('Differential Functions page', () => {
   const rangeFrom = '2023-04-18T00:00:00.000Z';
   const rangeTo = '2023-04-18T00:02:00.000Z';
 
@@ -26,6 +26,8 @@ describe('Functions page', () => {
     it('shows only the baseline values when comparison data is not available', () => {
       cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions/differential', { rangeFrom, rangeTo });
+      // wait for both apis to finisto move on
+      cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
       [
         { id: 'overallPerformance', value: '0%' },
@@ -66,6 +68,8 @@ describe('Functions page', () => {
         comparisonRangeFrom,
         comparisonRangeTo,
       });
+      // wait for both apis to finisto move on
+      cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
       [
         { id: 'overallPerformance', value: '33.09%', icon: 'sortUp_success' },
@@ -104,6 +108,8 @@ describe('Functions page', () => {
         comparisonRangeFrom: rangeFrom,
         comparisonRangeTo: rangeTo,
       });
+      // wait for both apis to finisto move on
+      cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
       [
         { id: 'overallPerformance', value: '49.46%', icon: 'sortDown_danger' },
@@ -136,6 +142,8 @@ describe('Functions page', () => {
     it('show empty summary when no data is availble', () => {
       cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions/differential');
+      // wait for both apis to finisto move on
+      cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
       [
         { id: 'overallPerformance', value: '0%' },

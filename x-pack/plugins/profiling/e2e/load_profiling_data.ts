@@ -30,7 +30,7 @@ export async function loadProfilingData({
     'utf8'
   );
 
-  await client.bulk({ operations: profilingData.split('\n'), refresh: 'wait_for' });
+  await client.bulk({ operations: profilingData.split('\n'), refresh: 'wait_for', timeout: '1m' });
   // eslint-disable-next-line no-console
   console.log('[Done] Loading Universal profiling data.');
 }

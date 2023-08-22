@@ -28,7 +28,7 @@ describe('Functions page', () => {
     cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
     cy.visitKibana('/app/profiling/functions', { rangeFrom, rangeTo });
     cy.wait('@getTopNFunctions');
-    const firstRowSelector = '[data-grid-row-index="0"] > [data-test-subj="dataGridRowCell"]';
+    const firstRowSelector = '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]';
     cy.get(firstRowSelector).eq(1).contains('1');
     cy.get(firstRowSelector).eq(2).contains('vmlinux');
     cy.get(firstRowSelector).eq(3).contains('5.45%');
@@ -43,7 +43,7 @@ describe('Functions page', () => {
     cy.visitKibana('/app/profiling/functions', { rangeFrom, rangeTo });
     cy.wait('@getTopNFunctions');
     const firstRowSelector =
-      '[data-grid-row-index="0"] > [data-test-subj="dataGridRowCell"] .euiButtonIcon';
+      '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"] .euiButtonIcon';
     cy.get(firstRowSelector).click();
     cy.contains('Frame information');
     cy.contains('Impact estimates');
