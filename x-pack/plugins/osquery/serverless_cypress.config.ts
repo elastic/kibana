@@ -29,7 +29,6 @@ export default defineCypressConfig({
     grepTags: '@serverless --@brokenInServerless',
     grepOmitFiltered: true,
   },
-  numTestsKeptInMemory: 3,
   e2e: {
     specPattern: './cypress/e2e/**/*.cy.ts',
     experimentalRunAllSpecs: true,

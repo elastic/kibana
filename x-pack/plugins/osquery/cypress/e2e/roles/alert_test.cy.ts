@@ -6,7 +6,7 @@
  */
 
 import { tag } from '../../tags';
-import { checkResults, submitQuery } from '../../tasks/live_query';
+import { checkResults, clickRuleName, submitQuery } from '../../tasks/live_query';
 import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
@@ -26,7 +26,7 @@ describe('Alert Test', { tags: [tag.ESS] }, () => {
       cy.login(ServerlessRoleName.T1_ANALYST);
 
       cy.visit('/app/security/rules');
-      cy.contains(ruleName).click();
+      clickRuleName(ruleName);
       cy.getBySel('expand-event').first().click({ force: true });
 
       cy.wait(500);

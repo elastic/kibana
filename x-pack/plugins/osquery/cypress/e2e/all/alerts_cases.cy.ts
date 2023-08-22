@@ -18,6 +18,7 @@ import {
 import {
   addToCase,
   checkActionItemsInResults,
+  clickRuleName,
   loadRuleAlerts,
   submitQuery,
   viewRecentCaseAndCheckResults,
@@ -47,7 +48,7 @@ describe('Alert Event Details - Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () 
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
     cy.visit('/app/security/rules');
-    cy.getBySel('ruleName').contains(ruleName).click();
+    clickRuleName(ruleName);
   });
 
   after(() => {
@@ -73,7 +74,6 @@ describe('Alert Event Details - Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () 
       cy.getBySel('expand-event').first().click({ force: true });
       cy.getBySel('take-action-dropdown-btn').click();
       cy.getBySel('osquery-action-item').click();
-      // here
       cy.contains('Run a set of queries in a pack').wait(500).click();
       cy.get(LIVE_QUERY_EDITOR).should('not.exist');
       cy.getBySel('select-live-pack').click().type(`${packName}{downArrow}{enter}`);

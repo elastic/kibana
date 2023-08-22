@@ -8,6 +8,7 @@
 import { tag } from '../../tags';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import {
+  clickRuleName,
   inputQuery,
   loadRuleAlerts,
   submitQuery,
@@ -34,7 +35,7 @@ describe('Alert Event Details - dynamic params', { tags: [tag.ESS, tag.SERVERLES
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
     cy.visit('/app/security/rules');
-    cy.getBySel('ruleName').contains(ruleName).click();
+    clickRuleName(ruleName);
   });
 
   it('should substitute parameters in investigation guide', () => {

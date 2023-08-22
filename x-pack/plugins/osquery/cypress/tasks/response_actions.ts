@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { clickRuleName } from './live_query';
 import { ServerlessRoleName } from '../support/roles';
 import { cleanupRule, loadRule } from './api_fixtures';
 import { closeDateTabIfVisible } from './integrations';
@@ -38,7 +39,7 @@ export const checkOsqueryResponseActionsPermissions = (enabled: boolean) => {
 
   it(`response actions should ${enabled ? 'be available ' : 'not be available'}`, () => {
     cy.visit('/app/security/rules');
-    cy.contains(ruleName).click();
+    clickRuleName(ruleName);
     cy.getBySel('editRuleSettingsLink').click();
     cy.getBySel('globalLoadingIndicator').should('not.exist');
     closeDateTabIfVisible();

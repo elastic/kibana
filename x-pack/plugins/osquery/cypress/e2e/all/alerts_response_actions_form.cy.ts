@@ -19,7 +19,12 @@ import {
   RESPONSE_ACTIONS_ITEM_2,
   OSQUERY_RESPONSE_ACTION_ADD_BUTTON,
 } from '../../tasks/response_actions';
-import { checkActionItemsInResults, inputQuery, typeInECSFieldInput } from '../../tasks/live_query';
+import {
+  checkActionItemsInResults,
+  clickRuleName,
+  inputQuery,
+  typeInECSFieldInput,
+} from '../../tasks/live_query';
 import { closeDateTabIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { tag } from '../../tags';
 import { ServerlessRoleName } from '../../support/roles';
@@ -60,7 +65,7 @@ describe(
 
     it('adds response actions with osquery with proper validation and form values', () => {
       cy.visit('/app/security/rules');
-      cy.getBySel('ruleName').contains(ruleName).click();
+      clickRuleName(ruleName);
       cy.getBySel('editRuleSettingsLink').click();
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       closeDateTabIfVisible();
