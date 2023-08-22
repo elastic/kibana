@@ -36,14 +36,15 @@ If you choose basic authentication, you must provide a user name and password.
 If you choose SSL authentication, you must provide SSL server certificate authentication data in a CRT and key file format or a PFX file format. You can also optionally provide a passphrase if the files are password-protected.
 HTTP headers::   A set of key-value pairs sent as headers with the request.
 Certificate authority::
-If the web service is configured to use a certificate authority (CA), for example to validate self-signed certificates, supply the CA file and verification mode. This option is available for all authentication types.
+A certificate authority (CA) that the connector can trust, for example to sign and validate server certificates.
+This option is available for all authentication types.
 CA file:::
-The certificate authority file that is used to sign and validate certificates.
+The certificate authority file.
 Verification mode:::
-Controls the verification of certificates.
+Controls the certificate verification.
 +
 --
-* Use `full` to validate the certificate has an issue date that is within the `not_before` and `not_after` dates, chains to a trusted certificate authority, and has a hostname or IP address that matches the names within the certificate.
+* Use `full` to validate that the certificate has an issue date within the `not_before` and `not_after` dates, chains to a trusted certificate authority, and has a hostname or IP address that matches the names within the certificate.
 * Use `certificate` to validate the certificate and verifies that it is signed by a trusted authority; this option does not check the certificate hostname.
 * Use `none` to skip certificate validation.
 --
