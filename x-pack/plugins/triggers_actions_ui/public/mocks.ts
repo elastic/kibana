@@ -47,7 +47,6 @@ import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
-import { getTextAreaWithAutocompleteLazy } from './common/get_text_area_with_autocomplete';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -137,9 +136,6 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     },
     getRulesSettingsLink: () => {
       return getRulesSettingsLinkLazy();
-    },
-    getTextAreaWithAutocomplete: (props) => {
-      return getTextAreaWithAutocompleteLazy(props);
     },
   };
 }
