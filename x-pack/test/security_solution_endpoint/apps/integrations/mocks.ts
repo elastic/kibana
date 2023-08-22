@@ -407,7 +407,7 @@ export const getArtifactsListTestsData = () => [
         },
         {
           type: 'click',
-          selector: 'blocklist-form-file.path',
+          selector: 'blocklist-form-file.path.caseless',
         },
         {
           type: 'clear',
@@ -440,7 +440,7 @@ export const getArtifactsListTestsData = () => [
         },
       ],
       waitForValue:
-        'OSIS Windows\nAND file.pathIS ONE OF\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
+        'OSIS Windows\nAND file.path.caselessIS ONE OF\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
     },
     delete: {
       confirmSelector: 'blocklistDeletionConfirm',
