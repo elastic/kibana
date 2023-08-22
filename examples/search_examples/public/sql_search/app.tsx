@@ -26,7 +26,7 @@ import { CoreStart } from '@kbn/core/public';
 import {
   DataPublicPluginStart,
   IKibanaSearchResponse,
-  isCompleteResponse,
+  isRunningResponse,
   isErrorResponse,
 } from '@kbn/data-plugin/public';
 import {
@@ -67,7 +67,7 @@ export const SqlSearchExampleApp = ({ notifications, data }: SearchExamplesAppDe
       })
       .subscribe({
         next: (res) => {
-          if (isCompleteResponse(res)) {
+          if (!isRunningResponse(res)) {
             setIsLoading(false);
             setResponse(res);
           } else if (isErrorResponse(res)) {

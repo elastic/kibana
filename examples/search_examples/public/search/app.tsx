@@ -29,7 +29,7 @@ import { IInspectorInfo } from '@kbn/data-plugin/common';
 import {
   DataPublicPluginStart,
   IKibanaSearchResponse,
-  isCompleteResponse,
+  isRunningResponse,
   isErrorResponse,
 } from '@kbn/data-plugin/public';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
@@ -210,7 +210,7 @@ export const SearchExamplesApp = ({
       })
       .subscribe({
         next: (res) => {
-          if (isCompleteResponse(res)) {
+          if (!isRunningResponse(res)) {
             setIsLoading(false);
             setResponse(res);
             const aggResult: number | undefined = res.rawResponse.aggregations
