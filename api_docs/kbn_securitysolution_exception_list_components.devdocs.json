@@ -1228,13 +1228,14 @@
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
             "id": "def-common.GetExceptionItemProps.pagination",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "pagination",
             "description": [],
             "signature": [
+              "(",
               "Pagination",
-              " | undefined"
+              " & { pageSize: number; }) | undefined"
             ],
             "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
             "deprecated": false,
@@ -1352,12 +1353,13 @@
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
             "id": "def-common.PaginationProps.pagination",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "pagination",
             "description": [],
             "signature": [
-              "Pagination"
+              "Pagination",
+              " & { pageSize: number; }"
             ],
             "path": "packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
             "deprecated": false,
