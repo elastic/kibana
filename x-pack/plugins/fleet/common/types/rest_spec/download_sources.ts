@@ -40,6 +40,7 @@ export interface PostDownloadSourceRequest {
     name: string;
     host: string;
     is_default?: boolean;
+    proxy_id?: string | null;
   };
 }
 
