@@ -166,20 +166,6 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
         .auth(username, password);
       return response.text as unknown;
     },
-    async deleteAllReports(username: string = 'test_user', password: string = 'changeme') {
-      log.debug('ReportingAPI.deleteAllReports');
-
-      // ignores 409 errs and keeps retrying
-      await retry.tryForTime(5000, async () => {
-        await supertest
-          .post(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/.reporting*/_delete_by_query`)
-          .send({ query: { match_all: {} } })
-          .auth(username, password)
-          .set(...API_HEADER)
-          .set(...INTERNAL_HEADER)
-          .expect(200);
-      });
-    },
     async waitForJobToFinish(
       downloadReportPath: string,
       username: string = 'test_user',

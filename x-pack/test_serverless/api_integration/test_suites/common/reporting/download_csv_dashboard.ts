@@ -50,9 +50,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    after(async () => {
-      await reportingAPI.deleteAllReports();
-    });
 
     describe('unquoted values', () => {
       before(async () => {

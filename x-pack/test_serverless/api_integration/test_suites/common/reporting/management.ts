@@ -29,12 +29,11 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      // archived reports has canvas workpad
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
     });
 
     describe('Deletion', () => {
