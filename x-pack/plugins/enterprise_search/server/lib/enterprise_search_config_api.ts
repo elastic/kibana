@@ -42,7 +42,7 @@ export const callEnterpriseSearchConfigAPI = async ({
   log,
   request,
 }: Params): Promise<Return | ResponseError> => {
-  if (!config.host || !config.canDeployEntSearch)
+  if (!config.host)
     // Return Access and Features for when running without `ent-search`
     return {
       access: {
