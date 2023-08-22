@@ -8,7 +8,7 @@
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const memoryCache: FormulaValueConfig = {
-  label: 'cached',
+  label: 'cache',
   value: 'average(system.memory.used.bytes) - average(system.memory.actual.used.bytes)',
   format: {
     id: 'bytes',

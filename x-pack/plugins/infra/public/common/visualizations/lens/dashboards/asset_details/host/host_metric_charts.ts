@@ -94,9 +94,24 @@ const memoryUsageBreakdown = {
   layers: [
     {
       data: [
-        hostLensFormulas.memoryUsed,
-        hostLensFormulas.memoryFreeExcludingCache,
-        hostLensFormulas.memoryCache,
+        {
+          ...hostLensFormulas.memoryCache,
+          label: i18n.translate('xpack.infra.assetDetails.metricsCharts.metric.label.cache', {
+            defaultMessage: 'Cache',
+          }),
+        },
+        {
+          ...hostLensFormulas.memoryUsed,
+          label: i18n.translate('xpack.infra.assetDetails.metricsCharts.metric.label.used', {
+            defaultMessage: 'Used',
+          }),
+        },
+        {
+          ...hostLensFormulas.memoryFreeExcludingCache,
+          label: i18n.translate('xpack.infra.assetDetails.metricsCharts.metric.label.free', {
+            defaultMessage: 'Free',
+          }),
+        },
       ],
       options: {
         seriesType: 'area_stacked' as const,
