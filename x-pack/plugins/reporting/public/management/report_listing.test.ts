@@ -274,16 +274,16 @@ describe('ReportListing', () => {
       expect(testBed.actions.hasScreenshotDiagnosticLink()).toBe(true);
     });
     it('does not show when image reporting not set in config', async () => {
-      const mockNoImageConfig = { 
-        ...mockConfig, 
-        export_types: { 
-          csv: { enabled: true }, 
-          pdf: { enabled: false }, 
-          png: { enabled: false }
-        } 
-      }
+      const mockNoImageConfig = {
+        ...mockConfig,
+        export_types: {
+          csv: { enabled: true },
+          pdf: { enabled: false },
+          png: { enabled: false },
+        },
+      };
       await runSetup({ config: mockNoImageConfig });
       expect(testBed.actions.hasScreenshotDiagnosticLink()).toBe(false);
     });
-    })
   });
+});
