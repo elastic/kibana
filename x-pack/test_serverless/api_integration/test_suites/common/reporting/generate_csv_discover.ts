@@ -19,7 +19,7 @@ export default ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('svlReportingAPI');
 
-  describe('Generate CSV from SearchSource', () => {
+  describe('Generate CSV from SearchSource Discover', () => {
     before(async () => {
       await reportingAPI.createReportingRole();
       await reportingAPI.createReportingUser();
@@ -27,11 +27,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
+      //archived reports has canvas workpad
+      await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
     });
 
     it(`exported CSV file matches snapshot`, async () => {
@@ -77,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
         job: ReportApiJSON;
         path: string;
       };
-      expect(report.created_by).to.be('elastic');
+      expect(report.created_by).to.be('test_user');
       expect(report.jobtype).to.be('csv_searchsource');
 
       // wait for the the pending job to complete

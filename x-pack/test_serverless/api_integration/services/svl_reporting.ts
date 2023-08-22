@@ -143,20 +143,20 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
       await kibanaServer.importExport.load(ecommerceSOPath);
     },
-    async generateCsv(job: JobParamsCSV, username = 'test_user', password = 'changeme') {
+    async generateCsv(job: JobParamsCSV, username: string = 'test_user', password:string = 'changeme') {
       const jobParams = rison.encode(job);
       return await supertest
-        .post(`/${INTERNAL_ROUTES.GENERATE_PREFIX}/csv_searchsource`)
+        .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/csv_searchsource?elasticInternalOrigin=true`)
         .auth(username, password)
         .set(...API_HEADER)
         .set(...INTERNAL_HEADER)
         .send({ jobParams });
     },
-    async getCompletedJobOutput(downloadReportPath: string) {
-      const response = await supertest.get(downloadReportPath);
+    async getCompletedJobOutput(downloadReportPath: string, username: string = 'test_user', password:string = 'changeme') {
+      const response = await supertest.get(`${downloadReportPath}?elasticInternalOrigin=true`).auth(username, password);
       return response.text as unknown;
     },
-    async deleteAllReports() {
+    async deleteAllReports(username: string = 'test_user', password:string = 'changeme') {
       log.debug('ReportingAPI.deleteAllReports');
 
       // ignores 409 errs and keeps retrying
@@ -164,16 +164,18 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
         await supertest
           .post('/.reporting*/_delete_by_query')
           .send({ query: { match_all: {} } })
+          .auth(username, password)
           .expect(200);
       });
     },
-    async waitForJobToFinish(downloadReportPath: string, options?: { timeout?: number }) {
+    async waitForJobToFinish(downloadReportPath: string, username: string = 'test_user', password:string = 'changeme', options?: { timeout?: number }) {
       await retry.waitForWithTimeout(
         `job ${downloadReportPath} finished`,
         options?.timeout ?? config.get('timeouts.kibanaReportCompletion'),
         async () => {
           const response = await supertest
-            .get(downloadReportPath)
+            .get(`${downloadReportPath}?elasticInternalOrigin=true`)
+            .auth(username, password)
             .responseType('blob')
             .set(...API_HEADER)
             .set(...INTERNAL_HEADER);
