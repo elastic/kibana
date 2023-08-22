@@ -20,8 +20,8 @@ import type { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { AppFeatures } from '../../../../lib/app_features';
 import { AppFeatureKey, type ExperimentalFeatures } from '../../../../../common';
-import type { AppFeaturesService } from '../../../../lib/app_features_service/app_features_service';
 import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import {
   manifestDispatchSchema,
@@ -101,7 +101,7 @@ export interface ManifestManagerContext {
   experimentalFeatures: ExperimentalFeatures;
   packagerTaskPackagePolicyUpdateBatchSize: number;
   esClient: ElasticsearchClient;
-  appFeatures: AppFeaturesService;
+  appFeatures: AppFeatures;
 }
 
 const getArtifactIds = (manifest: ManifestSchema) =>
@@ -123,7 +123,7 @@ export class ManifestManager {
   protected cachedExceptionsListsByOs: Map<string, ExceptionListItemSchema[]>;
   protected packagerTaskPackagePolicyUpdateBatchSize: number;
   protected esClient: ElasticsearchClient;
-  protected appFeatures: AppFeaturesService;
+  protected appFeatures: AppFeatures;
 
   constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;

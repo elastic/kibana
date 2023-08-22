@@ -459,6 +459,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         experimentalFeatures: config.experimentalFeatures,
         packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
         esClient: core.elasticsearch.client.asInternalUser,
+        // FIXME: appFeatures is not typed as AppFeaturesService
+        // @ts-expect-error
         appFeatures,
       });
 

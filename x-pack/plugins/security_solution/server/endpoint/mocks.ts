@@ -17,12 +17,12 @@ import {
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
 import type {
-  KibanaRequest,
-  RouteConfig,
-  SavedObjectsClientContract,
-  RequestHandler,
   IRouter,
+  KibanaRequest,
+  RequestHandler,
+  RouteConfig,
   RouteMethod,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
@@ -30,14 +30,14 @@ import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import {
-  createPackagePolicyServiceMock,
+  createFleetActionsClientMock,
+  createFleetFromHostFilesClientMock,
+  createFleetToHostFilesClientMock,
+  createMessageSigningServiceMock,
   createMockAgentPolicyService,
   createMockAgentService,
   createMockPackageService,
-  createMessageSigningServiceMock,
-  createFleetFromHostFilesClientMock,
-  createFleetToHostFilesClientMock,
-  createFleetActionsClientMock,
+  createPackagePolicyServiceMock,
 } from '@kbn/fleet-plugin/server/mocks';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import type { RequestFixtureOptions, RouterMock } from '@kbn/core-http-router-server-mocks';
@@ -45,7 +45,7 @@ import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-ser
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/server/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
-import type { VersionedRouteConfig, AddVersionOpts } from '@kbn/core-http-server';
+import type { AddVersionOpts, VersionedRouteConfig } from '@kbn/core-http-server';
 import { createActionCreateServiceMock } from './services/actions/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
@@ -215,6 +215,8 @@ export const createMockEndpointAppContextServiceStartContract =
       actionCreateService: undefined,
       createFleetActionsClient: jest.fn((_) => fleetActionsClientMock),
       esClient: elasticsearchClientMock.createElasticsearchClient(),
+      // FIXME: createAppFeaturesMock() is not typed as appFeaturesService
+      // @ts-expect-error
       appFeatures,
     };
   };

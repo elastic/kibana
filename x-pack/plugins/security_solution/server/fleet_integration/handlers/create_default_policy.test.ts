@@ -19,9 +19,9 @@ import type {
   PolicyCreateCloudConfig,
   PolicyCreateEndpointConfig,
 } from '../types';
+import type { AppFeatures } from '../../lib/app_features';
 import { createAppFeaturesMock } from '../../lib/app_features/mocks';
 import { ALL_APP_FEATURE_KEYS } from '../../../common';
-import type { AppFeaturesService } from '../../lib/app_features_service/app_features_service';
 
 describe('Create Default Policy tests ', () => {
   const cloud = cloudMock.createSetup();
@@ -31,7 +31,7 @@ describe('Create Default Policy tests ', () => {
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold', uid: '' } });
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
-  let appFeatures: AppFeaturesService;
+  let appFeatures: AppFeatures;
 
   const createDefaultPolicyCallback = async (
     config: AnyPolicyCreateConfig | undefined

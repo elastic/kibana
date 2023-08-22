@@ -54,9 +54,9 @@ import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { disableProtections } from '../../common/endpoint/models/policy_config_helpers';
+import type { AppFeatures } from '../lib/app_features';
 import { createAppFeaturesMock } from '../lib/app_features/mocks';
-import type { AppFeaturesService } from '../lib/app_features_service/app_features_service';
-import { DEFAULT_APP_FEATURES } from '@kbn/security-solution-ess/server/constants';
+import { ALL_APP_FEATURE_KEYS } from '../../common';
 
 jest.mock('uuid', () => ({
   v4: (): string => 'NEW_UUID',
@@ -77,7 +77,7 @@ describe('ingest_integration tests ', () => {
   });
   const generator = new EndpointDocGenerator();
   const cloudService = cloudMock.createSetup();
-  let appFeatures: AppFeaturesService;
+  let appFeatures: AppFeatures;
 
   beforeEach(() => {
     endpointAppContextMock = createMockEndpointAppContextServiceStartContract();
@@ -464,7 +464,7 @@ describe('ingest_integration tests ', () => {
 
     it('should turn off protections if endpointPolicyProtections appFeature is disabled', async () => {
       appFeatures = createAppFeaturesMock(
-        DEFAULT_APP_FEATURES.filter((key) => key !== 'endpoint_policy_protections')
+        ALL_APP_FEATURE_KEYS.filter((key) => key !== 'endpoint_policy_protections')
       );
       const callback = getPackagePolicyUpdateCallback(
         endpointAppContextMock.logger,
@@ -473,6 +473,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.endpointMetadataService,
         cloudService,
         esClient,
+        // FIXME: createAppFeaturesMock() is not typed as appFeaturesService
+        // @ts-expect-error
         appFeatures
       );
 
