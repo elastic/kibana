@@ -177,12 +177,14 @@ export const WatchListPage = () => {
 
   if (isWatchesLoading) {
     return (
-      <SectionLoading>
-        <FormattedMessage
-          id="xpack.watcher.sections.watchList.loadingWatchesDescription"
-          defaultMessage="Loading watches…"
-        />
-      </SectionLoading>
+      <EuiPageTemplate.EmptyPrompt>
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.watcher.sections.watchList.loadingWatchesDescription"
+            defaultMessage="Loading watches…"
+          />
+        </SectionLoading>
+      </EuiPageTemplate.EmptyPrompt>
     );
   }
 
