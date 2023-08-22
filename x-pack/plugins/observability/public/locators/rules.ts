@@ -12,7 +12,7 @@ import type { RuleStatus } from '@kbn/triggers-actions-ui-plugin/public';
 import { rulesLocatorID } from '../../common';
 import { RULES_PATH } from '../../common/locators/paths';
 
-export interface RulesParams {
+export interface RulesParams extends SerializableRecord {
   lastResponse?: string[];
   params?: Record<string, string | number>;
   search?: string;
@@ -20,7 +20,7 @@ export interface RulesParams {
   type?: string[];
 }
 
-export interface RulesLocatorParams extends RulesParams, SerializableRecord {}
+export interface RulesLocatorParams extends RulesParams {}
 
 export class RulesLocatorDefinition implements LocatorDefinition<RulesLocatorParams> {
   public readonly id = rulesLocatorID;
