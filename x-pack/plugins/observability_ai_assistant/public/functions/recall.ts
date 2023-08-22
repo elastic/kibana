@@ -25,6 +25,7 @@ export function registerRecallFunction({
       descriptionForUser: 'This function allows the assistant to recall previous learnings.',
       parameters: {
         type: 'object',
+        additionalProperties: false,
         properties: {
           query: {
             type: 'string',

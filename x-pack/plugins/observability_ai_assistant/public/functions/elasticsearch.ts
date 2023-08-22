@@ -35,6 +35,10 @@ export function registerElasticsearchFunction({
             type: 'string',
             description: 'The path of the Elasticsearch endpoint, including query parameters',
           },
+          body: {
+            type: 'object',
+            description: 'The body of the request',
+          },
         },
         required: ['method', 'path'] as const,
       },

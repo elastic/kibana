@@ -6,10 +6,12 @@
  */
 
 import dedent from 'dedent';
+import type { CoreStart } from '@kbn/core/public';
 import type { RegisterContextDefinition, RegisterFunctionDefinition } from '../../common/types';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import type { ObservabilityAIAssistantService } from '../types';
 import { registerElasticsearchFunction } from './elasticsearch';
+import { registerKibanaFunction } from './kibana';
 import { registerLensFunction } from './lens';
 import { registerRecallFunction } from './recall';
 import { registerSummarisationFunction } from './summarise';
@@ -19,12 +21,14 @@ export async function registerFunctions({
   registerContext,
   service,
   pluginsStart,
+  coreStart,
   signal,
 }: {
   registerFunction: RegisterFunctionDefinition;
   registerContext: RegisterContextDefinition;
   service: ObservabilityAIAssistantService;
   pluginsStart: ObservabilityAIAssistantPluginStartDependencies;
+  coreStart: CoreStart;
   signal: AbortSignal;
 }) {
   return service
@@ -70,6 +74,7 @@ export async function registerFunctions({
       }
 
       registerElasticsearchFunction({ service, registerFunction });
+      registerKibanaFunction({ service, registerFunction, coreStart });
 
       registerContext({
         name: 'core',
