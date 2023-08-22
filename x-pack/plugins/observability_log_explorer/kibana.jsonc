@@ -14,6 +14,7 @@
     "requiredPlugins": [
       "data",
       "logExplorer",
+      "observabilityShared"
     ],
     "optionalPlugins": [],
     "requiredBundles": []

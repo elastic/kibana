@@ -47,7 +47,7 @@ export interface ObservabilityLogExplorerAppProps {
 
 export const ObservabilityLogExplorerApp = ({
   core: { i18n, theme },
-  plugins: { logExplorer },
+  plugins: { logExplorer, observabilityShared },
   pluginStart,
   history,
 }: ObservabilityLogExplorerAppProps) => (
@@ -58,7 +58,11 @@ export const ObservabilityLogExplorerApp = ({
           path="/"
           exact={true}
           render={() => (
-            <ObservablityLogExplorerMainRoute history={history} logExplorer={logExplorer} />
+            <ObservablityLogExplorerMainRoute
+              history={history}
+              logExplorer={logExplorer}
+              observabilityShared={observabilityShared}
+            />
           )}
         />
       </Routes>

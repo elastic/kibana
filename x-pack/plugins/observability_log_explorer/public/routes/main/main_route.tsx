@@ -7,14 +7,22 @@
 
 import { ScopedHistory } from '@kbn/core/public';
 import { LogExplorerPluginStart } from '@kbn/log-explorer-plugin/public';
+import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
+import { ObservabilityLogExplorerPageTemplate } from '../../components/page_template';
 
 export interface ObservablityLogExplorerMainRouteProps {
   history: ScopedHistory;
   logExplorer: LogExplorerPluginStart;
+  observabilityShared: ObservabilitySharedPluginStart;
 }
 
 export const ObservablityLogExplorerMainRoute = ({
   history,
   logExplorer,
-}: ObservablityLogExplorerMainRouteProps) => <logExplorer.LogExplorer scopedHistory={history} />;
+  observabilityShared,
+}: ObservablityLogExplorerMainRouteProps) => (
+  <ObservabilityLogExplorerPageTemplate observabilityShared={observabilityShared}>
+    <logExplorer.LogExplorer scopedHistory={history} />
+  </ObservabilityLogExplorerPageTemplate>
+);
