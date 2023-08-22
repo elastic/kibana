@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import { Chat } from '@kbn/cloud-chat-plugin/public';
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs, useFetcher } from '@kbn/observability-shared-plugin/public';
@@ -14,7 +13,6 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { observabilityAlertFeatureIds } from '../../../common/constants';
 import { paths } from '../../../common/locators/paths';
-import { useKibana } from '../../utils/kibana_react';
 import { LoadingObservability } from '../../components/loading_observability';
 import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from '../../constants';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
@@ -23,7 +21,6 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { buildEsQuery } from '../../utils/build_es_query';
-import { useKibana } from '../../utils/kibana_react';
 import { DataAssistantFlyout } from './components/data_assistant_flyout';
 import { DataSections } from './components/data_sections';
 import { HeaderActions } from './components/header_actions/header_actions';
@@ -35,6 +32,7 @@ import { Resources } from './components/resources';
 import { EmptySections } from './components/sections/empty/empty_sections';
 import { SectionContainer } from './components/sections/section_container';
 import { calculateBucketSize } from './helpers/calculate_bucket_size';
+import { useKibana } from '../../utils/kibana_react';
 
 const ALERTS_PER_PAGE = 10;
 const ALERTS_TABLE_ID = 'xpack.observability.overview.alert.table';
