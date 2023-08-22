@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { IngestInferenceProcessor } from '@elastic/elasticsearch/lib/api/types';
 import { ProvidedType } from '@kbn/test';
 import { upperFirst } from 'lodash';
 
@@ -293,8 +294,8 @@ export function TrainedModelsTableProvider(
     }
 
     public async assertTrainedModelsInferenceFlyoutPipelineConfigValues(
-      inferenceConfig: any,
-      fieldMap: any
+      inferenceConfig: IngestInferenceProcessor['inference_config'],
+      fieldMap: IngestInferenceProcessor['field_map']
     ) {
       await retry.tryForTime(5000, async () => {
         const actualInferenceConfig = await testSubjects.getVisibleText(
@@ -338,8 +339,8 @@ export function TrainedModelsTableProvider(
 
     public async setTrainedModelsInferenceFlyoutCustomPipelineConfig(values: {
       condition: string;
-      editedInferenceConfig: any;
-      editedFieldMap: any;
+      editedInferenceConfig: IngestInferenceProcessor['inference_config'];
+      editedFieldMap: IngestInferenceProcessor['field_map'];
       tag: string;
     }) {
       // INFERENCE CONFIG
@@ -412,11 +413,7 @@ export function TrainedModelsTableProvider(
 
     public async trainedModelsInferenceOpenAdditionalSettings() {
       await testSubjects.existOrFail('mlTrainedModelsInferenceAdvancedSettingsAccordion');
-      await testSubjects.existOrFail('mlTrainedModelsInferenceAdvancedSettingsAccordion');
-      const additionalSettingsAccordionButton = await testSubjects.find(
-        'mlTrainedModelsInferenceAdvancedSettingsAccordionButton'
-      );
-      await additionalSettingsAccordionButton.click();
+      await testSubjects.click('mlTrainedModelsInferenceAdvancedSettingsAccordionButton');
       await testSubjects.existOrFail('mlTrainedModelsInferenceAdvancedSettingsConditionTextArea');
       await testSubjects.existOrFail('mlTrainedModelsInferenceAdvancedSettingsTagInput');
     }
@@ -447,14 +444,24 @@ export function TrainedModelsTableProvider(
     }
 
     public async completeTrainedModelsInferenceFlyoutOnFailure(
-      expectedOnFailure: any,
+      expectedOnFailure: IngestInferenceProcessor['on_failure'],
       editDefaults: boolean = false
     ) {
       await retry.tryForTime(30 * 1000, async () => {
         // Switch should default to unchecked
-        await testSubjects.existOrFail('mlTrainedModelsInferenceIgnoreFailureSwitch');
+        const ignoreFailureSelected =
+          (await testSubjects.getAttribute(
+            'mlTrainedModelsInferenceIgnoreFailureSwitch',
+            'aria-checked'
+          )) === 'true';
+        expect(ignoreFailureSelected).to.eql(false);
         // Switch should default to checked
-        await testSubjects.existOrFail('mlTrainedModelsInferenceTakeActionOnFailureSwitch checked');
+        const takeActionOnFailureSelected =
+          (await testSubjects.getAttribute(
+            'mlTrainedModelsInferenceTakeActionOnFailureSwitch',
+            'aria-checked'
+          )) === 'true';
+        expect(takeActionOnFailureSelected).to.eql(true);
       });
 
       const defaultOnFailure = await testSubjects.getVisibleText(
@@ -463,13 +470,17 @@ export function TrainedModelsTableProvider(
       expect(JSON.parse(defaultOnFailure)).to.eql(expectedOnFailure);
 
       if (editDefaults) {
-        // switch ignore failure to true
-        const ignoreFailureSwitch = await testSubjects.find(
-          'mlTrainedModelsInferenceIgnoreFailureSwitch'
-        );
-        await ignoreFailureSwitch.click();
-        // Switch should now be checked
-        await testSubjects.existOrFail('mlTrainedModelsInferenceIgnoreFailureSwitch checked');
+        await retry.tryForTime(30 * 1000, async () => {
+          // switch ignore failure to true
+          await testSubjects.click('mlTrainedModelsInferenceIgnoreFailureSwitch');
+          // Switch should now be checked
+          const isIgnoreFailureSelected =
+            (await testSubjects.getAttribute(
+              'mlTrainedModelsInferenceIgnoreFailureSwitch',
+              'aria-checked'
+            )) === 'true';
+          expect(isIgnoreFailureSelected).to.eql(true);
+        });
       }
       await this.deployModelsContinue('mlTrainedModelsInferenceTestStep');
       // skip test step
@@ -528,22 +539,16 @@ export function TrainedModelsTableProvider(
     }
 
     public async deployModelsContinue(expectedStep?: string) {
-      await testSubjects.exists('mlTrainedModelsInferencePipelineContinueButton');
-      const continueButton = await testSubjects.find(
-        'mlTrainedModelsInferencePipelineContinueButton'
-      );
-      await continueButton.isEnabled();
-      await continueButton.click();
+      await testSubjects.existOrFail('mlTrainedModelsInferencePipelineContinueButton');
+      await testSubjects.click('mlTrainedModelsInferencePipelineContinueButton');
       if (expectedStep) {
         await testSubjects.existOrFail(expectedStep);
       }
     }
 
     public async assertDeployModelsCreateButton(expectedStep?: string) {
-      await testSubjects.exists('mlTrainedModelsInferencePipelineCreateButton');
-      const createButton = await testSubjects.find('mlTrainedModelsInferencePipelineCreateButton');
-      await createButton.isEnabled();
-      await createButton.click();
+      await testSubjects.existOrFail('mlTrainedModelsInferencePipelineCreateButton');
+      await testSubjects.click('mlTrainedModelsInferencePipelineCreateButton');
     }
 
     public async assertDeleteModalExists() {

@@ -267,7 +267,6 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex }) => {
                     <EuiCodeBlock
                       language="json"
                       isCopyable
-                      className="reviewCodeBlock"
                       data-test-subj="mlTrainedModelsInferenceTestResult"
                     >
                       {simulatePipelineError

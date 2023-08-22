@@ -82,9 +82,10 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await ml.api.stopAllTrainedModelDeploymentsES();
       await ml.api.deleteAllTrainedModelsES();
-      await ml.api.deleteTrainedModelInferencePipeline(modelWithoutPipelineDataExpectedValues.name);
-      await ml.api.deleteTrainedModelInferencePipeline(
-        modelWithoutPipelineDataExpectedValues.duplicateName
+      await ml.api.deleteIngestPipeline(modelWithoutPipelineDataExpectedValues.name, false);
+      await ml.api.deleteIngestPipeline(
+        modelWithoutPipelineDataExpectedValues.duplicateName,
+        false
       );
       await ml.api.cleanMlIndices();
     });

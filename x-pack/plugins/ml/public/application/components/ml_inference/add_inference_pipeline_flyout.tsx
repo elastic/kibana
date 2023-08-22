@@ -103,12 +103,7 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
   );
 
   return (
-    <EuiFlyout
-      onClose={onClose}
-      className="mlTrainedModelsInferencePipelineFlyout"
-      size="l"
-      data-test-subj="mlTrainedModelsInferencePipelineFlyout"
-    >
+    <EuiFlyout onClose={onClose} size="l" data-test-subj="mlTrainedModelsInferencePipelineFlyout">
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h3>

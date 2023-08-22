@@ -146,9 +146,7 @@ export const OnFailureConfiguration: FC<Props> = memo(
                     <EuiFlexItem grow={false}>
                       <EuiFormRow fullWidth>
                         <EuiSwitch
-                          data-test-subj={`mlTrainedModelsInferenceIgnoreFailureSwitch${
-                            ignoreFailure ? ' checked' : ''
-                          }`}
+                          data-test-subj={'mlTrainedModelsInferenceIgnoreFailureSwitch'}
                           label={
                             <FormattedMessage
                               id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.ignoreFailureLabel"
@@ -164,9 +162,7 @@ export const OnFailureConfiguration: FC<Props> = memo(
                       {ignoreFailure === false ? (
                         <EuiFormRow>
                           <EuiSwitch
-                            data-test-subj={`mlTrainedModelsInferenceTakeActionOnFailureSwitch${
-                              takeActionOnFailure ? ' checked' : ''
-                            }`}
+                            data-test-subj={'mlTrainedModelsInferenceTakeActionOnFailureSwitch'}
                             label={
                               <EuiFlexItem>
                                 <FormattedMessage
