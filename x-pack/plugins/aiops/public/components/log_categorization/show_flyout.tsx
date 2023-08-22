@@ -12,7 +12,11 @@ import { pick } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
-import { wrapWithTheme, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import {
+  toMountPoint as toMountPointDeprecated,
+  wrapWithTheme,
+  KibanaContextProvider,
+} from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
@@ -50,7 +54,7 @@ export async function showCategorizeFlyout(
       };
       const datePickerDeps = {
         ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
-        toMountPoint,
+        toMountPoint: toMountPointDeprecated,
         wrapWithTheme,
         uiSettingsKeys: UI_SETTINGS,
       };
@@ -63,7 +67,6 @@ export async function showCategorizeFlyout(
             }}
           >
             <AiopsAppContext.Provider value={appDependencies}>
-              {/* @ts-expect-error toMountPoint in DatePickerDependencies uses deprecated version */}
               <DatePickerContextProvider {...datePickerDeps}>
                 <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
                   <LogCategorizationFlyout
@@ -76,7 +79,6 @@ export async function showCategorizeFlyout(
               </DatePickerContextProvider>
             </AiopsAppContext.Provider>
           </KibanaContextProvider>,
-
           { theme, i18n }
         ),
         {
