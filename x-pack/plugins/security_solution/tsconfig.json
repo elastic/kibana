@@ -171,5 +171,6 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/security-solution-features",
     "@kbn/handlebars",
+    "@kbn/security-solution-ess",
   ]
 }
