@@ -47,16 +47,10 @@ export const GoogleCloudShellGuide = (props: { commandText: string }) => {
         <EuiText size="s" color="subdued">
           <ol>
             <li>
-              <FormattedMessage
-                id="xpack.fleet.googleCloudShell.guide.steps.login"
-                defaultMessage="Log into your Google Cloud Console"
-              />
-            </li>
-            <li>
               <>
                 <FormattedMessage
                   id="xpack.fleet.googleCloudShell.guide.steps.copy"
-                  defaultMessage="Copy the command below"
+                  defaultMessage="Copy the following command and replace <PROJECT_ID> with your project ID."
                 />
                 <EuiSpacer size="m" />
                 <EuiCodeBlock language="bash" isCopyable>
@@ -67,7 +61,7 @@ export const GoogleCloudShellGuide = (props: { commandText: string }) => {
             <li>
               <FormattedMessage
                 id="xpack.fleet.googleCloudShell.guide.steps.launch"
-                defaultMessage="Click the Launch Google Cloud Shell button below and then execute the command you copied earlier in google cloud shell."
+                defaultMessage="Click Launch Google Cloud Shell, then run the command"
               />
             </li>
           </ol>
