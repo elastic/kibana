@@ -16,10 +16,6 @@ import type {
   FieldHistogramsRequestSchema,
   FieldHistogramsResponseSchema,
 } from '../../../common/api_schemas/field_histograms';
-import type {
-  ScheduleNowTransformsRequestSchema,
-  ScheduleNowTransformsResponseSchema,
-} from '../../../common/api_schemas/schedule_now_transforms';
 import { addInternalBasePath } from '../../../common/constants';
 import type { EsIndex } from '../../../common/types/es_index';
 import type { EsIngestPipeline } from '../../../common/types/es_ingest_pipeline';
@@ -38,18 +34,6 @@ export const useApi = () => {
 
   return useMemo(
     () => ({
-      async scheduleNowTransforms(
-        transformsInfo: ScheduleNowTransformsRequestSchema
-      ): Promise<ScheduleNowTransformsResponseSchema | IHttpFetchError> {
-        try {
-          return await http.post(addInternalBasePath(`schedule_now_transforms`), {
-            body: JSON.stringify(transformsInfo),
-            version: '1',
-          });
-        } catch (e) {
-          return e;
-        }
-      },
       async getEsIndices(): Promise<EsIndex[] | IHttpFetchError> {
         try {
           return await http.get(`/api/index_management/indices`, { version: '1' });
