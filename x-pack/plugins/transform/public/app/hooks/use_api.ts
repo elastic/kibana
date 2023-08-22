@@ -32,10 +32,6 @@ import type {
   ScheduleNowTransformsRequestSchema,
   ScheduleNowTransformsResponseSchema,
 } from '../../../common/api_schemas/schedule_now_transforms';
-import type {
-  PostTransformsPreviewRequestSchema,
-  PostTransformsPreviewResponseSchema,
-} from '../../../common/api_schemas/transforms';
 import { addInternalBasePath } from '../../../common/constants';
 import type { EsIndex } from '../../../common/types/es_index';
 import type { EsIngestPipeline } from '../../../common/types/es_ingest_pipeline';
@@ -54,18 +50,6 @@ export const useApi = () => {
 
   return useMemo(
     () => ({
-      async getTransformsPreview(
-        obj: PostTransformsPreviewRequestSchema
-      ): Promise<PostTransformsPreviewResponseSchema | IHttpFetchError> {
-        try {
-          return await http.post(addInternalBasePath(`transforms/_preview`), {
-            body: JSON.stringify(obj),
-            version: '1',
-          });
-        } catch (e) {
-          return e;
-        }
-      },
       async reauthorizeTransforms(
         reqBody: ReauthorizeTransformsRequestSchema
       ): Promise<ReauthorizeTransformsResponseSchema | IHttpFetchError> {

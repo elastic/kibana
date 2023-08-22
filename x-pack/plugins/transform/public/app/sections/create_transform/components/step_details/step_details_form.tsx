@@ -42,7 +42,11 @@ import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
-import { useDocumentationLinks, useGetTransforms } from '../../../../hooks';
+import {
+  useDocumentationLinks,
+  useGetTransforms,
+  useGetTransformsPreview,
+} from '../../../../hooks';
 import { SearchItems } from '../../../../hooks/use_search_items';
 import { useApi } from '../../../../hooks/use_api';
 import { StepDetailsTimeField } from './step_details_time_field';
@@ -127,11 +131,11 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const { overlays, theme } = useAppDependencies();
     const api = useApi();
 
-    const { error, data } = useGetTransforms();
-    const transformIds = data?.tableRows.map((d) => d.id) ?? [];
+    const { error: transformsError, data: transforms } = useGetTransforms();
+    const transformIds = transforms?.tableRows.map((d) => d.id) ?? [];
 
     useEffect(() => {
-      if (isHttpFetchError(error)) {
+      if (isHttpFetchError(transformsError)) {
         toastNotifications.addDanger({
           title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
             defaultMessage: 'An error occurred getting the existing transform IDs:',
@@ -140,53 +144,61 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
             <ToastNotificationText
               overlays={overlays}
               theme={theme}
-              text={getErrorMessage(error)}
+              text={getErrorMessage(transformsError)}
             />,
             { theme$: theme.theme$ }
           ),
         });
       }
-    }, [error, overlays, theme, toastNotifications]);
+    }, [transformsError, overlays, theme, toastNotifications]);
+
+    const previewRequest = useMemo(() => {
+      const { searchQuery, previewRequest: partialPreviewRequest } = stepDefineState;
+      const transformConfigQuery = getTransformConfigQuery(searchQuery);
+      return getPreviewTransformRequestBody(
+        searchItems.dataView,
+        transformConfigQuery,
+        partialPreviewRequest,
+        stepDefineState.runtimeMappings
+      );
+    }, [searchItems.dataView, stepDefineState]);
+    const { error: transformsPreviewError, data: transformPreview } =
+      useGetTransformsPreview(previewRequest);
+
+    useEffect(() => {
+      if (isPostTransformsPreviewResponseSchema(transformPreview)) {
+        const properties = transformPreview.generated_dest_index.mappings.properties;
+        const timeFields: string[] = Object.keys(properties).filter(
+          (col) => properties[col].type === 'date'
+        );
+
+        setDataViewAvailableTimeFields(timeFields);
+        setDataViewTimeField(timeFields[0]);
+      }
+    }, [transformPreview]);
+
+    useEffect(() => {
+      if (transformsPreviewError !== null) {
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformPreview', {
+            defaultMessage: 'An error occurred fetching the transform preview',
+          }),
+          text: toMountPoint(
+            <ToastNotificationText
+              overlays={overlays}
+              theme={theme}
+              text={getErrorMessage(transformsPreviewError)}
+            />,
+            { theme$: theme.theme$ }
+          ),
+        });
+      }
+    }, [overlays, theme, toastNotifications, transformsPreviewError]);
 
     // fetch existing transform IDs and indices once for form validation
     useEffect(() => {
       // use an IIFE to avoid returning a Promise to useEffect.
       (async function () {
-        const { searchQuery, previewRequest: partialPreviewRequest } = stepDefineState;
-        const transformConfigQuery = getTransformConfigQuery(searchQuery);
-        const previewRequest = getPreviewTransformRequestBody(
-          searchItems.dataView,
-          transformConfigQuery,
-          partialPreviewRequest,
-          stepDefineState.runtimeMappings
-        );
-
-        const transformPreview = await api.getTransformsPreview(previewRequest);
-
-        if (isPostTransformsPreviewResponseSchema(transformPreview)) {
-          const properties = transformPreview.generated_dest_index.mappings.properties;
-          const timeFields: string[] = Object.keys(properties).filter(
-            (col) => properties[col].type === 'date'
-          );
-
-          setDataViewAvailableTimeFields(timeFields);
-          setDataViewTimeField(timeFields[0]);
-        } else {
-          toastNotifications.addDanger({
-            title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformPreview', {
-              defaultMessage: 'An error occurred fetching the transform preview',
-            }),
-            text: toMountPoint(
-              <ToastNotificationText
-                overlays={overlays}
-                theme={theme}
-                text={getErrorMessage(transformPreview)}
-              />,
-              { theme$: theme.theme$ }
-            ),
-          });
-        }
-
         const [indices, ingestPipelines] = await Promise.all([
           api.getEsIndices(),
           api.getEsIngestPipelines(),

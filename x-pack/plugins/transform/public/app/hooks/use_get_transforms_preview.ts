@@ -9,21 +9,27 @@ import { useQuery } from '@tanstack/react-query';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
-import type { GetTransformsResponseSchema } from '../../../common/api_schemas/transforms';
+import type {
+  PostTransformsPreviewRequestSchema,
+  PostTransformsPreviewResponseSchema,
+} from '../../../common/api_schemas/transforms';
 import { addInternalBasePath, TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
-import type { TransformId } from '../../../common/types/transform';
 
 import { useAppDependencies } from '../app_dependencies';
 
-export const useGetTransform = (transformId: TransformId, enabled?: boolean) => {
+export const useGetTransformsPreview = (
+  obj: PostTransformsPreviewRequestSchema,
+  enabled?: boolean
+) => {
   const { http } = useAppDependencies();
 
-  return useQuery<GetTransformsResponseSchema, IHttpFetchError>(
-    [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORM, transformId],
+  return useQuery<PostTransformsPreviewResponseSchema, IHttpFetchError>(
+    [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORMS_PREVIEW, obj],
     async ({ signal }) =>
-      await http.get<GetTransformsResponseSchema>(
-        addInternalBasePath(`transforms/${transformId}`),
+      await http.post<PostTransformsPreviewResponseSchema>(
+        addInternalBasePath('transforms/_preview'),
         {
+          body: JSON.stringify(obj),
           version: '1',
           signal,
         }

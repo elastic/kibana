@@ -15,10 +15,6 @@ import type {
   StopTransformsRequestSchema,
   StopTransformsResponseSchema,
 } from '../../../../common/api_schemas/stop_transforms';
-import type {
-  PostTransformsPreviewRequestSchema,
-  PostTransformsPreviewResponseSchema,
-} from '../../../../common/api_schemas/transforms';
 
 import type { EsIndex } from '../../../../common/types/es_index';
 
@@ -30,28 +26,6 @@ export interface FieldHistogramRequestConfig {
 }
 
 const apiFactory = () => ({
-  async getTransformsPreview(
-    obj: PostTransformsPreviewRequestSchema
-  ): Promise<PostTransformsPreviewResponseSchema | IHttpFetchError> {
-    return Promise.resolve({
-      generated_dest_index: {
-        mappings: {
-          _meta: {
-            _transform: {
-              transform: 'the-transform',
-              version: { create: 'the-version' },
-              creation_date_in_millis: 0,
-            },
-            created_by: 'mock',
-          },
-          properties: {},
-        },
-        settings: { index: { number_of_shards: '1', auto_expand_replicas: '0-1' } },
-        aliases: {},
-      },
-      preview: [],
-    });
-  },
   async stopTransforms(
     transformsInfo: StopTransformsRequestSchema
   ): Promise<StopTransformsResponseSchema | IHttpFetchError> {

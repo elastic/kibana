@@ -11,6 +11,7 @@ export { useDocumentationLinks } from './use_documentation_links';
 export { useGetTransformAuditMessages } from './use_get_transform_audit_messages';
 export { useGetTransform } from './use_get_transform';
 export { useGetTransforms } from './use_get_transforms';
+export { useGetTransformsPreview } from './use_get_transforms_preview';
 export { useGetTransformStats } from './use_get_transform_stats';
 export { useDeleteTransforms, useDeleteIndexAndTargetIndex } from './use_delete_transform';
 export { useResetTransforms } from './use_reset_transform';
