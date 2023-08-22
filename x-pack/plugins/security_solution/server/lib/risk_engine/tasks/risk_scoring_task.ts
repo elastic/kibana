@@ -130,6 +130,7 @@ export const startRiskScoringTask = async ({
     });
   } catch (e) {
     logger.warn(`[task ${taskId}]: error scheduling task, received ${e.message}`);
+    throw e;
   }
 };
 

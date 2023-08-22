@@ -97,6 +97,19 @@ describe('Risk Scoring Task', () => {
         })
       );
     });
+
+    it('rethrows an error from taskManager', async () => {
+      mockTaskManagerStart.ensureScheduled.mockRejectedValueOnce(new Error('whoops'));
+
+      await expect(
+        startRiskScoringTask({
+          logger: mockLogger,
+          namespace: 'other',
+          taskManager: mockTaskManagerStart,
+          riskEngineDataClient: mockRiskEngineDataClient,
+        })
+      ).rejects.toThrowError('whoops');
+    });
   });
 
   describe('removeRiskScoringTask()', () => {
