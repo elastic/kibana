@@ -14,12 +14,9 @@ import type { IKibanaSearchResponse } from './types';
  * @returns true if response had an error while executing in ES
  */
 export const isErrorResponse = (response?: IKibanaSearchResponse) => {
-  return !response || !response.rawResponse || (!response.isRunning && !!response.isPartial);
+  return !response || !response.rawResponse;
 };
 
-/**
- * @returns true if response is completed successfully
- */
 export const isCompleteResponse = (response?: IKibanaSearchResponse) => {
   return Boolean(response && !response.isRunning && !response.isPartial);
 };
@@ -30,6 +27,11 @@ export const isCompleteResponse = (response?: IKibanaSearchResponse) => {
 export const isPartialResponse = (response?: IKibanaSearchResponse) => {
   return Boolean(response && response.isRunning && response.isPartial);
 };
+
+/**
+ * @returns true when async search is running
+ */
+export const isRunningResponse = (response?: IKibanaSearchResponse) => response?.isRunning ?? false;
 
 export const getUserTimeZone = (
   getConfig: AggTypesDependencies['getConfig'],

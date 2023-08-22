@@ -107,7 +107,7 @@ import {
   getEsQueryConfig,
   IKibanaSearchResponse,
   isErrorResponse,
-  isPartialResponse,
+  isRunningResponse,
   isCompleteResponse,
   UI_SETTINGS,
 } from '../..';
@@ -548,7 +548,7 @@ export class SearchSource {
         return new Observable<IKibanaSearchResponse<unknown>>((obs) => {
           if (isErrorResponse(response)) {
             obs.error(response);
-          } else if (isPartialResponse(response)) {
+          } else if (isRunningResponse(response)) {
             obs.next(this.postFlightTransform(response));
           } else {
             if (!this.hasPostFlightRequests()) {
