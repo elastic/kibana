@@ -103,7 +103,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(ruleStatus).to.be('active');
       });
 
-      it('produces an alert with the correct reason', async () => {
+      it('produces an alert for opbeans-java with the correct reason', async () => {
         const alerts = await waitForAlertsForRule({ es, ruleId });
         expect(alerts[0]!['kibana.alert.reason']).to.be(
           'Avg. latency is 5.0 s in the last 5 mins for service: opbeans-java, env: production, type: request, name: tx-java. Alert when > 3.0 s.'
@@ -191,9 +191,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(ruleStatus).to.be('active');
       });
 
-      it('produces an alert with the correct reason', async () => {
+      it('produces an alert for opbeans-node with the correct reason', async () => {
         const alerts = await waitForAlertsForRule({ es, ruleId });
-
         expect(alerts[0]!['kibana.alert.reason']).to.be(
           'Avg. latency is 4.0 s in the last 5 mins for service: opbeans-node, env: production, type: request, name: tx-node. Alert when > 3.0 s.'
         );

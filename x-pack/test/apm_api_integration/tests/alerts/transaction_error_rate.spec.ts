@@ -195,7 +195,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(alerts[0]).property('transaction.name', 'tx-node');
       });
 
-      it('produces an alert with the correct reason', async () => {
+      it('produces an alert for opbeans-node with the correct reason', async () => {
         const alerts = await waitForAlertsForRule({ es, ruleId });
         expect(alerts[0]!['kibana.alert.reason']).to.be(
           'Failed transactions is 50% in the last 5 mins for service: opbeans-node, env: production, type: request, name: tx-node. Alert when > 40%.'
