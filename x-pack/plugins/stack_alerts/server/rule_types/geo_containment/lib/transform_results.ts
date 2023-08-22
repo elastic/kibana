@@ -26,7 +26,16 @@ export function transformResults(
       const entityName = entitySplitBuckets[i].key;
       const entityResults = resultsMap.get(entityName) ?? [];
       entityResults.push({
-        location: entitySplitBuckets[i].entityHits?.hits?.hits?.[0]?.fields?.[geoField]?.[0] ?? '',
+        // Required for zero down time (ZDT)
+        // populate legacy location so non-updated-kibana nodes can handle new alert state
+        //
+        // Why 0,0 vs parsing WKT and populating actual location?
+        // This loop gets processed for each entity location in each containing boundary, ie: its a hot loop
+        // There is a mimial amount of time between one kibana node updating and all Kibana nodes being updated
+        // vs a huge CPU penetatily for all kibana nodes for the rest of the time
+        // Algorithm optimized for the more common use case where all Kibana nodes are running updated version
+        location: [0, 0],
+        locationWkt: entitySplitBuckets[i].entityHits?.hits?.hits?.[0]?.fields?.[geoField]?.[0] ?? '',
         shapeLocationId: boundaryId,
         dateInShape:
           entitySplitBuckets[i].entityHits?.hits?.hits?.[0]?.fields?.[dateField]?.[0] ?? null,

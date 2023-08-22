@@ -50,9 +50,9 @@ function getAlertContext({
     entityId: entityName,
     entityDateTime: containment.dateInShape || null,
     entityDocumentId: containment.docId,
-    entityLocation: Array.isArray(containment.location)
-      ? `POINT (${containment.location[0]} ${containment.location[1]})`
-      : containment.location,
+    entityLocation: containment.locationWkt !== undefined
+      ? containment.locationWkt
+      : `POINT (${containment.location[0]} ${containment.location[1]})`,
     detectionDateTime: new Date(windowEnd).toISOString(),
   };
   if (!isRecovered) {
