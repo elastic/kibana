@@ -29,7 +29,7 @@ export interface CloudPostureTableResult {
   queryError?: Error;
   pageIndex: number;
   urlQuery: {
-    vulnerabilityIndex?: number;
+    vulnerabilityIndex: number;
     filters: BoolQuery[];
     pageIndex: number;
     pageSize: number;
