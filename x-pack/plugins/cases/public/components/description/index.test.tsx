@@ -27,13 +27,7 @@ const defaultProps = {
   isLoadingDescription: false,
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/164049
-// FLAKY: https://github.com/elastic/kibana/issues/164048
-// FLAKY: https://github.com/elastic/kibana/issues/164047
-// FLAKY: https://github.com/elastic/kibana/issues/164046
-// FLAKY: https://github.com/elastic/kibana/issues/164045
-// FLAKY: https://github.com/elastic/kibana/issues/164044
-describe.skip('Description', () => {
+describe('Description', () => {
   const onUpdateField = jest.fn();
   let appMockRender: AppMockRenderer;
 
@@ -97,27 +91,6 @@ describe.skip('Description', () => {
     });
   });
 
-  it('trims the description correctly when saved', async () => {
-    const descriptionWithSpaces = 'New updated description               ';
-    const res = appMockRender.render(
-      <Description {...defaultProps} onUpdateField={onUpdateField} />
-    );
-
-    userEvent.click(res.getByTestId('description-edit-icon'));
-
-    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
-    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), descriptionWithSpaces);
-
-    userEvent.click(screen.getByTestId('editable-save-markdown'));
-
-    await waitFor(() => {
-      expect(onUpdateField).toHaveBeenCalledWith({
-        key: 'description',
-        value: descriptionWithSpaces.trim(),
-      });
-    });
-  });
-
   it('keeps the old description correctly when canceled', async () => {
     const editedDescription = 'New updated description';
     const res = appMockRender.render(
@@ -134,38 +107,6 @@ describe.skip('Description', () => {
     await waitFor(() => {
       expect(onUpdateField).not.toHaveBeenCalled();
       expect(screen.getByText('Security banana Issue')).toBeInTheDocument();
-    });
-  });
-
-  it('shows an error when description is empty', async () => {
-    const res = appMockRender.render(
-      <Description {...defaultProps} onUpdateField={onUpdateField} />
-    );
-
-    userEvent.click(res.getByTestId('description-edit-icon'));
-
-    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
-    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '');
-
-    await waitFor(() => {
-      expect(screen.getByText('A description is required.')).toBeInTheDocument();
-      expect(screen.getByTestId('editable-save-markdown')).toHaveAttribute('disabled');
-    });
-  });
-
-  it('shows an error when description is a sting of empty characters', async () => {
-    const res = appMockRender.render(
-      <Description {...defaultProps} onUpdateField={onUpdateField} />
-    );
-
-    userEvent.click(res.getByTestId('description-edit-icon'));
-
-    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
-    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '  ');
-
-    await waitFor(() => {
-      expect(screen.getByText('A description is required.')).toBeInTheDocument();
-      expect(screen.getByTestId('editable-save-markdown')).toHaveAttribute('disabled');
     });
   });
 
@@ -204,18 +145,11 @@ describe.skip('Description', () => {
     expect(screen.queryByTestId('description-edit-icon')).not.toBeInTheDocument();
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/164050
-  describe.skip('draft message', () => {
+  describe('draft message', () => {
     const draftStorageKey = `cases.testAppId.basic-case-id.description.markdownEditor`;
 
     beforeEach(() => {
       sessionStorage.setItem(draftStorageKey, 'value set in storage');
-    });
-
-    it('should show unsaved draft message correctly', async () => {
-      appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
-
-      expect(screen.getByTestId('description-unsaved-draft')).toBeInTheDocument();
     });
 
     it('should not show unsaved draft message when loading', async () => {

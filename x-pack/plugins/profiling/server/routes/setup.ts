@@ -110,10 +110,7 @@ export function registerSetupRoute({
          * because of users with viewer privileges
          * cannot get the cluster settings
          */
-        if (
-          areResourcesSetupForViewer(mergedStateForViewer) &&
-          mergedStateForViewer.data.available
-        ) {
+        if (areResourcesSetupForViewer(mergedStateForViewer)) {
           return response.ok({
             body: {
               has_setup: true,

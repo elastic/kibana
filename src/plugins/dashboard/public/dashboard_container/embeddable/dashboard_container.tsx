@@ -41,7 +41,6 @@ import {
   runQuickSave,
   replacePanel,
   addFromLibrary,
-  showPlaceholderUntil,
   addOrUpdateEmbeddable,
 } from './api';
 
@@ -314,7 +313,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public addFromLibrary = addFromLibrary;
 
   public replacePanel = replacePanel;
-  public showPlaceholderUntil = showPlaceholderUntil;
   public addOrUpdateEmbeddable = addOrUpdateEmbeddable;
 
   public forceRefresh(refreshControlGroup: boolean = true) {

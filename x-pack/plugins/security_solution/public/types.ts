@@ -169,7 +169,6 @@ export type StartServices = CoreStart &
 
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
-  upselling: UpsellingService;
   setAppLinksSwitcher: (appLinksSwitcher: AppLinksSwitcher) => void;
 }
 
@@ -179,6 +178,7 @@ export interface PluginStart {
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
   setGetStartedPage: (getStartedComponent: React.ComponentType) => void;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
+  getUpselling: () => UpsellingService;
 }
 
 export interface AppObservableLibs {
