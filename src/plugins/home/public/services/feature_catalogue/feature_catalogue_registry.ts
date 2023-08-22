@@ -108,10 +108,6 @@ export class FeatureCatalogueRegistry {
       .filter((solution) => capabilities.catalogue[solution.id] !== false)
       .sort(compareByKey('title'));
   }
-
-  public removeFeature(appId: string) {
-    this.features.delete(appId);
-  }
 }
 
 export type FeatureCatalogueRegistrySetup = ReturnType<FeatureCatalogueRegistry['setup']>;

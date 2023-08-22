@@ -27,7 +27,7 @@ import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
@@ -38,6 +38,7 @@ import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 export interface GraphPluginSetupDependencies {
   home?: HomePublicPluginSetup;
   contentManagement: ContentManagementPublicSetup;
+  licensing: LicensingPluginSetup;
 }
 
 export interface GraphPluginStartDependencies {
@@ -61,26 +62,30 @@ export class GraphPlugin
 
   setup(
     core: CoreSetup<GraphPluginStartDependencies>,
-    { home, contentManagement }: GraphPluginSetupDependencies
+    { home, contentManagement, licensing }: GraphPluginSetupDependencies
   ) {
-    if (home) {
-      home.featureCatalogue.register({
-        id: 'graph',
-        title: 'Graph',
-        subtitle: i18n.translate('xpack.graph.pluginSubtitle', {
-          defaultMessage: 'Reveal patterns and relationships.',
-        }),
-        description: i18n.translate('xpack.graph.pluginDescription', {
-          defaultMessage: 'Surface and analyze relevant relationships in your Elasticsearch data.',
-        }),
-        icon: 'graphApp',
-        path: '/app/graph',
-        showOnHomePage: false,
-        category: 'data',
-        solutionId: 'kibana',
-        order: 600,
-      });
-    }
+    licensing.license$.subscribe((license) => {
+      const licenseInformation = checkLicense(license);
+      if (home && licenseInformation.enableAppLink) {
+        home.featureCatalogue.register({
+          id: 'graph',
+          title: 'Graph',
+          subtitle: i18n.translate('xpack.graph.pluginSubtitle', {
+            defaultMessage: 'Reveal patterns and relationships.',
+          }),
+          description: i18n.translate('xpack.graph.pluginDescription', {
+            defaultMessage:
+              'Surface and analyze relevant relationships in your Elasticsearch data.',
+          }),
+          icon: 'graphApp',
+          path: '/app/graph',
+          showOnHomePage: false,
+          category: 'data',
+          solutionId: 'kibana',
+          order: 600,
+        });
+      }
+    });
 
     const config = this.initializerContext.config.get();
 
@@ -150,10 +155,6 @@ export class GraphPlugin
           : AppNavLinkStatus.hidden,
         tooltip: licenseInformation.showAppLink ? licenseInformation.message : undefined,
       }));
-
-      if (home && !licenseInformation.enableAppLink) {
-        home.featureCatalogue.removeFeature('graph');
-      }
     });
   }
 
