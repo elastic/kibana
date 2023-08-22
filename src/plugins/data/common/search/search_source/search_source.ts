@@ -108,7 +108,6 @@ import {
   IKibanaSearchResponse,
   isErrorResponse,
   isRunningResponse,
-  isCompleteResponse,
   UI_SETTINGS,
 } from '../..';
 import { AggsStart } from '../aggs';
@@ -584,7 +583,7 @@ export class SearchSource {
         });
       }),
       map((response) => {
-        if (!isCompleteResponse(response)) {
+        if (isRunningResponse(response)) {
           return response;
         }
         return onResponse(searchRequest, response, options);
