@@ -117,7 +117,7 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       await testSubjects.click('add-element-button');
       await testSubjects.click('saved-elements-menu-option');
 
-      await await PageObjects.common.sleep(1000); // give time for modal animation to complete
+      await PageObjects.common.sleep(1000); // give time for modal animation to complete
     },
 
     async closeSavedElementsModal() {
