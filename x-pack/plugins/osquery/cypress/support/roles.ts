@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ServerlessRoleName } from '../../../../test_serverless/shared/lib/security/roles';
+export { ServerlessRoleName } from '../../../../test_serverless/shared/lib/security/types';

@@ -6,4 +6,4 @@
  */
 
 export * from './kibana_roles';
-export * from './roles';
+export * from './types';
