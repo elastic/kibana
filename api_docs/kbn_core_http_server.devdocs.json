@@ -3736,6 +3736,10 @@
                 "path": "x-pack/plugins/asset_manager/server/routes/assets/hosts.ts"
               },
               {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/asset_manager/server/routes/assets/services.ts"
+              },
+              {
                 "plugin": "banners",
                 "path": "x-pack/plugins/banners/server/routes/info.ts"
               },
@@ -6466,6 +6470,10 @@
                 "path": "x-pack/plugins/alerting/server/routes/maintenance_window/bulk_get_maintenance_windows.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/suggestions/values_suggestion_alerts.ts"
+              },
+              {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/plugins/rule_registry/server/routes/update_alert_by_id.ts"
               },
@@ -7980,6 +7988,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/suggestions/fileds_rule.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/suggestions/values_suggestion_alerts.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -11140,6 +11152,21 @@
             "label": "isFakeRequest",
             "description": [
               "\nAllows identifying requests that were created using a {@link FakeRawRequest}\nEven if the API facade is the same, fake requests have some stubbed functionalities."
+            ],
+            "path": "packages/core/http/core-http-server/src/router/request.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.KibanaRequest.isInternalApiRequest",
+            "type": "boolean",
+            "tags": [
+              "note"
+            ],
+            "label": "isInternalApiRequest",
+            "description": [
+              "\nAn internal request has access to internal routes."
             ],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
