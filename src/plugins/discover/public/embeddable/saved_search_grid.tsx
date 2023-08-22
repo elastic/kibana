@@ -15,7 +15,6 @@ import {
 } from '@kbn/unified-data-table';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import './saved_search_grid.scss';
-import { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { MAX_DOC_FIELDS_DISPLAYED, ROW_HEIGHT_OPTION, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
 import { DiscoverGridFlyout } from '../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
@@ -26,7 +25,7 @@ export interface DiscoverGridEmbeddableProps extends UnifiedDataTableProps {
   interceptedWarnings?: SearchResponseInterceptedWarning[];
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
-  savedSearch?: SavedSearch;
+  savedSearchId?: string;
 }
 
 export const DataGridMemoized = memo(UnifiedDataTable);
@@ -43,7 +42,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         hits={displayedRows}
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
-        savedSearchId={props.savedSearch?.id}
+        savedSearchId={props.savedSearchId}
         onFilter={props.onFilter}
         onRemoveColumn={props.onRemoveColumn}
         onAddColumn={props.onAddColumn}
@@ -58,7 +57,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       props.onFilter,
       props.onRemoveColumn,
       props.query,
-      props.savedSearch?.id,
+      props.savedSearchId,
     ]
   );
 
