@@ -329,7 +329,7 @@ export const PolicyTabs = React.memo(() => {
             content: (
               <>
                 <EuiSpacer />
-                <ProtectionUpdatesLayout />
+                <ProtectionUpdatesLayout policy={policyItem} />
               </>
             ),
           }

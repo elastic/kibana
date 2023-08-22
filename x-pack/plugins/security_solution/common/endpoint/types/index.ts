@@ -948,6 +948,7 @@ export interface PolicyConfig {
     serverless: boolean;
     heartbeatinterval?: number;
   };
+  manifest_version: 'latest' | string;
   windows: {
     advanced?: {
       [key: string]: unknown;
