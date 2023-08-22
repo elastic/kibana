@@ -36,13 +36,6 @@ export const useResolveConflict = () => {
 
   const getLegacyUrlConflictCallout = useCallback(() => {
     // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
-    if (
-      !spaces ||
-      resolveTimelineConfig?.outcome !== 'conflict' ||
-      resolveTimelineConfig?.alias_target_id == null
-    ) {
-      return null;
-    }
 
     const searchQuery = new URLSearchParams(search);
     const timelineRison = searchQuery.get(URL_PARAM_KEY.timeline) ?? undefined;
@@ -59,6 +52,14 @@ export const useResolveConflict = () => {
     // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
     // callout with a warning for the user, and provide a way for them to navigate to the other object.
     const currentObjectId = timelineSearch?.id;
+    if (
+      !spaces ||
+      resolveTimelineConfig?.outcome !== 'conflict' ||
+      resolveTimelineConfig?.alias_target_id == null ||
+      currentObjectId == null
+    ) {
+      return null;
+    }
     const newSavedObjectId = resolveTimelineConfig?.alias_target_id ?? ''; // This is always defined if outcome === 'conflict'
 
     const newTimelineSearch: TimelineUrl = {
