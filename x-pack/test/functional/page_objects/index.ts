@@ -9,6 +9,7 @@ import { pageObjects as kibanaFunctionalPageObjects } from '../../../../test/fun
 
 import { AccountSettingsPageObject } from './account_settings_page';
 import { ApiKeysPageProvider } from './api_keys_page';
+import { AssetDetailsProvider } from './asset_details';
 import { BannersPageObject } from './banners_page';
 import { CanvasPageProvider } from './canvas_page';
 import { CopySavedObjectsToSpacePageProvider } from './copy_saved_objects_to_space_page';
@@ -54,6 +55,7 @@ export const pageObjects = {
   ...kibanaFunctionalPageObjects,
   accountSetting: AccountSettingsPageObject,
   apiKeys: ApiKeysPageProvider,
+  assetDetails: AssetDetailsProvider,
   banners: BannersPageObject,
   canvas: CanvasPageProvider,
   copySavedObjectsToSpace: CopySavedObjectsToSpacePageProvider,
