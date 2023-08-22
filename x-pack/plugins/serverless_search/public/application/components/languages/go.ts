@@ -10,7 +10,6 @@ import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { docLinks } from '../../../../common/doc_links';
 
 export const goDefinition: LanguageDefinition = {
-  advancedConfig: docLinks.goAdvancedConfig,
   apiReference: docLinks.goApiReference,
   basicConfig: docLinks.goBasicConfig,
   buildSearchQuery: `searchResp, err := es.Search().

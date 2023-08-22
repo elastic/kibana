@@ -152,19 +152,6 @@ export const ElasticsearchOverview = () => {
                   },
                 ]
               : []),
-            ...(selectedLanguage.advancedConfig
-              ? [
-                  {
-                    href: selectedLanguage.advancedConfig,
-                    label: i18n.translate(
-                      'xpack.serverlessSearch.configureClient.advancedConfigLabel',
-                      {
-                        defaultMessage: 'Advanced configuration',
-                      }
-                    ),
-                  },
-                ]
-              : []),
           ]}
           title={i18n.translate('xpack.serverlessSearch.configureClient.title', {
             defaultMessage: 'Configure your client',

@@ -21,27 +21,22 @@ class ESDocLinks {
   // Client links
   public elasticsearchClients: string = '';
   // go
-  public goAdvancedConfig: string = '';
   public goApiReference: string | undefined = undefined;
   public goBasicConfig: string = '';
   public goClient: string = '';
   // javascript
   public jsApiReference: string = '';
-  public jsAdvancedConfig: string = '';
   public jsBasicConfig: string = '';
   public jsClient: string = '';
   // php
-  public phpAdvancedConfig: string = '';
   public phpApiReference: string | undefined = undefined;
   public phpBasicConfig: string = '';
   public phpClient: string = '';
   // python
   public pythonApiReference: string | undefined = undefined;
-  public pythonAdvancedConfig: string = '';
   public pythonBasicConfig: string = '';
   public pythonClient: string = '';
   // ruby
-  public rubyAdvancedConfig: string = '';
   public rubyBasicConfig: string = '';
   public rubyClient: string = '';
   public rubyExamples: string = '';
@@ -68,29 +63,23 @@ class ESDocLinks {
     // Client links
     this.elasticsearchClients = newDocLinks.serverlessClients.httpApis;
     // Go
-    this.goAdvancedConfig = newDocLinks.clients.goConnecting;
     this.goApiReference = newDocLinks.serverlessClients.goApiReference;
-    this.goBasicConfig = newDocLinks.clients.goGettingStarted;
+    this.goBasicConfig = newDocLinks.serverlessClients.goGettingStarted;
     this.goClient = newDocLinks.serverlessClients.goGettingStarted;
     // JS
-    this.jsAdvancedConfig = newDocLinks.clients.jsAdvancedConfig;
     this.jsApiReference = newDocLinks.serverlessClients.jsApiReference;
-    this.jsBasicConfig = newDocLinks.clients.jsBasicConfig;
+    this.jsBasicConfig = newDocLinks.serverlessClients.jsGettingStarted;
     this.jsClient = newDocLinks.serverlessClients.jsGettingStarted;
     // PHP
-    this.phpAdvancedConfig = newDocLinks.clients.phpConfiguration;
     this.phpApiReference = newDocLinks.serverlessClients.phpApiReference;
-    this.phpBasicConfig = newDocLinks.clients.phpConnecting;
+    this.phpBasicConfig = newDocLinks.serverlessClients.phpGettingStarted;
     this.phpClient = newDocLinks.serverlessClients.phpGettingStarted;
-    this.phpBasicConfig = newDocLinks.clients.phpConnecting;
     // Python
-    this.pythonApiReference = newDocLinks.serverlessClients.pythonApiReference;
-    this.pythonAdvancedConfig = newDocLinks.clients.pythonConfig;
+    this.pythonApiReference = newDocLinks.serverlessClients.pythonGettingStarted;
     this.pythonBasicConfig = newDocLinks.clients.pythonConnecting;
     this.pythonClient = newDocLinks.serverlessClients.pythonGettingStarted;
     // Python
-    this.rubyAdvancedConfig = newDocLinks.clients.rubyAdvancedConfig;
-    this.rubyBasicConfig = newDocLinks.clients.rubyBasicConfig;
+    this.rubyBasicConfig = newDocLinks.serverlessClients.rubyGettingStarted;
     this.rubyExamples = newDocLinks.serverlessClients.rubyApiReference;
     this.rubyClient = newDocLinks.serverlessClients.rubyGettingStarted;
 

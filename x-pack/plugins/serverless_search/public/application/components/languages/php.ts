@@ -11,7 +11,6 @@ import { docLinks } from '../../../../common/doc_links';
 import { INDEX_NAME_PLACEHOLDER } from '../../constants';
 
 export const phpDefinition: LanguageDefinition = {
-  advancedConfig: docLinks.phpAdvancedConfig,
   apiReference: docLinks.phpApiReference,
   basicConfig: docLinks.phpBasicConfig,
   buildSearchQuery: `$params = [

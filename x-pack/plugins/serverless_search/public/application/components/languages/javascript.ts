@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../../common/doc_links';
 
 export const javascriptDefinition: LanguageDefinition = {
-  advancedConfig: docLinks.jsAdvancedConfig,
   apiReference: docLinks.jsApiReference,
   basicConfig: docLinks.jsBasicConfig,
   buildSearchQuery: `// Let's search!

@@ -11,7 +11,6 @@ import { docLinks } from '../../../../common/doc_links';
 import { INDEX_NAME_PLACEHOLDER } from '../../constants';
 
 export const rubyDefinition: LanguageDefinition = {
-  advancedConfig: docLinks.rubyAdvancedConfig,
   apiReference: docLinks.rubyExamples,
   buildSearchQuery: `client.search(index: 'books', q: 'snow')`,
   configureClient: ({ url, apiKey }) => `client = ElasticsearchServerless::Client.new(
