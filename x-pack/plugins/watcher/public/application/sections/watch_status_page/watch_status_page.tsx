@@ -6,7 +6,14 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiSpacer, EuiToolTip, EuiBadge, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiToolTip,
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiPageHeader,
+  EuiPageTemplate,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -70,12 +77,14 @@ export const WatchStatusPage = ({
 
   if (isWatchDetailLoading) {
     return (
-      <SectionLoading>
-        <FormattedMessage
-          id="xpack.watcher.sections.watchStatus.loadingWatchDetailsDescription"
-          defaultMessage="Loading watch details…"
-        />
-      </SectionLoading>
+      <EuiPageTemplate.EmptyPrompt>
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.watcher.sections.watchStatus.loadingWatchDetailsDescription"
+            defaultMessage="Loading watch details…"
+          />
+        </SectionLoading>
+      </EuiPageTemplate.EmptyPrompt>
     );
   }
 
