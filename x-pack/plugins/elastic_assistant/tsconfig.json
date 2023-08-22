@@ -1,0 +1,25 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "common/**/*",
+    "server/lib/**/*",
+    "server/**/*",
+    // must declare *.json explicitly per https://github.com/microsoft/TypeScript/issues/25636
+    "server/**/*.json",
+    "../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/core-http-server",
+    "@kbn/licensing-plugin",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/securitysolution-es-utils",
+    "@kbn/securitysolution-io-ts-utils",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}
