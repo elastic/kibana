@@ -360,26 +360,28 @@ export const ElasticsearchOverview = () => {
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section alignment="top" className="serverlessSearchFooter">
         <EuiFlexGroup gutterSize="l">
-          <EuiFlexItem>
-            <FooterIcon
-              // TODO: update with real link
-              href="https://elastic.co"
-              imgSrc={`${assetBasePath}invite_users_icon.png`}
-              title={i18n.translate('xpack.serverlessSearch.footer.inviteUsers.title', {
-                defaultMessage: 'Invite more users',
-              })}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <FooterIcon
-              // TODO: update with real link
-              href="https://elastic.co"
-              imgSrc={`${assetBasePath}billing_icon.png`}
-              title={i18n.translate('xpack.serverlessSearch.footer.billing.title', {
-                defaultMessage: 'Billing and usage',
-              })}
-            />
-          </EuiFlexItem>
+          {cloud.usersAndRolesUrl && (
+            <EuiFlexItem>
+              <FooterIcon
+                href={cloud.usersAndRolesUrl}
+                imgSrc={`${assetBasePath}invite_users_icon.png`}
+                title={i18n.translate('xpack.serverlessSearch.footer.inviteUsers.title', {
+                  defaultMessage: 'Invite more users',
+                })}
+              />
+            </EuiFlexItem>
+          )}
+          {cloud.billingUrl && (
+            <EuiFlexItem>
+              <FooterIcon
+                href={cloud.billingUrl}
+                imgSrc={`${assetBasePath}billing_icon.png`}
+                title={i18n.translate('xpack.serverlessSearch.footer.billing.title', {
+                  defaultMessage: 'Billing and usage',
+                })}
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <FooterIcon
               href="https://www.elastic.co/community/"
