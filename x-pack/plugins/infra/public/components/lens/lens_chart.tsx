@@ -87,7 +87,9 @@ export const LensChart = ({
         })}
         anchorClassName="eui-fullWidth"
       >
-        {Lens}
+        {/* EuiToolTip forwards some event handlers to the child component. 
+        Wrapping Lens inside a div prevents that from causing unnecessary re-renders  */}
+        <div>{Lens}</div>
       </EuiToolTip>
     );
   };

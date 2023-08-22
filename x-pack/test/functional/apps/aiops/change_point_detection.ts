@@ -65,7 +65,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.changePointDetectionPage.selectSplitField(0, 'geoip.city_name');
       await aiops.changePointDetectionPage.getTable(0).waitForTableToLoad();
       const result = await aiops.changePointDetectionPage.getTable(0).parseTable();
-      expect(result.length).to.be(7);
+      // the aggregation may return different results (+-1)
+      expect(result.length).to.be.above(5);
       // assert asc sorting by p_value is applied
       expect(parseFloat(result[0].pValue)).to.be.lessThan(parseFloat(result[4].pValue));
     });

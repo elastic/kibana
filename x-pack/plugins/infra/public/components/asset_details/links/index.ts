@@ -6,7 +6,6 @@
  */
 
 export { LinkToApmServices } from './link_to_apm_services';
+export { LinkToUptime } from './link_to_uptime';
 export { LinkToAlertsRule } from './link_to_alerts';
 export { LinkToNodeDetails } from './link_to_node_details';
-export { TabToApmTraces } from './tab_to_apm_traces';
-export { TabToUptime } from './tab_to_uptime';
