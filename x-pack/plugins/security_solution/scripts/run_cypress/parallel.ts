@@ -337,16 +337,20 @@ ${JSON.stringify(config.getAll(), null, 2)}
               { retries: 2, forever: false }
             );
 
-            await runKibanaServer({
-              procs,
-              config,
-              installDir: options?.installDir,
-              extraKbnOpts:
-                options?.installDir || options?.ci || !isOpen
-                  ? []
-                  : ['--dev', '--no-dev-config', '--no-dev-credentials'],
-              onEarlyExit,
-            });
+            const shutdownEs = await pRetry(
+              async () =>
+                runKibanaServer({
+                  procs,
+                  config,
+                  installDir: options?.installDir,
+                  extraKbnOpts:
+                    options?.installDir || options?.ci || !isOpen
+                      ? []
+                      : ['--dev', '--no-dev-config', '--no-dev-credentials'],
+                  onEarlyExit,
+                }),
+              { retries: 2, forever: false }
+            );
 
             await providers.loadAll();
 
