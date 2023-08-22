@@ -1239,7 +1239,6 @@
     "dashboard.panel.title.clonedTag": "副本",
     "dashboard.panel.unableToMigratePanelDataForSixOneZeroErrorMessage": "无法迁移用于“6.1.0”向后兼容的面板数据，面板不包含所需的列和/或行字段",
     "dashboard.panel.unlinkFromLibrary": "取消与库的链接",
-    "dashboard.placeholder.factory.displayName": "占位符",
     "dashboard.resetChangesConfirmModal.confirmButtonLabel": "重置仪表板",
     "dashboard.resetChangesConfirmModal.resetChangesDescription": "此仪表板将返回到其最后保存的状态。 您可能会丢失对筛选和查询的更改。",
     "dashboard.resetChangesConfirmModal.resetChangesTitle": "重置仪表板？",
