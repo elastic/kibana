@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
+import { map, pick } from 'lodash';
 import type { Client, estypes } from '@elastic/elasticsearch';
 import type {
   Agent,
@@ -35,6 +35,7 @@ import type {
 } from '@kbn/fleet-plugin/common/types';
 import nodeFetch from 'node-fetch';
 import semver from 'semver';
+import axios from 'axios';
 import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
@@ -236,7 +237,13 @@ export const getAgentVersionMatchingCurrentStack = async (
   kbnClient: KbnClient
 ): Promise<string> => {
   const kbnStatus = await kbnClient.status.get();
-  let version = kbnStatus.version.number;
+  const agentVersions = await axios
+    .get('https://artifacts-api.elastic.co/v1/versions')
+    .then((response) => map(response.data.versions, (version) => version.split('-SNAPSHOT')[0]));
+
+  let version =
+    semver.maxSatisfying(agentVersions, `<=${kbnStatus.version.number}`) ??
+    kbnStatus.version.number;
 
   // Add `-SNAPSHOT` if version indicates it was from a snapshot or the build hash starts
   // with `xxxxxxxxx` (value that seems to be present when running kibana from source)

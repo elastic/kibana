@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import type { IncomingMessage } from 'http';
+import { IncomingMessage } from 'http';
 import { notImplemented } from '@hapi/boom';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { messageRt } from '../runtime_types';
