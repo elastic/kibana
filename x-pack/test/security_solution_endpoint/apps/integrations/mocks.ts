@@ -401,7 +401,7 @@ export const getArtifactsListTestsData = () => [
         },
         {
           type: 'click',
-          selector: 'blocklist-form-file.path',
+          selector: 'blocklist-form-file.path.caseless',
         },
         {
           type: 'clear',
