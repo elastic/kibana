@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 export const CREATE_NEW_RULE_BTN = '[data-test-subj="create-new-rule"]';
@@ -76,7 +77,7 @@ export const SECOND_RULE = 1;
 
 export const RULE_CHECKBOX = '.euiTableRow .euiCheckbox__input';
 
-export const RULE_NAME = '[data-test-subj="ruleName"]';
+export const RULE_NAME = '[data-test-subj^="ruleName"]';
 
 export const RULE_LAST_RUN = '[data-test-subj="ruleLastRun"]';
 
