@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource_immediate/types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
+const TEST_USERNAME = 'test_user';
+const TEST_USER_PASSWORD = 'changeme';
+const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
+const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
 const getMockJobParams = (obj: object) => {
   return {
     title: `Mock CSV Title`,
@@ -24,8 +29,10 @@ export default function ({ getService }: FtrProviderContext) {
   const generateAPI = {
     getCSVFromSearchSource: async (job: JobParamsDownloadCSV) => {
       return await supertestSvc
-        .post(`/internal/reporting/generate/immediate/csv_searchsource`)
-        .set('kbn-xsrf', 'xxx')
+        .post(`/internal/reporting/generate/immediate/csv_searchsource?elasticInternalOrigin=true`)
+        .auth(TEST_USERNAME, TEST_USER_PASSWORD)
+        .set(...API_HEADER)
+        .set(...INTERNAL_HEADER)
         .send(job);
     },
   };

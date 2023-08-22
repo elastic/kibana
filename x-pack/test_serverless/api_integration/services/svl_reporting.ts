@@ -162,9 +162,11 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
       // ignores 409 errs and keeps retrying
       await retry.tryForTime(5000, async () => {
         await supertest
-          .post('/.reporting*/_delete_by_query')
+          .post(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/.reporting*/_delete_by_query`)
           .send({ query: { match_all: {} } })
           .auth(username, password)
+          .set(...API_HEADER)
+          .set(...INTERNAL_HEADER)
           .expect(200);
       });
     },
