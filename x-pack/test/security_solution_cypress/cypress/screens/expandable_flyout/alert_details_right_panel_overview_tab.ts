@@ -38,6 +38,7 @@ import {
   ANALYZER_PREVIEW_CONTENT_TEST_ID,
   SESSION_PREVIEW_CONTENT_TEST_ID,
   INSIGHTS_PREVALENCE_VALUE_TEST_ID,
+  REASON_DETAILS_PREVIEW_BUTTON_TEST_ID,
 } from '@kbn/security-solution-plugin/public/flyout/right/components/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
@@ -59,6 +60,8 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_TITLE =
   getDataTestSubjectSelector(REASON_TITLE_TEST_ID);
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_DETAILS =
   getDataTestSubjectSelector(REASON_DETAILS_TEST_ID);
+export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_OPEN_ALERT_REASON_PREVIEW_BUTTON =
+  getDataTestSubjectSelector(REASON_DETAILS_PREVIEW_BUTTON_TEST_ID);
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_TITLE = getDataTestSubjectSelector(
   MITRE_ATTACK_TITLE_TEST_ID
 );

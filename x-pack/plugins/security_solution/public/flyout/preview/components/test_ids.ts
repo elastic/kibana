@@ -38,3 +38,5 @@ export const RULE_PREVIEW_LOADING_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutRulePreviewLoadingSpinner';
 export const RULE_PREVIEW_FOOTER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutRulePreviewFooter';
 export const RULE_PREVIEW_NAVIGATE_TO_RULE_TEST_ID = 'goToRuleDetails';
+export const ALERT_REASON_PREVIEW_BODY_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutAlertReasonPreviewBody';

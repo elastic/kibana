@@ -26,9 +26,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getLanguageDisplayName } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
-import type { DataViewPickerPropsExtended } from './data_view_picker';
+import { type DataViewPickerPropsExtended, TextBasedLanguages } from './data_view_picker';
 import type { DataViewListItemEnhanced } from './dataview_list';
 import type { TextBasedLanguagesListProps } from './text_languages_list';
 import type { TextBasedLanguagesTransitionModalProps } from './text_languages_transition_modal';
@@ -122,7 +123,7 @@ export function ChangeDataView({
 
   useEffect(() => {
     if (textBasedLanguage) {
-      setTriggerLabel(textBasedLanguage.toUpperCase());
+      setTriggerLabel(getLanguageDisplayName(textBasedLanguage).toUpperCase());
     } else {
       setTriggerLabel(trigger.label);
     }
@@ -137,6 +138,12 @@ export function ChangeDataView({
   const isAdHocSelected = useMemo(() => {
     return adHocDataViews?.some((dataView) => dataView.id === currentDataViewId);
   }, [adHocDataViews, currentDataViewId]);
+
+  const languagesList = useMemo(() => {
+    const languages =
+      textBasedLanguages?.map((l) => getLanguageDisplayName(l.toLowerCase()).toUpperCase()) ?? [];
+    return languages as TextBasedLanguages[];
+  }, [textBasedLanguages]);
 
   const createTrigger = function () {
     const { label, title, 'data-test-subj': dataTestSubj, fullWidth, ...rest } = trigger;
@@ -362,10 +369,11 @@ export function ChangeDataView({
         </EuiFlexGroup>,
         <TextBasedLanguagesList
           key="text-based-languages-list"
-          textBasedLanguages={textBasedLanguages}
+          textBasedLanguages={languagesList}
           selectedOption={triggerLabel}
           onChange={(lang) => {
-            setTriggerLabel(lang);
+            const language = getLanguageDisplayName(lang.toLowerCase());
+            setTriggerLabel(language.toUpperCase());
             setPopoverIsOpen(false);
             setIsTextBasedLangSelected(true);
             // also update the query with the sql query

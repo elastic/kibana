@@ -229,6 +229,7 @@ export const cleanupCase = (id: string) => {
     method: 'DELETE',
     url: '/api/cases',
     qs: { ids: JSON.stringify([id]) },
+    failOnStatusCode: false,
   });
 };
 

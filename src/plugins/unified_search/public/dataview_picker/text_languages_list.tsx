@@ -56,6 +56,17 @@ export default function TextBasedLanguagesList({
     >
       {(list) => (
         <EuiPanel color="transparent" paddingSize="none">
+          {/* Uncomment when sql is removed */}
+          {/* <EuiButton color="success" size="s" fullWidth onClick={() => onChange('esql')}>
+            {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTryLabel', {
+              defaultMessage: 'Try ES | QL',
+            })}
+            <EuiBadge color="hollow">
+              {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTechPreviewLabel', {
+                defaultMessage: 'Technical preview',
+              })}
+            </EuiBadge>
+          </EuiButton> */}
           {list}
         </EuiPanel>
       )}

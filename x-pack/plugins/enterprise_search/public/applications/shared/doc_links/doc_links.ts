@@ -67,6 +67,8 @@ class DocLinks {
   public connectorsConfluence: string;
   public connectorsContentExtraction: string;
   public connectorsDropbox: string;
+  public connectorsGithub: string;
+  public connectorsGmail: string;
   public connectorsGoogleCloudStorage: string;
   public connectorsGoogleDrive: string;
   public connectorsJira: string;
@@ -75,12 +77,15 @@ class DocLinks {
   public connectorsMySQL: string;
   public connectorsNative: string;
   public connectorsNetworkDrive: string;
+  public connectorsOneDrive: string;
   public connectorsOracle: string;
   public connectorsPostgreSQL: string;
   public connectorsS3: string;
+  public connectorsSalesforce: string;
   public connectorsServiceNow: string;
   public connectorsSharepoint: string;
   public connectorsSharepointOnline: string;
+  public connectorsSlack: string;
   public connectorsWorkplaceSearch: string;
   public consoleGuide: string;
   public crawlerExtractionRules: string;
@@ -226,6 +231,8 @@ class DocLinks {
     this.connectorsContentExtraction = '';
     this.connectorsClients = '';
     this.connectorsDropbox = '';
+    this.connectorsGithub = '';
+    this.connectorsGmail = '';
     this.connectorsGoogleCloudStorage = '';
     this.connectorsGoogleDrive = '';
     this.connectorsJira = '';
@@ -234,12 +241,15 @@ class DocLinks {
     this.connectorsMySQL = '';
     this.connectorsNative = '';
     this.connectorsNetworkDrive = '';
+    this.connectorsOneDrive = '';
     this.connectorsOracle = '';
     this.connectorsPostgreSQL = '';
     this.connectorsS3 = '';
+    this.connectorsSalesforce = '';
     this.connectorsServiceNow = '';
     this.connectorsSharepoint = '';
     this.connectorsSharepointOnline = '';
+    this.connectorsSlack = '';
     this.connectorsWorkplaceSearch = '';
     this.consoleGuide = '';
     this.crawlerExtractionRules = '';
@@ -386,9 +396,11 @@ class DocLinks {
     this.connectorsContentExtraction = docLinks.links.enterpriseSearch.connectorsContentExtraction;
     this.connectorsClients = docLinks.links.enterpriseSearch.connectorsClients;
     this.connectorsDropbox = docLinks.links.enterpriseSearch.connectorsDropbox;
+    this.connectorsGithub = docLinks.links.enterpriseSearch.connectorsGithub;
     this.connectorsGoogleCloudStorage =
       docLinks.links.enterpriseSearch.connectorsGoogleCloudStorage;
     this.connectorsGoogleDrive = docLinks.links.enterpriseSearch.connectorsGoogleDrive;
+    this.connectorsGmail = docLinks.links.enterpriseSearch.connectorsGmail;
     this.connectorsJira = docLinks.links.enterpriseSearch.connectorsJira;
     this.connectorsMicrosoftSQL = docLinks.links.enterpriseSearch.connectorsMicrosoftSQL;
     this.connectorsMongoDB = docLinks.links.enterpriseSearch.connectorsMongoDB;
@@ -401,6 +413,7 @@ class DocLinks {
     this.connectorsServiceNow = docLinks.links.enterpriseSearch.connectorsServiceNow;
     this.connectorsSharepoint = docLinks.links.enterpriseSearch.connectorsSharepoint;
     this.connectorsSharepointOnline = docLinks.links.enterpriseSearch.connectorsSharepointOnline;
+    this.connectorsSlack = docLinks.links.enterpriseSearch.connectorsSlack;
     this.connectorsWorkplaceSearch = docLinks.links.enterpriseSearch.connectorsWorkplaceSearch;
     this.consoleGuide = docLinks.links.console.guide;
     this.crawlerExtractionRules = docLinks.links.enterpriseSearch.crawlerExtractionRules;

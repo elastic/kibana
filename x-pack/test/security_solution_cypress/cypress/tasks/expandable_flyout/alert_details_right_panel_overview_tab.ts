@@ -20,6 +20,8 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_TITLE,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_OPEN_RULE_PREVIEW_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_TITLE,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_OPEN_ALERT_REASON_PREVIEW_BUTTON,
 } from '../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
 
 /* About section */
@@ -125,6 +127,20 @@ export const clickRuleSummaryButton = () => {
     .should('be.visible')
     .within(() => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_OPEN_RULE_PREVIEW_BUTTON)
+        .should('be.visible')
+        .click();
+    });
+};
+
+/**
+ * Click `Show full reason` button to open alert reason preview panel
+ */
+export const clickAlertReasonButton = () => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_TITLE).scrollIntoView();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_TITLE)
+    .should('be.visible')
+    .within(() => {
+      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_OPEN_ALERT_REASON_PREVIEW_BUTTON)
         .should('be.visible')
         .click();
     });

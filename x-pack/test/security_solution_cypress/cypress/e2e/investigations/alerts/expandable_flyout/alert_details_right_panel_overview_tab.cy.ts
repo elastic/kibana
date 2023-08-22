@@ -111,7 +111,8 @@ describe(
 
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_TITLE)
           .should('be.visible')
-          .and('have.text', 'Alert reason');
+          .and('contain.text', 'Alert reason')
+          .and('contain.text', 'Show full reason');
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_DETAILS)
           .should('be.visible')
           .and('contain.text', rule.name);
