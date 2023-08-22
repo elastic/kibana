@@ -28,7 +28,7 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
 
       // load test workpad
       await PageObjects.common.navigateToApp('canvas', {
-        path: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1',
+        hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1',
       });
     });
 

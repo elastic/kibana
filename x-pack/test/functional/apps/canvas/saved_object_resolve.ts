@@ -84,7 +84,7 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
     it('redirects an alias match', async () => {
       await PageObjects.common.navigateToApp('canvas', {
         basePath: '/s/custom_space',
-        path: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31-old-id/page/1',
+        hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31-old-id/page/1',
       });
 
       // Wait for the redirect toast
@@ -113,7 +113,7 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
     it('handles a conflict match', async () => {
       await PageObjects.common.navigateToApp('canvas', {
         basePath: '/s/custom_space',
-        path: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31-conflict-old/page/1',
+        hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31-conflict-old/page/1',
       });
 
       await testSubjects.click('legacy-url-conflict-go-to-other-button');
