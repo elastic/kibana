@@ -97,6 +97,7 @@ export interface CrawlCustomSettingsFlyoutLogicActions {
 }
 
 const defaulCrawlerConfiguration: CrawlerCustomSchedule = {
+  scheduleKey: 'crawler_0',
   name: 'Crawler 0',
   maxCrawlDepth: 2,
   customEntryPointUrls: [],
@@ -163,7 +164,11 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
         },
         onAddCustomCrawler: (state, { index }) => [
           ...state,
-          { ...defaulCrawlerConfiguration, name: `Crawler ${index}` },
+          {
+            ...defaulCrawlerConfiguration,
+            name: `Crawler ${index}`,
+            scheduleKey: `crawler_${index}`,
+          },
         ],
         onDeleteCustomCrawler: (state, { index }) => {
           return state.filter((_, i) => i !== index);

@@ -173,6 +173,7 @@ export interface CrawlScheduleFromServer {
 // Client
 
 export interface CrawlerCustomSchedule {
+  scheduleKey: string;
   name: string;
   customEntryPointUrls: string[];
   customSitemapUrls: string[];
