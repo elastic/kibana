@@ -9,7 +9,7 @@
 import { isLocalhost } from '@kbn/security-solution-plugin/scripts/endpoint/common/is_localhost';
 import { request } from './common';
 import { STANDARD_HTTP_HEADERS } from '../../../../test_serverless/shared/lib/security/default_http_headers';
-import { ServerlessRoleName } from '../../../../test_serverless/shared/lib';
+import { ServerlessRoleName } from '../support/roles';
 
 /**
  * Send login via API

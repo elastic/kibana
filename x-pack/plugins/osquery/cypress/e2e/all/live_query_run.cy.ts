@@ -24,7 +24,7 @@ import {
 } from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
-import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe('ALL - Live Query run custom and saved', { tags: [tag.ESS] }, () => {
   let savedQueryId: string;

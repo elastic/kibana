@@ -10,22 +10,9 @@ import { readFileSync } from 'fs';
 import * as path from 'path';
 import { cloneDeep, merge } from 'lodash';
 import { FeaturesPrivileges, Role, RoleIndexPrivilege } from '@kbn/security-plugin/common';
+import { ServerlessRoleName } from '../roles';
 
 const ROLES_YAML_FILE_PATH = path.join(__dirname, 'project_controller_security_roles.yml');
-
-export enum ServerlessRoleName {
-  T1_ANALYST = 't1_analyst',
-  T2_ANALYST = 't2_analyst',
-  T3_ANALYST = 't3_analyst',
-  THREAT_INTELLIGENCE_ANALYST = 'threat_intelligence_analyst',
-  RULE_AUTHOR = 'rule_author',
-  SOC_MANAGER = 'soc_manager',
-  DETECTIONS_ADMIN = 'detections_admin',
-  PLATFORM_ENGINEER = 'platform_engineer',
-  ENDPOINT_OPERATIONS_ANALYST = 'endpoint_operations_analyst',
-  ENDPOINT_POLICY_MANAGER = 'endpoint_policy_manager',
-  READER = 'reader', // custom role to test lack of permissions
-}
 
 const ROLE_NAMES = Object.values(ServerlessRoleName);
 

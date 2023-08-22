@@ -8,7 +8,7 @@
 import { tag } from '../../tags';
 import { navigateTo } from '../../tasks/navigation';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
-import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe('ALL - Edit saved query', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   let savedQueryName: string;

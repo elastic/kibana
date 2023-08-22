@@ -17,7 +17,7 @@ import {
   typeInECSFieldInput,
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
-import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe('EcsMapping', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   beforeEach(() => {

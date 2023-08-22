@@ -6,7 +6,7 @@
  */
 
 import { LIVE_QUERY_EDITOR } from '../screens/live_query';
-import { ServerlessRoleName } from '../../../../test_serverless/shared/lib';
+import { ServerlessRoleName } from '../support/roles';
 
 export const DEFAULT_QUERY = 'select * from processes;';
 export const BIG_QUERY = 'select * from processes, users limit 110;';

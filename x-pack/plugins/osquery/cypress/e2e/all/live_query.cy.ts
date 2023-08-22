@@ -17,7 +17,7 @@ import {
 } from '../../tasks/live_query';
 import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
-import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe('ALL - Live Query', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
   beforeEach(() => {

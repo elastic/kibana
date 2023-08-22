@@ -22,7 +22,7 @@ import {
   loadPack,
   loadSavedQuery,
 } from '../../tasks/api_fixtures';
-import type { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
+import type { ServerlessRoleName } from '../../support/roles';
 
 describe(`T1 and T2 analysts`, { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   ['t1_analyst', 't2_analyst'].forEach((role: string) => {

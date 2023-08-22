@@ -13,7 +13,7 @@ import {
 } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
 import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
-import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe('Add to Cases', () => {
   let liveQueryId: string;

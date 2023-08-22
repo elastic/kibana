@@ -14,7 +14,7 @@ import {
   loadPack,
   loadSavedQuery,
 } from '../../tasks/api_fixtures';
-import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe('Reader - only READ', { tags: [tag.ESS] }, () => {
   let savedQueryName: string;

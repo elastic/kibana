@@ -22,7 +22,7 @@ import {
 import { checkActionItemsInResults, inputQuery, typeInECSFieldInput } from '../../tasks/live_query';
 import { closeDateTabIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { tag } from '../../tags';
-import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe(
   'Alert Event Details - Response Actions Form',

@@ -15,7 +15,7 @@ import {
   submitQuery,
 } from '../../tasks/live_query';
 import { loadSpace, loadPack, cleanupPack, cleanupSpace } from '../../tasks/api_fixtures';
-import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
+import { ServerlessRoleName } from '../../support/roles';
 
 const testSpaces = [
   { name: 'default', tags: [tag.ESS, tag.SERVERLESS] },

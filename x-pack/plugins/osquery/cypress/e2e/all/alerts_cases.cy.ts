@@ -23,7 +23,7 @@ import {
 } from '../../tasks/live_query';
 import { generateRandomStringName, interceptCaseId } from '../../tasks/integrations';
 import { tag } from '../../tags';
-import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
+import { ServerlessRoleName } from '../../support/roles';
 describe('Alert Event Details - Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   let ruleId: string;
   let ruleName: string;

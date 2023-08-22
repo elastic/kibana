@@ -32,7 +32,7 @@ import { DEFAULT_POLICY, OSQUERY_POLICY } from '../../screens/fleet';
 import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import { cleanupPack, cleanupAgentPolicy } from '../../tasks/api_fixtures';
 import { request } from '../../tasks/common';
-import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe('ALL - Packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   const integration = 'Osquery Manager';

@@ -13,7 +13,7 @@ import {
   submitQuery,
   takeOsqueryActionWithParams,
 } from '../../tasks/live_query';
-import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe('Alert Event Details - dynamic params', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   let ruleId: string;

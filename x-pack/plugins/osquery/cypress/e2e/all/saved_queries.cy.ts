@@ -21,7 +21,7 @@ import {
 import { navigateTo } from '../../tasks/navigation';
 import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 import { loadCase, cleanupCase, loadPack, cleanupPack } from '../../tasks/api_fixtures';
-import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe('ALL - Saved queries', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   let caseId: string;
