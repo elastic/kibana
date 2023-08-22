@@ -86,7 +86,6 @@ export default ({ getService }: FtrProviderContext) => {
 
       const csvFile = await reportingAPI.getCompletedJobOutput(downloadPath);
       expectSnapshot(csvFile).toMatch();
-
     });
 
     describe('with unmapped fields', () => {

@@ -50,7 +50,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-
     describe('unquoted values', () => {
       before(async () => {
         await kibanaServer.uiSettings.update({ 'csv:quoteValues': false });
