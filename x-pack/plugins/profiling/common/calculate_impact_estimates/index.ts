@@ -12,6 +12,7 @@ const ANNUAL_SECONDS = 60 * 60 * 24 * 365;
 const PER_CORE_WATT = 7;
 
 // The assumed CO2 emissions in kg per kWh.
+// This value represents "regional carbon intensity" and it defaults to AWS us-east-1.
 // Reference: https://www.cloudcarbonfootprint.org/docs/methodology/#appendix-v-grid-emissions-factors
 const CO2_PER_KWH = 0.379069;
 
