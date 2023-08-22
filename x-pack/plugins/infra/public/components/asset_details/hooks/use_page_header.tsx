@@ -17,9 +17,9 @@ import { LinkToAlertsRule, LinkToApmServices, LinkToNodeDetails, LinkToUptime } 
 import { FlyoutTabIds, type LinkOptions, type Tab, type TabIds } from '../types';
 import { toTimestampRange } from '../utils';
 import { useAssetDetailsStateContext } from './use_asset_details_state';
-import { useDateRangeProviderContext } from './use_date_range_provider';
+import { useDateRangeProviderContext } from './use_date_range';
 import { useTabSwitcherContext } from './use_tab_switcher';
-import { useMetadataProviderContext } from './use_metadata_provider';
+import { useMetadataStateProviderContext } from './use_metadata_state';
 
 type TabItem = NonNullable<Pick<EuiPageHeaderProps, 'tabs'>['tabs']>[number];
 
@@ -33,7 +33,7 @@ export const usePageHeader = (tabs: Tab[], links?: LinkOptions[]) => {
 const useRightSideItems = (links?: LinkOptions[]) => {
   const { dateRange } = useDateRangeProviderContext();
   const { asset, assetType, overrides } = useAssetDetailsStateContext();
-  const { metadata } = useMetadataProviderContext();
+  const { metadata } = useMetadataStateProviderContext();
 
   const topCornerLinkComponents: Record<LinkOptions, JSX.Element> = useMemo(
     () => ({
@@ -72,7 +72,7 @@ const useRightSideItems = (links?: LinkOptions[]) => {
 const useTabs = (tabs: Tab[]) => {
   const { showTab, activeTabId } = useTabSwitcherContext();
   const { asset, assetType } = useAssetDetailsStateContext();
-  const { metadata } = useMetadataProviderContext();
+  const { metadata } = useMetadataStateProviderContext();
   const { share } = useKibanaContextForPlugin().services;
   const { euiTheme } = useEuiTheme();
 

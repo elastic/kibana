@@ -28,7 +28,7 @@ import { SourceProvider } from '../../../containers/metrics_source';
 import { getHttp } from './context/http';
 import { assetDetailsProps, getLogEntries } from './context/fixtures';
 import { ContextProviders } from '../context_providers';
-import { DataViewsProvider } from '../hooks/use_data_views_provider';
+import { DataViewsProvider } from '../hooks/use_data_views';
 
 const settings: Record<string, any> = {
   'dateFormat:scaled': [['', 'HH:mm:ss.SSS']],

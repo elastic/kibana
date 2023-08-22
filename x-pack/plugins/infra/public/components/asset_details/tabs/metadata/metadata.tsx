@@ -11,7 +11,7 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Table } from './table';
 import { getAllFields } from './utils';
-import { useMetadataProviderContext } from '../../hooks/use_metadata_provider';
+import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 
 export interface MetadataSearchUrlState {
@@ -25,7 +25,7 @@ export const Metadata = () => {
     metadata,
     loading: metadataLoading,
     error: fetchMetadataError,
-  } = useMetadataProviderContext();
+  } = useMetadataStateProviderContext();
   const { query, showActionsColumn = false } = overrides?.metadata ?? {};
 
   const fields = useMemo(() => getAllFields(metadata), [metadata]);

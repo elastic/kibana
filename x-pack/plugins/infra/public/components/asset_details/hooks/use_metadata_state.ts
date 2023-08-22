@@ -10,7 +10,7 @@ import { findInventoryModel } from '../../../../common/inventory_models';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useMetadata } from './use_metadata';
 import { AssetDetailsProps } from '../types';
-import { useDateRangeProviderContext } from './use_date_range_provider';
+import { useDateRangeProviderContext } from './use_date_range';
 
 export type UseMetadataProviderProps = Pick<AssetDetailsProps, 'asset' | 'assetType'>;
 
@@ -34,4 +34,5 @@ export function useMetadataProvider({ asset, assetType }: UseMetadataProviderPro
   };
 }
 
-export const [MetadataProvider, useMetadataProviderContext] = createContainer(useMetadataProvider);
+export const [MetadataStateProvider, useMetadataStateProviderContext] =
+  createContainer(useMetadataProvider);

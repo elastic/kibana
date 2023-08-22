@@ -15,8 +15,8 @@ import { AlertsSummaryContent } from './alerts';
 import { KPIGrid } from './kpis/kpi_grid';
 import { MetricsGrid } from './metrics/metrics_grid';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
-import { useMetadataProviderContext } from '../../hooks/use_metadata_provider';
-import { useDataViewsProviderContext } from '../../hooks/use_data_views_provider';
+import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
+import { useDataViewsProviderContext } from '../../hooks/use_data_views';
 
 export const Overview = () => {
   const { asset, assetType, dateRange, renderMode } = useAssetDetailsStateContext();
@@ -24,7 +24,7 @@ export const Overview = () => {
     metadata,
     loading: metadataLoading,
     error: fetchMetadataError,
-  } = useMetadataProviderContext();
+  } = useMetadataStateProviderContext();
   const { logs, metrics } = useDataViewsProviderContext();
 
   return (

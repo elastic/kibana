@@ -18,7 +18,7 @@ import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { findInventoryFields } from '../../../../../common/inventory_models';
 import { InfraLoadingPanel } from '../../../loading';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
-import { useDataViewsProviderContext } from '../../hooks/use_data_views_provider';
+import { useDataViewsProviderContext } from '../../hooks/use_data_views';
 
 const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 

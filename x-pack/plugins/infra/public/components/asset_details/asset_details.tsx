@@ -11,7 +11,7 @@ import { Flyout } from './template/flyout';
 import { Page } from './template/page';
 import { ContextProviders } from './context_providers';
 import { TabSwitcherProvider } from './hooks/use_tab_switcher';
-import { DataViewsProvider } from './hooks/use_data_views_provider';
+import { DataViewsProvider } from './hooks/use_data_views';
 
 const ContentTemplate = ({
   header,

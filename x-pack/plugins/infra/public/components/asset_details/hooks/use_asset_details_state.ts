@@ -7,8 +7,8 @@
 
 import createContainer from 'constate';
 import type { AssetDetailsProps } from '../types';
-import { useDateRangeProviderContext } from './use_date_range_provider';
-import { useMetadataProviderContext } from './use_metadata_provider';
+import { useDateRangeProviderContext } from './use_date_range';
+import { useMetadataStateProviderContext } from './use_metadata_state';
 
 export interface UseAssetDetailsStateProps {
   state: Pick<
@@ -18,7 +18,7 @@ export interface UseAssetDetailsStateProps {
 }
 
 export function useAssetDetailsState({ state }: UseAssetDetailsStateProps) {
-  const { metadata } = useMetadataProviderContext();
+  const { metadata } = useMetadataStateProviderContext();
   const { dateRange, dateRangeTs } = useDateRangeProviderContext();
   const { asset, assetType, onTabsStateChange, overrides, renderMode } = state;
 
