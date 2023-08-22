@@ -1,5 +1,5 @@
 operator:
-  - usernames: ["elastic-admin"]
+  - usernames: ["kibana_serverless"]
     realm_type: "file"
     auth_type: "realm"
   - usernames: [ "elastic/kibana" ]

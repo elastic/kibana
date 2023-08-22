@@ -17,7 +17,7 @@ import { ES_P12_PASSWORD, ES_P12_PATH } from '@kbn/dev-utils';
 
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
-import { ESS_OPERATOR_USERS_PATH, ESS_SERVICE_TOKENS_PATH } from '../paths';
+import { ESS_USERS_PATH, ESS_USERS_ROLES_PATH, ESS_OPERATOR_USERS_PATH, ESS_SERVICE_TOKENS_PATH } from '../paths';
 
 interface BaseOptions {
   tag?: string;
@@ -385,6 +385,12 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 
           '--volume',
           `${ESS_OPERATOR_USERS_PATH}:${ESS_CONFIG_PATH}operator_users.yml`,
+
+          '--volume',
+          `${ESS_USERS_PATH}:${ESS_CONFIG_PATH}users`,
+
+          '--volume',
+          `${ESS_USERS_ROLES_PATH}:${ESS_CONFIG_PATH}users_roles`,
 
           '--volume',
           `${ESS_SERVICE_TOKENS_PATH}:${ESS_CONFIG_PATH}service_tokens`,

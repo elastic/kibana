@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SYSTEM_INDICES_SUPERUSER } from '@kbn/es';
+import { SYSTEM_INDICES_SUPERUSER, KIBANA_SERVERLESS_SUPERUSER, KIBANA_SERVERLESS_SUPERUSER_PASSWORD } from '@kbn/es';
 
 const env = process.env;
 
@@ -41,4 +41,9 @@ export const kibanaServiceAccount = {
   token:
     env.TEST_KIBANA_SERVICE_ACCOUNT_TOKEN ||
     'AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA',
+};
+
+export const kibanaEssTestSuperUser = {
+  username: KIBANA_SERVERLESS_SUPERUSER,
+  password: KIBANA_SERVERLESS_SUPERUSER_PASSWORD,
 };

@@ -6,11 +6,5 @@
  * Side Public License, v 1.
  */
 
-export {
-  kibanaTestUser,
-  kibanaServerTestUser,
-  adminTestUser,
-  systemIndicesSuperuser,
-  kibanaServiceAccount,
-  kibanaEssTestSuperUser,
-} from './users';
+export const KIBANA_SERVERLESS_SUPERUSER = 'kibana_serverless_superuser';
+export const KIBANA_SERVERLESS_SUPERUSER_PASSWORD = 'changeme';

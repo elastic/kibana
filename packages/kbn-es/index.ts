@@ -8,4 +8,4 @@
 
 export { run } from './src/cli';
 export { Cluster } from './src/cluster';
-export { SYSTEM_INDICES_SUPERUSER } from './src/utils';
+export { SYSTEM_INDICES_SUPERUSER, KIBANA_SERVERLESS_SUPERUSER, KIBANA_SERVERLESS_SUPERUSER_PASSWORD } from './src/utils';
