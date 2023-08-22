@@ -10,6 +10,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { createHash } from 'crypto';
 import { flatten, merge, pickBy, sortBy, sum, uniq } from 'lodash';
 import { SavedObjectsClient } from '@kbn/core/server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import {
   AGENT_ACTIVATION_METHOD,
@@ -56,10 +57,7 @@ import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { Span } from '../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { APMTelemetry, APMPerService, APMDataTelemetry } from '../types';
-import {
-  ApmIndicesConfig,
-  APM_AGENT_CONFIGURATION_INDEX,
-} from '../../../routes/settings/apm_indices/get_apm_indices';
+import { APM_AGENT_CONFIGURATION_INDEX } from '../../../routes/settings/apm_indices/apm_system_index_constants';
 import { TelemetryClient } from '../telemetry_client';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
@@ -76,7 +74,7 @@ interface TelemetryTask {
 
 export interface TelemetryTaskExecutorParams {
   telemetryClient: TelemetryClient;
-  indices: ApmIndicesConfig;
+  indices: APMIndices;
   savedObjectsClient: ISavedObjectsClient;
 }
 
