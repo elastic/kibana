@@ -12,7 +12,7 @@ import { noop } from 'lodash';
 import { useCallback, useEffect, useReducer, useRef, useMemo } from 'react';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import type {
   RuleRegistrySearchRequest,
   RuleRegistrySearchRequestPagination,
@@ -207,7 +207,7 @@ const useFetchAlerts = ({
             )
             .subscribe({
               next: (response: RuleRegistrySearchResponse) => {
-                if (isCompleteResponse(response)) {
+                if (!isRunningResponse(response)) {
                   const { rawResponse } = response;
                   inspectQuery.current = {
                     request: response?.inspect?.dsl ?? [],

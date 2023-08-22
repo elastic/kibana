@@ -8,7 +8,7 @@
 import { useCallback, useRef, useState } from 'react';
 import {
   type IKibanaSearchResponse,
-  isCompleteResponse,
+  isRunningResponse,
   isErrorResponse,
 } from '@kbn/data-plugin/common';
 import { tap } from 'rxjs/operators';
@@ -35,7 +35,7 @@ export function useCancellableSearch() {
           )
           .subscribe({
             next: (result) => {
-              if (isCompleteResponse(result)) {
+              if (!isRunningResponse(result)) {
                 setIsFetching(false);
                 resolve(result);
               } else if (isErrorResponse(result)) {

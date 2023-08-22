@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
 import type { DataView } from '@kbn/data-plugin/common';
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import type { ESQuery } from '../../../common/typed_json';
 
 import type { inputsModel } from '../../common/store';
@@ -247,7 +247,7 @@ export const useTimelineEventsHandler = ({
           })
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
+              if (!isRunningResponse(response)) {
                 endTracking('success');
                 setLoading(false);
                 setTimelineResponse((prevResponse) => {

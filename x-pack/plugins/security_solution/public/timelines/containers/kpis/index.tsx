@@ -10,7 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
+import { isRunningResponse, isErrorResponse } from '@kbn/data-plugin/public';
 import type { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import type {
@@ -64,7 +64,7 @@ export const useTimelineKpis = ({
           })
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
+              if (!isRunningResponse(response)) {
                 setLoading(false);
                 setTimelineKpiResponse(response);
                 searchSubscription$.current.unsubscribe();

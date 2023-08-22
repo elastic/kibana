@@ -17,17 +17,6 @@ export const isErrorResponse = (response?: IKibanaSearchResponse) => {
   return !response || !response.rawResponse;
 };
 
-export const isCompleteResponse = (response?: IKibanaSearchResponse) => {
-  return Boolean(response && !response.isRunning && !response.isPartial);
-};
-
-/**
- * @returns true if request is still running an/d response contains partial results
- */
-export const isPartialResponse = (response?: IKibanaSearchResponse) => {
-  return Boolean(response && response.isRunning && response.isPartial);
-};
-
 /**
  * @returns true when async search is running
  */

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isErrorResponse, isCompleteResponse, isRunningResponse } from './utils';
+import { isErrorResponse, isRunningResponse } from './utils';
 
 describe('utils', () => {
   describe('isErrorResponse', () => {
@@ -31,31 +31,6 @@ describe('utils', () => {
         rawResponse: {},
       });
       expect(isError).toBe(false);
-    });
-  });
-
-  describe('isCompleteResponse', () => {
-    it('returns `false` if the response is undefined', () => {
-      const isError = isCompleteResponse();
-      expect(isError).toBe(false);
-    });
-
-    it('returns `false` if the response is running and partial', () => {
-      const isError = isCompleteResponse({
-        isPartial: true,
-        isRunning: true,
-        rawResponse: {},
-      });
-      expect(isError).toBe(false);
-    });
-
-    it('returns `true` if the response is complete', () => {
-      const isError = isCompleteResponse({
-        isPartial: false,
-        isRunning: false,
-        rawResponse: {},
-      });
-      expect(isError).toBe(true);
     });
   });
 

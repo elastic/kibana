@@ -10,7 +10,7 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { inputsModel } from '../../../../../common/store';
 import { createFilter } from '../../../../../common/containers/helpers';
@@ -99,7 +99,7 @@ export const useNetworkKpiUniquePrivateIps = ({
           })
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
+              if (!isRunningResponse(response)) {
                 setLoading(false);
                 setNetworkKpiUniquePrivateIpsResponse((prevResponse) => ({
                   ...prevResponse,

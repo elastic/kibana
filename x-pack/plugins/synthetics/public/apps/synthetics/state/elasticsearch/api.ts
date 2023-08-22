@@ -7,7 +7,7 @@
 
 import {
   IKibanaSearchResponse,
-  isCompleteResponse,
+  isRunningResponse,
   isErrorResponse,
 } from '@kbn/data-plugin/common';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -40,7 +40,7 @@ export const executeEsQueryAPI = async ({
       )
       .subscribe({
         next: (result) => {
-          if (isCompleteResponse(result)) {
+          if (!isRunningResponse(result)) {
             if (addInspectorRequest) {
               addInspectorRequest({
                 data: {

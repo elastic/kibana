@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { EntityType } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useKibana } from '../../../common/lib/kibana';
@@ -89,7 +89,7 @@ export const useTimelineEventsDetails = ({
           )
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
+              if (!isRunningResponse(response)) {
                 Promise.resolve().then(() => {
                   ReactDOM.unstable_batchedUpdates(() => {
                     setLoading(false);

@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESSearchResponse } from '@kbn/es-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IInspectorInfo, isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { IInspectorInfo, isRunningResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { getInspectResponse } from '../../common/utils/get_inspect_response';
 import { useInspectorContext } from '../contexts/inspector/use_inspector_context';
 import { FETCH_STATUS, useFetcher } from './use_fetcher';
@@ -42,7 +42,7 @@ export const useEsSearch = <DocumentSource extends unknown, TParams extends esty
           )
           .subscribe({
             next: (result) => {
-              if (isCompleteResponse(result)) {
+              if (!isRunningResponse(result)) {
                 if (addInspectorRequest) {
                   addInspectorRequest({
                     data: {

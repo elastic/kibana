@@ -10,7 +10,7 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import type { inputsModel } from '../../../store';
 import { useKibana } from '../../../lib/kibana';
 import type {
@@ -77,7 +77,7 @@ export const useTimelineLastEventTime = ({
           })
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
+              if (!isRunningResponse(response)) {
                 setLoading(false);
                 setTimelineLastEventTimeResponse((prevResponse) => ({
                   ...prevResponse,
