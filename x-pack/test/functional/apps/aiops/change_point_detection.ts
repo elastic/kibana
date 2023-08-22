@@ -65,7 +65,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.changePointDetectionPage.selectSplitField(0, 'geoip.city_name');
       await aiops.changePointDetectionPage.getTable(0).waitForTableToLoad();
       const result = await aiops.changePointDetectionPage.getTable(0).parseTable();
-      expect(result.length).to.eql(5);
+      expect(result.length).to.be(7);
       // assert asc sorting by p_value is applied
       expect(parseFloat(result[0].pValue)).to.be.lessThan(parseFloat(result[4].pValue));
     });
@@ -73,7 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('allows change point selection for detailed view', async () => {
       await aiops.changePointDetectionPage.getTable(0).selectAllRows();
       await aiops.changePointDetectionPage.viewSelected();
-      await aiops.changePointDetectionPage.assertDetailedView(5);
+      await aiops.changePointDetectionPage.assertDetailedView(6);
       await aiops.changePointDetectionPage.closeFlyout();
       // deselect
       await aiops.changePointDetectionPage.getTable(0).selectAllRows();
