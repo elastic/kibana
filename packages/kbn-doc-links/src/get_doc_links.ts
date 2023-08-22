@@ -722,6 +722,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       fleetServer: `${FLEET_DOCS}fleet-server.html`,
       fleetServerAddFleetServer: `${FLEET_DOCS}add-a-fleet-server.html`,
       settings: `${FLEET_DOCS}fleet-settings.html`,
+      kafkaSettings: `${FLEET_DOCS}kafka-output-settings.html`,
+      logstashSettings: `${FLEET_DOCS}ls-output-settings.html`,
       settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
       settingsFleetServerProxySettings: `${KIBANA_DOCS}fleet-settings-kb.html#fleet-data-visualizer-settings`,
       troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,
