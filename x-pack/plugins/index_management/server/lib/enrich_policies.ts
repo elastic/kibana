@@ -50,6 +50,7 @@ export const serializeEnrichmentPolicies = (
       sourceIndices: policy.config[policyType].indices,
       matchField: policy.config[policyType].match_field,
       enrichFields: policy.config[policyType].enrich_fields,
+      query: policy.config[policyType].query,
     };
   });
 };

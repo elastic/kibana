@@ -38,6 +38,7 @@ import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import { UiMetricService } from './ui_metric';
+import type { SerializedEnrichPolicy } from '../../../common';
 
 interface ReloadIndicesOptions {
   asSystemRequest?: boolean;
@@ -314,7 +315,7 @@ export function useLoadNodesPlugins() {
 }
 
 export const useLoadEnrichPolicies = () => {
-  return useRequest({
+  return useRequest<SerializedEnrichPolicy[]>({
     path: `${INTERNAL_API_BASE_PATH}/enrich_policies`,
     method: 'get',
   });

@@ -30,14 +30,19 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await testSubjects.click('indexTableIncludeHiddenIndicesToggle');
     },
 
+    async clickEnrichPolicyAt(indexOfRow: number): Promise<void> {
+      const policyDetailsLinks = await testSubjects.findAll('enrichPolicyDetailsLink');
+      await policyDetailsLinks[indexOfRow].click();
+    },
+
     async clickDeleteEnrichPolicyAt(indexOfRow: number): Promise<void> {
       const deleteButons = await testSubjects.findAll('deletePolicyButton');
       await deleteButons[indexOfRow].click();
     },
 
     async clickExecuteEnrichPolicyAt(indexOfRow: number): Promise<void> {
-      const deleteButons = await testSubjects.findAll('executePolicyButton');
-      await deleteButons[indexOfRow].click();
+      const executeButtons = await testSubjects.findAll('executePolicyButton');
+      await executeButtons[indexOfRow].click();
     },
 
     async clickConfirmModalButton(): Promise<void> {

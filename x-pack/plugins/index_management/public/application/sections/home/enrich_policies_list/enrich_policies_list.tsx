@@ -5,29 +5,49 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
+import { RouteComponentProps } from 'react-router-dom';
+import { Location } from 'history';
+import { parse } from 'query-string';
 
 import { APP_WRAPPER_CLASS, useExecutionContext } from '../../../../shared_imports';
+import type { SerializedEnrichPolicy } from '../../../../../common';
 import { useAppContext } from '../../../app_context';
+import { useRedirectPath } from '../../../hooks/redirect_path';
 
 import { documentationService } from '../../../services/documentation';
 import { useLoadEnrichPolicies } from '../../../services/api';
 import { PoliciesTable } from './policies_table';
 import { DeletePolicyModal, ExecutePolicyModal } from './confirm_modals';
 import { LoadingState, ErrorState } from './empty_states';
+import { PolicyDetailsFlyout } from './details_flyout';
 
-export const EnrichPoliciesList = () => {
+const getEnrichPolicyNameFromLocation = (location: Location) => {
+  const { policy } = parse(location.search.substring(1));
+  return policy;
+};
+
+export const EnrichPoliciesList: React.FunctionComponent<RouteComponentProps> = ({
+  history,
+  location,
+}) => {
   const {
     core: { executionContext },
   } = useAppContext();
+  const redirectTo = useRedirectPath(history);
 
   useExecutionContext(executionContext, {
     type: 'application',
     page: 'indexManagementEnrichPoliciesTab',
   });
 
+  // Policy details flyout
+  const enrichPolicyNameFromLocation = getEnrichPolicyNameFromLocation(location);
+  const [showFlyoutFor, setShowFlyoutFor] = useState<SerializedEnrichPolicy | undefined>();
+
+  // Policy table actions
   const [policyToDelete, setPolicyToDelete] = useState<string | undefined>();
   const [policyToExecute, setPolicyToExecute] = useState<string | undefined>();
 
@@ -37,6 +57,13 @@ export const EnrichPoliciesList = () => {
     data: policies,
     resendRequest: reloadPolicies,
   } = useLoadEnrichPolicies();
+
+  useEffect(() => {
+    if (enrichPolicyNameFromLocation && policies?.length) {
+      const policy = policies.find((p) => p.name === enrichPolicyNameFromLocation);
+      setShowFlyoutFor(policy);
+    }
+  }, [enrichPolicyNameFromLocation, policies]);
 
   if (isLoading) {
     return <LoadingState />;
@@ -72,7 +99,7 @@ export const EnrichPoliciesList = () => {
       <EuiSpacer size="l" />
 
       <PoliciesTable
-        policies={policies}
+        policies={policies as SerializedEnrichPolicy[]}
         onReloadClick={reloadPolicies}
         onDeletePolicyClick={setPolicyToDelete}
         onExecutePolicyClick={setPolicyToExecute}
@@ -98,6 +125,16 @@ export const EnrichPoliciesList = () => {
               reloadPolicies();
             }
             setPolicyToExecute(undefined);
+          }}
+        />
+      )}
+
+      {showFlyoutFor && (
+        <PolicyDetailsFlyout
+          policy={showFlyoutFor}
+          onClose={() => {
+            setShowFlyoutFor(undefined);
+            redirectTo('/enrich_policies');
           }}
         />
       )}

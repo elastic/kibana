@@ -35,6 +35,7 @@ export interface EnrichPoliciesTestBed extends TestBed<TestSubjects> {
     clickConfirmDeletePolicyButton: () => Promise<void>;
     clickExecutePolicyAt: (index: number) => Promise<void>;
     clickConfirmExecutePolicyButton: () => Promise<void>;
+    clickEnrichPolicyAt: (index: number) => Promise<void>;
   };
 }
 
@@ -101,6 +102,21 @@ export const setup = async (
     testBed.component.update();
   };
 
+  const clickEnrichPolicyAt = async (index: number) => {
+    const { component, table, router } = testBed;
+
+    const { rows } = table.getMetaData('enrichPoliciesTable');
+
+    const policyLink = findTestSubject(rows[index].reactWrapper, 'enrichPolicyDetailsLink');
+
+    await act(async () => {
+      const { href } = policyLink.props();
+      router.navigateTo(href!);
+    });
+
+    component.update();
+  };
+
   return {
     ...testBed,
     actions: {
@@ -110,6 +126,7 @@ export const setup = async (
       clickConfirmDeletePolicyButton,
       clickExecutePolicyAt,
       clickConfirmExecutePolicyButton,
+      clickEnrichPolicyAt,
     },
   };
 };
