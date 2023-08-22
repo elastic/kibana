@@ -170,6 +170,14 @@ const fetchHistoricalSummaryResponseSchema = t.array(
   })
 );
 
+const findSloDefinitionsParamsSchema = t.type({
+  query: t.type({
+    search: t.string,
+  }),
+});
+
+const findSloDefinitionsResponseSchema = t.array(sloResponseSchema);
+
 const getSLODiagnosisParamsSchema = t.type({
   path: t.type({ id: t.string }),
 });
@@ -229,6 +237,8 @@ type FetchHistoricalSummaryParams = t.TypeOf<typeof fetchHistoricalSummaryParams
 type FetchHistoricalSummaryResponse = t.OutputOf<typeof fetchHistoricalSummaryResponseSchema>;
 type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
 
+type FindSloDefinitionsResponse = t.OutputOf<typeof findSloDefinitionsResponseSchema>;
+
 type GetPreviewDataParams = t.TypeOf<typeof getPreviewDataParamsSchema.props.body>;
 type GetPreviewDataResponse = t.OutputOf<typeof getPreviewDataResponseSchema>;
 
@@ -257,6 +267,8 @@ export {
   getSLOResponseSchema,
   fetchHistoricalSummaryParamsSchema,
   fetchHistoricalSummaryResponseSchema,
+  findSloDefinitionsParamsSchema,
+  findSloDefinitionsResponseSchema,
   manageSLOParamsSchema,
   sloResponseSchema,
   sloWithSummaryResponseSchema,
@@ -281,6 +293,7 @@ export type {
   FetchHistoricalSummaryParams,
   FetchHistoricalSummaryResponse,
   HistoricalSummaryResponse,
+  FindSloDefinitionsResponse,
   ManageSLOParams,
   SLOResponse,
   SLOWithSummaryResponse,

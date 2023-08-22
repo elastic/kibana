@@ -10,6 +10,7 @@ import {
   createSLOParamsSchema,
   deleteSLOParamsSchema,
   fetchHistoricalSummaryParamsSchema,
+  findSloDefinitionsParamsSchema,
   findSLOParamsSchema,
   getPreviewDataParamsSchema,
   getSLOBurnRatesParamsSchema,
@@ -31,6 +32,7 @@ import {
   UpdateSLO,
 } from '../../services/slo';
 import { FetchHistoricalSummary } from '../../services/slo/fetch_historical_summary';
+import { FindSLODefinitions } from '../../services/slo/find_slo_definitions';
 import { getBurnRates } from '../../services/slo/get_burn_rates';
 import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diagnosis';
 import { GetPreviewData } from '../../services/slo/get_preview_data';
@@ -223,6 +225,25 @@ const findSLORoute = createObservabilityServerRoute({
   },
 });
 
+const findSloDefinitionsRoute = createObservabilityServerRoute({
+  endpoint: 'GET /internal/observability/slos/_definitions',
+  options: {
+    tags: ['access:slo_read'],
+  },
+  params: findSloDefinitionsParamsSchema,
+  handler: async ({ context, params }) => {
+    await assertPlatinumLicense(context);
+
+    const soClient = (await context.core).savedObjects.client;
+    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const findSloDefinitions = new FindSLODefinitions(repository);
+
+    const response = await findSloDefinitions.execute(params.query.search);
+
+    return response;
+  },
+});
+
 const fetchHistoricalSummary = createObservabilityServerRoute({
   endpoint: 'POST /internal/observability/slos/_historical_summary',
   options: {
@@ -348,6 +369,7 @@ export const sloRouteRepository = {
   ...disableSLORoute,
   ...enableSLORoute,
   ...fetchHistoricalSummary,
+  ...findSloDefinitionsRoute,
   ...findSLORoute,
   ...getSLORoute,
   ...updateSLORoute,
