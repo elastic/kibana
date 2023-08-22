@@ -11,10 +11,7 @@ import React, { useState } from 'react';
 
 import { EuiFieldText } from '@elastic/eui';
 import { ExternalLinkStrings } from './external_link_strings';
-
-// TODO: As part of https://github.com/elastic/kibana/issues/154381, replace this regex URL check with more robust url validation
-const isValidUrl =
-  /^https?:\/\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
+import { coreServices } from '../../services/kibana_services';
 
 export const ExternalLinkDestinationPicker = ({
   onDestinationPicked,
@@ -29,8 +26,12 @@ export const ExternalLinkDestinationPicker = ({
 
   useMount(() => {
     if (initialSelection) {
-      onDestinationPicked(initialSelection);
-      setValidUrl(isValidUrl.test(initialSelection));
+      const url = coreServices.http.externalUrl.validateUrl(initialSelection);
+      if (url === null) {
+        setValidUrl(false);
+      } else {
+        onDestinationPicked(initialSelection);
+      }
     }
   });
 
@@ -42,12 +43,19 @@ export const ExternalLinkDestinationPicker = ({
         placeholder={ExternalLinkStrings.getPlaceholder()}
         isInvalid={!validUrl}
         onChange={(e) => {
-          const url = e.target.value;
-          const isValid = isValidUrl.test(url);
-          setValidUrl(isValid);
-          setCurrentUrl(url);
-          if (isValid) {
-            onDestinationPicked(url);
+          setCurrentUrl(e.target.value);
+          try {
+            const url = coreServices.http.externalUrl.validateUrl(e.target.value);
+            /** We only allow URLs that (a) can be parsed via the validator and (b) are not internal */
+            if (url === null || coreServices.http.externalUrl.isInternalUrl(url.href)) {
+              throw new Error('Invalid URL'); // This doesn't need to be translated because it will be caught below
+            } else {
+              setValidUrl(true);
+              onDestinationPicked(e.target.value);
+            }
+          } catch {
+            setValidUrl(false);
+            onDestinationPicked(undefined);
           }
         }}
       />

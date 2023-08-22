@@ -9,6 +9,9 @@
 import React from 'react';
 
 import { EuiListGroupItem } from '@elastic/eui';
+import { UrlDrilldownOptions } from '@kbn/ui-actions-enhanced-plugin/common';
+
+import { coreServices } from '../../services/kibana_services';
 import { NavigationEmbeddableLink } from '../../../common/content_management';
 
 export const ExternalLinkComponent = ({ link }: { link: NavigationEmbeddableLink }) => {
@@ -19,8 +22,16 @@ export const ExternalLinkComponent = ({ link }: { link: NavigationEmbeddableLink
       className={'navigationLink'}
       id={`externalLink--${link.id}`}
       label={link.label || link.destination}
-      onClick={() => {
-        // TODO: As part of https://github.com/elastic/kibana/issues/154381, connect to drilldown
+      onClick={async () => {
+        const destination =
+          !link.options || (link.options as UrlDrilldownOptions)?.encodeUrl
+            ? encodeURI(link.destination)
+            : link.destination;
+        if (!link.options || link.options.openInNewTab) {
+          window.open(destination, '_blank', 'noopener');
+        } else {
+          await coreServices.application.navigateToUrl(destination);
+        }
       }}
     />
   );
