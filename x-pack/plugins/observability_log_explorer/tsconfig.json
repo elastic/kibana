@@ -14,6 +14,11 @@
     "@kbn/core",
     "@kbn/log-explorer-plugin",
     "@kbn/i18n",
+    "@kbn/react-kibana-context-render",
+    "@kbn/shared-ux-router",
+    "@kbn/observability-shared-plugin",
+    "@kbn/data-plugin",
+    "@kbn/kibana-react-plugin",
   ],
   "exclude": [
     "target/**/*"

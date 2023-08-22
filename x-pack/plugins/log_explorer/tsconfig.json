@@ -20,6 +20,7 @@
     "@kbn/data-plugin",
     "@kbn/unified-field-list",
     "@kbn/config-schema",
+    "@kbn/core-application-browser",
   ],
   "exclude": ["target/**/*"]
 }
