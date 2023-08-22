@@ -303,24 +303,26 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           </EuiHideFor>
           <EuiFlexItem className="dscPageContent__wrapper">
             {resultState === 'none' ? (
-              dataState.error ? (
-                <ErrorCallout
-                  title={i18n.translate('discover.noResults.searchExamples.noResultsErrorTitle', {
-                    defaultMessage: 'Unable to retrieve search results',
-                  })}
-                  error={dataState.error}
-                  data-test-subj="discoverNoResultsError"
-                />
-              ) : (
-                <DiscoverNoResults
-                  stateContainer={stateContainer}
-                  isTimeBased={isTimeBased}
-                  query={globalQueryState.query}
-                  filters={globalQueryState.filters}
-                  dataView={dataView}
-                  onDisableFilters={onDisableFilters}
-                />
-              )
+              <EuiPanel>
+                {dataState.error ? (
+                  <ErrorCallout
+                    title={i18n.translate('discover.noResults.searchExamples.noResultsErrorTitle', {
+                      defaultMessage: 'Unable to retrieve search results',
+                    })}
+                    error={dataState.error}
+                    data-test-subj="discoverNoResultsError"
+                  />
+                ) : (
+                  <DiscoverNoResults
+                    stateContainer={stateContainer}
+                    isTimeBased={isTimeBased}
+                    query={globalQueryState.query}
+                    filters={globalQueryState.filters}
+                    dataView={dataView}
+                    onDisableFilters={onDisableFilters}
+                  />
+                )}
+              </EuiPanel>
             ) : (
               <EuiPanel
                 role="main"

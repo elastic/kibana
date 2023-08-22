@@ -63,7 +63,7 @@ discover-app {
 
 .dscDocuments__loading {
   display: flex;
-  flex-direction: column;
+    flex-direction: column;
   justify-content: center;
   text-align: center;
   height: 100%;
@@ -71,5 +71,5 @@ discover-app {
 }
 
 .domDragDrop-isDraggable  {
-  box-shadow: none !important;
+  box-shadow: none!important;
 }

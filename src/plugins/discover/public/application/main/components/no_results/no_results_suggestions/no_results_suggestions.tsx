@@ -119,9 +119,8 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
   return (
     <EuiEmptyPrompt
       layout="horizontal"
-      color="plain"
+      color="transparent"
       icon={<NoResultsIllustration />}
-      hasBorder
       title={
         <h2 data-test-subj="discoverNoResults">
           <FormattedMessage
