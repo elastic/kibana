@@ -6,22 +6,23 @@
  */
 
 import semver from 'semver';
-import { isEqual, isEmpty, chunk, keyBy } from 'lodash';
+import { chunk, isEmpty, isEqual, keyBy } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
 import {
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
   ENDPOINT_BLOCKLISTS_LIST_ID,
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
   ENDPOINT_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
 import type { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { AppFeatureKey } from '../../../../../common/types/app_features';
-import type { AppFeatures } from '../../../../lib/app_features';
+import type { AppFeaturesService } from '../../../../lib/app_features_service/app_features_service';
+import type { ExperimentalFeatures } from '../../../../../common';
+import { AppFeatureKey } from '../../../../../common';
 import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import type { ManifestSchema } from '../../../../../common/endpoint/schema/manifest';
 import { manifestDispatchSchema } from '../../../../../common/endpoint/schema/manifest';
@@ -30,10 +31,10 @@ import type { ArtifactListId } from '../../../lib/artifacts';
 import {
   ArtifactConstants,
   buildArtifact,
+  convertExceptionsToEndpointFormat,
   getAllItemsFromEndpointExceptionList,
   getArtifactId,
   Manifest,
-  convertExceptionsToEndpointFormat,
 } from '../../../lib/artifacts';
 import type {
   InternalArtifactCompleteSchema,
@@ -42,7 +43,6 @@ import type {
 import { internalArtifactCompleteSchema } from '../../../schemas/artifacts';
 import type { EndpointArtifactClientInterface } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
-import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { InvalidInternalManifestError } from '../errors';
 import { wrapErrorIfNeeded } from '../../../utils';
 import { EndpointError } from '../../../../../common/endpoint/errors';
@@ -99,7 +99,7 @@ export interface ManifestManagerContext {
   experimentalFeatures: ExperimentalFeatures;
   packagerTaskPackagePolicyUpdateBatchSize: number;
   esClient: ElasticsearchClient;
-  appFeatures: AppFeatures;
+  appFeatures: AppFeaturesService;
 }
 
 const getArtifactIds = (manifest: ManifestSchema) =>
@@ -121,7 +121,7 @@ export class ManifestManager {
   protected cachedExceptionsListsByOs: Map<string, ExceptionListItemSchema[]>;
   protected packagerTaskPackagePolicyUpdateBatchSize: number;
   protected esClient: ElasticsearchClient;
-  protected appFeatures: AppFeatures;
+  protected appFeatures: AppFeaturesService;
 
   constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
