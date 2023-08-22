@@ -10,7 +10,7 @@ import { from, Observable, timer, defer, fromEvent, EMPTY } from 'rxjs';
 import { expand, map, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { IAsyncSearchOptions, IKibanaSearchResponse } from '..';
-import { isErrorResponse, isPartialResponse } from '..';
+import { isErrorResponse, isRunningResponse } from '..';
 
 export const pollSearch = <Response extends IKibanaSearchResponse>(
   search: () => Promise<Response>,
@@ -59,7 +59,7 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
           throw response ? new Error('Received partial response') : new AbortError();
         }
       }),
-      takeWhile<Response>(isPartialResponse, true),
+      takeWhile<Response>(isRunningResponse, true),
       takeUntil<Response>(aborted$)
     );
   });
