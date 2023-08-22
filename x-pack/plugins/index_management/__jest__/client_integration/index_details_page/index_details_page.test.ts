@@ -8,18 +8,28 @@
 import { setupEnvironment } from '../helpers';
 import { IndexDetailsPageTestBed, setup } from './index_details_page.helpers';
 import { act } from 'react-dom/test-utils';
-import { httpServiceMock } from '@kbn/core/public/mocks';
 import { IndexDetailsSection } from '../../../public/application/sections/home/index_list/details_page';
+import { testIndexMock } from './mocks';
 
 describe('<IndexDetailsPage />', () => {
   let testBed: IndexDetailsPageTestBed;
-  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
   beforeEach(async () => {
-    httpSetup = httpServiceMock.createSetupContract();
+    const mockEnvironment = setupEnvironment();
+    const { httpSetup } = mockEnvironment;
+    ({ httpRequestsMockHelpers } = mockEnvironment);
+    // test_index is configured in initialEntries of the memory router
+    httpRequestsMockHelpers.setLoadIndexDetailsResponse('test_index', testIndexMock);
 
     await act(async () => {
-      testBed = await setup(httpSetup);
+      testBed = await setup(httpSetup, {
+        url: {
+          locators: {
+            get: () => ({ navigate: jest.fn() }),
+          },
+        },
+      });
     });
     testBed.component.update();
   });
@@ -57,5 +67,25 @@ describe('<IndexDetailsPage />', () => {
     await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Pipelines);
     const tabContent = testBed.actions.getActiveTabContent();
     expect(tabContent).toEqual('Pipelines');
+  });
+
+  it('navigates back to indices', async () => {
+    jest.spyOn(testBed.routerMock.history, 'push');
+    await testBed.actions.clickBackToIndicesButton();
+    expect(testBed.routerMock.history.push).toHaveBeenCalledTimes(1);
+    expect(testBed.routerMock.history.push).toHaveBeenCalledWith('/indices');
+  });
+
+  it('renders a link to discover', () => {
+    expect(testBed.actions.discoverLinkExists()).toBe(true);
+  });
+
+  it('opens an index context menu when "manage index" button is clicked', async () => {
+    const {
+      actions: { contextMenu },
+    } = testBed;
+    expect(contextMenu.isOpened()).toBe(false);
+    await testBed.actions.contextMenu.clickManageIndexButton();
+    expect(contextMenu.isOpened()).toBe(true);
   });
 });

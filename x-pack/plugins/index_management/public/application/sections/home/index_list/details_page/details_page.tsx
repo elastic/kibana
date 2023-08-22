@@ -98,6 +98,7 @@ export const DetailsPage: React.FunctionComponent<
     <>
       <EuiPageSection paddingSize="none">
         <EuiButton
+          data-test-subj="indexDetailsBackToIndicesButton"
           color="text"
           iconType="arrowLeft"
           onClick={() => {
