@@ -358,7 +358,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         },
         {
           type: 'click',
-          selector: 'blocklist-form-file.path',
+          selector: 'blocklist-form-file.path.caseless',
         },
         {
           type: 'click',
@@ -379,7 +379,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         {
           selector: 'blocklistPage-card-criteriaConditions',
           value:
-            'OSIS WindowsAND file.pathis one of\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
+            'OSIS WindowsAND file.path.caselessis one of\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
         },
         {
           selector: 'blocklistPage-card-header-title',
