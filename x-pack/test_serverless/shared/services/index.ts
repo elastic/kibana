@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
-
-import { SamlToolsProvider } from './saml_tools';
-
-export const services = {
-  samlTools: SamlToolsProvider,
-};
-
-export type InheritedFtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
+export const services = {};
