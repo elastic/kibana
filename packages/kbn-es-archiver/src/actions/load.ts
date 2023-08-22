@@ -35,10 +35,13 @@ import {
 // pipe a series of streams into each other so that data and errors
 // flow from the first stream to the last. Errors from the last stream
 // are not listened for
-const pipeline = (...streams: Readable[]) =>
-  streams.reduce((source, dest) =>
-    source.once('error', (error) => dest.destroy(error)).pipe(dest as any)
-  );
+const streamsReducer = (streamsAccumulator, destination$) =>
+  streamsAccumulator
+    .once('error', (error: any) => destination$.destroy(error))
+    .pipe(destination$ as any);
+
+const foldStreamsButIgnoreLastStreamErrors = (...streams: Readable[]) =>
+  streams.reduce(streamsReducer);
 
 const logLoad = (generalName: string) => (log: ToolingLog) => (mappingsOrArchiveName: string) => {
   log.info('[%s] Loading %j', generalName, mappingsOrArchiveName);
@@ -66,10 +69,8 @@ export async function loadAction({
 }) {
   const archiveGeneralName = relative(REPO_ROOT, inputDir);
   const stats = createStats(archiveGeneralName, log);
-  const mappingsFileAndArchive = prioritizeMappings(await readDirectory(inputDir));
-
-  const lazy = (eitherMappingsFileOrArchiveFileName: string) => () => {
-    return pipeline(
+  const uniteLazy = (eitherMappingsFileOrArchiveFileName: string) => () =>
+    foldStreamsButIgnoreLastStreamErrors(
       pipe(
         eitherMappingsFileOrArchiveFileName,
         logLoad(archiveGeneralName)(log),
@@ -78,13 +79,12 @@ export async function loadAction({
       ),
       ...createParseArchiveStreams({ gzip: isGzip(eitherMappingsFileOrArchiveFileName) })
     );
-  };
 
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
   // across archives and properly skip docs from existing indexes
   const recordsFromMappingsAndArchiveOrdered = concatStreamProviders(
-    mappingsFileAndArchive.map(lazy),
+    prioritizeMappings(await readDirectory(inputDir)).map(uniteLazy),
     { objectMode: true }
   );
 

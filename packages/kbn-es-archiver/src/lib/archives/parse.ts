@@ -18,15 +18,15 @@ import { flow, pipe } from 'fp-ts/function';
 
 import { RECORD_SEPARATOR } from './constants';
 
+const match = (regExpF: () => RegExp) => (x: ArchiveRecord) => x.match(regExpF());
 const anyCharButNotWhiteSpaces = (): RegExp => /[^\s]/;
 const toBoolean = (x: RegExpMatchArray | null) => Boolean(x);
-
-export type Record = string;
+const getAllButNotWhiteSpaces = (x: ArchiveRecord) => {
+  // console.log(`\nλjs [getAllButNotWhiteSpaces] x: \n\t${x}`);
+  return pipe(x, match(anyCharButNotWhiteSpaces), toBoolean);
+};
+export type ArchiveRecord = string;
 export function createParseArchiveStreams({ gzip = false } = {}) {
-  const getAllButNotWhiteSpaces = (x: Record) => {
-    // console.log(`\nλjs [getAllButNotWhiteSpaces] x: \n\t${x}`);
-    return pipe(x, match(anyCharButNotWhiteSpaces), toBoolean);
-  };
   return [
     gzip ? createGunzip() : new PassThrough(),
     createReplaceStream('\r\n', '\n'),
@@ -34,8 +34,4 @@ export function createParseArchiveStreams({ gzip = false } = {}) {
     createFilterStream<string>(getAllButNotWhiteSpaces),
     createMapStream<string>(flow((x: string) => x.trim(), JSON.parse.bind(JSON))),
   ];
-}
-
-function match(predicate: () => RegExp) {
-  return (x: Record) => x.match(predicate());
 }
