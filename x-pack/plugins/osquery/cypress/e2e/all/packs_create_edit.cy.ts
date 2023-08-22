@@ -697,7 +697,7 @@ describe('Packs - Create and Edit', () => {
     }
   );
 
-  describe('to click delete button', { tags: [tag.ESS] }, () => {
+  describe('to click delete button', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     let packName: string;
 
     before(() => {
@@ -720,7 +720,7 @@ describe('Packs - Create and Edit', () => {
         });
     });
 
-    it('', { tags: [tag.ESS] }, () => {
+    it('', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       preparePack(packName);
       findAndClickButton('Edit');
       deleteAndConfirm('pack');
