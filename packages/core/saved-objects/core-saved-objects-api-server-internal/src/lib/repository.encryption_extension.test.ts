@@ -42,7 +42,7 @@ import {
   mockVersion,
   mockVersionProps,
   MULTI_NAMESPACE_ENCRYPTED_TYPE,
-  updateSuccess,
+  updateBWCSuccess,
   type TypeIdTuple,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
@@ -339,7 +339,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
 
     it('does not attempt to encrypt or decrypt if type is not encryptable', async () => {
       mockEncryptionExt.isEncryptableType.mockReturnValue(false);
-      const result = await updateSuccess(
+      const result = await updateBWCSuccess(
         client,
         repository,
         registry,
@@ -350,7 +350,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
           namespace,
         }
       );
-      expect(client.update).toHaveBeenCalledTimes(1);
+      expect(client.index).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
       expect(mockEncryptionExt.encryptAttributes).not.toHaveBeenCalled();
@@ -370,7 +370,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
         ...encryptedSO,
         ...decryptedStrippedAttributes,
       });
-      const result = await updateSuccess(
+      const result = await updateBWCSuccess(
         client,
         repository,
         registry,
@@ -382,7 +382,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
           references: encryptedSO.references,
         }
       );
-      expect(client.update).toHaveBeenCalledTimes(1);
+      expect(client.index).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
       expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);

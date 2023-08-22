@@ -44,7 +44,7 @@ import {
   mockTimestamp,
   CUSTOM_INDEX_TYPE,
   getMockGetResponse,
-  updateSuccess,
+  updateBWCSuccess,
   deleteSuccess,
   removeReferencesToSuccess,
   MULTI_NAMESPACE_ISOLATED_TYPE,
@@ -214,7 +214,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           const type = CUSTOM_INDEX_TYPE;
           const id = 'some-id';
 
-          await updateSuccess(
+          await updateBWCSuccess(
             client,
             repository,
             registry,
@@ -222,7 +222,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
             id,
             {},
             { upsert: true },
-            { mockGetResponseValue: { found: false } as estypes.GetResponse },
+            { mockGetResponseAsNotFound: { found: false } as estypes.GetResponse },
             [currentSpace.expectedNamespace ?? 'default']
           );
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
@@ -1069,7 +1069,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         const type = CUSTOM_INDEX_TYPE;
         const id = 'some-id';
 
-        await updateSuccess(
+        await updateBWCSuccess(
           client,
           repository,
           registry,
@@ -1077,7 +1077,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           id,
           {},
           { upsert: true },
-          { mockGetResponseValue: { found: false } as estypes.GetResponse },
+          { mockGetResponseAsNotFound: { found: false } as estypes.GetResponse },
           [currentSpace]
         );
         expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
@@ -1344,7 +1344,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           ...encryptedSO,
           ...decryptedStrippedAttributes,
         });
-        await updateSuccess(
+        await updateBWCSuccess(
           client,
           repository,
           registry,
@@ -1360,7 +1360,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
         expect(client.index).toHaveBeenCalledTimes(1);
-        expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(3); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
         expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
         expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
         expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(

@@ -38,7 +38,8 @@ export const performUpdate = async <T>(
   apiContext: ApiExecutionContext
 ): Promise<SavedObjectsUpdateResponse<T>> => {
   const { type, id, options } = updateParams;
-  const { allowedTypes } = apiContext;
+  const { allowedTypes, helpers } = apiContext;
+  const namespace = helpers.common.getCurrentNamespace(options.namespace);
 
   // check request is valid
   const { validRequest, error } = isValidRequest({ allowedTypes, type, id });
@@ -52,7 +53,7 @@ export const performUpdate = async <T>(
   let response: SavedObjectsUpdateResponse<T>;
   for (let currentAttempt = 1; currentAttempt <= maxAttempts; currentAttempt++) {
     try {
-      response = await executeUpdate(updateParams, apiContext);
+      response = await executeUpdate(updateParams, apiContext, { namespace });
       break;
     } catch (e) {
       if (
@@ -71,7 +72,8 @@ export const performUpdate = async <T>(
 
 export const executeUpdate = async <T>(
   { id, type, attributes, options }: PerformUpdateParams<T>,
-  { registry, helpers, client, serializer, extensions = {}, logger }: ApiExecutionContext
+  { registry, helpers, client, serializer, extensions = {}, logger }: ApiExecutionContext,
+  { namespace }: { namespace: string | undefined }
 ): Promise<SavedObjectsUpdateResponse<T>> => {
   const {
     common: commonHelper,
@@ -81,7 +83,6 @@ export const executeUpdate = async <T>(
     validation: validationHelper,
   } = helpers;
   const { securityExtension } = extensions;
-  const namespace = commonHelper.getCurrentNamespace(options.namespace);
 
   const {
     version,

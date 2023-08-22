@@ -103,7 +103,7 @@ export const expectErrorConflict = (obj: TypeIdTuple, overrides?: Record<string,
 export const expectErrorInvalidType = (obj: TypeIdTuple, overrides?: Record<string, unknown>) =>
   expectErrorResult(obj, createUnsupportedTypeErrorPayload(obj.type), overrides);
 
-export const KIBANA_VERSION = '2.0.0';
+export const KIBANA_VERSION = '8.8.0';
 export const ALLOWED_CONVERT_VERSION = '8.0.0';
 export const CUSTOM_INDEX_TYPE = 'customIndex';
 /** This type has namespaceType: 'agnostic'. */
