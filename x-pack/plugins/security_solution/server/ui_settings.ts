@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
+import type { UiSettingsParams } from '@kbn/core/server';
 import {
   APP_ID,
   DEFAULT_ANOMALY_SCORE,
@@ -55,11 +55,10 @@ const orderSettings = (settings: SettingsConfig): SettingsConfig => {
   );
 };
 
-export const initUiSettings = (
-  uiSettings: CoreSetup['uiSettings'],
+export const buildSecuritySolutionsUiSettings = (
   experimentalFeatures: ExperimentalFeatures
-) => {
-  const securityUiSettings: Record<string, UiSettingsParams<unknown>> = {
+): Record<string, UiSettingsParams<unknown>> =>
+  orderSettings({
     [DEFAULT_APP_REFRESH_INTERVAL]: {
       type: 'json',
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultRefreshIntervalLabel', {
@@ -379,7 +378,4 @@ export const initUiSettings = (
           },
         }
       : {}),
-  };
-
-  uiSettings.register(orderSettings(securityUiSettings));
-};
+  });

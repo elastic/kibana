@@ -6,6 +6,7 @@
  */
 
 import type { Plugin, CoreSetup } from '@kbn/core/server';
+import { buildSecuritySolutionsUiSettings } from '@kbn/security-solution-plugin/server/ui_settings';
 import { DEFAULT_APP_FEATURES } from './constants';
 
 import type {
@@ -24,8 +25,12 @@ export class SecuritySolutionEssPlugin
       SecuritySolutionEssPluginStartDeps
     >
 {
-  public setup(_coreSetup: CoreSetup, pluginsSetup: SecuritySolutionEssPluginSetupDeps) {
+  public setup(coreSetup: CoreSetup, pluginsSetup: SecuritySolutionEssPluginSetupDeps) {
     pluginsSetup.securitySolution.setAppFeatures(DEFAULT_APP_FEATURES);
+
+    coreSetup.uiSettings.register(
+      buildSecuritySolutionsUiSettings(pluginsSetup.securitySolution.getExperimentalFeatures())
+    );
     return {};
   }
 

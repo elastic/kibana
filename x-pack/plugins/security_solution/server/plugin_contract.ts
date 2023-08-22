@@ -42,6 +42,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
 import type { AppFeatures } from './lib/app_features/app_features';
+import type { ExperimentalFeatures } from '../common';
 
 export interface SecuritySolutionPluginSetupDependencies {
   alerting: AlertingPluginSetup;
@@ -87,6 +88,7 @@ export interface SecuritySolutionPluginSetup {
    * Sets the app features that are available to the Security Solution
    */
   setAppFeatures: AppFeatures['set'];
+  getExperimentalFeatures: () => ExperimentalFeatures;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

@@ -13,6 +13,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
+import { buildSecuritySolutionsUiSettings } from '@kbn/security-solution-plugin/server/ui_settings';
 import { getProductAppFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -61,6 +62,10 @@ export class SecuritySolutionServerlessPlugin
     }
 
     pluginsSetup.ml.setFeaturesEnabled({ ad: true, dfa: true, nlp: false });
+
+    coreSetup.uiSettings.register(
+      buildSecuritySolutionsUiSettings(pluginsSetup.securitySolution.getExperimentalFeatures())
+    );
 
     this.cspmUsageReportingTask = new SecurityUsageReportingTask({
       core: coreSetup,

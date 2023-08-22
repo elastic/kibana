@@ -37,7 +37,6 @@ import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
 import { createConfig } from './config';
-import { initUiSettings } from './ui_settings';
 import { APP_ID, SERVER_APP_ID, DEFAULT_ALERTS_INDEX } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
@@ -156,7 +155,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = config.experimentalFeatures;
 
     initSavedObjects(core.savedObjects);
-    initUiSettings(core.uiSettings, experimentalFeatures);
+
     appFeatures.init(plugins.features);
 
     this.ruleMonitoringService.setup(core, plugins);
@@ -394,6 +393,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     return {
       setAppFeatures: this.appFeatures.set.bind(this.appFeatures),
+      getExperimentalFeatures: () => this.config.experimentalFeatures,
     };
   }
 
