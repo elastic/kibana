@@ -117,6 +117,14 @@ export const deleteAllRiskScores = async (
   );
 };
 
+/**
+ * Function to read risk scores from ES. By default, it reads from the risk
+ * score datastream in the default space, but this can be overridden with the
+ * `index` parameter.
+ *
+ * @param {string[]} index - the index or indices to read risk scores from.
+ * @param {number} size - the size parameter of the query
+ */
 export const readRiskScores = async (
   es: Client,
   index: string[] = ['risk-score.risk-score-default'],
@@ -129,6 +137,14 @@ export const readRiskScores = async (
   return results.hits.hits.map((hit) => hit._source as EcsRiskScore);
 };
 
+/**
+ * Function to read risk scores from ES and wait for them to be
+ * present/readable. By default, it reads from the risk score datastream in the
+ * default space, but this can be overridden with the `index` parameter.
+ *
+ * @param {string[]} index - the index or indices to read risk scores from.
+ * @param {number} scoreCount - the number of risk scores to wait for. Defaults to 1.
+ */
 export const waitForRiskScoresToBePresent = async ({
   es,
   log,
