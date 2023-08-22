@@ -31,7 +31,7 @@ import {
   PostCustomSchedulingArgs,
 } from './crawl_custom_settings_flyout_post_schedule_logic';
 
-export interface CrawlCustomSettingsFlyoutLogicValues {
+export interface CrawlCustomSettingsFlyoutMultiCrawlLogicValues {
   crawlerConfigActiveTab: number;
   crawlerConfigurations: CrawlerCustomSchedule[];
   crawlerConfigurationsWithDomainData: CrawlerCustomSchedule[];
@@ -46,7 +46,7 @@ export interface CrawlCustomSettingsFlyoutLogicValues {
 
 type PostCustomSchedulingApiValues = Actions<PostCustomSchedulingArgs, {}>;
 
-export interface CrawlCustomSettingsFlyoutLogicActions {
+export interface CrawlCustomSettingsFlyoutMultiCrawlLogicActions {
   fetchCustomScheduling(): void;
   postCustomScheduling(): void;
   onReceiveCrawlerCustomScheduling(crawlerConfigurations: CrawlerCustomSchedule[]): {
@@ -113,7 +113,10 @@ const defaulCrawlerConfiguration: CrawlerCustomSchedule = {
 };
 
 export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
-  MakeLogicType<CrawlCustomSettingsFlyoutLogicValues, CrawlCustomSettingsFlyoutLogicActions>
+  MakeLogicType<
+    CrawlCustomSettingsFlyoutMultiCrawlLogicValues,
+    CrawlCustomSettingsFlyoutMultiCrawlLogicActions
+  >
 >({
   path: ['enterprise_search', 'crawler', 'crawl_custom_settings_flyout_multi_crawl_logic'],
   connect: {
@@ -154,7 +157,7 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
       [defaulCrawlerConfiguration],
       {
         onReceiveCrawlerCustomScheduling: (_, { crawlerConfigurations }) => {
-          // Handle case with no custom scheduling
+          // Handle case with no custom scheduling returned from server
           return crawlerConfigurations.length > 0
             ? crawlerConfigurations.map((configuration) => ({
                 ...defaulCrawlerConfiguration,
@@ -162,14 +165,28 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
               }))
             : [defaulCrawlerConfiguration];
         },
-        onAddCustomCrawler: (state, { index }) => [
-          ...state,
-          {
-            ...defaulCrawlerConfiguration,
-            name: `Crawler ${index}`,
-            scheduleKey: `crawler_${index}`,
-          },
-        ],
+        onAddCustomCrawler: (state, { index }) => {
+          let newScheduleKey = `crawler_${index}`;
+          let suffix = index;
+
+          // Check if the newScheduleKey already exists in the array
+          const existingKeys = state.map((crawler) => crawler.scheduleKey);
+          if (existingKeys.includes(newScheduleKey)) {
+            // Handle the case where a duplicate scheduleKey is found
+            while (existingKeys.includes(`${newScheduleKey}_${suffix}`)) {
+              suffix++;
+            }
+            newScheduleKey = `${newScheduleKey}_${suffix}`;
+          }
+          return [
+            ...state,
+            {
+              ...defaulCrawlerConfiguration,
+              name: `Crawler ${suffix}`,
+              scheduleKey: newScheduleKey,
+            },
+          ];
+        },
         onDeleteCustomCrawler: (state, { index }) => {
           return state.filter((_, i) => i !== index);
         },
