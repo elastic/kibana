@@ -5,57 +5,21 @@
  * 2.0.
  */
 
-import { CloudSetup } from '@kbn/cloud-plugin/server';
-import { HttpServiceSetup } from '@kbn/core-http-server';
-import { PackageInfo } from '@kbn/core/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { HttpServiceSetup } from '@kbn/core-http-server';
+import type { PackageInfo } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import puppeteer from 'puppeteer';
 import * as Rx from 'rxjs';
 import { firstValueFrom } from 'rxjs';
-import { PngScreenshotOptions } from '..';
+import type { PngScreenshotOptions } from '..';
 import { HeadlessChromiumDriverFactory } from '../browsers';
-import { ConfigType } from '../config';
+import type { ConfigType } from '../config';
 import { Screenshots } from './screenshots';
 
-jest.mock('puppeteer', () => {
-  const stubDevTools = {
-    send: jest.fn(),
-  };
-  const stubTarget = {
-    createCDPSession: () => {
-      return stubDevTools;
-    },
-  };
-  const stubPage = {
-    target: () => {
-      return stubTarget;
-    },
-    emulateTimezone: jest.fn(),
-    setDefaultTimeout: jest.fn(),
-    isClosed: jest.fn(),
-    setViewport: jest.fn(),
-    evaluate: jest.fn(),
-    screenshot: jest.fn().mockResolvedValue(`you won't believe this one weird screenshot`),
-    evaluateOnNewDocument: jest.fn(),
-    setRequestInterception: jest.fn(),
-    _client: jest.fn(() => ({ on: jest.fn() })),
-    on: jest.fn(),
-    goto: jest.fn(),
-    waitForSelector: jest.fn().mockResolvedValue(true),
-    waitForFunction: jest.fn(),
-  };
-  const stubBrowser = {
-    newPage: () => {
-      return stubPage;
-    },
-  };
-  return {
-    launch: () => {
-      return stubBrowser;
-    },
-  };
-});
+jest.mock('puppeteer');
 
 describe('class Screenshots', () => {
   let mockConfig: ConfigType;
@@ -70,8 +34,7 @@ describe('class Screenshots', () => {
   const mockBasePath = '/kibanaTest1';
 
   beforeEach(() => {
-    mockLogger = { debug: jest.fn(), error: jest.fn(), info: jest.fn() } as unknown as Logger;
-    mockLogger.get = () => mockLogger;
+    mockLogger = loggerMock.create();
 
     mockConfig = {
       networkPolicy: {
@@ -93,11 +56,7 @@ describe('class Screenshots', () => {
       poolSize: 1,
     };
 
-    mockScreenshotModeSetup = {
-      setScreenshotContext: jest.fn(),
-      setScreenshotModeEnabled: jest.fn(),
-      isScreenshotMode: jest.fn(),
-    };
+    mockScreenshotModeSetup = {} as unknown as ScreenshotModePluginSetup;
 
     browserDriverFactory = new HeadlessChromiumDriverFactory(
       mockScreenshotModeSetup,
@@ -146,9 +105,9 @@ describe('class Screenshots', () => {
     });
 
     beforeEach(() => {
-      browserDriverFactory.getBrowserLogger = jest.fn(() => Rx.of());
-      browserDriverFactory.getProcessLogger = jest.fn(() => Rx.of());
-      browserDriverFactory.getPageExit = jest.fn(() => Rx.of());
+      jest.spyOn(browserDriverFactory, 'getBrowserLogger').mockReturnValue(Rx.EMPTY);
+      jest.spyOn(browserDriverFactory, 'getProcessLogger').mockReturnValue(Rx.EMPTY);
+      jest.spyOn(browserDriverFactory, 'getPageExit').mockReturnValue(Rx.EMPTY);
     });
 
     it('getScreenshots with PngScreenshotOptions', async () => {
