@@ -52,27 +52,28 @@ function mockSecurity() {
   return { authorization };
 }
 
-function mockFeature(appName: string, typeName?: string) {
+function mockFeature(appName: string, typeName?: string | string[]) {
+  const typeNameArray = typeName ? (Array.isArray(typeName) ? typeName : [typeName]) : undefined;
   return new KibanaFeature({
     id: appName,
     name: appName,
     app: [],
     category: { id: 'foo', label: 'foo' },
-    ...(typeName
+    ...(typeNameArray
       ? {
-          alerting: [typeName],
+          alerting: typeNameArray,
         }
       : {}),
     privileges: {
       all: {
-        ...(typeName
+        ...(typeNameArray
           ? {
               alerting: {
                 rule: {
-                  all: [typeName],
+                  all: typeNameArray,
                 },
                 alert: {
-                  all: [typeName],
+                  all: typeNameArray,
                 },
               },
             }
@@ -84,14 +85,14 @@ function mockFeature(appName: string, typeName?: string) {
         ui: [],
       },
       read: {
-        ...(typeName
+        ...(typeNameArray
           ? {
               alerting: {
                 rule: {
-                  read: [typeName],
+                  read: typeNameArray,
                 },
                 alert: {
-                  read: [typeName],
+                  read: typeNameArray,
                 },
               },
             }
@@ -815,6 +816,12 @@ describe('AlertingAuthorization', () => {
       ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule');
     });
     test('creates a filter based on the privileged types', async () => {
+      features.getKibanaFeatures.mockReturnValue([
+        mockFeature('myApp', ['myAppAlertType', 'mySecondAppAlertType']),
+        mockFeature('alerts', 'myOtherAppAlertType'),
+        myOtherAppFeature,
+        myAppWithSubFeature,
+      ]);
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -846,7 +853,7 @@ describe('AlertingAuthorization', () => {
         ).filter
       ).toEqual(
         fromKueryExpression(
-          `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:mySecondAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
+          `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:mySecondAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
         )
       );
     });
@@ -894,6 +901,10 @@ describe('AlertingAuthorization', () => {
       );
     });
     test('creates an `ensureRuleTypeIsAuthorized` function which throws if type is unauthorized', async () => {
+      features.getKibanaFeatures.mockReturnValue([
+        mockFeature('myApp', ['myOtherAppAlertType', 'myAppAlertType']),
+        mockFeature('myOtherApp', ['myOtherAppAlertType', 'myAppAlertType']),
+      ]);
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -954,6 +965,10 @@ describe('AlertingAuthorization', () => {
       );
     });
     test('creates an `ensureRuleTypeIsAuthorized` function which is no-op if type is authorized', async () => {
+      features.getKibanaFeatures.mockReturnValue([
+        mockFeature('myApp', ['myOtherAppAlertType', 'myAppAlertType']),
+        mockFeature('myOtherApp', 'myAppAlertType'),
+      ]);
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -1012,6 +1027,10 @@ describe('AlertingAuthorization', () => {
       }).not.toThrow();
     });
     test('creates an `logSuccessfulAuthorization` function which logs every authorized type', async () => {
+      features.getKibanaFeatures.mockReturnValue([
+        mockFeature('myApp', ['myOtherAppAlertType', 'myAppAlertType', 'mySecondAppAlertType']),
+        mockFeature('myOtherApp', ['mySecondAppAlertType', 'myAppAlertType']),
+      ]);
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -1140,8 +1159,19 @@ describe('AlertingAuthorization', () => {
       enabledInLicense: true,
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType]);
-
+    beforeEach(() => {
+      features.getKibanaFeatures.mockReturnValue([
+        mockFeature('myApp', ['myOtherAppAlertType', 'myAppAlertType']),
+        mockFeature('myOtherApp', ['myAppAlertType', 'myOtherAppAlertType']),
+      ]);
+    });
     test('augments a list of types with all features when there is no authorization api', async () => {
+      features.getKibanaFeatures.mockReturnValue([
+        myAppFeature,
+        myOtherAppFeature,
+        myAppWithSubFeature,
+        myFeatureWithoutAlerting,
+      ]);
       const alertAuthorization = new AlertingAuthorization({
         request,
         ruleTypeRegistry,
@@ -1670,7 +1700,9 @@ describe('AlertingAuthorization', () => {
       isExportable: true,
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType, mySecondAppAlertType]);
-
+    beforeEach(() => {
+      features.getKibanaFeatures.mockReturnValue([mockFeature('myApp', ['myOtherAppAlertType'])]);
+    });
     test('it returns authorized rule types given a set of feature ids', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
