@@ -10,6 +10,11 @@ import { defineCypressConfig } from '@kbn/cypress-config';
 import { dataLoaders } from './cypress/support/data_loaders';
 
 export default defineCypressConfig({
+  reporter: '../../../../node_modules/cypress-multi-reporters',
+  reporterOptions: {
+    configFile: path.resolve(__dirname, './cypress/reporter_config.json'),
+  },
+
   defaultCommandTimeout: 60000,
   execTimeout: 120000,
   pageLoadTimeout: 12000,
