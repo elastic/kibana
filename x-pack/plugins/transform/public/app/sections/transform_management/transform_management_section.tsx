@@ -176,8 +176,8 @@ export const TransformManagement: FC = () => {
                     <EuiButton
                       color="warning"
                       size="s"
-                      onClick={async () => {
-                        await deleteTransforms(
+                      onClick={() =>
+                        deleteTransforms(
                           // If transform task doesn't have any corresponding config
                           // we won't know what the destination index or data view would be
                           // and should be force deleted
@@ -190,8 +190,8 @@ export const TransformManagement: FC = () => {
                             deleteDestDataView: false,
                             forceDelete: true,
                           }
-                        );
-                      }}
+                        )
+                      }
                     >
                       <FormattedMessage
                         id="xpack.transform.forceDeleteTransformMessage"

@@ -17,10 +17,6 @@ import {
   ReauthorizeTransformsResponseSchema,
 } from '../../../common/api_schemas/reauthorize_transforms';
 import type {
-  DeleteTransformsRequestSchema,
-  DeleteTransformsResponseSchema,
-} from '../../../common/api_schemas/delete_transforms';
-import type {
   FieldHistogramsRequestSchema,
   FieldHistogramsResponseSchema,
 } from '../../../common/api_schemas/field_histograms';
@@ -28,10 +24,6 @@ import type {
   ResetTransformsRequestSchema,
   ResetTransformsResponseSchema,
 } from '../../../common/api_schemas/reset_transforms';
-import type {
-  StartTransformsRequestSchema,
-  StartTransformsResponseSchema,
-} from '../../../common/api_schemas/start_transforms';
 import type {
   StopTransformsRequestSchema,
   StopTransformsResponseSchema,
@@ -44,8 +36,6 @@ import type {
   GetTransformsResponseSchema,
   PostTransformsPreviewRequestSchema,
   PostTransformsPreviewResponseSchema,
-  PutTransformsRequestSchema,
-  PutTransformsResponseSchema,
 } from '../../../common/api_schemas/transforms';
 import type {
   PostTransformsUpdateRequestSchema,
@@ -93,19 +83,6 @@ export const useApi = () => {
           return e;
         }
       },
-      async createTransform(
-        transformId: TransformId,
-        transformConfig: PutTransformsRequestSchema
-      ): Promise<PutTransformsResponseSchema | IHttpFetchError> {
-        try {
-          return await http.put(addInternalBasePath(`transforms/${transformId}`), {
-            body: JSON.stringify(transformConfig),
-            version: '1',
-          });
-        } catch (e) {
-          return e;
-        }
-      },
       async updateTransform(
         transformId: TransformId,
         transformConfig: PostTransformsUpdateRequestSchema
@@ -113,18 +90,6 @@ export const useApi = () => {
         try {
           return await http.post(addInternalBasePath(`transforms/${transformId}/_update`), {
             body: JSON.stringify(transformConfig),
-            version: '1',
-          });
-        } catch (e) {
-          return e;
-        }
-      },
-      async deleteTransforms(
-        reqBody: DeleteTransformsRequestSchema
-      ): Promise<DeleteTransformsResponseSchema | IHttpFetchError> {
-        try {
-          return await http.post(addInternalBasePath(`delete_transforms`), {
-            body: JSON.stringify(reqBody),
             version: '1',
           });
         } catch (e) {
@@ -161,18 +126,6 @@ export const useApi = () => {
       ): Promise<ResetTransformsResponseSchema | IHttpFetchError> {
         try {
           return await http.post(addInternalBasePath(`reset_transforms`), {
-            body: JSON.stringify(reqBody),
-            version: '1',
-          });
-        } catch (e) {
-          return e;
-        }
-      },
-      async startTransforms(
-        reqBody: StartTransformsRequestSchema
-      ): Promise<StartTransformsResponseSchema | IHttpFetchError> {
-        try {
-          return await http.post(addInternalBasePath(`start_transforms`), {
             body: JSON.stringify(reqBody),
             version: '1',
           });

@@ -13,14 +13,6 @@ import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 import type { TransformId } from '../../../../common/types/transform';
 import type { FieldHistogramsResponseSchema } from '../../../../common/api_schemas/field_histograms';
 import type {
-  DeleteTransformsRequestSchema,
-  DeleteTransformsResponseSchema,
-} from '../../../../common/api_schemas/delete_transforms';
-import type {
-  StartTransformsRequestSchema,
-  StartTransformsResponseSchema,
-} from '../../../../common/api_schemas/start_transforms';
-import type {
   StopTransformsRequestSchema,
   StopTransformsResponseSchema,
 } from '../../../../common/api_schemas/stop_transforms';
@@ -28,8 +20,6 @@ import type {
   GetTransformsResponseSchema,
   PostTransformsPreviewRequestSchema,
   PostTransformsPreviewResponseSchema,
-  PutTransformsRequestSchema,
-  PutTransformsResponseSchema,
 } from '../../../../common/api_schemas/transforms';
 import type { GetTransformsStatsResponseSchema } from '../../../../common/api_schemas/transforms_stats';
 import type {
@@ -57,12 +47,6 @@ const apiFactory = () => ({
   ): Promise<GetTransformsStatsResponseSchema | IHttpFetchError> {
     return Promise.resolve({ count: 0, transforms: [] });
   },
-  async createTransform(
-    transformId: TransformId,
-    transformConfig: PutTransformsRequestSchema
-  ): Promise<PutTransformsResponseSchema | IHttpFetchError> {
-    return Promise.resolve({ transformsCreated: [], errors: [] });
-  },
   async updateTransform(
     transformId: TransformId,
     transformConfig: PostTransformsUpdateRequestSchema
@@ -81,11 +65,6 @@ const apiFactory = () => ({
       version: '8.0.0',
       create_time: 1598860879097,
     });
-  },
-  async deleteTransforms(
-    reqBody: DeleteTransformsRequestSchema
-  ): Promise<DeleteTransformsResponseSchema | IHttpFetchError> {
-    return Promise.resolve({});
   },
   async getTransformsPreview(
     obj: PostTransformsPreviewRequestSchema
@@ -108,11 +87,6 @@ const apiFactory = () => ({
       },
       preview: [],
     });
-  },
-  async startTransforms(
-    reqBody: StartTransformsRequestSchema
-  ): Promise<StartTransformsResponseSchema | IHttpFetchError> {
-    return Promise.resolve({});
   },
   async stopTransforms(
     transformsInfo: StopTransformsRequestSchema

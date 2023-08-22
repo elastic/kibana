@@ -35,6 +35,7 @@ export const addExternalBasePath = (uri: string): string => `${EXTERNAL_API_BASE
 export const TRANSFORM_REACT_QUERY_KEYS = {
   PRIVILEGES: 'transform.privileges',
   TRANSFORMS_LIST: 'transform.transforms_list',
+  TRANSFORM_STATS: 'transform.transform_stats',
 } as const;
 
 // In order to create a transform, the API requires the following privileges:
