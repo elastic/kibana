@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`License prompt renders a prompt with a link to License Management 1`] = `
-<EuiPageTemplate.EmptyPrompt
+<_EuiPageEmptyPrompt
   actions={
     Array [
       <EuiLink
@@ -20,6 +20,7 @@ exports[`License prompt renders a prompt with a link to License Management 1`] =
       License error
     </p>
   }
+  color="danger"
   iconType="warning"
   title={
     <h1>
@@ -34,7 +35,7 @@ exports[`License prompt renders a prompt with a link to License Management 1`] =
 `;
 
 exports[`License prompt renders a prompt without a link to License Management 1`] = `
-<EuiPageTemplate.EmptyPrompt
+<_EuiPageEmptyPrompt
   actions={
     Array [
       undefined,
@@ -54,6 +55,7 @@ exports[`License prompt renders a prompt without a link to License Management 1`
       </p>
     </React.Fragment>
   }
+  color="danger"
   iconType="warning"
   title={
     <h1>
