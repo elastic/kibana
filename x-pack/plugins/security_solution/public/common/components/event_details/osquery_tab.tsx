@@ -61,7 +61,7 @@ export const useOsqueryTab = ({
   const { OsqueryResults, fetchAllLiveQueries } = osquery;
 
   const { data: actionsData } = fetchAllLiveQueries({
-    kql: `alert_ids: ( ${alertId} )`,
+    kuery: `alert_ids: ( ${alertId} )`,
     alertId,
     skip: shouldEarlyReturn,
   });
