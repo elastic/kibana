@@ -6,17 +6,15 @@
  */
 
 import expect from '@kbn/expect';
-
 import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
-
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const ingestPipelines = getService('ingestPipelines');
   const log = getService('log');
 
-  describe('Pipelines', function () {
+  describe('Ingest Pipelines', function () {
     after(async () => {
       await ingestPipelines.api.deletePipelines();
     });
@@ -27,8 +25,8 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .post(ingestPipelines.fixtures.apiBasePath)
           .set('kbn-xsrf', 'xxx')
-          .send(pipelineRequestBody)
-          .expect(200);
+          .set('x-elastic-internal-origin', 'xxx')
+          .send(pipelineRequestBody);
 
         expect(body).to.eql({
           acknowledged: true,
@@ -41,6 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .post(ingestPipelines.fixtures.apiBasePath)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .send(pipelineRequestBody)
           .expect(200);
 
@@ -51,7 +50,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should not allow creation of an existing pipeline', async () => {
         const pipelineRequestBody = ingestPipelines.fixtures.createPipelineBodyWithRequiredFields(); // Includes name and processors[] only
-
         const { name, ...esPipelineRequestBody } = pipelineRequestBody;
 
         // First, create a pipeline using the ES API
@@ -61,6 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .post(ingestPipelines.fixtures.apiBasePath)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .send(pipelineRequestBody)
           .expect(409);
 
@@ -98,6 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .put(uri)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .send({
             ...pipeline,
             description: 'updated test pipeline description',
@@ -119,6 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .put(uri)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .send({
             // removes description, version, on_failure, and _meta
             processors: pipeline.processors,
@@ -136,6 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .put(uri)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .send({
             ...pipeline,
             description: 'updated test pipeline description',
@@ -180,6 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
           const { body } = await supertest
             .get(ingestPipelines.fixtures.apiBasePath)
             .set('kbn-xsrf', 'xxx')
+            .set('x-elastic-internal-origin', 'xxx')
             .expect(200);
 
           expect(Array.isArray(body)).to.be(true);
@@ -195,12 +198,15 @@ export default function ({ getService }: FtrProviderContext) {
           });
         });
       });
-
       describe('one pipeline', () => {
         it('should return a single pipeline', async () => {
           const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineName}`;
 
-          const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').expect(200);
+          const { body } = await supertest
+            .get(uri)
+            .set('kbn-xsrf', 'xxx')
+            .set('x-elastic-internal-origin', 'xxx')
+            .expect(200);
 
           expect(body).to.eql({
             ...pipeline,
@@ -238,7 +244,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineA}`;
 
-        const { body } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
+        const { body } = await supertest
+          .delete(uri)
+          .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
+          .expect(200);
 
         expect(body).to.eql({
           itemsDeleted: [pipelineA],
@@ -249,11 +259,15 @@ export default function ({ getService }: FtrProviderContext) {
       it('should delete multiple pipelines', async () => {
         const pipelineB = pipelineIds[1];
         const pipelineC = pipelineIds[2];
-        const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineIds[1]},${pipelineIds[2]}`;
+        const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineB},${pipelineC}`;
 
         const {
           body: { itemsDeleted, errors },
-        } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
+        } = await supertest
+          .delete(uri)
+          .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
+          .expect(200);
 
         expect(errors).to.eql([]);
 
@@ -269,7 +283,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineD},${PIPELINE_DOES_NOT_EXIST}`;
 
-        const { body } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
+        const { body } = await supertest
+          .delete(uri)
+          .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
+          .expect(200);
 
         expect(body).to.eql({
           itemsDeleted: [pipelineD],
@@ -300,6 +318,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .post(`${ingestPipelines.fixtures.apiBasePath}/simulate`)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .send({
             pipeline,
             documents,
@@ -318,6 +337,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .post(`${ingestPipelines.fixtures.apiBasePath}/simulate`)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .send({
             pipeline,
             documents,
@@ -360,7 +380,11 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return a document', async () => {
         const uri = `${ingestPipelines.fixtures.apiBasePath}/documents/${INDEX}/${DOCUMENT_ID}`;
 
-        const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').expect(200);
+        const { body } = await supertest
+          .get(uri)
+          .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
+          .expect(200);
 
         expect(body).to.eql({
           _index: INDEX,
@@ -372,7 +396,11 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return an error if the document does not exist', async () => {
         const uri = `${ingestPipelines.fixtures.apiBasePath}/documents/${INDEX}/2`; // Document 2 does not exist
 
-        const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').expect(404);
+        const { body } = await supertest
+          .get(uri)
+          .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
+          .expect(404);
 
         expect(body).to.eql({
           error: 'Not Found',
@@ -390,6 +418,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .post(`${ingestPipelines.fixtures.apiBasePath}/parse_csv`)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .send({
             copyAction: 'copy',
             file: validCsv,
