@@ -21,14 +21,14 @@ export interface Props {
 
 export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
   const { source } = useSourceContext();
-  const { searchCriteria } = useUnifiedSearchContext();
+  const { parsedDateRange } = useUnifiedSearchContext();
   const [hostFlyoutState, setHostFlyoutState] = useHostFlyoutUrlState();
 
   return source ? (
     <AssetDetails
       asset={{ id: name, name }}
       assetType="host"
-      dateRange={searchCriteria.dateRange}
+      dateRange={parsedDateRange}
       activeTabId={hostFlyoutState?.tabId}
       overrides={{
         metadata: {

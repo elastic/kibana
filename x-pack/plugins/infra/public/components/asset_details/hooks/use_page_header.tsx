@@ -15,7 +15,6 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { APM_HOST_FILTER_FIELD } from '../constants';
 import { LinkToAlertsRule, LinkToApmServices, LinkToNodeDetails, LinkToUptime } from '../links';
 import { FlyoutTabIds, type LinkOptions, type Tab, type TabIds } from '../types';
-import { toTimestampRange } from '../utils';
 import { useAssetDetailsStateContext } from './use_asset_details_state';
 import { useDateRangeProviderContext } from './use_date_range';
 import { useTabSwitcherContext } from './use_tab_switcher';
@@ -31,7 +30,7 @@ export const usePageHeader = (tabs: Tab[], links?: LinkOptions[]) => {
 };
 
 const useRightSideItems = (links?: LinkOptions[]) => {
-  const { dateRange } = useDateRangeProviderContext();
+  const { getDateRangeInTimestamp } = useDateRangeProviderContext();
   const { asset, assetType, overrides } = useAssetDetailsStateContext();
   const { metadata } = useMetadataStateProviderContext();
 
@@ -41,7 +40,7 @@ const useRightSideItems = (links?: LinkOptions[]) => {
         <LinkToNodeDetails
           asset={asset}
           assetType={assetType}
-          currentTimestamp={toTimestampRange(dateRange).to}
+          currentTimestamp={getDateRangeInTimestamp().to}
         />
       ),
       alertRule: <LinkToAlertsRule onClick={overrides?.alertRule?.onCreateRuleClick} />,
@@ -58,7 +57,13 @@ const useRightSideItems = (links?: LinkOptions[]) => {
         />
       ),
     }),
-    [asset, assetType, dateRange, metadata?.info?.host?.ip, overrides?.alertRule?.onCreateRuleClick]
+    [
+      asset,
+      assetType,
+      getDateRangeInTimestamp,
+      metadata?.info?.host?.ip,
+      overrides?.alertRule?.onCreateRuleClick,
+    ]
   );
 
   const rightSideItems = useMemo(

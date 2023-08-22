@@ -19,7 +19,7 @@ export const ContextProviders = ({
 }) => {
   const { asset, dateRange, overrides, onTabsStateChange, assetType = 'host', renderMode } = props;
   return (
-    <DateRangeProvider dateRange={dateRange}>
+    <DateRangeProvider initialDateRange={dateRange}>
       <MetadataStateProvider asset={asset} assetType={assetType}>
         <AssetDetailsStateProvider
           state={{
