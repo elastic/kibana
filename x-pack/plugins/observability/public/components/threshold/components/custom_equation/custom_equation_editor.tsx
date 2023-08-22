@@ -9,6 +9,7 @@ import {
   EuiFormRow,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiIconTip,
   EuiButtonEmpty,
   EuiSpacer,
   EuiExpression,
@@ -193,10 +194,23 @@ export function CustomEquationEditor({
         >
           <div>
             <ClosablePopoverTitle onClose={() => setCustomEqPopoverOpen(false)}>
-              <FormattedMessage
-                id="xpack.observability.threshold.rule.alertFlyout.customEquationLabel"
-                defaultMessage="Custom equation"
-              />
+              <span>
+                <FormattedMessage
+                  id="xpack.observability.threshold.rule.alertFlyout.customEquationLabel"
+                  defaultMessage="Custom equation"
+                />
+                &nbsp;
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.observability.threshold.rule.alertFlyout.customEquationTooltip',
+                    {
+                      defaultMessage:
+                        'This supports basic math (A + B / C) and boolean logic (A < B ? A : B).',
+                    }
+                  )}
+                  position="top"
+                />
+              </span>
             </ClosablePopoverTitle>
             <EuiFormRow
               fullWidth

@@ -40,7 +40,10 @@ export const getVulnerabilitiesGridCellActions = <
     if (columnId === columns.cvss) {
       return vulnerabilityRow.vulnerability?.score.base;
     }
-    if (columnId === columns.resource) {
+    if (columnId === columns.resourceId) {
+      return vulnerabilityRow.resource?.id;
+    }
+    if (columnId === columns.resourceName) {
       return vulnerabilityRow.resource?.name;
     }
     if (columnId === columns.severity) {
@@ -52,14 +55,8 @@ export const getVulnerabilitiesGridCellActions = <
     if (columnId === columns.version) {
       return vulnerabilityRow.vulnerability?.package?.version;
     }
-    if (columnId === columns.fix_version) {
+    if (columnId === columns.fixedVersion) {
       return vulnerabilityRow.vulnerability?.package?.fixed_version;
-    }
-    if (columnId === columns.resource_id) {
-      return vulnerabilityRow.resource?.id;
-    }
-    if (columnId === columns.resource_name) {
-      return vulnerabilityRow.resource?.name;
     }
     if (columnId === columns.region) {
       return vulnerabilityRow.cloud?.region;

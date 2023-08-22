@@ -84,8 +84,10 @@ export const cli = () => {
       );
 
       const isOpen = argv._[0] === 'open';
-      const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
-      const cypressConfigFile = await import(require.resolve(`../../${argv.configFile}`));
+      const cypressConfigFilePath = require.resolve(
+        `../../${_.isArray(argv.configFile) ? _.last(argv.configFile) : argv.configFile}`
+      ) as string;
+      const cypressConfigFile = await import(cypressConfigFilePath);
       const spec: string | undefined = argv?.spec as string;
       let files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
 
@@ -192,7 +194,9 @@ export const cli = () => {
             const config = await readConfigFile(
               log,
               EsVersion.getDefault(),
-              _.isArray(argv.ftrConfigFile) ? _.last(argv.ftrConfigFile) : argv.ftrConfigFile,
+              path.resolve(
+                _.isArray(argv.ftrConfigFile) ? _.last(argv.ftrConfigFile) : argv.ftrConfigFile
+              ),
               {
                 servers: {
                   elasticsearch: {

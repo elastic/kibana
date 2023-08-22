@@ -19,7 +19,8 @@ import {
   SESSION_PREVIEW_TITLE_TEXT_TEST_ID,
   SESSION_PREVIEW_TOGGLE_ICON_TEST_ID,
 } from './test_ids';
-import { LeftPanelKey, LeftPanelVisualizeTabPath } from '../../left';
+import { LeftPanelKey, LeftPanelVisualizeTab } from '../../left';
+import { SESSION_VIEW_ID } from '../../left/components/session_view';
 
 jest.mock('../hooks/use_process_data');
 
@@ -131,7 +132,7 @@ describe('SessionPreview', () => {
     getByTestId(SESSION_PREVIEW_TITLE_LINK_TEST_ID).click();
     expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
       id: LeftPanelKey,
-      path: LeftPanelVisualizeTabPath,
+      path: { tab: LeftPanelVisualizeTab, subTab: SESSION_VIEW_ID },
       params: {
         id: panelContextValue.eventId,
         indexName: panelContextValue.indexName,

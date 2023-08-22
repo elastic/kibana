@@ -97,3 +97,12 @@ xpack.graph.enabled: false
 
 # Disable cases in stack management
 xpack.cases.stack.enabled: false
+
+# Alerting and action circuit breakers
+xpack.alerting.rules.run.actions.max: 3000
+xpack.alerting.rules.run.timeout: 1m
+xpack.alerting.rules.run.ruleTypeOverrides:
+  - id: siem.indicatorRule
+    timeout: 1m
+xpack.alerting.rules.minimumScheduleInterval.enforce: true
+xpack.actions.run.maxAttempts: 10

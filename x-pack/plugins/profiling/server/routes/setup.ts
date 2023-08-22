@@ -42,7 +42,7 @@ export function registerSetupRoute({
   dependencies,
 }: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  // Check if Elasticsearch and Fleet are setup for Universal Profiling
+  // Check if Elasticsearch and Fleet are set up for Universal Profiling
   router.get(
     {
       path: paths.HasSetupESResources,
@@ -249,7 +249,7 @@ export function registerSetupRoute({
       }
     }
   );
-  // Show users the instructions on how to setup Universal Profiling agents
+  // Show users the instructions on how to set up Universal Profiling agents
   router.get(
     {
       path: paths.SetupDataCollectionInstructions,
@@ -259,10 +259,12 @@ export function registerSetupRoute({
     async (context, request, response) => {
       try {
         const apmServerHost = dependencies.setup.cloud?.apm?.url;
+        const stackVersion = dependencies.stackVersion;
         const setupInstructions = await getSetupInstructions({
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
           soClient: (await context.core).savedObjects.client,
           apmServerHost,
+          stackVersion,
         });
 
         return response.ok({ body: setupInstructions });

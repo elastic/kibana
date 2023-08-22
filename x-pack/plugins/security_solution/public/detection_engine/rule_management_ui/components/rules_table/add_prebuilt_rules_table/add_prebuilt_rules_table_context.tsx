@@ -21,6 +21,7 @@ import {
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
 import type { AddPrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_install';
 import { useFilterPrebuiltRulesToInstall } from './use_filter_prebuilt_rules_to_install';
+import { useRuleDetailsFlyout } from '../../../../rule_management/components/rule_details/use_rule_details_flyout';
 
 export interface AddPrebuiltRulesTableState {
   /**
@@ -68,6 +69,16 @@ export interface AddPrebuiltRulesTableState {
    * Rule rows selected in EUI InMemory Table
    */
   selectedRules: RuleInstallationInfoForReview[];
+  /**
+   * Rule that is currently displayed in the flyout or null if flyout is closed
+   */
+  flyoutRule: RuleInstallationInfoForReview | null;
+  /**
+   * Is true when the install button in the flyout is disabled
+   * (e.g. when the rule is already being installed or when the table is being refetched)
+   *
+   **/
+  isFlyoutInstallButtonDisabled: boolean;
 }
 
 export interface AddPrebuiltRulesTableActions {
@@ -77,6 +88,8 @@ export interface AddPrebuiltRulesTableActions {
   installSelectedRules: () => void;
   setFilterOptions: Dispatch<SetStateAction<AddPrebuiltRulesTableFilterOptions>>;
   selectRules: (rules: RuleInstallationInfoForReview[]) => void;
+  openFlyoutForRuleId: (ruleId: RuleSignatureId) => void;
+  closeFlyout: () => void;
 }
 
 export interface AddPrebuiltRulesContextType {
@@ -129,6 +142,15 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const { mutateAsync: installAllRulesRequest } = usePerformInstallAllRules();
   const { mutateAsync: installSpecificRulesRequest } = usePerformInstallSpecificRules();
 
+  const filteredRules = useFilterPrebuiltRulesToInstall({ filterOptions, rules });
+
+  const { openFlyoutForRuleId, closeFlyout, flyoutRule } = useRuleDetailsFlyout(filteredRules);
+  const isFlyoutInstallButtonDisabled = Boolean(
+    (flyoutRule?.rule_id && loadingRules.includes(flyoutRule.rule_id)) ||
+      isRefetching ||
+      isUpgradingSecurityPackages
+  );
+
   const installOneRule = useCallback(
     async (ruleId: RuleSignatureId) => {
       const rule = rules.find((r) => r.rule_id === ruleId);
@@ -177,11 +199,18 @@ export const AddPrebuiltRulesTableContextProvider = ({
       installSelectedRules,
       reFetchRules: refetch,
       selectRules: setSelectedRules,
+      openFlyoutForRuleId,
+      closeFlyout,
     }),
-    [installAllRules, installOneRule, installSelectedRules, refetch]
+    [
+      installAllRules,
+      installOneRule,
+      installSelectedRules,
+      refetch,
+      openFlyoutForRuleId,
+      closeFlyout,
+    ]
   );
-
-  const filteredRules = useFilterPrebuiltRulesToInstall({ filterOptions, rules });
 
   const providerValue = useMemo<AddPrebuiltRulesContextType>(() => {
     return {
@@ -197,6 +226,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
         isUpgradingSecurityPackages,
         selectedRules,
         lastUpdated: dataUpdatedAt,
+        flyoutRule,
+        isFlyoutInstallButtonDisabled,
       },
       actions,
     };
@@ -212,6 +243,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
     isUpgradingSecurityPackages,
     selectedRules,
     dataUpdatedAt,
+    flyoutRule,
+    isFlyoutInstallButtonDisabled,
     actions,
   ]);
 

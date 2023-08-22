@@ -12,13 +12,15 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PackagePolicy,
   PackagePolicyInput,
+  UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CLOUDBEAT_VANILLA,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+  AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP,
 } from '../constants';
-import type { BenchmarkId, Score, BaseCspSetupStatus } from '../types';
+import type { BenchmarkId, Score, BaseCspSetupStatus, AwsCredentialsType } from '../types';
 
 /**
  * @example
@@ -97,4 +99,48 @@ export const getStatusForIndexName = (indexName: string, status?: BaseCspSetupSt
   }
 
   return 'unknown';
+};
+
+export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePackagePolicy) => {
+  const enabledInput = packagePolicy.inputs.find((i) => i.enabled);
+  const credentialType: AwsCredentialsType | undefined =
+    enabledInput?.streams?.[0].vars?.['aws.credentials.type'].value;
+
+  if (credentialType) {
+    const credsToKeep = AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP[credentialType];
+    const credFields = Object.values(AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP).flat();
+
+    if (credsToKeep) {
+      // we need to return a copy of the policy with the unused
+      // credentials set to undefined
+      return {
+        ...packagePolicy,
+        inputs: packagePolicy.inputs.map((input) => {
+          if (input.enabled) {
+            return {
+              ...input,
+              streams: input.streams.map((stream) => {
+                const vars = stream.vars;
+                for (const field in vars) {
+                  if (!credsToKeep.includes(field) && credFields.includes(field)) {
+                    vars[field].value = undefined;
+                  }
+                }
+
+                return {
+                  ...stream,
+                  vars,
+                };
+              }),
+            };
+          }
+
+          return input;
+        }),
+      };
+    }
+  }
+
+  // nothing to do, return unmutated policy
+  return packagePolicy;
 };

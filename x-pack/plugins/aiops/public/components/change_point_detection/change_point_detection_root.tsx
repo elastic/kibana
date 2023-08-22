@@ -28,7 +28,10 @@ import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 import { PageHeader } from '../page_header';
 
 import { ChangePointDetectionPage } from './change_point_detection_page';
-import { ChangePointDetectionContextProvider } from './change_point_detection_context';
+import {
+  ChangePointDetectionContextProvider,
+  ChangePointDetectionControlsContextProvider,
+} from './change_point_detection_context';
 import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
 import { ReloadContextProvider } from '../../hooks/use_reload';
 
@@ -87,7 +90,9 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
                     <EuiSpacer />
                     <ReloadContextProvider reload$={reload$}>
                       <ChangePointDetectionContextProvider>
-                        <ChangePointDetectionPage />
+                        <ChangePointDetectionControlsContextProvider>
+                          <ChangePointDetectionPage />
+                        </ChangePointDetectionControlsContextProvider>
                       </ChangePointDetectionContextProvider>
                     </ReloadContextProvider>
                   </DatePickerContextProvider>

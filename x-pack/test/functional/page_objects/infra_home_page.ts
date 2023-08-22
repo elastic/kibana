@@ -335,20 +335,40 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.missingOrFail('metrics-alert-menu');
     },
 
+    async dismissDatePickerTooltip() {
+      const isTooltipOpen = await testSubjects.exists(`waffleDatePickerIntervalTooltip`, {
+        timeout: 1000,
+      });
+
+      if (isTooltipOpen) {
+        await testSubjects.click(`waffleDatePickerIntervalTooltip`);
+      }
+    },
+
     async openInventoryAlertFlyout() {
+      await this.dismissDatePickerTooltip();
       await testSubjects.click('infrastructure-alerts-and-rules');
       await testSubjects.click('inventory-alerts-menu-option');
-      await testSubjects.click('inventory-alerts-create-rule');
+
+      // forces date picker tooltip to close in case it pops up after Alerts and rules opens
+      await testSubjects.moveMouseTo('contextMenuPanelTitleButton');
+
+      await retry.tryForTime(1000, () => testSubjects.click('inventory-alerts-create-rule'));
       await testSubjects.missingOrFail('inventory-alerts-create-rule', { timeout: 30000 });
-      await testSubjects.find('euiFlyoutCloseButton');
     },
 
     async openMetricsThresholdAlertFlyout() {
+      await this.dismissDatePickerTooltip();
       await testSubjects.click('infrastructure-alerts-and-rules');
       await testSubjects.click('metrics-threshold-alerts-menu-option');
-      await testSubjects.click('metrics-threshold-alerts-create-rule');
+
+      // forces date picker tooltip to close in case it pops up after Alerts and rules opens
+      await testSubjects.moveMouseTo('contextMenuPanelTitleButton');
+
+      await retry.tryForTime(1000, () =>
+        testSubjects.click('metrics-threshold-alerts-create-rule')
+      );
       await testSubjects.missingOrFail('metrics-threshold-alerts-create-rule', { timeout: 30000 });
-      await testSubjects.find('euiFlyoutCloseButton');
     },
 
     async closeAlertFlyout() {

@@ -14,18 +14,29 @@ const testProps = {
   title: 'Test Title',
   titleIcon: 'globe',
   docLinks: { ELASTIC_WEBSITE_URL: 'https://www.elastic.co/', DOC_LINK_VERSION: '7.15' },
+  selectedConversation: undefined,
 };
+
 describe('AssistantTitle', () => {
   it('the component renders correctly with valid props', () => {
-    const { getByText, container } = render(<AssistantTitle {...testProps} />);
+    const { getByText, container } = render(
+      <TestProviders>
+        <AssistantTitle {...testProps} />
+      </TestProviders>
+    );
     expect(getByText('Test Title')).toBeInTheDocument();
     expect(container.querySelector('[data-euiicon-type="globe"]')).not.toBeNull();
   });
 
   it('clicking on the popover button opens the popover with the correct link', () => {
-    const { getByTestId, queryByTestId } = render(<AssistantTitle {...testProps} />, {
-      wrapper: TestProviders,
-    });
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders>
+        <AssistantTitle {...testProps} />
+      </TestProviders>,
+      {
+        wrapper: TestProviders,
+      }
+    );
     expect(queryByTestId('tooltipContent')).not.toBeInTheDocument();
     fireEvent.click(getByTestId('tooltipIcon'));
     expect(getByTestId('tooltipContent')).toBeInTheDocument();
