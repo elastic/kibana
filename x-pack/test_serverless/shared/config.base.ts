@@ -9,12 +9,17 @@ import { resolve } from 'path';
 import { format as formatUrl } from 'url';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { esTestConfig, kbnTestConfig, kibanaServiceAccount } from '@kbn/test';
+import {
+  esTestConfig,
+  kbnTestConfig,
+  kibanaServiceAccount,
+  kibanaServerlessSuperuser,
+} from '@kbn/test';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 
 export default async () => {
   const servers = {
-    kibana: kbnTestConfig.getUrlParts(),
+    kibana: kbnTestConfig.getUrlParts(kibanaServerlessSuperuser),
     elasticsearch: esTestConfig.getUrlParts(),
   };
 
@@ -51,13 +56,17 @@ export default async () => {
             type: 'json',
           },
         })}`,
-        `--logging.loggers=${JSON.stringify([
-          {
-            name: 'elasticsearch.deprecation',
-            level: 'all',
-            appenders: ['deprecation'],
-          },
-        ])}`,
+        /**
+         * ESS emits deprecation warnings for ssl.keystore.password.
+         * Need to mount a secure keystore into the images because ES_NOPASSWORD_P12_PATH doesn't work.
+         */
+        // `--logging.loggers=${JSON.stringify([
+        //   {
+        //     name: 'elasticsearch.deprecation',
+        //     level: 'all',
+        //     appenders: ['deprecation'],
+        //   },
+        // ])}`,
         '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
         `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
       ],
