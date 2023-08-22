@@ -179,16 +179,8 @@ export const filterByDisabledRules = () => {
   cy.get(DISABLED_RULES_BTN).click();
 };
 
-export const goToRuleDetailsPageFor = (ruleName: string) => {
-  cy.contains(RULE_NAME, ruleName).click();
-
-  cy.get(PAGE_CONTENT_SPINNER).should('be.visible');
-  cy.contains(RULE_NAME_HEADER, ruleName).should('be.visible');
-  cy.get(PAGE_CONTENT_SPINNER).should('not.exist');
-};
-
 /**
- * @deprecated use goToRuleDetailsPageFor
+ * @deprecated use goToTheRuleDetailsOf
  */
 export const goToRuleDetails = () => {
   cy.get(RULE_NAME).first().click();
@@ -196,6 +188,10 @@ export const goToRuleDetails = () => {
 
 export const goToTheRuleDetailsOf = (ruleName: string) => {
   cy.contains(RULE_NAME, ruleName).click();
+
+  cy.get(PAGE_CONTENT_SPINNER).should('be.visible');
+  cy.contains(RULE_NAME_HEADER, ruleName).should('be.visible');
+  cy.get(PAGE_CONTENT_SPINNER).should('not.exist');
 };
 
 export const openIntegrationsPopover = () => {

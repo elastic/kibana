@@ -79,7 +79,7 @@ import {
   expectManagementTableRules,
   getRulesManagementTableRows,
   goToRuleDetails,
-  goToRuleDetailsPageFor,
+  goToTheRuleDetailsOf,
   selectRulesByName,
 } from '../../../tasks/alerts_detection_rules';
 import { deleteSelectedRules } from '../../../tasks/rules_bulk_actions';
@@ -319,7 +319,7 @@ describe('Custom query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, ()
           const initialNumberOfRules = rules.length;
           const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
 
-          goToRuleDetailsPageFor('New Rule Test');
+          goToTheRuleDetailsOf('New Rule Test');
           cy.intercept('POST', '/api/detection_engine/rules/_bulk_delete').as('deleteRule');
 
           deleteRuleFromDetailsPage();
