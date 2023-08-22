@@ -9,11 +9,12 @@ import { useQuery } from '@tanstack/react-query';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { isDefined } from '@kbn/ml-is-defined';
-import { isGetTransformsStatsResponseSchema } from '../../../common/api_schemas/type_guards';
+
 import type {
   GetTransformNodesResponseSchema,
   GetTransformsResponseSchema,
 } from '../../../common/api_schemas/transforms';
+import type { GetTransformsStatsResponseSchema } from '../../../common/api_schemas/transforms_stats';
 import {
   addInternalBasePath,
   DEFAULT_REFRESH_INTERVAL_MS,
@@ -24,7 +25,6 @@ import { isTransformStats } from '../../../common/types/transform_stats';
 
 import { type TransformListRow } from '../common';
 import { useAppDependencies } from '../app_dependencies';
-
 import { TRANSFORM_ERROR_TYPE } from '../common/transform';
 
 interface UseGetTransformsResponse {
@@ -62,11 +62,14 @@ export const useGetTransforms = () => {
           signal,
         }
       );
-      const transformStats = await http.get(addInternalBasePath(`transforms/_stats`), {
-        version: '1',
-        asSystemRequest: true,
-        signal,
-      });
+      const transformStats = await http.get<GetTransformsStatsResponseSchema>(
+        addInternalBasePath(`transforms/_stats`),
+        {
+          version: '1',
+          asSystemRequest: true,
+          signal,
+        }
+      );
 
       // There might be some errors with fetching certain transforms
       // For example, when task exists and is running but the config is deleted
@@ -85,9 +88,7 @@ export const useGetTransforms = () => {
       }
 
       update.tableRows = transformConfigs.transforms.reduce((reducedtableRows, config) => {
-        const stats = isGetTransformsStatsResponseSchema(transformStats)
-          ? transformStats.transforms.find((d) => config.id === d.id)
-          : undefined;
+        const stats = transformStats.transforms.find((d) => config.id === d.id);
 
         // A newly created transform might not have corresponding stats yet.
         // If that's the case we just skip the transform and don't add it to the transform list yet.

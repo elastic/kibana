@@ -31,10 +31,6 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { DuplicateDataViewError } from '@kbn/data-plugin/public';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import {
-  isGetTransformsStatsResponseSchema,
-  isStartTransformsResponseSchema,
-} from '../../../../../../common/api_schemas/type_guards';
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
@@ -156,15 +152,9 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       setLoading(true);
 
       startTransforms([{ id: transformId }], {
-        onError: () => {
-          setStarted(false);
-        },
-        onSuccess: (resp) => {
-          setStarted(isStartTransformsResponseSchema(resp) && resp[transformId]?.success === true);
-        },
-        onSettled: () => {
-          setLoading(false);
-        },
+        onError: () => setStarted(false),
+        onSuccess: (resp) => setStarted(resp[transformId]?.success === true),
+        onSettled: () => setLoading(false),
       });
     }
 
@@ -258,11 +248,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
         return;
       }
 
-      if (
-        isGetTransformsStatsResponseSchema(stats) &&
-        Array.isArray(stats.transforms) &&
-        stats.transforms.length > 0
-      ) {
+      if (stats && Array.isArray(stats.transforms) && stats.transforms.length > 0) {
         const percent =
           getTransformProgress({
             id: transformId,

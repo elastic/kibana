@@ -15,7 +15,6 @@ import type {
   PutTransformsRequestSchema,
   PutTransformsResponseSchema,
 } from '../../../common/api_schemas/transforms';
-import { isPutTransformsResponseSchema } from '../../../common/api_schemas/type_guards';
 import { addInternalBasePath } from '../../../common/constants';
 import type { TransformId } from '../../../common/types/transform';
 import { getErrorMessage } from '../../../common/utils/errors';
@@ -32,6 +31,19 @@ export const useCreateTransform = (
   const refreshTransformList = useRefreshTransformList();
   const toastNotifications = useToastNotifications();
 
+  function errorToast(error: unknown) {
+    toastNotifications.addDanger({
+      title: i18n.translate('xpack.transform.stepCreateForm.createTransformErrorMessage', {
+        defaultMessage: 'An error occurred creating the transform {transformId}:',
+        values: { transformId },
+      }),
+      text: toMountPoint(
+        <ToastNotificationText overlays={overlays} theme={theme} text={getErrorMessage(error)} />,
+        { theme$: theme.theme$ }
+      ),
+    });
+  }
+
   const mutation = useMutation({
     mutationFn: () => {
       return http.put<PutTransformsResponseSchema>(
@@ -42,40 +54,21 @@ export const useCreateTransform = (
         }
       );
     },
-    onError: (resp) => {
-      if (!isPutTransformsResponseSchema(resp) || resp.errors.length > 0) {
-        let respErrors:
-          | PutTransformsResponseSchema['errors']
-          | PutTransformsResponseSchema['errors'][number]
-          | undefined;
-
-        if (isPutTransformsResponseSchema(resp) && resp.errors.length > 0) {
-          respErrors = resp.errors.length === 1 ? resp.errors[0] : resp.errors;
-        }
-
-        toastNotifications.addDanger({
-          title: i18n.translate('xpack.transform.stepCreateForm.createTransformErrorMessage', {
-            defaultMessage: 'An error occurred creating the transform {transformId}:',
-            values: { transformId },
-          }),
-          text: toMountPoint(
-            <ToastNotificationText
-              overlays={overlays}
-              theme={theme}
-              text={getErrorMessage(isPutTransformsResponseSchema(resp) ? respErrors : resp)}
-            />,
-            { theme$: theme.theme$ }
-          ),
-        });
-      }
+    onError: (error) => {
+      errorToast(error);
     },
-    onSuccess: (results) => {
-      toastNotifications.addSuccess(
-        i18n.translate('xpack.transform.stepCreateForm.createTransformSuccessMessage', {
-          defaultMessage: 'Request to create transform {transformId} acknowledged.',
-          values: { transformId },
-        })
-      );
+    onSuccess: (resp) => {
+      if (resp.errors.length > 0) {
+        errorToast(resp.errors.length === 1 ? resp.errors[0] : resp.errors);
+      } else {
+        toastNotifications.addSuccess(
+          i18n.translate('xpack.transform.stepCreateForm.createTransformSuccessMessage', {
+            defaultMessage: 'Request to create transform {transformId} acknowledged.',
+            values: { transformId },
+          })
+        );
+      }
+
       refreshTransformList();
     },
   });

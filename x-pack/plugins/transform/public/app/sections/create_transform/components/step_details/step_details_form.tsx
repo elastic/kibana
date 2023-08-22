@@ -29,7 +29,6 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/constants/validation_messages';
-import { isPostTransformsPreviewResponseSchema } from '../../../../../../common/api_schemas/type_guards';
 import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
 import { TransformId } from '../../../../../../common/types/transform';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
@@ -160,7 +159,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       useGetTransformsPreview(previewRequest);
 
     useEffect(() => {
-      if (isPostTransformsPreviewResponseSchema(transformPreview)) {
+      if (transformPreview) {
         const properties = transformPreview.generated_dest_index.mappings.properties;
         const timeFields: string[] = Object.keys(properties).filter(
           (col) => properties[col].type === 'date'
