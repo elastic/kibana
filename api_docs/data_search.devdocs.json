@@ -32480,10 +32480,6 @@
           {
             "plugin": "discover",
             "path": "src/plugins/discover/public/application/context/utils/get_es_query_search_after.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/get_es_query_search_after.ts"
           }
         ],
         "initialIsOpen": false
