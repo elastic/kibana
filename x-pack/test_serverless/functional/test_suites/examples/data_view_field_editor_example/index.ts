@@ -17,7 +17,15 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
   describe('data view field editor example', function () {
     before(async () => {
-      await esArchiver.emptyKibanaIndex();
+      // TODO: This fails in Serverless with
+      // "index_not_found_exception: no such index [.kibana_ingest]",
+      // but the tests still run
+      try {
+        await esArchiver.emptyKibanaIndex();
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+      }
       await browser.setWindowSize(1300, 900);
       await es.transport.request({
         path: '/blogs/_doc',
