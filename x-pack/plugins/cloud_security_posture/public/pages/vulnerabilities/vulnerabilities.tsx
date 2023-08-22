@@ -21,7 +21,10 @@ import { i18n } from '@kbn/i18n';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../common/constants';
-import { useCloudPostureTable } from '../../common/hooks/use_cloud_posture_table';
+import {
+  CloudPostureTableResult,
+  useCloudPostureTable,
+} from '../../common/hooks/use_cloud_posture_table';
 import { useLatestVulnerabilities } from './hooks/use_latest_vulnerabilities';
 import type { VulnerabilitiesQueryData } from './types';
 import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../common/constants';
@@ -182,16 +185,7 @@ const VulnerabilitiesDataGrid = ({
   dataView: DataView;
   data: VulnerabilitiesQueryData | undefined;
   isFetching: boolean;
-  onChangeItemsPerPage: any;
-  onChangePage: any;
-  onSort: any;
-  urlQuery: any;
-  onResetFilters: any;
-  pageSize: any;
-  setUrlQuery: any;
-  pageIndex: any;
-  sort: any;
-}) => {
+} & CloudPostureTableResult) => {
   const { euiTheme } = useEuiTheme();
   const styles = useStyles();
   const [showHighlight, setHighlight] = useState(false);
@@ -199,7 +193,9 @@ const VulnerabilitiesDataGrid = ({
   const invalidIndex = -1;
 
   const selectedVulnerability = useMemo(() => {
-    return data?.page[urlQuery.vulnerabilityIndex];
+    if (urlQuery.vulnerabilityIndex !== undefined) {
+      return data?.page[urlQuery.vulnerabilityIndex];
+    }
   }, [data?.page, urlQuery.vulnerabilityIndex]);
 
   const onCloseFlyout = () => {
@@ -262,7 +258,9 @@ const VulnerabilitiesDataGrid = ({
 
   const flyoutVulnerabilityIndex = urlQuery?.vulnerabilityIndex;
 
-  const selectedVulnerabilityIndex = flyoutVulnerabilityIndex + pageIndex * pageSize;
+  const selectedVulnerabilityIndex = flyoutVulnerabilityIndex
+    ? flyoutVulnerabilityIndex + pageIndex * pageSize
+    : undefined;
 
   const renderCellValue = useMemo(() => {
     const Cell: React.FC<EuiDataGridCellValueElementProps> = ({
@@ -374,7 +372,9 @@ const VulnerabilitiesDataGrid = ({
     [pageSize, setUrlQuery]
   );
 
-  const showVulnerabilityFlyout = flyoutVulnerabilityIndex > invalidIndex;
+  const showVulnerabilityFlyout = flyoutVulnerabilityIndex
+    ? flyoutVulnerabilityIndex > invalidIndex
+    : undefined;
 
   if (data?.page.length === 0) {
     return <EmptyState onResetFilters={onResetFilters} />;

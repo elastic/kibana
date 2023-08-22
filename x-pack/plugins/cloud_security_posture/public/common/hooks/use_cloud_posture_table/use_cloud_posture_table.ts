@@ -12,7 +12,7 @@ import { usePageSize } from '../use_page_size';
 import { getDefaultQuery, useBaseEsQuery, usePersistedQuery } from './utils';
 
 interface QuerySort {
-  direction: string;
+  direction: 'desc' | 'asc';
   id: string;
 }
 
@@ -29,6 +29,7 @@ export interface CloudPostureTableResult {
   queryError?: Error;
   pageIndex: number;
   urlQuery: {
+    vulnerabilityIndex?: number;
     filters: BoolQuery[];
     pageIndex: number;
     pageSize: number;
