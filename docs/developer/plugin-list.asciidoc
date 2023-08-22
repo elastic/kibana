@@ -512,10 +512,6 @@ Plugin server-side only. Plugin has three main functions:
 |Contains the enhancements to the OSS discover app.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/discover_log_explorer/README.md[discoverLogExplorer]
-|This plugin registers a log-explorer profile using the Discover customization framework, offering several affordances specifically designed for log consumption.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/ecs_data_quality_dashboard/README.md[ecsDataQualityDashboard]
 |This plugin implements (server) APIs used to render the content of the Data Quality dashboard.
 
@@ -620,6 +616,10 @@ the infrastructure monitoring use-case within Kibana.
 using the CURL scripts in the scripts folder.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/log_explorer/README.md[logExplorer]
+|This plugin provides a LogExplorer component using the Discover customization framework, offering several affordances specifically designed for log consumption.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/logs_shared/README.md[logsShared]
 |Exposes the shared components and APIs to access and visualize logs.
 
@@ -655,6 +655,10 @@ Elastic.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_ai_assistant/README.md[observabilityAIAssistant]
 |This document gives an overview of the features of the Observability AI Assistant at the time of writing, and how to use them. At a high level, the Observability AI Assistant offers contextual insights, and a chat functionality that we enrich with function calling, allowing the LLM to hook into the user's data. We also allow the LLM to store things it considers new information as embeddings into Elasticsearch, and query this knowledge base when it decides it needs more information, using ELSER.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_log_explorer/README.md[observabilityLogExplorer]
+|undefined
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_onboarding/README.md[observabilityOnboarding]
