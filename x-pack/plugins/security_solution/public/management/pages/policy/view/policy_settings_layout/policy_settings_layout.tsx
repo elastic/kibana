@@ -7,6 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
@@ -42,6 +43,7 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(({ policy: _
     },
   } = useKibana();
   const toasts = useToasts();
+  const dispatch = useDispatch();
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
   const { canWritePolicyManagement } = useUserPrivileges().endpointPrivileges;
   const { isLoading: isUpdating, mutateAsync: sendPolicyUpdate } = useUpdateEndpointPolicy();
@@ -89,7 +91,7 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(({ policy: _
 
     update.inputs[0].config.policy.value = policySettings;
     sendPolicyUpdate({ policy: update })
-      .then(() => {
+      .then(({ item: policyItem }) => {
         toasts.addSuccess({
           'data-test-subj': 'policyDetailsSuccessMessage',
           title: i18n.translate(
@@ -109,6 +111,13 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(({ policy: _
 
         if (routeState && routeState.onSaveNavigateTo) {
           navigateToApp(...routeState.onSaveNavigateTo);
+        } else {
+          dispatch({
+            type: 'serverReturnedPolicyDetailsData',
+            payload: {
+              policyItem,
+            },
+          });
         }
       })
       .catch((err) => {
@@ -123,6 +132,7 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(({ policy: _
 
     handleSaveCancel();
   }, [
+    dispatch,
     handleSaveCancel,
     navigateToApp,
     policy,
