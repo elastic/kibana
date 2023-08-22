@@ -153,10 +153,13 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
       [defaulCrawlerConfiguration],
       {
         onReceiveCrawlerCustomScheduling: (_, { crawlerConfigurations }) => {
-          return crawlerConfigurations.map((configuration) => ({
-            ...defaulCrawlerConfiguration,
-            ...configuration,
-          }));
+          // Handle case with no custom scheduling
+          return crawlerConfigurations.length > 0
+            ? crawlerConfigurations.map((configuration) => ({
+                ...defaulCrawlerConfiguration,
+                ...configuration,
+              }))
+            : [defaulCrawlerConfiguration];
         },
         onAddCustomCrawler: (state, { index }) => [
           ...state,
