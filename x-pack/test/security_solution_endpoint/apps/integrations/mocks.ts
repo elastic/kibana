@@ -380,7 +380,7 @@ export const getArtifactsListTestsData = () => [
         {
           selector: 'blocklistPage-card-criteriaConditions',
           value:
-            'OSIS Windows\nAND file.hash.*IS ONE OF\nA4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+            'OSIS Windows\nAND file.hash.*IS ONE OF\na4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
         },
       ],
     },
@@ -407,7 +407,7 @@ export const getArtifactsListTestsData = () => [
         {
           type: 'clear',
           selector:
-            'blocklist-form-values-input-A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+            'blocklist-form-values-input-a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
         },
         {
           type: 'input',
@@ -450,14 +450,14 @@ export const getArtifactsListTestsData = () => [
         type: 'blocklist',
         identifier: 'endpoint-blocklist-windows-v1',
         relative_url:
-          '/api/fleet/artifacts/endpoint-blocklist-windows-v1/d2b12779ee542a6c4742d505cd0c684b0f55436a97074c62e7de7155344c74bc',
-        body: 'eJxVzEEKgzAUBNC7ZF0kMRqjOyt4CSnym/+DgVTFxFKR3r0pdFNmN2+Yk9EcN0eBNcPJ4rESa1hwj9UTu/yZdeQxoXWesgnClIUJ8lKl2bLSBnHZkrrZ+B0JU/s7oxeYOBoIhCPMR4In+D3JwNpCVrzjXa+F0qrjV1WrvlW5EqZGSRy14EAVL+CuJRda1mgtllgKkduiUuz2/uYDrE49EA==',
+          '/api/fleet/artifacts/endpoint-blocklist-windows-v1/730aee3fea0a4d119285ecec500343262fb9f710915536a901a7b1cec8dff714',
+        body: 'eJxVzM0KgzAQBOB32XORxJ81+ipSZM1uMJCqmFgq0ndvCr2Uuc03zAWypN1LhH64IJ2bQA/RP7YgcPsz5yVwRueDFDPFuYgzlQ3m2brJTmnds/rFhoOFc/s7kxfZNFqKwiMtZ4YnhSPLAFRXrbLKOqPRoFUTdugIS9S240oUG61IWlXTZCqlTdWxc9xwo3Xp6hbh/v7mA+fuPhA=',
         encryption_algorithm: 'none',
         package_name: 'endpoint',
-        encoded_size: 160,
-        encoded_sha256: '8620957e33599029c5f96fa689e0df2206960f582130ccdea64f22403fc05e50',
+        encoded_size: 155,
+        encoded_sha256: 'caa472e57d793539061e438337b519367303f4a75adf5a883c4104b88c30ee08',
         decoded_size: 196,
-        decoded_sha256: 'd2b12779ee542a6c4742d505cd0c684b0f55436a97074c62e7de7155344c74bc',
+        decoded_sha256: '730aee3fea0a4d119285ecec500343262fb9f710915536a901a7b1cec8dff714',
         compression_algorithm: 'zlib',
         created: '2000-01-01T00:00:00.000Z',
       }),
@@ -470,7 +470,7 @@ export const getArtifactsListTestsData = () => [
                 field: 'file.hash.sha256',
                 operator: 'included',
                 type: 'exact_cased_any',
-                value: ['A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476'],
+                value: ['a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476'],
               },
             ],
           },
