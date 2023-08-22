@@ -6,5 +6,5 @@
  */
 
 export function stripSearchPrefix(input: string, replacement?: string): string {
-  return input?.startsWith('search-') ? `${replacement}${input.substring(7)}` : input || '';
+  return input?.startsWith('search-') ? `${replacement || ''}${input.substring(7)}` : input || '';
 }
