@@ -92,6 +92,7 @@ describe('GetCsvReportPanelAction', () => {
             from: 'now-7d',
           },
         }),
+        hasTimeRange: () => true,
       },
     } as unknown as ActionContext;
   });

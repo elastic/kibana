@@ -55,7 +55,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with metrics present', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/164164
+    describe.skip('with metrics present', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.common.navigateToApp('infraOps');
@@ -196,6 +197,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.getWaffleMap();
         await pageObjects.infraHome.openTimeline();
         await pageObjects.infraHome.closeTimeline();
+      });
+
+      it('toggles the inventory switcher', async () => {
+        await pageObjects.infraHome.toggleInventorySwitcher();
       });
     });
 

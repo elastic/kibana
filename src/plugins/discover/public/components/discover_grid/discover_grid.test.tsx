@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { buildDataViewMock, deepMockedFields, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { DiscoverGrid, DiscoverGridProps } from './discover_grid';
+import { DiscoverGrid, DiscoverGridProps, DataLoadingState } from './discover_grid';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
@@ -38,7 +38,7 @@ function getProps() {
     ariaLabelledBy: '',
     columns: [],
     dataView: dataViewMock,
-    isLoading: false,
+    loadingState: DataLoadingState.loaded,
     expandedDoc: undefined,
     onAddColumn: jest.fn(),
     onFilter: jest.fn(),
