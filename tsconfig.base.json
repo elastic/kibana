@@ -66,6 +66,8 @@
       "@kbn/analytics-shippers-gainsight/*": ["packages/analytics/shippers/gainsight/*"],
       "@kbn/apm-config-loader": ["packages/kbn-apm-config-loader"],
       "@kbn/apm-config-loader/*": ["packages/kbn-apm-config-loader/*"],
+      "@kbn/apm-data-access-plugin": ["x-pack/plugins/apm_data_access"],
+      "@kbn/apm-data-access-plugin/*": ["x-pack/plugins/apm_data_access/*"],
       "@kbn/apm-plugin": ["x-pack/plugins/apm"],
       "@kbn/apm-plugin/*": ["x-pack/plugins/apm/*"],
       "@kbn/apm-synthtrace": ["packages/kbn-apm-synthtrace"],
