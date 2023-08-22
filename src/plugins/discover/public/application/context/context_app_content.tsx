@@ -18,7 +18,13 @@ import {
   type SearchResponseInterceptedWarning,
   SearchResponseWarnings,
 } from '@kbn/search-response-warnings';
-import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
+import {
+  CONTEXT_STEP_SETTING,
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  MAX_DOC_FIELDS_DISPLAYED,
+  ROW_HEIGHT_OPTION,
+  SHOW_MULTIFIELDS,
+} from '@kbn/discover-utils';
 import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
 import { getDefaultRowsPerPage } from '../../../common/constants';
 import { LoadingStatus } from './services/context_query_state';
@@ -28,7 +34,7 @@ import { SurrDocType } from './services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
+import { DiscoverGridFlyout, DiscoverGridFlyoutProps } from '../../components/discover_grid_flyout';
 import { DocViewer } from '../../services/doc_views/components/doc_viewer';
 
 export interface ContextAppContentProps {
@@ -122,6 +128,24 @@ export function ContextAppContent({
     return [[dataView.timeFieldName!, SortDirection.desc]];
   }, [dataView]);
 
+  const renderDocumentView = useCallback(
+    (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => (
+      <DiscoverGridFlyout
+        dataView={dataView}
+        hit={hit}
+        hits={displayedRows}
+        // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
+        columns={displayedColumns}
+        onFilter={addFilter}
+        onRemoveColumn={onRemoveColumn}
+        onAddColumn={onAddColumn}
+        onClose={() => setExpandedDoc(undefined)}
+        setExpandedDoc={setExpandedDoc}
+      />
+    ),
+    []
+  );
+
   return (
     <Fragment>
       {!!interceptedWarnings?.length && (
@@ -181,27 +205,10 @@ export function ContextAppContent({
               setExpandedDoc={setExpandedDoc}
               onFilter={addFilter}
               onSetColumns={onSetColumns}
-              renderDocumentView={(
-                displayedRows: DataTableRecord[],
-                displayedColumns: string[]
-              ) => {
-                return (
-                  expandedDoc && (
-                    <DiscoverGridFlyout
-                      dataView={dataView}
-                      hit={expandedDoc}
-                      hits={displayedRows}
-                      // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
-                      columns={displayedColumns}
-                      onFilter={addFilter}
-                      onRemoveColumn={onRemoveColumn}
-                      onAddColumn={onAddColumn}
-                      onClose={() => setExpandedDoc(undefined)}
-                      setExpandedDoc={setExpandedDoc}
-                    />
-                  )
-                );
-              }}
+              configRowHeight={services.uiSettings.get(ROW_HEIGHT_OPTION)}
+              showMultiFields={services.uiSettings.get(SHOW_MULTIFIELDS)}
+              maxDocFieldsDisplayed={services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
+              renderDocumentView={renderDocumentView}
               services={services}
             />
           </CellActionsProvider>

@@ -14,10 +14,13 @@ export interface DataGridOptionsRecord {
   previousConfigRowHeight: number;
 }
 
-const ROW_HEIGHT_KEY = 'discover:dataGridRowHeight';
+const getRowHeightKey = (consumer: string) => `${consumer}:dataGridRowHeight`;
 
-export const getStoredRowHeight = (storage: Storage): DataGridOptionsRecord | null => {
-  const entry = storage.get(ROW_HEIGHT_KEY);
+export const getStoredRowHeight = (
+  storage: Storage,
+  consumer: string
+): DataGridOptionsRecord | null => {
+  const entry = storage.get(getRowHeightKey(consumer));
   if (
     typeof entry === 'object' &&
     entry !== null &&
@@ -32,9 +35,10 @@ export const getStoredRowHeight = (storage: Storage): DataGridOptionsRecord | nu
 export const updateStoredRowHeight = (
   newRowHeight: number,
   configRowHeight: number,
-  storage: Storage
+  storage: Storage,
+  consumer: string
 ) => {
-  storage.set(ROW_HEIGHT_KEY, {
+  storage.set(getRowHeightKey(consumer), {
     previousRowHeight: newRowHeight,
     previousConfigRowHeight: configRowHeight,
   });

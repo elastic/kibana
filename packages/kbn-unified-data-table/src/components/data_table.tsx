@@ -207,13 +207,29 @@ export interface UnifiedDataTableProps {
     storage: Storage;
     data: DataPublicPluginStart;
   };
+  /**
+   * Callback to render DocumentView when the document is expanded
+   */
   renderDocumentView?: (
+    hit: DataTableRecord,
     displayedRows: DataTableRecord[],
     displayedColumns: string[]
   ) => JSX.Element | undefined;
+  /**
+   * Optional value for providing configuration setting for UnifiedDataTable rows height
+   */
   configRowHeight?: number;
+  /**
+   * Optional value for providing configuration setting for enabling to display the complex fields in the table. Default is true.
+   */
   showMultiFields?: boolean;
+  /**
+   * Optional value for providing configuration setting for maximum number of document fields to display in the table. Default is 50.
+   */
   maxDocFieldsDisplayed?: number;
+  /**
+   * Number total hits from ES
+   */
   externalControlColumns?: EuiDataGridControlColumn[];
   /**
    * Number total hits from ES
@@ -243,6 +259,10 @@ export interface UnifiedDataTableProps {
     string,
     (props: EuiDataGridCellValueElementProps) => React.ReactNode
   >;
+  /**
+   * Name of the UnifiedDataTable consumer component or application
+   */
+  consumer?: string;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -288,12 +308,13 @@ export const UnifiedDataTable = ({
   expandedDoc,
   configRowHeight,
   showMultiFields = true,
-  maxDocFieldsDisplayed = Number.MAX_SAFE_INTEGER,
+  maxDocFieldsDisplayed = 50,
   externalControlColumns,
   externalAdditionalControls,
   rowsPerPageOptions,
   visibleCellActions,
   externalCustomRenderers,
+  consumer = 'discover',
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -608,11 +629,14 @@ export const UnifiedDataTable = ({
 
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
-  const internalControlColumns = useMemo(
-    () =>
-      getLeadControlColumns(canSetExpandedDoc).filter(({ id }) => controlColumnIds.includes(id)),
-    [controlColumnIds, canSetExpandedDoc]
-  );
+  const leadingControlColumns = useMemo(() => {
+    const internalControlColumns = getLeadControlColumns(canSetExpandedDoc).filter(({ id }) =>
+      controlColumnIds.includes(id)
+    );
+    return externalControlColumns
+      ? [...externalControlColumns, ...internalControlColumns]
+      : internalControlColumns;
+  }, [canSetExpandedDoc, externalControlColumns, controlColumnIds]);
 
   const additionalControls = useMemo(
     () => (
@@ -665,6 +689,7 @@ export const UnifiedDataTable = ({
             showDisplaySelector,
             showFullScreenSelector: showFullScreenButton,
           },
+
     [defaultColumns, isSortEnabled, additionalControls, showDisplaySelector, showFullScreenButton]
   );
 
@@ -673,6 +698,7 @@ export const UnifiedDataTable = ({
     onUpdateRowHeight,
     storage,
     configRowHeight,
+    consumer,
   });
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;
@@ -729,11 +755,7 @@ export const UnifiedDataTable = ({
             columns={euiGridColumns}
             columnVisibility={columnsVisibility}
             data-test-subj="docTable"
-            leadingControlColumns={
-              externalControlColumns
-                ? [...internalControlColumns, ...externalControlColumns]
-                : internalControlColumns
-            }
+            leadingControlColumns={leadingControlColumns}
             onColumnResize={onResize}
             pagination={paginationObj}
             renderCellValue={renderCellValue}
@@ -782,7 +804,9 @@ export const UnifiedDataTable = ({
             </p>
           </EuiScreenReaderOnly>
         )}
-        {canSetExpandedDoc && expandedDoc && renderDocumentView!(displayedRows, displayedColumns)}
+        {canSetExpandedDoc &&
+          expandedDoc &&
+          renderDocumentView!(expandedDoc, displayedRows, displayedColumns)}
       </span>
     </UnifiedDataTableContext.Provider>
   );

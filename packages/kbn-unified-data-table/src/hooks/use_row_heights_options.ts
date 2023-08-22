@@ -21,6 +21,7 @@ interface UseRowHeightProps {
   onUpdateRowHeight?: (rowHeight: number) => void;
   storage: Storage;
   configRowHeight?: number;
+  consumer: string;
 }
 
 /**
@@ -64,9 +65,10 @@ export const useRowHeightsOptions = ({
   onUpdateRowHeight,
   storage,
   configRowHeight = DEFAULT_ROW_HEIGHT_OPTION,
+  consumer,
 }: UseRowHeightProps) => {
   return useMemo((): EuiDataGridRowHeightsOptions => {
-    const rowHeightFromLS = getStoredRowHeight(storage);
+    const rowHeightFromLS = getStoredRowHeight(storage, consumer);
 
     const configHasNotChanged = (
       localStorageRecord: DataGridOptionsRecord | null
@@ -87,9 +89,9 @@ export const useRowHeightsOptions = ({
       lineHeight: '1.6em',
       onChange: ({ defaultHeight: newRowHeight }: EuiDataGridRowHeightsOptions) => {
         const newSerializedRowHeight = serializeRowHeight(newRowHeight);
-        updateStoredRowHeight(newSerializedRowHeight, configRowHeight, storage);
+        updateStoredRowHeight(newSerializedRowHeight, configRowHeight, storage, consumer);
         onUpdateRowHeight?.(newSerializedRowHeight);
       },
     };
-  }, [storage, rowHeightState, configRowHeight, onUpdateRowHeight]);
+  }, [storage, consumer, rowHeightState, configRowHeight, onUpdateRowHeight]);
 };

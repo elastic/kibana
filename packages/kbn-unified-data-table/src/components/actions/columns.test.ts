@@ -36,10 +36,10 @@ describe('Test column actions', () => {
     const actions = getStateColumnAction({}, setAppState);
 
     actions.onAddColumn('_score');
-    expect(setAppState).toHaveBeenCalledWith(['_score'], [['_score', 'desc']]);
+    expect(setAppState).toHaveBeenCalledWith({ columns: ['_score'], sort: [['_score', 'desc']] });
     setAppState.mockClear();
     actions.onAddColumn('test');
-    expect(setAppState).toHaveBeenCalledWith(['test'], undefined);
+    expect(setAppState).toHaveBeenCalledWith({ columns: ['test'] });
   });
 
   test('getStateColumnActions with columns and sort in state', () => {
@@ -50,19 +50,32 @@ describe('Test column actions', () => {
     );
 
     actions.onAddColumn('_score');
-    expect(setAppState).toHaveBeenCalledWith(['first', 'second', '_score'], [['first', 'desc']]);
+    expect(setAppState).toHaveBeenCalledWith({
+      columns: ['first', 'second', '_score'],
+      sort: [['first', 'desc']],
+    });
     setAppState.mockClear();
     actions.onAddColumn('third');
-    expect(setAppState).toHaveBeenCalledWith(['first', 'second', 'third'], [['first', 'desc']]);
+    expect(setAppState).toHaveBeenCalledWith({
+      columns: ['first', 'second', 'third'],
+      sort: [['first', 'desc']],
+    });
     setAppState.mockClear();
     actions.onRemoveColumn('first');
-    expect(setAppState).toHaveBeenCalledWith(['second'], []);
+    expect(setAppState).toHaveBeenCalledWith({
+      columns: ['second'],
+      sort: [],
+    });
     setAppState.mockClear();
     actions.onSetColumns(['first', 'second', 'third'], true);
-    expect(setAppState).toHaveBeenCalledWith(['first', 'second', 'third']);
+    expect(setAppState).toHaveBeenCalledWith({
+      columns: ['first', 'second', 'third'],
+    });
     setAppState.mockClear();
 
     actions.onMoveColumn('second', 0);
-    expect(setAppState).toHaveBeenCalledWith(['second', 'first']);
+    expect(setAppState).toHaveBeenCalledWith({
+      columns: ['second', 'first'],
+    });
   });
 });

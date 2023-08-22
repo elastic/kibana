@@ -19,6 +19,7 @@ describe('useRowHeightsOptions', () => {
       return useRowHeightsOptions({
         rowHeightState: 2,
         storage: new LocalStorageMock({}) as unknown as Storage,
+        consumer: 'discover',
       });
     });
 
@@ -34,6 +35,7 @@ describe('useRowHeightsOptions', () => {
             previousConfigRowHeight: 3,
           },
         }) as unknown as Storage,
+        consumer: 'discover',
       });
     });
 
@@ -43,6 +45,7 @@ describe('useRowHeightsOptions', () => {
   test('should apply rowHeight from configRowHeight', () => {
     const { result } = renderHook(() => {
       return useRowHeightsOptions({
+        consumer: 'discover',
         configRowHeight: 3,
         storage: new LocalStorageMock({}) as unknown as Storage,
       });
@@ -63,6 +66,7 @@ describe('useRowHeightsOptions', () => {
             previousConfigRowHeight: 4,
           },
         }) as unknown as Storage,
+        consumer: 'discover',
       });
     });
 

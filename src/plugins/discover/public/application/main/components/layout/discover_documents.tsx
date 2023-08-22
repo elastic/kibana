@@ -26,8 +26,11 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
   HIDE_ANNOUNCEMENTS,
+  MAX_DOC_FIELDS_DISPLAYED,
+  ROW_HEIGHT_OPTION,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
+  SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
@@ -76,25 +79,6 @@ export const onResize = (
   const newGrid = { ...grid, columns: newColumns };
   stateContainer.appState.update({ grid: newGrid });
 };
-
-function getDiscoverDetails(props: DiscoverGridFlyoutProps) {
-  return (
-    <DiscoverGridFlyout
-      dataView={props.dataView}
-      hit={props.hit}
-      hits={props.hits}
-      // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
-      columns={props.columns}
-      savedSearchId={props.savedSearchId}
-      onFilter={props.onFilter}
-      onRemoveColumn={props.onRemoveColumn}
-      onAddColumn={props.onAddColumn}
-      onClose={() => props.setExpandedDoc(undefined)}
-      setExpandedDoc={props.setExpandedDoc}
-      query={props.query}
-    />
-  );
-}
 
 function DiscoverDocumentsComponent({
   dataView,
@@ -215,6 +199,27 @@ function DiscoverDocumentsComponent({
     [isTextBasedQuery, uiSettings, dataView.timeFieldName]
   );
 
+  const renderDocumentView = useCallback(
+    (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) =>
+        (
+          <DiscoverGridFlyout
+            dataView={dataView}
+            hit={hit}
+            hits={displayedRows}
+            // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
+            columns={displayedColumns}
+            savedSearchId={savedSearch.id}
+            onFilter={onAddFilter}
+            onRemoveColumn={onRemoveColumn}
+            onAddColumn={onAddColumn}
+            onClose={() => setExpandedDoc(undefined)}
+            setExpandedDoc={setExpandedDoc}
+            query={query}
+          />
+        ),
+    []
+  );
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       <div className="dscDocuments__loading">
@@ -306,27 +311,10 @@ function DiscoverDocumentsComponent({
                 rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
                 onUpdateRowsPerPage={onUpdateRowsPerPage}
                 onFieldEdited={onFieldEdited}
-                renderDocumentView={(
-                  displayedRows: DataTableRecord[],
-                  displayedColumns: string[]
-                ) => {
-                  return (
-                    expandedDoc &&
-                    getDiscoverDetails({
-                      dataView,
-                      hit: expandedDoc,
-                      hits: displayedRows,
-                      columns: displayedColumns,
-                      savedSearchId: savedSearch.id,
-                      onFilter: onAddFilter as DocViewFilterFn,
-                      onRemoveColumn,
-                      onAddColumn,
-                      onClose: () => setExpandedDoc(undefined),
-                      setExpandedDoc,
-                      query,
-                    })
-                  );
-                }}
+                configRowHeight={uiSettings.get(ROW_HEIGHT_OPTION)}
+                showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
+                maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
+                renderDocumentView={renderDocumentView}
                 services={services}
                 totalHits={totalHits}
                 onFetchMoreRecords={onFetchMoreRecords}
