@@ -53,6 +53,7 @@ export function toEditableConfig({
     order: def.order,
     requiresPageReload: !!def.requiresPageReload,
     metric: def.metric,
+    allowlisted: !!def.allowlisted,
   };
 
   return conf;

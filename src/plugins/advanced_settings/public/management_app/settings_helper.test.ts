@@ -23,6 +23,7 @@ describe('Settings Helper', () => {
     defVal: 'defVal',
     type: 'string' as UiSettingsType,
     category: ['category'],
+    allowlisted: true,
   };
 
   const arraySetting = {
@@ -67,6 +68,7 @@ describe('Settings Helper', () => {
     readOnly: false,
     requiresPageReload: false,
     type: 'string' as UiSettingsType,
+    allowlisted: true,
   };
 
   const booleanFieldSetting = {
@@ -81,6 +83,7 @@ describe('Settings Helper', () => {
     readOnly: false,
     requiresPageReload: false,
     type: 'string' as UiSettingsType,
+    allowlisted: true,
   };
 
   const imageFieldSetting = {
@@ -95,6 +98,7 @@ describe('Settings Helper', () => {
     readOnly: false,
     requiresPageReload: false,
     type: 'image' as UiSettingsType,
+    allowlisted: true,
   };
 
   const config = {
@@ -129,6 +133,8 @@ describe('Settings Helper', () => {
         ...imageSetting,
       };
     },
+    allowlist: (keys: string[]) => {},
+    allowlistAll: () => {},
   };
 
   it('mapConfig', () => {

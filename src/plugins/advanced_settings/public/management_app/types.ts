@@ -34,6 +34,7 @@ export interface FieldSetting {
     type: UiCounterMetricType;
     name: string;
   };
+  allowlisted?: boolean;
 }
 
 // until eui searchbar and query are typed

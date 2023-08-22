@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin } from '@kbn/core/public';
 import { SectionRegistry } from '@kbn/management-settings-section-registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
+import { ALL_ALLOWLIST_SETTINGS } from './management_app/settings_allowlist';
 
 const { setup: sectionRegistrySetup, start: sectionRegistryStart } = new SectionRegistry();
 
@@ -24,6 +25,13 @@ export class AdvancedSettingsPlugin
     core: CoreSetup,
     { management, home, usageCollection }: AdvancedSettingsPluginSetup
   ) {
+    // This allowlists only the relevant settings for all projects in serverless
+    core.settings.client.allowlist(ALL_ALLOWLIST_SETTINGS);
+
+    // Uncomment the lines bellow to allowlist all settings
+    // core.settings.client.allowlistAll();
+    // core.settings.globalClient.allowlistAll();
+
     const kibanaSection = management.sections.section.kibana;
 
     kibanaSection.registerApp({

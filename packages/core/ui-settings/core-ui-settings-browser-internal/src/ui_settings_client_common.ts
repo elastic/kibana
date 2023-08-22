@@ -100,6 +100,22 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     return await this.update(key, null);
   }
 
+  allowlist(keys: string[]) {
+    keys.forEach((key) => {
+      if (this.defaults.hasOwnProperty(key)) {
+        this.defaults[key].allowlisted = true;
+      }
+      if (this.cache.hasOwnProperty(key)) {
+        this.cache[key].allowlisted = true;
+      }
+    });
+  }
+
+  allowlistAll() {
+    Object.entries(this.defaults).forEach(([key, value]) => (value.allowlisted = true));
+    Object.entries(this.cache).forEach(([key, value]) => (value.allowlisted = true));
+  }
+
   isDeclared(key: string) {
     return key in this.cache;
   }

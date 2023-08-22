@@ -135,6 +135,7 @@ export class UiSettingsService
       if (this.uiSettingsDefaults.has(key)) {
         throw new Error(`uiSettings for the key [${key}] has been already registered`);
       }
+      value.allowlisted = false;
       this.uiSettingsDefaults.set(key, value);
     });
   };
@@ -144,6 +145,7 @@ export class UiSettingsService
       if (this.uiSettingsGlobalDefaults.has(key)) {
         throw new Error(`Global uiSettings for the key [${key}] has been already registered`);
       }
+      value.allowlisted = false;
       this.uiSettingsGlobalDefaults.set(key, value);
     });
   };

@@ -25,6 +25,7 @@ export const mapConfig = (config: IUiSettingsClient) => {
     })
     .filter((c) => !c.readOnly)
     .filter((c) => !c.isCustom) // hide any settings that aren't explicitly registered by enabled plugins.
+    .filter((c) => c.allowlisted)
     .sort(fieldSorter);
 };
 

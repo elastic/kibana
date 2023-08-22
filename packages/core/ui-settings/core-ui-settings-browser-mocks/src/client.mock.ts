@@ -16,6 +16,8 @@ export const clientMock = () => {
     get$: jest.fn(),
     set: jest.fn(),
     remove: jest.fn(),
+    allowlist: jest.fn(),
+    allowlistAll: jest.fn(),
     isDeclared: jest.fn(),
     isDefault: jest.fn(),
     isCustom: jest.fn(),

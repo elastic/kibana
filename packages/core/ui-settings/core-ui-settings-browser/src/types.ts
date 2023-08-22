@@ -63,6 +63,16 @@ export interface IUiSettingsClient {
   remove: (key: string) => Promise<boolean>;
 
   /**
+   * Adds the keys to the allowlist, which allows these settings to be displayed in the Advanced settings app.
+   */
+  allowlist: (keys: string[]) => void;
+
+  /**
+   * Adds all keys to the allowlist.
+   */
+  allowlistAll: () => void;
+
+  /**
    * Returns true if the key is a "known" uiSetting, meaning it is either registered
    * by any plugin or was previously added as a custom setting via the `set()` method.
    */
