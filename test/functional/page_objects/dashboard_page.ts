@@ -380,7 +380,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickCreateDashboardPrompt() {
-    await this.testSubjects.click('newItemButton');
+    await this.testSubjects.click('createDashboardButton');
   }
 
   public async getCreateDashboardPromptExists() {
