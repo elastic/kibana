@@ -17,6 +17,12 @@ export const getCodeSnippet = (
 ): string => {
   const snippetVal = language[key];
   if (snippetVal === undefined) return '';
-  if (typeof snippetVal === 'string') return snippetVal;
-  return snippetVal(args);
+  switch (typeof snippetVal) {
+    case 'string':
+      return snippetVal;
+    case 'function':
+      return snippetVal(args);
+    default:
+      return '';
+  }
 };
