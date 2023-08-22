@@ -92,7 +92,7 @@ export const schema: FormSchema<DefineStepRule> = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewSelector',
       {
-        defaultMessage: 'Data View',
+        defaultMessage: 'Data View ID',
       }
     ),
     fieldsToValidateOnChange: ['dataViewId'],
