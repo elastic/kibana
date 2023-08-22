@@ -19,30 +19,29 @@ import { InfraLoadingPanel } from '../../../loading';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 import { useDataViewsProviderContext } from '../../hooks/use_data_views';
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';
+import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 
 const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 
 export const Logs = () => {
   const { getDateRangeInTimestamp } = useDateRangeProviderContext();
-  const { asset, assetType, overrides, onTabsStateChange } = useAssetDetailsStateContext();
+  const [urlState, setUrlState] = useAssetDetailsUrlState();
+  const { asset, assetType } = useAssetDetailsStateContext();
   const { logs } = useDataViewsProviderContext();
 
-  const { query: overrideQuery } = overrides?.logs ?? {};
   const { loading: logViewLoading, reference: logViewReference } = logs ?? {};
 
   const { services } = useKibanaContextForPlugin();
   const { locators } = services;
-  const [textQuery, setTextQuery] = useState(overrideQuery ?? '');
-  const [textQueryDebounced, setTextQueryDebounced] = useState(overrideQuery ?? '');
+  const [textQuery, setTextQuery] = useState(urlState?.logsSearch ?? '');
+  const [textQueryDebounced, setTextQueryDebounced] = useState(urlState?.logsSearch ?? '');
 
   const currentTimestamp = getDateRangeInTimestamp().to;
   const startTimestamp = currentTimestamp - 60 * 60 * 1000; // 60 minutes
 
   useDebounce(
     () => {
-      if (onTabsStateChange) {
-        onTabsStateChange({ logs: { query: textQuery } });
-      }
+      setUrlState({ logsSearch: textQuery });
       setTextQueryDebounced(textQuery);
     },
     TEXT_QUERY_THROTTLE_INTERVAL_MS,

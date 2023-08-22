@@ -9,28 +9,28 @@ import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-import { FlyoutTabIds } from '../../../../components/asset_details/types';
-import { useUrlState } from '../../../../utils/use_url_state';
+import { FlyoutTabIds } from '../types';
+import { useUrlState } from '../../../utils/use_url_state';
 
-export const DEFAULT_STATE: HostFlyout = {
+export const DEFAULT_STATE: AssetDetailsState = {
   itemId: '',
   tabId: FlyoutTabIds.OVERVIEW,
   processSearch: undefined,
   metadataSearch: undefined,
 };
-const HOST_FLYOUT_URL_STATE_KEY = 'flyout';
+const ASSET_DETAILS_URL_STATE_KEY = 'asset_details';
 
-type SetHostFlyoutState = (newProp: Payload | null) => void;
+type SetAssetDetailsState = (newProp: Payload | null) => void;
 
-export const useHostFlyoutUrlState = (): [HostFlyoutUrl, SetHostFlyoutState] => {
-  const [urlState, setUrlState] = useUrlState<HostFlyoutUrl>({
+export const useAssetDetailsUrlState = (): [AssetDetailsUrl, SetAssetDetailsState] => {
+  const [urlState, setUrlState] = useUrlState<AssetDetailsUrl>({
     defaultState: null,
     decodeUrlState,
     encodeUrlState,
-    urlStateKey: HOST_FLYOUT_URL_STATE_KEY,
+    urlStateKey: ASSET_DETAILS_URL_STATE_KEY,
   });
 
-  const setHostFlyoutState = (newProps: Payload | null) => {
+  const setAssetDetailsState = (newProps: Payload | null) => {
     if (!newProps) {
       setUrlState(DEFAULT_STATE);
     } else {
@@ -41,10 +41,10 @@ export const useHostFlyoutUrlState = (): [HostFlyoutUrl, SetHostFlyoutState] => 
     }
   };
 
-  return [urlState as HostFlyoutUrl, setHostFlyoutState];
+  return [urlState as AssetDetailsUrl, setAssetDetailsState];
 };
 
-const FlyoutTabIdRT = rt.union([
+const TabIdRT = rt.union([
   rt.literal(FlyoutTabIds.OVERVIEW),
   rt.literal(FlyoutTabIds.METADATA),
   rt.literal(FlyoutTabIds.PROCESSES),
@@ -53,10 +53,10 @@ const FlyoutTabIdRT = rt.union([
   rt.literal(FlyoutTabIds.OSQUERY),
 ]);
 
-const HostFlyoutStateRT = rt.intersection([
+const AssetDetailsStateRT = rt.intersection([
   rt.type({
     itemId: rt.string,
-    tabId: FlyoutTabIdRT,
+    tabId: TabIdRT,
   }),
   rt.partial({
     dateRange: rt.type({
@@ -69,14 +69,13 @@ const HostFlyoutStateRT = rt.intersection([
   }),
 ]);
 
-const HostFlyoutUrlRT = rt.union([HostFlyoutStateRT, rt.null]);
+const AssetDetailsUrlRT = rt.union([AssetDetailsStateRT, rt.null]);
 
-type HostFlyoutState = rt.TypeOf<typeof HostFlyoutStateRT>;
-type HostFlyoutUrl = rt.TypeOf<typeof HostFlyoutUrlRT>;
-type Payload = Partial<HostFlyoutState>;
-export type HostFlyout = rt.TypeOf<typeof HostFlyoutStateRT>;
+export type AssetDetailsState = rt.TypeOf<typeof AssetDetailsStateRT>;
+type AssetDetailsUrl = rt.TypeOf<typeof AssetDetailsUrlRT>;
+type Payload = Partial<AssetDetailsState>;
 
-const encodeUrlState = HostFlyoutUrlRT.encode;
+const encodeUrlState = AssetDetailsUrlRT.encode;
 const decodeUrlState = (value: unknown) => {
-  return pipe(HostFlyoutUrlRT.decode(value), fold(constant(undefined), identity));
+  return pipe(AssetDetailsUrlRT.decode(value), fold(constant(undefined), identity));
 };

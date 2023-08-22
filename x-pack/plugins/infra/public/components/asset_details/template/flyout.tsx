@@ -25,7 +25,7 @@ export const Flyout = ({
 }: ContentTemplateProps & { closeFlyout: () => void }) => {
   const { asset, assetType, loading } = useAssetDetailsStateContext();
   const { rightSideItems, tabEntries } = usePageHeader(tabs, links);
-  const { initialActiveTabId } = useTabSwitcherContext();
+  const { activeTabId } = useTabSwitcherContext();
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
@@ -34,7 +34,7 @@ export const Flyout = ({
     telemetry.reportAssetDetailsFlyoutViewed({
       componentName: ASSET_DETAILS_FLYOUT_COMPONENT_NAME,
       assetType,
-      tabId: initialActiveTabId,
+      tabId: activeTabId,
     });
   });
 

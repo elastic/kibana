@@ -17,7 +17,7 @@ export const ContextProviders = ({
 }: { props: Omit<AssetDetailsProps, 'links' | 'tabs' | 'activeTabId' | 'metricAlias'> } & {
   children: React.ReactNode;
 }) => {
-  const { asset, dateRange, overrides, onTabsStateChange, assetType = 'host', renderMode } = props;
+  const { asset, dateRange, overrides, assetType = 'host', renderMode } = props;
   return (
     <DateRangeProvider initialDateRange={dateRange}>
       <MetadataStateProvider asset={asset} assetType={assetType}>
@@ -26,7 +26,6 @@ export const ContextProviders = ({
             asset,
             assetType,
             overrides,
-            onTabsStateChange,
             renderMode,
           }}
         >

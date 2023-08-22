@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { TimeRange } from '@kbn/es-query';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { TimeRange } from '@kbn/es-query';
 import { NoRemoteCluster } from '../../../components/empty_states';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
-import { FlyoutTabIds, type Tab, type TabState } from '../../../components/asset_details/types';
+import { FlyoutTabIds, type Tab } from '../../../components/asset_details/types';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
 import { AssetDetails } from '../../../components/asset_details/asset_details';
-import { useMetricsTimeContext } from './hooks/use_metrics_time';
 import { MetricsPageTemplate } from '../page_template';
+import { useMetricsTimeContext } from './hooks/use_metrics_time';
 
 const orderedFlyoutTabs: Tab[] = [
   {
@@ -70,7 +70,7 @@ export const AssetDetailPage = () => {
     return queryParams.get('assetName') ?? undefined;
   }, [search]);
 
-  const { timeRange, setTimeRange } = useMetricsTimeContext();
+  const { timeRange } = useMetricsTimeContext();
 
   const dateRange: TimeRange = useMemo(
     () => ({
@@ -81,23 +81,6 @@ export const AssetDetailPage = () => {
       to: typeof timeRange.to === 'number' ? new Date(timeRange.to).toISOString() : timeRange.to,
     }),
     [timeRange.from, timeRange.to]
-  );
-
-  // Retrocompatibility
-  const handleTabStateChange = useCallback(
-    ({ dateRange: newDateRange }: TabState) => {
-      if (newDateRange) {
-        setTimeRange(
-          {
-            from: newDateRange.from,
-            to: newDateRange.to,
-            interval: timeRange.interval,
-          },
-          false
-        );
-      }
-    },
-    [setTimeRange, timeRange.interval]
   );
 
   const { metricIndicesExist, remoteClustersExist } = source?.status ?? {};
@@ -131,8 +114,6 @@ export const AssetDetailPage = () => {
         }}
         assetType={nodeType}
         dateRange={dateRange}
-        onTabsStateChange={handleTabStateChange}
-        activeTabId={FlyoutTabIds.OVERVIEW}
         tabs={orderedFlyoutTabs}
         links={['apmServices']}
         renderMode={{

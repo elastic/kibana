@@ -168,6 +168,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 
+  const refreshPageWithDelay = async () => {
+    /**
+     * Delay gives React a chance to finish
+     * running effects (like updating the URL) before
+     * refreshing the page.
+     */
+    await pageObjects.common.sleep(1000);
+    await browser.refresh();
+  };
+
   describe('Hosts View', function () {
     before(async () => {
       await Promise.all([
@@ -284,6 +294,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
 
+        it('preserves selected tab between page reloads', async () => {
+          await testSubjects.missingOrFail('infraAssetDetailsMetadataTable');
+          await pageObjects.assetDetails.clickMetadataTab();
+          await pageObjects.assetDetails.metadataTableExists();
+
+          await refreshPageWithDelay();
+
+          await pageObjects.assetDetails.metadataTableExists();
+        });
+
         describe('Overview Tab', () => {
           before(async () => {
             await pageObjects.assetDetails.clickOverviewTab();
@@ -342,6 +362,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               await pageObjects.assetDetails.metadataRemovePinExists();
             expect(removeFilterShouldNotExist).to.be(false);
           });
+
+          it('preserves search term between page reloads', async () => {
+            const searchInput = await pageObjects.assetDetails.getMetadataSearchField();
+
+            expect(await searchInput.getAttribute('value')).to.be('');
+
+            await searchInput.type('test');
+            await refreshPageWithDelay();
+
+            expect(await searchInput.getAttribute('value')).to.be('test');
+          });
         });
 
         describe('Processes Tab', () => {
@@ -352,6 +383,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('should show processes table', async () => {
             await pageObjects.assetDetails.processesTableExists();
           });
+
+          it('preserves search term between page reloads', async () => {
+            const searchInput = await pageObjects.assetDetails.getProcessesSearchField();
+
+            expect(await searchInput.getAttribute('value')).to.be('');
+
+            await searchInput.type('test');
+            await refreshPageWithDelay();
+
+            expect(await searchInput.getAttribute('value')).to.be('test');
+          });
         });
 
         describe('Logs Tab', () => {
@@ -361,6 +403,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('should render logs tab', async () => {
             await pageObjects.assetDetails.logsExists();
+          });
+
+          it('preserves search term between page reloads', async () => {
+            const searchInput = await pageObjects.assetDetails.getLogsSearchField();
+
+            expect(await searchInput.getAttribute('value')).to.be('');
+
+            await searchInput.type('test');
+            await refreshPageWithDelay();
+
+            expect(await searchInput.getAttribute('value')).to.be('test');
           });
         });
 
@@ -456,6 +509,37 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.header.waitUntilLoadingHasFinished();
           const hostRowsAfterRemovingFilter = await pageObjects.infraHostsView.getHostsTableData();
           expect(hostRowsAfterRemovingFilter.length).to.equal(6);
+        });
+      });
+
+      describe('Host details page navigation', () => {
+        after(async () => {
+          await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          await pageObjects.timePicker.setAbsoluteRange(
+            START_DATE.format(DATE_PICKER_FORMAT),
+            END_DATE.format(DATE_PICKER_FORMAT)
+          );
+
+          await waitForPageToLoad();
+        });
+
+        it('maintains selected date range when navigating to the individual host details', async () => {
+          const start = START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT);
+          const end = END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT);
+
+          await pageObjects.timePicker.setAbsoluteRange(start, end);
+
+          const hostDetailLinks = await pageObjects.infraHostsView.getAllHostDetailLinks();
+          expect(hostDetailLinks.length).not.to.equal(0);
+
+          await hostDetailLinks[0].click();
+
+          expect(await pageObjects.timePicker.timePickerExists()).to.be(true);
+
+          const datePickerValue = await pageObjects.timePicker.getTimeConfig();
+          expect(datePickerValue.start).to.equal(start);
+          expect(datePickerValue.end).to.equal(end);
         });
       });
 

@@ -24,15 +24,15 @@ import type {
   InfraAssetMetricsItem,
   InfraAssetMetricType,
 } from '../../../../../common/http_api';
-import { useHostFlyoutUrlState } from './use_host_flyout_url_state';
+import { useAssetDetailsUrlState } from '../../../../components/asset_details/hooks/use_asset_details_url_state';
 import { Sorting, useHostsTableUrlState } from './use_hosts_table_url_state';
 import { useHostsViewContext } from './use_hosts_view';
-import { useUnifiedSearchContext } from './use_unified_search';
 import { useMetricsDataViewContext } from './use_data_view';
 import { ColumnHeader } from '../components/table/column_header';
 import { TABLE_COLUMN_LABEL } from '../translations';
 import { METRICS_TOOLTIP } from '../../../../common/visualizations';
 import { buildCombinedHostsFilter } from '../../../../utils/filters/build';
+import { useUnifiedSearchContext } from './use_unified_search';
 
 /**
  * Columns and items types
@@ -140,7 +140,7 @@ export const useHostsTable = () => {
   } = useKibanaContextForPlugin();
   const { dataView } = useMetricsDataViewContext();
 
-  const [hostFlyoutState, setHostFlyoutState] = useHostFlyoutUrlState();
+  const [hostFlyoutState, setHostFlyoutState] = useAssetDetailsUrlState();
   const popoverContainerRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<EuiBasicTable | null>(null);
 

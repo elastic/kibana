@@ -51,6 +51,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
   };
 
+  const refreshPageWithDelay = async () => {
+    /**
+     * Delay gives React a chance to finish
+     * running effects (like updating the URL) before
+     * refreshing the page.
+     */
+    await pageObjects.common.sleep(1000);
+    await browser.refresh();
+  };
+
   describe('Node Details', () => {
     describe('#With Asset Details', () => {
       before(async () => {
@@ -111,6 +121,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           }
         );
+
+        it('preserves selected date range between page reloads', async () => {
+          const start = moment.utc('2023-08-28T10:20:00.000Z').format(DATE_PICKER_FORMAT);
+          const end = moment.utc('2023-08-28T21:00:00.000Z').format(DATE_PICKER_FORMAT);
+
+          await pageObjects.timePicker.setAbsoluteRange(start, end);
+          await refreshPageWithDelay();
+
+          const datePickerValue = await pageObjects.timePicker.getTimeConfig();
+
+          expect(datePickerValue.start).to.equal(start);
+          expect(datePickerValue.end).to.equal(end);
+        });
       });
 
       describe('#Asset Type: host', () => {
@@ -119,6 +142,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT),
             END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
           );
+        });
+
+        it('preserves selected tab between page reloads', async () => {
+          await testSubjects.missingOrFail('infraAssetDetailsMetadataTable');
+          await pageObjects.assetDetails.clickMetadataTab();
+          await pageObjects.assetDetails.metadataTableExists();
+
+          await refreshPageWithDelay();
+
+          await pageObjects.assetDetails.metadataTableExists();
         });
 
         describe('Overview Tab', () => {
