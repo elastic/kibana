@@ -29,7 +29,7 @@ import {
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { ES_P12_PATH } from '@kbn/dev-utils';
-import { ESS_OPERATOR_USERS_PATH, ESS_SERVICE_TOKENS_PATH } from '../paths';
+import { ESS_RESOURCES_PATHS } from '../paths';
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');
@@ -378,14 +378,11 @@ describe('setupServerlessVolumes()', () => {
 
     const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath, ssl: true });
 
-    expect(volumeCmd).toHaveLength(8);
+    expect(volumeCmd).toHaveLength(16);
     expect(
-      [
-        `${baseEsPath}:/objectstore:z`,
-        ES_P12_PATH,
-        ESS_OPERATOR_USERS_PATH,
-        ESS_SERVICE_TOKENS_PATH,
-      ].every((path) => volumeCmd.some((cmd) => cmd.includes(path)))
+      [`${baseEsPath}:/objectstore:z`, ES_P12_PATH, ...ESS_RESOURCES_PATHS].every((path) =>
+        volumeCmd.some((cmd) => cmd.includes(path))
+      )
     ).toBe(true);
   });
 });
