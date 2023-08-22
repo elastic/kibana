@@ -1289,6 +1289,7 @@ x-pack/test/security_solution_cypress/cli_config.ts @elastic/security-engineerin
 x-pack/test/security_solution_cypress/config.ts @elastic/security-engineering-productivity
 x-pack/test/security_solution_cypress/runner.ts @elastic/security-engineering-productivity
 x-pack/test/security_solution_cypress/serverless_config.ts @elastic/security-engineering-productivity
+x-pack/test/security_solution_cypress/cypress/tags.ts @elastic/security-engineering-productivity
 
 ## Security Solution sub teams - adaptive-workload-protection
 x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/kibana-cloud-security-posture
