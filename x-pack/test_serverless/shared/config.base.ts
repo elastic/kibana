@@ -60,6 +60,8 @@ export default async () => {
             appenders: ['deprecation'],
           },
         ])}`,
+        '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
+        `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
       ],
     },
 

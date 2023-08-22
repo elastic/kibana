@@ -30,3 +30,17 @@ export const IconDevToolsLazy = withSuspenseIcon(React.lazy(() => import('./icon
 export const IconFleetLazy = withSuspenseIcon(React.lazy(() => import('./icons/fleet')));
 export const IconAuditbeatLazy = withSuspenseIcon(React.lazy(() => import('./icons/auditbeat')));
 export const IconSiemLazy = withSuspenseIcon(React.lazy(() => import('./icons/siem')));
+export const IconEcctlLazy = withSuspenseIcon(React.lazy(() => import('./icons/ecctl')));
+export const IconGraphLazy = withSuspenseIcon(React.lazy(() => import('./icons/graph')));
+export const IconLoggingLazy = withSuspenseIcon(React.lazy(() => import('./icons/logging')));
+export const IconMapServicesLazy = withSuspenseIcon(
+  React.lazy(() => import('./icons/map_services'))
+);
+export const IconSecurityShieldLazy = withSuspenseIcon(
+  React.lazy(() => import('./icons/security_shield'))
+);
+export const IconProductFeaturesAlertingLazy = withSuspenseIcon(
+  React.lazy(() => import('./icons/product_features_alerting'))
+);
+export const IconTimelineLazy = withSuspenseIcon(React.lazy(() => import('./icons/timeline')));
+export const IconOsqueryLazy = withSuspenseIcon(React.lazy(() => import('./icons/osquery')));

@@ -8,14 +8,17 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { DESCRIPTION_TITLE_TEST_ID, RULE_SUMMARY_BUTTON_TEST_ID } from './test_ids';
-import { DOCUMENT_DESCRIPTION_TITLE, RULE_DESCRIPTION_TITLE } from './translations';
+import {
+  DOCUMENT_DESCRIPTION_TITLE,
+  PREVIEW_RULE_DETAILS,
+  RULE_DESCRIPTION_TITLE,
+} from './translations';
 import { Description } from './description';
-import { TestProviders } from '../../../common/mock';
 import { RightPanelContext } from '../context';
-import { ThemeProvider } from 'styled-components';
-import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
-
-const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
+import { mockGetFieldsData } from '../mocks/mock_context';
+import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { PreviewPanelKey } from '../../preview';
 
 const ruleUuid = {
   category: 'kibana',
@@ -41,23 +44,32 @@ const ruleName = {
   isObjectArray: false,
 };
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/components/link_to');
+const flyoutContextValue = {
+  openPreviewPanel: jest.fn(),
+} as unknown as ExpandableFlyoutContext;
+
+const panelContextValue = (dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null) =>
+  ({
+    eventId: 'event id',
+    indexName: 'indexName',
+    scopeId: 'scopeId',
+    dataFormattedForFieldBrowser,
+    getFieldsData: mockGetFieldsData,
+  } as unknown as RightPanelContext);
+
+const renderDescription = (panelContext: RightPanelContext) =>
+  render(
+    <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+      <RightPanelContext.Provider value={panelContext}>
+        <Description />
+      </RightPanelContext.Provider>
+    </ExpandableFlyoutContext.Provider>
+  );
 
 describe('<Description />', () => {
   it('should render the component', () => {
-    const panelContextValue = {
-      dataFormattedForFieldBrowser: [ruleUuid, ruleDescription, ruleName],
-    } as unknown as RightPanelContext;
-
-    const { getByTestId } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={panelContextValue}>
-          <ThemeProvider theme={mockTheme}>
-            <Description />
-          </ThemeProvider>
-        </RightPanelContext.Provider>
-      </TestProviders>
+    const { getByTestId } = renderDescription(
+      panelContextValue([ruleUuid, ruleDescription, ruleName])
     );
 
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
@@ -66,18 +78,8 @@ describe('<Description />', () => {
   });
 
   it('should not render rule preview button if rule name is not available', () => {
-    const panelContextValue = {
-      dataFormattedForFieldBrowser: [ruleUuid, ruleDescription],
-    } as unknown as RightPanelContext;
-
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={panelContextValue}>
-          <ThemeProvider theme={mockTheme}>
-            <Description />
-          </ThemeProvider>
-        </RightPanelContext.Provider>
-      </TestProviders>
+    const { getByTestId, queryByTestId } = renderDescription(
+      panelContextValue([ruleUuid, ruleDescription])
     );
 
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
@@ -86,21 +88,44 @@ describe('<Description />', () => {
   });
 
   it('should render document title if document is not an alert', () => {
-    const panelContextValue = {
-      dataFormattedForFieldBrowser: [ruleDescription],
-    } as unknown as RightPanelContext;
-
-    const { getByTestId } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={panelContextValue}>
-          <ThemeProvider theme={mockTheme}>
-            <Description />
-          </ThemeProvider>
-        </RightPanelContext.Provider>
-      </TestProviders>
-    );
+    const { getByTestId } = renderDescription(panelContextValue([ruleDescription]));
 
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent(DOCUMENT_DESCRIPTION_TITLE);
+  });
+
+  it('should render null if dataFormattedForFieldBrowser is null', () => {
+    const panelContext = {
+      ...panelContextValue([ruleUuid, ruleDescription, ruleName]),
+      dataFormattedForFieldBrowser: null,
+    } as unknown as RightPanelContext;
+
+    const { container } = renderDescription(panelContext);
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should open preview panel when clicking on button', () => {
+    const panelContext = panelContextValue([ruleUuid, ruleDescription, ruleName]);
+
+    const { getByTestId } = renderDescription(panelContext);
+
+    getByTestId(RULE_SUMMARY_BUTTON_TEST_ID).click();
+
+    expect(flyoutContextValue.openPreviewPanel).toHaveBeenCalledWith({
+      id: PreviewPanelKey,
+      path: { tab: 'rule-preview' },
+      params: {
+        id: panelContext.eventId,
+        indexName: panelContext.indexName,
+        scopeId: panelContext.scopeId,
+        banner: {
+          title: PREVIEW_RULE_DETAILS,
+          backgroundColor: 'warning',
+          textColor: 'warning',
+        },
+        ruleId: ruleUuid.values[0],
+      },
+    });
   });
 });

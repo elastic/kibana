@@ -542,20 +542,16 @@ const exampleInsight = `${insightPrefix}{
 }}`;
 
 export const plugin = ({
-  licenseIsPlatinum,
   insightsUpsellingMessage,
 }: {
-  licenseIsPlatinum: boolean;
   insightsUpsellingMessage: string | null;
 }) => {
-  const label = licenseIsPlatinum ? i18n.INVESTIGATE : i18n.INSIGHT_UPSELL;
-
   return {
     name: 'insights',
     button: {
-      label: insightsUpsellingMessage ?? label,
+      label: insightsUpsellingMessage ?? i18n.INVESTIGATE,
       iconType: 'timelineWithArrow',
-      isDisabled: !licenseIsPlatinum || !!insightsUpsellingMessage,
+      isDisabled: !!insightsUpsellingMessage,
     },
     helpText: (
       <div>

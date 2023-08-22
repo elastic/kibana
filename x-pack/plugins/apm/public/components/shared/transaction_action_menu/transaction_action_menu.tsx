@@ -79,11 +79,13 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
 
   return (
     <>
-      <CustomLinkFlyout
-        transaction={transaction}
-        isOpen={isCreateEditFlyoutOpen}
-        onClose={() => setIsCreateEditFlyoutOpen(false)}
-      />
+      {hasGoldLicense && (
+        <CustomLinkFlyout
+          transaction={transaction}
+          isOpen={isCreateEditFlyoutOpen}
+          onClose={() => setIsCreateEditFlyoutOpen(false)}
+        />
+      )}
 
       <ActionMenu
         id="transactionActionMenu"

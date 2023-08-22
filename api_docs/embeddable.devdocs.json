@@ -1726,6 +1726,27 @@
               {
                 "parentPluginId": "embeddable",
                 "id": "def-public.CustomizePanelAction.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "editPanel",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.EditPanelAction",
+                    "text": "EditPanelAction"
+                  }
+                ],
+                "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/customize_panel_action/customize_panel_action.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.CustomizePanelAction.Unnamed.$4",
                 "type": "Array",
                 "tags": [],
                 "label": "commonlyUsedRanges",
@@ -1741,7 +1762,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.CustomizePanelAction.Unnamed.$4",
+                "id": "def-public.CustomizePanelAction.Unnamed.$5",
                 "type": "string",
                 "tags": [],
                 "label": "dateFormat",

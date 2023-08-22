@@ -65,7 +65,8 @@ describe('None', () => {
       cy.visit(`/app/security/rules/id/${ruleId}/alerts`);
       cy.getBySel('expand-event').first().click();
       cy.getBySel('take-action-dropdown-btn').click();
-      cy.getBySel('responseActionsViewTab').click();
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseButton').click();
       cy.contains('Permission denied').should('exist');
     });
   });

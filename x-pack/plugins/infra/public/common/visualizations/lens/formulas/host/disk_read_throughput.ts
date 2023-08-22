@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { FormulaConfig } from '../../../types';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const diskReadThroughput: FormulaConfig = {
+export const diskReadThroughput: FormulaValueConfig = {
   label: 'Disk Read Throughput',
   value: "counter_rate(max(system.diskio.read.bytes), kql='system.diskio.read.bytes: *')",
   format: {

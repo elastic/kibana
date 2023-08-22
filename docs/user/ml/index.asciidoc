@@ -223,3 +223,11 @@ point type selector to filter the results by specific types of change points.
 
 [role="screenshot"]
 image::user/ml/images/ml-change-point-detection-selected.png[Selected change points]
+
+
+You can attach change point charts to a dashboard or a case by using the context 
+menu. If the split field is selected, you can either select specific charts 
+(partitions) or set the maximum number of top change points to plot. It's 
+possible to preserve the applied time range or use the time bound from the page 
+date picker. You can also add or edit change point charts directly from the 
+**Dashboard** app.

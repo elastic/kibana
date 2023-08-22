@@ -6,12 +6,15 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiLink, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import type { Message } from '../../../common/types';
+import { useAbortableAsync } from '../../hooks/use_abortable_async';
+import { useConversation } from '../../hooks/use_conversation';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useKibana } from '../../hooks/use_kibana';
+import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
@@ -19,6 +22,10 @@ import { ChatBody } from './chat_body';
 
 const containerClassName = css`
   max-height: 100%;
+`;
+
+const bodyClassName = css`
+  overflow-y: auto;
 `;
 
 export function ChatFlyout({
@@ -38,19 +45,33 @@ export function ChatFlyout({
   onChatUpdate?: (messages: Message[]) => void;
   onChatComplete?: (messages: Message[]) => void;
 }) {
-  const connectors = useGenAIConnectors();
-
-  const currentUser = useCurrentUser();
-
+  const { euiTheme } = useEuiTheme();
   const {
     services: { http },
   } = useKibana();
 
+  const currentUser = useCurrentUser();
+
+  const connectors = useGenAIConnectors();
+
   const service = useObservabilityAIAssistant();
 
-  const { euiTheme } = useEuiTheme();
+  const chatService = useAbortableAsync(
+    ({ signal }) => {
+      return service.start({ signal });
+    },
+    [service]
+  );
 
   const router = useObservabilityAIAssistantRouter();
+
+  const knowledgeBase = useKnowledgeBase();
+
+  const { saveTitle } = useConversation({
+    conversationId,
+    chatService: chatService.value,
+    connectorId: connectors.selectedConnector,
+  });
 
   return isOpen ? (
     <EuiFlyout onClose={onClose}>
@@ -86,14 +107,15 @@ export function ChatFlyout({
             )}
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow className={bodyClassName}>
           <ChatBody
-            service={service}
+            loading={false}
             connectors={connectors}
             title={title}
             messages={messages}
             currentUser={currentUser}
             connectorsManagementHref={getConnectorsManagementHref(http)}
+            knowledgeBase={knowledgeBase}
             onChatUpdate={(nextMessages) => {
               if (onChatUpdate) {
                 onChatUpdate(nextMessages);
@@ -103,6 +125,9 @@ export function ChatFlyout({
               if (onChatComplete) {
                 onChatComplete(nextMessages);
               }
+            }}
+            onSaveTitle={(newTitle) => {
+              saveTitle(newTitle);
             }}
           />
         </EuiFlexItem>

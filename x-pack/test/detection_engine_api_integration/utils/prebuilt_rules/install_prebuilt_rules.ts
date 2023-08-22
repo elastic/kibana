@@ -10,7 +10,9 @@ import {
   RuleVersionSpecifier,
   PerformRuleInstallationResponseBody,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
+import type { Client } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 
 /**
  * Installs available prebuilt rules in Kibana. Rules are
@@ -27,6 +29,7 @@ import type SuperTest from 'supertest';
  * @returns Install prebuilt rules response
  */
 export const installPrebuiltRules = async (
+  es: Client,
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   rules?: RuleVersionSpecifier[]
 ): Promise<PerformRuleInstallationResponseBody> => {
@@ -41,6 +44,18 @@ export const installPrebuiltRules = async (
     .set('kbn-xsrf', 'true')
     .send(payload)
     .expect(200);
+
+  // Before we proceed, we need to refresh saved object indices.
+  // At the previous step we installed the prebuilt detection rules SO of type 'security-rule'.
+  // The savedObjectsClient does this with a call with explicit `refresh: false`.
+  // So, despite of the fact that the endpoint waits until the prebuilt rule will be
+  // successfully indexed, it doesn't wait until they become "visible" for subsequent read
+  // operations.
+  // And this is usually what we do next in integration tests: we read these SOs with utility
+  // function such as getPrebuiltRulesAndTimelinesStatus().
+  // This can cause race conditions between a write and subsequent read operation, and to
+  // fix it deterministically we have to refresh saved object indices and wait until it's done.
+  await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
 
   return response.body;
 };

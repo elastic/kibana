@@ -12,6 +12,11 @@ import { cloneDeep } from 'lodash';
 import { APP_INDEX_PRIVILEGES } from '../constants';
 import { Privileges } from '../types/privileges';
 
+export interface PrivilegesAndCapabilities {
+  privileges: Privileges;
+  capabilities: Capabilities;
+}
+
 export interface TransformCapabilities {
   canGetTransform: boolean;
   canDeleteTransform: boolean;
@@ -89,7 +94,7 @@ export const getPrivilegesAndCapabilities = (
   clusterPrivileges: Record<string, boolean>,
   hasOneIndexWithAllPrivileges: boolean,
   hasAllPrivileges: boolean
-) => {
+): PrivilegesAndCapabilities => {
   const privilegesResult: Privileges = {
     hasAllPrivileges: true,
     missingPrivileges: {

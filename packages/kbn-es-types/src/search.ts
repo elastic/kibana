@@ -162,6 +162,20 @@ export type AggregateOf<
       cardinality: {
         value: number;
       };
+      change_point: {
+        bucket?: {
+          key: string;
+        };
+        type: Record<
+          string,
+          {
+            change_point?: number;
+            r_value?: number;
+            trend?: string;
+            p_value: number;
+          }
+        >;
+      };
       children: {
         doc_count: number;
       } & SubAggregateOf<TAggregationContainer, TDocument>;

@@ -46,15 +46,27 @@ function initSetup({
   return { uiMetricService };
 }
 
-export async function mountManagementSection(
-  coreSetup: CoreSetup<StartDependencies>,
-  usageCollection: UsageCollectionSetup,
-  params: ManagementAppMountParams,
-  extensionsService: ExtensionsService,
-  isFleetEnabled: boolean,
-  kibanaVersion: SemVer,
-  enableIndexActions: boolean = true
-) {
+export async function mountManagementSection({
+  coreSetup,
+  usageCollection,
+  params,
+  extensionsService,
+  isFleetEnabled,
+  kibanaVersion,
+  enableIndexActions = true,
+  enableLegacyTemplates = true,
+  enableIndexDetailsPage = false,
+}: {
+  coreSetup: CoreSetup<StartDependencies>;
+  usageCollection: UsageCollectionSetup;
+  params: ManagementAppMountParams;
+  extensionsService: ExtensionsService;
+  isFleetEnabled: boolean;
+  kibanaVersion: SemVer;
+  enableIndexActions?: boolean;
+  enableLegacyTemplates?: boolean;
+  enableIndexDetailsPage?: boolean;
+}) {
   const { element, setBreadcrumbs, history, theme$ } = params;
   const [core, startDependencies] = await coreSetup.getStartServices();
   const {
@@ -95,7 +107,11 @@ export async function mountManagementSection(
       uiMetricService,
       extensionsService,
     },
-    enableIndexActions,
+    config: {
+      enableIndexActions,
+      enableLegacyTemplates,
+      enableIndexDetailsPage,
+    },
     history,
     setBreadcrumbs,
     uiSettings,

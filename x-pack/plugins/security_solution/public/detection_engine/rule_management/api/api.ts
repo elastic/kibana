@@ -104,10 +104,15 @@ export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<Ru
  * @param rule RuleUpdateProps to be updated
  * @param signal to cancel request
  *
+ * @returns Promise<Rule> An updated rule
+ *
+ * In fact this function should return Promise<RuleResponse> but it'd require massive refactoring.
+ * It should be addressed as a part of OpenAPI schema adoption.
+ *
  * @throws An error if response is not OK
  */
-export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RuleResponse> =>
-  KibanaServices.get().http.fetch<RuleResponse>(DETECTION_ENGINE_RULES_URL, {
+export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<Rule> =>
+  KibanaServices.get().http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
     method: 'PUT',
     body: JSON.stringify(rule),
     signal,
@@ -197,6 +202,11 @@ export const fetchRules = async ({
  *
  * @param id Rule ID's (not rule_id)
  * @param signal to cancel request
+ *
+ * @returns Promise<Rule>
+ *
+ * In fact this function should return Promise<RuleResponse> but it'd require massive refactoring.
+ * It should be addressed as a part of OpenAPI schema adoption.
  *
  * @throws An error if response is not OK
  */

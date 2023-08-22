@@ -14,11 +14,11 @@ import type { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-a
 import type { DataViewBase, Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
-import { buildRelatedIntegrationsDescription } from '../related_integrations/integrations_description';
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes';
+import { buildRelatedIntegrationsDescription } from '../related_integrations/integrations_description';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -47,6 +47,7 @@ import {
   buildAlertSuppressionDescription,
   buildAlertSuppressionWindowDescription,
   buildAlertSuppressionMissingFieldsDescription,
+  buildHighlightedFieldsOverrideDescription,
 } from './helpers';
 import * as i18n from './translations';
 import { buildMlJobsDescription } from './build_ml_jobs_description';
@@ -261,6 +262,9 @@ export const getDescriptionItem = (
   } else if (field === 'falsePositives') {
     const values: string[] = get(field, data);
     return buildUnorderedListArrayDescription(label, field, values);
+  } else if (field === 'investigationFields') {
+    const values: string[] = get(field, data);
+    return buildHighlightedFieldsOverrideDescription(label, values);
   } else if (field === 'riskScore') {
     const values: AboutStepRiskScore = get(field, data);
     return buildRiskScoreDescription(values);

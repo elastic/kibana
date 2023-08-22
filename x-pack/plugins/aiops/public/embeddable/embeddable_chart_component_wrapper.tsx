@@ -6,7 +6,7 @@
  */
 
 import { type Observable } from 'rxjs';
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useEffect, useMemo } from 'react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
@@ -15,10 +15,17 @@ import type {
   ChangePointAnnotation,
   ChangePointDetectionRequestParams,
 } from '../components/change_point_detection/change_point_detection_context';
-import { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
+import type {
+  EmbeddableChangePointChartInput,
+  EmbeddableChangePointChartOutput,
+} from './embeddable_change_point_chart';
 import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
 import { FilterQueryContextProvider, useFilerQueryUpdates } from '../hooks/use_filters_query';
-import { DataSourceContextProvider, useDataSource } from '../hooks/use_data_source';
+import {
+  DataSourceContextProvider,
+  type DataSourceContextProviderProps,
+  useDataSource,
+} from '../hooks/use_data_source';
 import { useAiopsAppContext } from '../hooks/use_aiops_app_context';
 import { useTimeBuckets } from '../hooks/use_time_buckets';
 import { createMergedEsQuery } from '../application/utils/search_utils';
@@ -31,16 +38,37 @@ const defaultSort = {
   direction: 'asc',
 };
 
-export const EmbeddableInputTracker: FC<{
+export interface EmbeddableInputTrackerProps {
   input$: Observable<EmbeddableChangePointChartInput>;
   initialInput: EmbeddableChangePointChartInput;
   reload$: Observable<number>;
-}> = ({ input$, initialInput, reload$ }) => {
+  onOutputChange: (output: Partial<EmbeddableChangePointChartOutput>) => void;
+  onRenderComplete: () => void;
+  onLoading: () => void;
+  onError: (error: Error) => void;
+}
+
+export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
+  input$,
+  initialInput,
+  reload$,
+  onOutputChange,
+  onRenderComplete,
+  onLoading,
+  onError,
+}) => {
   const input = useObservable(input$, initialInput);
+
+  const onChange = useCallback<Exclude<DataSourceContextProviderProps['onChange'], undefined>>(
+    ({ dataViews }) => {
+      onOutputChange({ indexPatterns: dataViews });
+    },
+    [onOutputChange]
+  );
 
   return (
     <ReloadContextProvider reload$={reload$}>
-      <DataSourceContextProvider dataViewId={input.dataViewId}>
+      <DataSourceContextProvider dataViewId={input.dataViewId} onChange={onChange}>
         <FilterQueryContextProvider timeRange={input.timeRange}>
           <ChartGridEmbeddableWrapper
             timeRange={input.timeRange}
@@ -50,6 +78,9 @@ export const EmbeddableInputTracker: FC<{
             maxSeriesToPlot={input.maxSeriesToPlot}
             dataViewId={input.dataViewId}
             partitions={input.partitions}
+            onLoading={onLoading}
+            onRenderComplete={onRenderComplete}
+            onError={onError}
           />
         </FilterQueryContextProvider>
       </DataSourceContextProvider>
@@ -68,12 +99,21 @@ export const EmbeddableInputTracker: FC<{
  * @param partitions
  * @constructor
  */
-export const ChartGridEmbeddableWrapper: FC<EmbeddableChangePointChartProps> = ({
+export const ChartGridEmbeddableWrapper: FC<
+  EmbeddableChangePointChartProps & {
+    onRenderComplete: () => void;
+    onLoading: () => void;
+    onError: (error: Error) => void;
+  }
+> = ({
   fn,
   metricField,
   maxSeriesToPlot,
   splitField,
   partitions,
+  onError,
+  onLoading,
+  onRenderComplete,
 }) => {
   const { filters, query, timeRange } = useFilerQueryUpdates();
 
@@ -134,7 +174,18 @@ export const ChartGridEmbeddableWrapper: FC<EmbeddableChangePointChartProps> = (
     return { interval } as ChangePointDetectionRequestParams;
   }, [interval]);
 
-  const { results } = useChangePointResults(fieldConfig, requestParams, combinedQuery, 10000);
+  const { results, isLoading } = useChangePointResults(
+    fieldConfig,
+    requestParams,
+    combinedQuery,
+    10000
+  );
+
+  useEffect(() => {
+    if (isLoading) {
+      onLoading();
+    }
+  }, [onLoading, isLoading]);
 
   const changePoints = useMemo<ChangePointAnnotation[]>(() => {
     let resultChangePoints: ChangePointAnnotation[] = results.sort((a, b) => {
@@ -163,6 +214,7 @@ export const ChartGridEmbeddableWrapper: FC<EmbeddableChangePointChartProps> = (
         <ChartsGrid
           changePoints={changePoints.map((r) => ({ ...r, ...fieldConfig }))}
           interval={requestParams.interval}
+          onRenderComplete={onRenderComplete}
         />
       ) : (
         <NoChangePointsWarning />
