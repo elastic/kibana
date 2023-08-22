@@ -215,6 +215,50 @@ const diskSpaceUsageAvailable = {
   dataViewOrigin: DataViewOrigin.Metrics,
 };
 
+const diskSpaceUsageAvailableByMountPoint = {
+  id: 'DiskSpaceUsageByMountPoint',
+  title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskSpace', {
+    defaultMessage: 'Disk Space by Mount Point',
+  }),
+  layers: [
+    {
+      data: [
+        {
+          ...hostLensFormulas.diskSpaceUsage,
+          label: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskSpace.label.used', {
+            defaultMessage: 'Used',
+          }),
+        },
+        {
+          ...hostLensFormulas.diskSpaceAvailability,
+          label: i18n.translate(
+            'xpack.infra.assetDetails.metricsCharts.diskSpace.label.available',
+            {
+              defaultMessage: 'Available',
+            }
+          ),
+        },
+      ],
+      options: {
+        seriesType: 'area' as const,
+        breakdown: {
+          type: 'top_values',
+          field: 'system.filesystem.mount_point',
+          params: {
+            size: 5,
+          },
+        },
+      },
+      type: LayerParamsType.Visualization,
+    },
+  ],
+  overrides: {
+    axisLeft: XY_OVERRIDES.axisLeft,
+    settings: XY_OVERRIDES.settings,
+  },
+  dataViewOrigin: DataViewOrigin.Metrics,
+};
+
 const diskThroughputReadWrite = {
   id: 'diskThroughputReadWrite',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskIOPS', {
@@ -344,6 +388,7 @@ export const hostMetricChartsFullPage: Array<
   loadBreakdown,
   logRate,
   diskSpaceUsageAvailable,
+  diskSpaceUsageAvailableByMountPoint,
   diskThroughputReadWrite,
   diskIOReadWrite,
   rxTx,
