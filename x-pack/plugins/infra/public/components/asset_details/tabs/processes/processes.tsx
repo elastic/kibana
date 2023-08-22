@@ -31,7 +31,6 @@ import {
 import { getFieldByType } from '../../../../../common/inventory_models';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';
-import { DatePicker } from '../../date_picker/date_picker';
 
 const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
   value,
@@ -96,9 +95,6 @@ export const Processes = () => {
   return (
     <ProcessListContextProvider hostTerm={hostTerm} to={currentTimestamp}>
       <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFlexItem grow={false}>
-          <DatePicker />
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <SummaryTable
             isLoading={loading}

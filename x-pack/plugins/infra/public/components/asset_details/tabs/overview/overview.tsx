@@ -18,7 +18,6 @@ import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state
 import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
 import { useDataViewsProviderContext } from '../../hooks/use_data_views';
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';
-import { DatePicker } from '../../date_picker/date_picker';
 
 export const Overview = () => {
   const { dateRange } = useDateRangeProviderContext();
@@ -32,9 +31,6 @@ export const Overview = () => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexItem grow={false}>
-        <DatePicker />
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <KPIGrid nodeName={asset.name} timeRange={dateRange} dataView={metrics.dataView} />
       </EuiFlexItem>

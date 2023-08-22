@@ -5,30 +5,22 @@
  * 2.0.
  */
 
-import type { TimeRange } from '@kbn/es-query';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { AnomaliesTable } from '../../../../pages/metrics/inventory_view/components/ml/anomaly_detection/anomalies_table/anomalies_table';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';
 
 export const Anomalies = () => {
-  const { dateRange, setDateRange } = useDateRangeProviderContext();
+  const { dateRange } = useDateRangeProviderContext();
   const { asset, overrides } = useAssetDetailsStateContext();
   const { onClose = () => {} } = overrides?.anomalies ?? {};
-
-  const handleDateRangeChange = useCallback(
-    (newDateRange: TimeRange) => {
-      setDateRange(newDateRange);
-    },
-    [setDateRange]
-  );
 
   return (
     <AnomaliesTable
       closeFlyout={onClose}
       hostName={asset.name}
       dateRange={dateRange}
-      onDateRangeChange={handleDateRangeChange}
+      hideDatePicker
     />
   );
 };

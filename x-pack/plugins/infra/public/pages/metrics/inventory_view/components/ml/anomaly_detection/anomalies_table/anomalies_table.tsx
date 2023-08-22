@@ -194,7 +194,8 @@ interface Props {
   closeFlyout(): void;
   hostName?: string;
   dateRange?: TimeRange;
-  onDateRangeChange?: (dateRange: TimeRange) => void;
+  // In case the date picker is managed outside this component
+  hideDatePicker?: boolean;
 }
 
 const DEFAULT_DATE_RANGE: TimeRange = {
@@ -202,10 +203,13 @@ const DEFAULT_DATE_RANGE: TimeRange = {
   to: 'now',
 };
 
-export const AnomaliesTable = (props: Props) => {
-  const { closeFlyout, hostName, onDateRangeChange } = props;
+export const AnomaliesTable = ({
+  closeFlyout,
+  hostName,
+  dateRange = DEFAULT_DATE_RANGE,
+  hideDatePicker = false,
+}: Props) => {
   const [search, setSearch] = useState('');
-  const [dateRange, setDateRange] = useState<TimeRange>(props.dateRange ?? DEFAULT_DATE_RANGE);
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
   const [timeRange, setTimeRange] = useState<{ start: number; end: number }>({
     start: datemathToEpochMillis(dateRange.from) || 0,
@@ -241,17 +245,13 @@ export const AnomaliesTable = (props: Props) => {
   const onTimeChange = useCallback(
     ({ isInvalid, start: startChange, end: endChange }: OnTimeChangeProps) => {
       if (!isInvalid) {
-        setDateRange({ from: startChange, to: endChange });
         setTimeRange({
           start: datemathToEpochMillis(startChange)!,
           end: datemathToEpochMillis(endChange, 'up')!,
         });
-        if (onDateRangeChange) {
-          onDateRangeChange({ from: startChange, to: endChange });
-        }
       }
     },
-    [onDateRangeChange]
+    []
   );
 
   const anomalyParams = useMemo(
@@ -455,15 +455,17 @@ export const AnomaliesTable = (props: Props) => {
 
   return (
     <EuiFlexGroup direction="column">
-      <EuiFlexItem grow={false}>
-        <EuiSuperDatePicker
-          start={dateRange.from}
-          end={dateRange.to}
-          updateButtonProps={{ iconOnly: true }}
-          onTimeChange={onTimeChange}
-          width="full"
-        />
-      </EuiFlexItem>
+      {!hideDatePicker && (
+        <EuiFlexItem grow={false}>
+          <EuiSuperDatePicker
+            start={dateRange.from}
+            end={dateRange.to}
+            showUpdateButton={false}
+            onTimeChange={onTimeChange}
+            width="full"
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         {!hostName && (
           <EuiFlexGroup alignItems="center">

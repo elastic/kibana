@@ -13,7 +13,7 @@ import { NoRemoteCluster } from '../../../components/empty_states';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
-import { FlyoutTabIds, type Tab } from '../../../components/asset_details/types';
+import { FlyoutTabIds, type Tab, type TabState } from '../../../components/asset_details/types';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
 import { AssetDetails } from '../../../components/asset_details/asset_details';
 import { useMetricsTimeContext } from './hooks/use_metrics_time';
@@ -70,7 +70,7 @@ export const AssetDetailPage = () => {
     return queryParams.get('assetName') ?? undefined;
   }, [search]);
 
-  const { parsedTimeRange } = useMetricsTimeContext();
+  const { parsedTimeRange, setTimeRange } = useMetricsTimeContext();
 
   const dateRange: TimeRange = useMemo(
     () => ({
@@ -79,6 +79,17 @@ export const AssetDetailPage = () => {
     }),
     [parsedTimeRange.from, parsedTimeRange.to]
   );
+
+  // Retrocompatibility
+  const handleTabStateChange = ({ dateRange: newDateRange }: TabState) => {
+    if (newDateRange) {
+      setTimeRange({
+        from: newDateRange.from,
+        to: newDateRange.to,
+        interval: parsedTimeRange.interval,
+      });
+    }
+  };
 
   const { metricIndicesExist, remoteClustersExist } = source?.status ?? {};
 
@@ -111,6 +122,7 @@ export const AssetDetailPage = () => {
         }}
         assetType={nodeType}
         dateRange={dateRange}
+        onTabsStateChange={handleTabStateChange}
         activeTabId={FlyoutTabIds.OVERVIEW}
         tabs={orderedFlyoutTabs}
         links={['uptime', 'apmServices']}

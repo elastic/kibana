@@ -19,7 +19,6 @@ import { InfraLoadingPanel } from '../../../loading';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 import { useDataViewsProviderContext } from '../../hooks/use_data_views';
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';
-import { DatePicker } from '../../date_picker/date_picker';
 
 const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 
@@ -90,9 +89,6 @@ export const Logs = () => {
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="infraAssetDetailsLogsTabContent">
-      <EuiFlexItem grow={false}>
-        <DatePicker />
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
           <EuiFlexItem>

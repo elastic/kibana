@@ -27,6 +27,7 @@ export enum FlyoutTabIds {
 export type TabIds = `${FlyoutTabIds}`;
 
 export interface TabState {
+  dateRange?: TimeRange;
   metadata?: {
     query?: string;
     showActionsColumn?: boolean;

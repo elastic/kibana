@@ -11,6 +11,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { parseDateRange } from '../../../utils/datemath';
 
 import { toTimestampRange } from '../utils';
+import { useAssetDetailsStateContext } from './use_asset_details_state';
 
 const DEFAULT_DATE_RANGE: TimeRange = {
   from: 'now-15m',
@@ -22,6 +23,7 @@ export interface UseAssetDetailsStateProps {
 }
 
 export function useDateRangeProvider({ initialDateRange }: UseAssetDetailsStateProps) {
+  const { onTabsStateChange } = useAssetDetailsStateContext();
   const [dateRange, setDateRange] = useState(initialDateRange);
 
   const parsedDateRange = useMemo(() => {

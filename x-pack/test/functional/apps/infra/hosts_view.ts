@@ -12,13 +12,17 @@ import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common'
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { DATES, HOSTS_LINK_LOCAL_STORAGE_KEY, HOSTS_VIEW_PATH } from './constants';
+import {
+  DATES,
+  HOSTS_LINK_LOCAL_STORAGE_KEY,
+  HOSTS_VIEW_PATH,
+  DATE_PICKER_FORMAT,
+} from './constants';
 
 const START_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);
 const START_HOST_PROCESSES_DATE = moment.utc(DATES.metricsAndLogs.hosts.processesDataStartDate);
 const END_HOST_PROCESSES_DATE = moment.utc(DATES.metricsAndLogs.hosts.processesDataEndDate);
-const timepickerFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
 const tableEntries = [
   {
@@ -265,8 +269,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe('Tabs', () => {
         before(async () => {
           await pageObjects.timePicker.setAbsoluteRange(
-            START_HOST_PROCESSES_DATE.format(timepickerFormat),
-            END_HOST_PROCESSES_DATE.format(timepickerFormat)
+            START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT),
+            END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
           );
 
           await waitForPageToLoad();
@@ -282,7 +286,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Overview Tab', () => {
           before(async () => {
-            await pageObjects.assetDetails.clickOverviewFlyoutTab();
+            await pageObjects.assetDetails.clickOverviewTab();
           });
 
           [
@@ -314,7 +318,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Metadata Tab', () => {
           before(async () => {
-            await pageObjects.assetDetails.clickMetadataFlyoutTab();
+            await pageObjects.assetDetails.clickMetadataTab();
           });
 
           it('should show metadata table', async () => {
@@ -342,7 +346,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Processes Tab', () => {
           before(async () => {
-            await pageObjects.assetDetails.clickProcessesFlyoutTab();
+            await pageObjects.assetDetails.clickProcessesTab();
           });
 
           it('should show processes table', async () => {
@@ -352,7 +356,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Logs Tab', () => {
           before(async () => {
-            await pageObjects.assetDetails.clickLogsFlyoutTab();
+            await pageObjects.assetDetails.clickLogsTab();
           });
 
           it('should render logs tab', async () => {
@@ -382,8 +386,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
         await pageObjects.header.waitUntilLoadingHasFinished();
         await pageObjects.timePicker.setAbsoluteRange(
-          START_DATE.format(timepickerFormat),
-          END_DATE.format(timepickerFormat)
+          START_DATE.format(DATE_PICKER_FORMAT),
+          END_DATE.format(DATE_PICKER_FORMAT)
         );
 
         await waitForPageToLoad();

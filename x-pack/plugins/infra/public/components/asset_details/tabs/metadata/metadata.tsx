@@ -9,13 +9,10 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
 import { Table } from './table';
 import { getAllFields } from './utils';
 import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
-import { DatePicker } from '../../date_picker/date_picker';
 
 export interface MetadataSearchUrlState {
   metadataSearchUrlState: string;
@@ -73,20 +70,13 @@ export const Metadata = () => {
   }
 
   return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem grow={false}>
-        <DatePicker />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <Table
-          search={query}
-          onSearchChange={onSearchChange}
-          showActionsColumn={showActionsColumn}
-          rows={fields}
-          loading={metadataLoading}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <Table
+      search={query}
+      onSearchChange={onSearchChange}
+      showActionsColumn={showActionsColumn}
+      rows={fields}
+      loading={metadataLoading}
+    />
   );
 };
 
