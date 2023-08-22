@@ -33,14 +33,11 @@ const schemaLatest = schema.object(
       serverless: schema.boolean({ defaultValue: true }),
     }),
     dev: schema.object({ enableIndexDetailsPage: schema.boolean({ defaultValue: false }) }),
-    enableIndexStats: schema.conditional(
-      schema.contextRef('serverless'),
-      true,
+    enableIndexStats: offeringBasedSchema({
       // Index stats information is disabled in serverless; refer to the serverless.yml file as the source of truth
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
-      schema.boolean({ defaultValue: true }),
-      schema.never()
-    ),
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
   },
   { defaultValue: undefined }
 );
