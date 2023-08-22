@@ -112,6 +112,7 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(({ policy: _
         if (routeState && routeState.onSaveNavigateTo) {
           navigateToApp(...routeState.onSaveNavigateTo);
         } else {
+          // Since the 'policyItem' is stored in a store and fetched as a result of an action on urlChange, we still need to dispatch an action even though Redux was removed from this component.
           dispatch({
             type: 'serverReturnedPolicyDetailsData',
             payload: {
