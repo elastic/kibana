@@ -117,6 +117,7 @@ export interface FleetSetupDeps {
 export interface FleetStartDeps {
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
+  dashboard: DashboardStart;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   navigation: NavigationPublicPluginStart;
