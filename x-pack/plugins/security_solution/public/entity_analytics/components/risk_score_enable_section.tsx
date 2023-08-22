@@ -38,7 +38,7 @@ import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mutation';
 import { useEnableRiskEngineMutation } from '../api/hooks/use_enable_risk_engine_mutation';
 import { useDisableRiskEngineMutation } from '../api/hooks/use_disable_risk_engine_mutation';
-import { RiskEngineStatus } from '../../../common/risk_engine/types';
+import { RiskEngineStatus, MAX_SPACES_COUNT } from '../../../common/risk_engine';
 
 const docsLinks = [
   {
@@ -187,6 +187,22 @@ export const RiskScoreEnableSection = () => {
       initRiskEngineErrors = [errorBody];
     }
   }
+
+  if (
+    currentRiskEngineStatus !== RiskEngineStatus.ENABLED &&
+    riskEngineStatus?.is_max_amount_of_risk_engines_reached
+  ) {
+    return (
+      <EuiCallOut
+        title={i18n.getMaxSpaceTitle(MAX_SPACES_COUNT)}
+        color="warning"
+        iconType="error"
+        data-test-subj="risk-score-warning-panel"
+      >
+        <p>{i18n.MAX_SPACE_PANEL_MESSAGE}</p>
+      </EuiCallOut>
+    );
+  }
   return (
     <>
       <>
@@ -217,7 +233,9 @@ export const RiskScoreEnableSection = () => {
               {isUpdateAvailable && (
                 <EuiFlexGroup gutterSize="s" alignItems={'center'}>
                   <EuiFlexItem>
-                    {initRiskEngineMutation.isLoading && <EuiLoadingSpinner size="m" />}
+                    {initRiskEngineMutation.isLoading && !isModalVisible && (
+                      <EuiLoadingSpinner size="m" />
+                    )}
                   </EuiFlexItem>
                   <EuiButtonEmpty
                     disabled={initRiskEngineMutation.isLoading}

@@ -75,8 +75,7 @@ const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
 const useUpdateCommentMock = useUpdateComment as jest.Mock;
 const patchComment = jest.fn();
 
-// FLAKY: https://github.com/elastic/kibana/issues/156741
-describe.skip(`UserActions`, () => {
+describe(`UserActions`, () => {
   const sampleData = {
     content: 'what a great comment update',
   };
@@ -268,54 +267,6 @@ describe.skip(`UserActions`, () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId('add-comment')).not.toBeInTheDocument();
-    });
-  });
-
-  it('it should persist the draft of new comment while existing old comment is updated', async () => {
-    const editedComment = 'it is an edited comment';
-    const newComment = 'another cool comment';
-    const ourActions = [getUserAction('comment', UserActionActions.create)];
-
-    useFindCaseUserActionsMock.mockReturnValue({
-      ...defaultUseFindCaseUserActions,
-      data: { userActions: ourActions },
-    });
-
-    appMockRender.render(<UserActions {...defaultProps} />);
-
-    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
-    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), newComment);
-
-    userEvent.click(
-      within(
-        screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
-      ).getByTestId('property-actions-user-action-ellipses')
-    );
-
-    await waitForEuiPopoverOpen();
-
-    userEvent.click(screen.getByTestId('property-actions-user-action-pencil'));
-
-    fireEvent.change(screen.getAllByTestId('euiMarkdownEditorTextArea')[0], {
-      target: { value: editedComment },
-    });
-
-    userEvent.click(
-      within(
-        screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
-      ).getByTestId('editable-save-markdown')
-    );
-
-    await waitFor(() => {
-      expect(
-        within(
-          screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
-        ).queryByTestId('editable-markdown-form')
-      ).not.toBeInTheDocument();
-    });
-
-    await waitFor(() => {
-      expect(screen.getAllByTestId('add-comment')[1].textContent).toContain(newComment);
     });
   });
 });

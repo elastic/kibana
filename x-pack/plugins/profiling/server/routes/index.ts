@@ -35,6 +35,7 @@ export interface RouteRegisterParameters {
     start: ProfilingPluginStartDeps;
     setup: ProfilingPluginSetupDeps;
     config: ProfilingConfig;
+    stackVersion: string;
     telemetryUsageCounter?: TelemetryUsageCounter;
   };
   services: {

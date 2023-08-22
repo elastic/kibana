@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import {
+  getParsedFilterQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import { ApmRuleType } from '../../../../../common/rules/apm_rule_types';
 import {
   SERVICE_NAME,
@@ -48,6 +52,7 @@ export async function getTransactionErrorRateChartPreview({
     end,
     transactionName,
     groupBy: groupByFields,
+    kqlFilter,
   } = alertParams;
 
   const searchAggregatedTransactions = await getSearchTransactionsEvents({
@@ -61,6 +66,21 @@ export async function getTransactionErrorRateChartPreview({
     groupByFields
   );
 
+  const termFilterQuery = !kqlFilter
+    ? [
+        ...termQuery(SERVICE_NAME, serviceName, {
+          queryEmptyString: false,
+        }),
+        ...termQuery(TRANSACTION_TYPE, transactionType, {
+          queryEmptyString: false,
+        }),
+        ...termQuery(TRANSACTION_NAME, transactionName, {
+          queryEmptyString: false,
+        }),
+        ...environmentQuery(environment),
+      ]
+    : [];
+
   const params = {
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
@@ -71,17 +91,9 @@ export async function getTransactionErrorRateChartPreview({
       query: {
         bool: {
           filter: [
-            ...termQuery(SERVICE_NAME, serviceName, {
-              queryEmptyString: false,
-            }),
-            ...termQuery(TRANSACTION_TYPE, transactionType, {
-              queryEmptyString: false,
-            }),
-            ...termQuery(TRANSACTION_NAME, transactionName, {
-              queryEmptyString: false,
-            }),
+            ...termFilterQuery,
+            ...getParsedFilterQuery(kqlFilter),
             ...rangeQuery(start, end),
-            ...environmentQuery(environment),
             ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions
             ),

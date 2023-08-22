@@ -23,8 +23,14 @@ import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
  * and the SummaryPanel component for data rendering.
  */
 export const PrevalenceOverview: FC = () => {
-  const { eventId, indexName, browserFields, dataFormattedForFieldBrowser, scopeId } =
-    useRightPanelContext();
+  const {
+    eventId,
+    indexName,
+    browserFields,
+    dataFormattedForFieldBrowser,
+    scopeId,
+    investigationFields,
+  } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutContext();
 
   const goToCorrelationsTab = useCallback(() => {
@@ -46,6 +52,7 @@ export const PrevalenceOverview: FC = () => {
     eventId,
     browserFields,
     dataFormattedForFieldBrowser,
+    investigationFields,
     scopeId,
   });
 

@@ -13,11 +13,12 @@ export const vulnerabilitiesColumns = {
   actions: 'actions',
   vulnerability: 'vulnerability.id',
   cvss: 'vulnerability.score.base',
-  resource: 'resource.name',
+  resourceName: 'resource.name',
+  resourceId: 'resource.id',
   severity: 'vulnerability.severity',
   package: 'vulnerability.package.name',
   version: 'vulnerability.package.version',
-  fix_version: 'vulnerability.package.fixed_version',
+  fixedVersion: 'vulnerability.package.fixed_version',
 };
 
 const defaultColumnProps = () => ({
@@ -61,9 +62,17 @@ export const getVulnerabilitiesColumnsGrid = (
   },
   {
     ...defaultColumnProps(),
-    id: vulnerabilitiesColumns.resource,
-    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.resource', {
-      defaultMessage: 'Resource',
+    id: vulnerabilitiesColumns.resourceId,
+    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.resourceId', {
+      defaultMessage: 'Resource ID',
+    }),
+    cellActions,
+  },
+  {
+    ...defaultColumnProps(),
+    id: vulnerabilitiesColumns.resourceName,
+    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.resourceName', {
+      defaultMessage: 'Resource Name',
     }),
     cellActions,
   },
@@ -95,7 +104,7 @@ export const getVulnerabilitiesColumnsGrid = (
   },
   {
     ...defaultColumnProps(),
-    id: vulnerabilitiesColumns.fix_version,
+    id: vulnerabilitiesColumns.fixedVersion,
     displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.fixVersion', {
       defaultMessage: 'Fix Version',
     }),

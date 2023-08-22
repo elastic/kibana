@@ -33,6 +33,7 @@ const createRulesClientMock = () => {
     getAuditLogger: jest.fn(),
     getAuthorization: jest.fn().mockImplementation(() => ({
       getFindAuthorizationFilter: jest.fn().mockReturnValue({ filter: null }),
+      getAuthorizedRuleTypes: jest.fn().mockResolvedValue([]),
     })),
     getExecutionLogForRule: jest.fn(),
     getRuleExecutionKPI: jest.fn(),

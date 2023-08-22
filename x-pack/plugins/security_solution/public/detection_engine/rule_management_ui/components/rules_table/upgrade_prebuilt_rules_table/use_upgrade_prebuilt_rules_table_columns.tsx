@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBadge, EuiButtonEmpty, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
 import type { RuleUpgradeInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -25,13 +25,32 @@ import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_ta
 
 export type TableColumn = EuiBasicTableColumn<RuleUpgradeInfoForReview>;
 
+interface RuleNameProps {
+  name: string;
+  ruleId: string;
+}
+
+const RuleName = ({ name, ruleId }: RuleNameProps) => {
+  const {
+    actions: { openFlyoutForRuleId },
+  } = useUpgradePrebuiltRulesTableContext();
+
+  return (
+    <EuiLink
+      onClick={() => {
+        openFlyoutForRuleId(ruleId);
+      }}
+    >
+      {name}
+    </EuiLink>
+  );
+};
+
 const RULE_NAME_COLUMN: TableColumn = {
   field: 'rule.name',
   name: i18n.COLUMN_RULE,
-  render: (value: RuleUpgradeInfoForReview['rule']['name']) => (
-    <EuiText id={value} size="s">
-      {value}
-    </EuiText>
+  render: (value: RuleUpgradeInfoForReview['rule']['name'], rule: RuleUpgradeInfoForReview) => (
+    <RuleName name={value} ruleId={rule.rule.rule_id} />
   ),
   sortable: true,
   truncateText: true,

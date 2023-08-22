@@ -15,10 +15,14 @@ import {
   EuiModalHeaderTitle,
   EuiPopover,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import * as i18n from '../translations';
+import type { Conversation } from '../../..';
+import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
 
 /**
  * Renders a header title with an icon, a tooltip button, and a popover with
@@ -28,7 +32,10 @@ export const AssistantTitle: React.FC<{
   title: string | JSX.Element;
   titleIcon: string;
   docLinks: Omit<DocLinksStart, 'links'>;
-}> = ({ title, titleIcon, docLinks }) => {
+  selectedConversation: Conversation | undefined;
+}> = ({ title, titleIcon, docLinks, selectedConversation }) => {
+  const selectedConnectorId = selectedConversation?.apiConfig?.connectorId;
+
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const url = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/security-assistant.html`;
 
@@ -66,32 +73,57 @@ export const AssistantTitle: React.FC<{
 
   return (
     <EuiModalHeaderTitle>
-      <EuiFlexGroup gutterSize="xs" alignItems="center">
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            margin-top: 3px;
+          `}
+        >
           <EuiIcon data-test-subj="titleIcon" type={titleIcon} size="xl" />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{title}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            button={
-              <EuiButtonIcon
-                aria-label={i18n.TOOLTIP_ARIA_LABEL}
-                data-test-subj="tooltipIcon"
-                iconSize="l"
-                iconType="iInCircle"
-                onClick={onButtonClick}
-              />
-            }
-            isOpen={isPopoverOpen}
-            closePopover={closePopover}
-            anchorPosition="upCenter"
-          >
-            <EuiText data-test-subj="tooltipContent" grow={false} css={{ maxWidth: '400px' }}>
-              <h4>{i18n.TOOLTIP_TITLE}</h4>
-              <p>{content}</p>
-            </EuiText>
-          </EuiPopover>
-        </EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size={'s'}>
+                  <h3>{title}</h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  button={
+                    <EuiButtonIcon
+                      aria-label={i18n.TOOLTIP_ARIA_LABEL}
+                      data-test-subj="tooltipIcon"
+                      iconType="iInCircle"
+                      onClick={onButtonClick}
+                    />
+                  }
+                  isOpen={isPopoverOpen}
+                  closePopover={closePopover}
+                  anchorPosition="rightUp"
+                >
+                  <EuiText data-test-subj="tooltipContent" grow={false} css={{ maxWidth: '400px' }}>
+                    <h4>{i18n.TOOLTIP_TITLE}</h4>
+                    <EuiText size={'s'}>
+                      <p>{content}</p>
+                    </EuiText>
+                  </EuiText>
+                </EuiPopover>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ConnectorSelectorInline
+              isDisabled={selectedConversation === undefined}
+              onConnectorModalVisibilityChange={() => {}}
+              onConnectorSelectionChange={() => {}}
+              selectedConnectorId={selectedConnectorId}
+              selectedConversation={selectedConversation}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiModalHeaderTitle>
   );

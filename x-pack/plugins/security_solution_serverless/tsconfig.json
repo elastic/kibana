@@ -36,6 +36,7 @@
     "@kbn/task-manager-plugin",
     "@kbn/cloud-plugin",
     "@kbn/cloud-security-posture-plugin",
-    "@kbn/fleet-plugin"
+    "@kbn/fleet-plugin",
+    "@kbn/core-elasticsearch-server"
   ]
 }

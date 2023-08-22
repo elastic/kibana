@@ -84,7 +84,7 @@ export function ConnectorSelectorBase(props: ConnectorSelectorBaseProps) {
       gutterSize="xs"
       responsive={false}
     >
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiSuperSelect
           compressed
           valueOfSelected={props.selectedConnector}

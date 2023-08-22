@@ -104,6 +104,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
   name: durationAnomalyTranslations.alertFactoryName,
   validate: {
     params: schema.object({
+      stackVersion: schema.maybe(schema.string()),
       monitorId: schema.string(),
       severity: schema.number(),
     }),
@@ -146,7 +147,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
       savedObjectsClient,
       scopedClusterClient.asCurrentUser,
       {
-        isLegacyAlert: true,
+        stackVersion: params.stackVersion ?? '8.9.0',
       }
     );
     const { share, basePath } = server;

@@ -44,11 +44,8 @@ export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefin
     private readonly getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
   ) {}
 
-  /**
-   * TODO
-   */
   public isEditable = async () => {
-    return false;
+    return true;
   };
 
   getDisplayName() {
@@ -57,19 +54,16 @@ export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefin
     });
   }
 
-  /**
-   * TODO
-   */
   canCreateNew() {
-    return false;
+    return true;
   }
 
   public async getExplicitInput(): Promise<Partial<EmbeddableChangePointChartInput>> {
-    const [coreStart] = await this.getStartServices();
+    const [coreStart, pluginStart] = await this.getStartServices();
 
     try {
       const { resolveEmbeddableChangePointUserInput } = await import('./handle_explicit_input');
-      return await resolveEmbeddableChangePointUserInput(coreStart);
+      return await resolveEmbeddableChangePointUserInput(coreStart, pluginStart);
     } catch (e) {
       return Promise.reject();
     }

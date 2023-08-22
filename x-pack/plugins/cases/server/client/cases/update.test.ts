@@ -394,6 +394,41 @@ describe('update', () => {
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The category field cannot be an empty string.,Invalid value "   " supplied to "cases,category"'
       );
     });
+
+    it('should trim category', async () => {
+      await update(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              category: 'security     ',
+            },
+          ],
+        },
+        clientArgs
+      );
+
+      expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: [
+            {
+              caseId: mockCases[0].id,
+              version: mockCases[0].version,
+              originalCase: {
+                ...mockCases[0],
+              },
+              updatedAttributes: {
+                category: 'security',
+                updated_at: expect.any(String),
+                updated_by: expect.any(Object),
+              },
+            },
+          ],
+          refresh: false,
+        })
+      );
+    });
   });
 
   describe('Title', () => {
@@ -486,6 +521,41 @@ describe('update', () => {
         )
       ).rejects.toThrow(
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The title field cannot be an empty string.'
+      );
+    });
+
+    it('should trim title', async () => {
+      await update(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              title: 'title with spaces      ',
+            },
+          ],
+        },
+        clientArgs
+      );
+
+      expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: [
+            {
+              caseId: mockCases[0].id,
+              version: mockCases[0].version,
+              originalCase: {
+                ...mockCases[0],
+              },
+              updatedAttributes: {
+                title: 'title with spaces',
+                updated_at: expect.any(String),
+                updated_by: expect.any(Object),
+              },
+            },
+          ],
+          refresh: false,
+        })
       );
     });
   });
@@ -583,6 +653,41 @@ describe('update', () => {
         )
       ).rejects.toThrow(
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The description field cannot be an empty string.'
+      );
+    });
+
+    it('should trim description', async () => {
+      await update(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              description: 'This is a description with spaces!!      ',
+            },
+          ],
+        },
+        clientArgs
+      );
+
+      expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: [
+            {
+              caseId: mockCases[0].id,
+              version: mockCases[0].version,
+              originalCase: {
+                ...mockCases[0],
+              },
+              updatedAttributes: {
+                description: 'This is a description with spaces!!',
+                updated_at: expect.any(String),
+                updated_by: expect.any(Object),
+              },
+            },
+          ],
+          refresh: false,
+        })
       );
     });
   });
@@ -722,6 +827,41 @@ describe('update', () => {
         )
       ).rejects.toThrow(
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The tag field cannot be an empty string.'
+      );
+    });
+
+    it('should trim tags', async () => {
+      await update(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              tags: ['coke      ', 'pepsi'],
+            },
+          ],
+        },
+        clientArgs
+      );
+
+      expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: [
+            {
+              caseId: mockCases[0].id,
+              version: mockCases[0].version,
+              originalCase: {
+                ...mockCases[0],
+              },
+              updatedAttributes: {
+                tags: ['coke', 'pepsi'],
+                updated_at: expect.any(String),
+                updated_by: expect.any(Object),
+              },
+            },
+          ],
+          refresh: false,
+        })
       );
     });
   });
