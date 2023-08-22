@@ -10,19 +10,32 @@ import type { SerializedEnrichPolicy } from '../../../../common';
 
 export type DraftPolicy = Partial<SerializedEnrichPolicy>;
 
+export interface CompletionState {
+  configurationStep: boolean;
+  fieldsSelectionStep: boolean;
+}
+
 export interface Context {
   draft: DraftPolicy;
   updateDraft: React.Dispatch<React.SetStateAction<DraftPolicy>>;
+  completionState: CompletionState;
+  updateCompletionState: React.Dispatch<React.SetStateAction<CompletionState>>;
 }
 
 export const CreatePolicyContext = createContext<Context>({} as any);
 
 export const CreatePolicyContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [draft, updateDraft] = useState<DraftPolicy>({});
+  const [completionState, updateCompletionState] = useState<CompletionState>({
+    configurationStep: false,
+    fieldsSelectionStep: false,
+  });
 
   const contextValue = {
     draft,
     updateDraft,
+    completionState,
+    updateCompletionState,
   };
 
   return (

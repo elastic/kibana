@@ -13,6 +13,7 @@ import { documentationService } from '../../services/documentation';
 import { breadcrumbService } from '../../services/breadcrumbs';
 
 import { CreatePolicyWizard } from './create_policy_wizard';
+import { CreatePolicyContextProvider } from './create_policy_context';
 
 export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   useEffect(() => {
@@ -20,7 +21,7 @@ export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = 
   }, []);
 
   return (
-    <>
+    <CreatePolicyContextProvider context={{ draftPolicy: {} }}>
       <EuiPageHeader
         data-test-subj="indexManagementHeaderContent"
         pageTitle={
@@ -50,6 +51,6 @@ export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = 
       <EuiSpacer size="l" />
 
       <CreatePolicyWizard />
-    </>
+    </CreatePolicyContextProvider>
   );
 };

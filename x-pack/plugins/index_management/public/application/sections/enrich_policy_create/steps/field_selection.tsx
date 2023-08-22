@@ -62,7 +62,7 @@ export const fieldSelectionFormSchema: FormSchema = {
 };
 
 export const FieldSelectionStep = ({ onNext }: Props) => {
-  const { draft, updateDraft } = useCreatePolicyContext();
+  const { draft, updateDraft, updateCompletionState } = useCreatePolicyContext();
 
   const { form } = useForm({
     defaultValue: draft,
@@ -77,9 +77,16 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
       return;
     }
 
+    // Update form completion state
+    updateCompletionState((prevCompletionState) => ({
+      ...prevCompletionState,
+      fieldsSelectionStep: true,
+    }));
+
     // Update draft state with the data of the form
     updateDraft((prevDraft: DraftPolicy) => ({
       ...prevDraft,
+      hasCompletedFieldSelectionStep: true,
       ...data,
     }));
 

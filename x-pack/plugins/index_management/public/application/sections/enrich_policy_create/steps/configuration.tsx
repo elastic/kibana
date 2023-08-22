@@ -110,7 +110,7 @@ export const configurationFormSchema: FormSchema = {
 };
 
 export const ConfigurationStep = ({ onNext }: Props) => {
-  const { draft, updateDraft } = useCreatePolicyContext();
+  const { draft, updateDraft, updateCompletionState } = useCreatePolicyContext();
 
   const { form } = useForm({
     defaultValue: draft,
@@ -124,6 +124,12 @@ export const ConfigurationStep = ({ onNext }: Props) => {
     if (!isValid) {
       return;
     }
+
+    // Update form completion state
+    updateCompletionState((prevCompletionState) => ({
+      ...prevCompletionState,
+      configurationStep: true,
+    }));
 
     // Update draft state with the data of the form
     updateDraft((prevDraft: DraftPolicy) => ({
