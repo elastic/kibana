@@ -33303,7 +33303,6 @@
     "xpack.securitySolution.flyout.documentDetails.entitiesButton": "实体",
     "xpack.securitySolution.flyout.documentDetails.entitiesTitle": "实体",
     "xpack.securitySolution.flyout.documentDetails.expandDetailButton": "展开告警详情",
-    "xpack.securitySolution.flyout.documentDetails.headerTitle": "文档详情",
     "xpack.securitySolution.flyout.documentDetails.highlightedFieldsTitle": "突出显示的字段",
     "xpack.securitySolution.flyout.documentDetails.insightsOptions": "洞见选项",
     "xpack.securitySolution.flyout.documentDetails.insightsTab": "洞见",
