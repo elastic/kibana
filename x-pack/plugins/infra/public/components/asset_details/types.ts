@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { LogViewReference } from '@kbn/logs-shared-plugin/common';
 import { TimeRange } from '@kbn/es-query';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
 
-interface Metadata {
-  ip?: string | null;
-}
-export type Asset = Metadata & {
+export interface Asset {
   id: string;
-  name: string;
-};
+  name?: string;
+}
 
 export enum FlyoutTabIds {
   OVERVIEW = 'overview',
@@ -32,10 +27,6 @@ export enum FlyoutTabIds {
 export type TabIds = `${FlyoutTabIds}`;
 
 export interface TabState {
-  overview?: {
-    metricsDataView?: DataView;
-    logsDataView?: DataView;
-  };
   metadata?: {
     query?: string;
     showActionsColumn?: boolean;
@@ -51,10 +42,6 @@ export interface TabState {
   };
   logs?: {
     query?: string;
-    logView?: {
-      reference?: LogViewReference | null;
-      loading?: boolean;
-    };
   };
 }
 
@@ -74,7 +61,7 @@ export interface Tab {
   name: string;
 }
 
-export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices';
+export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices' | 'uptime';
 
 export interface AssetDetailsProps {
   asset: Asset;
@@ -83,9 +70,16 @@ export interface AssetDetailsProps {
   tabs: Tab[];
   activeTabId?: TabIds;
   overrides?: TabState;
-  renderMode?: RenderMode;
+  renderMode: RenderMode;
   onTabsStateChange?: TabsStateChangeFn;
   links?: LinkOptions[];
+  // This is temporary. Once we start using the asset details in other plugins,
+  // It will have to retrieve the metricAlias internally rather than receive it via props
+  metricAlias: string;
 }
 
 export type TabsStateChangeFn = (state: TabState & { activeTabId?: TabIds }) => void;
+
+export interface ContentTemplateProps {
+  header: Pick<AssetDetailsProps, 'tabs' | 'links'>;
+}

@@ -6,7 +6,7 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { ApmIndicesConfig } from '../../../routes/settings/apm_indices/get_apm_indices';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { tasks } from './tasks';
 import {
   SERVICE_NAME,
@@ -19,7 +19,7 @@ describe('data telemetry collection tasks', () => {
     metric: 'apm-8.0.0-metric',
     span: 'apm-8.0.0-span',
     transaction: 'apm-8.0.0-transaction',
-  } as ApmIndicesConfig;
+  } as APMIndices;
 
   describe('environments', () => {
     const task = tasks.find((t) => t.name === 'environments');
