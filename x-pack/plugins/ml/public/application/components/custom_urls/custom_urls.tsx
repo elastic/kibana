@@ -244,6 +244,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
         dashboards={dashboards}
         dataViewListItems={dataViewListItems}
         job={this.props.job}
+        isPartialDFAJob={this.props.isPartialDFAJob}
       />
     );
 

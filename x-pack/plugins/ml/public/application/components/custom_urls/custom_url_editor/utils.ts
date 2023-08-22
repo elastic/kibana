@@ -119,8 +119,12 @@ export function getNewCustomUrlDefaults(
   ) {
     // Ensure cast as dfaJob if it's just a partial from the wizard
     const dfaJob = job as DataFrameAnalyticsConfig;
-    indicesName = dfaJob.dest.index;
-    backupIndicesName = dfaJob.source.index[0];
+    const sourceIndex = Array.isArray(dfaJob.source.index)
+      ? dfaJob.source.index.join()
+      : dfaJob.source.index;
+
+    indicesName = isPartialDFAJob ? sourceIndex : dfaJob.dest.index;
+    backupIndicesName = sourceIndex;
     query = dfaJob.source?.query ?? {};
     jobId = dfaJob.id;
   }
