@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-/* eslint no-console: ["error",{ allow: ["log"] }] */
+/* eslint no-console: ["error",{ allow: ["log", "info"] }] */
 
 import { resolve } from 'path';
 import { createFlagError } from '@kbn/dev-cli-errors';
@@ -221,9 +221,9 @@ export const isDryRun = (): boolean => {
 };
 export const id = (x: any) => x;
 const fx = (a: FinalResult | string): string => `${chalk.bold.black.bgWhiteBright.underline(a)}`;
-export const tap = (log: ToolingLog) => (environ: RuntimeEnv) => (x: string) => {
+export const tap = (environ: RuntimeEnv) => (x: string) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-  environ === 'SERVERLESS' ? console.log(fx(x)) : log.info(fx(x));
+  environ === 'SERVERLESS' ? console.log(fx(x)) : console.info(fx(x));
   return x as unknown as FinalResult;
 };
 export const afterAll = (
@@ -235,7 +235,7 @@ export const afterAll = (
 
   return async function finalMetricsAndLogging(log: ToolingLog): Promise<void> {
     flushFinal(`λλλ FINAL METRICS @ ${lazyNow()}`);
-    const tapLog = tap(log)(theEnv);
+    const tapLog = tap(theEnv);
     // const tapLog = tap(log)('SERVERLESS');
     ((await computeAverageMinMax(results)) as FinalResult[])
       .map(function printEachJsonVerbose(x: FinalResult): FinalResult {
