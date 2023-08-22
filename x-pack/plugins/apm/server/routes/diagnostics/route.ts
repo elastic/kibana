@@ -104,7 +104,7 @@ const getDiagnosticsRoute = createApmServerRoute({
       hasAllIndexPrivileges: boolean;
       hasAllPrivileges: boolean;
     };
-    apmIndices: ApmIndicesConfig;
+    apmIndices: APMIndices;
     apmIndexTemplates: Array<{
       name: string;
       isNonStandard: boolean;
