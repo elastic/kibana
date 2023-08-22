@@ -68,6 +68,7 @@
     "@kbn/core-theme-browser",
     "@kbn/serverless",
     "@kbn/core-http-server",
+    "@kbn/alerting-plugin",
     "@kbn/content-management-plugin",
   ],
   "exclude": [

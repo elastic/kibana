@@ -543,6 +543,8 @@ export class SearchSource {
 
     return search({ params, indexType: searchRequest.indexType }, options).pipe(
       switchMap((response) => {
+        // For testing timeout messages in UI, uncomment the next line
+        // response.rawResponse.timed_out = true;
         return new Observable<IKibanaSearchResponse<unknown>>((obs) => {
           if (isErrorResponse(response)) {
             obs.error(response);
@@ -915,6 +917,20 @@ export class SearchSource {
       filtersInMustClause,
     };
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
+
+    // For testing shard failure messages in UI, uncomment the next block and switch to `kibana*` data view
+    // body.query = {
+    //   error_query: {
+    //     indices: [
+    //       {
+    //         name: 'kibana_sample_data_logs',
+    //         shard_ids: [0, 1],
+    //         error_type: 'exception',
+    //         message: 'Testing shard failures!',
+    //       },
+    //     ],
+    //   },
+    // };
 
     if (highlightAll && body.query) {
       body.highlight = getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT));

@@ -34,11 +34,8 @@ disabled:
   - x-pack/test/osquery_cypress/cli_config.ts
   - x-pack/test/osquery_cypress/config.ts
   - x-pack/test/osquery_cypress/visual_config.ts
-  - x-pack/test/security_solution_cypress/ccs_config.ts
   - x-pack/test/security_solution_cypress/cli_config.ts
-  - x-pack/test/security_solution_cypress/config.firefox.ts
   - x-pack/test/security_solution_cypress/config.ts
-  - x-pack/test/security_solution_cypress/upgrade_config.ts
   - x-pack/test/threat_intelligence_cypress/cli_config_parallel.ts
   - x-pack/test/threat_intelligence_cypress/config.ts
   - x-pack/test/functional_enterprise_search/visual_config.ts
@@ -49,6 +46,7 @@ disabled:
   - x-pack/plugins/apm/ftr_e2e/ftr_config.ts
   - x-pack/test_serverless/functional/test_suites/observability/cypress/config_headless.ts
   - x-pack/test_serverless/functional/test_suites/observability/cypress/config_runner.ts
+  - x-pack/test/security_solution_cypress/serverless_config.ts
   - x-pack/plugins/profiling/e2e/ftr_config_open.ts
   - x-pack/plugins/profiling/e2e/ftr_config_runner.ts
   - x-pack/plugins/profiling/e2e/ftr_config.ts
@@ -70,12 +68,10 @@ disabled:
   - x-pack/test/plugin_api_perf/config.js
   - x-pack/test/screenshot_creation/config.ts
   - x-pack/test/fleet_packages/config.ts
+  - x-pack/test/api_integration/apis/asset_manager/config_with_assets_source.ts
 
   # Scalability testing config that we run in its own pipeline
   - x-pack/test/scalability/config.ts
-
-  # Asset Manager configs, in tech preview, will move to enabled after more stability introduced
-  - x-pack/test/api_integration/apis/asset_manager/config.ts
 
   # Serverless base config files
   - x-pack/test_serverless/api_integration/config.base.ts
@@ -85,12 +81,18 @@ disabled:
   # Serverless configs, currently only for manual tests runs, CI integration planned
   - x-pack/test_serverless/api_integration/test_suites/common/config.ts
   - x-pack/test_serverless/api_integration/test_suites/observability/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts
   - x-pack/test_serverless/api_integration/test_suites/search/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/search/config.feature_flags.ts
   - x-pack/test_serverless/api_integration/test_suites/security/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/security/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/common/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.ts
+  - x-pack/test_serverless/functional/test_suites/observability/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/search/config.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/security/config.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:
@@ -152,7 +154,7 @@ enabled:
   - test/plugin_functional/config.ts
   - test/server_integration/http/platform/config.status.ts
   - test/server_integration/http/platform/config.ts
-  - test/server_integration/http/ssl_redirect/config.js
+  - test/server_integration/http/ssl_redirect/config.ts
   - test/server_integration/http/ssl_with_p12_intermediate/config.js
   - test/server_integration/http/ssl_with_p12/config.js
   - test/server_integration/http/ssl/config.js
@@ -178,6 +180,7 @@ enabled:
   - x-pack/test/api_integration/config_security_trial.ts
   - x-pack/test/api_integration/apis/aiops/config.ts
   - x-pack/test/api_integration/apis/asset_manager/config_when_disabled.ts
+  - x-pack/test/api_integration/apis/asset_manager/config_with_signals_source.ts
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/cloud_security_posture/config.ts
   - x-pack/test/api_integration/apis/console/config.ts
@@ -280,6 +283,7 @@ enabled:
   - x-pack/test/functional/apps/home/config.ts
   - x-pack/test/functional/apps/index_lifecycle_management/config.ts
   - x-pack/test/functional/apps/index_management/config.ts
+  - x-pack/test/functional/apps/index_management/index_details_page/config.ts
   - x-pack/test/functional/apps/infra/config.ts
   - x-pack/test/functional/apps/ingest_pipelines/config.ts
   - x-pack/test/functional/apps/lens/group1/config.ts
@@ -349,7 +353,6 @@ enabled:
   - x-pack/test/reporting_functional/reporting_and_deprecated_security.config.ts
   - x-pack/test/reporting_functional/reporting_and_security.config.ts
   - x-pack/test/reporting_functional/reporting_without_security.config.ts
-  - x-pack/test/reporting_functional/reporting_and_timeout.config.ts
   - x-pack/test/rule_registry/security_and_spaces/config_basic.ts
   - x-pack/test/rule_registry/security_and_spaces/config_trial.ts
   - x-pack/test/rule_registry/spaces_only/config_basic.ts
@@ -406,6 +409,7 @@ enabled:
   - x-pack/performance/journeys/flight_dashboard.ts
   - x-pack/performance/journeys/login.ts
   - x-pack/performance/journeys/many_fields_discover.ts
+  - x-pack/performance/journeys/many_fields_lens_editor.ts
   - x-pack/performance/journeys/many_fields_transform.ts
   - x-pack/performance/journeys/promotion_tracking_dashboard.ts
   - x-pack/performance/journeys/web_logs_dashboard.ts

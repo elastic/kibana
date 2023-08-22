@@ -60,6 +60,7 @@ export const getMockSharedResponseSchema = (
   timestamp_override: undefined,
   timestamp_override_fallback_disabled: undefined,
   namespace: undefined,
+  investigation_fields: [],
 });
 
 const getQueryRuleOutput = (ruleId = 'rule-1', enabled = false): RuleResponse => ({

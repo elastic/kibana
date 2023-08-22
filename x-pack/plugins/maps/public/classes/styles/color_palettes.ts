@@ -7,26 +7,17 @@
 
 import tinycolor from 'tinycolor2';
 import {
-  // @ts-ignore
   colorPalette as colorPaletteGenerator,
-  // @ts-ignore
   euiPaletteForStatus,
-  // @ts-ignore
   euiPaletteForTemperature,
-  // @ts-ignore
   euiPaletteCool,
-  // @ts-ignore
   euiPaletteWarm,
-  // @ts-ignore
   euiPaletteNegative,
-  // @ts-ignore
   euiPalettePositive,
-  // @ts-ignore
   euiPaletteGray,
-  // @ts-ignore
   euiPaletteColorBlind,
-} from '@elastic/eui/lib/services';
-import { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
+  EuiColorPalettePickerPaletteProps,
+} from '@elastic/eui';
 import { PercentilesFieldMeta } from '../../../common/descriptor_types';
 
 export const DEFAULT_HEATMAP_COLOR_RAMP_NAME = 'theclassic';

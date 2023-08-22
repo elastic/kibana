@@ -1,8 +1,18 @@
 {
   "delete_script": {
     "url_params": {
-      "timeout": "",
-      "master_timeout": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "master_timeout": [
+        "-1",
+        "0"
+      ],
+      "timeout": [
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "DELETE"
@@ -10,6 +20,10 @@
     "patterns": [
       "_scripts/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

@@ -102,6 +102,7 @@ import { INITIAL_VERSION } from './custom_integrations/constants';
 import { createAssets } from './custom_integrations';
 import { cacheAssets } from './custom_integrations/assets/cache';
 import { generateDatastreamEntries } from './custom_integrations/assets/dataset/utils';
+import { checkForNamingCollision } from './custom_integrations/validation/check_naming_collision';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -780,6 +781,9 @@ export async function installCustomPackage(
     datasets,
     kibanaVersion,
   } = args;
+
+  // Validate that we can create this package, validations will throw if they don't pass
+  await checkForNamingCollision(savedObjectsClient, pkgName);
 
   // Compose a packageInfo
   const packageInfo = {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { CoreStart } from '@kbn/core/public';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 type FeatureCapabilities = Capabilities[string];

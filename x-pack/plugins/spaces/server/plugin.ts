@@ -22,7 +22,6 @@ import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-import { SpacesLicenseService } from '../common/licensing';
 import { setupCapabilities } from './capabilities';
 import type { ConfigType } from './config';
 import { DefaultSpaceService } from './default_space';
@@ -39,6 +38,7 @@ import { SpacesService } from './spaces_service';
 import type { SpacesRequestHandlerContext } from './types';
 import { registerSpacesUsageCollector } from './usage_collection';
 import { UsageStatsService } from './usage_stats';
+import { SpacesLicenseService } from '../common/licensing';
 
 export interface PluginsSetup {
   features: FeaturesPluginSetup;

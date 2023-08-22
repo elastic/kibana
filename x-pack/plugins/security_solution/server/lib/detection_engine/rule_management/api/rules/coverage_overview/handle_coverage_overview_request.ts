@@ -33,16 +33,19 @@ export async function handleCoverageOverviewRequest({
   params: { filter },
   deps: { rulesClient },
 }: HandleCoverageOverviewRequestArgs): Promise<CoverageOverviewResponse> {
+  const activitySet = new Set(filter?.activity);
   const kqlFilter = filter
     ? convertRulesFilterToKQL({
         filter: filter.search_term,
         showCustomRules: filter.source?.includes(CoverageOverviewRuleSource.Custom) ?? false,
         showElasticRules: filter.source?.includes(CoverageOverviewRuleSource.Prebuilt) ?? false,
-        enabled: filter.activity?.includes(CoverageOverviewRuleActivity.Disabled)
-          ? false
-          : filter.activity?.includes(CoverageOverviewRuleActivity.Enabled)
-          ? true
-          : undefined,
+        enabled:
+          (activitySet.has(CoverageOverviewRuleActivity.Enabled) &&
+            activitySet.has(CoverageOverviewRuleActivity.Disabled)) ||
+          (!activitySet.has(CoverageOverviewRuleActivity.Enabled) &&
+            !activitySet.has(CoverageOverviewRuleActivity.Disabled))
+            ? undefined
+            : activitySet.has(CoverageOverviewRuleActivity.Enabled),
       })
     : undefined;
 

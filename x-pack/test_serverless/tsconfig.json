@@ -46,5 +46,6 @@
     "@kbn/test-subj-selector",
     "@kbn/core-http-common",
     "@kbn/data-views-plugin",
+    "@kbn/core-saved-objects-server",
   ]
 }

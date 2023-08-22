@@ -5,16 +5,36 @@
  * 2.0.
  */
 
-import { RuleResponseV1, RuleParamsV1 } from '../../../../../common/routes/rule/response';
-import { Rule, RuleLastRun, RuleParams } from '../../../../application/rule/types';
+import {
+  RuleResponseV1,
+  RuleParamsV1,
+  RuleLastRunV1,
+  MonitoringV1,
+} from '../../../../../common/routes/rule/response';
+import { Rule, RuleLastRun, RuleParams, Monitoring } from '../../../../application/rule/types';
 
-const transformRuleLastRun = (lastRun: RuleLastRun): RuleResponseV1['last_run'] => {
+const transformRuleLastRun = (lastRun: RuleLastRun): RuleLastRunV1 => {
   return {
     outcome: lastRun.outcome,
-    outcome_order: lastRun.outcomeOrder,
-    ...(lastRun.warning ? { warning: lastRun.warning } : {}),
+    ...(lastRun.outcomeOrder !== undefined ? { outcome_order: lastRun.outcomeOrder } : {}),
+    ...(lastRun.warning !== undefined ? { warning: lastRun.warning } : {}),
+    ...(lastRun.outcomeMsg !== undefined ? { outcome_msg: lastRun.outcomeMsg } : {}),
     alerts_count: lastRun.alertsCount,
-    outcome_msg: lastRun.outcomeMsg,
+  };
+};
+
+const transformMonitoring = (monitoring: Monitoring): MonitoringV1 => {
+  return {
+    run: {
+      history: monitoring.run.history.map((history) => ({
+        success: history.success,
+        timestamp: history.timestamp,
+        ...(history.duration !== undefined ? { duration: history.duration } : {}),
+        ...(history.outcome ? { outcome: transformRuleLastRun(history.outcome) } : {}),
+      })),
+      calculated_metrics: monitoring.run.calculated_metrics,
+      last_run: monitoring.run.last_run,
+    },
   };
 };
 
@@ -48,6 +68,8 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
     })
   ),
   params: rule.params,
+  ...(rule.mapped_params ? { mapped_params: rule.mapped_params } : {}),
+  ...(rule.scheduledTaskId !== undefined ? { scheduled_task_id: rule.scheduledTaskId } : {}),
   created_by: rule.createdBy,
   updated_by: rule.updatedBy,
   created_at: rule.createdAt.toISOString(),
@@ -57,13 +79,9 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
     ? { api_key_created_by_user: rule.apiKeyCreatedByUser }
     : {}),
   ...(rule.throttle !== undefined ? { throttle: rule.throttle } : {}),
-  ...(rule.notifyWhen !== undefined ? { notify_when: rule.notifyWhen } : {}),
   mute_all: rule.muteAll,
+  ...(rule.notifyWhen !== undefined ? { notify_when: rule.notifyWhen } : {}),
   muted_alert_ids: rule.mutedInstanceIds,
-  ...(rule.scheduledTaskId !== undefined ? { scheduled_task_id: rule.scheduledTaskId } : {}),
-  ...(rule.isSnoozedUntil !== undefined
-    ? { is_snoozed_until: rule.isSnoozedUntil?.toISOString() || null }
-    : {}),
   execution_status: {
     status: rule.executionStatus.status,
     ...(rule.executionStatus.error ? { error: rule.executionStatus.error } : {}),
@@ -73,10 +91,19 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
       ? { last_duration: rule.executionStatus.lastDuration }
       : {}),
   },
+  ...(rule.monitoring ? { monitoring: transformMonitoring(rule.monitoring) } : {}),
+  ...(rule.snoozeSchedule ? { snooze_schedule: rule.snoozeSchedule } : {}),
+  ...(rule.activeSnoozes ? { active_snoozes: rule.activeSnoozes } : {}),
+  ...(rule.isSnoozedUntil !== undefined
+    ? { is_snoozed_until: rule.isSnoozedUntil?.toISOString() || null }
+    : {}),
   ...(rule.lastRun !== undefined
     ? { last_run: rule.lastRun ? transformRuleLastRun(rule.lastRun) : null }
     : {}),
   ...(rule.nextRun !== undefined ? { next_run: rule.nextRun?.toISOString() || null } : {}),
   revision: rule.revision,
   ...(rule.running !== undefined ? { running: rule.running } : {}),
+  ...(rule.viewInAppRelativeUrl !== undefined
+    ? { view_in_app_relative_url: rule.viewInAppRelativeUrl }
+    : {}),
 });

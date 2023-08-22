@@ -11,6 +11,7 @@ import { KbnClient } from '@kbn/test';
 import type { StatusResponse } from '@kbn/core-status-common-internal';
 import pRetry from 'p-retry';
 import nodeFetch from 'node-fetch';
+import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { isLocalhost } from './is_localhost';
 import { getLocalhostRealIp } from './localhost_services';
 import { createSecuritySuperuser } from './security_user_services';
@@ -189,10 +190,12 @@ export const createKbnClient = ({
  */
 export const fetchStackVersion = async (kbnClient: KbnClient): Promise<string> => {
   const status = (
-    await kbnClient.request<StatusResponse>({
-      method: 'GET',
-      path: '/api/status',
-    })
+    await kbnClient
+      .request<StatusResponse>({
+        method: 'GET',
+        path: '/api/status',
+      })
+      .catch(catchAxiosErrorFormatAndThrow)
   ).data;
 
   if (!status?.version?.number) {

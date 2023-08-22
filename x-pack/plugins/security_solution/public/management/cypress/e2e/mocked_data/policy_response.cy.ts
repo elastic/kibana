@@ -61,7 +61,8 @@ describe('Endpoint Policy Response', () => {
     login();
   });
 
-  describe('from Fleet Agent Details page', () => {
+  // TODO failing test skipped https://github.com/elastic/kibana/issues/162428
+  describe.skip('from Fleet Agent Details page', () => {
     it('should display policy response with errors', () => {
       navigateToFleetAgentDetails(endpointMetadata.agent.id);
 

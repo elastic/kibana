@@ -908,11 +908,13 @@ export const buildExceptionEntriesFromAlertFields = ({
 export const getPrepopulatedRuleExceptionWithHighlightFields = ({
   alertData,
   exceptionItemName,
+  ruleCustomHighlightedFields,
 }: {
   alertData: AlertData;
   exceptionItemName: string;
+  ruleCustomHighlightedFields: string[];
 }): ExceptionsBuilderExceptionItem | null => {
-  const highlightedFields = getAlertHighlightedFields(alertData);
+  const highlightedFields = getAlertHighlightedFields(alertData, ruleCustomHighlightedFields);
   if (!highlightedFields.length) return null;
 
   const exceptionEntries = buildExceptionEntriesFromAlertFields({ highlightedFields, alertData });
@@ -951,11 +953,13 @@ export const filterHighlightedFields = (
  * * Alert field ids filters
  * @param alertData The Alert data object
  */
-export const getAlertHighlightedFields = (alertData: AlertData): EventSummaryField[] => {
+export const getAlertHighlightedFields = (
+  alertData: AlertData,
+  ruleCustomHighlightedFields: string[]
+): EventSummaryField[] => {
   const eventCategory = get(alertData, EVENT_CATEGORY);
   const eventCode = get(alertData, EVENT_CODE);
   const eventRuleType = get(alertData, KIBANA_ALERT_RULE_TYPE);
-
   const eventCategories = {
     primaryEventCategory: Array.isArray(eventCategory) ? eventCategory[0] : eventCategory,
     allEventCategories: [eventCategory],
@@ -965,6 +969,7 @@ export const getAlertHighlightedFields = (alertData: AlertData): EventSummaryFie
     eventCategories,
     eventCode,
     eventRuleType,
+    highlightedFieldsOverride: ruleCustomHighlightedFields,
   });
   return filterHighlightedFields(fieldsToDisplay, highlightedFieldsPrefixToExclude, alertData);
 };

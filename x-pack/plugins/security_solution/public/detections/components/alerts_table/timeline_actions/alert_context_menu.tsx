@@ -15,6 +15,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { get } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../common/components/header_actions';
 import { isActiveTimeline } from '../../../../helpers';
 import { useOsqueryContextActionItem } from '../../osquery/use_osquery_context_action_item';
@@ -384,6 +385,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
   alertStatus,
 }) => {
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
+  const { rule: maybeRule, loading: isRuleLoading } = useRuleWithFallback(ruleId);
 
   const { loading: isLoadingAlertData, data } = useQueryAlerts<EcsHit, {}>({
     query: buildGetAlertByIdQuery(eventId),
@@ -429,32 +431,13 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     return ruleDataViewId;
   }, [enrichedAlert, ruleDataViewId]);
 
-  // TODO: Do we want to notify user when they are working off of an older version of a rule
-  // if they select to add an exception from an alert referencing an older rule version?
   const memoRule = useMemo(() => {
-    if (enrichedAlert != null && enrichedAlert['kibana.alert.rule.parameters'] != null) {
-      return [
-        {
-          ...enrichedAlert['kibana.alert.rule.parameters'],
-          id: ruleId,
-          rule_id: ruleRuleId,
-          name: ruleName,
-          index: memoRuleIndices,
-          data_view_id: memoDataViewId,
-        },
-      ] as Rule[];
+    if (maybeRule) {
+      return [maybeRule];
     }
 
-    return [
-      {
-        id: ruleId,
-        rule_id: ruleRuleId,
-        name: ruleName,
-        index: memoRuleIndices,
-        data_view_id: memoDataViewId,
-      },
-    ] as Rule[];
-  }, [enrichedAlert, memoDataViewId, memoRuleIndices, ruleId, ruleName, ruleRuleId]);
+    return null;
+  }, [maybeRule]);
 
   const isLoading =
     (isLoadingAlertData && isSignalIndexLoading) ||
@@ -466,7 +449,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
       rules={memoRule}
       isEndpointItem={exceptionListType === ExceptionListTypeEnum.ENDPOINT}
       alertData={enrichedAlert}
-      isAlertDataLoading={isLoading}
+      isAlertDataLoading={isLoading || isRuleLoading}
       alertStatus={alertStatus}
       isBulkAction={false}
       showAlertCloseOptions

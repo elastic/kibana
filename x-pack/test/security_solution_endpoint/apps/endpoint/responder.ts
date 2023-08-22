@@ -197,6 +197,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       let indexedAlerts: IndexedEndpointRuleAlerts;
 
       before(async () => {
+        await getService('kibanaServer').request({
+          path: `internal/kibana/settings`,
+          method: 'POST',
+          body: { changes: { 'securitySolution:enableExpandableFlyout': false } },
+        });
+
         indexedAlerts = await detectionsTestService.loadEndpointRuleAlerts(endpointAgentId);
 
         await detectionsTestService.waitForAlerts(

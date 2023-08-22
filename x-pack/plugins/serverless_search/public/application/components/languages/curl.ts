@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../../common/doc_links';
-import { LanguageDefinition, Languages } from './types';
 
 export const curlDefinition: LanguageDefinition = {
   buildSearchQuery: `curl -X POST "\$\{ES_URL\}/books/_search?pretty" \\
