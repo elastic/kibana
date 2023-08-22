@@ -20,16 +20,13 @@ export const CreatePolicyWizard = () => {
   const { completionState } = useCreatePolicyContext();
   const [currentStep, setCurrentStep] = useState(CONFIGURATION);
 
-  const getStepStatus = useCallback(
-    (forStep: number): EuiStepStatus => {
-      if (currentStep === forStep) {
-        return 'current';
-      }
+  const getStepStatus = useCallback((forStep: number): EuiStepStatus => {
+    if (currentStep === forStep) {
+      return 'current';
+    }
 
-      return 'incomplete';
-    },
-    [currentStep]
-  );
+    return 'incomplete';
+  }, [currentStep]);
 
   const stepDefinitions = useMemo(
     () => [
@@ -50,7 +47,11 @@ export const CreatePolicyWizard = () => {
           defaultMessage: 'Field selection',
         }),
         status: completionState.fieldsSelectionStep ? 'complete' : getStepStatus(FIELD_SELECTION),
-        onClick: () => currentStep !== FIELD_SELECTION && setCurrentStep(FIELD_SELECTION),
+        onClick: () => {
+          if (currentStep !== FIELD_SELECTION && completionState.configurationStep) {
+            setCurrentStep(FIELD_SELECTION);
+          }
+        },
         children: currentStep === FIELD_SELECTION && (
           <FieldSelectionStep onNext={() => setCurrentStep(CREATE)} />
         ),
@@ -61,7 +62,11 @@ export const CreatePolicyWizard = () => {
           defaultMessage: 'Create',
         }),
         status: (currentStep === CREATE ? 'current' : 'incomplete') as EuiStepStatus,
-        onClick: () => currentStep !== CREATE && setCurrentStep(CREATE),
+        onClick: () => {
+          if (currentStep !== CREATE && completionState.configurationStep && completionState.fieldsSelectionStep) {
+            setCurrentStep(CREATE);
+          }
+        },
         children: currentStep === CREATE && <CreateStep />,
       },
     ],
