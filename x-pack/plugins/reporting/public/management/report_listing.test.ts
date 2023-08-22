@@ -270,7 +270,7 @@ describe('ReportListing', () => {
   });
   describe('Screenshotting Diagnostic', () => {
     it('shows screenshotting diagnostic link if config enables image reports', () => {
-      expect(testBed.actions.hasScreenshotDiagnosticLink()).toBe(true)
-    })
-  })
+      expect(testBed.actions.hasScreenshotDiagnosticLink()).toBe(true);
+    });
+  });
 });

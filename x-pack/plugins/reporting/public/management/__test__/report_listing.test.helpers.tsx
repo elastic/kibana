@@ -48,29 +48,28 @@ export interface TestDependencies {
 const mockConfig = {
   poll: {
     jobCompletionNotifier: {
-    interval: 5000,
-    intervalErrorMultiplier: 3,
+      interval: 5000,
+      intervalErrorMultiplier: 3,
+    },
+    jobsRefresh: {
+      interval: 5000,
+      intervalErrorMultiplier: 3,
+    },
   },
-  jobsRefresh: {
-    interval: 5000,
-    intervalErrorMultiplier: 3,
-  }
-},
-export_types: {
-  pdf: {
-    enabled: true,
+  export_types: {
+    pdf: {
+      enabled: true,
+    },
+    png: {
+      enabled: true,
+    },
+    csv: {
+      enabled: true,
+    },
   },
-  png: {
-    enabled: true,
+  roles: {
+    enabled: false,
   },
-  csv: {
-    enabled: true,
-  }
-}, 
-roles: {
-  enabled: false
-}
-  
 };
 
 const validCheck = {
@@ -133,7 +132,9 @@ export const setup = async (props?: Partial<Props>) => {
     getUrl: jest.fn(),
   } as unknown as LocatorPublic<SerializableRecord>;
 
-const reportDiagnostic = () => <ReportDiagnostic apiClient={reportingAPIClient} clientConfig={mockConfig}/>
+  const reportDiagnostic = () => (
+    <ReportDiagnostic apiClient={reportingAPIClient} clientConfig={mockConfig} />
+  );
 
   const testDependencies: TestDependencies = {
     http: httpService,
@@ -184,7 +185,7 @@ const reportDiagnostic = () => <ReportDiagnostic apiClient={reportingAPIClient} 
         });
         component.update();
       },
-      hasScreenshotDiagnosticLink: () => exists('screenshotDiagnosticLink')
+      hasScreenshotDiagnosticLink: () => exists('screenshotDiagnosticLink'),
     },
   };
 

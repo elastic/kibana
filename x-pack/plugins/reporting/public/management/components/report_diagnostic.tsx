@@ -176,7 +176,12 @@ export const ReportDiagnostic = ({ apiClient, clientConfig }: Props) => {
       {configAllowsImageReports && (
         <div>
           {flyout}
-          <EuiButtonEmpty data-test-subj='screenshotDiagnosticLink'size="xs" flush="left" onClick={showFlyout}>
+          <EuiButtonEmpty
+            data-test-subj="screenshotDiagnosticLink"
+            size="xs"
+            flush="left"
+            onClick={showFlyout}
+          >
             <FormattedMessage
               id="xpack.reporting.listing.diagnosticButton"
               defaultMessage="Run screenshot diagnostics"
