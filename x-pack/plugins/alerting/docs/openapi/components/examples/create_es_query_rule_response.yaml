@@ -1,43 +1,42 @@
 summary: The create rule API returns a JSON object that contains details about the rule.
 value:
-  id: 7bd506d0-2284-11ee-8fad-6101956ced88
+  id: 58148c70-407f-11ee-850e-c71febc4ca7f
   enabled: true
-  name: my Elasticsearch query rule"
+  name: my Elasticsearch query rule
   tags: []
   rule_type_id: .es-query
   consumer: alerts
-  schedule: 
+  schedule:
     interval: 1m
   actions: []
-  params: 
-    searchConfiguration:
-      query:
-        query: '""geo.src : "US" ""'
-        language: kuery
-      index: 90943e30-9a47-11e8-b64d-95841ca0b247
-    searchType: searchSource
-    timeWindowSize: 5
-    timeWindowUnit: m
-    threshold:
-      - 1000
+  params:
     thresholdComparator: ">"
+    timeWindowSize: 1
+    timeWindowUnit: d
+    threshold:
+      - 10
     size: 100
+    timeField: "@timestamp"
+    index:
+      - kibana_sample_data_logs
+    esQuery: '"""{"query":{"match_all" : {}}}"""'
+    excludeHitsFromPreviousRun: true
     aggType: count
     groupBy: all
-    excludeHitsFromPreviousRun: true
+    searchType: esQuery
+  scheduled_task_id: 58148c70-407f-11ee-850e-c71febc4ca7f
   created_by: elastic
   updated_by: elastic
-  created_at: '2023-07-14T20:24:50.729Z'
-  updated_at: '2023-07-14T20:24:50.729Z'
+  created_at: '2023-08-22T00:03:38.263Z'
+  updated_at: '2023-08-22T00:03:38.263Z'
   api_key_owner: elastic
   api_key_created_by_user: false
   throttle: null
-  notify_when: null
   mute_all: false
+  notify_when: null
   muted_alert_ids: []
-  scheduled_task_id: 7bd506d0-2284-11ee-8fad-6101956ced88
   execution_status:
     status: pending
-    last_execution_date: '2023-07-14T20:24:50.729Z'
+    last_execution_date: '2023-08-22T00:03:38.263Z'
   revision: 0
   running: false

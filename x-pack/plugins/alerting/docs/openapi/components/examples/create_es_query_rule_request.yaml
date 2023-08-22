@@ -1,23 +1,18 @@
-summary: Create an Elasticsearch query rule.
+summary: Create an Elasticsearch query rule that uses Elasticsearch query domain specific language (DSL).
 value:
   consumer: alerts
   name: my Elasticsearch query rule
-  params:
-    aggType: count
-    excludeHitsFromPreviousRun: true
-    groupBy: all
-    searchConfiguration:
-      query:
-        query: '""geo.src : "US" ""'
-        language: kuery
-      index: 90943e30-9a47-11e8-b64d-95841ca0b247
-    searchType: searchSource
+  params:    
+    esQuery: '"""{"query":{"match_all" : {}}}"""'
+    index:
+      - kibana_sample_data_logs
     size: 100
     threshold:
-      - 1000
+      - 10
     thresholdComparator: ">"
-    timeWindowSize: 5
-    timeWindowUnit: m
+    timeField: "@timestamp"
+    timeWindowSize: 1
+    timeWindowUnit: d
   rule_type_id: .es-query
   schedule:
     interval: 1m

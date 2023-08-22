@@ -12,16 +12,24 @@
       "url": "https://www.elastic.co/licensing/elastic-license"
     }
   },
-  "tags": [
-    {
-      "name": "alerting",
-      "description": "Alerting APIs enable you to create and manage rules and alerts."
-    }
-  ],
   "servers": [
     {
       "url": "http://localhost:5601",
       "description": "local"
+    }
+  ],
+  "security": [
+    {
+      "basicAuth": []
+    },
+    {
+      "apiKeyAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "alerting",
+      "description": "Alerting APIs enable you to create and manage rules and alerts."
     }
   ],
   "paths": {
@@ -52,6 +60,9 @@
                 "createEsQueryRuleRequest": {
                   "$ref": "#/components/examples/create_es_query_rule_request"
                 },
+                "createEsQueryKqlRuleRequest": {
+                  "$ref": "#/components/examples/create_es_query_kql_rule_request"
+                },
                 "createIndexThresholdRuleRequest": {
                   "$ref": "#/components/examples/create_index_threshold_rule_request"
                 }
@@ -70,6 +81,9 @@
                 "examples": {
                   "createEsQueryRuleResponse": {
                     "$ref": "#/components/examples/create_es_query_rule_response"
+                  },
+                  "createEsQueryKqlRuleResponse": {
+                    "$ref": "#/components/examples/create_es_query_kql_rule_response"
                   },
                   "createIndexThresholdRuleResponse": {
                     "$ref": "#/components/examples/create_index_threshold_rule_response"
@@ -255,6 +269,9 @@
                 "createEsQueryRuleIdRequest": {
                   "$ref": "#/components/examples/create_es_query_rule_request"
                 },
+                "createEsQueryKqlRuleIdRequest": {
+                  "$ref": "#/components/examples/create_es_query_kql_rule_request"
+                },
                 "createIndexThreholdRuleIdRequest": {
                   "$ref": "#/components/examples/create_index_threshold_rule_request"
                 }
@@ -273,6 +290,9 @@
                 "examples": {
                   "createEsQueryRuleIdResponse": {
                     "$ref": "#/components/examples/create_es_query_rule_response"
+                  },
+                  "createEsQueryKqlRuleIdResponse": {
+                    "$ref": "#/components/examples/create_es_query_kql_rule_response"
                   },
                   "createIndexThresholdRuleIdResponse": {
                     "$ref": "#/components/examples/create_index_threshold_rule_response"
@@ -6710,10 +6730,35 @@
     },
     "examples": {
       "create_es_query_rule_request": {
-        "summary": "Create an Elasticsearch query rule.",
+        "summary": "Create an Elasticsearch query rule that uses Elasticsearch query domain specific language (DSL).",
         "value": {
           "consumer": "alerts",
           "name": "my Elasticsearch query rule",
+          "params": {
+            "esQuery": "\"\"\"{\"query\":{\"match_all\" : {}}}\"\"\"",
+            "index": [
+              "kibana_sample_data_logs"
+            ],
+            "size": 100,
+            "threshold": [
+              10
+            ],
+            "thresholdComparator": ">",
+            "timeField": "@timestamp",
+            "timeWindowSize": 1,
+            "timeWindowUnit": "d"
+          },
+          "rule_type_id": ".es-query",
+          "schedule": {
+            "interval": "1m"
+          }
+        }
+      },
+      "create_es_query_kql_rule_request": {
+        "summary": "Create an Elasticsearch query rule that uses Kibana query language (KQL).",
+        "value": {
+          "consumer": "alerts",
+          "name": "my Elasticsearch query KQL rule",
           "params": {
             "aggType": "count",
             "excludeHitsFromPreviousRun": true,
@@ -6788,9 +6833,59 @@
       "create_es_query_rule_response": {
         "summary": "The create rule API returns a JSON object that contains details about the rule.",
         "value": {
+          "id": "58148c70-407f-11ee-850e-c71febc4ca7f",
+          "enabled": true,
+          "name": "my Elasticsearch query rule",
+          "tags": [],
+          "rule_type_id": ".es-query",
+          "consumer": "alerts",
+          "schedule": {
+            "interval": "1m"
+          },
+          "actions": [],
+          "params": {
+            "thresholdComparator": ">",
+            "timeWindowSize": 1,
+            "timeWindowUnit": "d",
+            "threshold": [
+              10
+            ],
+            "size": 100,
+            "timeField": "@timestamp",
+            "index": [
+              "kibana_sample_data_logs"
+            ],
+            "esQuery": "\"\"\"{\"query\":{\"match_all\" : {}}}\"\"\"",
+            "excludeHitsFromPreviousRun": true,
+            "aggType": "count",
+            "groupBy": "all",
+            "searchType": "esQuery"
+          },
+          "scheduled_task_id": "58148c70-407f-11ee-850e-c71febc4ca7f",
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "created_at": "2023-08-22T00:03:38.263Z",
+          "updated_at": "2023-08-22T00:03:38.263Z",
+          "api_key_owner": "elastic",
+          "api_key_created_by_user": false,
+          "throttle": null,
+          "mute_all": false,
+          "notify_when": null,
+          "muted_alert_ids": [],
+          "execution_status": {
+            "status": "pending",
+            "last_execution_date": "2023-08-22T00:03:38.263Z"
+          },
+          "revision": 0,
+          "running": false
+        }
+      },
+      "create_es_query_kql_rule_response": {
+        "summary": "The create rule API returns a JSON object that contains details about the rule.",
+        "value": {
           "id": "7bd506d0-2284-11ee-8fad-6101956ced88",
           "enabled": true,
-          "name": "my Elasticsearch query rule\"",
+          "name": "my Elasticsearch query KQL rule\"",
           "tags": [],
           "rule_type_id": ".es-query",
           "consumer": "alerts",
@@ -7504,13 +7599,5 @@
         ]
       }
     }
-  },
-  "security": [
-    {
-      "basicAuth": []
-    },
-    {
-      "apiKeyAuth": []
-    }
-  ]
+  }
 }
