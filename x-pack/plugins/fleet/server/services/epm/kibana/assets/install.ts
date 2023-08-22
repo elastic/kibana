@@ -101,13 +101,12 @@ export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectTo
 
   if (asset.migrationVersion) {
     so.migrationVersion = asset.migrationVersion;
-  } else {
-    if (asset.coreMigrationVersion) {
-      so.coreMigrationVersion = asset.coreMigrationVersion;
-    }
-    if (asset.typeMigrationVersion) {
-      so.typeMigrationVersion = asset.typeMigrationVersion;
-    }
+  }
+  if (asset.coreMigrationVersion) {
+    so.coreMigrationVersion = asset.coreMigrationVersion;
+  }
+  if (asset.typeMigrationVersion) {
+    so.typeMigrationVersion = asset.typeMigrationVersion;
   }
   return so as SavedObjectToBe;
 }
