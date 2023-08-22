@@ -45,7 +45,7 @@ export interface TestDependencies {
   reportDiagnostic: typeof ReportDiagnostic;
 }
 
-const mockConfig = {
+export const mockConfig = {
   poll: {
     jobCompletionNotifier: {
       interval: 5000,
@@ -85,7 +85,7 @@ const license$ = {
   },
 } as Observable<ILicense>;
 
-const createTestBed = registerTestBed(
+export const createTestBed = registerTestBed(
   ({
     http,
     application,
