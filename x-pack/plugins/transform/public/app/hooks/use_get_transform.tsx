@@ -20,14 +20,11 @@ export const useGetTransform = (transformId: TransformId, enabled?: boolean) => 
 
   return useQuery<GetTransformsResponseSchema, IHttpFetchError>(
     [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORM, transformId],
-    async ({ signal }) =>
-      await http.get<GetTransformsResponseSchema>(
-        addInternalBasePath(`transforms/${transformId}`),
-        {
-          version: '1',
-          signal,
-        }
-      ),
+    ({ signal }) =>
+      http.get<GetTransformsResponseSchema>(addInternalBasePath(`transforms/${transformId}`), {
+        version: '1',
+        signal,
+      }),
     { enabled }
   );
 };

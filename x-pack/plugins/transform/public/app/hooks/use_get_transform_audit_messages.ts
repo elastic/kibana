@@ -26,8 +26,8 @@ export const useGetTransformAuditMessages = (
 
   return useQuery<GetTransformsAuditMessagesResponseSchema, IHttpFetchError>(
     [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORM_AUDIT_MESSAGES, transformId, query],
-    async ({ signal }) =>
-      await http.get<GetTransformsAuditMessagesResponseSchema>(
+    ({ signal }) =>
+      http.get<GetTransformsAuditMessagesResponseSchema>(
         addInternalBasePath(`transforms/${transformId}/messages`),
         {
           query,

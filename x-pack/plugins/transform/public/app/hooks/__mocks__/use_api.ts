@@ -12,8 +12,6 @@ import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 
 import type { FieldHistogramsResponseSchema } from '../../../../common/api_schemas/field_histograms';
 
-import type { EsIndex } from '../../../../common/types/es_index';
-
 import type { SavedSearchQuery } from '../use_search_items';
 
 export interface FieldHistogramRequestConfig {
@@ -22,9 +20,6 @@ export interface FieldHistogramRequestConfig {
 }
 
 const apiFactory = () => ({
-  async getEsIndices(): Promise<EsIndex[] | IHttpFetchError> {
-    return Promise.resolve([]);
-  },
   async getHistogramsForFields(
     dataViewTitle: string,
     fields: FieldHistogramRequestConfig[],

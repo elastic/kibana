@@ -25,15 +25,12 @@ export const useGetTransformsPreview = (
 
   return useQuery<PostTransformsPreviewResponseSchema, IHttpFetchError>(
     [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORMS_PREVIEW, obj],
-    async ({ signal }) =>
-      await http.post<PostTransformsPreviewResponseSchema>(
-        addInternalBasePath('transforms/_preview'),
-        {
-          body: JSON.stringify(obj),
-          version: '1',
-          signal,
-        }
-      ),
+    ({ signal }) =>
+      http.post<PostTransformsPreviewResponseSchema>(addInternalBasePath('transforms/_preview'), {
+        body: JSON.stringify(obj),
+        version: '1',
+        signal,
+      }),
     { enabled }
   );
 };

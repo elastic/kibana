@@ -55,14 +55,13 @@ export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) =
     error,
     data: privilegesData,
   } = useQuery<PrivilegesAndCapabilities, IHttpFetchError>(
-    [TRANSFORM_REACT_QUERY_KEYS.PRIVILEGES],
-    async ({ signal }) => {
-      return await http.fetch<PrivilegesAndCapabilities>(path, {
+    [TRANSFORM_REACT_QUERY_KEYS.GET_PRIVILEGES],
+    ({ signal }) =>
+      http.fetch<PrivilegesAndCapabilities>(path, {
         version,
         method: 'GET',
         signal,
-      });
-    }
+      })
   );
 
   const value = {

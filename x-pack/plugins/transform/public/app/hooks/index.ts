@@ -8,6 +8,9 @@
 export { useApi } from './use_api';
 export { useCreateTransform } from './use_create_transform';
 export { useDocumentationLinks } from './use_documentation_links';
+export { useGetDataViewTitles } from './use_get_data_view_titles';
+export { useGetEsIndices } from './use_get_es_indices';
+export { useGetEsIngestPipelines } from './use_get_es_ingest_pipelines';
 export { useGetTransformAuditMessages } from './use_get_transform_audit_messages';
 export { useGetTransform } from './use_get_transform';
 export { useGetTransforms } from './use_get_transforms';

@@ -29,11 +29,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/constants/validation_messages';
-import {
-  isEsIndices,
-  isEsIngestPipelines,
-  isPostTransformsPreviewResponseSchema,
-} from '../../../../../../common/api_schemas/type_guards';
+import { isPostTransformsPreviewResponseSchema } from '../../../../../../common/api_schemas/type_guards';
 import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
 import { TransformId } from '../../../../../../common/types/transform';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
@@ -44,18 +40,20 @@ import { useAppDependencies, useToastNotifications } from '../../../../app_depen
 import { ToastNotificationText } from '../../../../components';
 import {
   useDocumentationLinks,
+  useGetDataViewTitles,
+  useGetEsIndices,
+  useGetEsIngestPipelines,
   useGetTransforms,
   useGetTransformsPreview,
 } from '../../../../hooks';
 import { SearchItems } from '../../../../hooks/use_search_items';
-import { useApi } from '../../../../hooks/use_api';
 import { StepDetailsTimeField } from './step_details_time_field';
 import {
   getTransformConfigQuery,
   getPreviewTransformRequestBody,
   isTransformIdValid,
 } from '../../../../common';
-import { EsIndexName, DataViewTitle } from './common';
+import { EsIndexName } from './common';
 import {
   continuousModeDelayValidator,
   integerRangeMinus1To100Validator,
@@ -94,8 +92,6 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const [destinationIngestPipeline, setDestinationIngestPipeline] = useState<string>(
       defaults.destinationIngestPipeline
     );
-    const [indexNames, setIndexNames] = useState<EsIndexName[]>([]);
-    const [ingestPipelineNames, setIngestPipelineNames] = useState<string[]>([]);
 
     const canCreateDataView = useMemo(
       () =>
@@ -105,7 +101,6 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     );
 
     // Index pattern state
-    const [dataViewTitles, setDataViewTitles] = useState<DataViewTitle[]>([]);
     const [createDataView, setCreateDataView] = useState(
       canCreateDataView === false ? false : defaults.createDataView
     );
@@ -129,7 +124,6 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     );
 
     const { overlays, theme } = useAppDependencies();
-    const api = useApi();
 
     const { error: transformsError, data: transforms } = useGetTransforms();
     const transformIds = transforms?.tableRows.map((d) => d.id) ?? [];
@@ -195,68 +189,72 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       }
     }, [overlays, theme, toastNotifications, transformsPreviewError]);
 
-    // fetch existing transform IDs and indices once for form validation
+    const { error: esIndicesError, data: esIndicesData } = useGetEsIndices();
+    const indexNames = esIndicesData?.map((index) => index.name) ?? [];
+
     useEffect(() => {
-      // use an IIFE to avoid returning a Promise to useEffect.
-      (async function () {
-        const [indices, ingestPipelines] = await Promise.all([
-          api.getEsIndices(),
-          api.getEsIngestPipelines(),
-        ]);
+      if (esIndicesError !== null) {
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
+            defaultMessage: 'An error occurred getting the existing index names:',
+          }),
+          text: toMountPoint(
+            <ToastNotificationText
+              overlays={overlays}
+              theme={theme}
+              text={getErrorMessage(esIndicesError)}
+            />,
+            { theme$: theme.theme$ }
+          ),
+        });
+      }
+      // custom comparison
+      /* eslint-disable react-hooks/exhaustive-deps */
+    }, [esIndicesError]);
 
-        if (isEsIndices(indices)) {
-          setIndexNames(indices.map((index) => index.name));
-        } else {
-          toastNotifications.addDanger({
-            title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
-              defaultMessage: 'An error occurred getting the existing index names:',
-            }),
-            text: toMountPoint(
-              <ToastNotificationText
-                overlays={overlays}
-                theme={theme}
-                text={getErrorMessage(indices)}
-              />,
-              { theme$: theme.theme$ }
-            ),
-          });
-        }
+    const { error: esIngestPipelinesError, data: esIngestPipelinesData } =
+      useGetEsIngestPipelines();
+    const ingestPipelineNames = esIngestPipelinesData?.map(({ name }) => name) ?? [];
 
-        if (isEsIngestPipelines(ingestPipelines)) {
-          setIngestPipelineNames(ingestPipelines.map(({ name }) => name));
-        } else {
-          toastNotifications.addDanger({
-            title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIngestPipelines', {
-              defaultMessage: 'An error occurred getting the existing ingest pipeline names:',
-            }),
-            text: toMountPoint(
-              <ToastNotificationText
-                overlays={overlays}
-                theme={theme}
-                text={getErrorMessage(ingestPipelines)}
-              />,
-              { theme$: theme.theme$ }
-            ),
-          });
-        }
+    useEffect(() => {
+      if (esIngestPipelinesError !== null) {
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIngestPipelines', {
+            defaultMessage: 'An error occurred getting the existing ingest pipeline names:',
+          }),
+          text: toMountPoint(
+            <ToastNotificationText
+              overlays={overlays}
+              theme={theme}
+              text={getErrorMessage(esIngestPipelinesError)}
+            />,
+            { theme$: theme.theme$ }
+          ),
+        });
+      }
+      // custom comparison
+      /* eslint-disable react-hooks/exhaustive-deps */
+    }, [esIngestPipelinesError]);
 
-        try {
-          setDataViewTitles(await deps.data.dataViews.getTitles());
-        } catch (e) {
-          toastNotifications.addDanger({
-            title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingDataViewTitles', {
-              defaultMessage: 'An error occurred getting the existing data view titles:',
-            }),
-            text: toMountPoint(
-              <ToastNotificationText overlays={overlays} theme={theme} text={getErrorMessage(e)} />,
-              { theme$: theme.theme$ }
-            ),
-          });
-        }
-      })();
-      // run once
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    const { error: dataViewTitlesError, data: dataViewTitles } = useGetDataViewTitles();
+
+    useEffect(() => {
+      if (dataViewTitlesError !== null) {
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingDataViewTitles', {
+            defaultMessage: 'An error occurred getting the existing data view titles:',
+          }),
+          text: toMountPoint(
+            <ToastNotificationText
+              overlays={overlays}
+              theme={theme}
+              text={getErrorMessage(dataViewTitlesError)}
+            />,
+            { theme$: theme.theme$ }
+          ),
+        });
+      }
+    }, [dataViewTitlesError]);
 
     const dateFieldNames = searchItems.dataView.fields
       .filter((f) => f.type === KBN_FIELD_TYPES.DATE)
@@ -296,7 +294,6 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         );
         setRetentionPolicyMaxAge('');
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isRetentionPolicyEnabled]);
 
     const transformIdExists = transformIds.some((id) => transformId === id);
@@ -306,7 +303,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const indexNameExists = indexNames.some((name) => destinationIndex === name);
     const indexNameEmpty = destinationIndex === '';
     const indexNameValid = isValidIndexName(destinationIndex);
-    const dataViewTitleExists = dataViewTitles.some((name) => destinationIndex === name);
+    const dataViewTitleExists = dataViewTitles?.some((name) => destinationIndex === name) ?? false;
 
     const [transformFrequency, setTransformFrequency] = useState(defaults.transformFrequency);
     const isTransformFrequencyValid = transformFrequencyValidator(transformFrequency);

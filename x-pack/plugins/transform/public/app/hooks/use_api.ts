@@ -17,8 +17,6 @@ import type {
   FieldHistogramsResponseSchema,
 } from '../../../common/api_schemas/field_histograms';
 import { addInternalBasePath } from '../../../common/constants';
-import type { EsIndex } from '../../../common/types/es_index';
-import type { EsIngestPipeline } from '../../../common/types/es_ingest_pipeline';
 
 import { useAppDependencies } from '../app_dependencies';
 
@@ -34,20 +32,6 @@ export const useApi = () => {
 
   return useMemo(
     () => ({
-      async getEsIndices(): Promise<EsIndex[] | IHttpFetchError> {
-        try {
-          return await http.get(`/api/index_management/indices`, { version: '1' });
-        } catch (e) {
-          return e;
-        }
-      },
-      async getEsIngestPipelines(): Promise<EsIngestPipeline[] | IHttpFetchError> {
-        try {
-          return await http.get('/api/ingest_pipelines', { version: '1' });
-        } catch (e) {
-          return e;
-        }
-      },
       async getHistogramsForFields(
         dataViewTitle: string,
         fields: FieldHistogramRequestConfig[],

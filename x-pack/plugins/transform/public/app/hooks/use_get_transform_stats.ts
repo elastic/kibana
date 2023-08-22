@@ -24,8 +24,8 @@ export const useGetTransformStats = (
 
   return useQuery<GetTransformsStatsResponseSchema, IHttpFetchError>(
     [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORM_STATS, transformId],
-    async ({ signal }) =>
-      await http.get<GetTransformsStatsResponseSchema>(
+    ({ signal }) =>
+      http.get<GetTransformsStatsResponseSchema>(
         addInternalBasePath(`transforms/${transformId}/_stats`),
         {
           version: '1',
