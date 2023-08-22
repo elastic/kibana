@@ -11,8 +11,8 @@ import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logi
 import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 import { affectedJobIds } from '../../../../../detections/components/callouts/ml_job_compatibility_callout/affected_job_ids';
-import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
-import type { RuleSignatureId } from '../../../../../../common/detection_engine/rule_schema';
+import type { RuleUpgradeInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
 import {
   usePerformUpgradeAllRules,
@@ -22,6 +22,7 @@ import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic
 import type { UpgradePrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_upgrade';
 import { useFilterPrebuiltRulesToUpgrade } from './use_filter_prebuilt_rules_to_upgrade';
 import { useAsyncConfirmation } from '../rules_table/use_async_confirmation';
+import { useRuleDetailsFlyout } from '../../../../rule_management/components/rule_details/use_rule_details_flyout';
 
 import { MlJobUpgradeModal } from '../../../../../detections/components/modals/ml_job_upgrade_modal';
 
@@ -72,6 +73,16 @@ export interface UpgradePrebuiltRulesTableState {
    * Rule rows selected in EUI InMemory Table
    */
   selectedRules: RuleUpgradeInfoForReview[];
+  /**
+   * Rule that is currently displayed in the flyout or null if flyout is closed
+   */
+  flyoutRule: RuleUpgradeInfoForReview['rule'] | null;
+  /**
+   * Is true when the upgrade button in the flyout is disabled
+   * (e.g. when the rule is already being upgrade or when the table is being refetched)
+   *
+   **/
+  isFlyoutInstallButtonDisabled: boolean;
 }
 
 export interface UpgradePrebuiltRulesTableActions {
@@ -81,6 +92,8 @@ export interface UpgradePrebuiltRulesTableActions {
   upgradeAllRules: () => void;
   setFilterOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesTableFilterOptions>>;
   selectRules: (rules: RuleUpgradeInfoForReview[]) => void;
+  openFlyoutForRuleId: (ruleId: RuleSignatureId) => void;
+  closeFlyout: () => void;
 }
 
 export interface UpgradePrebuiltRulesContextType {
@@ -125,6 +138,17 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
 
   const { mutateAsync: upgradeAllRulesRequest } = usePerformUpgradeAllRules();
   const { mutateAsync: upgradeSpecificRulesRequest } = usePerformUpgradeSpecificRules();
+
+  const filteredRules = useFilterPrebuiltRulesToUpgrade({ filterOptions, rules });
+
+  const { openFlyoutForRuleId, closeFlyout, flyoutRule } = useRuleDetailsFlyout(
+    filteredRules.map((upgradeInfo) => upgradeInfo.target_rule)
+  );
+  const isFlyoutInstallButtonDisabled = Boolean(
+    (flyoutRule?.rule_id && loadingRules.includes(flyoutRule.rule_id)) ||
+      isRefetching ||
+      isUpgradingSecurityPackages
+  );
 
   // Wrapper to add confirmation modal for users who may be running older ML Jobs that would
   // be overridden by updating their rules. For details, see: https://github.com/elastic/kibana/issues/128121
@@ -203,11 +227,18 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       upgradeAllRules,
       setFilterOptions,
       selectRules: setSelectedRules,
+      openFlyoutForRuleId,
+      closeFlyout,
     }),
-    [refetch, upgradeOneRule, upgradeSelectedRules, upgradeAllRules]
+    [
+      refetch,
+      upgradeOneRule,
+      upgradeSelectedRules,
+      upgradeAllRules,
+      openFlyoutForRuleId,
+      closeFlyout,
+    ]
   );
-
-  const filteredRules = useFilterPrebuiltRulesToUpgrade({ filterOptions, rules });
 
   const providerValue = useMemo<UpgradePrebuiltRulesContextType>(() => {
     return {
@@ -223,6 +254,8 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         selectedRules,
         loadingRules,
         lastUpdated: dataUpdatedAt,
+        flyoutRule,
+        isFlyoutInstallButtonDisabled,
       },
       actions,
     };
@@ -239,6 +272,8 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     selectedRules,
     loadingRules,
     dataUpdatedAt,
+    flyoutRule,
+    isFlyoutInstallButtonDisabled,
     actions,
   ]);
 

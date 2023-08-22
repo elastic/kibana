@@ -4,80 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { CSSProperties } from 'react';
+import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { KPIChartProps, Tile } from './tile';
+import { HostMetricsDocsLink } from '../../../../../components/lens';
+import { Kpi } from './kpi';
 import { HostCountProvider } from '../../hooks/use_host_count';
-import { TOOLTIP } from '../../translations';
-import { HostsTile } from './hosts_tile';
-import { HostMetricsDocsLink } from '../metric_explanation/host_metrics_docs_link';
-import { KPI_CHART_MIN_HEIGHT } from '../../constants';
-
-const lensStyle: CSSProperties = {
-  height: KPI_CHART_MIN_HEIGHT,
-};
-
-const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle' | 'style'>> = [
-  {
-    type: 'cpuUsage',
-    trendLine: true,
-    backgroundColor: '#F1D86F',
-    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.cpuUsage.title', {
-      defaultMessage: 'CPU Usage',
-    }),
-    toolTip: TOOLTIP.cpuUsage,
-  },
-  {
-    type: 'normalizedLoad1m',
-    trendLine: true,
-    backgroundColor: '#79AAD9',
-    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.normalizedLoad1m.title', {
-      defaultMessage: 'Normalized Load',
-    }),
-    toolTip: TOOLTIP.rx,
-  },
-  {
-    type: 'memoryUsage',
-    trendLine: true,
-    backgroundColor: '#A987D1',
-    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.memoryUsage.title', {
-      defaultMessage: 'Memory Usage',
-    }),
-    toolTip: i18n.translate('xpack.infra.hostsViewPage.metricTrend.memoryUsage.tooltip', {
-      defaultMessage: 'Main memory usage excluding page cache.',
-    }),
-  },
-  {
-    type: 'diskSpaceUsage',
-    trendLine: true,
-    backgroundColor: '#F5A35C',
-    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.diskSpaceUsage.title', {
-      defaultMessage: 'Disk Space Usage',
-    }),
-    toolTip: TOOLTIP.tx,
-  },
-];
+import { HostCountKpi } from './host_count_kpi';
+import { assetDetailsDashboards, KPI_CHART_HEIGHT } from '../../../../../common/visualizations';
 
 export const KPIGrid = () => {
   return (
     <HostCountProvider>
-      <HostMetricsDocsLink />
+      <HostMetricsDocsLink type="metrics" />
       <EuiSpacer size="s" />
-      <EuiFlexGroup
-        direction="row"
-        gutterSize="s"
-        style={{ flexGrow: 0 }}
-        data-test-subj="hostsViewKPIGrid"
-      >
+      <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="hostsViewKPIGrid">
         <EuiFlexItem>
-          <HostsTile style={lensStyle} />
+          <HostCountKpi height={KPI_CHART_HEIGHT} />
         </EuiFlexItem>
-        {KPI_CHARTS.map(({ ...chartProp }) => (
-          <EuiFlexItem key={chartProp.type}>
-            <Tile {...chartProp} style={lensStyle} />
+        {assetDetailsDashboards.host.hostKPICharts.map((chartProp, index) => (
+          <EuiFlexItem key={index}>
+            <Kpi {...chartProp} height={KPI_CHART_HEIGHT} />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>

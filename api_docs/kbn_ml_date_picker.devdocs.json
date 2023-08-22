@@ -536,13 +536,13 @@
               "Observable",
               "<",
               {
-                "pluginId": "@kbn/core-theme-browser",
+                "pluginId": "@kbn/react-kibana-context-common",
                 "scope": "common",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
-                "text": "CoreTheme"
+                "docId": "kibKbnReactKibanaContextCommonPluginApi",
+                "section": "def-common.KibanaTheme",
+                "text": "KibanaTheme"
               },
-              ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              ">) => JSX.Element"
             ],
             "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
@@ -559,7 +559,7 @@
                 "signature": [
                   "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
                 ],
-                "path": "src/plugins/kibana_react/public/theme/wrap_with_theme.tsx",
+                "path": "src/plugins/kibana_react/public/theme.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -574,15 +574,15 @@
                   "Observable",
                   "<",
                   {
-                    "pluginId": "@kbn/core-theme-browser",
+                    "pluginId": "@kbn/react-kibana-context-common",
                     "scope": "common",
-                    "docId": "kibKbnCoreThemeBrowserPluginApi",
-                    "section": "def-common.CoreTheme",
-                    "text": "CoreTheme"
+                    "docId": "kibKbnReactKibanaContextCommonPluginApi",
+                    "section": "def-common.KibanaTheme",
+                    "text": "KibanaTheme"
                   },
                   ">"
                 ],
-                "path": "src/plugins/kibana_react/public/theme/wrap_with_theme.tsx",
+                "path": "src/plugins/kibana_react/public/theme.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -631,7 +631,7 @@
                 "signature": [
                   "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
                 ],
-                "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
+                "path": "src/plugins/kibana_react/public/util/index.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -651,7 +651,7 @@
                     "text": "ToMountPointOptions"
                   }
                 ],
-                "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
+                "path": "src/plugins/kibana_react/public/util/index.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }

@@ -11,7 +11,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { savedSearchMock, savedSearchMockWithSQL } from '../../../__mocks__/saved_search';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../../__mocks__/services';
 
 describe('getStateDefaults', () => {

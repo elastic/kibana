@@ -6,6 +6,11 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
+import {
+  IngestPipeline,
+  IngestSimulateDocument,
+  IngestSimulateRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { PipelineDefinition } from '../../../common/types/trained_models';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
@@ -63,6 +68,65 @@ export function modelsProvider(client: IScopedClusterClient) {
       await Promise.all(
         pipelinesIds.map((id) => client.asCurrentUser.ingest.deletePipeline({ id }))
       );
+    },
+
+    /**
+     * Simulates the effect of the pipeline on given document.
+     *
+     */
+    async simulatePipeline(docs: IngestSimulateDocument[], pipelineConfig: IngestPipeline) {
+      const simulateRequest: IngestSimulateRequest = {
+        docs,
+        pipeline: pipelineConfig,
+      };
+      let result = {};
+      try {
+        result = await client.asCurrentUser.ingest.simulate(simulateRequest);
+      } catch (error) {
+        if (error.statusCode === 404) {
+          // ES returns 404 when there are no pipelines
+          // Instead, we should return an empty response and a 200
+          return result;
+        }
+        throw error;
+      }
+
+      return result;
+    },
+
+    /**
+     * Creates the pipeline
+     *
+     */
+    async createInferencePipeline(pipelineConfig: IngestPipeline, pipelineName: string) {
+      let result = {};
+
+      result = await client.asCurrentUser.ingest.putPipeline({
+        id: pipelineName,
+        ...pipelineConfig,
+      });
+
+      return result;
+    },
+
+    /**
+     * Retrieves existing pipelines.
+     *
+     */
+    async getPipelines() {
+      let result = {};
+      try {
+        result = await client.asCurrentUser.ingest.getPipeline();
+      } catch (error) {
+        if (error.statusCode === 404) {
+          // ES returns 404 when there are no pipelines
+          // Instead, we should return an empty response and a 200
+          return result;
+        }
+        throw error;
+      }
+
+      return result;
     },
   };
 }

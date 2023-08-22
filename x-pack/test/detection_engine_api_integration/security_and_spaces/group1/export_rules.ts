@@ -8,7 +8,7 @@
 import expect from 'expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
@@ -742,5 +742,6 @@ function expectToMatchRuleSchema(obj: RuleResponse): void {
     index: expect.arrayContaining([]),
     query: expect.any(String),
     actions: expect.arrayContaining([]),
+    investigation_fields: expect.arrayContaining([]),
   });
 }

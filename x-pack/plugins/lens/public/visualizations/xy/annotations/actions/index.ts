@@ -12,7 +12,11 @@ import type { ThemeServiceStart } from '@kbn/core/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { VISUALIZE_APP_NAME } from '@kbn/visualizations-plugin/common/constants';
 import { ANNOTATIONS_LISTING_VIEW_ID } from '@kbn/event-annotation-plugin/common';
-import type { LayerAction, StateSetter } from '../../../../types';
+import type {
+  LayerAction,
+  RegisterLibraryAnnotationGroupFunction,
+  StateSetter,
+} from '../../../../types';
 import { XYState, XYAnnotationLayerConfig } from '../../types';
 import { getUnlinkLayerAction } from './unlink_action';
 import { getSaveLayerAction } from './save_action';
@@ -23,6 +27,7 @@ export const createAnnotationActions = ({
   state,
   layer,
   setState,
+  registerLibraryAnnotationGroup,
   core,
   isSaveable,
   eventAnnotationService,
@@ -33,6 +38,7 @@ export const createAnnotationActions = ({
   state: XYState;
   layer: XYAnnotationLayerConfig;
   setState: StateSetter<XYState, unknown>;
+  registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
   core: CoreStart;
   isSaveable?: boolean;
   eventAnnotationService: EventAnnotationServiceType;
@@ -52,6 +58,7 @@ export const createAnnotationActions = ({
         state,
         layer,
         setState,
+        registerLibraryAnnotationGroup,
         eventAnnotationService,
         toasts: core.notifications.toasts,
         savedObjectsTagging,

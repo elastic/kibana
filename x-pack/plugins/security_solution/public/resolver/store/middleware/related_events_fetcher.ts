@@ -31,18 +31,14 @@ export function RelatedEventsFetcher(
     if (!last[id]) {
       last[id] = undefined;
     }
-    const newParams = selectors.panelViewAndParameters(state.analyzer.analyzerById[id]);
-    const isLoadingMoreEvents = selectors.isLoadingMoreNodeEventsInCategory(
-      state.analyzer.analyzerById[id]
-    );
-    const indices = selectors.eventIndices(state.analyzer.analyzerById[id]);
+    const newParams = selectors.panelViewAndParameters(state.analyzer[id]);
+    const isLoadingMoreEvents = selectors.isLoadingMoreNodeEventsInCategory(state.analyzer[id]);
+    const indices = selectors.eventIndices(state.analyzer[id]);
 
     const oldParams = last[id];
-    const detectedBounds = selectors.detectedBounds(state.analyzer.analyzerById[id]);
+    const detectedBounds = selectors.detectedBounds(state.analyzer[id]);
     const timeRangeFilters =
-      detectedBounds !== undefined
-        ? undefined
-        : selectors.timeRangeFilters(state.analyzer.analyzerById[id]);
+      detectedBounds !== undefined ? undefined : selectors.timeRangeFilters(state.analyzer[id]);
     // Update this each time before fetching data (or even if we don't fetch data) so that subsequent actions that call this (concurrently) will have up to date info.
     last[id] = newParams;
 
@@ -104,7 +100,7 @@ export function RelatedEventsFetcher(
         });
       }
     } else if (isLoadingMoreEvents) {
-      const nodeEventsInCategory = state.analyzer.analyzerById[id].data.nodeEventsInCategory;
+      const nodeEventsInCategory = state.analyzer[id].data.nodeEventsInCategory;
       if (nodeEventsInCategory !== undefined) {
         await fetchEvents(nodeEventsInCategory);
       }

@@ -7,7 +7,7 @@
 
 import { escapeKuery } from '@kbn/es-query';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { RuleExecutionStatus } from '../detection_engine/rule_monitoring';
+import { RuleExecutionStatus } from '../api/detection_engine';
 import {
   ENABLED_FIELD,
   LAST_RUN_OUTCOME_FIELD,

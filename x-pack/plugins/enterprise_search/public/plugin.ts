@@ -22,6 +22,7 @@ import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/publi
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { GetUserProfileResponse, UserProfileData } from '@kbn/security-plugin/common';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -34,6 +35,7 @@ import {
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
+  SEARCH_PRODUCT_NAME,
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
@@ -64,6 +66,7 @@ export interface PluginsStart {
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
   share: SharePluginStart;
+  userProfile: GetUserProfileResponse<UserProfileData>;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
@@ -99,7 +102,8 @@ export class EnterpriseSearchPlugin implements Plugin {
       cloudSetup && (pluginsStart as PluginsStart).cloud
         ? { ...cloudSetup, ...(pluginsStart as PluginsStart).cloud }
         : undefined;
-    const plugins = { ...pluginsStart, cloud } as PluginsStart;
+    const userProfile = await (pluginsStart as PluginsStart).security.userProfiles.getCurrent();
+    const plugins = { ...pluginsStart, cloud, userProfile } as PluginsStart;
 
     coreStart.chrome
       .getChromeStyle$()
@@ -144,24 +148,47 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     core.application.register({
-      appRoute: ESRE_PLUGIN.URL,
+      appRoute: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: ESRE_PLUGIN.LOGO,
-      id: ESRE_PLUGIN.ID,
+      euiIconType: ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO,
+      id: ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ESRE_PLUGIN.NAME);
+        chrome.docTitle.change(ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME);
 
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
-        const { EnterpriseSearchEsre } = await import('./applications/esre');
+        const { EnterpriseSearchContent } = await import(
+          './applications/enterprise_search_content'
+        );
 
-        return renderApp(EnterpriseSearchEsre, kibanaDeps, pluginData);
+        return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
       },
-      title: ESRE_PLUGIN.NAV_TITLE,
+      title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
+    });
+
+    core.application.register({
+      appRoute: ELASTICSEARCH_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+      id: ELASTICSEARCH_PLUGIN.ID,
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(ELASTICSEARCH_PLUGIN.NAME);
+
+        await this.getInitialData(http);
+        const pluginData = this.getPluginData();
+
+        const { renderApp } = await import('./applications');
+        const { Elasticsearch } = await import('./applications/elasticsearch');
+
+        return renderApp(Elasticsearch, kibanaDeps, pluginData);
+      },
+      title: ELASTICSEARCH_PLUGIN.NAME,
     });
 
     core.application.register({
@@ -186,26 +213,25 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     core.application.register({
-      appRoute: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL,
+      appRoute: ESRE_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO,
-      id: ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
+      euiIconType: ESRE_PLUGIN.LOGO,
+      id: ESRE_PLUGIN.ID,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME);
+        chrome.docTitle.change(ESRE_PLUGIN.NAME);
 
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
-        const { EnterpriseSearchContent } = await import(
-          './applications/enterprise_search_content'
-        );
+        const { EnterpriseSearchEsre } = await import('./applications/esre');
 
-        return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
+        return renderApp(EnterpriseSearchEsre, kibanaDeps, pluginData);
       },
-      title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
+      navLinkStatus: AppNavLinkStatus.hidden,
+      title: ESRE_PLUGIN.NAV_TITLE,
     });
 
     core.application.register({
@@ -255,24 +281,25 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     core.application.register({
-      appRoute: ELASTICSEARCH_PLUGIN.URL,
+      appRoute: SEARCH_EXPERIENCES_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
-      id: ELASTICSEARCH_PLUGIN.ID,
+      id: SEARCH_EXPERIENCES_PLUGIN.ID,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ELASTICSEARCH_PLUGIN.NAME);
+        chrome.docTitle.change(SEARCH_EXPERIENCES_PLUGIN.NAME);
 
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
-        const { Elasticsearch } = await import('./applications/elasticsearch');
+        const { SearchExperiences } = await import('./applications/search_experiences');
 
-        return renderApp(Elasticsearch, kibanaDeps, pluginData);
+        return renderApp(SearchExperiences, kibanaDeps, pluginData);
       },
-      title: ELASTICSEARCH_PLUGIN.NAME,
+      navLinkStatus: AppNavLinkStatus.hidden,
+      title: SEARCH_EXPERIENCES_PLUGIN.NAME,
     });
 
     if (config.canDeployEntSearch) {
@@ -294,6 +321,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
           return renderApp(AppSearch, kibanaDeps, pluginData);
         },
+        navLinkStatus: AppNavLinkStatus.hidden,
         title: APP_SEARCH_PLUGIN.NAME,
       });
 
@@ -318,30 +346,10 @@ export class EnterpriseSearchPlugin implements Plugin {
 
           return renderApp(WorkplaceSearch, kibanaDeps, pluginData);
         },
+        navLinkStatus: AppNavLinkStatus.hidden,
         title: WORKPLACE_SEARCH_PLUGIN.NAME,
       });
     }
-
-    core.application.register({
-      appRoute: SEARCH_EXPERIENCES_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
-      id: SEARCH_EXPERIENCES_PLUGIN.ID,
-      mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(SEARCH_EXPERIENCES_PLUGIN.NAME);
-
-        await this.getInitialData(http);
-        const pluginData = this.getPluginData();
-
-        const { renderApp } = await import('./applications');
-        const { SearchExperiences } = await import('./applications/search_experiences');
-
-        return renderApp(SearchExperiences, kibanaDeps, pluginData);
-      },
-      title: SEARCH_EXPERIENCES_PLUGIN.NAME,
-    });
 
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
@@ -350,7 +358,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
         order: 100,
         path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
-        title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME,
+        title: SEARCH_PRODUCT_NAME,
       });
 
       plugins.home.featureCatalogue.register({

@@ -8,7 +8,7 @@
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useEffect, useMemo, useReducer } from 'react';
-import type { CasesByAlertId } from '@kbn/cases-plugin/common/api';
+import type { GetRelatedCasesByAlertResponse } from '@kbn/cases-plugin/common';
 import { useFetchRelatedAlertsBySameSourceEvent } from './use_fetch_related_alerts_by_same_source_event';
 import { useShowRelatedCases } from './use_show_related_cases';
 import { useFetchRelatedCases } from './use_fetch_related_cases';
@@ -84,7 +84,7 @@ export interface UseCorrelationsResult {
   /**
    * Cases data, can be used to render correlated cases table
    */
-  cases: CasesByAlertId;
+  cases: GetRelatedCasesByAlertResponse;
 }
 
 /**

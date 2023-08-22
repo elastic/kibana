@@ -5,30 +5,15 @@
  * 2.0.
  */
 
-import type { LensChartConfig, LensLineChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-const memoryLineChart: LensLineChartConfig = {
-  extraVisualizationState: {
-    yLeftExtent: {
-      mode: 'custom',
-      lowerBound: 0,
-      upperBound: 1,
+export const memoryUsage: FormulaValueConfig = {
+  label: 'Memory Usage',
+  value: 'average(system.memory.actual.used.pct)',
+  format: {
+    id: 'percent',
+    params: {
+      decimals: 0,
     },
   },
-};
-
-export const memoryUsage: LensChartConfig = {
-  title: 'Memory Usage',
-  formula: {
-    formula: 'average(system.memory.actual.used.pct)',
-    format: {
-      id: 'percent',
-      params: {
-        decimals: 0,
-      },
-    },
-  },
-  lineChartConfig: memoryLineChart,
-  getFilters,
 };

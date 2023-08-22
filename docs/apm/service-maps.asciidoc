@@ -1,6 +1,6 @@
 [role="xpack"]
 [[service-maps]]
-=== Service map
+=== Service Map
 
 A service map is a real-time visual representation of the instrumented services in your application's architecture.
 It shows you how these services are connected, along with high-level metrics like average transaction duration,
@@ -40,7 +40,7 @@ We currently surface two types of service maps:
 [[service-maps-how]]
 === How do service maps work?
 
-Service maps rely on distributed traces to draw connections between services.
+Service Maps rely on distributed traces to draw connections between services.
 As {apm-guide-ref}/apm-distributed-tracing.html[distributed tracing] is enabled out-of-the-box for supported technologies, so are service maps.
 However, if a service isn't instrumented,
 or a `traceparent` header isn't being propagated to it,
@@ -105,7 +105,7 @@ Type and subtype are based on `span.type`, and `span.subtype`.
 [[service-maps-supported]]
 === Supported APM agents
 
-Service maps are supported for the following APM agent versions:
+Service Maps are supported for the following APM agent versions:
 
 [horizontal]
 Go agent:: ≥ v1.7.0

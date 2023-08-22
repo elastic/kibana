@@ -190,6 +190,27 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
+      it('should not allow to update a default ES output to Kafka', async function () {
+        const { body } = await supertest
+          .put(`/api/fleet/outputs/${defaultOutputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My Kafka Output',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'user_pass',
+            username: 'user',
+            password: 'pass',
+            is_default: true,
+            is_default_monitoring: true,
+            topics: [{ topic: 'topic1' }],
+          })
+          .expect(400);
+        expect(body.message).to.eql(
+          'Kafka output cannot be used with Fleet Server integration in Fleet Server policy 1. Please create a new ElasticSearch output.'
+        );
+      });
+
       it('should allow to update a default ES output if keeping it ES', async function () {
         await supertest
           .put(`/api/fleet/outputs/${defaultOutputId}`)
@@ -197,7 +218,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             name: 'Updated Default ES Output',
             type: 'elasticsearch',
-            hosts: ['test.fr:443'],
+            hosts: ['http://test.fr:443'],
           })
           .expect(200);
       });
@@ -231,6 +252,38 @@ export default function (providerContext: FtrProviderContext) {
               key: 'KEY',
               certificate_authorities: ['CA1', 'CA2'],
             },
+          })
+          .expect(200);
+
+        const { body } = await supertest.get(`/api/fleet/agent_policies/${fleetServerPolicyId}`);
+        const updatedFleetServerPolicy = body.item;
+        expect(updatedFleetServerPolicy.data_output_id === defaultOutputId);
+
+        const { body: bodyWithOutput } = await supertest.get(
+          `/api/fleet/agent_policies/${fleetServerPolicyWithCustomOutputId}`
+        );
+        const updatedFleetServerPolicyWithCustomOutput = bodyWithOutput.item;
+        expect(updatedFleetServerPolicyWithCustomOutput.data_output_id === ESOutputId);
+      });
+
+      it('should allow to update a non-default ES output to kafka', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Elasticsearch output',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr:443'],
+          })
+          .expect(200);
+
+        const { id: elasticsearchOutputId } = postResponse.item;
+        await supertest
+          .put(`/api/fleet/outputs/${elasticsearchOutputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'A Kafka Output',
+            type: 'kafka',
           })
           .expect(200);
 
@@ -505,6 +558,97 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
+      it('should allow to create a new kafka output', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My Kafka Output',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'user_pass',
+            username: 'user',
+            password: 'pass',
+            topics: [{ topic: 'topic1' }],
+          })
+          .expect(200);
+
+        const { id: _, ...itemWithoutId } = postResponse.item;
+        expect(itemWithoutId).to.eql({
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'My Kafka Output',
+          type: 'kafka',
+          hosts: ['test.fr:2000'],
+          auth_type: 'user_pass',
+          username: 'user',
+          password: 'pass',
+          topics: [{ topic: 'topic1' }],
+          broker_timeout: 10,
+          required_acks: 1,
+          client_id: 'Elastic',
+          compression: 'gzip',
+          compression_level: 4,
+          sasl: {
+            mechanism: 'PLAIN',
+          },
+          timeout: 30,
+          partition: 'hash',
+          version: '1.0.0',
+        });
+      });
+
+      it('should allow to create a new kafka default output and fleet server policies should not change', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Default Kafka Output',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'user_pass',
+            username: 'user',
+            password: 'pass',
+            topics: [{ topic: 'topic1' }],
+            is_default: true,
+          })
+          .expect(200);
+
+        const { id: _, ...itemWithoutId } = postResponse.item;
+        expect(itemWithoutId).to.eql({
+          name: 'Default Kafka Output',
+          type: 'kafka',
+          hosts: ['test.fr:2000'],
+          auth_type: 'user_pass',
+          username: 'user',
+          password: 'pass',
+          topics: [{ topic: 'topic1' }],
+          is_default: true,
+          is_default_monitoring: false,
+          broker_timeout: 10,
+          required_acks: 1,
+          client_id: 'Elastic',
+          compression: 'gzip',
+          compression_level: 4,
+          sasl: {
+            mechanism: 'PLAIN',
+          },
+          timeout: 30,
+          partition: 'hash',
+          version: '1.0.0',
+        });
+
+        const { body } = await supertest.get(`/api/fleet/agent_policies/${fleetServerPolicyId}`);
+        const updatedFleetServerPolicy = body.item;
+        expect(updatedFleetServerPolicy.data_output_id === defaultOutputId);
+
+        const { body: bodyWithOutput } = await supertest.get(
+          `/api/fleet/agent_policies/${fleetServerPolicyWithCustomOutputId}`
+        );
+        const updatedFleetServerPolicyWithCustomOutput = bodyWithOutput.item;
+        expect(updatedFleetServerPolicyWithCustomOutput.data_output_id === ESOutputId);
+      });
+
       it('should toggle the default output when creating a new one', async function () {
         await supertest
           .post(`/api/fleet/outputs`)
@@ -693,77 +837,166 @@ export default function (providerContext: FtrProviderContext) {
         const defaultOutputs = outputs.filter((o: any) => o.is_default_monitoring);
         expect(defaultOutputs[0].shipper).to.equal(null);
       });
+
+      it('should allow to create a kafka output with the shipper values', async function () {
+        await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Kafka Output',
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'user_pass',
+            username: 'user',
+            password: 'pass',
+            topics: [{ topic: 'topic1' }],
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+          })
+          .expect(200);
+
+        const {
+          body: { items: outputs },
+        } = await supertest.get(`/api/fleet/outputs`).expect(200);
+        const newOutput = outputs.filter((o: any) => o.name === 'Kafka Output');
+        expect(newOutput[0].shipper).to.eql({
+          compression_level: null,
+          disk_queue_compression_enabled: null,
+          disk_queue_enabled: true,
+          disk_queue_encryption_enabled: true,
+          disk_queue_max_size: null,
+          disk_queue_path: 'path/to/disk/queue',
+          loadbalance: null,
+          max_batch_bytes: null,
+          mem_queue_events: null,
+          queue_flush_timeout: null,
+        });
+      });
     });
 
     describe('DELETE /outputs/{outputId}', () => {
-      let outputId: string;
-      let defaultOutputIdToDelete: string;
-      let defaultMonitoringOutputId: string;
+      describe('Elasticsearch output', () => {
+        let outputId: string;
+        let defaultOutputIdToDelete: string;
+        let defaultMonitoringOutputId: string;
 
-      before(async () => {
-        const { body: postResponse } = await supertest
-          .post(`/api/fleet/outputs`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'Output to delete test',
-            type: 'elasticsearch',
-            hosts: ['https://test.fr'],
-          })
-          .expect(200);
-        outputId = postResponse.item.id;
+        before(async () => {
+          const { body: postResponse } = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Output to delete test',
+              type: 'elasticsearch',
+              hosts: ['https://test.fr'],
+            })
+            .expect(200);
+          outputId = postResponse.item.id;
 
-        const { body: defaultOutputPostResponse } = await supertest
-          .post(`/api/fleet/outputs`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'Default Output to delete test',
-            type: 'elasticsearch',
-            hosts: ['https://test.fr'],
-            is_default: true,
-          })
-          .expect(200);
-        defaultOutputIdToDelete = defaultOutputPostResponse.item.id;
-        const { body: defaultMonitoringOutputPostResponse } = await supertest
-          .post(`/api/fleet/outputs`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'Default Output to delete test',
-            type: 'elasticsearch',
-            hosts: ['https://test.fr'],
-            is_default_monitoring: true,
-          })
-          .expect(200);
-        defaultMonitoringOutputId = defaultMonitoringOutputPostResponse.item.id;
+          const { body: defaultOutputPostResponse } = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Default Output to delete test',
+              type: 'elasticsearch',
+              hosts: ['https://test.fr'],
+              is_default: true,
+            })
+            .expect(200);
+          defaultOutputIdToDelete = defaultOutputPostResponse.item.id;
+          const { body: defaultMonitoringOutputPostResponse } = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Default Output to delete test',
+              type: 'elasticsearch',
+              hosts: ['https://test.fr'],
+              is_default_monitoring: true,
+            })
+            .expect(200);
+          defaultMonitoringOutputId = defaultMonitoringOutputPostResponse.item.id;
+        });
+
+        it('should return a 400 when deleting a default output ', async function () {
+          await supertest
+            .delete(`/api/fleet/outputs/${defaultOutputIdToDelete}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(400);
+        });
+
+        it('should return a 400 when deleting a default output ', async function () {
+          await supertest
+            .delete(`/api/fleet/outputs/${defaultMonitoringOutputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(400);
+        });
+
+        it('should return a 404 when deleting a non existing output ', async function () {
+          await supertest
+            .delete(`/api/fleet/outputs/idonotexists`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(404);
+        });
+
+        it('should allow to delete an output ', async function () {
+          const { body: deleteResponse } = await supertest
+            .delete(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+
+          expect(deleteResponse.id).to.eql(outputId);
+        });
       });
 
-      it('should return a 400 when deleting a default output ', async function () {
-        await supertest
-          .delete(`/api/fleet/outputs/${defaultOutputIdToDelete}`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(400);
-      });
+      describe('Kafka output', () => {
+        let outputId: string;
+        let defaultOutputIdToDelete: string;
 
-      it('should return a 400 when deleting a default output ', async function () {
-        await supertest
-          .delete(`/api/fleet/outputs/${defaultMonitoringOutputId}`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(400);
-      });
+        const kafkaOutputPayload = {
+          name: 'Output to delete test',
+          type: 'kafka',
+          hosts: ['test.fr:2000'],
+          auth_type: 'user_pass',
+          username: 'user',
+          password: 'pass',
+          is_default: true,
+          topics: [{ topic: 'topic1' }],
+        };
 
-      it('should return a 404 when deleting a non existing output ', async function () {
-        await supertest
-          .delete(`/api/fleet/outputs/idonotexists`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(404);
-      });
+        before(async () => {
+          const { body: postResponse } = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send(kafkaOutputPayload)
+            .expect(200);
+          outputId = postResponse.item.id;
 
-      it('should allow to delete an output ', async function () {
-        const { body: deleteResponse } = await supertest
-          .delete(`/api/fleet/outputs/${outputId}`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(200);
+          const { body: defaultOutputPostResponse } = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ ...kafkaOutputPayload, name: 'Default Output to delete test' })
+            .expect(200);
+          defaultOutputIdToDelete = defaultOutputPostResponse.item.id;
+        });
 
-        expect(deleteResponse.id).to.eql(outputId);
+        it('should return a 400 when deleting a default output ', async function () {
+          await supertest
+            .delete(`/api/fleet/outputs/${defaultOutputIdToDelete}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(400);
+        });
+
+        it('should allow to delete an output ', async function () {
+          const { body: deleteResponse } = await supertest
+            .delete(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+
+          expect(deleteResponse.id).to.eql(outputId);
+        });
       });
     });
   });

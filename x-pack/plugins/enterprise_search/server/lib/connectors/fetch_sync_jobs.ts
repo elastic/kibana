@@ -12,7 +12,6 @@ import { ConnectorSyncJob, SyncJobType } from '../../../common/types/connectors'
 import { Paginate } from '../../../common/types/pagination';
 import { isNotNullish } from '../../../common/utils/is_not_nullish';
 
-import { setupConnectorsIndices } from '../../index_management/setup_indices';
 import { fetchWithPagination } from '../../utils/fetch_with_pagination';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
@@ -82,10 +81,8 @@ export const fetchSyncJobsByConnectorId = async (
     };
   } catch (error) {
     if (isIndexNotFoundException(error)) {
-      await setupConnectorsIndices(client.asCurrentUser);
       return defaultResult;
-    } else {
-      throw error;
     }
+    throw error;
   }
 };

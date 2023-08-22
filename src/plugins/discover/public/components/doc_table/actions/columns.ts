@@ -8,8 +8,8 @@
 import { Capabilities, IUiSettingsClient } from '@kbn/core/public';
 import { DataViewsContract } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { DiscoverAppStateContainer } from '../../../application/main/services/discover_app_state_container';
-import { SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { GetStateReturn as ContextGetStateReturn } from '../../../application/context/services/context_state';
 import { popularizeField } from '../../../utils/popularize_field';
 

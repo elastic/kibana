@@ -30,7 +30,7 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/plugins/cases/docs/**/*',
   'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
   'x-pack/plugins/fleet/cypress/packages/*.zip',
-  'x-pack/plugins/apm/ftr_e2e/cypress/e2e/power_user/diagnostics/apm-diagnostics-*.json',
+  '**/apm-diagnostics-*.json',
   '**/.*',
   '**/__mocks__/**/*',
   'x-pack/docs/**/*',
@@ -44,10 +44,14 @@ export const IGNORE_FILE_GLOBS = [
   'packages/kbn-test/jest-preset.js',
   'packages/kbn-test/*/jest-preset.js',
   'test/package/Vagrantfile',
+  'x-pack/plugins/security_solution/scripts/endpoint/endpoint_agent_runner/Vagrantfile',
   '**/test/**/fixtures/**/*',
 
   // Required to match the name in the docs.elastic.dev repo.
   'nav-kibana-dev.docnav.json',
+
+  // Match elastic wide naming convention for catalog-info.yaml
+  'catalog-info.yaml',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',

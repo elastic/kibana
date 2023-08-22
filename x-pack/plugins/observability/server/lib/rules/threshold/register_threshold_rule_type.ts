@@ -8,44 +8,36 @@
 import { schema } from '@kbn/config-schema';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
+import { IRuleTypeAlerts, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import {
-  createGetSummarizedAlertsFn,
-  createLifecycleExecutor,
-  IRuleDataClient,
-} from '@kbn/rule-registry-plugin/server';
+import { createLifecycleExecutor, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { LicenseType } from '@kbn/licensing-plugin/server';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
-import { observabilityFeatureId } from '../../../../common';
+import {
+  AlertsLocatorParams,
+  observabilityFeatureId,
+  observabilityPaths,
+} from '../../../../common';
 import { Comparator } from '../../../../common/threshold_rule/types';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../../common/constants';
 import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import {
   alertDetailUrlActionVariableDescription,
-  alertStateActionVariableDescription,
   cloudActionVariableDescription,
   containerActionVariableDescription,
   groupByKeysActionVariableDescription,
   hostActionVariableDescription,
   labelsActionVariableDescription,
-  metricActionVariableDescription,
   orchestratorActionVariableDescription,
-  originalAlertStateActionVariableDescription,
-  originalAlertStateWasActionVariableDescription,
   reasonActionVariableDescription,
   tagsActionVariableDescription,
-  thresholdActionVariableDescription,
   timestampActionVariableDescription,
   valueActionVariableDescription,
 } from './messages';
-import {
-  getAlertDetailsPageEnabledForApp,
-  oneOfLiterals,
-  validateIsStringElasticsearchJSONFilter,
-} from './utils';
+import { oneOfLiterals, validateKQLStringFilter } from './utils';
 import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
@@ -68,7 +60,8 @@ export function thresholdRuleType(
   basePath: IBasePath,
   config: ObservabilityConfig,
   logger: Logger,
-  ruleDataClient: IRuleDataClient
+  ruleDataClient: IRuleDataClient,
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>
 ) {
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
@@ -111,7 +104,11 @@ export function thresholdRuleType(
         schema.object({
           name: schema.string(),
           aggType: schema.literal('count'),
-          filter: schema.maybe(schema.string()),
+          filter: schema.maybe(
+            schema.string({
+              validate: validateKQLStringFilter,
+            })
+          ),
           field: schema.never(),
         }),
       ])
@@ -119,19 +116,6 @@ export function thresholdRuleType(
     equation: schema.maybe(schema.string()),
     label: schema.maybe(schema.string()),
   });
-  const getSummarizedAlerts = createGetSummarizedAlertsFn({
-    ruleDataClient,
-    useNamespace: false,
-    isLifecycleAlert: false,
-  });
-
-  const groupActionVariableDescription = i18n.translate(
-    'xpack.observability.threshold.rule.alerting.groupActionVariableDescription',
-    {
-      defaultMessage:
-        'Name of the group(s) reporting data. For accessing each group key, use context.groupByKeys.',
-    }
-  );
 
   return {
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
@@ -147,7 +131,7 @@ export function thresholdRuleType(
           groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
           filterQuery: schema.maybe(
             schema.string({
-              validate: validateIsStringElasticsearchJSONFilter,
+              validate: validateKQLStringFilter,
             })
           ),
           alertOnNoData: schema.maybe(schema.boolean()),
@@ -161,47 +145,26 @@ export function thresholdRuleType(
     minimumLicenseRequired: 'basic' as LicenseType,
     isExportable: true,
     executor: createLifecycleRuleExecutor(
-      createMetricThresholdExecutor({ basePath, logger, config })
+      createMetricThresholdExecutor({ alertsLocator, basePath, logger, config })
     ),
     doesSetRecoveryContext: true,
     actionVariables: {
       context: [
-        { name: 'group', description: groupActionVariableDescription },
-        { name: 'groupByKeys', description: groupByKeysActionVariableDescription },
-        ...(getAlertDetailsPageEnabledForApp(config.unsafe.alertDetails, 'metrics')
-          ? [
-              {
-                name: 'alertDetailsUrl',
-                description: alertDetailUrlActionVariableDescription,
-                usesPublicBaseUrl: true,
-              },
-            ]
-          : []),
-        { name: 'alertState', description: alertStateActionVariableDescription },
+        { name: 'groupings', description: groupByKeysActionVariableDescription },
+        {
+          name: 'alertDetailsUrl',
+          description: alertDetailUrlActionVariableDescription,
+          usesPublicBaseUrl: true,
+        },
         { name: 'reason', description: reasonActionVariableDescription },
         { name: 'timestamp', description: timestampActionVariableDescription },
         { name: 'value', description: valueActionVariableDescription },
-        { name: 'metric', description: metricActionVariableDescription },
-        { name: 'threshold', description: thresholdActionVariableDescription },
         { name: 'cloud', description: cloudActionVariableDescription },
         { name: 'host', description: hostActionVariableDescription },
         { name: 'container', description: containerActionVariableDescription },
         { name: 'orchestrator', description: orchestratorActionVariableDescription },
         { name: 'labels', description: labelsActionVariableDescription },
         { name: 'tags', description: tagsActionVariableDescription },
-        { name: 'originalAlertState', description: originalAlertStateActionVariableDescription },
-        {
-          name: 'originalAlertStateWasALERT',
-          description: originalAlertStateWasActionVariableDescription,
-        },
-        {
-          name: 'originalAlertStateWasWARNING',
-          description: originalAlertStateWasActionVariableDescription,
-        },
-        {
-          name: 'originalAlertStateWasNO_DATA',
-          description: originalAlertStateWasActionVariableDescription,
-        },
       ],
     },
     useSavedObjectReferences: {
@@ -220,7 +183,8 @@ export function thresholdRuleType(
       },
     },
     producer: observabilityFeatureId,
-    getSummarizedAlerts: getSummarizedAlerts(),
     alerts: MetricsRulesTypeAlertDefinition,
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
   };
 }

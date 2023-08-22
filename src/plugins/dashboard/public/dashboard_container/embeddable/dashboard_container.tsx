@@ -41,7 +41,6 @@ import {
   runQuickSave,
   replacePanel,
   addFromLibrary,
-  showPlaceholderUntil,
   addOrUpdateEmbeddable,
 } from './api';
 
@@ -312,7 +311,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public addFromLibrary = addFromLibrary;
 
   public replacePanel = replacePanel;
-  public showPlaceholderUntil = showPlaceholderUntil;
   public addOrUpdateEmbeddable = addOrUpdateEmbeddable;
 
   public forceRefresh(refreshControlGroup: boolean = true) {
@@ -380,12 +378,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         });
       });
 
-    const { input: newInput, searchSessionId } = await initializeDashboard({
+    const initializeResult = await initializeDashboard({
       creationOptions: this.creationOptions,
       controlGroup: this.controlGroup,
       untilDashboardReady,
       loadDashboardReturn,
     });
+    if (!initializeResult) return;
+    const { input: newInput, searchSessionId } = initializeResult;
 
     this.searchSessionId = searchSessionId;
 
@@ -425,10 +425,12 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public openOverlay = (ref: OverlayRef) => {
     this.clearOverlays();
+    this.dispatch.setHasOverlays(true);
     this.overlayRef = ref;
   };
 
   public clearOverlays = () => {
+    this.dispatch.setHasOverlays(false);
     this.controlGroup?.closeAllFlyouts();
     this.overlayRef?.close();
   };

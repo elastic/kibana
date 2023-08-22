@@ -11,7 +11,7 @@ import type { SignificantTerm } from './types';
 
 /**
  * Type guard for a significant term.
- * Note this is used as a custom type within Explain Log Rate Spikes
+ * Note this is used as a custom type within Log Rate Analysis
  * for a p-value based variant, not a generic significant terms
  * aggregation type.
  * @param arg The unknown type to be evaluated

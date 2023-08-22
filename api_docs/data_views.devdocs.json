@@ -68,8 +68,8 @@
                 "path": "packages/kbn-es-query/src/es_query/types.ts"
               },
               {
-                "plugin": "visualizationUiComponents",
-                "path": "src/plugins/visualization_ui_components/public/components/query_input/filter_query_input.tsx"
+                "plugin": "@kbn/visualization-ui-components",
+                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx"
               },
               {
                 "plugin": "observability",
@@ -89,7 +89,7 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/components/expression.tsx"
+                "path": "x-pack/plugins/observability/public/components/threshold/threshold_rule_expression.tsx"
               },
               {
                 "plugin": "observability",
@@ -126,6 +126,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/components/detection_page_filters/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/entity_analytics/components/risk_score_preview_section.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -172,12 +176,12 @@
                 "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
               },
               {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_preview_panel_context.ts"
               },
               {
                 "plugin": "threatIntelligence",
@@ -188,16 +192,16 @@
                 "path": "x-pack/plugins/security_solution/public/detection_engine/rule_exceptions/components/flyout_components/alerts_actions/utils.test.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/common/search/expressions/kibana_context.test.ts"
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/common/search/expressions/kibana_context.test.ts"
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/common/search/expressions/kibana_context.test.ts"
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
               },
               {
                 "plugin": "@kbn/es-query",
@@ -360,12 +364,12 @@
                 "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/components/group_editor_controls/group_editor_controls.tsx"
+                "plugin": "@kbn/event-annotation-components",
+                "path": "packages/kbn-event-annotation-components/components/group_editor_controls/group_editor_controls.tsx"
               },
               {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/components/table_list.tsx"
+                "plugin": "@kbn/event-annotation-components",
+                "path": "packages/kbn-event-annotation-components/components/table_list.tsx"
               },
               {
                 "plugin": "lens",
@@ -380,12 +384,8 @@
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_for_flyout.tsx"
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
               },
               {
                 "plugin": "ml",
@@ -404,8 +404,8 @@
                 "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/logs_shared/common/log_views/resolved_log_view.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -424,10 +424,6 @@
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
               },
@@ -442,6 +438,10 @@
               {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
               {
                 "plugin": "stackAlerts",
@@ -482,10 +482,6 @@
               {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
-              },
-              {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
               },
               {
                 "plugin": "ml",
@@ -584,10 +580,6 @@
                 "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-              },
-              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
               },
@@ -632,6 +624,18 @@
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
               },
               {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/sourcerer/create_sourcerer_data_view.ts"
               },
@@ -650,18 +654,6 @@
               {
                 "plugin": "timelines",
                 "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
               },
               {
                 "plugin": "transform",
@@ -1432,6 +1424,32 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataView.toMinimalSpec",
+            "type": "Function",
+            "tags": [],
+            "label": "toMinimalSpec",
+            "description": [
+              "\nCreates a minimal static representation of the data view. Fields and popularity scores will be omitted."
+            ],
+            "signature": [
+              "() => Omit<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ", \"fields\">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -4398,6 +4416,44 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-public.DataViewsService.getExistingIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getExistingIndices",
+            "description": [
+              "\nGet existing index pattern list by providing string array index pattern list."
+            ],
+            "signature": [
+              "(indices: string[]) => Promise<string[]>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewsService.getExistingIndices.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "indices",
+                "description": [
+                  "index pattern list"
+                ],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "index pattern list"
+            ]
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-public.DataViewsService.getFieldsForIndexPattern",
             "type": "Function",
             "tags": [],
@@ -5453,441 +5509,6 @@
                   }
                 ],
                 "path": "src/plugins/data_views/public/data_views_service_public.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
-        "id": "def-public.SavedObjectsClientPublicToCommon",
-        "type": "Class",
-        "tags": [],
-        "label": "SavedObjectsClientPublicToCommon",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "dataViews",
-            "scope": "public",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-public.SavedObjectsClientPublicToCommon",
-            "text": "SavedObjectsClientPublicToCommon"
-          },
-          " implements ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.SavedObjectsClientCommon",
-            "text": "SavedObjectsClientCommon"
-          }
-        ],
-        "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.SavedObjectsClientPublicToCommon.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.SavedObjectsClientPublicToCommon.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "contentManagementClient",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "contentManagement",
-                    "scope": "public",
-                    "docId": "kibContentManagementPluginApi",
-                    "section": "def-public.ContentClient",
-                    "text": "ContentClient"
-                  }
-                ],
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.SavedObjectsClientPublicToCommon.Unnamed.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "savedObjectClient",
-                "description": [],
-                "signature": [
-                  "SOClient"
-                ],
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.SavedObjectsClientPublicToCommon.find",
-            "type": "Function",
-            "tags": [],
-            "label": "find",
-            "description": [],
-            "signature": [
-              "(options: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.SavedObjectsClientCommonFindArgs",
-                "text": "SavedObjectsClientCommonFindArgs"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "@kbn/content-management-utils",
-                "scope": "common",
-                "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-common.SOWithMetadata",
-                "text": "SOWithMetadata"
-              },
-              "<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ">[]>"
-            ],
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.SavedObjectsClientPublicToCommon.find.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.SavedObjectsClientCommonFindArgs",
-                    "text": "SavedObjectsClientCommonFindArgs"
-                  }
-                ],
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.SavedObjectsClientPublicToCommon.get",
-            "type": "Function",
-            "tags": [],
-            "label": "get",
-            "description": [],
-            "signature": [
-              "(id: string) => Promise<",
-              {
-                "pluginId": "@kbn/content-management-utils",
-                "scope": "common",
-                "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-common.SOWithMetadata",
-                "text": "SOWithMetadata"
-              },
-              "<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ">>"
-            ],
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.SavedObjectsClientPublicToCommon.get.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.SavedObjectsClientPublicToCommon.getSavedSearch",
-            "type": "Function",
-            "tags": [],
-            "label": "getSavedSearch",
-            "description": [],
-            "signature": [
-              "(id: string) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                "section": "def-common.SimpleSavedObject",
-                "text": "SimpleSavedObject"
-              },
-              "<unknown>>"
-            ],
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.SavedObjectsClientPublicToCommon.getSavedSearch.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.SavedObjectsClientPublicToCommon.update",
-            "type": "Function",
-            "tags": [],
-            "label": "update",
-            "description": [],
-            "signature": [
-              "(id: string, attributes: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ", options: DataViewUpdateOptions) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
-              "<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ">>"
-            ],
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.SavedObjectsClientPublicToCommon.update.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.SavedObjectsClientPublicToCommon.update.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "attributes",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewAttributes",
-                    "text": "DataViewAttributes"
-                  }
-                ],
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.SavedObjectsClientPublicToCommon.update.$3",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  "DataViewUpdateOptions"
-                ],
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.SavedObjectsClientPublicToCommon.create",
-            "type": "Function",
-            "tags": [],
-            "label": "create",
-            "description": [],
-            "signature": [
-              "(attributes: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ", options: DataViewCreateOptions) => Promise<",
-              {
-                "pluginId": "@kbn/content-management-utils",
-                "scope": "common",
-                "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-common.SOWithMetadata",
-                "text": "SOWithMetadata"
-              },
-              "<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ">>"
-            ],
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.SavedObjectsClientPublicToCommon.create.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "attributes",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewAttributes",
-                    "text": "DataViewAttributes"
-                  }
-                ],
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.SavedObjectsClientPublicToCommon.create.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  "DataViewCreateOptions"
-                ],
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.SavedObjectsClientPublicToCommon.delete",
-            "type": "Function",
-            "tags": [],
-            "label": "delete",
-            "description": [],
-            "signature": [
-              "(id: string) => Promise<void>"
-            ],
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.SavedObjectsClientPublicToCommon.delete.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -7439,6 +7060,391 @@
       },
       {
         "parentPluginId": "dataViews",
+        "id": "def-public.PersistenceAPI",
+        "type": "Interface",
+        "tags": [],
+        "label": "PersistenceAPI",
+        "description": [
+          "\nCommon interface for the saved objects client on server and content management in browser"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.PersistenceAPI.find",
+            "type": "Function",
+            "tags": [],
+            "label": "find",
+            "description": [
+              "\nSearch for saved objects"
+            ],
+            "signature": [
+              "(options: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.SavedObjectsClientCommonFindArgs",
+                "text": "SavedObjectsClientCommonFindArgs"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
+              "<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewAttributes",
+                "text": "DataViewAttributes"
+              },
+              ">[]>"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.PersistenceAPI.find.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "- options for search"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.SavedObjectsClientCommonFindArgs",
+                    "text": "SavedObjectsClientCommonFindArgs"
+                  }
+                ],
+                "path": "src/plugins/data_views/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.PersistenceAPI.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nGet a single saved object by id"
+            ],
+            "signature": [
+              "(id: string) => Promise<",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
+              "<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewAttributes",
+                "text": "DataViewAttributes"
+              },
+              ">>"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.PersistenceAPI.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "- id of saved object"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.PersistenceAPI.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [
+              "\nUpdate a saved object by id"
+            ],
+            "signature": [
+              "(id: string, attributes: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewAttributes",
+                "text": "DataViewAttributes"
+              },
+              ", options: { version?: string | undefined; }) => Promise<",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
+              "<unknown>>"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.PersistenceAPI.update.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "- id of saved object"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.PersistenceAPI.update.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "attributes",
+                "description": [
+                  "- attributes to update"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewAttributes",
+                    "text": "DataViewAttributes"
+                  }
+                ],
+                "path": "src/plugins/data_views/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.PersistenceAPI.update.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/plugins/data_views/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-public.PersistenceAPI.update.$3.version",
+                    "type": "string",
+                    "tags": [],
+                    "label": "version",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.PersistenceAPI.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "\nCreate a saved object"
+            ],
+            "signature": [
+              "(attributes: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewAttributes",
+                "text": "DataViewAttributes"
+              },
+              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; overwrite?: boolean | undefined; }) => Promise<",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
+              "<unknown>>"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.PersistenceAPI.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "attributes",
+                "description": [
+                  "- attributes to set"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewAttributes",
+                    "text": "DataViewAttributes"
+                  }
+                ],
+                "path": "src/plugins/data_views/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.PersistenceAPI.create.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/plugins/data_views/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-public.PersistenceAPI.create.$2.id",
+                    "type": "string",
+                    "tags": [],
+                    "label": "id",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-public.PersistenceAPI.create.$2.initialNamespaces",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "initialNamespaces",
+                    "description": [],
+                    "signature": [
+                      "string[] | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-public.PersistenceAPI.create.$2.overwrite",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "overwrite",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.PersistenceAPI.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [
+              "\nDelete a saved object by id"
+            ],
+            "signature": [
+              "(id: string) => Promise<void>"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.PersistenceAPI.delete.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "- id of saved object"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
         "id": "def-public.RuntimeField",
         "type": "Interface",
         "tags": [],
@@ -7497,435 +7503,6 @@
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
-        "id": "def-public.SavedObjectsClientCommon",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedObjectsClientCommon",
-        "description": [
-          "\nCommon interface for the saved objects client"
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.SavedObjectsClientCommon.find",
-            "type": "Function",
-            "tags": [],
-            "label": "find",
-            "description": [
-              "\nSearch for saved objects"
-            ],
-            "signature": [
-              "(options: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.SavedObjectsClientCommonFindArgs",
-                "text": "SavedObjectsClientCommonFindArgs"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
-              "<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ">[]>"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.SavedObjectsClientCommon.find.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [
-                  "- options for search"
-                ],
-                "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.SavedObjectsClientCommonFindArgs",
-                    "text": "SavedObjectsClientCommonFindArgs"
-                  }
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.SavedObjectsClientCommon.get",
-            "type": "Function",
-            "tags": [],
-            "label": "get",
-            "description": [
-              "\nGet a single saved object by id"
-            ],
-            "signature": [
-              "(id: string) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
-              "<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ">>"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.SavedObjectsClientCommon.get.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [
-                  "- id of saved object"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.SavedObjectsClientCommon.getSavedSearch",
-            "type": "Function",
-            "tags": [],
-            "label": "getSavedSearch",
-            "description": [
-              "\nUpdate a saved object by id"
-            ],
-            "signature": [
-              "(id: string) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
-              "<unknown>>"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.SavedObjectsClientCommon.getSavedSearch.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [
-                  "- id of saved object"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.SavedObjectsClientCommon.update",
-            "type": "Function",
-            "tags": [],
-            "label": "update",
-            "description": [
-              "\nUpdate a saved object by id"
-            ],
-            "signature": [
-              "(id: string, attributes: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ", options: { version?: string | undefined; }) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
-              "<unknown>>"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.SavedObjectsClientCommon.update.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [
-                  "- id of saved object"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.SavedObjectsClientCommon.update.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "attributes",
-                "description": [
-                  "- attributes to update"
-                ],
-                "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewAttributes",
-                    "text": "DataViewAttributes"
-                  }
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.SavedObjectsClientCommon.update.$3",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "dataViews",
-                    "id": "def-public.SavedObjectsClientCommon.update.$3.version",
-                    "type": "string",
-                    "tags": [],
-                    "label": "version",
-                    "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
-                    "path": "src/plugins/data_views/common/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.SavedObjectsClientCommon.create",
-            "type": "Function",
-            "tags": [],
-            "label": "create",
-            "description": [
-              "\nCreate a saved object"
-            ],
-            "signature": [
-              "(attributes: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; overwrite?: boolean | undefined; }) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
-              "<unknown>>"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.SavedObjectsClientCommon.create.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "attributes",
-                "description": [
-                  "- attributes to set"
-                ],
-                "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewAttributes",
-                    "text": "DataViewAttributes"
-                  }
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.SavedObjectsClientCommon.create.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "dataViews",
-                    "id": "def-public.SavedObjectsClientCommon.create.$2.id",
-                    "type": "string",
-                    "tags": [],
-                    "label": "id",
-                    "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
-                    "path": "src/plugins/data_views/common/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "dataViews",
-                    "id": "def-public.SavedObjectsClientCommon.create.$2.initialNamespaces",
-                    "type": "Array",
-                    "tags": [],
-                    "label": "initialNamespaces",
-                    "description": [],
-                    "signature": [
-                      "string[] | undefined"
-                    ],
-                    "path": "src/plugins/data_views/common/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "dataViews",
-                    "id": "def-public.SavedObjectsClientCommon.create.$2.overwrite",
-                    "type": "CompoundType",
-                    "tags": [],
-                    "label": "overwrite",
-                    "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
-                    "path": "src/plugins/data_views/common/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.SavedObjectsClientCommon.delete",
-            "type": "Function",
-            "tags": [],
-            "label": "delete",
-            "description": [
-              "\nDelete a saved object by id"
-            ],
-            "signature": [
-              "(id: string) => Promise<void>"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.SavedObjectsClientCommon.delete.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [
-                  "- id of saved object"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -8383,8 +7960,8 @@
                 "path": "packages/kbn-es-query/src/es_query/types.ts"
               },
               {
-                "plugin": "visualizationUiComponents",
-                "path": "src/plugins/visualization_ui_components/public/components/query_input/filter_query_input.tsx"
+                "plugin": "@kbn/visualization-ui-components",
+                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx"
               },
               {
                 "plugin": "observability",
@@ -8404,7 +7981,7 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/components/expression.tsx"
+                "path": "x-pack/plugins/observability/public/components/threshold/threshold_rule_expression.tsx"
               },
               {
                 "plugin": "observability",
@@ -8441,6 +8018,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/components/detection_page_filters/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/entity_analytics/components/risk_score_preview_section.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -8487,12 +8068,12 @@
                 "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
               },
               {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_preview_panel_context.ts"
               },
               {
                 "plugin": "threatIntelligence",
@@ -8503,16 +8084,16 @@
                 "path": "x-pack/plugins/security_solution/public/detection_engine/rule_exceptions/components/flyout_components/alerts_actions/utils.test.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/common/search/expressions/kibana_context.test.ts"
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/common/search/expressions/kibana_context.test.ts"
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/common/search/expressions/kibana_context.test.ts"
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
               },
               {
                 "plugin": "@kbn/es-query",
@@ -8675,12 +8256,12 @@
                 "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/components/group_editor_controls/group_editor_controls.tsx"
+                "plugin": "@kbn/event-annotation-components",
+                "path": "packages/kbn-event-annotation-components/components/group_editor_controls/group_editor_controls.tsx"
               },
               {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/components/table_list.tsx"
+                "plugin": "@kbn/event-annotation-components",
+                "path": "packages/kbn-event-annotation-components/components/table_list.tsx"
               },
               {
                 "plugin": "lens",
@@ -8695,12 +8276,8 @@
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_for_flyout.tsx"
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
               },
               {
                 "plugin": "ml",
@@ -8719,8 +8296,8 @@
                 "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/logs_shared/common/log_views/resolved_log_view.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -8739,10 +8316,6 @@
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
               },
@@ -8757,6 +8330,10 @@
               {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
               {
                 "plugin": "stackAlerts",
@@ -8797,10 +8374,6 @@
               {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
-              },
-              {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
               },
               {
                 "plugin": "ml",
@@ -8899,10 +8472,6 @@
                 "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-              },
-              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
               },
@@ -8947,6 +8516,18 @@
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
               },
               {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/sourcerer/create_sourcerer_data_view.ts"
               },
@@ -8965,18 +8546,6 @@
               {
                 "plugin": "timelines",
                 "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
               },
               {
                 "plugin": "transform",
@@ -9747,6 +9316,32 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.DataView.toMinimalSpec",
+            "type": "Function",
+            "tags": [],
+            "label": "toMinimalSpec",
+            "description": [
+              "\nCreates a minimal static representation of the data view. Fields and popularity scores will be omitted."
+            ],
+            "signature": [
+              "() => Omit<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ", \"fields\">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -11027,7 +10622,7 @@
                 "section": "def-server.DataViewsServerPluginSetupDependencies",
                 "text": "DataViewsServerPluginSetupDependencies"
               },
-              ") => {}"
+              ") => { enableRollups: () => boolean; }"
             ],
             "path": "src/plugins/data_views/server/plugin.ts",
             "deprecated": false,
@@ -11750,6 +11345,44 @@
             ],
             "returnComment": [
               "FieldSpec[]"
+            ]
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.DataViewsService.getExistingIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getExistingIndices",
+            "description": [
+              "\nGet existing index pattern list by providing string array index pattern list."
+            ],
+            "signature": [
+              "(indices: string[]) => Promise<string[]>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-server.DataViewsService.getExistingIndices.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "indices",
+                "description": [
+                  "index pattern list"
+                ],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "index pattern list"
             ]
           },
           {
@@ -12729,6 +12362,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-server.IndexPatternsFetcher.Unnamed.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "rollupsEnabled",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -13579,435 +13227,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
-        "id": "def-server.SavedObjectsClientCommon",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedObjectsClientCommon",
-        "description": [
-          "\nCommon interface for the saved objects client"
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-server.SavedObjectsClientCommon.find",
-            "type": "Function",
-            "tags": [],
-            "label": "find",
-            "description": [
-              "\nSearch for saved objects"
-            ],
-            "signature": [
-              "(options: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.SavedObjectsClientCommonFindArgs",
-                "text": "SavedObjectsClientCommonFindArgs"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
-              "<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ">[]>"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-server.SavedObjectsClientCommon.find.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [
-                  "- options for search"
-                ],
-                "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.SavedObjectsClientCommonFindArgs",
-                    "text": "SavedObjectsClientCommonFindArgs"
-                  }
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-server.SavedObjectsClientCommon.get",
-            "type": "Function",
-            "tags": [],
-            "label": "get",
-            "description": [
-              "\nGet a single saved object by id"
-            ],
-            "signature": [
-              "(id: string) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
-              "<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ">>"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-server.SavedObjectsClientCommon.get.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [
-                  "- id of saved object"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-server.SavedObjectsClientCommon.getSavedSearch",
-            "type": "Function",
-            "tags": [],
-            "label": "getSavedSearch",
-            "description": [
-              "\nUpdate a saved object by id"
-            ],
-            "signature": [
-              "(id: string) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
-              "<unknown>>"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-server.SavedObjectsClientCommon.getSavedSearch.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [
-                  "- id of saved object"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-server.SavedObjectsClientCommon.update",
-            "type": "Function",
-            "tags": [],
-            "label": "update",
-            "description": [
-              "\nUpdate a saved object by id"
-            ],
-            "signature": [
-              "(id: string, attributes: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ", options: { version?: string | undefined; }) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
-              "<unknown>>"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-server.SavedObjectsClientCommon.update.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [
-                  "- id of saved object"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-server.SavedObjectsClientCommon.update.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "attributes",
-                "description": [
-                  "- attributes to update"
-                ],
-                "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewAttributes",
-                    "text": "DataViewAttributes"
-                  }
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-server.SavedObjectsClientCommon.update.$3",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "dataViews",
-                    "id": "def-server.SavedObjectsClientCommon.update.$3.version",
-                    "type": "string",
-                    "tags": [],
-                    "label": "version",
-                    "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
-                    "path": "src/plugins/data_views/common/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-server.SavedObjectsClientCommon.create",
-            "type": "Function",
-            "tags": [],
-            "label": "create",
-            "description": [
-              "\nCreate a saved object"
-            ],
-            "signature": [
-              "(attributes: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; overwrite?: boolean | undefined; }) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
-              "<unknown>>"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-server.SavedObjectsClientCommon.create.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "attributes",
-                "description": [
-                  "- attributes to set"
-                ],
-                "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewAttributes",
-                    "text": "DataViewAttributes"
-                  }
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-server.SavedObjectsClientCommon.create.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "dataViews",
-                    "id": "def-server.SavedObjectsClientCommon.create.$2.id",
-                    "type": "string",
-                    "tags": [],
-                    "label": "id",
-                    "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
-                    "path": "src/plugins/data_views/common/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "dataViews",
-                    "id": "def-server.SavedObjectsClientCommon.create.$2.initialNamespaces",
-                    "type": "Array",
-                    "tags": [],
-                    "label": "initialNamespaces",
-                    "description": [],
-                    "signature": [
-                      "string[] | undefined"
-                    ],
-                    "path": "src/plugins/data_views/common/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "dataViews",
-                    "id": "def-server.SavedObjectsClientCommon.create.$2.overwrite",
-                    "type": "CompoundType",
-                    "tags": [],
-                    "label": "overwrite",
-                    "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
-                    "path": "src/plugins/data_views/common/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-server.SavedObjectsClientCommon.delete",
-            "type": "Function",
-            "tags": [],
-            "label": "delete",
-            "description": [
-              "\nDelete a saved object by id"
-            ],
-            "signature": [
-              "(id: string) => Promise<void>"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-server.SavedObjectsClientCommon.delete.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [
-                  "- id of saved object"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -14034,6 +13253,20 @@
         "label": "DATA_VIEW_PATH_LEGACY",
         "description": [
           "\nLegacy path for data view creation"
+        ],
+        "path": "src/plugins/data_views/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-server.DATA_VIEW_SWAP_REFERENCES_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_VIEW_SWAP_REFERENCES_PATH",
+        "description": [
+          "\nPath to swap references"
         ],
         "path": "src/plugins/data_views/server/constants.ts",
         "deprecated": false,
@@ -14317,6 +13550,39 @@
       }
     ],
     "objects": [],
+    "setup": {
+      "parentPluginId": "dataViews",
+      "id": "def-server.DataViewsServerPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "DataViewsServerPluginSetup",
+      "description": [
+        "\nDataViews server plugin setup api"
+      ],
+      "path": "src/plugins/data_views/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "dataViews",
+          "id": "def-server.DataViewsServerPluginSetup.enableRollups",
+          "type": "Function",
+          "tags": [],
+          "label": "enableRollups",
+          "description": [],
+          "signature": [
+            "() => void"
+          ],
+          "path": "src/plugins/data_views/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
     "start": {
       "parentPluginId": "dataViews",
       "id": "def-server.DataViewsServerPluginStart",
@@ -14545,7 +13811,7 @@
                 "SearchResponse",
                 "<TDocument, TAggregations>>; }; helpers: ",
                 "default",
-                "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                 "default",
                 "; child: (opts: ",
                 "ClientOptions",
@@ -15507,6 +14773,8 @@
                 "default",
                 "; ssl: ",
                 "default",
+                "; synonyms: ",
+                "default",
                 "; tasks: ",
                 "default",
                 "; termsEnum: { (this: That, params: ",
@@ -15667,22 +14935,6 @@
       ],
       "lifecycle": "start",
       "initialIsOpen": true
-    },
-    "setup": {
-      "parentPluginId": "dataViews",
-      "id": "def-server.DataViewsServerPluginSetup",
-      "type": "Interface",
-      "tags": [],
-      "label": "DataViewsServerPluginSetup",
-      "description": [
-        "\nDataViews server plugin setup api"
-      ],
-      "path": "src/plugins/data_views/server/types.ts",
-      "deprecated": false,
-      "trackAdoption": false,
-      "children": [],
-      "lifecycle": "setup",
-      "initialIsOpen": true
     }
   },
   "common": {
@@ -15753,8 +15005,8 @@
                 "path": "packages/kbn-es-query/src/es_query/types.ts"
               },
               {
-                "plugin": "visualizationUiComponents",
-                "path": "src/plugins/visualization_ui_components/public/components/query_input/filter_query_input.tsx"
+                "plugin": "@kbn/visualization-ui-components",
+                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx"
               },
               {
                 "plugin": "observability",
@@ -15774,7 +15026,7 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/components/expression.tsx"
+                "path": "x-pack/plugins/observability/public/components/threshold/threshold_rule_expression.tsx"
               },
               {
                 "plugin": "observability",
@@ -15811,6 +15063,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/components/detection_page_filters/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/entity_analytics/components/risk_score_preview_section.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -15857,12 +15113,12 @@
                 "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
               },
               {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_preview_panel_context.ts"
               },
               {
                 "plugin": "threatIntelligence",
@@ -15873,16 +15129,16 @@
                 "path": "x-pack/plugins/security_solution/public/detection_engine/rule_exceptions/components/flyout_components/alerts_actions/utils.test.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/common/search/expressions/kibana_context.test.ts"
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/common/search/expressions/kibana_context.test.ts"
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/common/search/expressions/kibana_context.test.ts"
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
               },
               {
                 "plugin": "@kbn/es-query",
@@ -16045,12 +15301,12 @@
                 "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/components/group_editor_controls/group_editor_controls.tsx"
+                "plugin": "@kbn/event-annotation-components",
+                "path": "packages/kbn-event-annotation-components/components/group_editor_controls/group_editor_controls.tsx"
               },
               {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/components/table_list.tsx"
+                "plugin": "@kbn/event-annotation-components",
+                "path": "packages/kbn-event-annotation-components/components/table_list.tsx"
               },
               {
                 "plugin": "lens",
@@ -16065,12 +15321,8 @@
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_for_flyout.tsx"
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
               },
               {
                 "plugin": "ml",
@@ -16089,8 +15341,8 @@
                 "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/logs_shared/common/log_views/resolved_log_view.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -16109,10 +15361,6 @@
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
               },
@@ -16127,6 +15375,10 @@
               {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
               {
                 "plugin": "stackAlerts",
@@ -16167,10 +15419,6 @@
               {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
-              },
-              {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
               },
               {
                 "plugin": "ml",
@@ -16269,10 +15517,6 @@
                 "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-              },
-              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
               },
@@ -16317,6 +15561,18 @@
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
               },
               {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/sourcerer/create_sourcerer_data_view.ts"
               },
@@ -16335,18 +15591,6 @@
               {
                 "plugin": "timelines",
                 "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
               },
               {
                 "plugin": "transform",
@@ -17117,6 +16361,32 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataView.toMinimalSpec",
+            "type": "Function",
+            "tags": [],
+            "label": "toMinimalSpec",
+            "description": [
+              "\nCreates a minimal static representation of the data view. Fields and popularity scores will be omitted."
+            ],
+            "signature": [
+              "() => Omit<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ", \"fields\">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -19788,6 +19058,44 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-common.DataViewsService.getExistingIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getExistingIndices",
+            "description": [
+              "\nGet existing index pattern list by providing string array index pattern list."
+            ],
+            "signature": [
+              "(indices: string[]) => Promise<string[]>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsService.getExistingIndices.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "indices",
+                "description": [
+                  "index pattern list"
+                ],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "index pattern list"
+            ]
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-common.DataViewsService.getFieldsForIndexPattern",
             "type": "Function",
             "tags": [],
@@ -21436,8 +20744,8 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.SavedObjectsClientCommon",
-                "text": "SavedObjectsClientCommon"
+                "section": "def-common.PersistenceAPI",
+                "text": "PersistenceAPI"
               }
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -22888,6 +22196,44 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-common.DataViewsServicePublicMethods.getExistingIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getExistingIndices",
+            "description": [
+              "\nGet existing index pattern list by providing string array index pattern list."
+            ],
+            "signature": [
+              "(indices: string[]) => Promise<string[]>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsServicePublicMethods.getExistingIndices.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "indices",
+                "description": [
+                  "- index pattern list"
+                ],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "index pattern list of index patterns that match indices"
+            ]
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-common.DataViewsServicePublicMethods.getIds",
             "type": "Function",
             "tags": [],
@@ -24230,6 +23576,391 @@
       },
       {
         "parentPluginId": "dataViews",
+        "id": "def-common.PersistenceAPI",
+        "type": "Interface",
+        "tags": [],
+        "label": "PersistenceAPI",
+        "description": [
+          "\nCommon interface for the saved objects client on server and content management in browser"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.PersistenceAPI.find",
+            "type": "Function",
+            "tags": [],
+            "label": "find",
+            "description": [
+              "\nSearch for saved objects"
+            ],
+            "signature": [
+              "(options: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.SavedObjectsClientCommonFindArgs",
+                "text": "SavedObjectsClientCommonFindArgs"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
+              "<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewAttributes",
+                "text": "DataViewAttributes"
+              },
+              ">[]>"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.PersistenceAPI.find.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "- options for search"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.SavedObjectsClientCommonFindArgs",
+                    "text": "SavedObjectsClientCommonFindArgs"
+                  }
+                ],
+                "path": "src/plugins/data_views/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.PersistenceAPI.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nGet a single saved object by id"
+            ],
+            "signature": [
+              "(id: string) => Promise<",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
+              "<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewAttributes",
+                "text": "DataViewAttributes"
+              },
+              ">>"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.PersistenceAPI.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "- id of saved object"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.PersistenceAPI.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [
+              "\nUpdate a saved object by id"
+            ],
+            "signature": [
+              "(id: string, attributes: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewAttributes",
+                "text": "DataViewAttributes"
+              },
+              ", options: { version?: string | undefined; }) => Promise<",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
+              "<unknown>>"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.PersistenceAPI.update.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "- id of saved object"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.PersistenceAPI.update.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "attributes",
+                "description": [
+                  "- attributes to update"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewAttributes",
+                    "text": "DataViewAttributes"
+                  }
+                ],
+                "path": "src/plugins/data_views/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.PersistenceAPI.update.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/plugins/data_views/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-common.PersistenceAPI.update.$3.version",
+                    "type": "string",
+                    "tags": [],
+                    "label": "version",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.PersistenceAPI.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "\nCreate a saved object"
+            ],
+            "signature": [
+              "(attributes: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewAttributes",
+                "text": "DataViewAttributes"
+              },
+              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; overwrite?: boolean | undefined; }) => Promise<",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
+              "<unknown>>"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.PersistenceAPI.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "attributes",
+                "description": [
+                  "- attributes to set"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewAttributes",
+                    "text": "DataViewAttributes"
+                  }
+                ],
+                "path": "src/plugins/data_views/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.PersistenceAPI.create.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/plugins/data_views/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-common.PersistenceAPI.create.$2.id",
+                    "type": "string",
+                    "tags": [],
+                    "label": "id",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-common.PersistenceAPI.create.$2.initialNamespaces",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "initialNamespaces",
+                    "description": [],
+                    "signature": [
+                      "string[] | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-common.PersistenceAPI.create.$2.overwrite",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "overwrite",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.PersistenceAPI.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [
+              "\nDelete a saved object by id"
+            ],
+            "signature": [
+              "(id: string) => Promise<void>"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.PersistenceAPI.delete.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "- id of saved object"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
         "id": "def-common.RuntimeField",
         "type": "Interface",
         "tags": [],
@@ -24596,6 +24327,26 @@
                 "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/logs.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/ecommerce.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/sample_data/flights.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/routes/pack/read_pack_route.ts"
               },
@@ -24682,22 +24433,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/logs.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/ecommerce.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/sample_data/flights.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
               },
               {
                 "plugin": "alerting",
@@ -24820,435 +24555,6 @@
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
-        "id": "def-common.SavedObjectsClientCommon",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedObjectsClientCommon",
-        "description": [
-          "\nCommon interface for the saved objects client"
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.SavedObjectsClientCommon.find",
-            "type": "Function",
-            "tags": [],
-            "label": "find",
-            "description": [
-              "\nSearch for saved objects"
-            ],
-            "signature": [
-              "(options: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.SavedObjectsClientCommonFindArgs",
-                "text": "SavedObjectsClientCommonFindArgs"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
-              "<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ">[]>"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-common.SavedObjectsClientCommon.find.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [
-                  "- options for search"
-                ],
-                "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.SavedObjectsClientCommonFindArgs",
-                    "text": "SavedObjectsClientCommonFindArgs"
-                  }
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.SavedObjectsClientCommon.get",
-            "type": "Function",
-            "tags": [],
-            "label": "get",
-            "description": [
-              "\nGet a single saved object by id"
-            ],
-            "signature": [
-              "(id: string) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
-              "<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ">>"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-common.SavedObjectsClientCommon.get.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [
-                  "- id of saved object"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.SavedObjectsClientCommon.getSavedSearch",
-            "type": "Function",
-            "tags": [],
-            "label": "getSavedSearch",
-            "description": [
-              "\nUpdate a saved object by id"
-            ],
-            "signature": [
-              "(id: string) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
-              "<unknown>>"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-common.SavedObjectsClientCommon.getSavedSearch.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [
-                  "- id of saved object"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.SavedObjectsClientCommon.update",
-            "type": "Function",
-            "tags": [],
-            "label": "update",
-            "description": [
-              "\nUpdate a saved object by id"
-            ],
-            "signature": [
-              "(id: string, attributes: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ", options: { version?: string | undefined; }) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
-              "<unknown>>"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-common.SavedObjectsClientCommon.update.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [
-                  "- id of saved object"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-common.SavedObjectsClientCommon.update.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "attributes",
-                "description": [
-                  "- attributes to update"
-                ],
-                "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewAttributes",
-                    "text": "DataViewAttributes"
-                  }
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-common.SavedObjectsClientCommon.update.$3",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "dataViews",
-                    "id": "def-common.SavedObjectsClientCommon.update.$3.version",
-                    "type": "string",
-                    "tags": [],
-                    "label": "version",
-                    "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
-                    "path": "src/plugins/data_views/common/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.SavedObjectsClientCommon.create",
-            "type": "Function",
-            "tags": [],
-            "label": "create",
-            "description": [
-              "\nCreate a saved object"
-            ],
-            "signature": [
-              "(attributes: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; overwrite?: boolean | undefined; }) => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
-              "<unknown>>"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-common.SavedObjectsClientCommon.create.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "attributes",
-                "description": [
-                  "- attributes to set"
-                ],
-                "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewAttributes",
-                    "text": "DataViewAttributes"
-                  }
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-common.SavedObjectsClientCommon.create.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "dataViews",
-                    "id": "def-common.SavedObjectsClientCommon.create.$2.id",
-                    "type": "string",
-                    "tags": [],
-                    "label": "id",
-                    "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
-                    "path": "src/plugins/data_views/common/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "dataViews",
-                    "id": "def-common.SavedObjectsClientCommon.create.$2.initialNamespaces",
-                    "type": "Array",
-                    "tags": [],
-                    "label": "initialNamespaces",
-                    "description": [],
-                    "signature": [
-                      "string[] | undefined"
-                    ],
-                    "path": "src/plugins/data_views/common/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "dataViews",
-                    "id": "def-common.SavedObjectsClientCommon.create.$2.overwrite",
-                    "type": "CompoundType",
-                    "tags": [],
-                    "label": "overwrite",
-                    "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
-                    "path": "src/plugins/data_views/common/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.SavedObjectsClientCommon.delete",
-            "type": "Function",
-            "tags": [],
-            "label": "delete",
-            "description": [
-              "\nDelete a saved object by id"
-            ],
-            "signature": [
-              "(id: string) => Promise<void>"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-common.SavedObjectsClientCommon.delete.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [
-                  "- id of saved object"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -25797,7 +25103,7 @@
             "section": "def-common.FieldSpec",
             "text": "FieldSpec"
           },
-          "[]>; getFieldsForIndexPattern: (indexPattern: ",
+          "[]>; getExistingIndices: (indices: string[]) => Promise<string[]>; getFieldsForIndexPattern: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -26507,7 +25813,7 @@
         "label": "SourceFilter",
         "description": [],
         "signature": [
-          "{ value: string; }"
+          "{ value: string; clientId?: string | number | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,

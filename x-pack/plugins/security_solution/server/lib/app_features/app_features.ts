@@ -22,9 +22,16 @@ import {
 import { AppFeaturesConfigMerger } from './app_features_config_merger';
 import { casesSubFeaturesMap } from './security_cases_kibana_sub_features';
 import { securitySubFeaturesMap } from './security_kibana_sub_features';
+import { assistantSubFeaturesMap } from './security_assistant_kibana_sub_features';
+import {
+  getAssistantAppFeaturesConfig,
+  getAssistantBaseKibanaFeature,
+  getAssistantBaseKibanaSubFeatureIds,
+} from './security_assistant_kibana_features';
 
 export class AppFeatures {
   private securityFeatureConfigMerger: AppFeaturesConfigMerger;
+  private assistantFeatureConfigMerger: AppFeaturesConfigMerger;
   private casesFeatureConfigMerger: AppFeaturesConfigMerger;
   private appFeatures?: Set<AppFeatureKey>;
   private featuresSetup?: FeaturesPluginSetup;
@@ -38,6 +45,10 @@ export class AppFeatures {
       securitySubFeaturesMap
     );
     this.casesFeatureConfigMerger = new AppFeaturesConfigMerger(this.logger, casesSubFeaturesMap);
+    this.assistantFeatureConfigMerger = new AppFeaturesConfigMerger(
+      this.logger,
+      assistantSubFeaturesMap
+    );
   }
 
   public init(featuresSetup: FeaturesPluginSetup) {
@@ -59,7 +70,7 @@ export class AppFeatures {
     return this.appFeatures.has(appFeatureKey);
   }
 
-  private registerEnabledKibanaFeatures() {
+  protected registerEnabledKibanaFeatures() {
     if (this.featuresSetup == null) {
       throw new Error(
         'Cannot sync kibana features as featuresSetup is not present. Did you call init?'
@@ -73,13 +84,15 @@ export class AppFeatures {
     const enabledSecurityAppFeaturesConfigs = this.getEnabledAppFeaturesConfigs(
       getSecurityAppFeaturesConfig(this.experimentalFeatures)
     );
-    this.featuresSetup.registerKibanaFeature(
-      this.securityFeatureConfigMerger.mergeAppFeatureConfigs(
-        securityBaseKibanaFeature,
-        securityBaseKibanaSubFeatureIds,
-        enabledSecurityAppFeaturesConfigs
-      )
+    const completeAppFeatureConfig = this.securityFeatureConfigMerger.mergeAppFeatureConfigs(
+      securityBaseKibanaFeature,
+      securityBaseKibanaSubFeatureIds,
+      enabledSecurityAppFeaturesConfigs
     );
+
+    this.logger.debug(JSON.stringify(completeAppFeatureConfig));
+
+    this.featuresSetup.registerKibanaFeature(completeAppFeatureConfig);
 
     // register security cases Kibana features
     const securityCasesBaseKibanaFeature = getCasesBaseKibanaFeature();
@@ -87,13 +100,32 @@ export class AppFeatures {
     const enabledCasesAppFeaturesConfigs = this.getEnabledAppFeaturesConfigs(
       getCasesAppFeaturesConfig()
     );
-    this.featuresSetup.registerKibanaFeature(
-      this.casesFeatureConfigMerger.mergeAppFeatureConfigs(
-        securityCasesBaseKibanaFeature,
-        securityCasesBaseKibanaSubFeatureIds,
-        enabledCasesAppFeaturesConfigs
-      )
+    const completeCasesAppFeatureConfig = this.casesFeatureConfigMerger.mergeAppFeatureConfigs(
+      securityCasesBaseKibanaFeature,
+      securityCasesBaseKibanaSubFeatureIds,
+      enabledCasesAppFeaturesConfigs
     );
+
+    this.logger.info(JSON.stringify(completeCasesAppFeatureConfig));
+
+    this.featuresSetup.registerKibanaFeature(completeCasesAppFeatureConfig);
+
+    // register security assistant Kibana features
+    const securityAssistantBaseKibanaFeature = getAssistantBaseKibanaFeature();
+    const securityAssistantBaseKibanaSubFeatureIds = getAssistantBaseKibanaSubFeatureIds();
+    const enabledAssistantAppFeaturesConfigs = this.getEnabledAppFeaturesConfigs(
+      getAssistantAppFeaturesConfig()
+    );
+    const completeAssistantAppFeatureConfig =
+      this.assistantFeatureConfigMerger.mergeAppFeatureConfigs(
+        securityAssistantBaseKibanaFeature,
+        securityAssistantBaseKibanaSubFeatureIds,
+        enabledAssistantAppFeaturesConfigs
+      );
+
+    this.logger.info(JSON.stringify(completeAssistantAppFeatureConfig));
+
+    this.featuresSetup.registerKibanaFeature(completeAssistantAppFeatureConfig);
   }
 
   private getEnabledAppFeaturesConfigs(

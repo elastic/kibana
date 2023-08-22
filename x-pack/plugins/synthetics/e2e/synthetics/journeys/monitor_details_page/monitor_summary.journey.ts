@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { journey, step, before, after } from '@elastic/synthetics';
+import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import moment from 'moment';
@@ -83,5 +83,19 @@ journey(`MonitorSummaryTab`, async ({ page, params }) => {
         `${byTestId('monitorActiveAlertsCount')}  .legacyMtrVis__value:has-text("1")`
       );
     });
+    const existingLabels = [
+      'Availability',
+      'Median duration',
+      'Errors',
+      'All',
+      'Active',
+      'Recovered',
+    ];
+
+    const labels = await page.$$(byTestId('metric_label'));
+    for (const label of labels) {
+      const text = await label.textContent();
+      expect(existingLabels).toContain(text);
+    }
   });
 });

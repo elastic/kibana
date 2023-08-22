@@ -8,8 +8,8 @@
 import { getRegistryUrl as getRegistryUrlFromIngest } from '@kbn/fleet-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
-  isRegistryEnabled,
   getRegistryUrlFromTestEnv,
+  isRegistryEnabled,
 } from '../../../security_solution_endpoint_api_int/registry';
 
 export default function (providerContext: FtrProviderContext) {

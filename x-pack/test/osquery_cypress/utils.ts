@@ -5,8 +5,16 @@
  * 2.0.
  */
 
+import axios from 'axios';
+import semver from 'semver';
+import { map } from 'lodash';
 import { PackagePolicy, CreatePackagePolicyResponse } from '@kbn/fleet-plugin/common';
 import { KbnClient } from '@kbn/test';
+import {
+  GetEnrollmentAPIKeysResponse,
+  CreateAgentPolicyResponse,
+} from '@kbn/fleet-plugin/common/types';
+import { ToolingLog } from '@kbn/tooling-log';
 
 export const getInstalledIntegration = async (kbnClient: KbnClient, integrationName: string) => {
   const {
@@ -17,6 +25,42 @@ export const getInstalledIntegration = async (kbnClient: KbnClient, integrationN
   });
 
   return item;
+};
+
+export const createAgentPolicy = async (
+  kbnClient: KbnClient,
+  log: ToolingLog,
+  agentPolicyName = 'Osquery policy'
+) => {
+  log.info(`Creating "${agentPolicyName}" agent policy`);
+
+  const {
+    data: {
+      item: { id: agentPolicyId },
+    },
+  } = await kbnClient.request<CreateAgentPolicyResponse>({
+    method: 'POST',
+    path: `/api/fleet/agent_policies?sys_monitoring=true`,
+    body: {
+      name: agentPolicyName,
+      description: '',
+      namespace: 'default',
+      monitoring_enabled: ['logs', 'metrics'],
+      inactivity_timeout: 1209600,
+    },
+  });
+
+  log.info(`Adding integration to ${agentPolicyId}`);
+
+  await addIntegrationToAgentPolicy(kbnClient, agentPolicyId, agentPolicyName);
+
+  log.info('Getting agent enrollment key');
+  const { data: apiKeys } = await kbnClient.request<GetEnrollmentAPIKeysResponse>({
+    method: 'GET',
+    path: '/api/fleet/enrollment_api_keys',
+  });
+
+  return apiKeys.items[0].api_key;
 };
 
 export const addIntegrationToAgentPolicy = async (
@@ -47,4 +91,32 @@ export const addIntegrationToAgentPolicy = async (
       },
     },
   });
+};
+
+/**
+ * Returns the Agent version that is available for install (will check `artifacts-api.elastic.co/v1/versions`)
+ * that is equal to or less than `maxVersion`.
+ * @param maxVersion
+ */
+
+export const getLatestAvailableAgentVersion = async (kbnClient: KbnClient): Promise<string> => {
+  const kbnStatus = await kbnClient.status.get();
+  const agentVersions = await axios
+    .get('https://artifacts-api.elastic.co/v1/versions')
+    .then((response) => map(response.data.versions, (version) => version.split('-SNAPSHOT')[0]));
+
+  let version =
+    semver.maxSatisfying(agentVersions, `<=${kbnStatus.version.number}`) ??
+    kbnStatus.version.number;
+
+  // Add `-SNAPSHOT` if version indicates it was from a snapshot or the build hash starts
+  // with `xxxxxxxxx` (value that seems to be present when running kibana from source)
+  if (
+    kbnStatus.version.build_snapshot ||
+    kbnStatus.version.build_hash.startsWith('XXXXXXXXXXXXXXX')
+  ) {
+    version += '-SNAPSHOT';
+  }
+
+  return version;
 };

@@ -8,13 +8,13 @@
 import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+
 import { DEFAULT_RISK_SCORE_PAGE_SIZE, RISK_SCORE_PREVIEW_URL } from '../../../../common/constants';
 import { riskScorePreviewRequestSchema } from '../../../../common/risk_engine/risk_score_preview/request_schema';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
-import { riskScoreService } from '../risk_score_service';
-import { getRiskInputsIndex } from '../helpers';
-import { DATAVIEW_NOT_FOUND } from './translations';
+import { riskScoreServiceFactory } from '../risk_score_service';
+import { getRiskInputsIndex } from '../get_risk_inputs_index';
 
 export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.post(
@@ -27,12 +27,18 @@ export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logg
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-      const soClient = (await context.core).savedObjects.client;
-      const siemClient = (await context.securitySolution).getAppClient();
-      const riskScore = riskScoreService({
+      const securityContext = await context.securitySolution;
+      const coreContext = await context.core;
+      const esClient = coreContext.elasticsearch.client.asCurrentUser;
+      const soClient = coreContext.savedObjects.client;
+      const spaceId = securityContext.getSpaceId();
+      const riskEngineDataClient = securityContext.getRiskEngineDataClient();
+
+      const riskScoreService = riskScoreServiceFactory({
         esClient,
         logger,
+        riskEngineDataClient,
+        spaceId,
       });
 
       const {
@@ -47,36 +53,25 @@ export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logg
       } = request.body;
 
       try {
-        let index: string;
-        if (dataViewId) {
-          const dataViewIndex = await getRiskInputsIndex({
-            dataViewId,
-            logger,
-            soClient,
-          });
-
-          if (!dataViewIndex) {
-            return siemResponse.error({
-              statusCode: 404,
-              body: DATAVIEW_NOT_FOUND(dataViewId),
-            });
-          }
-          index = dataViewIndex;
-        }
-        index ??= siemClient.getAlertsIndex();
+        const { index, runtimeMappings } = await getRiskInputsIndex({
+          dataViewId,
+          logger,
+          soClient,
+        });
 
         const afterKeys = userAfterKeys ?? {};
         const range = userRange ?? { start: 'now-15d', end: 'now' };
         const pageSize = userPageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
 
-        const result = await riskScore.getScores({
+        const result = await riskScoreService.calculateScores({
           afterKeys,
           debug,
-          pageSize,
+          filter,
           identifierType,
           index,
-          filter,
+          pageSize,
           range,
+          runtimeMappings,
           weights,
         });
 

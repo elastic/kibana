@@ -27,7 +27,7 @@ pageLoadAssetSize:
   dashboard: 82025
   dashboardEnhanced: 65646
   data: 454087
-  dataViewEditor: 12000
+  dataViewEditor: 13000
   dataViewFieldEditor: 27000
   dataViewManagement: 5000
   dataViews: 47000
@@ -39,7 +39,6 @@ pageLoadAssetSize:
   embeddable: 87309
   embeddableEnhanced: 22107
   enterpriseSearch: 50858
-  essSecurity: 16573
   esUiShared: 326654
   eventAnnotation: 48565
   exploratoryView: 74673
@@ -62,7 +61,7 @@ pageLoadAssetSize:
   files: 22673
   filesManagement: 18683
   fileUpload: 25664
-  fleet: 142263
+  fleet: 158438
   globalSearch: 29696
   globalSearchBar: 50403
   globalSearchProviders: 25554
@@ -83,7 +82,7 @@ pageLoadAssetSize:
   kibanaUsageCollection: 16463
   kibanaUtils: 79713
   kubernetesSecurity: 77234
-  lens: 37000
+  lens: 38000
   licenseManagement: 41817
   licensing: 29004
   lists: 22900
@@ -97,12 +96,13 @@ pageLoadAssetSize:
   navigation: 37269
   newsfeed: 42228
   observability: 115443
+  observabilityAIAssistant: 25000
   observabilityOnboarding: 19573
   observabilityShared: 52256
   osquery: 107090
   painlessLab: 179748
   presentationUtil: 58834
-  profiling: 18628
+  profiling: 36694
   remoteClusters: 51327
   reporting: 57003
   rollup: 97204
@@ -116,18 +116,19 @@ pageLoadAssetSize:
   screenshotMode: 17856
   screenshotting: 22870
   searchprofiler: 67080
-  security: 65433
+  security: 81771
   securitySolution: 66738
+  securitySolutionEss: 16573
+  securitySolutionServerless: 40000
   serverless: 16573
   serverlessObservability: 68747
   serverlessSearch: 71995
-  serverlessSecurity: 40000
   sessionView: 77750
   share: 71239
   snapshotRestore: 79032
   spaces: 57868
   stackAlerts: 58316
-  stackConnectors: 36314
+  stackConnectors: 52131
   synthetics: 40958
   telemetry: 51957
   telemetryManagementSection: 38586
@@ -160,5 +161,4 @@ pageLoadAssetSize:
   visTypeVislib: 242838
   visTypeXy: 46868
   visualizations: 90000
-  visualizationUiComponents: 76424
   watcher: 43598

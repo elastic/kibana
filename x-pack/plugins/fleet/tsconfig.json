@@ -98,5 +98,6 @@
     "@kbn/shared-ux-file-types",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-application-browser",
+    "@kbn/core-saved-objects-base-server-internal",
   ]
 }

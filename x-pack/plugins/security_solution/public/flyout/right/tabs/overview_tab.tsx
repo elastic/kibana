@@ -8,8 +8,9 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
+import { ResponseSection } from '../components/response_section';
 import { InvestigationSection } from '../components/investigation_section';
-import { DescriptionSection } from '../components/description_section';
+import { AboutSection } from '../components/about_section';
 import { InsightsSection } from '../components/insights_section';
 import { VisualizationsSection } from '../components/visualizations_section';
 
@@ -19,13 +20,15 @@ import { VisualizationsSection } from '../components/visualizations_section';
 export const OverviewTab: FC = memo(() => {
   return (
     <>
-      <DescriptionSection />
+      <AboutSection />
       <EuiHorizontalRule margin="l" />
       <InvestigationSection />
       <EuiHorizontalRule margin="l" />
+      <VisualizationsSection />
+      <EuiHorizontalRule margin="l" />
       <InsightsSection />
       <EuiHorizontalRule margin="l" />
-      <VisualizationsSection />
+      <ResponseSection />
     </>
   );
 });

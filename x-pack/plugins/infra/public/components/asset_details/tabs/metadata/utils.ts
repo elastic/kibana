@@ -7,6 +7,11 @@
 
 import type { InfraMetadata } from '../../../../../common/http_api';
 
+export interface Field {
+  name: string;
+  value: string | string[] | undefined;
+}
+
 export const getAllFields = (metadata: InfraMetadata | null) => {
   if (!metadata?.info) return [];
   return prune([
@@ -105,5 +110,17 @@ export const getAllFields = (metadata: InfraMetadata | null) => {
   ]);
 };
 
-const prune = (fields: Array<{ name: string; value: string | string[] | undefined }>) =>
-  fields.filter((f) => !!f.value);
+const prune = (fields: Field[]) => fields.filter((f) => !!f.value);
+
+export const getRowsWithPins = (rows: Field[], pinnedItems: Array<Field['name']>) => {
+  if (pinnedItems.length > 0) {
+    const { pinned, other } = rows.reduce(
+      (acc, row) => {
+        (pinnedItems.includes(row.name) ? acc.pinned : acc.other).push(row);
+        return acc;
+      },
+      { pinned: [] as Field[], other: [] as Field[] }
+    );
+    return [...pinned, ...other];
+  }
+};

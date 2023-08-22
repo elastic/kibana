@@ -86,6 +86,9 @@ export const useIndexData = (
   };
 
   useEffect(() => {
+    if (dataView.timeFieldName !== undefined && timeRangeMs === undefined) {
+      return;
+    }
     const abortController = new AbortController();
 
     // Fetch 500 random documents to determine populated fields.
@@ -197,6 +200,9 @@ export const useIndexData = (
   }, [JSON.stringify([query, timeRangeMs])]);
 
   useEffect(() => {
+    if (typeof dataViewFields === 'undefined') {
+      return;
+    }
     const abortController = new AbortController();
 
     const fetchDataGridData = async function () {

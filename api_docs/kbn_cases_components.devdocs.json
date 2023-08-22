@@ -308,7 +308,9 @@
         "type": "Enum",
         "tags": [],
         "label": "CaseStatuses",
-        "description": [],
+        "description": [
+          "\nThis is being used by Cases in\nx-pack/plugins/cases/common/types/domain/case/v1.ts.\nIntroducing a breaking change in this enum will\nforce cases to create a version of the domain object\nwhich in turn will force cases to create a new version\nto most of the Cases APIs."
+        ],
         "path": "packages/kbn-cases-components/src/status/types.ts",
         "deprecated": false,
         "trackAdoption": false,

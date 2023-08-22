@@ -42,6 +42,7 @@ import {
   useDataGridColumnsCellActions,
   UseDataGridColumnsCellActionsProps,
 } from '@kbn/cell-actions';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { DataTableModel, DataTableState } from '../../store/data_table/types';
 
 import { getColumnHeader, getColumnHeaders } from './column_headers/helpers';
@@ -91,11 +92,12 @@ interface BaseDataTableProps {
   rowRenderers: DeprecatedRowRenderer[];
   hasCrudPermissions?: boolean;
   unitCountText: string;
-  pagination: EuiDataGridPaginationProps;
+  pagination: EuiDataGridPaginationProps & { pageSize: number };
   totalItems: number;
   rowHeightsOptions?: EuiDataGridRowHeightsOptions;
   isEventRenderedView?: boolean;
   getFieldBrowser: GetFieldBrowser;
+  getFieldSpec: (fieldName: string) => FieldSpec | undefined;
   cellActionsTriggerId?: string;
 }
 
@@ -135,6 +137,7 @@ const memoizedGetColumnHeaders: (
   isEventRenderedView: boolean
 ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
+// eslint-disable-next-line react/display-name
 export const DataTableComponent = React.memo<DataTableProps>(
   ({
     additionalControls,
@@ -154,6 +157,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
     rowHeightsOptions,
     isEventRenderedView = false,
     getFieldBrowser,
+    getFieldSpec,
     cellActionsTriggerId,
     ...otherProps
   }) => {
@@ -331,21 +335,20 @@ export const DataTableComponent = React.memo<DataTableProps>(
     );
 
     const cellActionsMetadata = useMemo(() => ({ scopeId: id }), [id]);
-
     const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
       () =>
         cellActionsTriggerId
-          ? // TODO use FieldSpec object instead of column
-            columnHeaders.map((column) => ({
-              name: column.id,
-              type: column.type ?? '', // When type is an empty string all cell actions are incompatible
-              aggregatable: column.aggregatable ?? false,
-              searchable: column.searchable ?? false,
-              esTypes: column.esTypes ?? [],
-              subType: column.subType,
-            }))
+          ? columnHeaders.map(
+              (column) =>
+                getFieldSpec(column.id) ?? {
+                  name: column.id,
+                  type: '', // When type is an empty string all cell actions are incompatible
+                  aggregatable: false,
+                  searchable: false,
+                }
+            )
           : undefined,
-      [cellActionsTriggerId, columnHeaders]
+      [cellActionsTriggerId, columnHeaders, getFieldSpec]
     );
 
     const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(

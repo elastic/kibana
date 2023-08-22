@@ -10,11 +10,16 @@ import { i18n } from '@kbn/i18n';
 import { ProductFeatures } from './types';
 import { IngestPipelineParams } from './types/connectors';
 
+export const SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.search.productName', {
+  defaultMessage: 'Search',
+});
+export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.productName', {
+  defaultMessage: 'Enterprise Search',
+});
+
 export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
   ID: 'enterpriseSearch',
-  NAME: i18n.translate('xpack.enterpriseSearch.overview.productName', {
-    defaultMessage: 'Enterprise Search',
-  }),
+  NAME: SEARCH_PRODUCT_NAME,
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.overview.navTitle', {
     defaultMessage: 'Overview',
   }),
@@ -27,9 +32,7 @@ export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
 
 export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
   ID: 'enterpriseSearchContent',
-  NAME: i18n.translate('xpack.enterpriseSearch.content.productName', {
-    defaultMessage: 'Enterprise Search',
-  }),
+  NAME: SEARCH_PRODUCT_NAME,
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.content.navTitle', {
     defaultMessage: 'Content',
   }),
@@ -194,6 +197,20 @@ export const DEFAULT_PIPELINE_VALUES: IngestPipelineParams = {
   name: DEFAULT_PIPELINE_NAME,
   reduce_whitespace: true,
   run_ml_inference: false,
+};
+
+export interface DefaultConnectorsPipelineMeta {
+  default_extract_binary_content: boolean;
+  default_name: string;
+  default_reduce_whitespace: boolean;
+  default_run_ml_inference: boolean;
+}
+
+export const defaultConnectorsPipelineMeta: DefaultConnectorsPipelineMeta = {
+  default_extract_binary_content: DEFAULT_PIPELINE_VALUES.extract_binary_content,
+  default_name: DEFAULT_PIPELINE_NAME,
+  default_reduce_whitespace: DEFAULT_PIPELINE_VALUES.reduce_whitespace,
+  default_run_ml_inference: DEFAULT_PIPELINE_VALUES.run_ml_inference,
 };
 
 export enum INGESTION_METHOD_IDS {

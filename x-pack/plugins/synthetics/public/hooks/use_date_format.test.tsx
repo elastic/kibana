@@ -6,10 +6,25 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { i18n } from '@kbn/i18n';
+
+jest.mock('@kbn/i18n', () => ({
+  i18n: {
+    getLocale: jest.fn().mockReturnValue(undefined),
+  },
+}));
 
 import { useDateFormat } from './use_date_format';
 
 describe('useDateFormat', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   Object.defineProperty(global.navigator, 'language', {
     value: 'en-US',
     writable: true,
@@ -25,5 +40,15 @@ describe('useDateFormat', () => {
     });
     const response = renderHook(() => useDateFormat());
     expect(response.result.current('2023-02-01 13:00:00')).toEqual('1 Feb 2023 @ 13:00');
+  });
+  it('prefers Kibana locale if set', () => {
+    jest.spyOn(i18n, 'getLocale').mockReturnValue('fr-FR');
+
+    Object.defineProperty(global.navigator, 'language', {
+      value: 'en-GB',
+      writable: true,
+    });
+    const response = renderHook(() => useDateFormat());
+    expect(response.result.current('2023-02-01 13:00:00')).toEqual('1 févr. 2023 @ 13:00');
   });
 });

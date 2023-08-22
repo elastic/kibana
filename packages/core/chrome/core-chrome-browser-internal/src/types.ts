@@ -51,6 +51,12 @@ export interface InternalChromeStart extends ChromeStart {
     setHome(homeHref: string): void;
 
     /**
+     * Sets the cloud's projects page.
+     * @param projectsUrl
+     */
+    setProjectsUrl(projectsUrl: string): void;
+
+    /**
      * Sets the project navigation config to be used for rendering project navigation.
      * It is used for default project sidenav, project breadcrumbs, tracking active deep link.
      * @param projectNavigation The project navigation config

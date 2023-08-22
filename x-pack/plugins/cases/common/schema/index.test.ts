@@ -7,7 +7,14 @@
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
 
-import { limitedArraySchema, limitedStringSchema, NonEmptyString } from '.';
+import {
+  limitedArraySchema,
+  limitedNumberSchema,
+  limitedStringSchema,
+  NonEmptyString,
+  paginationSchema,
+} from '.';
+import { MAX_DOCS_PER_PAGE } from '../constants';
 
 describe('schema', () => {
   describe('limitedArraySchema', () => {
@@ -19,10 +26,10 @@ describe('schema', () => {
           limitedArraySchema({ codec: NonEmptyString, fieldName, min: 1, max: 1 }).decode([''])
         )
       ).toMatchInlineSnapshot(`
-      Array [
-        "string must have length >= 1",
-      ]
-    `);
+              Array [
+                "string must have length >= 1",
+              ]
+          `);
     });
 
     it('fails when given an empty array', () => {
@@ -31,10 +38,10 @@ describe('schema', () => {
           limitedArraySchema({ codec: NonEmptyString, fieldName, min: 1, max: 1 }).decode([])
         )
       ).toMatchInlineSnapshot(`
-      Array [
-        "The length of the field foobar is too short. Array must be of length >= 1.",
-      ]
-    `);
+              Array [
+                "The length of the field foobar is too short. Array must be of length >= 1.",
+              ]
+          `);
     });
 
     it('fails when given an array larger than the limit of one item', () => {
@@ -46,10 +53,10 @@ describe('schema', () => {
           ])
         )
       ).toMatchInlineSnapshot(`
-      Array [
-        "The length of the field foobar is too long. Array must be of length <= 1.",
-      ]
-    `);
+              Array [
+                "The length of the field foobar is too long. Array must be of length <= 1.",
+              ]
+          `);
     });
 
     it('succeeds when given an array of 1 item with a non-empty string', () => {
@@ -58,10 +65,10 @@ describe('schema', () => {
           limitedArraySchema({ codec: NonEmptyString, fieldName, min: 1, max: 1 }).decode(['a'])
         )
       ).toMatchInlineSnapshot(`
-      Array [
-        "No errors!",
-      ]
-    `);
+              Array [
+                "No errors!",
+              ]
+          `);
     });
 
     it('succeeds when given an array of 0 item with a non-empty string when the min is 0', () => {
@@ -70,10 +77,10 @@ describe('schema', () => {
           limitedArraySchema({ codec: NonEmptyString, fieldName, min: 0, max: 2 }).decode([])
         )
       ).toMatchInlineSnapshot(`
-      Array [
-        "No errors!",
-      ]
-    `);
+              Array [
+                "No errors!",
+              ]
+          `);
     });
   });
 
@@ -84,7 +91,7 @@ describe('schema', () => {
       expect(PathReporter.report(limitedStringSchema({ fieldName, min: 2, max: 1 }).decode('a')))
         .toMatchInlineSnapshot(`
         Array [
-          "The length of the ${fieldName} is too short. The minimum length is 2.",
+          "The length of the foo is too short. The minimum length is 2.",
         ]
       `);
     });
@@ -93,7 +100,7 @@ describe('schema', () => {
       expect(PathReporter.report(limitedStringSchema({ fieldName, min: 1, max: 1 }).decode('')))
         .toMatchInlineSnapshot(`
         Array [
-          "The ${fieldName} field cannot be an empty string.",
+          "The foo field cannot be an empty string.",
         ]
       `);
     });
@@ -102,7 +109,7 @@ describe('schema', () => {
       expect(PathReporter.report(limitedStringSchema({ fieldName, min: 1, max: 1 }).decode('  ')))
         .toMatchInlineSnapshot(`
         Array [
-          "The ${fieldName} field cannot be an empty string.",
+          "The foo field cannot be an empty string.",
         ]
       `);
     });
@@ -114,7 +121,7 @@ describe('schema', () => {
         )
       ).toMatchInlineSnapshot(`
         Array [
-          "The length of the ${fieldName} is too long. The maximum length is 5.",
+          "The length of the foo is too long. The maximum length is 5.",
         ]
       `);
     });
@@ -163,6 +170,151 @@ describe('schema', () => {
       ).toMatchInlineSnapshot(`
         Array [
           "No errors!",
+        ]
+      `);
+    });
+  });
+
+  describe('paginationSchema', () => {
+    it('succeeds when no page or perPage passed', () => {
+      expect(PathReporter.report(paginationSchema({ maxPerPage: 1 }).decode({})))
+        .toMatchInlineSnapshot(`
+        Array [
+          "No errors!",
+        ]
+      `);
+    });
+
+    it('succeeds when only valid page is passed', () => {
+      expect(PathReporter.report(paginationSchema({ maxPerPage: 2 }).decode({ page: 0 })))
+        .toMatchInlineSnapshot(`
+        Array [
+          "No errors!",
+        ]
+      `);
+    });
+
+    it('succeeds when only valid perPage is passed', () => {
+      expect(PathReporter.report(paginationSchema({ maxPerPage: 3 }).decode({ perPage: 1 })))
+        .toMatchInlineSnapshot(`
+        Array [
+          "No errors!",
+        ]
+      `);
+    });
+
+    it('succeeds when page and perPage are passed and valid', () => {
+      expect(
+        PathReporter.report(paginationSchema({ maxPerPage: 3 }).decode({ page: 1, perPage: 2 }))
+      ).toMatchInlineSnapshot(`
+        Array [
+          "No errors!",
+        ]
+      `);
+    });
+
+    it('fails when perPage > maxPerPage', () => {
+      expect(PathReporter.report(paginationSchema({ maxPerPage: 3 }).decode({ perPage: 4 })))
+        .toMatchInlineSnapshot(`
+        Array [
+          "The provided perPage value is too high. The maximum allowed perPage value is 3.",
+        ]
+      `);
+    });
+
+    it(`fails when page > ${MAX_DOCS_PER_PAGE}`, () => {
+      expect(
+        PathReporter.report(
+          paginationSchema({ maxPerPage: 3 }).decode({ page: MAX_DOCS_PER_PAGE + 1 })
+        )
+      ).toMatchInlineSnapshot(`
+        Array [
+          "The number of documents is too high. Paginating through more than 10000 documents is not possible.",
+        ]
+      `);
+    });
+
+    it(`fails when page * perPage > ${MAX_DOCS_PER_PAGE}`, () => {
+      expect(
+        PathReporter.report(
+          paginationSchema({ maxPerPage: 3 }).decode({ page: MAX_DOCS_PER_PAGE, perPage: 2 })
+        )
+      ).toMatchInlineSnapshot(`
+        Array [
+          "The number of documents is too high. Paginating through more than 10000 documents is not possible.",
+        ]
+      `);
+    });
+
+    it('validate params as strings work correctly', () => {
+      expect(
+        PathReporter.report(paginationSchema({ maxPerPage: 3 }).decode({ page: '1', perPage: '2' }))
+      ).toMatchInlineSnapshot(`
+        Array [
+          "No errors!",
+        ]
+      `);
+    });
+
+    it('invalid NumberFromString work correctly', () => {
+      expect(
+        PathReporter.report(paginationSchema({ maxPerPage: 3 }).decode({ page: 'a', perPage: 'b' }))
+      ).toMatchInlineSnapshot(`
+        Array [
+          "Invalid value \\"a\\" supplied to : Pagination/page: (number | NumberFromString)/0: number",
+          "cannot parse to a number",
+          "Invalid value \\"b\\" supplied to : Pagination/perPage: (number | NumberFromString)/0: number",
+          "cannot parse to a number",
+        ]
+      `);
+    });
+
+    it.skip('fails when page number is negative', () => {
+      expect(PathReporter.report(paginationSchema({ maxPerPage: 3 }).decode({ page: -1 })))
+        .toMatchInlineSnapshot(`
+              Array [
+                "The provided page value is too low. The minimum allowed page value is 0.",
+              ]
+          `);
+    });
+
+    it.skip('fails when perPage number is negative', () => {
+      expect(PathReporter.report(paginationSchema({ maxPerPage: 3 }).decode({ perPage: -1 })))
+        .toMatchInlineSnapshot(`
+              Array [
+                "The provided perPage value is too low. The minimum allowed perPage value is 0.",
+              ]
+          `);
+    });
+  });
+
+  describe('limitedNumberSchema', () => {
+    it('works correctly the number is between min and max', () => {
+      expect(
+        PathReporter.report(limitedNumberSchema({ fieldName: 'foo', min: 0, max: 2 }).decode(1))
+      ).toMatchInlineSnapshot(`
+        Array [
+          "No errors!",
+        ]
+      `);
+    });
+
+    it('fails when given a number that is lower than the minimum', () => {
+      expect(
+        PathReporter.report(limitedNumberSchema({ fieldName: 'foo', min: 1, max: 2 }).decode(0))
+      ).toMatchInlineSnapshot(`
+        Array [
+          "The foo field cannot be less than 1.",
+        ]
+      `);
+    });
+
+    it('fails when given number that is higher than the maximum', () => {
+      expect(
+        PathReporter.report(limitedNumberSchema({ fieldName: 'foo', min: 1, max: 2 }).decode(3))
+      ).toMatchInlineSnapshot(`
+        Array [
+          "The foo field cannot be more than 2.",
         ]
       `);
     });

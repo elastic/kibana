@@ -92,7 +92,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
                 id: createdAction.id,
                 group: 'default',
                 params: {
-                  message: `message {{alertId}} - ${varsTemplate}`,
+                  message: `message {{rule.id}} - ${varsTemplate}`,
                 },
               },
             ],

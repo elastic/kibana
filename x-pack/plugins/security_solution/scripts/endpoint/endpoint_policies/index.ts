@@ -31,7 +31,7 @@ export const cli = () => {
       log.info(`Creating ${count} endpoint policies...`);
 
       try {
-        await setupFleetForEndpoint(kbn);
+        await setupFleetForEndpoint(kbn, log);
         const endpointPackage = await getEndpointPackageInfo(kbn);
 
         while (created < max) {

@@ -14,6 +14,7 @@ export interface InfraConfig {
       group_by_page_size: number;
     };
   };
+  enabled: boolean;
   inventory: {
     compositeSize: number;
   };

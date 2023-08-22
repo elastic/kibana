@@ -50,7 +50,7 @@ export function MetricsExplorerGroupBy({
 
   return (
     <EuiComboBox
-      data-test-subj="metricsExplorer-groupBy"
+      data-test-subj="thresholdRuleMetricsExplorer-groupBy"
       placeholder={i18n.translate('xpack.observability.threshold.ruleExplorer.groupByLabel', {
         defaultMessage: 'Everything',
       })}

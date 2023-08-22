@@ -7,8 +7,10 @@
 
 import expect from '@kbn/expect';
 
-import { RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL } from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/urls';
-import { ThreatArray } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import {
+  RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
+  ThreatArray,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
@@ -339,6 +341,51 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
         });
+
+        it('returns response filtered by enabled and disabled rules equal to response if enabled and disabled are not set', async () => {
+          const expectedRule1 = await createRule(supertest, log, {
+            ...getSimpleRule('rule-1'),
+            name: 'Disabled rule',
+            threat: generateThreatArray(1),
+          });
+          const expectedRule2 = await createRule(supertest, log, {
+            ...getSimpleRule('rule-2', true),
+            name: 'Enabled rule',
+            threat: generateThreatArray(2),
+          });
+
+          const { body } = await supertest
+            .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              filter: {
+                activity: ['enabled', 'disabled'],
+              },
+            })
+            .expect(200);
+
+          expect(body).to.eql({
+            coverage: {
+              T001: [expectedRule1.id],
+              TA001: [expectedRule1.id],
+              'T001.001': [expectedRule1.id],
+              T002: [expectedRule2.id],
+              TA002: [expectedRule2.id],
+              'T002.002': [expectedRule2.id],
+            },
+            unmapped_rule_ids: [],
+            rules_data: {
+              [expectedRule1.id]: {
+                activity: 'disabled',
+                name: 'Disabled rule',
+              },
+              [expectedRule2.id]: {
+                activity: 'enabled',
+                name: 'Enabled rule',
+              },
+            },
+          });
+        });
       });
 
       describe('source', () => {
@@ -349,7 +396,7 @@ export default ({ getService }: FtrProviderContext): void => {
               threat: generateThreatArray(1),
             }),
           ]);
-          await installPrebuiltRulesAndTimelines(supertest);
+          await installPrebuiltRulesAndTimelines(es, supertest);
 
           const expectedRule = await createRule(supertest, log, {
             ...getSimpleRule('rule-1'),

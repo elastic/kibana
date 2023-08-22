@@ -16,6 +16,7 @@ import {
   APM_LATENCY_DEFAULT_VALUES,
   CUSTOM_KQL_DEFAULT_VALUES,
   CUSTOM_METRIC_DEFAULT_VALUES,
+  HISTOGRAM_DEFAULT_VALUES,
   SLO_EDIT_FORM_DEFAULT_VALUES,
 } from '../constants';
 import { CreateSLOForm } from '../types';
@@ -52,6 +53,16 @@ export function useUnregisterFields({ isEditMode }: { isEditMode: boolean }) {
           reset(
             Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, {
               indicator: CUSTOM_KQL_DEFAULT_VALUES,
+            }),
+            {
+              keepDefaultValues: true,
+            }
+          );
+          break;
+        case 'sli.histogram.custom':
+          reset(
+            Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, {
+              indicator: HISTOGRAM_DEFAULT_VALUES,
             }),
             {
               keepDefaultValues: true,

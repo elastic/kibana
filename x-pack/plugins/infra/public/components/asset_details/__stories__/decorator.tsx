@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { JSXElementConstructor, ReactElement } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
   KibanaContextProvider,
@@ -18,15 +18,27 @@ import { useParameter } from '@storybook/addons';
 import type { DeepPartial } from 'utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/data-plugin/public';
+import { AlertSummaryWidget } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alert_summary_widget/alert_summary_widget';
+import type { Theme } from '@elastic/charts/dist/utils/themes/theme';
+import type { AlertSummaryWidgetProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alert_summary_widget';
+import { defaultLogViewAttributes } from '@kbn/logs-shared-plugin/common';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { PluginKibanaContextValue } from '../../../hooks/use_kibana';
 import { SourceProvider } from '../../../containers/metrics_source';
 import { getHttp } from './context/http';
-import { getLogEntries } from './context/fixtures';
+import { assetDetailsProps, getLogEntries } from './context/fixtures';
+import { ContextProviders } from '../context_providers';
+import { DataViewsProvider } from '../hooks/use_data_views';
 
 const settings: Record<string, any> = {
   'dateFormat:scaled': [['', 'HH:mm:ss.SSS']],
 };
 const getSettings = (key: string): any => settings[key];
+
+const mockDataView = {
+  id: 'default',
+  getFieldByName: () => 'hostname' as unknown as DataViewField,
+} as unknown as DataView;
 
 export const DecorateWithKibanaContext: DecoratorFn = (story) => {
   const initialProcesses = useParameter<{ mock: string }>('apiResponse', {
@@ -54,6 +66,9 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
         },
       },
     },
+    dataViews: {
+      create: () => Promise.resolve(mockDataView),
+    },
     locators: {
       nodeLogsLocator: {
         getRedirectUrl: () => {
@@ -64,6 +79,20 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
     uiActions: {
       getTriggerCompatibleActions: () => {
         return Promise.resolve([]);
+      },
+    },
+    uiSettings: {
+      get: () => ({ key: 'mock', defaultOverride: undefined } as any),
+    },
+    triggersActionsUi: {
+      getAlertSummaryWidget: AlertSummaryWidget as (
+        props: AlertSummaryWidgetProps
+      ) => ReactElement<AlertSummaryWidgetProps, string | JSXElementConstructor<any>>,
+    },
+    charts: {
+      theme: {
+        useChartsTheme: () => ({} as Theme),
+        useChartsBaseTheme: () => ({} as Theme),
       },
     },
     settings: {
@@ -93,6 +122,29 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
         },
       },
     },
+    logsShared: {
+      logViews: {
+        client: {
+          getLogView: () =>
+            Promise.resolve({
+              id: 'log',
+              attributes: defaultLogViewAttributes,
+              origin: 'internal',
+            }),
+          getResolvedLogView: () =>
+            Promise.resolve({
+              dataViewReference: mockDataView,
+            } as any),
+        },
+      },
+    },
+    lens: {
+      navigateToPrefilledEditor: () => {},
+      stateHelperApi: () => new Promise(() => {}),
+    },
+    telemetry: {
+      reportAssetDetailsFlyoutViewed: () => {},
+    },
   };
 
   return (
@@ -101,5 +153,21 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
         <SourceProvider sourceId="default">{story()}</SourceProvider>
       </KibanaContextProvider>
     </I18nProvider>
+  );
+};
+
+export const DecorateWithAssetDetailsStateContext: DecoratorFn = (story) => {
+  return (
+    <ContextProviders
+      props={{
+        ...assetDetailsProps,
+        dateRange: {
+          from: '2023-04-09T11:07:49Z',
+          to: '2023-04-09T11:23:49Z',
+        },
+      }}
+    >
+      <DataViewsProvider metricAlias="metrics-*">{story()}</DataViewsProvider>
+    </ContextProviders>
   );
 };

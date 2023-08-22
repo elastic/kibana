@@ -5,47 +5,53 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import {
-  PluginInitializerContext,
-  Plugin,
-  CoreSetup,
-  DEFAULT_APP_CATEGORIES,
-  Logger,
-} from '@kbn/core/server';
-import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
-import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
-import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import {
   createUICapabilities as createCasesUICapabilities,
   getApiTags as getCasesApiTags,
 } from '@kbn/cases-plugin/common';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+import {
+  CoreSetup,
+  DEFAULT_APP_CATEGORIES,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
+import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
+import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
+import { i18n } from '@kbn/i18n';
+import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import {
-  kubernetesGuideId,
-  kubernetesGuideConfig,
-} from '../common/guided_onboarding/kubernetes_guide_config';
 import { ObservabilityConfig } from '.';
+import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';
 import {
+  kubernetesGuideConfig,
+  kubernetesGuideId,
+} from '../common/guided_onboarding/kubernetes_guide_config';
+import { AlertsLocatorDefinition } from '../common/locators/alerts';
+import {
+  AnnotationsAPI,
   bootstrapAnnotations,
   ScopedAnnotationsClientFactory,
-  AnnotationsAPI,
 } from './lib/annotations/bootstrap_annotations';
-import { uiSettings } from './ui_settings';
-import { registerRoutes } from './routes/register_routes';
-import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
-import { compositeSlo, slo, SO_COMPOSITE_SLO_TYPE, SO_SLO_TYPE } from './saved_objects';
-import { AlertsLocatorDefinition } from '../common/locators/alerts';
-import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
-import { registerRuleTypes } from './lib/rules/register_rule_types';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';
 import { registerSloUsageCollector } from './lib/collectors/register';
-import { OpenAIService } from './services/openai';
+import { registerRuleTypes } from './lib/rules/register_rule_types';
+import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
+import { registerRoutes } from './routes/register_routes';
+import { compositeSlo, slo, SO_COMPOSITE_SLO_TYPE, SO_SLO_TYPE } from './saved_objects';
 import { threshold } from './saved_objects/threshold';
+import {
+  DefaultResourceInstaller,
+  DefaultSLOInstaller,
+  DefaultSummaryTransformInstaller,
+} from './services/slo';
+
+import { uiSettings } from './ui_settings';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -57,6 +63,7 @@ interface PluginSetup {
   share: SharePluginSetup;
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  cloud?: CloudSetup;
 }
 
 interface PluginStart {
@@ -242,21 +249,35 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     );
     registerSloUsageCollector(plugins.usageCollection);
 
-    const openAIService = config.aiAssistant?.enabled
-      ? new OpenAIService(config.aiAssistant)
-      : undefined;
-
     core.getStartServices().then(([coreStart, pluginStart]) => {
       registerRoutes({
         core,
+        config,
         dependencies: {
+          pluginsSetup: {
+            ...plugins,
+            core,
+          },
           ruleDataService,
           getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
-          getOpenAIClient: () => openAIService?.client,
         },
         logger: this.logger,
         repository: getObservabilityServerRouteRepository(config),
       });
+
+      const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
+
+      const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, this.logger);
+      const sloSummaryInstaller = new DefaultSummaryTransformInstaller(
+        esInternalClient,
+        this.logger
+      );
+      const sloInstaller = new DefaultSLOInstaller(
+        sloResourceInstaller,
+        sloSummaryInstaller,
+        this.logger
+      );
+      sloInstaller.install();
     });
 
     /**
@@ -271,9 +292,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       getScopedAnnotationsClient: async (...args: Parameters<ScopedAnnotationsClientFactory>) => {
         const api = await annotationsApiPromise;
         return api?.getScopedAnnotationsClient(...args);
-      },
-      getOpenAIClient() {
-        return openAIService?.client;
       },
       alertsLocator,
     };

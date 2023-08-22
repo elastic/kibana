@@ -13,6 +13,7 @@ import { useHistory, useRouteMatch } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ObservabilityAIAssistantActionMenuItem } from '@kbn/observability-ai-assistant-plugin/public';
 import { stringifyUrlParams } from '../../../lib/helper/url_params/stringify_url_params';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 import { useGetUrlParams } from '../../../hooks';
@@ -32,7 +33,7 @@ const ANALYZE_DATA = i18n.translate('xpack.uptime.analyzeDataButtonLabel', {
 
 const ANALYZE_MESSAGE = i18n.translate('xpack.uptime.analyzeDataButtonLabel.message', {
   defaultMessage:
-    'Explore Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
+    'Go to Explore Data, where you can select and filter result data in any dimension and look for the cause or impact of performance problems.',
 });
 
 export function ActionMenuContent(): React.ReactElement {
@@ -116,6 +117,7 @@ export function ActionMenuContent(): React.ReactElement {
         {ADD_DATA_LABEL}
       </EuiHeaderLink>
       <InspectorHeaderLink />
+      <ObservabilityAIAssistantActionMenuItem />
     </EuiHeaderLinks>
   );
 }

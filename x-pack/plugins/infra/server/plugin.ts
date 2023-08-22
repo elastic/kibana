@@ -6,7 +6,7 @@
  */
 
 import { Server } from '@hapi/hapi';
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import {
   CoreStart,
   Plugin,
@@ -60,21 +60,19 @@ import { mapSourceToLogView } from './utils/map_source_to_log_view';
 
 export const config: PluginConfigDescriptor<InfraConfig> = {
   schema: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
     // Setting variants only allowed in the Serverless offering, otherwise always default `logs-ui` value
-    logs: schema.conditional(
-      schema.contextRef('serverless'),
-      true,
-      schema.object({
+    logs: offeringBasedSchema({
+      serverless: schema.object({
         app_target: schema.oneOf(
           [schema.literal(LOGS_APP_TARGET), schema.literal(DISCOVER_APP_TARGET)],
           { defaultValue: LOGS_APP_TARGET }
         ),
       }),
-      schema.never(),
-      {
-        defaultValue: { app_target: LOGS_APP_TARGET },
-      }
-    ),
+      options: {
+        defaultValue: { app_target: LOGS_APP_TARGET } as const, // "as const" is required for TS to not generalize `app_target: string`
+      },
+    }),
     alerting: schema.object({
       inventory_threshold: schema.object({
         group_by_page_size: schema.number({ defaultValue: 5_000 }),
@@ -193,6 +191,7 @@ export class InfraServerPlugin
       logsRules: this.logsRules.setup(core, plugins),
       metricsRules: this.metricsRules.setup(core, plugins),
       getStartServices: () => core.getStartServices(),
+      getAlertDetailsConfig: () => plugins.observability.getAlertDetailsConfig(),
       logger: this.logger,
       basePath: core.http.basePath,
       alertsLocator: plugins.share.url.locators.get(alertsLocatorID),

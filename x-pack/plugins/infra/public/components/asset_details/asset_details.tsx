@@ -6,74 +6,42 @@
  */
 
 import React from 'react';
-import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody } from '@elastic/eui';
-import type { AssetDetailsProps, RenderMode } from './types';
-import { Content } from './content/content';
-import { Header } from './header/header';
+import type { AssetDetailsProps, ContentTemplateProps, RenderMode } from './types';
+import { Flyout } from './template/flyout';
+import { Page } from './template/page';
+import { ContextProviders } from './context_providers';
 import { TabSwitcherProvider } from './hooks/use_tab_switcher';
+import { DataViewsProvider } from './hooks/use_data_views';
 
-interface ContentTemplateProps {
-  header: React.ReactElement;
-  body: React.ReactElement;
-  renderMode: RenderMode;
-}
-
-const ContentTemplate = ({ header, body, renderMode }: ContentTemplateProps) => {
-  return renderMode.showInFlyout ? (
-    <EuiFlyout onClose={renderMode.closeFlyout} ownFocus={false}>
-      <EuiFlyoutHeader hasBorder>{header}</EuiFlyoutHeader>
-      <EuiFlyoutBody>{body}</EuiFlyoutBody>
-    </EuiFlyout>
+const ContentTemplate = ({
+  header,
+  renderMode,
+}: ContentTemplateProps & { renderMode: RenderMode }) => {
+  return renderMode.mode === 'flyout' ? (
+    <Flyout header={header} closeFlyout={renderMode.closeFlyout} />
   ) : (
-    <>
-      {header}
-      {body}
-    </>
+    <Page header={header} />
   );
 };
 
 export const AssetDetails = ({
-  node,
-  currentTimeRange,
+  tabs,
+  links,
+  renderMode,
   activeTabId,
-  overrides,
-  onTabsStateChange,
-  tabs = [],
-  links = [],
-  nodeType = 'host',
-  renderMode = {
-    showInFlyout: false,
-  },
+  metricAlias,
+  ...props
 }: AssetDetailsProps) => {
   return (
-    <TabSwitcherProvider
-      initialActiveTabId={tabs.length > 0 ? activeTabId ?? tabs[0].id : undefined}
-    >
-      <ContentTemplate
-        header={
-          <Header
-            node={node}
-            nodeType={nodeType}
-            currentTimeRange={currentTimeRange}
-            compact={renderMode.showInFlyout}
-            tabs={tabs}
-            links={links}
-            overrides={overrides}
-            onTabsStateChange={onTabsStateChange}
-          />
-        }
-        body={
-          <Content
-            node={node}
-            nodeType={nodeType}
-            currentTimeRange={currentTimeRange}
-            overrides={overrides}
-            onTabsStateChange={onTabsStateChange}
-          />
-        }
-        renderMode={renderMode}
-      />
-    </TabSwitcherProvider>
+    <ContextProviders props={{ ...props, renderMode }}>
+      <TabSwitcherProvider
+        initialActiveTabId={tabs.length > 0 ? activeTabId ?? tabs[0].id : undefined}
+      >
+        <DataViewsProvider metricAlias={metricAlias}>
+          <ContentTemplate header={{ tabs, links }} renderMode={renderMode} />
+        </DataViewsProvider>
+      </TabSwitcherProvider>
+    </ContextProviders>
   );
 };
 

@@ -12,13 +12,15 @@ import { isEmpty, pickBy } from 'lodash';
 import moment from 'moment';
 import url from 'url';
 import type { InfraLocators } from '@kbn/infra-plugin/common/locators';
+import type { ProfilingLocators } from '@kbn/profiling-plugin/public';
+import { Environment } from '../../../../common/environment_rt';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getDiscoverHref } from '../links/discover_links/discover_link';
 import { getDiscoverQuery } from '../links/discover_links/discover_transaction_link';
 import { getInfraHref } from '../links/infra_link';
 import { fromQuery } from '../links/url_helpers';
 import { SectionRecord, getNonEmptySections, Action } from './sections_helper';
-import { TRACE_ID } from '../../../../common/es_fields/apm';
+import { HOST_NAME, TRACE_ID } from '../../../../common/es_fields/apm';
 import { ApmRouter } from '../../routing/apm_route_config';
 
 function getInfraMetricsQuery(transaction: Transaction) {
@@ -38,6 +40,10 @@ export const getSections = ({
   apmRouter,
   infraLocators,
   infraLinksAvailable,
+  profilingLocators,
+  rangeFrom,
+  rangeTo,
+  environment,
 }: {
   transaction?: Transaction;
   basePath: IBasePath;
@@ -45,6 +51,10 @@ export const getSections = ({
   apmRouter: ApmRouter;
   infraLocators: InfraLocators;
   infraLinksAvailable: boolean;
+  profilingLocators?: ProfilingLocators;
+  rangeFrom: string;
+  rangeTo: string;
+  environment: Environment;
 }) => {
   if (!transaction) return [];
   const hostName = transaction.host?.hostname;
@@ -54,12 +64,6 @@ export const getSections = ({
 
   const time = Math.round(transaction.timestamp.us / 1000);
   const infraMetricsQuery = getInfraMetricsQuery(transaction);
-
-  const routeParams = apmRouter.getParams(
-    '/services/{serviceName}/transactions/view',
-    location
-  );
-  const { rangeFrom, rangeTo, environment } = routeParams.query;
 
   const uptimeLink = url.format({
     pathname: basePath.prepend('/app/uptime'),
@@ -162,6 +166,42 @@ export const getSections = ({
         query: infraMetricsQuery,
       }),
       condition: !!hostName,
+    },
+    {
+      key: 'hostProfilingFlamegraph',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showHostProfilingFlamegraphLinkLabel',
+        { defaultMessage: 'Host flamegraph' }
+      ),
+      href: profilingLocators?.flamegraphLocator.getRedirectUrl({
+        kuery: `${HOST_NAME}: "${hostName}"`,
+      }),
+      condition: !!hostName && !!profilingLocators,
+      showNewBadge: true,
+    },
+    {
+      key: 'hostProfilingTopNFunctions',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showHostProfilingTopNFunctionsLinkLabel',
+        { defaultMessage: 'Host topN functions' }
+      ),
+      href: profilingLocators?.topNFunctionsLocator.getRedirectUrl({
+        kuery: `${HOST_NAME}: "${hostName}"`,
+      }),
+      condition: !!hostName && !!profilingLocators,
+      showNewBadge: true,
+    },
+    {
+      key: 'hostProfilingStacktraces',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showHostProfilingStacktracesLinkLabel',
+        { defaultMessage: 'Host stacktraces' }
+      ),
+      href: profilingLocators?.stacktracesLocator.getRedirectUrl({
+        kuery: `${HOST_NAME}: "${hostName}"`,
+      }),
+      condition: !!hostName && !!profilingLocators,
+      showNewBadge: true,
     },
   ];
 
@@ -320,7 +360,7 @@ export const getSections = ({
         title: i18n.translate(
           'xpack.apm.transactionActionMenu.serviceMap.title',
           {
-            defaultMessage: 'Service map',
+            defaultMessage: 'Service Map',
           }
         ),
         subtitle: i18n.translate(

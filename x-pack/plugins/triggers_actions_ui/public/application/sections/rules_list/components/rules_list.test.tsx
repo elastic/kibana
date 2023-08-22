@@ -14,6 +14,9 @@ import {
   waitForElementToBeRemoved,
   cleanup,
 } from '@testing-library/react';
+
+import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
+import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { percentileFields, RulesList } from './rules_list';
@@ -38,7 +41,7 @@ import {
   getDisabledByLicenseRuleTypeFromApi,
 } from './test_helpers';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { parseDuration } from '@kbn/alerting-plugin/common';
+import { MAINTENANCE_WINDOW_FEATURE_ID, parseDuration } from '@kbn/alerting-plugin/common';
 import { getFormattedDuration } from '../../../lib/monitoring_utils';
 
 jest.mock('../../../../common/lib/kibana');
@@ -104,6 +107,12 @@ jest.mock('react-router-dom', () => ({
     pathname: '/triggersActions/rules/',
   }),
 }));
+
+jest.mock('@kbn/alerts-ui-shared/src/maintenance_window_callout/api', () => ({
+  fetchActiveMaintenanceWindows: jest.fn(() => Promise.resolve([])),
+}));
+const fetchActiveMaintenanceWindowsMock = fetchActiveMaintenanceWindows as jest.Mock;
+
 jest.mock('../../../lib/capabilities', () => ({
   hasAllPrivilege: jest.fn(() => true),
   hasSaveRulesCapability: jest.fn(() => true),
@@ -149,8 +158,10 @@ const renderWithProviders = (ui: any) => {
 describe('Update Api Key', () => {
   const addSuccess = jest.fn();
   const addError = jest.fn();
+  const addDanger = jest.fn();
 
   beforeAll(() => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
     loadRulesWithKueryFilter.mockResolvedValue({
       page: 1,
       perPage: 10000,
@@ -160,10 +171,19 @@ describe('Update Api Key', () => {
     loadActionTypes.mockResolvedValue([]);
     loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
+    useKibanaMock().services.application.capabilities = {
+      ...useKibanaMock().services.application.capabilities,
+      [MAINTENANCE_WINDOW_FEATURE_ID]: {
+        save: true,
+        show: true,
+      },
+    };
     useKibanaMock().services.notifications.toasts = {
       addSuccess,
       addError,
+      addDanger,
     } as unknown as IToasts;
+    useKibanaMock().services.unifiedSearch.ui.SearchBar = () => <></>;
     loadRuleTags.mockResolvedValue({
       data: [],
       page: 1,
@@ -194,6 +214,7 @@ describe('Update Api Key', () => {
 
 describe('rules_list component empty', () => {
   beforeEach(() => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
     loadRulesWithKueryFilter.mockResolvedValue({
       page: 1,
       perPage: 10000,
@@ -225,7 +246,13 @@ describe('rules_list component empty', () => {
 
     ruleTypeRegistry.list.mockReturnValue([ruleType]);
     actionTypeRegistry.list.mockReturnValue([]);
-
+    useKibanaMock().services.application.capabilities = {
+      ...useKibanaMock().services.application.capabilities,
+      [MAINTENANCE_WINDOW_FEATURE_ID]: {
+        save: true,
+        show: true,
+      },
+    };
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
   });
@@ -239,6 +266,13 @@ describe('rules_list component empty', () => {
   it('renders empty list', async () => {
     renderWithProviders(<RulesList />);
     expect(await screen.findByTestId('createFirstRuleEmptyPrompt')).toBeInTheDocument();
+  });
+
+  it('renders MaintenanceWindowCallout if one exists', async () => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
+    renderWithProviders(<RulesList />);
+    expect(await screen.findByText('Maintenance window is running')).toBeInTheDocument();
+    expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
   it('renders Create rule button', async () => {

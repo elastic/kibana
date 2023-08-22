@@ -12,13 +12,32 @@
   width: 100%;
 }
 
-// overriding `top` positioning of the chrome headers when the top banner is present.
+// overriding `top` positioning of the chrome headers
 .kbnBody--hasHeaderBanner .header__bars {
   .header__firstBar {
     top: $kbnHeaderBannerHeight;
   }
   .header__secondBar {
     top: $kbnHeaderBannerHeight + $euiHeaderHeightCompensation;
+  }
+}
+
+// overriding padding on the body element added by EUI
+.kbnBody.kbnBody--hasHeaderBanner.kbnBody--projectLayout.euiBody--headerIsFixed {
+  padding-top: $kbnHeaderBannerHeight + $euiHeaderHeightCompensation;
+
+  // overriding `top` positioning of the project side nav, and flyouts
+  // overriding `top` positioning of the project app menu toolbar
+  &.euiBody--headerIsFixed .euiCollapsibleNav,
+  &.euiBody--headerIsFixed:not(.euiDataGrid__restrictBody) .euiFlyout,
+  .header__actionMenu {
+    top: $kbnHeaderBannerHeight + $euiHeaderHeightCompensation;
+  }
+
+  // overriding `height` calculation of the project side nav, and flyouts
+  &.euiBody--headerIsFixed .euiCollapsibleNav,
+  &.euiBody--headerIsFixed:not(.euiDataGrid__restrictBody) .euiFlyout {
+    height: calc(100% - #{$kbnHeaderBannerHeight + $euiHeaderHeightCompensation});
   }
 }
 

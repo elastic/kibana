@@ -8,8 +8,10 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('serverless observability API', function () {
-    loadTestFile(require.resolve('./security_users'));
-    loadTestFile(require.resolve('./snapshot_telemetry'));
+  describe('Serverless observability API', function () {
+    loadTestFile(require.resolve('./fleet/fleet'));
+    loadTestFile(require.resolve('./telemetry/snapshot_telemetry'));
+    loadTestFile(require.resolve('./apm_api_integration/feature_flags.ts'));
+    loadTestFile(require.resolve('./cases'));
   });
 }

@@ -7,76 +7,29 @@
 
 import React from 'react';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
-import { Anomalies, Metadata, Processes, Osquery, Metrics, Logs } from '../tabs';
-import { FlyoutTabIds, type TabState, type AssetDetailsProps } from '../types';
+import { Anomalies, Metadata, Processes, Osquery, Logs, Overview } from '../tabs';
+import { FlyoutTabIds } from '../types';
 
-type Props = Pick<
-  AssetDetailsProps,
-  'currentTimeRange' | 'node' | 'nodeType' | 'overrides' | 'onTabsStateChange'
->;
-
-export const Content = ({
-  overrides,
-  currentTimeRange,
-  node,
-  nodeType = 'host',
-  onTabsStateChange,
-}: Props) => {
-  const onChange = (state: TabState) => {
-    if (!onTabsStateChange) {
-      return;
-    }
-
-    onTabsStateChange(state);
-  };
-
+export const Content = () => {
   return (
     <>
       <TabPanel activeWhen={FlyoutTabIds.ANOMALIES}>
-        <Anomalies nodeName={node.name} onClose={overrides?.anomalies?.onClose} />
+        <Anomalies />
+      </TabPanel>
+      <TabPanel activeWhen={FlyoutTabIds.OVERVIEW}>
+        <Overview />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.LOGS}>
-        <Logs
-          nodeName={node.name}
-          nodeType={nodeType}
-          currentTime={currentTimeRange.to}
-          logViewReference={overrides?.logs?.logView?.reference}
-          logViewLoading={overrides?.logs?.logView?.loading}
-          search={overrides?.logs?.query}
-          onSearchChange={(query) => onChange({ logs: { query } })}
-        />
+        <Logs />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.METADATA}>
-        <Metadata
-          currentTimeRange={currentTimeRange}
-          nodeName={node.name}
-          nodeType={nodeType}
-          showActionsColumn={overrides?.metadata?.showActionsColumn}
-          search={overrides?.metadata?.query}
-          onSearchChange={(query) => onChange({ metadata: { query } })}
-        />
-      </TabPanel>
-      <TabPanel activeWhen={FlyoutTabIds.METRICS}>
-        <Metrics
-          currentTime={currentTimeRange.to}
-          accountId={overrides?.metrics?.accountId}
-          customMetrics={overrides?.metrics?.customMetrics}
-          region={overrides?.metrics?.region}
-          nodeId={node.id}
-          nodeType={nodeType}
-        />
+        <Metadata />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.OSQUERY}>
-        <Osquery nodeName={node.name} nodeType={nodeType} currentTimeRange={currentTimeRange} />
+        <Osquery />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.PROCESSES}>
-        <Processes
-          nodeName={node.name}
-          nodeType={nodeType}
-          currentTime={currentTimeRange.to}
-          search={overrides?.processes?.query}
-          onSearchFilterChange={(query) => onChange({ processes: { query } })}
-        />
+        <Processes />
       </TabPanel>
     </>
   );

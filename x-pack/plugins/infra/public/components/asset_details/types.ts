@@ -5,27 +5,16 @@
  * 2.0.
  */
 
-import { LogViewReference } from '@kbn/logs-shared-plugin/common';
+import { TimeRange } from '@kbn/es-query';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
-import type { InfraAssetMetricType, SnapshotCustomMetricInput } from '../../../common/http_api';
 
-export type CloudProvider = 'gcp' | 'aws' | 'azure' | 'unknownProvider';
-type HostMetrics = Record<InfraAssetMetricType, number | null>;
-
-interface HostMetadata {
-  os?: string | null;
-  ip?: string | null;
-  servicesOnHost?: number | null;
-  title: { name: string; cloudProvider?: CloudProvider | null };
+export interface Asset {
   id: string;
+  name?: string;
 }
-export type HostNodeRow = HostMetadata &
-  HostMetrics & {
-    name: string;
-  };
 
 export enum FlyoutTabIds {
-  METRICS = 'metrics',
+  OVERVIEW = 'overview',
   METADATA = 'metadata',
   PROCESSES = 'processes',
   ANOMALIES = 'anomalies',
@@ -48,30 +37,21 @@ export interface TabState {
   anomalies?: {
     onClose?: () => void;
   };
-  metrics?: {
-    accountId?: string;
-    region?: string;
-    customMetrics?: SnapshotCustomMetricInput[];
-  };
   alertRule?: {
     onCreateRuleClick?: () => void;
   };
   logs?: {
     query?: string;
-    logView?: {
-      reference?: LogViewReference | null;
-      loading?: boolean;
-    };
   };
 }
 
 export interface FlyoutProps {
   closeFlyout: () => void;
-  showInFlyout: true;
+  mode: 'flyout';
 }
 
 export interface FullPageProps {
-  showInFlyout: false;
+  mode: 'page';
 }
 
 export type RenderMode = FlyoutProps | FullPageProps;
@@ -79,25 +59,27 @@ export type RenderMode = FlyoutProps | FullPageProps;
 export interface Tab {
   id: FlyoutTabIds;
   name: string;
-  'data-test-subj': string;
 }
 
 export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices' | 'uptime';
 
 export interface AssetDetailsProps {
-  node: HostNodeRow;
-  nodeType: InventoryItemType;
-  currentTimeRange: {
-    interval: string;
-    from: number;
-    to: number;
-  };
+  asset: Asset;
+  assetType: InventoryItemType;
+  dateRange: TimeRange;
   tabs: Tab[];
   activeTabId?: TabIds;
   overrides?: TabState;
-  renderMode?: RenderMode;
+  renderMode: RenderMode;
   onTabsStateChange?: TabsStateChangeFn;
   links?: LinkOptions[];
+  // This is temporary. Once we start using the asset details in other plugins,
+  // It will have to retrieve the metricAlias internally rather than receive it via props
+  metricAlias: string;
 }
 
 export type TabsStateChangeFn = (state: TabState & { activeTabId?: TabIds }) => void;
+
+export interface ContentTemplateProps {
+  header: Pick<AssetDetailsProps, 'tabs' | 'links'>;
+}

@@ -37,7 +37,7 @@
             "section": "def-common.ExpandableFlyoutProps",
             "text": "ExpandableFlyoutProps"
           },
-          ">): JSX.Element; displayName: string | undefined; }"
+          ">): JSX.Element | null; displayName: string | undefined; }"
         ],
         "path": "packages/kbn-expandable-flyout/src/index.tsx",
         "deprecated": false,
@@ -184,24 +184,24 @@
                 "pluginId": "@kbn/expandable-flyout",
                 "scope": "common",
                 "docId": "kibKbnExpandableFlyoutPluginApi",
-                "section": "def-common.FlyoutPanel",
-                "text": "FlyoutPanel"
+                "section": "def-common.FlyoutPanelProps",
+                "text": "FlyoutPanelProps"
               },
               " | undefined; right?: ",
               {
                 "pluginId": "@kbn/expandable-flyout",
                 "scope": "common",
                 "docId": "kibKbnExpandableFlyoutPluginApi",
-                "section": "def-common.FlyoutPanel",
-                "text": "FlyoutPanel"
+                "section": "def-common.FlyoutPanelProps",
+                "text": "FlyoutPanelProps"
               },
               " | undefined; preview?: ",
               {
                 "pluginId": "@kbn/expandable-flyout",
                 "scope": "common",
                 "docId": "kibKbnExpandableFlyoutPluginApi",
-                "section": "def-common.FlyoutPanel",
-                "text": "FlyoutPanel"
+                "section": "def-common.FlyoutPanelProps",
+                "text": "FlyoutPanelProps"
               },
               " | undefined; }) => void"
             ],
@@ -232,8 +232,8 @@
                         "pluginId": "@kbn/expandable-flyout",
                         "scope": "common",
                         "docId": "kibKbnExpandableFlyoutPluginApi",
-                        "section": "def-common.FlyoutPanel",
-                        "text": "FlyoutPanel"
+                        "section": "def-common.FlyoutPanelProps",
+                        "text": "FlyoutPanelProps"
                       },
                       " | undefined"
                     ],
@@ -253,8 +253,8 @@
                         "pluginId": "@kbn/expandable-flyout",
                         "scope": "common",
                         "docId": "kibKbnExpandableFlyoutPluginApi",
-                        "section": "def-common.FlyoutPanel",
-                        "text": "FlyoutPanel"
+                        "section": "def-common.FlyoutPanelProps",
+                        "text": "FlyoutPanelProps"
                       },
                       " | undefined"
                     ],
@@ -274,8 +274,8 @@
                         "pluginId": "@kbn/expandable-flyout",
                         "scope": "common",
                         "docId": "kibKbnExpandableFlyoutPluginApi",
-                        "section": "def-common.FlyoutPanel",
-                        "text": "FlyoutPanel"
+                        "section": "def-common.FlyoutPanelProps",
+                        "text": "FlyoutPanelProps"
                       },
                       " | undefined"
                     ],
@@ -303,8 +303,8 @@
                 "pluginId": "@kbn/expandable-flyout",
                 "scope": "common",
                 "docId": "kibKbnExpandableFlyoutPluginApi",
-                "section": "def-common.FlyoutPanel",
-                "text": "FlyoutPanel"
+                "section": "def-common.FlyoutPanelProps",
+                "text": "FlyoutPanelProps"
               },
               ") => void"
             ],
@@ -324,8 +324,8 @@
                     "pluginId": "@kbn/expandable-flyout",
                     "scope": "common",
                     "docId": "kibKbnExpandableFlyoutPluginApi",
-                    "section": "def-common.FlyoutPanel",
-                    "text": "FlyoutPanel"
+                    "section": "def-common.FlyoutPanelProps",
+                    "text": "FlyoutPanelProps"
                   }
                 ],
                 "path": "packages/kbn-expandable-flyout/src/context.tsx",
@@ -351,8 +351,8 @@
                 "pluginId": "@kbn/expandable-flyout",
                 "scope": "common",
                 "docId": "kibKbnExpandableFlyoutPluginApi",
-                "section": "def-common.FlyoutPanel",
-                "text": "FlyoutPanel"
+                "section": "def-common.FlyoutPanelProps",
+                "text": "FlyoutPanelProps"
               },
               ") => void"
             ],
@@ -372,8 +372,8 @@
                     "pluginId": "@kbn/expandable-flyout",
                     "scope": "common",
                     "docId": "kibKbnExpandableFlyoutPluginApi",
-                    "section": "def-common.FlyoutPanel",
-                    "text": "FlyoutPanel"
+                    "section": "def-common.FlyoutPanelProps",
+                    "text": "FlyoutPanelProps"
                   }
                 ],
                 "path": "packages/kbn-expandable-flyout/src/context.tsx",
@@ -399,8 +399,8 @@
                 "pluginId": "@kbn/expandable-flyout",
                 "scope": "common",
                 "docId": "kibKbnExpandableFlyoutPluginApi",
-                "section": "def-common.FlyoutPanel",
-                "text": "FlyoutPanel"
+                "section": "def-common.FlyoutPanelProps",
+                "text": "FlyoutPanelProps"
               },
               ") => void"
             ],
@@ -420,8 +420,8 @@
                     "pluginId": "@kbn/expandable-flyout",
                     "scope": "common",
                     "docId": "kibKbnExpandableFlyoutPluginApi",
-                    "section": "def-common.FlyoutPanel",
-                    "text": "FlyoutPanel"
+                    "section": "def-common.FlyoutPanelProps",
+                    "text": "FlyoutPanelProps"
                   }
                 ],
                 "path": "packages/kbn-expandable-flyout/src/context.tsx",
@@ -540,9 +540,9 @@
             "section": "def-common.ExpandableFlyoutProps",
             "text": "ExpandableFlyoutProps"
           },
-          " extends ",
+          " extends Omit<",
           "EuiFlyoutProps",
-          "<\"div\">"
+          "<\"div\">, \"onClose\">"
         ],
         "path": "packages/kbn-expandable-flyout/src/index.tsx",
         "deprecated": false,
@@ -588,10 +588,10 @@
       },
       {
         "parentPluginId": "@kbn/expandable-flyout",
-        "id": "def-common.FlyoutPanel",
+        "id": "def-common.FlyoutPanelProps",
         "type": "Interface",
         "tags": [],
-        "label": "FlyoutPanel",
+        "label": "FlyoutPanelProps",
         "description": [],
         "path": "packages/kbn-expandable-flyout/src/types.ts",
         "deprecated": false,
@@ -599,7 +599,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/expandable-flyout",
-            "id": "def-common.FlyoutPanel.id",
+            "id": "def-common.FlyoutPanelProps.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -612,7 +612,7 @@
           },
           {
             "parentPluginId": "@kbn/expandable-flyout",
-            "id": "def-common.FlyoutPanel.params",
+            "id": "def-common.FlyoutPanelProps.params",
             "type": "Object",
             "tags": [],
             "label": "params",
@@ -628,15 +628,22 @@
           },
           {
             "parentPluginId": "@kbn/expandable-flyout",
-            "id": "def-common.FlyoutPanel.path",
-            "type": "Array",
+            "id": "def-common.FlyoutPanelProps.path",
+            "type": "Object",
             "tags": [],
             "label": "path",
             "description": [
-              "\nTracks the path for what to show in a panel. We may have multiple tabs or details..., so easiest to just use a stack"
+              "\nTracks the path for what to show in a panel, such as activated tab and subtab"
             ],
             "signature": [
-              "string[] | undefined"
+              {
+                "pluginId": "@kbn/expandable-flyout",
+                "scope": "common",
+                "docId": "kibKbnExpandableFlyoutPluginApi",
+                "section": "def-common.PanelPath",
+                "text": "PanelPath"
+              },
+              " | undefined"
             ],
             "path": "packages/kbn-expandable-flyout/src/types.ts",
             "deprecated": false,
@@ -644,7 +651,7 @@
           },
           {
             "parentPluginId": "@kbn/expandable-flyout",
-            "id": "def-common.FlyoutPanel.state",
+            "id": "def-common.FlyoutPanelProps.state",
             "type": "Object",
             "tags": [],
             "label": "state",
@@ -653,6 +660,49 @@
             ],
             "signature": [
               "Record<string, unknown> | undefined"
+            ],
+            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/expandable-flyout",
+        "id": "def-common.PanelPath",
+        "type": "Interface",
+        "tags": [],
+        "label": "PanelPath",
+        "description": [],
+        "path": "packages/kbn-expandable-flyout/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-common.PanelPath.tab",
+            "type": "string",
+            "tags": [],
+            "label": "tab",
+            "description": [
+              "\nTop level tab that to be displayed"
+            ],
+            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-common.PanelPath.subTab",
+            "type": "string",
+            "tags": [],
+            "label": "subTab",
+            "description": [
+              "\nOptional secondary level to be displayed under top level tab"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/kbn-expandable-flyout/src/types.ts",
             "deprecated": false,

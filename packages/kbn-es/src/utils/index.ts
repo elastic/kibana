@@ -16,3 +16,4 @@ export { NativeRealm, SYSTEM_INDICES_SUPERUSER } from './native_realm';
 export { buildSnapshot } from './build_snapshot';
 export { archiveForPlatform } from './build_snapshot';
 export * from './parse_timeout_to_ms';
+export * from './docker';

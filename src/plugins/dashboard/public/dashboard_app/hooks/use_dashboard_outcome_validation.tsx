@@ -12,6 +12,7 @@ import { pluginServices } from '../../services/plugin_services';
 import { createDashboardEditUrl } from '../../dashboard_constants';
 import { useDashboardMountContext } from './dashboard_mount_context';
 import { LoadDashboardReturn } from '../../services/dashboard_content_management/types';
+import { DashboardCreationOptions } from '../..';
 
 export const useDashboardOutcomeValidation = () => {
   const [aliasId, setAliasId] = useState<string>();
@@ -26,10 +27,10 @@ export const useDashboardOutcomeValidation = () => {
    */
   const { screenshotMode, spaces } = pluginServices.getServices();
 
-  const validateOutcome = useCallback(
+  const validateOutcome: DashboardCreationOptions['validateLoadedSavedObject'] = useCallback(
     ({ dashboardFound, resolveMeta, dashboardId }: LoadDashboardReturn) => {
       if (!dashboardFound) {
-        return false; // redirected. Stop loading dashboard.
+        return 'invalid';
       }
 
       if (resolveMeta && dashboardId) {
@@ -40,17 +41,17 @@ export const useDashboardOutcomeValidation = () => {
         if (loadOutcome === 'aliasMatch' && dashboardId && alias) {
           const path = scopedHistory.location.hash.replace(dashboardId, alias);
           if (screenshotMode.isScreenshotMode()) {
-            scopedHistory.replace(path);
+            scopedHistory.replace(path); // redirect without the toast when in screenshot mode.
           } else {
             spaces.redirectLegacyUrl?.({ path, aliasPurpose });
-            return false; // redirected. Stop loading dashboard.
           }
+          return 'redirected'; // redirected. Stop loading dashboard.
         }
         setAliasId(alias);
         setOutcome(loadOutcome);
         setSavedObjectId(dashboardId);
       }
-      return true;
+      return 'valid';
     },
     [scopedHistory, screenshotMode, spaces]
   );

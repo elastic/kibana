@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   Filter,
@@ -16,7 +16,6 @@ import {
 import { useHistory, useLocation } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EuiSkeletonRectangle } from '@elastic/eui';
 import qs from 'query-string';
 import { DataView, UI_SETTINGS } from '@kbn/data-plugin/common';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -158,7 +157,6 @@ export function UnifiedSearchBar({
     UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
   );
   const urlTimeRange = useUrlTimeRange(timePickerTimeDefaults);
-  const [displaySearchBar, setDisplaySearchBar] = useState(false);
 
   const syncSearchBarWithUrl = useCallback(() => {
     // Sync Kuery params with Search Bar
@@ -201,10 +199,6 @@ export function UnifiedSearchBar({
     placeholder,
     processorEvent
   );
-
-  useEffect(() => {
-    if (dataView) setDisplaySearchBar(true);
-  }, [dataView]);
 
   const customFilters =
     boolFilter ??
@@ -288,32 +282,26 @@ export function UnifiedSearchBar({
   };
 
   return (
-    <EuiSkeletonRectangle
-      isLoading={!displaySearchBar}
-      width="100%"
-      height="40px"
-    >
-      <SearchBar
-        appName={i18n.translate('xpack.apm.appName', {
-          defaultMessage: 'APM',
-        })}
-        iconType="search"
-        placeholder={searchbarPlaceholder}
-        useDefaultBehaviors={true}
-        indexPatterns={dataView ? [dataView] : undefined}
-        showQueryInput={true}
-        showQueryMenu={false}
-        showFilterBar={false}
-        showDatePicker={showDatePicker}
-        showSubmitButton={showSubmitButton}
-        displayStyle="inPage"
-        onQuerySubmit={handleSubmit}
-        onRefresh={onRefresh}
-        onRefreshChange={onRefreshChange}
-        isClearable={isClearable}
-        dataTestSubj="apmUnifiedSearchBar"
-        filtersForSuggestions={filtersForSearchBarSuggestions}
-      />
-    </EuiSkeletonRectangle>
+    <SearchBar
+      appName={i18n.translate('xpack.apm.appName', {
+        defaultMessage: 'APM',
+      })}
+      iconType="search"
+      placeholder={searchbarPlaceholder}
+      useDefaultBehaviors={true}
+      indexPatterns={dataView ? [dataView] : undefined}
+      showQueryInput={true}
+      showQueryMenu={false}
+      showFilterBar={false}
+      showDatePicker={showDatePicker}
+      showSubmitButton={showSubmitButton}
+      displayStyle="inPage"
+      onQuerySubmit={handleSubmit}
+      onRefresh={onRefresh}
+      onRefreshChange={onRefreshChange}
+      isClearable={isClearable}
+      dataTestSubj="apmUnifiedSearchBar"
+      filtersForSuggestions={filtersForSearchBarSuggestions}
+    />
   );
 }

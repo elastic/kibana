@@ -38,6 +38,10 @@ interface MultiFields {
   [key: string]: object;
 }
 
+interface RuntimeFields {
+  [key: string]: any;
+}
+
 export interface IndexTemplateMapping {
   [key: string]: any;
 }
@@ -115,6 +119,7 @@ export function getTemplate({
 export function generateMappings(fields: Field[]): IndexTemplateMappings {
   const dynamicTemplates: Array<Record<string, Properties>> = [];
   const dynamicTemplateNames = new Set<string>();
+  const runtimeFields: RuntimeFields = {};
 
   const { properties } = _generateMappings(fields, {
     addDynamicMapping: (dynamicMapping: {
@@ -122,15 +127,19 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
       matchingType: string;
       pathMatch: string;
       properties: string;
+      runtimeProperties?: string;
     }) => {
       const name = dynamicMapping.path;
       if (dynamicTemplateNames.has(name)) {
         return;
       }
 
-      const dynamicTemplate: Properties = {
-        mapping: dynamicMapping.properties,
-      };
+      const dynamicTemplate: Properties = {};
+      if (dynamicMapping.runtimeProperties !== undefined) {
+        dynamicTemplate.runtime = dynamicMapping.runtimeProperties;
+      } else {
+        dynamicTemplate.mapping = dynamicMapping.properties;
+      }
 
       if (dynamicMapping.matchingType) {
         dynamicTemplate.match_mapping_type = dynamicMapping.matchingType;
@@ -139,17 +148,23 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
       if (dynamicMapping.pathMatch) {
         dynamicTemplate.path_match = dynamicMapping.pathMatch;
       }
+
       dynamicTemplateNames.add(name);
       dynamicTemplates.push({ [dynamicMapping.path]: dynamicTemplate });
     },
+    addRuntimeField: (runtimeField: { path: string; properties: Properties }) => {
+      runtimeFields[`${runtimeField.path}`] = runtimeField.properties;
+    },
   });
 
-  return dynamicTemplates.length
-    ? {
-        properties,
-        dynamic_templates: dynamicTemplates,
-      }
-    : { properties };
+  const indexTemplateMappings: IndexTemplateMappings = { properties };
+  if (dynamicTemplates.length > 0) {
+    indexTemplateMappings.dynamic_templates = dynamicTemplates;
+  }
+  if (Object.keys(runtimeFields).length > 0) {
+    indexTemplateMappings.runtime = runtimeFields;
+  }
+  return indexTemplateMappings;
 }
 
 /**
@@ -164,6 +179,7 @@ function _generateMappings(
   fields: Field[],
   ctx: {
     addDynamicMapping: any;
+    addRuntimeField: any;
     groupFieldName?: string;
   }
 ): {
@@ -178,6 +194,55 @@ function _generateMappings(
     fields.forEach((field) => {
       // If type is not defined, assume keyword
       const type = field.type || 'keyword';
+
+      if (field.runtime !== undefined) {
+        const path = ctx.groupFieldName ? `${ctx.groupFieldName}.${field.name}` : field.name;
+        let runtimeFieldProps: Properties = getDefaultProperties(field);
+
+        // Is it a dynamic template?
+        if (type === 'object' && field.object_type) {
+          const pathMatch = path.includes('*') ? path : `${path}.*`;
+
+          let dynProperties: Properties = getDefaultProperties(field);
+          let matchingType: string | undefined;
+          switch (field.object_type) {
+            case 'keyword':
+              dynProperties.type = field.object_type;
+              matchingType = field.object_type_mapping_type ?? 'string';
+              break;
+            case 'double':
+            case 'long':
+            case 'boolean':
+              dynProperties = {
+                type: field.object_type,
+                time_series_metric: field.metric_type,
+              };
+              matchingType = field.object_type_mapping_type ?? field.object_type;
+            default:
+              break;
+          }
+
+          // get the runtime properies of this field assuming type equals to object_type
+          const _field = { ...field, type: field.object_type };
+          const fieldProps = generateRuntimeFieldProps(_field);
+
+          if (dynProperties && matchingType) {
+            ctx.addDynamicMapping({
+              path,
+              pathMatch,
+              matchingType,
+              properties: dynProperties,
+              runtimeProperties: fieldProps,
+            });
+          }
+          return;
+        }
+        const fieldProps = generateRuntimeFieldProps(field);
+        runtimeFieldProps = { ...runtimeFieldProps, ...fieldProps };
+
+        ctx.addRuntimeField({ path, properties: runtimeFieldProps });
+        return; // runtime fields should not be added as a property
+      }
 
       if (type === 'object' && field.object_type) {
         const path = ctx.groupFieldName ? `${ctx.groupFieldName}.${field.name}` : field.name;
@@ -435,6 +500,30 @@ function generateDateMapping(field: Field): IndexTemplateMapping {
   return mapping;
 }
 
+function generateRuntimeFieldProps(field: Field): IndexTemplateMapping {
+  let mapping: IndexTemplateMapping = {};
+  const type = field.type || keyword;
+  switch (type) {
+    case 'integer':
+      mapping.type = 'long';
+      break;
+    case 'date':
+      const dateMappings = generateDateMapping(field);
+      mapping = { ...mapping, ...dateMappings, type: 'date' };
+      break;
+    default:
+      mapping.type = type;
+  }
+
+  if (typeof field.runtime === 'string') {
+    const scriptObject = {
+      source: field.runtime.trim(),
+    };
+    mapping.script = scriptObject;
+  }
+  return mapping;
+}
+
 /**
  * Generates the template name out of the given information
  */
@@ -665,6 +754,7 @@ const updateExistingDataStream = async ({
 
   let settings: IndicesIndexSettings;
   let mappings: MappingTypeMapping;
+  let lifecycle: any;
 
   try {
     const simulateResult = await retryTransientEsErrors(() =>
@@ -675,6 +765,8 @@ const updateExistingDataStream = async ({
 
     settings = simulateResult.template.settings;
     mappings = simulateResult.template.mappings;
+    // @ts-expect-error template is not yet typed with DLM
+    lifecycle = simulateResult.template.lifecycle;
 
     // for now, remove from object so as not to update stream or data stream properties of the index until type and name
     // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
@@ -684,7 +776,7 @@ const updateExistingDataStream = async ({
       delete mappings.properties.data_stream;
     }
 
-    logger.debug(`Updating mappings for ${dataStreamName}`);
+    logger.info(`Attempt to update the mappings for the ${dataStreamName} (write_index_only)`);
     await retryTransientEsErrors(
       () =>
         esClient.indices.putMapping({
@@ -697,9 +789,8 @@ const updateExistingDataStream = async ({
 
     // if update fails, rollover data stream and bail out
   } catch (err) {
-    logger.error(`Mappings update for ${dataStreamName} failed`);
-    logger.error(err);
-
+    logger.info(`Mappings update for ${dataStreamName} failed due to ${err}`);
+    logger.info(`Triggering a rollover for ${dataStreamName}`);
     await rolloverDataStream(dataStreamName, esClient);
     return;
   }
@@ -710,6 +801,24 @@ const updateExistingDataStream = async ({
       `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
     );
     await rolloverDataStream(dataStreamName, esClient);
+  }
+
+  if (lifecycle?.data_retention) {
+    try {
+      logger.debug(`Updating lifecycle for ${dataStreamName}`);
+
+      await retryTransientEsErrors(
+        () =>
+          esClient.transport.request({
+            method: 'PUT',
+            path: `_data_stream/${dataStreamName}/_lifecycle`,
+            body: { data_retention: lifecycle.data_retention },
+          }),
+        { logger }
+      );
+    } catch (err) {
+      throw new Error(`could not update lifecycle settings for ${dataStreamName}: ${err.message}`);
+    }
   }
 
   // update settings after mappings was successful to ensure

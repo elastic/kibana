@@ -7,8 +7,8 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { uniq } from 'lodash/fp';
-import type { SetAlertTagsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_alert_tags_schema';
-import { setAlertTagsSchema } from '../../../../../common/detection_engine/schemas/request/set_alert_tags_schema';
+import type { SetAlertTagsRequestBodyDecoded } from '../../../../../common/api/detection_engine/alert_tags';
+import { setAlertTagsRequestBody } from '../../../../../common/api/detection_engine/alert_tags';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
   DEFAULT_ALERTS_INDEX,
@@ -23,8 +23,8 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
     {
       path: DETECTION_ENGINE_ALERT_TAGS_URL,
       validate: {
-        body: buildRouteValidation<typeof setAlertTagsSchema, SetAlertTagsSchemaDecoded>(
-          setAlertTagsSchema
+        body: buildRouteValidation<typeof setAlertTagsRequestBody, SetAlertTagsRequestBodyDecoded>(
+          setAlertTagsRequestBody
         ),
       },
       options: {
@@ -32,13 +32,13 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
       },
     },
     async (context, request, response) => {
-      const { tags, query } = request.body;
+      const { tags, ids } = request.body;
       const core = await context.core;
       const securitySolution = await context.securitySolution;
       const esClient = core.elasticsearch.client.asCurrentUser;
       const siemClient = securitySolution?.getAppClient();
       const siemResponse = buildSiemResponse(response);
-      const validationErrors = validateAlertTagsArrays(tags);
+      const validationErrors = validateAlertTagsArrays(tags, ids);
       const spaceId = securitySolution?.getSpaceId() ?? 'default';
 
       if (validationErrors.length) {
@@ -49,45 +49,50 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
         return siemResponse.error({ statusCode: 404 });
       }
 
-      let queryObject;
-      if (query) {
-        queryObject = {
-          bool: {
-            filter: query,
-          },
-        };
-      }
       const tagsToAdd = uniq(tags.tags_to_add);
       const tagsToRemove = uniq(tags.tags_to_remove);
-      try {
-        const body = await esClient.updateByQuery({
-          index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
-          refresh: false,
-          body: {
-            script: {
-              params: { tagsToAdd, tagsToRemove },
-              source: `List newTagsArray = []; 
-              if (ctx._source["kibana.alert.workflow_tags"] != null) {
-                for (tag in ctx._source["kibana.alert.workflow_tags"]) {
-                  if (!params.tagsToRemove.contains(tag)) {
-                    newTagsArray.add(tag);
-                  } 
-                }
-                for (tag in params.tagsToAdd) {
-                  if (!newTagsArray.contains(tag)) {
-                    newTagsArray.add(tag)
-                  }
-                }
-                ctx._source["kibana.alert.workflow_tags"] = newTagsArray;
-              } else {
-                ctx._source["kibana.alert.workflow_tags"] = params.tagsToAdd;
-              }
-              `,
-              lang: 'painless',
+
+      const painlessScript = {
+        params: { tagsToAdd, tagsToRemove },
+        source: `List newTagsArray = []; 
+        if (ctx._source["kibana.alert.workflow_tags"] != null) {
+          for (tag in ctx._source["kibana.alert.workflow_tags"]) {
+            if (!params.tagsToRemove.contains(tag)) {
+              newTagsArray.add(tag);
+            } 
+          }
+          for (tag in params.tagsToAdd) {
+            if (!newTagsArray.contains(tag)) {
+              newTagsArray.add(tag)
+            }
+          }
+          ctx._source["kibana.alert.workflow_tags"] = newTagsArray;
+        } else {
+          ctx._source["kibana.alert.workflow_tags"] = params.tagsToAdd;
+        }
+        `,
+        lang: 'painless',
+      };
+
+      const bulkUpdateRequest = [];
+      for (const id of ids) {
+        bulkUpdateRequest.push(
+          {
+            update: {
+              _index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
+              _id: id,
             },
-            query: queryObject,
           },
-          ignore_unavailable: true,
+          {
+            script: painlessScript,
+          }
+        );
+      }
+
+      try {
+        const body = await esClient.bulk({
+          refresh: 'wait_for',
+          body: bulkUpdateRequest,
         });
         return response.ok({ body });
       } catch (err) {

@@ -5,42 +5,30 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import React from 'react';
+
+import { useSourceContext } from '../../../../../containers/metrics_source';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { HostFlyout, useHostFlyoutUrlState } from '../../hooks/use_host_flyout_url_state';
 import { AssetDetails } from '../../../../../components/asset_details/asset_details';
 import { orderedFlyoutTabs } from './tabs';
-import { useLogViewReference } from '../../hooks/use_log_view_reference';
 
 export interface Props {
   node: HostNodeRow;
   closeFlyout: () => void;
 }
 
-const NODE_TYPE = 'host' as InventoryItemType;
-
-export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
-  const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
-  const { logViewReference, loading } = useLogViewReference({
-    id: 'hosts-flyout-logs-view',
-  });
-  const currentTimeRange = useMemo(
-    () => ({
-      ...getDateRangeAsTimestamp(),
-      interval: '1m',
-    }),
-    [getDateRangeAsTimestamp]
-  );
-
+export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
+  const { source } = useSourceContext();
+  const { searchCriteria } = useUnifiedSearchContext();
   const [hostFlyoutState, setHostFlyoutState] = useHostFlyoutUrlState();
 
-  return (
+  return source ? (
     <AssetDetails
-      node={node}
-      nodeType={NODE_TYPE}
-      currentTimeRange={currentTimeRange}
+      asset={{ id: name, name }}
+      assetType="host"
+      dateRange={searchCriteria.dateRange}
       activeTabId={hostFlyoutState?.tabId}
       overrides={{
         metadata: {
@@ -52,10 +40,6 @@ export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
         },
         logs: {
           query: hostFlyoutState?.logsSearch,
-          logView: {
-            reference: logViewReference,
-            loading,
-          },
         },
       }}
       onTabsStateChange={(state) =>
@@ -67,11 +51,12 @@ export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
         })
       }
       tabs={orderedFlyoutTabs}
-      links={['apmServices', 'uptime']}
+      links={['apmServices', 'nodeDetails']}
       renderMode={{
-        showInFlyout: true,
+        mode: 'flyout',
         closeFlyout,
       }}
+      metricAlias={source.configuration.metricAlias}
     />
-  );
+  ) : null;
 };

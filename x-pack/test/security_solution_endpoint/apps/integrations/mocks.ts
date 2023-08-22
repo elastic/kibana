@@ -207,21 +207,22 @@ export const getArtifactsListTestsData = () => [
         },
         {
           type: 'customClick',
-          selector: 'button[title="agent.type"]',
+          selector: 'button[title="agent.ephemeral_id"]',
         },
         {
           type: 'click',
           selector: 'valuesAutocompleteMatch',
         },
         {
-          type: 'customClick',
-          selector: 'button[title="endpoint"]',
+          type: 'input',
+          selector: 'valuesAutocompleteMatch',
+          value: 'endpoint',
         },
       ],
       checkResults: [
         {
           selector: 'EventFiltersListPage-card-criteriaConditions-condition',
-          value: 'AND agent.typeIS endpoint',
+          value: 'AND agent.ephemeral_idIS endpoint',
         },
       ],
     },
@@ -243,7 +244,7 @@ export const getArtifactsListTestsData = () => [
         },
         {
           type: 'customClick',
-          selector: 'button[title="agent.name"]',
+          selector: 'button[title="agent.id"]',
         },
         {
           type: 'input',
@@ -258,7 +259,7 @@ export const getArtifactsListTestsData = () => [
       checkResults: [
         {
           selector: 'EventFiltersListPage-card-criteriaConditions-condition',
-          value: 'AND agent.nameIS test super large value',
+          value: 'AND agent.idIS test super large value',
         },
         {
           selector: 'EventFiltersListPage-card-header-title',
@@ -269,7 +270,7 @@ export const getArtifactsListTestsData = () => [
           value: 'This is the event filter description edited',
         },
       ],
-      waitForValue: 'AND agent.nameIS test super large value',
+      waitForValue: 'AND agent.idIS test super large value',
     },
     delete: {
       confirmSelector: 'EventFiltersListPage-deleteModal-submitButton',
@@ -283,17 +284,17 @@ export const getArtifactsListTestsData = () => [
       getExpectedUpdatedtArtifactWhenCreate: (): ArtifactElasticsearchProperties => ({
         type: 'eventfilterlist',
         identifier: 'endpoint-eventfilterlist-windows-v1',
-        body: 'eJxVzFEKgCAQBNC77Ld0AK8SEYtusWAqukYh3b1F+on5ezNMB4pSmCrYuYPcmcBC5SMHAvPrNqbgtcRddRpLAylTQUlFnaMLzZNX/W7oQierwzrwxNCGRp8TR4Fn0bwiRSx6',
+        body: 'eJxVjEEKwzAMBP+ic+kD8pUSgrA3qUCxha2EltC/Vwm9lL0sM8sehOJN0Gl4HORvAw3UZTUF3f7cLNAckpegd9gTKxrrJDmG1aJ7beGlJN0yTvq7w4uTT4n7BXfW7aIlW5Xi9BkjX6sIL5c=',
         package_name: 'endpoint',
         created: '2000-01-01T00:00:00.000Z',
         relative_url:
-          '/api/fleet/artifacts/endpoint-eventfilterlist-windows-v1/54e692d3d896a72ba8b0ccc1e174d9c24d43e427ea88a42ddba8ec0839a37fec',
+          '/api/fleet/artifacts/endpoint-eventfilterlist-windows-v1/b3373c93ffc795d954f22c625c084dc5874a156ec0cb3d4af1c3dab0b965fa30',
         compression_algorithm: 'zlib',
-        decoded_size: 128,
-        decoded_sha256: '54e692d3d896a72ba8b0ccc1e174d9c24d43e427ea88a42ddba8ec0839a37fec',
+        decoded_size: 136,
+        decoded_sha256: 'b3373c93ffc795d954f22c625c084dc5874a156ec0cb3d4af1c3dab0b965fa30',
         encryption_algorithm: 'none',
-        encoded_sha256: '3f3f689efc895ada36b232b71d63f93b9b9552f84d395689f828429017016b46',
-        encoded_size: 99,
+        encoded_sha256: 'c1b30df9457ba007065fff1388c026ad269e63fbed535b506ac559fd616aabe9',
+        encoded_size: 107,
       }),
       getExpectedUpdatedArtifactBodyWhenCreate: (): ArtifactBodyType => ({
         entries: [
@@ -301,7 +302,7 @@ export const getArtifactsListTestsData = () => [
             type: 'simple',
             entries: [
               {
-                field: 'agent.type',
+                field: 'agent.ephemeral_id',
                 operator: 'included',
                 type: 'exact_cased',
                 value: 'endpoint',
@@ -313,17 +314,17 @@ export const getArtifactsListTestsData = () => [
       getExpectedUpdatedArtifactWhenUpdate: (): ArtifactElasticsearchProperties => ({
         type: 'eventfilterlist',
         identifier: 'endpoint-eventfilterlist-windows-v1',
-        body: 'eJxVjFEKgzAQRK8S9rt4AK8ipSzJKIE1huxGWsS7u9L+lPl7b2YOQrGWoTROB9mngkbSvFYBPf7cnCHJJS9Oh8LrXdgqGtvWnOcSpSckp78bvDnaK7JCoOp8Z+m3MKgF7b4Nwm1B+Irz6bkASPAywg==',
+        body: 'eJxVzEEKwkAMheGrDFmLB+hVikiYeS2B2A6TjCildze1biS77+dlIyzeBEbDuJG/K2ggk0dV0OWvTQItEXkOvUqJvFY09rWFypK1Fxz6e4IXZ79nti8+WfuhDvNkPYZJuc1IZ9hvcR86lDCb',
         package_name: 'endpoint',
         created: '2000-01-01T00:00:00.000Z',
         relative_url:
-          '/api/fleet/artifacts/endpoint-eventfilterlist-windows-v1/49b7181f97ea4c92dd8457cabb6d67bde7e05d02a7f41ce8ae40ff2e5819e098',
+          '/api/fleet/artifacts/endpoint-eventfilterlist-windows-v1/e4f00c88380d2c429eeb2741ad19383b94d76f79744b098b095befc24003e158',
         compression_algorithm: 'zlib',
-        decoded_size: 145,
-        decoded_sha256: '49b7181f97ea4c92dd8457cabb6d67bde7e05d02a7f41ce8ae40ff2e5819e098',
+        decoded_size: 140,
+        decoded_sha256: 'e4f00c88380d2c429eeb2741ad19383b94d76f79744b098b095befc24003e158',
         encryption_algorithm: 'none',
-        encoded_sha256: 'f852031403be242a4190b9c5ea2726706877bb0d45fe9b21f8b297ed11ab1d7c',
-        encoded_size: 112,
+        encoded_sha256: '99386e3d9a67eac88f0a4cc4ac36ad42cfda42598ce0ee1c11a8afc50bf004fe',
+        encoded_size: 108,
       }),
       getExpectedUpdatedArtifactBodyWhenUpdate: (): ArtifactBodyType => ({
         entries: [
@@ -331,9 +332,9 @@ export const getArtifactsListTestsData = () => [
             type: 'simple',
             entries: [
               {
-                field: 'agent.name',
+                field: 'agent.id',
                 operator: 'included',
-                type: 'exact_caseless',
+                type: 'exact_cased',
                 value: 'test super large value',
               },
             ],
@@ -422,7 +423,7 @@ export const getArtifactsListTestsData = () => [
         {
           selector: 'blocklistPage-card-criteriaConditions',
           value:
-            'OSIS Windows\nAND file.pathIS ONE OF\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
+            'OSIS Windows\nAND file.path.caselessIS ONE OF\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
         },
         {
           selector: 'blocklistPage-card-header-title',
@@ -498,7 +499,7 @@ export const getArtifactsListTestsData = () => [
               {
                 field: 'file.path',
                 operator: 'included',
-                type: 'exact_cased_any',
+                type: 'exact_caseless_any',
                 value: ['c:\\randomFolder\\randomFile.exe', ' c:\\randomFolder\\randomFile2.exe'],
               },
             ],

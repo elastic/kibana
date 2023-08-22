@@ -192,29 +192,26 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         },
         {
           type: 'click',
-          customSelector: 'button[title="agent.type"]',
-        },
-        {
-          type: 'click',
-          selector: 'fieldAutocompleteComboBox',
-        },
-        {
-          type: 'click',
-          customSelector: 'button[title="agent.type"]',
+          customSelector: 'button[title="@timestamp"]',
         },
         {
           type: 'click',
           selector: 'valuesAutocompleteMatch',
         },
         {
+          type: 'input',
+          selector: 'valuesAutocompleteMatch',
+          value: '1234',
+        },
+        {
           type: 'click',
-          customSelector: 'button[title="endpoint"]',
+          selector: 'eventFilters-form-description-input',
         },
       ],
       checkResults: [
         {
           selector: 'EventFiltersListPage-card-criteriaConditions-condition',
-          value: 'AND agent.typeIS endpoint',
+          value: 'AND @timestampIS 1234',
         },
       ],
     },
@@ -361,7 +358,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         },
         {
           type: 'click',
-          selector: 'blocklist-form-file.path',
+          selector: 'blocklist-form-file.path.caseless',
         },
         {
           type: 'click',
@@ -382,7 +379,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         {
           selector: 'blocklistPage-card-criteriaConditions',
           value:
-            'OSIS WindowsAND file.pathis one of\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
+            'OSIS WindowsAND file.path.caselessis one of\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
         },
         {
           selector: 'blocklistPage-card-header-title',

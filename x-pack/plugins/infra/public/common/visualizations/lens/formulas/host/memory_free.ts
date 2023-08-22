@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import type { LensChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const memoryFree: LensChartConfig = {
-  title: 'Memory Free',
-  formula: {
-    formula: 'max(system.memory.total) - average(system.memory.actual.used.bytes)',
-    format: {
-      id: 'bytes',
-      params: {
-        decimals: 1,
-      },
+export const memoryFree: FormulaValueConfig = {
+  label: 'Memory Free',
+  value: 'max(system.memory.total) - average(system.memory.actual.used.bytes)',
+  format: {
+    id: 'bytes',
+    params: {
+      decimals: 1,
     },
   },
-  getFilters,
 };

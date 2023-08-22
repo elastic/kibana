@@ -9,9 +9,11 @@ import { get } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { setSignalStatusValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/set_signal_status_type_dependents';
-import type { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
-import { setSignalsStatusSchema } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
+import {
+  setSignalStatusValidateTypeDependents,
+  setSignalsStatusSchema,
+} from '../../../../../common/api/detection_engine/signals';
+import type { SetSignalsStatusSchemaDecoded } from '../../../../../common/api/detection_engine/signals';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
   DEFAULT_ALERTS_INDEX,

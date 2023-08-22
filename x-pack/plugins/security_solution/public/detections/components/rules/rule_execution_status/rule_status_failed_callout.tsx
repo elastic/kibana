@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
+import { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
 
 import * as i18n from './translations';
 

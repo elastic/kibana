@@ -8,26 +8,22 @@
 import DateMath from '@kbn/datemath';
 import { useCallback, useEffect } from 'react';
 import { DataViewBase } from '@kbn/es-query';
-import { MetricsExplorerView } from '../../../../../common/metrics_explorer_views';
+import type {
+  MetricsExplorerChartOptions,
+  MetricsExplorerOptions,
+  MetricsExplorerTimeOptions,
+  MetricsExplorerView,
+  MetricsExplorerViewState,
+} from '../../../../../common/metrics_explorer_views';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,
 } from '../../../../../common/http_api/metrics_explorer';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
-import {
-  useMetricsExplorerOptionsContainerContext,
-  MetricsExplorerChartOptions,
-  MetricsExplorerTimeOptions,
-  MetricsExplorerOptions,
-} from './use_metrics_explorer_options';
+import { useMetricsExplorerOptionsContainerContext } from './use_metrics_explorer_options';
 
-export interface MetricExplorerViewState {
-  chartOptions: MetricsExplorerChartOptions;
-  currentTimerange: MetricsExplorerTimeOptions;
-  options: MetricsExplorerOptions;
-  id?: string;
-}
+export type { MetricsExplorerViewState };
 
 export const useMetricsExplorerState = (
   source: MetricsSourceConfigurationProperties,

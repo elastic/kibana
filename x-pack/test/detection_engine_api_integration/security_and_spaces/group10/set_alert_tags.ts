@@ -12,7 +12,7 @@ import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_ALERT_TAGS_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_engine/schemas/alerts';
+import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -24,9 +24,8 @@ import {
   getSignalsByIds,
   waitForRuleSuccess,
   getRuleForSignalTesting,
-  getAlertUpdateByQueryEmptyResponse,
 } from '../../utils';
-import { buildAlertTagsQuery, setAlertTags } from '../../utils/set_alert_tags';
+import { setAlertTags } from '../../utils/set_alert_tags';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -37,24 +36,24 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('set_alert_tags', () => {
     describe('validation checks', () => {
-      it('should not give errors when querying and the signals index does not exist yet', async () => {
+      it('should give errors when no alert ids are provided', async () => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_ALERT_TAGS_URL)
           .set('kbn-xsrf', 'true')
-          .send(setAlertTags({ tagsToAdd: [], tagsToRemove: [] }))
-          .expect(200);
+          .send(setAlertTags({ tagsToAdd: [], tagsToRemove: [], ids: [] }))
+          .expect(400);
 
-        // remove any server generated items that are indeterministic
-        delete body.took;
-
-        expect(body).to.eql(getAlertUpdateByQueryEmptyResponse());
+        expect(body).to.eql({
+          message: ['No alert ids were provided'],
+          status_code: 400,
+        });
       });
 
       it('should give errors when duplicate tags exist in both tags_to_add and tags_to_remove', async () => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_ALERT_TAGS_URL)
           .set('kbn-xsrf', 'true')
-          .send(setAlertTags({ tagsToAdd: ['test-1'], tagsToRemove: ['test-1'] }))
+          .send(setAlertTags({ tagsToAdd: ['test-1'], tagsToRemove: ['test-1'], ids: ['123'] }))
           .expect(400);
 
         expect(body).to.eql({
@@ -66,7 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('tests with auditbeat data', () => {
+    describe('tests with auditbeat data', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
@@ -102,7 +101,7 @@ export default ({ getService }: FtrProviderContext) => {
             setAlertTags({
               tagsToAdd: ['tag-1'],
               tagsToRemove: [],
-              query: buildAlertTagsQuery(alertIds),
+              ids: alertIds,
             })
           )
           .expect(200);
@@ -136,7 +135,7 @@ export default ({ getService }: FtrProviderContext) => {
             setAlertTags({
               tagsToAdd: ['tag-1'],
               tagsToRemove: [],
-              query: buildAlertTagsQuery(alertIds.slice(0, 4)),
+              ids: alertIds.slice(0, 4),
             })
           )
           .expect(200);
@@ -148,7 +147,7 @@ export default ({ getService }: FtrProviderContext) => {
             setAlertTags({
               tagsToAdd: ['tag-1'],
               tagsToRemove: [],
-              query: buildAlertTagsQuery(alertIds),
+              ids: alertIds,
             })
           )
           .expect(200);
@@ -182,7 +181,7 @@ export default ({ getService }: FtrProviderContext) => {
             setAlertTags({
               tagsToAdd: ['tag-1', 'tag-2'],
               tagsToRemove: [],
-              query: buildAlertTagsQuery(alertIds),
+              ids: alertIds,
             })
           )
           .expect(200);
@@ -194,7 +193,7 @@ export default ({ getService }: FtrProviderContext) => {
             setAlertTags({
               tagsToAdd: [],
               tagsToRemove: ['tag-2'],
-              query: buildAlertTagsQuery(alertIds),
+              ids: alertIds,
             })
           )
           .expect(200);
@@ -228,7 +227,7 @@ export default ({ getService }: FtrProviderContext) => {
             setAlertTags({
               tagsToAdd: [],
               tagsToRemove: ['tag-1'],
-              query: buildAlertTagsQuery(alertIds),
+              ids: alertIds,
             })
           )
           .expect(200);

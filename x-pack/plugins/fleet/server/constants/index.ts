@@ -78,7 +78,8 @@ export {
   // Message signing service
   MESSAGE_SIGNING_SERVICE_API_ROUTES,
   // secrets
-  SECRETS_INDEX,
+  SECRETS_ENDPOINT_PATH,
+  SECRETS_MINIMUM_FLEET_SERVER_VERSION,
 } from '../../common/constants';
 
 export {
@@ -95,3 +96,4 @@ export {
 } from './fleet_es_assets';
 export { FILE_STORAGE_DATA_AGENT_INDEX } from './fleet_es_assets';
 export { FILE_STORAGE_METADATA_AGENT_INDEX } from './fleet_es_assets';
+export * from './mappings';

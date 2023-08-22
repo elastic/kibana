@@ -31,6 +31,7 @@
     "@kbn/core-analytics-server",
     "@kbn/storybook",
     "@kbn/shared-ux-router",
+    "@kbn/core-http-common",
   ],
   "exclude": [
     "target/**/*",

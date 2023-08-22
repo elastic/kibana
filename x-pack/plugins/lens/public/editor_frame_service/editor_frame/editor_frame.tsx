@@ -8,7 +8,7 @@
 import React, { useCallback, useRef } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
-import { DragDropIdentifier, RootDragDropProvider } from '@kbn/dom-drag-drop';
+import { type DragDropAction, DragDropIdentifier, RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import {
   DatasourceMap,
@@ -108,8 +108,14 @@ export function EditorFrame(props: EditorFrameProps) {
 
   const bannerMessages = props.getUserMessages('banner', { severity: 'warning' });
 
+  const telemetryMiddleware = useCallback((action: DragDropAction) => {
+    if (action.type === 'dropToTarget') {
+      trackUiCounterEvents('drop_total');
+    }
+  }, []);
+
   return (
-    <RootDragDropProvider dataTestSubj="lnsDragDrop" onTrackUICounterEvent={trackUiCounterEvents}>
+    <RootDragDropProvider dataTestSubj="lnsDragDrop" customMiddleware={telemetryMiddleware}>
       <FrameLayout
         bannerMessages={
           bannerMessages.length ? (
@@ -179,6 +185,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 frame={framePublicAPI}
                 getUserMessages={props.getUserMessages}
                 nowProvider={props.plugins.data.nowProvider}
+                core={props.core}
               />
             </ErrorBoundary>
           )

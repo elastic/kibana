@@ -97,6 +97,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const chartType = await pageObjects.infraMetricsExplorer.getChartType(charts[0]);
         expect(chartType).to.equal('bar chart');
       });
+
+      it('renders the metrics explorer survey link', async () => {
+        await pageObjects.infraMetricsExplorer.ensureMetricsExplorerFeedbackLinkIsVisible();
+      });
     });
 
     describe('Saved Views', function () {

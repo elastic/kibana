@@ -11,32 +11,36 @@ import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { getNodeDetailUrl } from '../../../pages/link_to';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
+import type { Asset } from '../types';
 
-export interface LinkToAlertsRule {
-  currentTime: number;
-  nodeId: string;
-  nodeType: InventoryItemType;
+export interface LinkToNodeDetailsProps {
+  currentTimestamp: number;
+  asset: Asset;
+  assetType: InventoryItemType;
 }
 
-export const LinkToNodeDetails = ({ nodeId, nodeType, currentTime }: LinkToAlertsRule) => {
-  const inventoryModel = findInventoryModel(nodeType);
-  const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
+export const LinkToNodeDetails = ({
+  asset,
+  assetType,
+  currentTimestamp,
+}: LinkToNodeDetailsProps) => {
+  const inventoryModel = findInventoryModel(assetType);
+  const nodeDetailFrom = currentTimestamp - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
 
   const nodeDetailMenuItemLinkProps = useLinkProps({
     ...getNodeDetailUrl({
-      nodeType,
-      nodeId,
+      nodeType: assetType,
+      nodeId: asset.id,
       from: nodeDetailFrom,
-      to: currentTime,
+      to: currentTimestamp,
+      assetName: asset.name,
     }),
   });
 
   return (
     <EuiButtonEmpty
-      data-test-subj="infraNodeContextPopoverOpenAsPageButton"
+      data-test-subj="infraAssetDetailsOpenAsPageButton"
       size="xs"
-      iconSide="left"
-      iconType="popout"
       flush="both"
       {...nodeDetailMenuItemLinkProps}
     >

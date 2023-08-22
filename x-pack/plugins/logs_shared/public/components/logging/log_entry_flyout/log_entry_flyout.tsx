@@ -15,21 +15,21 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import { OverlayRef } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Query } from '@kbn/es-query';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { OverlayRef } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { createKibanaReactContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  useCoPilot,
-  CoPilotPrompt,
-  ObservabilityPublicStart,
-  CoPilotContextProvider,
-} from '@kbn/observability-plugin/public';
-import { CoPilotPromptId } from '@kbn/observability-plugin/common';
+  ContextualInsight,
+  MessageRole,
+  ObservabilityAIAssistantPluginStart,
+  ObservabilityAIAssistantProvider,
+  useObservabilityAIAssistant,
+  type Message,
+} from '@kbn/observability-ai-assistant-plugin/public';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { LogViewReference } from '../../../../common/log_views';
 import { TimeKey } from '../../../../common/time';
 import { useLogEntry } from '../../../containers/logs/log_entry';
@@ -38,6 +38,12 @@ import { DataSearchErrorCallout } from '../../data_search_error_callout';
 import { DataSearchProgress } from '../../data_search_progress';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';
 import { LogEntryFieldsTable } from './log_entry_fields_table';
+
+const LOGS_SYSTEM_MESSAGE = {
+  content: `You are logs-gpt, a helpful assistant for logs-based observability. Answer as
+    concisely as possible.`,
+  role: MessageRole.System,
+};
 
 export interface LogEntryFlyoutProps {
   logEntryId: string | null | undefined;
@@ -49,9 +55,12 @@ export interface LogEntryFlyoutProps {
 export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
   const flyoutRef = useRef<OverlayRef>();
   const {
-    services: { http, data, uiSettings, application, observability },
+    services: { http, data, uiSettings, application, observabilityAIAssistant },
     overlays: { openFlyout },
-  } = useKibana<{ data: DataPublicPluginStart; observability?: ObservabilityPublicStart }>();
+  } = useKibana<{
+    data: DataPublicPluginStart;
+    observabilityAIAssistant?: ObservabilityAIAssistantPluginStart;
+  }>();
 
   const closeLogEntryFlyout = useCallback(() => {
     flyoutRef.current?.close();
@@ -68,13 +77,13 @@ export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
 
       flyoutRef.current = openFlyout(
         <KibanaReactContextProvider>
-          <CoPilotContextProvider value={observability?.getCoPilotService()}>
+          <ObservabilityAIAssistantProvider value={observabilityAIAssistant}>
             <LogEntryFlyout
               logEntryId={logEntryId}
               onCloseFlyout={closeLogEntryFlyout}
               logViewReference={logViewReference}
             />
-          </CoPilotContextProvider>
+          </ObservabilityAIAssistantProvider>
         </KibanaReactContextProvider>
       );
     },
@@ -86,7 +95,7 @@ export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
       openFlyout,
       logViewReference,
       closeLogEntryFlyout,
-      observability,
+      observabilityAIAssistant,
     ]
   );
 
@@ -127,15 +136,55 @@ export const LogEntryFlyout = ({
     }
   }, [fetchLogEntry, logViewReference, logEntryId]);
 
-  const explainLogMessageParams = useMemo(() => {
-    return logEntry ? { logEntry: { fields: logEntry.fields } } : undefined;
+  const explainLogMessageMessages = useMemo<Message[] | undefined>(() => {
+    if (!logEntry) {
+      return undefined;
+    }
+
+    const now = new Date().toISOString();
+
+    return [
+      {
+        '@timestamp': now,
+        message: LOGS_SYSTEM_MESSAGE,
+      },
+      {
+        '@timestamp': now,
+        message: {
+          role: MessageRole.User,
+          content: `I'm looking at a log entry. Can you explain me what the log message means? Where it could be coming from, whether it is expected and whether it is an issue. Here's the context, serialized: ${JSON.stringify(
+            { logEntry: { fields: logEntry.fields } }
+          )} `,
+        },
+      },
+    ];
   }, [logEntry]);
 
-  const similarLogMessageParams = useMemo(() => {
-    return logEntry ? { logEntry: { fields: logEntry.fields } } : undefined;
+  const similarLogMessageMessages = useMemo<Message[] | undefined>(() => {
+    if (!logEntry) {
+      return undefined;
+    }
+
+    const now = new Date().toISOString();
+
+    const message = logEntry.fields.find((field) => field.field === 'message')?.value[0];
+
+    return [
+      {
+        '@timestamp': now,
+        message: LOGS_SYSTEM_MESSAGE,
+      },
+      {
+        '@timestamp': now,
+        message: {
+          role: MessageRole.User,
+          content: `I'm looking at a log entry. Can you construct a Kibana KQL query that I can enter in the search bar that gives me similar log entries, based on the \`message\` field: ${message}`,
+        },
+      },
+    ];
   }, [logEntry]);
 
-  const coPilotService = useCoPilot();
+  const aiAssistant = useObservabilityAIAssistant();
 
   return (
     <EuiFlyout onClose={onCloseFlyout} size="m">
@@ -197,23 +246,19 @@ export const LogEntryFlyout = ({
           }
         >
           <EuiFlexGroup direction="column" gutterSize="m">
-            {coPilotService?.isEnabled() && explainLogMessageParams ? (
+            {aiAssistant.isEnabled() && explainLogMessageMessages ? (
               <EuiFlexItem grow={false}>
-                <CoPilotPrompt
-                  coPilot={coPilotService}
+                <ContextualInsight
                   title={explainLogMessageTitle}
-                  params={explainLogMessageParams}
-                  promptId={CoPilotPromptId.LogsExplainMessage}
+                  messages={explainLogMessageMessages}
                 />
               </EuiFlexItem>
             ) : null}
-            {coPilotService?.isEnabled() && similarLogMessageParams ? (
+            {aiAssistant.isEnabled() && similarLogMessageMessages ? (
               <EuiFlexItem grow={false}>
-                <CoPilotPrompt
-                  coPilot={coPilotService}
+                <ContextualInsight
                   title={similarLogMessagesTitle}
-                  params={similarLogMessageParams}
-                  promptId={CoPilotPromptId.LogsFindSimilar}
+                  messages={similarLogMessageMessages}
                 />
               </EuiFlexItem>
             ) : null}

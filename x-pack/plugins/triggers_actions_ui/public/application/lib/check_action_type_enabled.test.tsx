@@ -29,6 +29,7 @@ describe('checkActionTypeEnabled', () => {
       enabled: true,
       enabledInConfig: true,
       enabledInLicense: true,
+      isSystemActionType: false,
     };
     expect(checkActionTypeEnabled(actionType)).toMatchInlineSnapshot(`
           Object {
@@ -46,6 +47,7 @@ describe('checkActionTypeEnabled', () => {
       enabled: false,
       enabledInConfig: true,
       enabledInLicense: false,
+      isSystemActionType: false,
     };
     expect(checkActionTypeEnabled(actionType)).toMatchInlineSnapshot(`
       Object {
@@ -81,6 +83,7 @@ describe('checkActionTypeEnabled', () => {
       enabled: false,
       enabledInConfig: false,
       enabledInLicense: true,
+      isSystemActionType: false,
     };
     expect(checkActionTypeEnabled(actionType)).toMatchInlineSnapshot(`
           Object {
@@ -127,6 +130,7 @@ describe('checkActionFormActionTypeEnabled', () => {
       enabled: true,
       enabledInConfig: false,
       enabledInLicense: true,
+      isSystemActionType: false,
     };
 
     expect(checkActionFormActionTypeEnabled(actionType, preconfiguredConnectors))
@@ -146,6 +150,7 @@ describe('checkActionFormActionTypeEnabled', () => {
       enabled: true,
       enabledInConfig: false,
       enabledInLicense: true,
+      isSystemActionType: false,
     };
     expect(checkActionFormActionTypeEnabled(actionType, preconfiguredConnectors))
       .toMatchInlineSnapshot(`

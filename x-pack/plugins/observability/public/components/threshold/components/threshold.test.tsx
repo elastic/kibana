@@ -39,6 +39,6 @@ describe('Threshold', () => {
 
   it('shows component', () => {
     const component = renderComponent();
-    expect(component.queryByTestId('threshold-90-93')).toBeTruthy();
+    expect(component.queryByTestId('thresholdRule-90-93')).toBeTruthy();
   });
 });

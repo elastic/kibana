@@ -7,7 +7,7 @@
 import { SemVer } from 'semver';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 
 import { MAJOR_VERSION } from '../common/constants';
@@ -22,6 +22,17 @@ const schemaLatest = schema.object(
     ui: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),
+    enableIndexActions: offeringBasedSchema({
+      // Index actions are disabled in serverless; refer to the serverless.yml file as the source of truth
+      // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
+    enableLegacyTemplates: offeringBasedSchema({
+      // Legacy templates functionality is disabled in serverless; refer to the serverless.yml file as the source of truth
+      // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
+    dev: schema.object({ enableIndexDetailsPage: schema.boolean({ defaultValue: false }) }),
   },
   { defaultValue: undefined }
 );
@@ -29,6 +40,11 @@ const schemaLatest = schema.object(
 const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
   exposeToBrowser: {
     ui: true,
+    enableIndexActions: true,
+    enableLegacyTemplates: true,
+    dev: {
+      enableIndexDetailsPage: true,
+    },
   },
   schema: schemaLatest,
   deprecations: () => [],

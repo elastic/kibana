@@ -22,13 +22,14 @@ import {
   updateFleetProxy,
   getFleetProxyRelatedSavedObjects,
 } from '../../services/fleet_proxies';
-import { defaultFleetErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler, FleetProxyUnauthorizedError } from '../../errors';
 import type {
   GetOneFleetProxyRequestSchema,
   PostFleetProxyRequestSchema,
   PutFleetProxyRequestSchema,
   FleetServerHost,
   Output,
+  DownloadSource,
 } from '../../types';
 import { agentPolicyService, appContextService } from '../../services';
 
@@ -36,7 +37,8 @@ async function bumpRelatedPolicies(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   fleetServerHosts: FleetServerHost[],
-  outputs: Output[]
+  outputs: Output[],
+  downloadSources: DownloadSource[]
 ) {
   if (
     fleetServerHosts.some((host) => host.is_default) ||
@@ -63,12 +65,25 @@ async function bumpRelatedPolicies(
         concurrency: 20,
       }
     );
+
+    await pMap(
+      downloadSources,
+      (downloadSource) =>
+        agentPolicyService.bumpAllAgentPoliciesForDownloadSource(
+          soClient,
+          esClient,
+          downloadSource.id
+        ),
+      {
+        concurrency: 20,
+      }
+    );
   }
 }
 
 function checkProxiesAvailable() {
   if (appContextService.getConfig()?.internal?.disableProxies) {
-    throw new Error('Proxies are not available');
+    throw new FleetProxyUnauthorizedError('Proxies write APIs are disabled');
   }
 }
 
@@ -112,8 +127,11 @@ export const putFleetProxyHandler: RequestHandler<
     };
 
     // Bump all the agent policy that use that proxy
-    const { fleetServerHosts, outputs } = await getFleetProxyRelatedSavedObjects(soClient, proxyId);
-    await bumpRelatedPolicies(soClient, esClient, fleetServerHosts, outputs);
+    const { fleetServerHosts, outputs, downloadSources } = await getFleetProxyRelatedSavedObjects(
+      soClient,
+      proxyId
+    );
+    await bumpRelatedPolicies(soClient, esClient, fleetServerHosts, outputs, downloadSources);
 
     return response.ok({ body });
   } catch (error) {
@@ -155,11 +173,14 @@ export const deleteFleetProxyHandler: RequestHandler<
     const soClient = coreContext.savedObjects.client;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-    const { fleetServerHosts, outputs } = await getFleetProxyRelatedSavedObjects(soClient, proxyId);
+    const { fleetServerHosts, outputs, downloadSources } = await getFleetProxyRelatedSavedObjects(
+      soClient,
+      proxyId
+    );
 
     await deleteFleetProxy(soClient, esClient, request.params.itemId);
 
-    await bumpRelatedPolicies(soClient, esClient, fleetServerHosts, outputs);
+    await bumpRelatedPolicies(soClient, esClient, fleetServerHosts, outputs, downloadSources);
 
     const body = {
       id: request.params.itemId,

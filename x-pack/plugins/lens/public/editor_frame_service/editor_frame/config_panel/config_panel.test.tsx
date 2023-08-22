@@ -168,37 +168,26 @@ describe('ConfigPanel', () => {
     expect(instance.find(LayerPanel).exists()).toBe(false);
   });
 
-  it('allow datasources and visualizations to use setters', async () => {
+  it('updates datasources and visualizations', async () => {
     const props = getDefaultProps();
-    const onUpdateCbSpy = jest.fn();
-    const newProps = {
-      ...props,
-      onUpdateStateCb: onUpdateCbSpy,
-    };
-    const { instance, lensStore } = await prepareAndMountComponent(newProps);
+    const { instance, lensStore } = await prepareAndMountComponent(props);
     const { updateDatasource, updateAll } = instance.find(LayerPanel).props();
 
-    const updater = () => 'updated';
-    updateDatasource('testDatasource', updater);
+    const newDatasourceState = 'updated';
+    updateDatasource('testDatasource', newDatasourceState);
     await waitMs(0);
     expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
-    expect(onUpdateCbSpy).toHaveBeenCalled();
-    expect(
-      (lensStore.dispatch as jest.Mock).mock.calls[0][0].payload.updater(
-        props.datasourceStates.testDatasource.state
-      )
-    ).toEqual('updated');
+    expect((lensStore.dispatch as jest.Mock).mock.calls[0][0].payload.newDatasourceState).toEqual(
+      'updated'
+    );
 
-    updateAll('testDatasource', updater, props.visualizationState);
-    expect(onUpdateCbSpy).toHaveBeenCalled();
+    updateAll('testDatasource', newDatasourceState, props.visualizationState);
     // wait for one tick so async updater has a chance to trigger
     await waitMs(0);
-    expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
-    expect(
-      (lensStore.dispatch as jest.Mock).mock.calls[0][0].payload.updater(
-        props.datasourceStates.testDatasource.state
-      )
-    ).toEqual('updated');
+    expect(lensStore.dispatch).toHaveBeenCalledTimes(3);
+    expect((lensStore.dispatch as jest.Mock).mock.calls[0][0].payload.newDatasourceState).toEqual(
+      'updated'
+    );
   });
 
   describe('focus behavior when adding or removing layers', () => {

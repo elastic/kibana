@@ -77,7 +77,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         });
     });
 
-    it('should handle get action request from preconfigured list', async () => {
+    it('should handle get a preconfigured connector', async () => {
       await supertest
         .get(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/my-slack1`)
         .expect(200, {
@@ -90,7 +90,17 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         });
     });
 
-    it('should handle get action request for deprecated connectors from preconfigured list', async () => {
+    it('should return 404 when trying to get a system connector', async () => {
+      await supertest
+        .get(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/actions/connector/system-connector-test.system-action`
+        )
+        .expect(404);
+    });
+
+    it('should handle get a deprecated connector', async () => {
       await supertest
         .get(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/my-deprecated-servicenow`)
         .expect(200, {
@@ -176,7 +186,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should handle get action request from preconfigured list', async () => {
+      it('should handle get a preconfigured connector', async () => {
         await supertest
           .get(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action/my-slack1`)
           .expect(200, {
@@ -187,6 +197,16 @@ export default function getActionTests({ getService }: FtrProviderContext) {
             actionTypeId: '.slack',
             name: 'Slack#xyz',
           });
+      });
+
+      it('should return 404 when trying to get a system connector', async () => {
+        await supertest
+          .get(
+            `${getUrlPrefix(
+              Spaces.space1.id
+            )}/api/actions/action/system-connector-test.system-action`
+          )
+          .expect(404);
       });
     });
   });

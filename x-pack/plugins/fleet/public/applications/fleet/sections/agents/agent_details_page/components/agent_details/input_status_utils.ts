@@ -49,8 +49,9 @@ export const getInputUnitsByPackage = (
   packagePolicy: PackagePolicy
 ): FleetServerAgentComponentUnit[] => {
   const re = new RegExp(packagePolicy.id);
+
   return agentComponents
-    .map((c) => c.units)
+    .map((c) => c?.units || [])
     .flat()
-    .filter((u) => u.id.match(re));
+    .filter((u) => !!u && u.id.match(re));
 };

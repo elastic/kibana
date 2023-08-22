@@ -6,10 +6,10 @@
  */
 
 import type { SavedObjectsFindResult } from '@kbn/core/server';
-import type { CommentAttributes } from '@kbn/cases-plugin/common/api/cases/comment';
+import type { AttachmentAttributes } from '@kbn/cases-plugin/common';
 
 export const getRuleIdToCasesMap = (
-  cases: Array<SavedObjectsFindResult<CommentAttributes>>
+  cases: Array<SavedObjectsFindResult<AttachmentAttributes>>
 ): Map<string, number> => {
   return cases.reduce((cache, { attributes: casesObject }) => {
     if (casesObject.type === 'alert') {

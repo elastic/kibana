@@ -22,13 +22,13 @@ load("@build_bazel_rules_nodejs//:index.bzl", "node_repositories", "yarn_install
 # Setup the Node.js toolchain for the architectures we want to support
 node_repositories(
   node_repositories = {
-    "16.20.1-darwin_amd64": ("node-v16.20.1-darwin-x64.tar.gz", "node-v16.20.1-darwin-x64", "d1f9c2a7c3a0fe09860f701af5fb8ff9ac72d72faa7ebabfeb5794503e79f955"),
-    "16.20.1-darwin_arm64": ("node-v16.20.1-darwin-arm64.tar.gz", "node-v16.20.1-darwin-arm64", "5f6b31c5a75567d382ba67220f3d7a2d9bb0c03d8af9307cd35a9cb32a6fde9d"),
-    "16.20.1-linux_arm64": ("node-v16.20.1-linux-arm64.tar.xz", "node-v16.20.1-linux-arm64", "7fce19f3d1c2952599a0b47f9f5d8f497265ad577f37f256a8c6a03be6353234"),
-    "16.20.1-linux_amd64": ("node-v16.20.1-linux-x64.tar.xz", "node-v16.20.1-linux-x64", "b6c60e1e106ad7d8881e83945a5208c1b1d1b63e6901c04b9dafa607aff3a154"),
-    "16.20.1-windows_amd64": ("node-v16.20.1-win-x64.zip", "node-v16.20.1-win-x64", "2a7fde996c57a969f0498742f99385a520eb14aac864e0eff9c32e3f3633ff0a"),
+    "18.17.1-darwin_amd64": ("node-v18.17.1-darwin-x64.tar.gz", "node-v18.17.1-darwin-x64", "b3e083d2715f07ec3f00438401fb58faa1e0bdf3c7bde9f38b75ed17809d92fa"),
+    "18.17.1-darwin_arm64": ("node-v18.17.1-darwin-arm64.tar.gz", "node-v18.17.1-darwin-arm64", "18ca716ea57522b90473777cb9f878467f77fdf826d37beb15a0889fdd74533e"),
+    "18.17.1-linux_arm64": ("node-v18.17.1-linux-arm64.tar.xz", "node-v18.17.1-linux-arm64", "3f933716a468524acb68c2514d819b532131eb50399ee946954d4a511303e1bb"),
+    "18.17.1-linux_amd64": ("node-v18.17.1-linux-x64.tar.xz", "node-v18.17.1-linux-x64", "07e76408ddb0300a6f46fcc9abc61f841acde49b45020ec4e86bb9b25df4dced"),
+    "18.17.1-windows_amd64": ("node-v18.17.1-win-x64.zip", "node-v18.17.1-win-x64", "afc83f5cf6e8b45a4d3fb842904f604dcd271fefada31ad6654f8302f8da28c9"),
   },
-  node_version = "16.20.1",
+  node_version = "18.17.1",
   node_urls = [
     "https://nodejs.org/dist/v{version}/{filename}",
   ],
@@ -57,7 +57,11 @@ yarn_install(
   quiet = False,
   frozen_lockfile = False,
   environment = {
+    "GECKODRIVER_CDNURL": "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache",
+    "CHROMEDRIVER_CDNURL": "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache",
+    "CHROMEDRIVER_CDNBINARIESURL": "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache",
     "SASS_BINARY_SITE": "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-sass",
     "RE2_DOWNLOAD_MIRROR": "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2",
+    "CYPRESS_DOWNLOAD_MIRROR": "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/cypress",
   }
 )

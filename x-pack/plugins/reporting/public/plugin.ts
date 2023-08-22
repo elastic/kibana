@@ -46,6 +46,7 @@ import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../common/constants';
 export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
   roles: { enabled: boolean };
+  export_types: { pdf: { enabled: boolean }; png: { enabled: boolean }; csv: { enabled: boolean } };
 }
 
 function getStored(): JobId[] {
@@ -236,17 +237,19 @@ export class ReportingPublicPlugin
           })
         );
 
-        share.register(
-          reportingScreenshotShareProvider({
-            apiClient,
-            toasts,
-            uiSettings,
-            license,
-            application,
-            usesUiCapabilities,
-            theme: core.theme,
-          })
-        );
+        if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
+          share.register(
+            reportingScreenshotShareProvider({
+              apiClient,
+              toasts,
+              uiSettings,
+              license,
+              application,
+              usesUiCapabilities,
+              theme: core.theme,
+            })
+          );
+        }
       });
     });
 

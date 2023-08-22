@@ -6,10 +6,14 @@
  */
 import React from 'react';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
 
 const triggersActionsUiStartMock = {
   createStart() {
     return {
+      getAlertSummaryWidget: jest.fn(() => (
+        <div data-test-subj="alerts-summary-widget">mocked component</div>
+      )),
       getAlertsSearchBar: jest.fn(() => (
         <div data-test-subj="alerts-search-bar">mocked component</div>
       )),
@@ -67,12 +71,12 @@ const data = {
         create: jest.fn(),
       },
       query: {
-        timefilter: {
-          timefilter: jest.fn(),
-        },
+        timefilter: timefilterServiceMock.createSetupContract(),
       },
       search: {
-        searchSource: jest.fn(),
+        searchSource: {
+          create: jest.fn(),
+        },
       },
     };
   },

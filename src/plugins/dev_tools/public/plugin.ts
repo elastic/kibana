@@ -12,9 +12,14 @@ import { AppUpdater } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
 
-import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import {
+  PluginInitializerContext,
+  AppNavLinkStatus,
+  DEFAULT_APP_CATEGORIES,
+} from '@kbn/core/public';
 import { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
 import { deepLinkIds as devtoolsDeeplinkIds } from '@kbn/deeplinks-devtools';
+import { ConfigSchema } from './types';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 import { DocTitleService, BreadcrumbService } from './services';
 
@@ -44,6 +49,8 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
   private getSortedDevTools(): readonly DevToolApp[] {
     return sortBy([...this.devTools.values()], 'order');
   }
+
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(coreSetup: CoreSetup, { urlForwarding }: { urlForwarding: UrlForwardingSetup }) {
     const { application: applicationSetup, getStartServices } = coreSetup;
@@ -107,6 +114,10 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
     if (this.getSortedDevTools().length === 0) {
       this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
     } else {
+      const config = this.initializerContext.config.get();
+      const navLinkStatus =
+        AppNavLinkStatus[config.deeplinks.navLinkStatus as keyof typeof AppNavLinkStatus];
+
       this.appStateUpdater.next(() => {
         const deepLinks: AppDeepLink[] = [...this.devTools.values()]
           .filter(
@@ -118,13 +129,18 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
               id: tool.id,
               title: tool.title as string,
               path: `#/${tool.id}`,
+              navLinkStatus,
             };
             if (!devtoolsDeeplinkIds.some((id) => id === deepLink.id)) {
               throw new Error('Deeplink must be registered in package.');
             }
             return deepLink;
           });
-        return { deepLinks };
+
+        return {
+          deepLinks,
+          navLinkStatus,
+        };
       });
     }
   }

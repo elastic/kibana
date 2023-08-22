@@ -137,7 +137,8 @@ export class UiSettingsApi {
 
     try {
       this.sendInProgress = true;
-      const path = scope === 'namespace' ? '/api/kibana/settings' : '/api/kibana/global_settings';
+      const path =
+        scope === 'namespace' ? '/internal/kibana/settings' : '/internal/kibana/global_settings';
       changes.callback(
         undefined,
         await this.sendRequest('POST', path, {

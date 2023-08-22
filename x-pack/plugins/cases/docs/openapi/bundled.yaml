@@ -150,6 +150,7 @@ paths:
                 properties:
                   cases:
                     type: array
+                    maxItems: 10000
                     items:
                       $ref: '#/components/schemas/case_response_properties'
                   count_closed_cases:
@@ -196,6 +197,7 @@ paths:
             application/json:
               schema:
                 type: array
+                maxItems: 10000
                 items:
                   type: object
                   properties:
@@ -610,6 +612,7 @@ paths:
             application/json:
               schema:
                 type: array
+                maxItems: 10000
                 items:
                   type: object
                   properties:
@@ -696,6 +699,7 @@ paths:
             application/json:
               schema:
                 type: array
+                maxItems: 10000
                 items:
                   type: string
               examples:
@@ -1054,6 +1058,7 @@ paths:
                     type: integer
                   userActions:
                     type: array
+                    maxItems: 10000
                     items:
                       $ref: '#/components/schemas/user_actions_find_response_properties'
               examples:
@@ -1109,6 +1114,7 @@ paths:
                       type: string
                     referencedByCount:
                       type: integer
+                maxItems: 1000
               examples:
                 findConnectorResponse:
                   $ref: '#/components/examples/find_connector_response'
@@ -2085,14 +2091,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/case_id'
         - $ref: '#/components/parameters/page_index'
-        - name: perPage
-          in: query
-          description: The number of items to return. Limited to 100 items.
-          required: false
-          schema:
-            type: integer
-            default: 20
-            maximum: 100
+        - $ref: '#/components/parameters/page_size'
         - $ref: '#/components/parameters/sort_order'
         - $ref: '#/components/parameters/space_id'
       responses:
@@ -2382,11 +2381,12 @@ components:
     page_size:
       in: query
       name: perPage
-      description: The number of items to return.
+      description: The number of items to return. Limited to 100 items.
       required: false
       schema:
         type: integer
         default: 20
+        maximum: 100
     reporters:
       in: query
       name: reporters
@@ -2435,6 +2435,11 @@ components:
         enum:
           - createdAt
           - updatedAt
+          - closedAt
+          - title
+          - category
+          - status
+          - severity
         default: createdAt
       example: updatedAt
     sort_order:
@@ -2565,6 +2570,7 @@ components:
     assignees:
       type: array
       description: An array containing users that are assigned to the case.
+      maxItems: 10
       nullable: true
       items:
         type: object
@@ -3254,6 +3260,7 @@ components:
           title: Case response properties for comments
           description: An array of comment objects for the case.
           type: array
+          maxItems: 10000
           items:
             discriminator:
               propertyName: type
@@ -3346,6 +3353,8 @@ components:
         cases:
           type: array
           description: An array containing one or more case objects.
+          maxItems: 100
+          minItems: 1
           items:
             type: object
             required:
@@ -3398,31 +3407,8 @@ components:
       type: string
       description: The fields to perform the `simple_query_string` parsed query against.
       enum:
-        - closed_by.username
-        - closed_by.full_name
-        - closed_by.email
-        - closed_by.profile_uid
-        - created_by.username
-        - created_by.full_name
-        - created_by.email
-        - created_by.profile_uid
         - description
-        - connector.name
-        - connector.type
-        - external_service.pushed_by.username
-        - external_service.pushed_by.full_name
-        - external_service.pushed_by.email
-        - external_service.pushed_by.profile_uid
-        - external_service.connector_name
-        - external_service.external_id
-        - external_service.external_title
-        - external_service.external_url
         - title
-        - title.keyword
-        - updated_by.username
-        - updated_by.full_name
-        - updated_by.email
-        - updated_by.profile_uid
     closure_types:
       type: string
       description: Indicates whether a case is automatically closed when it is pushed to external systems (`close-by-pushing`) or not automatically closed (`close-by-user`).
@@ -3546,6 +3532,7 @@ components:
         - type: array
           items:
             type: string
+          maxItems: 1000
       x-technical-preview: true
       example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
     alert_indices:
@@ -3557,6 +3544,7 @@ components:
         - type: array
           items:
             type: string
+          maxItems: 1000
       x-technical-preview: true
     rule:
       title: Alerting rule
@@ -3606,6 +3594,7 @@ components:
         comment:
           description: The new comment. It is required only when `type` is `user`.
           type: string
+          maxLength: 30000
           example: A new comment.
         owner:
           $ref: '#/components/schemas/owners'
@@ -3672,6 +3661,7 @@ components:
         comment:
           description: The new comment. It is required only when `type` is `user`.
           type: string
+          maxLength: 30000
           example: A new comment.
         id:
           type: string

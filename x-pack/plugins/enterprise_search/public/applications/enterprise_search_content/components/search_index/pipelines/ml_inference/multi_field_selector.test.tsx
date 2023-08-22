@@ -11,7 +11,13 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBasicTable, EuiButton, EuiComboBox } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiButton,
+  EuiComboBox,
+  EuiFieldText,
+} from '@elastic/eui';
 
 import { MultiFieldMapping, SelectedFieldMappings } from './multi_field_selector';
 
@@ -92,31 +98,79 @@ describe('MultiFieldMapping', () => {
     const button = wrapper.find(EuiButton);
     expect(button.prop('disabled')).toBe(false);
   });
+  it('disables target field text field if no source fields are selected', () => {
+    setMockValues(DEFAULT_VALUES);
+    const wrapper = shallow(<MultiFieldMapping />);
+
+    expect(wrapper.find(EuiFieldText)).toHaveLength(1);
+    const textField = wrapper.find(EuiFieldText);
+    expect(textField.prop('disabled')).toBe(true);
+  });
+  it('disables target field text field if multiple source fields are selected', () => {
+    setMockValues({
+      ...DEFAULT_VALUES,
+      addInferencePipelineModal: {
+        ...DEFAULT_VALUES.addInferencePipelineModal,
+        selectedSourceFields: ['my-source-field1', 'my-source-field2'],
+      },
+    });
+    const wrapper = shallow(<MultiFieldMapping />);
+
+    expect(wrapper.find(EuiFieldText)).toHaveLength(1);
+    const textField = wrapper.find(EuiFieldText);
+    expect(textField.prop('disabled')).toBe(true);
+  });
+  it('disables target field text field if text expansion model is selected', () => {
+    setMockValues({
+      ...DEFAULT_VALUES,
+      isTextExpansionModelSelected: true,
+    });
+    const wrapper = shallow(<MultiFieldMapping />);
+
+    expect(wrapper.find(EuiFieldText)).toHaveLength(1);
+    const textField = wrapper.find(EuiFieldText);
+    expect(textField.prop('disabled')).toBe(true);
+  });
+  it('enables target field text field if a single source field is selected', () => {
+    setMockValues({
+      ...DEFAULT_VALUES,
+      addInferencePipelineModal: {
+        ...DEFAULT_VALUES.addInferencePipelineModal,
+        selectedSourceFields: ['my-source-field1'],
+      },
+    });
+    const wrapper = shallow(<MultiFieldMapping />);
+
+    expect(wrapper.find(EuiFieldText)).toHaveLength(1);
+    const textField = wrapper.find(EuiFieldText);
+    expect(textField.prop('disabled')).toBe(false);
+  });
 });
 
 describe('SelectedFieldMappings', () => {
+  const mockValues = {
+    ...DEFAULT_VALUES,
+    addInferencePipelineModal: {
+      configuration: {
+        fieldMappings: [
+          {
+            sourceField: 'my-source-field1',
+            targetField: 'my-target-field1',
+          },
+          {
+            sourceField: 'my-source-field2',
+            targetField: 'my-target-field2',
+          },
+        ],
+      },
+    },
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues({});
   });
   it('renders field mapping list', () => {
-    const mockValues = {
-      ...DEFAULT_VALUES,
-      addInferencePipelineModal: {
-        configuration: {
-          fieldMappings: [
-            {
-              sourceField: 'my-source-field1',
-              targetField: 'my-target-field1',
-            },
-            {
-              sourceField: 'my-source-field2',
-              targetField: 'my-target-field2',
-            },
-          ],
-        },
-      },
-    };
     setMockValues(mockValues);
     const wrapper = shallow(<SelectedFieldMappings />);
 
@@ -125,5 +179,17 @@ describe('SelectedFieldMappings', () => {
     expect(table.prop('items')).toEqual(
       mockValues.addInferencePipelineModal.configuration.fieldMappings
     );
+  });
+  it('does not render action column in read-only mode', () => {
+    setMockValues(mockValues);
+    const wrapper = shallow(<SelectedFieldMappings isReadOnly />);
+
+    expect(wrapper.find(EuiBasicTable)).toHaveLength(1);
+    const table = wrapper.find(EuiBasicTable);
+    expect(table.prop('columns').map((c: EuiBasicTableColumn<{}>) => c.name)).toEqual([
+      'Source text field',
+      '',
+      'Target field',
+    ]);
   });
 });

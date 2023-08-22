@@ -11,6 +11,7 @@ import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../apm_common/field_selector';
+import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
 
 export function ApmLatencyIndicatorTypeForm() {
@@ -160,6 +161,8 @@ export function ApmLatencyIndicatorTypeForm() {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <DataPreviewChart />
     </EuiFlexGroup>
   );
 }

@@ -20,6 +20,8 @@ export const DEFAULT_MONITORING_REFRESH_RATE = 60 * 1000;
 export const DEFAULT_MONITORING_STATS_RUNNING_AVERAGE_WINDOW = 50;
 export const DEFAULT_MONITORING_STATS_WARN_DELAYED_TASK_START_IN_SECONDS = 60;
 
+export const DEFAULT_METRICS_RESET_INTERVAL = 30 * 1000; // 30 seconds
+
 // At the default poll interval of 3sec, this averages over the last 15sec.
 export const DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW = 5;
 
@@ -51,12 +53,76 @@ const eventLoopDelaySchema = schema.object({
   }),
 });
 
+const requeueInvalidTasksConfig = schema.object({
+  delay: schema.number({ defaultValue: 3000, min: 0 }),
+  enabled: schema.boolean({ defaultValue: false }),
+  max_attempts: schema.number({ defaultValue: 100, min: 1, max: 500 }),
+});
+
 export const configSchema = schema.object(
   {
+    allow_reading_invalid_state: schema.boolean({ defaultValue: true }),
+    ephemeral_tasks: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      /* How many requests can Task Manager buffer before it rejects new requests. */
+      request_capacity: schema.number({
+        // a nice round contrived number, feel free to change as we learn how it behaves
+        defaultValue: 10,
+        min: 1,
+        max: DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY,
+      }),
+    }),
+    event_loop_delay: eventLoopDelaySchema,
     /* The maximum number of times a task will be attempted before being abandoned as failed */
     max_attempts: schema.number({
       defaultValue: 3,
       min: 1,
+    }),
+    /* The maximum number of tasks that this Kibana instance will run simultaneously. */
+    max_workers: schema.number({
+      defaultValue: DEFAULT_MAX_WORKERS,
+      // disable the task manager rather than trying to specify it with 0 workers
+      min: 1,
+    }),
+    /* The interval at which monotonically increasing metrics counters will reset */
+    metrics_reset_interval: schema.number({
+      defaultValue: DEFAULT_METRICS_RESET_INTERVAL,
+      min: 10 * 1000, // minimum 10 seconds
+    }),
+    /* The rate at which we refresh monitored stats that require aggregation queries against ES. */
+    monitored_aggregated_stats_refresh_rate: schema.number({
+      defaultValue: DEFAULT_MONITORING_REFRESH_RATE,
+      /* don't run monitored stat aggregations any faster than once every 5 seconds */
+      min: 5000,
+    }),
+    monitored_stats_health_verbose_log: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      level: schema.oneOf([schema.literal('debug'), schema.literal('info')], {
+        defaultValue: 'debug',
+      }),
+      /* The amount of seconds we allow a task to delay before printing a warning server log */
+      warn_delayed_task_start_in_seconds: schema.number({
+        defaultValue: DEFAULT_MONITORING_STATS_WARN_DELAYED_TASK_START_IN_SECONDS,
+      }),
+    }),
+    /* The rate at which we emit fresh monitored stats. By default we'll use the poll_interval (+ a slight buffer) */
+    monitored_stats_required_freshness: schema.number({
+      defaultValue: (config?: unknown) =>
+        ((config as { poll_interval: number })?.poll_interval ?? DEFAULT_POLL_INTERVAL) + 1000,
+      min: 100,
+    }),
+    /* The size of the running average window for monitored stats. */
+    monitored_stats_running_average_window: schema.number({
+      defaultValue: DEFAULT_MONITORING_STATS_RUNNING_AVERAGE_WINDOW,
+      max: 100,
+      min: 10,
+    }),
+    /* Task Execution result warn & error thresholds. */
+    monitored_task_execution_thresholds: schema.object({
+      custom: schema.recordOf(schema.string(), taskExecutionFailureThresholdSchema, {
+        defaultValue: {},
+      }),
+      default: taskExecutionFailureThresholdSchema,
     }),
     /* How often, in milliseconds, the task manager will look for more work. */
     poll_interval: schema.number({
@@ -69,11 +135,11 @@ export const configSchema = schema.object(
       defaultValue: 1000,
       min: 1,
     }),
-    /* The maximum number of tasks that this Kibana instance will run simultaneously. */
-    max_workers: schema.number({
-      defaultValue: DEFAULT_MAX_WORKERS,
-      // disable the task manager rather than trying to specify it with 0 workers
-      min: 1,
+    requeue_invalid_tasks: requeueInvalidTasksConfig,
+    /* These are not designed to be used by most users. Please use caution when changing these */
+    unsafe: schema.object({
+      authenticate_background_task_utilization: schema.boolean({ defaultValue: true }),
+      exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
     }),
     /* The threshold percenatge for workers experiencing version conflicts for shifting the polling interval. */
     version_conflict_threshold: schema.number({
@@ -81,63 +147,11 @@ export const configSchema = schema.object(
       min: 50,
       max: 100,
     }),
-    /* The rate at which we emit fresh monitored stats. By default we'll use the poll_interval (+ a slight buffer) */
-    monitored_stats_required_freshness: schema.number({
-      defaultValue: (config?: unknown) =>
-        ((config as { poll_interval: number })?.poll_interval ?? DEFAULT_POLL_INTERVAL) + 1000,
-      min: 100,
-    }),
-    /* The rate at which we refresh monitored stats that require aggregation queries against ES. */
-    monitored_aggregated_stats_refresh_rate: schema.number({
-      defaultValue: DEFAULT_MONITORING_REFRESH_RATE,
-      /* don't run monitored stat aggregations any faster than once every 5 seconds */
-      min: 5000,
-    }),
-    /* The size of the running average window for monitored stats. */
-    monitored_stats_running_average_window: schema.number({
-      defaultValue: DEFAULT_MONITORING_STATS_RUNNING_AVERAGE_WINDOW,
-      max: 100,
-      min: 10,
-    }),
-    /* Task Execution result warn & error thresholds. */
-    monitored_task_execution_thresholds: schema.object({
-      default: taskExecutionFailureThresholdSchema,
-      custom: schema.recordOf(schema.string(), taskExecutionFailureThresholdSchema, {
-        defaultValue: {},
-      }),
-    }),
-    monitored_stats_health_verbose_log: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
-      level: schema.oneOf([schema.literal('debug'), schema.literal('info')], {
-        defaultValue: 'debug',
-      }),
-      /* The amount of seconds we allow a task to delay before printing a warning server log */
-      warn_delayed_task_start_in_seconds: schema.number({
-        defaultValue: DEFAULT_MONITORING_STATS_WARN_DELAYED_TASK_START_IN_SECONDS,
-      }),
-    }),
-    ephemeral_tasks: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
-      /* How many requests can Task Manager buffer before it rejects new requests. */
-      request_capacity: schema.number({
-        // a nice round contrived number, feel free to change as we learn how it behaves
-        defaultValue: 10,
-        min: 1,
-        max: DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY,
-      }),
-    }),
-    event_loop_delay: eventLoopDelaySchema,
     worker_utilization_running_average_window: schema.number({
       defaultValue: DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW,
       max: 100,
       min: 1,
     }),
-    /* These are not designed to be used by most users. Please use caution when changing these */
-    unsafe: schema.object({
-      exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
-      authenticate_background_task_utilization: schema.boolean({ defaultValue: true }),
-    }),
-    allow_reading_invalid_state: schema.boolean({ defaultValue: true }),
   },
   {
     validate: (config) => {
@@ -152,6 +166,7 @@ export const configSchema = schema.object(
   }
 );
 
+export type RequeueInvalidTasksConfig = TypeOf<typeof requeueInvalidTasksConfig>;
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
 export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;

@@ -21,7 +21,7 @@ Array [
     </div>
   </div>,
   <button
-    class="euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-s-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly"
+    class="euiButton euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly"
     tabindex="0"
     type="button"
   >
@@ -44,18 +44,18 @@ Array [
       id="globalHeaderBars"
     >
       <div
-        class="euiHeader euiHeader--dark euiHeader--fixed header__firstBar"
+        class="euiHeader header__firstBar emotion-euiHeader-fixed-dark"
         data-fixed-header="true"
       >
         <div
-          class="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
+          class="euiHeaderSection emotion-euiHeaderSection"
         >
           <div
-            class="euiHeaderSectionItem"
+            class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
           >
             <a
               aria-label="Elastic home"
-              class="euiHeaderLogo"
+              class="chrHeaderLogo"
               data-test-subj="logo"
               href="/"
             >
@@ -88,23 +88,23 @@ Array [
           </div>
         </div>
         <div
-          class="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
+          class="euiHeaderSection emotion-euiHeaderSection"
         >
           <div
-            class="euiHeaderSectionItem"
+            class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
           />
         </div>
         <div
-          class="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
+          class="euiHeaderSection emotion-euiHeaderSection"
         >
           <div
-            class="euiHeaderSectionItem"
+            class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
           />
           <div
-            class="euiHeaderSectionItem"
+            class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
           />
           <div
-            class="euiHeaderSectionItem"
+            class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
           >
             <div
               class="euiPopover emotion-euiPopover"
@@ -118,17 +118,17 @@ Array [
                   aria-expanded="false"
                   aria-haspopup="true"
                   aria-label="Help menu"
-                  class="euiButtonEmpty euiHeaderSectionItemButton css-wvaqcf-empty-text"
+                  class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
                   type="button"
                 >
                   <span
-                    class="euiButtonContent euiButtonEmpty__content"
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text"
                     >
                       <span
-                        class="euiHeaderSectionItemButton__content"
+                        class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
                       >
                         <span
                           data-euiicon-type="help"
@@ -141,37 +141,37 @@ Array [
             </div>
           </div>
           <div
-            class="euiHeaderSectionItem"
+            class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
           />
         </div>
       </div>
       <div
-        class="euiHeader euiHeader--default euiHeader--fixed header__secondBar"
+        class="euiHeader header__secondBar emotion-euiHeader-fixed-default"
         data-fixed-header="true"
       >
         <div
-          class="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
+          class="euiHeaderSection emotion-euiHeaderSection"
         >
           <div
-            class="euiHeaderSectionItem euiHeaderSectionItem--borderRight header__toggleNavButtonSection"
+            class="euiHeaderSectionItem header__toggleNavButtonSection emotion-euiHeaderSectionItem"
           >
             <button
               aria-controls="generated-id"
               aria-expanded="false"
               aria-label="Toggle primary navigation"
               aria-pressed="false"
-              class="euiButtonEmpty euiHeaderSectionItemButton css-wvaqcf-empty-text"
+              class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
               data-test-subj="toggleNavButton"
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonEmpty__content"
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
                   <span
-                    class="euiHeaderSectionItemButton__content"
+                    class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
                   >
                     <span
                       data-euiicon-type="menu"
@@ -206,10 +206,10 @@ Array [
           </ol>
         </nav>
         <div
-          class="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--right"
+          class="euiHeaderSection emotion-euiHeaderSection-right"
         >
           <div
-            class="euiHeaderSectionItem"
+            class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
           >
             <div
               data-test-subj="headerAppActionMenu"

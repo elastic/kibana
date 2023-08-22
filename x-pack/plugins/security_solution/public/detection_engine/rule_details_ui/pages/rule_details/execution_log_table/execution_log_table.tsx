@@ -34,7 +34,7 @@ import { RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY } from
 import type {
   RuleExecutionResult,
   RuleExecutionStatus,
-} from '../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../common/api/detection_engine/rule_monitoring';
 
 import { HeaderSection } from '../../../../../common/components/header_section';
 import {

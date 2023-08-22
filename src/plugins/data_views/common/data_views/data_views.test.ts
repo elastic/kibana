@@ -13,7 +13,7 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 import {
   UiSettingsCommon,
-  SavedObjectsClientCommon,
+  PersistenceAPI,
   SavedObject,
   DataViewSpec,
   IDataViewsApiClient,
@@ -60,7 +60,7 @@ const savedObject = {
 describe('IndexPatterns', () => {
   let indexPatterns: DataViewsService;
   let indexPatternsNoAccess: DataViewsService;
-  let savedObjectsClient: SavedObjectsClientCommon;
+  let savedObjectsClient: PersistenceAPI;
   let SOClientGetDelay = 0;
   let apiClient: IDataViewsApiClient;
   const uiSettings = {
@@ -73,7 +73,7 @@ describe('IndexPatterns', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    savedObjectsClient = {} as SavedObjectsClientCommon;
+    savedObjectsClient = {} as PersistenceAPI;
     savedObjectsClient.find = jest.fn(
       () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
     );
@@ -107,7 +107,7 @@ describe('IndexPatterns', () => {
 
     indexPatterns = new DataViewsService({
       uiSettings,
-      savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
+      savedObjectsClient: savedObjectsClient as unknown as PersistenceAPI,
       apiClient,
       fieldFormats,
       onNotification: () => {},
@@ -119,7 +119,7 @@ describe('IndexPatterns', () => {
 
     indexPatternsNoAccess = new DataViewsService({
       uiSettings,
-      savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
+      savedObjectsClient: savedObjectsClient as unknown as PersistenceAPI,
       apiClient,
       fieldFormats,
       onNotification: () => {},
@@ -627,6 +627,38 @@ describe('IndexPatterns', () => {
       indexPatterns.refreshFields(indexPattern);
       // @ts-expect-error
       expect(apiClient.getFieldsForWildcard.mock.calls[0][0].allowNoIndex).toBe(true);
+    });
+  });
+
+  describe('getExistingIndices', () => {
+    test('getExistingIndices returns the valid matched indices', async () => {
+      apiClient.getFieldsForWildcard = jest
+        .fn()
+        .mockResolvedValueOnce({ fields: ['length'] })
+        .mockResolvedValue({ fields: [] });
+      const patternList = await indexPatterns.getExistingIndices(['packetbeat-*', 'filebeat-*']);
+      expect(apiClient.getFieldsForWildcard).toBeCalledTimes(2);
+      expect(patternList.length).toBe(1);
+    });
+
+    test('getExistingIndices checks the positive pattern if provided with a negative pattern', async () => {
+      const mockFn = jest.fn().mockResolvedValue({ fields: ['length'] });
+      apiClient.getFieldsForWildcard = mockFn;
+      const patternList = await indexPatterns.getExistingIndices(['-filebeat-*', 'filebeat-*']);
+      expect(mockFn.mock.calls[0][0].pattern).toEqual('filebeat-*');
+      expect(mockFn.mock.calls[1][0].pattern).toEqual('filebeat-*');
+      expect(patternList).toEqual(['-filebeat-*', 'filebeat-*']);
+    });
+
+    test('getExistingIndices handles an error', async () => {
+      apiClient.getFieldsForWildcard = jest
+        .fn()
+        .mockImplementationOnce(async () => {
+          throw new DataViewMissingIndices('Catch me if you can!');
+        })
+        .mockImplementation(() => Promise.resolve({ fields: ['length'] }));
+      const patternList = await indexPatterns.getExistingIndices(['packetbeat-*', 'filebeat-*']);
+      expect(patternList).toEqual(['filebeat-*']);
     });
   });
 });

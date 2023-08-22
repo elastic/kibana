@@ -7,10 +7,10 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { listSchema, readListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
+import { readListRequestQuery, readListResponse } from '../../common/api';
 
 import { buildRouteValidation, buildSiemResponse } from './utils';
 
@@ -24,7 +24,7 @@ export const readListRoute = (router: ListsPluginRouter): void => {
       },
       path: LIST_URL,
       validate: {
-        query: buildRouteValidation(readListSchema),
+        query: buildRouteValidation(readListRequestQuery),
       },
     },
     async (context, request, response) => {
@@ -39,7 +39,7 @@ export const readListRoute = (router: ListsPluginRouter): void => {
             statusCode: 404,
           });
         } else {
-          const [validated, errors] = validate(list, listSchema);
+          const [validated, errors] = validate(list, readListResponse);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {

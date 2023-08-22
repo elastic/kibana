@@ -9,6 +9,7 @@
     "browser": true,
     "configPath": ["xpack", "apm"],
     "requiredPlugins": [
+      "apmDataAccess",
       "data",
       "dashboard",
       "controls",
@@ -28,7 +29,8 @@
       "dataViews",
       "lens",
       "maps",
-      "uiActions"
+      "uiActions",
+      "observabilityAIAssistant"
     ],
     "optionalPlugins": [
       "actions",
@@ -46,7 +48,8 @@
       "taskManager",
       "usageCollection",
       "customIntegrations", // Move this to requiredPlugins after completely migrating from the Tutorials Home App
-      "licenseManagement"
+      "licenseManagement",
+      "profiling",
     ],
     "requiredBundles": [
       "advancedSettings",
@@ -56,7 +59,8 @@
       "ml",
       "observability",
       "esUiShared",
-      "maps"
+      "maps",
+      "observabilityAIAssistant"
     ]
   }
 }

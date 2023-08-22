@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('rejects request to create a space', async () => {
       const { body, status } = await supertest
         .post('/api/spaces/space')
-        .set(svlCommonApi.getCommonRequestHeader())
+        .set(svlCommonApi.getInternalRequestHeader())
         .send({
           id: 'custom',
           name: 'Custom',
@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('rejects request to update a space with disabledFeatures', async () => {
       const { body, status } = await supertest
         .put('/api/spaces/space/default')
-        .set(svlCommonApi.getCommonRequestHeader())
+        .set(svlCommonApi.getInternalRequestHeader())
         .send({
           id: 'custom',
           name: 'Custom',

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
-import { CommentResponseAlertsType } from '@kbn/cases-plugin/common/api';
+import { AlertAttachment } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { deleteAllCaseItems, getComment } from '../../../../common/lib/api';
 
@@ -84,7 +84,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           supertest,
           caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
           commentId: 'ee59cdd0-cf9d-11eb-a603-13e7747d215c',
-        })) as CommentResponseAlertsType;
+        })) as AlertAttachment;
 
         expect(comment).to.have.property('rule');
         expect(comment.rule.id).to.be(null);
@@ -96,7 +96,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           supertest,
           caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
           commentId: 'ae59cdd0-cf9d-11eb-a603-13e7747d215c',
-        })) as CommentResponseAlertsType;
+        })) as AlertAttachment;
 
         expect(comment).to.not.have.property('rule');
       });
@@ -121,7 +121,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           supertest,
           caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
           commentId: 'ee59cdd0-cf9d-11eb-a603-13e7747d215c',
-        })) as CommentResponseAlertsType;
+        })) as AlertAttachment;
 
         expect(comment).not.to.have.property('associationType');
       });
@@ -131,7 +131,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           supertest,
           caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
           commentId: 'ae59cdd0-cf9d-11eb-a603-13e7747d215c',
-        })) as CommentResponseAlertsType;
+        })) as AlertAttachment;
 
         expect(comment).not.to.have.property('associationType');
       });

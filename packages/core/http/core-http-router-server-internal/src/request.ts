@@ -29,6 +29,10 @@ import {
   RawRequest,
   FakeRawRequest,
 } from '@kbn/core-http-server';
+import {
+  ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { RouteValidator } from './validator';
 import { isSafeMethod } from './route';
 import { KibanaSocket } from './socket';
@@ -59,7 +63,13 @@ export class CoreKibanaRequest<
     withoutSecretHeaders: boolean = true
   ) {
     const routeValidator = RouteValidator.from<P, Q, B>(routeSchemas);
-    const requestParts = CoreKibanaRequest.validate(req, routeValidator);
+    let requestParts: { params: P; query: Q; body: B };
+    if (isFakeRawRequest(req)) {
+      requestParts = { query: {} as Q, params: {} as P, body: {} as B };
+    } else {
+      const rawParts = CoreKibanaRequest.sanitizeRequest(req);
+      requestParts = CoreKibanaRequest.validate(rawParts, routeValidator);
+    }
     return new CoreKibanaRequest(
       req,
       requestParts.params,
@@ -70,49 +80,64 @@ export class CoreKibanaRequest<
   }
 
   /**
+   * We have certain values that may be passed via query params that we want to
+   * exclude from further processing like validation. This method removes those
+   * internal values.
+   */
+  private static sanitizeRequest<P, Q, B>(
+    req: Request
+  ): { query: unknown; params: unknown; body: unknown } {
+    const { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: __, ...query } = req.query ?? {};
+    return {
+      query,
+      params: req.params,
+      body: req.payload,
+    };
+  }
+
+  /**
    * Validates the different parts of a request based on the schemas defined for
    * the route. Builds up the actual params, query and body object that will be
    * received in the route handler.
    * @internal
    */
   private static validate<P, Q, B>(
-    req: RawRequest,
+    raw: { params: unknown; query: unknown; body: unknown },
     routeValidator: RouteValidator<P, Q, B>
   ): {
     params: P;
     query: Q;
     body: B;
   } {
-    if (isFakeRawRequest(req)) {
-      return { query: {} as Q, params: {} as P, body: {} as B };
-    }
-    const params = routeValidator.getParams(req.params, 'request params');
-    const query = routeValidator.getQuery(req.query, 'request query');
-    const body = routeValidator.getBody(req.payload, 'request body');
+    const params = routeValidator.getParams(raw.params, 'request params');
+    const query = routeValidator.getQuery(raw.query, 'request query');
+    const body = routeValidator.getBody(raw.body, 'request body');
     return { query, params, body };
   }
 
-  /** {@inheritDoc IKibanaRequest.id} */
+  /** {@inheritDoc KibanaRequest.id} */
   public readonly id: string;
-  /** {@inheritDoc IKibanaRequest.uuid} */
+  /** {@inheritDoc KibanaRequest.uuid} */
   public readonly uuid: string;
-  /** {@inheritDoc IKibanaRequest.url} */
+  /** {@inheritDoc KibanaRequest.url} */
   public readonly url: URL;
-  /** {@inheritDoc IKibanaRequest.route} */
+  /** {@inheritDoc KibanaRequest.route} */
   public readonly route: RecursiveReadonly<KibanaRequestRoute<Method>>;
-  /** {@inheritDoc IKibanaRequest.headers} */
+  /** {@inheritDoc KibanaRequest.headers} */
   public readonly headers: Headers;
-  /** {@inheritDoc IKibanaRequest.isSystemRequest} */
+  /** {@inheritDoc KibanaRequest.isSystemRequest} */
   public readonly isSystemRequest: boolean;
-  /** {@inheritDoc IKibanaRequest.socket} */
+  /** {@inheritDoc KibanaRequest.socket} */
   public readonly socket: IKibanaSocket;
-  /** {@inheritDoc IKibanaRequest.events} */
+  /** {@inheritDoc KibanaRequest.events} */
   public readonly events: KibanaRequestEvents;
-  /** {@inheritDoc IKibanaRequest.auth} */
+  /** {@inheritDoc KibanaRequest.auth} */
   public readonly auth: KibanaRequestAuth;
-  /** {@inheritDoc IKibanaRequest.isFakeRequest} */
+  /** {@inheritDoc KibanaRequest.isFakeRequest} */
   public readonly isFakeRequest: boolean;
-  /** {@inheritDoc IKibanaRequest.rewrittenUrl} */
+  /** {@inheritDoc KibanaRequest.isInternalApiRequest} */
+  public readonly isInternalApiRequest: boolean;
+  /** {@inheritDoc KibanaRequest.rewrittenUrl} */
   public readonly rewrittenUrl?: URL;
 
   /** @internal */
@@ -139,7 +164,9 @@ export class CoreKibanaRequest<
     this.headers = isRealRawRequest(request) ? deepFreeze({ ...request.headers }) : request.headers;
     this.isSystemRequest = this.headers['kbn-system-request'] === 'true';
     this.isFakeRequest = isFakeRawRequest(request);
-
+    this.isInternalApiRequest =
+      X_ELASTIC_INTERNAL_ORIGIN_REQUEST in this.headers ||
+      Boolean(this.url?.searchParams?.has(ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM));
     // prevent Symbol exposure via Object.getOwnPropertySymbols()
     Object.defineProperty(this, requestSymbol, {
       value: request,
@@ -223,11 +250,10 @@ export class CoreKibanaRequest<
       options,
     };
   }
-  /** infer route access from path if not declared */
+  /** set route access to internal if not declared */
   private getAccess(request: RawRequest): 'internal' | 'public' {
     return (
-      ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.access ??
-      (request.path.startsWith('/internal') ? 'internal' : 'public')
+      ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.access ?? 'internal'
     );
   }
 

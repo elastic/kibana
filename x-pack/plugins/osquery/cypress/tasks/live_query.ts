@@ -6,6 +6,7 @@
  */
 
 import { LIVE_QUERY_EDITOR } from '../screens/live_query';
+import { ROLE, login } from './login';
 
 export const DEFAULT_QUERY = 'select * from processes;';
 export const BIG_QUERY = 'select * from processes, users limit 110;';
@@ -49,7 +50,12 @@ export const checkResults = () => {
 export const typeInECSFieldInput = (text: string, index = 0) =>
   cy.getBySel('ECS-field-input').eq(index).type(text);
 export const typeInOsqueryFieldInput = (text: string, index = 0) =>
-  cy.react('OsqueryColumnFieldComponent').eq(index).react('ResultComboBox').type(text);
+  cy
+    .react('OsqueryColumnFieldComponent')
+    .eq(index)
+    .within(() => {
+      cy.getBySel('comboBoxInput').type(text);
+    });
 
 export const getOsqueryFieldTypes = (value: 'Osquery value' | 'Static value', index = 0) => {
   cy.getBySel(`osquery-result-type-select-${index}`).click();
@@ -95,6 +101,7 @@ export const toggleRuleOffAndOn = (ruleName: string) => {
 };
 
 export const loadRuleAlerts = (ruleName: string) => {
+  login(ROLE.soc_manager);
   cy.visit('/app/security/rules');
   cy.contains(ruleName).click();
   cy.getBySel('alertsTable').within(() => {

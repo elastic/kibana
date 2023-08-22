@@ -107,7 +107,7 @@ describe('RenderingService#start', () => {
           `);
   });
 
-  it('adds global styles via `CoreContextProvider` `globalStyles` configuration', () => {
+  it('adds global styles via `KibanaRootRenderingContext` `globalStyles` configuration', () => {
     startService();
     expect(document.querySelector(`style[data-emotion="eui-styles-global"]`)).toBeDefined();
   });

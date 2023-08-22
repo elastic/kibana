@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-export { getSnappedWindowParameters, getWindowParameters } from './src/get_window_parameters';
-export type { WindowParameters } from './src/get_window_parameters';
-export { streamFactory } from './src/stream_factory';
-export { useFetchStream } from './src/use_fetch_stream';
-export type {
-  UseFetchStreamCustomReducerParams,
-  UseFetchStreamParamsDefault,
-} from './src/use_fetch_stream';
+export { getLogRateAnalysisType } from './get_log_rate_analysis_type';
+export { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from './log_rate_analysis_type';
+export { type LogRateHistogramItem } from './log_rate_histogram_item';
+export {
+  getSnappedWindowParameters,
+  getWindowParameters,
+  type WindowParameters,
+} from './window_parameters';

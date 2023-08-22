@@ -7,15 +7,22 @@
 
 import { i18n } from '@kbn/i18n';
 
+import type {
+  CloudFormationProps,
+  CloudSecurityIntegrationAwsAccountType,
+} from '../components/agent_enrollment_flyout/types';
+
 import { useKibanaVersion } from './use_kibana_version';
 import { useGetSettings } from './use_request';
 
+const CLOUD_FORMATION_DEFAULT_ACCOUNT_TYPE = 'single-account';
+
 export const useCreateCloudFormationUrl = ({
   enrollmentAPIKey,
-  cloudFormationTemplateUrl,
+  cloudFormationProps,
 }: {
   enrollmentAPIKey: string | undefined;
-  cloudFormationTemplateUrl: string;
+  cloudFormationProps: CloudFormationProps | undefined;
 }) => {
   const { data, isLoading } = useGetSettings();
 
@@ -42,12 +49,13 @@ export const useCreateCloudFormationUrl = ({
   }
 
   const cloudFormationUrl =
-    enrollmentAPIKey && fleetServerHost && cloudFormationTemplateUrl
+    enrollmentAPIKey && fleetServerHost && cloudFormationProps?.templateUrl
       ? createCloudFormationUrl(
-          cloudFormationTemplateUrl,
+          cloudFormationProps?.templateUrl,
           enrollmentAPIKey,
           fleetServerHost,
-          kibanaVersion
+          kibanaVersion,
+          cloudFormationProps?.awsAccountType
         )
       : undefined;
 
@@ -63,12 +71,26 @@ const createCloudFormationUrl = (
   templateURL: string,
   enrollmentToken: string,
   fleetUrl: string,
-  kibanaVersion: string
+  kibanaVersion: string,
+  awsAccountType: CloudSecurityIntegrationAwsAccountType | undefined
 ) => {
-  const cloudFormationUrl = templateURL
+  let cloudFormationUrl;
+
+  cloudFormationUrl = templateURL
     .replace('FLEET_ENROLLMENT_TOKEN', enrollmentToken)
     .replace('FLEET_URL', fleetUrl)
     .replace('KIBANA_VERSION', kibanaVersion);
 
+  if (cloudFormationUrl.includes('ACCOUNT_TYPE')) {
+    cloudFormationUrl = cloudFormationUrl.replace(
+      'ACCOUNT_TYPE',
+      getAwsAccountType(awsAccountType)
+    );
+  }
+
   return new URL(cloudFormationUrl).toString();
+};
+
+const getAwsAccountType = (awsAccountType: CloudSecurityIntegrationAwsAccountType | undefined) => {
+  return awsAccountType ? awsAccountType : CLOUD_FORMATION_DEFAULT_ACCOUNT_TYPE;
 };

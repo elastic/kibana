@@ -38,7 +38,6 @@ import {
   ipRangeFunction,
   ISearchGeneric,
   kibana,
-  kibanaContext,
   kibanaFilterFunction,
   kibanaTimerangeFunction,
   kqlFunction,
@@ -65,7 +64,7 @@ import { DataPublicPluginStart, DataStartDependencies } from '../types';
 import { AggsService } from './aggs';
 import { createUsageCollector, SearchUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql } from './expressions';
-import { getKibanaContext } from './expressions/kibana_context';
+
 import { handleWarnings } from './fetch/handle_warnings';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
@@ -143,11 +142,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       })
     );
     expressions.registerFunction(kibana);
-    expressions.registerFunction(
-      getKibanaContext({ getStartServices } as {
-        getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
-      })
-    );
     expressions.registerFunction(cidrFunction);
     expressions.registerFunction(dateRangeFunction);
     expressions.registerFunction(extendedBoundsFunction);
@@ -167,7 +161,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(removeFilterFunction);
     expressions.registerFunction(selectFilterFunction);
     expressions.registerFunction(phraseFilterFunction);
-    expressions.registerType(kibanaContext);
 
     expressions.registerFunction(
       getEsdsl({ getStartServices } as {

@@ -12,6 +12,7 @@ import { SecurityPageName } from '../../../../../common/constants';
 import type { LinkInfo, LinkItem } from '../../../links';
 import { useBreadcrumbsNav } from './use_breadcrumbs_nav';
 import type { BreadcrumbsNav } from '../../../breadcrumbs';
+import * as kibanaLib from '../../../lib/kibana';
 
 jest.mock('../../../lib/kibana');
 
@@ -136,6 +137,16 @@ describe('useBreadcrumbsNav', () => {
   });
 
   it('should create breadcrumbs onClick handler', () => {
+    const reportBreadcrumbClickedMock = jest.fn();
+
+    (kibanaLib.useKibana as jest.Mock).mockImplementation(() => ({
+      services: {
+        telemetry: {
+          reportBreadcrumbClicked: reportBreadcrumbClickedMock,
+        },
+      },
+    }));
+
     renderHook(useBreadcrumbsNav);
     const event = { preventDefault: jest.fn() } as unknown as React.MouseEvent<
       HTMLElement,
@@ -146,5 +157,6 @@ describe('useBreadcrumbsNav', () => {
 
     expect(event.preventDefault).toHaveBeenCalled();
     expect(mockDispatch).toHaveBeenCalled();
+    expect(reportBreadcrumbClickedMock).toHaveBeenCalled();
   });
 });

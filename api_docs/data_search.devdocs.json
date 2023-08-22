@@ -267,7 +267,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; save: () => Promise<void>; clear: () => void; destroy: () => void; readonly state$: ",
+              "{ start: () => string; readonly state$: ",
               "Observable",
               "<",
               {
@@ -277,7 +277,7 @@
                 "section": "def-public.SearchSessionState",
                 "text": "SearchSessionState"
               },
-              ">; readonly sessionMeta$: ",
+              ">; save: () => Promise<void>; clear: () => void; destroy: () => void; readonly sessionMeta$: ",
               "Observable",
               "<",
               "SessionMeta",
@@ -703,7 +703,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; save: () => Promise<void>; clear: () => void; destroy: () => void; readonly state$: ",
+              "{ start: () => string; readonly state$: ",
               "Observable",
               "<",
               {
@@ -713,7 +713,7 @@
                 "section": "def-public.SearchSessionState",
                 "text": "SearchSessionState"
               },
-              ">; readonly sessionMeta$: ",
+              ">; save: () => Promise<void>; clear: () => void; destroy: () => void; readonly sessionMeta$: ",
               "Observable",
               "<",
               "SessionMeta",
@@ -1360,7 +1360,7 @@
         "label": "ISessionService",
         "description": [],
         "signature": [
-          "{ start: () => string; save: () => Promise<void>; clear: () => void; destroy: () => void; readonly state$: ",
+          "{ start: () => string; readonly state$: ",
           "Observable",
           "<",
           {
@@ -1370,7 +1370,7 @@
             "section": "def-public.SearchSessionState",
             "text": "SearchSessionState"
           },
-          ">; readonly sessionMeta$: ",
+          ">; save: () => Promise<void>; clear: () => void; destroy: () => void; readonly sessionMeta$: ",
           "Observable",
           "<",
           "SessionMeta",
@@ -3121,11 +3121,11 @@
                     "section": "def-common.SavedObjectsPitParams",
                     "text": "SavedObjectsPitParams"
                   },
-                  " | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; sortOrder?: ",
+                  " | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortOrder?: ",
                   "SortOrder",
                   " | undefined; searchAfter?: ",
                   "SortResults",
-                  " | undefined; hasReference?: ",
+                  " | undefined; rootSearchFields?: string[] | undefined; hasReference?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
@@ -3885,6 +3885,20 @@
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"
+            ],
+            "path": "src/plugins/data/server/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.SearchStrategyDependencies.rollupsEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rollupsEnabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
@@ -7229,7 +7243,9 @@
                   "SearchResponse",
                   "<unknown, Record<string, ",
                   "AggregationsAggregate",
-                  ">>>; setField: <K extends keyof ",
+                  ">>>; history: ",
+                  "SearchRequest",
+                  "[]; setField: <K extends keyof ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -7253,9 +7269,7 @@
                     "section": "def-common.SearchSource",
                     "text": "SearchSource"
                   },
-                  "; history: ",
-                  "SearchRequest",
-                  "[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; removeField: <K extends keyof ",
+                  "; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; removeField: <K extends keyof ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -14317,78 +14331,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.getKibanaContextFn",
-        "type": "Function",
-        "tags": [],
-        "label": "getKibanaContextFn",
-        "description": [],
-        "signature": [
-          "(getStartDependencies: (getKibanaRequest: (() => ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaRequest",
-            "text": "KibanaRequest"
-          },
-          "<unknown, unknown, unknown, any>) | undefined) => Promise<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.KibanaContextStartDependencies",
-            "text": "KibanaContextStartDependencies"
-          },
-          ">) => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ExpressionFunctionKibanaContext",
-            "text": "ExpressionFunctionKibanaContext"
-          }
-        ],
-        "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.getKibanaContextFn.$1",
-            "type": "Function",
-            "tags": [],
-            "label": "getStartDependencies",
-            "description": [],
-            "signature": [
-              "(getKibanaRequest: (() => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any>) | undefined) => Promise<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.KibanaContextStartDependencies",
-                "text": "KibanaContextStartDependencies"
-              },
-              ">"
-            ],
-            "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.getMaxMetricAgg",
         "type": "Function",
         "tags": [],
@@ -16712,7 +16654,7 @@
           "\nThis method parses a string into a time shift duration.\nIf parsing fails, 'invalid' is returned.\nAllowed values are the string 'previous' and an integer followed by the units s,m,h,d,w,M,y"
         ],
         "signature": [
-          "(val: string) => moment.Duration | \"previous\" | \"invalid\""
+          "(val: string) => \"invalid\" | moment.Duration | \"previous\""
         ],
         "path": "src/plugins/data/common/search/aggs/utils/parse_time_shift.ts",
         "deprecated": false,
@@ -28750,40 +28692,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.KibanaContextStartDependencies",
-        "type": "Interface",
-        "tags": [],
-        "label": "KibanaContextStartDependencies",
-        "description": [],
-        "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.KibanaContextStartDependencies.savedObjectsClient",
-            "type": "Object",
-            "tags": [],
-            "label": "savedObjectsClient",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.SavedObjectsClientCommon",
-                "text": "SavedObjectsClientCommon"
-              }
-            ],
-            "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.MetricAggParam",
         "type": "Interface",
         "tags": [],
@@ -32572,10 +32480,6 @@
           {
             "plugin": "discover",
             "path": "src/plugins/discover/public/application/context/utils/get_es_query_search_after.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/get_es_query_search_after.ts"
           }
         ],
         "initialIsOpen": false
@@ -34678,7 +34582,9 @@
           "SearchResponse",
           "<unknown, Record<string, ",
           "AggregationsAggregate",
-          ">>>; setField: <K extends keyof ",
+          ">>>; history: ",
+          "SearchRequest",
+          "[]; setField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -34702,9 +34608,7 @@
             "section": "def-common.SearchSource",
             "text": "SearchSource"
           },
-          "; history: ",
-          "SearchRequest",
-          "[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; removeField: <K extends keyof ",
+          "; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; removeField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -38153,142 +38057,6 @@
               }
             ],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.kibanaContext",
-        "type": "Object",
-        "tags": [],
-        "label": "kibanaContext",
-        "description": [],
-        "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.kibanaContext.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.kibanaContext.from",
-            "type": "Object",
-            "tags": [],
-            "label": "from",
-            "description": [],
-            "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.kibanaContext.from.null",
-                "type": "Function",
-                "tags": [],
-                "label": "null",
-                "description": [],
-                "signature": [
-                  "() => { type: string; }"
-                ],
-                "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [],
-                "returnComment": []
-              }
-            ]
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.kibanaContext.to",
-            "type": "Object",
-            "tags": [],
-            "label": "to",
-            "description": [],
-            "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.kibanaContext.to.null",
-                "type": "Function",
-                "tags": [],
-                "label": "null",
-                "description": [],
-                "signature": [
-                  "() => { type: string; }"
-                ],
-                "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [],
-                "returnComment": []
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-common.kibanaContext.to.filter",
-                "type": "Function",
-                "tags": [],
-                "label": "filter",
-                "description": [],
-                "signature": [
-                  "(input: ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.ExpressionValueSearchContext",
-                    "text": "ExpressionValueSearchContext"
-                  },
-                  ") => ",
-                  {
-                    "pluginId": "expressions",
-                    "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
-                    "section": "def-common.ExpressionValueFilter",
-                    "text": "ExpressionValueFilter"
-                  }
-                ],
-                "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "data",
-                    "id": "def-common.kibanaContext.to.filter.$1",
-                    "type": "CompoundType",
-                    "tags": [],
-                    "label": "input",
-                    "description": [],
-                    "signature": [
-                      {
-                        "pluginId": "data",
-                        "scope": "common",
-                        "docId": "kibDataSearchPluginApi",
-                        "section": "def-common.ExpressionValueSearchContext",
-                        "text": "ExpressionValueSearchContext"
-                      }
-                    ],
-                    "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "isRequired": true
-                  }
-                ],
-                "returnComment": []
-              }
-            ]
           }
         ],
         "initialIsOpen": false

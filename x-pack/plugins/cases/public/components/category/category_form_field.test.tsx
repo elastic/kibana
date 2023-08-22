@@ -120,7 +120,11 @@ describe('Category', () => {
       expect(onSubmit).toBeCalledWith({}, false);
     });
 
-    expect(screen.getByText('The length of the category is too long. The maximum length is 50.'));
+    expect(
+      screen.getByText(
+        'The length of the category is too long. The maximum length is 50 characters.'
+      )
+    );
   });
 
   it('can set a category from existing ones', async () => {

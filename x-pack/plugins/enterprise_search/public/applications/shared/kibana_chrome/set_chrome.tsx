@@ -9,13 +9,13 @@ import React, { useEffect } from 'react';
 
 import { useValues } from 'kea';
 
-import { APPLICATIONS_PLUGIN, VECTOR_SEARCH_PLUGIN } from '../../../../common/constants';
+import { APPLICATIONS_PLUGIN } from '../../../../common/constants';
 
 import { KibanaLogic } from '../kibana';
 
 import {
   useGenerateBreadcrumbs,
-  useEnterpriseSearchBreadcrumbs,
+  useSearchBreadcrumbs,
   useEnterpriseSearchApplicationsBreadcrumbs,
   useAnalyticsBreadcrumbs,
   useEnterpriseSearchContentBreadcrumbs,
@@ -28,7 +28,7 @@ import {
   useVectorSearchBreadcrumbs,
 } from './generate_breadcrumbs';
 import {
-  enterpriseSearchTitle,
+  searchTitle,
   analyticsTitle,
   elasticsearchTitle,
   appSearchTitle,
@@ -57,19 +57,19 @@ interface SetChromeProps {
   trail?: BreadcrumbTrail;
 }
 
-export const SetEnterpriseSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
+export const SetSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
-  const docTitle = enterpriseSearchTitle(title);
+  const docTitle = searchTitle(title);
 
   const crumbs = useGenerateBreadcrumbs(trail);
-  const breadcrumbs = useEnterpriseSearchBreadcrumbs(crumbs);
+  const breadcrumbs = useSearchBreadcrumbs(crumbs);
 
   useEffect(() => {
     setBreadcrumbs(breadcrumbs);
     setDocTitle(docTitle);
-  }, [trail]);
+  }, [trail.join('|')]);
 
   return null;
 };
@@ -217,9 +217,7 @@ export const SetVectorSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) 
   const title = reverseArray(trail);
   const docTitle = vectorSearchTitle(title);
 
-  const breadcrumbs = useVectorSearchBreadcrumbs(
-    useGenerateBreadcrumbs([VECTOR_SEARCH_PLUGIN.NAV_TITLE, ...trail])
-  );
+  const breadcrumbs = useVectorSearchBreadcrumbs(useGenerateBreadcrumbs(trail));
 
   useEffect(() => {
     setBreadcrumbs(breadcrumbs);

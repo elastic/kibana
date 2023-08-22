@@ -51,6 +51,7 @@ function mountComponent() {
     request: {
       searchSessionId: '123',
     },
+    hasLensSuggestions: false,
     hits: {
       status: UnifiedHistogramFetchStatus.loading,
       total: undefined,
@@ -206,6 +207,7 @@ describe('Histogram', () => {
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
     const onLoad = component.find(embeddable).props().onLoad;
     const adapters = createDefaultInspectorAdapters();
+    adapters.tables.tables.unifiedHistogram = { meta: { statistics: { totalCount: 100 } } } as any;
     const rawResponse = {
       _shards: {
         total: 1,
@@ -214,14 +216,21 @@ describe('Histogram', () => {
         failed: 1,
         failures: [],
       },
+      hits: {
+        total: 100,
+        max_score: null,
+        hits: [],
+      },
     };
     jest
       .spyOn(adapters.requests, 'getRequests')
       .mockReturnValue([{ response: { json: { rawResponse } } } as any]);
-    onLoad(false, adapters);
+    act(() => {
+      onLoad(false, adapters);
+    });
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
-      UnifiedHistogramFetchStatus.error,
-      undefined
+      UnifiedHistogramFetchStatus.complete,
+      100
     );
     expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters });
   });

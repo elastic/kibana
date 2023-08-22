@@ -37,7 +37,6 @@ import { EventKind } from '../../shared/hooks/use_fetch_field_value_pair_by_even
 
 interface PrevalenceDetailsTableCell {
   highlightedField: { name: string; values: string[] };
-  scopeId: string;
 }
 
 export const PREVALENCE_TAB_ID = 'prevalence-details';
@@ -60,7 +59,6 @@ const columns: Array<EuiBasicTableColumn<unknown>> = [
     render: (data: PrevalenceDetailsTableCell) => (
       <PrevalenceDetailsCountCell
         highlightedField={data.highlightedField}
-        scopeId={data.scopeId}
         type={{
           eventKind: EventKind.signal,
           include: true,
@@ -75,7 +73,6 @@ const columns: Array<EuiBasicTableColumn<unknown>> = [
     render: (data: PrevalenceDetailsTableCell) => (
       <PrevalenceDetailsCountCell
         highlightedField={data.highlightedField}
-        scopeId={data.scopeId}
         type={{
           eventKind: EventKind.signal,
           exclude: true,
@@ -90,7 +87,6 @@ const columns: Array<EuiBasicTableColumn<unknown>> = [
     render: (data: PrevalenceDetailsTableCell) => (
       <PrevalenceDetailsPrevalenceCell
         highlightedField={data.highlightedField}
-        scopeId={data.scopeId}
         aggregationField={'host.name'}
       />
     ),
@@ -102,7 +98,6 @@ const columns: Array<EuiBasicTableColumn<unknown>> = [
     render: (data: PrevalenceDetailsTableCell) => (
       <PrevalenceDetailsPrevalenceCell
         highlightedField={data.highlightedField}
-        scopeId={data.scopeId}
         aggregationField={'user.name'}
       />
     ),
@@ -113,7 +108,8 @@ const columns: Array<EuiBasicTableColumn<unknown>> = [
  * Prevalence table displayed in the document details expandable flyout left section under the Insights tab
  */
 export const PrevalenceDetails: React.FC = () => {
-  const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId } = useLeftPanelContext();
+  const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId, investigationFields } =
+    useLeftPanelContext();
 
   const data = useMemo(() => {
     const summaryRows = getSummaryRows({
@@ -121,6 +117,7 @@ export const PrevalenceDetails: React.FC = () => {
       data: dataFormattedForFieldBrowser || [],
       eventId,
       scopeId,
+      investigationFields,
       isReadOnly: false,
     });
 
@@ -129,7 +126,6 @@ export const PrevalenceDetails: React.FC = () => {
         name: summaryRow.description.data.field,
         values: summaryRow.description.values || [],
       },
-      scopeId,
     });
 
     return (summaryRows || []).map((summaryRow) => {
@@ -143,7 +139,7 @@ export const PrevalenceDetails: React.FC = () => {
         userPrevalence: fields,
       };
     });
-  }, [browserFields, dataFormattedForFieldBrowser, eventId, scopeId]);
+  }, [browserFields, investigationFields, dataFormattedForFieldBrowser, eventId, scopeId]);
 
   if (!eventId || !dataFormattedForFieldBrowser || !browserFields || !data || data.length === 0) {
     return (

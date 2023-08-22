@@ -105,7 +105,6 @@ const slackApiExecutor = async ({
 
   const externalService = createExternalService(
     {
-      config,
       secrets,
     },
     logger,

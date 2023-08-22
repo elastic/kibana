@@ -13,7 +13,7 @@ import { CoreStart, KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/co
 import { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { errors } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchMvtRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   APP_ID,
   MVT_GETTILE_API_PATH,
@@ -70,7 +70,7 @@ export function initMVTRoutes({
         const y = parseInt((params as any).y, 10) as number;
         const z = parseInt((params as any).z, 10) as number;
 
-        let tileRequest: { path: string; body: estypes.SearchMvtRequest['body'] } = {
+        let tileRequest: { path: string; body: SearchMvtRequest['body'] } = {
           path: '',
           body: {},
         };
@@ -148,7 +148,7 @@ export function initMVTRoutes({
         const y = parseInt((params as any).y, 10) as number;
         const z = parseInt((params as any).z, 10) as number;
 
-        let tileRequest: { path: string; body: estypes.SearchMvtRequest['body'] } = {
+        let tileRequest: { path: string; body: SearchMvtRequest['body'] } = {
           path: '',
           body: {},
         };
@@ -200,7 +200,7 @@ async function getTile({
   path,
 }: {
   abortController: AbortController;
-  body: estypes.SearchMvtRequest['body'];
+  body: SearchMvtRequest['body'];
   context: DataRequestHandlerContext;
   core: CoreStart;
   executionContext: KibanaExecutionContext;

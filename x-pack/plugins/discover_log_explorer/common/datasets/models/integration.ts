@@ -11,6 +11,9 @@ import { IntegrationId, IntegrationType } from '../types';
 export class Integration {
   id: IntegrationId;
   name: IntegrationType['name'];
+  title?: IntegrationType['title'];
+  description?: IntegrationType['description'];
+  icons?: IntegrationType['icons'];
   status: IntegrationType['status'];
   version: IntegrationType['version'];
   datasets: Dataset[];
@@ -18,16 +21,23 @@ export class Integration {
   private constructor(integration: Integration) {
     this.id = integration.id;
     this.name = integration.name;
+    this.title = integration.title ?? integration.name;
+    this.description = integration.description;
+    this.icons = integration.icons;
     this.status = integration.status;
     this.version = integration.version;
     this.datasets = integration.datasets;
   }
 
   public static create(integration: IntegrationType) {
-    return new Integration({
+    const integrationProps = {
       ...integration,
       id: `integration-${integration.name}-${integration.version}` as IntegrationId,
-      datasets: integration.dataStreams.map((dataset) => Dataset.create(dataset, integration)),
+      title: integration.title ?? integration.name,
+    };
+    return new Integration({
+      ...integrationProps,
+      datasets: integration.dataStreams.map((dataset) => Dataset.create(dataset, integrationProps)),
     });
   }
 }

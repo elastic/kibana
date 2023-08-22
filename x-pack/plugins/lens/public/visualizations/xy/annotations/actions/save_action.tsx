@@ -18,11 +18,15 @@ import {
   SavedObjectSaveModal,
 } from '@kbn/saved-objects-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
+import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import { type SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { LayerAction, StateSetter } from '../../../../types';
+import type {
+  LayerAction,
+  RegisterLibraryAnnotationGroupFunction,
+  StateSetter,
+} from '../../../../types';
 import { XYByReferenceAnnotationLayerConfig, XYAnnotationLayerConfig, XYState } from '../../types';
 import { isByReferenceAnnotationsLayer } from '../../visualization_helpers';
 
@@ -160,6 +164,7 @@ export const onSave = async ({
   state,
   layer,
   setState,
+  registerLibraryAnnotationGroup,
   eventAnnotationService,
   toasts,
   modalOnSaveProps: {
@@ -177,6 +182,10 @@ export const onSave = async ({
   state: XYState;
   layer: XYAnnotationLayerConfig;
   setState: StateSetter<XYState, unknown>;
+  registerLibraryAnnotationGroup: (props: {
+    id: string;
+    group: EventAnnotationGroupConfig;
+  }) => void;
   eventAnnotationService: EventAnnotationServiceType;
   toasts: ToastsStart;
   modalOnSaveProps: ModalOnSaveProps;
@@ -202,6 +211,12 @@ export const onSave = async ({
       eventAnnotationService,
       dataViews
     );
+
+    // add new group to state
+    registerLibraryAnnotationGroup({
+      id: savedInfo.id,
+      group: savedInfo.config,
+    });
   } catch (err) {
     toasts.addError(err, {
       title: i18n.translate(
@@ -275,6 +290,7 @@ export const getSaveLayerAction = ({
   state,
   layer,
   setState,
+  registerLibraryAnnotationGroup,
   eventAnnotationService,
   toasts,
   savedObjectsTagging,
@@ -285,6 +301,7 @@ export const getSaveLayerAction = ({
   state: XYState;
   layer: XYAnnotationLayerConfig;
   setState: StateSetter<XYState, unknown>;
+  registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
   eventAnnotationService: EventAnnotationServiceType;
   toasts: ToastsStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
@@ -320,6 +337,7 @@ export const getSaveLayerAction = ({
                     state,
                     layer,
                     setState,
+                    registerLibraryAnnotationGroup,
                     eventAnnotationService,
                     toasts,
                     modalOnSaveProps: props,

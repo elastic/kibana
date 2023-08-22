@@ -8,17 +8,17 @@
 import { buildEsQuery } from '@kbn/es-query';
 import { KibanaServices } from '../../../common/lib/kibana';
 
-import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/detection_engine/rule_exceptions';
-import { getPatchRulesSchemaMock } from '../../../../common/detection_engine/rule_management/mocks';
+import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/api/detection_engine/rule_exceptions';
+import { getPatchRulesSchemaMock } from '../../../../common/api/detection_engine/rule_management/mocks';
 import {
   getCreateRulesSchemaMock,
   getUpdateRulesSchemaMock,
   getRulesSchemaMock,
-} from '../../../../common/detection_engine/rule_schema/mocks';
+} from '../../../../common/api/detection_engine/model/rule_schema/mocks';
 import {
   BulkActionType,
   BulkActionEditType,
-} from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+} from '../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import { rulesMock } from '../logic/mock';
 import type { FindRulesReferencedByExceptionsListProp } from '../logic/types';
 
@@ -445,7 +445,7 @@ describe('Detections Rules API', () => {
       slice: jest.fn(),
       stream: jest.fn(),
       text: jest.fn(),
-    } as File;
+    } as unknown as File;
     const formData = new FormData();
     formData.append('file', fileToImport);
 
@@ -527,7 +527,7 @@ describe('Detections Rules API', () => {
       slice: jest.fn(),
       stream: jest.fn(),
       text: jest.fn(),
-    } as Blob;
+    } as unknown as Blob;
 
     beforeEach(() => {
       fetchMock.mockClear();

@@ -127,6 +127,8 @@ import {
 } from './services/security/uninstall_token_service';
 import { FleetActionsClient, type FleetActionsClientInterface } from './services/actions';
 import type { FilesClientFactory } from './services/files/types';
+import { PolicyWatcher } from './services/agent_policy_watch';
+import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -231,6 +233,10 @@ export interface FleetStartContract {
   messageSigningService: MessageSigningServiceInterface;
   uninstallTokenService: UninstallTokenServiceInterface;
   createFleetActionsClient: (packageName: string) => FleetActionsClientInterface;
+  /*
+  Function exported to allow creating unique ids for saved object tags
+   */
+  getPackageSpecTagId: (spaceId: string, pkgName: string, tagName: string) => string;
 }
 
 export class FleetPlugin
@@ -256,6 +262,7 @@ export class FleetPlugin
   private agentService?: AgentService;
   private packageService?: PackageService;
   private packagePolicyService?: PackagePolicyService;
+  private policyWatcher?: PolicyWatcher;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -491,7 +498,6 @@ export class FleetPlugin
       uninstallTokenService,
     });
     licenseService.start(plugins.licensing.license$);
-
     this.telemetryEventsSender.start(plugins.telemetry, core);
     this.bulkActionsResolver?.start(plugins.taskManager);
     this.fleetUsageSender?.start(plugins.taskManager);
@@ -499,6 +505,10 @@ export class FleetPlugin
     startFleetUsageLogger(plugins.taskManager);
 
     const logger = appContextService.getLogger();
+
+    this.policyWatcher = new PolicyWatcher(core.savedObjects, core.elasticsearch, logger);
+
+    this.policyWatcher.start(licenseService);
 
     const fleetSetupPromise = (async () => {
       try {
@@ -586,11 +596,13 @@ export class FleetPlugin
       createFleetActionsClient(packageName: string) {
         return new FleetActionsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
+      getPackageSpecTagId,
     };
   }
 
   public async stop() {
     appContextService.stop();
+    this.policyWatcher?.stop();
     licenseService.stop();
     this.telemetryEventsSender.stop();
     this.fleetStatus$.complete();

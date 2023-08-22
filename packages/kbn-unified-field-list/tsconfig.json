@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", "src/**/*"],
+  "include": ["*.ts", "src/**/*", "__mocks__/**/*.ts"],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/data-views-plugin",
@@ -24,6 +24,11 @@
     "@kbn/field-types",
     "@kbn/ui-actions-browser",
     "@kbn/data-service",
+    "@kbn/data-view-field-editor-plugin",
+    "@kbn/dom-drag-drop",
+    "@kbn/shared-ux-utility",
+    "@kbn/discover-utils",
+    "@kbn/ebt-tools",
   ],
   "exclude": ["target/**/*"]
 }

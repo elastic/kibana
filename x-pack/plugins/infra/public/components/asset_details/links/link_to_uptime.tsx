@@ -13,25 +13,21 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
 
 export interface LinkToUptimeProps {
-  nodeType: InventoryItemType;
-  nodeName: string;
-  nodeIp?: string | null;
+  assetType: InventoryItemType;
+  assetName: string;
+  ip?: string | null;
 }
 
-export const LinkToUptime = ({ nodeType, nodeName, nodeIp }: LinkToUptimeProps) => {
+export const LinkToUptime = ({ assetType, assetName, ip }: LinkToUptimeProps) => {
   const { share } = useKibanaContextForPlugin().services;
 
   return (
     <EuiButtonEmpty
-      data-test-subj="hostsView-flyout-uptime-link"
+      data-test-subj="infraAssetDetailsUptimeButton"
       size="xs"
-      iconSide="left"
-      iconType="popout"
       flush="both"
       onClick={() =>
-        share.url.locators
-          .get(uptimeOverviewLocatorID)!
-          .navigate({ [nodeType]: nodeName, ip: nodeIp })
+        share.url.locators.get(uptimeOverviewLocatorID)!.navigate({ [assetType]: assetName, ip })
       }
     >
       <FormattedMessage

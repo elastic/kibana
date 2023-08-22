@@ -13,6 +13,7 @@ import { render as reactRender, act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { Router } from '@kbn/shared-ux-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
@@ -59,6 +60,8 @@ export interface TestRenderer {
   setHeaderActionMenu: Function;
 }
 
+const queryClient = new QueryClient();
+
 export const createFleetTestRendererMock = (): TestRenderer => {
   const basePath = '/mock';
   const extensions: UIExtensionsStorage = {};
@@ -72,7 +75,11 @@ export const createFleetTestRendererMock = (): TestRenderer => {
     return (
       <startServices.i18n.Context>
         <Router history={mountHistory}>
-          <KibanaContextProvider services={{ ...startServices }}>{children}</KibanaContextProvider>
+          <QueryClientProvider client={queryClient}>
+            <KibanaContextProvider services={{ ...startServices }}>
+              {children}
+            </KibanaContextProvider>
+          </QueryClientProvider>
         </Router>
       </startServices.i18n.Context>
     );

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { PluginInitializerContext } from '@kbn/core/public';
+import { DiscoverLogExplorerConfig } from '../common/plugin_config';
 import { DiscoverLogExplorerPlugin } from './plugin';
 
-export function plugin() {
-  return new DiscoverLogExplorerPlugin();
+export function plugin(context: PluginInitializerContext<DiscoverLogExplorerConfig>) {
+  return new DiscoverLogExplorerPlugin(context);
 }

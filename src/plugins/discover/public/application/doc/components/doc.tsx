@@ -11,12 +11,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPage, EuiPageBody } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { getRootBreadcrumbs } from '../../../utils/breadcrumbs';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { setBreadcrumbs } from '../../../utils/breadcrumbs';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { ElasticRequestState } from '../types';
 import { useEsDocSearch } from '../../../hooks/use_es_doc_search';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import type { DataTableRecord } from '../../../types';
 
 export interface DocProps {
   /**
@@ -53,10 +53,11 @@ export function Doc(props: DocProps) {
   const indexExistsLink = docLinks.links.apis.indexExists;
 
   useEffect(() => {
-    chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs({ breadcrumb: props.referrer, services }),
-      { text: `${props.index}#${props.id}` },
-    ]);
+    setBreadcrumbs({
+      services,
+      titleBreadcrumbText: `${props.index}#${props.id}`,
+      rootBreadcrumbPath: props.referrer,
+    });
   }, [chrome, props.referrer, props.index, props.id, dataView, locator, services]);
 
   return (

@@ -37,7 +37,16 @@ export const SUPERHERO_PERSONALITY = i18n.translate(
   }
 );
 
+export const FORMAT_OUTPUT_CORRECTLY = i18n.translate(
+  'xpack.securitySolution.assistant.content.prompts.system.outputFormatting',
+  {
+    defaultMessage:
+      'If you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.',
+  }
+);
+
 export const DEFAULT_SYSTEM_PROMPT_NON_I18N = `${YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT} ${IF_YOU_DONT_KNOW_THE_ANSWER}
+${FORMAT_OUTPUT_CORRECTLY}
 ${USE_THE_FOLLOWING_CONTEXT_TO_ANSWER}`;
 
 export const DEFAULT_SYSTEM_PROMPT_NAME = i18n.translate(
@@ -49,6 +58,7 @@ export const DEFAULT_SYSTEM_PROMPT_NAME = i18n.translate(
 
 export const SUPERHERO_SYSTEM_PROMPT_NON_I18N = `${YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT} ${IF_YOU_DONT_KNOW_THE_ANSWER}
 ${SUPERHERO_PERSONALITY}
+${FORMAT_OUTPUT_CORRECTLY}
 ${USE_THE_FOLLOWING_CONTEXT_TO_ANSWER}`;
 
 export const SUPERHERO_SYSTEM_PROMPT_NAME = i18n.translate(

@@ -9,6 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
+import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { AppPluginStartDependencies } from './types';
 import { UnifiedFieldListExampleApp } from './example_app';
@@ -16,17 +17,18 @@ import { UnifiedFieldListExampleApp } from './example_app';
 export const renderApp = (
   core: CoreStart,
   deps: AppPluginStartDependencies,
-  { element }: AppMountParameters
+  { element, theme$ }: AppMountParameters
 ) => {
   ReactDOM.render(
     <I18nProvider>
-      <UnifiedFieldListExampleApp
-        services={{
-          core,
-          uiSettings: core.uiSettings,
-          ...deps,
-        }}
-      />
+      <CoreThemeProvider theme$={theme$}>
+        <UnifiedFieldListExampleApp
+          services={{
+            core,
+            ...deps,
+          }}
+        />
+      </CoreThemeProvider>
     </I18nProvider>,
     element
   );

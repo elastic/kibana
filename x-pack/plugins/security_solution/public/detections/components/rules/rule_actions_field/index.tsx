@@ -99,7 +99,7 @@ const ContainerActions = styled.div.attrs(
   ${({ $caseIndexes }) =>
     $caseIndexes.map(
       (index) => `
-        div[id="${index}"].euiAccordion__childWrapper .euiAccordion__padding--l {
+        div[id="${index}"].euiAccordion__childWrapper .euiAccordion__children {
           padding: 0px;
           .euiFlexGroup {
             display: none;
@@ -119,7 +119,7 @@ export const RuleActionsField: React.FC<Props> = ({
 }) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
   const form = useFormContext();
-  const { isSubmitted, isSubmitting, isValid } = form;
+  const { isValid } = form;
   const {
     triggersActionsUi: { getActionForm },
   } = useKibana().services;
@@ -231,6 +231,7 @@ export const RuleActionsField: React.FC<Props> = ({
     [field]
   );
 
+  const isFormValidated = isValid !== undefined;
   const actionForm = useMemo(
     () =>
       getActionForm({
@@ -248,9 +249,10 @@ export const RuleActionsField: React.FC<Props> = ({
         defaultActionMessage: FORM_FOR_EACH_ALERT_BODY_MESSAGE,
         defaultSummaryMessage: FORM_SUMMARY_BODY_MESSAGE,
         hideActionHeader: true,
-        hasSummary: true,
+        hasAlertsMappings: true,
         notifyWhenSelectOptions: NOTIFY_WHEN_OPTIONS,
         defaultRuleFrequency: NOTIFICATION_DEFAULT_FREQUENCY,
+        disableErrorMessages: !isFormValidated,
       }),
     [
       actions,
@@ -262,18 +264,17 @@ export const RuleActionsField: React.FC<Props> = ({
       setActionParamsProperty,
       setAlertActionsProperty,
       setActionAlertsFilterProperty,
+      isFormValidated,
     ]
   );
 
   useEffect(() => {
-    if (isSubmitting || !field.errors.length) {
-      return setFieldErrors(null);
-    }
-    if (isSubmitted && !isSubmitting && isValid === false && field.errors.length) {
+    if (isValid === false) {
       const errorsString = field.errors.map(({ message }) => message).join('\n');
       return setFieldErrors(errorsString);
     }
-  }, [isSubmitted, isSubmitting, field.isChangingValue, isValid, field.errors, setFieldErrors]);
+    return setFieldErrors(null);
+  }, [field.errors, isValid]);
 
   return (
     <ContainerActions $caseIndexes={caseActionIndexes}>

@@ -60,5 +60,6 @@
     "@kbn/global-search-plugin",
     "@kbn/share-plugin",
     "@kbn/core-saved-objects-migration-server-internal",
+    "@kbn/search-api-panels",
   ]
 }

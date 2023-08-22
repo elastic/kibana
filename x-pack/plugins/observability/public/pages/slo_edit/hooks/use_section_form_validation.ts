@@ -54,6 +54,48 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
         isGoodParamsValid() &&
         isTotalParamsValid();
       break;
+    case 'sli.histogram.custom':
+      const isRangeValid = (type: 'good' | 'total') => {
+        const aggregation = getValues(`indicator.params.${type}.aggregation`);
+        // If aggreagtion is a value count we can exit early with true
+        if (aggregation === 'value_count') {
+          return true;
+        }
+        const from = getValues(`indicator.params.${type}.from`);
+        const to = getValues(`indicator.params.${type}.to`);
+        // If both from and to are defined and from is less that to, return true
+        if (from != null && to != null && from < to) {
+          return true;
+        }
+        return false;
+      };
+      isIndicatorSectionValid =
+        (
+          [
+            'indicator.params.index',
+            'indicator.params.filter',
+            'indicator.params.timestampField',
+            'indicator.params.good.aggregation',
+            'indicator.params.total.aggregation',
+            'indicator.params.good.field',
+            'indicator.params.total.field',
+            'indicator.params.good.filter',
+            'indicator.params.total.filter',
+          ] as const
+        ).every((field) => !getFieldState(field).invalid) &&
+        (
+          [
+            'indicator.params.good.aggregation',
+            'indicator.params.total.aggregation',
+            'indicator.params.good.field',
+            'indicator.params.total.field',
+            'indicator.params.index',
+            'indicator.params.timestampField',
+          ] as const
+        ).every((field) => !!getValues(field)) &&
+        isRangeValid('good') &&
+        isRangeValid('total');
+      break;
     case 'sli.kql.custom':
       isIndicatorSectionValid =
         (

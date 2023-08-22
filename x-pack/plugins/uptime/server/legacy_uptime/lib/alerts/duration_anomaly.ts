@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import moment from 'moment';
 import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
@@ -19,6 +20,7 @@ import {
   alertsLocatorID,
   AlertsLocatorParams,
   getAlertUrl,
+  observabilityPaths,
 } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { asyncForEach } from '@kbn/std';
@@ -102,6 +104,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
   name: durationAnomalyTranslations.alertFactoryName,
   validate: {
     params: schema.object({
+      stackVersion: schema.maybe(schema.string()),
       monitorId: schema.string(),
       severity: schema.number(),
     }),
@@ -142,7 +145,10 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
   }) {
     const uptimeEsClient = new UptimeEsClient(
       savedObjectsClient,
-      scopedClusterClient.asCurrentUser
+      scopedClusterClient.asCurrentUser,
+      {
+        stackVersion: params.stackVersion ?? '8.9.0',
+      }
     );
     const { share, basePath } = server;
     const alertsLocator: LocatorPublic<AlertsLocatorParams> | undefined =
@@ -223,4 +229,6 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
     return { state: updateState(state, foundAnomalies) };
   },
   alerts: UptimeRuleTypeAlertDefinition,
+  getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+    observabilityPaths.ruleDetails(rule.id),
 });

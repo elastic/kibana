@@ -12,14 +12,6 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   return {
-    async clickTryHostViewLink() {
-      return await testSubjects.click('inventory-hostsView-link');
-    },
-
-    async clickTryHostViewBadge() {
-      return await testSubjects.click('inventory-hostsView-link-badge');
-    },
-
     async clickTableOpenFlyoutButton() {
       return testSubjects.click('hostsView-flyout-button');
     },
@@ -40,37 +32,74 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('euiFlyoutCloseButton');
     },
 
+    async getBetaBadgeExists() {
+      return testSubjects.exists('infra-beta-badge');
+    },
+
+    // Inventory UI
+    async clickTryHostViewLink() {
+      return await testSubjects.click('inventory-hostsView-link');
+    },
+
+    async clickTryHostViewBadge() {
+      return await testSubjects.click('inventory-hostsView-link-badge');
+    },
+
+    // Asset Details Flyout
+
+    async clickOverviewFlyoutTab() {
+      return testSubjects.click('infraAssetDetailsOverviewTab');
+    },
+
+    async clickMetadataFlyoutTab() {
+      return testSubjects.click('infraAssetDetailsMetadataTab');
+    },
+
     async clickProcessesFlyoutTab() {
-      return testSubjects.click('hostsView-flyout-tabs-processes');
+      return testSubjects.click('infraAssetDetailsProcessesTab');
     },
 
     async clickLogsFlyoutTab() {
-      return testSubjects.click('hostsView-flyout-tabs-logs');
+      return testSubjects.click('infraAssetDetailsLogsTab');
+    },
+
+    async clickOverviewLinkToAlerts() {
+      return testSubjects.click('infraAssetDetailsAlertsShowAllButton');
+    },
+
+    async clickOverviewOpenAlertsFlyout() {
+      return testSubjects.click('infraAssetDetailsCreateAlertsRuleButton');
+    },
+
+    async clickShowAllMetadataOverviewTab() {
+      return testSubjects.click('infraAssetDetailsMetadataShowAllButton');
     },
 
     async clickProcessesTableExpandButton() {
       return testSubjects.click('infraProcessRowButton');
     },
 
-    async clickFlyoutUptimeLink() {
-      return testSubjects.click('hostsView-flyout-uptime-link');
+    async clickFlyoutApmServicesLink() {
+      return testSubjects.click('infraAssetDetailsViewAPMServicesButton');
     },
 
-    async clickFlyoutApmServicesLink() {
-      return testSubjects.click('hostsView-flyout-apm-services-link');
+    async clickAddMetadataPin() {
+      return testSubjects.click('infraAssetDetailsMetadataAddPin');
+    },
+
+    async clickRemoveMetadataPin() {
+      return testSubjects.click('infraAssetDetailsMetadataRemovePin');
     },
 
     async clickAddMetadataFilter() {
-      return testSubjects.click('hostsView-flyout-metadata-add-filter');
+      return testSubjects.click('infraAssetDetailsMetadataAddFilterButton');
     },
 
     async clickRemoveMetadataFilter() {
-      return testSubjects.click('hostsView-flyout-metadata-remove-filter');
+      return testSubjects.click('infraAssetDetailsMetadataRemoveFilterButton');
     },
 
-    async getBetaBadgeExists() {
-      return testSubjects.exists('infra-beta-badge');
-    },
+    // Splash screen
 
     async getHostsLandingPageDisabled() {
       const container = await testSubjects.find('hostView-no-enable-access');
@@ -179,15 +208,29 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return div.getAttribute('title');
     },
 
-    // Flyout Tabs
-    getMetadataTab() {
-      return testSubjects.find('hostsView-flyout-tabs-metadata');
+    // Asset Details Flyout Tabs
+    async getAssetDetailsKPITileValue(type: string) {
+      const container = await testSubjects.find('infraAssetDetailsKPIGrid');
+      const element = await container.findByTestSubject(`infraAssetDetailsKPI${type}`);
+      const div = await element.findByClassName('echMetricText__value');
+      return div.getAttribute('title');
     },
 
-    async getMetadataTabName() {
-      const tabElement = await this.getMetadataTab();
-      const tabTitle = await tabElement.findByClassName('euiTab__content');
-      return tabTitle.getVisibleText();
+    overviewAlertsTitleExist() {
+      return testSubjects.exists('infraAssetDetailsAlertsTitle');
+    },
+
+    async getAssetDetailsMetricsCharts() {
+      const container = await testSubjects.find('infraAssetDetailsMetricsChartGrid');
+      return container.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricsChart"]');
+    },
+
+    metadataTableExist() {
+      return testSubjects.exists('infraAssetDetailsMetadataTable');
+    },
+
+    async getRemovePinExist() {
+      return testSubjects.exists('infraAssetDetailsMetadataRemovePin');
     },
 
     async getAppliedFilter() {
@@ -198,21 +241,25 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async getRemoveFilterExist() {
-      return testSubjects.exists('hostsView-flyout-metadata-remove-filter');
+      return testSubjects.exists('infraAssetDetailsMetadataRemoveFilterButton');
     },
 
     async getProcessesTabContentTitle(index: number) {
-      const processesListElements = await testSubjects.findAll('infraProcessesSummaryTableItem');
+      const processesListElements = await testSubjects.findAll(
+        'infraAssetDetailsProcessesSummaryTableItem'
+      );
       return processesListElements[index].findByCssSelector('dt');
     },
 
     async getProcessesTabContentTotalValue() {
-      const processesListElements = await testSubjects.findAll('infraProcessesSummaryTableItem');
+      const processesListElements = await testSubjects.findAll(
+        'infraAssetDetailsProcessesSummaryTableItem'
+      );
       return processesListElements[0].findByCssSelector('dd');
     },
 
     getProcessesTable() {
-      return testSubjects.find('infraProcessesTable');
+      return testSubjects.find('infraAssetDetailsProcessesTable');
     },
 
     async getProcessesTableBody() {
