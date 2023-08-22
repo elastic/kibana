@@ -26,10 +26,11 @@ interface Props {
   timeRange: TimeRange;
   metricsDataView?: DataView;
   logsDataView?: DataView;
+  isCompactView: boolean;
 }
 
 export const MetricsGrid = React.memo(
-  ({ nodeName, metricsDataView, logsDataView, timeRange }: Props) => {
+  ({ nodeName, metricsDataView, logsDataView, timeRange, isCompactView }: Props) => {
     const getDataView = useCallback(
       (dataViewOrigin: DataViewOrigin) => {
         return dataViewOrigin === 'metrics' ? metricsDataView : logsDataView;
@@ -62,26 +63,27 @@ export const MetricsGrid = React.memo(
             gutterSize="s"
             data-test-subj="infraAssetDetailsMetricsChartGrid"
           >
-            {assetDetailsDashboards.host.hostMetricCharts.map(
-              ({ dataViewOrigin, id, layers, title, overrides }, index) => (
-                <EuiFlexItem key={index} grow={false}>
-                  <LensChart
-                    id={`infraAssetDetailsMetricsChart${id}`}
-                    borderRadius="m"
-                    dataView={getDataView(dataViewOrigin)}
-                    dateRange={timeRange}
-                    height={METRIC_CHART_HEIGHT}
-                    visualOptions={XY_MISSING_VALUE_DOTTED_LINE_CONFIG}
-                    layers={layers}
-                    filters={getFilters(dataViewOrigin)}
-                    title={title}
-                    overrides={overrides}
-                    visualizationType="lnsXY"
-                    disableTriggers
-                  />
-                </EuiFlexItem>
-              )
-            )}
+            {(isCompactView
+              ? assetDetailsDashboards.host.hostMetricCharts
+              : assetDetailsDashboards.host.hostMetricChartsFullPage
+            ).map(({ dataViewOrigin, id, layers, title, overrides }, index) => (
+              <EuiFlexItem key={index} grow={false}>
+                <LensChart
+                  id={`infraAssetDetailsMetricsChart${id}`}
+                  borderRadius="m"
+                  dataView={getDataView(dataViewOrigin)}
+                  dateRange={timeRange}
+                  height={METRIC_CHART_HEIGHT}
+                  visualOptions={XY_MISSING_VALUE_DOTTED_LINE_CONFIG}
+                  layers={layers}
+                  filters={getFilters(dataViewOrigin)}
+                  title={title}
+                  overrides={overrides}
+                  visualizationType="lnsXY"
+                  disableTriggers
+                />
+              </EuiFlexItem>
+            ))}
           </EuiFlexGrid>
         </EuiFlexItem>
       </EuiFlexGroup>

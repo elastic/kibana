@@ -78,6 +78,7 @@ export const Overview = () => {
           logsDataView={logs.dataView}
           metricsDataView={metrics.dataView}
           nodeName={asset.name}
+          isCompactView={renderMode?.mode === 'flyout'}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

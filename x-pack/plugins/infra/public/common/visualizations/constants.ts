@@ -7,6 +7,13 @@
 
 import {
   cpuUsage,
+  cpuUsageIowait,
+  cpuUsageIrq,
+  cpuUsageNice,
+  cpuUsageSoftirq,
+  cpuUsageSteal,
+  cpuUsageUser,
+  cpuUsageSystem,
   diskIORead,
   diskIOWrite,
   diskReadThroughput,
@@ -25,6 +32,13 @@ import {
 
 export const hostLensFormulas = {
   cpuUsage,
+  cpuUsageIowait,
+  cpuUsageIrq,
+  cpuUsageNice,
+  cpuUsageSoftirq,
+  cpuUsageSteal,
+  cpuUsageUser,
+  cpuUsageSystem,
   diskIORead,
   diskIOWrite,
   diskReadThroughput,

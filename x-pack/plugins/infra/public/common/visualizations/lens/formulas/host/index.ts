@@ -6,6 +6,13 @@
  */
 
 export { cpuUsage } from './cpu_usage';
+export { cpuUsageIowait } from './cpu_usage_iowait';
+export { cpuUsageIrq } from './cpu_usage_irq';
+export { cpuUsageNice } from './cpu_usage_nice';
+export { cpuUsageSoftirq } from './cpu_usage_softirq';
+export { cpuUsageSteal } from './cpu_usage_steal';
+export { cpuUsageUser } from './cpu_usage_user';
+export { cpuUsageSystem } from './cpu_usage_system';
 export { diskIORead } from './disk_read_iops';
 export { diskIOWrite } from './disk_write_iops';
 export { diskReadThroughput } from './disk_read_throughput';
