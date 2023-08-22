@@ -143,7 +143,11 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
       await kibanaServer.importExport.load(ecommerceSOPath);
     },
-    async generateCsv(job: JobParamsCSV, username: string = 'test_user', password:string = 'changeme') {
+    async generateCsv(
+      job: JobParamsCSV,
+      username: string = 'test_user',
+      password: string = 'changeme'
+    ) {
       const jobParams = rison.encode(job);
       return await supertest
         .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/csv_searchsource?elasticInternalOrigin=true`)
@@ -152,11 +156,17 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
         .set(...INTERNAL_HEADER)
         .send({ jobParams });
     },
-    async getCompletedJobOutput(downloadReportPath: string, username: string = 'test_user', password:string = 'changeme') {
-      const response = await supertest.get(`${downloadReportPath}?elasticInternalOrigin=true`).auth(username, password);
+    async getCompletedJobOutput(
+      downloadReportPath: string,
+      username: string = 'test_user',
+      password: string = 'changeme'
+    ) {
+      const response = await supertest
+        .get(`${downloadReportPath}?elasticInternalOrigin=true`)
+        .auth(username, password);
       return response.text as unknown;
     },
-    async deleteAllReports(username: string = 'test_user', password:string = 'changeme') {
+    async deleteAllReports(username: string = 'test_user', password: string = 'changeme') {
       log.debug('ReportingAPI.deleteAllReports');
 
       // ignores 409 errs and keeps retrying
@@ -170,7 +180,12 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
           .expect(200);
       });
     },
-    async waitForJobToFinish(downloadReportPath: string, username: string = 'test_user', password:string = 'changeme', options?: { timeout?: number }) {
+    async waitForJobToFinish(
+      downloadReportPath: string,
+      username: string = 'test_user',
+      password: string = 'changeme',
+      options?: { timeout?: number }
+    ) {
       await retry.waitForWithTimeout(
         `job ${downloadReportPath} finished`,
         options?.timeout ?? config.get('timeouts.kibanaReportCompletion'),

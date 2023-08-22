@@ -27,7 +27,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      //archived reports has canvas workpad
+      // archived reports has canvas workpad
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
     });
 
