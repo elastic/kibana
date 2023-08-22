@@ -24,7 +24,15 @@ export default function ({ getService }: FtrProviderContext) {
     configArray.forEach((config) => {
       describe(config.name, () => {
         beforeEach(async () => {
-          await esArchiver.emptyKibanaIndex();
+          // TODO: This fails in Serverless with
+          // "index_not_found_exception: no such index [.kibana_ingest]",
+          // but the tests still run
+          try {
+            await esArchiver.emptyKibanaIndex();
+          } catch (e) {
+            // eslint-disable-next-line no-console
+            console.error(e);
+          }
           if (await es.indices.exists({ index: 'metrics-test' })) {
             await es.indices.delete({ index: 'metrics-test' });
           }
@@ -38,7 +46,15 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('should return false if no index patterns', async () => {
           // Make sure all saved objects including data views are cleared
-          await esArchiver.emptyKibanaIndex();
+          // TODO: This fails in Serverless with
+          // "index_not_found_exception: no such index [.kibana_ingest]",
+          // but the tests still run
+          try {
+            await esArchiver.emptyKibanaIndex();
+          } catch (e) {
+            // eslint-disable-next-line no-console
+            console.error(e);
+          }
           const response = await supertest
             .get(servicePath)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)

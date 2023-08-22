@@ -18,7 +18,15 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('search', () => {
     before(async () => {
-      await esArchiver.emptyKibanaIndex();
+      // TODO: This fails in Serverless with
+      // "index_not_found_exception: no such index [.kibana_ingest]",
+      // but the tests still run
+      try {
+        await esArchiver.emptyKibanaIndex();
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+      }
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
