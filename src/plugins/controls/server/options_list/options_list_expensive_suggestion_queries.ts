@@ -32,6 +32,9 @@ export const getExpensiveSuggestionAggregationBuilder = ({ fieldSpec }: OptionsL
   if (fieldSpec?.type === 'ip') {
     return expensiveSuggestionAggSubtypes.ip;
   }
+  if (fieldSpec?.type === 'date') {
+    return expensiveSuggestionAggSubtypes.date;
+  }
   return expensiveSuggestionAggSubtypes.textOrKeywordOrNested;
 };
 
@@ -223,6 +226,62 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
       return {
         suggestions,
         totalCardinality,
+      };
+    },
+  },
+  /**
+   * The "date" query / parser should be used whenever the field is built on some type of string field,
+   * regardless of if it is keyword only, keyword+text, or some nested keyword/keyword+text field.
+   */
+  date: {
+    buildAggregation: ({ searchString, fieldName, sort, size }: OptionsListRequestBody) => {
+      let dateQuery: any = {
+        suggestions: {
+          terms: {
+            size,
+            field: fieldName,
+            shard_size: 10,
+            order: getSortType(sort),
+          },
+        },
+        unique_terms: {
+          cardinality: {
+            field: fieldName,
+          },
+        },
+      };
+      if (searchString && searchString.length > 0) {
+        dateQuery = {
+          filteredSuggestions: {
+            filter: {
+              [fieldName]: {
+                value: searchString,
+                case_insensitive: true,
+              },
+            },
+            aggs: { ...dateQuery },
+          },
+        };
+      }
+      return dateQuery;
+    },
+    parse: (rawEsResult, request) => {
+      let basePath = 'aggregations';
+      basePath += request.searchString ? '.filteredSuggestions' : '';
+
+      const suggestions = get(rawEsResult, `${basePath}.suggestions.buckets`)?.reduce(
+        (acc: OptionsListSuggestions, suggestion: EsBucket & { key_as_string: string }) => {
+          acc.push({
+            value: suggestion.key_as_string,
+            docCount: suggestion.doc_count,
+          });
+          return acc;
+        },
+        []
+      );
+      return {
+        suggestions,
+        totalCardinality: get(rawEsResult, `${basePath}.unique_terms.value`),
       };
     },
   },

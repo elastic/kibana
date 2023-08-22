@@ -42,6 +42,8 @@ export const optionsListReducers = {
     ) {
       state.componentState.searchString.valid = getIpRangeQuery(action.payload).validSearch;
     }
+
+    // TODO: add validation for date search strings
   },
   setAllowExpensiveQueries: (
     state: WritableDraft<OptionsListReduxState>,
