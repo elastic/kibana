@@ -268,4 +268,9 @@ describe('ReportListing', () => {
       expect(testBed.actions.hasIlmPolicyLink()).toBe(true);
     });
   });
+  describe('Screenshotting Diagnostic', () => {
+    it('shows screenshotting diagnostic link if config enables image reports', () => {
+      expect(testBed.actions.hasScreenshotDiagnosticLink()).toBe(true)
+    })
+  })
 });

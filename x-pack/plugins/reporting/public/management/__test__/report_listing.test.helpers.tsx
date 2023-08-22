@@ -31,6 +31,7 @@ import { InternalApiClientProvider, ReportingAPIClient } from '../../lib/reporti
 import { Job } from '../../lib/job';
 
 import { ListingProps as Props, ReportListing } from '..';
+import { ReportDiagnostic } from '../components';
 
 export interface TestDependencies {
   http: ReturnType<typeof httpServiceMock.createSetupContract>;
@@ -41,17 +42,35 @@ export interface TestDependencies {
   toasts: NotificationsSetup['toasts'];
   ilmLocator: LocatorPublic<SerializableRecord>;
   uiSettings: ReturnType<typeof coreMock.createSetup>['uiSettings'];
+  reportDiagnostic: typeof ReportDiagnostic;
 }
 
-const mockPollConfig = {
-  jobCompletionNotifier: {
+const mockConfig = {
+  poll: {
+    jobCompletionNotifier: {
     interval: 5000,
     intervalErrorMultiplier: 3,
   },
   jobsRefresh: {
     interval: 5000,
     intervalErrorMultiplier: 3,
+  }
+},
+export_types: {
+  pdf: {
+    enabled: true,
   },
+  png: {
+    enabled: true,
+  },
+  csv: {
+    enabled: true,
+  }
+}, 
+roles: {
+  enabled: false
+}
+  
 };
 
 const validCheck = {
@@ -83,7 +102,7 @@ const createTestBed = registerTestBed(
         <IlmPolicyStatusContextProvider>
           <ReportListing
             license$={l$}
-            pollConfig={mockPollConfig}
+            config={mockConfig}
             redirect={jest.fn()}
             navigateToUrl={jest.fn()}
             urlService={urlService}
@@ -114,6 +133,8 @@ export const setup = async (props?: Partial<Props>) => {
     getUrl: jest.fn(),
   } as unknown as LocatorPublic<SerializableRecord>;
 
+const reportDiagnostic = () => <ReportDiagnostic apiClient={reportingAPIClient} clientConfig={mockConfig}/>
+
   const testDependencies: TestDependencies = {
     http: httpService,
     application: applicationServiceMock.createStartContract(),
@@ -127,6 +148,7 @@ export const setup = async (props?: Partial<Props>) => {
         get: () => ilmLocator,
       },
     } as unknown as SharePluginSetup['url'],
+    reportDiagnostic,
   };
 
   const testBed = createTestBed({ ...testDependencies, ...props });
@@ -162,6 +184,7 @@ export const setup = async (props?: Partial<Props>) => {
         });
         component.update();
       },
+      hasScreenshotDiagnosticLink: () => exists('screenshotDiagnosticLink')
     },
   };
 
