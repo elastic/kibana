@@ -39,7 +39,7 @@ import {
   setupRedactPassthrough,
   MULTI_NAMESPACE_CUSTOM_INDEX_TYPE,
   authMap,
-  updateBWCSuccess,
+  updateSuccess,
   deleteSuccess,
   removeReferencesToSuccess,
   checkConflictsSuccess,
@@ -212,7 +212,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     test(`propagates decorated error when authorizeUpdate rejects promise`, async () => {
       mockSecurityExt.authorizeUpdate.mockRejectedValueOnce(checkAuthError);
       await expect(
-        updateBWCSuccess(client, repository, registry, type, id, attributes, { namespace })
+        updateSuccess(client, repository, registry, type, id, attributes, { namespace })
       ).rejects.toThrow(checkAuthError);
       expect(mockSecurityExt.authorizeUpdate).toHaveBeenCalledTimes(1);
     });
@@ -220,7 +220,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     test(`propagates decorated error when unauthorized`, async () => {
       setupAuthorizeFunc(mockSecurityExt.authorizeUpdate, 'unauthorized');
       await expect(
-        updateBWCSuccess(client, repository, registry, type, id, attributes, { namespace })
+        updateSuccess(client, repository, registry, type, id, attributes, { namespace })
       ).rejects.toThrow(enforceError);
 
       expect(mockSecurityExt.authorizeUpdate).toHaveBeenCalledTimes(1);
@@ -230,7 +230,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       setupAuthorizeFunc(mockSecurityExt.authorizeUpdate, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
-      const result = await updateBWCSuccess(client, repository, registry, type, id, attributes, {
+      const result = await updateSuccess(client, repository, registry, type, id, attributes, {
         namespace,
       });
 
@@ -245,7 +245,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       setupAuthorizeFunc(mockSecurityExt.authorizeUpdate, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
-      const result = await updateBWCSuccess(client, repository, registry, type, id, attributes, {
+      const result = await updateSuccess(client, repository, registry, type, id, attributes, {
         namespace,
       });
 
@@ -257,7 +257,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls authorizeUpdate with correct parameters`, async () => {
-      await updateBWCSuccess(
+      await updateSuccess(
         client,
         repository,
         registry,
@@ -290,7 +290,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       setupAuthorizeFunc(mockSecurityExt.authorizeUpdate, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
-      await updateBWCSuccess(client, repository, registry, type, id, attributes, { namespace });
+      await updateSuccess(client, repository, registry, type, id, attributes, { namespace });
 
       expect(mockSecurityExt.authorizeUpdate).toHaveBeenCalledTimes(1);
       expect(mockSecurityExt.redactNamespaces).toHaveBeenCalledTimes(1);

@@ -523,7 +523,7 @@ export const mockUpdateResponse = (
   );
 };
 
-export const updateBWCSuccess = async <T extends Partial<unknown>>(
+export const updateSuccess = async <T extends Partial<unknown>>(
   client: ElasticsearchClientMock,
   repository: SavedObjectsRepository,
   registry: SavedObjectTypeRegistry,
@@ -564,56 +564,6 @@ export const updateBWCSuccess = async <T extends Partial<unknown>>(
         } as estypes.CreateResponse,
       };
     });
-  }
-
-  const result = await repository.update(type, id, attributes, options);
-  expect(client.get).toHaveBeenCalled(); // not asserting on the number of calls here, we end up testing the test mocks and not the actual implementation
-  return result;
-};
-
-export const updateSuccess = async <T extends Partial<unknown>>(
-  client: ElasticsearchClientMock,
-  repository: SavedObjectsRepository,
-  registry: SavedObjectTypeRegistry,
-  type: string,
-  id: string,
-  attributes: T,
-  options?: SavedObjectsUpdateOptions,
-  internalOptions: {
-    originId?: string;
-    mockGetResponseValue?: estypes.GetResponse;
-  } = {},
-  objNamespaces?: string[]
-) => {
-  const { mockGetResponseValue, originId } = internalOptions;
-
-  const mockGetResponse =
-    mockGetResponseValue ??
-    getMockGetResponse(registry, { type, id }, objNamespaces ?? options?.namespace);
-  client.get.mockResponseOnce(mockGetResponse, { statusCode: 200 });
-
-  mockUpdateResponse(client, type, id, options, objNamespaces, originId);
-
-  const namespace = objNamespaces ? objNamespaces[0] : options?.namespace ?? 'default';
-  const namespaceId = namespace === 'default' ? undefined : namespace;
-  const docId = `${
-    registry.isSingleNamespace(type) && namespaceId ? `${namespaceId}:` : ''
-  }${type}:${id}`;
-
-  if (options?.upsert) {
-    client.create.mockResponseOnce({
-      _seq_no: 12,
-      _primary_term: 42,
-      result: 'created',
-      _id: docId,
-    } as estypes.CreateResponse);
-  } else {
-    client.index.mockResponseOnce({
-      _seq_no: 12,
-      _primary_term: 42,
-      result: 'updated',
-      _id: docId,
-    } as estypes.IndexResponse);
   }
 
   const result = await repository.update(type, id, attributes, options);

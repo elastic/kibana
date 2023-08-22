@@ -38,11 +38,10 @@ import {
   createDocumentMigrator,
   getMockGetResponse,
   createSpySerializer,
-  updateSuccess,
   createBadRequestErrorPayload,
   createConflictErrorPayload,
   createGenericNotFoundErrorPayload,
-  updateBWCSuccess,
+  updateSuccess,
 } from '../../test_helpers/repository.test.common';
 
 describe('SavedObjectsRepository', () => {
@@ -176,7 +175,7 @@ describe('SavedObjectsRepository', () => {
         const type = 'index-pattern';
         const id = 'logstash-*';
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
-        await updateBWCSuccess(client, repository, registry, type, id, attributes, { namespace });
+        await updateSuccess(client, repository, registry, type, id, attributes, { namespace });
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.index).toHaveBeenCalledTimes(1);
@@ -184,7 +183,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`should use the ES get action then index action when type is multi-namespace for existing objects`, async () => {
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
-        await updateBWCSuccess(
+        await updateSuccess(
           client,
           repository,
           registry,
@@ -199,7 +198,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`should use the ES get action then index action when type is namespace agnostic for existing objects`, async () => {
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
-        await updateBWCSuccess(
+        await updateSuccess(
           client,
           repository,
           registry,
@@ -214,7 +213,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`should check for alias conflicts if a new multi-namespace object before create action would be created then create action to create the object`, async () => {
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
-        await updateBWCSuccess(
+        await updateSuccess(
           client,
           repository,
           registry,
@@ -231,7 +230,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`defaults to empty array with no input references`, async () => {
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
-        await updateBWCSuccess(client, repository, registry, type, id, attributes);
+        await updateSuccess(client, repository, registry, type, id, attributes);
         expect(
           (client.index.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
             .references
@@ -241,7 +240,7 @@ describe('SavedObjectsRepository', () => {
       it(`accepts custom references array 1`, async () => {
         const test = async (references: SavedObjectReference[]) => {
           migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
-          await updateBWCSuccess(client, repository, registry, type, id, attributes, {
+          await updateSuccess(client, repository, registry, type, id, attributes, {
             references,
           });
           expect(
@@ -255,7 +254,7 @@ describe('SavedObjectsRepository', () => {
       it(`accepts custom references array 2`, async () => {
         const test = async (references: SavedObjectReference[]) => {
           migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
-          await updateBWCSuccess(client, repository, registry, type, id, attributes, {
+          await updateSuccess(client, repository, registry, type, id, attributes, {
             references,
           });
           expect(
@@ -269,7 +268,7 @@ describe('SavedObjectsRepository', () => {
       it(`accepts custom references array 3`, async () => {
         const test = async (references: SavedObjectReference[]) => {
           migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
-          await updateBWCSuccess(client, repository, registry, type, id, attributes, {
+          await updateSuccess(client, repository, registry, type, id, attributes, {
             references,
           });
           expect(
@@ -283,7 +282,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`uses the 'upsertAttributes' option when specified for a single-namespace type that does not exist`, async () => {
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
-        await updateBWCSuccess(
+        await updateSuccess(
           client,
           repository,
           registry,
@@ -312,7 +311,7 @@ describe('SavedObjectsRepository', () => {
       it(`uses the 'upsertAttributes' option when specified for a multi-namespace type that does not exist`, async () => {
         const options = { upsert: { title: 'foo', description: 'bar' } };
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
-        await updateBWCSuccess(
+        await updateSuccess(
           client,
           repository,
           registry,
@@ -346,7 +345,7 @@ describe('SavedObjectsRepository', () => {
         // attributes don't change
         const options = { upsert: { title: 'foo', description: 'bar' } };
         migrator.migrateDocument.mockImplementation((doc) => ({ ...doc, migrated: true }));
-        await updateBWCSuccess(
+        await updateSuccess(
           client,
           repository,
           registry,
@@ -381,7 +380,7 @@ describe('SavedObjectsRepository', () => {
         // const coreMigrationVersion = '8.0.0';
         const test = async (references: unknown) => {
           migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
-          await updateBWCSuccess(client, repository, registry, type, id, attributes, {
+          await updateSuccess(client, repository, registry, type, id, attributes, {
             // @ts-expect-error references is unknown
             references,
           });
@@ -400,7 +399,7 @@ describe('SavedObjectsRepository', () => {
 
       it.skip(`TODOdefaults to a refresh setting of wait_for`, async () => {
         migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
-        await updateBWCSuccess(client, repository, registry, type, id, { foo: 'bar' });
+        await updateSuccess(client, repository, registry, type, id, { foo: 'bar' });
         expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({
             refresh: 'wait_for',
@@ -411,7 +410,7 @@ describe('SavedObjectsRepository', () => {
 
       it.skip(`TODOdoes not default to the version of the existing document when type is multi-namespace`, async () => {
         migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
-        await updateBWCSuccess(
+        await updateSuccess(
           client,
           repository,
           registry,
@@ -432,7 +431,7 @@ describe('SavedObjectsRepository', () => {
 
       it.skip(`TODOaccepts version`, async () => {
         migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
-        await updateBWCSuccess(client, repository, registry, type, id, attributes, {
+        await updateSuccess(client, repository, registry, type, id, attributes, {
           version: encodeHitVersion({ _seq_no: 100, _primary_term: 200 }),
         });
         expect(client.index).toHaveBeenCalledWith(
@@ -472,7 +471,7 @@ describe('SavedObjectsRepository', () => {
 
       it.skip(`TODOprepends namespace to the id when providing namespace for single-namespace type`, async () => {
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
-        await updateBWCSuccess(
+        await updateSuccess(
           client,
           repository,
           registry,
@@ -659,7 +658,7 @@ describe('SavedObjectsRepository', () => {
         mockPreflightCheckForCreate.mockResolvedValue([
           { type: 'type', id: 'id', error: { type: 'conflict' } },
         ]);
-        await updateBWCSuccess(
+        await updateSuccess(
           client,
           repository,
           registry,
@@ -685,7 +684,7 @@ describe('SavedObjectsRepository', () => {
         const type = 'index-pattern';
         const id = 'logstash-*';
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
-        await updateBWCSuccess(client, repository, registry, type, id, attributes);
+        await updateSuccess(client, repository, registry, type, id, attributes);
         expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
         expectMigrationArgs({
           id,
@@ -703,7 +702,7 @@ describe('SavedObjectsRepository', () => {
         const internalOptions = {
           mockGetResponseAsNotFound: { found: false } as estypes.GetResponse,
         };
-        await updateBWCSuccess(
+        await updateSuccess(
           client,
           repository,
           registry,

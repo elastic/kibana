@@ -44,7 +44,7 @@ import {
   mockTimestamp,
   CUSTOM_INDEX_TYPE,
   getMockGetResponse,
-  updateBWCSuccess,
+  updateSuccess,
   deleteSuccess,
   removeReferencesToSuccess,
   MULTI_NAMESPACE_ISOLATED_TYPE,
@@ -214,7 +214,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           const type = CUSTOM_INDEX_TYPE;
           const id = 'some-id';
 
-          await updateBWCSuccess(
+          await updateSuccess(
             client,
             repository,
             registry,
@@ -1069,7 +1069,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         const type = CUSTOM_INDEX_TYPE;
         const id = 'some-id';
 
-        await updateBWCSuccess(
+        await updateSuccess(
           client,
           repository,
           registry,
@@ -1344,7 +1344,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           ...encryptedSO,
           ...decryptedStrippedAttributes,
         });
-        await updateBWCSuccess(
+        await updateSuccess(
           client,
           repository,
           registry,

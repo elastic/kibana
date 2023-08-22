@@ -42,7 +42,7 @@ import {
   mockVersion,
   mockVersionProps,
   MULTI_NAMESPACE_ENCRYPTED_TYPE,
-  updateBWCSuccess,
+  updateSuccess,
   type TypeIdTuple,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
@@ -339,7 +339,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
 
     it('does not attempt to encrypt or decrypt if type is not encryptable', async () => {
       mockEncryptionExt.isEncryptableType.mockReturnValue(false);
-      const result = await updateBWCSuccess(
+      const result = await updateSuccess(
         client,
         repository,
         registry,
@@ -370,7 +370,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
         ...encryptedSO,
         ...decryptedStrippedAttributes,
       });
-      const result = await updateBWCSuccess(
+      const result = await updateSuccess(
         client,
         repository,
         registry,
