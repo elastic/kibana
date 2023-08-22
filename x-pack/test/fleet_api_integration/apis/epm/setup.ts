@@ -21,8 +21,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('setup api', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
-    // FAILING ES FORWARD COMPATIBILITY: https://github.com/elastic/kibana/issues/164205
-    describe.skip('setup performs upgrades', async () => {
+    describe('setup performs upgrades', async () => {
       const oldEndpointVersion = '0.13.0';
       beforeEach(async () => {
         await supertest
