@@ -15,6 +15,7 @@ import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { pipe } from 'fp-ts/function';
 import { ES_CLIENT_HEADERS } from '../client_headers';
 
 import {
@@ -40,8 +41,10 @@ const pipeline = (...streams: Readable[]) =>
 
 const logLoad = (generalName: string) => (log: ToolingLog) => (mappingsOrArchiveName: string) => {
   log.info('[%s] Loading %j', generalName, mappingsOrArchiveName);
+  // console.info('[%s] Loading %j', generalName, mappingsOrArchiveName);
   return mappingsOrArchiveName;
 };
+const res = (dir: string) => (file: string) => resolve(dir, file);
 
 export async function loadAction({
   inputDir,
@@ -64,16 +67,15 @@ export async function loadAction({
   const stats = createStats(archiveGeneralName, log);
   const mappingsFileAndArchive = prioritizeMappings(await readDirectory(inputDir));
   const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
+  const resDir = res(inputDir);
 
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
   // across archives and properly skip docs from existing indexes
   const recordStream = concatStreamProviders(
     mappingsFileAndArchive.map((mappingsOrArchiveName) => () => {
-      logLoad(archiveGeneralName)(log)(mappingsOrArchiveName);
-
       return pipeline(
-        createReadStream(resolve(inputDir, mappingsOrArchiveName)),
+        pipe(mappingsOrArchiveName, logLoad(archiveGeneralName)(log), resDir, createReadStream),
         ...createParseArchiveStreams({ gzip: isGzip(mappingsOrArchiveName) })
       );
     }),
