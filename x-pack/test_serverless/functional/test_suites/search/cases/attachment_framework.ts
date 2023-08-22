@@ -28,6 +28,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'dashboards' });
 
+        await testSubjects.click('createDashboardButton');
         await dashboard.clickNewDashboard();
 
         await lens.createAndAddLensFromDashboard({});
