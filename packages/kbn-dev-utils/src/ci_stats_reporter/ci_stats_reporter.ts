@@ -17,9 +17,8 @@ import Axios, { AxiosRequestConfig } from 'axios';
 
 import { ToolingLog } from '../tooling_log';
 import { parseConfig, Config } from './ci_stats_config';
-import { CiStatsMetadata } from './ci_stats_metadata';
-
 import type { CiStatsTestGroupInfo, CiStatsTestRun } from './ci_stats_test_group_types';
+import { CiStatsMetadata } from './ci_stats_metadata';
 
 const BASE_URL = 'https://ci-stats.kibana.dev';
 const SECOND = 1000;
