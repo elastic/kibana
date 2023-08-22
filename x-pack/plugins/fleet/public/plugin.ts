@@ -49,6 +49,8 @@ import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
 import { calculateAuthz, calculatePackagePrivilegesFromCapabilities } from '../common/authz';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
@@ -128,6 +130,7 @@ export interface FleetStartDeps {
 export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, 'cloud'> {
   storage: Storage;
   share: SharePluginStart;
+  dashboard: DashboardStart;
   cloud?: CloudSetup & CloudStart;
   discover?: DiscoverStart;
   spaces?: SpacesPluginStart;
