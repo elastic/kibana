@@ -23,14 +23,13 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import { useColumns } from '@kbn/unified-data-table';
+import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/discover-utils/types';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
 import { AppState, GlobalState, isEqualFilters } from './services/context_state';
 import { useContextAppState } from './hooks/use_context_app_state';
 import { useContextAppFetch } from './hooks/use_context_app_fetch';
-import { popularizeField } from '../../utils/popularize_field';
 import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -76,9 +75,7 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     dataView,
     dataViews,
     useNewFieldsApi,
-    setAppState: (newState: { columns: string[]; sort?: string[][] }) => {
-      stateContainer.setAppState(newState);
-    },
+    setAppState: stateContainer.setAppState,
     columns: appState.columns,
     sort: appState.sort,
   });

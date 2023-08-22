@@ -658,7 +658,7 @@ export const UnifiedDataTable = ({
 
   const showDisplaySelector = useMemo(
     () =>
-      onUpdateRowHeight
+      !!onUpdateRowHeight
         ? {
             allowDensity: false,
             allowRowHeight: true,
@@ -689,7 +689,6 @@ export const UnifiedDataTable = ({
             showDisplaySelector,
             showFullScreenSelector: showFullScreenButton,
           },
-
     [defaultColumns, isSortEnabled, additionalControls, showDisplaySelector, showFullScreenButton]
   );
 

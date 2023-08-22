@@ -154,9 +154,7 @@ function DiscoverDocumentsComponent({
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
     dataViews,
-    setAppState: (newState: { columns: string[]; sort?: string[][] }) => {
-      stateContainer.appState.update(newState);
-    },
+    setAppState: stateContainer.appState.update,
     useNewFieldsApi,
     columns,
     sort,

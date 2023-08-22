@@ -28,7 +28,7 @@ import {
   SHOW_FIELD_STATISTICS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import { useColumns } from '@kbn/unified-data-table';
+import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/discover-utils/types';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
@@ -40,7 +40,6 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../sidebar';
-import { popularizeField } from '../../../../utils/popularize_field';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
@@ -134,9 +133,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
     dataViews,
-    setAppState: (newState: { columns: string[]; sort?: string[][] }) => {
-      stateContainer.appState.update(newState);
-    },
+    setAppState: stateContainer.appState.update,
     useNewFieldsApi,
     columns,
     sort,
