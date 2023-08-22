@@ -113,13 +113,13 @@ export const PipelineTable: FunctionComponent<Props> = ({
         <EuiPopover
           isOpen={showPopover}
           closePopover={() => setShowPopover(false)}
+          key="createPipelineDropdown"
           button={
             <EuiButton
               fill
               iconSide="right"
               iconType="arrowDown"
               data-test-subj="createPipelineDropdown"
-              key="createPipelineDropdown"
               onClick={() => setShowPopover((previousBool) => !previousBool)}
             >
               {i18n.translate('xpack.ingestPipelines.list.table.createPipelineDropdownLabel', {

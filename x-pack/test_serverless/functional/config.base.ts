@@ -58,6 +58,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         indexManagement: {
           pathname: '/app/management/data/index_management',
         },
+        ingestPipelines: {
+          pathname: '/app/management/ingest/ingest_pipelines',
+        },
       },
       // choose where screenshots should be saved
       screenshots: {
