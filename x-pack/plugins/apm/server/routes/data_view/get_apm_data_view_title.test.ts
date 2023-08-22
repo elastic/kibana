@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { getApmDataViewTitle } from './get_apm_data_view_title';
 
 describe('getApmDataViewTitle', () => {
@@ -15,7 +15,7 @@ describe('getApmDataViewTitle', () => {
       span: 'apm-*-span-*',
       error: 'apm-*-error-*',
       metric: 'apm-*-metrics-*',
-    } as ApmIndicesConfig);
+    } as APMIndices);
     expect(title).toBe(
       'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*'
     );
@@ -27,7 +27,7 @@ describe('getApmDataViewTitle', () => {
       span: 'apm-*',
       error: 'apm-*',
       metric: 'apm-*',
-    } as ApmIndicesConfig);
+    } as APMIndices);
     expect(title).toBe('apm-*');
   });
 });

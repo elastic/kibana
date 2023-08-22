@@ -56,13 +56,6 @@ const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
   }),
-  indices: schema.object({
-    transaction: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
-    span: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
-    error: schema.string({ defaultValue: 'logs-apm*,apm-*' }),
-    metric: schema.string({ defaultValue: 'metrics-apm*,apm-*' }),
-    onboarding: schema.string({ defaultValue: 'apm-*' }),
-  }),
   forceSyntheticSource: schema.boolean({ defaultValue: false }),
   latestAgentVersionsUrl: schema.string({
     defaultValue: 'https://apm-agent-versions.elastic.co/versions.json',
@@ -109,35 +102,12 @@ export const config: PluginConfigDescriptor<APMConfig> = {
     deprecateFromRoot,
     unusedFromRoot,
   }) => [
-    unused('indices.sourcemap', { level: 'warning' }),
     unused('ui.transactionGroupBucketSize', {
       level: 'warning',
     }),
     rename('autocreateApmIndexPattern', 'autoCreateApmDataView', {
       level: 'warning',
     }),
-    renameFromRoot(
-      'apm_oss.transactionIndices',
-      'xpack.apm.indices.transaction',
-      { level: 'warning' }
-    ),
-    renameFromRoot('apm_oss.spanIndices', 'xpack.apm.indices.span', {
-      level: 'warning',
-    }),
-    renameFromRoot('apm_oss.errorIndices', 'xpack.apm.indices.error', {
-      level: 'warning',
-    }),
-    renameFromRoot('apm_oss.metricsIndices', 'xpack.apm.indices.metric', {
-      level: 'warning',
-    }),
-    renameFromRoot('apm_oss.sourcemapIndices', 'xpack.apm.indices.sourcemap', {
-      level: 'warning',
-    }),
-    renameFromRoot(
-      'apm_oss.onboardingIndices',
-      'xpack.apm.indices.onboarding',
-      { level: 'warning' }
-    ),
     deprecateFromRoot('apm_oss.enabled', '8.0.0', { level: 'warning' }),
     unusedFromRoot('apm_oss.fleetMode', { level: 'warning' }),
     unusedFromRoot('apm_oss.indexPattern', { level: 'warning' }),
@@ -165,7 +135,6 @@ export const config: PluginConfigDescriptor<APMConfig> = {
 };
 
 export type APMConfig = TypeOf<typeof configSchema>;
-export type ApmIndicesConfigName = keyof APMConfig['indices'];
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new APMPlugin(initContext);
@@ -177,4 +146,3 @@ export type {
   APMServerRouteRepository,
   APIEndpoint,
 } from './routes/apm_routes/get_global_apm_server_route_repository';
-export type { APMRouteHandlerResources } from './routes/typings';
