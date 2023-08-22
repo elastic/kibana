@@ -61,8 +61,9 @@ const EMPTY_INDEX_NAMES: string[] = [];
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
+  baseTheme: Theme;
   canUserCreateAndReadCases: () => boolean;
-  endDate?: string;
+  endDate?: string | null;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   getGroupByFieldsOnClick: (
@@ -92,9 +93,8 @@ interface Props {
   patternRollup: PatternRollup | undefined;
   selectedIndex: SelectedIndex | null;
   setSelectedIndex: (selectedIndex: SelectedIndex | null) => void;
-  startDate?: string;
+  startDate?: string | null;
   theme?: PartialTheme;
-  baseTheme: Theme;
   updatePatternIndexNames: ({
     indexNames,
     pattern,
@@ -237,19 +237,35 @@ const PatternComponent: React.FC<Props> = ({
 
   useEffect(() => {
     const newIndexNames = getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable });
-    if (shouldCreateIndexNames({ indexNames, ilmExplain, isILMAvailable, newIndexNames, stats })) {
+    const newDocsCount = getTotalDocsCount({ indexNames: newIndexNames, stats });
+
+    if (
+      shouldCreateIndexNames({
+        indexNames,
+        ilmExplain,
+        isILMAvailable,
+        newIndexNames,
+        stats,
+      })
+    ) {
       updatePatternIndexNames({
         indexNames: newIndexNames,
         pattern,
       });
     }
 
-    if (shouldCreatePatternRollup({ error, patternRollup, stats, ilmExplain, isILMAvailable })) {
+    if (
+      shouldCreatePatternRollup({
+        error,
+        ilmExplain,
+        isILMAvailable,
+        newDocsCount,
+        patternRollup,
+        stats,
+      })
+    ) {
       updatePatternRollup({
-        docsCount: getTotalDocsCount({
-          indexNames: getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable }),
-          stats,
-        }),
+        docsCount: newDocsCount,
         error,
         ilmExplain,
         ilmExplainPhaseCounts,

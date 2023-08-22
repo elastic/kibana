@@ -26,8 +26,9 @@ import { useDataQualityContext } from '../../data_quality_context';
 
 export interface Props {
   addSuccessToast: (toast: { title: string }) => void;
+  baseTheme: Theme;
   canUserCreateAndReadCases: () => boolean;
-  endDate?: string;
+  endDate?: string | null;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   getGroupByFieldsOnClick: (
@@ -55,9 +56,8 @@ export interface Props {
   patternIndexNames: Record<string, string[]>;
   patternRollups: Record<string, PatternRollup>;
   patterns: string[];
-  startDate?: string;
+  startDate?: string | null;
   theme?: PartialTheme;
-  baseTheme: Theme;
   updatePatternIndexNames: ({
     indexNames,
     pattern,

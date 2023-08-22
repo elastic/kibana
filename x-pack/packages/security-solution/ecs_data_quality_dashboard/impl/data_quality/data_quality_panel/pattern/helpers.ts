@@ -201,17 +201,19 @@ export const shouldCreatePatternRollup = ({
   error,
   ilmExplain,
   isILMAvailable,
+  newDocsCount,
   patternRollup,
   stats,
 }: {
   error: string | null;
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
   isILMAvailable: boolean;
+  newDocsCount: number;
   patternRollup: PatternRollup | undefined;
   stats: Record<string, IndicesStatsIndicesStats> | null;
 }): boolean => {
-  if (patternRollup != null) {
-    return false; // the rollup already exists
+  if (patternRollup?.docsCount === newDocsCount) {
+    return false;
   }
 
   const allDataLoaded: boolean =

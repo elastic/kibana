@@ -27,7 +27,7 @@ import {
   useGeneratedHtmlId,
   EuiSuperDatePicker,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import useObservable from 'react-use/lib/useObservable';
 
@@ -122,6 +122,9 @@ const defaultOptions: EuiComboBoxOptionOption[] = [
   },
 ];
 
+const DEFAULT_START_TIME = 'now-7d';
+const DEFAULT_END_TIME = 'now';
+
 const renderOption = (
   option: EuiComboBoxOptionOption<string | number | string[] | undefined>
 ): React.ReactNode => (
@@ -157,14 +160,23 @@ const DataQualityComponent: React.FC = () => {
   const { isILMAvailable$, cases } = useKibana().services;
   const isILMAvailable = useObservable(isILMAvailable$);
 
-  const [startDate, setStartTime] = useState('now-7d');
-  const [endDate, setEndTime] = useState('now');
+  const [startDate, setStartTime] = useState<string>();
+  const [endDate, setEndTime] = useState<string>();
   const onTimeChange = ({ start, end, isInvalid }: OnTimeChangeProps) => {
-    if (!isInvalid) {
-      setStartTime(start);
-      setEndTime(end);
+    if (isInvalid) {
+      return;
     }
+
+    setStartTime(start);
+    setEndTime(end);
   };
+
+  useEffect(() => {
+    if (isILMAvailable != null && isILMAvailable === false) {
+      setStartTime(DEFAULT_START_TIME);
+      setEndTime(DEFAULT_END_TIME);
+    }
+  }, [isILMAvailable]);
 
   const alertsAndSelectedPatterns = useMemo(
     () =>
@@ -262,8 +274,13 @@ const DataQualityComponent: React.FC = () => {
                 </FormControlLayout>
               </EuiToolTip>
             )}
-            {!isILMAvailable && (
-              <EuiSuperDatePicker start={startDate} end={endDate} onTimeChange={onTimeChange} />
+            {!isILMAvailable && startDate && endDate && (
+              <EuiSuperDatePicker
+                start={startDate}
+                end={endDate}
+                onTimeChange={onTimeChange}
+                showUpdateButton={false}
+              />
             )}
           </HeaderPage>
 

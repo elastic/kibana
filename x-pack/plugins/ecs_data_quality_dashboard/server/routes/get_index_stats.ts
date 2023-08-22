@@ -35,48 +35,49 @@ export const getIndexStatsRoute = (router: IRouter) => {
 
         const stats = await fetchStats(client, decodedIndexName);
         const { isILMAvailable, startDate, endDate } = request.query;
+
         if (isILMAvailable === true) {
           return response.ok({
             body: stats.indices,
           });
+        }
+
+        /**
+         * If ILM is not available, we need to fetch the available indices with the given date range.
+         * `fetchAvailableIndices` returns indices that have data in the given date range.
+         */
+        if (startDate && endDate) {
+          const decodedStartDate = decodeURIComponent(startDate);
+          const decodedEndDate = decodeURIComponent(endDate);
+
+          const indices = await fetchAvailableIndices(esClient, {
+            indexPattern: decodedIndexName,
+            startDate: decodedStartDate,
+            endDate: decodedEndDate,
+          });
+          const availableIndices = indices?.aggregations?.index?.buckets?.reduce(
+            (acc: Record<string, IndicesStatsIndicesStats>, { key }: { key: string }) => {
+              if (stats.indices?.[key]) {
+                acc[key] = stats.indices?.[key];
+              }
+              return acc;
+            },
+            {}
+          );
+
+          return response.ok({
+            body: availableIndices,
+          });
         } else {
-          /**
-           * If ILM is not available, we need to fetch the available indices with the given date range.
-           * `fetchAvailableIndices` returns indices that have data in the given date range.
-           */
-          if (startDate && endDate) {
-            const decodedStartDate = decodeURIComponent(startDate);
-            const decodedEndDate = decodeURIComponent(endDate);
-
-            const indices = await fetchAvailableIndices(esClient, {
-              indexPattern: decodedIndexName,
-              startDate: decodedStartDate,
-              endDate: decodedEndDate,
-            });
-            const availableIndices = indices?.aggregations?.index?.buckets?.reduce(
-              (acc: Record<string, IndicesStatsIndicesStats>, { key }: { key: string }) => {
-                if (stats.indices?.[key]) {
-                  acc[key] = stats.indices?.[key];
-                }
-                return acc;
-              },
-              {}
-            );
-
-            return response.ok({
-              body: availableIndices,
-            });
-          } else {
-            return resp.error({
-              body: i18n.translate(
-                'xpack.ecsDataQualityDashboard.getIndexStats.dateRangeRequiredErrorMessage',
-                {
-                  defaultMessage: 'startDate and endDate are required',
-                }
-              ),
-              statusCode: 403,
-            });
-          }
+          return resp.error({
+            body: i18n.translate(
+              'xpack.ecsDataQualityDashboard.getIndexStats.dateRangeRequiredErrorMessage',
+              {
+                defaultMessage: 'startDate and endDate are required',
+              }
+            ),
+            statusCode: 403,
+          });
         }
       } catch (err) {
         const error = transformError(err);

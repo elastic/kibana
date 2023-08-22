@@ -7,6 +7,7 @@
 
 import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { useEffect, useState } from 'react';
+import { HttpFetchQuery } from '@kbn/core/public';
 
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 import * as i18n from '../translations';
@@ -39,17 +40,22 @@ export const useStats = ({
     async function fetchData() {
       try {
         const encodedIndexName = encodeURIComponent(`${pattern}`);
+        const query: HttpFetchQuery = { isILMAvailable };
+        if (!isILMAvailable) {
+          if (startDate) {
+            query.startDate = startDate;
+          }
+          if (endDate) {
+            query.endDate = endDate;
+          }
+        }
 
         const response = await httpFetch<Record<string, IndicesStatsIndicesStats>>(
           `${STATS_ENDPOINT}/${encodedIndexName}`,
           {
             method: 'GET',
             signal: abortController.signal,
-            query: {
-              isILMAvailable,
-              startDate,
-              endDate,
-            },
+            query,
           }
         );
 

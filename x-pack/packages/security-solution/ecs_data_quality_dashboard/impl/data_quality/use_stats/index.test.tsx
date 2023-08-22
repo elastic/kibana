@@ -31,18 +31,51 @@ const ContextWrapper: React.FC = ({ children }) => (
   </DataQualityProvider>
 );
 
+const ContextWrapperILMNotAvailable: React.FC = ({ children }) => (
+  <DataQualityProvider
+    httpFetch={mockHttpFetch}
+    telemetryEvents={mockTelemetryEvents}
+    isILMAvailable={false}
+  >
+    {children}
+  </DataQualityProvider>
+);
+
 const pattern = 'auditbeat-*';
 const startDate = `now-7d`;
 const endDate = `now`;
 const params = {
   pattern,
-  startDate,
-  endDate,
 };
 
 describe('useStats', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('query with date range when ILM is not available', () => {
+    let statsResult: UseStats | undefined;
+    const queryParams = {
+      isILMAvailable: false,
+      startDate,
+      endDate,
+    };
+
+    beforeEach(async () => {
+      mockHttpFetch.mockResolvedValue(mockStatsGreenIndex);
+
+      const { result, waitForNextUpdate } = renderHook(
+        () => useStats({ pattern, startDate, endDate }),
+        {
+          wrapper: ContextWrapperILMNotAvailable,
+        }
+      );
+      await waitForNextUpdate();
+      statsResult = await result.current;
+    });
+    test(`it calls the stats api with the expected params`, async () => {
+      expect(mockHttpFetch.mock.calls[0][1].query).toEqual(queryParams);
+    });
   });
 
   describe('successful response from the stats api', () => {
@@ -68,6 +101,10 @@ describe('useStats', () => {
 
     test('it returns a null error, because no errors occurred', async () => {
       expect(statsResult?.error).toBeNull();
+    });
+
+    test(`it calls the stats api with the expected params`, async () => {
+      expect(mockHttpFetch.mock.calls[0][1].query).toEqual({ isILMAvailable: true });
     });
   });
 

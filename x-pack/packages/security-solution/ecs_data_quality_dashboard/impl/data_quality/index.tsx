@@ -26,10 +26,11 @@ import { ReportDataQualityCheckAllCompleted, ReportDataQualityIndexChecked } fro
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
+  baseTheme: Theme;
   canUserCreateAndReadCases: () => boolean;
   defaultNumberFormat: string;
   defaultBytesFormat: string;
-  endDate?: string;
+  endDate?: string | null;
   getGroupByFieldsOnClick: (
     elements: Array<
       | FlameElementEvent
@@ -59,9 +60,8 @@ interface Props {
   reportDataQualityIndexChecked?: ReportDataQualityIndexChecked;
   reportDataQualityCheckAllCompleted?: ReportDataQualityCheckAllCompleted;
   setLastChecked: (lastChecked: string) => void;
-  startDate?: string;
+  startDate?: string | null;
   theme?: PartialTheme;
-  baseTheme: Theme;
 }
 
 /** Renders the `Data Quality` dashboard content */

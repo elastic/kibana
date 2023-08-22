@@ -24,8 +24,9 @@ import { useResultsRollup } from '../../use_results_rollup';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
+  baseTheme: Theme;
   canUserCreateAndReadCases: () => boolean;
-  endDate?: string;
+  endDate?: string | null;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   getGroupByFieldsOnClick: (
@@ -53,9 +54,8 @@ interface Props {
   }) => void;
   patterns: string[];
   setLastChecked: (lastChecked: string) => void;
-  startDate?: string;
+  startDate?: string | null;
   theme?: PartialTheme;
-  baseTheme: Theme;
 }
 
 const BodyComponent: React.FC<Props> = ({

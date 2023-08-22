@@ -33,7 +33,7 @@ export const getRequestBody = ({
           range: {
             '@timestamp': {
               format: 'strict_date_optional_time',
-              gt: startDate,
+              gte: startDate,
               lte: endDate,
             },
           },

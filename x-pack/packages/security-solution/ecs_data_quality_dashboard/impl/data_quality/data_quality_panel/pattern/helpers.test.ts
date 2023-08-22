@@ -30,6 +30,7 @@ import { auditbeatWithAllResults } from '../../mock/pattern_rollup/mock_auditbea
 import { mockStats } from '../../mock/stats/mock_stats';
 import { IndexSummaryTableItem } from '../summary_table/helpers';
 import { DataQualityCheckResult } from '../../types';
+import { getIndexNames, getTotalDocsCount } from '../../helpers';
 
 const hot: IlmExplainLifecycleLifecycleExplainManaged = {
   index: '.ds-packetbeat-8.6.1-2023.02.04-000001',
@@ -548,25 +549,46 @@ describe('helpers', () => {
 
   describe('shouldCreatePatternRollup', () => {
     const isILMAvailable = true;
-
-    test('it returns false when the `patternRollup` already exists', () => {
+    const newIndexNames = getIndexNames({
+      stats: mockStats,
+      ilmExplain: mockIlmExplain,
+      ilmPhases: ['hot', 'unmanaged'],
+      isILMAvailable,
+    });
+    const newDocsCount = getTotalDocsCount({ indexNames: newIndexNames, stats: mockStats });
+    test('it returns false when the `patternRollup.docsCount` equals newDocsCount', () => {
       expect(
         shouldCreatePatternRollup({
           error: null,
           ilmExplain: mockIlmExplain,
           isILMAvailable,
+          newDocsCount: auditbeatWithAllResults.docsCount as number,
           patternRollup: auditbeatWithAllResults,
           stats: mockStats,
         })
       ).toBe(false);
     });
 
-    test('it returns true when all data was loaded', () => {
+    test('it returns true when all data and ILMExplain were loaded', () => {
       expect(
         shouldCreatePatternRollup({
           error: null,
-          isILMAvailable,
           ilmExplain: mockIlmExplain,
+          isILMAvailable,
+          newDocsCount,
+          patternRollup: undefined,
+          stats: mockStats,
+        })
+      ).toBe(true);
+    });
+
+    test('it returns true when all data was loaded and ILM is not available', () => {
+      expect(
+        shouldCreatePatternRollup({
+          error: null,
+          ilmExplain: null,
+          isILMAvailable: false,
+          newDocsCount,
           patternRollup: undefined,
           stats: mockStats,
         })
@@ -579,6 +601,7 @@ describe('helpers', () => {
           error: null,
           ilmExplain: null,
           isILMAvailable,
+          newDocsCount,
           patternRollup: undefined,
           stats: mockStats,
         })
@@ -591,6 +614,7 @@ describe('helpers', () => {
           error: null,
           ilmExplain: mockIlmExplain,
           isILMAvailable,
+          newDocsCount,
           patternRollup: undefined,
           stats: null,
         })
@@ -603,6 +627,7 @@ describe('helpers', () => {
           error: 'whoops',
           ilmExplain: null,
           isILMAvailable,
+          newDocsCount,
           patternRollup: undefined,
           stats: null,
         })
@@ -615,6 +640,7 @@ describe('helpers', () => {
           error: 'something went',
           ilmExplain: null,
           isILMAvailable,
+          newDocsCount,
           patternRollup: undefined,
           stats: mockStats,
         })
@@ -627,6 +653,7 @@ describe('helpers', () => {
           error: 'horribly wrong',
           ilmExplain: mockIlmExplain,
           isILMAvailable,
+          newDocsCount,
           patternRollup: undefined,
           stats: null,
         })
@@ -639,6 +666,7 @@ describe('helpers', () => {
           error: 'over here',
           ilmExplain: mockIlmExplain,
           isILMAvailable,
+          newDocsCount,
           patternRollup: undefined,
           stats: mockStats,
         })

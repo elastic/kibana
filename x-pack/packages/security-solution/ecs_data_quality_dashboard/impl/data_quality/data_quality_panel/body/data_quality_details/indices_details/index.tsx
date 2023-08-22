@@ -24,7 +24,7 @@ import { PatternRollup, SelectedIndex } from '../../../../types';
 export interface Props {
   addSuccessToast: (toast: { title: string }) => void;
   canUserCreateAndReadCases: () => boolean;
-  endDate?: string;
+  endDate?: string | null;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   getGroupByFieldsOnClick: (
@@ -54,7 +54,7 @@ export interface Props {
   patterns: string[];
   selectedIndex: SelectedIndex | null;
   setSelectedIndex: (selectedIndex: SelectedIndex | null) => void;
-  startDate?: string;
+  startDate?: string | null;
   theme?: PartialTheme;
   baseTheme: Theme;
   updatePatternIndexNames: ({
