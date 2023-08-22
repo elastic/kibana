@@ -57,9 +57,13 @@ const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.histogram.custom': new HistogramTransformGenerator(),
 };
 
-const isLicenseAtLeastPlatinum = async (context: ObservabilityRequestHandlerContext) => {
+const assertPlatinumLicense = async (context: ObservabilityRequestHandlerContext) => {
   const licensing = await context.licensing;
-  return licensing.license.hasAtLeast('platinum');
+  const hasCorrectLicense = licensing.license.hasAtLeast('platinum');
+
+  if (!hasCorrectLicense) {
+    throw forbidden('Platinum license or higher is needed to make use of this feature.');
+  }
 };
 
 const createSLORoute = createObservabilityServerRoute({
@@ -69,11 +73,7 @@ const createSLORoute = createObservabilityServerRoute({
   },
   params: createSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
@@ -94,11 +94,7 @@ const updateSLORoute = createObservabilityServerRoute({
   },
   params: updateSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
@@ -126,11 +122,7 @@ const deleteSLORoute = createObservabilityServerRoute({
     logger,
     dependencies: { getRulesClientWithRequest },
   }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
@@ -152,11 +144,7 @@ const getSLORoute = createObservabilityServerRoute({
   },
   params: getSLOParamsSchema,
   handler: async ({ context, params }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -177,11 +165,7 @@ const enableSLORoute = createObservabilityServerRoute({
   },
   params: manageSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -203,11 +187,7 @@ const disableSLORoute = createObservabilityServerRoute({
   },
   params: manageSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -229,11 +209,7 @@ const findSLORoute = createObservabilityServerRoute({
   },
   params: findSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -254,11 +230,7 @@ const fetchHistoricalSummary = createObservabilityServerRoute({
   },
   params: fetchHistoricalSummaryParamsSchema,
   handler: async ({ context, params }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -280,11 +252,7 @@ const getSLOInstancesRoute = createObservabilityServerRoute({
   },
   params: getSLOInstancesParamsSchema,
   handler: async ({ context, params }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -342,11 +310,7 @@ const getSloBurnRates = createObservabilityServerRoute({
   },
   params: getSLOBurnRatesParamsSchema,
   handler: async ({ context, params }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
@@ -370,11 +334,7 @@ const getPreviewData = createObservabilityServerRoute({
   },
   params: getPreviewDataParamsSchema,
   handler: async ({ context, params }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const service = new GetPreviewData(esClient);
