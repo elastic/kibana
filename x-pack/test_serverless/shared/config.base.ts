@@ -91,6 +91,7 @@ export default async () => {
           saml: { 'cloud-saml-kibana': { order: 1, realm: 'cloud-saml-kibana' } },
         })}`,
         '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
+        `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
       ],
     },
 
