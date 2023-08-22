@@ -71,8 +71,6 @@ interface HasPrivileges {
 type AuthorizedConsumers = Record<string, HasPrivileges>;
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: AuthorizedConsumers;
-  hasAlertsMappings?: boolean;
-  hasFieldsForAAD?: boolean;
 }
 
 type IsAuthorizedAtProducerLevel = boolean;
@@ -371,7 +369,7 @@ export class AlertingAuthorization {
       const ruleTypesWithAuthorization = Array.from(
         this.augmentWithAuthorizedConsumers(ruleTypes, {})
       );
-      const ruleTypesAuthorized: Map<string, RegistryRuleType> = new Map();
+      const ruleTypesAuthorized: Map<string, RegistryAlertTypeWithAuth> = new Map();
       // map from privilege to ruleType which we can refer back to when analyzing the result
       // of checkPrivileges
       const privilegeToRuleType = new Map<
@@ -386,9 +384,7 @@ export class AlertingAuthorization {
           const ruleTypeAuth = ruleTypesWithAuthorization.find((rtwa) => rtwa.id === ruleTypeId);
           if (ruleTypeAuth) {
             if (!ruleTypesAuthorized.has(ruleTypeId)) {
-              const { authorizedConsumers, hasAlertsMappings, hasFieldsForAAD, ...ruleType } =
-                ruleTypeAuth;
-              ruleTypesAuthorized.set(ruleTypeId, ruleType);
+              ruleTypesAuthorized.set(ruleTypeId, ruleTypeAuth);
             }
             for (const operation of operations) {
               privilegeToRuleType.set(
@@ -420,10 +416,15 @@ export class AlertingAuthorization {
         authorizedRuleTypes:
           hasAllRequested && featuresIds === undefined
             ? // has access to all features
-              this.augmentWithAuthorizedConsumers(
-                new Set(ruleTypesAuthorized.values()),
-                await this.allPossibleConsumers
-              )
+              await (async () => {
+                const allPossibleConsumers = await this.allPossibleConsumers;
+                return new Set(
+                  Array.from(ruleTypesAuthorized.values()).map((ruleTypeAuth) => ({
+                    ...ruleTypeAuth,
+                    authorizedConsumers: allPossibleConsumers,
+                  }))
+                );
+              })()
             : // only has some of the required privileges
               privileges.kibana.reduce((authorizedRuleTypes, { authorized, privilege }) => {
                 if (authorized && privilegeToRuleType.has(privilege)) {
