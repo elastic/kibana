@@ -230,6 +230,14 @@ export class CommonPageObject extends FtrService {
     } = {}
   ) {
     let appUrl: string;
+
+    // See https://github.com/elastic/kibana/pull/164376
+    if (appName === 'canvas' && !path) {
+      throw new Error(
+        'This causes flaky test failures. Use Canvas page object goToListingPage instead'
+      );
+    }
+
     if (this.config.has(['apps', appName])) {
       // Legacy applications
       const appConfig = this.config.get(['apps', appName]);

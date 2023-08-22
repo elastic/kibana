@@ -24,9 +24,11 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
     before(async () => {
       await kibanaServer.importExport.load(archive);
       // load test workpad
-      await PageObjects.common.navigateToApp('canvas', {
-        hash: '/workpad/workpad-b5618217-56d2-47fa-b756-1be2306cda68/page/1',
-      });
+      await PageObjects.common.navigateToUrl(
+        'canvas',
+        '/workpad/workpad-b5618217-56d2-47fa-b756-1be2306cda68/page/1',
+        { ensureCurrentUrl: false }
+      );
     });
 
     after(async () => {
