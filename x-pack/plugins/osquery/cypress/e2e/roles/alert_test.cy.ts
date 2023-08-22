@@ -11,10 +11,12 @@ import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
 describe('Alert Test', { tags: [tag.ESS] }, () => {
+  let ruleName: string;
   let ruleId: string;
 
   before(() => {
     loadRule().then((data) => {
+      ruleName = data.name;
       ruleId = data.id;
     });
   });
@@ -23,8 +25,9 @@ describe('Alert Test', { tags: [tag.ESS] }, () => {
     beforeEach(() => {
       cy.login(ServerlessRoleName.T1_ANALYST);
 
-      cy.visit(`/app/security/rules/id/${ruleId}/alerts`);
-      cy.getBySel('expand-event').first().click();
+      cy.visit('/app/security/rules');
+      cy.contains(ruleName).click();
+      cy.getBySel('expand-event').first().click({ force: true });
 
       cy.wait(500);
       cy.getBySel('securitySolutionDocumentDetailsFlyoutInvestigationGuideButton').click();
