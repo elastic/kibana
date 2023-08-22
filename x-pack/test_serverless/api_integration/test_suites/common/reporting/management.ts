@@ -42,8 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it(`user can delete a report they've created`, async () => {
         const response = await supertest
-          .delete(
-            `${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${DELETE_REPORT_ID}`)
+          .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${DELETE_REPORT_ID}`)
           .auth(TEST_USERNAME, TEST_USER_PASSWORD)
           .set(...API_HEADER)
           .set(...INTERNAL_HEADER);
