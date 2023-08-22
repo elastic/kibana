@@ -6,16 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf, offeringBasedSchema } from '@kbn/config-schema';
-
-export const configSchema = schema.object({
-  readOnly: offeringBasedSchema({
-    serverless: schema.boolean({ defaultValue: false }),
-  }),
-});
-
-export type InputControlConfig = TypeOf<typeof configSchema>;
-
-export interface InputControlPublicConfig {
-  readOnly?: boolean;
-}
+export { offeringBasedSchema } from './offering_based_schema';
