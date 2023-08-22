@@ -107,6 +107,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'dev_tools.deeplinks.navLinkStatus (string)',
         'enterpriseSearch.canDeployEntSearch (boolean)',
         'enterpriseSearch.host (string)',
+        'enterpriseSearch.ui.enabled (boolean)',
         'home.disableWelcomeScreen (boolean)',
         'management.deeplinks.navLinkStatus (string)',
         'map.emsFileApiUrl (string)',

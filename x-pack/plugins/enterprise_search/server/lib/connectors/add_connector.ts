@@ -71,12 +71,16 @@ export const addConnector = async (
     isNative: boolean;
     language: string | null;
     pipeline?: IngestPipelineParams | null;
-    serviceType: string | null;
+    serviceType?: string | null;
   }
 ): Promise<Connector> => {
   const pipeline = input.pipeline || (await getDefaultPipeline(client));
 
-  const document = createConnectorDocument({ ...input, pipeline });
+  const document = createConnectorDocument({
+    ...input,
+    pipeline,
+    serviceType: input.serviceType || null,
+  });
 
   return await createConnector(document, client, input.language, !!input.deleteExistingConnector);
 };
