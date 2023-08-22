@@ -20,27 +20,29 @@ import type { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { AppFeatureKey, type ExperimentalFeatures } from '../../../../../common';
 import type { AppFeaturesService } from '../../../../lib/app_features_service/app_features_service';
-import type { ExperimentalFeatures } from '../../../../../common';
-import { AppFeatureKey } from '../../../../../common';
 import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
-import type { ManifestSchema } from '../../../../../common/endpoint/schema/manifest';
-import { manifestDispatchSchema } from '../../../../../common/endpoint/schema/manifest';
+import {
+  manifestDispatchSchema,
+  type ManifestSchema,
+} from '../../../../../common/endpoint/schema/manifest';
 
-import type { ArtifactListId } from '../../../lib/artifacts';
 import {
   ArtifactConstants,
+  type ArtifactListId,
   buildArtifact,
   convertExceptionsToEndpointFormat,
   getAllItemsFromEndpointExceptionList,
   getArtifactId,
   Manifest,
 } from '../../../lib/artifacts';
-import type {
-  InternalArtifactCompleteSchema,
-  WrappedTranslatedExceptionList,
+
+import {
+  internalArtifactCompleteSchema,
+  type InternalArtifactCompleteSchema,
+  type WrappedTranslatedExceptionList,
 } from '../../../schemas/artifacts';
-import { internalArtifactCompleteSchema } from '../../../schemas/artifacts';
 import type { EndpointArtifactClientInterface } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
 import { InvalidInternalManifestError } from '../errors';

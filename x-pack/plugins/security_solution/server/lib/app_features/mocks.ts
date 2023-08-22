@@ -10,10 +10,8 @@ import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-p
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { DEFAULT_APP_FEATURES } from '@kbn/security-solution-ess/server/constants';
-import { getProductAppFeaturesConfigurator } from '@kbn/security-solution-ess/server/app_features';
-import type { ExperimentalFeatures } from '../../../common';
-import { allowedExperimentalValues } from '../../../common';
 import { AppFeaturesService } from '../app_features_service/app_features_service';
+import { allowedExperimentalValues, type ExperimentalFeatures } from '../../../common';
 
 class AppFeaturesMock extends AppFeaturesService {
   protected registerEnabledKibanaFeatures() {
@@ -32,10 +30,11 @@ export const createAppFeaturesMock = (
 
   appFeatures.init(featuresPluginSetupContract);
 
-  if (enabledFeatureKeys) {
-    const appFeaturesConfigurator = getProductAppFeaturesConfigurator(enabledFeatureKeys);
-    appFeatures.setAppFeaturesConfigurator(appFeaturesConfigurator);
-  }
+  // TODO: fix this without importing getProductAppFeaturesConfigurator
+  // if (enabledFeatureKeys) {
+  //   const appFeaturesConfigurator = getProductAppFeaturesConfigurator(enabledFeatureKeys);
+  //   appFeatures.setAppFeaturesConfigurator(DEFAULT_APP_FEATURES);
+  // }
 
   return appFeatures;
 };
