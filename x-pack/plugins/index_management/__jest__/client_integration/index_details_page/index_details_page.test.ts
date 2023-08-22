@@ -13,12 +13,12 @@ import { testIndexMock } from './mocks';
 
 describe('<IndexDetailsPage />', () => {
   let testBed: IndexDetailsPageTestBed;
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
   beforeEach(async () => {
     const mockEnvironment = setupEnvironment();
-    const { httpSetup } = mockEnvironment;
-    ({ httpRequestsMockHelpers } = mockEnvironment);
+    ({ httpSetup, httpRequestsMockHelpers } = mockEnvironment);
     // test_index is configured in initialEntries of the memory router
     httpRequestsMockHelpers.setLoadIndexDetailsResponse('test_index', testIndexMock);
 
@@ -32,6 +32,31 @@ describe('<IndexDetailsPage />', () => {
       });
     });
     testBed.component.update();
+  });
+
+  describe('error section', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadIndexDetailsResponse('test_index', undefined, {
+        statusCode: 400,
+        message: 'Data for index .apm-agent-configuration was not found',
+      });
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+
+      testBed.component.update();
+    });
+    it('displays an error callout when failed to load index details', async () => {
+      expect(testBed.actions.errorSection.isDisplayed()).toBe(true);
+    });
+
+    it('resends a request when reload button is clicked', async () => {
+      // already sent 2 requests while setting up the component
+      const numberOfRequests = 2;
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+      await testBed.actions.errorSection.clickReloadButton();
+      expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+    });
   });
 
   it('displays index name in the header', () => {

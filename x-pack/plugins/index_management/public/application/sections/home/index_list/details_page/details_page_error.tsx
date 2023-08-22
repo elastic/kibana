@@ -19,6 +19,7 @@ export const DetailsPageError = ({
 }) => {
   return (
     <EuiPageTemplate.EmptyPrompt
+      data-test-subj="indexDetailsErrorLoadingDetails"
       color="danger"
       iconType="error"
       title={
@@ -41,7 +42,13 @@ export const DetailsPageError = ({
             />
           </EuiText>
           <EuiSpacer />
-          <EuiButton iconSide="right" onClick={resendRequest} iconType="refresh" color="danger">
+          <EuiButton
+            iconSide="right"
+            onClick={resendRequest}
+            iconType="refresh"
+            color="danger"
+            data-test-subj="indexDetailsReloadDetailsButton"
+          >
             <FormattedMessage
               id="xpack.idxMgmt.indexDetails.reloadButtonLabel"
               defaultMessage="Reload"

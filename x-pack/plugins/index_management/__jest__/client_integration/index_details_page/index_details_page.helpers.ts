@@ -43,6 +43,10 @@ export interface IndexDetailsPageTestBed extends TestBed {
       clickManageIndexButton: () => Promise<void>;
       isOpened: () => boolean;
     };
+    errorSection: {
+      isDisplayed: () => boolean;
+      clickReloadButton: () => Promise<void>;
+    };
   };
 }
 
@@ -55,14 +59,24 @@ export const setup = async (
     testBedConfig
   );
   const testBed = await initTestBed();
+  const { find, component, exists } = testBed;
 
+  const errorSection = {
+    isDisplayed: () => {
+      return exists('indexDetailsErrorLoadingDetails');
+    },
+    clickReloadButton: async () => {
+      await act(async () => {
+        find('indexDetailsReloadDetailsButton').simulate('click');
+      });
+      component.update();
+    },
+  };
   const getHeader = () => {
-    return testBed.component.find('[data-test-subj="indexDetailsHeader"] h1').text();
+    return component.find('[data-test-subj="indexDetailsHeader"] h1').text();
   };
 
   const clickIndexDetailsTab = async (tab: IndexDetailsSection) => {
-    const { find, component } = testBed;
-
     await act(async () => {
       find(`indexDetailsTab-${tab}`).simulate('click');
     });
@@ -70,12 +84,10 @@ export const setup = async (
   };
 
   const getActiveTabContent = () => {
-    return testBed.find('indexDetailsContent').text();
+    return find('indexDetailsContent').text();
   };
 
   const clickBackToIndicesButton = async () => {
-    const { find, component } = testBed;
-
     await act(async () => {
       find('indexDetailsBackToIndicesButton').simulate('click');
     });
@@ -83,20 +95,18 @@ export const setup = async (
   };
 
   const discoverLinkExists = () => {
-    return testBed.exists('discoverButtonLink');
+    return exists('discoverButtonLink');
   };
 
   const contextMenu = {
     clickManageIndexButton: async () => {
-      const { find, component } = testBed;
-
       await act(async () => {
         find('indexActionsContextMenuButton').simulate('click');
       });
       component.update();
     },
     isOpened: () => {
-      return testBed.exists('indexContextMenu');
+      return exists('indexContextMenu');
     },
   };
   return {
@@ -109,6 +119,7 @@ export const setup = async (
       clickBackToIndicesButton,
       discoverLinkExists,
       contextMenu,
+      errorSection,
     },
   };
 };
