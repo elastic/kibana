@@ -391,7 +391,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     isDisabled('compression_level')
   );
   const kafkaCompressionCodecInput = useInput(
-    kafkaOutput?.compression ?? kafkaCompressionType.None,
+    kafkaOutput?.compression && kafkaOutput.compression !== kafkaCompressionType.None
+      ? kafkaOutput.compression
+      : kafkaCompressionType.Gzip,
     undefined,
     isDisabled('compression')
   );
@@ -642,8 +644,11 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               client_id: kafkaClientIdInput.value || undefined,
               version: kafkaVersionInput.value,
               ...(kafkaKeyInput.value ? { key: kafkaKeyInput.value } : {}),
-              compression: kafkaCompressionCodecInput.value,
-              ...(kafkaCompressionCodecInput.value === kafkaCompressionType.Gzip
+              compression: kafkaCompressionInput.value
+                ? kafkaCompressionCodecInput.value
+                : kafkaCompressionType.None,
+              ...(kafkaCompressionInput.value &&
+              kafkaCompressionCodecInput.value === kafkaCompressionType.Gzip
                 ? {
                     compression_level: parseIntegerIfStringDefined(
                       kafkaCompressionLevelInput.value
@@ -785,6 +790,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     loadBalanceEnabledInput.value,
     typeInput.value,
     kafkaSslCertificateAuthoritiesInput.value,
+    kafkaCompressionInput.value,
     nameInput.value,
     kafkaHostsInput.value,
     defaultOutputInput.value,
