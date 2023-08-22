@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
-import { NOT_AVAILABLE_LABEL } from '@kbn/profiling-plugin/common';
+import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 import {
   useFetcher,
@@ -110,9 +110,11 @@ export function MobileStats({
         defaultMessage: 'Crashes',
       }),
       icon: getIcon('bug'),
-      value: data?.currentPeriod?.crashes?.value ?? NOT_AVAILABLE_LABEL,
+      value:
+        data?.currentPeriod?.crashes?.value /
+          data?.currentPeriod?.sessions?.value ?? NOT_AVAILABLE_LABEL,
       valueFormatter: (value: number) =>
-        valueFormatter(Number(value.toPrecision(2))),
+        valueFormatter(Number((value * 100).toPrecision(2)), '%'),
       trend: data?.currentPeriod?.crashes?.timeseries,
       trendShape: MetricTrendShape.Area,
     },
