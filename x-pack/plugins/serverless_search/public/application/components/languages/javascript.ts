@@ -29,6 +29,12 @@ auth: {
 }
 });`,
   docLink: docLinks.jsClient,
+  github: {
+    link: 'https://github.com/elastic/elasticsearch-serverless-js',
+    label: i18n.translate('xpack.serverlessSearch.languages.javascript.githubLabel', {
+      defaultMessage: 'elasticsearch-serverless',
+    }),
+  },
   iconType: 'javascript.svg',
   id: Languages.JAVASCRIPT,
   ingestData: `// Sample flight data
