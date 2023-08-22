@@ -14,7 +14,7 @@ import {
   createReplaceStream,
   createMapStream,
 } from '@kbn/utils';
-import { pipe } from 'fp-ts/function';
+import { flow, pipe } from 'fp-ts/function';
 
 import { RECORD_SEPARATOR } from './constants';
 
@@ -32,9 +32,7 @@ export function createParseArchiveStreams({ gzip = false } = {}) {
     createReplaceStream('\r\n', '\n'),
     createSplitStream(RECORD_SEPARATOR),
     createFilterStream<string>(getAllButNotWhiteSpaces),
-    createMapStream<string>((xformedButNotParsedYet) =>
-      pipe(xformedButNotParsedYet, (x) => x.trim(), JSON.parse.bind(JSON))
-    ),
+    createMapStream<string>(flow((x: string) => x.trim(), JSON.parse.bind(JSON))),
   ];
 }
 
