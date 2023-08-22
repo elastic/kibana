@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { firstValueFrom } from 'rxjs';
 import {
-  FeatureCatalogueRegistry,
   FeatureCatalogueEntry,
+  FeatureCatalogueRegistry,
   FeatureCatalogueSolution,
 } from './feature_catalogue_registry';
 
@@ -53,41 +54,41 @@ describe('FeatureCatalogueRegistry', () => {
 
   describe('start', () => {
     describe('capabilities filtering', () => {
-      test('retains items with no entry in capabilities', () => {
+      test('retains items with no entry in capabilities', async () => {
         const service = new FeatureCatalogueRegistry();
         service.setup().register(DASHBOARD_FEATURE);
         const capabilities = { catalogue: {} } as any;
         service.start({ capabilities });
-        expect(service.get()).toEqual([DASHBOARD_FEATURE]);
+        expect(await firstValueFrom(service.getFeatures$())).toEqual([DASHBOARD_FEATURE]);
       });
 
-      test('retains items with true in capabilities', () => {
+      test('retains items with true in capabilities', async () => {
         const service = new FeatureCatalogueRegistry();
         service.setup().register(DASHBOARD_FEATURE);
         const capabilities = { catalogue: { dashboard: true } } as any;
         service.start({ capabilities });
-        expect(service.get()).toEqual([DASHBOARD_FEATURE]);
+        expect(await firstValueFrom(service.getFeatures$())).toEqual([DASHBOARD_FEATURE]);
       });
 
-      test('removes items with false in capabilities', () => {
+      test('removes items with false in capabilities', async () => {
         const service = new FeatureCatalogueRegistry();
         service.setup().register(DASHBOARD_FEATURE);
         const capabilities = { catalogue: { dashboard: false } } as any;
         service.start({ capabilities });
-        expect(service.get()).toEqual([]);
+        expect(await firstValueFrom(service.getFeatures$())).toEqual([]);
       });
     });
 
     describe('visibility filtering', () => {
-      test('retains items with no "visible" callback', () => {
+      test('retains items with no "visible" callback', async () => {
         const service = new FeatureCatalogueRegistry();
         service.setup().register(DASHBOARD_FEATURE);
         const capabilities = { catalogue: {} } as any;
         service.start({ capabilities });
-        expect(service.get()).toEqual([DASHBOARD_FEATURE]);
+        expect(await firstValueFrom(service.getFeatures$())).toEqual([DASHBOARD_FEATURE]);
       });
 
-      test('retains items with a "visible" callback which returns "true"', () => {
+      test('retains items with a "visible" callback which returns "true"', async () => {
         const service = new FeatureCatalogueRegistry();
         const feature = {
           ...DASHBOARD_FEATURE,
@@ -96,10 +97,10 @@ describe('FeatureCatalogueRegistry', () => {
         service.setup().register(feature);
         const capabilities = { catalogue: {} } as any;
         service.start({ capabilities });
-        expect(service.get()).toEqual([feature]);
+        expect(await firstValueFrom(service.getFeatures$())).toEqual([feature]);
       });
 
-      test('removes items with a "visible" callback which returns "false"', () => {
+      test('removes items with a "visible" callback which returns "false"', async () => {
         const service = new FeatureCatalogueRegistry();
         const feature = {
           ...DASHBOARD_FEATURE,
@@ -108,13 +109,13 @@ describe('FeatureCatalogueRegistry', () => {
         service.setup().register(feature);
         const capabilities = { catalogue: {} } as any;
         service.start({ capabilities });
-        expect(service.get()).toEqual([]);
+        expect(await firstValueFrom(service.getFeatures$())).toEqual([]);
       });
     });
   });
 
   describe('title sorting', () => {
-    test('sorts by title ascending', () => {
+    test('sorts by title ascending', async () => {
       const service = new FeatureCatalogueRegistry();
       const setup = service.setup();
       setup.register({ id: '1', title: 'Orange' } as any);
@@ -122,7 +123,7 @@ describe('FeatureCatalogueRegistry', () => {
       setup.register({ id: '3', title: 'Banana' } as any);
       const capabilities = { catalogue: {} } as any;
       service.start({ capabilities });
-      expect(service.get()).toEqual([
+      expect(await firstValueFrom(service.getFeatures$())).toEqual([
         { id: '2', title: 'Apple' },
         { id: '3', title: 'Banana' },
         { id: '1', title: 'Orange' },

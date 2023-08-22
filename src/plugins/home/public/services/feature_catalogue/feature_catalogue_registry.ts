@@ -8,6 +8,7 @@
 
 import { Capabilities } from '@kbn/core/public';
 import { IconType } from '@elastic/eui';
+import { BehaviorSubject, map, Observable } from 'rxjs';
 
 /** @public */
 export type FeatureCatalogueCategory = 'admin' | 'data' | 'other';
@@ -56,8 +57,9 @@ export interface FeatureCatalogueSolution {
 
 export class FeatureCatalogueRegistry {
   private capabilities: Capabilities | null = null;
-  private readonly features = new Map<string, FeatureCatalogueEntry>();
-  private readonly solutions = new Map<string, FeatureCatalogueSolution>();
+  private solutions = new Map<string, FeatureCatalogueSolution>();
+  private features = new Map<string, FeatureCatalogueEntry>();
+  private featuresSubject = new BehaviorSubject<Map<string, FeatureCatalogueEntry>>(new Map());
 
   public setup() {
     return {
@@ -69,6 +71,7 @@ export class FeatureCatalogueRegistry {
         }
 
         this.features.set(feature.id, feature);
+        this.featuresSubject.next(new Map(this.features));
       },
       registerSolution: (solution: FeatureCatalogueSolution) => {
         if (this.solutions.has(solution.id)) {
@@ -86,6 +89,10 @@ export class FeatureCatalogueRegistry {
     this.capabilities = capabilities;
   }
 
+  /**
+   * @deprecated
+   * Use getFeatures$() instead
+   */
   public get(): FeatureCatalogueEntry[] {
     if (this.capabilities === null) {
       throw new Error('Catalogue entries are only available after start phase');
@@ -99,6 +106,23 @@ export class FeatureCatalogueRegistry {
       .sort(compareByKey('title'));
   }
 
+  public getFeatures$(): Observable<FeatureCatalogueEntry[]> {
+    if (this.capabilities === null) {
+      throw new Error('Catalogue entries are only available after start phase');
+    }
+    const capabilities = this.capabilities;
+    return this.featuresSubject.pipe(
+      map((features) =>
+        [...features.values()]
+          .filter(
+            (entry) =>
+              capabilities.catalogue[entry.id] !== false && (entry.visible ? entry.visible() : true)
+          )
+          .sort(compareByKey('title'))
+      )
+    );
+  }
+
   public getSolutions(): FeatureCatalogueSolution[] {
     if (this.capabilities === null) {
       throw new Error('Catalogue entries are only available after start phase');
@@ -107,6 +131,11 @@ export class FeatureCatalogueRegistry {
     return [...this.solutions.values()]
       .filter((solution) => capabilities.catalogue[solution.id] !== false)
       .sort(compareByKey('title'));
+  }
+
+  public removeFeature(appId: string) {
+    this.features.delete(appId);
+    this.featuresSubject.next(new Map(this.features));
   }
 }
 
