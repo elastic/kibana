@@ -467,6 +467,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         experimentalFeatures: config.experimentalFeatures,
         packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
         esClient: core.elasticsearch.client.asInternalUser,
+        appFeatures: this.appFeatures,
       });
 
       // Migrate artifacts to fleet and then start the manifest task after that is done
