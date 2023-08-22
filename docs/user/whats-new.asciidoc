@@ -44,7 +44,7 @@ To learn more, check out cases in the {observability-guide}/create-cases.html[{o
 
 [discrete]
 ==== Wildcard search in dashboard controls
-You can now search for strings anywhere within a control. Previously, the string had to be located at the start of the value in order to be found. This option is disabled by default as it is a more expensive option then just searching for the prefix. To enable it in **Dashboard** select Edit control > Options list settings > Contains. 
+You can now search for strings anywhere within a control. Previously, the string had to be located at the start of the value. This option is disabled by default as it is more expensive than just searching for the prefix. To enable it in **Dashboard**, select **Edit control > Options list settings > Contains**. 
 
 [role="screenshot"]
 image::images/wildcard-search.png[Example of new string search]
@@ -71,7 +71,7 @@ image::images/newwayhighlighted.png[Example of the new ordering of the chart leg
 
 [discrete]
 ==== Step curve
-**Lens** now supports a new line interpolation option for line charts. Step curve line charts help users see clearly when data changes at irregular intervals, reducing misinterpretation. When creating visualizations select **Line** in the visualization type dropdown. Then use the **Visual options** menu to choose step in the **Line interpolation** dropdown.
+**Lens** now supports a new line interpolation option for line charts. Step curve line charts help users understand clearly when data changes at irregular intervals, reducing misinterpretation. When creating visualizations, select **Line** in the visualization type dropdown. Then use the **Visual options** menu to choose step in the **Line interpolation** dropdown.
 
 [role="screenshot"]
 image::images/stepcurve.gif[An short video displaying the three new chart options]
@@ -79,7 +79,7 @@ image::images/stepcurve.gif[An short video displaying the three new chart option
 [discrete]
 ==== Significance (significant terms)
 
-This new ranking method in the top values breakdown displays data by significance (significant terms). It helps you identify the key and most crucial terms for a specific query. It’s a powerful way to find anomalies in your data with multiple use cases. Read more {ref}/search-aggregations-bucket-significantterms-aggregation.html[here].
+This new ranking method in the top values breakdown displays data by significance (significant terms). It helps you identify the key and most crucial terms for a specific query. It’s a powerful way to find anomalies in your data with multiple use cases. Refer to the {ref}/search-aggregations-bucket-significantterms-aggregation.html[Significant terms aggregation] documentation to learn more.
 This is not just based on the most popular terms in a set. When calculating significant terms, {es} looks for significant changes in popularity of a specific term between two sets of data. A foreground set (the data returned by a query) and a background set (the data in our indices). This is supported on all charts. 
 
 [role="screenshot"]
@@ -88,7 +88,7 @@ image::images/significant-terms.png[Example of a donut chart organized by signif
 [discrete]
 ==== Tag cloud
 
-preview:[] You can now create a word cloud in **Lens** using Tag cloud, which is currently in technical preview. When creating new visualizations, select **Tag cloud** in the visualization type dropdown. From the available fields drag and drop the desired field into the workspace to visualize keywords. 
+preview:[] You can now create a word cloud in **Lens** using Tag cloud. When creating new visualizations, select **Tag cloud** in the visualization type dropdown. From the available fields, drag and drop the desired field into the workspace to visualize keywords. 
  
 [role="screenshot"]
 image::images/tagcloud.png[Example of a tag cloud, width=70%]
