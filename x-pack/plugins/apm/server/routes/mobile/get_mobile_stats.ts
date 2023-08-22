@@ -19,7 +19,7 @@ export interface Timeseries {
 interface MobileStats {
   sessions: { timeseries: Timeseries[]; value: Maybe<number> };
   requests: { timeseries: Timeseries[]; value: Maybe<number> };
-  crashes: { timeseries: Timeseries[]; value: Maybe<number> };
+  crashRate: { timeseries: Timeseries[]; value: Maybe<number> };
 }
 
 export interface MobilePeriodStats {
@@ -77,9 +77,17 @@ async function getMobileStats({
       value: httpRequests.currentPeriod.value,
       timeseries: httpRequests.currentPeriod.timeseries as Timeseries[],
     },
-    crashes: {
-      value: crashes.currentPeriod.value,
-      timeseries: crashes.currentPeriod.timeseries as Timeseries[],
+    crashRate: {
+      value: sessions.currentPeriod.value
+        ? (crashes.currentPeriod.value ?? 0) / sessions.currentPeriod.value
+        : 0,
+      timeseries: crashes.currentPeriod.timeseries.map((bucket, i) => {
+        const sessionValue = sessions.currentPeriod.timeseries[i].y;
+        return {
+          x: bucket.x,
+          y: sessionValue ? (bucket.y ?? 0) / sessionValue : 0,
+        };
+      }) as Timeseries[],
     },
   };
 }
@@ -114,7 +122,7 @@ export async function getMobileStatsPeriods({
     : {
         sessions: { timeseries: [], value: null },
         requests: { timeseries: [], value: null },
-        crashes: { timeseries: [], value: null },
+        crashRate: { timeseries: [], value: null },
       };
 
   const [currentPeriod, previousPeriod] = await Promise.all([

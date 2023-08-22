@@ -107,15 +107,13 @@ export function MobileStats({
     {
       color: euiTheme.eui.euiColorLightestShade,
       title: i18n.translate('xpack.apm.mobile.metrics.crash.rate', {
-        defaultMessage: 'Crashes',
+        defaultMessage: 'Crash rate',
       }),
       icon: getIcon('bug'),
-      value:
-        data?.currentPeriod?.crashes?.value /
-          data?.currentPeriod?.sessions?.value ?? NOT_AVAILABLE_LABEL,
+      value: data?.currentPeriod?.crashRate?.value ?? NOT_AVAILABLE_LABEL,
       valueFormatter: (value: number) =>
         valueFormatter(Number((value * 100).toPrecision(2)), '%'),
-      trend: data?.currentPeriod?.crashes?.timeseries,
+      trend: data?.currentPeriod?.crashRate?.timeseries,
       trendShape: MetricTrendShape.Area,
     },
     {
