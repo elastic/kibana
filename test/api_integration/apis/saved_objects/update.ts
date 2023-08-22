@@ -29,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
         .put(`/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab`)
         .send({
           attributes: {
-            title: 'My second favorite vis', // change title for single-namespace object with a reference. Call doesn't include a references option
+            title: 'My second favorite vis',
           },
         })
         .expect(200)
@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('does not pass references if omitted', async () => {
       const resp = await supertest
-        .put(`/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab`) // same so as above that starts with references defined. Request response body doesn't have references, changes title
+        .put(`/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab`)
         .send({
           attributes: {
             title: 'foo',
