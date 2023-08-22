@@ -17,7 +17,12 @@ import { ES_P12_PASSWORD, ES_P12_PATH } from '@kbn/dev-utils';
 
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
-import { ESS_USERS_PATH, ESS_USERS_ROLES_PATH, ESS_OPERATOR_USERS_PATH, ESS_SERVICE_TOKENS_PATH } from '../paths';
+import {
+  ESS_USERS_PATH,
+  ESS_USERS_ROLES_PATH,
+  ESS_OPERATOR_USERS_PATH,
+  ESS_SERVICE_TOKENS_PATH,
+} from '../paths';
 
 interface BaseOptions {
   tag?: string;
