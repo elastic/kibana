@@ -46,7 +46,7 @@ describe('Alert Event Details - Cases', () => {
   beforeEach(() => {
     login(ROLE.soc_manager);
     cy.visit('/app/security/rules');
-    cy.contains(ruleName).click();
+    cy.getBySel(`ruleName-${ruleName}`).click();
   });
 
   after(() => {

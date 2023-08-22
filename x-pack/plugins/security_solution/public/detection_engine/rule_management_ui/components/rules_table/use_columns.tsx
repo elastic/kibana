@@ -125,7 +125,7 @@ export const RuleLink = ({ name, id }: Pick<Rule, 'id' | 'name'>) => {
   return (
     <EuiToolTip content={name} anchorClassName="eui-textTruncate">
       <SecuritySolutionLinkAnchor
-        data-test-subj="ruleName"
+        data-test-subj={`ruleName-${name}`}
         deepLinkId={SecurityPageName.rules}
         path={getRuleDetailsTabUrl(id, RuleDetailTabs.alerts)}
       >

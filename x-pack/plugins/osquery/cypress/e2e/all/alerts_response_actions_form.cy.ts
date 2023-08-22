@@ -56,7 +56,7 @@ describe('Alert Event Details - Response Actions Form', { browser: 'electron' },
 
   it('adds response actions with osquery with proper validation and form values', () => {
     cy.visit('/app/security/rules');
-    cy.contains(ruleName).click();
+    cy.getBySel(`ruleName-${ruleName}`).click();
     cy.getBySel('editRuleSettingsLink').click();
     cy.getBySel('globalLoadingIndicator').should('not.exist');
     closeDateTabIfVisible();

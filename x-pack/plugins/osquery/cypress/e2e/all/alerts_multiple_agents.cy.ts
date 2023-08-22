@@ -33,7 +33,7 @@ describe('Alert Event Details - dynamic params', () => {
   beforeEach(() => {
     login(ROLE.soc_manager);
     cy.visit('/app/security/rules');
-    cy.contains(ruleName).click();
+    cy.getBySel(`ruleName-${ruleName}`).click();
   });
 
   it('should substitute parameters in investigation guide', () => {

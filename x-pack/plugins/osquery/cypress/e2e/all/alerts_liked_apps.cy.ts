@@ -38,7 +38,7 @@ describe('Alert Event Details', { browser: 'electron' }, () => {
   beforeEach(() => {
     login(ROLE.soc_manager);
     cy.visit('/app/security/rules');
-    cy.contains(ruleName).click();
+    cy.getBySel(`ruleName-${ruleName}`).click();
   });
 
   it('should be able to add investigation guides to response actions', () => {
