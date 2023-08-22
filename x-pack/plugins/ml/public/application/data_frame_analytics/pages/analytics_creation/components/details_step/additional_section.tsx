@@ -17,6 +17,7 @@ import {
   getJobConfigFromFormState,
   type State,
 } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import { ActionDispatchers } from '../../../analytics_management/hooks/use_create_analytics_form/actions';
 
 const buttonContent = i18n.translate(
   'xpack.ml.dataframe.analytics.create.detailsStep.additionalSectionButton',
@@ -27,15 +28,21 @@ const buttonContent = i18n.translate(
 
 interface Props {
   formState: State['form'];
+  setFormState: ActionDispatchers['setFormState'];
 }
 
-export const AdditionalSection: FC<Props> = ({ formState }) => {
+export const AdditionalSection: FC<Props> = ({ formState, setFormState }) => {
   const [additionalExpanded, setAdditionalExpanded] = useState<boolean>(false);
-  const [customUrls, setCustomUrls] = useState<MlUrlConfig[]>([]);
+  const { _meta: formMeta } = formState;
+
   const analyticsJob = useMemo(
     () => getJobConfigFromFormState(formState) as DeepPartial<DataFrameAnalyticsConfig>,
     [formState]
   );
+  const setCustomUrls = (urls: MlUrlConfig[]) => {
+    setFormState({ _meta: { ...formMeta, custom_urls: urls } });
+  };
+
   return (
     <>
       <EuiSpacer />
@@ -51,7 +58,7 @@ export const AdditionalSection: FC<Props> = ({ formState }) => {
           <Description>
             <CustomUrlsWrapper
               job={analyticsJob as DataFrameAnalyticsConfig}
-              jobCustomUrls={customUrls}
+              jobCustomUrls={formMeta?.custom_urls ?? []}
               setCustomUrls={setCustomUrls}
               editMode="modal"
               isPartialDFAJob={true}

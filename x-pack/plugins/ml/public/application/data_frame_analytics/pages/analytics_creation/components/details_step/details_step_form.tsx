@@ -387,7 +387,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
         />
       ) : null}
       <EuiSpacer size="s" />
-      <AdditionalSection formState={state.form} />
+      <AdditionalSection formState={state.form} setFormState={setFormState} />
       <EuiSpacer />
       <ContinueButton
         isDisabled={isStepInvalid}
