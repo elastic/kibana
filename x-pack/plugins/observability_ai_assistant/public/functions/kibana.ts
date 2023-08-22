@@ -23,7 +23,7 @@ export function registerKibanaFunction({
       name: 'kibana',
       contexts: ['core'],
       description:
-        'Call Kibana APIs on behalf of the user. Only call this function when the user has explicitly requested it, and you know how to call it, for example by querying the knowledge base or having the user explain it to you.',
+        'Call Kibana APIs on behalf of the user. Only call this function when the user has explicitly requested it, and you know how to call it, for example by querying the knowledge base or having the user explain it to you. Assume that pathnames, bodies and query parameters may have changed since your knowledge cut off date.',
       descriptionForUser: 'Call Kibana APIs on behalf of the user',
       parameters: {
         type: 'object',

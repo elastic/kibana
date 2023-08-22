@@ -312,8 +312,13 @@ export class KnowledgeBaseService {
         wait_for: 'fully_allocated',
       });
     } catch (error) {
+      this.dependencies.logger.debug('Error starting model deployment');
+      this.dependencies.logger.debug(error);
       if (
-        !(error instanceof errors.ResponseError && error.body.error.type === 'status_exception')
+        !(
+          (error instanceof errors.ResponseError && error.body.error.type === 'status_exception') ||
+          error.body.error.type === 'resource_not_found_exception'
+        )
       ) {
         throw error;
       }
@@ -333,6 +338,7 @@ export class KnowledgeBaseService {
         }
 
         this.dependencies.logger.debug('Model is not allocated yet');
+        this.dependencies.logger.debug(JSON.stringify(response));
 
         return Promise.reject(new Error('Not Ready'));
       },
