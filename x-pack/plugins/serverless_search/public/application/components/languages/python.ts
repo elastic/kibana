@@ -22,6 +22,12 @@ client = Elasticsearch(
   api_key="${apiKey}"
 )`,
   docLink: docLinks.pythonClient,
+  github: {
+    link: 'https://github.com/elastic/elasticsearch-serverless-python',
+    label: i18n.translate('xpack.serverlessSearch.languages.python.githubLabel', {
+      defaultMessage: 'elasticsearch-serverless-python',
+    }),
+  },
   iconType: 'python.svg',
   id: Languages.PYTHON,
   ingestData: `documents = [

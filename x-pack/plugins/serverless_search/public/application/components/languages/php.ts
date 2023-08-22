@@ -28,6 +28,12 @@ print_r($response->asArray());`,
   ->setApiKey('${apiKey}')
   ->build();`,
   docLink: docLinks.phpClient,
+  github: {
+    link: 'https://github.com/elastic/elasticsearch-serverless-php',
+    label: i18n.translate('xpack.serverlessSearch.languages.php.githubLink', {
+      defaultMessage: 'elasticsearch-serverless-php',
+    }),
+  },
   iconType: 'php.svg',
   id: Languages.PHP,
   ingestData: `$params = [

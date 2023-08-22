@@ -21,6 +21,12 @@ export const rubyDefinition: LanguageDefinition = {
 `,
   basicConfig: docLinks.rubyBasicConfig,
   docLink: docLinks.rubyClient,
+  github: {
+    link: 'https://github.com/elastic/elasticsearch-serverless-ruby',
+    label: i18n.translate('xpack.serverlessSearch.languages.ruby.githubLabel', {
+      defaultMessage: 'elasticsearch-serverless-ruby',
+    }),
+  },
   iconType: 'ruby.svg',
   id: Languages.RUBY,
   ingestData: `documents = [
