@@ -12,14 +12,13 @@ import type { RuleStatus } from '@kbn/triggers-actions-ui-plugin/public';
 import { rulesLocatorID } from '../../common';
 import { RULES_PATH } from '../../common/locators/paths';
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type RulesParams = {
+export interface RulesParams {
   lastResponse?: string[];
   params?: Record<string, string | number>;
   search?: string;
   status?: RuleStatus[];
   type?: string[];
-};
+}
 
 export interface RulesLocatorParams extends RulesParams, SerializableRecord {}
 
