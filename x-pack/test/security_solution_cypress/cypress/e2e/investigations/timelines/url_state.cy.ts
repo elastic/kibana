@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { encode, decode } from '@kbn/rison';
 import { tag } from '../../../tags';
 
 import { getTimeline } from '../../../objects/timeline';
@@ -51,9 +52,15 @@ describe('Open timeline', { tags: [tag.BROKEN_IN_SERVERLESS, tag.ESS] }, () => {
     });
 
     it('should also support opening with a saved object id', () => {
-      const urlWithSavedObjectId = `${ALERTS_URL}?timeline=(id:${timelineSavedObjectId},isOpen:!t)`;
-      visitWithoutDateRange(urlWithSavedObjectId);
-      cy.get(TIMELINE_HEADER).should('be.visible');
+      cy.location('search').then((search) => {
+        const params = new URLSearchParams(search);
+        const timelineParams = encode({activeTab: 'query', isOpen: true, id: timelineSavedObjectId});
+        params.set('timeline', timelineParams);
+        const urlWithSavedObjectId = `${ALERTS_URL}?${params.toString()}`;
+        visitWithoutDateRange(urlWithSavedObjectId);
+        cy.get(TIMELINE_HEADER).should('be.visible');
+      });
+
     });
   });
 });
