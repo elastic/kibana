@@ -173,7 +173,7 @@ export async function clearKibanaApmEventLog(es: Client) {
   });
 }
 
-type ApmAlertFields = ParsedTechnicalFields & {
+export type ApmAlertFields = ParsedTechnicalFields & {
   'service.name': string;
   'service.environment': string;
   'transaction.name': string;
@@ -181,14 +181,8 @@ type ApmAlertFields = ParsedTechnicalFields & {
   'error.grouping_name': string;
 };
 
-export async function getAlertByRuleId<T = ApmAlertFields>({
-  es,
-  ruleId,
-}: {
-  es: Client;
-  ruleId: string;
-}) {
-  const response = (await es.search<T>({
+export async function getAlertByRuleId({ es, ruleId }: { es: Client; ruleId: string }) {
+  const response = (await es.search({
     index: APM_ALERTS_INDEX,
     body: {
       query: {
@@ -197,9 +191,9 @@ export async function getAlertByRuleId<T = ApmAlertFields>({
         },
       },
     },
-  })) as SearchResponse<T, Record<string, AggregationsAggregate>>;
+  })) as SearchResponse<ApmAlertFields, Record<string, AggregationsAggregate>>;
 
-  return response.hits.hits.map((hit) => hit._source);
+  return response.hits.hits.map((hit) => hit._source) as ApmAlertFields[];
 }
 
 export async function getActiveApmAlerts({

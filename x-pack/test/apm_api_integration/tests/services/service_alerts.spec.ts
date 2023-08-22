@@ -13,6 +13,7 @@ import {
   deleteApmAlerts,
   runRuleSoon,
   deleteRuleById,
+  ApmAlertFields,
 } from '../alerts/helpers/alerting_api_helper';
 import { waitForRuleStatus } from '../alerts/helpers/wait_for_rule_status';
 import { waitForAlertsForRule } from '../alerts/helpers/wait_for_alerts_for_rule';
@@ -120,10 +121,12 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
 
     describe('with alerts', () => {
       let ruleId: string;
+      let alerts: ApmAlertFields[];
+
       before(async () => {
         const createdRule = await createRule();
         ruleId = createdRule.id;
-        expect(createdRule.id).to.not.eql(undefined);
+        alerts = await waitForAlertsForRule({ es: esClient, ruleId });
       });
 
       after(async () => {
@@ -148,8 +151,7 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
         expect(response.status).to.be(204);
       });
 
-      it('indexes alert document', async () => {
-        const alerts = await waitForAlertsForRule({ es: esClient, ruleId });
+      it('produces 1 alert', async () => {
         expect(alerts.length).to.be(1);
       });
 

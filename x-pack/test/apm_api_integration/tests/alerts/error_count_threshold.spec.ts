@@ -19,9 +19,10 @@ import {
   deleteAlertsByRuleId,
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
+  ApmAlertFields,
 } from './helpers/alerting_api_helper';
 import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
-import { waitFor, waitForRuleStatus } from './helpers/wait_for_rule_status';
+import { waitForRuleStatus } from './helpers/wait_for_rule_status';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -107,6 +108,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('create rule without kql filter', () => {
       let ruleId: string;
+      let alerts: ApmAlertFields[];
 
       before(async () => {
         const createdRule = await createApmRule({
@@ -119,8 +121,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
           actions: [],
         });
-        expect(createdRule.id).to.not.eql(undefined);
+
         ruleId = createdRule.id;
+        alerts = await waitForAlertsForRule({ es, ruleId, minimumAlertCount: 2 });
       });
 
       after(async () => {
@@ -138,8 +141,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('produces one alert for each of the opbeans-java and opbeans-php', async () => {
-        const alerts = await waitForAlertsForRule({ es, ruleId, minimumAlertCount: 2 });
-        const alertReasons = [alerts[0]!['kibana.alert.reason'], alerts[1]!['kibana.alert.reason']];
+        const alertReasons = [alerts[0]['kibana.alert.reason'], alerts[1]['kibana.alert.reason']];
 
         expect(alertReasons).to.eql([
           'Error count is 30 in the last 1 hr for service: opbeans-php, env: production, name: tx-php, error key: c85df8159a74b47b461d6ddaa6ba7da38cfc3e74019aef66257d10df74adeb99, error name: a php error. Alert when > 1.',
@@ -148,8 +150,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('indexes alert document with all group-by fields', async () => {
-        const alerts = await waitForAlertsForRule({ es, ruleId });
-
         const alertDetails = [alerts[0], alerts[1]].map((alert) => {
           return {
             serviceName: alert!['service.name'],
@@ -179,13 +179,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('shows the a single alert for opbeans-java and opbeans-php on the service inventory', async () => {
-        await waitFor({
-          fn: () => fetchServiceInventoryAlertCounts(apmApiClient),
-          expectation: {
-            'opbeans-node': 0,
-            'opbeans-java': 1,
-            'opbeans-php': 1,
-          },
+        const serviceInventoryAlertCounts = await fetchServiceInventoryAlertCounts(apmApiClient);
+        expect(serviceInventoryAlertCounts).to.eql({
+          'opbeans-node': 0,
+          'opbeans-java': 1,
+          'opbeans-php': 1,
         });
       });
 
@@ -230,7 +228,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('produces one alert for the opbeans-php service', async () => {
         const alerts = await waitForAlertsForRule({ es, ruleId });
-        expect(alerts[0]!['kibana.alert.reason']).to.be(
+        expect(alerts[0]['kibana.alert.reason']).to.be(
           'Error count is 30 in the last 1 hr for service: opbeans-php, env: production, name: tx-php, error key: c85df8159a74b47b461d6ddaa6ba7da38cfc3e74019aef66257d10df74adeb99, error name: a php error. Alert when > 1.'
         );
       });

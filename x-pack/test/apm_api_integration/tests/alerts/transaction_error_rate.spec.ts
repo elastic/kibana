@@ -16,6 +16,7 @@ import {
   deleteAlertsByRuleId,
   clearKibanaApmEventLog,
   deleteRuleById,
+  ApmAlertFields,
 } from './helpers/alerting_api_helper';
 import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
 import { waitForRuleStatus } from './helpers/wait_for_rule_status';
@@ -69,14 +70,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await clearKibanaApmEventLog(es);
     });
 
-    describe('create alert without filter query', () => {
+    describe('create rule without kql query', () => {
       let ruleId: string;
+      let alerts: ApmAlertFields[];
 
       before(async () => {
         const createdRule = await createApmRule({
           supertest,
           ruleTypeId: ApmRuleType.TransactionErrorRate,
-          name: 'Apm transaction error rate without filter query',
+          name: 'Apm transaction error rate without kql query',
           params: {
             threshold: 40,
             windowSize: 5,
@@ -94,8 +96,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
           actions: [],
         });
-        expect(createdRule.id).to.not.eql(undefined);
         ruleId = createdRule.id;
+        alerts = await waitForAlertsForRule({ es, ruleId });
       });
 
       after(async () => {
@@ -113,8 +115,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('indexes alert document with all group-by fields', async () => {
-        const alerts = await waitForAlertsForRule({ es, ruleId });
-
         expect(alerts[0]).property('service.name', 'opbeans-java');
         expect(alerts[0]).property('service.environment', 'production');
         expect(alerts[0]).property('transaction.type', 'request');
@@ -122,7 +122,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('produces an alert for opbeans-java with the correct reason', async () => {
-        const alerts = await waitForAlertsForRule({ es, ruleId });
         expect(alerts[0]!['kibana.alert.reason']).to.be(
           'Failed transactions is 50% in the last 5 mins for service: opbeans-java, env: production, type: request, name: tx-java. Alert when > 40%.'
         );
@@ -153,13 +152,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('create alert with filter query', () => {
+    describe('create rule with kql query', () => {
       let ruleId: string;
+      let alerts: ApmAlertFields[];
+
       before(async () => {
         const createdRule = await createApmRule({
           supertest,
           ruleTypeId: ApmRuleType.TransactionErrorRate,
-          name: 'Apm transaction error rate without filter query',
+          name: 'Apm transaction error rate without kql query',
           params: {
             threshold: 40,
             windowSize: 5,
@@ -178,8 +179,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
           actions: [],
         });
-        expect(createdRule.id).to.not.eql(undefined);
         ruleId = createdRule.id;
+        alerts = await waitForAlertsForRule({ es, ruleId });
       });
 
       after(async () => {
@@ -188,7 +189,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('indexes alert document with all group-by fields', async () => {
-        const alerts = await waitForAlertsForRule({ es, ruleId });
         expect(alerts[0]).property('service.name', 'opbeans-node');
         expect(alerts[0]).property('service.environment', 'production');
         expect(alerts[0]).property('transaction.type', 'request');
@@ -196,7 +196,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('produces an alert for opbeans-node with the correct reason', async () => {
-        const alerts = await waitForAlertsForRule({ es, ruleId });
         expect(alerts[0]!['kibana.alert.reason']).to.be(
           'Failed transactions is 50% in the last 5 mins for service: opbeans-node, env: production, type: request, name: tx-node. Alert when > 40%.'
         );

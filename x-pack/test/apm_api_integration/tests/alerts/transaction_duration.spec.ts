@@ -16,6 +16,7 @@ import {
   deleteAlertsByRuleId,
   deleteRuleById,
   clearKibanaApmEventLog,
+  ApmAlertFields,
 } from './helpers/alerting_api_helper';
 import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
 import { waitForRuleStatus } from './helpers/wait_for_rule_status';
@@ -26,6 +27,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
+
+  const ruleParams = {
+    threshold: 3000,
+    windowSize: 5,
+    windowUnit: 'm',
+    transactionType: 'request',
+    serviceName: 'opbeans-java',
+    environment: 'production',
+    aggregationType: AggregationType.Avg,
+    groupBy: ['service.name', 'service.environment', 'transaction.type', 'transaction.name'],
+  };
 
   registry.when('transaction duration alert', { config: 'basic', archives: [] }, () => {
     before(async () => {
@@ -61,6 +73,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('create rule for opbeans-java without kql filter', () => {
       let ruleId: string;
+      let alerts: ApmAlertFields[];
 
       before(async () => {
         const createdRule = await createApmRule({
@@ -68,25 +81,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ruleTypeId: ApmRuleType.TransactionDuration,
           name: 'Apm transaction duration without kql filter',
           params: {
-            threshold: 3000,
-            windowSize: 5,
-            windowUnit: 'm',
-            transactionType: 'request',
-            serviceName: 'opbeans-java',
-            environment: 'production',
-            aggregationType: AggregationType.Avg,
             kqlFilter: '',
-            groupBy: [
-              'service.name',
-              'service.environment',
-              'transaction.type',
-              'transaction.name',
-            ],
+            ...ruleParams,
           },
           actions: [],
         });
-        expect(createdRule.id).to.not.eql(undefined);
         ruleId = createdRule.id;
+        alerts = await waitForAlertsForRule({ es, ruleId });
       });
 
       after(async () => {
@@ -104,15 +105,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('produces an alert for opbeans-java with the correct reason', async () => {
-        const alerts = await waitForAlertsForRule({ es, ruleId });
-        expect(alerts[0]!['kibana.alert.reason']).to.be(
+        expect(alerts[0]['kibana.alert.reason']).to.be(
           'Avg. latency is 5.0 s in the last 5 mins for service: opbeans-java, env: production, type: request, name: tx-java. Alert when > 3.0 s.'
         );
       });
 
       it('indexes alert document with all group-by fields', async () => {
-        const alerts = await waitForAlertsForRule({ es, ruleId });
-
         expect(alerts[0]).property('service.name', 'opbeans-java');
         expect(alerts[0]).property('service.environment', 'production');
         expect(alerts[0]).property('transaction.type', 'request');
@@ -120,7 +118,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('shows the correct alert count for each service on service inventory', async () => {
-        await waitForAlertsForRule({ es, ruleId });
         const serviceInventoryAlertCounts = await fetchServiceInventoryAlertCounts(apmApiClient);
         expect(serviceInventoryAlertCounts).to.eql({
           'opbeans-node': 0,
@@ -129,7 +126,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('shows the correct alert count in opbeans-java service', async () => {
-        await waitForAlertsForRule({ es, ruleId });
         const serviceTabAlertCount = await fetchServiceTabAlertCount({
           apmApiClient,
           serviceName: 'opbeans-java',
@@ -148,6 +144,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('create rule for opbeans-node using kql filter', () => {
       let ruleId: string;
+      let alerts: ApmAlertFields[];
 
       before(async () => {
         const createdRule = await createApmRule({
@@ -155,26 +152,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ruleTypeId: ApmRuleType.TransactionDuration,
           name: 'Apm transaction duration with kql filter',
           params: {
-            threshold: 3000,
-            windowSize: 5,
-            windowUnit: 'm',
-            transactionType: undefined,
-            serviceName: undefined,
-            environment: 'ENVIRONMENT_ALL',
-            aggregationType: AggregationType.Avg,
             kqlFilter:
               'service.name: opbeans-node and transaction.type: request and service.environment: production',
-            groupBy: [
-              'service.name',
-              'service.environment',
-              'transaction.type',
-              'transaction.name',
-            ],
+            ...ruleParams,
           },
           actions: [],
         });
-        expect(createdRule.id).to.not.eql(undefined);
         ruleId = createdRule.id;
+        alerts = await waitForAlertsForRule({ es, ruleId });
       });
 
       after(async () => {
@@ -192,15 +177,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('produces an alert for opbeans-node with the correct reason', async () => {
-        const alerts = await waitForAlertsForRule({ es, ruleId });
-        expect(alerts[0]!['kibana.alert.reason']).to.be(
+        expect(alerts[0]['kibana.alert.reason']).to.be(
           'Avg. latency is 4.0 s in the last 5 mins for service: opbeans-node, env: production, type: request, name: tx-node. Alert when > 3.0 s.'
         );
       });
 
       it('indexes alert document with all group-by fields', async () => {
-        const alerts = await waitForAlertsForRule({ es, ruleId });
-
         expect(alerts[0]).property('service.name', 'opbeans-node');
         expect(alerts[0]).property('service.environment', 'production');
         expect(alerts[0]).property('transaction.type', 'request');
@@ -208,7 +190,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('shows alert count=1 for opbeans-node on service inventory', async () => {
-        await waitForAlertsForRule({ es, ruleId });
         const serviceInventoryAlertCounts = await fetchServiceInventoryAlertCounts(apmApiClient);
         expect(serviceInventoryAlertCounts).to.eql({
           'opbeans-node': 1,

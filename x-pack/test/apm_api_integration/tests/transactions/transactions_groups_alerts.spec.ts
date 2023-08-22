@@ -18,6 +18,7 @@ import {
   runRuleSoon,
   deleteApmAlerts,
   deleteRuleById,
+  ApmAlertFields,
 } from '../alerts/helpers/alerting_api_helper';
 import { waitForRuleStatus } from '../alerts/helpers/wait_for_rule_status';
 import { waitForAlertsForRule } from '../alerts/helpers/wait_for_alerts_for_rule';
@@ -30,7 +31,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
   const supertest = getService('supertest');
-  const esClient = getService('es');
+  const es = getService('es');
   const serviceName = 'synth-go';
   const dayInMs = 24 * 60 * 60 * 1000;
   const start = Date.now() - dayInMs;
@@ -140,6 +141,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('Transaction groups with avg transaction duration alerts', () => {
         let ruleId: string;
+        let alerts: ApmAlertFields[];
 
         before(async () => {
           const createdRule = await createApmRule({
@@ -163,13 +165,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             ruleTypeId: ApmRuleType.TransactionDuration,
           });
-          expect(createdRule.id).to.not.eql(undefined);
           ruleId = createdRule.id;
+          alerts = await waitForAlertsForRule({ es, ruleId });
         });
 
         after(async () => {
           await deleteRuleById({ supertest, ruleId });
-          await deleteApmAlerts(esClient);
+          await deleteApmAlerts(es);
         });
 
         it('checks if rule is active', async () => {
@@ -190,7 +192,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('indexes alert document', async () => {
-          const alerts = await waitForAlertsForRule({ es: esClient, ruleId });
           expect(alerts.length).to.be(1);
         });
 
@@ -217,6 +218,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('Transaction groups with p99 transaction duration alerts', () => {
         let ruleId: string;
+        let alerts: ApmAlertFields[];
 
         before(async () => {
           const createdRule = await createApmRule({
@@ -240,13 +242,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             ruleTypeId: ApmRuleType.TransactionDuration,
           });
-          expect(createdRule.id).to.not.eql(undefined);
+
           ruleId = createdRule.id;
+          alerts = await waitForAlertsForRule({ es, ruleId });
         });
 
         after(async () => {
           await deleteRuleById({ supertest, ruleId });
-          await deleteApmAlerts(esClient);
+          await deleteApmAlerts(es);
         });
 
         it('checks if rule is active', async () => {
@@ -267,7 +270,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('indexes alert document', async () => {
-          const alerts = await waitForAlertsForRule({ es: esClient, ruleId });
           expect(alerts.length).to.be(1);
         });
 
@@ -297,6 +299,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('Transaction groups with error rate alerts', () => {
         let ruleId: string;
+        let alerts: ApmAlertFields[];
 
         before(async () => {
           const createdRule = await createApmRule({
@@ -319,13 +322,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             ruleTypeId: ApmRuleType.TransactionErrorRate,
           });
-          expect(createdRule.id).to.not.eql(undefined);
           ruleId = createdRule.id;
+          alerts = await waitForAlertsForRule({ es, ruleId });
         });
 
         after(async () => {
           await deleteRuleById({ supertest, ruleId });
-          await deleteApmAlerts(esClient);
+          await deleteApmAlerts(es);
         });
 
         it('checks if rule is active', async () => {
@@ -346,7 +349,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('indexes alert document', async () => {
-          const alerts = await waitForAlertsForRule({ es: esClient, ruleId });
           expect(alerts.length).to.be(1);
         });
 
