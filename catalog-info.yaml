@@ -101,7 +101,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: Kibana-Background-Tasks-Service
-  description: Kibana Background Tasks Service provides additional task processing prallelism for an instance of the Kibana UI Servcie.  It is comprised of the same codebase as Kibana UI Service but is launched with an alternative configuration.   
+  description: Kibana Background Tasks Service provides additional task processing parallelism for an instance of the Kibana UI Service.  It is comprised of the same codebase as Kibana UI Service but is launched with an alternative configuration.   
   annotations:
     backstage.io/source-location: url:https://github.com/elastic/kibana/tree/main
     github.com/project-slug: elastic/kibana
