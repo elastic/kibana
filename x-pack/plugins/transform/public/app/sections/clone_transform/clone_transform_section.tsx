@@ -23,7 +23,7 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 import { TransformConfigUnion } from '../../../../common/types/transform';
 
-import { useApi } from '../../hooks/use_api';
+import { useGetTransform } from '../../hooks';
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
 import { useSearchItems } from '../../hooks/use_search_items';
 
@@ -45,8 +45,6 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
     docTitleService.setTitle('createTransform');
   }, []);
 
-  const api = useApi();
-
   const { esTransform } = useDocumentationLinks();
 
   const transformId = match.params.transformId;
@@ -56,52 +54,55 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const { error: searchItemsError, searchItems, setSavedObjectId } = useSearchItems(undefined);
 
-  const fetchTransformConfig = async () => {
+  useEffect(() => {
+    if (dataViewId === undefined) {
+      setErrorMessage(
+        i18n.translate('xpack.transform.clone.fetchErrorPromptText', {
+          defaultMessage: 'Could not fetch the Kibana data view ID.',
+        })
+      );
+    } else {
+      setSavedObjectId(dataViewId);
+    }
+  }, [dataViewId, setSavedObjectId]);
+
+  useEffect(() => {
     if (searchItemsError !== undefined) {
       setTransformConfig(undefined);
       setErrorMessage(searchItemsError);
       setIsInitialized(true);
-      return;
     }
+  }, [searchItemsError]);
 
-    const transformConfigs = await api.getTransform(transformId);
-    if (isHttpFetchError(transformConfigs)) {
-      setTransformConfig(undefined);
-      setErrorMessage(transformConfigs.message);
-      setIsInitialized(true);
-      return;
-    }
-
-    try {
-      if (dataViewId === undefined) {
-        throw new Error(
-          i18n.translate('xpack.transform.clone.fetchErrorPromptText', {
-            defaultMessage: 'Could not fetch the Kibana data view ID.',
-          })
-        );
-      }
-
-      setSavedObjectId(dataViewId);
-
-      setTransformConfig(overrideTransformForCloning(transformConfigs.transforms[0]));
-      setErrorMessage(undefined);
-      setIsInitialized(true);
-    } catch (e) {
-      setTransformConfig(undefined);
-      if (e.message !== undefined) {
-        setErrorMessage(e.message);
-      } else {
-        setErrorMessage(JSON.stringify(e, null, 2));
-      }
-      setIsInitialized(true);
-    }
-  };
+  const { data: transformConfigs, error } = useGetTransform(
+    transformId,
+    searchItemsError === undefined
+  );
 
   useEffect(() => {
-    fetchTransformConfig();
-    // The effect should only be called once.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (isHttpFetchError(error) && error.message !== errorMessage) {
+      setTransformConfig(undefined);
+      setErrorMessage(error.message);
+      setIsInitialized(true);
+      return;
+    }
+
+    if (transformConfigs !== undefined) {
+      try {
+        setTransformConfig(overrideTransformForCloning(transformConfigs.transforms[0]));
+        setErrorMessage(undefined);
+        setIsInitialized(true);
+      } catch (e) {
+        setTransformConfig(undefined);
+        if (e.message !== undefined) {
+          setErrorMessage(e.message);
+        } else {
+          setErrorMessage(JSON.stringify(e, null, 2));
+        }
+        setIsInitialized(true);
+      }
+    }
+  }, [error, errorMessage, transformConfigs]);
 
   const docsLink = (
     <EuiButtonEmpty

@@ -33,7 +33,6 @@ import type {
   ScheduleNowTransformsResponseSchema,
 } from '../../../common/api_schemas/schedule_now_transforms';
 import type {
-  GetTransformsResponseSchema,
   PostTransformsPreviewRequestSchema,
   PostTransformsPreviewResponseSchema,
 } from '../../../common/api_schemas/transforms';
@@ -61,17 +60,6 @@ export const useApi = () => {
 
   return useMemo(
     () => ({
-      async getTransform(
-        transformId: TransformId
-      ): Promise<GetTransformsResponseSchema | IHttpFetchError> {
-        try {
-          return await http.get(addInternalBasePath(`transforms/${transformId}`), {
-            version: '1',
-          });
-        } catch (e) {
-          return e;
-        }
-      },
       async getTransformStats(
         transformId: TransformId
       ): Promise<GetTransformsStatsResponseSchema | IHttpFetchError> {

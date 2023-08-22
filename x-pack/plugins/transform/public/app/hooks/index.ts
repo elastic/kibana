@@ -9,6 +9,7 @@ export { useApi } from './use_api';
 export { useCreateTransform } from './use_create_transform';
 export { useDocumentationLinks } from './use_documentation_links';
 export { useGetTransformAuditMessages } from './use_get_transform_audit_messages';
+export { useGetTransform } from './use_get_transform';
 export { useGetTransforms } from './use_get_transforms';
 export { useGetTransformStats } from './use_get_transform_stats';
 export { useDeleteTransforms, useDeleteIndexAndTargetIndex } from './use_delete_transform';

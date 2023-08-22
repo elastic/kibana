@@ -37,7 +37,7 @@ export const useGetTransforms = () => {
   const { http } = useAppDependencies();
 
   return useQuery<UseGetTransformsResponse, IHttpFetchError>(
-    [TRANSFORM_REACT_QUERY_KEYS.TRANSFORMS_LIST],
+    [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORMS],
     async ({ signal }) => {
       const update: UseGetTransformsResponse = {
         tableRows: [],

@@ -28,7 +28,8 @@ export const useRefreshTransformList = () => {
   const queryClient = useQueryClient();
 
   return useCallback(() => {
-    queryClient.invalidateQueries([TRANSFORM_REACT_QUERY_KEYS.TRANSFORMS_LIST]);
+    queryClient.invalidateQueries([TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORMS]);
+    queryClient.invalidateQueries([TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORM_AUDIT_MESSAGES]);
   }, [queryClient]);
 };
 
