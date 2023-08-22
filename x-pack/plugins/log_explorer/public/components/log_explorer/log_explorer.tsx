@@ -7,7 +7,7 @@
 
 import { ScopedHistory } from '@kbn/core-application-browser';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   createLogExplorerProfileCustomizations,
   CreateLogExplorerProfileCustomizationsDeps,
