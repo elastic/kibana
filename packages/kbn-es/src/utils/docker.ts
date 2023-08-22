@@ -478,10 +478,9 @@ export async function stopServerlessCluster(log: ToolingLog, nodes: string[]) {
 /**
  * Kill any serverless ES nodes which are running.
  */
-export function teardownServerlessClusterSync(log: ToolingLog) {
-  // TODO: this should use the resolved image
+export function teardownServerlessClusterSync(log: ToolingLog, options: ServerlessOptions) {
   const { stdout } = execa.commandSync(
-    `docker ps --filter status=running --filter ancestor=${SERVERLESS_IMG} --quiet`
+    `docker ps --filter status=running --filter ancestor=${getServerlessImage(options)} --quiet`
   );
   // Filter empty strings
   const runningNodes = stdout.split(/\r?\n/).filter((s) => s);
