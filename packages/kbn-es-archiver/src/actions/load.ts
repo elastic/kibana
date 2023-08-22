@@ -25,7 +25,8 @@ import {
   readDirectory,
   createParseArchiveStreams,
   createCreateIndexStream,
-  createIndexDocRecordsStream,
+  // createIndexDocRecordsStream,
+  createIndexDocRecordsStreamSvrLess,
   migrateSavedObjectIndices,
   Progress,
   createDefaultSpace,
@@ -66,8 +67,6 @@ export async function loadAction({
   const archiveGeneralName = relative(REPO_ROOT, inputDir);
   const stats = createStats(archiveGeneralName, log);
   const mappingsFileAndArchive = prioritizeMappings(await readDirectory(inputDir));
-  const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
-  const resDir = res(inputDir);
 
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
@@ -75,7 +74,12 @@ export async function loadAction({
   const recordsFromMappingsAndArchiveOrdered = concatStreamProviders(
     mappingsFileAndArchive.map((mappingsOrArchiveName) => () => {
       return pipeline(
-        pipe(mappingsOrArchiveName, logLoad(archiveGeneralName)(log), resDir, createReadStream),
+        pipe(
+          mappingsOrArchiveName,
+          logLoad(archiveGeneralName)(log),
+          res(inputDir),
+          createReadStream
+        ),
         ...createParseArchiveStreams({ gzip: isGzip(mappingsOrArchiveName) })
       );
     }),
@@ -88,7 +92,8 @@ export async function loadAction({
   await createPromiseFromStreams([
     recordsFromMappingsAndArchiveOrdered,
     createCreateIndexStream({ client, stats, skipExisting, docsOnly, log }),
-    createIndexDocRecordsStream(client, stats, progress, useCreate),
+    // createIndexDocRecordsStream(client, stats, progress, useCreate),
+    createIndexDocRecordsStreamSvrLess(client, stats, useCreate),
   ]);
 
   progress.deactivate();
@@ -117,8 +122,8 @@ export async function loadAction({
     await migrateSavedObjectIndices(kbnClient);
     log.debug('[%s] Migrated Kibana index after loading Kibana data', archiveGeneralName);
 
-    if (kibanaPluginIds.includes('spaces')) {
-      // WARNING affected by #104081. Assumes 'spaces' saved objects are stored in MAIN_SAVED_OBJECT_INDEX
+    // WARNING affected by #104081. Assumes 'spaces' saved objects are stored in MAIN_SAVED_OBJECT_INDEX
+    if ((await kbnClient.plugins.getEnabledIds()).includes('spaces')) {
       await createDefaultSpace({ client, index: MAIN_SAVED_OBJECT_INDEX });
       log.debug(
         `[%s] Ensured that default space exists in ${MAIN_SAVED_OBJECT_INDEX}`,
