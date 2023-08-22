@@ -910,18 +910,6 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/placeholder_embeddable/placeholder_embeddable.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/placeholder_embeddable/placeholder_embeddable.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/placeholder_embeddable/placeholder_embeddable.tsx"
-          },
-          {
-            "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
           },
           {
