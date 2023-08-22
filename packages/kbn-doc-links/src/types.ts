@@ -488,6 +488,8 @@ export interface DocLinks {
     fleetServer: string;
     fleetServerAddFleetServer: string;
     settings: string;
+    logstashSettings: string;
+    kafkaSettings: string;
     settingsFleetServerHostSettings: string;
     settingsFleetServerProxySettings: string;
     troubleshooting: string;
