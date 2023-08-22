@@ -764,6 +764,8 @@
       "@kbn/functional-with-es-ssl-cases-test-plugin/*": ["x-pack/test/functional_with_es_ssl/plugins/cases/*"],
       "@kbn/generate": ["packages/kbn-generate"],
       "@kbn/generate/*": ["packages/kbn-generate/*"],
+      "@kbn/generate_oas": ["packages/kbn-generate-oas-cli/plugins/generate_oas"],
+      "@kbn/generate_oas/*": ["packages/kbn-generate-oas-cli/plugins/generate_oas/*"],
       "@kbn/generate-csv": ["packages/kbn-generate-csv"],
       "@kbn/generate-csv/*": ["packages/kbn-generate-csv/*"],
       "@kbn/generate-csv-types": ["packages/kbn-generate-csv-types"],

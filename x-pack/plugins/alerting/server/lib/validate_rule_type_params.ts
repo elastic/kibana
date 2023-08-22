@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { instanceofZodType } from '@kbn/zod';
 import { RuleTypeParams, RuleTypeParamsValidator } from '../types';
 
 export function validateRuleTypeParams<Params extends RuleTypeParams>(
@@ -17,6 +18,10 @@ export function validateRuleTypeParams<Params extends RuleTypeParams>(
   }
 
   try {
+    if (instanceofZodType(validator)) {
+      return validator.parse(params);
+    }
+
     return validator.validate(params as Params);
   } catch (err) {
     throw Boom.badRequest(`params invalid: ${err.message}`);

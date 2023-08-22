@@ -6,30 +6,28 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
-import {
-  CoreQueryParamsSchemaProperties,
-  validateCoreQueryBody,
-} from '@kbn/triggers-actions-ui-plugin/server';
+import { validateCoreQueryBody } from '@kbn/triggers-actions-ui-plugin/server';
+import { z } from '@kbn/zod';
 import { ComparatorFnNames } from '../../../common';
 import { Comparator } from '../../../common/comparator_types';
-import { getComparatorSchemaType } from '../lib/comparator';
-
+import { ParamsSchemaZod as ParamsSchema } from './rule_type_params_zod';
 // rule type parameters
 
-export type Params = TypeOf<typeof ParamsSchema>;
+export type Params = z.infer<typeof ParamsSchema>;
+export { ParamsSchema };
+// export type Params = TypeOf<typeof ParamsSchema>;
 
-export const ParamsSchema = schema.object(
-  {
-    ...CoreQueryParamsSchemaProperties,
-    // the comparison function to use to determine if the threshold as been met
-    thresholdComparator: getComparatorSchemaType(validateComparator),
-    // the values to use as the threshold; `between` and `notBetween` require
-    // two values, the others require one.
-    threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
-  },
-  { validate: validateParams }
-);
+// export const ParamsSchema = schema.object(
+//   {
+//     ...CoreQueryParamsSchemaProperties,
+//     // the comparison function to use to determine if the threshold as been met
+//     thresholdComparator: getComparatorSchemaType(validateComparator),
+//     // the values to use as the threshold; `between` and `notBetween` require
+//     // two values, the others require one.
+//     threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
+//   },
+//   { validate: validateParams }
+// );
 
 const betweenComparators = new Set(['between', 'notBetween']);
 

@@ -4278,6 +4278,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/generate_oas@link:packages/kbn-generate-oas-cli/plugins/generate_oas":
+  version "0.0.0"
+  uid ""
+
 "@kbn/get-repo-files@link:packages/kbn-get-repo-files":
   version "0.0.0"
   uid ""

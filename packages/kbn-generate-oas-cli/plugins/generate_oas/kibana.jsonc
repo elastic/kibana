@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/generate_oas",
+  "owner": "@elastic/response-ops",
+  "plugin": {
+    "id": "generateOas",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "alerting"
+    ]
+  }
+}
