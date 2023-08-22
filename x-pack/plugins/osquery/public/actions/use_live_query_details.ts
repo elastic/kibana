@@ -17,7 +17,7 @@ import { useErrorToast } from '../common/hooks/use_error_toast';
 interface UseLiveQueryDetails {
   actionId?: string;
   isLive?: boolean;
-  kql?: string;
+  kuery?: string;
   skip?: boolean;
   queryIds?: string[];
 }
@@ -53,7 +53,7 @@ export interface LiveQueryDetailsItem {
 
 export const useLiveQueryDetails = ({
   actionId,
-  kql,
+  kuery,
   isLive = false,
   skip = false,
   queryIds, // enable finding out specific queries only, eg. in cases
@@ -62,7 +62,7 @@ export const useLiveQueryDetails = ({
   const setErrorToast = useErrorToast();
 
   return useQuery<{ data: LiveQueryDetailsItem }, Error, LiveQueryDetailsItem>(
-    ['liveQueries', { actionId, kql, queryIds }],
+    ['liveQueries', { actionId, kuery, queryIds }],
     () => http.get(`/api/osquery/live_queries/${actionId}`, { version: API_VERSIONS.public.v1 }),
     {
       enabled: !skip && !!actionId,

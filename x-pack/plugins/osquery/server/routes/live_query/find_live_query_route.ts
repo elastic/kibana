@@ -52,7 +52,7 @@ export const findLiveQueryRoute = (router: IRouter<DataRequestHandlerContext>) =
             search.search<ActionsRequestOptions, ActionsStrategyResponse>(
               {
                 factoryQueryType: OsqueryQueries.actions,
-                kql: request.query.kql,
+                kuery: request.query.kuery,
                 pagination: generateTablePaginationOptions(
                   request.query.page ?? 0,
                   request.query.pageSize ?? 100

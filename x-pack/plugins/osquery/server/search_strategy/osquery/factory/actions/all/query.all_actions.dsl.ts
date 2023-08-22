@@ -14,14 +14,14 @@ import { ACTIONS_INDEX } from '../../../../../../common/constants';
 import type { AgentsRequestOptions } from '../../../../../../common/search_strategy';
 
 export const buildActionsQuery = ({
-  kql = '',
+  kuery = '',
   sort,
   pagination: { cursorStart, querySize },
   componentTemplateExists,
 }: AgentsRequestOptions): ISearchRequestParams => {
   const {
     bool: { filter },
-  } = getQueryFilter({ filter: kql });
+  } = getQueryFilter({ filter: kuery });
 
   const dslQuery = {
     allow_no_indices: true,

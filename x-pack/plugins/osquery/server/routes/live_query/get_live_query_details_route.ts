@@ -61,7 +61,6 @@ export const getLiveQueryDetailsRoute = (router: IRouter<DataRequestHandlerConte
             search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
               {
                 actionId: request.params.id,
-                kql: request.query.kql,
                 factoryQueryType: OsqueryQueries.actionDetails,
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }

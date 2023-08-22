@@ -34,7 +34,7 @@ export enum OsqueryQueries {
 export type FactoryQueryTypes = OsqueryQueries;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
-  kql?: string;
+  kuery?: string;
   factoryQueryType?: FactoryQueryTypes;
   componentTemplateExists?: boolean;
 }

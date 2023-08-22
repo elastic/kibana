@@ -12,14 +12,14 @@ import { getQueryFilter } from '../../../../utils/build_query';
 import type { AgentsRequestOptions } from '../../../../../common/search_strategy';
 
 export const buildAgentsQuery = ({
-  kql,
+  kuery,
   pagination: { cursorStart, querySize },
   sort,
 }: AgentsRequestOptions): ISearchRequestParams => {
   const activeQuery = `active: true`;
   let filter = activeQuery;
-  if (!isEmpty(kql)) {
-    filter = activeQuery + ` AND ${kql}`;
+  if (!isEmpty(kuery)) {
+    filter = activeQuery + ` AND ${kuery}`;
   }
 
   const filterQuery = getQueryFilter({ filter });

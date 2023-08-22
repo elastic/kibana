@@ -14,13 +14,13 @@ import type { ActionDetailsRequestOptions } from '../../../../../../common/searc
 
 export const buildActionDetailsQuery = ({
   actionId,
-  kql,
+  kuery,
   componentTemplateExists,
 }: ActionDetailsRequestOptions): ISearchRequestParams => {
   const actionIdQuery = `action_id: ${actionId}`;
   let filter = actionIdQuery;
-  if (!isEmpty(kql)) {
-    filter = filter + ` AND ${kql}`;
+  if (!isEmpty(kuery)) {
+    filter = filter + ` AND ${kuery}`;
   }
 
   const filterQuery = getQueryFilter({ filter });

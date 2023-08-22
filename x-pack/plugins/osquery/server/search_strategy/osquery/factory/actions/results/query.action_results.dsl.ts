@@ -14,15 +14,15 @@ import { getQueryFilter } from '../../../../../utils/build_query';
 
 export const buildActionResultsQuery = ({
   actionId,
-  kql,
+  kuery,
   // pagination: { activePage, querySize },
   sort,
   componentTemplateExists,
 }: ActionResultsRequestOptions): ISearchRequestParams => {
   const actionIdQuery = `action_id: ${actionId}`;
   let filter = actionIdQuery;
-  if (!isEmpty(kql)) {
-    filter = filter + ` AND ${kql}`;
+  if (!isEmpty(kuery)) {
+    filter = filter + ` AND ${kuery}`;
   }
 
   const filterQuery = getQueryFilter({ filter });

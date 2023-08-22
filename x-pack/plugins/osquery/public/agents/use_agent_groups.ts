@@ -40,7 +40,7 @@ export const useAgentGroups = () => {
       const responseData = await lastValueFrom(
         data.search.search<AgentsRequestOptions, AgentsStrategyResponse>(
           {
-            kql: `policy_id: ( ${policiesQuery} )`,
+            kuery: `policy_id: ( ${policiesQuery} )`,
             factoryQueryType: OsqueryQueries.agents,
             pagination: generateTablePaginationOptions(0, 9000),
             sort: {

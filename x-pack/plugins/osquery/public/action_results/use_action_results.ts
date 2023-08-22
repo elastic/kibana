@@ -38,7 +38,7 @@ export interface UseActionResults {
   direction: Direction;
   limit: number;
   sortField: string;
-  kql?: string;
+  kuery?: string;
   skip?: boolean;
   isLive?: boolean;
 }
@@ -50,7 +50,7 @@ export const useActionResults = ({
   direction,
   limit,
   sortField,
-  kql,
+  kuery,
   skip = false,
   isLive = false,
 }: UseActionResults) => {
@@ -65,7 +65,7 @@ export const useActionResults = ({
           {
             actionId,
             factoryQueryType: OsqueryQueries.actionResults,
-            kql,
+            kuery,
             pagination: generateTablePaginationOptions(activePage, limit),
             sort: {
               direction,

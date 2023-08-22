@@ -35,7 +35,7 @@ interface UseAllResults {
   activePage: number;
   limit: number;
   sort: Array<{ field: string; direction: Direction }>;
-  kql?: string;
+  kuery?: string;
   skip?: boolean;
   isLive?: boolean;
 }
@@ -45,7 +45,7 @@ export const useAllResults = ({
   activePage,
   limit,
   sort,
-  kql,
+  kuery,
   skip = false,
   isLive = false,
 }: UseAllResults) => {
@@ -60,7 +60,7 @@ export const useAllResults = ({
           {
             actionId,
             factoryQueryType: OsqueryQueries.results,
-            kql,
+            kuery,
             pagination: generateTablePaginationOptions(activePage, limit),
             sort,
           },

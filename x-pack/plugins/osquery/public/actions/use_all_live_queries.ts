@@ -20,7 +20,7 @@ export interface UseAllLiveQueriesConfig {
   direction?: Direction;
   limit?: number;
   sortField?: string;
-  kql?: string;
+  kuery?: string;
   skip?: boolean;
   alertId?: string;
 }
@@ -33,7 +33,7 @@ export const useAllLiveQueries = ({
   direction = Direction.desc,
   limit = 100,
   sortField = '@timestamp',
-  kql,
+  kuery,
   skip = false,
   alertId,
 }: UseAllLiveQueriesConfig) => {
@@ -51,7 +51,7 @@ export const useAllLiveQueries = ({
         {
           version: API_VERSIONS.public.v1,
           query: {
-            kql,
+            kuery,
             page: activePage,
             pageSize: limit,
             sort: sortField,

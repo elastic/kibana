@@ -14,15 +14,15 @@ import type { ResultsRequestOptions } from '../../../../../common/search_strateg
 export const buildResultsQuery = ({
   actionId,
   agentId,
-  kql,
+  kuery,
   sort,
   pagination: { activePage, querySize },
 }: ResultsRequestOptions): ISearchRequestParams => {
   const actionIdQuery = `action_id: ${actionId}`;
   const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
   let filter = actionIdQuery + agentQuery;
-  if (!isEmpty(kql)) {
-    filter = filter + ` AND ${kql}`;
+  if (!isEmpty(kuery)) {
+    filter = filter + ` AND ${kuery}`;
   }
 
   const filterQuery = getQueryFilter({ filter });
