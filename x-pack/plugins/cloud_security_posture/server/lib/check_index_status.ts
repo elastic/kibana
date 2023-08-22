@@ -19,7 +19,7 @@ export const checkIndexStatus = async (
   const query =
     !postureType || postureType === 'all' || postureType === 'vuln_mgmt'
       ? {
-        bool:{
+          bool: {
             must: {
               range: {
                 '@timestamp': {
@@ -28,11 +28,10 @@ export const checkIndexStatus = async (
                 },
               },
             },
-          }
-
+          },
         }
-      // ? undefined
-      : {
+      : // ? undefined
+        {
           bool: {
             filter: [
               {

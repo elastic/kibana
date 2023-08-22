@@ -175,14 +175,13 @@ export const getCspStatus = async ({
     checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, 'all', 72),
     checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'all', 72),
 
-
     checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, 'cspm', 24),
     checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, 'cspm', 24),
     checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'cspm', 24),
 
     checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, 'kspm', 5),
     checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, 'kspm', 5),
-    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'kspm',5),
+    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'kspm', 5),
 
     checkIndexStatus(
       esClient,
