@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
@@ -19,69 +19,30 @@ import type {
   DeleteTransformsResponseSchema,
 } from '../../../common/api_schemas/delete_transforms';
 import { getErrorMessage } from '../../../common/utils/errors';
+
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
+import { useCanDeleteIndex } from './use_can_delete_index';
+import { useDataViewExists } from './use_data_view_exists';
 import { useRefreshTransformList, type TransformListRow } from '../common';
 import { ToastNotificationText } from '../components';
-import { indexService } from '../services/es_index_service';
 
 export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
   const {
-    http,
-    data: { dataViews: dataViewsContract },
     application: { capabilities },
   } = useAppDependencies();
   const toastNotifications = useToastNotifications();
 
+  const userCanDeleteDataView =
+    capabilities.savedObjectsManagement.delete === true || capabilities.indexPatterns.save === true;
+
   const [deleteDestIndex, setDeleteDestIndex] = useState<boolean>(true);
-  const [deleteDataView, setDeleteDataView] = useState<boolean>(true);
-  const [userCanDeleteIndex, setUserCanDeleteIndex] = useState<boolean>(false);
-  const [dataViewExists, setDataViewExists] = useState<boolean>(false);
-  const [userCanDeleteDataView, setUserCanDeleteDataView] = useState<boolean>(false);
+  const [deleteDataView, setDeleteDataView] = useState<boolean>(userCanDeleteDataView);
 
-  const toggleDeleteIndex = useCallback(
-    () => setDeleteDestIndex(!deleteDestIndex),
-    [deleteDestIndex]
-  );
-  const toggleDeleteDataView = useCallback(
-    () => setDeleteDataView(!deleteDataView),
-    [deleteDataView]
-  );
-  const checkDataViewExists = useCallback(
-    async (indexName: string) => {
-      try {
-        const dvExists = await indexService.dataViewExists(dataViewsContract, indexName);
-        setDataViewExists(dvExists);
-      } catch (e) {
-        const error = extractErrorMessage(e);
+  const { error: canDeleteIndexError, data: canDeleteIndex } = useCanDeleteIndex();
+  const userCanDeleteIndex = canDeleteIndex === true;
 
-        toastNotifications.addDanger(
-          i18n.translate(
-            'xpack.transform.deleteTransform.errorWithCheckingIfDataViewExistsNotificationErrorMessage',
-            {
-              defaultMessage: 'An error occurred checking if data view {dataView} exists: {error}',
-              values: { dataView: indexName, error },
-            }
-          )
-        );
-      }
-    },
-    [dataViewsContract, toastNotifications]
-  );
-
-  const checkUserIndexPermission = useCallback(async () => {
-    try {
-      const userCanDelete = await indexService.canDeleteIndex(http);
-      if (userCanDelete) {
-        setUserCanDeleteIndex(true);
-      }
-      const canDeleteDataView =
-        capabilities.savedObjectsManagement.delete === true ||
-        capabilities.indexPatterns.save === true;
-      setUserCanDeleteDataView(canDeleteDataView);
-      if (canDeleteDataView === false) {
-        setDeleteDataView(false);
-      }
-    } catch (e) {
+  useEffect(() => {
+    if (canDeleteIndexError !== null) {
       toastNotifications.addDanger(
         i18n.translate(
           'xpack.transform.transformList.errorWithCheckingIfUserCanDeleteIndexNotificationErrorMessage',
@@ -91,22 +52,51 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
         )
       );
     }
-  }, [http, toastNotifications, capabilities]);
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canDeleteIndexError]);
 
-  useEffect(() => {
-    checkUserIndexPermission();
+  const toggleDeleteIndex = useCallback(
+    () => setDeleteDestIndex(!deleteDestIndex),
+    [deleteDestIndex]
+  );
+  const toggleDeleteDataView = useCallback(
+    () => setDeleteDataView(!deleteDataView),
+    [deleteDataView]
+  );
 
+  const indexName = useMemo<string | undefined>(() => {
     // if user only deleting one transform
     if (items.length === 1) {
       const config = items[0].config;
-      const destinationIndex = Array.isArray(config.dest.index)
-        ? config.dest.index[0]
-        : config.dest.index;
-      checkDataViewExists(destinationIndex);
-    } else {
-      setDataViewExists(true);
+      return Array.isArray(config.dest.index) ? config.dest.index[0] : config.dest.index;
     }
-  }, [checkDataViewExists, checkUserIndexPermission, items]);
+  }, [items]);
+
+  const { error: dataViewExistsError, data: dataViewExists } = useDataViewExists(
+    indexName,
+    items.length === 1,
+    items.length !== 1
+  );
+
+  useEffect(() => {
+    if (dataViewExistsError !== null) {
+      toastNotifications.addDanger(
+        i18n.translate(
+          'xpack.transform.deleteTransform.errorWithCheckingIfDataViewExistsNotificationErrorMessage',
+          {
+            defaultMessage: 'An error occurred checking if data view {dataView} exists: {error}',
+            values: {
+              dataView: indexName,
+              error: extractErrorMessage(dataViewExistsError),
+            },
+          }
+        )
+      );
+    }
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataViewExistsError]);
 
   return {
     userCanDeleteIndex,

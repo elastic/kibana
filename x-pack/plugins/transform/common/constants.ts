@@ -33,7 +33,9 @@ export const addInternalBasePath = (uri: string): string => `${INTERNAL_API_BASE
 export const addExternalBasePath = (uri: string): string => `${EXTERNAL_API_BASE_PATH}${uri}`;
 
 export const TRANSFORM_REACT_QUERY_KEYS = {
+  CAN_DELETE_INDEX: 'transform.can_delete_index',
   DATA_SEARCH: 'transform.data_search',
+  DATA_VIEW_EXISTS: 'transform.data_view_exists',
   GET_DATA_VIEW_TITLES: 'transform.get_data_view_titles',
   GET_ES_INDICES: 'transform.get_es_indices',
   GET_ES_INGEST_PIPELINES: 'transform.get_es_ingest_pipelines',

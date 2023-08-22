@@ -23,7 +23,7 @@ export type DeleteAction = ReturnType<typeof useDeleteAction>;
 export const useDeleteAction = (forceDisable: boolean) => {
   const { canDeleteTransform } = useContext(AuthorizationContext).capabilities;
 
-  const deleteTransforms = useDeleteTransforms();
+  const { mutate: deleteTransforms } = useDeleteTransforms();
 
   const [isModalVisible, setModalVisible] = useState(false);
   const [items, setItems] = useState<TransformListRow[]>([]);
