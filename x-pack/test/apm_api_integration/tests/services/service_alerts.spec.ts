@@ -8,12 +8,14 @@ import expect from '@kbn/expect';
 import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createApmRule } from '../alerts/alerting_api_helper';
 import {
-  waitForRuleStatus,
+  createApmRule,
+  deleteApmAlerts,
   runRuleSoon,
-  waitForAlertInIndex,
-} from '../alerts/wait_for_rule_status';
+  deleteRuleById,
+} from '../alerts/helpers/alerting_api_helper';
+import { waitForRuleStatus } from '../alerts/helpers/wait_for_rule_status';
+import { waitForAlertsForRule } from '../alerts/helpers/wait_for_alerts_for_rule';
 
 export default function ServiceAlerts({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -25,8 +27,6 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
   const start = Date.now() - dayInMs;
   const end = Date.now() + dayInMs;
   const goService = 'synth-go';
-
-  const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
 
   async function getServiceAlerts({
     serviceName,
@@ -127,17 +127,17 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
-        await esClient.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
+        await deleteRuleById({ supertest, ruleId });
+        await deleteApmAlerts(esClient);
       });
 
       it('checks if rule is active', async () => {
-        const executionStatus = await waitForRuleStatus({
+        const ruleStatus = await waitForRuleStatus({
           id: ruleId,
           expectedStatus: 'active',
           supertest,
         });
-        expect(executionStatus.status).to.be('active');
+        expect(ruleStatus).to.be('active');
       });
 
       it('should successfully run the rule', async () => {
@@ -149,13 +149,8 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
       });
 
       it('indexes alert document', async () => {
-        const resp = await waitForAlertInIndex({
-          es: esClient,
-          indexName: APM_ALERTS_INDEX,
-          ruleId,
-        });
-
-        expect(resp.hits.hits.length).to.be(1);
+        const alerts = await waitForAlertsForRule({ es: esClient, ruleId });
+        expect(alerts.length).to.be(1);
       });
 
       it('returns the correct number of alerts', async () => {

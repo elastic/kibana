@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
-import { errorCountMessage } from '@kbn/apm-plugin/common/rules/default_action_message';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createApmRule,
-  createIndexConnector,
+  deleteApmAlerts,
+  deleteApmRules,
+  deleteRuleById,
+  clearKibanaApmEventLog,
+  deleteAlertsByRuleId,
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
-} from './alerting_api_helper';
-import {
-  waitForRuleStatus,
-  waitForDocumentInIndex,
-  waitForAlertInIndex,
-} from './wait_for_rule_status';
+} from './helpers/alerting_api_helper';
+import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
+import { waitFor, waitForRuleStatus } from './helpers/wait_for_rule_status';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -30,32 +29,43 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const apmApiClient = getService('apmApiClient');
-  const esDeleteAllIndices = getService('esDeleteAllIndices');
-
   const synthtraceEsClient = getService('synthtraceEsClient');
 
   registry.when('error count threshold alert', { config: 'basic', archives: [] }, () => {
-    let ruleId1: string;
-    let ruleId2: string;
-    let alertId: string;
-    let startedAt: string;
-    let actionId1: string | undefined;
-    let actionId2: string | undefined;
+    const javaErrorMessage = 'a java error';
+    const phpErrorMessage = 'a php error';
 
-    const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
-    const ALERT_ACTION_INDEX_NAME1 = 'alert-action-error-count1';
-    const ALERT_ACTION_INDEX_NAME2 = 'alert-action-error-count2';
-
-    const errorMessage = '[ResponseError] index_not_found_exception';
-    const errorGroupingKey = getErrorGroupingKey(errorMessage);
+    const ruleParams = {
+      environment: 'production',
+      threshold: 1,
+      windowSize: 1,
+      windowUnit: 'h',
+      groupBy: [
+        'service.name',
+        'service.environment',
+        'transaction.name',
+        'error.grouping_key',
+        'error.grouping_name',
+      ],
+    };
 
     before(async () => {
+      await deleteApmRules(supertest);
+      await deleteApmAlerts(es);
+      await clearKibanaApmEventLog(es);
+
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');
+
+      const opbeansPhp = apm
+        .service({ name: 'opbeans-php', environment: 'production', agentName: 'php' })
+        .instance('instance');
+
       const opbeansNode = apm
         .service({ name: 'opbeans-node', environment: 'production', agentName: 'node' })
         .instance('instance');
+
       const events = timerange('now-15m', 'now')
         .ratePerMinute(1)
         .generator((timestamp) => {
@@ -65,7 +75,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .timestamp(timestamp)
               .duration(100)
               .failure()
-              .errors(opbeansJava.error({ message: errorMessage }).timestamp(timestamp + 50)),
+              .errors(opbeansJava.error({ message: javaErrorMessage }).timestamp(timestamp + 50)),
+
             opbeansNode
               .transaction({ transactionName: 'tx-node' })
               .timestamp(timestamp)
@@ -73,140 +84,112 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .success(),
           ];
         });
-      await synthtraceEsClient.index(events);
+
+      const phpEvents = timerange('now-15m', 'now')
+        .ratePerMinute(2)
+        .generator((timestamp) => {
+          return [
+            opbeansPhp
+              .transaction({ transactionName: 'tx-php' })
+              .timestamp(timestamp)
+              .duration(100)
+              .failure()
+              .errors(opbeansPhp.error({ message: phpErrorMessage }).timestamp(timestamp + 50)),
+          ];
+        });
+
+      await Promise.all([synthtraceEsClient.index(events), synthtraceEsClient.index(phpEvents)]);
     });
 
     after(async () => {
       await synthtraceEsClient.clean();
-      await supertest.delete(`/api/alerting/rule/${ruleId1}`).set('kbn-xsrf', 'foo');
-      await supertest.delete(`/api/actions/connector/${actionId1}`).set('kbn-xsrf', 'foo');
-      await supertest.delete(`/api/alerting/rule/${ruleId2}`).set('kbn-xsrf', 'foo');
-      await supertest.delete(`/api/actions/connector/${actionId2}`).set('kbn-xsrf', 'foo');
-      await esDeleteAllIndices([ALERT_ACTION_INDEX_NAME1, ALERT_ACTION_INDEX_NAME2]);
-      await es.deleteByQuery({
-        index: APM_ALERTS_INDEX,
-        query: { term: { 'kibana.alert.rule.uuid': ruleId1 } },
-      });
-      await es.deleteByQuery({
-        index: APM_ALERTS_INDEX,
-        query: { term: { 'kibana.alert.rule.uuid': ruleId2 } },
-      });
-      await es.deleteByQuery({
-        index: '.kibana-event-log-*',
-        query: { term: { 'kibana.alert.rule.consumer': 'apm' } },
-      });
     });
 
-    describe('create alert without filter query', () => {
+    describe('create rule without kql filter', () => {
+      let ruleId: string;
+
       before(async () => {
-        actionId1 = await createIndexConnector({
-          supertest,
-          name: 'Error count without filter query',
-          indexName: ALERT_ACTION_INDEX_NAME1,
-        });
         const createdRule = await createApmRule({
           supertest,
           ruleTypeId: ApmRuleType.ErrorCount,
-          name: 'Apm error count without filter query',
+          name: 'Apm error count without kql query',
           params: {
-            environment: 'production',
-            threshold: 1,
-            windowSize: 1,
-            windowUnit: 'h',
             kqlFilter: '',
-            groupBy: [
-              'service.name',
-              'service.environment',
-              'transaction.name',
-              'error.grouping_key',
-              'error.grouping_name',
-            ],
+            ...ruleParams,
           },
-          actions: [
-            {
-              group: 'threshold_met',
-              id: actionId1,
-              params: {
-                documents: [
-                  {
-                    message: `${errorCountMessage}
-- Transaction name: {{context.transactionName}}
-- Error grouping key: {{context.errorGroupingKey}}
-- Error grouping name: {{context.errorGroupingName}}`,
-                  },
-                ],
-              },
-              frequency: {
-                notify_when: 'onActionGroupChange',
-                throttle: null,
-                summary: false,
-              },
-            },
-          ],
+          actions: [],
         });
         expect(createdRule.id).to.not.eql(undefined);
-        ruleId1 = createdRule.id;
+        ruleId = createdRule.id;
+      });
+
+      after(async () => {
+        await deleteRuleById({ supertest, ruleId });
+        await deleteAlertsByRuleId({ es, ruleId });
       });
 
       it('checks if rule is active', async () => {
-        const executionStatus = await waitForRuleStatus({
-          id: ruleId1,
+        const ruleStatus = await waitForRuleStatus({
+          id: ruleId,
           expectedStatus: 'active',
           supertest,
         });
-        expect(executionStatus.status).to.be('active');
+        expect(ruleStatus).to.be('active');
+      });
+
+      it('produces one alert for each of the opbeans-java and opbeans-php', async () => {
+        const alerts = await waitForAlertsForRule({ es, ruleId, minimumAlertCount: 2 });
+        const alertReasons = [alerts[0]!['kibana.alert.reason'], alerts[1]!['kibana.alert.reason']];
+
+        expect(alertReasons).to.eql([
+          'Error count is 30 in the last 1 hr for service: opbeans-php, env: production, name: tx-php, error key: c85df8159a74b47b461d6ddaa6ba7da38cfc3e74019aef66257d10df74adeb99, error name: a php error. Alert when > 1.',
+          'Error count is 15 in the last 1 hr for service: opbeans-java, env: production, name: tx-java, error key: b6a4ac83620b34ae44dd98a13e144782f88698f827af7edb10690c5e6e7d8597, error name: a java error. Alert when > 1.',
+        ]);
       });
 
       it('indexes alert document with all group-by fields', async () => {
-        const resp = await waitForAlertInIndex({
-          es,
-          indexName: APM_ALERTS_INDEX,
-          ruleId: ruleId1,
-        });
-        alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
-        startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
+        const alerts = await waitForAlertsForRule({ es, ruleId });
 
-        expect(resp.hits.hits[0]._source).property('service.name', 'opbeans-java');
-        expect(resp.hits.hits[0]._source).property('service.environment', 'production');
-        expect(resp.hits.hits[0]._source).property('transaction.name', 'tx-java');
-        expect(resp.hits.hits[0]._source).property('error.grouping_key', errorGroupingKey);
-        expect(resp.hits.hits[0]._source).property('error.grouping_name', errorMessage);
-      });
-
-      it('returns correct message', async () => {
-        const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
-        const resp = await waitForDocumentInIndex<{ message: string }>({
-          es,
-          indexName: ALERT_ACTION_INDEX_NAME1,
+        const alertDetails = [alerts[0], alerts[1]].map((alert) => {
+          return {
+            serviceName: alert!['service.name'],
+            environment: alert!['service.environment'],
+            transactionName: alert!['transaction.name'],
+            errorGroupingKey: alert!['error.grouping_key'],
+            errorGroupingName: alert!['error.grouping_name'],
+          };
         });
 
-        expect(resp.hits.hits[0]._source?.message).eql(
-          `Error count is 15 in the last 1 hr for service: opbeans-java, env: production, name: tx-java, error key: ${errorGroupingKey}, error name: ${errorMessage}. Alert when > 1.
-
-Apm error count without filter query is active with the following conditions:
-
-- Service name: opbeans-java
-- Environment: production
-- Error count: 15 errors over the last 1 hr
-- Threshold: 1
-
-[View alert details](http://mockedpublicbaseurl/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all))
-
-- Transaction name: tx-java
-- Error grouping key: ${errorGroupingKey}
-- Error grouping name: ${errorMessage}`
-        );
+        expect(alertDetails).to.eql([
+          {
+            serviceName: 'opbeans-php',
+            environment: 'production',
+            transactionName: 'tx-php',
+            errorGroupingKey: getErrorGroupingKey(phpErrorMessage),
+            errorGroupingName: phpErrorMessage,
+          },
+          {
+            serviceName: 'opbeans-java',
+            environment: 'production',
+            transactionName: 'tx-java',
+            errorGroupingKey: getErrorGroupingKey(javaErrorMessage),
+            errorGroupingName: javaErrorMessage,
+          },
+        ]);
       });
 
-      it('shows the correct alert count for each service on service inventory', async () => {
-        const serviceInventoryAlertCounts = await fetchServiceInventoryAlertCounts(apmApiClient);
-        expect(serviceInventoryAlertCounts).to.eql({
-          'opbeans-node': 0,
-          'opbeans-java': 1,
+      it('shows the a single alert for opbeans-java and opbeans-php on the service inventory', async () => {
+        await waitFor({
+          fn: () => fetchServiceInventoryAlertCounts(apmApiClient),
+          expectation: {
+            'opbeans-node': 0,
+            'opbeans-java': 1,
+            'opbeans-php': 1,
+          },
         });
       });
 
-      it('shows the correct alert count in opbeans-java service', async () => {
+      it('shows 1 alert for opbeans-java in the tab', async () => {
         const serviceTabAlertCount = await fetchServiceTabAlertCount({
           apmApiClient,
           serviceName: 'opbeans-java',
@@ -214,7 +197,7 @@ Apm error count without filter query is active with the following conditions:
         expect(serviceTabAlertCount).to.be(1);
       });
 
-      it('shows the correct alert count in opbeans-node service', async () => {
+      it('shows no alerts for opbeans-node in the tab', async () => {
         const serviceTabAlertCount = await fetchServiceTabAlertCount({
           apmApiClient,
           serviceName: 'opbeans-node',
@@ -223,130 +206,33 @@ Apm error count without filter query is active with the following conditions:
       });
     });
 
-    describe('create alert with filter query', () => {
+    describe('create rule with kql filter for opbeans-php', () => {
+      let ruleId: string;
+
       before(async () => {
-        actionId2 = await createIndexConnector({
-          supertest,
-          name: 'Error count with filter query',
-          indexName: ALERT_ACTION_INDEX_NAME2,
-        });
         const createdRule = await createApmRule({
           supertest,
           ruleTypeId: ApmRuleType.ErrorCount,
-          name: 'Apm error count with filter query',
+          name: 'Apm error count with kql query',
           params: {
-            environment: 'ENVIRONMENT_ALL',
-            threshold: 1,
-            windowSize: 1,
-            windowUnit: 'h',
-            serviceName: undefined,
-            kqlFilter: 'service.name: opbeans-java and service.environment: production',
-            groupBy: [
-              'service.name',
-              'service.environment',
-              'transaction.name',
-              'error.grouping_key',
-              'error.grouping_name',
-            ],
+            kqlFilter: 'service.name: opbeans-php',
+            ...ruleParams,
           },
-          actions: [
-            {
-              group: 'threshold_met',
-              id: actionId2,
-              params: {
-                documents: [
-                  {
-                    message: `${errorCountMessage}
-- Transaction name: {{context.transactionName}}
-- Error grouping key: {{context.errorGroupingKey}}
-- Error grouping name: {{context.errorGroupingName}}`,
-                  },
-                ],
-              },
-              frequency: {
-                notify_when: 'onActionGroupChange',
-                throttle: null,
-                summary: false,
-              },
-            },
-          ],
+          actions: [],
         });
-        expect(createdRule.id).to.not.eql(undefined);
-        ruleId2 = createdRule.id;
+        ruleId = createdRule.id;
       });
 
-      it('checks if rule is active', async () => {
-        const executionStatus = await waitForRuleStatus({
-          id: ruleId2,
-          expectedStatus: 'active',
-          supertest,
-        });
-        expect(executionStatus.status).to.be('active');
+      after(async () => {
+        await deleteRuleById({ supertest, ruleId });
+        await deleteAlertsByRuleId({ es, ruleId });
       });
 
-      it('indexes alert document with all group-by fields', async () => {
-        const resp = await waitForAlertInIndex({
-          es,
-          indexName: APM_ALERTS_INDEX,
-          ruleId: ruleId2,
-        });
-        alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
-        startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
-
-        expect(resp.hits.hits[0]._source).property('service.name', 'opbeans-java');
-        expect(resp.hits.hits[0]._source).property('service.environment', 'production');
-        expect(resp.hits.hits[0]._source).property('transaction.name', 'tx-java');
-        expect(resp.hits.hits[0]._source).property('error.grouping_key', errorGroupingKey);
-        expect(resp.hits.hits[0]._source).property('error.grouping_name', errorMessage);
-      });
-
-      it('returns correct message', async () => {
-        const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
-        const resp = await waitForDocumentInIndex<{ message: string }>({
-          es,
-          indexName: ALERT_ACTION_INDEX_NAME2,
-        });
-
-        expect(resp.hits.hits[0]._source?.message).eql(
-          `Error count is 15 in the last 1 hr for service: opbeans-java, env: production, name: tx-java, error key: ${errorGroupingKey}, error name: ${errorMessage}. Alert when > 1.
-
-Apm error count with filter query is active with the following conditions:
-
-- Service name: opbeans-java
-- Environment: production
-- Error count: 15 errors over the last 1 hr
-- Threshold: 1
-
-[View alert details](http://mockedpublicbaseurl/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all))
-
-- Transaction name: tx-java
-- Error grouping key: ${errorGroupingKey}
-- Error grouping name: ${errorMessage}`
+      it('produces one alert for the opbeans-php service', async () => {
+        const alerts = await waitForAlertsForRule({ es, ruleId });
+        expect(alerts[0]!['kibana.alert.reason']).to.be(
+          'Error count is 30 in the last 1 hr for service: opbeans-php, env: production, name: tx-php, error key: c85df8159a74b47b461d6ddaa6ba7da38cfc3e74019aef66257d10df74adeb99, error name: a php error. Alert when > 1.'
         );
-      });
-
-      it('shows the correct alert count for each service on service inventory', async () => {
-        const serviceInventoryAlertCounts = await fetchServiceInventoryAlertCounts(apmApiClient);
-        expect(serviceInventoryAlertCounts).to.eql({
-          'opbeans-node': 0,
-          'opbeans-java': 2,
-        });
-      });
-
-      it('shows the correct alert count in opbeans-java service', async () => {
-        const serviceTabAlertCount = await fetchServiceTabAlertCount({
-          apmApiClient,
-          serviceName: 'opbeans-java',
-        });
-        expect(serviceTabAlertCount).to.be(2);
-      });
-
-      it('shows the correct alert count in opbeans-node service', async () => {
-        const serviceTabAlertCount = await fetchServiceTabAlertCount({
-          apmApiClient,
-          serviceName: 'opbeans-node',
-        });
-        expect(serviceTabAlertCount).to.be(0);
       });
     });
   });
