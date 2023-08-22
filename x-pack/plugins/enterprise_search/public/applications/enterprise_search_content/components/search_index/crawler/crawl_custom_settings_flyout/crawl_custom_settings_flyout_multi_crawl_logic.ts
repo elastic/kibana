@@ -8,12 +8,10 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { ConnectorScheduling } from '../../../../../../../common/types/connectors';
-import {
-  CrawlerCustomSchedulesServer,
-  CrawlerCustomScheduleClient,
-} from '../../../../../../../common/types/crawler';
+import { CrawlerCustomSchedulesServer } from '../../../../../../../common/types/crawler';
 
 import { CrawlerIndex } from '../../../../../../../common/types/indices';
+import { Actions } from '../../../../../shared/api_logic/create_api_logic';
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { DomainConfig, CrawlerCustomSchedule } from '../../../../api/crawler/types';
@@ -28,6 +26,10 @@ import { IndexViewLogic } from '../../index_view_logic';
 import { CrawlCustomSettingsFlyoutDomainConfigLogic } from './crawl_custom_settings_flyout_domain_config_logic';
 
 import { filterSeedUrlsByDomainUrls } from './crawl_custom_settings_flyout_logic';
+import {
+  PostCustomSchedulingApiLogic,
+  PostCustomSchedulingArgs,
+} from './crawl_custom_settings_flyout_post_schedule_logic';
 
 export interface CrawlCustomSettingsFlyoutLogicValues {
   crawlerConfigActiveTab: number;
@@ -41,6 +43,8 @@ export interface CrawlCustomSettingsFlyoutLogicValues {
   };
   crawlerCustomSchedulingIsValid: boolean;
 }
+
+type PostCustomSchedulingApiValues = Actions<PostCustomSchedulingArgs, {}>;
 
 export interface CrawlCustomSettingsFlyoutLogicActions {
   fetchCustomScheduling(): void;
@@ -89,6 +93,7 @@ export interface CrawlCustomSettingsFlyoutLogicActions {
     enabled: boolean;
   };
   toggleIncludeSitemapsInRobotsTxt(index: number): { index: number };
+  makePostCustomSchedulingRequest: PostCustomSchedulingApiValues['makeRequest'];
 }
 
 const defaulCrawlerConfiguration: CrawlerCustomSchedule = {
@@ -111,6 +116,7 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
 >({
   path: ['enterprise_search', 'crawler', 'crawl_custom_settings_flyout_multi_crawl_logic'],
   connect: {
+    actions: [PostCustomSchedulingApiLogic, ['makeRequest as makePostCustomSchedulingRequest']],
     values: [
       IndexViewLogic,
       ['index'],
@@ -261,15 +267,11 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
       }
     },
     postCustomScheduling: async () => {
-      const { http } = HttpLogic.values;
       const { indexName } = IndexNameLogic.values;
       const { crawlerConfigurations } = values;
       const customScheduling = crawlerCustomSchedulingClientToServer(crawlerConfigurations);
       try {
-        await http.post<CrawlerCustomScheduleClient>(
-          `/internal/enterprise_search/indices/${indexName}/crawler/custom_scheduling`,
-          { body: JSON.stringify(Object.fromEntries(customScheduling)) }
-        );
+        actions.makePostCustomSchedulingRequest({ indexName, customScheduling });
       } catch (e) {
         flashAPIErrors(e);
       }
