@@ -10,7 +10,6 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 
-import type { TransformId } from '../../../../common/types/transform';
 import type { FieldHistogramsResponseSchema } from '../../../../common/api_schemas/field_histograms';
 import type {
   StopTransformsRequestSchema,
@@ -20,10 +19,6 @@ import type {
   PostTransformsPreviewRequestSchema,
   PostTransformsPreviewResponseSchema,
 } from '../../../../common/api_schemas/transforms';
-import type {
-  PostTransformsUpdateRequestSchema,
-  PostTransformsUpdateResponseSchema,
-} from '../../../../common/api_schemas/update_transforms';
 
 import type { EsIndex } from '../../../../common/types/es_index';
 
@@ -35,25 +30,6 @@ export interface FieldHistogramRequestConfig {
 }
 
 const apiFactory = () => ({
-  async updateTransform(
-    transformId: TransformId,
-    transformConfig: PostTransformsUpdateRequestSchema
-  ): Promise<PostTransformsUpdateResponseSchema | IHttpFetchError> {
-    return Promise.resolve({
-      id: 'the-test-id',
-      source: { index: ['the-index-name'], query: { match_all: {} } },
-      dest: { index: 'user-the-destination-index-name' },
-      frequency: '10m',
-      pivot: {
-        group_by: { the_group: { terms: { field: 'the-group-by-field' } } },
-        aggregations: { the_agg: { value_count: { field: 'the-agg-field' } } },
-      },
-      description: 'the-description',
-      settings: { docs_per_second: null },
-      version: '8.0.0',
-      create_time: 1598860879097,
-    });
-  },
   async getTransformsPreview(
     obj: PostTransformsPreviewRequestSchema
   ): Promise<PostTransformsPreviewResponseSchema | IHttpFetchError> {

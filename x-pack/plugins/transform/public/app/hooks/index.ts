@@ -17,3 +17,4 @@ export { useResetTransforms } from './use_reset_transform';
 export { useScheduleNowTransforms } from './use_schedule_now_transform';
 export { useStartTransforms } from './use_start_transform';
 export { useStopTransforms } from './use_stop_transform';
+export { useUpdateTransform } from './use_update_transform';
