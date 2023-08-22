@@ -23,7 +23,7 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const supertest = getService('supertest');
   const synthtraceEsClient = getService('synthtraceEsClient');
-  const esClient = getService('es');
+  const es = getService('es');
   const dayInMs = 24 * 60 * 60 * 1000;
   const start = Date.now() - dayInMs;
   const end = Date.now() + dayInMs;
@@ -126,12 +126,12 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
       before(async () => {
         const createdRule = await createRule();
         ruleId = createdRule.id;
-        alerts = await waitForAlertsForRule({ es: esClient, ruleId });
+        alerts = await waitForAlertsForRule({ es, ruleId });
       });
 
       after(async () => {
         await deleteRuleById({ supertest, ruleId });
-        await deleteApmAlerts(esClient);
+        await deleteApmAlerts(es);
       });
 
       it('checks if rule is active', async () => {

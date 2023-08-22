@@ -25,7 +25,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const supertest = getService('supertest');
   const synthtraceEsClient = getService('synthtraceEsClient');
-  const esClient = getService('es');
+  const es = getService('es');
   const log = getService('log');
   const start = Date.now() - 24 * 60 * 60 * 1000;
   const end = Date.now();
@@ -88,12 +88,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(async () => {
         const createdRule = await createRule();
         ruleId = createdRule.id;
-        await waitForActiveApmAlert({ ruleId, esClient, log });
+        await waitForActiveApmAlert({ ruleId, esClient: es, log });
       });
 
       after(async () => {
         await deleteRuleById({ supertest, ruleId });
-        await deleteApmAlerts(esClient);
+        await deleteApmAlerts(es);
       });
 
       it('returns the correct number of alerts', async () => {
