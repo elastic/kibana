@@ -16,7 +16,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { pipe } from 'fp-ts/function';
-import { ES_CLIENT_HEADERS } from '../client_headers';
+import { atLeastOne, freshenUp, hasDotKibanaPrefix, indexingOccurred } from './load_utils';
 
 import {
   isGzip,
@@ -68,21 +68,23 @@ export async function loadAction({
   const stats = createStats(archiveGeneralName, log);
   const mappingsFileAndArchive = prioritizeMappings(await readDirectory(inputDir));
 
+  const lazy = (eitherMappingsFileOrArchiveFileName: string) => () => {
+    return pipeline(
+      pipe(
+        eitherMappingsFileOrArchiveFileName,
+        logLoad(archiveGeneralName)(log),
+        res(inputDir),
+        createReadStream
+      ),
+      ...createParseArchiveStreams({ gzip: isGzip(eitherMappingsFileOrArchiveFileName) })
+    );
+  };
+
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
   // across archives and properly skip docs from existing indexes
   const recordsFromMappingsAndArchiveOrdered = concatStreamProviders(
-    mappingsFileAndArchive.map((mappingsOrArchiveName) => () => {
-      return pipeline(
-        pipe(
-          mappingsOrArchiveName,
-          logLoad(archiveGeneralName)(log),
-          res(inputDir),
-          createReadStream
-        ),
-        ...createParseArchiveStreams({ gzip: isGzip(mappingsOrArchiveName) })
-      );
-    }),
+    mappingsFileAndArchive.map(lazy),
     { objectMode: true }
   );
 
@@ -100,27 +102,14 @@ export async function loadAction({
   const result = stats.toJSON();
 
   const indicesWithDocs: string[] = [];
-  for (const [index, { docs }] of Object.entries(result)) {
-    if (docs && docs.indexed > 0) {
-      log.info('[%s] Indexed %d docs into %j', archiveGeneralName, docs.indexed, index);
-      indicesWithDocs.push(index);
-    }
-  }
 
-  await client.indices.refresh(
-    {
-      index: indicesWithDocs.join(','),
-      allow_no_indices: true,
-    },
-    {
-      headers: ES_CLIENT_HEADERS,
-    }
-  );
+  for (const [index, { docs }] of Object.entries(result))
+    if (indexingOccurred(docs)) indicesWithDocs.push(index);
 
   // If we affected saved objects indices, we need to ensure they are migrated...
-  if (Object.keys(result).some((k) => k.startsWith(MAIN_SAVED_OBJECT_INDEX))) {
+  if (atLeastOne(hasDotKibanaPrefix(MAIN_SAVED_OBJECT_INDEX))(result)) {
+    await freshenUp(client, indicesWithDocs);
     await migrateSavedObjectIndices(kbnClient);
-    log.debug('[%s] Migrated Kibana index after loading Kibana data', archiveGeneralName);
 
     // WARNING affected by #104081. Assumes 'spaces' saved objects are stored in MAIN_SAVED_OBJECT_INDEX
     if ((await kbnClient.plugins.getEnabledIds()).includes('spaces')) {

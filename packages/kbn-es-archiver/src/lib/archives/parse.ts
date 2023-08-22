@@ -21,17 +21,23 @@ import { RECORD_SEPARATOR } from './constants';
 const anyCharButNotWhiteSpaces = (): RegExp => /[^\s]/;
 const toBoolean = (x: RegExpMatchArray | null) => Boolean(x);
 
+export type Record = string;
 export function createParseArchiveStreams({ gzip = false } = {}) {
-  const getAllButNotWhiteSpaces = (x) => pipe(x, match(anyCharButNotWhiteSpaces), toBoolean);
+  const getAllButNotWhiteSpaces = (x: Record) => {
+    // console.log(`\nλjs [getAllButNotWhiteSpaces] x: \n\t${x}`);
+    return pipe(x, match(anyCharButNotWhiteSpaces), toBoolean);
+  };
   return [
     gzip ? createGunzip() : new PassThrough(),
     createReplaceStream('\r\n', '\n'),
     createSplitStream(RECORD_SEPARATOR),
     createFilterStream<string>(getAllButNotWhiteSpaces),
-    createMapStream<string>((json) => JSON.parse(json.trim())),
+    createMapStream<string>((xformedButNotParsedYet) =>
+      pipe(xformedButNotParsedYet, (x) => x.trim(), JSON.parse.bind(JSON))
+    ),
   ];
 }
 
-function match(predicate) {
-  return (x) => x.match(predicate());
+function match(predicate: () => RegExp) {
+  return (x: Record) => x.match(predicate());
 }
