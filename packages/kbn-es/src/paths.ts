@@ -26,5 +26,18 @@ export const ES_KEYSTORE_BIN = maybeUseBat('./bin/elasticsearch-keystore');
 
 export const ESS_OPERATOR_USERS_PATH = resolve(__dirname, './ess_resources/operator_users.yml');
 export const ESS_SERVICE_TOKENS_PATH = resolve(__dirname, './ess_resources/service_tokens');
+
 export const ESS_USERS_PATH = resolve(__dirname, './ess_resources/users');
 export const ESS_USERS_ROLES_PATH = resolve(__dirname, './ess_resources/users_roles');
+
+export const ESS_ROLES_PATH = resolve(__dirname, './ess_resources/roles.yml');
+export const ESS_ROLE_MAPPING_PATH = resolve(__dirname, './ess_resources/role_mapping.yml');
+
+export const ESS_RESOURCES_PATHS = [
+  ESS_OPERATOR_USERS_PATH,
+  ESS_ROLE_MAPPING_PATH,
+  ESS_ROLES_PATH,
+  ESS_SERVICE_TOKENS_PATH,
+  ESS_USERS_PATH,
+  ESS_USERS_ROLES_PATH,
+];

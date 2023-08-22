@@ -17,12 +17,7 @@ import { ES_P12_PASSWORD, ES_P12_PATH } from '@kbn/dev-utils';
 
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
-import {
-  ESS_USERS_PATH,
-  ESS_USERS_ROLES_PATH,
-  ESS_OPERATOR_USERS_PATH,
-  ESS_SERVICE_TOKENS_PATH,
-} from '../paths';
+import { ESS_RESOURCES_PATHS } from '../paths';
 
 interface BaseOptions {
   tag?: string;
@@ -383,25 +378,21 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 
   log.indent(-4);
 
-  return ['--volume', `${basePath}:/objectstore:z`].concat(
-    ssl
-      ? [
-          ...getESp12Volume(),
+  const baseCmd = ['--volume', `${basePath}:/objectstore:z`];
 
-          '--volume',
-          `${ESS_OPERATOR_USERS_PATH}:${ESS_CONFIG_PATH}operator_users.yml`,
+  if (ssl) {
+    const essResources = ESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
+      const fileName = path.split('/').at(-1);
 
-          '--volume',
-          `${ESS_USERS_PATH}:${ESS_CONFIG_PATH}users`,
+      acc.push('--volume', `${path}:${ESS_CONFIG_PATH}${fileName}`);
 
-          '--volume',
-          `${ESS_USERS_ROLES_PATH}:${ESS_CONFIG_PATH}users_roles`,
+      return acc;
+    }, []);
 
-          '--volume',
-          `${ESS_SERVICE_TOKENS_PATH}:${ESS_CONFIG_PATH}service_tokens`,
-        ]
-      : []
-  );
+    return baseCmd.concat(getESp12Volume(), essResources);
+  }
+
+  return baseCmd;
 }
 
 /**
