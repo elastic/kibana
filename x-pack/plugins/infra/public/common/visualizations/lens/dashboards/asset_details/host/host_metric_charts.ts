@@ -39,6 +39,7 @@ const cpuUsage = {
     axisLeft: XY_OVERRIDES.axisLeft,
   },
 };
+
 const cpuUsageBreakdown = {
   id: 'cpuUsageBreakdown',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.cpuUsage', {
@@ -67,6 +68,7 @@ const cpuUsageBreakdown = {
   },
   dataViewOrigin: DataViewOrigin.Metrics,
 };
+
 const memoryUsage = {
   id: 'memoryUsage',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.memoryUsage', {
@@ -83,6 +85,31 @@ const memoryUsage = {
     axisLeft: XY_OVERRIDES.axisLeft,
   },
 };
+
+const memoryUsageBreakdown = {
+  id: 'memoryUsage',
+  title: i18n.translate('xpack.infra.assetDetails.metricsCharts.memoryUsage', {
+    defaultMessage: 'Memory Usage',
+  }),
+  layers: [
+    {
+      data: [
+        hostLensFormulas.memoryUsed,
+        hostLensFormulas.memoryFreeExcludingCache,
+        hostLensFormulas.memoryCache,
+      ],
+      options: {
+        seriesType: 'area_stacked' as const,
+      },
+      type: LayerParamsType.Visualization,
+    },
+  ],
+  overrides: {
+    settings: XY_OVERRIDES.settings,
+  },
+  dataViewOrigin: DataViewOrigin.Metrics,
+};
+
 const normalizedLoad1m = {
   id: 'normalizedLoad1m',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.normalizedLoad1m', {
@@ -100,6 +127,28 @@ const normalizedLoad1m = {
   ],
   dataViewOrigin: DataViewOrigin.Metrics,
 };
+
+const loadBreakdown = {
+  id: 'cpuUsageBreakdown',
+  title: i18n.translate('xpack.infra.assetDetails.metricsCharts.cpuUsage', {
+    defaultMessage: 'Load',
+  }),
+  layers: [
+    {
+      data: [hostLensFormulas.load1m, hostLensFormulas.load5m, hostLensFormulas.load15m],
+      options: {
+        seriesType: 'area' as const,
+      },
+      type: LayerParamsType.Visualization,
+    },
+  ],
+  overrides: {
+    axisLeft: XY_OVERRIDES.axisLeft,
+    settings: XY_OVERRIDES.settings,
+  },
+  dataViewOrigin: DataViewOrigin.Metrics,
+};
+
 const logRate = {
   id: 'logRate',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.logRate', {
@@ -150,6 +199,7 @@ const diskSpaceUsageAvailable = {
   },
   dataViewOrigin: DataViewOrigin.Metrics,
 };
+
 const diskThroughputReadWrite = {
   id: 'diskThroughputReadWrite',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskIOPS', {
@@ -182,6 +232,7 @@ const diskThroughputReadWrite = {
   },
   dataViewOrigin: DataViewOrigin.Metrics,
 };
+
 const diskIOReadWrite = {
   id: 'diskIOReadWrite',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskThroughput', {
@@ -214,6 +265,7 @@ const diskIOReadWrite = {
   },
   dataViewOrigin: DataViewOrigin.Metrics,
 };
+
 const rxTx = {
   id: 'rxTx',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.network', {
@@ -272,7 +324,9 @@ export const hostMetricChartsFullPage: Array<
   cpuUsage,
   cpuUsageBreakdown,
   memoryUsage,
+  memoryUsageBreakdown,
   normalizedLoad1m,
+  loadBreakdown,
   logRate,
   diskSpaceUsageAvailable,
   diskThroughputReadWrite,
