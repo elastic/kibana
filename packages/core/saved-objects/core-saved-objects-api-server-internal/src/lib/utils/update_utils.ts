@@ -8,22 +8,6 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
-/**
- * Downward compatible update control flow helpers
- * unused ATM
- */
-export const updateProgressData: Record<string, unknown> = {
-  unmigratedRawDoc: {},
-  migratedOriginalSODoc: {},
-  updatedNewSODoc: {},
-  safeToSendUpdatedNewSODoc: {},
-  updateResult: {},
-  retriesCount: 0,
-  safeToSendCreateUpsertedSODoc: {},
-  createdResult: {},
-  finalResponse: {},
-};
-
 export const isValidRequest = ({
   allowedTypes,
   type,
