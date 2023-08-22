@@ -21,7 +21,9 @@ import { RegistryRuleType } from '@kbn/alerting-plugin/server/rule_type_registry
 type RuleTypeParams = Array<[string, z.ZodTypeAny]>;
 
 interface PathsObject {
-  [pattern: string]: PathItemObject;
+  paths: {
+    [pattern: string]: PathItemObject;
+  };
 }
 
 type PathItemObject = {
@@ -64,21 +66,23 @@ export class ApiDocsPlugin implements Plugin {
       .filter(Boolean) as unknown as RuleTypeParams;
 
     this.alerting = {
-      '/api/alerting/rule/{id}': {
-        post: {
-          requestBody: {
-            content: {
-              'application/json; Elastic-Api-Version=2023-10-31': {
-                schema: this.getCreateSchema(ruleTypeParams),
+      paths: {
+        '/api/alerting/rule/{id}': {
+          post: {
+            requestBody: {
+              content: {
+                'application/json; Elastic-Api-Version=2023-10-31': {
+                  schema: this.getCreateSchema(ruleTypeParams),
+                },
               },
             },
           },
-        },
-        put: {
-          requestBody: {
-            content: {
-              'application/json; Elastic-Api-Version=2023-10-31': {
-                schema: this.getUpdateSchema(ruleTypeParams),
+          put: {
+            requestBody: {
+              content: {
+                'application/json; Elastic-Api-Version=2023-10-31': {
+                  schema: this.getUpdateSchema(ruleTypeParams),
+                },
               },
             },
           },
@@ -109,7 +113,10 @@ export class ApiDocsPlugin implements Plugin {
 
     // discriminated union is used here because we would to use the oneOf option
     // this means that the valid params schema is different for each rule type
-    return zodToJsonSchema(z.discriminatedUnion('rule_type_id', schemas)) as any;
+    return zodToJsonSchema(z.discriminatedUnion('rule_type_id', schemas), {
+      target: 'openApi3',
+      $refStrategy: 'none',
+    }) as any;
   }
 
   /**
@@ -125,7 +132,7 @@ export class ApiDocsPlugin implements Plugin {
 
     const schemaWithParams = updateBodySchema.merge(z.object({ params: z.union(paramSchemas) }));
 
-    return zodToJsonSchema(schemaWithParams) as any;
+    return zodToJsonSchema(schemaWithParams, { target: 'openApi3', $refStrategy: 'none' }) as any;
   }
 }
 

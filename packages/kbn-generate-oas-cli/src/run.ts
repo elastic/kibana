@@ -10,7 +10,8 @@ import Fsp from 'fs/promises';
 import Path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import axios from 'axios';
-import { merge } from 'lodash';
+import { mergeWith } from 'lodash';
+import { OpenAPIV3 } from 'openapi-types';
 import { CoreVersionedRouter } from '@kbn/core-http-router-server-internal';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 
@@ -79,7 +80,17 @@ run(
 
       log.info('Merging OpenAPI specs...');
 
-      const output = merge(spec, { paths: data });
+      const output = mergeWith(
+        spec,
+        data,
+        (objValue: OpenAPIV3.SchemaObject, srcValue: OpenAPIV3.SchemaObject, key: string) => {
+          // use schema from server side generated spec
+          if (key === 'schema') {
+            return srcValue;
+          }
+          return undefined;
+        }
+      );
 
       log.info(`Writing OpenAPI spec ${OUTPUT_FILE}...`);
       await Fsp.writeFile(OUTPUT_FILE, JSON.stringify(output, null, 2));
