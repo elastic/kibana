@@ -512,7 +512,6 @@ export default ({ getService }: FtrProviderContext) => {
             related_integrations: [],
             required_fields: [],
             setup: '',
-            investigation_fields: [],
           },
           'kibana.alert.rule.actions': [],
           'kibana.alert.rule.created_by': 'elastic',

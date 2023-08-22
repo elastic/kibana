@@ -1364,7 +1364,7 @@ describe('rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "foo" supplied to "investigation_options,fields"',
+        'Invalid value "undefined" supplied to "investigation_options,fields"',
       ]);
       expect(message.schema).toEqual({});
     });
