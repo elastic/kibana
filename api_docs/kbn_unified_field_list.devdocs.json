@@ -2083,7 +2083,7 @@
                 "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
-              ", \"uiSettings\">; data: ",
+              ", \"analytics\" | \"uiSettings\">; data: ",
               {
                 "pluginId": "data",
                 "scope": "public",
