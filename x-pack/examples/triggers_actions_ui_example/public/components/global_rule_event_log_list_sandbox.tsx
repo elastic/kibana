@@ -17,6 +17,7 @@ export const GlobalRuleEventLogListSandbox = ({ triggersActionsUi }: SandboxProp
     <div style={{ height: '400px' }}>
       {triggersActionsUi.getGlobalRuleEventLogList({
         localStorageKey: 'test-local-storage-key',
+        filteredRuleTypes: ['apm.error_rate', 'apm.transaction_error_rate'],
       })}
     </div>
   );

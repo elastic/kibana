@@ -229,6 +229,23 @@ describe('rule_event_log_list_table', () => {
     });
   });
 
+  it('can filter by rule types', async () => {
+    render(
+      <RuleEventLogListWithProvider ruleId={ruleMock.id} filteredRuleTypes={['test-1', 'test-2']} />
+    );
+    await waitFor(() => {
+      expect(useLoadRuleEventLogs).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          id: ruleMock.id,
+          sort: [],
+          page: 0,
+          perPage: 10,
+          ruleTypeIds: ['test-1', 'test-2'],
+        })
+      );
+    });
+  });
+
   describe('pagination', () => {
     beforeEach(() => {
       useLoadRuleEventLogs.mockReturnValue({
