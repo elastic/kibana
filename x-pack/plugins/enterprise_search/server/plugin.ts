@@ -326,9 +326,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, EnterpriseSearchPlug
     /**
      * Create exposed plugin services
      */
-    if (!this.logger) {
-      throw new Error('Enterprise Search logger has not been initialized');
-    }
     if (!this.clusterClient) {
       this.clusterClient = core.elasticsearch.client;
     }
@@ -336,11 +333,10 @@ export class EnterpriseSearchPlugin implements Plugin<void, EnterpriseSearchPlug
       this.connectorsService = new ConnectorsService({
         clusterClient: this.clusterClient,
         http: core.http,
-        logger: this.logger,
       });
     }
     if (!this.connectorsService) {
-      throw new Error('Enterprise Search connectors service has not been initialized');
+      this.logger.warn('Enterprise Search connectors service has not been initialized');
     }
     return Object.freeze<EnterpriseSearchPluginStart>({
       connectorsService: this.connectorsService,

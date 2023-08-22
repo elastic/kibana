@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
 import { IClusterClient } from '@kbn/core-elasticsearch-server';
 import { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
 
@@ -19,20 +18,10 @@ import { fetchConnectors } from '../lib/connectors/fetch_connectors';
 export class ConnectorsService {
   private readonly clusterClient: IClusterClient;
   private readonly http: HttpServiceStart;
-  private readonly logger: Logger;
 
-  constructor({
-    clusterClient,
-    http,
-    logger,
-  }: {
-    clusterClient: IClusterClient;
-    http: HttpServiceStart;
-    logger: Logger;
-  }) {
+  constructor({ clusterClient, http }: { clusterClient: IClusterClient; http: HttpServiceStart }) {
     this.clusterClient = clusterClient;
     this.http = http;
-    this.logger = logger;
   }
 
   async createConnector(

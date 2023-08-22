@@ -16,6 +16,7 @@ import {
   FilteringValidationState,
   IngestPipelineParams,
 } from '../../common/types/connectors';
+import { stripSearchPrefix } from '../../common/utils/strip_search_prefix';
 
 export function createConnectorDocument({
   indexName,
@@ -125,7 +126,7 @@ export function createConnectorDocument({
     last_sync_scheduled_at: null,
     last_sync_status: null,
     last_synced: null,
-    name: name || (indexName?.startsWith('search-') ? indexName.substring(7) : indexName || ''),
+    name: name || stripSearchPrefix(indexName ?? ''),
     pipeline,
     scheduling: {
       access_control: { enabled: false, interval: '0 0 0 * * ?' },
