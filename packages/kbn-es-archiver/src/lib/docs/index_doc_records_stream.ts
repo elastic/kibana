@@ -9,10 +9,20 @@
 import type { Client } from '@elastic/elasticsearch';
 import AggregateError from 'aggregate-error';
 import { Writable } from 'stream';
+import { opendirSync } from 'fs';
+import { isGzip } from '..';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 
+const isCompressed = (x: string): boolean => {
+  const opened = opendirSync(x);
+  const dirent = opened.readSync();
+  // @ts-ignore
+  const isIt: boolean = isGzip(dirent?.name);
+  opened.closeSync();
+  return isIt;
+};
 enum BulkOperation {
   Create = 'create',
   Index = 'index',
