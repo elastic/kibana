@@ -12,8 +12,8 @@ import xpackRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/sch
 import ossPluginsTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_plugins.json';
 import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
 import { assertTelemetryPayload } from '@kbn/telemetry-tools';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import type { UsageStatsPayloadTestFriendly } from '../../../../test/api_integration/services/usage_api';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { UsageStatsPayloadTestFriendly } from '../../../../../test/api_integration/services/usage_api';
 
 export default function ({ getService }: FtrProviderContext) {
   const usageApi = getService('usageAPI');
@@ -39,7 +39,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('includes the serverless info in the body', async () => {
-      expect(stats.stack_stats.kibana?.plugins?.telemetry?.labels?.serverless).toBe('security');
+      const [unencryptedPayload] = await usageApi.getTelemetryStats({ unencrypted: true });
+
+      expect(
+        unencryptedPayload.stats.stack_stats.kibana?.plugins?.telemetry?.labels?.serverless
+      ).toBe('observability');
     });
   });
 }
