@@ -6,7 +6,7 @@
  */
 
 import stripAnsi from 'strip-ansi';
-// eslint-disable-next-line import/no-extraneous-dependencies
+
 import ansiRegex from 'ansi-regex'; // its a dependency of `strip-ansi` so it should be fine
 import { blue } from 'chalk';
 import { DataFormatter } from './data_formatter';
