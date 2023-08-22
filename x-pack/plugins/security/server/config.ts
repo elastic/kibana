@@ -279,14 +279,11 @@ export const ConfigSchema = schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       autoSchemesEnabled: schema.boolean({ defaultValue: true }),
       schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey', 'bearer'] }),
-      jwt: schema.conditional(
-        schema.contextRef('serverless'),
-        true,
-        schema.object({
+      jwt: offeringBasedSchema({
+        serverless: schema.object({
           taggedRoutesOnly: schema.boolean({ defaultValue: true }),
         }),
-        schema.never()
-      ),
+      }),
     }),
   }),
   audit: schema.object({
