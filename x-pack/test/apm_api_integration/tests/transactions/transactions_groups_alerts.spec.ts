@@ -176,7 +176,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('checks if rule is active', async () => {
           const ruleStatus = await waitForRuleStatus({
-            id: ruleId,
+            ruleId,
             expectedStatus: 'active',
             supertest,
           });
@@ -254,7 +254,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('checks if rule is active', async () => {
           const ruleStatus = await waitForRuleStatus({
-            id: ruleId,
+            ruleId,
             expectedStatus: 'active',
             supertest,
           });
@@ -333,7 +333,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('checks if rule is active', async () => {
           const ruleStatus = await waitForRuleStatus({
-            id: ruleId,
+            ruleId,
             expectedStatus: 'active',
             supertest,
           });

@@ -10,17 +10,17 @@ import pRetry from 'p-retry';
 import type SuperTest from 'supertest';
 
 export async function waitForRuleStatus({
-  id,
+  ruleId,
   expectedStatus,
   supertest,
 }: {
-  id: string;
+  ruleId: string;
   expectedStatus: string;
   supertest: SuperTest.SuperTest<SuperTest.Test>;
 }): Promise<Record<string, any>> {
   return pRetry(
     async () => {
-      const response = await supertest.get(`/api/alerting/rule/${id}`);
+      const response = await supertest.get(`/api/alerting/rule/${ruleId}`);
       const status = response.body?.execution_status?.status;
 
       if (status !== expectedStatus) {

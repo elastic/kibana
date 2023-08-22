@@ -99,7 +99,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(ruleId).to.not.eql(undefined);
           } else {
             const ruleStatus = await waitForRuleStatus({
-              id: ruleId,
+              ruleId,
               expectedStatus: 'active',
               supertest,
             });
