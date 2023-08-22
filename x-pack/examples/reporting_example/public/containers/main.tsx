@@ -18,8 +18,7 @@ import {
   EuiLink,
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
   EuiPageHeader,
   EuiPopover,
   EuiSpacer,
@@ -292,86 +291,84 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
                 <h1>Reporting Example</h1>
               </EuiTitle>
             </EuiPageHeader>
-            <EuiPageContent>
-              <EuiPageContentBody>
-                <EuiTitle>
-                  <h2>Example of a Sharing menu using components from Reporting</h2>
-                </EuiTitle>
-                <EuiSpacer />
-                <EuiText>
-                  <EuiFlexGroup alignItems="center" gutterSize="l">
-                    <EuiFlexItem grow={false}>
-                      <EuiPopover
-                        id="contextMenuExample"
-                        button={
-                          <EuiButton data-test-subj="shareButton" onClick={onButtonClick}>
-                            Share
-                          </EuiButton>
-                        }
-                        isOpen={isPopoverOpen}
-                        closePopover={closePopover}
-                        panelPaddingSize="none"
-                        anchorPosition="downLeft"
+            <EuiPageSection>
+              <EuiTitle>
+                <h2>Example of a Sharing menu using components from Reporting</h2>
+              </EuiTitle>
+              <EuiSpacer />
+              <EuiText>
+                <EuiFlexGroup alignItems="center" gutterSize="l">
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
+                      id="contextMenuExample"
+                      button={
+                        <EuiButton data-test-subj="shareButton" onClick={onButtonClick}>
+                          Share
+                        </EuiButton>
+                      }
+                      isOpen={isPopoverOpen}
+                      closePopover={closePopover}
+                      panelPaddingSize="none"
+                      anchorPosition="downLeft"
+                    >
+                      <EuiContextMenu initialPanelId={0} panels={panels} />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      <EuiLink href={history.createHref(parsePath(ROUTES.captureTest))}>
+                        Go to capture test
+                      </EuiLink>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+
+                <EuiHorizontalRule />
+
+                <div data-shared-items-container data-shared-items-count="5">
+                  <EuiFlexGroup gutterSize="l">
+                    <EuiFlexItem data-shared-item>
+                      {forwardedState ? (
+                        <>
+                          <EuiText>
+                            <p>
+                              <strong>Forwarded app state</strong>
+                            </p>
+                          </EuiText>
+                          <EuiCodeBlock>{JSON.stringify(forwardedState)}</EuiCodeBlock>
+                        </>
+                      ) : (
+                        <>
+                          <EuiText>
+                            <p>
+                              <strong>No forwarded app state found</strong>
+                            </p>
+                          </EuiText>
+                          <EuiCodeBlock>{'{}'}</EuiCodeBlock>
+                        </>
+                      )}
+                    </EuiFlexItem>
+                    {logos.map((item, index) => (
+                      <EuiFlexItem
+                        key={index}
+                        data-shared-item
+                        data-shared-render-error
+                        data-render-error="This is an example error"
                       >
-                        <EuiContextMenu initialPanelId={0} panels={panels} />
-                      </EuiPopover>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s">
-                        <EuiLink href={history.createHref(parsePath(ROUTES.captureTest))}>
-                          Go to capture test
-                        </EuiLink>
-                      </EuiText>
-                    </EuiFlexItem>
+                        <EuiCard
+                          icon={<EuiIcon size="xxl" type={`logo${item}`} />}
+                          title={`Elastic ${item}`}
+                          description="Example of a card's description. Stick to one or two sentences."
+                          onClick={() => {}}
+                        />
+                      </EuiFlexItem>
+                    ))}
                   </EuiFlexGroup>
 
-                  <EuiHorizontalRule />
-
-                  <div data-shared-items-container data-shared-items-count="5">
-                    <EuiFlexGroup gutterSize="l">
-                      <EuiFlexItem data-shared-item>
-                        {forwardedState ? (
-                          <>
-                            <EuiText>
-                              <p>
-                                <strong>Forwarded app state</strong>
-                              </p>
-                            </EuiText>
-                            <EuiCodeBlock>{JSON.stringify(forwardedState)}</EuiCodeBlock>
-                          </>
-                        ) : (
-                          <>
-                            <EuiText>
-                              <p>
-                                <strong>No forwarded app state found</strong>
-                              </p>
-                            </EuiText>
-                            <EuiCodeBlock>{'{}'}</EuiCodeBlock>
-                          </>
-                        )}
-                      </EuiFlexItem>
-                      {logos.map((item, index) => (
-                        <EuiFlexItem
-                          key={index}
-                          data-shared-item
-                          data-shared-render-error
-                          data-render-error="This is an example error"
-                        >
-                          <EuiCard
-                            icon={<EuiIcon size="xxl" type={`logo${item}`} />}
-                            title={`Elastic ${item}`}
-                            description="Example of a card's description. Stick to one or two sentences."
-                            onClick={() => {}}
-                          />
-                        </EuiFlexItem>
-                      ))}
-                    </EuiFlexGroup>
-
-                    <p>Screenshot Mode is {screenshotMode.isScreenshotMode() ? 'ON' : 'OFF'}!</p>
-                  </div>
-                </EuiText>
-              </EuiPageContentBody>
-            </EuiPageContent>
+                  <p>Screenshot Mode is {screenshotMode.isScreenshotMode() ? 'ON' : 'OFF'}!</p>
+                </div>
+              </EuiText>
+            </EuiPageSection>
           </EuiPageBody>
         </EuiPage>
       </I18nProvider>

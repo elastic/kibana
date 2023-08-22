@@ -11,13 +11,13 @@ import type {
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
 } from '../types';
-import type { IObservabilityAIAssistantService } from '../service/types';
+import type { ObservabilityAIAssistantService } from '../service';
 
 export interface ObservabilityAIAssistantRouteHandlerResources {
   request: KibanaRequest;
   context: RequestHandlerContext;
   logger: Logger;
-  service: IObservabilityAIAssistantService;
+  service: ObservabilityAIAssistantService;
   plugins: {
     [key in keyof ObservabilityAIAssistantPluginSetupDependencies]: {
       setup: Required<ObservabilityAIAssistantPluginSetupDependencies>[key];

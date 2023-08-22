@@ -35,6 +35,7 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { DropIllustration } from '@kbn/chart-icons';
 import { DragDrop, useDragDropContext, DragDropIdentifier } from '@kbn/dom-drag-drop';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
 import {
@@ -138,10 +139,6 @@ export const WorkspacePanel = React.memo(function WorkspacePanel(props: Workspac
   );
 });
 
-const log = (...messages: Array<string | number>) => {
-  // console.log(...messages);
-};
-
 // Exported for testing purposes only.
 export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   framePublicAPI,
@@ -208,10 +205,15 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       if (!initialVisualizationRenderComplete.current) {
         initialVisualizationRenderComplete.current = true;
         // NOTE: this metric is only reported for an initial editor load of a pre-existing visualization
-        log(
-          'initial visualization took to render after data received',
-          performance.now() - dataReceivedTime.current
-        );
+        const currentTime = performance.now();
+        reportPerformanceMetricEvent(core.analytics, {
+          eventName: 'lensVisualizationRenderTime',
+          duration: currentTime - visualizationRenderStartTime.current,
+          key1: 'time_to_data',
+          value1: dataReceivedTime.current - visualizationRenderStartTime.current,
+          key2: 'time_to_render',
+          value2: currentTime - dataReceivedTime.current,
+        });
       }
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
         (acc, datasource) => {
@@ -243,7 +245,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
       trackUiCounterEvents(events);
     }
-  }, []);
+  }, [core.analytics]);
 
   const removeSearchWarningMessagesRef = useRef<() => void>();
   const removeExpressionBuildErrorsRef = useRef<() => void>();
@@ -252,13 +254,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     (_data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
       if (renderDeps.current) {
         dataReceivedTime.current = performance.now();
-        if (!initialVisualizationRenderComplete.current) {
-          // NOTE: this metric is only reported for an initial editor load of a pre-existing visualization
-          log(
-            'initial data took to arrive',
-            dataReceivedTime.current - visualizationRenderStartTime.current
-          );
-        }
 
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
         const datasource = Object.values(renderDeps.current.datasourceMap)[0];
