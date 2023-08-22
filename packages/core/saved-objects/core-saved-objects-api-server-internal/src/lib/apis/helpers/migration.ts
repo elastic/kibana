@@ -28,13 +28,15 @@ export class MigrationHelper {
    * before storing it in the index. It will therefore throw if the document is in a higher / unknown version.
    */
   migrateInputDocument(document: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
-    return this.migrator.migrateDocument(document, { allowDowngrade: false });
+    return this.migrator.migrateDocument(document, { allowDowngrade: false }); // if false (as by default), allows documents to be indeed without a downgrade option
   }
 
   /**
    * Migrate the given SO document, accepting downgrades.
    * This function is meant to be used by read APIs (get, find) for documents fetched from the index.
    * It will therefore accept downgrading the document before returning it from the API.
+   * SO types needing to opt out of cross-version read operatations can set `allowDowngrade`: false for their documents by declaring
+   * the new SOR api call query option: 
    */
   migrateStorageDocument(document: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
     return this.migrator.migrateDocument(document, { allowDowngrade: true });
