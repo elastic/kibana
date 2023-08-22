@@ -46,6 +46,7 @@ export async function showCategorizeFlyout(
         http,
         theme,
         application,
+        i18n,
         ...plugins,
       };
       const datePickerDeps: DatePickerDependencies = {
