@@ -29,6 +29,7 @@ export const docker: Command = {
       --password          Sets password for elastic user [default: ${password}]
       --port              The port to bind to on 127.0.0.1 [default: ${DEFAULT_PORT}]
       --ssl               Sets up SSL on Elasticsearch
+      --kill              Kill running ES nodes if detected
       -E                  Additional key=value settings to pass to Elasticsearch
       -D                  Override Docker command
 
@@ -55,7 +56,7 @@ export const docker: Command = {
       },
 
       string: ['tag', 'image', 'D'],
-      boolean: ['ssl'],
+      boolean: ['ssl', 'kill'],
 
       default: defaults,
     });

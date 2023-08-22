@@ -12,6 +12,7 @@ import { stat } from 'fs/promises';
 
 import {
   DOCKER_IMG,
+  detectRunningNodes,
   maybeCreateDockerNetwork,
   maybePullDockerImage,
   resolveDockerCmd,
@@ -233,6 +234,44 @@ describe('maybePullDockerImage()', () => {
   });
 });
 
+describe('detectRunningNodes()', () => {
+  const nodes = ['es01', 'es02', 'es03'];
+
+  test('should not error if no nodes detected', async () => {
+    execa.mockImplementationOnce(() => Promise.resolve({ stdout: '' }));
+
+    await detectRunningNodes(log, {});
+
+    expect(execa.mock.calls).toHaveLength(1);
+    expect(execa.mock.calls[0][1]).toEqual(expect.arrayContaining(['ps', '--quiet', '--filter']));
+  });
+
+  test('should kill nodes if detected and kill passed', async () => {
+    execa.mockImplementationOnce(() =>
+      Promise.resolve({
+        stdout: nodes.join('\n'),
+      })
+    );
+
+    await detectRunningNodes(log, { kill: true });
+
+    expect(execa.mock.calls).toHaveLength(2);
+    expect(execa.mock.calls[1][1]).toEqual(expect.arrayContaining(nodes.concat('kill')));
+  });
+
+  test('should error if nodes detected and kill not passed', async () => {
+    execa.mockImplementationOnce(() =>
+      Promise.resolve({
+        stdout: nodes.join('\n'),
+      })
+    );
+
+    await expect(detectRunningNodes(log, {})).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"ES has already been started"`
+    );
+  });
+});
+
 describe('resolveEsArgs()', () => {
   const defaultEsArgs: Array<[string, string]> = [
     ['foo', 'bar'],
@@ -427,7 +466,7 @@ describe('runServerlessCluster()', () => {
     await runServerlessCluster(log, { basePath: baseEsPath });
 
     // setupDocker execa calls then run three nodes
-    expect(execa.mock.calls).toHaveLength(6);
+    expect(execa.mock.calls).toHaveLength(7);
   });
 });
 
@@ -499,6 +538,6 @@ describe('runDockerContainer()', () => {
 
     await expect(runDockerContainer(log, {})).resolves.toEqual({ stdout: '' });
     // setupDocker execa calls then run container
-    expect(execa.mock.calls).toHaveLength(4);
+    expect(execa.mock.calls).toHaveLength(5);
   });
 });

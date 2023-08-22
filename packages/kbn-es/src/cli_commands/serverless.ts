@@ -22,11 +22,12 @@ export const serverless: Command = {
     return dedent`
     Options:
 
-      --tag               Image tag of ES Serverless to run from ${SERVERLESS_REPO} [default: ${SERVERLESS_TAG}]
-      --image             Full path of ES Serverless image to run, has precedence over tag. [default: ${SERVERLESS_IMG}]
+      --tag               Image tag of ESS to run from ${SERVERLESS_REPO} [default: ${SERVERLESS_TAG}]
+      --image             Full path of ESS image to run, has precedence over tag. [default: ${SERVERLESS_IMG}]
       --clean             Remove existing file system object store before running
       --port              The port to bind to on 127.0.0.1 [default: ${DEFAULT_PORT}]
       --ssl               Sets up SSL on Elasticsearch
+      --kill              Kill running ESS nodes if detected
       -E                  Additional key=value settings to pass to Elasticsearch
 
     Examples:
@@ -51,7 +52,7 @@ export const serverless: Command = {
       },
 
       string: ['tag', 'image'],
-      boolean: ['clean', 'ssl'],
+      boolean: ['clean', 'ssl', 'kill'],
 
       default: defaults,
     });

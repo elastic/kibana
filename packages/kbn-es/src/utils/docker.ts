@@ -24,6 +24,7 @@ interface BaseOptions {
   image?: string;
   port?: number;
   ssl?: boolean;
+  kill?: boolean;
 }
 
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
@@ -303,11 +304,45 @@ export async function maybePullDockerImage(log: ToolingLog, image: string) {
   });
 }
 
+export async function detectRunningNodes(
+  log: ToolingLog,
+  options: ServerlessOptions | DockerOptions
+) {
+  const namesCmd = SERVERLESS_NODES.reduce<string[]>((acc, { name }) => {
+    acc.push('--filter', `name=${name}`);
+
+    return acc;
+  }, []);
+
+  const { stdout } = await execa('docker', ['ps', '--quiet'].concat(namesCmd));
+  const runningNodes = stdout.split(/\r?\n/).filter((s) => s);
+
+  if (runningNodes.length) {
+    if (options.kill) {
+      log.info(chalk.bold('Running ES Nodes detected, killing.'));
+      await execa('docker', ['kill'].concat(runningNodes));
+
+      return;
+    }
+
+    throw createCliError('ES has already been started');
+  }
+}
+
 /**
  * Common setup for Docker and Serverless containers
  */
-async function setupDocker(log: ToolingLog, image: string) {
+async function setupDocker({
+  log,
+  image,
+  options,
+}: {
+  log: ToolingLog;
+  image: string;
+  options: ServerlessOptions | DockerOptions;
+}) {
   await verifyDockerInstalled(log);
+  await detectRunningNodes(log, options);
   await maybeCreateDockerNetwork(log);
   await maybePullDockerImage(log, image);
 }
@@ -440,7 +475,7 @@ export async function runServerlessEsNode(
  */
 export async function runServerlessCluster(log: ToolingLog, options: ServerlessOptions) {
   const image = getServerlessImage(options);
-  await setupDocker(log, image);
+  await setupDocker({ log, image, options });
 
   const volumeCmd = await setupServerlessVolumes(log, options);
 
@@ -523,7 +558,7 @@ export async function runDockerContainer(log: ToolingLog, options: DockerOptions
 
   if (!options.dockerCmd) {
     image = getDockerImage(options);
-    await setupDocker(log, image);
+    await setupDocker({ log, image, options });
   }
 
   const dockerCmd = resolveDockerCmd(options, image);
