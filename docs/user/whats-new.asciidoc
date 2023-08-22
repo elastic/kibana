@@ -44,7 +44,7 @@ To learn more, check out cases in the {observability-guide}/create-cases.html[{o
 
 [discrete]
 ==== Wildcard search in dashboard controls
-**Dashboard** now supports searching for strings that are found within the values shown in a control. Previously, it was required for the string to be located at the start of the value in order to be found. However this is a more expensive option then just searching for the prefix, so it’s disabled by default. To enable it in **Dashboard** select Edit control > Options list settings > Contains. 
+You can now search for strings anywhere within a control. Previously, the string had to be located at the start of the value in order to be found. This option is disabled by default as it is a more expensive option then just searching for the prefix. To enable it in **Dashboard** select Edit control > Options list settings > Contains. 
 
 [role="screenshot"]
 image::images/wildcard-search.png[Example of new string search]
@@ -64,21 +64,14 @@ image::images/currierlocation.png[Example of currier locations in relations to s
 
 [discrete]
 ==== Stacked bar chart legend
+The stacked bar chart legends are now arranged in descending order based on their values, with the segment having the highest total value shown at the top.
 
-The order of stacked bar chart legends is now based on popularity with the most important element displayed on top. You no longer need to scroll to the bottom of the legend to find the most popular data in the chart. 
-
-Previously:
 [role="screenshot"]
-image::images/oldwayhighlighted.png[Example of the old ordering of the chart legend, width=80%]
-
-New in 8.9:
-[role="screenshot"]
-image::images/newwayhighlighted.png[Example of the new ordering of the chart legend, width=80%]
+image::images/newwayhighlighted.png[Example of the new ordering of the chart legend, width=90%]
 
 [discrete]
 ==== Step curve
-
-**Lens** now supports three new options for line charts. The three options are straight, smooth, and step. Step curve line charts help users see clearly when data changes at irregular intervals, which helps to avoid misinterpretation. When creating visualizations select **Line** in the visualization type dropdown. Then use the visual options menu to choose between straight, smooth, or step in the Line interpolation dropdown. 
+**Lens** now supports a new line interpolation option for line charts. Step curve line charts help users see clearly when data changes at irregular intervals, reducing misinterpretation. When creating visualizations select **Line** in the visualization type dropdown. Then use the **Visual options** menu to choose step in the **Line interpolation** dropdown.
 
 [role="screenshot"]
 image::images/stepcurve.gif[An short video displaying the three new chart options]
@@ -86,8 +79,8 @@ image::images/stepcurve.gif[An short video displaying the three new chart option
 [discrete]
 ==== Significance (significant terms)
 
-This new ranking method in the top values breakdown displays data by significance (significant terms). It permits us to get the terms that are important and likely the most critical for a given query. It’s a powerful way to find anomalies in your data with multiple use cases. Read more {ref}/search-aggregations-bucket-significantterms-aggregation.html[here].
-This is not just based on the most popular terms in a set. When calculating significant terms, Elasticsearch looks for significant changes in popularity of a specific term between two sets of data. A foreground set (the data returned by a query) and a background set (the data in our indices). This is supported on all charts. 
+This new ranking method in the top values breakdown displays data by significance (significant terms). It helps you identify the key and most crucial terms for a specific query. It’s a powerful way to find anomalies in your data with multiple use cases. Read more {ref}/search-aggregations-bucket-significantterms-aggregation.html[here].
+This is not just based on the most popular terms in a set. When calculating significant terms, {es} looks for significant changes in popularity of a specific term between two sets of data. A foreground set (the data returned by a query) and a background set (the data in our indices). This is supported on all charts. 
 
 [role="screenshot"]
 image::images/significant-terms.png[Example of a donut chart organized by significant terms, width=70%]
@@ -95,7 +88,7 @@ image::images/significant-terms.png[Example of a donut chart organized by signif
 [discrete]
 ==== Tag cloud
 
-You can now create a word cloud in **Lens** using Tag cloud, which is currently in technical preview. When creating new visualizations, select **Tag cloud** in the visualization type dropdown. From the available fields drag and drop the desired field into the workspace to visualize keywords. 
+preview:[] You can now create a word cloud in **Lens** using Tag cloud, which is currently in technical preview. When creating new visualizations, select **Tag cloud** in the visualization type dropdown. From the available fields drag and drop the desired field into the workspace to visualize keywords. 
  
 [role="screenshot"]
 image::images/tagcloud.png[Example of a tag cloud, width=70%]
@@ -106,7 +99,7 @@ image::images/tagcloud.png[Example of a tag cloud, width=70%]
 Group annotations and save them to the visualize library, so the content can be reused across multiple visualizations. This saves time for users with complicated annotations. From the main menu select Visualize Library, then select the tab **Annotation groups**. Here you can create new annotation groups in **Lens**, or select from a list of previously created annotation groups.
  
 [role="screenshot"]
-image::images/annotation.gif[Example of how to save an annotation group to the visualize library]
+image::images/annotation.gif[Example of how to save an annotation group to the visualize library, width=75%]
 
 [discrete]
 ==== New time functions in Lens formula
