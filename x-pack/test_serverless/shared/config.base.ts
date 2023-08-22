@@ -18,12 +18,10 @@ export default async () => {
     elasticsearch: esTestConfig.getUrlParts(),
   };
 
-  const kibanaPort = kbnTestConfig.getPort();
-
   // "Fake" SAML provider
   const idpPath = resolve(
     __dirname,
-    '../../test//security_api_integration/plugins/saml_provider/metadata.xml'
+    '../../test/security_api_integration/plugins/saml_provider/metadata.xml'
   );
   const samlIdPPlugin = resolve(
     __dirname,
@@ -41,9 +39,9 @@ export default async () => {
         'xpack.security.authc.realms.saml.cloud-saml-kibana.order=0',
         `xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=${idpPath}`,
         'xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=http://www.elastic.co/saml1',
-        `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://localhost:${kibanaPort}`,
-        `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=http://localhost:${kibanaPort}/logout`,
-        `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=http://localhost:${kibanaPort}/api/security/saml/callback`,
+        `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://localhost:${servers.kibana.port}`,
+        `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=http://localhost:${servers.kibana.port}/logout`,
+        `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=http://localhost:${servers.kibana.port}/api/security/saml/callback`,
         'xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.principal=urn:oid:0.0.7',
       ],
     },
@@ -56,7 +54,7 @@ export default async () => {
       sourceArgs: ['--no-base-path', '--env.name=development'],
       serverArgs: [
         `--server.restrictInternalApis=true`,
-        `--server.port=${kibanaPort}`,
+        `--server.port=${servers.kibana.port}`,
         '--status.allowAnonymous=true',
         // We shouldn't embed credentials into the URL since Kibana requests to Elasticsearch should
         // either include `kibanaServerTestUser` credentials, or credentials provided by the test

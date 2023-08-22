@@ -17,6 +17,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function SamlToolsProvider({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const randomness = getService('randomness');
+  const svlCommonApi = getService('svlCommonApi');
 
   function createSAMLResponse(options = {}) {
     return getSAMLResponse({
@@ -30,12 +31,12 @@ export function SamlToolsProvider({ getService }: FtrProviderContext) {
     async login(username: string) {
       const samlAuthenticationResponse = await supertestWithoutAuth
         .post('/api/security/saml/callback')
-        .set('kbn-xsrf', 'some-xsrf-token')
+        .set(svlCommonApi.getCommonRequestHeader())
         .send({ SAMLResponse: await createSAMLResponse({ username }) });
       expect(samlAuthenticationResponse.status).to.equal(302);
       expect(samlAuthenticationResponse.header.location).to.equal('/');
       const sessionCookie = parseCookie(samlAuthenticationResponse.header['set-cookie'][0])!;
-      return sessionCookie;
+      return { Cookie: sessionCookie.cookieString() };
     },
   };
 }

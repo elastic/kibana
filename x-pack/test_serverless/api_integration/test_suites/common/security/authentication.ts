@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('security/authentication', function () {
     describe('route access', () => {
       describe('disabled', () => {
-        // ToDo: uncommment when we disable login
+        // ToDo: uncomment when we disable login
         // it('login', async () => {
         //   const { body, status } = await supertest
         //     .post('/internal/security/login')

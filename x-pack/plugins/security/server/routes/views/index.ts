@@ -21,15 +21,13 @@ export function defineViewRoutes(params: RouteDefinitionParams) {
   defineLogoutRoutes(params);
   defineOverwrittenSessionRoutes(params);
 
-  if (params.buildFlavor !== 'serverless') {
-    // In the serverless offering, the access agreement functionality isn't available.
+  if (
+    params.config.accessAgreement?.message ||
+    params.config.authc.sortedProviders.some(({ hasAccessAgreement }) => hasAccessAgreement)
+  ) {
     defineAccessAgreementRoutes(params);
   }
 
-  // Temporarily allow the login page route
-  // ToDo: move this block into the 'not serverless' block above when login routes are disabled
-  // In the serverless environment, the only valid authentication methodology is SAML.
-  // There is no need for basic or token login HTTP APIs
   if (
     params.config.authc.selector.enabled ||
     params.config.authc.sortedProviders.some(({ type }) => type === 'basic' || type === 'token')

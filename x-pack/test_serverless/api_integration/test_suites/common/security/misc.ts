@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
           svlCommonApi.assertApiNotFound(body, status);
         });
 
-        it('fix decprecated role mappings', async () => {
+        it('fix deprecated role mappings', async () => {
           const { body, status } = await supertest
             .post('/internal/security/deprecations/kibana_user_role/_fix_role_mappings')
             .set(svlCommonApi.getInternalRequestHeader());

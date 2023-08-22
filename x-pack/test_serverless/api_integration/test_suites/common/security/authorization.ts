@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('security/authorization', function () {
     describe('route access', () => {
       describe('disabled', () => {
-        it('get all priviledges', async () => {
+        it('get all privileges', async () => {
           const { body, status } = await supertest
             .get('/api/security/privileges')
             .set(svlCommonApi.getInternalRequestHeader());

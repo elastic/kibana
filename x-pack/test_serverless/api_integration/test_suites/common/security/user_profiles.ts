@@ -18,30 +18,27 @@ export default function ({ getService }: FtrProviderContext) {
     describe('route access', () => {
       describe('internal', () => {
         it('update', async () => {
-          const sessionCookie = await samlTools.login(kibanaTestUser.username);
           const { status } = await supertestWithoutAuth
             .post(`/internal/security/user_profile/_data`)
             .set(svlCommonApi.getInternalRequestHeader())
-            .set('Cookie', sessionCookie.cookieString())
+            .set(await samlTools.login(kibanaTestUser.username))
             .send({ key: 'value' });
           expect(status).not.toBe(404);
         });
 
         it('get current', async () => {
-          const sessionCookie = await samlTools.login(kibanaTestUser.username);
           const { status } = await supertestWithoutAuth
             .get(`/internal/security/user_profile`)
             .set(svlCommonApi.getInternalRequestHeader())
-            .set('Cookie', sessionCookie.cookieString());
+            .set(await samlTools.login(kibanaTestUser.username));
           expect(status).not.toBe(404);
         });
 
         it('bulk get', async () => {
-          const sessionCookie = await samlTools.login(kibanaTestUser.username);
           const { status } = await supertestWithoutAuth
             .get(`/internal/security/user_profile`)
             .set(svlCommonApi.getInternalRequestHeader())
-            .set('Cookie', sessionCookie.cookieString())
+            .set(await samlTools.login(kibanaTestUser.username))
             .send({ uids: ['12345678'] });
           expect(status).not.toBe(404);
         });

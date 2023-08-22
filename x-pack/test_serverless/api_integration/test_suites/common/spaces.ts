@@ -37,6 +37,19 @@ export default function ({ getService }: FtrProviderContext) {
           svlCommonApi.assertApiNotFound(body, status);
         });
 
+        it('#update requires internal header', async () => {
+          const { body, status } = await supertest
+            .put('/api/spaces/space/default')
+            .set(svlCommonApi.getCommonRequestHeader())
+            .send({
+              id: 'default',
+              name: 'UPDATED!',
+              disabledFeatures: [],
+            });
+
+          svlCommonApi.assertApiNotFound(body, status);
+        });
+
         it('#copyToSpace', async () => {
           const { body, status } = await supertest
             .post('/api/spaces/_copy_saved_objects')
@@ -172,67 +185,28 @@ export default function ({ getService }: FtrProviderContext) {
           );
           expect(status).toBe(200);
         });
-
-        it('#update requires internal header', async () => {
-          let body: any;
-          let status: number;
-
-          ({ body, status } = await supertest
-            .put('/api/spaces/space/default')
-            .set(svlCommonApi.getCommonRequestHeader())
-            .send({
-              id: 'default',
-              name: 'UPDATED!',
-              disabledFeatures: [],
-            }));
-          // expect a rejection because we're not using the internal header
-          expect(body).toEqual({
-            statusCode: 400,
-            error: 'Bad Request',
-            message: expect.stringContaining(
-              'method [put] exists but is not available with the current configuration'
-            ),
-          });
-          expect(status).toBe(400);
-
-          ({ body, status } = await supertest
-            .put('/api/spaces/space/default')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .send({
-              id: 'default',
-              name: 'UPDATED!',
-              disabledFeatures: [],
-            }));
-          // expect success because we're using the internal header
-          expect(body).toEqual(
-            expect.objectContaining({
-              id: 'default',
-              name: 'UPDATED!',
-            })
-          );
-          expect(status).toBe(200);
-        });
       });
     });
 
-    it('rejects request to update a space with disabledFeatures', async () => {
-      const { body, status } = await supertest
-        .put('/api/spaces/space/default')
-        .set(svlCommonApi.getInternalRequestHeader())
-        .send({
-          id: 'custom',
-          name: 'Custom',
-          disabledFeatures: ['some-feature'],
-        });
-
-      // in a non-serverless environment this would succeed with a 200
-      expect(body).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message:
-          'Unable to update Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled',
-      });
-      expect(status).toBe(400);
-    });
+    // TODO: Re-enable test-suite once users can create and update spaces in the Serverless offering.
+    // it('rejects request to update a space with disabledFeatures', async () => {
+    //   const { body, status } = await supertest
+    //     .put('/api/spaces/space/default')
+    //     .set(svlCommonApi.getInternalRequestHeader())
+    //     .send({
+    //       id: 'custom',
+    //       name: 'Custom',
+    //       disabledFeatures: ['some-feature'],
+    //     });
+    //
+    //   // in a non-serverless environment this would succeed with a 200
+    //   expect(body).toEqual({
+    //     statusCode: 400,
+    //     error: 'Bad Request',
+    //     message:
+    //       'Unable to update Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled',
+    //   });
+    //   expect(status).toBe(400);
+    // });
   });
 }

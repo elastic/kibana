@@ -20,7 +20,6 @@ export function defineAuthorizationRoutes(params: RouteDefinitionParams) {
   // exposed to users and administrators via control plane UI, eliminating the need for any public HTTP APIs.
   if (params.buildFlavor !== 'serverless') {
     definePrivilegesRoutes(params);
-    // defineRolesRoutes(params);
     defineShareSavedObjectPermissionRoutes(params);
   }
 }
