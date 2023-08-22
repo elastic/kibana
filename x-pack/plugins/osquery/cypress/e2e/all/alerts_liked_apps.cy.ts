@@ -39,7 +39,7 @@ describe('Alert Event Details', { browser: 'electron', tags: [tag.ESS, tag.SERVE
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
     cy.visit('/app/security/rules');
-    cy.contains(ruleName).click();
+    cy.getBySel('ruleName').contains(ruleName).click();
   });
 
   it('should be able to add investigation guides to response actions', () => {

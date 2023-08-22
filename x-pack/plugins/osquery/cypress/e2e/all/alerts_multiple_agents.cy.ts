@@ -34,7 +34,7 @@ describe('Alert Event Details - dynamic params', { tags: [tag.ESS, tag.SERVERLES
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
     cy.visit('/app/security/rules');
-    cy.contains(ruleName).click();
+    cy.getBySel('ruleName').contains(ruleName).click();
   });
 
   it('should substitute parameters in investigation guide', () => {

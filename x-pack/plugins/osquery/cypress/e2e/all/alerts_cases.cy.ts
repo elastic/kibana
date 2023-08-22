@@ -47,7 +47,7 @@ describe('Alert Event Details - Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () 
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
     cy.visit('/app/security/rules');
-    cy.contains(ruleName).click();
+    cy.getBySel('ruleName').contains(ruleName).click();
   });
 
   after(() => {
