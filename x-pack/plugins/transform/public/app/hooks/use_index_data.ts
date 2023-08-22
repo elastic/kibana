@@ -28,10 +28,7 @@ import {
 } from '@kbn/ml-data-grid';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
-import {
-  isEsSearchResponse,
-  isFieldHistogramsResponseSchema,
-} from '../../../common/api_schemas/type_guards';
+import { isEsSearchResponse } from '../../../common/api_schemas/type_guards';
 import {
   hasKeywordDuplicate,
   isKeywordDuplicate,
@@ -44,7 +41,7 @@ import { useToastNotifications, useAppDependencies } from '../app_dependencies';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define/common';
 
 import { SearchItems } from './use_search_items';
-import { useApi } from './use_api';
+import { useGetHistogramsForFields } from './use_get_histograms_for_fields';
 import { useDataSearch } from './use_data_search';
 
 export const useIndexData = (
@@ -61,7 +58,6 @@ export const useIndexData = (
 
   const indexPattern = useMemo(() => dataView.getIndexPattern(), [dataView]);
 
-  const api = useApi();
   const dataSearch = useDataSearch();
   const toastNotifications = useToastNotifications();
 
@@ -273,58 +269,54 @@ export const useIndexData = (
     ]),
   ]);
 
+  const allDataViewFieldNames = new Set(dataView.fields.map((f) => f.name));
+  const { error: histogramsForFieldsError, data: histogramsForFieldsData } =
+    useGetHistogramsForFields(
+      indexPattern,
+      columns
+        .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+        .map((cT) => {
+          // If a column field name has a corresponding keyword field,
+          // fetch the keyword field instead to be able to do aggregations.
+          const fieldName = cT.id;
+          return hasKeywordDuplicate(fieldName, allDataViewFieldNames)
+            ? {
+                fieldName: `${fieldName}.keyword`,
+                type: getFieldType(undefined),
+              }
+            : {
+                fieldName,
+                type: getFieldType(cT.schema),
+              };
+        }),
+      isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
+      combinedRuntimeMappings,
+      chartsVisible
+    );
+
   useEffect(() => {
-    const fetchColumnChartsData = async function () {
-      const allDataViewFieldNames = new Set(dataView.fields.map((f) => f.name));
-      const columnChartsData = await api.getHistogramsForFields(
-        indexPattern,
-        columns
-          .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
-          .map((cT) => {
-            // If a column field name has a corresponding keyword field,
-            // fetch the keyword field instead to be able to do aggregations.
-            const fieldName = cT.id;
-            return hasKeywordDuplicate(fieldName, allDataViewFieldNames)
-              ? {
-                  fieldName: `${fieldName}.keyword`,
-                  type: getFieldType(undefined),
-                }
-              : {
-                  fieldName,
-                  type: getFieldType(cT.schema),
-                };
-          }),
-        isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
-        combinedRuntimeMappings
-      );
+    if (histogramsForFieldsError !== null) {
+      showDataGridColumnChartErrorMessageToast(histogramsForFieldsError, toastNotifications);
+    }
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [histogramsForFieldsError]);
 
-      if (!isFieldHistogramsResponseSchema(columnChartsData)) {
-        showDataGridColumnChartErrorMessageToast(columnChartsData, toastNotifications);
-        return;
-      }
-
+  useEffect(() => {
+    if (histogramsForFieldsData) {
       setColumnCharts(
         // revert field names with `.keyword` used to do aggregations to their original column name
-        columnChartsData.map((d) => ({
+        histogramsForFieldsData.map((d) => ({
           ...d,
           ...(isKeywordDuplicate(d.id, allDataViewFieldNames)
             ? { id: removeKeywordPostfix(d.id) }
             : {}),
         }))
       );
-    };
-
-    if (chartsVisible) {
-      fetchColumnChartsData();
     }
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    chartsVisible,
-    indexPattern,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify([query, dataGrid.visibleColumns, combinedRuntimeMappings, timeRangeMs]),
-  ]);
+  }, [histogramsForFieldsData]);
 
   const renderCellValue = useRenderCellValue(dataView, pagination, tableItems);
 

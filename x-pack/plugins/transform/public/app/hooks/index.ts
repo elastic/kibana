@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { useApi } from './use_api';
 export { useCreateTransform } from './use_create_transform';
 export { useDocumentationLinks } from './use_documentation_links';
 export { useGetDataViewTitles } from './use_get_data_view_titles';

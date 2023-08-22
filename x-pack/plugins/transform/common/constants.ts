@@ -36,6 +36,7 @@ export const TRANSFORM_REACT_QUERY_KEYS = {
   GET_DATA_VIEW_TITLES: 'transform.get_data_view_titles',
   GET_ES_INDICES: 'transform.get_es_indices',
   GET_ES_INGEST_PIPELINES: 'transform.get_es_ingest_pipelines',
+  GET_HISTOGRAMS_FOR_FIELDS: 'transform.get_histograms_for_fields',
   GET_PRIVILEGES: 'transform.get_privileges',
   GET_TRANSFORM: 'transform.get_transform',
   GET_TRANSFORM_AUDIT_MESSAGES: 'transform.get_transform_audit_messages',
