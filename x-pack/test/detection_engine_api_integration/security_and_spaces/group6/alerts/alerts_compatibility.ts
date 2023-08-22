@@ -337,7 +337,6 @@ export default ({ getService }: FtrProviderContext) => {
             max_signals: 100,
             risk_score_mapping: [],
             severity_mapping: [],
-            investigation_fields: [],
             threat: [],
             to: 'now',
             references: [],

@@ -295,7 +295,8 @@ describe('Rule response schema', () => {
       const message = pipe(checked, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "[]" supplied to "investigation_options"',
+        'Invalid value "[]" supplied to "investigation_options,fields"',
+        'Invalid value "{"fields":[]}" supplied to "investigation_options"',
       ]);
       expect(message.schema).toEqual({});
     });

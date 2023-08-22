@@ -1332,7 +1332,7 @@ describe('rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "0" supplied to "investigation_options"',
+        'Invalid value "[]" supplied to "investigation_options,fields"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -1347,9 +1347,9 @@ describe('rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "0" supplied to "investigation_options"',
-        'Invalid value "1" supplied to "investigation_options"',
-        'Invalid value "2" supplied to "investigation_options"',
+        'Invalid value "0" supplied to "investigation_options,fields"',
+        'Invalid value "1" supplied to "investigation_options,fields"',
+        'Invalid value "2" supplied to "investigation_options,fields"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -1364,7 +1364,7 @@ describe('rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "foo" supplied to "investigation_options"',
+        'Invalid value "foo" supplied to "investigation_options,fields"',
       ]);
       expect(message.schema).toEqual({});
     });
