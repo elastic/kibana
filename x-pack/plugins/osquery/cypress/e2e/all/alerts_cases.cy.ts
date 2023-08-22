@@ -74,6 +74,7 @@ describe('Alert Event Details - Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () 
       cy.getBySel('expand-event').first().click({ force: true });
       cy.getBySel('take-action-dropdown-btn').click();
       cy.getBySel('osquery-action-item').click();
+      cy.contains(/^\d+ agen(t|ts) selected/);
       cy.contains('Run a set of queries in a pack').click();
       cy.get(LIVE_QUERY_EDITOR).should('not.exist');
       cy.getBySel('select-live-pack').click().type(`${packName}{downArrow}{enter}`);
