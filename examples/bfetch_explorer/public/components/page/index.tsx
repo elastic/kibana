@@ -16,7 +16,7 @@ export interface PageProps {
 
 export const Page: React.FC<PageProps> = ({ title = 'Untitled', sidebar, children }) => {
   return (
-    <EuiPageTemplate panelled={true} offset={0} grow={true}>
+    <EuiPageTemplate offset={0} grow={true}>
       <EuiPageTemplate.Sidebar>{sidebar}</EuiPageTemplate.Sidebar>
       <EuiPageTemplate.Header>
         <EuiPageHeader pageTitle={title} />
