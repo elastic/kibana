@@ -337,7 +337,7 @@ ${JSON.stringify(config.getAll(), null, 2)}
               { retries: 2, forever: false }
             );
 
-            const shutdownEs = await pRetry(
+            await pRetry(
               async () =>
                 runKibanaServer({
                   procs,
