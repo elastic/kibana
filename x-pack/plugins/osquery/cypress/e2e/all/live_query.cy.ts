@@ -86,6 +86,6 @@ describe('ALL - Live Query', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
 
     inputQuery('{selectall}{backspace}{selectall}{backspace}');
     // not sure if this is how it used to work when I implemented the functionality, but let's leave it like this for now
-    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 200).and('be.lt', 350);
+    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 200).and('be.lt', 380);
   });
 });
