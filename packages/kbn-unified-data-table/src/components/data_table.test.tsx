@@ -12,7 +12,6 @@ import {
   EuiCopy,
   EuiDataGridCellValueElementProps,
   EuiDataGridCustomBodyProps,
-  EuiDataGridProps,
 } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
