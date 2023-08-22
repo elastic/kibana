@@ -32,6 +32,20 @@ const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
       <EuiSpacer size="m" />
 
       <EuiDescriptionList>
+        {/* Policy name */}
+        {policy.name && (
+          <>
+            <EuiDescriptionListTitle>
+              {i18n.translate('xpack.idxMgmt.enrich_policies.detailsFlyout.nameTitle', {
+                defaultMessage: 'Name',
+              })}
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription data-test-subj="policyNameValue">
+              {policy.name}
+            </EuiDescriptionListDescription>
+          </>
+        )}
+
         {/* Policy type */}
         {policy.type && (
           <>
@@ -148,7 +162,7 @@ export const CreateStep = ({ onSubmit }: Props) => {
       name: i18n.translate('xpack.idxMgmt.enrichPolicies.create.stepCreate.summaryTabTitle', {
         defaultMessage: 'Summary',
       }),
-      content: <SummaryTab policy={draft} />,
+      content: <SummaryTab policy={draft as SerializedEnrichPolicy} />,
     },
     {
       id: 'request',

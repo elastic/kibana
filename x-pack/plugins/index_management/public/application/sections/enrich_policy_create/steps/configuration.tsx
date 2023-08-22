@@ -30,10 +30,10 @@ interface Props {
 
 export const configurationFormSchema: FormSchema = {
   name: {
+    type: FIELD_TYPES.TEXT,
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.dateDetectionFieldLabel', {
       defaultMessage: 'Policy name',
     }),
-    type: FIELD_TYPES.TEXT,
     validations: [
       {
         validator: fieldValidators.emptyField(
@@ -48,7 +48,7 @@ export const configurationFormSchema: FormSchema = {
     ],
   },
 
-  policyType: {
+  type: {
     type: FIELD_TYPES.SELECT,
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.enrichForm.shapeRelationFieldLabel',
@@ -83,6 +83,7 @@ export const configurationFormSchema: FormSchema = {
   },
 
   query: {
+    type: FIELD_TYPES.TEXT,
     label: i18n.translate('xpack.ingestPipelines.form.queryFieldLabel', {
       defaultMessage: 'Query (optional)',
     }),
@@ -118,16 +119,16 @@ export const ConfigurationStep = ({ onNext }: Props) => {
   });
 
   const onSubmit = async () => {
-    await form.validate();
+    const { isValid, data } = await form.submit();
 
-    if (!form.isValid) {
+    if (!isValid) {
       return;
     }
 
     // Update draft state with the data of the form
     updateDraft((prevDraft: DraftPolicy) => ({
       ...prevDraft,
-      ...form.getFormData(),
+      ...data,
     }));
 
     // And then navigate to the next step
@@ -135,11 +136,11 @@ export const ConfigurationStep = ({ onNext }: Props) => {
   };
 
   return (
-    <Form form={form} isInvalid={form.isSubmitted && !form.isValid} error={form.getErrors()}>
+    <Form form={form}>
       <UseField path="name" component={TextField} componentProps={{ fullWidth: false }} />
 
       <UseField
-        path="policyType"
+        path="type"
         component={SelectField}
         componentProps={{
           fullWidth: false,

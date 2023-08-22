@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { uniq, debounce } from 'lodash';
+import { uniq } from 'lodash';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { getMatchingIndices } from '../../../../services/api';
 import type { FieldHook } from '../../../../../shared_imports';
@@ -57,12 +57,12 @@ export const IndicesSelector = ({ field, ...rest }: Props) => {
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
 
   const onSearchChange = useCallback(
-    debounce(async (search: string) => {
+    async (search: string) => {
       setIsIndiciesLoading(true);
       setIndexOptions(await getIndexOptions(search));
       setIsIndiciesLoading(false);
-    }, 400),
-    [setIsIndiciesLoading, setIndexOptions, field]
+    },
+    [setIsIndiciesLoading, setIndexOptions]
   );
 
   return (
@@ -77,9 +77,8 @@ export const IndicesSelector = ({ field, ...rest }: Props) => {
       <EuiComboBox
         async
         isLoading={isIndiciesLoading}
-        noSuggestions={!indexOptions.length}
         options={indexOptions}
-        selectedOptions={(field.value || []).map((anIndex: string) => {
+        selectedOptions={((field.value as string[]) || []).map((anIndex: string) => {
           return {
             label: anIndex,
             value: anIndex,
@@ -89,11 +88,6 @@ export const IndicesSelector = ({ field, ...rest }: Props) => {
           field.setValue(selected.map((aSelected) => aSelected.value) as string[]);
         }}
         onSearchChange={onSearchChange}
-        onBlur={() => {
-          if (field.value.length === 0) {
-            field.setValue([]);
-          }
-        }}
       />
     </EuiFormRow>
   );

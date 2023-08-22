@@ -60,6 +60,7 @@ export {
   SelectField,
   ToggleField,
   JsonEditorField,
+  ComboBoxField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 export { isJSON } from '@kbn/es-ui-shared-plugin/static/validators/string';
