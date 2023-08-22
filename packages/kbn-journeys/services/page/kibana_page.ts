@@ -72,4 +72,11 @@ export class KibanaPage {
       checkAttribute: 'data-ech-render-complete',
     });
   }
+
+  async clearInput(locator: string) {
+    const textArea = this.page.locator(locator);
+    await textArea.focus();
+    await this.page.keyboard.press('Meta+A');
+    await this.page.keyboard.press('Backspace');
+  }
 }

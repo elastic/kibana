@@ -418,6 +418,7 @@ enabled:
   - x-pack/performance/journeys/ecommerce_dashboard_saved_search_only.ts
   - x-pack/performance/journeys/ecommerce_dashboard_tsvb_gauge_only.ts
   - x-pack/performance/journeys/dashboard_listing_page.ts
+  - x-pack/performance/journeys/tags_listing_page.ts
   - x-pack/performance/journeys/cloud_security_dashboard.ts
   - x-pack/performance/journeys/apm_service_inventory.ts
   - x-pack/test/custom_branding/config.ts

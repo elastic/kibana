@@ -139,48 +139,52 @@ export const TagTable: FC<TagTableProps> = ({
       : []),
   ];
 
+  const testSubjectState = !loading ? 'table-is-ready' : 'table-is-loading';
+
   return (
-    <EuiInMemoryTable
-      data-test-subj="tagsManagementTable"
-      ref={tableRef}
-      childrenBetween={actionBar}
-      loading={loading}
-      itemId={'id'}
-      columns={columns}
-      items={tags}
-      pagination={tablePagination}
-      sorting={sorting}
-      tableCaption={i18n.translate('xpack.savedObjectsTagging.management.table.columns.caption', {
-        defaultMessage: 'Tags',
-      })}
-      rowHeader="name"
-      selection={
-        allowSelection
-          ? {
-              initialSelected: selectedTags,
-              onSelectionChange,
-            }
-          : undefined
-      }
-      search={{
-        defaultQuery: initialQuery,
-        onChange: ({ query }) => {
-          onQueryChange(query || undefined);
-        },
-        box: {
-          'data-test-subj': 'tagsManagementSearchBar',
-          incremental: true,
-          schema: {
-            fields: {
-              name: { type: 'string' },
-              description: { type: 'string' },
+    <div data-test-subj={testSubjectState}>
+      <EuiInMemoryTable
+        data-test-subj="tagsManagementTable"
+        ref={tableRef}
+        childrenBetween={actionBar}
+        loading={loading}
+        itemId={'id'}
+        columns={columns}
+        items={tags}
+        pagination={tablePagination}
+        sorting={sorting}
+        tableCaption={i18n.translate('xpack.savedObjectsTagging.management.table.columns.caption', {
+          defaultMessage: 'Tags',
+        })}
+        rowHeader="name"
+        selection={
+          allowSelection
+            ? {
+                initialSelected: selectedTags,
+                onSelectionChange,
+              }
+            : undefined
+        }
+        search={{
+          defaultQuery: initialQuery,
+          onChange: ({ query }) => {
+            onQueryChange(query || undefined);
+          },
+          box: {
+            'data-test-subj': 'tagsManagementSearchBar',
+            incremental: true,
+            schema: {
+              fields: {
+                name: { type: 'string' },
+                description: { type: 'string' },
+              },
             },
           },
-        },
-      }}
-      rowProps={(item) => ({
-        'data-test-subj': 'tagsTableRow',
-      })}
-    />
+        }}
+        rowProps={(item) => ({
+          'data-test-subj': 'tagsTableRow',
+        })}
+      />
+    </div>
   );
 };
