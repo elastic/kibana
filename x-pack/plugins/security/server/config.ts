@@ -10,7 +10,7 @@ import type { Duration } from 'moment';
 import path from 'path';
 
 import type { Type, TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { AppenderConfigType, Logger } from '@kbn/core/server';
 import { config as coreConfig } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
@@ -299,16 +299,13 @@ export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
 
   // Setting only allowed in the Serverless offering
-  ui: schema.conditional(
-    schema.contextRef('serverless'),
-    true,
-    schema.object({
+  ui: offeringBasedSchema({
+    serverless: schema.object({
       userManagementEnabled: schema.boolean({ defaultValue: true }),
       roleManagementEnabled: schema.boolean({ defaultValue: true }),
       roleMappingManagementEnabled: schema.boolean({ defaultValue: true }),
     }),
-    schema.never()
-  ),
+  }),
 });
 
 export function createConfig(
