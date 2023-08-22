@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const TEST_START_TIME = 'Sep 19, 2015 @ 06:31:44.000';
 const TEST_END_TIME = 'Sep 23, 2015 @ 18:31:44.000';

@@ -9,8 +9,8 @@ import type { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import assert from 'assert';
-import type { WebElementWrapper } from '../../../../../../../test/functional/services/lib/web_element_wrapper';
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker']);
