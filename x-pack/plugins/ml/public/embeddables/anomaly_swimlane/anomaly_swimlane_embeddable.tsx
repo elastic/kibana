@@ -9,9 +9,10 @@ import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
+import { isDefined } from '@kbn/ml-is-defined';
 import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container_lazy';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../../application/app';
@@ -40,6 +41,9 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
   private reload$ = new Subject<void>();
   public readonly type: string = ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
 
+  // Need to defer embeddable load in order to resolve data views
+  deferEmbeddableLoad = true;
+
   constructor(
     initialInput: AnomalySwimlaneEmbeddableInput,
     public services: [CoreStart, MlDependencies, AnomalySwimlaneServices],
@@ -53,6 +57,40 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
       },
       parent
     );
+
+    this.initializeOutput()
+      .then(() => {
+        // deferred loading of this embeddable is complete
+        this.setInitializationFinished();
+      })
+      .catch((error) => {
+        this.onError(error);
+        this.setInitializationFinished();
+      });
+  }
+
+  private async initializeOutput() {
+    const [
+      {},
+      {
+        data: { dataViews: dataViewsService },
+      },
+      { anomalyDetectorService },
+    ] = this.services;
+
+    const jobs = await firstValueFrom(anomalyDetectorService.getJobs$(this.getInput().jobIds));
+
+    const indexPatterns = [
+      ...new Set(jobs.flatMap((j) => j.datafeed_config?.indices).filter(isDefined)),
+    ];
+
+    const dataViews = (
+      await Promise.all(indexPatterns.map((indexPattern) => dataViewsService.find(indexPattern)))
+    ).flat();
+
+    this.updateOutput({
+      indexPatterns: dataViews,
+    });
   }
 
   public reportsEmbeddableLoad() {
