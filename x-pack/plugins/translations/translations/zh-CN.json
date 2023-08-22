@@ -37787,8 +37787,6 @@
     "xpack.transform.stepCreateForm.createTransformErrorMessage": "创建转换 {transformId} 时出错：",
     "xpack.transform.stepCreateForm.createTransformSuccessMessage": "创建转换 {transformId} 的请求已确认。",
     "xpack.transform.stepCreateForm.duplicateDataViewErrorMessage": "创建 Kibana 数据视图 {dataViewName} 时发生错误：数据视图已存在。",
-    "xpack.transform.stepCreateForm.startTransformErrorMessage": "启动转换 {transformId} 时发生错误：",
-    "xpack.transform.stepCreateForm.startTransformSuccessMessage": "启动转换 {transformId} 的请求已确认。",
     "xpack.transform.stepDefineForm.invalidKuerySyntaxErrorMessageQueryBar": "无效查询：{queryErrorMessage}",
     "xpack.transform.stepDefineForm.queryPlaceholderKql": "例如，{example}",
     "xpack.transform.stepDefineForm.queryPlaceholderLucene": "例如，{example}",
