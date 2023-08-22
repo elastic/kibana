@@ -12,8 +12,8 @@ import {
   LazyDashboardDrilldownOptionsComponent,
 } from '@kbn/presentation-util-plugin/public';
 
-import { DrilldownConfig } from '../../types';
 import { txtChooseDestinationDashboard } from './i18n';
+import { DashboardDrilldownConfig as DrilldownConfig } from '../../../../../../common/drilldowns/dashboard_drilldown/types';
 
 const DashboardDrilldownOptions = withSuspense(LazyDashboardDrilldownOptionsComponent, null);
 

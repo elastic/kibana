@@ -19,10 +19,10 @@ import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
 import {
   AbstractDashboardDrilldown,
   AbstractDashboardDrilldownParams,
-  AbstractDashboardDrilldownConfig as Config,
 } from '../abstract_dashboard_drilldown';
 import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';
 import { createExtract, createInject } from '../../../../common';
+import { DashboardDrilldownConfig } from '../../../../common/drilldowns/dashboard_drilldown/types';
 
 type Context = EnhancedEmbeddableContext & ApplyGlobalFilterActionContext;
 export type Params = AbstractDashboardDrilldownParams;
@@ -40,7 +40,7 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
   public readonly supportedTriggers = () => [APPLY_FILTER_TRIGGER, IMAGE_CLICK_TRIGGER];
 
   protected async getLocation(
-    config: Config,
+    config: DashboardDrilldownConfig,
     context: Context,
     useUrlForState: boolean
   ): Promise<KibanaLocation> {
