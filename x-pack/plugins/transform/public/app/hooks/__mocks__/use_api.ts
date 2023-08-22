@@ -11,10 +11,6 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 
 import type { FieldHistogramsResponseSchema } from '../../../../common/api_schemas/field_histograms';
-import type {
-  StopTransformsRequestSchema,
-  StopTransformsResponseSchema,
-} from '../../../../common/api_schemas/stop_transforms';
 
 import type { EsIndex } from '../../../../common/types/es_index';
 
@@ -26,11 +22,6 @@ export interface FieldHistogramRequestConfig {
 }
 
 const apiFactory = () => ({
-  async stopTransforms(
-    transformsInfo: StopTransformsRequestSchema
-  ): Promise<StopTransformsResponseSchema | IHttpFetchError> {
-    return Promise.resolve({});
-  },
   async getEsIndices(): Promise<EsIndex[] | IHttpFetchError> {
     return Promise.resolve([]);
   },

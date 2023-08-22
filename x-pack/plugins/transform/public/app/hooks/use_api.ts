@@ -17,10 +17,6 @@ import type {
   FieldHistogramsResponseSchema,
 } from '../../../common/api_schemas/field_histograms';
 import type {
-  StopTransformsRequestSchema,
-  StopTransformsResponseSchema,
-} from '../../../common/api_schemas/stop_transforms';
-import type {
   ScheduleNowTransformsRequestSchema,
   ScheduleNowTransformsResponseSchema,
 } from '../../../common/api_schemas/schedule_now_transforms';
@@ -42,18 +38,6 @@ export const useApi = () => {
 
   return useMemo(
     () => ({
-      async stopTransforms(
-        transformsInfo: StopTransformsRequestSchema
-      ): Promise<StopTransformsResponseSchema | IHttpFetchError> {
-        try {
-          return await http.post(addInternalBasePath(`stop_transforms`), {
-            body: JSON.stringify(transformsInfo),
-            version: '1',
-          });
-        } catch (e) {
-          return e;
-        }
-      },
       async scheduleNowTransforms(
         transformsInfo: ScheduleNowTransformsRequestSchema
       ): Promise<ScheduleNowTransformsResponseSchema | IHttpFetchError> {

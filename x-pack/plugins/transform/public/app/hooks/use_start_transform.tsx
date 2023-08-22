@@ -31,7 +31,7 @@ export const useStartTransforms = () => {
 
   const mutation = useMutation({
     mutationFn: (reqBody: StartTransformsRequestSchema) => {
-      return http.post<StartTransformsResponseSchema>(addInternalBasePath(`start_transforms`), {
+      return http.post<StartTransformsResponseSchema>(addInternalBasePath('start_transforms'), {
         body: JSON.stringify(reqBody),
         version: '1',
       });

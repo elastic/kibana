@@ -18,7 +18,7 @@ export type StopAction = ReturnType<typeof useStopAction>;
 export const useStopAction = (forceDisable: boolean) => {
   const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
 
-  const stopTransforms = useStopTransforms();
+  const { mutate: stopTransforms } = useStopTransforms();
   const [isModalVisible, setModalVisible] = useState(false);
   const [items, setItems] = useState<TransformListRow[]>([]);
 
