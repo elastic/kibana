@@ -18,6 +18,8 @@ export function getIndexPatternSavedObjects() {
   return indexPatternTypes.map((indexPatternType) => ({
     id: `${indexPatternType}-*`,
     type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
+    // workaround until https://github.com/elastic/kibana/issues/164454 is fixed
+    typeMigrationVersion: '8.0.0',
     attributes: {
       title: `${indexPatternType}-*`,
       timeFieldName: '@timestamp',
