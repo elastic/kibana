@@ -688,7 +688,9 @@
           "EuiIconProps",
           ", \"type\"> | undefined; icon?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; showToolTip?: boolean | undefined; extraAction?: ",
           "EuiListGroupItemExtraActionProps",
-          " | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; wrapText?: boolean | undefined; buttonRef?: React.Ref<HTMLButtonElement> | undefined; toolTipText?: string | undefined; } & { showNewBadge?: boolean | undefined; }) => JSX.Element"
+          " | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; wrapText?: boolean | undefined; buttonRef?: React.Ref<HTMLButtonElement> | undefined; toolTipText?: string | undefined; toolTipProps?: Partial<",
+          "EuiToolTipProps",
+          "> | undefined; } & { showNewBadge?: boolean | undefined; }) => JSX.Element"
         ],
         "path": "x-pack/plugins/observability_shared/public/components/section/section.tsx",
         "deprecated": false,
@@ -725,7 +727,9 @@
               "EuiIconProps",
               ", \"type\"> | undefined; icon?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; showToolTip?: boolean | undefined; extraAction?: ",
               "EuiListGroupItemExtraActionProps",
-              " | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; wrapText?: boolean | undefined; buttonRef?: React.Ref<HTMLButtonElement> | undefined; toolTipText?: string | undefined; } & { showNewBadge?: boolean | undefined; }"
+              " | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; wrapText?: boolean | undefined; buttonRef?: React.Ref<HTMLButtonElement> | undefined; toolTipText?: string | undefined; toolTipProps?: Partial<",
+              "EuiToolTipProps",
+              "> | undefined; } & { showNewBadge?: boolean | undefined; }"
             ],
             "path": "x-pack/plugins/observability_shared/public/components/section/section.tsx",
             "deprecated": false,
@@ -2550,7 +2554,9 @@
           "EuiIconProps",
           ", \"type\"> | undefined; icon?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; showToolTip?: boolean | undefined; extraAction?: ",
           "EuiListGroupItemExtraActionProps",
-          " | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; wrapText?: boolean | undefined; buttonRef?: React.Ref<HTMLButtonElement> | undefined; toolTipText?: string | undefined; }"
+          " | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; wrapText?: boolean | undefined; buttonRef?: React.Ref<HTMLButtonElement> | undefined; toolTipText?: string | undefined; toolTipProps?: Partial<",
+          "EuiToolTipProps",
+          "> | undefined; }"
         ],
         "path": "x-pack/plugins/observability_shared/public/components/section/section.tsx",
         "deprecated": false,
