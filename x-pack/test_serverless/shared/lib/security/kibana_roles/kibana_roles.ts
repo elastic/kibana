@@ -27,6 +27,8 @@ export enum ServerlessRoleName {
   READER = 'reader', // custom role to test lack of permissions
 }
 
+const ROLE_NAMES = Object.values(ServerlessRoleName);
+
 export type YamlRoleDefinitions = Record<
   ServerlessRoleName,
   {
