@@ -230,6 +230,7 @@ export function createTestEsCluster<
           clean: true,
           teardown: true,
           ssl: true,
+          background: true,
         });
       } else if (Path.isAbsolute(esFrom)) {
         installPath = esFrom;

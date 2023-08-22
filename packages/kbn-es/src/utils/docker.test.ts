@@ -267,7 +267,7 @@ describe('detectRunningNodes()', () => {
     );
 
     await expect(detectRunningNodes(log, {})).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"ES has already been started"`
+      `"ES has already been started, pass --kill to automatically stop the nodes on startup."`
     );
   });
 });
@@ -465,8 +465,8 @@ describe('runServerlessCluster()', () => {
 
     await runServerlessCluster(log, { basePath: baseEsPath });
 
-    // setupDocker execa calls then run three nodes
-    expect(execa.mock.calls).toHaveLength(7);
+    // setupDocker execa calls then run three nodes and attach logger
+    expect(execa.mock.calls).toHaveLength(8);
   });
 });
 

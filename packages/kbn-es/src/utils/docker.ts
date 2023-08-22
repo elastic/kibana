@@ -35,6 +35,7 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   clean?: boolean;
   basePath: string;
   teardown?: boolean;
+  background?: boolean;
 }
 
 interface ServerlessEsNodeArgs {
@@ -319,13 +320,15 @@ export async function detectRunningNodes(
 
   if (runningNodes.length) {
     if (options.kill) {
-      log.info(chalk.bold('Running ES Nodes detected, killing.'));
+      log.info(chalk.bold('Killing running ES Nodes.'));
       await execa('docker', ['kill'].concat(runningNodes));
 
       return;
     }
 
-    throw createCliError('ES has already been started');
+    throw createCliError(
+      'ES has already been started, pass --kill to automatically stop the nodes on startup.'
+    );
   }
 }
 
@@ -497,6 +500,14 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   log.success(`Serverless ES cluster running.
       Stop the cluster:     ${chalk.bold(`docker container stop ${nodeNames.join(' ')}`)}
     `);
+
+  if (!options.background) {
+    // The ESS cluster has to be started detached, so we attach a logger afterwards for output
+    await execa('docker', ['logs', '-f', SERVERLESS_NODES[0].name], {
+      // inherit is required to show Docker output and Java console output for pw, enrollment token, etc
+      stdio: ['ignore', 'inherit', 'inherit'],
+    });
+  }
 
   return nodeNames;
 }

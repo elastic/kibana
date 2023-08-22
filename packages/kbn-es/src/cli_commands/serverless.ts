@@ -28,6 +28,7 @@ export const serverless: Command = {
       --port              The port to bind to on 127.0.0.1 [default: ${DEFAULT_PORT}]
       --ssl               Sets up SSL on Elasticsearch
       --kill              Kill running ESS nodes if detected
+      --background        Start ESS without attaching to the first node's logs
       -E                  Additional key=value settings to pass to Elasticsearch
 
     Examples:
@@ -52,7 +53,7 @@ export const serverless: Command = {
       },
 
       string: ['tag', 'image'],
-      boolean: ['clean', 'ssl', 'kill'],
+      boolean: ['clean', 'ssl', 'kill', 'background'],
 
       default: defaults,
     });
