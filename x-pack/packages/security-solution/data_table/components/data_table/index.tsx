@@ -92,7 +92,7 @@ interface BaseDataTableProps {
   rowRenderers: DeprecatedRowRenderer[];
   hasCrudPermissions?: boolean;
   unitCountText: string;
-  pagination: EuiDataGridPaginationProps;
+  pagination: EuiDataGridPaginationProps & { pageSize: number };
   totalItems: number;
   rowHeightsOptions?: EuiDataGridRowHeightsOptions;
   isEventRenderedView?: boolean;

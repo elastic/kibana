@@ -80,6 +80,7 @@ export class AssetDetailsEmbeddable extends Embeddable<AssetDetailsEmbeddableInp
               tabs={this.input.tabs}
               onTabsStateChange={this.input.onTabsStateChange}
               links={this.input.links}
+              metricAlias={this.input.metricAlias}
             />
           </div>
         </EuiThemeProvider>

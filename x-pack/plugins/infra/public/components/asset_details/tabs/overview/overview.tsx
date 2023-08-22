@@ -15,18 +15,22 @@ import { AlertsSummaryContent } from './alerts';
 import { KPIGrid } from './kpis/kpi_grid';
 import { MetricsGrid } from './metrics/metrics_grid';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
+import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
+import { useDataViewsProviderContext } from '../../hooks/use_data_views';
 
 export const Overview = () => {
-  const { asset, assetType, overrides, dateRange, renderMode, metadataResponse } =
-    useAssetDetailsStateContext();
-  const { logsDataView, metricsDataView } = overrides?.overview ?? {};
-
-  const { metadataLoading, fetchMetadataError, metadata } = metadataResponse;
+  const { asset, assetType, dateRange, renderMode } = useAssetDetailsStateContext();
+  const {
+    metadata,
+    loading: metadataLoading,
+    error: fetchMetadataError,
+  } = useMetadataStateProviderContext();
+  const { logs, metrics } = useDataViewsProviderContext();
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <KPIGrid nodeName={asset.name} timeRange={dateRange} dataView={metricsDataView} />
+        <KPIGrid nodeName={asset.name} timeRange={dateRange} dataView={metrics.dataView} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {fetchMetadataError ? (
@@ -71,8 +75,8 @@ export const Overview = () => {
       <EuiFlexItem grow={false}>
         <MetricsGrid
           timeRange={dateRange}
-          logsDataView={logsDataView}
-          metricsDataView={metricsDataView}
+          logsDataView={logs.dataView}
+          metricsDataView={metrics.dataView}
           nodeName={asset.name}
         />
       </EuiFlexItem>

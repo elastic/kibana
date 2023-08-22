@@ -12,7 +12,11 @@ import { getNewRule } from '../../../objects/rule';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { goToExceptionsTab, goToAlertsTab } from '../../../tasks/rule_details';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
+import {
+  disableAutoRefresh,
+  goToRuleDetails,
+  waitForRulesTableToBeLoaded,
+} from '../../../tasks/alerts_detection_rules';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import {
@@ -56,8 +60,9 @@ describe('Exceptions viewer read only', { tags: tag.ESS }, () => {
   beforeEach(() => {
     login(ROLES.reader);
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL, ROLES.reader);
+    waitForRulesTableToBeLoaded();
+    disableAutoRefresh();
     goToRuleDetails();
-    cy.url().should('contain', 'app/security/rules/id');
     goToExceptionsTab();
   });
 
