@@ -434,7 +434,7 @@ export const getArtifactsListTestsData = () => [
         },
       ],
       waitForValue:
-        'OSIS Windows\nAND file.pathIS ONE OF\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
+        'OSIS Windows\nAND file.path.caselessIS ONE OF\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
     },
     delete: {
       confirmSelector: 'blocklistDeletionConfirm',
