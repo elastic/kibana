@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridColumn } from '@elastic/eui';
@@ -28,7 +28,6 @@ import {
 } from '@kbn/ml-data-grid';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
-import { isEsSearchResponse } from '../../../common/api_schemas/type_guards';
 import {
   hasKeywordDuplicate,
   isKeywordDuplicate,
@@ -57,11 +56,7 @@ export const useIndexData = (
   const loadIndexDataStartTime = useRef<number | undefined>(window.performance.now());
 
   const indexPattern = useMemo(() => dataView.getIndexPattern(), [dataView]);
-
-  const dataSearch = useDataSearch();
   const toastNotifications = useToastNotifications();
-
-  const [dataViewFields, setDataViewFields] = useState<string[]>();
 
   const baseFilterCriteria = buildBaseFilterCriteria(
     dataView.timeFieldName,
@@ -81,67 +76,69 @@ export const useIndexData = (
     },
   };
 
-  useEffect(() => {
-    if (dataView.timeFieldName !== undefined && timeRangeMs === undefined) {
-      return;
-    }
-    const abortController = new AbortController();
+  // Fetch 500 random documents to determine populated fields.
+  // This is a workaround to avoid passing potentially thousands of unpopulated fields
+  // (for example, as part of filebeat/metricbeat/ECS based indices)
+  // to the data grid component which would significantly slow down the page.
+  const {
+    error: dataViewFieldsError,
+    data: dataViewFieldsData,
+    isError: dataViewFieldsIsError,
+    isLoading: dataViewFieldsIsLoading,
+  } = useDataSearch(
+    {
+      index: indexPattern,
+      body: {
+        fields: ['*'],
+        _source: false,
+        query: {
+          function_score: {
+            query: defaultQuery,
+            random_score: {},
+          },
+        },
+        size: 500,
+      },
+    },
+    // Check whether fetching should be enabled
+    !(dataView.timeFieldName !== undefined && timeRangeMs === undefined)
+  );
 
-    // Fetch 500 random documents to determine populated fields.
-    // This is a workaround to avoid passing potentially thousands of unpopulated fields
-    // (for example, as part of filebeat/metricbeat/ECS based indices)
-    // to the data grid component which would significantly slow down the page.
-    const fetchDataGridSampleDocuments = async function () {
+  useEffect(() => {
+    if (dataViewFieldsIsLoading && !dataViewFieldsIsError) {
       setErrorMessage('');
       setStatus(INDEX_STATUS.LOADING);
-
-      const esSearchRequest = {
-        index: indexPattern,
-        body: {
-          fields: ['*'],
-          _source: false,
-          query: {
-            function_score: {
-              query: defaultQuery,
-              random_score: {},
-            },
-          },
-          size: 500,
-        },
-      };
-
-      const resp = await dataSearch(esSearchRequest, abortController.signal);
-
-      if (!isEsSearchResponse(resp)) {
-        setErrorMessage(getErrorMessage(resp));
-        setStatus(INDEX_STATUS.ERROR);
-        return;
-      }
-
+    } else if (dataViewFieldsError !== null) {
+      setErrorMessage(getErrorMessage(dataViewFieldsError));
+      setStatus(INDEX_STATUS.ERROR);
+    } else if (
+      !dataViewFieldsIsLoading &&
+      !dataViewFieldsIsError &&
+      dataViewFieldsData !== undefined
+    ) {
       const isCrossClusterSearch = indexPattern.includes(':');
-      const isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
+      const isMissingFields = dataViewFieldsData.hits.hits.every(
+        (d) => typeof d.fields === 'undefined'
+      );
 
-      const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
+      setCcsWarning(isCrossClusterSearch && isMissingFields);
+      setStatus(INDEX_STATUS.LOADED);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataViewFieldsData, dataViewFieldsError, dataViewFieldsIsError, dataViewFieldsIsLoading]);
+
+  const dataViewFields = useMemo(() => {
+    if (dataViewFieldsData) {
+      const docs = dataViewFieldsData.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
       // Get all field names for each returned doc and flatten it
       // to a list of unique field names used across all docs.
       const allDataViewFields = getFieldsFromKibanaIndexPattern(dataView);
-      const populatedFields = [...new Set(docs.map(Object.keys).flat(1))]
+      return [...new Set(docs.map(Object.keys).flat(1))]
         .filter((d) => allDataViewFields.includes(d))
         .sort();
-
-      setCcsWarning(isCrossClusterSearch && isMissingFields);
-      setStatus(INDEX_STATUS.LOADED);
-      setDataViewFields(populatedFields);
-    };
-
-    fetchDataGridSampleDocuments();
-
-    return () => {
-      abortController.abort();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeRangeMs]);
+    }
+  }, [dataView, dataViewFieldsData]);
 
   const columns: EuiDataGridColumn[] = useMemo(() => {
     if (typeof dataViewFields === 'undefined') {
@@ -195,79 +192,64 @@ export const useIndexData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify([query, timeRangeMs])]);
 
-  useEffect(() => {
-    if (typeof dataViewFields === 'undefined') {
-      return;
-    }
-    const abortController = new AbortController();
+  const sort: EsSorting = sortingColumns.reduce((s, column) => {
+    s[column.id] = { order: column.direction };
+    return s;
+  }, {} as EsSorting);
 
-    const fetchDataGridData = async function () {
+  const {
+    error: dataGridDataError,
+    data: dataGridData,
+    isError: dataGridDataIsError,
+    isLoading: dataGridDataIsLoading,
+  } = useDataSearch(
+    {
+      index: indexPattern,
+      body: {
+        fields: ['*'],
+        _source: false,
+        query: isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
+        from: pagination.pageIndex * pagination.pageSize,
+        size: pagination.pageSize,
+        ...(Object.keys(sort).length > 0 ? { sort } : {}),
+        ...(isRuntimeMappings(combinedRuntimeMappings)
+          ? { runtime_mappings: combinedRuntimeMappings }
+          : {}),
+      },
+    },
+    // Check whether fetching should be enabled
+    dataViewFields !== undefined
+  );
+
+  useEffect(() => {
+    if (dataGridDataIsLoading && !dataGridDataIsError) {
       setErrorMessage('');
       setStatus(INDEX_STATUS.LOADING);
-
-      const sort: EsSorting = sortingColumns.reduce((s, column) => {
-        s[column.id] = { order: column.direction };
-        return s;
-      }, {} as EsSorting);
-
-      const esSearchRequest = {
-        index: indexPattern,
-        body: {
-          fields: ['*'],
-          _source: false,
-          query: isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
-          from: pagination.pageIndex * pagination.pageSize,
-          size: pagination.pageSize,
-          ...(Object.keys(sort).length > 0 ? { sort } : {}),
-          ...(isRuntimeMappings(combinedRuntimeMappings)
-            ? { runtime_mappings: combinedRuntimeMappings }
-            : {}),
-        },
-      };
-      const resp = await dataSearch(esSearchRequest, abortController.signal);
-
-      if (!isEsSearchResponse(resp)) {
-        setErrorMessage(getErrorMessage(resp));
-        setStatus(INDEX_STATUS.ERROR);
-        return;
-      }
-
+    } else if (dataGridDataError !== null) {
+      setErrorMessage(getErrorMessage(dataGridDataError));
+      setStatus(INDEX_STATUS.ERROR);
+    } else if (!dataGridDataIsLoading && !dataGridDataIsError && dataGridData !== undefined) {
       const isCrossClusterSearch = indexPattern.includes(':');
-      const isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
+      const isMissingFields = dataGridData.hits.hits.every((d) => typeof d.fields === 'undefined');
 
-      const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
+      const docs = dataGridData.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
       setCcsWarning(isCrossClusterSearch && isMissingFields);
       setRowCountInfo({
-        rowCount: typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value,
+        rowCount:
+          typeof dataGridData.hits.total === 'number'
+            ? dataGridData.hits.total
+            : dataGridData.hits.total!.value,
         rowCountRelation:
-          typeof resp.hits.total === 'number'
+          typeof dataGridData.hits.total === 'number'
             ? ('eq' as estypes.SearchTotalHitsRelation)
-            : resp.hits.total!.relation,
+            : dataGridData.hits.total!.relation,
       });
       setTableItems(docs);
       setStatus(INDEX_STATUS.LOADED);
-    };
-
-    fetchDataGridData();
-
-    return () => {
-      abortController.abort();
-    };
-    // custom comparison
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    indexPattern,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify([
-      query,
-      pagination,
-      sortingColumns,
-      dataViewFields,
-      combinedRuntimeMappings,
-      timeRangeMs,
-    ]),
-  ]);
+  }, [dataGridDataError, dataGridDataIsError, dataGridDataIsLoading]);
 
   const allDataViewFieldNames = new Set(dataView.fields.map((f) => f.name));
   const { error: histogramsForFieldsError, data: histogramsForFieldsData } =
