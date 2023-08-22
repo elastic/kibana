@@ -53,7 +53,8 @@ describe('getEntitiesAndGenerateAlerts', () => {
       'a',
       [
         {
-          location: 'POINT (0 0)',
+          location: [0, 0],
+          locationWkt: 'POINT (0 0)',
           shapeLocationId: '123',
           dateInShape: 'Wed Dec 09 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
           docId: 'docId1',
@@ -64,7 +65,8 @@ describe('getEntitiesAndGenerateAlerts', () => {
       'b',
       [
         {
-          location: 'POINT (0 0)',
+          location: [0, 0],
+          locationWkt: 'POINT (0 0)',
           shapeLocationId: '456',
           dateInShape: 'Wed Dec 16 2020 15:31:31 GMT-0700 (Mountain Standard Time)',
           docId: 'docId2',
@@ -75,7 +77,8 @@ describe('getEntitiesAndGenerateAlerts', () => {
       'c',
       [
         {
-          location: 'POINT (0 0)',
+          location: [0, 0],
+          locationWkt: 'POINT (0 0)',
           shapeLocationId: '789',
           dateInShape: 'Wed Dec 23 2020 16:31:31 GMT-0700 (Mountain Standard Time)',
           docId: 'docId3',
@@ -140,7 +143,8 @@ describe('getEntitiesAndGenerateAlerts', () => {
         'a',
         [
           {
-            location: 'POINT (0 0)',
+            location: [0, 0],
+            locationWkt: 'POINT (0 0)',
             shapeLocationId: '999',
             dateInShape: 'Wed Dec 09 2020 12:31:31 GMT-0700 (Mountain Standard Time)',
             docId: 'docId7',
@@ -165,7 +169,8 @@ describe('getEntitiesAndGenerateAlerts', () => {
         'd',
         [
           {
-            location: 'POINT (0 0)',
+            location: [0, 0],
+            locationWkt: 'POINT (0 0)',
             shapeLocationId: '999',
             dateInShape: 'Wed Dec 09 2020 12:31:31 GMT-0700 (Mountain Standard Time)',
             docId: 'docId7',
@@ -203,7 +208,8 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const emptyPrevLocationMap = new Map();
     const currLocationMapWithOther = new Map([...currLocationMap]).set('d', [
       {
-        location: 'POINT (0 0)',
+        location: [0, 0],
+        locationWkt: 'POINT (0 0)',
         shapeLocationId: OTHER_CATEGORY,
         dateInShape: 'Wed Dec 09 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
         docId: 'docId1',
@@ -224,7 +230,8 @@ describe('getEntitiesAndGenerateAlerts', () => {
           'd',
           [
             {
-              location: 'POINT (0 0)',
+              location: [0, 0],
+              locationWkt: 'POINT (0 0)',
               shapeLocationId: 'other',
               dateInShape: 'Wed Dec 09 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
               docId: 'docId1',
@@ -240,19 +247,22 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const emptyPrevLocationMap = new Map();
     const currLocationMapWithThreeMore = new Map([...currLocationMap]).set('d', [
       {
-        location: 'POINT (0 0)',
+        location: [0, 0],
+        locationWkt: 'POINT (0 0)',
         shapeLocationId: '789',
         dateInShape: 'Wed Dec 10 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
         docId: 'docId1',
       },
       {
-        location: 'POINT (0 0)',
+        location: [0, 0],
+        locationWkt: 'POINT (0 0)',
         shapeLocationId: '123',
         dateInShape: 'Wed Dec 08 2020 12:31:31 GMT-0700 (Mountain Standard Time)',
         docId: 'docId2',
       },
       {
-        location: 'POINT (0 0)',
+        location: [0, 0],
+        locationWkt: 'POINT (0 0)',
         shapeLocationId: '456',
         dateInShape: 'Wed Dec 07 2020 10:31:31 GMT-0700 (Mountain Standard Time)',
         docId: 'docId3',
@@ -276,19 +286,22 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const emptyPrevLocationMap = new Map();
     const currLocationMapWithOther = new Map([...currLocationMap]).set('d', [
       {
-        location: 'POINT (0 0)',
+        location: [0, 0],
+        locationWkt: 'POINT (0 0)',
         shapeLocationId: OTHER_CATEGORY,
         dateInShape: 'Wed Dec 10 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
         docId: 'docId1',
       },
       {
-        location: 'POINT (0 0)',
+        location: [0, 0],
+        locationWkt: 'POINT (0 0)',
         shapeLocationId: '123',
         dateInShape: 'Wed Dec 08 2020 12:31:31 GMT-0700 (Mountain Standard Time)',
         docId: 'docId1',
       },
       {
-        location: 'POINT (0 0)',
+        location: [0, 0],
+        locationWkt: 'POINT (0 0)',
         shapeLocationId: '456',
         dateInShape: 'Wed Dec 07 2020 10:31:31 GMT-0700 (Mountain Standard Time)',
         docId: 'docId1',
@@ -309,19 +322,22 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const emptyPrevLocationMap = new Map();
     const currLocationMapWithOther = new Map([...currLocationMap]).set('d', [
       {
-        location: 'POINT (0 0)',
+        location: [0, 0],
+        locationWkt: 'POINT (0 0)',
         shapeLocationId: '123',
         dateInShape: 'Wed Dec 10 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
         docId: 'docId1',
       },
       {
-        location: 'POINT (0 0)',
+        location: [0, 0],
+        locationWkt: 'POINT (0 0)',
         shapeLocationId: OTHER_CATEGORY,
         dateInShape: 'Wed Dec 08 2020 12:31:31 GMT-0700 (Mountain Standard Time)',
         docId: 'docId1',
       },
       {
-        location: 'POINT (0 0)',
+        location: [0, 0],
+        locationWkt: 'POINT (0 0)',
         shapeLocationId: '456',
         dateInShape: 'Wed Dec 07 2020 10:31:31 GMT-0700 (Mountain Standard Time)',
         docId: 'docId1',
@@ -337,7 +353,8 @@ describe('getEntitiesAndGenerateAlerts', () => {
     expect(activeEntities).toEqual(
       new Map([...currLocationMap]).set('d', [
         {
-          location: 'POINT (0 0)',
+          location: [0, 0],
+          locationWkt: 'POINT (0 0)',
           shapeLocationId: '123',
           dateInShape: 'Wed Dec 10 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
           docId: 'docId1',
