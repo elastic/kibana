@@ -29,7 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      //archived reports has canvas workpad
+      // archived reports has canvas workpad
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
     });
 
@@ -42,7 +42,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       it(`user can delete a report they've created`, async () => {
         const response = await supertest
-          .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${DELETE_REPORT_ID}?elasticInternalOrigin=true`)
+          .delete(
+            `${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${DELETE_REPORT_ID}?elasticInternalOrigin=true`
+          )
           .auth(TEST_USERNAME, TEST_USER_PASSWORD)
           .set(...API_HEADER)
           .set(...INTERNAL_HEADER);
@@ -53,7 +55,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       it(`user can not delete a report they haven't created`, async () => {
         const response = await supertest
-          .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${DELETE_REPORT_ID}?elasticInternalOrigin=true`)
+          .delete(
+            `${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${DELETE_REPORT_ID}?elasticInternalOrigin=true`
+          )
           .auth(reportingAPI.REPORTING_USER_USERNAME, reportingAPI.REPORTING_USER_PASSWORD)
           .set(...API_HEADER)
           .set(...INTERNAL_HEADER);
