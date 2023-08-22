@@ -20,13 +20,11 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
   const { mount } = new LogicMounter(CrawlCustomSettingsFlyoutLogic);
   const { mount: indexViewLogicMount } = new LogicMounter(IndexViewLogic);
   const { mount: indexNameMount } = new LogicMounter(IndexNameLogic);
-  const { mount: domainConfigMount } = new LogicMounter(CrawlCustomSettingsFlyoutDomainConfigLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
     indexViewLogicMount();
     indexNameMount();
-    domainConfigMount();
     mount();
   });
 
@@ -340,26 +338,27 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
 
   describe('selectors', () => {
     beforeEach(() => {
-      domainConfigMount({
-        domainConfigs: [
-          {
-            name: 'https://www.elastic.co',
-            sitemapUrls: [
-              'https://www.elastic.co/sitemap1.xml',
-              'https://www.elastic.co/sitemap2.xml',
-            ],
-            seedUrls: ['https://www.elastic.co/', 'https://www.elastic.co/guide'],
-          },
-          {
-            name: 'https://swiftype.com',
-            sitemapUrls: ['https://swiftype.com/sitemap1.xml', 'https://swiftype.com/sitemap2.xml'],
-            seedUrls: ['https://swiftype.com/', 'https://swiftype.com/documentation'],
-          },
-        ],
-      });
+      jest.clearAllMocks();
       mount({
         selectedDomainUrls: ['https://swiftype.com'],
       });
+      CrawlCustomSettingsFlyoutDomainConfigLogic.actions.onRecieveDomainConfigData([
+        {
+          id: '1',
+          name: 'https://www.elastic.co',
+          sitemapUrls: [
+            'https://www.elastic.co/sitemap1.xml',
+            'https://www.elastic.co/sitemap2.xml',
+          ],
+          seedUrls: ['https://www.elastic.co/', 'https://www.elastic.co/guide'],
+        },
+        {
+          id: '2',
+          name: 'https://swiftype.com',
+          sitemapUrls: ['https://swiftype.com/sitemap1.xml', 'https://swiftype.com/sitemap2.xml'],
+          seedUrls: ['https://swiftype.com/', 'https://swiftype.com/documentation'],
+        },
+      ]);
     });
 
     describe('entryPointUrls', () => {

@@ -183,6 +183,8 @@ export interface CrawlerCustomSchedule {
   selectedSitemapUrls: string[];
   interval: string; // interval has crontab syntax
   enabled: boolean;
+  entryPointUrls: string[];
+  sitemapUrls: string[];
 }
 
 export enum CustomCrawlType {

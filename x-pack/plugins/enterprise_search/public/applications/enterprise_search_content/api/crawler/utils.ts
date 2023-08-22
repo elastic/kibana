@@ -274,6 +274,8 @@ export const crawlerCustomSchedulingServerToClient = (
       selectedSitemapUrls: [],
       customEntryPointUrls,
       customSitemapUrls,
+      entryPointUrls: [],
+      sitemapUrls: [],
     };
   });
 

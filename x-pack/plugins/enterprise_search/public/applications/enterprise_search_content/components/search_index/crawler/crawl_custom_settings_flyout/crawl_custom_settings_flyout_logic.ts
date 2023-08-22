@@ -186,7 +186,10 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
   }),
   selectors: () => ({
     entryPointUrls: [
-      (selectors) => [selectors.domainConfigMap, selectors.selectedDomainUrls],
+      (selectors) => [
+        CrawlCustomSettingsFlyoutDomainConfigLogic.selectors.domainConfigMap,
+        selectors.selectedDomainUrls,
+      ],
       (domainConfigMap: { [key: string]: DomainConfig }, selectedDomainUrls: string[]): string[] =>
         selectedDomainUrls.flatMap(
           (selectedDomainUrl) => domainConfigMap[selectedDomainUrl].seedUrls
@@ -197,7 +200,10 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
       (crawlType: string): boolean => crawlType === CustomCrawlType.ONE_TIME,
     ],
     sitemapUrls: [
-      (selectors) => [selectors.domainConfigMap, selectors.selectedDomainUrls],
+      (selectors) => [
+        CrawlCustomSettingsFlyoutDomainConfigLogic.selectors.domainConfigMap,
+        selectors.selectedDomainUrls,
+      ],
       (domainConfigMap: { [key: string]: DomainConfig }, selectedDomainUrls: string[]): string[] =>
         selectedDomainUrls.flatMap(
           (selectedDomainUrl) => domainConfigMap[selectedDomainUrl].sitemapUrls
@@ -205,7 +211,7 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
     ],
   }),
   listeners: ({ actions, values }) => ({
-    showFlyout: () => {
+    showFlyout: async () => {
       actions.fetchDomainConfigData();
       actions.fetchCustomScheduling();
     },

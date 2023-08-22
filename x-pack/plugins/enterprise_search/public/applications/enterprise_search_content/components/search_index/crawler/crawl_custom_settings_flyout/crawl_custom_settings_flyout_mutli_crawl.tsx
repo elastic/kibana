@@ -22,10 +22,9 @@ export const CrawlCustomSettingsFlyoutMultiCrawlScheduling: React.FC = () => {
   const { domainUrls } = useValues(CrawlCustomSettingsFlyoutDomainConfigLogic);
 
   const {
-    crawlerConfigurations,
+    crawlerConfigurationsWithDomainData,
+    // crawlerConfigurations,
     crawlerConfigActiveTab,
-    multiCrawlerEntryPointUrls,
-    multiCrawlerSitemapUrls,
     index: crawlerIndex,
   } = useValues(CrawlCustomSettingsFlyoutMultiCrawlLogic);
 
@@ -43,7 +42,7 @@ export const CrawlCustomSettingsFlyoutMultiCrawlScheduling: React.FC = () => {
 
   return (
     <>
-      {crawlerConfigurations.map((config, index) => {
+      {crawlerConfigurationsWithDomainData.map((config, index) => {
         if (index === crawlerConfigActiveTab) {
           return (
             <React.Fragment key={index}>
@@ -65,8 +64,6 @@ export const CrawlCustomSettingsFlyoutMultiCrawlScheduling: React.FC = () => {
                 onSelectEntryPointUrls={(e) => onSelectEntryPointUrls(index, e)}
                 onSelectSitemapUrls={(e) => onSelectSitemapUrls(index, e)}
                 toggleIncludeSitemapsInRobotsTxt={() => toggleIncludeSitemapsInRobotsTxt(index)}
-                entryPointUrls={multiCrawlerEntryPointUrls[index]}
-                sitemapUrls={multiCrawlerSitemapUrls[index]}
               />
               <EuiSpacer />
               <MultiCrawlScheduler

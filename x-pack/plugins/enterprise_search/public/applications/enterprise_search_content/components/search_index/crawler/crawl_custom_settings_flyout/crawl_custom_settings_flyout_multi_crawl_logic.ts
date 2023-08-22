@@ -32,15 +32,14 @@ import { filterSeedUrlsByDomainUrls } from './crawl_custom_settings_flyout_logic
 export interface CrawlCustomSettingsFlyoutLogicValues {
   crawlerConfigActiveTab: number;
   crawlerConfigurations: CrawlerCustomSchedule[];
-  receivedCrawlerConfigurations: CrawlerCustomSchedule[];
+  crawlerConfigurationsWithDomainData: CrawlerCustomSchedule[];
   index: CrawlerIndex;
   domainUrls: string[];
   domainConfigs: DomainConfig[];
   domainConfigMap: {
     [key: string]: DomainConfig;
   };
-  multiCrawlerSitemapUrls: string[][];
-  multiCrawlerEntryPointUrls: string[][];
+  crawlerCustomSchedulingIsValid: boolean;
 }
 
 export interface CrawlCustomSettingsFlyoutLogicActions {
@@ -103,6 +102,8 @@ const defaulCrawlerConfiguration: CrawlerCustomSchedule = {
   selectedSitemapUrls: [],
   interval: '* * * * *',
   enabled: false,
+  sitemapUrls: [],
+  entryPointUrls: [],
 };
 
 export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
@@ -110,10 +111,6 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
 >({
   path: ['enterprise_search', 'crawler', 'crawl_custom_settings_flyout_multi_crawl_logic'],
   connect: {
-    actions: [
-      CrawlCustomSettingsFlyoutDomainConfigLogic,
-      ['fetchDomainConfigData', 'onRecieveDomainConfigData'],
-    ],
     values: [
       IndexViewLogic,
       ['index'],
@@ -221,29 +218,31 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
     ],
   }),
   selectors: () => ({
-    multiCrawlerEntryPointUrls: [
+    crawlerConfigurationsWithDomainData: [
       (selectors) => [selectors.domainConfigMap, selectors.crawlerConfigurations],
       (
         domainConfigMap: { [key: string]: DomainConfig },
         crawlerConfigs: CrawlerCustomSchedule[]
-      ): string[][] =>
-        crawlerConfigs.map((c) =>
-          c.selectedDomainUrls.flatMap(
+      ): CrawlerCustomSchedule[] =>
+        crawlerConfigs.map((crawlerConfig) => {
+          const entryPointUrls = crawlerConfig.selectedDomainUrls.flatMap(
             (selectedDomainUrl) => domainConfigMap[selectedDomainUrl].seedUrls
-          )
-        ),
-    ],
-    multiCrawlerSitemapUrls: [
-      (selectors) => [selectors.domainConfigMap, selectors.crawlerConfigurations],
-      (
-        domainConfigMap: { [key: string]: DomainConfig },
-        crawlerConfigs: CrawlerCustomSchedule[]
-      ): string[][] =>
-        crawlerConfigs.map((c) =>
-          c.selectedDomainUrls.flatMap(
+          );
+          const sitemapUrls = crawlerConfig.selectedDomainUrls.flatMap(
             (selectedDomainUrl) => domainConfigMap[selectedDomainUrl].sitemapUrls
-          )
-        ),
+          );
+
+          return {
+            ...crawlerConfig,
+            entryPointUrls,
+            sitemapUrls,
+          };
+        }),
+    ],
+    crawlerCustomSchedulingIsValid: [
+      (selectors) => [selectors.crawlerConfigurations],
+      (crawlerConfigs: CrawlerCustomSchedule[]): boolean =>
+        crawlerConfigs.every((config) => config.selectedDomainUrls.length > 0),
     ],
   }),
   listeners: ({ actions, values }) => ({
