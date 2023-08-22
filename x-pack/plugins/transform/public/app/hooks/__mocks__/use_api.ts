@@ -20,7 +20,6 @@ import type {
   PostTransformsPreviewRequestSchema,
   PostTransformsPreviewResponseSchema,
 } from '../../../../common/api_schemas/transforms';
-import type { GetTransformsStatsResponseSchema } from '../../../../common/api_schemas/transforms_stats';
 import type {
   PostTransformsUpdateRequestSchema,
   PostTransformsUpdateResponseSchema,
@@ -36,11 +35,6 @@ export interface FieldHistogramRequestConfig {
 }
 
 const apiFactory = () => ({
-  async getTransformStats(
-    transformId: TransformId
-  ): Promise<GetTransformsStatsResponseSchema | IHttpFetchError> {
-    return Promise.resolve({ count: 0, transforms: [] });
-  },
   async updateTransform(
     transformId: TransformId,
     transformConfig: PostTransformsUpdateRequestSchema

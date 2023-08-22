@@ -40,7 +40,6 @@ import type {
   PostTransformsUpdateRequestSchema,
   PostTransformsUpdateResponseSchema,
 } from '../../../common/api_schemas/update_transforms';
-import type { GetTransformsStatsResponseSchema } from '../../../common/api_schemas/transforms_stats';
 import type { TransformId } from '../../../common/types/transform';
 import { addInternalBasePath } from '../../../common/constants';
 import type { EsIndex } from '../../../common/types/es_index';
@@ -60,17 +59,6 @@ export const useApi = () => {
 
   return useMemo(
     () => ({
-      async getTransformStats(
-        transformId: TransformId
-      ): Promise<GetTransformsStatsResponseSchema | IHttpFetchError> {
-        try {
-          return await http.get(addInternalBasePath(`transforms/${transformId}/_stats`), {
-            version: '1',
-          });
-        } catch (e) {
-          return e;
-        }
-      },
       async updateTransform(
         transformId: TransformId,
         transformConfig: PostTransformsUpdateRequestSchema
