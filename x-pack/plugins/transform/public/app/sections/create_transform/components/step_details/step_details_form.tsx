@@ -27,7 +27,6 @@ import {
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import { isHttpFetchError } from '@kbn/core-http-browser';
 import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/constants/validation_messages';
 import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
 import { TransformId } from '../../../../../../common/types/transform';
@@ -128,7 +127,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const transformIds = transforms?.tableRows.map((d) => d.id) ?? [];
 
     useEffect(() => {
-      if (isHttpFetchError(transformsError)) {
+      if (transformsError !== null) {
         toastNotifications.addDanger({
           title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
             defaultMessage: 'An error occurred getting the existing transform IDs:',

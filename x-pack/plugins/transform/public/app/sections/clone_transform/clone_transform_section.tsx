@@ -19,7 +19,7 @@ import {
   EuiPageHeader,
   EuiSpacer,
 } from '@elastic/eui';
-import { isHttpFetchError } from '@kbn/core-http-browser';
+
 import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 import { TransformConfigUnion } from '../../../../common/types/transform';
 
@@ -80,7 +80,7 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
   );
 
   useEffect(() => {
-    if (isHttpFetchError(error) && error.message !== errorMessage) {
+    if (error !== null && error.message !== errorMessage) {
       setTransformConfig(undefined);
       setErrorMessage(error.message);
       setIsInitialized(true);
