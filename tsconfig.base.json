@@ -1080,6 +1080,8 @@
       "@kbn/profiling-data-access-plugin/*": ["x-pack/plugins/profiling_data_access/*"],
       "@kbn/profiling-plugin": ["x-pack/plugins/profiling"],
       "@kbn/profiling-plugin/*": ["x-pack/plugins/profiling/*"],
+      "@kbn/profiling-shared-ui": ["x-pack/packages/kbn-profiling-shared-ui"],
+      "@kbn/profiling-shared-ui/*": ["x-pack/packages/kbn-profiling-shared-ui/*"],
       "@kbn/random-sampling": ["x-pack/packages/kbn-random-sampling"],
       "@kbn/random-sampling/*": ["x-pack/packages/kbn-random-sampling/*"],
       "@kbn/react-field": ["packages/kbn-react-field"],

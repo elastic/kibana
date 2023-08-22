@@ -553,6 +553,7 @@
     "@kbn/presentation-util-plugin": "link:src/plugins/presentation_util",
     "@kbn/profiling-data-access-plugin": "link:x-pack/plugins/profiling_data_access",
     "@kbn/profiling-plugin": "link:x-pack/plugins/profiling",
+    "@kbn/profiling-shared-ui": "link:x-pack/packages/kbn-profiling-shared-ui",
     "@kbn/random-sampling": "link:x-pack/packages/kbn-random-sampling",
     "@kbn/react-field": "link:packages/kbn-react-field",
     "@kbn/react-kibana-context-common": "link:packages/react/kibana_context/common",

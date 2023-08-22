@@ -10,7 +10,6 @@ import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import {
   areResourcesSetupForAdmin,
-  areResourcesSetupForViewer,
   createDefaultSetupState,
   mergePartialSetupStates,
 } from '../../common/setup';
