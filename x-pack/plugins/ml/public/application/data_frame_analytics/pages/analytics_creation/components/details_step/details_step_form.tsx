@@ -19,6 +19,7 @@ import { ANALYTICS_STEPS } from '../../page';
 import { ml } from '../../../../../services/ml_api_service';
 import { useDataSource } from '../../../../../contexts/ml';
 import { DetailsStepTimeField } from './details_step_time_field';
+import { AdditionalSection } from './additional_section';
 
 const DEFAULT_RESULTS_FIELD = 'ml';
 
@@ -385,6 +386,8 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
           onTimeFieldChanged={onTimeFieldChanged}
         />
       ) : null}
+      <EuiSpacer size="s" />
+      <AdditionalSection formState={state.form} />
       <EuiSpacer />
       <ContinueButton
         isDisabled={isStepInvalid}

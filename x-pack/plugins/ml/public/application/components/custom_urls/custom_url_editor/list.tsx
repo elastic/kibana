@@ -51,6 +51,7 @@ export interface CustomUrlListProps {
   customUrls: MlUrlConfig[];
   onChange: (customUrls: MlUrlConfig[]) => void;
   dataViewListItems?: DataViewListItem[];
+  isPartialDFAJob?: boolean;
 }
 
 /*
@@ -62,6 +63,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
   customUrls,
   onChange: setCustomUrls,
   dataViewListItems,
+  isPartialDFAJob,
 }) => {
   const {
     services: {
@@ -151,7 +153,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
 
     if (index < customUrls.length) {
       try {
-        const testUrl = await getTestUrl(job, customUrl, timefieldName);
+        const testUrl = await getTestUrl(job, customUrl, timefieldName, undefined, isPartialDFAJob);
         openCustomUrlWindow(testUrl, customUrl, http.basePath.get());
       } catch (error) {
         // eslint-disable-next-line no-console

@@ -54,6 +54,7 @@ interface CustomUrlsProps extends CustomUrlsWrapperProps {
   kibana: MlKibanaReactContextValue;
   currentTimeFilter?: EsQueryTimeRange;
   dashboardService: DashboardService;
+  isPartialDFAJob?: boolean;
 }
 
 class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
@@ -122,7 +123,12 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
 
       return {
         editorOpen: true,
-        editorSettings: getNewCustomUrlDefaults(this.props.job, dashboards, dataViewListItems),
+        editorSettings: getNewCustomUrlDefaults(
+          this.props.job,
+          dashboards,
+          dataViewListItems,
+          this.props.isPartialDFAJob
+        ),
       };
     });
   };
@@ -167,7 +173,6 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
     } = this.props.kibana.services;
     const dataViewId = this.state?.editorSettings?.kibanaSettings?.discoverIndexPatternId;
     const job = this.props.job;
-
     dataViews
       .get(dataViewId ?? '')
       .catch((error) => {
@@ -179,7 +184,13 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
         const timefieldName = dataView?.timeFieldName ?? null;
         buildCustomUrlFromSettings(dashboard, this.state.editorSettings as CustomUrlSettings).then(
           (customUrl) => {
-            getTestUrl(job, customUrl, timefieldName, this.props.currentTimeFilter)
+            getTestUrl(
+              job,
+              customUrl,
+              timefieldName,
+              this.props.currentTimeFilter,
+              this.props.isPartialDFAJob
+            )
               .then((testUrl) => {
                 openCustomUrlWindow(testUrl, customUrl, basePath.get());
               })
@@ -224,7 +235,9 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
     const editMode = this.props.editMode ?? 'inline';
     const editor = (
       <CustomUrlEditor
-        showCustomTimeRangeSelector={isDataFrameAnalyticsConfigs(this.props.job)}
+        showCustomTimeRangeSelector={
+          isDataFrameAnalyticsConfigs(this.props.job) || this.props.isPartialDFAJob === true
+        }
         customUrl={editorSettings}
         setEditCustomUrl={this.setEditCustomUrl}
         savedCustomUrls={customUrls}
@@ -340,6 +353,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
           customUrls={customUrls}
           onChange={this.props.setCustomUrls}
           dataViewListItems={this.state.dataViewListItems}
+          isPartialDFAJob={this.props.isPartialDFAJob}
         />
       </>
     );
