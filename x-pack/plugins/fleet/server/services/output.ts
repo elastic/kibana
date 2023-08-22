@@ -764,7 +764,7 @@ class OutputService {
         ) {
           updateData.compression_level = 4;
         }
-        if (data.compression !== kafkaCompressionType.Gzip) {
+        if (data.compression && data.compression !== kafkaCompressionType.Gzip) {
           // Clear compression level if compression is not gzip
           updateData.compression_level = null;
         }
