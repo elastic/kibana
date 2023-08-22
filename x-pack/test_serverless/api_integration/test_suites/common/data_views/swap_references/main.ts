@@ -20,6 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const title = 'logs-*';
   const prevDataViewId = '91200a00-9efd-11e7-acb3-3dab96693fab';
+  const PREVIEW_PATH = `${DATA_VIEW_SWAP_REFERENCES_PATH}/_preview`;
   let dataViewId = '';
 
   describe('main', () => {
@@ -53,27 +54,27 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('can preview', async () => {
       const res = await supertest
-        .post(DATA_VIEW_SWAP_REFERENCES_PATH)
+        .post(PREVIEW_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
         // TODO: API requests in Serverless require internal request headers
         .set(svlCommonApi.getInternalRequestHeader())
         .send({
-          from_id: prevDataViewId,
-          to_id: dataViewId,
+          fromId: prevDataViewId,
+          toId: dataViewId,
         });
       expect(res).to.have.property('status', 200);
     });
 
     it('can preview specifying type', async () => {
       const res = await supertest
-        .post(DATA_VIEW_SWAP_REFERENCES_PATH)
+        .post(PREVIEW_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
         // TODO: API requests in Serverless require internal request headers
         .set(svlCommonApi.getInternalRequestHeader())
         .send({
-          from_id: prevDataViewId,
-          from_type: 'index-pattern',
-          to_id: dataViewId,
+          fromId: prevDataViewId,
+          fromType: 'index-pattern',
+          toId: dataViewId,
         });
       expect(res).to.have.property('status', 200);
     });
@@ -85,13 +86,11 @@ export default function ({ getService }: FtrProviderContext) {
         // TODO: API requests in Serverless require internal request headers
         .set(svlCommonApi.getInternalRequestHeader())
         .send({
-          from_id: prevDataViewId,
-          to_id: dataViewId,
-          preview: false,
+          fromId: prevDataViewId,
+          toId: dataViewId,
         });
       expect(res).to.have.property('status', 200);
       expect(res.body.result.length).to.equal(1);
-      expect(res.body.preview).to.equal(false);
       expect(res.body.result[0].id).to.equal('dd7caf20-9efd-11e7-acb3-3dab96693fab');
       expect(res.body.result[0].type).to.equal('visualization');
     });
@@ -103,13 +102,14 @@ export default function ({ getService }: FtrProviderContext) {
         // TODO: API requests in Serverless require internal request headers
         .set(svlCommonApi.getInternalRequestHeader())
         .send({
-          from_id: prevDataViewId,
-          to_id: dataViewId,
-          preview: false,
+          fromId: prevDataViewId,
+          toId: dataViewId,
           delete: true,
         });
       expect(res).to.have.property('status', 200);
       expect(res.body.result.length).to.equal(1);
+      expect(res.body.deleteStatus.remainingRefs).to.equal(0);
+      expect(res.body.deleteStatus.deletePerformed).to.equal(true);
 
       const res2 = await supertest
         .get(SPECIFIC_DATA_VIEW_PATH.replace('{id}', prevDataViewId))
@@ -132,13 +132,31 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
+      it("won't delete if reference remains", async () => {
+        const res = await supertest
+          .post(DATA_VIEW_SWAP_REFERENCES_PATH)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
+          // TODO: API requests in Serverless require internal request headers
+          .set(svlCommonApi.getInternalRequestHeader())
+          .send({
+            fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
+            toId: '91200a00-9efd-11e7-acb3-3dab96693fab',
+            forId: ['960372e0-3224-11e8-a572-ffca06da1357'],
+            delete: true,
+          });
+        expect(res).to.have.property('status', 200);
+        expect(res.body.result.length).to.equal(1);
+        expect(res.body.deleteStatus.remainingRefs).to.equal(1);
+        expect(res.body.deleteStatus.deletePerformed).to.equal(false);
+      });
+
       it('can limit by id', async () => {
         // confirm this will find two items
         const res = await supertest
-          .post(DATA_VIEW_SWAP_REFERENCES_PATH)
+          .post(PREVIEW_PATH)
           .send({
-            from_id: '8963ca30-3224-11e8-a572-ffca06da1357',
-            to_id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+            fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
+            toId: '91200a00-9efd-11e7-acb3-3dab96693fab',
           })
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           // TODO: API requests in Serverless require internal request headers
@@ -150,10 +168,9 @@ export default function ({ getService }: FtrProviderContext) {
         const res2 = await supertest
           .post(DATA_VIEW_SWAP_REFERENCES_PATH)
           .send({
-            from_id: '8963ca30-3224-11e8-a572-ffca06da1357',
-            to_id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-            for_id: ['960372e0-3224-11e8-a572-ffca06da1357'],
-            preview: false,
+            fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
+            toId: '91200a00-9efd-11e7-acb3-3dab96693fab',
+            forId: ['960372e0-3224-11e8-a572-ffca06da1357'],
           })
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           // TODO: API requests in Serverless require internal request headers
@@ -165,10 +182,10 @@ export default function ({ getService }: FtrProviderContext) {
       it('can limit by type', async () => {
         // confirm this will find two items
         const res = await supertest
-          .post(DATA_VIEW_SWAP_REFERENCES_PATH)
+          .post(PREVIEW_PATH)
           .send({
-            from_id: '8963ca30-3224-11e8-a572-ffca06da1357',
-            to_id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+            fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
+            toId: '91200a00-9efd-11e7-acb3-3dab96693fab',
           })
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           // TODO: API requests in Serverless require internal request headers
@@ -180,10 +197,9 @@ export default function ({ getService }: FtrProviderContext) {
         const res2 = await supertest
           .post(DATA_VIEW_SWAP_REFERENCES_PATH)
           .send({
-            from_id: '8963ca30-3224-11e8-a572-ffca06da1357',
-            to_id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-            for_type: 'search',
-            preview: false,
+            fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
+            toId: '91200a00-9efd-11e7-acb3-3dab96693fab',
+            forType: 'search',
           })
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           // TODO: API requests in Serverless require internal request headers

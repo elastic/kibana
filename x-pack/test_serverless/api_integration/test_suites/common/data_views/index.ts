@@ -18,7 +18,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./default_index_pattern'));
     loadTestFile(require.resolve('./runtime_fields_crud'));
     loadTestFile(require.resolve('./integration'));
-    loadTestFile(require.resolve('./deprecations'));
+    // TODO: Removed `deprecations` since
+    // scripted fields are not supported in Serverless
     loadTestFile(require.resolve('./has_user_index_pattern'));
     loadTestFile(require.resolve('./swap_references'));
   });

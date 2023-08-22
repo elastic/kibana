@@ -141,7 +141,8 @@ export default function ({ getService }: FtrProviderContext) {
             expect(response.body[config.serviceKey].fields.bar.type).to.be('boolean');
           });
 
-          it('can add scripted fields, other fields created from es index', async () => {
+          // TODO: Scripted fields code dropped since they are not supported in Serverless
+          it('can add fields created from es index', async () => {
             const title = `basic_index*`;
             const response = await supertest
               .post(config.path)
@@ -160,14 +161,6 @@ export default function ({ getService }: FtrProviderContext) {
                       name: 'fake',
                       type: 'string',
                     },
-                    bar: {
-                      name: 'bar',
-                      type: 'number',
-                      count: 123,
-                      script: '',
-                      esTypes: ['test-type'],
-                      scripted: true,
-                    },
                   },
                 },
               });
@@ -179,13 +172,6 @@ export default function ({ getService }: FtrProviderContext) {
             expect(response.body[config.serviceKey].fields.foo.type).to.be('number'); // picked up from index
 
             expect(response.body[config.serviceKey].fields.fake).to.be(undefined); // not in index, so not created
-
-            expect(response.body[config.serviceKey].fields.bar.name).to.be('bar');
-            expect(response.body[config.serviceKey].fields.bar.type).to.be('number');
-            expect(response.body[config.serviceKey].fields.bar.count).to.be(123);
-            expect(response.body[config.serviceKey].fields.bar.script).to.be('');
-            expect(response.body[config.serviceKey].fields.bar.esTypes[0]).to.be('test-type');
-            expect(response.body[config.serviceKey].fields.bar.scripted).to.be(true);
           });
 
           it('can add runtime fields', async () => {
