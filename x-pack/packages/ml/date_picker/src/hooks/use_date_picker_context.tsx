@@ -41,7 +41,7 @@ export interface DatePickerDependencies {
    */
   uiSettingsKeys: typeof UI_SETTINGS;
   /**
-   * Tnternationalisation service
+   * Internationalisation service
    */
   i18n: I18nStart;
 }
