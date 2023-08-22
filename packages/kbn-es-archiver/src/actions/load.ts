@@ -80,9 +80,6 @@ export async function loadAction({
       ...createParseArchiveStreams({ gzip: isGzip(eitherMappingsFileOrArchiveFileName) })
     );
 
-  // a single stream that emits records from all archive files, in
-  // order, so that createIndexStream can track the state of indexes
-  // across archives and properly skip docs from existing indexes
   const recordsFromMappingsAndArchiveOrdered = concatStreamProviders(
     prioritizeMappings(await readDirectory(inputDir)).map(uniteLazy),
     { objectMode: true }
