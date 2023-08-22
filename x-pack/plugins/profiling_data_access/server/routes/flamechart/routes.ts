@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { RouteRegisterParameters } from '../register_routes';
 
 export function registerFlameChartRoutes({ router }: RouteRegisterParameters) {
