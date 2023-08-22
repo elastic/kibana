@@ -58,12 +58,30 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
 
   private node?: HTMLElement;
 
+  deferEmbeddableLoad = true;
+
   constructor(
     private readonly deps: EmbeddableChangePointChartDeps,
     initialInput: EmbeddableChangePointChartInput,
     parent?: IContainer
   ) {
     super(initialInput, { defaultTitle: initialInput.title }, parent);
+
+    this.initOutput().finally(() => this.setInitializationFinished());
+  }
+
+  private async initOutput() {
+    const {
+      data: { dataViews: dataViewsService },
+    } = this.deps;
+
+    const { dataViewId } = this.getInput();
+
+    const dataView = await dataViewsService.get(dataViewId);
+
+    this.updateOutput({
+      indexPatterns: [dataView],
+    });
   }
 
   public reportsEmbeddableLoad() {
