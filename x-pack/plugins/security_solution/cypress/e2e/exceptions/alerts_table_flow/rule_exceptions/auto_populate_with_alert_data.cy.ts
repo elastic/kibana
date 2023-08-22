@@ -4,7 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import {
+  esArchiverLoad,
+  esArchiverResetKibana,
+  esArchiverUnload,
+} from '../../../../tasks/es_archiver';
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
 import { getEndpointRule } from '../../../../objects/rule';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -45,9 +49,9 @@ describe('Auto populate exception with Alert data', () => {
   const ADDITIONAL_ENTRY = 'host.hostname';
 
   beforeEach(() => {
-    cy.task('esArchiverUnload', 'endpoint');
-    cy.task('esArchiverResetKibana');
-    cy.task('esArchiverLoad', 'endpoint');
+    esArchiverUnload('endpoint');
+    esArchiverResetKibana();
+    esArchiverLoad('endpoint');
     login();
     createRule(getEndpointRule());
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
@@ -55,11 +59,11 @@ describe('Auto populate exception with Alert data', () => {
     waitForAlertsToPopulate();
   });
   after(() => {
-    cy.task('esArchiverUnload', 'endpoint');
+    esArchiverUnload('endpoint');
     deleteAlertsAndRules();
   });
   afterEach(() => {
-    cy.task('esArchiverUnload', 'endpoint');
+    esArchiverUnload('endpoint');
   });
 
   it('Should create a Rule exception item from alert actions overflow menu and auto populate the conditions using alert Highlighted fields', () => {

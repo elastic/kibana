@@ -5,6 +5,11 @@
  * 2.0.
  */
 import {
+  esArchiverLoad,
+  esArchiverResetKibana,
+  esArchiverUnload,
+} from '../../../../tasks/es_archiver';
+import {
   addExceptionFromFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
   waitForAlerts,
@@ -32,10 +37,10 @@ describe('Close matching Alerts ', () => {
   const ITEM_NAME = 'Sample Exception Item';
 
   beforeEach(() => {
-    cy.task('esArchiverUnload', 'exceptions');
-    cy.task('esArchiverResetKibana');
+    esArchiverUnload('exceptions');
+    esArchiverResetKibana();
     deleteAlertsAndRules();
-    cy.task('esArchiverLoad', 'exceptions');
+    esArchiverLoad('exceptions');
 
     login();
     postDataView('exceptions-*');
@@ -51,7 +56,7 @@ describe('Close matching Alerts ', () => {
     waitForAlertsToPopulate();
   });
   after(() => {
-    cy.task('esArchiverUnload', 'exceptions');
+    esArchiverUnload('exceptions');
   });
 
   it('Should create a Rule exception item from alert actions overflow menu and close all matching alerts', () => {

@@ -4,7 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import {
+  esArchiverLoad,
+  esArchiverResetKibana,
+  esArchiverUnload,
+} from '../../../tasks/es_archiver';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   expandFirstAlert,
@@ -45,11 +49,11 @@ describe('Endpoint Exceptions workflows from Alert', () => {
   const ITEM_NAME_EDIT = 'Sample Exception List Item';
   const ADDITIONAL_ENTRY = 'host.hostname';
   beforeEach(() => {
-    cy.task('esArchiverUnload', 'endpoint');
-    cy.task('esArchiverResetKibana');
+    esArchiverUnload('endpoint');
+    esArchiverResetKibana();
     login();
     deleteAlertsAndRules();
-    cy.task('esArchiverLoad', 'endpoint');
+    esArchiverLoad('endpoint');
     createRule(getEndpointRule());
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
@@ -58,7 +62,7 @@ describe('Endpoint Exceptions workflows from Alert', () => {
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'endpoint');
+    esArchiverUnload('endpoint');
   });
 
   it('Should be able to create and close single Endpoint exception from overflow menu', () => {
