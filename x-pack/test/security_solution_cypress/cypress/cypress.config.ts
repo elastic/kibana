@@ -9,10 +9,6 @@ import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
 
 export default defineCypressConfig({
-  reporter: '../../../node_modules/cypress-multi-reporters',
-  reporterOptions: {
-    configFile: './reporter_config.json',
-  },
   defaultCommandTimeout: 60000,
   env: {
     grepFilterSpecs: true,

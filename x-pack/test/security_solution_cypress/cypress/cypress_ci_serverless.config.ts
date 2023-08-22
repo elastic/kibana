@@ -12,7 +12,7 @@ import { esArchiver } from './support/es_archiver';
 export default defineCypressConfig({
   reporter: '../../../node_modules/cypress-multi-reporters',
   reporterOptions: {
-    configFile: './reporter_config.json',
+    configFile: './cypress/reporter_config.json',
   },
   defaultCommandTimeout: 150000,
   env: {
