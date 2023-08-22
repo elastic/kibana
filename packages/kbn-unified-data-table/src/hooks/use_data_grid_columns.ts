@@ -32,7 +32,7 @@ export const useColumns = ({
   useNewFieldsApi,
   columns,
   sort,
-  defaultOrder,
+  defaultOrder = 'desc',
 }: UseColumnsProps) => {
   const [usedColumns, setUsedColumns] = useState(getColumns(columns, useNewFieldsApi));
   useEffect(() => {

@@ -60,7 +60,7 @@ export function getStateColumnActions({
   setAppState,
   columns,
   sort,
-  defaultOrder = 'desc',
+  defaultOrder,
 }: {
   capabilities: Capabilities;
   dataView: DataView;
@@ -69,7 +69,7 @@ export function getStateColumnActions({
   setAppState: (state: { columns: string[]; sort?: string[][] }) => void;
   columns?: string[];
   sort: string[][] | undefined;
-  defaultOrder?: string;
+  defaultOrder: string;
 }) {
   function onAddColumn(columnName: string) {
     popularizeField(dataView, columnName, dataViews, capabilities);

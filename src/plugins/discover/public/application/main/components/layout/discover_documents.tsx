@@ -46,10 +46,7 @@ import { DocumentExplorerCallout } from '../document_explorer_callout';
 import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
-import {
-  DiscoverGridFlyout,
-  DiscoverGridFlyoutProps,
-} from '../../../../components/discover_grid_flyout';
+import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
 import { DocViewer } from '../../../../services/doc_views/components/doc_viewer';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useFetchMoreRecords } from './use_fetch_more_records';
@@ -200,24 +197,23 @@ function DiscoverDocumentsComponent({
   );
 
   const renderDocumentView = useCallback(
-    (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) =>
-        (
-          <DiscoverGridFlyout
-            dataView={dataView}
-            hit={hit}
-            hits={displayedRows}
-            // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
-            columns={displayedColumns}
-            savedSearchId={savedSearch.id}
-            onFilter={onAddFilter}
-            onRemoveColumn={onRemoveColumn}
-            onAddColumn={onAddColumn}
-            onClose={() => setExpandedDoc(undefined)}
-            setExpandedDoc={setExpandedDoc}
-            query={query}
-          />
-        ),
-    []
+    (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => (
+      <DiscoverGridFlyout
+        dataView={dataView}
+        hit={hit}
+        hits={displayedRows}
+        // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
+        columns={displayedColumns}
+        savedSearchId={savedSearch.id}
+        onFilter={onAddFilter}
+        onRemoveColumn={onRemoveColumn}
+        onAddColumn={onAddColumn}
+        onClose={() => setExpandedDoc(undefined)}
+        setExpandedDoc={setExpandedDoc}
+        query={query}
+      />
+    ),
+    [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
@@ -246,7 +242,7 @@ function DiscoverDocumentsComponent({
           data-test-subj="dscInterceptedWarningsCallout"
         />
       )}
-      {isLegacy && rows && rows.length && (
+      {isLegacy && rows && rows.length > 0 && (
         <>
           {!hideAnnouncements && <DocumentExplorerCallout />}
           <DocTableInfiniteMemoized

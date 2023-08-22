@@ -27,6 +27,7 @@ function getStateColumnAction(
     setAppState,
     columns: state.columns,
     sort: state.sort,
+    defaultOrder: 'desc',
   });
 }
 
@@ -37,11 +38,9 @@ describe('Test column actions', () => {
 
     actions.onAddColumn('_score');
     expect(setAppState).toHaveBeenCalledWith({ columns: ['_score'], sort: [['_score', 'desc']] });
-    setAppState.mockClear();
     actions.onAddColumn('test');
     expect(setAppState).toHaveBeenCalledWith({ columns: ['test'] });
   });
-
   test('getStateColumnActions with columns and sort in state', () => {
     const setAppState = jest.fn();
     const actions = getStateColumnAction(
