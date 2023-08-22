@@ -416,15 +416,10 @@ export class AlertingAuthorization {
         authorizedRuleTypes:
           hasAllRequested && featuresIds === undefined
             ? // has access to all features
-              await (async () => {
-                const allPossibleConsumers = await this.allPossibleConsumers;
-                return new Set(
-                  Array.from(ruleTypesAuthorized.values()).map((ruleTypeAuth) => ({
-                    ...ruleTypeAuth,
-                    authorizedConsumers: allPossibleConsumers,
-                  }))
-                );
-              })()
+              this.augmentWithAuthorizedConsumers(
+                new Set(ruleTypesAuthorized.values()),
+                await this.allPossibleConsumers
+              )
             : // only has some of the required privileges
               privileges.kibana.reduce((authorizedRuleTypes, { authorized, privilege }) => {
                 if (authorized && privilegeToRuleType.has(privilege)) {
