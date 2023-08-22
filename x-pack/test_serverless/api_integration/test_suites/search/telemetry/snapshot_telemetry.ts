@@ -7,13 +7,13 @@
 
 import expect from 'expect';
 import deepmerge from 'deepmerge';
-import ossRootTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_root.json';
-import xpackRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_root.json';
-import ossPluginsTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_plugins.json';
-import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
 import { assertTelemetryPayload } from '@kbn/telemetry-tools';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import type { UsageStatsPayloadTestFriendly } from '../../../../test/api_integration/services/usage_api';
+import ossRootTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_root.json';
+import ossPluginsTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_plugins.json';
+import xpackRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_root.json';
+import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { UsageStatsPayloadTestFriendly } from '../../../../../test/api_integration/services/usage_api';
 
 export default function ({ getService }: FtrProviderContext) {
   const usageApi = getService('usageAPI');
@@ -39,11 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('includes the serverless info in the body', async () => {
-      const [unencryptedPayload] = await usageApi.getTelemetryStats({ unencrypted: true });
-
-      expect(
-        unencryptedPayload.stats.stack_stats.kibana?.plugins?.telemetry?.labels?.serverless
-      ).toBe('observability');
+      expect(stats.stack_stats.kibana?.plugins?.telemetry?.labels?.serverless).toBe('search');
     });
   });
 }
