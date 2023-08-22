@@ -61,11 +61,14 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       getActiveSpace: () => this.spacesManager.getActiveSpace(),
     };
 
-    if (plugins.home) {
+    if (plugins.home && this.initializerContext.env.packageInfo.buildFlavor !== 'serverless') {
       plugins.home.featureCatalogue.register(createSpacesFeatureCatalogueEntry());
     }
 
-    if (plugins.management) {
+    if (
+      plugins.management &&
+      this.initializerContext.env.packageInfo.buildFlavor !== 'serverless'
+    ) {
       this.managementService = new ManagementService();
       this.managementService.setup({
         management: plugins.management,
@@ -85,7 +88,9 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   }
 
   public start(core: CoreStart) {
-    initSpacesNavControl(this.spacesManager, core);
+    if (this.initializerContext.env.packageInfo.buildFlavor !== 'serverless') {
+      initSpacesNavControl(this.spacesManager, core);
+    }
 
     return this.spacesApi;
   }
