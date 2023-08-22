@@ -11,20 +11,19 @@ import {
   CriteriaWithPagination,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiInMemoryTable,
   EuiIcon,
   EuiLink,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiCallOut,
   EuiSpacer,
   EuiText,
   EuiToolTip,
-  EuiEmptyPrompt,
   EuiButtonIcon,
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPageHeader,
+  EuiPageTemplate,
   EuiSearchBarOnChangeArgs,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -178,24 +177,20 @@ export const WatchListPage = () => {
 
   if (isWatchesLoading) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageTemplate.EmptyPrompt>
         <SectionLoading>
           <FormattedMessage
             id="xpack.watcher.sections.watchList.loadingWatchesDescription"
             defaultMessage="Loading watches…"
           />
         </SectionLoading>
-      </EuiPageContent>
+      </EuiPageTemplate.EmptyPrompt>
     );
   }
 
   const errorCode = getPageErrorCode(error);
   if (errorCode) {
-    return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
-        <PageError errorCode={errorCode} />
-      </EuiPageContent>
-    );
+    return <PageError errorCode={errorCode} />;
   } else if (error) {
     return (
       <GenericPageError
@@ -226,22 +221,20 @@ export const WatchListPage = () => {
     );
 
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-        <EuiEmptyPrompt
-          iconType="managementApp"
-          title={
-            <h1>
-              <FormattedMessage
-                id="xpack.watcher.sections.watchList.emptyPromptTitle"
-                defaultMessage="You don’t have any watches yet"
-              />
-            </h1>
-          }
-          body={emptyPromptBody}
-          actions={createWatchContextMenu}
-          data-test-subj="emptyPrompt"
-        />
-      </EuiPageContent>
+      <EuiPageTemplate.EmptyPrompt
+        iconType="managementApp"
+        title={
+          <h1>
+            <FormattedMessage
+              id="xpack.watcher.sections.watchList.emptyPromptTitle"
+              defaultMessage="You don’t have any watches yet"
+            />
+          </h1>
+        }
+        body={emptyPromptBody}
+        actions={createWatchContextMenu}
+        data-test-subj="emptyPrompt"
+      />
     );
   }
 
