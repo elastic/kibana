@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Serverless search API', function () {
-    loadTestFile(require.resolve('./telemetry/snapshot_telemetry'));
-    loadTestFile(require.resolve('./cases/find_cases'));
-    loadTestFile(require.resolve('./cases/post_case'));
+  describe('Cases', function () {
+    loadTestFile(require.resolve('./get_case'));
+    loadTestFile(require.resolve('./find_cases'));
+    loadTestFile(require.resolve('./post_case'));
   });
 }
