@@ -6,21 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
-import { createCalleeTree } from '../../common/callee';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
-import { createBaseFlameGraph } from '../../common/flamegraph';
-import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
-import { createCommonFilter } from './query';
-import { searchStackTraces } from './search_stacktraces';
 
 export function registerFlameChartSearchRoute({
   router,
   logger,
-  services: { createProfilingEsClient },
   dependencies: {
     start: { profilingDataAccess },
   },
@@ -39,7 +32,6 @@ export function registerFlameChartSearchRoute({
       },
     },
     async (context, request, response) => {
-      // await profilingDataAccess.fetchFlamechartData();
       const { timeFrom, timeTo, kuery } = request.query;
 
       try {
