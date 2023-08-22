@@ -6,32 +6,39 @@
  */
 
 import React from 'react';
+import { useMutation } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import type { StartTransformsRequestSchema } from '../../../common/api_schemas/start_transforms';
-import { isStartTransformsResponseSchema } from '../../../common/api_schemas/type_guards';
-
+import { addInternalBasePath } from '../../../common/constants';
 import { getErrorMessage } from '../../../common/utils/errors';
+import {
+  ReauthorizeTransformsRequestSchema,
+  ReauthorizeTransformsResponseSchema,
+} from '../../../common/api_schemas/reauthorize_transforms';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 import { useRefreshTransformList } from '../common';
 import { ToastNotificationText } from '../components';
 
-import { useApi } from './use_api';
-
 export const useReauthorizeTransforms = () => {
-  const { overlays, theme } = useAppDependencies();
+  const { http, overlays, theme } = useAppDependencies();
   const refreshTransformList = useRefreshTransformList();
   const toastNotifications = useToastNotifications();
-  const api = useApi();
 
-  return async (transformsInfo: StartTransformsRequestSchema) => {
-    const results = await api.reauthorizeTransforms(transformsInfo);
-
-    if (!isStartTransformsResponseSchema(results)) {
+  const mutation = useMutation({
+    mutationFn: (reqBody: ReauthorizeTransformsRequestSchema) => {
+      return http.post<ReauthorizeTransformsResponseSchema>(
+        addInternalBasePath('reauthorize_transforms'),
+        {
+          body: JSON.stringify(reqBody),
+          version: '1',
+        }
+      );
+    },
+    onError: (error) => {
       toastNotifications.addDanger({
         title: i18n.translate(
           'xpack.transform.stepCreateForm.reauthorizeTransformResponseSchemaErrorMessage',
@@ -40,43 +47,44 @@ export const useReauthorizeTransforms = () => {
           }
         ),
         text: toMountPoint(
-          <ToastNotificationText
-            overlays={overlays}
-            theme={theme}
-            text={getErrorMessage(results)}
-          />,
+          <ToastNotificationText overlays={overlays} theme={theme} text={getErrorMessage(error)} />,
           { theme$: theme.theme$ }
         ),
       });
-      return;
-    }
-
-    for (const transformId in results) {
-      // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
-      if (results.hasOwnProperty(transformId)) {
-        const result = results[transformId];
-        if (result.success === true) {
-          toastNotifications.addSuccess(
-            i18n.translate('xpack.transform.transformList.reauthorizeTransformSuccessMessage', {
-              defaultMessage: 'Request to reauthorize transform {transformId} acknowledged.',
-              values: { transformId },
-            })
-          );
-        } else {
-          toastNotifications.addError(new Error(JSON.stringify(result.error!.caused_by, null, 2)), {
-            title: i18n.translate(
-              'xpack.transform.transformList.reauthorizeTransformErrorMessage',
-              {
-                defaultMessage: 'An error occurred reauthorizing the transform {transformId}',
+    },
+    onSuccess: (results) => {
+      for (const transformId in results) {
+        // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
+        if (results.hasOwnProperty(transformId)) {
+          const result = results[transformId];
+          if (result.success === true) {
+            toastNotifications.addSuccess(
+              i18n.translate('xpack.transform.transformList.reauthorizeTransformSuccessMessage', {
+                defaultMessage: 'Request to reauthorize transform {transformId} acknowledged.',
                 values: { transformId },
+              })
+            );
+          } else {
+            toastNotifications.addError(
+              new Error(JSON.stringify(result.error!.caused_by, null, 2)),
+              {
+                title: i18n.translate(
+                  'xpack.transform.transformList.reauthorizeTransformErrorMessage',
+                  {
+                    defaultMessage: 'An error occurred reauthorizing the transform {transformId}',
+                    values: { transformId },
+                  }
+                ),
+                toastMessage: result.error!.reason,
               }
-            ),
-            toastMessage: result.error!.reason,
-          });
+            );
+          }
         }
       }
-    }
 
-    refreshTransformList();
-  };
+      refreshTransformList();
+    },
+  });
+
+  return mutation;
 };

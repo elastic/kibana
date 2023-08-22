@@ -12,10 +12,6 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 
-import {
-  ReauthorizeTransformsRequestSchema,
-  ReauthorizeTransformsResponseSchema,
-} from '../../../common/api_schemas/reauthorize_transforms';
 import type {
   FieldHistogramsRequestSchema,
   FieldHistogramsResponseSchema,
@@ -50,19 +46,6 @@ export const useApi = () => {
 
   return useMemo(
     () => ({
-      async reauthorizeTransforms(
-        reqBody: ReauthorizeTransformsRequestSchema
-      ): Promise<ReauthorizeTransformsResponseSchema | IHttpFetchError> {
-        try {
-          return await http.post(addInternalBasePath(`reauthorize_transforms`), {
-            body: JSON.stringify(reqBody),
-            version: '1',
-          });
-        } catch (e) {
-          return e;
-        }
-      },
-
       async resetTransforms(
         reqBody: ResetTransformsRequestSchema
       ): Promise<ResetTransformsResponseSchema | IHttpFetchError> {

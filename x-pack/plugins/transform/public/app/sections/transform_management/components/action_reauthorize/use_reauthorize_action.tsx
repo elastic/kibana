@@ -23,7 +23,7 @@ export type ReauthorizeAction = ReturnType<typeof useReauthorizeAction>;
 export const useReauthorizeAction = (forceDisable: boolean, transformNodes: number) => {
   const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
 
-  const reauthorizeTransforms = useReauthorizeTransforms();
+  const { mutate: reauthorizeTransforms } = useReauthorizeTransforms();
 
   const [isModalVisible, setModalVisible] = useState(false);
   const [items, setItems] = useState<TransformListRow[]>([]);
