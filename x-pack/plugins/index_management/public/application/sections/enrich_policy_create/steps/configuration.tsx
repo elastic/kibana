@@ -21,7 +21,7 @@ import {
   JsonEditorField,
 } from '../../../../shared_imports';
 
-import { IndicesSelector } from './components/indices_selector';
+import { IndicesSelector } from './fields/indices_selector';
 import { useCreatePolicyContext, DraftPolicy } from '../create_policy_context';
 
 interface Props {
