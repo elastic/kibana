@@ -28,7 +28,7 @@ import {
   // createIndexDocRecordsStream,
   createIndexDocRecordsStreamSvrLess,
   migrateSavedObjectIndices,
-  Progress,
+  // Progress,
   createDefaultSpace,
 } from '../lib';
 
@@ -86,8 +86,8 @@ export async function loadAction({
     { objectMode: true }
   );
 
-  const progress = new Progress();
-  progress.activate(log);
+  // const progress = new Progress();
+  // progress.activate(log);
 
   await createPromiseFromStreams([
     recordsFromMappingsAndArchiveOrdered,
@@ -96,7 +96,7 @@ export async function loadAction({
     createIndexDocRecordsStreamSvrLess(client, stats, useCreate),
   ]);
 
-  progress.deactivate();
+  // progress.deactivate();
   const result = stats.toJSON();
 
   const indicesWithDocs: string[] = [];
