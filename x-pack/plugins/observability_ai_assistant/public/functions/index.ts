@@ -34,7 +34,7 @@ export async function registerFunctions({
     .then((response) => {
       const isReady = response.ready;
 
-      let description = `You have the ability to call Elasticsearch APIs with the "elasticsearch" function or create visualisations using Lens with the "lens" function in the context of this chat.`;
+      let description = `You have the ability to call Elasticsearch APIs with the "elasticsearch" function or create visualisations using Lens with the "lens" function in the context of this chat. Use the Elasticsearch function only when requested by the user.`;
 
       if (isReady) {
         description += `You can use the "summarise" functions to store new information you have learned in a knowledge database. Once you have established that you did not know the answer to a question, and the user gave you this information, it's important that you create a summarisation of what you have learned and store it in the knowledge database. When you create this summarisation, make sure you craft it in a way that can be recalled with a semantic search later.

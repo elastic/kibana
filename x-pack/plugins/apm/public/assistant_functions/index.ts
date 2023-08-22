@@ -18,6 +18,7 @@ import {
 import { registerGetApmCorrelationsFunction } from './get_apm_correlations';
 import { registerGetApmDownstreamDependenciesFunction } from './get_apm_downstream_dependencies';
 import { registerGetApmErrorDocumentFunction } from './get_apm_error_document';
+import { registerGetApmServicesListFunction } from './get_apm_services_list';
 import { registerGetApmServiceSummaryFunction } from './get_apm_service_summary';
 import { registerGetApmTimeseriesFunction } from './get_apm_timeseries';
 
@@ -61,6 +62,10 @@ export async function registerAssistantFunctions({
   });
 
   registerGetApmServiceSummaryFunction({
+    registerFunction,
+  });
+
+  registerGetApmServicesListFunction({
     registerFunction,
   });
 
