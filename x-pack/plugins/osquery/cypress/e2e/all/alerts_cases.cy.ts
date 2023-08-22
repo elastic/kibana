@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import {
   cleanupCase,
   cleanupPack,
@@ -74,7 +75,8 @@ describe('Alert Event Details - Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () 
       cy.getBySel('osquery-action-item').click();
       // here
       cy.contains('Run a set of queries in a pack').wait(500).click();
-      cy.getBySel('select-live-pack').type(`${packName}{downArrow}{enter}`);
+      cy.get(LIVE_QUERY_EDITOR).should('not.exist');
+      cy.getBySel('select-live-pack').click().type(`${packName}{downArrow}{enter}`);
       submitQuery();
       cy.get('[aria-label="Add to Case"]').first().click();
       cy.getBySel('cases-table-add-case-filter-bar').click();
