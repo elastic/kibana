@@ -11,15 +11,16 @@ import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { getNodeDetailUrl } from '../../../pages/link_to';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
+import type { Asset } from '../types';
 
 export interface LinkToNodeDetailsProps {
   currentTimestamp: number;
-  assetName: string;
+  asset: Asset;
   assetType: InventoryItemType;
 }
 
 export const LinkToNodeDetails = ({
-  assetName,
+  asset,
   assetType,
   currentTimestamp,
 }: LinkToNodeDetailsProps) => {
@@ -29,9 +30,10 @@ export const LinkToNodeDetails = ({
   const nodeDetailMenuItemLinkProps = useLinkProps({
     ...getNodeDetailUrl({
       nodeType: assetType,
-      nodeId: assetName,
+      nodeId: asset.id,
       from: nodeDetailFrom,
       to: currentTimestamp,
+      assetName: asset.name,
     }),
   });
 
