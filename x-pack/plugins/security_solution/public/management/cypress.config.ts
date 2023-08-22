@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-nodejs-modules
-import path from 'path';
 import { defineCypressConfig } from '@kbn/cypress-config';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { dataLoaders } from './cypress/support/data_loaders';
@@ -14,7 +12,7 @@ import { dataLoaders } from './cypress/support/data_loaders';
 export default defineCypressConfig({
   reporter: '../../../../node_modules/cypress-multi-reporters',
   reporterOptions: {
-    configFile: path.resolve(__dirname, './cypress/reporter_config.json'),
+    configFile: './management/reporter_config.json',
   },
 
   defaultCommandTimeout: 60000,
