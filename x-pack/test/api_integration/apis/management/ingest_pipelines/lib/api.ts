@@ -50,8 +50,7 @@ export function IngestPipelinesAPIProvider({ getService }: FtrProviderContext) {
       const deletePipeline = (pipelineId: string) => es.ingest.deletePipeline({ id: pipelineId });
 
       return Promise.all(pipelineIds.map(deletePipeline)).catch((err) => {
-        // eslint-disable-next-line no-console
-        console.log(`[Cleanup error] Error deleting ES resources: ${err.message}`);
+        log.debug(`[Cleanup error] Error deleting ES resources: ${err.message}`);
       });
     },
 
