@@ -7,7 +7,13 @@
  */
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
-import { EuiCopy } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCopy,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridCustomBodyProps,
+  EuiDataGridProps,
+} from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { buildDataViewMock, deepMockedFields, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
@@ -16,7 +22,8 @@ import { DataLoadingState, UnifiedDataTable, UnifiedDataTableProps } from './dat
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { servicesMock } from '../../__mocks__/services';
 import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import { testLeadingControlColumn } from '../../__mocks__/external_control_columns';
 
 const mockUseDataGridColumnsCellActions = jest.fn((prop: unknown) => []);
 jest.mock('@kbn/cell-actions', () => ({
@@ -292,6 +299,115 @@ describe('UnifiedDataTable', () => {
           "level": "sorting",
         }
       `);
+    });
+  });
+
+  describe('externalControlColumns', () => {
+    it('should render external leading control columns', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        expandedDoc: {
+          id: 'test',
+          raw: {
+            _index: 'test_i',
+            _id: 'test',
+          },
+          flattened: { test: jest.fn() },
+        },
+        setExpandedDoc: jest.fn(),
+        renderDocumentView: jest.fn(),
+        externalControlColumns: [testLeadingControlColumn],
+      });
+
+      expect(findTestSubject(component, 'docTableExpandToggleColumn').exists()).toBeTruthy();
+      expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
+    });
+  });
+
+  it('should render provided in renderDocumentView DocumentView on expand clicked', async () => {
+    const component = await getComponent({
+      ...getProps(),
+      expandedDoc: {
+        id: 'test',
+        raw: {
+          _index: 'test_i',
+          _id: 'test',
+        },
+        flattened: { test: jest.fn() },
+      },
+      setExpandedDoc: jest.fn(),
+      renderDocumentView: (
+        hit: DataTableRecord,
+        displayedRows: DataTableRecord[],
+        displayedColumns: string[]
+      ) => <div data-test-subj="test-document-view">{hit.id}</div>,
+      externalControlColumns: [testLeadingControlColumn],
+    });
+
+    findTestSubject(component, 'docTableExpandToggleColumn').first().simulate('click');
+    expect(findTestSubject(component, 'test-document-view').exists()).toBeTruthy();
+  });
+
+  describe('externalAdditionalControls', () => {
+    it('should render external additional toolbar controls', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        columns: ['message'],
+        externalAdditionalControls: <EuiButton data-test-subj="test-additional-control" />,
+      });
+
+      expect(findTestSubject(component, 'test-additional-control').exists()).toBeTruthy();
+      expect(findTestSubject(component, 'dataGridColumnSelectorButton').exists()).toBeTruthy();
+    });
+  });
+
+  describe('externalCustomRenderers', () => {
+    it('should render only host column with the custom renderer, message should be rendered with the default cell renderer', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        columns: ['message', 'host'],
+        externalCustomRenderers: {
+          host: (props: EuiDataGridCellValueElementProps) => (
+            <div data-test-subj={`test-renderer-${props.columnId}`}>{props.columnId}</div>
+          ),
+        },
+      });
+
+      expect(findTestSubject(component, 'test-renderer-host').exists()).toBeTruthy();
+      expect(findTestSubject(component, 'test-renderer-message').exists()).toBeFalsy();
+    });
+  });
+
+  describe('renderCustomGridBody', () => {
+    it('should render custom grid body for each row', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        columns: ['message', 'host'],
+        trailingControlColumns: [
+          {
+            id: 'row-details',
+
+            // The header cell should be visually hidden, but available to screen readers
+            width: 0,
+            headerCellRender: () => <></>,
+            headerCellProps: { className: 'euiScreenReaderOnly' },
+
+            // The footer cell can be hidden to both visual & SR users, as it does not contain meaningful information
+            footerCellProps: { style: { display: 'none' } },
+
+            // When rendering this custom cell, we'll want to override
+            // the automatic width/heights calculated by EuiDataGrid
+            rowCellRender: jest.fn(),
+          },
+        ],
+        renderCustomGridBody: (props: EuiDataGridCustomBodyProps) => (
+          <div data-test-subj="test-renderer-custom-grid-body">
+            <EuiButton />
+          </div>
+        ),
+      });
+
+      expect(findTestSubject(component, 'test-renderer-custom-grid-body').exists()).toBeTruthy();
     });
   });
 });

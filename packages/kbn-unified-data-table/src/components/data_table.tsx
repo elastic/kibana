@@ -228,7 +228,7 @@ export interface UnifiedDataTableProps {
    */
   maxDocFieldsDisplayed?: number;
   /**
-   * Number total hits from ES
+   * Optional value for providing EuiDataGridControlColumn list of the additional leading control columns. UnifiedDataTable includes two control columns: Open Details and Select.
    */
   externalControlColumns?: EuiDataGridControlColumn[];
   /**
@@ -239,7 +239,13 @@ export interface UnifiedDataTableProps {
    * To fetch more
    */
   onFetchMoreRecords?: () => void;
+  /**
+   * Optional value for providing the additional controls available in the UnifiedDataTable toolbar to manage it's records or state. UnifiedDataTable includes Columns, Sorting and Bulk Actions.
+   */
   externalAdditionalControls?: React.ReactNode;
+  /**
+   * Optional list of number type values to set custom UnifiedDataTable paging options to display the records per page.
+   */
   rowsPerPageOptions?: number[];
   /**
    * An optional function called to completely customize and control the rendering of
@@ -253,8 +259,17 @@ export interface UnifiedDataTableProps {
    * It receives #EuiDataGridCustomBodyProps as its only argument.
    */
   renderCustomGridBody?: (args: EuiDataGridCustomBodyProps) => React.ReactNode;
+  /**
+   * An optional list of the EuiDataGridControlColumn type for setting trailing control columns standard for EuiDataGrid.
+   */
   trailingControlColumns?: EuiDataGridControlColumn[];
+  /**
+   * An optional value for a custom number of the visible cell actions in the table. By default is up to 3.
+   **/
   visibleCellActions?: number;
+  /**
+   * An optional settings for a specified fields rendering like links. Applied only for the listed fields rendering.
+   */
   externalCustomRenderers?: Record<
     string,
     (props: EuiDataGridCellValueElementProps) => React.ReactNode
@@ -634,7 +649,7 @@ export const UnifiedDataTable = ({
       controlColumnIds.includes(id)
     );
     return externalControlColumns
-      ? [...externalControlColumns, ...internalControlColumns]
+      ? [...internalControlColumns, ...externalControlColumns]
       : internalControlColumns;
   }, [canSetExpandedDoc, externalControlColumns, controlColumnIds]);
 
