@@ -19,7 +19,7 @@ export type ResetAction = ReturnType<typeof useResetAction>;
 export const useResetAction = (forceDisable: boolean) => {
   const { canResetTransform } = useContext(AuthorizationContext).capabilities;
 
-  const resetTransforms = useResetTransforms();
+  const { mutate: resetTransforms } = useResetTransforms();
 
   const [isModalVisible, setModalVisible] = useState(false);
   const [items, setItems] = useState<TransformListRow[]>([]);
