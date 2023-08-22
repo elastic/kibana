@@ -15,13 +15,13 @@ import { breadcrumbService } from '../../services/breadcrumbs';
 import { CreatePolicyWizard } from './create_policy_wizard';
 import { CreatePolicyContextProvider } from './create_policy_context';
 
-export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
+export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = () => {
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('enrichPolicyCreate');
   }, []);
 
   return (
-    <CreatePolicyContextProvider context={{ draftPolicy: {} }}>
+    <CreatePolicyContextProvider>
       <EuiPageHeader
         data-test-subj="indexManagementHeaderContent"
         pageTitle={
