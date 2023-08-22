@@ -20,7 +20,7 @@ import { ModelDeployed } from './model_deployed';
 import { ModelDeploymentInProgress } from './model_deployment_in_progress';
 import { ModelStarted } from './model_started';
 import { useTextExpansionCallOutData } from './text_expansion_callout_data';
-import { getTextExpansionError, TextExpansionCalloutLogic } from './text_expansion_callout_logic';
+import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 import { TextExpansionErrors } from './text_expansion_errors';
 import { TRAINED_MODELS_PATH } from './utils';
 
@@ -78,24 +78,16 @@ export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props)
   const { dismiss, isCompact, isDismissable, show } = useTextExpansionCallOutData(props);
   const { ingestionMethod } = useValues(IndexViewLogic);
   const {
-    createTextExpansionModelError,
-    fetchTextExpansionModelError,
     isCreateButtonDisabled,
     isModelDownloadInProgress,
     isModelDownloaded,
     isModelRunningSingleThreaded,
     isModelStarted,
+    textExpansionError,
     isStartButtonDisabled,
-    startTextExpansionModelError,
   } = useValues(TextExpansionCalloutLogic);
 
-  // In case of an error, show the error callout only
-  const error = getTextExpansionError(
-    createTextExpansionModelError,
-    fetchTextExpansionModelError,
-    startTextExpansionModelError
-  );
-  if (error) return <TextExpansionErrors error={error} />;
+  if (textExpansionError) return <TextExpansionErrors error={textExpansionError} />;
 
   if (!show) return null;
 
