@@ -56,7 +56,7 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
       }),
       tap((response) => {
         if (isErrorResponse(response)) {
-          throw response ? new Error('Received partial response') : new AbortError();
+          throw new AbortError();
         }
       }),
       takeWhile<Response>(isRunningResponse, true),
