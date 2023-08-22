@@ -19845,7 +19845,7 @@ function patch (fs) {
         var backoff = 0;
         fs$rename(from, to, function CB (er) {
           if (er
-              && (er.code === "EACCES" || er.code === "EPERM")
+              && (er.code === "EACCES" || er.code === "EPERM" || er.code === "EBUSY")
               && Date.now() - start < 60000) {
             setTimeout(function() {
               fs.stat(to, function (stater, st) {
@@ -67594,7 +67594,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _build_bazel_production_projects__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(595);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildBazelProductionProjects", function() { return _build_bazel_production_projects__WEBPACK_IMPORTED_MODULE_0__["buildBazelProductionProjects"]; });
 
-/* harmony import */ var _build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(839);
+/* harmony import */ var _build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(840);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildNonBazelProductionProjects", function() { return _build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_1__["buildNonBazelProductionProjects"]; });
 
 /*
@@ -67621,7 +67621,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var globby__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(globby__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(839);
+/* harmony import */ var _build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(840);
 /* harmony import */ var _utils_bazel__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(452);
 /* harmony import */ var _utils_fs__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(255);
 /* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(244);
@@ -78152,6 +78152,13 @@ Emitter.prototype.removeEventListener = function(event, fn){
       break;
     }
   }
+
+  // Remove event specific arrays for event types that no
+  // one is subscribed for to avoid memory leak.
+  if (callbacks.length === 0) {
+    delete this._callbacks['$' + event];
+  }
+
   return this;
 };
 
@@ -78165,8 +78172,13 @@ Emitter.prototype.removeEventListener = function(event, fn){
 
 Emitter.prototype.emit = function(event){
   this._callbacks = this._callbacks || {};
-  var args = [].slice.call(arguments, 1)
+
+  var args = new Array(arguments.length - 1)
     , callbacks = this._callbacks['$' + event];
+
+  for (var i = 1; i < arguments.length; i++) {
+    args[i - 1] = arguments[i];
+  }
 
   if (callbacks) {
     callbacks = callbacks.slice(0);
@@ -95882,8 +95894,8 @@ const arrayUnion = __webpack_require__(266);
 const merge2 = __webpack_require__(267);
 const fastGlob = __webpack_require__(812);
 const dirGlob = __webpack_require__(350);
-const gitignore = __webpack_require__(837);
-const {FilterStream, UniqueStream} = __webpack_require__(838);
+const gitignore = __webpack_require__(838);
+const {FilterStream, UniqueStream} = __webpack_require__(839);
 
 const DEFAULT_FILTER = () => false;
 
@@ -96067,9 +96079,9 @@ module.exports.gitignore = gitignore;
 
 const taskManager = __webpack_require__(813);
 const async_1 = __webpack_require__(823);
-const stream_1 = __webpack_require__(833);
-const sync_1 = __webpack_require__(834);
-const settings_1 = __webpack_require__(836);
+const stream_1 = __webpack_require__(834);
+const sync_1 = __webpack_require__(835);
+const settings_1 = __webpack_require__(837);
 const utils = __webpack_require__(814);
 async function FastGlob(source, options) {
     assertPatternsInput(source);
@@ -96080,6 +96092,10 @@ async function FastGlob(source, options) {
 // https://github.com/typescript-eslint/typescript-eslint/issues/60
 // eslint-disable-next-line no-redeclare
 (function (FastGlob) {
+    FastGlob.glob = FastGlob;
+    FastGlob.globSync = sync;
+    FastGlob.globStream = stream;
+    FastGlob.async = FastGlob;
     function sync(source, options) {
         assertPatternsInput(source);
         const works = getWorks(source, sync_1.default, options);
@@ -96115,6 +96131,37 @@ async function FastGlob(source, options) {
         return utils.path.escape(source);
     }
     FastGlob.escapePath = escapePath;
+    function convertPathToPattern(source) {
+        assertPatternsInput(source);
+        return utils.path.convertPathToPattern(source);
+    }
+    FastGlob.convertPathToPattern = convertPathToPattern;
+    let posix;
+    (function (posix) {
+        function escapePath(source) {
+            assertPatternsInput(source);
+            return utils.path.escapePosixPath(source);
+        }
+        posix.escapePath = escapePath;
+        function convertPathToPattern(source) {
+            assertPatternsInput(source);
+            return utils.path.convertPosixPathToPattern(source);
+        }
+        posix.convertPathToPattern = convertPathToPattern;
+    })(posix = FastGlob.posix || (FastGlob.posix = {}));
+    let win32;
+    (function (win32) {
+        function escapePath(source) {
+            assertPatternsInput(source);
+            return utils.path.escapeWindowsPath(source);
+        }
+        win32.escapePath = escapePath;
+        function convertPathToPattern(source) {
+            assertPatternsInput(source);
+            return utils.path.convertWindowsPathToPattern(source);
+        }
+        win32.convertPathToPattern = convertPathToPattern;
+    })(win32 = FastGlob.win32 || (FastGlob.win32 = {}));
 })(FastGlob || (FastGlob = {}));
 function getWorks(source, _Provider, options) {
     const patterns = [].concat(source);
@@ -96142,9 +96189,11 @@ module.exports = FastGlob;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.convertPatternGroupToTask = exports.convertPatternGroupsToTasks = exports.groupPatternsByBaseDirectory = exports.getNegativePatternsAsPositive = exports.getPositivePatterns = exports.convertPatternsToTasks = exports.generate = void 0;
 const utils = __webpack_require__(814);
-function generate(patterns, settings) {
+function generate(input, settings) {
+    const patterns = processPatterns(input, settings);
+    const ignore = processPatterns(settings.ignore, settings);
     const positivePatterns = getPositivePatterns(patterns);
-    const negativePatterns = getNegativePatternsAsPositive(patterns, settings.ignore);
+    const negativePatterns = getNegativePatternsAsPositive(patterns, ignore);
     const staticPatterns = positivePatterns.filter((pattern) => utils.pattern.isStaticPattern(pattern, settings));
     const dynamicPatterns = positivePatterns.filter((pattern) => utils.pattern.isDynamicPattern(pattern, settings));
     const staticTasks = convertPatternsToTasks(staticPatterns, negativePatterns, /* dynamic */ false);
@@ -96152,6 +96201,34 @@ function generate(patterns, settings) {
     return staticTasks.concat(dynamicTasks);
 }
 exports.generate = generate;
+function processPatterns(input, settings) {
+    let patterns = input;
+    /**
+     * The original pattern like `{,*,**,a/*}` can lead to problems checking the depth when matching entry
+     * and some problems with the micromatch package (see fast-glob issues: #365, #394).
+     *
+     * To solve this problem, we expand all patterns containing brace expansion. This can lead to a slight slowdown
+     * in matching in the case of a large set of patterns after expansion.
+     */
+    if (settings.braceExpansion) {
+        patterns = utils.pattern.expandPatternsWithBraceExpansion(patterns);
+    }
+    /**
+     * If the `baseNameMatch` option is enabled, we must add globstar to patterns, so that they can be used
+     * at any nesting level.
+     *
+     * We do this here, because otherwise we have to complicate the filtering logic. For example, we need to change
+     * the pattern in the filter before creating a regular expression. There is no need to change the patterns
+     * in the application. Only on the input.
+     */
+    if (settings.baseNameMatch) {
+        patterns = patterns.map((pattern) => pattern.includes('/') ? pattern : `**/${pattern}`);
+    }
+    /**
+     * This method also removes duplicate slashes that may have been in the pattern or formed as a result of expansion.
+     */
+    return patterns.map((pattern) => utils.pattern.removeDuplicateSlashes(pattern));
+}
 /**
  * Returns tasks grouped by basic pattern directories.
  *
@@ -96320,10 +96397,29 @@ exports.createDirentFromStats = createDirentFromStats;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeLeadingDotSegment = exports.escape = exports.makeAbsolute = exports.unixify = void 0;
+exports.convertPosixPathToPattern = exports.convertWindowsPathToPattern = exports.convertPathToPattern = exports.escapePosixPath = exports.escapeWindowsPath = exports.escape = exports.removeLeadingDotSegment = exports.makeAbsolute = exports.unixify = void 0;
+const os = __webpack_require__(125);
 const path = __webpack_require__(4);
+const IS_WINDOWS_PLATFORM = os.platform() === 'win32';
 const LEADING_DOT_SEGMENT_CHARACTERS_COUNT = 2; // ./ or .\\
-const UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([()*?[\]{|}]|^!|[!+@](?=\())/g;
+/**
+ * All non-escaped special characters.
+ * Posix: ()*?[\]{|}, !+@ before (, ! at the beginning, \\ before non-special characters.
+ * Windows: (){}, !+@ before (, ! at the beginning.
+ */
+const POSIX_UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([()*?[\]{|}]|^!|[!+@](?=\()|\\(?![!()*+?@[\]{|}]))/g;
+const WINDOWS_UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([(){}]|^!|[!+@](?=\())/g;
+/**
+ * The device path (\\.\ or \\?\).
+ * https://learn.microsoft.com/en-us/dotnet/standard/io/file-path-formats#dos-device-paths
+ */
+const DOS_DEVICE_PATH_RE = /^\\\\([.?])/;
+/**
+ * All backslashes except those escaping special characters.
+ * Windows: !()+@{}
+ * https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#naming-conventions
+ */
+const WINDOWS_BACKSLASHES_RE = /\\(?![!()+@{}])/g;
 /**
  * Designed to work only with simple paths: `dir\\file`.
  */
@@ -96335,10 +96431,6 @@ function makeAbsolute(cwd, filepath) {
     return path.resolve(cwd, filepath);
 }
 exports.makeAbsolute = makeAbsolute;
-function escape(pattern) {
-    return pattern.replace(UNESCAPED_GLOB_SYMBOLS_RE, '\\$2');
-}
-exports.escape = escape;
 function removeLeadingDotSegment(entry) {
     // We do not use `startsWith` because this is 10x slower than current implementation for some cases.
     // eslint-disable-next-line @typescript-eslint/prefer-string-starts-ends-with
@@ -96351,6 +96443,26 @@ function removeLeadingDotSegment(entry) {
     return entry;
 }
 exports.removeLeadingDotSegment = removeLeadingDotSegment;
+exports.escape = IS_WINDOWS_PLATFORM ? escapeWindowsPath : escapePosixPath;
+function escapeWindowsPath(pattern) {
+    return pattern.replace(WINDOWS_UNESCAPED_GLOB_SYMBOLS_RE, '\\$2');
+}
+exports.escapeWindowsPath = escapeWindowsPath;
+function escapePosixPath(pattern) {
+    return pattern.replace(POSIX_UNESCAPED_GLOB_SYMBOLS_RE, '\\$2');
+}
+exports.escapePosixPath = escapePosixPath;
+exports.convertPathToPattern = IS_WINDOWS_PLATFORM ? convertWindowsPathToPattern : convertPosixPathToPattern;
+function convertWindowsPathToPattern(filepath) {
+    return escapeWindowsPath(filepath)
+        .replace(DOS_DEVICE_PATH_RE, '//$1')
+        .replace(WINDOWS_BACKSLASHES_RE, '/');
+}
+exports.convertWindowsPathToPattern = convertWindowsPathToPattern;
+function convertPosixPathToPattern(filepath) {
+    return escapePosixPath(filepath);
+}
+exports.convertPosixPathToPattern = convertPosixPathToPattern;
 
 
 /***/ }),
@@ -96360,17 +96472,22 @@ exports.removeLeadingDotSegment = removeLeadingDotSegment;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.matchAny = exports.convertPatternsToRe = exports.makeRe = exports.getPatternParts = exports.expandBraceExpansion = exports.expandPatternsWithBraceExpansion = exports.isAffectDepthOfReadingPattern = exports.endsWithSlashGlobStar = exports.hasGlobStar = exports.getBaseDirectory = exports.isPatternRelatedToParentDirectory = exports.getPatternsOutsideCurrentDirectory = exports.getPatternsInsideCurrentDirectory = exports.getPositivePatterns = exports.getNegativePatterns = exports.isPositivePattern = exports.isNegativePattern = exports.convertToNegativePattern = exports.convertToPositivePattern = exports.isDynamicPattern = exports.isStaticPattern = void 0;
+exports.removeDuplicateSlashes = exports.matchAny = exports.convertPatternsToRe = exports.makeRe = exports.getPatternParts = exports.expandBraceExpansion = exports.expandPatternsWithBraceExpansion = exports.isAffectDepthOfReadingPattern = exports.endsWithSlashGlobStar = exports.hasGlobStar = exports.getBaseDirectory = exports.isPatternRelatedToParentDirectory = exports.getPatternsOutsideCurrentDirectory = exports.getPatternsInsideCurrentDirectory = exports.getPositivePatterns = exports.getNegativePatterns = exports.isPositivePattern = exports.isNegativePattern = exports.convertToNegativePattern = exports.convertToPositivePattern = exports.isDynamicPattern = exports.isStaticPattern = void 0;
 const path = __webpack_require__(4);
 const globParent = __webpack_require__(289);
 const micromatch = __webpack_require__(820);
 const GLOBSTAR = '**';
 const ESCAPE_SYMBOL = '\\';
 const COMMON_GLOB_SYMBOLS_RE = /[*?]|^!/;
-const REGEX_CHARACTER_CLASS_SYMBOLS_RE = /\[.*]/;
-const REGEX_GROUP_SYMBOLS_RE = /(?:^|[^!*+?@])\(.*\|.*\)/;
-const GLOB_EXTENSION_SYMBOLS_RE = /[!*+?@]\(.*\)/;
-const BRACE_EXPANSIONS_SYMBOLS_RE = /{.*(?:,|\.\.).*}/;
+const REGEX_CHARACTER_CLASS_SYMBOLS_RE = /\[[^[]*]/;
+const REGEX_GROUP_SYMBOLS_RE = /(?:^|[^!*+?@])\([^(]*\|[^|]*\)/;
+const GLOB_EXTENSION_SYMBOLS_RE = /[!*+?@]\([^(]*\)/;
+const BRACE_EXPANSION_SEPARATORS_RE = /,|\.\./;
+/**
+ * Matches a sequence of two or more consecutive slashes, excluding the first two slashes at the beginning of the string.
+ * The latter is due to the presence of the device path at the beginning of the UNC path.
+ */
+const DOUBLE_SLASH_RE = /(?!^)\/{2,}/g;
 function isStaticPattern(pattern, options = {}) {
     return !isDynamicPattern(pattern, options);
 }
@@ -96397,12 +96514,24 @@ function isDynamicPattern(pattern, options = {}) {
     if (options.extglob !== false && GLOB_EXTENSION_SYMBOLS_RE.test(pattern)) {
         return true;
     }
-    if (options.braceExpansion !== false && BRACE_EXPANSIONS_SYMBOLS_RE.test(pattern)) {
+    if (options.braceExpansion !== false && hasBraceExpansion(pattern)) {
         return true;
     }
     return false;
 }
 exports.isDynamicPattern = isDynamicPattern;
+function hasBraceExpansion(pattern) {
+    const openingBraceIndex = pattern.indexOf('{');
+    if (openingBraceIndex === -1) {
+        return false;
+    }
+    const closingBraceIndex = pattern.indexOf('}', openingBraceIndex + 1);
+    if (closingBraceIndex === -1) {
+        return false;
+    }
+    const braceContent = pattern.slice(openingBraceIndex, closingBraceIndex);
+    return BRACE_EXPANSION_SEPARATORS_RE.test(braceContent);
+}
 function convertToPositivePattern(pattern) {
     return isNegativePattern(pattern) ? pattern.slice(1) : pattern;
 }
@@ -96477,10 +96606,16 @@ function expandPatternsWithBraceExpansion(patterns) {
 }
 exports.expandPatternsWithBraceExpansion = expandPatternsWithBraceExpansion;
 function expandBraceExpansion(pattern) {
-    return micromatch.braces(pattern, {
-        expand: true,
-        nodupes: true
-    });
+    const patterns = micromatch.braces(pattern, { expand: true, nodupes: true });
+    /**
+     * Sort the patterns by length so that the same depth patterns are processed side by side.
+     * `a/{b,}/{c,}/*` – `['a///*', 'a/b//*', 'a//c/*', 'a/b/c/*']`
+     */
+    patterns.sort((a, b) => a.length - b.length);
+    /**
+     * Micromatch can return an empty string in the case of patterns like `{a,}`.
+     */
+    return patterns.filter((pattern) => pattern !== '');
 }
 exports.expandBraceExpansion = expandBraceExpansion;
 function getPatternParts(pattern, options) {
@@ -96515,6 +96650,14 @@ function matchAny(entry, patternsRe) {
     return patternsRe.some((patternRe) => patternRe.test(entry));
 }
 exports.matchAny = matchAny;
+/**
+ * This package only works with forward slashes as a path separator.
+ * Because of this, we cannot use the standard `path.normalize` method, because on Windows platform it will use of backslashes.
+ */
+function removeDuplicateSlashes(pattern) {
+    return pattern.replace(DOUBLE_SLASH_RE, '/');
+}
+exports.removeDuplicateSlashes = removeDuplicateSlashes;
 
 
 /***/ }),
@@ -97040,23 +97183,18 @@ exports.isEmpty = isEmpty;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const stream_1 = __webpack_require__(824);
-const provider_1 = __webpack_require__(826);
+const async_1 = __webpack_require__(824);
+const provider_1 = __webpack_require__(827);
 class ProviderAsync extends provider_1.default {
     constructor() {
         super(...arguments);
-        this._reader = new stream_1.default(this._settings);
+        this._reader = new async_1.default(this._settings);
     }
-    read(task) {
+    async read(task) {
         const root = this._getRootDirectory(task);
         const options = this._getReaderOptions(task);
-        const entries = [];
-        return new Promise((resolve, reject) => {
-            const stream = this.api(root, task, options);
-            stream.once('error', reject);
-            stream.on('data', (entry) => entries.push(options.transform(entry)));
-            stream.once('end', () => resolve(entries));
-        });
+        const entries = await this.api(root, task, options);
+        return entries.map((entry) => options.transform(entry));
     }
     api(root, task, options) {
         if (task.dynamic) {
@@ -97070,6 +97208,88 @@ exports.default = ProviderAsync;
 
 /***/ }),
 /* 824 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const fsWalk = __webpack_require__(318);
+const reader_1 = __webpack_require__(825);
+const stream_1 = __webpack_require__(826);
+class ReaderAsync extends reader_1.default {
+    constructor() {
+        super(...arguments);
+        this._walkAsync = fsWalk.walk;
+        this._readerStream = new stream_1.default(this._settings);
+    }
+    dynamic(root, options) {
+        return new Promise((resolve, reject) => {
+            this._walkAsync(root, options, (error, entries) => {
+                if (error === null) {
+                    resolve(entries);
+                }
+                else {
+                    reject(error);
+                }
+            });
+        });
+    }
+    async static(patterns, options) {
+        const entries = [];
+        const stream = this._readerStream.static(patterns, options);
+        // After #235, replace it with an asynchronous iterator.
+        return new Promise((resolve, reject) => {
+            stream.once('error', reject);
+            stream.on('data', (entry) => entries.push(entry));
+            stream.once('end', () => resolve(entries));
+        });
+    }
+}
+exports.default = ReaderAsync;
+
+
+/***/ }),
+/* 825 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const path = __webpack_require__(4);
+const fsStat = __webpack_require__(313);
+const utils = __webpack_require__(814);
+class Reader {
+    constructor(_settings) {
+        this._settings = _settings;
+        this._fsStatSettings = new fsStat.Settings({
+            followSymbolicLink: this._settings.followSymbolicLinks,
+            fs: this._settings.fs,
+            throwErrorOnBrokenSymbolicLink: this._settings.followSymbolicLinks
+        });
+    }
+    _getFullEntryPath(filepath) {
+        return path.resolve(this._settings.cwd, filepath);
+    }
+    _makeEntry(stats, pattern) {
+        const entry = {
+            name: pattern,
+            path: pattern,
+            dirent: utils.fs.createDirentFromStats(pattern, stats)
+        };
+        if (this._settings.stats) {
+            entry.stats = stats;
+        }
+        return entry;
+    }
+    _isFatalError(error) {
+        return !utils.errno.isEnoentCodeError(error) && !this._settings.suppressErrors;
+    }
+}
+exports.default = Reader;
+
+
+/***/ }),
+/* 826 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -97131,57 +97351,17 @@ exports.default = ReaderStream;
 
 
 /***/ }),
-/* 825 */
+/* 827 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = __webpack_require__(4);
-const fsStat = __webpack_require__(313);
-const utils = __webpack_require__(814);
-class Reader {
-    constructor(_settings) {
-        this._settings = _settings;
-        this._fsStatSettings = new fsStat.Settings({
-            followSymbolicLink: this._settings.followSymbolicLinks,
-            fs: this._settings.fs,
-            throwErrorOnBrokenSymbolicLink: this._settings.followSymbolicLinks
-        });
-    }
-    _getFullEntryPath(filepath) {
-        return path.resolve(this._settings.cwd, filepath);
-    }
-    _makeEntry(stats, pattern) {
-        const entry = {
-            name: pattern,
-            path: pattern,
-            dirent: utils.fs.createDirentFromStats(pattern, stats)
-        };
-        if (this._settings.stats) {
-            entry.stats = stats;
-        }
-        return entry;
-    }
-    _isFatalError(error) {
-        return !utils.errno.isEnoentCodeError(error) && !this._settings.suppressErrors;
-    }
-}
-exports.default = Reader;
-
-
-/***/ }),
-/* 826 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const path = __webpack_require__(4);
-const deep_1 = __webpack_require__(827);
-const entry_1 = __webpack_require__(830);
-const error_1 = __webpack_require__(831);
-const entry_2 = __webpack_require__(832);
+const deep_1 = __webpack_require__(828);
+const entry_1 = __webpack_require__(831);
+const error_1 = __webpack_require__(832);
+const entry_2 = __webpack_require__(833);
 class Provider {
     constructor(_settings) {
         this._settings = _settings;
@@ -97226,14 +97406,14 @@ exports.default = Provider;
 
 
 /***/ }),
-/* 827 */
+/* 828 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const utils = __webpack_require__(814);
-const partial_1 = __webpack_require__(828);
+const partial_1 = __webpack_require__(829);
 class DeepFilter {
     constructor(_settings, _micromatchOptions) {
         this._settings = _settings;
@@ -97295,13 +97475,13 @@ exports.default = DeepFilter;
 
 
 /***/ }),
-/* 828 */
+/* 829 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const matcher_1 = __webpack_require__(829);
+const matcher_1 = __webpack_require__(830);
 class PartialMatcher extends matcher_1.default {
     match(filepath) {
         const parts = filepath.split('/');
@@ -97340,7 +97520,7 @@ exports.default = PartialMatcher;
 
 
 /***/ }),
-/* 829 */
+/* 830 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -97356,12 +97536,7 @@ class Matcher {
         this._fillStorage();
     }
     _fillStorage() {
-        /**
-         * The original pattern may include `{,*,**,a/*}`, which will lead to problems with matching (unresolved level).
-         * So, before expand patterns with brace expansion into separated patterns.
-         */
-        const patterns = utils.pattern.expandPatternsWithBraceExpansion(this._patterns);
-        for (const pattern of patterns) {
+        for (const pattern of this._patterns) {
             const segments = this._getPatternSegments(pattern);
             const sections = this._splitSegmentsIntoSections(segments);
             this._storage.push({
@@ -97397,7 +97572,7 @@ exports.default = Matcher;
 
 
 /***/ }),
-/* 830 */
+/* 831 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -97412,31 +97587,32 @@ class EntryFilter {
     }
     getFilter(positive, negative) {
         const positiveRe = utils.pattern.convertPatternsToRe(positive, this._micromatchOptions);
-        const negativeRe = utils.pattern.convertPatternsToRe(negative, this._micromatchOptions);
+        const negativeRe = utils.pattern.convertPatternsToRe(negative, Object.assign(Object.assign({}, this._micromatchOptions), { dot: true }));
         return (entry) => this._filter(entry, positiveRe, negativeRe);
     }
     _filter(entry, positiveRe, negativeRe) {
-        if (this._settings.unique && this._isDuplicateEntry(entry)) {
+        const filepath = utils.path.removeLeadingDotSegment(entry.path);
+        if (this._settings.unique && this._isDuplicateEntry(filepath)) {
             return false;
         }
         if (this._onlyFileFilter(entry) || this._onlyDirectoryFilter(entry)) {
             return false;
         }
-        if (this._isSkippedByAbsoluteNegativePatterns(entry.path, negativeRe)) {
+        if (this._isSkippedByAbsoluteNegativePatterns(filepath, negativeRe)) {
             return false;
         }
-        const filepath = this._settings.baseNameMatch ? entry.name : entry.path;
-        const isMatched = this._isMatchToPatterns(filepath, positiveRe) && !this._isMatchToPatterns(entry.path, negativeRe);
+        const isDirectory = entry.dirent.isDirectory();
+        const isMatched = this._isMatchToPatterns(filepath, positiveRe, isDirectory) && !this._isMatchToPatterns(filepath, negativeRe, isDirectory);
         if (this._settings.unique && isMatched) {
-            this._createIndexRecord(entry);
+            this._createIndexRecord(filepath);
         }
         return isMatched;
     }
-    _isDuplicateEntry(entry) {
-        return this.index.has(entry.path);
+    _isDuplicateEntry(filepath) {
+        return this.index.has(filepath);
     }
-    _createIndexRecord(entry) {
-        this.index.set(entry.path, undefined);
+    _createIndexRecord(filepath) {
+        this.index.set(filepath, undefined);
     }
     _onlyFileFilter(entry) {
         return this._settings.onlyFiles && !entry.dirent.isFile();
@@ -97451,16 +97627,22 @@ class EntryFilter {
         const fullpath = utils.path.makeAbsolute(this._settings.cwd, entryPath);
         return utils.pattern.matchAny(fullpath, patternsRe);
     }
-    _isMatchToPatterns(entryPath, patternsRe) {
-        const filepath = utils.path.removeLeadingDotSegment(entryPath);
-        return utils.pattern.matchAny(filepath, patternsRe);
+    _isMatchToPatterns(filepath, patternsRe, isDirectory) {
+        // Trying to match files and directories by patterns.
+        const isMatched = utils.pattern.matchAny(filepath, patternsRe);
+        // A pattern with a trailling slash can be used for directory matching.
+        // To apply such pattern, we need to add a tralling slash to the path.
+        if (!isMatched && isDirectory) {
+            return utils.pattern.matchAny(filepath + '/', patternsRe);
+        }
+        return isMatched;
     }
 }
 exports.default = EntryFilter;
 
 
 /***/ }),
-/* 831 */
+/* 832 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -97482,7 +97664,7 @@ exports.default = ErrorFilter;
 
 
 /***/ }),
-/* 832 */
+/* 833 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -97515,15 +97697,15 @@ exports.default = EntryTransformer;
 
 
 /***/ }),
-/* 833 */
+/* 834 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const stream_1 = __webpack_require__(176);
-const stream_2 = __webpack_require__(824);
-const provider_1 = __webpack_require__(826);
+const stream_2 = __webpack_require__(826);
+const provider_1 = __webpack_require__(827);
 class ProviderStream extends provider_1.default {
     constructor() {
         super(...arguments);
@@ -97553,14 +97735,14 @@ exports.default = ProviderStream;
 
 
 /***/ }),
-/* 834 */
+/* 835 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const sync_1 = __webpack_require__(835);
-const provider_1 = __webpack_require__(826);
+const sync_1 = __webpack_require__(836);
+const provider_1 = __webpack_require__(827);
 class ProviderSync extends provider_1.default {
     constructor() {
         super(...arguments);
@@ -97583,7 +97765,7 @@ exports.default = ProviderSync;
 
 
 /***/ }),
-/* 835 */
+/* 836 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -97633,7 +97815,7 @@ exports.default = ReaderSync;
 
 
 /***/ }),
-/* 836 */
+/* 837 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -97685,6 +97867,8 @@ class Settings {
         if (this.stats) {
             this.objectMode = true;
         }
+        // Remove the cast to the array in the next major (#404).
+        this.ignore = [].concat(this.ignore);
     }
     _getValue(option, value) {
         return option === undefined ? value : option;
@@ -97697,7 +97881,7 @@ exports.default = Settings;
 
 
 /***/ }),
-/* 837 */
+/* 838 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -97824,7 +98008,7 @@ module.exports.sync = options => {
 
 
 /***/ }),
-/* 838 */
+/* 839 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -97877,7 +98061,7 @@ module.exports = {
 
 
 /***/ }),
-/* 839 */
+/* 840 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

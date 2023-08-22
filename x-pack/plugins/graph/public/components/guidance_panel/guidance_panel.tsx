@@ -53,7 +53,6 @@ function ListItem({
     // eslint-disable-next-line jsx-a11y/role-supports-aria-props
     <li
       className={classNames('gphGuidancePanel__item', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'gphGuidancePanel__item--disabled': state === 'disabled',
       })}
       aria-disabled={state === 'disabled'}
@@ -62,7 +61,6 @@ function ListItem({
       {state !== 'disabled' && (
         <span
           className={classNames('gphGuidancePanel__itemIcon', {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'gphGuidancePanel__itemIcon--done': state === 'done',
           })}
           aria-hidden={true}

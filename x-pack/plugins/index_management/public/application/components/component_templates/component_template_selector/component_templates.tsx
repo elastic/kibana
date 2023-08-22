@@ -175,7 +175,6 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
       </div>
       <div
         className={classNames('eui-yScrollWithShadows componentTemplates__listWrapper', {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'componentTemplates__listWrapper--is-empty': isSearchResultEmpty,
         })}
       >

@@ -54,7 +54,6 @@ export const TableRow = ({
 }: TableRowProps) => {
   const [open, setOpen] = useState(false);
   const docTableRowClassName = classNames('kbnDocTable__row', {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'kbnDocTable__row--highlight': row.isAnchor,
   });
   const anchorDocTableRowSubj = row.isAnchor ? ' docTableAnchorRow' : '';

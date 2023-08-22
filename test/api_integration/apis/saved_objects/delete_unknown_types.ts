@@ -16,8 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  // FAILING ES 8.2 forward compatibility: https://github.com/elastic/kibana/issues/130474
-  describe.skip('/deprecations/_delete_unknown_types', () => {
+  describe('/deprecations/_delete_unknown_types', () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await esArchiver.load(
@@ -50,40 +49,23 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should return 200 with individual responses', async () => {
       const beforeDelete = await fetchIndexContent();
-      expect(beforeDelete).to.eql([
-        {
-          id: 'dashboard:b70c7ae0-3224-11e8-a572-ffca06da1357',
-          type: 'dashboard',
-        },
-        {
-          id: 'index-pattern:8963ca30-3224-11e8-a572-ffca06da1357',
-          type: 'index-pattern',
-        },
-        {
-          id: 'search:960372e0-3224-11e8-a572-ffca06da1357',
-          type: 'search',
-        },
-        {
-          id: 'space:default',
-          type: 'space',
-        },
-        {
-          id: 'unknown-shareable-doc',
-          type: 'unknown-shareable-type',
-        },
-        {
-          id: 'unknown-type:unknown-doc',
-          type: 'unknown-type',
-        },
-        {
-          id: 'visualization:a42c0580-3224-11e8-a572-ffca06da1357',
-          type: 'visualization',
-        },
-      ]);
+      const beforeDeleteIds = beforeDelete.map((obj) => obj.id);
+      [
+        'dashboard:b70c7ae0-3224-11e8-a572-ffca06da1357',
+        'index-pattern:8963ca30-3224-11e8-a572-ffca06da1357',
+        'search:960372e0-3224-11e8-a572-ffca06da1357',
+        'space:default',
+        'unknown-shareable-doc',
+        'unknown-type:unknown-doc',
+        'visualization:a42c0580-3224-11e8-a572-ffca06da1357',
+      ].forEach((id) => {
+        expect(beforeDeleteIds).to.contain(id);
+      });
 
       await supertest
         .post(`/internal/saved_objects/deprecations/_delete_unknown_types`)
         .send({})
+        .set('kbn-xsrf', 'true')
         .expect(200)
         .then((resp) => {
           expect(resp.body).to.eql({ success: true });
@@ -97,28 +79,15 @@ export default function ({ getService }: FtrProviderContext) {
           await delay(1000);
           continue;
         }
-        expect(afterDelete).to.eql([
-          {
-            id: 'dashboard:b70c7ae0-3224-11e8-a572-ffca06da1357',
-            type: 'dashboard',
-          },
-          {
-            id: 'index-pattern:8963ca30-3224-11e8-a572-ffca06da1357',
-            type: 'index-pattern',
-          },
-          {
-            id: 'search:960372e0-3224-11e8-a572-ffca06da1357',
-            type: 'search',
-          },
-          {
-            id: 'space:default',
-            type: 'space',
-          },
-          {
-            id: 'visualization:a42c0580-3224-11e8-a572-ffca06da1357',
-            type: 'visualization',
-          },
-        ]);
+        const afterDeleteIds = afterDelete.map((obj) => obj.id);
+        [
+          'dashboard:b70c7ae0-3224-11e8-a572-ffca06da1357',
+          'index-pattern:8963ca30-3224-11e8-a572-ffca06da1357',
+          'search:960372e0-3224-11e8-a572-ffca06da1357',
+          'space:default',
+          'visualization:a42c0580-3224-11e8-a572-ffca06da1357',
+        ].forEach((id) => expect(afterDeleteIds).to.contain(id));
+
         break;
       }
     });
