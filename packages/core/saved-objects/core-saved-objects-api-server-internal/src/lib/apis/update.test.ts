@@ -54,7 +54,6 @@ describe('SavedObjectsRepository', () => {
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
 
-  // ADDED BY PIERRE IN https://github.com/elastic/kibana/pull/158251
   const expectMigrationArgs = (args: unknown, contains = true, n = 1) => {
     const obj = contains ? expect.objectContaining(args) : expect.not.objectContaining(args);
     expect(migrator.migrateDocument).toHaveBeenNthCalledWith(
@@ -94,33 +93,7 @@ describe('SavedObjectsRepository', () => {
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
   });
-  // ZDT IMPLEMENTATIONS
 
-  /*
-  const mockMigrationVersion = { foo: '2.3.4' };
-  const mockMigrateDocument = (doc: SavedObjectUnsanitizedDoc<any>) => {
-    const response = {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        ...(doc.attributes?.title && { title: `${doc.attributes.title}!!` }),
-      },
-      migrationVersion: mockMigrationVersion,
-      managed: doc.managed ?? false,
-      references: [
-        {
-          name: 'ref_0',
-          type: 'test',
-          id: '1',
-        },
-      ],
-    };
-    return response;
-  };
-  */
-
-  // ZDT IMPLEMENTATIONS: Using client.index || client.create to handle SOR.update REQUIRES refactoring
-  // all these tests.
   describe('#update', () => {
     const id = 'logstash-*';
     const type = 'index-pattern';
@@ -198,14 +171,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`should use the ES get action then index action when type is namespace agnostic for existing objects`, async () => {
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
-        await updateSuccess(
-          client,
-          repository,
-          registry,
-          NAMESPACE_AGNOSTIC_TYPE,
-          id,
-          attributes
-        );
+        await updateSuccess(client, repository, registry, NAMESPACE_AGNOSTIC_TYPE, id, attributes);
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.index).toHaveBeenCalledTimes(1);
@@ -236,7 +202,7 @@ describe('SavedObjectsRepository', () => {
             .references
         ).toEqual([]); // we're indexing a full new doc, serializer adds default if not defined
       });
-      // There's a mock that isn't clearing somewhere and causes testing more than once to fail.
+
       it(`accepts custom references array 1`, async () => {
         const test = async (references: SavedObjectReference[]) => {
           migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
@@ -376,8 +342,6 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`doesn't accept custom references if not an array`, async () => {
-        // const migrationVersion = mockMigrationVersion;
-        // const coreMigrationVersion = '8.0.0';
         const test = async (references: unknown) => {
           migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
           await updateSuccess(client, repository, registry, type, id, attributes, {
@@ -397,7 +361,7 @@ describe('SavedObjectsRepository', () => {
         await test(null);
       });
 
-      it.skip(`TODOdefaults to a refresh setting of wait_for`, async () => {
+      it(`defaults to a refresh setting of wait_for`, async () => {
         migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
         await updateSuccess(client, repository, registry, type, id, { foo: 'bar' });
         expect(client.index).toHaveBeenCalledWith(
@@ -408,7 +372,7 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip(`TODOdoes not default to the version of the existing document when type is multi-namespace`, async () => {
+      it(`defaults to the version of the existing document when type is multi-namespace`, async () => {
         migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
         await updateSuccess(
           client,
@@ -424,12 +388,12 @@ describe('SavedObjectsRepository', () => {
           if_primary_term: mockVersionProps._primary_term,
         };
         expect(client.index).toHaveBeenCalledWith(
-          expect.not.objectContaining(versionProperties),
+          expect.objectContaining(versionProperties),
           expect.anything()
         );
       });
 
-      it.skip(`TODOaccepts version`, async () => {
+      it(`accepts version`, async () => {
         migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
         await updateSuccess(client, repository, registry, type, id, attributes, {
           version: encodeHitVersion({ _seq_no: 100, _primary_term: 200 }),
@@ -440,7 +404,8 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip('TODOdefault to a `retry_on_conflict` setting of `3` when `version` is not provided', async () => {
+      // TODO: adapt retry_on_conflict tests
+      it.skip('default to a `retry_on_conflict` setting of `3` when `version` is not provided', async () => {
         await updateSuccess(client, repository, registry, type, id, attributes, {});
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({ retry_on_conflict: 3 }),
@@ -448,7 +413,7 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip('TODOdefault to a `retry_on_conflict` setting of `0` when `version` is provided', async () => {
+      it.skip('default to a `retry_on_conflict` setting of `0` when `version` is provided', async () => {
         await updateSuccess(client, repository, registry, type, id, attributes, {
           version: encodeHitVersion({ _seq_no: 100, _primary_term: 200 }),
         });
@@ -458,7 +423,7 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip('TODOaccepts a `retryOnConflict` option', async () => {
+      it.skip('accepts a `retryOnConflict` option', async () => {
         await updateSuccess(client, repository, registry, type, id, attributes, {
           version: encodeHitVersion({ _seq_no: 100, _primary_term: 200 }),
           retryOnConflict: 42,
@@ -469,16 +434,8 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip(`TODOprepends namespace to the id when providing namespace for single-namespace type`, async () => {
-        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
-        await updateSuccess(
-          client,
-          repository,
-          registry,
-          NAMESPACE_AGNOSTIC_TYPE,
-          id,
-          attributes
-        );
+      it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
+        await updateSuccess(client, repository, registry, type, id, attributes, { namespace });
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.index).toHaveBeenCalledWith(
@@ -487,31 +444,31 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip(`TODOdoesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
+      it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
         await updateSuccess(client, repository, registry, type, id, attributes, { references });
-        expect(client.update).toHaveBeenCalledWith(
+        expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({ id: expect.stringMatching(`${type}:${id}`) }),
           expect.anything()
         );
       });
 
-      it.skip(`TODOnormalizes options.namespace from 'default' to undefined`, async () => {
+      it(`normalizes options.namespace from 'default' to undefined`, async () => {
         await updateSuccess(client, repository, registry, type, id, attributes, {
           references,
           namespace: 'default',
         });
-        expect(client.update).toHaveBeenCalledWith(
+        expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({ id: expect.stringMatching(`${type}:${id}`) }),
           expect.anything()
         );
       });
 
-      it.skip(`TODOdoesn't prepend namespace to the id when using agnostic-namespace type`, async () => {
+      it(`doesn't prepend namespace to the id when using agnostic-namespace type`, async () => {
         await updateSuccess(client, repository, registry, NAMESPACE_AGNOSTIC_TYPE, id, attributes, {
           namespace,
         });
 
-        expect(client.update).toHaveBeenCalledWith(
+        expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({
             id: expect.stringMatching(`${NAMESPACE_AGNOSTIC_TYPE}:${id}`),
           }),
@@ -519,7 +476,7 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip(`TODOdoesn't prepend namespace to the id when using multi-namespace type`, async () => {
+      it(`doesn't prepend namespace to the id when using multi-namespace type`, async () => {
         await updateSuccess(
           client,
           repository,
@@ -529,34 +486,9 @@ describe('SavedObjectsRepository', () => {
           attributes,
           { namespace }
         );
-        expect(client.update).toHaveBeenCalledWith(
+        expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({
             id: expect.stringMatching(`${MULTI_NAMESPACE_ISOLATED_TYPE}:${id}`),
-          }),
-          expect.anything()
-        );
-      });
-
-      it.skip(`TODOincludes _source_includes when type is multi-namespace`, async () => {
-        await updateSuccess(
-          client,
-          repository,
-          registry,
-          MULTI_NAMESPACE_ISOLATED_TYPE,
-          id,
-          attributes
-        );
-        expect(client.update).toHaveBeenCalledWith(
-          expect.objectContaining({ _source_includes: ['namespace', 'namespaces', 'originId'] }),
-          expect.anything()
-        );
-      });
-
-      it.skip(`TODOincludes _source_includes when type is not multi-namespace`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes);
-        expect(client.update).toHaveBeenLastCalledWith(
-          expect.objectContaining({
-            _source_includes: ['namespace', 'namespaces', 'originId'],
           }),
           expect.anything()
         );
@@ -578,19 +510,19 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when type is invalid`, async () => {
         await expectNotFoundError('unknownType', id);
-        expect(client.update).not.toHaveBeenCalled();
+        expect(client.index).not.toHaveBeenCalled();
       });
 
       it(`throws when type is hidden`, async () => {
         await expectNotFoundError(HIDDEN_TYPE, id);
-        expect(client.update).not.toHaveBeenCalled();
+        expect(client.index).not.toHaveBeenCalled();
       });
 
       it(`throws when id is empty`, async () => {
         await expect(repository.update(type, '', attributes)).rejects.toThrowError(
           createBadRequestErrorPayload('id cannot be empty')
         );
-        expect(client.update).not.toHaveBeenCalled();
+        expect(client.index).not.toHaveBeenCalled();
       });
 
       it(`throws when ES is unable to find the document during get`, async () => {
@@ -678,8 +610,8 @@ describe('SavedObjectsRepository', () => {
         await expectNotFoundError(type, id);
       });
     });
-    // todo for downward compatible update
-    describe.skip('migration', () => {
+
+    describe('migration', () => {
       it('migrates the fetched document from get', async () => {
         const type = 'index-pattern';
         const id = 'logstash-*';
@@ -719,8 +651,8 @@ describe('SavedObjectsRepository', () => {
         });
       });
     });
-    // todo for downward compatible update
-    describe.skip('returns', () => {
+
+    describe('returns', () => {
       it(`returns _seq_no and _primary_term encoded as version`, async () => {
         const result = await updateSuccess(client, repository, registry, type, id, attributes, {
           namespace,
