@@ -23,4 +23,5 @@ export const processorEventRt = t.union([
 export type UIProcessorEvent =
   | ProcessorEvent.transaction
   | ProcessorEvent.error
+  | ProcessorEvent.span
   | ProcessorEvent.metric;
