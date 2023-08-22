@@ -24,6 +24,7 @@ import {
 } from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
 
 describe('ALL - Live Query run custom and saved', { tags: [tag.ESS] }, () => {
   let savedQueryId: string;
@@ -41,7 +42,7 @@ describe('ALL - Live Query run custom and saved', { tags: [tag.ESS] }, () => {
   });
 
   beforeEach(() => {
-    cy.login('soc_manager');
+    cy.login(ServerlessRoleName.SOC_MANAGER);
     navigateTo('/app/osquery');
   });
 

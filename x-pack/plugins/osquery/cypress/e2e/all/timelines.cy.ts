@@ -7,10 +7,11 @@
 
 import { tag } from '../../tags';
 import { takeOsqueryActionWithParams } from '../../tasks/live_query';
+import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
 
 describe('ALL - Timelines', { tags: [tag.ESS] }, () => {
   beforeEach(() => {
-    cy.login('soc_manager');
+    cy.login(ServerlessRoleName.SOC_MANAGER);
   });
 
   it('should substitute osquery parameter on non-alert event take action', () => {

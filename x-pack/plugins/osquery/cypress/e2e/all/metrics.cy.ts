@@ -10,6 +10,7 @@ import { navigateTo } from '../../tasks/navigation';
 import { checkResults, inputQuery, submitQuery } from '../../tasks/live_query';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 import { triggerLoadData } from '../../tasks/inventory';
+import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
 
 describe('ALL - Inventory', { tags: [tag.ESS] }, () => {
   let savedQueryName: string;
@@ -23,7 +24,7 @@ describe('ALL - Inventory', { tags: [tag.ESS] }, () => {
   });
 
   beforeEach(() => {
-    cy.login('soc_manager');
+    cy.login(ServerlessRoleName.SOC_MANAGER);
     navigateTo('/app/osquery');
   });
 

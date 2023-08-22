@@ -8,6 +8,7 @@
 import { tag } from '../../tags';
 import { checkResults, submitQuery } from '../../tasks/live_query';
 import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
 
 describe('Alert Test', { tags: [tag.ESS] }, () => {
   let ruleId: string;
@@ -20,7 +21,7 @@ describe('Alert Test', { tags: [tag.ESS] }, () => {
 
   describe('t1_analyst role', () => {
     beforeEach(() => {
-      cy.login('t1_analyst');
+      cy.login(ServerlessRoleName.T1_ANALYST);
 
       cy.visit(`/app/security/rules/id/${ruleId}/alerts`);
       cy.getBySel('expand-event').first().click();

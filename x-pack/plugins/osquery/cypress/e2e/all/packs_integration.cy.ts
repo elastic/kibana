@@ -32,6 +32,7 @@ import { DEFAULT_POLICY, OSQUERY_POLICY } from '../../screens/fleet';
 import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import { cleanupPack, cleanupAgentPolicy } from '../../tasks/api_fixtures';
 import { request } from '../../tasks/common';
+import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
 
 describe('ALL - Packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   const integration = 'Osquery Manager';
@@ -94,7 +95,7 @@ describe('ALL - Packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
   describe('Load prebuilt packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     beforeEach(() => {
-      cy.login('soc_manager');
+      cy.login(ServerlessRoleName.SOC_MANAGER);
       navigateTo('/app/osquery/packs');
     });
 

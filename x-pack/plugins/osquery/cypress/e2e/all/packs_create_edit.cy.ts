@@ -27,6 +27,7 @@ import { DEFAULT_POLICY } from '../../screens/fleet';
 import { getIdFormField, getSavedQueriesDropdown } from '../../screens/live_query';
 import { loadSavedQuery, cleanupSavedQuery, cleanupPack, loadPack } from '../../tasks/api_fixtures';
 import { request } from '../../tasks/common';
+import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
 
 describe('Packs - Create and Edit', () => {
   let savedQueryId: string;
@@ -86,7 +87,7 @@ describe('Packs - Create and Edit', () => {
   });
 
   beforeEach(() => {
-    cy.login('soc_manager');
+    cy.login(ServerlessRoleName.SOC_MANAGER);
     navigateTo('/app/osquery');
   });
 

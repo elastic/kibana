@@ -9,7 +9,8 @@
 import { isLocalhost } from '@kbn/security-solution-plugin/scripts/endpoint/common/is_localhost';
 import { request } from './common';
 import { STANDARD_HTTP_HEADERS } from '../../../../test_serverless/shared/lib/security/default_http_headers';
-import type { ServerlessRoleName } from '../../../../test_serverless/shared/lib';
+import { ServerlessRoleName } from '../../../../test_serverless/shared/lib';
+
 /**
  * Send login via API
  * @param username
@@ -63,7 +64,7 @@ interface CyLoginTask {
  * @param user Defaults to `soc_manager`
  */
 export const login: CyLoginTask = (
-  user: ServerlessRoleName | 'elastic' = 'soc_manager'
+  user: ServerlessRoleName | 'elastic' = ServerlessRoleName.SOC_MANAGER
 ): ReturnType<typeof sendApiLoginRequest> => {
   let username = Cypress.env('KIBANA_USERNAME');
   let password = Cypress.env('KIBANA_PASSWORD');

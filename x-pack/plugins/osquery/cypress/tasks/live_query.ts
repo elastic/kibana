@@ -6,6 +6,7 @@
  */
 
 import { LIVE_QUERY_EDITOR } from '../screens/live_query';
+import { ServerlessRoleName } from '../../../../test_serverless/shared/lib';
 
 export const DEFAULT_QUERY = 'select * from processes;';
 export const BIG_QUERY = 'select * from processes, users limit 110;';
@@ -100,7 +101,7 @@ export const toggleRuleOffAndOn = (ruleName: string) => {
 };
 
 export const loadRuleAlerts = (ruleName: string) => {
-  cy.login('soc_manager');
+  cy.login(ServerlessRoleName.SOC_MANAGER);
   cy.visit('/app/security/rules');
   cy.contains(ruleName).click();
   cy.getBySel('alertsTable').within(() => {

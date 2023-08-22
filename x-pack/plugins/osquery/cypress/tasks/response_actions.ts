@@ -7,6 +7,7 @@
 
 import { cleanupRule, loadRule } from './api_fixtures';
 import { closeDateTabIfVisible } from './integrations';
+import { ServerlessRoleName } from '../../../../test_serverless/shared/lib';
 
 export const RESPONSE_ACTIONS_ITEM_0 = 'response-actions-list-item-0';
 export const RESPONSE_ACTIONS_ITEM_1 = 'response-actions-list-item-1';
@@ -32,7 +33,7 @@ export const checkOsqueryResponseActionsPermissions = (enabled: boolean) => {
   });
 
   beforeEach(() => {
-    cy.login('soc_manager');
+    cy.login(ServerlessRoleName.SOC_MANAGER);
   });
 
   it(`response actions should ${enabled ? 'be available ' : 'not be available'}`, () => {

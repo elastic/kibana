@@ -13,21 +13,19 @@ import { FeaturesPrivileges, Role, RoleIndexPrivilege } from '@kbn/security-plug
 
 const ROLES_YAML_FILE_PATH = path.join(__dirname, 'project_controller_security_roles.yml');
 
-const ROLE_NAMES = [
-  't1_analyst',
-  't2_analyst',
-  't3_analyst',
-  'threat_intelligence_analyst',
-  'rule_author',
-  'soc_manager',
-  'detections_admin',
-  'platform_engineer',
-  'endpoint_operations_analyst',
-  'endpoint_policy_manager',
-  'reader', // custom role to test lack of permissions
-] as const;
-
-export type ServerlessRoleName = typeof ROLE_NAMES[number];
+export enum ServerlessRoleName {
+  T1_ANALYST = 't1_analyst',
+  T2_ANALYST = 't2_analyst',
+  T3_ANALYST = 't3_analyst',
+  THREAT_INTELLIGENCE_ANALYST = 'threat_intelligence_analyst',
+  RULE_AUTHOR = 'rule_author',
+  SOC_MANAGER = 'soc_manager',
+  DETECTIONS_ADMIN = 'detections_admin',
+  PLATFORM_ENGINEER = 'platform_engineer',
+  ENDPOINT_OPERATIONS_ANALYST = 'endpoint_operations_analyst',
+  ENDPOINT_POLICY_MANAGER = 'endpoint_policy_manager',
+  READER = 'reader', // custom role to test lack of permissions
+}
 
 export type YamlRoleDefinitions = Record<
   ServerlessRoleName,

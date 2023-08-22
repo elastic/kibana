@@ -16,6 +16,7 @@ import {
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 import { tag } from '../../tags';
+import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
@@ -36,7 +37,7 @@ describe('Alert Event Details', { browser: 'electron', tags: [tag.ESS, tag.SERVE
   });
 
   beforeEach(() => {
-    cy.login('soc_manager');
+    cy.login(ServerlessRoleName.SOC_MANAGER);
     cy.visit('/app/security/rules');
     cy.contains(ruleName).click();
   });

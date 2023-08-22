@@ -8,6 +8,7 @@
 import { tag } from '../../tags';
 import { navigateTo } from '../../tasks/navigation';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
 
 describe('ALL - Edit saved query', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   let savedQueryName: string;
@@ -21,7 +22,7 @@ describe('ALL - Edit saved query', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   });
 
   beforeEach(() => {
-    cy.login('soc_manager');
+    cy.login(ServerlessRoleName.SOC_MANAGER);
     navigateTo('/app/osquery/saved_queries');
   });
 

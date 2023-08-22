@@ -13,6 +13,7 @@ import {
   submitQuery,
   takeOsqueryActionWithParams,
 } from '../../tasks/live_query';
+import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
 
 describe('Alert Event Details - dynamic params', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   let ruleId: string;
@@ -31,7 +32,7 @@ describe('Alert Event Details - dynamic params', { tags: [tag.ESS, tag.SERVERLES
   });
 
   beforeEach(() => {
-    cy.login('soc_manager');
+    cy.login(ServerlessRoleName.SOC_MANAGER);
     cy.visit('/app/security/rules');
     cy.contains(ruleName).click();
   });

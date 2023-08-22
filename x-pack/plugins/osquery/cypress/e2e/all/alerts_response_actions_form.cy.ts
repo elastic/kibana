@@ -22,6 +22,7 @@ import {
 import { checkActionItemsInResults, inputQuery, typeInECSFieldInput } from '../../tasks/live_query';
 import { closeDateTabIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { tag } from '../../tags';
+import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
 
 describe(
   'Alert Event Details - Response Actions Form',
@@ -49,7 +50,7 @@ describe(
         ruleId = data.id;
         ruleName = data.name;
       });
-      cy.login('soc_manager');
+      cy.login(ServerlessRoleName.SOC_MANAGER);
     });
     afterEach(() => {
       cleanupPack(packId);

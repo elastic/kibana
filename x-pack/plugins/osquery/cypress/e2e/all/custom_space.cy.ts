@@ -15,6 +15,7 @@ import {
   submitQuery,
 } from '../../tasks/live_query';
 import { loadSpace, loadPack, cleanupPack, cleanupSpace } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
 
 const testSpaces = [
   { name: 'default', tags: [tag.ESS, tag.SERVERLESS] },
@@ -60,7 +61,7 @@ describe('ALL - Custom space', () => {
       });
 
       beforeEach(() => {
-        cy.login('soc_manager');
+        cy.login(ServerlessRoleName.SOC_MANAGER);
         navigateTo(`/s/${spaceId}/app/osquery`);
       });
 

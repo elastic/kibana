@@ -17,10 +17,11 @@ import {
   typeInECSFieldInput,
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
+import { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
 
 describe('EcsMapping', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   beforeEach(() => {
-    cy.login('soc_manager');
+    cy.login(ServerlessRoleName.SOC_MANAGER);
   });
 
   it('should properly show static values in form and results', () => {
