@@ -20,7 +20,7 @@ export interface RulesParams extends SerializableRecord {
   type?: string[];
 }
 
-export interface RulesLocatorParams extends RulesParams {}
+export type RulesLocatorParams = RulesParams;
 
 export class RulesLocatorDefinition implements LocatorDefinition<RulesLocatorParams> {
   public readonly id = rulesLocatorID;
