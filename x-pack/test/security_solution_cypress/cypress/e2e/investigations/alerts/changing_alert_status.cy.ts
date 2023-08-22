@@ -126,7 +126,7 @@ describe('Changing alert status', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
       waitForAlertsToPopulate();
       selectCountTable();
     });
-    it.skip('Mark one alert as acknowledged when more than one open alerts are selected', () => {
+    it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
       cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((alertNumberString) => {
@@ -228,7 +228,7 @@ describe('Changing alert status', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
         });
     });
 
-    it.skip('Closes one alert when more than one opened alerts are selected', () => {
+    it('Closes one alert when more than one opened alerts are selected', () => {
       cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((alertNumberString) => {
@@ -309,7 +309,7 @@ describe('Changing alert status', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
   });
 
   // TODO: Are you sure that read only role should be able to close alerts?
-  context.skip('Changing alert status with read only role', () => {
+  context('Changing alert status with read only role', () => {
     beforeEach(() => {
       login(ROLES.t2_analyst);
       deleteAlertsAndRules();
@@ -319,7 +319,7 @@ describe('Changing alert status', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
       selectCountTable();
     });
 
-    it.skip('Mark one alert as acknowledged when more than one open alerts are selected', () => {
+    it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
       cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((alertNumberString) => {

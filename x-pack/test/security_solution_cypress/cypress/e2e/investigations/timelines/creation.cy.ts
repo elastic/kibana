@@ -43,7 +43,7 @@ import {
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
 
-describe.skip('Create a timeline from a template', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Create a timeline from a template', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     deleteTimelines();
     login();
@@ -110,7 +110,7 @@ describe('Timelines', (): void => {
     });
   });
 
-  describe.skip(
+  describe(
     'Creates a timeline by clicking untitled timeline from bottom bar',
     { tags: tag.BROKEN_IN_SERVERLESS },
     () => {

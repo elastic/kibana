@@ -60,7 +60,7 @@ describe('Timeline Templates', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     cy.intercept('PATCH', '/api/timeline').as('timeline');
   });
 
-  it.skip('Creates a timeline template', () => {
+  it('Creates a timeline template', () => {
     visitWithoutDateRange(TIMELINES_URL);
     openTimelineUsingToggle();
     createNewTimelineTemplate();
