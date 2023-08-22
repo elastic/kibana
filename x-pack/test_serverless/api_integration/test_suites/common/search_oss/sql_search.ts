@@ -7,26 +7,25 @@
 
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/fleet-plugin/common/constants';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const svlCommonApi = getService('svlCommonApi');
+  const es = getService('es');
 
   const sqlQuery = `SELECT index, bytes FROM "logstash-*" ORDER BY "@timestamp" DESC`;
 
   describe('SQL search', () => {
     before(async () => {
-      // TODO: This fails in Serverless with
-      // "index_not_found_exception: no such index [.kibana_ingest]",
-      // but the tests still run
-      try {
-        await esArchiver.emptyKibanaIndex();
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(e);
+      // TODO: emptyKibanaIndex fails in Serverless with
+      // "index_not_found_exception: no such index [.kibana_ingest]"
+      if (!(await es.indices.exists({ index: INGEST_SAVED_OBJECT_INDEX }))) {
+        await es.indices.create({ index: INGEST_SAVED_OBJECT_INDEX });
       }
+      await esArchiver.emptyKibanaIndex();
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
