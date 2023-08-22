@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import {
+  AppNavLinkStatus,
+  CoreSetup,
+  CoreStart,
+  DEFAULT_APP_CATEGORIES,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { type ObservabilityLogExplorerConfig } from '../common/plugin_config';
 import { renderObservabilityLogExplorer } from './applications/observability_log_explorer';
@@ -34,6 +41,9 @@ export class ObservabilityLogExplorerPlugin
       title: i18n.translate('xpack.observability_log_explorer.appTitle', {
         defaultMessage: 'Log Explorer',
       }),
+      category: DEFAULT_APP_CATEGORIES.observability,
+      euiIconType: 'logoObservability',
+      navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (appMountParams) => {
         const [coreStart, pluginsStart, ownPluginStart] = await core.getStartServices();
 
