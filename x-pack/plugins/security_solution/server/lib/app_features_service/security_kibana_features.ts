@@ -19,8 +19,10 @@ import {
   SAVED_QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-import type { SecuritySubFeatureId } from '@kbn/security-solution-features';
-import { type BaseKibanaFeatureConfig } from '@kbn/security-solution-features';
+import {
+  type BaseKibanaFeatureConfig,
+  SecuritySubFeatureId,
+} from '@kbn/security-solution-features';
 import type { ExperimentalFeatures } from '../../../common';
 import { APP_ID, LEGACY_NOTIFICATIONS_ID, SERVER_APP_ID } from '../../../common/constants';
 import { savedObjectTypes } from '../../saved_objects';
@@ -123,4 +125,4 @@ export const getSecurityBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
 
 export const getSecurityBaseKibanaSubFeatureIds = (
   _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
-): SecuritySubFeatureId[] => [];
+): SecuritySubFeatureId[] => [SecuritySubFeatureId.hostIsolation];
