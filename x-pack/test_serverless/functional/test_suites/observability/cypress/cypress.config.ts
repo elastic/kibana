@@ -26,6 +26,7 @@ export default defineCypressConfig({
     runMode: 1,
   },
   e2e: {
+    experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     baseUrl: 'http://localhost:5620',
     supportFile: './support/e2e.ts',
     specPattern: './e2e/**/*.cy.ts',

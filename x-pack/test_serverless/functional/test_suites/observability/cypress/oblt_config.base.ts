@@ -23,12 +23,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     kbnTestServer: {
       ...svlSharedConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...svlSharedConfig.get('kbnTestServer.serverArgs'),
-        '--csp.strict=false',
-        '--csp.warnLegacyBrowsers=false',
-        '--serverless=oblt',
-      ],
+      serverArgs: [...svlSharedConfig.get('kbnTestServer.serverArgs'), '--serverless=oblt'],
     },
   };
 }
