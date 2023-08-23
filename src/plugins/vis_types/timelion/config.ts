@@ -6,18 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   graphiteUrls: schema.maybe(schema.arrayOf(schema.string())),
   enabled: schema.boolean({ defaultValue: true }),
 
-  readOnly: schema.conditional(
-    schema.contextRef('serverless'),
-    true,
-    schema.maybe(schema.boolean({ defaultValue: false })),
-    schema.never()
-  ),
+  readOnly: offeringBasedSchema({
+    serverless: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type TimelionConfig = TypeOf<typeof configSchema>;

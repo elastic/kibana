@@ -69,6 +69,7 @@ describe('Search service', () => {
         fieldFormats: {} as FieldFormatsStart,
         indexPatterns: {} as DataViewsContract,
         screenshotMode: screenshotModePluginMock.createStartContract(),
+        scriptedFieldsEnabled: true,
       });
     });
 
