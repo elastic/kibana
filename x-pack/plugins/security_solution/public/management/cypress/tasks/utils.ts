@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export async function getLatestVersion(): Promise<string> {
-  return '8.10.0-SNAPSHOT';
-}
+export const generateRandomStringName = (length: number) =>
+  Array.from({ length }, () => Math.random().toString(36).substring(2));

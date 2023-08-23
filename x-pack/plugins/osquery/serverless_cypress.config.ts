@@ -6,29 +6,38 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
-import { dataLoaders as setupEndpointDataLoaders } from '@kbn/security-solution-plugin/public/management/cypress/support/data_loaders';
-import { setupUserDataLoader } from './support/setup_data_loader_tasks';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { setupUserDataLoader } from '../../test_serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
 
+// eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
   execTimeout: 60000,
   pageLoadTimeout: 60000,
   responseTimeout: 60000,
-  screenshotsFolder: '../../../../../../target/kibana-security-solution/cypress/screenshots',
+  screenshotsFolder: '../../../target/kibana-osquery/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
   viewportHeight: 946,
   viewportWidth: 1680,
-  numTestsKeptInMemory: 10,
+
+  env: {
+    'cypress-react-selector': {
+      root: '#osquery-app',
+    },
+    grepFilterSpecs: true,
+    grepTags: '@serverless --@brokenInServerless',
+    grepOmitFiltered: true,
+  },
   e2e: {
+    specPattern: './cypress/e2e/**/*.cy.ts',
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
-    supportFile: './support/e2e.js',
-    specPattern: './e2e/**/*.cy.ts',
+    numTestsKeptInMemory: 3,
     setupNodeEvents: (on, config) => {
-      // Reuse data loaders from endpoint management cypress setup
-      setupEndpointDataLoaders(on, config);
-      setupUserDataLoader(on, config, {});
+      setupUserDataLoader(on, config, { additionalRoleName: 'viewer' });
+
+      return config;
     },
   },
 });
