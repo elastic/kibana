@@ -139,11 +139,7 @@ export function TransactionDurationRuleType(props: Props) {
                 start,
                 end,
                 groupBy: params.groupBy,
-                searchConfiguration: JSON.stringify(
-                  params.searchConfiguration,
-                  null,
-                  4
-                ),
+                searchConfiguration: JSON.stringify(params.searchConfiguration),
               },
             },
           }
