@@ -32,6 +32,7 @@ disabled:
   - x-pack/plugins/observability_onboarding/e2e/ftr_config_runner.ts
   - x-pack/plugins/observability_onboarding/e2e/ftr_config.ts
   - x-pack/test/osquery_cypress/cli_config.ts
+  - x-pack/test/osquery_cypress/serverless_cli_config.ts
   - x-pack/test/osquery_cypress/config.ts
   - x-pack/test/osquery_cypress/visual_config.ts
   - x-pack/test/security_solution_cypress/cli_config.ts
