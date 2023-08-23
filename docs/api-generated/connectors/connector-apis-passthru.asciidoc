@@ -368,6 +368,7 @@ Any modifications made to this file will be overwritten.
   "is_deprecated" : false,
   "is_preconfigured" : false,
   "name" : "my-connector",
+  "is_system_action" : false,
   "referenced_by_count" : 2,
   "id" : "b0766e10-d190-11ec-b04c-776c77d14fca",
   "config" : {
@@ -1009,6 +1010,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#config_properties_servicenow"><code>config_properties_servicenow</code> - Connector request properties for a ServiceNow ITSM connector</a></li>
     <li><a href="#config_properties_servicenow_itom"><code>config_properties_servicenow_itom</code> - Connector request properties for a ServiceNow ITSM connector</a></li>
     <li><a href="#config_properties_swimlane"><code>config_properties_swimlane</code> - Connector request properties for a Swimlane connector</a></li>
+    <li><a href="#config_properties_webhook"><code>config_properties_webhook</code> - Connector request properties for a Webhook connector</a></li>
     <li><a href="#connector_response_properties"><code>connector_response_properties</code> - Connector response properties</a></li>
     <li><a href="#connector_response_properties_cases_webhook"><code>connector_response_properties_cases_webhook</code> - Connector request properties for a Webhook - Case Management connector</a></li>
     <li><a href="#connector_response_properties_email"><code>connector_response_properties_email</code> - Connector response properties for an email connector</a></li>
@@ -1092,6 +1094,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#secrets_properties_slack_api"><code>secrets_properties_slack_api</code> - Connector secrets properties for a Web API Slack connector</a></li>
     <li><a href="#secrets_properties_slack_webhook"><code>secrets_properties_slack_webhook</code> - Connector secrets properties for a Webhook Slack connector</a></li>
     <li><a href="#secrets_properties_swimlane"><code>secrets_properties_swimlane</code> - Connector secrets properties for a Swimlane connector</a></li>
+    <li><a href="#secrets_properties_webhook"><code>secrets_properties_webhook</code> - Connector secrets properties for a Webhook connector</a></li>
     <li><a href="#updateConnector_400_response"><code>updateConnector_400_response</code> - </a></li>
     <li><a href="#update_connector_request_cases_webhook"><code>update_connector_request_cases_webhook</code> - Update Webhook - Case Managment connector request</a></li>
     <li><a href="#update_connector_request_index"><code>update_connector_request_index</code> - Update index connector request</a></li>
@@ -1204,6 +1207,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
 <div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
 <div class="param">referenced_by_count </div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> Indicates the number of saved objects that reference the connector. If <code>is_preconfigured</code> is true, this value is not calculated. </div>
     </div>  <!-- field-items -->
@@ -1449,6 +1453,28 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="config_properties_webhook"><code>config_properties_webhook</code> - Connector request properties for a Webhook connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines properties for connectors when type is <code>.webhook</code>.</div>
+    <div class="field-items">
+      <div class="param">authType (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of authentication to use: basic, SSL, or none. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">webhook-authentication-basic</div><div class="param-enum">webhook-authentication-ssl</div><div class="param-enum">null</div>
+<div class="param">ca (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A base64 encoded version of the certificate authority file, which is used to sign and validate certificates. </div>
+<div class="param">certType (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> If the <code>authType</code> is <code>webhook-authentication-ssl</code>, specifies whether the certificate authentication data is in a CRT and key file format or a PFX file format. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">ssl-crt-key</div><div class="param-enum">ssl-pfx</div>
+<div class="param">hasAuth (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> If <code>true</code>, a user name and password must be provided for login type authentication. </div>
+<div class="param">headers (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span> A set of key-value pairs sent as headers with the request. </div>
+<div class="param">method (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The HTTP request method, either <code>post</code> or <code>put</code>. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">post</div><div class="param-enum">put</div>
+<div class="param">url (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The request URL. If you are using the <code>xpack.actions.allowedHosts</code> setting, add the hostname to the allowed hosts. </div>
+<div class="param">verificationMode (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Controls the verification of certificates. Use <code>full</code> to validate that the provided certificate has an issue date that is within the <code>not_before</code> and <code>not_after</code> dates, chains to a trusted certificate authority (CA), and has a hostname or IP address that matches the names within the certificate. Use <code>certificate</code> to validate the provided certificate and verifies that it is signed by a trusted authority; this option does not check the certificate hostname. Use <code>none</code> to skip certificate validation. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">certificate</div><div class="param-enum">full</div><div class="param-enum">none</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="connector_response_properties"><code>connector_response_properties</code> - Connector response properties</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>The properties vary depending on the connector type.</div>
     <div class="field-items">
@@ -1460,6 +1486,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
 <div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
     </div>  <!-- field-items -->
   </div>
@@ -1475,6 +1502,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
 <div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
     </div>  <!-- field-items -->
   </div>
@@ -1490,6 +1518,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
 <div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
     </div>  <!-- field-items -->
   </div>
@@ -1505,6 +1534,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
 <div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
     </div>  <!-- field-items -->
   </div>
@@ -1520,6 +1550,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
 <div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
     </div>  <!-- field-items -->
   </div>
@@ -1535,6 +1566,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
 <div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
     </div>  <!-- field-items -->
   </div>
@@ -1550,6 +1582,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
 <div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
     </div>  <!-- field-items -->
   </div>
@@ -1565,6 +1598,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
 <div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
     </div>  <!-- field-items -->
   </div>
@@ -1580,6 +1614,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
 <div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
     </div>  <!-- field-items -->
   </div>
@@ -1595,6 +1630,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
 <div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
     </div>  <!-- field-items -->
   </div>
@@ -1610,6 +1646,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
 <div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
     </div>  <!-- field-items -->
   </div>
@@ -1625,6 +1662,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
 <div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
     </div>  <!-- field-items -->
   </div>
@@ -1639,6 +1677,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
 <div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
     </div>  <!-- field-items -->
   </div>
@@ -1653,6 +1692,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
 <div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
     </div>  <!-- field-items -->
   </div>
@@ -1668,6 +1708,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
 <div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
     </div>  <!-- field-items -->
   </div>
@@ -1682,6 +1723,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
 <div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
     </div>  <!-- field-items -->
   </div>
@@ -1697,6 +1739,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
 <div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
     </div>  <!-- field-items -->
   </div>
@@ -1704,7 +1747,7 @@ Any modifications made to this file will be overwritten.
     <h3><a name="connector_response_properties_webhook"><code>connector_response_properties_webhook</code> - Connector response properties for a Webhook connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines properties for connectors when type is <code>.webhook</code>. </div>
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_webhook">config_properties_webhook</a></span>  </div>
 <div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">.webhook</div>
@@ -1712,6 +1755,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
 <div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
     </div>  <!-- field-items -->
   </div>
@@ -1727,6 +1771,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
 <div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
 <div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">is_system_action (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is used for system actions. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
     </div>  <!-- field-items -->
   </div>
@@ -1938,12 +1983,12 @@ Any modifications made to this file will be overwritten.
     <h3><a name="create_connector_request_webhook"><code>create_connector_request_webhook</code> - Create Webhook connector request</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>The Webhook connector uses axios to send a POST or PUT request to a web service.</div>
     <div class="field-items">
-      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines properties for connectors when type is <code>.webhook</code>. </div>
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_webhook">config_properties_webhook</a></span>  </div>
 <div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">.webhook</div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
-<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines secrets for connectors when type is <code>.webhook</code>. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_webhook">secrets_properties_webhook</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2372,6 +2417,17 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="secrets_properties_webhook"><code>secrets_properties_webhook</code> - Connector secrets properties for a Webhook connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines secrets for connectors when type is <code>.webhook</code>.</div>
+    <div class="field-items">
+      <div class="param">crt (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> If <code>authType</code> is <code>webhook-authentication-ssl</code> and <code>certType</code> is <code>ssl-crt-key</code>, it is a base64 encoded version of the CRT or CERT file. </div>
+<div class="param">key (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> If <code>authType</code> is <code>webhook-authentication-ssl</code> and <code>certType</code> is <code>ssl-crt-key</code>, it is a base64 encoded version of the KEY file. </div>
+<div class="param">pfx (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> If <code>authType</code> is <code>webhook-authentication-ssl</code> and <code>certType</code> is <code>ssl-pfx</code>, it is a base64 encoded version of the PFX or P12 file. </div>
+<div class="param">password (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The password for HTTP basic authentication or the passphrase for the SSL certificate files. If <code>hasAuth</code> is set to <code>true</code> and <code>authType</code> is <code>webhook-authentication-basic</code>, this property is required. </div>
+<div class="param">user (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The username for HTTP basic authentication. If <code>hasAuth</code> is set to <code>true</code>  and <code>authType</code> is <code>webhook-authentication-basic</code>, this property is required. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="updateConnector_400_response"><code>updateConnector_400_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
@@ -2454,7 +2510,7 @@ Any modifications made to this file will be overwritten.
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
-<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#">secrets_properties_slack_api</a></span>  </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_slack_api">secrets_properties_slack_api</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2462,7 +2518,7 @@ Any modifications made to this file will be overwritten.
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
-<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#">secrets_properties_slack_webhook</a></span>  </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_slack_webhook">secrets_properties_slack_webhook</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">

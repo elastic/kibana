@@ -15,7 +15,12 @@ import { PAGE_TITLE } from '../../screens/common/page';
 import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../tasks/login';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createRule, deleteCustomRule } from '../../tasks/api_calls/rules';
-import { getCallOut, waitForCallOutToBeShown, dismissCallOut } from '../../tasks/common/callouts';
+import {
+  getCallOut,
+  waitForCallOutToBeShown,
+  dismissCallOut,
+  MISSING_PRIVILEGES_CALLOUT,
+} from '../../tasks/common/callouts';
 
 const loadPageAsReadOnlyUser = (url: string) => {
   login(ROLES.reader);
@@ -39,8 +44,6 @@ const waitForPageTitleToBeShown = () => {
 };
 
 describe('Detections > Callouts', { tags: tag.ESS }, () => {
-  const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
-
   before(() => {
     // First, we have to open the app on behalf of a privileged user in order to initialize it.
     // Otherwise the app will be disabled and show a "welcome"-like page.

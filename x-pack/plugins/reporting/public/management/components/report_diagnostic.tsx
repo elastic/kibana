@@ -20,9 +20,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { ReportingAPIClient, DiagnoseResponse } from '../../lib/reporting_api_client';
+import { ClientConfigType } from '../../plugin';
 
 interface Props {
   apiClient: ReportingAPIClient;
+  clientConfig: ClientConfigType;
 }
 
 type ResultStatus = 'danger' | 'incomplete' | 'complete';
@@ -50,7 +52,7 @@ const initialState: State = {
   success: true,
 };
 
-export const ReportDiagnostic = ({ apiClient }: Props) => {
+export const ReportDiagnostic = ({ apiClient, clientConfig }: Props) => {
   const [state, setStateBase] = useState(initialState);
   const setState = (s: Partial<typeof state>) =>
     setStateBase({
@@ -58,6 +60,8 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
       ...s,
     });
   const { isBusy, chromeStatus, isFlyoutVisible } = state;
+  const configAllowsImageReports =
+    clientConfig.export_types.pdf.enabled || clientConfig.export_types.png.enabled;
 
   const closeFlyout = () => setState({ ...initialState, isFlyoutVisible: false });
   const showFlyout = () => setState({ isFlyoutVisible: true });
@@ -169,13 +173,22 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
   }
   return (
     <div>
-      {flyout}
-      <EuiButtonEmpty size="xs" flush="left" onClick={showFlyout}>
-        <FormattedMessage
-          id="xpack.reporting.listing.diagnosticButton"
-          defaultMessage="Run screenshot diagnostics"
-        />
-      </EuiButtonEmpty>
+      {configAllowsImageReports && (
+        <div>
+          {flyout}
+          <EuiButtonEmpty
+            data-test-subj="screenshotDiagnosticLink"
+            size="xs"
+            flush="left"
+            onClick={showFlyout}
+          >
+            <FormattedMessage
+              id="xpack.reporting.listing.diagnosticButton"
+              defaultMessage="Run screenshot diagnostics"
+            />
+          </EuiButtonEmpty>
+        </div>
+      )}
     </div>
   );
 };

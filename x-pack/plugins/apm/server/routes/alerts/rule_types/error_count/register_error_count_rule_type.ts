@@ -22,7 +22,6 @@ import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server
 import { termQuery } from '@kbn/observability-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
-import { firstValueFrom } from 'rxjs';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
 import {
   ERROR_GROUP_ID,
@@ -39,7 +38,6 @@ import {
 import { errorCountParamsSchema } from '../../../../../common/rules/schema';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { getAlertUrlErrorCount } from '../../../../../common/utils/formatters';
-import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
 import {
@@ -61,7 +59,7 @@ export function registerErrorCountRuleType({
   alerting,
   alertsLocator,
   basePath,
-  config$,
+  getApmIndices,
   logger,
   ruleDataClient,
 }: RegisterRuleDependencies) {
@@ -106,8 +104,6 @@ export function registerErrorCountRuleType({
           ruleParams.groupBy
         );
 
-        const config = await firstValueFrom(config$);
-
         const {
           getAlertUuid,
           getAlertStartedDate,
@@ -115,10 +111,7 @@ export function registerErrorCountRuleType({
           scopedClusterClient,
         } = services;
 
-        const indices = await getApmIndices({
-          config,
-          savedObjectsClient,
-        });
+        const indices = await getApmIndices(savedObjectsClient);
 
         const termFilterQuery = !ruleParams.searchConfiguration
           ? [

@@ -17,11 +17,10 @@ import {
   dismissCallOut,
   getCallOut,
   waitForCallOutToBeShown,
+  MISSING_PRIVILEGES_CALLOUT,
 } from '../../../../tasks/common/callouts';
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
-
-const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 
 describe('Shared exception lists - read only', { tags: tag.ESS }, () => {
   before(() => {

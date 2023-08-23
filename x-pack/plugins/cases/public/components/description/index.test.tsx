@@ -91,27 +91,6 @@ describe('Description', () => {
     });
   });
 
-  it('trims the description correctly when saved', async () => {
-    const descriptionWithSpaces = 'New updated description               ';
-    const res = appMockRender.render(
-      <Description {...defaultProps} onUpdateField={onUpdateField} />
-    );
-
-    userEvent.click(res.getByTestId('description-edit-icon'));
-
-    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
-    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), descriptionWithSpaces);
-
-    userEvent.click(screen.getByTestId('editable-save-markdown'));
-
-    await waitFor(() => {
-      expect(onUpdateField).toHaveBeenCalledWith({
-        key: 'description',
-        value: descriptionWithSpaces.trim(),
-      });
-    });
-  });
-
   it('keeps the old description correctly when canceled', async () => {
     const editedDescription = 'New updated description';
     const res = appMockRender.render(
@@ -128,38 +107,6 @@ describe('Description', () => {
     await waitFor(() => {
       expect(onUpdateField).not.toHaveBeenCalled();
       expect(screen.getByText('Security banana Issue')).toBeInTheDocument();
-    });
-  });
-
-  it('shows an error when description is empty', async () => {
-    const res = appMockRender.render(
-      <Description {...defaultProps} onUpdateField={onUpdateField} />
-    );
-
-    userEvent.click(res.getByTestId('description-edit-icon'));
-
-    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
-    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '');
-
-    await waitFor(() => {
-      expect(screen.getByText('A description is required.')).toBeInTheDocument();
-      expect(screen.getByTestId('editable-save-markdown')).toHaveAttribute('disabled');
-    });
-  });
-
-  it('shows an error when description is a sting of empty characters', async () => {
-    const res = appMockRender.render(
-      <Description {...defaultProps} onUpdateField={onUpdateField} />
-    );
-
-    userEvent.click(res.getByTestId('description-edit-icon'));
-
-    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
-    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '  ');
-
-    await waitFor(() => {
-      expect(screen.getByText('A description is required.')).toBeInTheDocument();
-      expect(screen.getByTestId('editable-save-markdown')).toHaveAttribute('disabled');
     });
   });
 
@@ -203,12 +150,6 @@ describe('Description', () => {
 
     beforeEach(() => {
       sessionStorage.setItem(draftStorageKey, 'value set in storage');
-    });
-
-    it('should show unsaved draft message correctly', async () => {
-      appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
-
-      expect(screen.getByTestId('description-unsaved-draft')).toBeInTheDocument();
     });
 
     it('should not show unsaved draft message when loading', async () => {

@@ -12,12 +12,12 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiInMemoryTable,
-  EuiHorizontalRule,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
   EuiIcon,
+  EuiPanel,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
@@ -207,7 +207,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
   return (
     <>
       <EuiTitle size="xs">
-        <h4>{i18n.HOSTS_TITLE}</h4>
+        <h4>{i18n.HOST_TITLE}</h4>
       </EuiTitle>
       <EuiSpacer size="s" />
       <ExpandablePanel
@@ -250,41 +250,43 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
             />
           )}
         </AnomalyTableProvider>
-        <EuiHorizontalRule margin="m" />
-        <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <h5>{i18n.RELATED_USERS_TITLE}</h5>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={i18n.RELATED_USERS_TOOL_TIP}>
-              <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <RelatedUsersManage
-          id={relatedUsersQueryId}
-          inspect={inspectRelatedUsers}
-          loading={isRelatedUsersLoading}
-          setQuery={setQuery}
-          deleteQuery={deleteQuery}
-          refetch={refetchRelatedUsers}
-        >
-          <EuiInMemoryTable
-            columns={relatedUsersColumns}
-            items={relatedUsers}
+        <EuiPanel hasBorder={true}>
+          <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxs">
+                <h5>{i18n.RELATED_USERS_TITLE}</h5>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18n.RELATED_USERS_TOOL_TIP}>
+                <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <RelatedUsersManage
+            id={relatedUsersQueryId}
+            inspect={inspectRelatedUsers}
             loading={isRelatedUsersLoading}
-            data-test-subj={HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID}
-            pagination={pagination}
-          />
-          <InspectButton
-            queryId={relatedUsersQueryId}
-            title={i18n.RELATED_USERS_TITLE}
-            inspectIndex={0}
-          />
-        </RelatedUsersManage>
+            setQuery={setQuery}
+            deleteQuery={deleteQuery}
+            refetch={refetchRelatedUsers}
+          >
+            <EuiInMemoryTable
+              columns={relatedUsersColumns}
+              items={relatedUsers}
+              loading={isRelatedUsersLoading}
+              data-test-subj={HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID}
+              pagination={pagination}
+            />
+            <InspectButton
+              queryId={relatedUsersQueryId}
+              title={i18n.RELATED_USERS_TITLE}
+              inspectIndex={0}
+            />
+          </RelatedUsersManage>
+        </EuiPanel>
       </ExpandablePanel>
     </>
   );

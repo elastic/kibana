@@ -13,9 +13,10 @@ import type { PluginStart, PluginSetup } from './types';
 
 const setupMock = (): PluginSetup => ({
   resolver: jest.fn(),
-  upselling: new UpsellingService(),
   setAppLinksSwitcher: jest.fn(),
 });
+
+const upselling = new UpsellingService();
 
 const startMock = (): PluginStart => ({
   getNavLinks$: jest.fn(() => new BehaviorSubject<NavigationLink[]>([])),
@@ -25,6 +26,7 @@ const startMock = (): PluginStart => ({
     () => new BehaviorSubject<BreadcrumbsNav>({ leading: [], trailing: [] })
   ),
   setExtraRoutes: jest.fn(),
+  getUpselling: () => upselling,
 });
 
 export const securitySolutionMock = {

@@ -31,6 +31,7 @@ import { waitForPageFilters } from '../alerts';
 export const openFilterGroupContextMenu = () => {
   recurse(
     () => {
+      cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU_BTN).scrollIntoView();
       cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU_BTN).click();
       return cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).should(Cypress._.noop);
     },

@@ -12,15 +12,17 @@ import { isEmpty } from 'lodash';
 import { isValidFeatureId, AlertConsumers } from '@kbn/rule-data-utils';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
-import { ReadOperations, PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/server';
+import {
+  ReadOperations,
+  PluginStartContract as AlertingStart,
+  AlertingAuthorizationEntity,
+} from '@kbn/alerting-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
 } from '../../common/search_strategy';
-import { IRuleDataService } from '..';
-import { Dataset } from '../rule_data_plugin_service/index_options';
 import { MAX_ALERT_SEARCH_SIZE } from '../../common/constants';
 import { AlertAuditAction, alertAuditEvent } from '..';
 import { getSpacesFilter, getAuthzFilter } from '../lib';
@@ -35,7 +37,6 @@ export const RULE_SEARCH_STRATEGY_NAME = 'privateRuleRegistryAlertsSearchStrateg
 
 export const ruleRegistrySearchStrategyProvider = (
   data: PluginStart,
-  ruleDataService: IRuleDataService,
   alerting: AlertingStart,
   logger: Logger,
   security?: SecurityPluginSetup,
@@ -57,10 +58,17 @@ export const ruleRegistrySearchStrategyProvider = (
           `The ${RULE_SEARCH_STRATEGY_NAME} search strategy is unable to accommodate requests containing multiple feature IDs and one of those IDs is SIEM.`
         );
       }
+      request.featureIds.forEach((featureId) => {
+        if (!isValidFeatureId(featureId)) {
+          logger.warn(
+            `Found invalid feature '${featureId}' while using ${RULE_SEARCH_STRATEGY_NAME} search strategy. No alert data from this feature will be searched.`
+          );
+        }
+      });
 
       const securityAuditLogger = security?.audit.asScoped(deps.request);
       const getActiveSpace = async () => spaces?.spacesService.getActiveSpace(deps.request);
-      const getAsync = async () => {
+      const getAsync = async (featureIds: string[]) => {
         const [space, authorization] = await Promise.all([
           getActiveSpace(),
           alerting.getAlertingAuthorizationWithRequest(deps.request),
@@ -73,28 +81,22 @@ export const ruleRegistrySearchStrategyProvider = (
             ReadOperations.Find
           )) as estypes.QueryDslQueryContainer;
         }
-        return { space, authzFilter };
-      };
-      return from(getAsync()).pipe(
-        mergeMap(({ space, authzFilter }) => {
-          const indices: string[] = request.featureIds.reduce((accum: string[], featureId) => {
-            if (!isValidFeatureId(featureId)) {
-              logger.warn(
-                `Found invalid feature '${featureId}' while using ${RULE_SEARCH_STRATEGY_NAME} search strategy. No alert data from this feature will be searched.`
-              );
-              return accum;
-            }
-            const alertIndexInfo = ruleDataService.findIndexByFeature(featureId, Dataset.alerts);
-            if (alertIndexInfo) {
-              accum.push(
-                featureId === 'siem'
-                  ? `${alertIndexInfo.baseName}-${space?.id ?? ''}*`
-                  : `${alertIndexInfo.baseName}*`
-              );
-            }
-            return accum;
-          }, []);
 
+        const authorizedRuleTypes =
+          featureIds.length > 0
+            ? await authorization.getAuthorizedRuleTypes(
+                AlertingAuthorizationEntity.Alert,
+                new Set(featureIds)
+              )
+            : [];
+        return { space, authzFilter, authorizedRuleTypes };
+      };
+      return from(getAsync(request.featureIds)).pipe(
+        mergeMap(({ space, authzFilter, authorizedRuleTypes }) => {
+          const indices = alerting.getAlertIndicesAlias(
+            authorizedRuleTypes.map((art: { id: any }) => art.id),
+            space?.id
+          );
           if (indices.length === 0) {
             return of(EMPTY_RESPONSE);
           }
