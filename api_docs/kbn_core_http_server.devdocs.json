@@ -3736,6 +3736,10 @@
                 "path": "x-pack/plugins/asset_manager/server/routes/assets/hosts.ts"
               },
               {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/asset_manager/server/routes/assets/services.ts"
+              },
+              {
                 "plugin": "banners",
                 "path": "x-pack/plugins/banners/server/routes/info.ts"
               },
@@ -6466,6 +6470,10 @@
                 "path": "x-pack/plugins/alerting/server/routes/maintenance_window/bulk_get_maintenance_windows.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/suggestions/values_suggestion_alerts.ts"
+              },
+              {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/plugins/rule_registry/server/routes/update_alert_by_id.ts"
               },
@@ -7980,6 +7988,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/suggestions/fileds_rule.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/suggestions/values_suggestion_alerts.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -11147,6 +11159,21 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.KibanaRequest.isInternalApiRequest",
+            "type": "boolean",
+            "tags": [
+              "note"
+            ],
+            "label": "isInternalApiRequest",
+            "description": [
+              "\nAn internal request has access to internal routes."
+            ],
+            "path": "packages/core/http/core-http-server/src/router/request.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.KibanaRequest.socket",
             "type": "Object",
             "tags": [],
@@ -11572,7 +11599,7 @@
             "label": "access",
             "description": [],
             "signature": [
-              "\"internal\" | \"public\""
+              "\"public\" | \"internal\""
             ],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
@@ -12676,7 +12703,7 @@
               "\nDefines intended request origin of the route:\n- public. The route is public, declared stable and intended for external access.\n          In the future, may require an incomming request to contain a specified header.\n- internal. The route is internal and intended for internal access only.\n\nDefaults to 'internal' If not declared,"
             ],
             "signature": [
-              "\"internal\" | \"public\" | undefined"
+              "\"public\" | \"internal\" | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
@@ -14481,7 +14508,7 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
+                  "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -14677,7 +14704,7 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
+                  "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -15345,7 +15372,7 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
+                  "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -15429,7 +15456,7 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
+                  "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -15605,7 +15632,7 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
+                  "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -18089,7 +18116,7 @@
             "section": "def-common.RouteConfigOptions",
             "text": "RouteConfigOptions"
           },
-          "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
+          "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
         ],
         "path": "packages/core/http/core-http-server/src/versioning/types.ts",
         "deprecated": false,
@@ -18159,7 +18186,7 @@
                 "section": "def-common.RouteConfigOptions",
                 "text": "RouteConfigOptions"
               },
-              "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
+              "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
             ],
             "path": "packages/core/http/core-http-server/src/versioning/types.ts",
             "deprecated": false,
