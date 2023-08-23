@@ -698,7 +698,7 @@ describe('Packs - Create and Edit', () => {
     }
   );
 
-  describe('to click delete button', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  describe.only('to click delete button', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     let packName: string;
 
     before(() => {
