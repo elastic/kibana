@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { bulkDeleteRulesRequestBodySchema } from './schemas/latest';
-export { bulkDeleteRulesRequestBodySchema as bulkDeleteRulesRequestBodySchemaV1 } from './schemas/v1';
+export { bulkDeleteRulesRequestParamsSchema } from './schemas/latest';
+export { bulkDeleteRulesRequestParamsSchema as bulkDeleteRulesRequestParamsSchemaV1 } from './schemas/v1';
+
+export type {  BulkDeleteRulesResponse } from './types/latest';
+export type { BulkDeleteRulesResponse as BulkDeleteRulesResponseV1 } from './types/v1';

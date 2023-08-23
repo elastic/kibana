@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const bulkDeleteRulesRequestBodySchema = schema.object({
+export const bulkDeleteRulesRequestParamsSchema = schema.object({
   filter: schema.maybe(schema.string()),
   ids: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 })),
 });

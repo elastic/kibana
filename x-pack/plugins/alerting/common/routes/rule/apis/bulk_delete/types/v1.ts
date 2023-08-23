@@ -15,12 +15,12 @@ export interface BulkOperationError {
   };
 }
 
-interface BulkOperationResponse<Params> {
+interface BulkBulkDeleteResponse<Params> {
   rules: Array<RuleResponseV1<Params>>;
   errors: BulkOperationError[];
   total: number;
 }
 
 export interface BulkDeleteRulesResponse<Params extends RuleParamsV1 = never> {
-  body: BulkOperationResponse<Params>;
+  body: BulkBulkDeleteResponse<Params>;
 }
