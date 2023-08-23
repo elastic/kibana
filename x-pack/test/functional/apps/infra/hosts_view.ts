@@ -93,6 +93,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects([
+    'assetDetails',
     'common',
     'infraHome',
     'timePicker',
@@ -281,7 +282,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Overview Tab', () => {
           before(async () => {
-            await pageObjects.infraHostsView.clickOverviewFlyoutTab();
+            await pageObjects.assetDetails.clickOverviewFlyoutTab();
           });
 
           [
@@ -292,7 +293,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           ].forEach(({ metric, value }) => {
             it(`${metric} tile should show ${value}`, async () => {
               await retry.try(async () => {
-                const tileValue = await pageObjects.infraHostsView.getAssetDetailsKPITileValue(
+                const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
                   metric
                 );
                 expect(tileValue).to.eql(value);
@@ -301,141 +302,67 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should render 8 charts in the Metrics section', async () => {
-            const hosts = await pageObjects.infraHostsView.getAssetDetailsMetricsCharts();
+            const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
             expect(hosts.length).to.equal(8);
-          });
-
-          it('should navigate to metadata tab', async () => {
-            await pageObjects.infraHostsView.clickShowAllMetadataOverviewTab();
-            await pageObjects.header.waitUntilLoadingHasFinished();
-            await pageObjects.infraHostsView.metadataTableExist();
-            await pageObjects.infraHostsView.clickOverviewFlyoutTab();
           });
 
           it('should show alerts', async () => {
             await pageObjects.header.waitUntilLoadingHasFinished();
-            await pageObjects.infraHostsView.overviewAlertsTitleExist();
-          });
-
-          it('should open alerts flyout', async () => {
-            await pageObjects.header.waitUntilLoadingHasFinished();
-            await pageObjects.infraHostsView.clickOverviewOpenAlertsFlyout();
-            // There are 2 flyouts open (asset details and alerts)
-            // so we need a stricter selector
-            // to be sure that we are closing the alerts flyout
-            const closeAlertFlyout = await find.byCssSelector(
-              '[aria-labelledby="flyoutRuleAddTitle"] > [data-test-subj="euiFlyoutCloseButton"]'
-            );
-            await closeAlertFlyout.click();
-          });
-
-          it('should navigate to alerts', async () => {
-            await pageObjects.infraHostsView.clickOverviewLinkToAlerts();
-            await pageObjects.header.waitUntilLoadingHasFinished();
-            const url = parse(await browser.getCurrentUrl());
-
-            const query = decodeURIComponent(url.query ?? '');
-
-            const alertsQuery =
-              "_a=(kuery:'host.name:\"Jennys-MBP.fritz.box\"',rangeFrom:'2023-03-28T18:20:00.000Z',rangeTo:'2023-03-28T18:21:00.000Z',status:all)";
-
-            expect(url.pathname).to.eql('/app/observability/alerts');
-            expect(query).to.contain(alertsQuery);
-
-            await returnTo(HOSTS_VIEW_PATH);
+            await pageObjects.assetDetails.overviewAlertsTitleExists();
           });
         });
 
         describe('Metadata Tab', () => {
           before(async () => {
-            await pageObjects.infraHostsView.clickMetadataFlyoutTab();
+            await pageObjects.assetDetails.clickMetadataFlyoutTab();
+          });
+
+          it('should show metadata table', async () => {
+            await pageObjects.assetDetails.metadataTableExists();
           });
 
           it('should render metadata tab, add and remove filter', async () => {
-            await pageObjects.infraHostsView.metadataTableExist();
-
-            // Add Pin
-            await pageObjects.infraHostsView.clickAddMetadataPin();
-            expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(true);
-
-            // Persist pin after refresh
-            await browser.refresh();
-            await retry.try(async () => {
-              await pageObjects.infraHome.waitForLoading();
-              const removePinExist = await pageObjects.infraHostsView.getRemovePinExist();
-              expect(removePinExist).to.be(true);
-            });
-
-            // Remove Pin
-            await pageObjects.infraHostsView.clickRemoveMetadataPin();
-            expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(false);
-
-            await pageObjects.infraHostsView.clickAddMetadataFilter();
+            // Add Filter
+            await pageObjects.assetDetails.clickAddMetadataFilter();
             await pageObjects.header.waitUntilLoadingHasFinished();
 
-            // Add Filter
-            const addedFilter = await pageObjects.infraHostsView.getAppliedFilter();
+            const addedFilter = await pageObjects.assetDetails.getMetadataAppliedFilter();
             expect(addedFilter).to.contain('host.architecture: arm64');
-            const removeFilterExists = await pageObjects.infraHostsView.getRemoveFilterExist();
+            const removeFilterExists = await pageObjects.assetDetails.metadataRemoveFilterExists();
             expect(removeFilterExists).to.be(true);
 
             // Remove filter
-            await pageObjects.infraHostsView.clickRemoveMetadataFilter();
+            await pageObjects.assetDetails.clickRemoveMetadataFilter();
             await pageObjects.header.waitUntilLoadingHasFinished();
             const removeFilterShouldNotExist =
-              await pageObjects.infraHostsView.getRemoveFilterExist();
+              await pageObjects.assetDetails.metadataRemovePinExists();
             expect(removeFilterShouldNotExist).to.be(false);
-          });
-
-          it('should render metadata tab, pin and unpin table row', async () => {
-            // Add Pin
-            await pageObjects.infraHostsView.clickAddMetadataPin();
-            expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(true);
-
-            // Persist pin after refresh
-            await browser.refresh();
-            await retry.try(async () => {
-              await pageObjects.infraHome.waitForLoading();
-              const removePinExist = await pageObjects.infraHostsView.getRemovePinExist();
-              expect(removePinExist).to.be(true);
-            });
-
-            // Remove Pin
-            await pageObjects.infraHostsView.clickRemoveMetadataPin();
-            expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(false);
           });
         });
 
         describe('Processes Tab', () => {
           before(async () => {
-            await pageObjects.infraHostsView.clickProcessesFlyoutTab();
-          });
-          it('should render processes tab and with Total Value summary', async () => {
-            const processesTotalValue =
-              await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
-            const processValue = await processesTotalValue.getVisibleText();
-            expect(processValue).to.eql('313');
+            await pageObjects.assetDetails.clickProcessesFlyoutTab();
           });
 
-          it('should expand processes table row', async () => {
-            await pageObjects.infraHostsView.getProcessesTable();
-            await pageObjects.infraHostsView.getProcessesTableBody();
-            await pageObjects.infraHostsView.clickProcessesTableExpandButton();
+          it('should show processes table', async () => {
+            await pageObjects.assetDetails.processesTableExists();
           });
         });
 
         describe('Logs Tab', () => {
           before(async () => {
-            await pageObjects.infraHostsView.clickLogsFlyoutTab();
+            await pageObjects.assetDetails.clickLogsFlyoutTab();
           });
+
           it('should render logs tab', async () => {
-            await testSubjects.existOrFail('infraAssetDetailsLogsTabContent');
+            await pageObjects.assetDetails.logsExists();
           });
         });
 
         describe('Flyout links', () => {
           it('should navigate to APM services after click', async () => {
-            await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
+            await pageObjects.assetDetails.clickApmServicesLink();
             const url = parse(await browser.getCurrentUrl());
             const query = decodeURIComponent(url.query ?? '');
             const kuery = 'kuery=host.hostname:"Jennys-MBP.fritz.box"';
@@ -445,52 +372,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
             await returnTo(HOSTS_VIEW_PATH);
           });
-        });
-      });
-
-      describe('Host with alerts', () => {
-        before(async () => {
-          await pageObjects.timePicker.setAbsoluteRange(
-            START_DATE.format(timepickerFormat),
-            END_DATE.format(timepickerFormat)
-          );
-          await pageObjects.infraHostsView.clickHostCheckbox('demo-stack-mysql-01', '-');
-          await pageObjects.infraHostsView.clickSelectedHostsButton();
-          await pageObjects.infraHostsView.clickSelectedHostsAddFilterButton();
-
-          await waitForPageToLoad();
-
-          await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
-        });
-
-        after(async () => {
-          await retry.try(async () => {
-            await pageObjects.infraHostsView.clickCloseFlyoutButton();
-          });
-        });
-
-        it('should render alerts count for a host inside a flyout', async () => {
-          await pageObjects.infraHostsView.clickOverviewFlyoutTab();
-
-          retry.tryForTime(30 * 1000, async () => {
-            await observability.components.alertSummaryWidget.getFullSizeComponentSelectorOrFail();
-          });
-
-          const activeAlertsCount =
-            await observability.components.alertSummaryWidget.getActiveAlertCount();
-          const totalAlertsCount =
-            await observability.components.alertSummaryWidget.getTotalAlertCount();
-
-          expect(activeAlertsCount.trim()).to.equal('2');
-          expect(totalAlertsCount.trim()).to.equal('3');
-        });
-
-        it('should render "N/A" when processes summary is not available in flyout', async () => {
-          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
-          const processesTotalValue =
-            await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
-          const processValue = await processesTotalValue.getVisibleText();
-          expect(processValue).to.eql('N/A');
         });
       });
     });

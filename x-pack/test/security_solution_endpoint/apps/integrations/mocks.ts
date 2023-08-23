@@ -243,6 +243,11 @@ export const getArtifactsListTestsData = () => [
           selector: 'fieldAutocompleteComboBox',
         },
         {
+          type: 'input',
+          selector: 'fieldAutocompleteComboBox',
+          value: 'agent.id',
+        },
+        {
           type: 'customClick',
           selector: 'button[title="agent.id"]',
         },
@@ -402,7 +407,7 @@ export const getArtifactsListTestsData = () => [
         },
         {
           type: 'click',
-          selector: 'blocklist-form-file.path',
+          selector: 'blocklist-form-file.path.caseless',
         },
         {
           type: 'clear',
@@ -423,7 +428,7 @@ export const getArtifactsListTestsData = () => [
         {
           selector: 'blocklistPage-card-criteriaConditions',
           value:
-            'OSIS Windows\nAND file.pathIS ONE OF\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
+            'OSIS Windows\nAND file.path.caselessIS ONE OF\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
         },
         {
           selector: 'blocklistPage-card-header-title',
@@ -435,7 +440,7 @@ export const getArtifactsListTestsData = () => [
         },
       ],
       waitForValue:
-        'OSIS Windows\nAND file.pathIS ONE OF\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
+        'OSIS Windows\nAND file.path.caselessIS ONE OF\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
     },
     delete: {
       confirmSelector: 'blocklistDeletionConfirm',
@@ -480,14 +485,14 @@ export const getArtifactsListTestsData = () => [
         type: 'blocklist',
         identifier: 'endpoint-blocklist-windows-v1',
         relative_url:
-          '/api/fleet/artifacts/endpoint-blocklist-windows-v1/2df413b3c01b54be7e9106e92c39297ca72d32bcd626c3f7eb7d395db8e905fe',
-        body: 'eJx9jcEKwjAQRH9F9iwePOYD/IlWypKdYmCbhCSVltJ/dysieJE5zbxhZiPEVgIquW6jtmaQoxqmrKDzDxsDVAyOQXHJ3B7GU0bhlorFIXqdBWLpZwUL+zZ4rpCB42rgyTob6ci7vi8cJU23pILydcc2luP69K9zfZfu+6EXorpEbA==',
+          '/api/fleet/artifacts/endpoint-blocklist-windows-v1/3ead6ce4e34cb4411083a44bfe813d9442d296981ee8d56e727e6cff14dea0f0',
+        body: 'eJx9jUEKwzAQA79S9lx66NEP6CeSEhZboYaNbWynJIT8vetSArkUnaQR0kYINXsUMt1GdU0gQ8VPSUDXExs9xCkcveCWuL6Ux4TMNWaNfbAyOzhNfytY2NbBcoGglIHDquzNMivsyJq+zxxcnB5RHPLh2jyW9n7517l/S8+96QOI6kW/',
         encryption_algorithm: 'none',
         package_name: 'endpoint',
-        encoded_size: 130,
-        encoded_sha256: '3fb42b56c16ef38f8ecb62c082a7f3dddf4a52998a83c97d16688e854e15a502',
-        decoded_size: 194,
-        decoded_sha256: '2df413b3c01b54be7e9106e92c39297ca72d32bcd626c3f7eb7d395db8e905fe',
+        encoded_size: 132,
+        encoded_sha256: '9f81934389ff29599c0b0f16aa91b9f5cebd95d51271a47ea469662a61a29884',
+        decoded_size: 197,
+        decoded_sha256: '3ead6ce4e34cb4411083a44bfe813d9442d296981ee8d56e727e6cff14dea0f0',
         compression_algorithm: 'zlib',
         created: '2000-01-01T00:00:00.000Z',
       }),
@@ -499,7 +504,7 @@ export const getArtifactsListTestsData = () => [
               {
                 field: 'file.path',
                 operator: 'included',
-                type: 'exact_cased_any',
+                type: 'exact_caseless_any',
                 value: ['c:\\randomFolder\\randomFile.exe', ' c:\\randomFolder\\randomFile2.exe'],
               },
             ],
