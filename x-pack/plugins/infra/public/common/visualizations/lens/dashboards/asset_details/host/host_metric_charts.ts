@@ -215,7 +215,7 @@ const diskSpaceUsageAvailable = {
   dataViewOrigin: DataViewOrigin.Metrics,
 };
 
-const diskSpaceUsageAvailableByMountPoint = {
+const diskSpaceUsageByMountPoint = {
   id: 'DiskSpaceUsageByMountPoint',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskSpace', {
     defaultMessage: 'Disk Space by Mount Point',
@@ -228,15 +228,6 @@ const diskSpaceUsageAvailableByMountPoint = {
           label: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskSpace.label.used', {
             defaultMessage: 'Used',
           }),
-        },
-        {
-          ...hostLensFormulas.diskSpaceAvailability,
-          label: i18n.translate(
-            'xpack.infra.assetDetails.metricsCharts.diskSpace.label.available',
-            {
-              defaultMessage: 'Available',
-            }
-          ),
         },
       ],
       options: {
@@ -387,7 +378,7 @@ export const hostMetricChartsFullPage: Array<
   loadBreakdown,
   logRate,
   diskSpaceUsageAvailable,
-  diskSpaceUsageAvailableByMountPoint,
+  diskSpaceUsageByMountPoint,
   diskThroughputReadWrite,
   diskIOReadWrite,
   rxTx,
