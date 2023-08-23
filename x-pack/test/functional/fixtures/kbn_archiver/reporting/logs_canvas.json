@@ -1,0 +1,229 @@
+{
+    "attributes": {
+      "description": "",
+      "hits": 0,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+      },
+      "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+      "panelsJSON": "[{\"version\":\"7.11.0\",\"type\":\"search\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":13,\"i\":\"56f914c9-9597-4781-bfc6-229d40b382c7\"},\"panelIndex\":\"56f914c9-9597-4781-bfc6-229d40b382c7\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_56f914c9-9597-4781-bfc6-229d40b382c7\"},{\"version\":\"7.11.0\",\"type\":\"lens\",\"gridData\":{\"x\":0,\"y\":13,\"w\":48,\"h\":14,\"i\":\"f3ea512f-e441-4206-8aa7-000b1418ea2b\"},\"panelIndex\":\"f3ea512f-e441-4206-8aa7-000b1418ea2b\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_f3ea512f-e441-4206-8aa7-000b1418ea2b\"}]",
+      "timeRestore": false,
+      "title": "names dashboard",
+      "version": 1
+    },
+    "coreMigrationVersion": "8.0.0",
+    "id": "52af6d10-6821-11eb-9375-4bd700f7d8d4",
+    "migrationVersion": {
+      "dashboard": "8.0.0"
+    },
+    "references": [
+      {
+        "id": "cdb908f0-6820-11eb-9375-4bd700f7d8d4",
+        "name": "56f914c9-9597-4781-bfc6-229d40b382c7:panel_56f914c9-9597-4781-bfc6-229d40b382c7",
+        "type": "search"
+      },
+      {
+        "id": "4b498150-6821-11eb-9375-4bd700f7d8d4",
+        "name": "f3ea512f-e441-4206-8aa7-000b1418ea2b:panel_f3ea512f-e441-4206-8aa7-000b1418ea2b",
+        "type": "lens"
+      }
+    ],
+    "type": "dashboard",
+    "updated_at": "2021-02-06T02:16:29.540Z",
+    "version": "WzksMl0="
+  }
+  
+  {
+    "attributes": {
+      "@created": "2020-07-16T20:33:21.826Z",
+      "@timestamp": "2020-07-16T20:34:01.093Z",
+      "assets": {},
+      "colors": [
+        "#37988d",
+        "#c19628",
+        "#b83c6f",
+        "#3f9939",
+        "#1785b0",
+        "#ca5f35",
+        "#45bdb0",
+        "#f2bc33",
+        "#e74b8b",
+        "#4fbf48",
+        "#1ea6dc",
+        "#fd7643",
+        "#72cec3",
+        "#f5cc5d",
+        "#ec77a8",
+        "#7acf74",
+        "#4cbce4",
+        "#fd986f",
+        "#a1ded7",
+        "#f8dd91",
+        "#f2a4c5",
+        "#a6dfa2",
+        "#86d2ed",
+        "#fdba9f",
+        "#000000",
+        "#444444",
+        "#777777",
+        "#BBBBBB",
+        "#FFFFFF",
+        "rgba(255,255,255,0)"
+      ],
+      "css": ".canvasPage {\n\n}",
+      "height": 720,
+      "isWriteable": true,
+      "name": "Workpad of Death",
+      "page": 0,
+      "pages": [
+        {
+          "elements": [
+            {
+              "expression": "image \n  dataurl=\"https://via.placeholder.com/728x90.png?text=test+external+image\" mode=\"contain\"\n| render",
+              "id": "element-4612f502-7880-418b-8107-a629e9b842bc",
+              "position": {
+                "angle": 0,
+                "height": 300,
+                "left": 20,
+                "parent": null,
+                "top": 20,
+                "width": 500
+              }
+            }
+          ],
+          "groups": [],
+          "id": "page-28d24ed2-c162-408c-92b3-978d7433aa1d",
+          "style": {
+            "background": "#FFF"
+          },
+          "transition": {}
+        }
+      ],
+      "variables": [],
+      "width": 1080
+    },
+    "coreMigrationVersion": "8.1.0",
+    "id": "workpad-e7464259-0b75-4b8c-81c8-8422b15ff201",
+    "migrationVersion": {
+      "canvas-workpad": "8.0.0"
+    },
+    "references": [],
+    "type": "canvas-workpad",
+    "updated_at": "2020-07-16T20:34:01.098Z",
+    "version": "WzIsMl0="
+  }
+  
+  {
+    "attributes": {
+      "description": "",
+      "hits": 0,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+      },
+      "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+      "panelsJSON": "[{\"version\":\"7.11.0\",\"type\":\"search\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":13,\"i\":\"56f914c9-9597-4781-bfc6-229d40b382c7\"},\"panelIndex\":\"56f914c9-9597-4781-bfc6-229d40b382c7\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_56f914c9-9597-4781-bfc6-229d40b382c7\"},{\"version\":\"7.11.0\",\"type\":\"lens\",\"gridData\":{\"x\":0,\"y\":13,\"w\":48,\"h\":14,\"i\":\"f3ea512f-e441-4206-8aa7-000b1418ea2b\"},\"panelIndex\":\"f3ea512f-e441-4206-8aa7-000b1418ea2b\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_f3ea512f-e441-4206-8aa7-000b1418ea2b\"}]",
+      "timeRestore": false,
+      "title": "names dashboard",
+      "version": 1
+    },
+    "coreMigrationVersion": "8.0.0",
+    "id": "52af6d10-6821-11eb-9375-4bd700f7d8d4",
+    "migrationVersion": {
+      "dashboard": "8.0.0"
+    },
+    "references": [
+      {
+        "id": "cdb908f0-6820-11eb-9375-4bd700f7d8d4",
+        "name": "56f914c9-9597-4781-bfc6-229d40b382c7:panel_56f914c9-9597-4781-bfc6-229d40b382c7",
+        "type": "search"
+      },
+      {
+        "id": "4b498150-6821-11eb-9375-4bd700f7d8d4",
+        "name": "f3ea512f-e441-4206-8aa7-000b1418ea2b:panel_f3ea512f-e441-4206-8aa7-000b1418ea2b",
+        "type": "lens"
+      }
+    ],
+    "type": "dashboard",
+    "updated_at": "2021-02-06T02:16:29.540Z",
+    "version": "WzksMl0="
+  }
+  
+  {
+    "attributes": {
+      "@created": "2020-07-16T20:33:21.826Z",
+      "@timestamp": "2020-07-16T20:34:01.093Z",
+      "assets": {},
+      "colors": [
+        "#37988d",
+        "#c19628",
+        "#b83c6f",
+        "#3f9939",
+        "#1785b0",
+        "#ca5f35",
+        "#45bdb0",
+        "#f2bc33",
+        "#e74b8b",
+        "#4fbf48",
+        "#1ea6dc",
+        "#fd7643",
+        "#72cec3",
+        "#f5cc5d",
+        "#ec77a8",
+        "#7acf74",
+        "#4cbce4",
+        "#fd986f",
+        "#a1ded7",
+        "#f8dd91",
+        "#f2a4c5",
+        "#a6dfa2",
+        "#86d2ed",
+        "#fdba9f",
+        "#000000",
+        "#444444",
+        "#777777",
+        "#BBBBBB",
+        "#FFFFFF",
+        "rgba(255,255,255,0)"
+      ],
+      "css": ".canvasPage {\n\n}",
+      "height": 720,
+      "isWriteable": true,
+      "name": "Workpad of Death",
+      "page": 0,
+      "pages": [
+        {
+          "elements": [
+            {
+              "expression": "image \n  dataurl=\"https://via.placeholder.com/728x90.png?text=test+external+image\" mode=\"contain\"\n| render",
+              "id": "element-4612f502-7880-418b-8107-a629e9b842bc",
+              "position": {
+                "angle": 0,
+                "height": 300,
+                "left": 20,
+                "parent": null,
+                "top": 20,
+                "width": 500
+              }
+            }
+          ],
+          "groups": [],
+          "id": "page-28d24ed2-c162-408c-92b3-978d7433aa1d",
+          "style": {
+            "background": "#FFF"
+          },
+          "transition": {}
+        }
+      ],
+      "variables": [],
+      "width": 1080
+    },
+    "coreMigrationVersion": "8.1.0",
+    "id": "workpad-e7464259-0b75-4b8c-81c8-8422b15ff201",
+    "migrationVersion": {
+      "canvas-workpad": "8.0.0"
+    },
+    "references": [],
+    "type": "canvas-workpad",
+    "updated_at": "2020-07-16T20:34:01.098Z",
+    "version": "WzIsMl0="
+  }
