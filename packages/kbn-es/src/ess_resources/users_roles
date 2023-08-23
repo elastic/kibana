@@ -1,2 +1,2 @@
 superuser:kibana_serverless_superuser
-superuser:system_indices_superuser
+system_indices_superuser:system_indices_superuser
