@@ -81,12 +81,18 @@ disabled:
   # Serverless configs, currently only for manual tests runs, CI integration planned
   - x-pack/test_serverless/api_integration/test_suites/common/config.ts
   - x-pack/test_serverless/api_integration/test_suites/observability/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts
   - x-pack/test_serverless/api_integration/test_suites/search/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/search/config.feature_flags.ts
   - x-pack/test_serverless/api_integration/test_suites/security/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/security/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/common/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.ts
+  - x-pack/test_serverless/functional/test_suites/observability/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/search/config.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/security/config.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:
@@ -347,7 +353,6 @@ enabled:
   - x-pack/test/reporting_functional/reporting_and_deprecated_security.config.ts
   - x-pack/test/reporting_functional/reporting_and_security.config.ts
   - x-pack/test/reporting_functional/reporting_without_security.config.ts
-  - x-pack/test/reporting_functional/reporting_and_timeout.config.ts
   - x-pack/test/rule_registry/security_and_spaces/config_basic.ts
   - x-pack/test/rule_registry/security_and_spaces/config_trial.ts
   - x-pack/test/rule_registry/spaces_only/config_basic.ts

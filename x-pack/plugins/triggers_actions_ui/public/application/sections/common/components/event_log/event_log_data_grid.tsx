@@ -55,7 +55,7 @@ type ExecutionLog = IExecutionLog | IConnectorsExecutionLog;
 export interface EventLogDataGrid {
   columns: EuiDataGridColumn[];
   logs: ExecutionLog[];
-  pagination: Pagination;
+  pagination: Pagination & { pageSize: number };
   sortingColumns: EuiDataGridSorting['columns'];
   visibleColumns: string[];
   dateFormat: string;
