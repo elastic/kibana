@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit, isEqual, keyBy, groupBy } from 'lodash';
+import { omit, isEqual, keyBy, groupBy, pick } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
 import { safeDump } from 'js-yaml';
 import pMap from 'p-map';
@@ -562,14 +562,24 @@ class AgentPolicyService {
     if (!baseAgentPolicy) {
       throw new Error('Agent policy not found');
     }
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { namespace, monitoring_enabled } = baseAgentPolicy;
+
+    const {} = baseAgentPolicy;
     const newAgentPolicy = await this.create(
       soClient,
       esClient,
       {
-        namespace,
-        monitoring_enabled,
+        ...pick(baseAgentPolicy, [
+          'namespace',
+          'monitoring_enabled',
+          'inactivity_timeout',
+          'unenroll_timeout',
+          'agent_features',
+          'overrides',
+          'data_output_id',
+          'monitoring_output_id',
+          'download_source_id',
+          'fleet_server_host_id',
+        ]),
         ...newAgentPolicyProps,
       },
       options
