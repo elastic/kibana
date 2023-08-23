@@ -58,6 +58,7 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
 
   private node?: HTMLElement;
 
+  // Need to defer embeddable load in order to resolve data views
   deferEmbeddableLoad = true;
 
   constructor(
