@@ -1,8 +1,5 @@
-env:
-  ENVIRONMENT: ${ENVIRONMENT?}
-
 steps:
-  - label: ":pipeline::grey_question::seedling: Trigger Kibana Tests for ${ENVIRONMENT}"
+  - label: ":pipeline::grey_question::seedling: Trigger Kibana Tests"
     env:
       QG_PIPELINE_LOCATION: ".buildkite/pipelines/quality-gates"
     command: "make -C /agent run-environment-tests"
