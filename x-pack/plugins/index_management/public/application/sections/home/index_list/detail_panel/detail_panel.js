@@ -34,7 +34,7 @@ import { IndexActionsContextMenu } from '../index_actions_context_menu';
 import { ShowJson } from './show_json';
 import { Summary } from './summary';
 import { EditSettingsJson } from './edit_settings_json';
-import { useServices } from '../../../../app_context';
+import { useServices, useAppContext } from '../../../../app_context';
 import { DiscoverLink } from '../../../../lib/discover_link';
 
 const tabToHumanizedMap = {
@@ -58,12 +58,19 @@ const tabToHumanizedMap = {
   ),
 };
 
-const tabs = [TAB_SUMMARY, TAB_SETTINGS, TAB_MAPPING, TAB_STATS, TAB_EDIT_SETTINGS];
+const getTabs = (showStats) => {
+  if (showStats) {
+    return [TAB_SUMMARY, TAB_SETTINGS, TAB_MAPPING, TAB_STATS, TAB_EDIT_SETTINGS];
+  }
+  return [TAB_SUMMARY, TAB_SETTINGS, TAB_MAPPING, TAB_EDIT_SETTINGS];
+};
 
 export const DetailPanel = ({ panelType, indexName, index, openDetailPanel, closeDetailPanel }) => {
   const { extensionsService } = useServices();
+  const { config } = useAppContext();
 
   const renderTabs = () => {
+    const tabs = getTabs(config.enableIndexStats);
     return tabs.map((tab, i) => {
       const isSelected = tab === panelType;
       return (

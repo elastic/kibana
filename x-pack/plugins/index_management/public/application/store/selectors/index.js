@@ -113,15 +113,19 @@ export const getPageOfIndices = createSelector(
     const { firstItemIndex, lastItemIndex } = pager;
     const pagedIndexes = sortedIndexes.slice(firstItemIndex, lastItemIndex + 1);
     return pagedIndexes.map((index) => {
-      const status =
-        indexStatusLabels[rowStatuses[index.name]] || // user friendly version of row status
-        rowStatuses[index.name] || // row status
-        indexStatusLabels[index.status] || // user friendly version of index status
-        index.status; // index status
-      return {
-        ...index,
-        status,
-      };
+      if (index.status) {
+        const status =
+          indexStatusLabels[rowStatuses[index.name]] || // user friendly version of row status
+          rowStatuses[index.name] || // row status
+          indexStatusLabels[index.status] || // user friendly version of index status
+          index.status; // index status
+        return {
+          ...index,
+          status,
+        };
+      }
+
+      return index;
     });
   }
 );
