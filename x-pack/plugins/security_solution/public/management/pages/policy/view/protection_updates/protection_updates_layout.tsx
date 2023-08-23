@@ -13,16 +13,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIconTip,
   EuiPanel,
   EuiShowFor,
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { ThemeContext } from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -40,26 +39,35 @@ interface ProtectionUpdatesLayoutProps {
 export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
   ({ policy: _policy }) => {
     const toasts = useToasts();
-    const paddingSize = useContext(ThemeContext).eui.euiPanelPaddingModifiers.paddingMedium;
+    const dispatch = useDispatch();
     const { isLoading: isUpdating, mutateAsync: sendPolicyUpdate } = useUpdateEndpointPolicy();
+    const paddingSize = useContext(ThemeContext).eui.euiPanelPaddingModifiers.paddingMedium;
 
     const policy = _policy as PolicyData;
     const deployedVersion = policy.inputs[0].config.policy.value.manifest_version;
-
     const [manifestVersion, setManifestVersion] = useState(deployedVersion);
 
-    const automaticUpdatesEnabled = manifestVersion === 'latest';
-    const unifiedDateFormat = 'YYYY-MM-DD';
-
     const today = moment();
-    const cutoffDate = moment().subtract(18, 'months');
-    const [startDate, setStartDate] = useState<Moment>(today);
+    const [selectedDate, setSelectedDate] = useState<Moment>(today);
+
+    const automaticUpdatesEnabled = manifestVersion === 'latest';
+    const internalDateFormat = 'YYYY-MM-DD';
+    const displayDateFormat = 'MMMM DD, YYYY';
+    const formattedDate = moment(deployedVersion, internalDateFormat).format(displayDateFormat);
+    const cutoffDate = moment().subtract(18, 'months'); // Earliest selectable date
+
+    useEffect(() => {
+      if (automaticUpdatesEnabled && selectedDate !== today) {
+        // Clear selected date on user enabling automatic updates
+        setSelectedDate(today);
+      }
+    }, [automaticUpdatesEnabled, selectedDate, today]);
 
     const onSave = useCallback(() => {
       const update = cloneDeep(policy);
       update.inputs[0].config.policy.value.manifest_version = manifestVersion;
       sendPolicyUpdate({ policy: update })
-        .then(() => {
+        .then(({ item: policyItem }) => {
           toasts.addSuccess({
             'data-test-subj': 'protectionUpdatesSuccessfulMessage',
             title: i18n.translate(
@@ -75,6 +83,14 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
               }
             ),
           });
+
+          // Since the 'policyItem' is stored in a store and fetched as a result of an action on urlChange, we still need to dispatch an action even though Redux was removed from this component.
+          dispatch({
+            type: 'serverReturnedPolicyDetailsData',
+            payload: {
+              policyItem,
+            },
+          });
         })
         .catch((err) => {
           toasts.addDanger({
@@ -88,7 +104,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
             text: err.message,
           });
         });
-    }, [manifestVersion, policy, sendPolicyUpdate, toasts]);
+    }, [dispatch, manifestVersion, policy, sendPolicyUpdate, toasts]);
 
     const toggleAutomaticUpdates = useCallback(
       (event: EuiSwitchEvent) => {
@@ -97,14 +113,14 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
         if (checked && !automaticUpdatesEnabled) {
           setManifestVersion('latest');
         } else {
-          setManifestVersion(startDate.format(unifiedDateFormat));
+          setManifestVersion(selectedDate.format(internalDateFormat));
         }
       },
-      [automaticUpdatesEnabled, startDate]
+      [automaticUpdatesEnabled, selectedDate]
     );
 
     useEffect(() => {
-      // User turned on automatic updates, we need to save the policy without the user clicking save
+      // User turned on automatic updates, we need to save the policy without the user clicking save button
       if (deployedVersion !== manifestVersion && manifestVersion === 'latest') {
         onSave();
       }
@@ -129,13 +145,13 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
           <EuiSpacer size="m" />
           <EuiDatePicker
             popoverPlacement={'upCenter'}
-            dateFormat={'MMMM DD, YYYY'}
-            selected={startDate}
+            dateFormat={displayDateFormat}
+            selected={selectedDate}
             maxDate={today}
             minDate={cutoffDate}
             onChange={(date) => {
-              setStartDate(date || today);
-              setManifestVersion(date?.format(unifiedDateFormat) || 'latest');
+              setSelectedDate(date || today);
+              setManifestVersion(date?.format(internalDateFormat) || 'latest');
             }}
           />
         </>
@@ -147,7 +163,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
         return null;
       }
 
-      const deployedVersionDate = moment(deployedVersion).format(unifiedDateFormat);
+      const deployedVersionDate = moment(deployedVersion).format(internalDateFormat);
       const daysSinceLastUpdate = today.diff(deployedVersionDate, 'days');
 
       if (daysSinceLastUpdate < 30) {
@@ -221,48 +237,48 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
           <EuiSpacer size="m" />
 
           <EuiText size="m" data-test-subj="protection-updates-deployed-version">
-            {deployedVersion}
+            {deployedVersion === 'latest' ? 'latest' : formattedDate}
           </EuiText>
           <EuiSpacer size="l" />
           {renderVersionToDeployPicker()}
 
           <EuiSpacer size="m" />
-          <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
-            <EuiTitle size="xxs" data-test-subj={'protection-updates-manifest-name-note-title'}>
-              <h5>
-                {i18n.translate('xpack.securitySolution.endpoint.protectionUpdates.note.label', {
-                  defaultMessage: 'Note',
-                })}
-              </h5>
-            </EuiTitle>
-            <EuiIconTip
-              position="right"
-              content={
-                <>
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.protectionUpdates.note.tooltip"
-                    defaultMessage="Note will help you understand why you decided to deploy a particular version next time you access policy update."
-                  />
-                </>
-              }
-            />
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
+          {/* <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">*/}
+          {/*  <EuiTitle size="xxs" data-test-subj={'protection-updates-manifest-name-note-title'}>*/}
+          {/*    <h5>*/}
+          {/*      {i18n.translate('xpack.securitySolution.endpoint.protectionUpdates.note.label', {*/}
+          {/*        defaultMessage: 'Note',*/}
+          {/*      })}*/}
+          {/*    </h5>*/}
+          {/*  </EuiTitle>*/}
+          {/*  <EuiIconTip*/}
+          {/*    position="right"*/}
+          {/*    content={*/}
+          {/*      <>*/}
+          {/*        <FormattedMessage*/}
+          {/*          id="xpack.securitySolution.endpoint.protectionUpdates.note.tooltip"*/}
+          {/*          defaultMessage="Note will help you understand why you decided to deploy a particular version next time you access policy update."*/}
+          {/*        />*/}
+          {/*      </>*/}
+          {/*    }*/}
+          {/*  />*/}
+          {/* </EuiFlexGroup>*/}
+          {/* <EuiSpacer size="m" />*/}
 
-          <EuiTextArea
-            value={''}
-            onChange={() => console.log('test')}
-            fullWidth={true}
-            rows={2}
-            placeholder={i18n.translate(
-              'xpack.securitySolution.endpoint.protectionUpdates.note.placeholder',
-              {
-                defaultMessage: 'Add relevant information about update here',
-              }
-            )}
-            data-test-subj={'protection-updates-manifest-note'}
-          />
-          <EuiSpacer size="m" />
+          {/* <EuiTextArea*/}
+          {/*  value={''}*/}
+          {/*  onChange={() => console.log('test')}*/}
+          {/*  fullWidth={true}*/}
+          {/*  rows={3}*/}
+          {/*  placeholder={i18n.translate(*/}
+          {/*    'xpack.securitySolution.endpoint.protectionUpdates.note.placeholder',*/}
+          {/*    {*/}
+          {/*      defaultMessage: 'Add relevant information about update here',*/}
+          {/*    }*/}
+          {/*  )}*/}
+          {/*  data-test-subj={'protection-updates-manifest-note'}*/}
+          {/* />*/}
+          {/* <EuiSpacer size="m" />*/}
 
           <EuiButton
             fill={true}
