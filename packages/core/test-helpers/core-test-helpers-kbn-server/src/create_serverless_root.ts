@@ -40,15 +40,14 @@ export const createServerlessES = () => {
 
 export type TestServerlessKibanaUtils = ReturnType<typeof createServerlessKibana>;
 
+const defaults = {
+  server: {
+    port: 5620,
+  },
+  elasticsearch: {
+    serviceAccountToken: 'BEEF',
+  },
+};
 export const createServerlessKibana = (settings = {}, cliArgs: Partial<CliArgs> = {}) => {
-  const defaults = {
-    server: {
-      port: 5620,
-    },
-    elasticsearch: {
-      serviceAccountToken: 'BEEF',
-    },
-  };
-
   return createRoot(defaultsDeep(settings, defaults), { ...cliArgs, serverless: true });
 };
