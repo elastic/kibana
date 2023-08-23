@@ -10,7 +10,7 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
 import { replaceMetricTimeInQueryString } from '../metrics/metric_detail/hooks/use_metrics_time';
-import { getFromFromLocation, getToFromLocation } from './query_params';
+import { getFromFromLocation, getToFromLocation, getNodeNameFromLocation } from './query_params';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 
 type RedirectToNodeDetailProps = RouteComponentProps<{
@@ -29,7 +29,16 @@ export const RedirectToNodeDetail = ({
     getToFromLocation(location)
   )('');
 
-  return <Redirect to={`/detail/${nodeType}/${nodeId}?${searchString}`} />;
+  const queryParams = new URLSearchParams(searchString);
+
+  if (nodeType === 'host') {
+    const assetName = getNodeNameFromLocation(location);
+    if (assetName) {
+      queryParams.set('assetName', assetName);
+    }
+  }
+
+  return <Redirect to={`/detail/${nodeType}/${nodeId}?${queryParams.toString()}`} />;
 };
 
 export const getNodeDetailUrl = ({
@@ -37,21 +46,25 @@ export const getNodeDetailUrl = ({
   nodeId,
   to,
   from,
+  assetName,
 }: {
   nodeType: InventoryItemType;
   nodeId: string;
   to?: number;
   from?: number;
+  assetName?: string;
 }): LinkDescriptor => {
   return {
     app: 'metrics',
     pathname: `link-to/${nodeType}-detail/${nodeId}`,
-    search:
-      to && from
+    search: {
+      ...(assetName ? { assetName } : undefined),
+      ...(to && from
         ? {
             to: `${to}`,
             from: `${from}`,
           }
-        : undefined,
+        : undefined),
+    },
   };
 };
