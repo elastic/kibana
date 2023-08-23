@@ -284,7 +284,7 @@ export const useTimelineEventsHandler = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [skip, data, entityType, dataViewId, dispatch, id, prevFilterStatus]
+    [skip, data, entityType, dataViewId, startTracking, dispatch, id, prevFilterStatus]
   );
 
   useEffect(() => {
