@@ -88,6 +88,7 @@ import {
   getExecutionKPIAggregation,
   getExecutionLogAggregation,
 } from './lib/get_execution_log_aggregation';
+import { ReachedQueuedActionsLimit } from './create_queued_actions_limit_function';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -126,6 +127,7 @@ interface ConstructorOptions {
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
   getEventLogClient: () => Promise<IEventLogClient>;
+  reachedQueuedActionsLimit: ReachedQueuedActionsLimit;
 }
 
 export interface UpdateOptions {
@@ -159,6 +161,7 @@ export class ActionsClient {
   private readonly usageCounter?: UsageCounter;
   private readonly connectorTokenClient: ConnectorTokenClientContract;
   private readonly getEventLogClient: () => Promise<IEventLogClient>;
+  private readonly reachedQueuedActionsLimit: ReachedQueuedActionsLimit;
 
   constructor({
     logger,
@@ -177,6 +180,7 @@ export class ActionsClient {
     usageCounter,
     connectorTokenClient,
     getEventLogClient,
+    reachedQueuedActionsLimit,
   }: ConstructorOptions) {
     this.logger = logger;
     this.actionTypeRegistry = actionTypeRegistry;
@@ -194,6 +198,7 @@ export class ActionsClient {
     this.usageCounter = usageCounter;
     this.connectorTokenClient = connectorTokenClient;
     this.getEventLogClient = getEventLogClient;
+    this.reachedQueuedActionsLimit = reachedQueuedActionsLimit;
   }
 
   /**
@@ -1027,6 +1032,10 @@ export class ActionsClient {
       );
       throw err;
     }
+  }
+
+  public async hasReachedTheQueuedActionsLimit() {
+    return await this.reachedQueuedActionsLimit();
   }
 }
 

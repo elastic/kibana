@@ -29,6 +29,7 @@ enum AllowListingField {
 }
 
 export const DEFAULT_MAX_ATTEMPTS: number = 3;
+export const DEFAULT_QUEUED_MAX = 1000000;
 
 export interface ActionsConfigurationUtilities {
   isHostnameAllowed: (hostname: string) => boolean;
@@ -54,6 +55,7 @@ export interface ActionsConfigurationUtilities {
     options?: ValidateEmailAddressesOptions
   ): string | undefined;
   enableFooterInEmail: () => boolean;
+  getQueuedMax: () => number;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -217,5 +219,6 @@ export function getActionsConfigurationUtilities(
       );
     },
     enableFooterInEmail: () => config.enableFooterInEmail,
+    getQueuedMax: () => config.queued?.max || DEFAULT_QUEUED_MAX,
   };
 }

@@ -47,8 +47,13 @@ export const lastRunFromState = (
     outcomeMsg.push(translations.taskRunner.warning.maxAlerts);
   } else if (metrics.triggeredActionsStatus === ActionsCompletion.PARTIAL) {
     outcome = RuleLastRunOutcomeValues[1];
-    warning = RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS;
-    outcomeMsg.push(translations.taskRunner.warning.maxExecutableActions);
+    if (metrics.hasReachedQueuedActionsLimit) {
+      warning = RuleExecutionStatusWarningReasons.MAX_QUEUED_ACTIONS;
+      outcomeMsg.push(translations.taskRunner.warning.maxQueuedActions);
+    } else {
+      warning = RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS;
+      outcomeMsg.push(translations.taskRunner.warning.maxExecutableActions);
+    }
   }
 
   // Overwrite outcome to be error if last run reported any errors

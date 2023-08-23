@@ -107,6 +107,7 @@ import {
 } from './unsecured_actions_client/unsecured_actions_client';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 import { createSystemConnectors } from './create_system_actions';
+import { createQueuedActionsLimitFunction } from './create_queued_actions_limit_function';
 
 export interface PluginSetupContract {
   registerType<
@@ -300,7 +301,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     core.http.registerRouteHandlerContext<ActionsRequestHandlerContext, 'actions'>(
       'actions',
-      this.createRouteHandlerContext(core)
+      this.createRouteHandlerContext(core, actionsConfigUtils)
     );
     if (usageCollection) {
       const eventLogIndex = this.eventLogService.getIndexPattern();
@@ -389,7 +390,10 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       isESOCanEncrypt,
       instantiateAuthorization,
       getUnsecuredSavedObjectsClient,
+      actionsConfig,
     } = this;
+
+    const actionsConfigUtils = getActionsConfigurationUtilities(actionsConfig);
 
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
@@ -465,6 +469,10 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         async getEventLogClient() {
           return plugins.eventLog.getClient(request);
         },
+        reachedQueuedActionsLimit: createQueuedActionsLimitFunction({
+          taskManager: plugins.taskManager,
+          configurationUtilities: actionsConfigUtils,
+        }),
       });
     };
 
@@ -630,7 +638,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   };
 
   private createRouteHandlerContext = (
-    core: CoreSetup<ActionsPluginsStart>
+    core: CoreSetup<ActionsPluginsStart>,
+    actionsConfigUtils: ActionsConfigurationUtilities
   ): IContextProvider<ActionsRequestHandlerContext, 'actions'> => {
     const {
       actionTypeRegistry,
@@ -701,6 +710,10 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             async getEventLogClient() {
               return eventLog.getClient(request);
             },
+            reachedQueuedActionsLimit: createQueuedActionsLimitFunction({
+              taskManager,
+              configurationUtilities: actionsConfigUtils,
+            }),
           });
         },
         listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),

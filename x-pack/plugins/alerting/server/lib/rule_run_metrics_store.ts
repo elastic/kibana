@@ -27,6 +27,7 @@ interface State {
       numberOfGeneratedActions: number;
     };
   };
+  hasReachedQueuedActionsLimit: boolean;
 }
 
 export type RuleRunMetrics = Omit<State, 'connectorTypes'> & {
@@ -44,6 +45,7 @@ export class RuleRunMetricsStore {
     numberOfNewAlerts: 0,
     hasReachedAlertLimit: false,
     connectorTypes: {},
+    hasReachedQueuedActionsLimit: false,
   };
 
   // Getters
@@ -134,6 +136,9 @@ export class RuleRunMetricsStore {
   };
   public setHasReachedAlertLimit = (hasReachedAlertLimit: boolean) => {
     this.state.hasReachedAlertLimit = hasReachedAlertLimit;
+  };
+  public setHasReachedQueuedActionsLimit = (hasReachedQueuedActionsLimit: boolean) => {
+    this.state.hasReachedQueuedActionsLimit = hasReachedQueuedActionsLimit;
   };
 
   // Checkers

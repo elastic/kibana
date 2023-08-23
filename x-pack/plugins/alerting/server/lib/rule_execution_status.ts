@@ -46,10 +46,17 @@ export function executionStatusFromState(
     };
   } else if (stateWithMetrics.metrics.triggeredActionsStatus === ActionsCompletion.PARTIAL) {
     status = RuleExecutionStatusValues[5];
-    warning = {
-      reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
-      message: translations.taskRunner.warning.maxExecutableActions,
-    };
+    if (stateWithMetrics.metrics.hasReachedQueuedActionsLimit) {
+      warning = {
+        reason: RuleExecutionStatusWarningReasons.MAX_QUEUED_ACTIONS,
+        message: translations.taskRunner.warning.maxQueuedActions,
+      };
+    } else {
+      warning = {
+        reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+        message: translations.taskRunner.warning.maxExecutableActions,
+      };
+    }
   }
 
   return {

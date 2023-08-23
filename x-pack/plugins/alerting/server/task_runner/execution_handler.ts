@@ -223,6 +223,19 @@ export class ExecutionHandler<
           continue;
         }
 
+        if (await this.actionsClient!.hasReachedTheQueuedActionsLimit()) {
+          ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+            actionTypeId,
+            status: ActionsCompletion.PARTIAL,
+          });
+          ruleRunMetricsStore.setHasReachedQueuedActionsLimit(true);
+
+          logger.debug(
+            `Rule "${this.rule.id}" skipped scheduling action "${action.id}" because the maximum number of queued actions has been reached.`
+          );
+          break;
+        }
+
         ruleRunMetricsStore.incrementNumberOfTriggeredActions();
         ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
