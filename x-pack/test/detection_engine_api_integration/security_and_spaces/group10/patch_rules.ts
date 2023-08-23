@@ -448,7 +448,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body.investigation_options.fields).to.eql(['foo', 'bar']);
         });
 
-        it('should allow field to be unset', async () => {
+        it('should not allow field to be unset', async () => {
           await createRule(supertest, log, {
             ...getSimpleRule('rule-1'),
             investigation_options: { fields: ['blob', 'boop'] },
@@ -465,7 +465,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(rulePatch)
             .expect(200);
 
-          expect(body.investigation_options).to.eql(undefined);
+          expect(body.investigation_options).to.eql({ fields: ['blob', 'boop'] });
         });
 
         it('should not unset investigation_options if not specified in patch', async () => {
