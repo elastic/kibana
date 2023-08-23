@@ -39,6 +39,7 @@ export const ConnectorButton: React.FC<ConnectorButtonProps> = React.memo<Connec
       <EuiFlexGroup gutterSize="l" justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
           <EuiCard
+            data-test-subj="connectorButton"
             layout="horizontal"
             icon={<EuiIcon size="xl" type={GenAiLogo} />}
             title={title}

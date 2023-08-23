@@ -15,6 +15,7 @@ import { CONVERSATIONS_TAB } from '../../assistant/settings/assistant_settings';
 import { ConnectorButton } from '../connector_button';
 
 interface Props {
+  isConnectorConfigured: boolean;
   isSettingsModalVisible: boolean;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -27,7 +28,7 @@ interface Props {
  * TODO: Add setting for 'default connector' so we can auto-resolve and not even show this
  */
 export const ConnectorMissingCallout: React.FC<Props> = React.memo(
-  ({ isSettingsModalVisible, setIsSettingsModalVisible }) => {
+  ({ isConnectorConfigured, isSettingsModalVisible, setIsSettingsModalVisible }) => {
     const { assistantAvailability, setSelectedSettingsTab } = useAssistantContext();
 
     const onConversationSettingsClicked = useCallback(() => {
@@ -37,10 +38,16 @@ export const ConnectorMissingCallout: React.FC<Props> = React.memo(
       }
     }, [isSettingsModalVisible, setIsSettingsModalVisible, setSelectedSettingsTab]);
 
+    // Show missing callout if user has all privileges or read privileges and at least 1 connector configured
+    const showMissingCallout =
+      assistantAvailability.hasConnectorsAllPrivilege ||
+      (assistantAvailability.hasConnectorsReadPrivilege && isConnectorConfigured);
+
     return (
       <>
-        {assistantAvailability.hasConnectorsAllPrivilege ? (
+        {showMissingCallout ? (
           <EuiCallOut
+            data-test-subj="connectorMissingCallout"
             color="danger"
             iconType="controlsVertical"
             size="m"

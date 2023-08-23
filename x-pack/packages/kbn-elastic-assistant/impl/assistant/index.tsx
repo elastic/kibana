@@ -466,6 +466,7 @@ const AssistantComponent: React.FC<Props> = ({
             <EuiFlexGroup justifyContent="spaceAround">
               <EuiFlexItem grow={false}>
                 <ConnectorMissingCallout
+                  isConnectorConfigured={connectors?.length > 0}
                   isSettingsModalVisible={isSettingsModalVisible}
                   setIsSettingsModalVisible={setIsSettingsModalVisible}
                 />
