@@ -11,8 +11,6 @@ import {
   CUSTOM_RULES_BTN,
   DELETE_RULE_ACTION_BTN,
   RULES_SELECTED_TAG,
-  RULES_TABLE_INITIAL_LOADING_INDICATOR,
-  RULE_CHECKBOX,
   RULE_NAME,
   RULE_SWITCH,
   RULE_SWITCH_LOADER,
@@ -56,15 +54,19 @@ import {
   ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN,
   CONFIRM_DELETE_RULE_BTN,
   AUTO_REFRESH_POPOVER_TRIGGER_BUTTON,
+  SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
-import { ALL_ACTIONS } from '../screens/rule_details';
+import { POPOVER_ACTIONS_TRIGGER_BUTTON, RULE_NAME_HEADER } from '../screens/rule_details';
 import { EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
 import { LOADING_INDICATOR } from '../screens/security_header';
+import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 
 import { goToRuleEditSettings } from './rule_details';
 import { goToActionsStepTab } from './create_new_rule';
+
+export const getRulesManagementTableRows = () => cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW);
 
 export const enableRule = (rulePosition: number) => {
   cy.get(RULE_SWITCH).eq(rulePosition).click();
@@ -93,7 +95,7 @@ export const duplicateFirstRule = () => {
  */
 export const duplicateRuleFromMenu = () => {
   cy.get(LOADING_INDICATOR).should('not.exist');
-  cy.get(ALL_ACTIONS).click({ force: true });
+  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click({ force: true });
   cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).should('be.visible');
 
   // Because of a fade effect and fast clicking this can produce more than one click
@@ -119,15 +121,7 @@ export const deleteFirstRule = () => {
 };
 
 export const deleteRuleFromDetailsPage = () => {
-  cy.get(ALL_ACTIONS).should('be.visible');
-  // We cannot use cy.root().pipe($el) withing this function and instead have to use a cy.wait()
-  // for the click handler to be registered. If you see flake here because of click handler issues
-  // increase the cy.wait(). The reason we cannot use cypress pipe is because multiple clicks on ALL_ACTIONS
-  // causes the pop up to show and then the next click for it to hide. Multiple clicks can cause
-  // the DOM to queue up and once we detect that the element is visible it can then become invisible later
-  // eslint-disable-next-line cypress/no-unnecessary-waiting
-  cy.wait(1000);
-  cy.get(ALL_ACTIONS).click();
+  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click();
   cy.get(RULE_DETAILS_DELETE_BTN).click();
   cy.get(RULE_DETAILS_DELETE_BTN).should('not.exist');
   cy.get(CONFIRM_DELETE_RULE_BTN).click();
@@ -185,6 +179,17 @@ export const filterByDisabledRules = () => {
   cy.get(DISABLED_RULES_BTN).click();
 };
 
+export const goToRuleDetailsPageFor = (ruleName: string) => {
+  cy.contains(RULE_NAME, ruleName).click();
+
+  cy.get(PAGE_CONTENT_SPINNER).should('be.visible');
+  cy.contains(RULE_NAME_HEADER, ruleName).should('be.visible');
+  cy.get(PAGE_CONTENT_SPINNER).should('not.exist');
+};
+
+/**
+ * @deprecated use goToRuleDetailsPageFor
+ */
 export const goToRuleDetails = () => {
   cy.get(RULE_NAME).first().click();
 };
@@ -197,36 +202,15 @@ export const openIntegrationsPopover = () => {
   cy.get(INTEGRATIONS_POPOVER).click();
 };
 
-/**
- * Selects the number of rules. Since there can be missing click handlers
- * when the page loads at first, we use a pipe and a trigger of click
- * on it and then check to ensure that it is checked before continuing
- * with the tests.
- * @param numberOfRules The number of rules to click/check
- */
-export const selectNumberOfRules = (numberOfRules: number) => {
-  for (let i = 0; i < numberOfRules; i++) {
-    cy.get(RULE_CHECKBOX).eq(i).check();
-    cy.get(RULE_CHECKBOX).eq(i).should('be.checked');
+export const selectRulesByName = (ruleNames: Readonly<string[]>) => {
+  for (const ruleName of ruleNames) {
+    selectRuleByName(ruleName);
   }
 };
 
-export const unselectRuleByName = (ruleName: string) => {
-  cy.contains(RULE_NAME, ruleName).parents(RULES_ROW).find(EUI_CHECKBOX).uncheck();
-  cy.contains(RULE_NAME, ruleName).parents(RULES_ROW).find(EUI_CHECKBOX).should('not.be.checked');
-};
-
-/**
- * Unselects a passed number of rules. To use together with selectNumberOfRules
- * as this utility will expect and check the passed number of rules
- * to have been previously checked.
- * @param numberOfRules The number of rules to click/check
- */
-export const unselectNumberOfRules = (numberOfRules: number) => {
-  for (let i = 0; i < numberOfRules; i++) {
-    cy.get(RULE_CHECKBOX).eq(i).should('be.checked');
-    cy.get(RULE_CHECKBOX).eq(i).uncheck();
-    cy.get(RULE_CHECKBOX).eq(i).should('not.be.checked');
+export const unselectRulesByName = (ruleNames: Readonly<string[]>) => {
+  for (const ruleName of ruleNames) {
+    unselectRuleByName(ruleName);
   }
 };
 
@@ -234,6 +218,12 @@ export const selectAllRules = () => {
   cy.log('Select all rules');
   cy.get(SELECT_ALL_RULES_BTN).contains('Select all').click();
   cy.get(SELECT_ALL_RULES_BTN).contains('Clear');
+};
+
+export const selectAllRulesOnPage = () => {
+  cy.log('Select all rules on page');
+  cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).check();
+  cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).should('be.checked');
 };
 
 export const clearAllRuleSelection = () => {
@@ -264,21 +254,6 @@ export const confirmRulesDelete = () => {
 export const waitForRulesTableToShow = () => {
   // Wait up to 5 minutes for the table to show up as in CI containers this can be very slow
   cy.get(RULES_MANAGEMENT_TABLE, { timeout: 300000 }).should('exist');
-};
-
-/**
- * Because the Rule Management page is relatively slow, in order to avoid timeouts and flakiness,
- * we almost always want to wait until the Rules table is "loaded" before we do anything with it.
- *
- * This task can be needed for some tests that e.g. check the table load/refetch/pagination logic.
- * It waits for the table's own loading indicator to show up and disappear.
- *
- * NOTE: Normally, we should not rely on loading indicators in tests, because due to their
- * dynamic nature it's possible to introduce race conditions and flakiness.
- */
-export const waitForRulesTableToBeLoaded = () => {
-  // Wait up to 5 minutes for the rules to load as in CI containers this can be very slow
-  cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR, { timeout: 300000 }).should('not.exist');
 };
 
 export const waitForRulesTableToBeRefreshed = () => {
@@ -522,4 +497,20 @@ export const goToEditRuleActionsSettingsOf = (name: string) => {
   // wait until first step loads completely. Otherwise cypress stuck at the first edit page
   cy.get(EDIT_SUBMIT_BUTTON).should('be.enabled');
   goToActionsStepTab();
+};
+
+export const getRuleRow = (ruleName: string) => cy.contains(RULE_NAME, ruleName).parents(RULES_ROW);
+
+const selectRuleByName = (ruleName: string) => {
+  cy.log(`Select rule "${ruleName}"`);
+  getRuleRow(ruleName).find(EUI_CHECKBOX).check();
+  cy.log(`Make sure rule "${ruleName}" has been selected`);
+  getRuleRow(ruleName).find(EUI_CHECKBOX).should('be.checked');
+};
+
+const unselectRuleByName = (ruleName: string) => {
+  cy.log(`Unselect rule "${ruleName}"`);
+  getRuleRow(ruleName).find(EUI_CHECKBOX).uncheck();
+  cy.log(`Make sure rule "${ruleName}" has been unselected`);
+  getRuleRow(ruleName).find(EUI_CHECKBOX).should('not.be.checked');
 };
