@@ -482,6 +482,34 @@ export default function (providerContext: FtrProviderContext) {
         expect(newPolicy.inactivity_timeout).to.eql(123);
       });
 
+      it('should copy tamper protection', async () => {
+        const {
+          body: { item: policyWithTamperProtection },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Tamper Protection test',
+            namespace: 'default',
+            is_managed: true,
+            is_protected: true,
+          })
+          .expect(200);
+
+        const {
+          body: { item: newPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies/${policyWithTamperProtection.id}/copy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Tamper Protection test copy',
+            description: 'Test',
+          })
+          .expect(200);
+
+        expect(newPolicy.is_protected).to.eql(true);
+      });
+
       it('should increment package policy copy names', async () => {
         async function getSystemPackagePolicyCopyVersion(policyId: string) {
           const {
