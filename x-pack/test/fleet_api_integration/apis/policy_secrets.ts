@@ -44,7 +44,7 @@ function createdPolicyToUpdatePolicy(policy: any) {
 
 const SECRETS_INDEX_NAME = '.fleet-secrets';
 export default function (providerContext: FtrProviderContext) {
-  describe('fleet policy secrets', () => {
+  describe('TMPDEBUGME fleet policy secrets', () => {
     const { getService } = providerContext;
 
     const es: Client = getService('es');
@@ -106,12 +106,14 @@ export default function (providerContext: FtrProviderContext) {
               enabled: true,
               vars: {
                 input_var_secret: 'input_secret_val',
+                input_var_non_secret: 'input_non_secret_val',
               },
               streams: {
                 'secrets.log': {
                   enabled: true,
                   vars: {
                     stream_var_secret: 'stream_secret_val',
+                    stream_var_non_secret: 'stream_non_secret_val',
                   },
                 },
               },
@@ -119,6 +121,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           vars: {
             package_var_secret: 'package_secret_val',
+            package_var_non_secret: 'package_non_secret_val',
           },
           package: {
             name: 'secrets',
@@ -127,6 +130,12 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
     };
+
+    async function createPolicyWSecretVar() {
+      const { body: createResBody } = await createPolicyWithSecrets();
+      const createdPolicy = createResBody.item;
+      return createdPolicy;
+    }
 
     const createFleetServerAgent = async (
       agentPolicyId: string,
@@ -338,12 +347,14 @@ export default function (providerContext: FtrProviderContext) {
               enabled: true,
               vars: {
                 input_var_secret: 'input_secret_val',
+                input_var_non_secret: 'input_non_secret_val',
               },
               streams: {
                 'secrets.log': {
                   enabled: true,
                   vars: {
                     stream_var_secret: 'stream_secret_val',
+                    stream_var_non_secret: 'stream_non_secret_val',
                   },
                 },
               },
@@ -351,6 +362,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           vars: {
             package_var_secret: 'package_secret_val',
+            package_var_non_secret: 'package_non_secret_val',
           },
           package: {
             name: 'secrets',
@@ -376,10 +388,13 @@ export default function (providerContext: FtrProviderContext) {
         ])
       ).to.eql(true);
       expectedCompiledStream = {
-        'config.version': 2,
+        'config.version': '2',
         package_var_secret: secretVar(packageVarId),
+        package_var_non_secret: 'package_non_secret_val',
         input_var_secret: secretVar(inputVarId),
+        input_var_non_secret: 'input_non_secret_val',
         stream_var_secret: secretVar(streamVarId),
+        stream_var_non_secret: 'stream_non_secret_val',
       };
       expect(createdPackagePolicy.inputs[0].streams[0].compiled_stream).to.eql(
         expectedCompiledStream
@@ -387,7 +402,9 @@ export default function (providerContext: FtrProviderContext) {
 
       expectedCompiledInput = {
         package_var_secret: secretVar(packageVarId),
+        package_var_non_secret: 'package_non_secret_val',
         input_var_secret: secretVar(inputVarId),
+        input_var_non_secret: 'input_non_secret_val',
       };
 
       expect(createdPackagePolicy.inputs[0].compiled_input).to.eql(expectedCompiledInput);
@@ -468,12 +485,17 @@ export default function (providerContext: FtrProviderContext) {
       expect(updatedPackagePolicy.inputs[0].streams[0].compiled_stream).to.eql({
         'config.version': 2,
         package_var_secret: secretVar(updatedPackageVarId),
+        package_var_non_secret: 'package_non_secret_val',
         input_var_secret: secretVar(inputVarId),
+        input_var_non_secret: 'input_non_secret_val',
         stream_var_secret: secretVar(streamVarId),
+        stream_var_non_secret: 'stream_non_secret_val',
       });
       expect(updatedPackagePolicy.inputs[0].compiled_input).to.eql({
         package_var_secret: secretVar(updatedPackageVarId),
+        package_var_non_secret: 'package_non_secret_val',
         input_var_secret: secretVar(inputVarId),
+        input_var_non_secret: 'input_non_secret_val',
       });
       expect(updatedPackagePolicy.vars.package_var_secret.value.isSecretRef).to.eql(true);
       expect(updatedPackagePolicy.vars.package_var_secret.value.id).eql(updatedPackageVarId);
@@ -594,18 +616,10 @@ export default function (providerContext: FtrProviderContext) {
       expect(createdPolicy.vars.package_var_secret.value).eql('package_secret_val');
     });
 
-    async function createPolicyWSecretVar() {
-      const { body: createResBody } = await createPolicyWithSecrets();
-      const createdPolicy = createResBody.item;
-      return createdPolicy;
-    }
-
     it('should not store secrets if there are no fleet servers', async () => {
       await clearAgents();
 
-      const { body: createResBody } = await createPolicyWithSecrets();
-
-      const createdPolicy = createResBody.item;
+      const createdPolicy = await createPolicyWSecretVar();
 
       // secret should be in plain text i.e not a secret refrerence
       expect(createdPolicy.vars.package_var_secret.value).eql('package_secret_val');
@@ -644,6 +658,77 @@ export default function (providerContext: FtrProviderContext) {
       const createdPolicy = await createPolicyWSecretVar();
 
       expect(createdPolicy.vars.package_var_secret.value.isSecretRef).eql(true);
+    });
+
+    it('should store new secrets after package upgrade', async () => {
+      const createdPolicy = await createPolicyWSecretVar();
+
+      // Install newer version of secrets package
+      await supertest
+        .post('/api/fleet/epm/packages/secrets/1.1.0')
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+
+      // Upgrade package policy
+      await supertest
+        .post(`/api/fleet/package_policies/upgrade`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          packagePolicyIds: [createdPolicy.id],
+        })
+        .expect(200);
+
+      // Fetch policy again
+      const res = await supertest.get(`/api/fleet/package_policies/${createdPolicy.id}`);
+      const upgradedPolicy = res.body.item;
+
+      const packageSecretVarId = upgradedPolicy.vars.package_var_secret.value.id;
+      const packageNonSecretVarId = upgradedPolicy.vars.package_var_non_secret.value.id;
+      const inputSecretVarId = upgradedPolicy.inputs[0].vars.input_var_secret.value.id;
+      const inputNonSecretVarId = upgradedPolicy.inputs[0].vars.input_var_non_secret.value.id;
+      const streamSecretVarId = upgradedPolicy.inputs[0].streams[0].vars.stream_var_secret.value.id;
+      const streamNonSecretVarId =
+        upgradedPolicy.inputs[0].streams[0].vars.stream_var_non_secret.value.id;
+
+      expect(
+        arrayIdsEqual(upgradedPolicy.secret_references, [
+          { id: packageSecretVarId },
+          { id: packageNonSecretVarId },
+          { id: inputSecretVarId },
+          { id: inputNonSecretVarId },
+          { id: streamSecretVarId },
+          { id: streamNonSecretVarId },
+        ])
+      ).to.eql(true);
+
+      expect(upgradedPolicy.inputs[0].compiled_input).to.eql({
+        package_var_secret: secretVar(packageSecretVarId),
+        package_var_non_secret: secretVar(packageNonSecretVarId),
+        input_var_secret: secretVar(inputSecretVarId),
+        input_var_non_secret: secretVar(inputNonSecretVarId),
+      });
+
+      expect(upgradedPolicy.inputs[0].streams[0].compiled_stream).to.eql({
+        'config.version': '2',
+        package_var_secret: secretVar(packageSecretVarId),
+        package_var_non_secret: secretVar(packageNonSecretVarId),
+        input_var_secret: secretVar(inputSecretVarId),
+        input_var_non_secret: secretVar(inputNonSecretVarId),
+        stream_var_secret: secretVar(streamSecretVarId),
+        stream_var_non_secret: secretVar(streamNonSecretVarId),
+      });
+
+      expect(upgradedPolicy.vars.package_var_secret.value.isSecretRef).to.eql(true);
+      expect(upgradedPolicy.vars.package_var_non_secret.value.isSecretRef).to.eql(true);
+      expect(upgradedPolicy.inputs[0].vars.input_var_secret.value.isSecretRef).to.eql(true);
+      expect(upgradedPolicy.inputs[0].vars.input_var_non_secret.value.isSecretRef).to.eql(true);
+      expect(upgradedPolicy.inputs[0].streams[0].vars.stream_var_secret.value.isSecretRef).to.eql(
+        true
+      );
+      expect(
+        upgradedPolicy.inputs[0].streams[0].vars.stream_var_non_secret.value.isSecretRef
+      ).to.eql(true);
     });
   });
 }
