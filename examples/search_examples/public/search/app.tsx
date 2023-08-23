@@ -30,7 +30,6 @@ import {
   DataPublicPluginStart,
   IKibanaSearchResponse,
   isCompleteResponse,
-  isErrorResponse,
 } from '@kbn/data-plugin/public';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';

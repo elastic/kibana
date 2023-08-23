@@ -27,7 +27,6 @@ import type {
 import type { Alert, Alerts, GetInspectQuery, InspectQuery } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DefaultSort } from './constants';
-import * as i18n from './translations';
 
 export interface FetchAlertsArgs {
   featureIds: ValidFeatureId[];
