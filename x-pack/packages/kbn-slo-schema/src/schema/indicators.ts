@@ -80,13 +80,17 @@ const metricCustomMetricDef = t.type({
 const metricCustomIndicatorTypeSchema = t.literal('sli.metric.custom');
 const metricCustomIndicatorSchema = t.type({
   type: metricCustomIndicatorTypeSchema,
-  params: t.type({
-    index: t.string,
-    filter: t.string,
-    good: metricCustomMetricDef,
-    total: metricCustomMetricDef,
-    timestampField: t.string,
-  }),
+  params: t.intersection([
+    t.type({
+      index: t.string,
+      good: metricCustomMetricDef,
+      total: metricCustomMetricDef,
+      timestampField: t.string,
+    }),
+    t.partial({
+      filter: t.string,
+    }),
+  ]),
 });
 
 const rangeHistogramMetricType = t.literal('range');
