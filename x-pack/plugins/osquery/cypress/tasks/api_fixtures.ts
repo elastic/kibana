@@ -122,6 +122,7 @@ export const loadLiveQuery = (
   payload = {
     agent_all: true,
     query: 'select * from uptime;',
+    kuery: '',
   }
 ) =>
   request<{
