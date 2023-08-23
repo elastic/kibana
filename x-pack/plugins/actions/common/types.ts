@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
+
 export {
   AlertingConnectorFeatureId,
   CasesConnectorFeatureId,
@@ -12,6 +14,16 @@ export {
   SecurityConnectorFeatureId,
   GeneralConnectorFeatureId,
 } from './connector_feature_config';
+export interface ActionType {
+  id: string;
+  name: string;
+  enabled: boolean;
+  enabledInConfig: boolean;
+  enabledInLicense: boolean;
+  minimumLicenseRequired: LicenseType;
+  supportedFeatureIds: string[];
+  isSystemActionType: boolean;
+}
 
 export enum InvalidEmailReason {
   invalid = 'invalid',
