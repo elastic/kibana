@@ -82,6 +82,8 @@ describe('find()', () => {
       name: 'myType',
       producer: 'myApp',
       enabledInLicense: true,
+      hasAlertsMappings: false,
+      hasFieldsForAAD: false,
     },
   ]);
   beforeEach(() => {
@@ -142,6 +144,8 @@ describe('find()', () => {
             myApp: { read: true, all: true },
           },
           enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
         },
       ])
     );
@@ -453,6 +457,8 @@ describe('find()', () => {
           name: 'myType',
           producer: 'myApp',
           enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
         },
       ])
     );
@@ -659,6 +665,8 @@ describe('find()', () => {
           name: 'myType',
           producer: 'myApp',
           enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
         },
       ])
     );
