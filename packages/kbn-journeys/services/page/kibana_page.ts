@@ -79,4 +79,13 @@ export class KibanaPage {
     await this.page.keyboard.press('Meta+A');
     await this.page.keyboard.press('Backspace');
   }
+
+  async clickAndWaitFor(
+    locator: string,
+    state?: 'attached' | 'detached' | 'visible' | 'hidden' | undefined
+  ) {
+    const element = this.page.locator(locator);
+    await element.click();
+    await element.waitFor({ state });
+  }
 }

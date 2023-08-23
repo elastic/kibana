@@ -8,7 +8,8 @@
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
 
-const TEST_TAG = 'testing';
+const TAG_NAME = 'testing';
+const TAG_DESCRIPTION = 'test description';
 
 export const journey = new Journey({
   esArchives: ['x-pack/performance/es_archives/sample_data_flights'],
@@ -18,27 +19,40 @@ export const journey = new Journey({
     await page.goto(kbnUrl.get(`/app/management/kibana/tags`));
     await page.waitForSelector(subj('table-is-ready'));
   })
-  .step('Search tag', async ({ page, inputDelays }) => {
+  .step('Delete the first 20 tags', async ({ page }) => {
+    await page.click(subj('checkboxSelectAll'));
+    await page.click(subj('actionBar-contextMenuButton'));
+    await page.click(subj('actionBar-button-delete'));
+    await page.click(subj('confirmModalConfirmButton'));
+    await page.waitForSelector(subj('table-is-ready'));
+  })
+  .step(`Search for 'stream' tag`, async ({ page, inputDelays }) => {
     await page.type(subj('tagsManagementSearchBar'), 'stream', {
       delay: inputDelays.TYPING,
     });
     await page.waitForSelector(subj('table-is-ready'));
   })
-  .step('Create tag', async ({ page, inputDelays, kibanaPage }) => {
+  .step('Create a new tag', async ({ page, inputDelays, kibanaPage }) => {
     await kibanaPage.clearInput(subj('tagsManagementSearchBar'));
     await page.waitForSelector(subj('table-is-ready'));
     await page.click(subj('createTagButton'));
-    await page.type(subj('createModalField-name'), TEST_TAG, { delay: inputDelays.TYPING });
-    const createButton = page.locator(subj('createModalConfirmButton'));
-    await createButton.click();
-    await createButton.waitFor({ state: 'detached' });
+    await page.type(subj('createModalField-name'), TAG_NAME, { delay: inputDelays.TYPING });
+    await kibanaPage.clickAndWaitFor(subj('createModalConfirmButton'), 'detached');
     await page.waitForSelector(subj('table-is-ready'));
-
-    await page.type(subj('tagsManagementSearchBar'), TEST_TAG, {
+    // search for newly created tag
+    await page.type(subj('tagsManagementSearchBar'), TAG_NAME, {
       delay: inputDelays.TYPING,
     });
     await page.waitForSelector(subj('table-is-ready'));
     await page.waitForSelector(subj('tagsTableRowName'), { state: 'visible' });
+  })
+  .step('Update tag', async ({ page, inputDelays, kibanaPage }) => {
+    await page.click(subj('tagsTableAction-edit'));
+    await page.type(subj('createModalField-description'), TAG_DESCRIPTION, {
+      delay: inputDelays.TYPING,
+    });
+    await kibanaPage.clickAndWaitFor(subj('createModalConfirmButton'), 'detached');
+    await page.waitForSelector(subj('table-is-ready'));
   })
   .step('Delete tag', async ({ page }) => {
     const tagRow = page.locator(subj('tagsTableRowName'));
