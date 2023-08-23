@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-
-import execa from 'execa';
 import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { ProcRunner, withProcRunner } from '@kbn/dev-proc-runner';
+import { ProcRunner } from '@kbn/dev-proc-runner';
 import yargs from 'yargs';
-import { EsVersion, FunctionalTestRunner, runElasticsearch, runKibanaServer, Config } from '@kbn/test';
+import { EsVersion, FunctionalTestRunner, runElasticsearch, runKibanaServer } from '@kbn/test';
 import {
   Lifecycle,
   ProviderCollection,
@@ -33,112 +31,104 @@ export const setupEnv = (on: Cypress.PluginEvents, cypressConfig: Cypress.Plugin
     // console.error(details);
     const specFile = details.specs[0];
     // log.error(specFile);
-      // console.error('cypressConfig', specFile, cypressConfig);
-      const { argv } = yargs(process.argv.slice(2)[0].split(' '))
-        .coerce('specFilePath', (specFilePath) => path.resolve(specFile.absolute))
-        // .coerce('ftrConfigFile', (ftrConfigFile) =>
-        //   path.resolve('../../../../../../test/osquery_cypress/cli_config')
-        // )
-        .default('specFilePath', specFile)
-        // .default('ftrConfigFile', path.resolve('../../../test/security_solution_cypress/cli_config'))
-        // .default('ftrConfigFile', path.resolve('../../test/osquery_cypress/cli_config'))
-        // .coerce('specFilePath', (specFilePath) => path.resolve(specFilePath))
-        // .coerce('ftrConfigFile', (ftrConfigFile) => path.resolve(ftrConfigFile))
-        .default('esPort', 9220)
-        .default('kibanaPort', 5620)
-        .default('fleetServerPort', 8220)
+    // console.error('cypressConfig', specFile, cypressConfig);
+    const { argv } = yargs(process.argv.slice(2)[0].split(' '))
+      .coerce('specFilePath', (specFilePath) => path.resolve(specFile.absolute))
+      // .coerce('ftrConfigFile', (ftrConfigFile) =>
+      //   path.resolve('../../../../../../test/osquery_cypress/cli_config')
+      // )
+      .default('specFilePath', specFile)
+      // .default('ftrConfigFile', path.resolve('../../../test/security_solution_cypress/cli_config'))
+      // .default('ftrConfigFile', path.resolve('../../test/osquery_cypress/cli_config'))
+      // .coerce('specFilePath', (specFilePath) => path.resolve(specFilePath))
+      // .coerce('ftrConfigFile', (ftrConfigFile) => path.resolve(ftrConfigFile))
+      .default('esPort', 9220)
+      .default('kibanaPort', 5620)
+      .default('fleetServerPort', 8220);
 
+    // console.error('argv', argv);
 
+    const response = {};
 
-      console.error('argv', argv);
+    // await withProcRunner(log, async (procs) => {
+    const abortCtrl = new AbortController();
 
-      let response = {};
+    const onEarlyExit = (msg: string) => {
+      log.error(msg);
+      abortCtrl.abort();
+    };
 
+    const config = await getFtrConfig({
+      log,
+      specFilePath: argv.specFilePath as string,
+      ftrConfigFile: cypressConfig.env.FTR_CONFIG_FILE as string,
+      esPort: argv.esPort,
+      kibanaPort: argv.kibanaPort,
+      fleetServerPort: argv.fleetServerPort,
+    });
 
+    const lifecycle = new Lifecycle(log);
 
+    const providers = new ProviderCollection(log, [
+      ...readProviderSpec('Service', {
+        lifecycle: () => lifecycle,
+        log: () => log,
+        config: () => config,
+      }),
+      ...readProviderSpec('Service', config.get('services')),
+    ]);
 
-      // await withProcRunner(log, async (procs) => {
-        const abortCtrl = new AbortController();
+    const options = {
+      installDir: process.env.KIBANA_INSTALL_DIR,
+      ci: process.env.CI,
+    };
 
-        const onEarlyExit = (msg: string) => {
-          log.error(msg);
-          abortCtrl.abort();
-        };
-
-        const config = await getFtrConfig({
+    shutdownEs = await pRetry(
+      async () =>
+        runElasticsearch({
+          config,
           log,
-          specFilePath: argv.specFilePath as string,
-          ftrConfigFile: cypressConfig.env.FTR_CONFIG_FILE as string,
-          esPort: argv.esPort,
-          kibanaPort: argv.kibanaPort,
-          fleetServerPort: argv.fleetServerPort,
-        });
+          name: `ftr-${argv.esPort}`,
+          esFrom: 'snapshot',
+          onEarlyExit,
+        }),
+      { retries: 2, forever: false }
+    );
 
-        const lifecycle = new Lifecycle(log);
+    await pRetry(
+      async () =>
+        runKibanaServer({
+          procs,
+          config,
+          installDir: options?.installDir,
+          extraKbnOpts:
+            options?.installDir || options?.ci
+              ? []
+              : ['--dev', '--no-dev-config', '--no-dev-credentials'],
+          onEarlyExit,
+        }),
+      { retries: 2, forever: false }
+    );
 
-        const providers = new ProviderCollection(log, [
-          ...readProviderSpec('Service', {
-            lifecycle: () => lifecycle,
-            log: () => log,
-            config: () => config,
-          }),
-          ...readProviderSpec('Service', config.get('services')),
-        ]);
+    await providers.loadAll();
 
-        const options = {
-          installDir: process.env.KIBANA_INSTALL_DIR,
-          ci: process.env.CI,
-        };
+    const functionalTestRunner = new FunctionalTestRunner(log, config, EsVersion.getDefault());
 
-        shutdownEs = await pRetry(
-          async () =>
-            runElasticsearch({
-              config,
-              log,
-              name: `ftr-${argv.esPort}`,
-              esFrom: 'snapshot',
-              onEarlyExit,
-            }),
-          { retries: 2, forever: false }
-        );
+    await pRetry(() => functionalTestRunner.run(abortCtrl.signal), {
+      retries: 1,
+    });
 
+    // response = async () => {
+    //   await procs.stop('kibana');
+    //   await shutdownEs();
+    //   procs.teardown();
 
-        await pRetry(
-          async () =>
-            runKibanaServer({
-              procs,
-              config,
-              installDir: options?.installDir,
-              extraKbnOpts:
-                options?.installDir || options?.ci
-                  ? []
-                  : ['--dev', '--no-dev-config', '--no-dev-credentials'],
-              onEarlyExit,
-            }),
-          { retries: 2, forever: false }
-        );
+    //   process.exit(0);
+    // };
+    // });
 
-        await providers.loadAll();
-
-        const functionalTestRunner = new FunctionalTestRunner(log, config, EsVersion.getDefault());
-
-        await pRetry(() => functionalTestRunner.run(abortCtrl.signal), {
-          retries: 1,
-        });
-
-
-        // response = async () => {
-        //   await procs.stop('kibana');
-        //   await shutdownEs();
-        //   procs.teardown();
-
-        //   process.exit(0);
-        // };
-      // });
-
-      return response
+    return response;
   });
-
 
   return cypressConfig;
 };
