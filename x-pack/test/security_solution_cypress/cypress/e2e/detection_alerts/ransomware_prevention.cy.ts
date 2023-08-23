@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
-
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { login, visit } from '../../tasks/login';
 

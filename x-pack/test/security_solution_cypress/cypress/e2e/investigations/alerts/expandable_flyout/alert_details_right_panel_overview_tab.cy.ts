@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../../tags';
-
 import { collapseDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT } from '../../../../screens/expandable_flyout/alert_details_left_panel_investigation_tab';
 import {

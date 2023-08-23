@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../../tags';
-
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
 
 import { FIELD } from '../../../../screens/alerts_details';

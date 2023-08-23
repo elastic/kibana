@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { login, visit } from '../../../tasks/login';
 
 import { HOSTS_URL } from '../../../urls/navigation';

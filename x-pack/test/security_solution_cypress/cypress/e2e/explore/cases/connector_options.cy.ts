@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   getCase1,

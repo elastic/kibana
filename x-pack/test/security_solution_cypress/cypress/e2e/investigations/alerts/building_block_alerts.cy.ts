@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { getBuildingBlockRule } from '../../../objects/rule';
 import { OVERVIEW_ALERTS_HISTOGRAM_EMPTY } from '../../../screens/overview';
 import { HIGHLIGHTED_ROWS_IN_TABLE } from '../../../screens/rule_details';

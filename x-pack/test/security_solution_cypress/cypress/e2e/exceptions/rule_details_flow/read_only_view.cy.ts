@@ -6,7 +6,6 @@
  */
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-
 import { getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 import { createRule } from '../../../tasks/api_calls/rules';

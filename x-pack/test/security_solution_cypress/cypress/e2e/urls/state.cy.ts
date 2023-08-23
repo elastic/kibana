@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
-
 import {
   DATE_PICKER_APPLY_BUTTON_TIMELINE,
   DATE_PICKER_END_DATE_POPOVER_BUTTON,

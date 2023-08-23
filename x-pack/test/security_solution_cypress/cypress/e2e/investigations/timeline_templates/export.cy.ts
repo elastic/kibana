@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { exportTimeline } from '../../../tasks/timelines';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {

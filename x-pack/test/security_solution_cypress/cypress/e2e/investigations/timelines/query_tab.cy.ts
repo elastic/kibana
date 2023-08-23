@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { getTimeline } from '../../../objects/timeline';
 
 import {

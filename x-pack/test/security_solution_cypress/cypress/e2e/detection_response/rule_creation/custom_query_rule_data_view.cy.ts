@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-
-
 import { formatMitreAttackDescription, getHumanizedDuration } from '../../../helpers/rules';
 import { getDataViewRule } from '../../../objects/rule';
 import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../../screens/alerts';

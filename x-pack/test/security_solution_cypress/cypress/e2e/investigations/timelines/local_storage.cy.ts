@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { reload } from '../../../tasks/common';
 import { login, visit } from '../../../tasks/login';
 import { HOSTS_URL } from '../../../urls/navigation';

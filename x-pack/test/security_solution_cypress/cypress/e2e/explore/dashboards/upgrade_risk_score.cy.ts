@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { getNewRule } from '../../../objects/rule';
 import {
   RISK_SCORE_INSTALLATION_SUCCESS_TOAST,

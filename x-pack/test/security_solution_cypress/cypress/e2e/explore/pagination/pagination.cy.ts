@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import {
   PROCESS_NAME_FIELD,
   UNCOMMON_PROCESSES_TABLE,

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { TIMELINE_HEADER, TIMELINE_TABS } from '../../../screens/timeline';
 import { cleanKibana } from '../../../tasks/common';
 

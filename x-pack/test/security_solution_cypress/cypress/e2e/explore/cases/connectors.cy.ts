@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { getServiceNowConnector, getServiceNowITSMHealthResponse } from '../../../objects/case';
 
 import { SERVICE_NOW_MAPPING } from '../../../screens/configure_cases';

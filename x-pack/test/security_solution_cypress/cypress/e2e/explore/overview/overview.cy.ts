@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { HOST_STATS, NETWORK_STATS, OVERVIEW_EMPTY_PAGE } from '../../../screens/overview';
 
 import { expandHostStats, expandNetworkStats } from '../../../tasks/overview';

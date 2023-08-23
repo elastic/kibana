@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import {
   ADD_FILTER,
   SERVER_SIDE_EVENT_COUNT,

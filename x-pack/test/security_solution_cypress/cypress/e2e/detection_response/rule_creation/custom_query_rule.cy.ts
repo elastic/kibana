@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-
-
 import { ruleFields } from '../../../data/detection_engine';
 import {
   getNewRule,
@@ -85,7 +83,7 @@ import {
 import { deleteSelectedRules } from '../../../tasks/rules_bulk_actions';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { deleteAlertsAndRules, deleteConnectors } from '../../../tasks/common';
+import { deleteConnectors } from '../../../tasks/common';
 import { addEmailConnectorAndRuleAction } from '../../../tasks/common/rule_actions';
 import {
   createAndEnableRule,

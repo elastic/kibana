@@ -9,7 +9,6 @@ import type { FilterItemObj } from '@kbn/security-solution-plugin/public/common/
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '@kbn/security-solution-plugin/common/constants';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
 
-
 import { getNewRule } from '../../../objects/rule';
 import {
   CONTROL_FRAMES,

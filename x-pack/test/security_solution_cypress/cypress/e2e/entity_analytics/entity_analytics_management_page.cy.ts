@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
-
 import {
   PAGE_TITLE,
   HOST_RISK_PREVIEW_TABLE,

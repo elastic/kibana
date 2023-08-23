@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import {
   addExceptionEntryFieldMatchIncludedValue,
   addExceptionEntryFieldValue,

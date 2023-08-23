@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import {
   TIMELINE_EVENT,
   TIMELINE_EVENTS_COUNT_NEXT_PAGE,

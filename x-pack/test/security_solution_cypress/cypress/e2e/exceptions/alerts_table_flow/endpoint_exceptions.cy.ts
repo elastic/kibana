@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-
-
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   expandFirstAlert,

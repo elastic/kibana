@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { getNewRule } from '../../../objects/rule';
 import { CELL_COPY_BUTTON, FILTER_BADGE, SHOW_TOP_N_HEADER } from '../../../screens/alerts';
 import {

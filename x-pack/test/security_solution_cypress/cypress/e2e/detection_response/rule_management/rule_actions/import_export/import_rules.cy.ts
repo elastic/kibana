@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../../../tags';
-
 import { TOASTER } from '../../../../../screens/alerts_detection_rules';
 import {
   expectManagementTableRules,

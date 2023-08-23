@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-
-
 import { getNewRule, getSavedQueryRule } from '../../../objects/rule';
 
 import {

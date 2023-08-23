@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../../tags';
-
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import {
   SELECTED_RULES_NUMBER_LABEL,

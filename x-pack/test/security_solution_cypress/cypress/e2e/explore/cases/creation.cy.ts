@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import type { TestCase } from '../../../objects/case';
 import { getCase1 } from '../../../objects/case';
 

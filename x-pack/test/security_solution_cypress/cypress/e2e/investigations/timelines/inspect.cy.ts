@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { INSPECT_MODAL } from '../../../screens/inspect';
 
 import { login, visit } from '../../../tasks/login';

@@ -6,7 +6,6 @@
  */
 import { AlertsCasesTourSteps } from '@kbn/security-solution-plugin/public/common/components/guided_onboarding_tour/tour_config';
 
-
 import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import { navigateFromHeaderTo } from '../../../tasks/security_header';
 import { ALERTS, TIMELINES } from '../../../screens/security_header';
@@ -83,19 +82,15 @@ describe('Guided onboarding tour', { tags: ['ess', 'brokenInServerless'] }, () =
       const stepsInCasesFlyout = [AlertsCasesTourSteps.createCase, AlertsCasesTourSteps.submitCase];
 
       stepsInAlertsFlyout.forEach((step) => {
-        it(
-          `step: ${step}, resets to ${step}`,
-          { tags: ['ess', 'brokenInServerless'] },
-          () => {
-            startTour();
-            goToStep(step);
-            assertTourStepExist(step);
-            closeAlertFlyout();
-            assertTourStepNotExist(step);
-            expandFirstAlert();
-            assertTourStepExist(step);
-          }
-        );
+        it(`step: ${step}, resets to ${step}`, { tags: ['ess', 'brokenInServerless'] }, () => {
+          startTour();
+          goToStep(step);
+          assertTourStepExist(step);
+          closeAlertFlyout();
+          assertTourStepNotExist(step);
+          expandFirstAlert();
+          assertTourStepExist(step);
+        });
       });
 
       stepsInCasesFlyout.forEach((step) => {

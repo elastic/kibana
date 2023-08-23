@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { getNewRule } from '../../../objects/rule';
 import {
   ENABLE_HOST_RISK_SCORE_BUTTON,

@@ -7,7 +7,6 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import {

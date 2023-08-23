@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { getNewRule } from '../../../objects/rule';
 
 import { RULE_STATUS } from '../../../screens/create_new_rule';

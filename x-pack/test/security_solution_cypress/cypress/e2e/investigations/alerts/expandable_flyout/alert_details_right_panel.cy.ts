@@ -6,7 +6,6 @@
  */
 
 import { upperFirst } from 'lodash';
-import { tag } from '../../../../tags';
 
 import {
   DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_CREATE_BUTTON,

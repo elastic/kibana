@@ -8,7 +8,6 @@
 import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
 import _ from 'lodash';
-import globby from 'globby';
 import pMap from 'p-map';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
@@ -16,7 +15,7 @@ import cypress from 'cypress';
 import { findChangedFiles } from 'find-cypress-specs';
 import minimatch from 'minimatch';
 import path from 'path';
-import grep from '@cypress/grep/src/plugin'
+import grep from '@cypress/grep/src/plugin';
 
 import {
   EsVersion,
@@ -42,9 +41,7 @@ import { parseTestFileConfig } from './utils';
  * Retrieve test files using a glob pattern.
  * If process.env.RUN_ALL_TESTS is true, returns all matching files, otherwise, return files that should be run by this job based on process.env.BUILDKITE_PARALLEL_JOB_COUNT and process.env.BUILDKITE_PARALLEL_JOB
  */
-const retrieveIntegrations = (
-  integrationsPaths: string[]
-) => {
+const retrieveIntegrations = (integrationsPaths: string[]) => {
   if (process.env.RUN_ALL_TESTS === 'true') {
     return integrationsPaths;
   } else {
@@ -88,7 +85,13 @@ export const cli = () => {
       ) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
       const spec: string | undefined = argv?.spec as string;
-      let files = retrieveIntegrations(grep({ ...cypressConfigFile, specPattern: spec ? [spec] : cypressConfigFile.e2e.specPattern, excludeSpecPattern:[] }).specPattern);
+      let files = retrieveIntegrations(
+        grep({
+          ...cypressConfigFile,
+          specPattern: spec ? [spec] : cypressConfigFile.e2e.specPattern,
+          excludeSpecPattern: [],
+        }).specPattern
+      );
 
       if (argv.changedSpecsOnly) {
         const basePath = process.cwd().split('kibana/')[1];

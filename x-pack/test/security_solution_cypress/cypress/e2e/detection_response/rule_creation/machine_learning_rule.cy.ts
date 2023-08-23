@@ -6,7 +6,6 @@
  */
 import { isArray } from 'lodash';
 
-
 import { formatMitreAttackDescription, getHumanizedDuration } from '../../../helpers/rules';
 import { getMachineLearningRule } from '../../../objects/rule';
 

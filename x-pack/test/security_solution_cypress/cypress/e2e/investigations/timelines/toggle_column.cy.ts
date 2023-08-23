@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { ID_HEADER_FIELD, TIMESTAMP_HEADER_FIELD } from '../../../screens/timeline';
 import { cleanKibana } from '../../../tasks/common';
 

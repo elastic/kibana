@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { elementsOverlap } from '../../../helpers/rules';
 import {
   TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN,

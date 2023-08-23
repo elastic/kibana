@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
-
 import { login, visit } from '../../tasks/login';
 
 import {

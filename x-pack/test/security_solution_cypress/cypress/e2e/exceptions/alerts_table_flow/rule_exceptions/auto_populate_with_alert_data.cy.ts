@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../../tags';
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
 import { getEndpointRule } from '../../../../objects/rule';
 import { createRule } from '../../../../tasks/api_calls/rules';

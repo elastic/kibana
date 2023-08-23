@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import type { TestCaseWithoutTimeline } from '../../../objects/case';
 import { ALL_CASES_CREATE_NEW_CASE_BTN, ALL_CASES_NAME } from '../../../screens/all_cases';
 

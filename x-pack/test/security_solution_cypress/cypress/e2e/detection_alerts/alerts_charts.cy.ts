@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
-
 import { getNewRule } from '../../objects/rule';
 import { ALERTS_COUNT } from '../../screens/alerts';
 import {

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-
-
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import {
   COLLAPSED_ACTION_BTN,

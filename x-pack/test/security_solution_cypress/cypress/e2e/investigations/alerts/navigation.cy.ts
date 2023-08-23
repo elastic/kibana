@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { expandFirstAlert, waitForAlerts } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { getTimelineNonValidQuery } from '../../../objects/timeline';
 
 import {

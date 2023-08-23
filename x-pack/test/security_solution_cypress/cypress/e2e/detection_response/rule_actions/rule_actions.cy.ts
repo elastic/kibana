@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-
-
 import { getIndexConnector } from '../../../objects/connector';
 import { getSimpleCustomQueryRule } from '../../../objects/rule';
 

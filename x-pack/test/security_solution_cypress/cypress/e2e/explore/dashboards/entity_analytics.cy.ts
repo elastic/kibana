@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { login, visit } from '../../../tasks/login';
 
 import { ALERTS_URL, ENTITY_ANALYTICS_URL } from '../../../urls/navigation';

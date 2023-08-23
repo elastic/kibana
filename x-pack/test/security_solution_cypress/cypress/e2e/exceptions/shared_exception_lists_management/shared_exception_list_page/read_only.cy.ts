@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../../../tags';
 
 import { getExceptionList } from '../../../../objects/exception';
 import {

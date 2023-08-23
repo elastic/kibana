@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../../tags';
-
 import {
   FIRST_RULE,
   RULE_NAME,

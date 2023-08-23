@@ -6,7 +6,6 @@
  */
 
 import { encode } from '@kbn/rison';
-import { tag } from '../../../../tags';
 
 import { cleanKibana, resetRulesTableState } from '../../../../tasks/common';
 import { login, visit } from '../../../../tasks/login';

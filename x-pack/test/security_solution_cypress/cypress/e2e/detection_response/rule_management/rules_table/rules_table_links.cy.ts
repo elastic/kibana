@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../../tags';
-
 import { getNewRule } from '../../../../objects/rule';
 import { RULES_MONITORING_TAB, RULE_NAME } from '../../../../screens/alerts_detection_rules';
 import { createRule } from '../../../../tasks/api_calls/rules';

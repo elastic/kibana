@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { openTimeline } from '../../../tasks/timelines';
 import { getTimeline } from '../../../objects/timeline';
 

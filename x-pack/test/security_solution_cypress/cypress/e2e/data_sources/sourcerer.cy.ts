@@ -9,7 +9,6 @@ import {
   DEFAULT_ALERTS_INDEX,
   DEFAULT_INDEX_PATTERN,
 } from '@kbn/security-solution-plugin/common/constants';
-import { tag } from '../../tags';
 
 import { login, loginWithUser, visit, visitWithUser } from '../../tasks/login';
 

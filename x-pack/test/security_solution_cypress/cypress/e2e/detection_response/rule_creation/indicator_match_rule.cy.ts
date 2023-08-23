@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-
-
 import { formatMitreAttackDescription, getHumanizedDuration } from '../../../helpers/rules';
 import {
   getIndexPatterns,

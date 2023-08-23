@@ -6,7 +6,6 @@
  */
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../tags';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigation';
 import { getNewRule } from '../../objects/rule';

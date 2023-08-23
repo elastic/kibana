@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../tags';
 
 import { KQL_INPUT } from '../../screens/security_header';
 

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../../tags';
-
 import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../../../tasks/common';
 import { login, visitSecurityDetectionRulesPage } from '../../../../tasks/login';
 import {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { OVERLAY_CONTAINER } from '../../../screens/alerts';
 import {
   openAnalyzerForFirstAlertInTimeline,

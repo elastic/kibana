@@ -6,7 +6,6 @@
  */
 
 import path from 'path';
-import { tag } from '../../../../../tags';
 
 import { expectedExportedRule, getNewRule } from '../../../../../objects/rule';
 import {

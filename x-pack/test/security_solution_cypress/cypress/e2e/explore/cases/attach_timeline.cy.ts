@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { login, visitTimeline } from '../../../tasks/login';
 import {
   attachTimelineToNewCase,

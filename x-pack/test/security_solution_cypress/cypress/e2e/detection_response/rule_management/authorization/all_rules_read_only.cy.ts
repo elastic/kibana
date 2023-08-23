@@ -6,7 +6,6 @@
  */
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../../../tags';
 
 import { getNewRule } from '../../../../objects/rule';
 import {

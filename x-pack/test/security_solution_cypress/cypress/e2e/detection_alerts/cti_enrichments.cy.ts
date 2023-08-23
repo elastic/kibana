@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
-
 import { disableExpandableFlyout } from '../../tasks/api_calls/kibana_advanced_settings';
 import { getNewThreatIndicatorRule, indicatorRuleMatchingDoc } from '../../objects/rule';
 import { cleanKibana } from '../../tasks/common';

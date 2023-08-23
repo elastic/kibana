@@ -73,7 +73,6 @@ import {
 } from '../../../../../tasks/rules_bulk_actions';
 
 import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
-import { tag } from '../../../../../tags';
 import { hasIndexPatterns, getDetails } from '../../../../../tasks/rule_details';
 import { login, visitSecurityDetectionRulesPage } from '../../../../../tasks/login';
 import { createRule } from '../../../../../tasks/api_calls/rules';

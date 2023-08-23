@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { ANALYZER_NODE } from '../../../screens/alerts';
 
 import { openAnalyzerForFirstAlertInTimeline } from '../../../tasks/alerts';
