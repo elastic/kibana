@@ -14,7 +14,6 @@ import { FtrProviderContext } from '../../services/types';
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const oneSec = 1_000;
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');
 

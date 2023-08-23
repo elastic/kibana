@@ -46,6 +46,7 @@ describe('GET privileges', () => {
       router,
       config: {
         isSecurityEnabled: () => true,
+        isLegacyTemplatesEnabled: true,
       },
       indexDataEnricher: mockedIndexDataEnricher,
       lib: {
@@ -112,6 +113,7 @@ describe('GET privileges', () => {
         router,
         config: {
           isSecurityEnabled: () => false,
+          isLegacyTemplatesEnabled: true,
         },
         indexDataEnricher: mockedIndexDataEnricher,
         lib: {

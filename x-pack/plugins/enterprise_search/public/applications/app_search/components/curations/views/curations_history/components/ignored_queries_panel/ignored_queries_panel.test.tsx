@@ -68,7 +68,6 @@ describe('IgnoredQueriesPanel', () => {
   });
 
   it('show a query', () => {
-    // @ts-expect-error 4.3.5 upgrade
     const column = getColumn(0).render('test query');
     expect(column).toEqual('test query');
   });

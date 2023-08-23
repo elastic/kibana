@@ -19,6 +19,7 @@ import {
 import { ComponentTemplateListItem } from '../../../../../common';
 import { Forms } from '../../../../shared_imports';
 import { ComponentTemplatesSelector } from '../../component_templates';
+import { documentationService } from '../../mappings_editor/shared_imports';
 
 interface Props {
   esDocsBase: string;
@@ -63,7 +64,7 @@ export const StepComponents = ({ defaultValue, onChange, esDocsBase }: Props) =>
   );
 
   const showHeader = state.isLoadingComponents === true || state.components.length > 0;
-  const docUri = `${esDocsBase}/indices-component-template.html`;
+  const docUri = documentationService.getIndicesComponentTemplate();
 
   const renderHeader = () => {
     if (!showHeader) {

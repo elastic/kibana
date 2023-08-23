@@ -57,6 +57,7 @@ interface AuthenticationServiceStartParams {
   applicationName: string;
   kibanaFeatures: KibanaFeature[];
   isElasticCloudDeployment: () => boolean;
+  customLogoutURL?: string;
 }
 
 export interface InternalAuthenticationServiceStart extends AuthenticationServiceStart {
@@ -328,6 +329,7 @@ export class AuthenticationService {
     applicationName,
     kibanaFeatures,
     isElasticCloudDeployment,
+    customLogoutURL,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
       clusterClient,
@@ -368,6 +370,7 @@ export class AuthenticationService {
       license: this.license,
       session,
       isElasticCloudDeployment,
+      customLogoutURL,
     });
 
     return {

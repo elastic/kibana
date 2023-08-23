@@ -6,12 +6,15 @@
  */
 
 import { extensionsServiceMock } from './services/extensions_service.mock';
+import { publicApiServiceMock } from './services/public_api_service.mock';
 
 export { extensionsServiceMock } from './services/extensions_service.mock';
+export { publicApiServiceMock } from './services/public_api_service.mock';
 
 function createIdxManagementSetupMock() {
   const mock = {
     extensionsService: extensionsServiceMock,
+    publicApiService: publicApiServiceMock,
   };
 
   return mock;

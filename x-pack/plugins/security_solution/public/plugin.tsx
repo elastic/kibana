@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { combineLatest, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
@@ -37,7 +37,7 @@ import { SOLUTION_NAME } from './common/translations';
 
 import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION } from '../common/constants';
 
-import { updateAppLinks, updateExtraAppLinks, type LinksPermissions } from './common/links';
+import { updateAppLinks, type LinksPermissions } from './common/links';
 import { registerDeepLinksUpdater } from './common/links/deep_links';
 import { licenseService } from './common/hooks/use_license';
 import type { SecuritySolutionUiConfigType } from './common/types';
@@ -511,7 +511,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
     const { links, getFilteredLinks } = await this.lazyApplicationLinks();
     const { license$ } = plugins.licensing;
-    const { upsellingService, extraAppLinks$ } = this.contract;
+    const { upsellingService, appLinksSwitcher } = this.contract;
 
     registerDeepLinksUpdater(this.appUpdater$);
 
@@ -528,18 +528,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       };
 
       // set initial links to not block rendering
-      updateAppLinks(links, linksPermissions);
+      updateAppLinks(appLinksSwitcher(links), linksPermissions);
 
       // set filtered links asynchronously
       const filteredLinks = await getFilteredLinks(core, plugins);
-      updateAppLinks(filteredLinks, linksPermissions);
-    });
-
-    combineLatest([extraAppLinks$, license$]).subscribe(([extraAppLinks, license]) => {
-      updateExtraAppLinks(extraAppLinks, {
-        ...baseLinksPermissions,
-        ...(license.type != null && { license }),
-      });
+      updateAppLinks(appLinksSwitcher(filteredLinks), linksPermissions);
     });
   }
 }

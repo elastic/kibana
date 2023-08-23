@@ -10,7 +10,7 @@ import { filter, startWith, map } from 'rxjs/operators';
 import { JsonObject, JsonValue } from '@kbn/utility-types';
 import { isNumber, mapValues } from 'lodash';
 import { Logger } from '@kbn/core/server';
-import { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
+import { AggregatedStatProvider, AggregatedStat } from '../lib/runtime_statistics_aggregator';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import {
   isTaskRunEvent,

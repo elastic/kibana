@@ -7,9 +7,11 @@
 
 import type { HttpHandler } from '@kbn/core-http-browser';
 import React, { useMemo } from 'react';
+import { TelemetryEvents } from '../../types';
 
 interface DataQualityProviderProps {
   httpFetch: HttpHandler;
+  telemetryEvents: TelemetryEvents;
 }
 
 const DataQualityContext = React.createContext<DataQualityProviderProps | undefined>(undefined);
@@ -17,12 +19,14 @@ const DataQualityContext = React.createContext<DataQualityProviderProps | undefi
 export const DataQualityProvider: React.FC<DataQualityProviderProps> = ({
   children,
   httpFetch,
+  telemetryEvents,
 }) => {
   const value = useMemo(
     () => ({
       httpFetch,
+      telemetryEvents,
     }),
-    [httpFetch]
+    [httpFetch, telemetryEvents]
   );
 
   return <DataQualityContext.Provider value={value}>{children}</DataQualityContext.Provider>;

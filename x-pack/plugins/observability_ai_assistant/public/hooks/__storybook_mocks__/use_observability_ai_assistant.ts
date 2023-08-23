@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+const service = {
+  start: async () => {
+    return {
+      getFunctions: [],
+    };
+  },
+};
+
 export function useObservabilityAIAssistant() {
-  return {};
+  return service;
 }

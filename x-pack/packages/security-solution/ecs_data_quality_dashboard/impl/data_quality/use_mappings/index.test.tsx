@@ -14,8 +14,17 @@ import { ERROR_LOADING_MAPPINGS } from '../translations';
 import { useMappings, UseMappings } from '.';
 
 const mockHttpFetch = jest.fn();
+const mockReportDataQualityIndexChecked = jest.fn();
+const mockReportDataQualityCheckAllClicked = jest.fn();
+const mockTelemetryEvents = {
+  reportDataQualityIndexChecked: mockReportDataQualityIndexChecked,
+  reportDataQualityCheckAllCompleted: mockReportDataQualityCheckAllClicked,
+};
+
 const ContextWrapper: React.FC = ({ children }) => (
-  <DataQualityProvider httpFetch={mockHttpFetch}>{children}</DataQualityProvider>
+  <DataQualityProvider httpFetch={mockHttpFetch} telemetryEvents={mockTelemetryEvents}>
+    {children}
+  </DataQualityProvider>
 );
 
 const pattern = 'auditbeat-*';

@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import { useEuiBackgroundColor } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
@@ -19,15 +19,14 @@ import { useLeftPanelContext } from './context';
 
 export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation' | 'response';
 export const LeftPanelKey: LeftPanelProps['key'] = 'document-details-left';
-
-export const LeftPanelVisualizeTabPath: LeftPanelProps['path'] = ['visualize'];
-export const LeftPanelInsightsTabPath: LeftPanelProps['path'] = ['insights'];
-export const LeftPanelInvestigationTabPath: LeftPanelProps['path'] = ['investigation'];
-export const LeftPanelResponseTabPath: LeftPanelProps['path'] = ['response'];
+export const LeftPanelVisualizeTab: LeftPanelPaths = 'visualize';
+export const LeftPanelInsightsTab: LeftPanelPaths = 'insights';
+export const LeftPanelInvestigationTab: LeftPanelPaths = 'investigation';
+export const LeftPanelResponseTab: LeftPanelPaths = 'response';
 
 export interface LeftPanelProps extends FlyoutPanelProps {
   key: 'document-details-left';
-  path?: LeftPanelPaths[];
+  path?: PanelPath;
   params?: {
     id: string;
     indexName: string;
@@ -42,13 +41,15 @@ export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
   const selectedTabId = useMemo(() => {
     const defaultTab = tabs[0].id;
     if (!path) return defaultTab;
-    return tabs.map((tab) => tab.id).find((tabId) => tabId === path[0]) ?? defaultTab;
+    return tabs.map((tab) => tab.id).find((tabId) => tabId === path.tab) ?? defaultTab;
   }, [path]);
 
   const setSelectedTabId = (tabId: LeftPanelTabsType[number]['id']) => {
     openLeftPanel({
       id: LeftPanelKey,
-      path: [tabId],
+      path: {
+        tab: tabId,
+      },
       params: {
         id: eventId,
         indexName,

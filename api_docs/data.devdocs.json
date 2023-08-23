@@ -11089,13 +11089,10 @@
           {
             "parentPluginId": "data",
             "id": "def-public.AggGroupLabels.AggGroupNames.Buckets",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "[AggGroupNames.Buckets]",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/aggs/agg_groups.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11103,13 +11100,10 @@
           {
             "parentPluginId": "data",
             "id": "def-public.AggGroupLabels.AggGroupNames.Metrics",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "[AggGroupNames.Metrics]",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/aggs/agg_groups.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11117,13 +11111,10 @@
           {
             "parentPluginId": "data",
             "id": "def-public.AggGroupLabels.AggGroupNames.None",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "[AggGroupNames.None]",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/data/common/search/aggs/agg_groups.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11735,7 +11726,7 @@
                 "label": "intervalOptions",
                 "description": [],
                 "signature": [
-                  "({ display: any; val: string; enabled(agg: ",
+                  "({ display: string; val: string; enabled(agg: ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -11743,7 +11734,7 @@
                     "section": "def-common.IBucketAggConfig",
                     "text": "IBucketAggConfig"
                   },
-                  "): boolean; } | { display: any; val: string; })[]"
+                  "): boolean; } | { display: string; val: string; })[]"
                 ],
                 "path": "src/plugins/data/public/index.ts",
                 "deprecated": false,
@@ -12052,13 +12043,10 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.search.aggs.parentPipelineType",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "parentPipelineType",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/data/public/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12161,13 +12149,10 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.search.aggs.siblingPipelineType",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "siblingPipelineType",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/data/public/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12233,7 +12218,7 @@
                 "label": "boundsDescendingRaw",
                 "description": [],
                 "signature": [
-                  "({ bound: number; interval: moment.Duration; boundLabel: any; intervalLabel: any; } | { bound: moment.Duration; interval: moment.Duration; boundLabel: any; intervalLabel: any; })[]"
+                  "({ bound: number; interval: moment.Duration; boundLabel: string; intervalLabel: string; } | { bound: moment.Duration; interval: moment.Duration; boundLabel: string; intervalLabel: string; })[]"
                 ],
                 "path": "src/plugins/data/public/index.ts",
                 "deprecated": false,
@@ -12793,6 +12778,10 @@
               "path": "src/plugins/dashboard/public/services/data/data_service.ts"
             },
             {
+              "plugin": "stackAlerts",
+              "path": "x-pack/plugins/stack_alerts/public/rule_types/threshold/expression.tsx"
+            },
+            {
               "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_row/document_stats.tsx"
             },
@@ -12803,10 +12792,6 @@
             {
               "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_expanded_row/choropleth_map.tsx"
-            },
-            {
-              "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/rule_types/threshold/expression.tsx"
             },
             {
               "plugin": "expressionPartitionVis",
@@ -13633,6 +13618,42 @@
                 "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
               {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
+              },
+              {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
               },
@@ -13715,42 +13736,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "infra",
@@ -15825,6 +15810,17 @@
             "trackAdoption": false,
             "returnComment": [],
             "children": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.DataViewsService.scriptedFieldsEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "scriptedFieldsEnabled",
+            "description": [],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "data",
@@ -19155,6 +19151,24 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.DataViewsServerPluginStart.getScriptedFieldsEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "getScriptedFieldsEnabled",
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -21369,6 +21383,42 @@
                 "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
               {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
+              },
+              {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
               },
@@ -21451,42 +21501,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "infra",
@@ -24432,6 +24446,17 @@
             "trackAdoption": false,
             "returnComment": [],
             "children": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewsService.scriptedFieldsEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "scriptedFieldsEnabled",
+            "description": [],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "data",
@@ -28886,6 +28911,21 @@
           "{ query: string | { [key: string]: any; }; language: string; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SAVED_QUERY_BASE_URL",
+        "type": "string",
+        "tags": [],
+        "label": "SAVED_QUERY_BASE_URL",
+        "description": [],
+        "signature": [
+          "\"/internal/saved_query\""
+        ],
+        "path": "src/plugins/data/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

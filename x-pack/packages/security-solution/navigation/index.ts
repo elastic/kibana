@@ -9,12 +9,4 @@ export { useGetAppUrl, useNavigateTo, useNavigation } from './src/navigation';
 export type { GetAppUrl, NavigateTo } from './src/navigation';
 export { NavigationProvider } from './src/context';
 export { SecurityPageName, LinkCategoryType } from './src/constants';
-export type {
-  NavigationLink,
-  LinkCategories,
-  LinkCategory,
-  TitleLinkCategory,
-  SeparatorLinkCategory,
-  AccordionLinkCategory,
-} from './src/types';
-export { isAccordionLinkCategory, isSeparatorLinkCategory, isTitleLinkCategory } from './src/types';
+export * from './src/types';

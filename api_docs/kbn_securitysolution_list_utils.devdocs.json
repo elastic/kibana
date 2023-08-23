@@ -3326,13 +3326,10 @@
           {
             "parentPluginId": "@kbn/securitysolution-list-utils",
             "id": "def-common.doesNotExistOperator.message",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "message",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3407,13 +3404,10 @@
           {
             "parentPluginId": "@kbn/securitysolution-list-utils",
             "id": "def-common.doesNotMatchOperator.message",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "message",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3488,13 +3482,10 @@
           {
             "parentPluginId": "@kbn/securitysolution-list-utils",
             "id": "def-common.existsOperator.message",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "message",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3569,13 +3560,10 @@
           {
             "parentPluginId": "@kbn/securitysolution-list-utils",
             "id": "def-common.isInListOperator.message",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "message",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3650,13 +3638,10 @@
           {
             "parentPluginId": "@kbn/securitysolution-list-utils",
             "id": "def-common.isNotInListOperator.message",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "message",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3731,13 +3716,10 @@
           {
             "parentPluginId": "@kbn/securitysolution-list-utils",
             "id": "def-common.isNotOneOfOperator.message",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "message",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3812,13 +3794,10 @@
           {
             "parentPluginId": "@kbn/securitysolution-list-utils",
             "id": "def-common.isNotOperator.message",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "message",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3893,13 +3872,10 @@
           {
             "parentPluginId": "@kbn/securitysolution-list-utils",
             "id": "def-common.isOneOfOperator.message",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "message",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3974,13 +3950,10 @@
           {
             "parentPluginId": "@kbn/securitysolution-list-utils",
             "id": "def-common.isOperator.message",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "message",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4055,13 +4028,10 @@
           {
             "parentPluginId": "@kbn/securitysolution-list-utils",
             "id": "def-common.matchesOperator.message",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "message",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false

@@ -21,8 +21,8 @@ export const SESSION_VIEW_ERROR_MESSAGE = i18n.translate(
   }
 );
 
-export const USERS_TITLE = i18n.translate('xpack.securitySolution.flyout.entities.usersTitle', {
-  defaultMessage: 'Users',
+export const USER_TITLE = i18n.translate('xpack.securitySolution.flyout.entities.userTitle', {
+  defaultMessage: 'User',
 });
 
 export const USERS_INFO_TITLE = i18n.translate(
@@ -60,8 +60,8 @@ export const RELATED_ENTITIES_IP_COLUMN_TITLE = i18n.translate(
   }
 );
 
-export const HOSTS_TITLE = i18n.translate('xpack.securitySolution.flyout.entities.hostsTitle', {
-  defaultMessage: 'Hosts',
+export const HOST_TITLE = i18n.translate('xpack.securitySolution.flyout.entities.hostTitle', {
+  defaultMessage: 'Host',
 });
 
 export const HOSTS_INFO_TITLE = i18n.translate(
