@@ -75,12 +75,12 @@ export const DiscoverTabContent = () => {
   }, []);
 
   const initialDiscoverCustomizationCallback: CustomizationCallback = useCallback(
-    ({ stateContainer }) => {
+    async ({ stateContainer }) => {
       stateContainerRef.current = stateContainer;
 
       if (discoverAppState && discoverInternalState && discoverSavedSearchState) {
-        stateContainer.appState.syncState().start();
         stateContainer.appState.set(discoverAppState);
+        await stateContainer.appState.replaceUrlState(discoverAppState);
       } else {
         // set initial dataView Id
         if (dataView) stateContainer.actions.setDataView(dataView);
