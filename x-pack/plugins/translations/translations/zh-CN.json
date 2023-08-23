@@ -28431,7 +28431,6 @@
     "xpack.remoteClusters.remoteClusterForm.sectionModeTitle": "连接模式",
     "xpack.remoteClusters.remoteClusterForm.sectionNameDescription": "集群的唯一名称。",
     "xpack.remoteClusters.remoteClusterForm.sectionNameTitle": "名称",
-    "xpack.remoteClusters.remoteClusterForm.sectionSeedsHelpText.transportPortLinkText": "传输端口",
     "xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.learnMoreLinkLabel": "了解详情。",
     "xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.optionNameLabel": "如果不可用，则跳过",
     "xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableLabel": "如果不可用，则跳过",
