@@ -331,7 +331,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         {
           selector: 'blocklistPage-card-criteriaConditions',
           value:
-            ' OSIS WindowsAND file.hash.*is one of A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+            ' OSIS WindowsAND file.hash.*is one of a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
         },
       ],
     },
@@ -366,7 +366,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         {
           type: 'click',
           customSelector:
-            '[data-test-subj="blocklist-form-values-input-A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476"] > span > button',
+            '[data-test-subj="blocklist-form-values-input-a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476"] > span > button',
         },
         {
           type: 'input',
