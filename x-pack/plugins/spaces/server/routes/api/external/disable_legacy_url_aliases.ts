@@ -12,10 +12,10 @@ import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initDisableLegacyUrlAliasesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, getSpacesService, usageStatsServicePromise } = deps;
+  const { router, getSpacesService, usageStatsServicePromise } = deps;
   const usageStatsClientPromise = usageStatsServicePromise.then(({ getClient }) => getClient());
 
-  externalRouter.post(
+  router.post(
     {
       path: '/api/spaces/_disable_legacy_url_aliases',
       validate: {
