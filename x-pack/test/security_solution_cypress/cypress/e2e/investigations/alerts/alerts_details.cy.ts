@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
-import { tag } from '../../../tags';
+
 import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import {
   ALERT_FLYOUT,
@@ -35,7 +35,7 @@ import { ALERT_SUMMARY_SEVERITY_DONUT_CHART } from '../../../screens/alerts';
 import { getLocalstorageEntryAsObject } from '../../../helpers/common';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 
-describe('Alert details flyout', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Alert details flyout', { tags: ['ess', 'serverless'] }, () => {
   describe('Basic functions', () => {
     before(() => {
       cleanKibana();

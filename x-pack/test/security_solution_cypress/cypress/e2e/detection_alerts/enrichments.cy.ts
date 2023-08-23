@@ -32,7 +32,7 @@ import { login, visit } from '../../tasks/login';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-describe('Enrichment', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Enrichment', { tags: ['ess', 'serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'risk_users');

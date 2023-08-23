@@ -38,7 +38,7 @@ import {
 } from '../../../../tasks/table_pagination';
 import { TABLE_FIRST_PAGE, TABLE_SECOND_PAGE } from '../../../../screens/table_pagination';
 
-describe('Rules table: sorting', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Rules table: sorting', { tags: ['ess', 'serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();

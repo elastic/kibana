@@ -76,7 +76,7 @@ const expectedSlackMessage = 'Slack action test message';
 
 describe(
   'Detection rules, bulk edit of rule actions',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['ess', 'brokenInServerless'] },
   () => {
     beforeEach(() => {
       cleanKibana();

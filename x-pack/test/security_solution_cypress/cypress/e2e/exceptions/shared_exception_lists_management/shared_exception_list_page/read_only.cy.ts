@@ -22,7 +22,7 @@ import {
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 
-describe('Shared exception lists - read only', { tags: tag.ESS }, () => {
+describe('Shared exception lists - read only', { tags: 'ess' }, () => {
   before(() => {
     cy.task('esArchiverResetKibana');
   });

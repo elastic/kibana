@@ -45,7 +45,7 @@ describe(
   'Entity analytics management page',
   {
     env: { ftrConfig: { enableExperimental: ['riskScoringRoutesEnabled'] } },
-    tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS],
+    tags: ['ess', 'brokenInServerless'],
   },
   () => {
     before(() => {

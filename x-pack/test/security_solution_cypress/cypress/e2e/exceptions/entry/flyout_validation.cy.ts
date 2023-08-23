@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
+
 
 import { getNewRule } from '../../../objects/rule';
 
@@ -66,7 +66,7 @@ import { getExceptionList } from '../../../objects/exception';
 // to test in enzyme and very small changes can inadvertently add
 // bugs. As the complexity within the builder grows, these should
 // ensure the most basic logic holds.
-describe.skip('Exceptions flyout', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe.skip('Exceptions flyout', { tags: ['ess', 'serverless'] }, () => {
   before(() => {
     cy.task('esArchiverResetKibana');
     // this is a made-up index that has just the necessary

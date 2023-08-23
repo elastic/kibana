@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
+
 
 import { getServiceNowConnector, getServiceNowITSMHealthResponse } from '../../../objects/case';
 
@@ -21,7 +21,7 @@ import { login, visitWithoutDateRange } from '../../../tasks/login';
 
 import { CASES_URL } from '../../../urls/navigation';
 
-describe('Cases connectors', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Cases connectors', { tags: ['ess', 'serverless'] }, () => {
   const configureResult = {
     connector: {
       id: 'e271c3b8-f702-4fbc-98e0-db942b573bbd',

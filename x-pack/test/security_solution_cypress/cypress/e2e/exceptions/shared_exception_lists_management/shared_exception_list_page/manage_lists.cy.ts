@@ -47,7 +47,7 @@ const getExceptionList2 = () => ({
 
 describe(
   'Manage lists from "Shared Exception Lists" page',
-  { tags: [tag.ESS, tag.SERVERLESS] },
+  { tags: ['ess', 'serverless'] },
   () => {
     describe('Create/Export/Delete List', () => {
       before(() => {

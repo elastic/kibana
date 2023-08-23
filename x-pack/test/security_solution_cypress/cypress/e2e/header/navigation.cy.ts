@@ -78,7 +78,7 @@ import {
   THREAT_INTELLIGENCE_PAGE,
 } from '../../screens/kibana_navigation';
 
-describe('top-level navigation common to all pages in the Security app', { tags: tag.ESS }, () => {
+describe('top-level navigation common to all pages in the Security app', { tags: 'ess' }, () => {
   beforeEach(() => {
     login();
     visit(TIMELINES_URL);
@@ -200,7 +200,7 @@ describe('top-level navigation common to all pages in the Security app', { tags:
   });
 });
 
-describe('Kibana navigation to all pages in the Security app ', { tags: tag.ESS }, () => {
+describe('Kibana navigation to all pages in the Security app ', { tags: 'ess' }, () => {
   beforeEach(() => {
     login();
     visit(KIBANA_HOME);

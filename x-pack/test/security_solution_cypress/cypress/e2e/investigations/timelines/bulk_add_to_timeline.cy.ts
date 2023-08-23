@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
+
 
 import { getNewRule } from '../../../objects/rule';
 import { SELECTED_ALERTS } from '../../../screens/alerts';
@@ -23,7 +23,7 @@ import { openEvents, openSessions } from '../../../tasks/hosts/main';
 import { login, visit } from '../../../tasks/login';
 import { ALERTS_URL, HOSTS_URL } from '../../../urls/navigation';
 
-describe('Bulk Investigate in Timeline', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Bulk Investigate in Timeline', { tags: ['ess', 'serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'bulk_process');

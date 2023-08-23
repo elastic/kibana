@@ -16,6 +16,7 @@ import cypress from 'cypress';
 import { findChangedFiles } from 'find-cypress-specs';
 import minimatch from 'minimatch';
 import path from 'path';
+import grep from '@cypress/grep/src/plugin'
 
 import {
   EsVersion,
@@ -42,10 +43,8 @@ import { parseTestFileConfig } from './utils';
  * If process.env.RUN_ALL_TESTS is true, returns all matching files, otherwise, return files that should be run by this job based on process.env.BUILDKITE_PARALLEL_JOB_COUNT and process.env.BUILDKITE_PARALLEL_JOB
  */
 const retrieveIntegrations = (
-  /** Pattern passed to globby to find spec files. */ specPattern: string[]
+  integrationsPaths: string[]
 ) => {
-  const integrationsPaths = globby.sync(specPattern);
-
   if (process.env.RUN_ALL_TESTS === 'true') {
     return integrationsPaths;
   } else {
@@ -89,7 +88,7 @@ export const cli = () => {
       ) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
       const spec: string | undefined = argv?.spec as string;
-      let files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
+      let files = retrieveIntegrations(grep({ ...cypressConfigFile, specPattern: spec ? [spec] : cypressConfigFile.e2e.specPattern, excludeSpecPattern:[] }).specPattern);
 
       if (argv.changedSpecsOnly) {
         const basePath = process.cwd().split('kibana/')[1];
@@ -451,7 +450,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
               try {
                 result = await cypress.run({
                   browser: 'chrome',
-                  spec: filePath,
+                  spec: `cypress/${filePath.split('/cypress')[1]}`,
                   configFile: cypressConfigFilePath,
                   reporter: argv.reporter as string,
                   reporterOptions: argv.reporterOptions,

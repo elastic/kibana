@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
+
 
 import { getTimelineNonValidQuery } from '../../../objects/timeline';
 
@@ -36,7 +36,7 @@ import { TIMELINES_URL } from '../../../urls/navigation';
 const text = 'system_indices_superuser';
 const link = 'https://www.elastic.co/';
 
-describe.skip('Timeline notes tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe.skip('Timeline notes tab', { tags: ['ess', 'serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();

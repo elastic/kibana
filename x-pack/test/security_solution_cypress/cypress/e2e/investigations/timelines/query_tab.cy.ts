@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
+
 
 import { getTimeline } from '../../../objects/timeline';
 
@@ -31,7 +31,7 @@ import {
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe.skip('Timeline query tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe.skip('Timeline query tab', { tags: ['ess', 'serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();
@@ -82,7 +82,7 @@ describe.skip('Timeline query tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
         .and('match', /Unpin the event in row 2/);
     });
 
-    it('should have an unlock icon', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
+    it('should have an unlock icon', { tags: 'brokenInServerless' }, () => {
       cy.get(UNLOCKED_ICON).should('be.visible');
     });
   });

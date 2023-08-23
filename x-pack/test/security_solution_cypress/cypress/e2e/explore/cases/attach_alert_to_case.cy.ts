@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../../tags';
+
 
 import { getNewRule } from '../../../objects/rule';
 
@@ -25,7 +25,7 @@ const loadDetectionsPage = (role: ROLES) => {
   waitForAlertsToPopulate();
 };
 
-describe('Alerts timeline', () => {
+describe('Alerts timeline', { tags: 'ess' }, () => {
   before(() => {
     // First we login as a privileged user to create alerts.
     cleanKibana();
@@ -35,7 +35,7 @@ describe('Alerts timeline', () => {
     waitForAlertsToPopulate();
   });
 
-  context('Privileges: read only', { tags: tag.ESS }, () => {
+  context('Privileges: read only', { tags: 'ess' }, () => {
     beforeEach(() => {
       loadDetectionsPage(ROLES.reader);
     });
@@ -53,7 +53,7 @@ describe('Alerts timeline', () => {
     });
   });
 
-  context('Privileges: can crud', { tags: tag.ESS }, () => {
+  context('Privileges: can crud', { tags: 'ess' }, () => {
     beforeEach(() => {
       loadDetectionsPage(ROLES.platform_engineer);
       cy.get(LOADING_INDICATOR).should('not.exist');

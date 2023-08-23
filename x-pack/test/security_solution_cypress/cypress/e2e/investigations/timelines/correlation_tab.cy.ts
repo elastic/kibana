@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
+
 
 import { openTimeline } from '../../../tasks/timelines';
 import { getTimeline } from '../../../objects/timeline';
@@ -23,7 +23,7 @@ import { TIMELINES_URL } from '../../../urls/navigation';
 import { EQL_QUERY_VALIDATION_ERROR } from '../../../screens/create_new_rule';
 import { deleteTimelines } from '../../../tasks/common';
 
-describe('Correlation tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Correlation tab', { tags: ['ess', 'serverless'] }, () => {
   const eql = 'any where process.name == "zsh"';
 
   beforeEach(() => {

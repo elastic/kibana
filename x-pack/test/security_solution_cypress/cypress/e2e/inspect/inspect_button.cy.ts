@@ -23,7 +23,7 @@ import { selectDataView } from '../../tasks/sourcerer';
 
 const DATA_VIEW = 'auditbeat-*';
 
-describe('Inspect Explore pages', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Inspect Explore pages', { tags: ['ess', 'serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', 'risk_users');
     cy.task('esArchiverLoad', 'risk_hosts');

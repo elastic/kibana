@@ -41,7 +41,7 @@ const getExceptionList2 = () => ({
   list_id: 'exception_list_2',
 });
 
-describe('Duplicate List', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Duplicate List', { tags: ['ess', 'serverless'] }, () => {
   beforeEach(() => {
     cy.task('esArchiverResetKibana');
     login();

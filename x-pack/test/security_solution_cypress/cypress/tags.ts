@@ -6,7 +6,7 @@
  */
 
 export const tag = {
-  SERVERLESS: '@serverless',
-  ESS: '@ess',
-  BROKEN_IN_SERVERLESS: '@brokenInServerless',
+  SERVERLESS: 'serverless',
+  ESS: 'ess',
+  BROKEN_IN_SERVERLESS: 'brokenInServerless',
 };

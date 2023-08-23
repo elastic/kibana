@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { isArray } from 'lodash';
-import { tag } from '../../../tags';
+
 
 import { formatMitreAttackDescription, getHumanizedDuration } from '../../../helpers/rules';
 import { getMachineLearningRule } from '../../../objects/rule';
@@ -54,7 +54,7 @@ import { login, visitWithoutDateRange } from '../../../tasks/login';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Detection rules, machine learning', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('Detection rules, machine learning', { tags: ['ess', 'brokenInServerless'] }, () => {
   const expectedUrls = (getMachineLearningRule().references ?? []).join('');
   const expectedFalsePositives = (getMachineLearningRule().false_positives ?? []).join('');
   const expectedTags = (getMachineLearningRule().tags ?? []).join('');

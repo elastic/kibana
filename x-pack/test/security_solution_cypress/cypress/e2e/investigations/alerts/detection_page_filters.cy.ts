@@ -8,7 +8,7 @@ import { encode } from '@kbn/rison';
 import type { FilterItemObj } from '@kbn/security-solution-plugin/public/common/components/filter_group/types';
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '@kbn/security-solution-plugin/common/constants';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
-import { tag } from '../../../tags';
+
 
 import { getNewRule } from '../../../objects/rule';
 import {
@@ -108,7 +108,7 @@ const assertFilterControlsWithFilterObject = (
   });
 };
 
-describe(`Detections : Page Filters`, { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe(`Detections : Page Filters`, { tags: ['ess', 'brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule({ rule_id: 'custom_rule_filters' }));

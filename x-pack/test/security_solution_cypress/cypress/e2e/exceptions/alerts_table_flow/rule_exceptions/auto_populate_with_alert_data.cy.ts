@@ -42,7 +42,7 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 // See https://github.com/elastic/kibana/issues/163967
 describe.skip(
   'Auto populate exception with Alert data',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['ess', 'brokenInServerless'] },
   () => {
     const ITEM_NAME = 'Sample Exception Item';
     const ITEM_NAME_EDIT = 'Sample Exception Item Edit';

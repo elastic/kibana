@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
+
 
 import { login, visit } from '../../../tasks/login';
 
@@ -13,7 +13,7 @@ import { cleanKibana } from '../../../tasks/common';
 import { TABLE_CELL } from '../../../screens/alerts_details';
 import { kqlSearch } from '../../../tasks/security_header';
 
-describe('All hosts table', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('All hosts table', { tags: ['ess', 'serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'risk_hosts');

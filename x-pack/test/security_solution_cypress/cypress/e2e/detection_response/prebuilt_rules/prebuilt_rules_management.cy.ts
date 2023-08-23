@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tag } from '../../../tags';
+
 
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import {
@@ -50,7 +50,7 @@ const rules = Array.from(Array(5)).map((_, i) => {
   });
 });
 
-describe('Prebuilt rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Prebuilt rules', { tags: ['ess', 'serverless'] }, () => {
   before(() => {
     cleanKibana();
   });

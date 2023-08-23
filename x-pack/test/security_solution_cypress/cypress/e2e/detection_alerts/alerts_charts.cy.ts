@@ -26,7 +26,7 @@ import {
 } from '../../screens/search_bar';
 import { TOASTER } from '../../screens/alerts_detection_rules';
 
-describe('Histogram legend hover actions', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Histogram legend hover actions', { tags: ['ess', 'serverless'] }, () => {
   const ruleConfigs = getNewRule();
 
   before(() => {

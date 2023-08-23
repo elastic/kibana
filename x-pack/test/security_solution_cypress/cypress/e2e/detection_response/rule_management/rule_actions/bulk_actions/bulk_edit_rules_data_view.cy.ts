@@ -57,7 +57,7 @@ const expectedIndexPatterns = ['index-1-*', 'index-2-*'];
 
 describe(
   'Bulk editing index patterns of rules with a data view only',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['ess', 'brokenInServerless'] },
   () => {
     before(() => {
       cleanKibana();

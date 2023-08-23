@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
+
 
 import { getTimeline } from '../../../objects/timeline';
 
@@ -36,7 +36,7 @@ import {
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Open timeline', { tags: [tag.BROKEN_IN_SERVERLESS, tag.ESS] }, () => {
+describe('Open timeline', { tags: ['brokenInServerless', 'ess'] }, () => {
   describe('Open timeline modal', () => {
     before(function () {
       cleanKibana();

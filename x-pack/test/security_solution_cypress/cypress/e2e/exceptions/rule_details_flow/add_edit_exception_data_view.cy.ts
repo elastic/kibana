@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
+
 
 import { getNewRule } from '../../../objects/rule';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
@@ -44,7 +44,7 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
 describe(
   'Add exception using data views from rule details',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['ess', 'brokenInServerless'] },
   () => {
     const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
     const ITEM_NAME = 'Sample Exception List Item';

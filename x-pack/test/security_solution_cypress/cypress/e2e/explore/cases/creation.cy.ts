@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
+
 
 import type { TestCase } from '../../../objects/case';
 import { getCase1 } from '../../../objects/case';
@@ -54,7 +54,7 @@ import { loginWithUser, visit, visitWithoutDateRange } from '../../../tasks/logi
 
 import { CASES_URL, OVERVIEW_URL } from '../../../urls/navigation';
 
-describe('Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Cases', { tags: ['ess', 'serverless'] }, () => {
   before(() => {
     cleanKibana();
     createTimeline(getCase1().timeline).then((response) =>

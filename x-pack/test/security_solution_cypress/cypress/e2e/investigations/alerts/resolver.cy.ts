@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
+
 
 import { ANALYZER_NODE } from '../../../screens/alerts';
 
@@ -18,7 +18,7 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login, visit } from '../../../tasks/login';
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe('Analyze events view for alerts', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Analyze events view for alerts', { tags: ['ess', 'serverless'] }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule());

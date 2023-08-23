@@ -23,7 +23,7 @@ import { getHostIpFilter } from '../../objects/filter';
 import { HOSTS_URL } from '../../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 
-describe('SearchBar', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('SearchBar', { tags: ['ess', 'serverless'] }, () => {
   beforeEach(() => {
     login();
     visit(HOSTS_URL);

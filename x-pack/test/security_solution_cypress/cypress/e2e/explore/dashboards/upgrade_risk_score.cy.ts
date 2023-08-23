@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
+
 
 import { getNewRule } from '../../../objects/rule';
 import {
@@ -39,7 +39,7 @@ import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
 const spaceId = 'default';
 
-describe('Upgrade risk scores', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Upgrade risk scores', { tags: ['ess', 'serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();

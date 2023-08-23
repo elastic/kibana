@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
+
 
 import { getNewRule } from '../../../objects/rule';
 
@@ -31,7 +31,7 @@ import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 
 describe(
   'Add multiple conditions and validate the generated exceptions',
-  { tags: [tag.ESS, tag.SERVERLESS] },
+  { tags: ['ess', 'serverless'] },
   () => {
     beforeEach(() => {
       cy.task('esArchiverResetKibana');

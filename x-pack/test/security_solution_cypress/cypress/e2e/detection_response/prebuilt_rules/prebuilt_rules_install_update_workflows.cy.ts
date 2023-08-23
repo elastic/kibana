@@ -7,7 +7,7 @@
 
 import type { BulkInstallPackageInfo } from '@kbn/fleet-plugin/common';
 import type { Rule } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
-import { tag } from '../../../tags';
+
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import {
   GO_BACK_TO_RULES_TABLE_BUTTON,
@@ -41,7 +41,7 @@ import {
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update workflow',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['ess', 'brokenInServerless'] },
   () => {
     beforeEach(() => {
       login();

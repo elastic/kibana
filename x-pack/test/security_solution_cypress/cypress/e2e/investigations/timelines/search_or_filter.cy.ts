@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
+
 
 import {
   ADD_FILTER,
@@ -27,7 +27,7 @@ import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 
 import { HOSTS_URL, TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Timeline search and filters', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('Timeline search and filters', { tags: ['ess', 'brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });

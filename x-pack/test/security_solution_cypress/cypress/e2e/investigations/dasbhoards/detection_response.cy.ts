@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
+
 
 import { getNewRule } from '../../../objects/rule';
 import { ALERTS_COUNT } from '../../../screens/alerts';
@@ -43,7 +43,7 @@ import { ALERTS_URL, DASHBOARDS_URL, DETECTIONS_RESPONSE_URL } from '../../../ur
 const TEST_USER_NAME = 'test';
 const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 
-describe('Detection response view', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('Detection response view', { tags: ['ess', 'brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule());

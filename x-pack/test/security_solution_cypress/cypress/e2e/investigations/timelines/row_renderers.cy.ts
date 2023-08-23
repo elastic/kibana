@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
+
 
 import { elementsOverlap } from '../../../helpers/rules';
 import {
@@ -25,7 +25,7 @@ import { populateTimeline } from '../../../tasks/timeline';
 
 import { HOSTS_URL } from '../../../urls/navigation';
 
-describe('Row renderers', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Row renderers', { tags: ['ess', 'serverless'] }, () => {
   before(() => {
     cleanKibana();
   });

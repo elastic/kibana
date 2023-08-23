@@ -48,7 +48,7 @@ import { TOOLTIP } from '../../../../../screens/common';
 
 const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 
-describe('rule snoozing', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('rule snoozing', { tags: ['ess', 'serverless'] }, () => {
   before(() => {
     cleanKibana();
   });

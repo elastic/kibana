@@ -11,7 +11,6 @@ import {
   RULES_UPDATES,
 } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../../tags';
 
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import { createAndInstallMockedPrebuiltRules } from '../../../tasks/api_calls/prebuilt_rules';
@@ -58,7 +57,7 @@ const loadPageAsReadOnlyUser = (url: string) => {
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update - Authorization/RBAC',
-  { tags: tag.ESS },
+  { tags: 'ess' },
   () => {
     beforeEach(() => {
       login();

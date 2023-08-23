@@ -35,7 +35,7 @@ import { getNewRule } from '../../../../objects/rule';
 const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000;
 const NUM_OF_TEST_RULES = 6;
 
-describe('Rules table: auto-refresh', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('Rules table: auto-refresh', { tags: ['ess', 'brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     login();

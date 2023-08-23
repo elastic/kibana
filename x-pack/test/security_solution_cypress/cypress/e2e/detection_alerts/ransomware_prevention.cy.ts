@@ -16,7 +16,7 @@ import { TIMELINE_QUERY, TIMELINE_VIEW_IN_ANALYZER } from '../../screens/timelin
 import { selectAlertsHistogram } from '../../tasks/alerts';
 import { createTimeline } from '../../tasks/timelines';
 
-describe('Ransomware Prevention Alerts', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Ransomware Prevention Alerts', { tags: ['ess', 'serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', 'ransomware_prevention');
   });

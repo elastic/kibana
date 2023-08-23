@@ -100,7 +100,7 @@ function expectDefaultRulesTableState(): void {
   expectTablePage(1);
 }
 
-describe('Rules table: persistent state', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Rules table: persistent state', { tags: ['ess', 'serverless'] }, () => {
   before(() => {
     cleanKibana();
     createTestRules();

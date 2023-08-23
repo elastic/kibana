@@ -71,7 +71,7 @@ import {
 
 describe(
   'Alert details expandable flyout right panel overview tab',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['ess', 'brokenInServerless'] },
   () => {
     const rule = getNewRule();
 

@@ -25,7 +25,7 @@ import {
 } from '../../../../tasks/common/callouts';
 import { login, visitSecurityDetectionRulesPage } from '../../../../tasks/login';
 
-describe('All rules - read only', { tags: tag.ESS }, () => {
+describe('All rules - read only', { tags: 'ess' }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule({ rule_id: '1', enabled: false }));
