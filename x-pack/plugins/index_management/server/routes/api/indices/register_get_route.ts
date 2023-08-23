@@ -16,6 +16,7 @@ export function registerGetRoute({
   router,
   indexDataEnricher,
   lib: { handleEsError },
+  config,
 }: RouteDependencies) {
   router.get(
     {
@@ -30,7 +31,12 @@ export function registerGetRoute({
       const client = (await context.core).elasticsearch.client as IScopedClusterClient;
       const { indexName } = request.params;
       try {
-        const indices = await fetchIndices(client, indexDataEnricher, [indexName]);
+        const indices = await fetchIndices({
+          client,
+          indexDataEnricher,
+          indexNames: [indexName],
+          config,
+        });
         if (indices.length !== 1) {
           return reportServerError(
             response,
