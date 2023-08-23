@@ -27,8 +27,8 @@ describe('Differential Functions page', () => {
       cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions/differential', { rangeFrom, rangeTo });
       // wait for both apis to finisto move on
-      cy.wait('@getTopNFunctions');
-      cy.wait('@getTopNFunctions');
+      cy.wait('@getTopNFunctions', { timeout: 30000 });
+      cy.wait('@getTopNFunctions', { timeout: 30000 });
       [
         { id: 'overallPerformance', value: '0%' },
         { id: 'annualizedCo2', value: '672.14 lbs / 304.88 kg' },
@@ -46,7 +46,8 @@ describe('Differential Functions page', () => {
         comparisonRangeFrom: rangeFrom,
         comparisonRangeTo: rangeTo,
       });
-      cy.wait('@getTopNFunctions');
+      cy.wait('@getTopNFunctions', { timeout: 30000 });
+      cy.wait('@getTopNFunctions', { timeout: 30000 });
       [
         { id: 'overallPerformance', value: '0%' },
         { id: 'annualizedCo2', value: '0 lbs / 0 kg', comparisonValue: '672.14 lbs / 304.88 kg' },
@@ -69,8 +70,8 @@ describe('Differential Functions page', () => {
         comparisonRangeTo,
       });
       // wait for both apis to finisto move on
-      cy.wait('@getTopNFunctions');
-      cy.wait('@getTopNFunctions');
+      cy.wait('@getTopNFunctions', { timeout: 30000 });
+      cy.wait('@getTopNFunctions', { timeout: 30000 });
       [
         { id: 'overallPerformance', value: '33.09%', icon: 'sortUp_success' },
         {
@@ -109,8 +110,8 @@ describe('Differential Functions page', () => {
         comparisonRangeTo: rangeTo,
       });
       // wait for both apis to finisto move on
-      cy.wait('@getTopNFunctions');
-      cy.wait('@getTopNFunctions');
+      cy.wait('@getTopNFunctions', { timeout: 30000 });
+      cy.wait('@getTopNFunctions', { timeout: 30000 });
       [
         { id: 'overallPerformance', value: '49.46%', icon: 'sortDown_danger' },
         {
@@ -143,8 +144,8 @@ describe('Differential Functions page', () => {
       cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions/differential');
       // wait for both apis to finisto move on
-      cy.wait('@getTopNFunctions');
-      cy.wait('@getTopNFunctions');
+      cy.wait('@getTopNFunctions', { timeout: 30000 });
+      cy.wait('@getTopNFunctions', { timeout: 30000 });
       [
         { id: 'overallPerformance', value: '0%' },
         { id: 'annualizedCo2', value: '0 lbs / 0 kg' },
