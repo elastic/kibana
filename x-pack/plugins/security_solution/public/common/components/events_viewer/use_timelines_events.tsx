@@ -155,7 +155,6 @@ export const useTimelineEventsHandler = ({
   filterStatus,
 }: UseTimelineEventsProps): [boolean, TimelineArgs, TimelineEventsSearchHandler] => {
   const dispatch = useDispatch();
-  const { startTracking } = useApmTracking(id);
   const refetch = useRef<Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
