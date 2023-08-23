@@ -144,7 +144,13 @@ export const ElasticsearchIndexingApi = () => {
   const showNoIndices = !isLoading && data?.indices?.length === 0 && indexSearchQuery === undefined;
 
   return (
-    <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchIndexingApiPage">
+    <EuiPageTemplate
+      offset={0}
+      grow
+      restrictWidth
+      data-test-subj="svlSearchIndexingApiPage"
+      panelled
+    >
       <EuiPageTemplate.Header
         pageTitle={i18n.translate('xpack.serverlessSearch.content.indexingApi.header.title', {
           defaultMessage: 'Indexing API',
