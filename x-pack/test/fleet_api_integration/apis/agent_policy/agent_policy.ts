@@ -454,6 +454,34 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      it('should copy inactivity timeout', async () => {
+        const {
+          body: { item: policyWithTimeout },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Inactivity test',
+            namespace: 'default',
+            is_managed: true,
+            inactivity_timeout: 123,
+          })
+          .expect(200);
+
+        const {
+          body: { item: newPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies/${policyWithTimeout.id}/copy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Inactivity test copy',
+            description: 'Test',
+          })
+          .expect(200);
+
+        expect(newPolicy.inactivity_timeout).to.eql(123);
+      });
+
       it('should increment package policy copy names', async () => {
         async function getSystemPackagePolicyCopyVersion(policyId: string) {
           const {

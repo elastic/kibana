@@ -8,27 +8,15 @@
 import { safeLoad as loadYaml } from 'js-yaml';
 import { readFileSync } from 'fs';
 import * as path from 'path';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, merge } from 'lodash';
 import { FeaturesPrivileges, Role, RoleIndexPrivilege } from '@kbn/security-plugin/common';
+import { ServerlessRoleName } from '../types';
 
 const ROLES_YAML_FILE_PATH = path.join(__dirname, 'project_controller_security_roles.yml');
 
-const ROLE_NAMES = [
-  't1_analyst',
-  't2_analyst',
-  't3_analyst',
-  'threat_intelligence_analyst',
-  'rule_author',
-  'soc_manager',
-  'detections_admin',
-  'platform_engineer',
-  'endpoint_operations_analyst',
-  'endpoint_policy_manager',
-] as const;
+const ROLE_NAMES = Object.values(ServerlessRoleName);
 
-export type ServerlessRoleName = typeof ROLE_NAMES[number];
-
-type YamlRoleDefinitions = Record<
+export type YamlRoleDefinitions = Record<
   ServerlessRoleName,
   {
     cluster: string[] | null;
@@ -45,10 +33,16 @@ const roleDefinitions = loadYaml(readFileSync(ROLES_YAML_FILE_PATH, 'utf8')) as 
 
 export type ServerlessSecurityRoles = Record<ServerlessRoleName, Role>;
 
-export const getServerlessSecurityKibanaRoleDefinitions = (): ServerlessSecurityRoles => {
+export const getServerlessSecurityKibanaRoleDefinitions = (
+  additionalRoleDefinitions?: YamlRoleDefinitions
+): ServerlessSecurityRoles => {
   const definitions = cloneDeep(roleDefinitions);
+  const mergedDefinitions: YamlRoleDefinitions = merge(
+    definitions,
+    additionalRoleDefinitions || {}
+  );
 
-  return Object.entries(definitions).reduce((roles, [roleName, definition]) => {
+  return Object.entries(mergedDefinitions).reduce((roles, [roleName, definition]) => {
     if (!ROLE_NAMES.includes(roleName as ServerlessRoleName)) {
       throw new Error(
         `Un-expected role [${roleName}] found in YAML file [${ROLES_YAML_FILE_PATH}]`

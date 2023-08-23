@@ -18,12 +18,32 @@ export default async () => {
     elasticsearch: esTestConfig.getUrlParts(),
   };
 
+  // "Fake" SAML provider
+  const idpPath = resolve(
+    __dirname,
+    '../../test/security_api_integration/plugins/saml_provider/metadata.xml'
+  );
+  const samlIdPPlugin = resolve(
+    __dirname,
+    '../../test/security_api_integration/plugins/saml_provider'
+  );
+
   return {
     servers,
 
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
+      serverArgs: [
+        'xpack.security.authc.token.enabled=true',
+        'xpack.security.authc.realms.saml.cloud-saml-kibana.order=0',
+        `xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=${idpPath}`,
+        'xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=http://www.elastic.co/saml1',
+        `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://localhost:${servers.kibana.port}`,
+        `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=http://localhost:${servers.kibana.port}/logout`,
+        `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=http://localhost:${servers.kibana.port}/api/security/saml/callback`,
+        'xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.principal=urn:oid:0.0.7',
+      ],
     },
 
     kbnTestServer: {
@@ -34,7 +54,7 @@ export default async () => {
       sourceArgs: ['--no-base-path', '--env.name=development'],
       serverArgs: [
         `--server.restrictInternalApis=true`,
-        `--server.port=${kbnTestConfig.getPort()}`,
+        `--server.port=${servers.kibana.port}`,
         '--status.allowAnonymous=true',
         // We shouldn't embed credentials into the URL since Kibana requests to Elasticsearch should
         // either include `kibanaServerTestUser` credentials, or credentials provided by the test
@@ -60,7 +80,18 @@ export default async () => {
             appenders: ['deprecation'],
           },
         ])}`,
+        // This ensures that we register the Security SAML API endpoints.
+        // In the real world the SAML config is injected by control plane.
+        // basic: { 'basic': { order: 0 } },
+        `--plugin-path=${samlIdPPlugin}`,
+        '--xpack.cloud.id=ftr_fake_cloud_id',
+        '--xpack.security.authc.selector.enabled=false',
+        `--xpack.security.authc.providers=${JSON.stringify({
+          basic: { basic: { order: 0 } },
+          saml: { 'cloud-saml-kibana': { order: 1, realm: 'cloud-saml-kibana' } },
+        })}`,
         '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
+        `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
       ],
     },
 

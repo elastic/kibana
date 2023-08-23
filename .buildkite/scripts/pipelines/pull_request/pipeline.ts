@@ -10,6 +10,7 @@ import { execSync } from 'child_process';
 import fs from 'fs';
 import prConfigs from '../../../pull_requests.json';
 import { areChangesSkippable, doAnyChangesMatch } from '#pipeline-utils';
+
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 
 if (!prConfig) {
@@ -75,10 +76,6 @@ const uploadPipeline = (pipelineContent: string | object) => {
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution.yml'));
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution_investigations.yml'),
-        getPipeline('.buildkite/pipelines/pull_request/security_solution_explore.yml')
-      );
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/defend_workflows.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/osquery_cypress.yml'));
     }
