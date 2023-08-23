@@ -33,7 +33,7 @@ const renderTechniquePanelPopover = (
 describe('CoverageOverviewMitreTechniquePanelPopover', () => {
   beforeEach(() => {
     (useCoverageOverviewDashboardContext as jest.Mock).mockReturnValue({
-      state: { showExpandedCells: false },
+      state: { showExpandedCells: false, filter: {} },
       actions: { enableAllDisabled: mockEnableAllDisabled },
     });
     (useUserData as jest.Mock).mockReturnValue([{ loading: false, canUserCRUD: true }]);
@@ -52,7 +52,7 @@ describe('CoverageOverviewMitreTechniquePanelPopover', () => {
 
   test('it renders panel with expanded view', () => {
     (useCoverageOverviewDashboardContext as jest.Mock).mockReturnValue({
-      state: { showExpandedCells: true },
+      state: { showExpandedCells: true, filter: {} },
       actions: { enableAllDisabled: mockEnableAllDisabled },
     });
     const wrapper = renderTechniquePanelPopover();

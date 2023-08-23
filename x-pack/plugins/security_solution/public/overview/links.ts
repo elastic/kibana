@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  COVERAGE_OVERVIEW_PATH,
   DATA_QUALITY_PATH,
   DETECTION_RESPONSE_PATH,
   ENTITY_ANALYTICS_PATH,
@@ -22,15 +21,12 @@ import {
   GETTING_STARTED,
   OVERVIEW,
   ENTITY_ANALYTICS,
-  COVERAGE_OVERVIEW,
 } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import overviewPageImg from '../common/images/overview_page.png';
 import dataQualityDashboardPageImg from '../common/images/data_quality_dashboard_page.png';
 import detectionResponsePageImg from '../common/images/detection_response_page.png';
 import entityAnalyticsDashboard from '../common/images/entity_analytics_dashboard.png';
-import coverageOverviewDashboardImg from '../common/images/coverage_overview_dashboard.png';
-import { IconDashboards } from '../common/icons/dashboards';
 
 export const overviewLinks: LinkItem = {
   id: SecurityPageName.overview,
@@ -114,25 +110,4 @@ export const ecsDataQualityDashboardLinks: LinkItem = {
       defaultMessage: 'Data Quality',
     }),
   ],
-};
-
-export const coverageOverviewDashboardLinks: LinkItem = {
-  id: SecurityPageName.coverageOverview,
-  title: COVERAGE_OVERVIEW,
-  landingImage: coverageOverviewDashboardImg,
-  landingIcon: IconDashboards,
-  description: i18n.translate(
-    'xpack.securitySolution.appLinks.coverageOverviewDashboardDescription',
-    {
-      defaultMessage: 'Review and maintain your protections MITRE ATT&CK® coverage',
-    }
-  ),
-  path: COVERAGE_OVERVIEW_PATH,
-  capabilities: [`${SERVER_APP_ID}.show`],
-  globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.coverageOverviewDashboard', {
-      defaultMessage: 'MITRE ATT&CK Coverage',
-    }),
-  ],
-  experimentalKey: 'detectionsCoverageOverview',
 };
