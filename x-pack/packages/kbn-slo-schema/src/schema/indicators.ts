@@ -46,13 +46,17 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
 const kqlCustomIndicatorTypeSchema = t.literal('sli.kql.custom');
 const kqlCustomIndicatorSchema = t.type({
   type: kqlCustomIndicatorTypeSchema,
-  params: t.type({
-    index: t.string,
-    filter: t.string,
-    good: t.string,
-    total: t.string,
-    timestampField: t.string,
-  }),
+  params: t.intersection([
+    t.type({
+      index: t.string,
+      good: t.string,
+      total: t.string,
+      timestampField: t.string,
+    }),
+    t.partial({
+      filter: t.string,
+    }),
+  ]),
 });
 
 const metricCustomValidAggregations = t.keyof({
