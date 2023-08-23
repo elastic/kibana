@@ -55,7 +55,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       describe('delete', () => {
         before(async () => {
           await cases.api.createNthRandomCases(8, 'securitySolution');
-          await cases.api.createCase({ title: 'delete me', tags: ['one'], owner: 'securitySolution' });
+          await cases.api.createCase({
+            title: 'delete me',
+            tags: ['one'],
+            owner: 'securitySolution',
+          });
           await header.waitUntilLoadingHasFinished();
           await cases.casesTable.waitForCasesToBeListed();
         });
@@ -114,9 +118,21 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         let caseIds: string[] = [];
         beforeEach(async () => {
           caseIds = [];
-          const case1 = await cases.api.createCase({ title: 'case 1', tags: ['one', 'three'], owner: 'securitySolution' });
-          const case2 = await cases.api.createCase({ title: 'case 2', tags: ['two', 'four'], owner: 'securitySolution' });
-          const case3 = await cases.api.createCase({ title: 'case 3', tags: ['two', 'five'], owner: 'securitySolution' });
+          const case1 = await cases.api.createCase({
+            title: 'case 1',
+            tags: ['one', 'three'],
+            owner: 'securitySolution',
+          });
+          const case2 = await cases.api.createCase({
+            title: 'case 2',
+            tags: ['two', 'four'],
+            owner: 'securitySolution',
+          });
+          const case3 = await cases.api.createCase({
+            title: 'case 3',
+            tags: ['two', 'five'],
+            owner: 'securitySolution',
+          });
 
           caseIds.push(case1.id);
           caseIds.push(case2.id);

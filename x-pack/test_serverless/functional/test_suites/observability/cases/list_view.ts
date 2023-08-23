@@ -114,9 +114,21 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         let caseIds: string[] = [];
         beforeEach(async () => {
           caseIds = [];
-          const case1 = await cases.api.createCase({ title: 'case 1', tags: ['one', 'three'], owner: 'observability' });
-          const case2 = await cases.api.createCase({ title: 'case 2', tags: ['two', 'four'], owner: 'observability' });
-          const case3 = await cases.api.createCase({ title: 'case 3', tags: ['two', 'five'], owner: 'observability' });
+          const case1 = await cases.api.createCase({
+            title: 'case 1',
+            tags: ['one', 'three'],
+            owner: 'observability',
+          });
+          const case2 = await cases.api.createCase({
+            title: 'case 2',
+            tags: ['two', 'four'],
+            owner: 'observability',
+          });
+          const case3 = await cases.api.createCase({
+            title: 'case 3',
+            tags: ['two', 'five'],
+            owner: 'observability',
+          });
 
           caseIds.push(case1.id);
           caseIds.push(case2.id);
@@ -171,7 +183,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('severity filtering', () => {
       before(async () => {
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
-        
+
         await cases.api.createCase({ severity: CaseSeverity.LOW, owner: 'observability' });
         await cases.api.createCase({ severity: CaseSeverity.LOW, owner: 'observability' });
         await cases.api.createCase({ severity: CaseSeverity.HIGH, owner: 'observability' });
