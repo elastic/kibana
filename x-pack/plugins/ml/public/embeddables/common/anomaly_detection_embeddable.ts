@@ -59,10 +59,10 @@ export abstract class AnomalyDetectionEmbeddable<
       const indexPatterns: Record<string, DataView> = {};
       for (const indexName of indices) {
         const response = await this.dataViewsService.find(`"${indexName}"`);
-
-        const indexPattern = response.find(
-          (obj) => obj.getIndexPattern().toLowerCase() === indexName.toLowerCase()
+        const indexPattern = response.find((obj) =>
+          obj.getIndexPattern().toLowerCase().includes(indexName.toLowerCase())
         );
+
         if (indexPattern !== undefined) {
           indexPatterns[indexPattern.id!] = indexPattern;
         }
