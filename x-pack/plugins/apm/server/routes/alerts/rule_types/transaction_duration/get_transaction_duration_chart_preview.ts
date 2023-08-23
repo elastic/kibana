@@ -6,11 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  getParsedFilterQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   AggregationType,
   ApmRuleType,
@@ -40,6 +36,7 @@ import {
   BarSeriesDataMap,
   getFilteredBarSeries,
 } from '../utils/get_filtered_series_for_preview_chart';
+import { getParsedFilterQuery } from '../utils/get_parsed_filtered_query';
 
 export async function getTransactionDurationChartPreview({
   alertParams,
@@ -60,7 +57,7 @@ export async function getTransactionDurationChartPreview({
     start,
     end,
     groupBy: groupByFields,
-    kqlFilter,
+    searchConfiguration,
   } = alertParams;
   const searchAggregatedTransactions = await getSearchTransactionsEvents({
     config,
@@ -68,7 +65,7 @@ export async function getTransactionDurationChartPreview({
     kuery: '',
   });
 
-  const termFilterQuery = !kqlFilter
+  const termFilterQuery = !searchConfiguration
     ? [
         ...termQuery(SERVICE_NAME, serviceName, {
           queryEmptyString: false,
@@ -87,7 +84,9 @@ export async function getTransactionDurationChartPreview({
     bool: {
       filter: [
         ...termFilterQuery,
-        ...getParsedFilterQuery(kqlFilter),
+        ...getParsedFilterQuery(
+          searchConfiguration ? JSON.parse(searchConfiguration) : undefined
+        ),
         ...rangeQuery(start, end),
         ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
       ] as QueryDslQueryContainer[],

@@ -15,6 +15,13 @@ import { environmentRt, rangeRt } from '../default_api_types';
 import { AggregationType } from '../../../common/rules/apm_rule_types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
+const searchConfigurationRt = t.type({
+  query: t.type({
+    query: t.union([t.string, t.record(t.string, t.unknown)]),
+    language: t.string,
+  }),
+});
+
 const alertParamsRt = t.intersection([
   t.partial({
     aggregationType: t.union([
@@ -34,7 +41,7 @@ const alertParamsRt = t.intersection([
   }),
   t.partial({
     groupBy: t.array(t.string),
-    kqlFilter: t.string,
+    searchConfiguration: t.string,
   }),
 ]);
 
@@ -49,6 +56,8 @@ export interface PreviewChartResponse {
 }
 
 export type AlertParams = t.TypeOf<typeof alertParamsRt>;
+
+export type SearchConfiguration = t.TypeOf<typeof searchConfigurationRt>;
 
 const transactionErrorRateChartPreview = createApmServerRoute({
   endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',

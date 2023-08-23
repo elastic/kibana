@@ -32,7 +32,11 @@ import {
   IsAboveField,
   ServiceField,
 } from '../../utils/fields';
-import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
+import {
+  AlertMetadata,
+  getIntervalAndTimeRange,
+  SearchConfiguration,
+} from '../../utils/helper';
 import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
 import { APMRuleGroupBy } from '../../ui_components/apm_rule_group_by';
 import {
@@ -58,7 +62,7 @@ export interface ErrorCountRuleParams {
   groupBy?: string[] | undefined;
   errorGroupingKey?: string;
   useKqlFilter?: boolean;
-  kqlFilter?: string;
+  searchConfiguration?: SearchConfiguration;
 }
 
 interface Props {
@@ -105,7 +109,11 @@ export function ErrorCountRuleType(props: Props) {
                 start,
                 end,
                 groupBy: params.groupBy,
-                kqlFilter: params.kqlFilter,
+                searchConfiguration: JSON.stringify(
+                  params.searchConfiguration,
+                  null,
+                  4
+                ),
               },
             },
           }
@@ -119,7 +127,7 @@ export function ErrorCountRuleType(props: Props) {
       params.serviceName,
       params.errorGroupingKey,
       params.groupBy,
-      params.kqlFilter,
+      params.searchConfiguration,
     ]
   );
 
@@ -244,7 +252,9 @@ export function ErrorCountRuleType(props: Props) {
     setRuleParams('serviceName', undefined);
     setRuleParams('errorGroupingKey', undefined);
     setRuleParams('environment', ENVIRONMENT_ALL.value);
-    setRuleParams('kqlFilter', undefined);
+    setRuleParams('searchConfiguration', {
+      query: { query: '', language: 'kuery' },
+    });
     setRuleParams('useKqlFilter', e.target.checked);
   };
 

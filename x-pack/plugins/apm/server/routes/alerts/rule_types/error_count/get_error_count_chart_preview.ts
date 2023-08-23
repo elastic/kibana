@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  getParsedFilterQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   ERROR_GROUP_ID,
@@ -26,6 +22,7 @@ import {
   BarSeriesDataMap,
   getFilteredBarSeries,
 } from '../utils/get_filtered_series_for_preview_chart';
+import { getParsedFilterQuery } from '../utils/get_parsed_filtered_query';
 
 export async function getTransactionErrorCountChartPreview({
   apmEventClient,
@@ -42,7 +39,7 @@ export async function getTransactionErrorCountChartPreview({
     start,
     end,
     groupBy: groupByFields,
-    kqlFilter,
+    searchConfiguration,
   } = alertParams;
 
   const allGroupByFields = getAllGroupByFields(
@@ -50,7 +47,7 @@ export async function getTransactionErrorCountChartPreview({
     groupByFields
   );
 
-  const termFilterQuery = !kqlFilter
+  const termFilterQuery = !searchConfiguration
     ? [
         ...termQuery(SERVICE_NAME, serviceName, {
           queryEmptyString: false,
@@ -66,7 +63,9 @@ export async function getTransactionErrorCountChartPreview({
     bool: {
       filter: [
         ...termFilterQuery,
-        ...getParsedFilterQuery(kqlFilter),
+        ...getParsedFilterQuery(
+          searchConfiguration ? JSON.parse(searchConfiguration) : undefined
+        ),
         ...rangeQuery(start, end),
         { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
       ],

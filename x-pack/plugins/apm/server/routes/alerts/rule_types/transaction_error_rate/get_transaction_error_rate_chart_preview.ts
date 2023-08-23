@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  getParsedFilterQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ApmRuleType } from '../../../../../common/rules/apm_rule_types';
 import {
   SERVICE_NAME,
@@ -33,6 +29,7 @@ import {
   BarSeriesDataMap,
   getFilteredBarSeries,
 } from '../utils/get_filtered_series_for_preview_chart';
+import { getParsedFilterQuery } from '../utils/get_parsed_filtered_query';
 
 export async function getTransactionErrorRateChartPreview({
   config,
@@ -52,7 +49,7 @@ export async function getTransactionErrorRateChartPreview({
     end,
     transactionName,
     groupBy: groupByFields,
-    kqlFilter,
+    searchConfiguration,
   } = alertParams;
 
   const searchAggregatedTransactions = await getSearchTransactionsEvents({
@@ -66,7 +63,7 @@ export async function getTransactionErrorRateChartPreview({
     groupByFields
   );
 
-  const termFilterQuery = !kqlFilter
+  const termFilterQuery = !searchConfiguration
     ? [
         ...termQuery(SERVICE_NAME, serviceName, {
           queryEmptyString: false,
@@ -92,7 +89,9 @@ export async function getTransactionErrorRateChartPreview({
         bool: {
           filter: [
             ...termFilterQuery,
-            ...getParsedFilterQuery(kqlFilter),
+            ...getParsedFilterQuery(
+              searchConfiguration ? JSON.parse(searchConfiguration) : undefined
+            ),
             ...rangeQuery(start, end),
             ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions

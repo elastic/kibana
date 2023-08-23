@@ -16,6 +16,13 @@ export interface AlertMetadata {
   end?: string;
 }
 
+export interface SearchConfiguration {
+  query: {
+    query: string | { [x: string]: unknown };
+    language: string;
+  };
+}
+
 export const ALERT_PREVIEW_BUCKET_SIZE = 5;
 
 export function getIntervalAndTimeRange({

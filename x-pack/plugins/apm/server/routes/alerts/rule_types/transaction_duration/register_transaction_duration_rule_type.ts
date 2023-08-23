@@ -15,10 +15,7 @@ import {
   ProcessorEvent,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
-import {
-  getParsedFilterQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { termQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -70,6 +67,7 @@ import {
 } from './average_or_percentile_agg';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
+import { getParsedFilterQuery } from '../utils/get_parsed_filtered_query';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 
@@ -139,7 +137,7 @@ export function registerTransactionDurationRuleType({
         searchAggregatedTransactions
       );
 
-      const termFilterQuery = !ruleParams.kqlFilter
+      const termFilterQuery = !ruleParams.searchConfiguration
         ? [
             ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
               queryEmptyString: false,
@@ -173,7 +171,7 @@ export function registerTransactionDurationRuleType({
                   searchAggregatedTransactions
                 ),
                 ...termFilterQuery,
-                ...getParsedFilterQuery(ruleParams.kqlFilter),
+                ...getParsedFilterQuery(ruleParams.searchConfiguration),
               ] as QueryDslQueryContainer[],
             },
           },

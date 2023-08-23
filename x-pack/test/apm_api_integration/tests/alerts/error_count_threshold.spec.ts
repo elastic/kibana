@@ -113,7 +113,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             threshold: 1,
             windowSize: 1,
             windowUnit: 'h',
-            kqlFilter: '',
             groupBy: [
               'service.name',
               'service.environment',
@@ -240,7 +239,12 @@ Apm error count without filter query is active with the following conditions:
             windowSize: 1,
             windowUnit: 'h',
             serviceName: undefined,
-            kqlFilter: 'service.name: opbeans-java and service.environment: production',
+            searchConfiguration: {
+              query: {
+                query: 'service.name: opbeans-java and service.environment: production',
+                language: 'kuery',
+              },
+            },
             groupBy: [
               'service.name',
               'service.environment',

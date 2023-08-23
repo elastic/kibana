@@ -33,7 +33,11 @@ import {
   TransactionTypeField,
   TransactionNameField,
 } from '../../utils/fields';
-import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
+import {
+  AlertMetadata,
+  getIntervalAndTimeRange,
+  SearchConfiguration,
+} from '../../utils/helper';
 import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
 import { APMRuleGroupBy } from '../../ui_components/apm_rule_group_by';
 import {
@@ -59,7 +63,7 @@ export interface ErrorRateRuleParams {
   environment?: string;
   groupBy?: string[] | undefined;
   useKqlFilter?: boolean;
-  kqlFilter?: string;
+  searchConfiguration?: SearchConfiguration;
 }
 
 export interface Props {
@@ -107,7 +111,11 @@ export function TransactionErrorRateRuleType(props: Props) {
                 start,
                 end,
                 groupBy: params.groupBy,
-                kqlFilter: params.kqlFilter,
+                searchConfiguration: JSON.stringify(
+                  params.searchConfiguration,
+                  null,
+                  4
+                ),
               },
             },
           }
@@ -122,7 +130,7 @@ export function TransactionErrorRateRuleType(props: Props) {
       params.windowSize,
       params.windowUnit,
       params.groupBy,
-      params.kqlFilter,
+      params.searchConfiguration,
     ]
   );
 
@@ -256,7 +264,9 @@ export function TransactionErrorRateRuleType(props: Props) {
     setRuleParams('transactionType', undefined);
     setRuleParams('transactionName', undefined);
     setRuleParams('environment', ENVIRONMENT_ALL.value);
-    setRuleParams('kqlFilter', undefined);
+    setRuleParams('searchConfiguration', {
+      query: { query: '', language: 'kuery' },
+    });
     setRuleParams('useKqlFilter', e.target.checked);
   };
 
