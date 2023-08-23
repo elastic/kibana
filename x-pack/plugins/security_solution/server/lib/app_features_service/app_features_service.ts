@@ -29,8 +29,8 @@ import { securitySubFeaturesMap } from './security_kibana_sub_features';
 import {
   getAssistantBaseKibanaFeature,
   getAssistantBaseKibanaSubFeatureIds,
-} from '../app_features/security_assistant_kibana_features';
-import { assistantSubFeaturesMap } from '../app_features/security_assistant_kibana_sub_features';
+} from './security_assistant_kibana_features';
+import { assistantSubFeaturesMap } from './security_assistant_kibana_sub_features';
 
 export class AppFeaturesService {
   private securityAppFeatures: AppFeatures;

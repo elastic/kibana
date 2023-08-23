@@ -18,6 +18,98 @@ import {
 } from '../../../common';
 import { AppFeaturesService } from './app_features_service';
 
+const SECURITY_BASE_CONFIG = {
+  foo: 'foo',
+};
+
+const SECURITY_APP_FEATURE_CONFIG = {
+  'test-base-feature': {
+    privileges: {
+      all: {
+        ui: ['test-capability'],
+        api: ['test-capability'],
+      },
+      read: {
+        ui: ['test-capability'],
+        api: ['test-capability'],
+      },
+    },
+  },
+};
+
+const CASES_BASE_CONFIG = {
+  bar: 'bar',
+};
+
+const CASES_APP_FEATURE_CONFIG = {
+  'test-cases-feature': {
+    privileges: {
+      all: {
+        ui: ['test-cases-capability'],
+        api: ['test-cases-capability'],
+      },
+      read: {
+        ui: ['test-cases-capability'],
+        api: ['test-cases-capability'],
+      },
+    },
+  },
+};
+
+const ASSISTANT_BASE_CONFIG = {
+  bar: 'bar',
+};
+
+const ASSISTANT_APP_FEATURE_CONFIG = {
+  'test-assistant-feature': {
+    privileges: {
+      all: {
+        ui: ['test-assistant-capability'],
+        api: ['test-assistant-capability'],
+      },
+      read: {
+        ui: ['test-assistant-capability'],
+        api: ['test-assistant-capability'],
+      },
+    },
+  },
+};
+
+jest.mock('./security_kibana_features', () => {
+  return {
+    getSecurityBaseKibanaFeature: jest.fn(() => SECURITY_BASE_CONFIG),
+    getSecurityBaseKibanaSubFeatureIds: jest.fn(() => ['subFeature1']),
+    getSecurityAppFeaturesConfig: jest.fn(() => SECURITY_APP_FEATURE_CONFIG),
+  };
+});
+jest.mock('./security_kibana_sub_features', () => {
+  return {
+    securitySubFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
+  };
+});
+
+jest.mock('./security_cases_kibana_features', () => {
+  return {
+    getCasesBaseKibanaFeature: jest.fn(() => CASES_BASE_CONFIG),
+    getCasesBaseKibanaSubFeatureIds: jest.fn(() => ['subFeature1']),
+    getCasesAppFeaturesConfig: jest.fn(() => CASES_APP_FEATURE_CONFIG),
+  };
+});
+
+jest.mock('./security_cases_kibana_sub_features', () => {
+  return {
+    casesSubFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
+  };
+});
+
+jest.mock('./security_assistant_kibana_features', () => {
+  return {
+    getAssistantBaseKibanaFeature: jest.fn(() => ASSISTANT_BASE_CONFIG),
+    getAssistantBaseKibanaSubFeatureIds: jest.fn(() => ['subFeature1']),
+    getAssistantAppFeaturesConfig: jest.fn(() => ASSISTANT_APP_FEATURE_CONFIG),
+  };
+});
+
 class AppFeaturesServiceMock extends AppFeaturesService {
   protected registerEnabledKibanaFeatures() {
     // NOOP
@@ -56,8 +148,44 @@ export const createAppFeaturesServiceMock = (
           ])
         )
       ),
-      cases: jest.fn(),
-      securityAssistant: jest.fn(),
+      cases: jest.fn().mockReturnValue(
+        new Map(
+          enabledFeatureKeys.map((key) => [
+            key,
+            {
+              privileges: {
+                all: {
+                  ui: ['entity-analytics'],
+                  api: [`test-entity-analytics`],
+                },
+                read: {
+                  ui: ['entity-analytics'],
+                  api: [`test-entity-analytics`],
+                },
+              },
+            },
+          ])
+        )
+      ),
+      securityAssistant: jest.fn().mockReturnValue(
+        new Map(
+          enabledFeatureKeys.map((key) => [
+            key,
+            {
+              privileges: {
+                all: {
+                  ui: ['entity-analytics'],
+                  api: [`test-entity-analytics`],
+                },
+                read: {
+                  ui: ['entity-analytics'],
+                  api: [`test-entity-analytics`],
+                },
+              },
+            },
+          ])
+        )
+      ),
     });
   }
 

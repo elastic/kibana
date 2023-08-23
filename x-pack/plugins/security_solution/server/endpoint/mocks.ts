@@ -71,7 +71,7 @@ import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { EndpointFleetServicesFactory } from './services/fleet';
 import { createLicenseServiceMock } from '../../common/license/mocks';
 import { createFeatureUsageServiceMock } from './services/feature_usage/mocks';
-import { createAppFeaturesMock } from '../lib/app_features/mocks';
+import { createAppFeaturesServiceMock } from '../lib/app_features_service/mocks';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -165,7 +165,12 @@ export const createMockEndpointAppContextServiceStartContract =
       savedObjectsStart
     );
     const experimentalFeatures = config.experimentalFeatures;
-    const appFeatures = createAppFeaturesMock(undefined, experimentalFeatures, undefined, logger);
+    const appFeaturesService = createAppFeaturesServiceMock(
+      undefined,
+      experimentalFeatures,
+      undefined,
+      logger
+    );
 
     packagePolicyService.list.mockImplementation(async (_, options) => {
       return {
@@ -215,9 +220,7 @@ export const createMockEndpointAppContextServiceStartContract =
       actionCreateService: undefined,
       createFleetActionsClient: jest.fn((_) => fleetActionsClientMock),
       esClient: elasticsearchClientMock.createElasticsearchClient(),
-      // FIXME: createAppFeaturesMock() is not typed as appFeaturesService
-      // @ts-expect-error
-      appFeatures,
+      appFeaturesService,
     };
   };
 

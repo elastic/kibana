@@ -105,7 +105,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly config: ConfigType;
   private readonly logger: Logger;
   private readonly appClientFactory: AppClientFactory;
-  private readonly appFeatures: AppFeaturesService;
+  private readonly appFeaturesService: AppFeaturesService;
 
   private readonly ruleMonitoringService: IRuleMonitoringService;
   private readonly endpointAppContextService = new EndpointAppContextService();
@@ -128,7 +128,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.config = serverConfig;
     this.logger = context.logger.get();
     this.appClientFactory = new AppClientFactory();
-    this.appFeatures = new AppFeaturesService(this.logger, this.config.experimentalFeatures);
+    this.appFeaturesService = new AppFeaturesService(this.logger, this.config.experimentalFeatures);
 
     this.ruleMonitoringService = createRuleMonitoringService(this.config, this.logger);
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
@@ -152,12 +152,12 @@ export class Plugin implements ISecuritySolutionPlugin {
   ): SecuritySolutionPluginSetup {
     this.logger.debug('plugin setup');
 
-    const { appClientFactory, appFeatures, pluginContext, config, logger } = this;
+    const { appClientFactory, appFeaturesService, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings, experimentalFeatures);
-    appFeatures.init(plugins.features);
+    appFeaturesService.init(plugins.features);
 
     this.ruleMonitoringService.setup(core, plugins);
 
@@ -393,8 +393,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.guidedOnboarding.registerGuideConfig(siemGuideId, siemGuideConfig);
 
     return {
-      setAppFeaturesConfigurator: this.appFeatures.setAppFeaturesConfigurator.bind(
-        this.appFeatures
+      setAppFeaturesConfigurator: this.appFeaturesService.setAppFeaturesConfigurator.bind(
+        this.appFeaturesService
       ),
     };
   }
@@ -403,7 +403,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
-    const { config, logger, appFeatures } = this;
+    const { config, logger, appFeaturesService } = this;
 
     this.ruleMonitoringService.start(core, plugins);
 
@@ -461,7 +461,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         esClient: core.elasticsearch.client.asInternalUser,
         // FIXME: appFeatures is not typed as AppFeaturesService
         // @ts-expect-error
-        appFeatures,
+        appFeaturesService,
       });
 
       // Migrate artifacts to fleet and then start the manifest task after that is done
@@ -478,7 +478,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         turnOffPolicyProtectionsIfNotSupported(
           core.elasticsearch.client.asInternalUser,
           endpointFleetServicesFactory.asInternalUser(),
-          appFeatures,
+          appFeaturesService,
           logger
         );
       });
@@ -525,7 +525,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       ),
       createFleetActionsClient,
       esClient: core.elasticsearch.client.asInternalUser,
-      appFeatures,
+      appFeaturesService,
     });
 
     this.telemetryReceiver.start(
