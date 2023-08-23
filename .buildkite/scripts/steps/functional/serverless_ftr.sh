@@ -6,9 +6,6 @@ source .buildkite/scripts/steps/functional/common.sh
 
 export JOB="kibana-serverless-$SERVERLESS_ENVIRONMENT"
 
-echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-trap 'docker logout docker.elastic.co' EXIT
-
 if [[ "$SERVERLESS_ENVIRONMENT" == "search" ]]; then
   SERVERLESS_CONFIGS=(
     "x-pack/test_serverless/api_integration/test_suites/search/config.ts"

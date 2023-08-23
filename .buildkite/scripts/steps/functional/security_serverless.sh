@@ -8,9 +8,6 @@ source .buildkite/scripts/steps/functional/common_cypress.sh
 export JOB=kibana-serverless-security-cypress
 export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
-echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-trap 'docker logout docker.elastic.co' EXIT
-
 echo "--- Security Serverless Cypress Tests"
 
 yarn --cwd x-pack/test/security_solution_cypress cypress:run:serverless
