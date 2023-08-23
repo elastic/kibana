@@ -70,7 +70,7 @@ export interface EndpointAppContextServiceStartContract {
   actionCreateService: ActionCreateService | undefined;
   cloud: CloudSetup;
   esClient: ElasticsearchClient;
-  appFeatures: AppFeaturesService;
+  appFeaturesService: AppFeaturesService;
 }
 
 /**
@@ -108,7 +108,7 @@ export class EndpointAppContextService {
         featureUsageService,
         endpointMetadataService,
         esClient,
-        appFeatures,
+        appFeaturesService,
       } = dependencies;
 
       registerIngestCallback(
@@ -121,7 +121,7 @@ export class EndpointAppContextService {
           licenseService,
           exceptionListsClient,
           cloud,
-          appFeatures
+          appFeaturesService
         )
       );
 
@@ -139,7 +139,7 @@ export class EndpointAppContextService {
           endpointMetadataService,
           cloud,
           esClient,
-          appFeatures
+          appFeaturesService
         )
       );
 

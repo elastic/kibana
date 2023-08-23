@@ -19,9 +19,9 @@ import type {
   PolicyCreateCloudConfig,
   PolicyCreateEndpointConfig,
 } from '../types';
-import type { AppFeatures } from '../../lib/app_features';
-import { createAppFeaturesMock } from '../../lib/app_features/mocks';
 import { ALL_APP_FEATURE_KEYS } from '../../../common';
+import type { AppFeaturesService } from '../../lib/app_features_service/app_features_service';
+import { createAppFeaturesServiceMock } from '../../lib/app_features_service/mocks';
 
 describe('Create Default Policy tests ', () => {
   const cloud = cloudMock.createSetup();
@@ -31,7 +31,7 @@ describe('Create Default Policy tests ', () => {
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold', uid: '' } });
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
-  let appFeatures: AppFeatures;
+  let appFeaturesService: AppFeaturesService;
 
   const createDefaultPolicyCallback = async (
     config: AnyPolicyCreateConfig | undefined
@@ -39,7 +39,7 @@ describe('Create Default Policy tests ', () => {
     const esClientInfo = await elasticsearchServiceMock.createClusterClient().asInternalUser.info();
     esClientInfo.cluster_name = '';
     esClientInfo.cluster_uuid = '';
-    return createDefaultPolicy(licenseService, config, cloud, esClientInfo, appFeatures);
+    return createDefaultPolicy(licenseService, config, cloud, esClientInfo, appFeaturesService);
   };
 
   beforeEach(() => {
@@ -47,7 +47,7 @@ describe('Create Default Policy tests ', () => {
     licenseService = new LicenseService();
     licenseService.start(licenseEmitter);
     licenseEmitter.next(Platinum); // set license level to platinum
-    appFeatures = createAppFeaturesMock();
+    appFeaturesService = createAppFeaturesServiceMock();
   });
 
   describe('When no config is set', () => {
@@ -211,7 +211,7 @@ describe('Create Default Policy tests ', () => {
     });
 
     it('should set policy to event collection only if endpointPolicyProtections appFeature is disabled', async () => {
-      appFeatures = createAppFeaturesMock(
+      appFeaturesService = createAppFeaturesServiceMock(
         ALL_APP_FEATURE_KEYS.filter((key) => key !== 'endpoint_policy_protections')
       );
 
