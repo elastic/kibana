@@ -8,8 +8,17 @@
 
 import classNames from 'classnames';
 import useAsync from 'react-use/lib/useAsync';
-import React, { useMemo, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import React, { useCallback, useMemo, useState } from 'react';
 
+import {
+  cleanEmptyKeys,
+  DashboardAppLocatorParams,
+  getEmbeddableParams,
+} from '@kbn/dashboard-plugin/public';
+import { isFilterPinned } from '@kbn/es-query';
+import { KibanaLocation } from '@kbn/share-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import { EuiButtonEmpty, EuiListGroupItem, EuiToolTip } from '@elastic/eui';
 import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/common';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
@@ -21,9 +30,9 @@ import {
   DEFAULT_DASHBOARD_LINK_OPTIONS,
 } from '../../../common/content_management';
 import { fetchDashboard } from './dashboard_link_tools';
-import { clickLink } from '../../services/link_service';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { useNavigationEmbeddable } from '../../embeddable/navigation_embeddable';
+import { coreServices, dashboardServices } from '../../services/kibana_services';
 
 export const DashboardLinkComponent = ({
   link,
@@ -36,13 +45,10 @@ export const DashboardLinkComponent = ({
   const [error, setError] = useState<Error | undefined>();
 
   const dashboardContainer = navEmbeddable.parent as DashboardContainer;
-  const parentDashboardTitle = dashboardContainer.select((state) => state.explicitInput.title);
-  const parentDashboardDescription = dashboardContainer.select(
-    (state) => state.explicitInput.description
-  );
-
+  const parentDashboardInput = useObservable(dashboardContainer.getInput$());
   const parentDashboardId = dashboardContainer.select((state) => state.componentState.lastSavedId);
 
+  /** Fetch the dashboard that the link is pointing to */
   const { loading: loadingDestinationDashboard, value: destinationDashboard } =
     useAsync(async () => {
       if (link.id !== parentDashboardId) {
@@ -60,22 +66,23 @@ export const DashboardLinkComponent = ({
       }
     }, [link, parentDashboardId]);
 
+  /**
+   * Returns the title and description of the dashboard that the link points to; note that, if the link points to
+   * the current dashboard, then we need to get the most up-to-date information via the `parentDashboardInput` - this
+   * will respond to changes so that the link label/tooltip remains in sync with the dashboard title/description.
+   */
   const [dashboardTitle, dashboardDescription] = useMemo(() => {
     return link.destination === parentDashboardId
-      ? [parentDashboardTitle, parentDashboardDescription]
+      ? [parentDashboardInput?.title, parentDashboardInput?.description]
       : [destinationDashboard?.attributes.title, destinationDashboard?.attributes.description];
-  }, [
-    link.destination,
-    parentDashboardId,
-    parentDashboardTitle,
-    destinationDashboard,
-    parentDashboardDescription,
-  ]);
+  }, [link.destination, parentDashboardId, parentDashboardInput, destinationDashboard]);
 
+  /** Label of the `EuiListGroupItem` for the given link */
   const linkLabel = useMemo(() => {
     return link.label || (dashboardTitle ?? DashboardLinkStrings.getDashboardErrorLabel());
   }, [link, dashboardTitle]);
 
+  /** Tooltip info of the `EuiListGroupItem` for the given link */
   const { tooltipTitle, tooltipMessage } = useMemo(() => {
     if (error) {
       return {
@@ -88,6 +95,52 @@ export const DashboardLinkComponent = ({
       tooltipMessage: dashboardDescription || dashboardTitle,
     };
   }, [error, dashboardTitle, dashboardDescription]);
+
+  /** `onClick` action for navigating to the destination dashboard */
+  const navigateToDashboard = useCallback(
+    async (modifiedClick: boolean) => {
+      const options: DashboardDrilldownOptions = {
+        ...DEFAULT_DASHBOARD_LINK_OPTIONS,
+        ...link.options,
+      };
+      const params: DashboardAppLocatorParams = {
+        dashboardId: link.destination,
+        ...getEmbeddableParams(navEmbeddable, options),
+      };
+
+      const locator = dashboardServices.locator; // TODO: Make this a generic locator that is coming from the dashboard container through some sort of getter
+      if (locator) {
+        const { app, path, state }: KibanaLocation<DashboardAppLocatorParams> =
+          await locator.getLocation(params);
+
+        /**
+         * the app state should be sent via URL if either (a) the `openInNewTab` setting is `true`
+         * or if (b) the ctrl/shift/meta (command on Mac) key is pressed on click.
+         */
+        if (options.openInNewTab || modifiedClick) {
+          const url = coreServices.application.getUrlForApp(app, {
+            path: setStateToKbnUrl(
+              '_a',
+              cleanEmptyKeys({
+                query: state.query,
+                filters: state.filters?.filter((f) => !isFilterPinned(f)),
+              }),
+              { useHash: false, storeInHashQuery: true },
+              path
+            ),
+            absolute: true,
+          });
+          window.open(url, '_blank');
+        } else {
+          await coreServices.application.navigateToApp(app, {
+            path,
+            state,
+          });
+        }
+      }
+    },
+    [link, navEmbeddable]
+  );
 
   return loadingDestinationDashboard ? (
     <li id={`dashboardLink--${link.id}--loading`}>
@@ -112,20 +165,7 @@ export const DashboardLinkComponent = ({
         link.destination === parentDashboardId
           ? undefined // no `onClick` event should exist if the link points to the current dashboard
           : (event) => {
-              const options = link.options as DashboardDrilldownOptions;
-              clickLink(navEmbeddable, {
-                ...link,
-                options: {
-                  ...DEFAULT_DASHBOARD_LINK_OPTIONS,
-                  ...options,
-                  /**
-                   * the app state should be sent via URL if either (a) the `openInNewTab` setting is `true`
-                   * or if (b) the ctrl/shift/meta (command on Mac) key is pressed on click.
-                   */
-                  openInNewTab:
-                    options.openInNewTab || event.ctrlKey || event.metaKey || event.shiftKey,
-                },
-              });
+              navigateToDashboard(event.ctrlKey || event.metaKey || event.shiftKey);
             }
       }
       label={
