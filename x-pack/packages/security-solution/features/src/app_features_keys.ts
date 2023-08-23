@@ -43,10 +43,6 @@ export enum AppFeatureSecurityKey {
    * Enables Osquery Response Actions
    */
   osqueryAutomatedResponseActions = 'osquery_automated_response_actions',
-  /**
-   * Test for the POC extracting rules page functionality
-   */
-  rulesTest = 'rulesTest',
 
   /**
    * Enables managing endpoint exceptions on rules and alerts
@@ -93,7 +89,6 @@ export enum SecuritySubFeatureId {
   processOperations = 'processOperationsSubFeature',
   fileOperations = 'fileOperationsSubFeature',
   executeAction = 'executeActionSubFeature',
-  rulesTest = 'rulesTestSubFeature',
 }
 
 /** Sub-features IDs for Cases */

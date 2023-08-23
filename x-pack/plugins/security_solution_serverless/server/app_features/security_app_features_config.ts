@@ -133,8 +133,4 @@ const securityAppFeaturesConfig: Record<
   },
 
   [AppFeatureSecurityKey.osqueryAutomatedResponseActions]: {},
-
-  [AppFeatureSecurityKey.rulesTest]: {
-    subFeatureIds: [SecuritySubFeatureId.rulesTest],
-  },
 };

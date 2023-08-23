@@ -9,16 +9,6 @@ import { APP_ID } from './constants';
 import { AppFeatureKey } from './app_features_keys';
 
 export const AppFeaturesPrivileges = {
-  [AppFeatureKey.rulesTest]: {
-    all: {
-      ui: ['showRules', 'crudRules'],
-      api: [`${APP_ID}-showRules`, `${APP_ID}-crudRules`],
-    },
-    read: {
-      ui: ['showRules'],
-      api: [`${APP_ID}-showRules`],
-    },
-  },
   [AppFeatureKey.endpointExceptions]: {
     all: {
       ui: ['showEndpointExceptions', 'crudEndpointExceptions'],

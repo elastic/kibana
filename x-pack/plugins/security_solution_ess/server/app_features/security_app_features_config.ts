@@ -131,19 +131,6 @@ const securityAppFeaturesConfig: Record<
 
   [AppFeatureSecurityKey.osqueryAutomatedResponseActions]: {},
 
-  [AppFeatureSecurityKey.rulesTest]: {
-    privileges: {
-      all: {
-        api: AppFeaturesPrivileges[AppFeatureKey.rulesTest].all.api,
-        ui: AppFeaturesPrivileges[AppFeatureKey.rulesTest].all.ui,
-      },
-      read: {
-        api: AppFeaturesPrivileges[AppFeatureKey.rulesTest].read.api,
-        ui: AppFeaturesPrivileges[AppFeatureKey.rulesTest].read.ui,
-      },
-    },
-  },
-
   [AppFeatureSecurityKey.endpointExceptions]: {
     privileges: {
       all: {

@@ -529,54 +529,6 @@ const executeActionSubFeature: SubFeatureConfig = {
   ],
 };
 
-const rulesTestSubFeature: SubFeatureConfig = {
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.rules.privilegesTooltip',
-    {
-      defaultMessage: 'All Spaces is required for Rules access.',
-    }
-  ),
-  name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.rules', {
-    defaultMessage: 'Rules',
-  }),
-  description: i18n.translate(
-    'xpack.securitySolution.featureRegistry.subFeatures.rules.description',
-    {
-      defaultMessage: 'Use rules (this is a test sub-feature).',
-    }
-  ),
-  privilegeGroups: [
-    {
-      groupType: 'mutually_exclusive',
-      privileges: [
-        {
-          id: 'rules_management_all',
-          includeIn: 'all',
-          name: 'All',
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          api: AppFeaturesPrivileges[AppFeatureKey.rulesTest].all.api,
-          ui: AppFeaturesPrivileges[AppFeatureKey.rulesTest].all.ui,
-        },
-        {
-          id: 'rules_management_read',
-          includeIn: 'read',
-          name: 'Read',
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          api: AppFeaturesPrivileges[AppFeatureKey.rulesTest].read.api,
-          ui: AppFeaturesPrivileges[AppFeatureKey.rulesTest].read.api,
-        },
-      ],
-    },
-  ],
-};
-
 const endpointExceptionsSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
@@ -640,6 +592,5 @@ export const securitySubFeaturesMap = Object.freeze(
     [SecuritySubFeatureId.processOperations, processOperationsSubFeature],
     [SecuritySubFeatureId.fileOperations, fileOperationsSubFeature],
     [SecuritySubFeatureId.executeAction, executeActionSubFeature],
-    [SecuritySubFeatureId.rulesTest, rulesTestSubFeature],
   ])
 );
