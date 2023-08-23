@@ -20,5 +20,4 @@ export const pagination = z
     /** The querySize parameter is the number of items to be returned */
     querySize: z.number(),
   })
-  .passthrough()
-  .optional();
+  .passthrough();

@@ -9,7 +9,7 @@ import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { hostFieldsMap } from '@kbn/securitysolution-ecs';
 import { HostsFields } from '../../../../../../common/api/search_strategy/hosts/model/sort';
 import type { HostsRequestOptions } from '../../../../../../common/api/search_strategy';
-import type { Direction, SortField } from '../../../../../../common/search_strategy';
+import type { Direction } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses, reduceFields } from '../../../../../utils/build_query';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import { HOSTS_FIELDS } from './helpers';
@@ -85,7 +85,7 @@ export const buildHostsQuery = ({
 
 type QueryOrder = { lastSeen: Direction } | { _key: Direction };
 
-const getQueryOrder = (sort: SortField<HostsFields>): QueryOrder => {
+const getQueryOrder = (sort: HostsRequestOptions['sort']): QueryOrder => {
   switch (sort.field) {
     case HostsFields.lastSeen:
       return { lastSeen: sort.direction };

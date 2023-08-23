@@ -15,6 +15,7 @@ import type { Capabilities, CoreStart } from '@kbn/core/public';
 import type { DocLinks } from '@kbn/doc-links';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
+import { isObject } from 'lodash';
 import {
   ALERTS_PATH,
   APP_UI_ID,
@@ -157,7 +158,10 @@ export const getInspectResponse = <T extends FactoryQueryTypes>(
   response: StrategyResponseType<T> | TimelineEqlResponse | undefined,
   prevResponse: InspectResponse
 ): InspectResponse => ({
-  dsl: response?.inspect?.dsl ?? prevResponse?.dsl ?? [],
+  dsl:
+    isObject(response?.inspect) && response?.inspect.dsl
+      ? response.inspect.dsl
+      : prevResponse?.dsl || [],
   response:
     response != null ? [JSON.stringify(response.rawResponse, null, 2)] : prevResponse?.response,
 });

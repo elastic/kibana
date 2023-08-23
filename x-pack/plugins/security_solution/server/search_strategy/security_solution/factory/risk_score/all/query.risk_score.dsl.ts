@@ -11,7 +11,6 @@ import {
   Direction,
   RiskScoreFields,
   RiskScoreEntity,
-  type RiskScoreSortField,
 } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
@@ -63,7 +62,7 @@ export const buildRiskScoreQuery = ({
   return dslQuery;
 };
 
-const getQueryOrder = (sort?: RiskScoreSortField): Sort => {
+const getQueryOrder = (sort?: RiskScoreRequestOptions['sort']): Sort => {
   if (!sort) {
     return [
       {

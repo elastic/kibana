@@ -17,7 +17,7 @@ export const hostDetailsSchema = z
     hostName: z.string(),
     skip: z.boolean().optional(),
     inspect,
-    pagination,
+    pagination: pagination.optional(),
   })
   .extend(requestBasicOptionsSchema.shape)
   .extend({ timerange, sort: sort.optional() });

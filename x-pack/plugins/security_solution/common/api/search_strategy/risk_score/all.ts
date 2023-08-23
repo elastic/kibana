@@ -35,6 +35,7 @@ export const riskScoreRequestOptionsSchema = requestBasicOptionsSchema.extend({
     .optional(),
   sort: sort
     .unwrap()
+    .required()
     .extend({
       field: z.enum([
         RiskScoreFields.timestamp,
@@ -47,7 +48,6 @@ export const riskScoreRequestOptionsSchema = requestBasicOptionsSchema.extend({
         RiskScoreFields.alertsCount,
       ]),
     })
-    .deepPartial()
     .optional(),
 });
 

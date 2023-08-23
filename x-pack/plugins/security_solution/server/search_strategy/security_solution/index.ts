@@ -44,6 +44,7 @@ export const securitySolutionSearchStrategyProvider = (
       assertValidRequestType(request);
 
       const queryFactory = securitySolutionFactory[request.factoryQueryType];
+
       const dsl = queryFactory.buildDsl(request);
       return es.search({ ...request, params: dsl }, options, deps).pipe(
         map((response) => {

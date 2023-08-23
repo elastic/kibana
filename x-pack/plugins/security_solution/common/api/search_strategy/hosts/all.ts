@@ -13,8 +13,8 @@ import { sort } from './model/sort';
 
 export const allHostsSchema = z
   .object({
-    sort,
-    pagination: pagination.unwrap().required(),
+    sort: sort.unwrap().required(),
+    pagination: pagination.required(),
     isNewRiskScoreModuleAvailable: z.boolean(),
   })
   .extend(requestBasicOptionsSchema.partial().shape)

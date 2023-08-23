@@ -19,10 +19,11 @@ export enum NetworkDnsFields {
 }
 
 export const networkDnsSchema = requestOptionsPaginatedSchema.extend({
-  isPtrIncluded: z.boolean().optional(),
+  isPtrIncluded: z.boolean(),
   stackByField: z.string().nullable().optional(),
   sort: sort
     .unwrap()
+    .required()
     .extend({
       field: z.enum([
         NetworkDnsFields.dnsName,
@@ -31,9 +32,7 @@ export const networkDnsSchema = requestOptionsPaginatedSchema.extend({
         NetworkDnsFields.dnsBytesIn,
         NetworkDnsFields.dnsBytesOut,
       ]),
-    })
-    .deepPartial()
-    .optional(),
+    }),
   timerange,
 });
 

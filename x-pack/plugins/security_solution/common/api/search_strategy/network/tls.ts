@@ -20,11 +20,10 @@ export const networkTlsSchema = requestOptionsPaginatedSchema.extend({
   flowTarget,
   sort: sort
     .unwrap()
+    .required()
     .extend({
       field: z.enum([NetworkTlsFields._id]),
-    })
-    .deepPartial()
-    .optional(),
+    }),
   timerange,
 });
 

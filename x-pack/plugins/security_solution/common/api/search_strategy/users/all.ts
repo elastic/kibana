@@ -25,6 +25,7 @@ export const usersSchema = requestOptionsPaginatedSchema
         field: z.enum([UsersFields.name, UsersFields.lastSeen]),
       }),
     timerange,
+    isNewRiskScoreModuleAvailable: z.boolean(),
   })
   .passthrough();
 
