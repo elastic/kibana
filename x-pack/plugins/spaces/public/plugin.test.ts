@@ -33,7 +33,7 @@ describe('Spaces plugin', () => {
       );
     });
 
-    it('should register the management and feature catalogue sections when the management and home plugins are both available', () => {
+    it('should register the management and feature catalogue sections when the management and home plugins are both available when buildFlavor is traditional', () => {
       const coreSetup = coreMock.createSetup();
       const home = homePluginMock.createSetupContract();
 
@@ -43,7 +43,12 @@ describe('Spaces plugin', () => {
 
       management.sections.section.kibana = mockSection;
 
-      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext());
+      const mockInitializerContext = coreMock.createPluginInitializerContext();
+
+      // @ts-expect-error buildFlavor marked as readonly
+      mockInitializerContext.env.packageInfo.buildFlavor = 'traditional';
+
+      const plugin = new SpacesPlugin(mockInitializerContext);
       plugin.setup(coreSetup, {
         management,
         home,
@@ -62,10 +67,57 @@ describe('Spaces plugin', () => {
         })
       );
     });
+
+    it('should not register the management and feature catalogue sections when the management and home plugins are both available when buildFlavor is serverless', () => {
+      const coreSetup = coreMock.createSetup();
+      const home = homePluginMock.createSetupContract();
+
+      const management = managementPluginMock.createSetupContract();
+      const mockSection = createManagementSectionMock();
+      mockSection.registerApp = jest.fn();
+
+      management.sections.section.kibana = mockSection;
+
+      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext());
+      plugin.setup(coreSetup, {
+        management,
+        home,
+      });
+
+      expect(mockSection.registerApp).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'spaces' })
+      );
+
+      expect(home.featureCatalogue.register).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          category: 'admin',
+          icon: 'spacesApp',
+          id: 'spaces',
+          showOnHomePage: false,
+        })
+      );
+    });
   });
 
   describe('#start', () => {
-    it('should register the spaces nav control', () => {
+    it('should register the spaces nav control when build flavor is traditional', () => {
+      const coreSetup = coreMock.createSetup();
+      const coreStart = coreMock.createStart();
+
+      const mockInitializerContext = coreMock.createPluginInitializerContext();
+
+      // @ts-expect-error buildFlavor marked as readonly
+      mockInitializerContext.env.packageInfo.buildFlavor = 'traditional';
+
+      const plugin = new SpacesPlugin(mockInitializerContext);
+      plugin.setup(coreSetup, {});
+
+      plugin.start(coreStart);
+
+      expect(coreStart.chrome.navControls.registerLeft).toHaveBeenCalled();
+    });
+
+    it('should not register the spaces nav control when build flavor is serverless', () => {
       const coreSetup = coreMock.createSetup();
       const coreStart = coreMock.createStart();
 
@@ -74,7 +126,7 @@ describe('Spaces plugin', () => {
 
       plugin.start(coreStart);
 
-      expect(coreStart.chrome.navControls.registerLeft).toHaveBeenCalled();
+      expect(coreStart.chrome.navControls.registerLeft).not.toHaveBeenCalled();
     });
   });
 });
