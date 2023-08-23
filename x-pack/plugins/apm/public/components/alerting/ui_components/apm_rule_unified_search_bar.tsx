@@ -61,7 +61,7 @@ export function ApmRuleUnifiedSearchBar({
       displayStyle="inPage"
       onQueryChange={handleSubmit}
       onQuerySubmit={handleSubmit}
-      dataTestSubj="apmUnifiedSearchBar"
+      dataTestSubj="apmRuleUnifiedSearchBar"
       query={ruleParams.searchConfiguration?.query}
     />
   );
