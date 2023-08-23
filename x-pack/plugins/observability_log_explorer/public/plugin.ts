@@ -38,12 +38,11 @@ export class ObservabilityLogExplorerPlugin
   ) {
     core.application.register({
       id: 'observability-log-explorer',
-      title: i18n.translate('xpack.observability_log_explorer.appTitle', {
-        defaultMessage: 'Log Explorer',
-      }),
+      title: logExplorerAppTitle,
       category: DEFAULT_APP_CATEGORIES.observability,
-      euiIconType: 'logoObservability',
+      euiIconType: 'logoLogging',
       navLinkStatus: AppNavLinkStatus.hidden,
+      searchable: true,
       mount: async (appMountParams) => {
         const [coreStart, pluginsStart, ownPluginStart] = await core.getStartServices();
 
@@ -63,3 +62,7 @@ export class ObservabilityLogExplorerPlugin
     return {};
   }
 }
+
+const logExplorerAppTitle = i18n.translate('xpack.observability_log_explorer.appTitle', {
+  defaultMessage: 'Log Explorer',
+});
