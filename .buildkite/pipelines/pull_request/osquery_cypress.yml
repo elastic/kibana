@@ -13,6 +13,31 @@ steps:
     artifact_paths:
       - "target/kibana-osquery/**/*"
 
+  - label: 'Sorry Cypress Osquery Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    soft_fail: true
+    command: |
+      source .buildkite/scripts/steps/functional/common.sh
+      export PARALLELISM=$(node x-pack/plugins/security_solution/scripts/get_parallelism.js --projectName osquery)
+      buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" 'false'
+      buildkite-agent pipeline upload <<YAML
+      steps:
+      - command: .buildkite/scripts/steps/functional/osquery_cypress_cloud.sh
+        label: Sorry Cypress Osquery Tests
+        parallelism: $${PARALLELISM:-8}
+        agents:
+          queue: n2-4-spot
+        depends_on: build
+        timeout_in_minutes: 60
+        soft_fail: true
+        artifact_paths:
+          - "target/kibana-osquery/**/*"
+      YAML
+      exit 0
+
   - command: .buildkite/scripts/steps/functional/osquery_cypress_burn.sh
     label: 'Osquery Cypress Tests, burning changed specs'
     agents:

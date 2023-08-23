@@ -7,7 +7,7 @@
   "scripts": {
     "cypress:burn": "yarn cypress:run --env burn=2 --concurrency=1 --headed",
     "cypress:changed-specs-only": "yarn cypress:run --changed-specs-only --env burn=2",
-    "cypress:cloud:run": "node ../security_solution/scripts/start_cypress_cloud run --config-file ./cypress_ci_cloud.config.ts --ftr-config-file ../../test/osquery_cypress/cli_config",
+    "cypress:cloud:run": "node ../security_solution/scripts/start_cypress_cloud run --config-file ./cypress_ci_cloud.config.ts --ftr-config-file ../../test/osquery_cypress/cli_config --projectId osquery",
     "cypress:open": "node ../security_solution/scripts/start_cypress_parallel open --config-file ../osquery/cypress.config.ts --ftr-config-file ../../test/osquery_cypress/cli_config",
     "cypress:run": "node ../security_solution/scripts/start_cypress_parallel run --config-file ../cypress.config.ts --ftr-config-file ../../test/osquery_cypress/cli_config --concurrency 1",
     "nyc": "../../../node_modules/.bin/nyc report --reporter=text-summary",

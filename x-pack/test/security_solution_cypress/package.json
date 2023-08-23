@@ -7,6 +7,7 @@
     "scripts": {
       "cypress": "../../../node_modules/.bin/cypress",
       "cypress:open:ess": "TZ=UTC node ../../plugins/security_solution/scripts/start_cypress_parallel open --spec './cypress/e2e/**/*.cy.ts' --config-file ../../test/security_solution_cypress/cypress/cypress.config.ts --ftr-config-file ../../test/security_solution_cypress/cli_config",
+      "cypress:cloud:run": "node ../../plugins/security_solution/scripts/start_cypress_cloud open --config-file ../../test/security_solution_cypress/cypress/cypress_ci_cloud.config.ts --ftr-config-file ../../test/security_solution_cypress/cli_config",
       "cypress:run:ess": "yarn cypress:ess --spec './cypress/e2e/{,!(investigations,explore)/**/}*.cy.ts'",
       "cypress:run:cases:ess": "yarn cypress:ess --spec './cypress/e2e/explore/cases/*.cy.ts'",
       "cypress:ess": "TZ=UTC node ../../plugins/security_solution/scripts/start_cypress_parallel run --config-file ../../test/security_solution_cypress/cypress/cypress_ci.config.ts --ftr-config-file ../../test/security_solution_cypress/cli_config",

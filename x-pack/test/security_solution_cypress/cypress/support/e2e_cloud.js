@@ -13,11 +13,5 @@ Cypress.on('uncaught:exception', () => {
 });
 
 before(() => {
-  cy.task('isSkipped', Cypress.spec.absolute).then((isSkippedSpec) => {
-    if (!isSkippedSpec) {
-      Cypress.config('baseUrl', Cypress.env('BASE_URL'));
-      cy.visit('/');
-      cy.location('origin').should('eq', Cypress.env('BASE_URL'));
-    }
-  });
+  Cypress.config('baseUrl', 'http://localhost:5620');
 });

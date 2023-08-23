@@ -10,13 +10,13 @@ import { defineCypressConfig } from '@kbn/cypress-config';
 import { cloudPlugin } from 'cypress-cloud/plugin';
 import path from 'path';
 import { isSkipped } from '@kbn/security-solution-plugin/scripts/run_cypress/utils';
-import { setupEnv } from '@kbn/osquery-plugin/cypress/support/setup_env';
+import { setupEnv } from './cypress/support/setup_env';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
   reporter: '../../../node_modules/cypress-multi-reporters',
   reporterOptions: {
-    configFile: path.resolve(__dirname, './reporter_config.json'),
+    configFile: path.resolve(__dirname, './cypress/reporter_config.json'),
   },
   defaultCommandTimeout: 150000,
   execTimeout: 150000,
@@ -25,17 +25,23 @@ export default defineCypressConfig({
   retries: {
     runMode: 1,
   },
-  screenshotsFolder: '../../../target/kibana-security-solution/cypress/screenshots',
+  screenshotsFolder: '../../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: true,
-  videosFolder: '../../../target/kibana-security-solution/cypress/videos',
+  videosFolder: '../../../../target/kibana-security-solution/cypress/videos',
   viewportHeight: 946,
   viewportWidth: 1680,
+  env: {
+    'cypress-react-selector': {
+      root: '#osquery-app',
+    },
+  },
   e2e: {
     experimentalMemoryManagement: true,
     experimentalInteractiveRunEvents: true,
-    specPattern: ['./cypress/e2e', '!./cypress/e2e/investigations', '!./cypress/e2e/explore'],
-    supportFile: './cypress/support/e2e_cloud.js',
+    experimentalSourceRewriting: true,
+    specPattern: './cypress/e2e/**/*.cy.ts',
+    supportFile: './cypress/support/e2e_cloud.ts',
     env: {
       FORCE_COLOR: '1',
       baseUrl: 'http://elastic:changeme@localhost:5620',
@@ -43,7 +49,7 @@ export default defineCypressConfig({
       ELASTICSEARCH_URL: 'http://system_indices_superuser:changeme@localhost:9222',
       ELASTICSEARCH_USERNAME: 'system_indices_superuser',
       ELASTICSEARCH_PASSWORD: 'changeme',
-      FTR_CONFIG_FILE: path.resolve(__dirname, '../../test/security_solution_cypress/cli_config'),
+      FTR_CONFIG_FILE: path.resolve(__dirname, '../../test/osquery_cypress/cli_config'),
     },
     async setupNodeEvents(on, config) {
       setupEnv(on, config);

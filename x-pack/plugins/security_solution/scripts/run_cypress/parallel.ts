@@ -122,7 +122,7 @@ export const cli = () => {
 
       const getKibanaPort = <T>(): T | number => {
         if (isOpen) {
-          return 5620;
+          return 5622;
         }
 
         const kibanaPort = parseInt(`56${Math.floor(Math.random() * 89) + 10}`, 10);

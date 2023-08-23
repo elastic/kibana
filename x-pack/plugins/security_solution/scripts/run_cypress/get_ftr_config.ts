@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require('@kbn/babel-register').install();
+
 import _ from 'lodash';
 import { EsVersion, readConfigFile } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -47,6 +50,9 @@ export const getFtrConfig = async ({
         },
       },
       kbnTestServer: {
+        env: {
+          NODE_TLS_REJECT_UNAUTHORIZED: 1,
+        },
         serverArgs: [
           `--server.port=${kibanaPort}`,
           `--elasticsearch.hosts=http://0.0.0.0:${esPort}`,
