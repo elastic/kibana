@@ -1557,10 +1557,10 @@
     "@elastic/transport" "^8.3.3"
     tslib "^2.4.0"
 
-"@elastic/ems-client@8.4.0":
-  version "8.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.4.0.tgz#e77bbddda998a77e29b86767fe4ff403c5a62133"
-  integrity sha512-uMxZl6BxCPLvIJiG80gqQbOlxKqNLYCo0KtHDFVwUGpTgUQnrVzAZUJ9PZ7fSD7cUDW6pE+QekDddDxB2nOCwA==
+"@elastic/ems-client@8.5.0":
+  version "8.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.5.0.tgz#5e3988ab01dee54bace9f8c2f9e71470b26a1bfa"
+  integrity sha512-uEI8teyS3gWErlEL4mEYh0MDHms9Rp3eEHKnMMSdMtAkaa3xs60SOm3Vd0ld9sIPsyarQHrAybAw30GXVXXRjw==
   dependencies:
     "@types/geojson" "^7946.0.10"
     "@types/lru-cache" "^5.1.0"
@@ -1569,7 +1569,7 @@
     chroma-js "^2.1.0"
     lodash "^4.17.15"
     lru-cache "^6.0.0"
-    semver "^7.3.8"
+    semver "7.5.4"
     topojson-client "^3.1.0"
 
 "@elastic/eslint-plugin-eui@0.0.2":
@@ -26567,6 +26567,13 @@ semver@5.6.0:
   version "5.6.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.6.0.tgz#7e74256fbaa49c75aa7c7a205cc22799cac80004"
   integrity sha512-RS9R6R35NYgQn++fkDWaOmqGoj4Ek9gGs+DPxNUZKuwE183xjJroKvyo1IzVFeXvUrvmALy6FWD5xrdJT25gMg==
+
+semver@7.5.4:
+  version "7.5.4"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-7.5.4.tgz#483986ec4ed38e1c6c48c34894a9182dbff68a6e"
+  integrity sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==
+  dependencies:
+    lru-cache "^6.0.0"
 
 semver@^6.0.0, semver@^6.1.0, semver@^6.1.1, semver@^6.1.2, semver@^6.2.0, semver@^6.3.0, semver@^6.3.1:
   version "6.3.1"
