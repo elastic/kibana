@@ -181,6 +181,11 @@ const findSloDefinitionsParamsSchema = t.type({
   }),
 });
 
+/**
+ * The response schema for /internal/observability/slo/_definitions
+ *
+ * @private
+ */
 const findSloDefinitionsResponseSchema = t.array(sloResponseSchema);
 
 const getSLODiagnosisParamsSchema = t.type({
