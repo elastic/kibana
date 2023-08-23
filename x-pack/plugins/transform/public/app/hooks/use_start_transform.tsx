@@ -51,14 +51,7 @@ export const useStartTransforms = () => {
         // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
         if (results.hasOwnProperty(transformId)) {
           const result = results[transformId];
-          if (result.success === true) {
-            toastNotifications.addSuccess(
-              i18n.translate('xpack.transform.transformList.startTransformSuccessMessage', {
-                defaultMessage: 'Request to start transform {transformId} acknowledged.',
-                values: { transformId },
-              })
-            );
-          } else {
+          if (!result.success) {
             toastNotifications.addError(
               new Error(JSON.stringify(result.error!.caused_by, null, 2)),
               {

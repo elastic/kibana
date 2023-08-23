@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import type {
-  ResetTransformStatus,
   ResetTransformsRequestSchema,
   ResetTransformsResponseSchema,
 } from '../../../common/api_schemas/reset_transforms';
@@ -21,8 +20,6 @@ import { getErrorMessage } from '../../../common/utils/errors';
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 import { useRefreshTransformList } from '../common';
 import { ToastNotificationText } from '../components';
-
-type SuccessCountField = keyof Omit<ResetTransformStatus, 'destinationIndex'>;
 
 export const useResetTransforms = () => {
   const { http, overlays, theme } = useAppDependencies();
@@ -51,32 +48,11 @@ export const useResetTransforms = () => {
         ),
       }),
     onSuccess: (results) => {
-      const isBulk = Object.keys(results).length > 1;
-      const successCount: Record<SuccessCountField, number> = {
-        transformReset: 0,
-      };
       for (const transformId in results) {
         // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
         if (results.hasOwnProperty(transformId)) {
           const status = results[transformId];
 
-          // if we are only resetting one transform, show the success toast messages
-          if (!isBulk && status.transformReset) {
-            if (status.transformReset?.success) {
-              toastNotifications.addSuccess(
-                i18n.translate('xpack.transform.transformList.resetTransformSuccessMessage', {
-                  defaultMessage: 'Request to reset transform {transformId} acknowledged.',
-                  values: { transformId },
-                })
-              );
-            }
-          } else {
-            (Object.keys(successCount) as SuccessCountField[]).forEach((key) => {
-              if (status[key]?.success) {
-                successCount[key] = successCount[key] + 1;
-              }
-            });
-          }
           if (status.transformReset?.error) {
             const error = status.transformReset.error.reason;
             toastNotifications.addDanger({
@@ -95,19 +71,6 @@ export const useResetTransforms = () => {
               ),
             });
           }
-        }
-      }
-
-      // if we are deleting multiple transforms, combine the success messages
-      if (isBulk) {
-        if (successCount.transformReset > 0) {
-          toastNotifications.addSuccess(
-            i18n.translate('xpack.transform.transformList.bulkResetTransformSuccessMessage', {
-              defaultMessage:
-                'Successfully reset {count} {count, plural, one {transform} other {transforms}}.',
-              values: { count: successCount.transformReset },
-            })
-          );
         }
       }
 

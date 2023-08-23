@@ -33,12 +33,8 @@ export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ 
     apiError(undefined);
 
     updateTransfrom(undefined, {
-      onError: (error) => {
-        apiError(getErrorMessage(error));
-      },
-      onSuccess: () => {
-        closeFlyout();
-      },
+      onError: (error) => apiError(getErrorMessage(error)),
+      onSuccess: () => closeFlyout(),
     });
   }
 

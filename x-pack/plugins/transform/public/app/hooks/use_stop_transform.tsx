@@ -51,14 +51,7 @@ export const useStopTransforms = () => {
       for (const transformId in results) {
         // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
         if (results.hasOwnProperty(transformId)) {
-          if (results[transformId].success === true) {
-            toastNotifications.addSuccess(
-              i18n.translate('xpack.transform.transformList.stopTransformSuccessMessage', {
-                defaultMessage: 'Request to stop data frame transform {transformId} acknowledged.',
-                values: { transformId },
-              })
-            );
-          } else {
+          if (!results[transformId].success) {
             toastNotifications.addDanger(
               i18n.translate('xpack.transform.transformList.stopTransformErrorMessage', {
                 defaultMessage: 'An error occurred stopping the data frame transform {transformId}',

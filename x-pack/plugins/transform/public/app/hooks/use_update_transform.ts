@@ -7,8 +7,6 @@
 
 import { useMutation } from '@tanstack/react-query';
 
-import { i18n } from '@kbn/i18n';
-
 import type {
   PostTransformsUpdateRequestSchema,
   PostTransformsUpdateResponseSchema,
@@ -16,7 +14,7 @@ import type {
 import { addInternalBasePath } from '../../../common/constants';
 import type { TransformId } from '../../../common/types/transform';
 
-import { useAppDependencies, useToastNotifications } from '../app_dependencies';
+import { useAppDependencies } from '../app_dependencies';
 import { useRefreshTransformList } from '../common';
 
 export const useUpdateTransform = (
@@ -25,7 +23,6 @@ export const useUpdateTransform = (
 ) => {
   const { http } = useAppDependencies();
   const refreshTransformList = useRefreshTransformList();
-  const toastNotifications = useToastNotifications();
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -36,15 +33,7 @@ export const useUpdateTransform = (
           version: '1',
         }
       ),
-    onSuccess: () => {
-      toastNotifications.addSuccess(
-        i18n.translate('xpack.transform.transformList.editTransformSuccessMessage', {
-          defaultMessage: 'Transform {transformId} updated.',
-          values: { transformId },
-        })
-      );
-      refreshTransformList();
-    },
+    onSuccess: () => refreshTransformList(),
   });
 
   return mutation;

@@ -55,15 +55,7 @@ export const useScheduleNowTransforms = () => {
         // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
         if (results.hasOwnProperty(transformId)) {
           const result = results[transformId];
-          if (result.success === true) {
-            toastNotifications.addSuccess(
-              i18n.translate('xpack.transform.transformList.scheduleNowTransformSuccessMessage', {
-                defaultMessage:
-                  'Request to schedule transform {transformId} to process data instantly acknowledged.',
-                values: { transformId },
-              })
-            );
-          } else {
+          if (!result.success) {
             toastNotifications.addError(
               new Error(JSON.stringify(result.error!.caused_by, null, 2)),
               {

@@ -14,7 +14,6 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { addInternalBasePath } from '../../../common/constants';
 import type {
-  DeleteTransformStatus,
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
 } from '../../../common/api_schemas/delete_transforms';
@@ -110,8 +109,6 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
   };
 };
 
-type SuccessCountField = keyof Omit<DeleteTransformStatus, 'destinationIndex'>;
-
 export const useDeleteTransforms = () => {
   const { http, overlays, theme } = useAppDependencies();
   const refreshTransformList = useRefreshTransformList();
@@ -139,58 +136,12 @@ export const useDeleteTransforms = () => {
         ),
       }),
     onSuccess: (results) => {
-      const isBulk = Object.keys(results).length > 1;
-      const successCount: Record<SuccessCountField, number> = {
-        transformDeleted: 0,
-        destIndexDeleted: 0,
-        destDataViewDeleted: 0,
-      };
       for (const transformId in results) {
         // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
         if (results.hasOwnProperty(transformId)) {
           const status = results[transformId];
           const destinationIndex = status.destinationIndex;
 
-          // if we are only deleting one transform, show the success toast messages
-          if (!isBulk && status.transformDeleted) {
-            if (status.transformDeleted?.success) {
-              toastNotifications.addSuccess(
-                i18n.translate('xpack.transform.transformList.deleteTransformSuccessMessage', {
-                  defaultMessage: 'Request to delete transform {transformId} acknowledged.',
-                  values: { transformId },
-                })
-              );
-            }
-            if (status.destIndexDeleted?.success) {
-              toastNotifications.addSuccess(
-                i18n.translate(
-                  'xpack.transform.deleteTransform.deleteAnalyticsWithIndexSuccessMessage',
-                  {
-                    defaultMessage:
-                      'Request to delete destination index {destinationIndex} acknowledged.',
-                    values: { destinationIndex },
-                  }
-                )
-              );
-            }
-            if (status.destDataViewDeleted?.success) {
-              toastNotifications.addSuccess(
-                i18n.translate(
-                  'xpack.transform.deleteTransform.deleteAnalyticsWithDataViewSuccessMessage',
-                  {
-                    defaultMessage: 'Request to delete data view {destinationIndex} acknowledged.',
-                    values: { destinationIndex },
-                  }
-                )
-              );
-            }
-          } else {
-            (Object.keys(successCount) as SuccessCountField[]).forEach((key) => {
-              if (status[key]?.success) {
-                successCount[key] = successCount[key] + 1;
-              }
-            });
-          }
           if (status.transformDeleted?.error) {
             const error = status.transformDeleted.error.reason;
             toastNotifications.addDanger({
@@ -253,38 +204,6 @@ export const useDeleteTransforms = () => {
               ),
             });
           }
-        }
-      }
-
-      // if we are deleting multiple transforms, combine the success messages
-      if (isBulk) {
-        if (successCount.transformDeleted > 0) {
-          toastNotifications.addSuccess(
-            i18n.translate('xpack.transform.transformList.bulkDeleteTransformSuccessMessage', {
-              defaultMessage:
-                'Successfully deleted {count} {count, plural, one {transform} other {transforms}}.',
-              values: { count: successCount.transformDeleted },
-            })
-          );
-        }
-
-        if (successCount.destIndexDeleted > 0) {
-          toastNotifications.addSuccess(
-            i18n.translate('xpack.transform.transformList.bulkDeleteDestIndexSuccessMessage', {
-              defaultMessage:
-                'Successfully deleted {count} destination {count, plural, one {index} other {indices}}.',
-              values: { count: successCount.destIndexDeleted },
-            })
-          );
-        }
-        if (successCount.destDataViewDeleted > 0) {
-          toastNotifications.addSuccess(
-            i18n.translate('xpack.transform.transformList.bulkDeleteDestDataViewSuccessMessage', {
-              defaultMessage:
-                'Successfully deleted {count} destination data {count, plural, one {view} other {views}}.',
-              values: { count: successCount.destDataViewDeleted },
-            })
-          );
         }
       }
 

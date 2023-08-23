@@ -180,13 +180,6 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
           true
         );
 
-        toastNotifications.addSuccess(
-          i18n.translate('xpack.transform.stepCreateForm.createDataViewSuccessMessage', {
-            defaultMessage: 'Kibana data view {dataViewName} created successfully.',
-            values: { dataViewName },
-          })
-        );
-
         setDataViewId(newDataView.id);
         setLoading(false);
         return true;

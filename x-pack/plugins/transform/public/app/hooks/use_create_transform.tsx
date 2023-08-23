@@ -54,13 +54,6 @@ export const useCreateTransform = (
     onSuccess: (resp) => {
       if (resp.errors.length > 0) {
         errorToast(resp.errors.length === 1 ? resp.errors[0] : resp.errors);
-      } else {
-        toastNotifications.addSuccess(
-          i18n.translate('xpack.transform.stepCreateForm.createTransformSuccessMessage', {
-            defaultMessage: 'Request to create transform {transformId} acknowledged.',
-            values: { transformId },
-          })
-        );
       }
 
       refreshTransformList();
