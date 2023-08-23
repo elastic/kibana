@@ -97,6 +97,33 @@ tests that should run in a serverless environment have to be added to the
 Tests in this area should be clearly designed for the serverless environment,
 particularly when it comes to timing for API requests and UI interaction.
 
+### Testing with feature flags
+
+**tl;dr:** Tests specific to functionality behind a feature flag need special
+handling and are by default only tested locally / in CI but excluded from regular
+test runs in MKI.
+
+New features might be gated behind a feature flag and can only be enabled
+through a yml configuration entry. By default, these features are not enabled
+so they're not available in a regular serverless MKI project, which would make
+end-to-end tests for such a feature fail. In order to still have tests for
+features behind a feature flag, these tests need to be separated from the
+regular tests.
+
+For every project's `test_suites` directory, there are feature flags specific
+config (`config.feature_flags.ts`) and index (`index.feature_flags.ts`) files
+next to the regular `config.ts` and `index.ts`. These extra files are used to
+cover all feature flag tests of the respective area.
+If you want to add feature flag specific tests:
+- Add your feature flag(s) to the `kbnServerArgs` in the `config.feature_flags.ts` file
+- Load your test file(s) in the `index.feature_flags.ts` file
+
+As mentioned above, these tests are not part of the regular test run against MKI
+projects. If you still want to run feature flag tests against an MKI project,
+this requires a Kibana docker build that has the feature flags enabled by default.
+This docker image can then be used to create a project in serverless QA and the
+feature flags tests can be pointed to the project.
+
 ## Run tests
 Similar to how functional tests are run in `x-pack/test`, you can point the
 functional tests server and test runner to config files in this `x-pack/test_serverless`
