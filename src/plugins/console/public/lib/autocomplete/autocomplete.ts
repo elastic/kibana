@@ -1118,7 +1118,7 @@ export default function ({
     if (
       lastEvaluatedToken.position.column + 1 === currentToken.position.column &&
       lastEvaluatedToken.position.lineNumber === currentToken.position.lineNumber &&
-      (lastEvaluatedToken.type === 'url.slash' || lastEvaluatedToken.type === 'url.comma')&&
+      (lastEvaluatedToken.type === 'url.slash' || lastEvaluatedToken.type === 'url.comma') &&
       currentToken.type === 'url.part' &&
       currentToken.value.length === 1
     ) {
