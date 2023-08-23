@@ -13,20 +13,6 @@ import type { AutocompleteCommandDefinition } from '../types';
 
 export const whereCommandDefinition: AutocompleteCommandDefinition[] = [
   {
-    label: 'is_null',
-    insertText: 'is_null',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.isNullDoc', {
-      defaultMessage: `Returns a boolean than indicates whether its input is null.`,
-    }),
-    documentation: {
-      value: buildDocumentation('is_null(grouped[T]): aggregated[T]', [
-        'from index where is_null(field)',
-      ]),
-    },
-    sortText: 'C',
-  },
-  {
     label: 'cidr_match',
     insertText: 'cidr_match',
     kind: 1,

@@ -100,12 +100,13 @@ DOT : '.';
 LP : '(';
 OPENING_BRACKET : '[' -> pushMode(EXPRESSION), pushMode(EXPRESSION);
 CLOSING_BRACKET : ']' -> popMode, popMode;
-NOT : 'not';
+NOT : N O T;
 LIKE: L I K E;
 RLIKE: R L I K E;
 IN: I N;
+IS: I S;
 AS: A S;
-NULL : 'null';
+NULL : N U L L;
 OR : 'or';
 RP : ')';
 UNDERSCORE: '_';
@@ -204,8 +205,7 @@ UNARY_FUNCTION
     ;
 
 WHERE_FUNCTIONS
-    : I S UNDERSCORE N U L L
-    | C I D R UNDERSCORE M A T C H
+    : C I D R UNDERSCORE M A T C H
     ;
 
 UNQUOTED_IDENTIFIER

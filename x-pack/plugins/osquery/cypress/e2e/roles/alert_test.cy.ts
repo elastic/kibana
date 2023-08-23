@@ -97,6 +97,7 @@ describe('Alert Test', () => {
       cy.getBySel('expand-event').first().click();
 
       cy.wait(500);
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutInvestigationGuideButton').click();
       cy.contains('Get processes').click();
     });
 

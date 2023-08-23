@@ -197,6 +197,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.openTimeline();
         await pageObjects.infraHome.closeTimeline();
       });
+
+      it('toggles the inventory switcher', async () => {
+        await pageObjects.infraHome.toggleInventorySwitcher();
+      });
     });
 
     describe('alerts flyouts', () => {

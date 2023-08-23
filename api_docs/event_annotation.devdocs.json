@@ -957,7 +957,7 @@
           {
             "parentPluginId": "eventAnnotation",
             "id": "def-common.EventAnnotationGroupSavedObjectAttributes.dataViewSpec",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "dataViewSpec",
             "description": [],
@@ -969,7 +969,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              " | undefined"
+              " | null"
             ],
             "path": "src/plugins/event_annotation/common/content_management/v1/types.ts",
             "deprecated": false,
