@@ -10,7 +10,7 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import { sumBy } from 'lodash';
+import { sumBy, meanBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 type MobileStats = APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/stats'>;
@@ -218,8 +218,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns same crashes', () => {
         const { value, timeseries } = response.currentPeriod.crashRate;
-        const timeseriesTotal = sumBy(timeseries, 'y');
-        expect(value).to.be(timeseriesTotal);
+        const timeseriesMean = meanBy(timeseries, 'y');
+        expect(value).to.be(timeseriesMean);
       });
     });
 
