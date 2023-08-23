@@ -44,7 +44,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
     });
 
-    describe('anti-regression watchdogs', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/164584
+    describe.skip('anti-regression watchdogs', () => {
       beforeEach(async () => {
         await PageObjects.console.clearTextArea();
         await PageObjects.console.pressEnter();
