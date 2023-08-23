@@ -21,7 +21,7 @@ export const DetailsPageError = ({
     <EuiPageTemplate.EmptyPrompt
       data-test-subj="indexDetailsErrorLoadingDetails"
       color="danger"
-      iconType="error"
+      iconType="warning"
       title={
         <h2>
           <FormattedMessage

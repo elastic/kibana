@@ -102,6 +102,7 @@ describe('<IndexDetailsPage />', () => {
   });
 
   it('renders a link to discover', () => {
+    // we only need to test that the link is rendered since the link component has its own tests for navigation
     expect(testBed.actions.discoverLinkExists()).toBe(true);
   });
 

@@ -16,10 +16,10 @@ import {
   EuiPageSection,
   EuiButton,
 } from '@elastic/eui';
+import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { DiscoverLink } from '../../../../lib/discover_link';
 import { useLoadIndex } from '../../../../services';
 import { Section } from '../../home';
-import { DetailsPageLoading } from './details_page_loading';
 import { DetailsPageError } from './details_page_error';
 import { IndexActionsContextMenuWithoutRedux } from '../index_actions_context_menu/index_actions_context_menu.without_redux';
 export enum IndexDetailsSection {
@@ -88,7 +88,14 @@ export const DetailsPage: React.FunctionComponent<
 
   const { isLoading, error, resendRequest, data } = useLoadIndex(indexName);
   if (isLoading) {
-    return <DetailsPageLoading />;
+    return (
+      <SectionLoading>
+        <FormattedMessage
+          id="xpack.idxMgmt.indexDetails.loadingDescription"
+          defaultMessage="Loading index details…"
+        />
+      </SectionLoading>
+    );
   }
   if (error || !data) {
     return <DetailsPageError indexName={indexName} resendRequest={resendRequest} />;

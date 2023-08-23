@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it(`throws 404 when index doesn't exist`, async () => {
-      const { body: index } = await supertest
+      await supertest
         .get(`${INTERNAL_API_BASE_PATH}/indices/non_existent`)
         .set('kbn-xsrf', 'xxx')
         .expect(404);
