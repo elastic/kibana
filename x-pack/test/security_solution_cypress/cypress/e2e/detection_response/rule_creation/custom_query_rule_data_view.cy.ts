@@ -15,8 +15,6 @@ import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
   RULE_NAME,
-  RULES_ROW,
-  RULES_MANAGEMENT_TABLE,
   RULE_SWITCH,
   SEVERITY,
 } from '../../../screens/alerts_detection_rules';
@@ -52,7 +50,10 @@ import {
   EDIT_RULE_SETTINGS_LINK,
 } from '../../../screens/rule_details';
 
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
+import {
+  getRulesManagementTableRows,
+  goToRuleDetails,
+} from '../../../tasks/alerts_detection_rules';
 import { postDataView } from '../../../tasks/common';
 import {
   createAndEnableRule,
@@ -100,7 +101,7 @@ describe('Custom query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, ()
 
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-      cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW).should('have.length', expectedNumberOfRules);
+      getRulesManagementTableRows().should('have.length', expectedNumberOfRules);
       cy.get(RULE_NAME).should('have.text', rule.name);
       cy.get(RISK_SCORE).should('have.text', rule.risk_score);
       cy.get(SEVERITY).should('have.text', 'High');

@@ -19,7 +19,7 @@ import {
 } from '../../../common/components/event_details/translations';
 import { DocumentSeverity } from './severity';
 import { RiskScore } from './risk_score';
-import { DOCUMENT_DETAILS } from './translations';
+import { EVENT_DETAILS } from './translations';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import { useRightPanelContext } from '../context';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
@@ -79,11 +79,11 @@ export const HeaderTitle: VFC<HeaderTitleProps> = memo(({ flyoutIsExpandable }) 
       <EuiSpacer size="s" />
       <EuiTitle size="s">
         <h4 data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>
-          {isAlert && !isEmpty(ruleName) ? ruleName : DOCUMENT_DETAILS}
+          {isAlert && !isEmpty(ruleName) ? ruleName : EVENT_DETAILS}
         </h4>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup direction="row" gutterSize="m">
+      <EuiFlexGroup direction="row" gutterSize={isAlert ? 'm' : 'none'}>
         <EuiFlexItem grow={false}>
           <DocumentStatus />
         </EuiFlexItem>
