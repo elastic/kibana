@@ -25,8 +25,7 @@ const DATA_VIEW = 'auditbeat-*';
 
 describe('Inspect Explore pages', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
-    cy.task('esArchiverLoad', 'risk_users');
-    cy.task('esArchiverLoad', 'risk_hosts');
+    cy.task('esArchiverLoad', 'risk_entities');
 
     login();
     // Create and select data view
@@ -34,8 +33,7 @@ describe('Inspect Explore pages', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'risk_users');
-    cy.task('esArchiverUnload', 'risk_hosts');
+    cy.task('esArchiverUnload', 'risk_entities');
   });
 
   INSPECT_BUTTONS_IN_SECURITY.forEach(({ pageName, url, lensVisualizations, tables }) => {

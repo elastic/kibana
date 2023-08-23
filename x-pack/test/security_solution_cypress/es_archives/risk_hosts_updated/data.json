@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "a4cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f",
-    "index": "ml_host_risk_score_latest_default",
+    "index": "risk-score.risk-score-latest-default",
     "source": {
       "@timestamp": "2021-03-10T14:51:05.766Z",
       "host": {
@@ -10,15 +10,24 @@
         "risk": {
           "calculated_level": "Critical",
           "calculated_score_norm": 90,
-          "rule_risks": [
+          "id_field": "host.name",
+          "id_value": "siem-kibana",
+          "calculated_score": 150,
+          "category_1_score": 150,
+          "category_1_count": 1,
+          "notes": [],
+          "inputs": [
             {
-              "rule_name": "Unusual Linux Username",
-              "rule_risk": 42
+              "id": "2e17f189-d77d-4537-8d84-592e29334493",
+              "index": ".internal.alerts-security.alerts-default-000001",
+              "description": "Alert from Rule: Rule 2",
+              "category": "category_1",
+              "risk_score": 70,
+              "timestamp": "2023-08-14T09:08:18.664Z"
             }
           ]
         }
-      },
-      "ingest_timestamp": "2021-03-09T18:02:08.319296053Z"
+      }
     }
   }
 }

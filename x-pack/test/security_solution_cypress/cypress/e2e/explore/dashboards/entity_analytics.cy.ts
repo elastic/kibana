@@ -20,8 +20,6 @@ import {
   HOSTS_DONUT_CHART,
   HOSTS_TABLE_ROWS,
   HOST_RISK_SCORE_NO_DATA_DETECTED,
-  UPGRADE_HOST_RISK_SCORE_BUTTON,
-  UPGRADE_USER_RISK_SCORE_BUTTON,
   USERS_DONUT_CHART,
   USERS_TABLE,
   USERS_TABLE_ROWS,
@@ -33,8 +31,10 @@ import {
   ANOMALIES_TABLE_COUNT_COLUMN,
 } from '../../../screens/entity_analytics';
 import {
-  openRiskTableFilterAndSelectTheLowOption,
-  removeLowFilterAndCloseRiskTableFilter,
+  openHostRiskTableFilterAndSelectTheLowOption,
+  removeLowFilterAndCloseHostRiskTableFilter,
+  removeLowFilterAndCloseUserRiskTableFilter,
+  openUserRiskTableFilterAndSelectTheLowOption,
 } from '../../../tasks/host_risk';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
@@ -78,8 +78,7 @@ describe('Entity Analytics Dashboard', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
 
   describe('Risk Score enabled but still no data', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'risk_hosts_no_data');
-      cy.task('esArchiverLoad', 'risk_users_no_data');
+      cy.task('esArchiverLoad', 'risk_entities_no_data');
     });
 
     beforeEach(() => {
@@ -88,8 +87,7 @@ describe('Entity Analytics Dashboard', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_hosts_no_data');
-      cy.task('esArchiverUnload', 'risk_users_no_data');
+      cy.task('esArchiverUnload', 'risk_entities_no_data');
     });
 
     it('shows no data detected prompt for host risk score module', () => {
@@ -101,34 +99,9 @@ describe('Entity Analytics Dashboard', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
     });
   });
 
-  describe('With Legacy data', () => {
-    before(() => {
-      cy.task('esArchiverLoad', 'risk_hosts_legacy_data');
-      cy.task('esArchiverLoad', 'risk_users_legacy_data');
-    });
-
-    beforeEach(() => {
-      login();
-      visit(ENTITY_ANALYTICS_URL);
-    });
-
-    after(() => {
-      cy.task('esArchiverUnload', 'risk_hosts_legacy_data');
-      cy.task('esArchiverUnload', 'risk_users_legacy_data');
-    });
-
-    it('shows upgrade host risk button', () => {
-      cy.get(UPGRADE_HOST_RISK_SCORE_BUTTON).should('be.visible');
-    });
-
-    it('shows upgrade user risk button', () => {
-      cy.get(UPGRADE_USER_RISK_SCORE_BUTTON).should('be.visible');
-    });
-  });
-
   describe('With host risk data', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'risk_hosts');
+      cy.task('esArchiverLoad', 'risk_entities');
     });
 
     beforeEach(() => {
@@ -137,7 +110,7 @@ describe('Entity Analytics Dashboard', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_hosts');
+      cy.task('esArchiverUnload', 'risk_entities');
     });
 
     it('renders donut chart', () => {
@@ -154,12 +127,12 @@ describe('Entity Analytics Dashboard', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
     });
 
     it('filters by risk classification', () => {
-      openRiskTableFilterAndSelectTheLowOption();
+      openHostRiskTableFilterAndSelectTheLowOption();
 
       cy.get(HOSTS_DONUT_CHART).should('include.text', '1Total');
       cy.get(HOSTS_TABLE_ROWS).should('have.length', 1);
 
-      removeLowFilterAndCloseRiskTableFilter();
+      removeLowFilterAndCloseHostRiskTableFilter();
     });
 
     it('filters the host risk table with KQL search bar query', () => {
@@ -216,7 +189,7 @@ describe('Entity Analytics Dashboard', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
 
   describe('With user risk data', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'risk_users');
+      cy.task('esArchiverLoad', 'risk_entities');
     });
 
     beforeEach(() => {
@@ -225,7 +198,7 @@ describe('Entity Analytics Dashboard', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_users');
+      cy.task('esArchiverUnload', 'risk_entities');
     });
 
     it('renders donut chart', () => {
@@ -242,12 +215,12 @@ describe('Entity Analytics Dashboard', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
     });
 
     it('filters by risk classification', () => {
-      openRiskTableFilterAndSelectTheLowOption();
+      openUserRiskTableFilterAndSelectTheLowOption();
 
       cy.get(USERS_DONUT_CHART).should('include.text', '2Total');
       cy.get(USERS_TABLE_ROWS).should('have.length', 2);
 
-      removeLowFilterAndCloseRiskTableFilter();
+      removeLowFilterAndCloseUserRiskTableFilter();
     });
 
     it('filters the host risk table with KQL search bar query', () => {

@@ -6,12 +6,13 @@
  */
 import { tag } from '../../../tags';
 
-import { login, visitHostDetailsPage } from '../../../tasks/login';
+import { login, visitUserDetailsPage } from '../../../tasks/login';
 
 import { cleanKibana, waitForTableToLoad } from '../../../tasks/common';
+
 import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../../screens/alerts';
 
-describe('risk tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('User risk tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'risk_entities');
@@ -28,8 +29,8 @@ describe('risk tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   });
 
   it('renders risk tab and alerts table', () => {
-    visitHostDetailsPage('Host-fwarau82er');
-    cy.get('[data-test-subj="navigation-hostRisk"]').click();
+    visitUserDetailsPage('user1');
+    cy.get('[data-test-subj="navigation-userRisk"]').click();
     waitForTableToLoad();
 
     cy.get(ALERTS_COUNT).should('have.text', '1 alert');

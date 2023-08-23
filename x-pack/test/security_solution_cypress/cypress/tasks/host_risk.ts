@@ -11,6 +11,8 @@ import {
   HOST_BY_RISK_TABLE_FILTER_LOW,
   HOST_BY_RISK_TABLE_PERPAGE_BUTTON,
   HOST_BY_RISK_TABLE_PERPAGE_OPTIONS,
+  USER_BY_RISK_TABLE_FILTER,
+  USER_BY_RISK_TABLE_FILTER_LOW,
   LOADING_SPINNER,
   RISK_DETAILS_NAV,
 } from '../screens/hosts/host_risk';
@@ -20,22 +22,32 @@ export const navigateToHostRiskDetailTab = () => {
   cy.get(LOADING_SPINNER).should('not.exist');
 };
 
-export const openRiskTableFilterAndSelectTheCriticalOption = () => {
+export const openHostRiskTableFilterAndSelectTheCriticalOption = () => {
   cy.get(HOST_BY_RISK_TABLE_FILTER).click();
   cy.get(HOST_BY_RISK_TABLE_FILTER_CRITICAL).click();
 };
 
-export const openRiskTableFilterAndSelectTheLowOption = () => {
+export const openHostRiskTableFilterAndSelectTheLowOption = () => {
   cy.get(HOST_BY_RISK_TABLE_FILTER).first().click();
   cy.get(HOST_BY_RISK_TABLE_FILTER_LOW).click();
 };
 
-export const removeLowFilterAndCloseRiskTableFilter = () => {
+export const removeLowFilterAndCloseHostRiskTableFilter = () => {
   cy.get(HOST_BY_RISK_TABLE_FILTER_LOW).click();
   cy.get(HOST_BY_RISK_TABLE_FILTER).first().click();
 };
 
-export const removeCriticalFilterAndCloseRiskTableFilter = () => {
+export const openUserRiskTableFilterAndSelectTheLowOption = () => {
+  cy.get(USER_BY_RISK_TABLE_FILTER).first().click();
+  cy.get(USER_BY_RISK_TABLE_FILTER_LOW).click();
+};
+
+export const removeLowFilterAndCloseUserRiskTableFilter = () => {
+  cy.get(USER_BY_RISK_TABLE_FILTER_LOW).click();
+  cy.get(USER_BY_RISK_TABLE_FILTER).first().click();
+};
+
+export const removeCriticalFilterAndCloseHostRiskTableFilter = () => {
   cy.get(HOST_BY_RISK_TABLE_FILTER_CRITICAL).click();
   cy.get(HOST_BY_RISK_TABLE_FILTER).first().click();
 };

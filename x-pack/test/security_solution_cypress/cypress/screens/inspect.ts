@@ -90,7 +90,7 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
       {
         title: 'Host risk',
         tab: RISK_DETAILS_NAV,
-        customIndexPattern: 'ml_host_risk_score_latest_default',
+        customIndexPattern: 'risk-score.risk-score-latest-default',
         id: HOST_BY_RISK_TABLE,
       },
     ],
@@ -287,7 +287,7 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
         title: 'User risk',
         tab: RISK_SCORE_TAB,
         id: RISK_SCORE_TAB_CONTENT,
-        customIndexPattern: 'ml_user_risk_score_latest_default',
+        customIndexPattern: 'risk-score.risk-score-latest-default',
       },
     ],
   },

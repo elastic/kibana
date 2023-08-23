@@ -9,8 +9,8 @@ import { tag } from '../../../tags';
 import { cleanKibana } from '../../../tasks/common';
 import {
   navigateToHostRiskDetailTab,
-  openRiskTableFilterAndSelectTheCriticalOption,
-  removeCriticalFilterAndCloseRiskTableFilter,
+  openHostRiskTableFilterAndSelectTheCriticalOption,
+  removeCriticalFilterAndCloseHostRiskTableFilter,
   selectFiveItemsPerPageOption,
 } from '../../../tasks/host_risk';
 import {
@@ -25,7 +25,7 @@ import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
 describe('risk tab', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'risk_hosts');
+    cy.task('esArchiverLoad', 'risk_entities');
   });
 
   beforeEach(() => {
@@ -35,7 +35,7 @@ describe('risk tab', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'risk_hosts');
+    cy.task('esArchiverUnload', 'risk_entities');
   });
 
   it('renders the table', () => {
@@ -47,11 +47,11 @@ describe('risk tab', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   });
 
   it('filters the table', () => {
-    openRiskTableFilterAndSelectTheCriticalOption();
+    openHostRiskTableFilterAndSelectTheCriticalOption();
 
     cy.get(HOST_BY_RISK_TABLE_CELL).eq(3).should('not.have.text', 'siem-kibana');
 
-    removeCriticalFilterAndCloseRiskTableFilter();
+    removeCriticalFilterAndCloseHostRiskTableFilter();
   });
 
   it('should be able to change items count per page', () => {

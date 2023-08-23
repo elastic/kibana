@@ -35,17 +35,17 @@ import { ALERTS_URL } from '../../urls/navigation';
 describe('Enrichment', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverLoad', 'risk_users');
+    cy.task('esArchiverLoad', 'risk_entities');
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'risk_users');
+    cy.task('esArchiverUnload', 'risk_entities');
   });
 
   describe('Custom query rule', () => {
     beforeEach(() => {
       disableExpandableFlyout();
-      cy.task('esArchiverLoad', 'risk_hosts');
+      cy.task('esArchiverLoad', 'risk_entities');
       deleteAlertsAndRules();
       createRule(getNewRule({ rule_id: 'rule1' }));
       login();
@@ -54,7 +54,7 @@ describe('Enrichment', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     });
 
     afterEach(() => {
-      cy.task('esArchiverUnload', 'risk_hosts');
+      cy.task('esArchiverUnload', 'risk_entities');
       cy.task('esArchiverUnload', 'risk_hosts_updated');
     });
 
@@ -76,7 +76,7 @@ describe('Enrichment', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       cy.get(ENRICHED_DATA_ROW).contains('Original host risk classification').should('not.exist');
 
       closeAlertFlyout();
-      cy.task('esArchiverUnload', 'risk_hosts');
+      cy.task('esArchiverUnload', 'risk_entities');
       cy.task('esArchiverLoad', 'risk_hosts_updated');
       expandFirstAlert();
       cy.get(ENRICHED_DATA_ROW).contains('Critical');
