@@ -15,14 +15,14 @@ import { Stats } from '../stats';
 import { Progress } from '../progress';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 
-const isCompressed = (x: string): boolean => {
-  const opened = opendirSync(x);
-  const dirent = opened.readSync();
-  // @ts-ignore
-  const isIt: boolean = isGzip(dirent?.name);
-  opened.closeSync();
-  return isIt;
-};
+// const isCompressed = (x: string): boolean => {
+//   const opened = opendirSync(x);
+//   const dirent = opened.readSync();
+//   // @ts-ignore
+//   const isIt: boolean = isGzip(dirent?.name);
+//   opened.closeSync();
+//   return isIt;
+// };
 enum BulkOperation {
   Create = 'create',
   Index = 'index',

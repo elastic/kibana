@@ -33,7 +33,7 @@ import {
 // pipe a series of streams into each other so that data and errors
 // flow from the first stream to the last. Errors from the last stream
 // are not listened for
-const streamsReducer = (streamsAccumulator, destination$) =>
+const streamsReducer = (streamsAccumulator: any, destination$: { destroy: (arg0: any) => any }) =>
   streamsAccumulator
     .once('error', (error: any) => destination$.destroy(error))
     .pipe(destination$ as any);
@@ -67,7 +67,7 @@ export async function loadAction({
 }) {
   const archiveGeneralName = relative(REPO_ROOT, inputDir);
   const stats = createStats(archiveGeneralName, log);
-  const uniteLazy = (eitherMappingsFileOrArchiveFileName: string) => () =>
+  const uniteStreamsLazy = (eitherMappingsFileOrArchiveFileName: string) => () =>
     foldStreamsButIgnoreLastStreamErrors(
       pipe(
         eitherMappingsFileOrArchiveFileName,
@@ -79,7 +79,7 @@ export async function loadAction({
     );
 
   await createPromiseFromStreams([
-    concatStreamProviders(prioritizeMappings(await readDirectory(inputDir)).map(uniteLazy), {
+    concatStreamProviders(prioritizeMappings(await readDirectory(inputDir)).map(uniteStreamsLazy), {
       objectMode: true,
     }),
     createCreateIndexStream({ client, stats, skipExisting, docsOnly, log }),
