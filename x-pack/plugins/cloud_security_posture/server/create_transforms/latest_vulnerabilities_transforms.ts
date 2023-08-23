@@ -41,8 +41,8 @@ export const latestVulnerabilitiesTransform: TransformPutTransformRequest = {
     unique_key: [
       'vulnerability.id',
       'resource.id',
-      'vulnerability.package.name',
-      'vulnerability.package.version',
+      'package.name',
+      'package.version',
     ],
   },
   _meta: {
