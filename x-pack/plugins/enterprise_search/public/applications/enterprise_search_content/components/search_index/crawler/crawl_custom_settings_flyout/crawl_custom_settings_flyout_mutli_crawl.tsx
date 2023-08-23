@@ -23,7 +23,6 @@ export const CrawlCustomSettingsFlyoutMultiCrawlScheduling: React.FC = () => {
 
   const {
     crawlerConfigurationsWithDomainData,
-    // crawlerConfigurations,
     crawlerConfigActiveTab,
     index: crawlerIndex,
   } = useValues(CrawlCustomSettingsFlyoutMultiCrawlLogic);
