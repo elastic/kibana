@@ -130,6 +130,7 @@ export const ManagementApp = ({
               // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
               // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
               mainProps={{ paddingSize: 'l' }}
+              panelled
             >
               <ManagementRouter
                 history={history}

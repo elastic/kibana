@@ -819,7 +819,7 @@
             "section": "def-public.TIME_UNITS",
             "text": "TIME_UNITS"
           },
-          ", timeValue: string) => any"
+          ", timeValue: string) => string"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_unit_label.ts",
         "deprecated": false,
@@ -6086,13 +6086,10 @@
       {
         "parentPluginId": "triggersActionsUi",
         "id": "def-public.connectorDeprecatedMessage",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "connectorDeprecatedMessage",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/common/connectors_selection.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -6122,13 +6119,10 @@
       {
         "parentPluginId": "triggersActionsUi",
         "id": "def-public.deprecatedMessage",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "deprecatedMessage",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/common/connectors_selection.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -6704,13 +6698,10 @@
               {
                 "parentPluginId": "triggersActionsUi",
                 "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN.text",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6762,13 +6753,10 @@
               {
                 "parentPluginId": "triggersActionsUi",
                 "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN_OR_EQUALS.text",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6820,13 +6808,10 @@
               {
                 "parentPluginId": "triggersActionsUi",
                 "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN.text",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6878,13 +6863,10 @@
               {
                 "parentPluginId": "triggersActionsUi",
                 "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN_OR_EQUALS.text",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6936,13 +6918,10 @@
               {
                 "parentPluginId": "triggersActionsUi",
                 "id": "def-public.builtInComparators.COMPARATORS.BETWEEN.text",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6994,13 +6973,10 @@
               {
                 "parentPluginId": "triggersActionsUi",
                 "id": "def-public.builtInComparators.COMPARATORS.NOT_BETWEEN.text",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -7066,13 +7042,10 @@
               {
                 "parentPluginId": "triggersActionsUi",
                 "id": "def-public.builtInGroupByTypes.all.text",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -7132,13 +7105,10 @@
               {
                 "parentPluginId": "triggersActionsUi",
                 "id": "def-public.builtInGroupByTypes.top.text",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -7201,13 +7171,10 @@
           {
             "parentPluginId": "triggersActionsUi",
             "id": "def-public.firstFieldOption.text",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "text",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8874,7 +8841,7 @@
         "label": "getTooManyIntervalsErrorMessage",
         "description": [],
         "signature": [
-          "(intervals: number, maxIntervals: number) => any"
+          "(intervals: number, maxIntervals: number) => string"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/date_range_info.ts",
         "deprecated": false,
