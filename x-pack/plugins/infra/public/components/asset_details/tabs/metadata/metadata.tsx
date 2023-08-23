@@ -9,10 +9,9 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TimeRange } from '@kbn/es-query';
-import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { Table } from './table';
 import { getAllFields } from './utils';
+import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 
 export interface MetadataSearchUrlState {
@@ -20,19 +19,14 @@ export interface MetadataSearchUrlState {
   setMetadataSearchUrlState: (metadataSearch: { metadataSearch?: string }) => void;
 }
 
-export interface MetadataProps {
-  assetName: string;
-  assetType: InventoryItemType;
-  dateRange: TimeRange;
-  showActionsColumn?: boolean;
-  search?: string;
-  onSearchChange?: (query: string) => void;
-}
-
 export const Metadata = () => {
-  const { overrides, onTabsStateChange, metadataResponse } = useAssetDetailsStateContext();
+  const { overrides, onTabsStateChange } = useAssetDetailsStateContext();
+  const {
+    metadata,
+    loading: metadataLoading,
+    error: fetchMetadataError,
+  } = useMetadataStateProviderContext();
   const { query, showActionsColumn = false } = overrides?.metadata ?? {};
-  const { metadataLoading, fetchMetadataError, metadata } = metadataResponse;
 
   const fields = useMemo(() => getAllFields(metadata), [metadata]);
 
