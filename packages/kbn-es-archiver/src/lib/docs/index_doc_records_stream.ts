@@ -9,8 +9,8 @@
 import type { Client } from '@elastic/elasticsearch';
 import AggregateError from 'aggregate-error';
 import { Writable } from 'stream';
-import { opendirSync } from 'fs';
-import { isGzip } from '..';
+// import { opendirSync } from 'fs';
+// import { isGzip } from '..';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
