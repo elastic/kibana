@@ -562,7 +562,6 @@ class AgentPolicyService {
     if (!baseAgentPolicy) {
       throw new Error('Agent policy not found');
     }
-
     const newAgentPolicy = await this.create(
       soClient,
       esClient,
