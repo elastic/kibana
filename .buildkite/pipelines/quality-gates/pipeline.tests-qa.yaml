@@ -38,4 +38,3 @@ steps:
 #    command: echo "replace me with Control Plane specific Kibana tests"
 #    agent:
 #      image: "docker.elastic.co/ci-agent-images/basic-buildkite-agent:1688566364"
-
