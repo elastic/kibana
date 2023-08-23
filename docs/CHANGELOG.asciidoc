@@ -63,158 +63,105 @@ Before you upgrade to 8.10.0, review the breaking changes, then mitigate the imp
 
 [discrete]
 [[breaking-163150]]
-* Updating a case comment is now included in the 10000 user actions restriction.
+.Case comments changes
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to ({kibana-pull}163150[#163150]).
+Updating a case comment is now included in the 10000 user actions restriction. For more information, refer to ({kibana-pull}163150[#163150]).
 
-*Impact* +
-!!TODO!!
+Updating a case now fails if the operation makes it reach more than 10000 user actions. For more information, refer to ({kibana-pull}161848[#161848]
+
+The total number of characters per comment is limited to 30000. For more information, refer to ({kibana-pull}161357[#161357]).
 ====
-      
+
 [discrete]
 [[breaking-162665]]
-* Feat(slo): introduce new search capabilities.
+.New summary search capabilities 
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to ({kibana-pull}162665[#162665]).
+New summary search capabilities introduce breaking changes in various places, and we have decided to not handle backward compatibility:
 
-*Impact* +
-!!TODO!!
+* SLO find API body parameters have changed
+* The index mapping used by the rollup data has changed, and we have added a summary index that becomes the new source of truth for search
+* The rollup transform have been updated, but existing SLO with their transform won't be updated.
+
+If some SLOs have been installed in a prior version at 8.10, the user will need to remove them manually from the UI, or by deleting the Saved Object and the associated Transform.
 ====
       
 [discrete]
 [[breaking-162506]]
-* The get case metrics APIs are now internal.
+.Get case metrics APIs now internal
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to ({kibana-pull}162506[#162506]).
-
-*Impact* +
-!!TODO!!
+The get case metrics APIs are now internal. For more information, refer to ({kibana-pull}162506[#162506]).
 ====
       
 [discrete]
 [[breaking-162492]]
-* Update docs for remaining guardrails.
+.Cases APIs have new limits on objects processed and amount of data stored in objects
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to ({kibana-pull}162492[#162492]).
+For Cases APIs, limits are now imposed on the number of objects that can be processed or the amount of data those objects can store. For more information, refer to ({kibana-pull}162492[#162492]).
+====
 
-*Impact* +
-!!TODO!!
+[discrete]
+[[breaking-161282]]
+.The getConnectors API new limit
+[%collapsible]
+====
+*Details* +
+The getConnectors API now limits the number of supported connectors returned to 1000. For more information, refer to ({kibana-pull}161282[#161282]).
 ====
       
 [discrete]
 [[breaking-162411]]
-* The Find Cases API now limits.
+.Find Cases API new limits
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to ({kibana-pull}162411[#162411]).
+New limits:
 
-*Impact* +
-!!TODO!!
+* Maximum number of assignees to filter to 100
+* Maximum number of tags to filter to 100
+* Maximum number of categories to filter to 100 
+
+For more information, refer to ({kibana-pull}162411[#162411]).
 ====
       
 [discrete]
 [[breaking-162245]]
-* Restrict searchFields, sortField and remove rootSearchFields from find_cases API.
+.Find Cases API new restrictions
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to ({kibana-pull}162245[#162245]).
+New restrictions:
 
-*Impact* +
-!!TODO!!
+* Restrict searchFields, sortField and remove rootSearchFields from find_cases API.
+* Restrict searchFields only to the title and the description
+* Restrict sortField to: title, category, createdAt, updatedAt, status, and severity
+
+For more information, refer to ({kibana-pull}162245[#162245]).
 ====
       
 [discrete]
 [[breaking-162071]]
-* A case can now only have 100 external references and persistable state(excluding files) attachments combined.
+.Case external references limit change
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to ({kibana-pull}162071[#162071]).
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-161871]]
-* The function `addExtensionSpecFilePath` is removed from the Console plugin setup contract (server side).
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to ({kibana-pull}161871[#161871]).
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-161848]]
-* Updating a case will now fail if the operation makes it reach more than 10000 user actions.
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to ({kibana-pull}161848[#161848]).
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-161357]]
-* The total number of characters per comment is limited to 30000.
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to ({kibana-pull}161357[#161357]).
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-161282]]
-* The getConnectors API will now limit the number of supported connectors returned to 1000.
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to ({kibana-pull}161282[#161282]).
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[breaking-161200]]
-* The total number of characters per comment is limited to 30000.
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to ({kibana-pull}161200[#161200]).
-
-*Impact* +
-!!TODO!!
+A case can now only have 100 external references and persistable state(excluding files) attachments combined. For more information, refer to ({kibana-pull}162071[#162071]).
 ====
       
 [discrete]
 [[breaking-161111]]
-* Max value for perPage parameter in find Cases API is now 100.
+.Find Cases API max value change
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to ({kibana-pull}161111[#161111]).
-
-*Impact* +
-!!TODO!!
+Max value for perPage parameter in find Cases API is now 100. For more information, refer to ({kibana-pull}161111[#161111]).
 ====
       
 [discrete]
@@ -223,7 +170,12 @@ Before you upgrade to 8.10.0, review the breaking changes, then mitigate the imp
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to ({kibana-pull}161087[#161087]).
+UI validations to check:
+
+maximum 30000 characters per description
+maximum 256 characters per tag
+maximum 200 tags per case
+ For more information, refer to ({kibana-pull}161087[#161087]).
 
 *Impact* +
 !!TODO!!
