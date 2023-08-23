@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export const ALL_ACTIONS = '[data-test-subj="rules-details-popover-button-icon"]';
+export const POPOVER_ACTIONS_TRIGGER_BUTTON =
+  '[data-test-subj="rules-details-popover-button-icon"]';
 
 export const ABOUT_INVESTIGATION_NOTES = '[data-test-subj="stepAboutDetailsNoteContent"]';
 
