@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import type { z } from 'zod';
 import { pagination } from '../model/pagination';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { sort } from '../model/sort';

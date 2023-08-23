@@ -6,11 +6,9 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { NetworkHttpRequestOptions } from '../../../../../../../common/api/search_strategy';
 
-import type {
-  NetworkHttpRequestOptions,
-  SortField,
-} from '../../../../../../../common/search_strategy';
+import type { SortField } from '../../../../../../../common/search_strategy';
 import {
   Direction,
   NetworkQueries,

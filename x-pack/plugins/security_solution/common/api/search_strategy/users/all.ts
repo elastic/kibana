@@ -20,11 +20,10 @@ export const usersSchema = requestOptionsPaginatedSchema
   .extend({
     sort: sort
       .unwrap()
+      .required()
       .extend({
         field: z.enum([UsersFields.name, UsersFields.lastSeen]),
-      })
-      .deepPartial()
-      .optional(),
+      }),
     timerange,
   })
   .passthrough();

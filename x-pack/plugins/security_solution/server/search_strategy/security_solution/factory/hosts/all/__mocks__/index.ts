@@ -8,12 +8,10 @@
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { HostsRequestOptions } from '../../../../../../../common/api/search_strategy';
 import { HostsFields } from '../../../../../../../common/api/search_strategy/hosts/model/sort';
 
-import type {
-  HostAggEsItem,
-  HostsRequestOptions,
-} from '../../../../../../../common/search_strategy';
+import type { HostAggEsItem } from '../../../../../../../common/search_strategy';
 import { Direction, HostsQueries } from '../../../../../../../common/search_strategy';
 import { createMockEndpointAppContext } from '../../../../../../endpoint/mocks';
 

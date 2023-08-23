@@ -14,9 +14,11 @@ import { UNCOMMON_PROCESSES_FIELDS } from '../helpers';
 export const buildQuery = ({
   defaultIndex,
   filterQuery,
-  pagination: { querySize },
+  pagination,
   timerange: { from, to },
 }: HostUncommonProcessesRequestOptions) => {
+  const querySize = pagination?.querySize ?? 10;
+
   const processUserFields = reduceFields(UNCOMMON_PROCESSES_FIELDS, {
     ...processFieldsMap,
     ...userFieldsMap,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { SortField } from '../../../../../../../common/search_strategy';
+import type { HostUncommonProcessesRequestOptions } from '../../../../../../../common/api/search_strategy';
 import { HostsQueries } from '../../../../../../../common/search_strategy';
 
-export const mockOptions = {
+export const mockOptions: HostUncommonProcessesRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
     'traces-apm*',
@@ -33,7 +33,7 @@ export const mockOptions = {
     from: '2020-09-06T15:23:52.757Z',
     to: '2020-09-07T15:23:52.757Z',
   },
-  sort: {} as SortField,
+  sort: {},
 };
 
 export const mockSearchStrategyResponse = {
