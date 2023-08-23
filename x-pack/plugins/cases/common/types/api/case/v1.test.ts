@@ -19,9 +19,11 @@ import {
 } from '../../../constants';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { AttachmentType } from '../../domain/attachment/v1';
+import type { Case } from '../../domain/case/v1';
 import { CaseSeverity, CaseStatuses } from '../../domain/case/v1';
 import { ConnectorTypes } from '../../domain/connector/v1';
 import { CasesStatusRequestRt, CasesStatusResponseRt } from '../stats/v1';
+import type { CasePostRequest } from './v1';
 import {
   AllReportersFindRequestRt,
   CasePatchRequestRt,
@@ -38,7 +40,7 @@ import {
   CasesPatchRequestRt,
 } from './v1';
 
-const basicCase = {
+const basicCase: Case = {
   owner: 'cases',
   closed_at: null,
   closed_by: null,
@@ -96,6 +98,23 @@ const basicCase = {
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
   category: null,
+  custom_fields: [
+    {
+      key: 'first_custom_field_key',
+      type: 'string',
+      field: { value: ['this is a text field value', 'this is second'] },
+    },
+    {
+      key: 'second_custom_field_key',
+      type: 'boolean',
+      field: { value: [true] },
+    },
+    {
+      key: 'second_custom_field_key',
+      type: 'string',
+      field: { value: ['www.example.com'] },
+    },
+  ],
 };
 
 describe('Status', () => {
@@ -152,7 +171,7 @@ describe('Status', () => {
   });
 
   describe('CasePostRequestRt', () => {
-    const defaultRequest = {
+    const defaultRequest: CasePostRequest = {
       description: 'A description',
       tags: ['new', 'case'],
       title: 'My new case',
@@ -168,6 +187,23 @@ describe('Status', () => {
       owner: 'cases',
       severity: CaseSeverity.LOW,
       assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
+      customFields: [
+        {
+          key: 'first_custom_field_key',
+          type: 'string',
+          field: { value: ['this is a text field value', 'this is second'] },
+        },
+        {
+          key: 'second_custom_field_key',
+          type: 'boolean',
+          field: { value: [true] },
+        },
+        {
+          key: 'second_custom_field_key',
+          type: 'url',
+          field: { value: ['www.example.com'] },
+        },
+      ],
     };
 
     it('has expected attributes in request', () => {
@@ -258,6 +294,26 @@ describe('Status', () => {
       expect(
         PathReporter.report(CasePostRequestRt.decode({ ...defaultRequest, category }))
       ).toContain('The length of the category is too long. The maximum length is 50.');
+    });
+
+    it('removes foo:bar attributes from customFields', () => {
+      const customField = defaultRequest.customFields ? defaultRequest.customFields[0] : {};
+
+      const query = CasePostRequestRt.decode({
+        ...defaultRequest,
+        customFields: [{ ...customField, foo: 'bar' }],
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, customFields: [{ ...customField }] },
+      });
+    });
+
+    it('does not throw an error with undefined customFields', async () => {
+      const { customFields, ...rest } = defaultRequest;
+
+      expect(PathReporter.report(CasePostRequestRt.decode(rest))).toContain('No errors!');
     });
   });
 

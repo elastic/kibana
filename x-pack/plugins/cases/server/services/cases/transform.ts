@@ -45,6 +45,7 @@ export function transformUpdateResponseToExternalModel(
     status,
     total_alerts,
     total_comments,
+    custom_fields,
     ...restUpdateAttributes
   } =
     updatedCase.attributes ??
@@ -77,6 +78,7 @@ export function transformUpdateResponseToExternalModel(
       ...(transformedConnector && { connector: transformedConnector }),
       // if externalService is null that means we intentionally updated it to null within ES so return that as a valid value
       ...(externalService !== undefined && { external_service: externalService }),
+      ...(!custom_fields && { custom_fields: [] }), // TODO: doublecheck, should apply to undefined
     },
   };
 }
@@ -121,6 +123,7 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
       ...transformedExternalService,
       ...(severity && { severity: SEVERITY_EXTERNAL_TO_ESMODEL[severity] }),
       ...(status && { status: STATUS_EXTERNAL_TO_ESMODEL[status] }),
+      custom_fields: [], // REMOVE WHEN REQUEST TYPES UPDATED
     },
     referenceHandler: buildReferenceHandler(connector?.id, pushConnectorId),
   };
@@ -174,6 +177,9 @@ export function transformSavedObjectToExternalModel(
     SEVERITY_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.severity] ?? CaseSeverity.LOW;
   const status = STATUS_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.status] ?? CaseStatuses.open;
   const category = !caseSavedObjectAttributes.category ? null : caseSavedObjectAttributes.category;
+  const custom_fields = !caseSavedObjectAttributes.custom_fields
+    ? []
+    : caseSavedObjectAttributes.custom_fields;
 
   return {
     ...caseSavedObject,
@@ -184,6 +190,7 @@ export function transformSavedObjectToExternalModel(
       connector,
       external_service: externalService,
       category,
+      custom_fields,
     },
   };
 }

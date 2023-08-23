@@ -74,6 +74,23 @@ const basicCase = {
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
   category: null,
+  customFields: [
+    {
+      key: 'first_custom_filed_key',
+      type: 'string',
+      value: ['this is a text filed value', 'this is second'],
+    },
+    {
+      key: 'second_custom_filed_key',
+      type: 'boolean',
+      value: true,
+    },
+    {
+      key: 'second_custom_filed_key',
+      type: 'url',
+      value: ['www.example.com'],
+    },
+  ],
 };
 
 describe('RelatedCaseRt', () => {

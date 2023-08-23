@@ -87,6 +87,7 @@ export const transformNewCase = ({
   updated_by: null,
   assignees: dedupAssignees(newCase.assignees) ?? [],
   category: newCase.category ?? null,
+  custom_fields: newCase.customFields ?? [], // TODO: naming?
 });
 
 export const transformCases = ({

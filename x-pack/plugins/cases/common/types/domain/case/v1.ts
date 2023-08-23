@@ -51,6 +51,22 @@ export const CaseSettingsRt = rt.strict({
   syncAlerts: rt.boolean,
 });
 
+export const CustomFieldValuesRt = rt.union([rt.string, rt.number, rt.boolean]);
+export const CustomFieldTypesRt = rt.union([
+  rt.literal('string'),
+  rt.literal('url'),
+  rt.literal('list'),
+  rt.literal('boolean'),
+]);
+
+const CaseCustomFieldsRt = rt.array(
+  rt.strict({
+    key: rt.string,
+    type: CustomFieldTypesRt, // not sure yet
+    field: rt.strict({ value: rt.array(CustomFieldValuesRt) }),
+  })
+);
+
 const CaseBasicRt = rt.strict({
   /**
    * The description of the case
@@ -92,6 +108,11 @@ const CaseBasicRt = rt.strict({
    * The category of the case.
    */
   category: rt.union([rt.string, rt.null]),
+  /**
+   * An array containing the possible,
+   * user-configured custom fields.
+   */
+  custom_fields: CaseCustomFieldsRt,
 });
 
 export const CaseAttributesRt = rt.intersection([
@@ -139,6 +160,7 @@ export const RelatedCaseRt = rt.strict({
   totals: AttachmentTotalsRt,
 });
 
+export type CaseCustomFields = rt.TypeOf<typeof CaseCustomFieldsRt>;
 export type Case = rt.TypeOf<typeof CaseRt>;
 export type Cases = rt.TypeOf<typeof CasesRt>;
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;

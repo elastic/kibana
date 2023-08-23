@@ -32,6 +32,8 @@ import {
   CaseRt,
   CaseSettingsRt,
   CaseSeverityRt,
+  CustomFieldValuesRt,
+  CustomFieldTypesRt,
   CasesRt,
   CaseStatusRt,
   RelatedCaseRt,
@@ -104,6 +106,16 @@ export const CasePostRequestRt = rt.intersection([
         limitedStringSchema({ fieldName: 'category', min: 1, max: MAX_CATEGORY_LENGTH }),
         rt.null,
       ]),
+      /**
+       * The list of custom field values of the case.
+       */
+      customFields: rt.array(
+        rt.strict({
+          key: rt.string,
+          type: CustomFieldTypesRt,
+          field: rt.strict({ value: rt.array(CustomFieldValuesRt) }),
+        })
+      ),
     })
   ),
 ]);
@@ -358,6 +370,16 @@ export const CasePatchRequestRt = rt.intersection([
         limitedStringSchema({ fieldName: 'category', min: 1, max: MAX_CATEGORY_LENGTH }),
         rt.null,
       ]),
+      /**
+       * Custom fields of the case
+       */
+      customFields: rt.array(
+        rt.strict({
+          key: rt.string,
+          type: CustomFieldTypesRt,
+          field: rt.strict({ value: rt.array(CustomFieldValuesRt) }),
+        })
+      ),
     })
   ),
   /**
