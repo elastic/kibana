@@ -10,16 +10,11 @@ import {
   EuiText,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
-  getDefaultEuiMarkdownUiPlugins,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { euiThemeVars } from '@kbn/ui-theme';
 import classNames from 'classnames';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
-import React, { Fragment, createElement, useMemo } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehype2react from 'rehype-react';
+import React, { useMemo } from 'react';
 import type { Node } from 'unist';
 import { v4 } from 'uuid';
 
@@ -89,7 +84,7 @@ const loadingCursorPlugin = () => {
   };
 };
 
-export function MessageText(props: Props) {
+export function MessageText({ loading, content }: Props) {
   const containerClassName = css`
     overflow-wrap: break-word;
   `;
@@ -152,7 +147,7 @@ export function MessageText(props: Props) {
         parsingPluginList={parsingPluginList}
         processingPluginList={processingPluginList}
       >
-        {`${props.content}${props.loading ? CURSOR : ''}`}
+        {`${content}${loading ? CURSOR : ''}`}
       </EuiMarkdownFormat>
     </EuiText>
   );

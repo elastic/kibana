@@ -5,16 +5,12 @@
  * 2.0.
  */
 import datemath from '@elastic/datemath';
-import type {
-  AggregationsBuckets,
-  AggregationsDateHistogramBucket,
-} from '@elastic/elasticsearch/lib/api/types';
 import { notImplemented } from '@hapi/boom';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { omit } from 'lodash';
-import { ParsedTechnicalFields } from '../../../../rule_registry/common';
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { KnowledgeBaseEntry } from '../../../common/types';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 
