@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="es_arch_slow_local_quiet_1" type="NodeJSConfigurationType" application-parameters="--config=test/api_integration/apis/local_and_ess_is_es_archiver_slow/config.ts  --quiet" path-to-js-file="scripts/functional_test_runner.js" working-dir="$PROJECT_DIR$">
+    <envs>
+      <env name="CI_STATS_DISABLED" value="true" />
+      <env name="LOG_FILE_NAME" value="LOCAL-DEBUG.txt" />
+      <env name="LOOP_LIMIT" value="1" />
+    </envs>
+    <method v="2" />
+  </configuration>
+</component>
