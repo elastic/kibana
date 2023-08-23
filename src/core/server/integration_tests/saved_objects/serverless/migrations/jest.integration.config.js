@@ -13,7 +13,7 @@ module.exports = {
   // see https://github.com/elastic/kibana/pull/130255/
   preset: '@kbn/test/jest_integration',
   rootDir: '../../../../../../..',
-  roots: ['<rootDir>/src/core/server/integration_tests/saved_objects/migrations/serverless'],
+  roots: ['<rootDir>/src/core/server/integration_tests/saved_objects/serverless/migrations'],
   // must override to match all test given there is no `integration_tests` subfolder
   testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
 };
