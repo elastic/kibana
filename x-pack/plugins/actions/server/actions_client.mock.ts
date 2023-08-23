@@ -30,6 +30,7 @@ const createActionsClientMock = () => {
     isSystemAction: jest.fn(),
     getGlobalExecutionKpiWithAuth: jest.fn(),
     getGlobalExecutionLogWithAuth: jest.fn(),
+    hasReachedTheQueuedActionsLimit: jest.fn(),
   };
   return mocked;
 };

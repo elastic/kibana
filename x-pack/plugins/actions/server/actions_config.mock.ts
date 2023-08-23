@@ -28,6 +28,7 @@ const createActionsConfigMock = () => {
     validateEmailAddresses: jest.fn().mockReturnValue(undefined),
     getMaxAttempts: jest.fn().mockReturnValue(3),
     enableFooterInEmail: jest.fn().mockReturnValue(true),
+    getQueuedMax: jest.fn().mockReturnValue(1000),
   };
   return mocked;
 };
