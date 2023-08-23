@@ -347,7 +347,7 @@ const findTestUtils = (
             )
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
-  
+
           // create another type with same tag
           const { body: createdSecondAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
