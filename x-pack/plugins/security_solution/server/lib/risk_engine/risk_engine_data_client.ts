@@ -192,7 +192,7 @@ export class RiskEngineDataClient {
       logger: this.options.logger,
     });
 
-    return await updateSavedObjectAttribute({
+    return updateSavedObjectAttribute({
       savedObjectsClient: this.options.soClient,
       attributes: {
         enabled: false,
