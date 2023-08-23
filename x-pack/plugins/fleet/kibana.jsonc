@@ -23,7 +23,8 @@
       "taskManager",
       "guidedOnboarding",
       "files",
-      "uiActions"
+      "uiActions",
+      "dashboard"
     ],
     "optionalPlugins": [
       "features",

@@ -9,19 +9,24 @@ import { SavedObjectsClientContract } from '@kbn/core/server';
 import { Artifact } from '@kbn/fleet-plugin/server';
 import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import { either } from 'fp-ts/lib/Either';
 import { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { stringFromBufferRt } from '../../utils/string_from_buffer_rt';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
   createFleetSourceMapArtifact,
+  createFleetAndroidMapArtifact,
   deleteFleetSourcemapArtifact,
   getCleanedBundleFilePath,
   listSourceMapArtifacts,
   ListSourceMapArtifactsResponse,
   updateSourceMapsOnFleetPolicies,
 } from '../fleet/source_maps';
-import { createApmSourceMap } from './create_apm_source_map';
+import {
+  createApmSourceMap,
+  createApmAndroidMap,
+} from './create_apm_source_map';
 import { deleteApmSourceMap } from './delete_apm_sourcemap';
 import { runFleetSourcemapArtifactsMigration } from './schedule_source_map_migration';
 
@@ -40,6 +45,24 @@ export const sourceMapRt = t.intersection([
 ]);
 
 export type SourceMap = t.TypeOf<typeof sourceMapRt>;
+
+const androidMapValidation = new t.Type<string, string, unknown>(
+  'ANDROID_MAP_VALIDATION',
+  t.string.is,
+  (input, context): t.Validation<string> =>
+    either.chain(
+      t.string.validate(input, context),
+      (str): t.Validation<string> => {
+        const firstLine = str.split('\n', 1)[0];
+        if (firstLine.trim() === '# compiler: R8') {
+          return t.success(str);
+        } else {
+          return t.failure(input, context);
+        }
+      }
+    ),
+  (a): string => a
+);
 
 function throwNotImplementedIfSourceMapNotAvailable(
   featureFlags: ApmFeatureFlags
@@ -91,7 +114,7 @@ const uploadSourceMapRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/sourcemaps 2023-10-31',
   options: {
     tags: ['access:apm', 'access:apm_write'],
-    body: { accepts: ['multipart/form-data'] },
+    body: { accepts: ['multipart/form-data'], maxBytes: 100 * 1024 * 1024 },
   },
   params: t.type({
     body: t.type({
@@ -169,6 +192,85 @@ const uploadSourceMapRoute = createApmServerRoute({
   },
 });
 
+const uploadAndroidMapRoute = createApmServerRoute({
+  endpoint: 'POST /api/apm/androidmaps 2023-10-31',
+  options: {
+    tags: ['access:apm', 'access:apm_write'],
+    body: { accepts: ['multipart/form-data'], maxBytes: 100 * 1024 * 1024 },
+  },
+  params: t.type({
+    body: t.type({
+      service_name: t.string,
+      service_version: t.string,
+      map_file: t
+        .union([t.string, stringFromBufferRt])
+        .pipe(androidMapValidation),
+    }),
+  }),
+  handler: async ({
+    params,
+    plugins,
+    core,
+    logger,
+    featureFlags,
+  }): Promise<Artifact | undefined> => {
+    throwNotImplementedIfSourceMapNotAvailable(featureFlags);
+
+    const {
+      service_name: serviceName,
+      service_version: serviceVersion,
+      map_file: sourceMapContent,
+    } = params.body;
+    const bundleFilepath = 'android';
+    const fleetPluginStart = await plugins.fleet?.start();
+    const coreStart = await core.start();
+    const internalESClient = coreStart.elasticsearch.client.asInternalUser;
+    const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
+    try {
+      if (fleetPluginStart) {
+        // create source map as fleet artifact
+        const artifact = await createFleetAndroidMapArtifact({
+          fleetPluginStart,
+          apmArtifactBody: {
+            serviceName,
+            serviceVersion,
+            bundleFilepath,
+            sourceMap: sourceMapContent,
+          },
+        });
+
+        // sync source map to APM managed index
+        await createApmAndroidMap({
+          internalESClient,
+          logger,
+          fleetId: artifact.id,
+          created: artifact.created,
+          mapContent: sourceMapContent,
+          bundleFilepath,
+          serviceName,
+          serviceVersion,
+        });
+
+        // sync source map to fleet policy
+        await updateSourceMapsOnFleetPolicies({
+          coreStart,
+          fleetPluginStart,
+          savedObjectsClient:
+            savedObjectsClient as unknown as SavedObjectsClientContract,
+          internalESClient,
+        });
+
+        return artifact;
+      }
+    } catch (e) {
+      throw Boom.internal(
+        'Something went wrong while creating a new android map',
+        e
+      );
+    }
+  },
+});
+
 const deleteSourceMapRoute = createApmServerRoute({
   endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-10-31',
   options: { tags: ['access:apm', 'access:apm_write'] },
@@ -230,5 +332,6 @@ export const sourceMapsRouteRepository = {
   ...listSourceMapRoute,
   ...uploadSourceMapRoute,
   ...deleteSourceMapRoute,
+  ...uploadAndroidMapRoute,
   ...migrateFleetArtifactsSourceMapRoute,
 };

@@ -13,9 +13,7 @@ import {
   ExceptionListSchema,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
-  deleteListSchema,
   exceptionListItemSchema,
-  listSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
@@ -23,6 +21,7 @@ import { LIST_URL } from '@kbn/securitysolution-list-constants';
 import type { ListsPluginRouter } from '../types';
 import type { ExceptionListClient } from '../services/exception_lists/exception_list_client';
 import { escapeQuotes } from '../services/utils/escape_query';
+import { deleteListRequestQuery, deleteListResponse } from '../../common/api';
 
 import { buildRouteValidation, buildSiemResponse } from './utils';
 
@@ -36,7 +35,7 @@ export const deleteListRoute = (router: ListsPluginRouter): void => {
       },
       path: LIST_URL,
       validate: {
-        query: buildRouteValidation(deleteListSchema),
+        query: buildRouteValidation(deleteListRequestQuery),
       },
     },
     async (context, request, response) => {
@@ -115,7 +114,7 @@ export const deleteListRoute = (router: ListsPluginRouter): void => {
             statusCode: 404,
           });
         } else {
-          const [validated, errors] = validate(deleted, listSchema);
+          const [validated, errors] = validate(deleted, deleteListResponse);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {

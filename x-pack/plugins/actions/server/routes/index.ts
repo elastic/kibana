@@ -7,14 +7,14 @@
 
 import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { getAllConnectorsRoute } from './connector/get_all';
 import { ILicenseState } from '../lib';
 import { ActionsRequestHandlerContext } from '../types';
 import { createActionRoute } from './create';
 import { deleteActionRoute } from './delete';
 import { executeActionRoute } from './execute';
 import { getActionRoute } from './get';
-import { getAllActionRoute } from './get_all';
-import { connectorTypesRoute } from './connector/apis/connector_types/connector_types';
+import { connectorTypesRoute } from './connector_types';
 import { updateActionRoute } from './update';
 import { getOAuthAccessToken } from './get_oauth_access_token';
 import { defineLegacyRoutes } from './legacy';
@@ -37,7 +37,7 @@ export function defineRoutes(opts: RouteOptions) {
   createActionRoute(router, licenseState);
   deleteActionRoute(router, licenseState);
   getActionRoute(router, licenseState);
-  getAllActionRoute(router, licenseState);
+  getAllConnectorsRoute(router, licenseState);
   updateActionRoute(router, licenseState);
   connectorTypesRoute(router, licenseState);
   executeActionRoute(router, licenseState);

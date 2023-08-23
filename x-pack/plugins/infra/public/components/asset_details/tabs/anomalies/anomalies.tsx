@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { AnomaliesTable } from '../../../../pages/metrics/inventory_view/components/ml/anomaly_detection/anomalies_table/anomalies_table';
+import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 
-export interface AnomaliesProps {
-  nodeName: string;
-  onClose?: () => void;
-}
-export const Anomalies = ({ nodeName, onClose = () => {} }: AnomaliesProps) => {
-  return <AnomaliesTable closeFlyout={onClose} hostName={nodeName} />;
+export const Anomalies = () => {
+  const { asset, overrides } = useAssetDetailsStateContext();
+  const { onClose = () => {} } = overrides?.anomalies ?? {};
+
+  return <AnomaliesTable closeFlyout={onClose} hostName={asset.name} />;
 };

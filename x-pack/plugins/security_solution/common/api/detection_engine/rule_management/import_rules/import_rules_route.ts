@@ -19,15 +19,12 @@ export const ImportRulesRequestQuery = t.exact(
 );
 
 export type ImportRulesRequestQuery = t.TypeOf<typeof ImportRulesRequestQuery>;
-export type ImportRulesRequestQueryDecoded = Omit<
-  ImportRulesRequestQuery,
-  'overwrite' | 'overwrite_exceptions' | 'as_new_list' | 'overwrite_action_connectors'
-> & {
+export interface ImportRulesRequestQueryDecoded {
   overwrite: boolean;
   overwrite_exceptions: boolean;
   overwrite_action_connectors: boolean;
   as_new_list: boolean;
-};
+}
 
 export type ImportRulesResponse = t.TypeOf<typeof ImportRulesResponse>;
 export const ImportRulesResponse = t.exact(

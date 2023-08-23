@@ -13,8 +13,9 @@ import { mockContextValue } from '../mocks/mock_right_panel_context';
 import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
 import { RightPanelContext } from '../context';
 import { AnalyzerPreview } from './analyzer_preview';
-import { ANALYZER_PREVIEW_TEST_ID, ANALYZER_TREE_TEST_ID } from './test_ids';
+import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import * as mock from '../mocks/mock_analyzer_data';
+import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../shared/components/test_ids';
 
 jest.mock('../../../common/containers/alerts/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),
@@ -64,8 +65,9 @@ describe('<AnalyzerPreview />', () => {
       documentId: 'ancestors-id',
       indices: ['rule-parameters-index'],
     });
-    expect(wrapper.getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
-    expect(wrapper.getByTestId(ANALYZER_TREE_TEST_ID)).toBeInTheDocument();
+    expect(
+      wrapper.getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(ANALYZER_PREVIEW_TEST_ID))
+    ).toBeInTheDocument();
   });
 
   it('does not show analyzer preview when documentid and index are not present', () => {
@@ -88,6 +90,8 @@ describe('<AnalyzerPreview />', () => {
       documentId: '',
       indices: [],
     });
-    expect(queryByTestId(ANALYZER_TREE_TEST_ID)).not.toBeInTheDocument();
+    expect(
+      queryByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(ANALYZER_PREVIEW_TEST_ID))
+    ).not.toBeInTheDocument();
   });
 });

@@ -33,16 +33,13 @@ export async function handleCoverageOverviewRequest({
   params: { filter },
   deps: { rulesClient },
 }: HandleCoverageOverviewRequestArgs): Promise<CoverageOverviewResponse> {
+  const activitySet = new Set(filter?.activity);
   const kqlFilter = filter
     ? convertRulesFilterToKQL({
         filter: filter.search_term,
         showCustomRules: filter.source?.includes(CoverageOverviewRuleSource.Custom) ?? false,
         showElasticRules: filter.source?.includes(CoverageOverviewRuleSource.Prebuilt) ?? false,
-        enabled: filter.activity?.includes(CoverageOverviewRuleActivity.Disabled)
-          ? false
-          : filter.activity?.includes(CoverageOverviewRuleActivity.Enabled)
-          ? true
-          : undefined,
+        enabled: getIsEnabledFilter(activitySet),
       })
     : undefined;
 
@@ -64,6 +61,47 @@ export async function handleCoverageOverviewRequest({
     unmapped_rule_ids: [],
     rules_data: {},
   } as CoverageOverviewResponse);
+}
+
+function getIsEnabledFilter(activitySet: Set<CoverageOverviewRuleActivity>): boolean | undefined {
+  const bothSpecified =
+    activitySet.has(CoverageOverviewRuleActivity.Enabled) &&
+    activitySet.has(CoverageOverviewRuleActivity.Disabled);
+  const noneSpecified =
+    !activitySet.has(CoverageOverviewRuleActivity.Enabled) &&
+    !activitySet.has(CoverageOverviewRuleActivity.Disabled);
+
+  return bothSpecified || noneSpecified
+    ? undefined
+    : activitySet.has(CoverageOverviewRuleActivity.Enabled);
+}
+
+function appendRuleToResponse(
+  response: CoverageOverviewResponse,
+  rule: SanitizedRule<CoverageOverviewRuleParams>
+): CoverageOverviewResponse {
+  const categories = extractRuleMitreCategories(rule);
+
+  for (const category of categories) {
+    if (!response.coverage[category]) {
+      response.coverage[category] = [rule.id];
+    } else {
+      response.coverage[category].push(rule.id);
+    }
+  }
+
+  if (categories.length === 0) {
+    response.unmapped_rule_ids.push(rule.id);
+  }
+
+  response.rules_data[rule.id] = {
+    name: rule.name,
+    activity: rule.enabled
+      ? CoverageOverviewRuleActivity.Enabled
+      : CoverageOverviewRuleActivity.Disabled,
+  };
+
+  return response;
 }
 
 /**
@@ -97,32 +135,4 @@ function extractRuleMitreCategories(rule: SanitizedRule<CoverageOverviewRulePara
   }
 
   return Array.from(categories);
-}
-
-function appendRuleToResponse(
-  response: CoverageOverviewResponse,
-  rule: SanitizedRule<CoverageOverviewRuleParams>
-): CoverageOverviewResponse {
-  const categories = extractRuleMitreCategories(rule);
-
-  for (const category of categories) {
-    if (!response.coverage[category]) {
-      response.coverage[category] = [rule.id];
-    } else {
-      response.coverage[category].push(rule.id);
-    }
-  }
-
-  if (categories.length === 0) {
-    response.unmapped_rule_ids.push(rule.id);
-  }
-
-  response.rules_data[rule.id] = {
-    name: rule.name,
-    activity: rule.enabled
-      ? CoverageOverviewRuleActivity.Enabled
-      : CoverageOverviewRuleActivity.Disabled,
-  };
-
-  return response;
 }

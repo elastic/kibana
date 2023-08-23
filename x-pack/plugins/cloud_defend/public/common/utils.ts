@@ -124,7 +124,7 @@ export function validateBlockRestrictions(selectors: Selector[], responses: Resp
   const errors: string[] = [];
 
   responses.forEach((response) => {
-    if (response.actions.includes('block')) {
+    if (response.actions?.includes('block')) {
       // check if any selectors are using FIM operations
       // and verify that targetFilePath is specfied in all 'match' selectors
       // or at least one 'exclude' selector

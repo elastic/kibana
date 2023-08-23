@@ -25,7 +25,7 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       authorizedConsumers,
       defaultScheduleInterval,
       doesSetRecoveryContext,
-      hasGetSummarizedAlerts,
+      hasAlertsMappings,
       hasFieldsForAAD,
       ...rest
     }) => ({
@@ -41,7 +41,7 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       authorized_consumers: authorizedConsumers,
       default_schedule_interval: defaultScheduleInterval,
       does_set_recovery_context: doesSetRecoveryContext,
-      has_get_summarized_alerts: !!hasGetSummarizedAlerts,
+      has_alerts_mappings: !!hasAlertsMappings,
       has_fields_for_a_a_d: !!hasFieldsForAAD,
     })
   );

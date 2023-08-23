@@ -485,6 +485,7 @@ export const formatAboutStepData = (
   const {
     author,
     falsePositives,
+    investigationFields,
     references,
     riskScore,
     severity,
@@ -524,6 +525,7 @@ export const formatAboutStepData = (
       : {}),
     false_positives: falsePositives.filter((item) => !isEmpty(item)),
     references: references.filter((item) => !isEmpty(item)),
+    investigation_fields: investigationFields.filter((item) => !isEmpty(item.trim())),
     risk_score: riskScore.value,
     risk_score_mapping: riskScore.isMappingChecked
       ? riskScore.mapping.filter((m) => m.field != null && m.field !== '')

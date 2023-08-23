@@ -23,7 +23,6 @@ const highlightedField = {
   name: 'field',
   values: ['values'],
 };
-const scopeId = 'scopeId';
 const aggregationField = 'aggregationField';
 
 describe('PrevalenceDetailsAlertCountCell', () => {
@@ -42,7 +41,6 @@ describe('PrevalenceDetailsAlertCountCell', () => {
     const { getByTestId } = render(
       <PrevalenceDetailsPrevalenceCell
         highlightedField={highlightedField}
-        scopeId={scopeId}
         aggregationField={aggregationField}
       />
     );
@@ -65,7 +63,6 @@ describe('PrevalenceDetailsAlertCountCell', () => {
     const { getByTestId } = render(
       <PrevalenceDetailsPrevalenceCell
         highlightedField={highlightedField}
-        scopeId={scopeId}
         aggregationField={aggregationField}
       />
     );
@@ -88,7 +85,6 @@ describe('PrevalenceDetailsAlertCountCell', () => {
     const { getByTestId } = render(
       <PrevalenceDetailsPrevalenceCell
         highlightedField={highlightedField}
-        scopeId={scopeId}
         aggregationField={aggregationField}
       />
     );
@@ -111,7 +107,6 @@ describe('PrevalenceDetailsAlertCountCell', () => {
     const { getByTestId } = render(
       <PrevalenceDetailsPrevalenceCell
         highlightedField={highlightedField}
-        scopeId={scopeId}
         aggregationField={aggregationField}
       />
     );
@@ -134,7 +129,6 @@ describe('PrevalenceDetailsAlertCountCell', () => {
     const { getByTestId } = render(
       <PrevalenceDetailsPrevalenceCell
         highlightedField={highlightedField}
-        scopeId={scopeId}
         aggregationField={aggregationField}
       />
     );
@@ -157,7 +151,6 @@ describe('PrevalenceDetailsAlertCountCell', () => {
     const { getByTestId } = render(
       <PrevalenceDetailsPrevalenceCell
         highlightedField={highlightedField}
-        scopeId={scopeId}
         aggregationField={aggregationField}
       />
     );

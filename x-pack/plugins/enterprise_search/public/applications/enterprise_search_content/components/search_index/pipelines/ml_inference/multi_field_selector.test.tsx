@@ -11,7 +11,13 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBasicTable, EuiButton, EuiComboBox, EuiFieldText } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiButton,
+  EuiComboBox,
+  EuiFieldText,
+} from '@elastic/eui';
 
 import { MultiFieldMapping, SelectedFieldMappings } from './multi_field_selector';
 
@@ -180,6 +186,10 @@ describe('SelectedFieldMappings', () => {
 
     expect(wrapper.find(EuiBasicTable)).toHaveLength(1);
     const table = wrapper.find(EuiBasicTable);
-    expect(table.prop('columns').map((c) => c.name)).toEqual(['Source field', '', 'Target field']);
+    expect(table.prop('columns').map((c: EuiBasicTableColumn<{}>) => c.name)).toEqual([
+      'Source text field',
+      '',
+      'Target field',
+    ]);
   });
 });

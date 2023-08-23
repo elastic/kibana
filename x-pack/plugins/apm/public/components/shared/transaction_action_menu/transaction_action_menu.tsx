@@ -32,6 +32,7 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { CustomLinkMenuSection } from './custom_link_menu_section';
 import { getSections } from './sections';
+import { CustomLinkFlyout } from './custom_link_flyout';
 
 interface Props {
   readonly transaction?: Transaction;
@@ -69,8 +70,23 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
   const { isProfilingPluginInitialized, profilingLocators } =
     useProfilingPlugin();
 
+  const [isCreateEditFlyoutOpen, setIsCreateEditFlyoutOpen] = useState(false);
+
+  function openCustomLinkFlyout() {
+    setIsCreateEditFlyoutOpen(true);
+    setIsActionPopoverOpen(false);
+  }
+
   return (
     <>
+      {hasGoldLicense && (
+        <CustomLinkFlyout
+          transaction={transaction}
+          isOpen={isCreateEditFlyoutOpen}
+          onClose={() => setIsCreateEditFlyoutOpen(false)}
+        />
+      )}
+
       <ActionMenu
         id="transactionActionMenu"
         closePopover={() => setIsActionPopoverOpen(false)}
@@ -91,7 +107,12 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
           transaction={transaction}
           profilingLocators={profilingLocators}
         />
-        {hasGoldLicense && <CustomLinkMenuSection transaction={transaction} />}
+        {hasGoldLicense && (
+          <CustomLinkMenuSection
+            transaction={transaction}
+            openCreateCustomLinkFlyout={openCustomLinkFlyout}
+          />
+        )}
       </ActionMenu>
     </>
   );

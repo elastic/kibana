@@ -54,6 +54,7 @@ import {
 } from '../../../../common/lib/api';
 import {
   globalRead,
+  noCasesConnectors,
   noKibanaPrivileges,
   obsOnlyRead,
   obsSecRead,
@@ -839,6 +840,24 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           expect(theCase.status).to.eql('open');
+        });
+
+        it('should return 403 when the user does not have access to push', async () => {
+          const { postedCase } = await createCaseWithConnector({
+            supertest,
+            serviceNowSimulatorURL,
+            actionsRemover,
+            configureReq: { owner: 'testNoCasesConnectorFixture' },
+            createCaseReq: { ...getPostCaseRequest(), owner: 'testNoCasesConnectorFixture' },
+          });
+
+          await pushCase({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            connectorId: postedCase.connector.id,
+            expectedHttpCode: 403,
+            auth: { user: noCasesConnectors, space: null },
+          });
         });
       });
     });

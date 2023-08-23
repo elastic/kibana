@@ -8,9 +8,9 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Artifact } from '@kbn/fleet-plugin/server';
 import { getUnzippedArtifactBody } from '../fleet/source_maps';
-import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/get_apm_indices';
+import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/apm_system_index_constants';
 import { ApmSourceMap } from './create_apm_source_map_index_template';
-import { getEncodedContent, getSourceMapId } from './sourcemap_utils';
+import { getEncodedSourceMapContent, getSourceMapId } from './sourcemap_utils';
 
 export async function bulkCreateApmSourceMaps({
   artifacts,
@@ -24,7 +24,7 @@ export async function bulkCreateApmSourceMaps({
       const { serviceName, serviceVersion, bundleFilepath, sourceMap } =
         await getUnzippedArtifactBody(artifact.body);
 
-      const { contentEncoded, contentHash } = await getEncodedContent(
+      const { contentEncoded, contentHash } = await getEncodedSourceMapContent(
         sourceMap
       );
 

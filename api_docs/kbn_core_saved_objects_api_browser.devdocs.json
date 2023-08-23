@@ -1079,10 +1079,6 @@
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts"
               },
               {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
-              },
-              {
                 "plugin": "savedObjects",
                 "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
               },
@@ -1640,8 +1636,8 @@
                 "path": "src/plugins/presentation_util/public/services/dashboards/dashboards_service.ts"
               },
               {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/hooks/slo/use_fetch_slo_definitions.ts"
               },
               {
                 "plugin": "dashboardEnhanced",
@@ -1738,10 +1734,6 @@
               {
                 "plugin": "savedObjects",
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/initialize_saved_object.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
               },
               {
                 "plugin": "dashboardEnhanced",
@@ -3054,14 +3046,6 @@
           {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/types/app_state.ts"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/common/types/synthetics_monitor.ts"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/common/types/synthetics_monitor.ts"
           },
           {
             "plugin": "graph",

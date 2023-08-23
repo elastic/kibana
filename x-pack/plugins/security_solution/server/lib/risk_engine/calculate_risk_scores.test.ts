@@ -9,7 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { calculateRiskScores } from './calculate_risk_scores';
-import { calculateRiskScoreMock } from './calculate_risk_scores.mock';
+import { calculateRiskScoresMock } from './calculate_risk_scores.mock';
 
 describe('calculateRiskScores()', () => {
   let params: Parameters<typeof calculateRiskScores>[0];
@@ -26,6 +26,7 @@ describe('calculateRiskScores()', () => {
       index: 'index',
       pageSize: 500,
       range: { start: 'now - 15d', end: 'now' },
+      runtimeMappings: {},
     };
   });
 
@@ -134,45 +135,52 @@ describe('calculateRiskScores()', () => {
     beforeEach(() => {
       // stub out a reasonable response
       (esClient.search as jest.Mock).mockResolvedValueOnce({
-        aggregations: calculateRiskScoreMock.createAggregationResponse(),
+        aggregations: calculateRiskScoresMock.buildAggregationResponse(),
       });
     });
 
     it('returns a flattened list of risk scores', async () => {
       const response = await calculateRiskScores(params);
       expect(response).toHaveProperty('scores');
-      expect(response.scores).toHaveLength(4);
+      expect(response.scores.host).toHaveLength(2);
+      expect(response.scores.user).toHaveLength(2);
     });
 
     it('returns scores in the expected format', async () => {
       const {
-        scores: [score],
+        scores: { host: hostScores },
       } = await calculateRiskScores(params);
+      const [score] = hostScores ?? [];
       expect(score).toEqual(
         expect.objectContaining({
           '@timestamp': expect.any(String),
-          identifierField: expect.any(String),
-          identifierValue: expect.any(String),
-          level: 'Unknown',
-          totalScore: expect.any(Number),
-          totalScoreNormalized: expect.any(Number),
-          alertsScore: expect.any(Number),
-          otherScore: expect.any(Number),
+          id_field: expect.any(String),
+          id_value: expect.any(String),
+          calculated_level: 'Unknown',
+          calculated_score: expect.any(Number),
+          calculated_score_norm: expect.any(Number),
+          category_1_score: expect.any(Number),
+          category_1_count: expect.any(Number),
+          notes: expect.any(Array),
         })
       );
     });
 
     it('returns risk inputs in the expected format', async () => {
       const {
-        scores: [score],
+        scores: { user: userScores },
       } = await calculateRiskScores(params);
+      const [score] = userScores ?? [];
       expect(score).toEqual(
         expect.objectContaining({
-          riskiestInputs: expect.arrayContaining([
+          inputs: expect.arrayContaining([
             expect.objectContaining({
               id: expect.any(String),
               index: expect.any(String),
-              riskScore: expect.any(Number),
+              category: expect.any(String),
+              description: expect.any(String),
+              risk_score: expect.any(Number),
+              timestamp: expect.any(String),
             }),
           ]),
         })
@@ -184,14 +192,14 @@ describe('calculateRiskScores()', () => {
     beforeEach(() => {
       // stub out a rejected response
       (esClient.search as jest.Mock).mockRejectedValueOnce({
-        aggregations: calculateRiskScoreMock.createAggregationResponse(),
+        aggregations: calculateRiskScoresMock.buildAggregationResponse(),
       });
     });
 
     it('raises an error if elasticsearch client rejects', () => {
       expect.assertions(1);
       expect(() => calculateRiskScores(params)).rejects.toEqual({
-        aggregations: calculateRiskScoreMock.createAggregationResponse(),
+        aggregations: calculateRiskScoresMock.buildAggregationResponse(),
       });
     });
   });

@@ -193,6 +193,9 @@
       "label": "Contributors Newsletters",
       "items": [
         {
+          "id": "kibJuly2023ContributorNewsletter"
+        },
+        {
           "id": "kibMay2023ContributorNewsletter"
         },
         {

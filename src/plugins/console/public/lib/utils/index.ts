@@ -127,6 +127,11 @@ export const replaceVariables = (
   const bodyRegexTripleQuotes = /([\\"]?)"""\${(\w+)}"""(?!")/g;
 
   return requests.map((req) => {
+    // safeguard - caller passes any[] from editor's getRequestsInRange() as requests
+    if (!req || !req.url || !req.data) {
+      return req;
+    }
+
     if (urlRegex.test(req.url)) {
       req.url = req.url.replaceAll(urlRegex, (match, key) => {
         const variable = variables.find(({ name }) => name === key);
@@ -135,9 +140,9 @@ export const replaceVariables = (
       });
     }
 
-    if (req.data && req.data.length) {
-      if (bodyRegexSingleQuote.test(req.data[0])) {
-        const data = req.data[0].replaceAll(bodyRegexSingleQuote, (match, lookbehind, key) => {
+    req.data = req.data.map((data) => {
+      if (bodyRegexSingleQuote.test(data)) {
+        data = data.replaceAll(bodyRegexSingleQuote, (match, lookbehind, key) => {
           const variable = variables.find(({ name }) => name === key);
 
           if (!lookbehind && variable) {
@@ -172,20 +177,20 @@ export const replaceVariables = (
 
           return match;
         });
-        req.data = [data];
       }
 
-      if (bodyRegexTripleQuotes.test(req.data[0])) {
-        const data = req.data[0].replaceAll(bodyRegexTripleQuotes, (match, lookbehind, key) => {
+      if (bodyRegexTripleQuotes.test(data)) {
+        data = data.replaceAll(bodyRegexTripleQuotes, (match, lookbehind, key) => {
           const variable = variables.find(({ name }) => name === key);
 
           return !lookbehind && variable?.value
             ? '""' + JSON.stringify(variable?.value) + '""'
             : match;
         });
-        req.data = [data];
       }
-    }
+
+      return data;
+    });
 
     return req;
   });

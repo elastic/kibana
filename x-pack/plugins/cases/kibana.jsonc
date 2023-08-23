@@ -28,7 +28,7 @@
       "ruleRegistry",
       "files",
       "savedObjectsFinder",
-      "savedObjectsManagement",
+      "contentManagement",
       "uiActions",
     ],
     "optionalPlugins": [

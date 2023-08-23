@@ -8,7 +8,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import Boom from '@hapi/boom';
 import url from 'url';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { i18n } from '@kbn/i18n';
@@ -17,7 +16,6 @@ import {
   IScopedClusterClient,
   SavedObjectsClientContract,
   SavedObjectAttributes,
-  SavedObject,
   KibanaRequest,
   SavedObjectsUtils,
   Logger,
@@ -26,6 +24,8 @@ import { AuditLogger } from '@kbn/security-plugin/server';
 import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { KueryNode } from '@kbn/es-query';
+import { FindConnectorResult } from '../application/connector/types';
+import { getAll } from '../application/connector/methods/get_all';
 import {
   GetGlobalExecutionKPIParams,
   GetGlobalExecutionLogParams,
@@ -42,7 +42,6 @@ import {
 } from '../lib';
 import {
   ActionResult,
-  FindActionResult,
   RawAction,
   InMemoryConnector,
   ActionTypeExecutorResult,
@@ -63,7 +62,6 @@ import {
 } from '../authorization/get_authorization_mode_by_source';
 import { connectorAuditEvent, ConnectorAuditAction } from '../lib/audit_events';
 import { trackLegacyRBACExemption } from '../lib/track_legacy_rbac_exemption';
-import { isConnectorDeprecated } from '../lib/is_connector_deprecated';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import {
   OAuthClientCredentialsParams,
@@ -87,13 +85,8 @@ import {
   getExecutionKPIAggregation,
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
-import { ActionsClientContext } from './types';
-import { ListTypesParams, listTypes } from '../application/connector/methods/list_types/list_types';
-
-// We are assuming there won't be many actions. This is why we will load
-// all the actions in advance and assume the total count to not go over 10000.
-// We'll set this max setting assuming it's never reached.
-export const MAX_ACTIONS_RETURNED = 10000;
+import { connectorFromSavedObject, isConnectorDeprecated } from '../application/connector/lib';
+import { ListTypesParams } from '../application/connector/methods/list_types';
 
 interface ActionUpdate {
   name: string;
@@ -134,14 +127,69 @@ export interface UpdateOptions {
   action: ActionUpdate;
 }
 
-interface GetAllOptions {
-  includeSystemActions?: boolean;
+interface ListTypesOptions {
+  featureId?: string;
+  includeSystemActionTypes?: boolean;
 }
+
+export interface ActionsClientContext {
+  logger: Logger;
+  kibanaIndices: string[];
+  scopedClusterClient: IScopedClusterClient;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  actionTypeRegistry: ActionTypeRegistry;
+  inMemoryConnectors: InMemoryConnector[];
+  actionExecutor: ActionExecutorContract;
+  request: KibanaRequest;
+  authorization: ActionsAuthorization;
+  executionEnqueuer: ExecutionEnqueuer<void>;
+  ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
+  bulkExecutionEnqueuer: BulkExecutionEnqueuer<void>;
+  auditLogger?: AuditLogger;
+  usageCounter?: UsageCounter;
+  connectorTokenClient: ConnectorTokenClientContract;
+  getEventLogClient: () => Promise<IEventLogClient>;
+}
+
 export class ActionsClient {
   private readonly context: ActionsClientContext;
 
-  constructor(context: ConstructorOptions) {
-    this.context = context;
+  constructor({
+    logger,
+    actionTypeRegistry,
+    kibanaIndices,
+    scopedClusterClient,
+    unsecuredSavedObjectsClient,
+    inMemoryConnectors,
+    actionExecutor,
+    executionEnqueuer,
+    ephemeralExecutionEnqueuer,
+    bulkExecutionEnqueuer,
+    request,
+    authorization,
+    auditLogger,
+    usageCounter,
+    connectorTokenClient,
+    getEventLogClient,
+  }: ConstructorOptions) {
+    this.context = {
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      inMemoryConnectors,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization,
+      auditLogger,
+      usageCounter,
+      connectorTokenClient,
+      getEventLogClient,
+    };
   }
 
   /**
@@ -154,7 +202,10 @@ export class ActionsClient {
     const id = options?.id || SavedObjectsUtils.generateId();
 
     try {
-      await this.context.authorization.ensureAuthorized({ operation: 'create', actionTypeId });
+      await this.context.authorization.ensureAuthorized({
+        operation: 'create',
+        actionTypeId,
+      });
     } catch (error) {
       this.context.auditLogger?.log(
         connectorAuditEvent({
@@ -430,70 +481,22 @@ export class ActionsClient {
   }
 
   /**
-   * Get all actions with in-memory connectors
+   * Get all connectors with in-memory connectors
    */
-  public async getAll({ includeSystemActions = false }: GetAllOptions = {}): Promise<
-    FindActionResult[]
-  > {
-    try {
-      await this.context.authorization.ensureAuthorized({ operation: 'get' });
-    } catch (error) {
-      this.context.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.FIND,
-          error,
-        })
-      );
-      throw error;
-    }
-
-    const savedObjectsActions = (
-      await this.context.unsecuredSavedObjectsClient.find<RawAction>({
-        perPage: MAX_ACTIONS_RETURNED,
-        type: 'action',
-      })
-    ).saved_objects.map((rawAction) =>
-      actionFromSavedObject(rawAction, isConnectorDeprecated(rawAction.attributes))
-    );
-
-    savedObjectsActions.forEach(({ id }) =>
-      this.context.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.FIND,
-          savedObject: { type: 'action', id },
-        })
-      )
-    );
-
-    const inMemoryConnectorsFiltered = includeSystemActions
-      ? this.context.inMemoryConnectors
-      : this.context.inMemoryConnectors.filter((connector) => !connector.isSystemAction);
-
-    const mergedResult = [
-      ...savedObjectsActions,
-      ...inMemoryConnectorsFiltered.map((inMemoryConnector) => ({
-        id: inMemoryConnector.id,
-        actionTypeId: inMemoryConnector.actionTypeId,
-        name: inMemoryConnector.name,
-        isPreconfigured: inMemoryConnector.isPreconfigured,
-        isDeprecated: isConnectorDeprecated(inMemoryConnector),
-        isSystemAction: inMemoryConnector.isSystemAction,
-      })),
-    ].sort((a, b) => a.name.localeCompare(b.name));
-    return await injectExtraFindData(
-      this.context.kibanaIndices,
-      this.context.scopedClusterClient,
-      mergedResult
-    );
+  public async getAll({ includeSystemActions = false } = {}): Promise<FindConnectorResult[]> {
+    return getAll({ context: this.context, includeSystemActions });
   }
 
   /**
    * Get bulk actions with in-memory list
    */
-  public async getBulk(
-    ids: string[],
-    throwIfSystemAction: boolean = true
-  ): Promise<ActionResult[]> {
+  public async getBulk({
+    ids,
+    throwIfSystemAction = true,
+  }: {
+    ids: string[];
+    throwIfSystemAction?: boolean;
+  }): Promise<ActionResult[]> {
     try {
       await this.context.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
@@ -562,7 +565,9 @@ export class ActionsClient {
           `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
         );
       }
-      actionResults.push(actionFromSavedObject(action, isConnectorDeprecated(action.attributes)));
+      actionResults.push(
+        connectorFromSavedObject(action, isConnectorDeprecated(action.attributes))
+      );
     }
 
     return actionResults;
@@ -973,73 +978,4 @@ export class ActionsClient {
       throw err;
     }
   }
-}
-
-function actionFromSavedObject(
-  savedObject: SavedObject<RawAction>,
-  isDeprecated: boolean
-): ActionResult {
-  return {
-    id: savedObject.id,
-    ...savedObject.attributes,
-    isPreconfigured: false,
-    isDeprecated,
-    isSystemAction: false,
-  };
-}
-
-async function injectExtraFindData(
-  kibanaIndices: string[],
-  scopedClusterClient: IScopedClusterClient,
-  actionResults: ActionResult[]
-): Promise<FindActionResult[]> {
-  const aggs: Record<string, estypes.AggregationsAggregationContainer> = {};
-  for (const actionResult of actionResults) {
-    aggs[actionResult.id] = {
-      filter: {
-        bool: {
-          must: {
-            nested: {
-              path: 'references',
-              query: {
-                bool: {
-                  filter: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            'references.id': actionResult.id,
-                          },
-                        },
-                        {
-                          term: {
-                            'references.type': 'action',
-                          },
-                        },
-                      ],
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-  }
-  const aggregationResult = await scopedClusterClient.asInternalUser.search({
-    index: kibanaIndices,
-    body: {
-      aggs,
-      size: 0,
-      query: {
-        match_all: {},
-      },
-    },
-  });
-  return actionResults.map((actionResult) => ({
-    ...actionResult,
-    // @ts-expect-error aggegation type is not specified
-    referencedByCount: aggregationResult.aggregations[actionResult.id].doc_count,
-  }));
 }

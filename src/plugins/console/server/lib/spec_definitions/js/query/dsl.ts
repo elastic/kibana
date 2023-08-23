@@ -360,7 +360,7 @@ export const query = (specService: SpecDefinitionsService) => {
         query: {},
       },
       inner_hits: { ...innerHits },
-      type: '{type}',
+      type: '',
       score_mode: {
         __one_of: ['none', 'max', 'sum', 'avg'],
       },
@@ -374,7 +374,7 @@ export const query = (specService: SpecDefinitionsService) => {
         parent_type: 'TYPE',
         query: {},
       },
-      parent_type: '{type}',
+      parent_type: '',
       score_mode: {
         __one_of: ['none', 'score'],
       },
@@ -407,7 +407,6 @@ export const query = (specService: SpecDefinitionsService) => {
       docs: [
         {
           _index: '{index}',
-          _type: '{type}',
           _id: '',
         },
       ],

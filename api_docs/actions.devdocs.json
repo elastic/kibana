@@ -697,7 +697,7 @@
               "SearchResponse",
               "<TDocument, TAggregations>>; }; helpers: ",
               "default",
-              "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -1658,6 +1658,8 @@
               "; sql: ",
               "default",
               "; ssl: ",
+              "default",
+              "; synonyms: ",
               "default",
               "; tasks: ",
               "default",
@@ -3331,7 +3333,7 @@
             "section": "def-server.FindActionResult",
             "text": "FindActionResult"
           },
-          "[]>; getBulk: (ids: string[], throwIfSystemAction?: boolean) => Promise<",
+          "[]>; getBulk: ({ ids, throwIfSystemAction, }: { ids: string[]; throwIfSystemAction?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "actions",
             "scope": "server",
@@ -5543,13 +5545,10 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.AlertingConnectorFeature.name",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5557,13 +5556,10 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.AlertingConnectorFeature.compatibility",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "compatibility",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5596,13 +5592,10 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.CasesConnectorFeature.name",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5610,13 +5603,10 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.CasesConnectorFeature.compatibility",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "compatibility",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5722,13 +5712,10 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.GeneralFeature.name",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5736,13 +5723,10 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.GeneralFeature.compatibility",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "compatibility",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5790,13 +5774,10 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.SecuritySolutionFeature.name",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5804,13 +5785,10 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.SecuritySolutionFeature.compatibility",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "compatibility",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5843,13 +5821,10 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.UptimeConnectorFeature.name",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5857,13 +5832,10 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.UptimeConnectorFeature.compatibility",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "compatibility",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false

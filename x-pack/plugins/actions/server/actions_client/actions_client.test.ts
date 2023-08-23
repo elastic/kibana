@@ -1242,364 +1242,6 @@ describe('get()', () => {
   });
 });
 
-describe('getAll()', () => {
-  describe('authorization', () => {
-    function getAllOperation(): ReturnType<ActionsClient['getAll']> {
-      const expectedResult = {
-        total: 1,
-        per_page: 10,
-        page: 1,
-        saved_objects: [
-          {
-            id: '1',
-            type: 'type',
-            attributes: {
-              name: 'test',
-              config: {
-                foo: 'bar',
-              },
-            },
-            score: 1,
-            references: [],
-          },
-        ],
-      };
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
-      scopedClusterClient.asInternalUser.search.mockResponse(
-        // @ts-expect-error not full search response
-        {
-          aggregations: {
-            '1': { doc_count: 6 },
-            testPreconfigured: { doc_count: 2 },
-          },
-        }
-      );
-
-      actionsClient = new ActionsClient({
-        logger,
-        actionTypeRegistry,
-        unsecuredSavedObjectsClient,
-        scopedClusterClient,
-        kibanaIndices,
-        actionExecutor,
-        executionEnqueuer,
-        ephemeralExecutionEnqueuer,
-        bulkExecutionEnqueuer,
-        request,
-        authorization: authorization as unknown as ActionsAuthorization,
-        inMemoryConnectors: [
-          {
-            id: 'testPreconfigured',
-            actionTypeId: '.slack',
-            secrets: {},
-            isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
-            name: 'test',
-            config: {
-              foo: 'bar',
-            },
-          },
-        ],
-        connectorTokenClient: connectorTokenClientMock.create(),
-        getEventLogClient,
-      });
-      return actionsClient.getAll();
-    }
-
-    test('ensures user is authorised to get the type of action', async () => {
-      await getAllOperation();
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
-    });
-
-    test('throws when user is not authorised to create the type of action', async () => {
-      authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to get all actions`)
-      );
-
-      await expect(getAllOperation()).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to get all actions]`
-      );
-
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
-    });
-  });
-
-  describe('auditLogger', () => {
-    test('logs audit event when searching connectors', async () => {
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-        total: 1,
-        per_page: 10,
-        page: 1,
-        saved_objects: [
-          {
-            id: '1',
-            type: 'type',
-            attributes: {
-              name: 'test',
-              isMissingSecrets: false,
-              config: {
-                foo: 'bar',
-              },
-            },
-            score: 1,
-            references: [],
-          },
-        ],
-      });
-      scopedClusterClient.asInternalUser.search.mockResponse(
-        // @ts-expect-error not full search response
-        {
-          aggregations: {
-            '1': { doc_count: 6 },
-            testPreconfigured: { doc_count: 2 },
-          },
-        }
-      );
-
-      await actionsClient.getAll();
-
-      expect(auditLogger.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          event: expect.objectContaining({
-            action: 'connector_find',
-            outcome: 'success',
-          }),
-          kibana: { saved_object: { id: '1', type: 'action' } },
-        })
-      );
-    });
-
-    test('logs audit event when not authorised to search connectors', async () => {
-      authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
-
-      await expect(actionsClient.getAll()).rejects.toThrow();
-
-      expect(auditLogger.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          event: expect.objectContaining({
-            action: 'connector_find',
-            outcome: 'failure',
-          }),
-          error: { code: 'Error', message: 'Unauthorized' },
-        })
-      );
-    });
-  });
-
-  test('calls unsecuredSavedObjectsClient with parameters and returns inMemoryConnectors correctly', async () => {
-    const expectedResult = {
-      total: 1,
-      per_page: 10,
-      page: 1,
-      saved_objects: [
-        {
-          id: '1',
-          type: 'type',
-          attributes: {
-            name: 'test',
-            isMissingSecrets: false,
-            config: {
-              foo: 'bar',
-            },
-          },
-          score: 1,
-          references: [],
-        },
-      ],
-    };
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
-    scopedClusterClient.asInternalUser.search.mockResponse(
-      // @ts-expect-error not full search response
-      {
-        aggregations: {
-          '1': { doc_count: 6 },
-          testPreconfigured: { doc_count: 2 },
-          'system-connector-.cases': { doc_count: 2 },
-        },
-      }
-    );
-
-    actionsClient = new ActionsClient({
-      logger,
-      actionTypeRegistry,
-      unsecuredSavedObjectsClient,
-      scopedClusterClient,
-      kibanaIndices,
-      actionExecutor,
-      executionEnqueuer,
-      ephemeralExecutionEnqueuer,
-      bulkExecutionEnqueuer,
-      request,
-      authorization: authorization as unknown as ActionsAuthorization,
-      inMemoryConnectors: [
-        {
-          id: 'testPreconfigured',
-          actionTypeId: '.slack',
-          secrets: {},
-          isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
-          name: 'test',
-          config: {
-            foo: 'bar',
-          },
-        },
-        /**
-         * System actions will not
-         * be returned from getAll
-         * if no options are provided
-         */
-        {
-          id: 'system-connector-.cases',
-          actionTypeId: '.cases',
-          name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
-          isSystemAction: true,
-        },
-      ],
-      connectorTokenClient: connectorTokenClientMock.create(),
-      getEventLogClient,
-    });
-
-    const result = await actionsClient.getAll();
-
-    expect(result).toEqual([
-      {
-        id: '1',
-        name: 'test',
-        isMissingSecrets: false,
-        config: { foo: 'bar' },
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-        referencedByCount: 6,
-      },
-      {
-        id: 'testPreconfigured',
-        actionTypeId: '.slack',
-        name: 'test',
-        isPreconfigured: true,
-        isSystemAction: false,
-        isDeprecated: false,
-        referencedByCount: 2,
-      },
-    ]);
-  });
-
-  test('get system actions correctly', async () => {
-    const expectedResult = {
-      total: 1,
-      per_page: 10,
-      page: 1,
-      saved_objects: [
-        {
-          id: '1',
-          type: 'type',
-          attributes: {
-            name: 'test',
-            isMissingSecrets: false,
-            config: {
-              foo: 'bar',
-            },
-          },
-          score: 1,
-          references: [],
-        },
-      ],
-    };
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
-    scopedClusterClient.asInternalUser.search.mockResponse(
-      // @ts-expect-error not full search response
-      {
-        aggregations: {
-          '1': { doc_count: 6 },
-          testPreconfigured: { doc_count: 2 },
-          'system-connector-.cases': { doc_count: 2 },
-        },
-      }
-    );
-
-    actionsClient = new ActionsClient({
-      logger,
-      actionTypeRegistry,
-      unsecuredSavedObjectsClient,
-      scopedClusterClient,
-      kibanaIndices,
-      actionExecutor,
-      executionEnqueuer,
-      ephemeralExecutionEnqueuer,
-      bulkExecutionEnqueuer,
-      request,
-      authorization: authorization as unknown as ActionsAuthorization,
-      inMemoryConnectors: [
-        {
-          id: 'testPreconfigured',
-          actionTypeId: '.slack',
-          secrets: {},
-          isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
-          name: 'test',
-          config: {
-            foo: 'bar',
-          },
-        },
-        {
-          id: 'system-connector-.cases',
-          actionTypeId: '.cases',
-          name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
-          isSystemAction: true,
-        },
-      ],
-      connectorTokenClient: connectorTokenClientMock.create(),
-      getEventLogClient,
-    });
-
-    const result = await actionsClient.getAll({ includeSystemActions: true });
-
-    expect(result).toEqual([
-      {
-        actionTypeId: '.cases',
-        id: 'system-connector-.cases',
-        isDeprecated: false,
-        isPreconfigured: false,
-        isSystemAction: true,
-        name: 'System action: .cases',
-        referencedByCount: 2,
-      },
-      {
-        id: '1',
-        name: 'test',
-        isMissingSecrets: false,
-        config: { foo: 'bar' },
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-        referencedByCount: 6,
-      },
-      {
-        id: 'testPreconfigured',
-        actionTypeId: '.slack',
-        name: 'test',
-        isPreconfigured: true,
-        isSystemAction: false,
-        isDeprecated: false,
-        referencedByCount: 2,
-      },
-    ]);
-  });
-});
-
 describe('getBulk()', () => {
   describe('authorization', () => {
     function getBulkOperation(): ReturnType<ActionsClient['getBulk']> {
@@ -1659,7 +1301,7 @@ describe('getBulk()', () => {
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
       });
-      return actionsClient.getBulk(['1', 'testPreconfigured']);
+      return actionsClient.getBulk({ ids: ['1', 'testPreconfigured'] });
     }
 
     test('ensures user is authorised to get the type of action', async () => {
@@ -1709,7 +1351,7 @@ describe('getBulk()', () => {
         }
       );
 
-      await actionsClient.getBulk(['1']);
+      await actionsClient.getBulk({ ids: ['1'] });
 
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1725,7 +1367,7 @@ describe('getBulk()', () => {
     test('logs audit event when not authorised to bulk get connectors', async () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
-      await expect(actionsClient.getBulk(['1'])).rejects.toThrow();
+      await expect(actionsClient.getBulk({ ids: ['1'] })).rejects.toThrow();
 
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1810,7 +1452,7 @@ describe('getBulk()', () => {
       getEventLogClient,
     });
 
-    const result = await actionsClient.getBulk(['1', 'testPreconfigured']);
+    const result = await actionsClient.getBulk({ ids: ['1', 'testPreconfigured'] });
 
     expect(result).toEqual([
       {
@@ -1907,7 +1549,7 @@ describe('getBulk()', () => {
     });
 
     await expect(
-      actionsClient.getBulk(['1', 'testPreconfigured', 'system-connector-.cases'])
+      actionsClient.getBulk({ ids: ['1', 'testPreconfigured', 'system-connector-.cases'] })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Connector system-connector-.cases not found"`);
   });
 
@@ -1982,7 +1624,10 @@ describe('getBulk()', () => {
     });
 
     expect(
-      await actionsClient.getBulk(['1', 'testPreconfigured', 'system-connector-.cases'], false)
+      await actionsClient.getBulk({
+        ids: ['1', 'testPreconfigured', 'system-connector-.cases'],
+        throwIfSystemAction: false,
+      })
     ).toEqual([
       {
         actionTypeId: '.slack',

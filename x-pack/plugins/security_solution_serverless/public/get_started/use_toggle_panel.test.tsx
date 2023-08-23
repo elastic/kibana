@@ -10,7 +10,8 @@ import { getStartedStorage } from './storage';
 import { ProductLine } from '../../common/product';
 import type { SecurityProductTypes } from '../../common/config';
 import {
-  GetMoreFromElasticSecurityCardId,
+  ConfigureSteps,
+  ExploreSteps,
   GetSetUpCardId,
   IntroductionSteps,
   SectionId,
@@ -28,7 +29,7 @@ describe('useTogglePanel', () => {
     jest.clearAllMocks();
 
     (getStartedStorage.getAllFinishedStepsFromStorage as jest.Mock).mockReturnValue({
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
+      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
     });
     (getStartedStorage.getActiveProductsFromStorage as jest.Mock).mockReturnValue([
       ProductLine.security,
@@ -48,45 +49,31 @@ describe('useTogglePanel', () => {
     expect(state.activeProducts).toEqual(new Set([ProductLine.security, ProductLine.endpoint]));
     expect(state.finishedSteps).toEqual({});
 
-    expect(state.activeCards).toEqual(
+    expect(state.activeSections).toEqual(
       expect.objectContaining({
         [SectionId.getSetUp]: {
           [GetSetUpCardId.introduction]: {
             id: GetSetUpCardId.introduction,
             timeInMins: 3,
             stepsLeft: 1,
+            activeStepIds: [IntroductionSteps.getToKnowElasticSecurity],
           },
-          [GetSetUpCardId.activateAndCreateRules]: {
-            id: GetSetUpCardId.activateAndCreateRules,
+          [GetSetUpCardId.configure]: {
+            id: GetSetUpCardId.configure,
             timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 4,
+            activeStepIds: [
+              ConfigureSteps.learnAbout,
+              ConfigureSteps.deployElasticAgent,
+              ConfigureSteps.connectToDataSources,
+              ConfigureSteps.enablePrebuiltRules,
+            ],
           },
-          [GetSetUpCardId.bringInYourData]: {
-            id: GetSetUpCardId.bringInYourData,
+          [GetSetUpCardId.explore]: {
+            id: GetSetUpCardId.explore,
             timeInMins: 0,
-            stepsLeft: 0,
-          },
-          [GetSetUpCardId.protectYourEnvironmentInRealtime]: {
-            id: GetSetUpCardId.protectYourEnvironmentInRealtime,
-            timeInMins: 0,
-            stepsLeft: 0,
-          },
-        },
-        [SectionId.getMoreFromElasticSecurity]: {
-          [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
-            id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
-            timeInMins: 0,
-            stepsLeft: 0,
-          },
-          [GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace]: {
-            id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
-            timeInMins: 0,
-            stepsLeft: 0,
-          },
-          [GetMoreFromElasticSecurityCardId.respondToThreats]: {
-            id: GetMoreFromElasticSecurityCardId.respondToThreats,
-            timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 2,
+            activeStepIds: [ExploreSteps.viewAlerts, ExploreSteps.analyzeData],
           },
         },
       })
@@ -102,55 +89,41 @@ describe('useTogglePanel', () => {
       new Set([ProductLine.security, ProductLine.cloud, ProductLine.endpoint])
     );
     expect(state.finishedSteps).toEqual({
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
+      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
     });
 
-    expect(state.activeCards).toEqual(
+    expect(state.activeSections).toEqual(
       expect.objectContaining({
         [SectionId.getSetUp]: {
           [GetSetUpCardId.introduction]: {
             id: GetSetUpCardId.introduction,
             timeInMins: 0,
             stepsLeft: 0,
+            activeStepIds: [IntroductionSteps.getToKnowElasticSecurity],
           },
-          [GetSetUpCardId.activateAndCreateRules]: {
-            id: GetSetUpCardId.activateAndCreateRules,
+          [GetSetUpCardId.configure]: {
+            id: GetSetUpCardId.configure,
             timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 4,
+            activeStepIds: [
+              ConfigureSteps.learnAbout,
+              ConfigureSteps.deployElasticAgent,
+              ConfigureSteps.connectToDataSources,
+              ConfigureSteps.enablePrebuiltRules,
+            ],
           },
-          [GetSetUpCardId.bringInYourData]: {
-            id: GetSetUpCardId.bringInYourData,
+          [GetSetUpCardId.explore]: {
+            id: GetSetUpCardId.explore,
             timeInMins: 0,
-            stepsLeft: 0,
-          },
-          [GetSetUpCardId.protectYourEnvironmentInRealtime]: {
-            id: GetSetUpCardId.protectYourEnvironmentInRealtime,
-            timeInMins: 0,
-            stepsLeft: 0,
-          },
-        },
-        [SectionId.getMoreFromElasticSecurity]: {
-          [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
-            id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
-            timeInMins: 0,
-            stepsLeft: 0,
-          },
-          [GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace]: {
-            id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
-            timeInMins: 0,
-            stepsLeft: 0,
-          },
-          [GetMoreFromElasticSecurityCardId.respondToThreats]: {
-            id: GetMoreFromElasticSecurityCardId.respondToThreats,
-            timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 2,
+            activeStepIds: [ExploreSteps.viewAlerts, ExploreSteps.analyzeData],
           },
         },
       })
     );
   });
 
-  test('should initialize state with correct initial values - when only security product active', () => {
+  test('should initialize state with correct initial values - when security product active', () => {
     (getStartedStorage.getActiveProductsFromStorage as jest.Mock).mockReturnValue([
       ProductLine.security,
     ]);
@@ -160,57 +133,86 @@ describe('useTogglePanel', () => {
 
     expect(state.activeProducts).toEqual(new Set([ProductLine.security]));
     expect(state.finishedSteps).toEqual({
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
+      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
     });
 
-    expect(state.activeCards).toEqual(
+    expect(state.activeSections).toEqual(
       expect.objectContaining({
         [SectionId.getSetUp]: {
           [GetSetUpCardId.introduction]: {
             id: GetSetUpCardId.introduction,
             timeInMins: 0,
             stepsLeft: 0,
+            activeStepIds: [IntroductionSteps.getToKnowElasticSecurity],
           },
-          [GetSetUpCardId.activateAndCreateRules]: {
-            id: GetSetUpCardId.activateAndCreateRules,
+          [GetSetUpCardId.configure]: {
+            id: GetSetUpCardId.configure,
             timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 4,
+            activeStepIds: [
+              ConfigureSteps.learnAbout,
+              ConfigureSteps.deployElasticAgent,
+              ConfigureSteps.connectToDataSources,
+              ConfigureSteps.enablePrebuiltRules,
+            ],
           },
-          [GetSetUpCardId.bringInYourData]: {
-            id: GetSetUpCardId.bringInYourData,
+          [GetSetUpCardId.explore]: {
+            id: GetSetUpCardId.explore,
             timeInMins: 0,
-            stepsLeft: 0,
-          },
-        },
-        [SectionId.getMoreFromElasticSecurity]: {
-          [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
-            id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
-            timeInMins: 0,
-            stepsLeft: 0,
-          },
-          [GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace]: {
-            id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
-            timeInMins: 0,
-            stepsLeft: 0,
-          },
-          [GetMoreFromElasticSecurityCardId.respondToThreats]: {
-            id: GetMoreFromElasticSecurityCardId.respondToThreats,
-            timeInMins: 0,
-            stepsLeft: 0,
+            stepsLeft: 2,
+            activeStepIds: [ExploreSteps.viewAlerts, ExploreSteps.analyzeData],
           },
         },
       })
     );
   });
 
-  test('should call addFinishedStepToStorage', () => {
+  test('should call addFinishedStepToStorage when onStepClicked is executed', () => {
     const { result } = renderHook(() => useTogglePanel({ productTypes }));
 
     const { onStepClicked } = result.current;
 
     act(() => {
       onStepClicked({
-        stepId: IntroductionSteps.watchOverviewVideo,
+        stepId: IntroductionSteps.getToKnowElasticSecurity,
+        cardId: GetSetUpCardId.introduction,
+        sectionId: SectionId.getSetUp,
+        isExpanded: true,
+      });
+    });
+
+    expect(getStartedStorage.addFinishedStepToStorage).toHaveBeenCalledTimes(1);
+    expect(getStartedStorage.addFinishedStepToStorage).toHaveBeenCalledWith(
+      GetSetUpCardId.introduction,
+      IntroductionSteps.getToKnowElasticSecurity
+    );
+  });
+
+  test('should not call addFinishedStepToStorage when the step is going to be collapsed', () => {
+    const { result } = renderHook(() => useTogglePanel({ productTypes }));
+
+    const { onStepClicked } = result.current;
+
+    act(() => {
+      onStepClicked({
+        stepId: IntroductionSteps.getToKnowElasticSecurity,
+        cardId: GetSetUpCardId.introduction,
+        sectionId: SectionId.getSetUp,
+        isExpanded: false,
+      });
+    });
+
+    expect(getStartedStorage.addFinishedStepToStorage).not.toHaveBeenCalledTimes(1);
+  });
+
+  test('should call addFinishedStepToStorage when onStepButtonClicked is executed', () => {
+    const { result } = renderHook(() => useTogglePanel({ productTypes }));
+
+    const { onStepButtonClicked } = result.current;
+
+    act(() => {
+      onStepButtonClicked({
+        stepId: IntroductionSteps.getToKnowElasticSecurity,
         cardId: GetSetUpCardId.introduction,
         sectionId: SectionId.getSetUp,
       });
@@ -219,11 +221,32 @@ describe('useTogglePanel', () => {
     expect(getStartedStorage.addFinishedStepToStorage).toHaveBeenCalledTimes(1);
     expect(getStartedStorage.addFinishedStepToStorage).toHaveBeenCalledWith(
       GetSetUpCardId.introduction,
-      IntroductionSteps.watchOverviewVideo
+      IntroductionSteps.getToKnowElasticSecurity
     );
   });
 
-  test('should call toggleActiveProductsInStorage', () => {
+  test('should call removeFinishedStepToStorage when onStepButtonClicked is executed with undo equals to true', () => {
+    const { result } = renderHook(() => useTogglePanel({ productTypes }));
+
+    const { onStepButtonClicked } = result.current;
+
+    act(() => {
+      onStepButtonClicked({
+        stepId: IntroductionSteps.getToKnowElasticSecurity,
+        cardId: GetSetUpCardId.introduction,
+        sectionId: SectionId.getSetUp,
+        undo: true,
+      });
+    });
+
+    expect(getStartedStorage.removeFinishedStepFromStorage).toHaveBeenCalledTimes(1);
+    expect(getStartedStorage.removeFinishedStepFromStorage).toHaveBeenCalledWith(
+      GetSetUpCardId.introduction,
+      IntroductionSteps.getToKnowElasticSecurity
+    );
+  });
+
+  test('should call toggleActiveProductsInStorage when onProductSwitchChanged is executed', () => {
     const { result } = renderHook(() => useTogglePanel({ productTypes }));
 
     const { onProductSwitchChanged } = result.current;

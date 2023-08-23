@@ -72,6 +72,7 @@
     "@kbn/core-http-common",
     "@kbn/content-management-table-list-view-table",
     "@kbn/content-management-table-list-view",
+    "@kbn/serverless",
   ],
   "exclude": [
     "target/**/*",

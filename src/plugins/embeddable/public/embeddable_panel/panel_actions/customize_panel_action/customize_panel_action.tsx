@@ -9,28 +9,28 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { OverlayRef, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { CustomizePanelEditor } from './customize_panel_editor';
+import { core } from '../../../kibana_services';
+import {
+  IEmbeddable,
+  Embeddable,
+  EmbeddableInput,
+  EmbeddableOutput,
+  EditPanelAction,
+} from '../../..';
 import { ViewMode, CommonlyUsedRange } from '../../../lib/types';
-import { IEmbeddable, Embeddable, EmbeddableInput, EmbeddableOutput } from '../../..';
+import { tracksOverlays } from '../track_overlays';
+import { CustomizePanelEditor } from './customize_panel_editor';
 
 export const ACTION_CUSTOMIZE_PANEL = 'ACTION_CUSTOMIZE_PANEL';
 
 const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
 
 type VisualizeEmbeddable = IEmbeddable<{ id: string }, EmbeddableOutput & { visTypeName: string }>;
-
-interface TracksOverlays {
-  openOverlay: (ref: OverlayRef) => void;
-  clearOverlays: () => void;
-}
-
-function tracksOverlays(root: unknown): root is TracksOverlays {
-  return Boolean((root as TracksOverlays).openOverlay && (root as TracksOverlays).clearOverlays);
-}
 
 function isVisualizeEmbeddable(
   embeddable: IEmbeddable | VisualizeEmbeddable
@@ -60,6 +60,7 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
   constructor(
     protected readonly overlays: OverlayStart,
     protected readonly theme: ThemeServiceStart,
+    protected readonly editPanel: EditPanelAction,
     protected readonly commonlyUsedRanges?: CommonlyUsedRange[],
     protected readonly dateFormat?: string
   ) {}
@@ -107,19 +108,30 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
     const rootEmbeddable = embeddable.getRoot();
     const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
 
+    const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
+      uiSettings: core.uiSettings,
+    });
+
+    const onEdit = () => {
+      this.editPanel.execute({ embeddable });
+    };
+
     const handle = this.overlays.openFlyout(
       toMountPoint(
-        <CustomizePanelEditor
-          embeddable={embeddable}
-          timeRangeCompatible={this.isTimeRangeCompatible({ embeddable })}
-          dateFormat={this.dateFormat}
-          commonlyUsedRanges={this.commonlyUsedRanges}
-          onClose={() => {
-            if (overlayTracker) overlayTracker.clearOverlays();
-            handle.close();
-          }}
-        />,
-        { theme$: this.theme.theme$ }
+        <KibanaReactContextProvider>
+          <CustomizePanelEditor
+            embeddable={embeddable}
+            timeRangeCompatible={this.isTimeRangeCompatible({ embeddable })}
+            dateFormat={this.dateFormat}
+            commonlyUsedRanges={this.commonlyUsedRanges}
+            onClose={() => {
+              if (overlayTracker) overlayTracker.clearOverlays();
+              handle.close();
+            }}
+            onEdit={onEdit}
+          />
+        </KibanaReactContextProvider>,
+        { theme: this.theme, i18n: core.i18n }
       ),
       {
         size: 's',
@@ -128,6 +140,7 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
           if (overlayTracker) overlayTracker.clearOverlays();
           overlayRef.close();
         },
+        maxWidth: true,
       }
     );
     overlayTracker?.openOverlay(handle);

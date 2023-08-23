@@ -20,10 +20,9 @@ import {
 } from '@elastic/eui';
 import type { BoolQuery, TimeRange, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { RiskScoreEntity } from '../../../common/risk_engine/types';
+import { RiskScoreEntity, type RiskScore } from '../../../common/risk_engine';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
 import * as i18n from '../translations';
-import type { RiskScore } from '../../../server/lib/risk_engine/types';
 import { useRiskScorePreview } from '../api/hooks/use_preview_risk_scores';
 import { useKibana } from '../../common/lib/kibana';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
@@ -40,8 +39,8 @@ interface IRiskScorePreviewPanel {
 
 const getRiskiestScores = (scores: RiskScore[] = [], field: string) =>
   scores
-    ?.filter((item) => item?.identifierField === field)
-    ?.sort((a, b) => b?.totalScoreNormalized - a?.totalScoreNormalized)
+    ?.filter((item) => item?.id_field === field)
+    ?.sort((a, b) => b?.calculated_score_norm - a?.calculated_score_norm)
     ?.slice(0, 5) || [];
 
 const RiskScorePreviewPanel = ({
@@ -95,7 +94,10 @@ export const RiskScorePreviewSection = () => {
 
   const { addError } = useAppToasts();
 
+  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
+
   const { data, isLoading, refetch, isError } = useRiskScorePreview({
+    data_view_id: indexPattern.title, // TODO @nkhristinin verify this is correct
     filter: filters,
     range: {
       start: dateRange.from,
@@ -103,10 +105,8 @@ export const RiskScorePreviewSection = () => {
     },
   });
 
-  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
-
-  const hosts = getRiskiestScores(data?.scores, 'host.name');
-  const users = getRiskiestScores(data?.scores, 'user.name');
+  const hosts = getRiskiestScores(data?.scores.host, 'host.name');
+  const users = getRiskiestScores(data?.scores.user, 'user.name');
 
   const onQuerySubmit = useCallback(
     (payload: { dateRange: TimeRange; query?: Query }) => {

@@ -6,19 +6,37 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { GetScoresParams, GetScoresResponse } from './types';
+import type {
+  CalculateAndPersistScoresParams,
+  CalculateAndPersistScoresResponse,
+  CalculateScoresParams,
+  CalculateScoresResponse,
+} from './types';
 import { calculateRiskScores } from './calculate_risk_scores';
+import { calculateAndPersistRiskScores } from './calculate_and_persist_risk_scores';
+import type { RiskEngineDataClient } from './risk_engine_data_client';
 
 export interface RiskScoreService {
-  getScores: (params: GetScoresParams) => Promise<GetScoresResponse>;
+  calculateScores: (params: CalculateScoresParams) => Promise<CalculateScoresResponse>;
+  calculateAndPersistScores: (
+    params: CalculateAndPersistScoresParams
+  ) => Promise<CalculateAndPersistScoresResponse>;
 }
 
-export const riskScoreService = ({
-  esClient,
-  logger,
-}: {
+export interface RiskScoreServiceFactoryParams {
   esClient: ElasticsearchClient;
   logger: Logger;
-}): RiskScoreService => ({
-  getScores: (params) => calculateRiskScores({ ...params, esClient, logger }),
+  riskEngineDataClient: RiskEngineDataClient;
+  spaceId: string;
+}
+
+export const riskScoreServiceFactory = ({
+  esClient,
+  logger,
+  riskEngineDataClient,
+  spaceId,
+}: RiskScoreServiceFactoryParams): RiskScoreService => ({
+  calculateScores: (params) => calculateRiskScores({ ...params, esClient, logger }),
+  calculateAndPersistScores: (params) =>
+    calculateAndPersistRiskScores({ ...params, esClient, logger, riskEngineDataClient, spaceId }),
 });

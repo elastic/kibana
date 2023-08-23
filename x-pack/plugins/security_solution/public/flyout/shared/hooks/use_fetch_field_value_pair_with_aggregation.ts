@@ -12,21 +12,16 @@ import { buildAggregationSearchRequest } from '../utils/build_requests';
 import type { RawAggregatedDataResponse } from '../utils/fetch_data';
 import { AGG_KEY, createFetchData } from '../utils/fetch_data';
 import { useKibana } from '../../../common/lib/kibana';
-import { inputsSelectors } from '../../../common/store';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
 
 const QUERY_KEY = 'useFetchFieldValuePairWithAggregation';
+const DEFAULT_FROM = 'now-30d';
+const DEFAULT_TO = 'now';
 
 export interface UseFetchFieldValuePairWithAggregationParams {
   /**
    * The highlighted field name and values
    * */
   highlightedField: { name: string; values: string[] };
-  /**
-   *
-   */
-  isActiveTimelines: boolean;
   /**
    * Field to aggregate value by
    */
@@ -55,7 +50,6 @@ export interface UseFetchFieldValuePairWithAggregationResult {
  */
 export const useFetchFieldValuePairWithAggregation = ({
   highlightedField,
-  isActiveTimelines,
   aggregationField,
 }: UseFetchFieldValuePairWithAggregationParams): UseFetchFieldValuePairWithAggregationResult => {
   const {
@@ -64,12 +58,7 @@ export const useFetchFieldValuePairWithAggregation = ({
     },
   } = useKibana();
 
-  const timelineTime = useDeepEqualSelector((state) =>
-    inputsSelectors.timelineTimeRangeSelector(state)
-  );
-  const globalTime = useGlobalTime();
-  const { to, from } = isActiveTimelines ? timelineTime : globalTime;
-
+  const { from, to } = { from: DEFAULT_FROM, to: DEFAULT_TO };
   const { name, values } = highlightedField;
 
   const searchRequest = buildSearchRequest(name, values, from, to, aggregationField);

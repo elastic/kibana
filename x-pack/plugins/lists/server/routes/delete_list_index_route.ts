@@ -7,10 +7,10 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { acknowledgeSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
+import { deleteListIndexResponse } from '../../common/api';
 
 import { buildSiemResponse } from './utils';
 
@@ -93,7 +93,7 @@ export const deleteListIndexRoute = (router: ListsPluginRouter): void => {
             await lists.deleteLegacyListItemTemplate();
           }
 
-          const [validated, errors] = validate({ acknowledged: true }, acknowledgeSchema);
+          const [validated, errors] = validate({ acknowledged: true }, deleteListIndexResponse);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {

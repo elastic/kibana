@@ -1,0 +1,103 @@
+openapi: 3.1.0
+info:
+  title: Saved objects
+  description: OpenAPI schema for saved object endpoints
+  version: '0.1'
+  contact:
+    name: Kibana Core Team
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+servers:
+  - url: http://localhost:5601
+    description: local
+security:
+  - basicAuth: []
+  - apiKeyAuth: []
+tags:
+  - name: saved objects
+    description: Manage Kibana saved objects, including dashboards, visualizations, and more.
+paths:
+  /api/saved_objects/_resolve_import_errors:
+    post:
+      summary: Resolve errors from the Import objects API.
+      operationId: resolveImportErrors
+      description: |
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. To resolve errors, you can: * Retry certain saved objects * Overwrite specific saved objects * Change references to different saved objects NOTE: One object can result in multiple errors, which requires separate steps to resolve. For instance, a missing_references error and a conflict error. Objects are only created when all resolvable errors are addressed.
+      tags:
+        - saved objects
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              properties:
+                compatibilityMode:
+                  description: Applies various adjustments to the saved objects that are being imported to maintain compatibility between different Kibana versions. When enabled during the initial import, also enable when resolving import errors. This option cannot be used with the `createNewCopies` option.
+                  type: array
+                createNewCopies:
+                  description: Creates copies of the saved objects, regenerates each object ID, and resets the origin. When enabled during the initial import, also enable when resolving import errors.
+                  type: array
+            examples:
+              resolveImportErrorsRequest:
+                $ref: '#/components/examples/resolve_missing_reference'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: ApiKey
+  parameters:
+    kbn_xsrf:
+      schema:
+        type: string
+      in: header
+      name: kbn-xsrf
+      description: Cross-site request forgery protection
+      required: true
+  examples:
+    resolve_missing_reference:
+      summary: Resolve missing reference errors.
+      value:
+        success: true
+        successCount: 3
+        successResults:
+          - id: my-vis
+            type: visualization
+            meta:
+              icon: visualizeApp
+              title: Look at my visualization
+          - id: my-search
+            type: search
+            meta:
+              icon: searchApp
+              title: Look at my search
+          - id: my-dashboard
+            type: dashboard
+            meta:
+              icon: dashboardApp
+              title: Look at my dashboard
