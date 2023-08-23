@@ -10,6 +10,7 @@ import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import {
   areResourcesSetupForAdmin,
+  areResourcesSetupForViewer,
   createDefaultSetupState,
   mergePartialSetupStates,
 } from '../../common/setup';
@@ -88,12 +89,6 @@ export function registerSetupRoute({
           });
         }
 
-        return response.ok({
-          body: {
-            has_setup: true,
-            has_data: true,
-          },
-        });
         const verifyFunctionsForViewer = [
           validateCollectorPackagePolicy,
           validateSymbolizerPackagePolicy,
@@ -115,11 +110,14 @@ export function registerSetupRoute({
          * because of users with viewer privileges
          * cannot get the cluster settings
          */
-        // if (
-        //   areResourcesSetupForViewer(mergedStateForViewer) &&
-        //   mergedStateForViewer.data.available
-        // ) {
-        // }
+        if (areResourcesSetupForViewer(mergedStateForViewer)) {
+          return response.ok({
+            body: {
+              has_setup: true,
+              has_data: mergedStateForViewer.data.available,
+            },
+          });
+        }
 
         /**
          * Performe advanced verification in case the first step failed.

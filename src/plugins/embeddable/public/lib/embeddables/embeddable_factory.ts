@@ -36,6 +36,14 @@ export interface EmbeddableFactory<
   >,
   TSavedObjectAttributes = unknown
 > extends PersistableState<EmbeddableStateWithType> {
+  /**
+   * The version of this Embeddable factory. This will be used in the client side migration system
+   * to ensure that input from any source is compatible with the latest version of this embeddable.
+   * If the latest version is not defined, all clientside migrations will be skipped. If migrations
+   * are added to this factory but a latestVersion is not set, an error will be thrown on server start
+   */
+  readonly latestVersion?: string;
+
   // A unique identified for this factory, which will be used to map an embeddable spec to
   // a factory that can generate an instance of it.
   readonly type: string;
@@ -115,10 +123,8 @@ export interface EmbeddableFactory<
   ): Promise<TEmbeddable | ErrorEmbeddable>;
 
   /**
-   * Resolves to undefined if a new Embeddable cannot be directly created and the user will instead be redirected
-   * elsewhere.
-   *
-   * This will likely change in future iterations when we improve in place editing capabilities.
+   * Creates an Embeddable instance, running the inital input through all registered migrations. Resolves to undefined if a new Embeddable
+   * cannot be directly created and the user will instead be redirected elsewhere.
    */
   create(
     initialInput: TEmbeddableInput,

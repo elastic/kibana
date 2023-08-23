@@ -12,17 +12,24 @@ import { TestProviders } from '../../../common/mock';
 import React from 'react';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
-import {
-  SESSION_PREVIEW_CONTENT_TEST_ID,
-  SESSION_PREVIEW_TITLE_ICON_TEST_ID,
-  SESSION_PREVIEW_TITLE_LINK_TEST_ID,
-  SESSION_PREVIEW_TITLE_TEXT_TEST_ID,
-  SESSION_PREVIEW_TOGGLE_ICON_TEST_ID,
-} from './test_ids';
+import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 import { LeftPanelKey, LeftPanelVisualizeTab } from '../../left';
 import { SESSION_VIEW_ID } from '../../left/components/session_view';
+import {
+  EXPANDABLE_PANEL_CONTENT_TEST_ID,
+  EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
+  EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
+  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
+  EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
+} from '../../shared/components/test_ids';
 
 jest.mock('../hooks/use_process_data');
+
+const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(SESSION_PREVIEW_TEST_ID);
+const TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID);
+const TITLE_ICON_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(SESSION_PREVIEW_TEST_ID);
+const TITLE_TEXT_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(SESSION_PREVIEW_TEST_ID);
+const CONTENT_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(SESSION_PREVIEW_TEST_ID);
 
 const flyoutContextValue = {
   openLeftPanel: jest.fn(),
@@ -64,11 +71,11 @@ describe('SessionPreview', () => {
 
     renderSessionPreview();
 
-    expect(screen.queryByTestId(SESSION_PREVIEW_TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
-    expect(screen.getByTestId(SESSION_PREVIEW_TITLE_LINK_TEST_ID)).toBeInTheDocument();
-    expect(screen.getByTestId(SESSION_PREVIEW_TITLE_ICON_TEST_ID)).toBeInTheDocument();
-    expect(screen.getByTestId(SESSION_PREVIEW_CONTENT_TEST_ID)).toBeInTheDocument();
-    expect(screen.queryByTestId(SESSION_PREVIEW_TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(TITLE_ICON_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('renders session preview with all data', () => {
@@ -129,7 +136,7 @@ describe('SessionPreview', () => {
 
     const { getByTestId } = renderSessionPreview();
 
-    getByTestId(SESSION_PREVIEW_TITLE_LINK_TEST_ID).click();
+    getByTestId(TITLE_LINK_TEST_ID).click();
     expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
       id: LeftPanelKey,
       path: { tab: LeftPanelVisualizeTab, subTab: SESSION_VIEW_ID },

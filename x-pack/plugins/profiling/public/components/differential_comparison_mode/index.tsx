@@ -7,7 +7,7 @@
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ComparisonMode } from '../normalization_menu';
+import { ComparisonMode } from '@kbn/profiling-shared-ui/common/normalization_options';
 
 interface Props {
   comparisonMode: ComparisonMode;

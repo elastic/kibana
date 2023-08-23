@@ -6,7 +6,7 @@
  */
 
 import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
-import { ProfilingESField } from '../../../common/elasticsearch';
+import { ProfilingESField } from '@kbn/profiling-data-access-plugin/common/elasticsearch';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,

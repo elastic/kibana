@@ -25,23 +25,10 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-
-export interface NormalizationOptions {
-  baselineScale: number;
-  baselineTime: number;
-  comparisonScale: number;
-  comparisonTime: number;
-}
-
-export enum ComparisonMode {
-  Absolute = 'absolute',
-  Relative = 'relative',
-}
-
-export enum NormalizationMode {
-  Scale = 'scale',
-  Time = 'time',
-}
+import {
+  NormalizationMode,
+  NormalizationOptions,
+} from '@kbn/profiling-shared-ui/common/normalization_options';
 
 interface Props {
   mode: NormalizationMode;

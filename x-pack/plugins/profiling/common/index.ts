@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
 export const PLUGIN_ID = 'profiling';
 export const PLUGIN_NAME = 'profiling';
 
@@ -52,7 +50,3 @@ export function fromMapToRecord<K extends string, V>(m: Map<K, V>): Record<strin
 
   return output;
 }
-
-export const NOT_AVAILABLE_LABEL = i18n.translate('xpack.profiling.notAvailableLabel', {
-  defaultMessage: 'N/A',
-});

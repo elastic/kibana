@@ -16,13 +16,15 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { FrameInformationFlyout } from '@kbn/profiling-shared-ui';
 import { last } from 'lodash';
 import React, { forwardRef, Ref, useMemo, useState } from 'react';
 import { GridOnScrollProps } from 'react-window';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { TopNFunctions, TopNFunctionSortField } from '../../../common/functions';
+import { useProfilingRouter } from '../../hooks/use_profiling_router';
+import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
-import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { LabelWithHint } from '../label_with_hint';
 import { FunctionRow } from './function_row';
 import { getFunctionsRows, IFunctionRow } from './utils';
@@ -66,6 +68,8 @@ export const TopNFunctionsGrid = forwardRef(
   ) => {
     const [selectedRow, setSelectedRow] = useState<IFunctionRow | undefined>();
     const trackProfilingEvent = useUiTracker({ app: 'profiling' });
+    const router = useProfilingRouter();
+    const { docLinks } = useProfilingDependencies().start.core;
 
     function onSort(newSortingColumns: EuiDataGridSorting['columns']) {
       const lastItem = last(newSortingColumns);
@@ -314,7 +318,7 @@ export const TopNFunctionsGrid = forwardRef(
           ]}
         />
         {selectedRow && (
-          <FrameInformationTooltip
+          <FrameInformationFlyout
             onClose={() => {
               setSelectedRow(undefined);
             }}
@@ -332,6 +336,14 @@ export const TopNFunctionsGrid = forwardRef(
             totalSeconds={totalSeconds}
             totalSamples={totalCount}
             samplingRate={topNFunctions?.SamplingRate ?? 1.0}
+            elasticWebsiteUrl={docLinks.ELASTIC_WEBSITE_URL}
+            dockLinkVersion={docLinks.DOC_LINK_VERSION}
+            onUploadSymbolsClick={(selectedTab) => {
+              router.push('/add-data-instructions', {
+                path: {},
+                query: { selectedTab },
+              });
+            }}
           />
         )}
       </>

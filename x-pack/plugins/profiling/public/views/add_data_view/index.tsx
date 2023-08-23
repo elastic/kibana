@@ -26,22 +26,13 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import major from 'semver/functions/major';
+import { AddDataTabs } from '@kbn/profiling-shared-ui/common';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { AsyncStatus, useAsync } from '../../hooks/use_async';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
-
-export enum AddDataTabs {
-  Kubernetes = 'kubernetes',
-  Docker = 'docker',
-  Binary = 'binary',
-  Deb = 'deb',
-  RPM = 'rpm',
-  ElasticAgentIntegration = 'elasticAgentIntegration',
-  Symbols = 'symbols',
-}
 
 export function AddDataView() {
   const { query } = useProfilingParams('/add-data-instructions');

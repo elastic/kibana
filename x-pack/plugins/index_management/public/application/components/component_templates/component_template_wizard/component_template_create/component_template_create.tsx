@@ -8,11 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiSpacer,
-  EuiPageHeader,
-} from '@elastic/eui';
+import { EuiPageSection, EuiSpacer, EuiPageHeader } from '@elastic/eui';
 
 import { ComponentTemplateDeserialized } from '../../shared_imports';
 import { useComponentTemplatesContext } from '../../component_templates_context';
@@ -63,7 +59,7 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
   }, [breadcrumbs]);
 
   return (
-    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+    <EuiPageSection restrictWidth style={{ width: '100%' }}>
       <EuiPageHeader
         pageTitle={
           <span data-test-subj="pageTitle">
@@ -85,6 +81,6 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
         saveError={saveError}
         clearSaveError={clearSaveError}
       />
-    </EuiPageContentBody>
+    </EuiPageSection>
   );
 };

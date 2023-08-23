@@ -9,13 +9,20 @@ import { toNumberRt } from '@kbn/io-ts-utils';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
+import {
+  StackTracesDisplayOption,
+  TopNType,
+} from '@kbn/profiling-data-access-plugin/common/stack_traces';
+import {
+  ComparisonMode,
+  NormalizationMode,
+} from '@kbn/profiling-shared-ui/common/normalization_options';
+import { AddDataTabs } from '@kbn/profiling-shared-ui/common';
 import { TopNFunctionSortField, topNFunctionSortFieldRt } from '../../common/functions';
-import { StackTracesDisplayOption, TopNType } from '../../common/stack_traces';
 import {
   indexLifecyclePhaseRt,
   IndexLifecyclePhaseSelectOption,
 } from '../../common/storage_explorer';
-import { ComparisonMode, NormalizationMode } from '../components/normalization_menu';
 import { RedirectTo } from '../components/redirect_to';
 import { FlameGraphsView } from '../views/flamegraphs';
 import { DifferentialFlameGraphsView } from '../views/flamegraphs/differential_flamegraphs';
@@ -23,10 +30,10 @@ import { FlameGraphView } from '../views/flamegraphs/flamegraph';
 import { FunctionsView } from '../views/functions';
 import { DifferentialTopNFunctionsView } from '../views/functions/differential_topn';
 import { TopNFunctionsView } from '../views/functions/topn';
-import { AddDataTabs, AddDataView } from '../views/add_data_view';
 import { StackTracesView } from '../views/stack_traces_view';
 import { StorageExplorerView } from '../views/storage_explorer';
 import { RouteBreadcrumb } from './route_breadcrumb';
+import { AddDataView } from '../views/add_data_view';
 
 const routes = {
   '/': {

@@ -15,8 +15,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { asDynamicBytes, asInteger } from '@kbn/observability-plugin/common';
+import { NOT_AVAILABLE_LABEL } from '@kbn/profiling-shared-ui/common';
 import { StorageDetailsPerIndex } from '../../../../common/storage_explorer';
-import { NOT_AVAILABLE_LABEL } from '../../../../common';
 
 interface Props {
   data?: StorageDetailsPerIndex[];
