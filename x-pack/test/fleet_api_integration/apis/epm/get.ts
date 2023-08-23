@@ -123,7 +123,11 @@ export default function (providerContext: FtrProviderContext) {
       it('Allows the fetching of installed packages', async () => {
         const res = await supertest.get(`/api/fleet/epm/packages/installed`).expect(200);
         const packages = res.body.items;
-        expect(packages.length).to.be(3);
+        const packageNames = packages.map((pkg: any) => pkg.name);
+        expect(packageNames).to.contain('apache');
+        expect(packageNames).to.contain('endpoint');
+        expect(packageNames).to.contain('experimental');
+        expect(packageNames.length).to.be(3);
       });
       it('Can be limited with perPage', async () => {
         const res = await supertest.get(`/api/fleet/epm/packages/installed?perPage=2`).expect(200);

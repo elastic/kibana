@@ -1074,13 +1074,10 @@
       {
         "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.ELASTIC_AI_ASSISTANT_TITLE",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "ELASTIC_AI_ASSISTANT_TITLE",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/use_conversation/translations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1121,13 +1118,10 @@
       {
         "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.WELCOME_CONVERSATION_TITLE",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "WELCOME_CONVERSATION_TITLE",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/use_conversation/translations.ts",
         "deprecated": false,
         "trackAdoption": false,
