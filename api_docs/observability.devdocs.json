@@ -498,7 +498,7 @@
         "label": "formatAlertEvaluationValue",
         "description": [],
         "signature": [
-          "(ruleTypeId?: string | undefined, evaluationValue?: number | undefined) => any"
+          "(ruleTypeId?: string | undefined, evaluationValue?: number | undefined) => string | number"
         ],
         "path": "x-pack/plugins/observability/public/utils/format_alert_evaluation_value.ts",
         "deprecated": false,
@@ -3207,7 +3207,7 @@
               "Maybe",
               "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
               "Maybe",
-              "<number>, denominator: number | undefined, fallbackResult?: any) => any; }; }) => { reason: string; link?: string | undefined; }"
+              "<number>, denominator: number | undefined, fallbackResult?: string) => string; }; }) => { reason: string; link?: string | undefined; }"
             ],
             "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
             "deprecated": false,
@@ -3226,7 +3226,7 @@
                   "Maybe",
                   "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
                   "Maybe",
-                  "<number>, denominator: number | undefined, fallbackResult?: any) => any; }; }"
+                  "<number>, denominator: number | undefined, fallbackResult?: string) => string; }; }"
                 ],
                 "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
                 "deprecated": false,
@@ -4220,7 +4220,7 @@
           "Maybe",
           "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
           "Maybe",
-          "<number>, denominator: number | undefined, fallbackResult?: any) => any; }; }) => { reason: string; link?: string | undefined; }"
+          "<number>, denominator: number | undefined, fallbackResult?: string) => string; }; }) => { reason: string; link?: string | undefined; }"
         ],
         "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
         "deprecated": false,
@@ -4239,7 +4239,7 @@
               "Maybe",
               "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
               "Maybe",
-              "<number>, denominator: number | undefined, fallbackResult?: any) => any; }; }"
+              "<number>, denominator: number | undefined, fallbackResult?: string) => string; }; }"
             ],
             "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
             "deprecated": false,
@@ -7898,7 +7898,7 @@
             "label": "config",
             "description": [],
             "signature": [
-              "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; }>; readonly thresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly compositeSlo: Readonly<{} & { enabled: boolean; }>; }"
+              "{ readonly enabled: boolean; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; }>; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly thresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly compositeSlo: Readonly<{} & { enabled: boolean; }>; }"
             ],
             "path": "x-pack/plugins/observability/server/routes/types.ts",
             "deprecated": false,
@@ -9674,7 +9674,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; }>; readonly thresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly compositeSlo: Readonly<{} & { enabled: boolean; }>; }"
+          "{ readonly enabled: boolean; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; }>; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly thresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly compositeSlo: Readonly<{} & { enabled: boolean; }>; }"
         ],
         "path": "x-pack/plugins/observability/server/index.ts",
         "deprecated": false,
@@ -11522,13 +11522,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableInspectEsQueries.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11550,13 +11547,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableInspectEsQueries.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11626,13 +11620,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.maxSuggestions.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11651,13 +11642,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.maxSuggestions.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11713,13 +11701,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableComparisonByDefault.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11741,13 +11726,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableComparisonByDefault.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11817,13 +11799,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.defaultApmServiceEnvironment.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11831,13 +11810,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.defaultApmServiceEnvironment.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11904,13 +11880,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmProgressiveLoading.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11918,13 +11891,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmProgressiveLoading.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12041,13 +12011,10 @@
                   {
                     "parentPluginId": "observability",
                     "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels.ProgressiveLoadingQuality.off",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "[ProgressiveLoadingQuality.off]",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "x-pack/plugins/observability/server/ui_settings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -12055,13 +12022,10 @@
                   {
                     "parentPluginId": "observability",
                     "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels.ProgressiveLoadingQuality.low",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "[ProgressiveLoadingQuality.low]",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "x-pack/plugins/observability/server/ui_settings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -12069,13 +12033,10 @@
                   {
                     "parentPluginId": "observability",
                     "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels.ProgressiveLoadingQuality.medium",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "[ProgressiveLoadingQuality.medium]",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "x-pack/plugins/observability/server/ui_settings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -12083,13 +12044,10 @@
                   {
                     "parentPluginId": "observability",
                     "id": "def-server.uiSettings.apmProgressiveLoading.optionLabels.ProgressiveLoadingQuality.high",
-                    "type": "Any",
+                    "type": "string",
                     "tags": [],
                     "label": "[ProgressiveLoadingQuality.high]",
                     "description": [],
-                    "signature": [
-                      "any"
-                    ],
                     "path": "x-pack/plugins/observability/server/ui_settings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -12140,13 +12098,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmServiceInventoryOptimizedSorting.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12154,13 +12109,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmServiceInventoryOptimizedSorting.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12272,13 +12224,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmServiceGroupMaxNumberOfServices.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12297,13 +12246,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmServiceGroupMaxNumberOfServices.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12359,13 +12305,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmTraceExplorerTab.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12373,13 +12316,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmTraceExplorerTab.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12491,13 +12431,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmLabsButton.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12505,13 +12442,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmLabsButton.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12609,13 +12543,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableInfrastructureHostsView.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12637,13 +12568,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableInfrastructureHostsView.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12699,13 +12627,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableAwsLambdaMetrics.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12713,13 +12638,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableAwsLambdaMetrics.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12831,13 +12753,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableAgentExplorerView.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12845,13 +12764,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableAgentExplorerView.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12949,13 +12865,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12988,13 +12901,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13066,13 +12976,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13139,13 +13046,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmEnableServiceMetrics.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13167,13 +13071,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmEnableServiceMetrics.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13243,13 +13144,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmEnableContinuousRollups.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13271,13 +13169,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmEnableContinuousRollups.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13347,13 +13242,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableCriticalPath.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13361,13 +13253,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableCriticalPath.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13479,13 +13368,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.syntheticsThrottlingEnabled.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13507,13 +13393,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.syntheticsThrottlingEnabled.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13583,13 +13466,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableLegacyUptimeApp.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13611,13 +13491,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableLegacyUptimeApp.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13687,13 +13564,10 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmEnableProfilingIntegration.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13964,7 +13838,7 @@
         "label": "asInteger",
         "description": [],
         "signature": [
-          "(value: number | null | undefined) => any"
+          "(value: number | null | undefined) => string"
         ],
         "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
         "deprecated": false,
@@ -13999,7 +13873,7 @@
         "signature": [
           "(numerator: ",
           "Maybe",
-          "<number>, denominator: number | undefined, fallbackResult: any) => any"
+          "<number>, denominator: number | undefined, fallbackResult: string) => string"
         ],
         "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
         "deprecated": false,
@@ -14039,12 +13913,12 @@
           {
             "parentPluginId": "observability",
             "id": "def-common.asPercent.$3",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "fallbackResult",
             "description": [],
             "signature": [
-              "any"
+              "string"
             ],
             "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
             "deprecated": false,
@@ -14928,7 +14802,7 @@
         "signature": [
           "(numerator: ",
           "Maybe",
-          "<number>, denominator: number | undefined, fallbackResult?: any) => any"
+          "<number>, denominator: number | undefined, fallbackResult?: string) => string"
         ],
         "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
         "deprecated": false,
@@ -14966,13 +14840,10 @@
           {
             "parentPluginId": "observability",
             "id": "def-common.AsPercent.$3",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "fallbackResult",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
             "deprecated": false,
             "trackAdoption": false
