@@ -4,58 +4,43 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { LogicMounter, mockHttpValues } from '../../../../../__mocks__/kea_logic';
-import '../../_mocks_/index_name_logic.mock';
+import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
-import { StartSyncApiLogic } from '../../../../api/connector/start_sync_api_logic';
-import { DomainConfig } from '../../../../api/crawler/types';
-import { CachedFetchIndexApiLogic } from '../../../../api/index/cached_fetch_index_api_logic';
+import { DomainConfig, CustomCrawlType } from '../../../../api/crawler/types';
 import { IndexNameLogic } from '../../index_name_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 import { CrawlerLogic } from '../crawler_logic';
 
+import { CrawlCustomSettingsFlyoutDomainConfigLogic } from './crawl_custom_settings_flyout_domain_logic';
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
-import { CrawlCustomSettingsFlyoutMultiCrawlLogic } from './crawl_custom_settings_flyout_multi_crawl_logic';
 
-// Temporarily skipping the tests before FF, the error results from connected kea logic.
-// They will be fixed as a separate ticket.
-describe.skip('CrawlCustomSettingsFlyoutLogic', () => {
+describe('CrawlCustomSettingsFlyoutLogic', () => {
   const { mount } = new LogicMounter(CrawlCustomSettingsFlyoutLogic);
-  const { mount: multiCrawlLogicMount } = new LogicMounter(
-    CrawlCustomSettingsFlyoutMultiCrawlLogic
-  );
   const { mount: indexViewLogicMount } = new LogicMounter(IndexViewLogic);
-  const { mount: apiLogicMount } = new LogicMounter(StartSyncApiLogic);
-  const { mount: fetchIndexMount } = new LogicMounter(CachedFetchIndexApiLogic);
   const { mount: indexNameMount } = new LogicMounter(IndexNameLogic);
-
-  const { http } = mockHttpValues;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    indexNameMount();
-    apiLogicMount();
-    fetchIndexMount();
     indexViewLogicMount();
-    multiCrawlLogicMount();
+    indexNameMount();
     mount();
   });
 
   it('has expected default values', () => {
     expect(CrawlCustomSettingsFlyoutLogic.values).toEqual({
+      crawlType: CustomCrawlType.ONE_TIME,
       customEntryPointUrls: [],
       customSitemapUrls: [],
       domainConfigMap: {},
       domainConfigs: [],
-      domainUrls: [],
       entryPointUrls: [],
       includeSitemapsInRobotsTxt: true,
       isDataLoading: true,
       isFlyoutVisible: false,
       isFormSubmitting: false,
+      isSingleCrawlType: true,
       maxCrawlDepth: 2,
       selectedDomainUrls: [],
       selectedEntryPointUrls: [],
@@ -65,96 +50,6 @@ describe.skip('CrawlCustomSettingsFlyoutLogic', () => {
   });
 
   describe('actions', () => {
-    describe('fetchDomainConfigData', () => {
-      it('updates logic with data that has been converted from server to client', async () => {
-        jest.spyOn(CrawlCustomSettingsFlyoutLogic.actions, 'onRecieveDomainConfigData');
-
-        http.get.mockReturnValueOnce(
-          Promise.resolve({
-            meta: {
-              page: {
-                current: 1,
-                size: 1,
-                total_pages: 2,
-              },
-            },
-            results: [
-              {
-                id: '1234',
-                name: 'https://www.elastic.co',
-                seed_urls: [],
-                sitemap_urls: [],
-              },
-            ],
-          })
-        );
-
-        http.get.mockReturnValueOnce(
-          Promise.resolve({
-            meta: {
-              page: {
-                current: 2,
-                size: 1,
-                total_pages: 2,
-              },
-            },
-            results: [
-              {
-                id: '5678',
-                name: 'https://www.swiftype.com',
-                seed_urls: [],
-                sitemap_urls: [],
-              },
-            ],
-          })
-        );
-
-        CrawlCustomSettingsFlyoutLogic.actions.fetchDomainConfigData();
-        await nextTick();
-
-        expect(http.get).toHaveBeenNthCalledWith(
-          1,
-          '/internal/enterprise_search/indices/index-name/crawler/domain_configs',
-          {
-            query: {
-              'page[current]': 1,
-              'page[size]': 100,
-            },
-          }
-        );
-        expect(http.get).toHaveBeenNthCalledWith(
-          2,
-          '/internal/enterprise_search/indices/index-name/crawler/domain_configs',
-          {
-            query: {
-              'page[current]': 2,
-              'page[size]': 1,
-            },
-          }
-        );
-        expect(
-          CrawlCustomSettingsFlyoutLogic.actions.onRecieveDomainConfigData
-        ).toHaveBeenCalledWith([
-          {
-            id: '1234',
-            name: 'https://www.elastic.co',
-            seedUrls: [],
-            sitemapUrls: [],
-          },
-          {
-            id: '5678',
-            name: 'https://www.swiftype.com',
-            seedUrls: [],
-            sitemapUrls: [],
-          },
-        ]);
-      });
-
-      itShowsServerErrorAsFlashMessage(http.get, () => {
-        CrawlCustomSettingsFlyoutLogic.actions.fetchDomainConfigData();
-      });
-    });
-
     describe('hideFlyout', () => {
       it('hides the modal', () => {
         CrawlCustomSettingsFlyoutLogic.actions.hideFlyout();
@@ -443,53 +338,27 @@ describe.skip('CrawlCustomSettingsFlyoutLogic', () => {
 
   describe('selectors', () => {
     beforeEach(() => {
+      jest.clearAllMocks();
       mount({
-        domainConfigs: [
-          {
-            name: 'https://www.elastic.co',
-            sitemapUrls: [
-              'https://www.elastic.co/sitemap1.xml',
-              'https://www.elastic.co/sitemap2.xml',
-            ],
-            seedUrls: ['https://www.elastic.co/', 'https://www.elastic.co/guide'],
-          },
-          {
-            name: 'https://swiftype.com',
-            sitemapUrls: ['https://swiftype.com/sitemap1.xml', 'https://swiftype.com/sitemap2.xml'],
-            seedUrls: ['https://swiftype.com/', 'https://swiftype.com/documentation'],
-          },
-        ],
         selectedDomainUrls: ['https://swiftype.com'],
       });
-    });
-
-    describe('domainUrls', () => {
-      it('contains all the domain urls from the domain config', () => {
-        expect(CrawlCustomSettingsFlyoutLogic.values.domainUrls).toEqual([
-          'https://www.elastic.co',
-          'https://swiftype.com',
-        ]);
-      });
-    });
-
-    describe('domainConfigMap', () => {
-      it('contains all the domain urls from the domain config', () => {
-        expect(CrawlCustomSettingsFlyoutLogic.values.domainConfigMap).toEqual({
-          'https://www.elastic.co': {
-            name: 'https://www.elastic.co',
-            sitemapUrls: [
-              'https://www.elastic.co/sitemap1.xml',
-              'https://www.elastic.co/sitemap2.xml',
-            ],
-            seedUrls: ['https://www.elastic.co/', 'https://www.elastic.co/guide'],
-          },
-          'https://swiftype.com': {
-            name: 'https://swiftype.com',
-            sitemapUrls: ['https://swiftype.com/sitemap1.xml', 'https://swiftype.com/sitemap2.xml'],
-            seedUrls: ['https://swiftype.com/', 'https://swiftype.com/documentation'],
-          },
-        });
-      });
+      CrawlCustomSettingsFlyoutDomainConfigLogic.actions.onRecieveDomainConfigData([
+        {
+          id: '1',
+          name: 'https://www.elastic.co',
+          sitemapUrls: [
+            'https://www.elastic.co/sitemap1.xml',
+            'https://www.elastic.co/sitemap2.xml',
+          ],
+          seedUrls: ['https://www.elastic.co/', 'https://www.elastic.co/guide'],
+        },
+        {
+          id: '2',
+          name: 'https://swiftype.com',
+          sitemapUrls: ['https://swiftype.com/sitemap1.xml', 'https://swiftype.com/sitemap2.xml'],
+          seedUrls: ['https://swiftype.com/', 'https://swiftype.com/documentation'],
+        },
+      ]);
     });
 
     describe('entryPointUrls', () => {

@@ -40,6 +40,7 @@ export class IndexMgmtUIPlugin {
       ui: { enabled: isIndexManagementUiEnabled },
       enableIndexActions,
       enableLegacyTemplates,
+      enableIndexStats,
       dev: { enableIndexDetailsPage },
     } = this.ctx.config.get<ClientConfigType>();
 
@@ -62,6 +63,7 @@ export class IndexMgmtUIPlugin {
             enableIndexActions,
             enableLegacyTemplates,
             enableIndexDetailsPage,
+            enableIndexStats,
           });
         },
       });
