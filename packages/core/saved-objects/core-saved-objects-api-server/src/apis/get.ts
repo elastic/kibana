@@ -16,4 +16,5 @@ import { SavedObjectsBaseOptions } from './base';
 export interface SavedObjectsGetOptions extends SavedObjectsBaseOptions {
   /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
   migrationVersionCompatibility?: 'compatible' | 'raw';
+  versionModelMatch?: 'strict';
 }

@@ -120,7 +120,7 @@ export async function internalBulkResolve<T>(
   const validObjects = allObjects.filter(isRight);
 
   const namespace = normalizeNamespace(options.namespace);
-  const { migrationVersionCompatibility } = options;
+  const { migrationVersionCompatibility, versionModelMatch } = options;
 
   const aliasDocs = await fetchAndUpdateAliases(
     validObjects,
@@ -186,8 +186,11 @@ export async function internalBulkResolve<T>(
     // @ts-expect-error MultiGetHit._source is optional
     const object = getSavedObjectFromSource<T>(registry, objectType, objectId, doc, {
       migrationVersionCompatibility,
+      versionModelMatch,
     });
-    const migrated = migrator.migrateDocument(object, { allowDowngrade: true }) as SavedObject<T>;
+    const migrated = migrator.migrateDocument(object, {
+      allowDowngrade: versionModelMatch && versionModelMatch === 'strict' ? false : true, // 'strict' => docMigrator throws on newerVersionModel.
+    }) as SavedObject<T>;
 
     if (!encryptionExtension?.isEncryptableType(migrated.type)) {
       return migrated;

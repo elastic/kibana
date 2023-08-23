@@ -154,6 +154,7 @@ export interface SavedObjectsFindOptions {
   pit?: SavedObjectsPitParams;
   /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
   migrationVersionCompatibility?: 'compatible' | 'raw';
+  versionModelMatch?: 'strict';
 }
 
 /**

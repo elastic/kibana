@@ -42,7 +42,7 @@ export const performGet = async <T>(
   const { securityExtension } = extensions;
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
-  const { migrationVersionCompatibility } = options;
+  const { migrationVersionCompatibility, versionModelMatch } = options;
 
   if (!allowedTypes.includes(type)) {
     throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
@@ -86,7 +86,9 @@ export const performGet = async <T>(
 
   let migrated: SavedObject<T>;
   try {
-    migrated = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;
+    migrated = migrationHelper.migrateStorageDocument(document, {
+      versionModelMatch,
+    }) as SavedObject<T>;
   } catch (error) {
     throw SavedObjectsErrorHelpers.decorateGeneralError(
       error,

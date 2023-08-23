@@ -17,6 +17,7 @@ import type { SavedObject } from '../..';
 export interface SavedObjectsResolveOptions extends SavedObjectsBaseOptions {
   /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
   migrationVersionCompatibility?: 'compatible' | 'raw';
+  versionModelMatch?: 'strict';
 }
 
 /**

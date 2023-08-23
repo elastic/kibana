@@ -36,9 +36,16 @@ export class MigrationHelper {
    * This function is meant to be used by read APIs (get, find) for documents fetched from the index.
    * It will therefore accept downgrading the document before returning it from the API.
    * SO types needing to opt out of cross-version read operatations can set `allowDowngrade`: false for their documents by declaring
-   * the new SOR api call query option: 
+   * the new SOR api call query option: versionModelMatch: 'strict' | undefined | null
+
    */
-  migrateStorageDocument(document: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
-    return this.migrator.migrateDocument(document, { allowDowngrade: true });
+  migrateStorageDocument(
+    document: SavedObjectUnsanitizedDoc,
+    options: { versionModelMatch?: 'strict' }
+  ): SavedObjectUnsanitizedDoc {
+    return this.migrator.migrateDocument(document, {
+      allowDowngrade:
+        options?.versionModelMatch && options.versionModelMatch === 'strict' ? false : true,
+    }); // allowDowngrade conditional on versionModelMatch
   }
 }

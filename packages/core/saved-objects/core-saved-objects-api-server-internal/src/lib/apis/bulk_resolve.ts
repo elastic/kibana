@@ -52,7 +52,7 @@ export const performBulkResolve = async <T>(
     encryptionExtension,
     securityExtension,
     objects,
-    options: { ...options, namespace },
+    options: { ...options, namespace }, // note: Includes versionModelMatch?: 'strict'
   });
   const resolvedObjects = bulkResults.map<SavedObjectsResolveResponse<T>>((result) => {
     // extract payloads from saved object errors
