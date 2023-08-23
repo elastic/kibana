@@ -160,21 +160,29 @@ export class RiskEngineDataClient {
   }
 
   public async enableRiskEngine({ taskManager }: { taskManager: TaskManagerStartContract }) {
-    const configurationResult = await updateSavedObjectAttribute({
-      savedObjectsClient: this.options.soClient,
-      attributes: {
-        enabled: true,
-      },
-    });
+    try {
+      const configurationResult = await updateSavedObjectAttribute({
+        savedObjectsClient: this.options.soClient,
+        attributes: {
+          enabled: true,
+        },
+      });
 
-    await startRiskScoringTask({
-      logger: this.options.logger,
-      namespace: this.options.namespace,
-      riskEngineDataClient: this,
-      taskManager,
-    });
+      await startRiskScoringTask({
+        logger: this.options.logger,
+        namespace: this.options.namespace,
+        riskEngineDataClient: this,
+        taskManager,
+      });
 
-    return configurationResult;
+      return configurationResult;
+    } catch (e) {
+      this.options.logger.error(`Error while enabling risk engine: ${e.message}`);
+
+      await this.disableRiskEngine({ taskManager });
+
+      throw e;
+    }
   }
 
   public async disableRiskEngine({ taskManager }: { taskManager: TaskManagerStartContract }) {
@@ -184,7 +192,7 @@ export class RiskEngineDataClient {
       logger: this.options.logger,
     });
 
-    return updateSavedObjectAttribute({
+    return await updateSavedObjectAttribute({
       savedObjectsClient: this.options.soClient,
       attributes: {
         enabled: false,

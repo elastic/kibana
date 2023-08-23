@@ -632,7 +632,7 @@ describe('RiskEngineDataClient', () => {
       mockTaskManagerStart = taskManagerMock.createStart();
     });
 
-    it('should return error if saved object not exist', async () => {
+    it('returns an error if saved object does not exist', async () => {
       mockSavedObjectClient.find.mockResolvedValue({
         page: 1,
         per_page: 20,
@@ -642,10 +642,10 @@ describe('RiskEngineDataClient', () => {
 
       await expect(
         riskEngineDataClient.enableRiskEngine({ taskManager: mockTaskManagerStart })
-      ).rejects.toThrow('There no saved object configuration for risk engine');
+      ).rejects.toThrow('Risk engine configuration not found');
     });
 
-    it('should update saved object attrubute', async () => {
+    it('should update saved object attribute', async () => {
       await riskEngineDataClient.enableRiskEngine({ taskManager: mockTaskManagerStart });
 
       expect(mockSavedObjectClient.update).toHaveBeenCalledWith(
@@ -658,6 +658,29 @@ describe('RiskEngineDataClient', () => {
           refresh: 'wait_for',
         }
       );
+    });
+
+    describe('if task manager throws an error', () => {
+      beforeEach(() => {
+        mockTaskManagerStart.ensureScheduled.mockRejectedValueOnce(new Error('Task Manager error'));
+      });
+
+      it('disables the risk engine and re-throws the error', async () => {
+        await expect(
+          riskEngineDataClient.enableRiskEngine({ taskManager: mockTaskManagerStart })
+        ).rejects.toThrow('Task Manager error');
+
+        expect(mockSavedObjectClient.update).toHaveBeenCalledWith(
+          'risk-engine-configuration',
+          'de8ca330-2d26-11ee-bc86-f95bf6192ee6',
+          {
+            enabled: false,
+          },
+          {
+            refresh: 'wait_for',
+          }
+        );
+      });
     });
   });
 
@@ -680,7 +703,7 @@ describe('RiskEngineDataClient', () => {
       try {
         await riskEngineDataClient.disableRiskEngine({ taskManager: mockTaskManagerStart });
       } catch (e) {
-        expect(e.message).toEqual('There no saved object configuration for risk engine');
+        expect(e.message).toEqual('Risk engine configuration not found');
       }
     });
 

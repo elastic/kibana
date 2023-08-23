@@ -62,7 +62,7 @@ export const updateSavedObjectAttribute = async ({
   });
 
   if (!savedObjectConfiguration) {
-    throw new Error('There no saved object configuration for risk engine');
+    throw new Error('Risk engine configuration not found');
   }
 
   const result = await savedObjectsClient.update(
