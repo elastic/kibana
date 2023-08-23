@@ -23,13 +23,13 @@ import { IndexNameLogic } from '../../index_name_logic';
 
 import { IndexViewLogic } from '../../index_view_logic';
 
-import { CrawlCustomSettingsFlyoutDomainConfigLogic } from './crawl_custom_settings_flyout_domain_config_logic';
+import { CrawlCustomSettingsFlyoutDomainConfigLogic } from './crawl_custom_settings_flyout_domain_logic';
 
 import { filterSeedUrlsByDomainUrls } from './crawl_custom_settings_flyout_logic';
 import {
   PostCustomSchedulingApiLogic,
   PostCustomSchedulingArgs,
-} from './crawl_custom_settings_flyout_post_schedule_logic';
+} from './crawl_custom_settings_flyout_schedule_api_logic';
 
 export interface CrawlCustomSettingsFlyoutMultiCrawlLogicValues {
   crawlerConfigActiveTab: number;

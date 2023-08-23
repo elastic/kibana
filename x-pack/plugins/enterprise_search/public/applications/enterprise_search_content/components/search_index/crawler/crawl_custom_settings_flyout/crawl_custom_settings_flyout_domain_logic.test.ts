@@ -12,7 +12,7 @@ import { nextTick } from '@kbn/test-jest-helpers';
 import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 import { DomainConfig } from '../../../../api/crawler/types';
 
-import { CrawlCustomSettingsFlyoutDomainConfigLogic } from './crawl_custom_settings_flyout_domain_config_logic';
+import { CrawlCustomSettingsFlyoutDomainConfigLogic } from './crawl_custom_settings_flyout_domain_logic';
 
 describe('CrawlCustomSettingsFlyoutDomainConfigLogic', () => {
   const { mount } = new LogicMounter(CrawlCustomSettingsFlyoutDomainConfigLogic);

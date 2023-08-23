@@ -33,7 +33,7 @@ export const CrawlCustomSettingsFlyoutDomainConfigLogic = kea<
     CrawlCustomSettingsFlyoutDomainConfigLogicActions
   >
 >({
-  path: ['enterprise_search', 'crawler', 'crawl_custom_settings_flyout_domain_config_logic'],
+  path: ['enterprise_search', 'crawler', 'crawl_custom_settings_flyout_domain_logic'],
   actions: () => ({
     fetchDomainConfigData: true,
     onRecieveDomainConfigData: (domainConfigs) => ({ domainConfigs }),
