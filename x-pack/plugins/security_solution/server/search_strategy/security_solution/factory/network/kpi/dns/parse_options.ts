@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { NetworkKpiDnsRequestOptions } from '../../../../../../../common/api/search_strategy';
 import { networkKpiDns } from '../../../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): NetworkKpiDnsRequestOptions =>
-  networkKpiDns.parse(options);
+export const parseOptions = (options: unknown) => networkKpiDns.parse(options);

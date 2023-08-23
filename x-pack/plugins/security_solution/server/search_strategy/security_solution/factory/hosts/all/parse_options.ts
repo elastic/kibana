@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { HostsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { allHostsSchema } from '../../../../../../common/api/search_strategy/hosts/all';
 
-export const parseOptions = (options: unknown): HostsRequestOptions =>
-  allHostsSchema.parse(options);
+export const parseOptions = (options: unknown) => allHostsSchema.parse(options);

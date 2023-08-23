@@ -10,4 +10,8 @@ import { requestBasicOptionsSchema } from '../model/request_basic_options';
 
 export const threatIntelSourceRequestOptionsSchema = requestBasicOptionsSchema;
 
+export type ThreatIntelSourceRequestOptionsInput = z.input<
+  typeof threatIntelSourceRequestOptionsSchema
+>;
+
 export type ThreatIntelSourceRequestOptions = z.infer<typeof threatIntelSourceRequestOptionsSchema>;

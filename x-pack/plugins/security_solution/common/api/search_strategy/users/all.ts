@@ -18,15 +18,14 @@ export enum UsersFields {
 
 export const usersSchema = requestOptionsPaginatedSchema
   .extend({
-    sort: sort
-      .unwrap()
-      .required()
-      .extend({
-        field: z.enum([UsersFields.name, UsersFields.lastSeen]),
-      }),
+    sort: sort.removeDefault().extend({
+      field: z.enum([UsersFields.name, UsersFields.lastSeen]),
+    }),
     timerange,
-    isNewRiskScoreModuleAvailable: z.boolean(),
+    isNewRiskScoreModuleAvailable: z.boolean().default(false),
   })
   .passthrough();
+
+export type UsersRequestOptionsInput = z.input<typeof usersSchema>;
 
 export type UsersRequestOptions = z.infer<typeof usersSchema>;

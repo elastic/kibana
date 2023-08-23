@@ -14,4 +14,6 @@ export const hostOverviewSchema = requestBasicOptionsSchema.extend({
   timerange,
 });
 
+export type HostOverviewRequestOptionsInput = z.input<typeof hostOverviewSchema>;
+
 export type HostOverviewRequestOptions = z.infer<typeof hostOverviewSchema>;

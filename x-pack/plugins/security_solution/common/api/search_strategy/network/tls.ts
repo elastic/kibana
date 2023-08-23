@@ -18,13 +18,12 @@ export enum NetworkTlsFields {
 export const networkTlsSchema = requestOptionsPaginatedSchema.extend({
   ip: z.string().optional(),
   flowTarget,
-  sort: sort
-    .unwrap()
-    .required()
-    .extend({
-      field: z.enum([NetworkTlsFields._id]),
-    }),
+  sort: sort.removeDefault().extend({
+    field: z.enum([NetworkTlsFields._id]),
+  }),
   timerange,
 });
+
+export type NetworkTlsRequestOptionsInput = z.input<typeof networkTlsSchema>;
 
 export type NetworkTlsRequestOptions = z.infer<typeof networkTlsSchema>;

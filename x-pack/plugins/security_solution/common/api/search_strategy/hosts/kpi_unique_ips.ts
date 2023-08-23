@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import type { z } from 'zod';
 import { pagination } from '../model/pagination';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { timerange } from '../model/timerange';
@@ -16,5 +16,7 @@ export const kpiUniqueIpsSchema = requestBasicOptionsSchema.extend({
   pagination,
   timerange,
 });
+
+export type KpiUniqueIpsRequestOptionsInput = z.input<typeof kpiUniqueIpsSchema>;
 
 export type KpiUniqueIpsRequestOptions = z.infer<typeof kpiUniqueIpsSchema>;

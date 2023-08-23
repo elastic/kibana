@@ -12,4 +12,6 @@ export const networkDetailsSchema = requestBasicOptionsSchema.extend({
   ip: z.string().ip(),
 });
 
+export type NetworkDetailsRequestOptionsInput = z.input<typeof networkDetailsSchema>;
+
 export type NetworkDetailsRequestOptions = z.infer<typeof networkDetailsSchema>;

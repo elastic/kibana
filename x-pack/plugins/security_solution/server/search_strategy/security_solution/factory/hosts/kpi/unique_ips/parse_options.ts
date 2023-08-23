@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { KpiUniqueIpsRequestOptions } from '../../../../../../../common/api/search_strategy';
 import { kpiUniqueIpsSchema } from '../../../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): KpiUniqueIpsRequestOptions =>
-  kpiUniqueIpsSchema.parse(options);
+export const parseOptions = (options: unknown) => kpiUniqueIpsSchema.parse(options);

@@ -19,4 +19,6 @@ export const indexFieldsRequestSchema = z.union([
   indexFieldsRequestBase.extend({ dataViewId: z.string() }),
 ]);
 
+export type IndexFieldsRequestInput = z.input<typeof indexFieldsRequestSchema>;
+
 export type IndexFieldsRequest = z.infer<typeof indexFieldsRequestSchema>;

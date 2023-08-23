@@ -14,4 +14,8 @@ export const networkKpiUniquePrivateIps = requestBasicOptionsSchema.extend({
   timerange,
 });
 
+export type NetworkKpiUniquePrivateIpsRequestOptionsInput = z.input<
+  typeof networkKpiUniquePrivateIps
+>;
+
 export type NetworkKpiUniquePrivateIpsRequestOptions = z.infer<typeof networkKpiUniquePrivateIps>;

@@ -23,7 +23,7 @@ export const buildEventsHistogramQuery = ({
   defaultIndex,
   stackByField = 'event.action',
   threshold,
-  includeMissingData = true,
+  includeMissingData,
   runtimeMappings,
 }: MatrixHistogramRequestOptions) => {
   const [queryFilterFirstClause, ...queryFilterClauses] = createQueryFilterClauses(filterQuery);

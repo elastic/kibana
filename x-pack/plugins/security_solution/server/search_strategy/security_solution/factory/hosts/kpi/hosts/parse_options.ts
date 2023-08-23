@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { KpiHostsRequestOptions } from '../../../../../../../common/api/search_strategy';
 import { kpiHostsSchema } from '../../../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): KpiHostsRequestOptions =>
-  kpiHostsSchema.parse(options);
+export const parseOptions = (options: unknown) => kpiHostsSchema.parse(options);

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { NetworkTlsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { networkTlsSchema } from '../../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): NetworkTlsRequestOptions =>
-  networkTlsSchema.parse(options);
+export const parseOptions = (options: unknown) => networkTlsSchema.parse(options);

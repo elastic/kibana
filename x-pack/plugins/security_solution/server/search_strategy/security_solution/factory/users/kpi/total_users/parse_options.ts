@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { TotalUsersKpiRequestOptions } from '../../../../../../../common/api/search_strategy';
 import { totalUsersKpiSchema } from '../../../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): TotalUsersKpiRequestOptions =>
-  totalUsersKpiSchema.parse(options);
+export const parseOptions = (options: unknown) => totalUsersKpiSchema.parse(options);

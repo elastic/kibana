@@ -14,4 +14,6 @@ export const networkOverviewSchema = requestBasicOptionsSchema.extend({
   timerange,
 });
 
+export type NetworkOverviewRequestOptionsInput = z.input<typeof networkOverviewSchema>;
+
 export type NetworkOverviewRequestOptions = z.infer<typeof networkOverviewSchema>;

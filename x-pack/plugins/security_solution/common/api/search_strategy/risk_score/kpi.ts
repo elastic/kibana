@@ -13,4 +13,6 @@ export const riskScoreKpiRequestOptionsSchema = requestBasicOptionsSchema.extend
   entity: riskScoreEntity,
 });
 
+export type RiskScoreKpiRequestOptionsInput = z.input<typeof riskScoreKpiRequestOptionsSchema>;
+
 export type RiskScoreKpiRequestOptions = z.infer<typeof riskScoreKpiRequestOptionsSchema>;

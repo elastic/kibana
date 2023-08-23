@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { MatrixHistogramRequestOptions } from '../../../../../common/api/search_strategy';
 import { matrixHistogramSchema } from '../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): MatrixHistogramRequestOptions =>
-  matrixHistogramSchema.parse(options);
+export const parseOptions = (options: unknown) => matrixHistogramSchema.parse(options);

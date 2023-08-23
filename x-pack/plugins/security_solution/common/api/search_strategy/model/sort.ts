@@ -6,12 +6,11 @@
  */
 
 import { z } from 'zod';
-import { order } from './order';
+import { Direction, order } from './order';
 
 export const sort = z
   .object({
-    direction: order,
-    field: z.string(),
+    direction: order.default(Direction.desc),
+    field: z.string().default('@timestamp'),
   })
-  .passthrough()
-  .optional();
+  .default({ direction: Direction.desc, field: '@timestamp' });

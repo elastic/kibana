@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { NetworkKpiUniqueFlowsRequestOptions } from '../../../../../../../common/api/search_strategy';
 import { networkKpiUniqueFlows } from '../../../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): NetworkKpiUniqueFlowsRequestOptions =>
-  networkKpiUniqueFlows.parse(options);
+export const parseOptions = (options: unknown) => networkKpiUniqueFlows.parse(options);

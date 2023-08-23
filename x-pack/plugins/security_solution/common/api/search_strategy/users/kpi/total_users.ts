@@ -14,4 +14,6 @@ export const totalUsersKpiSchema = requestBasicOptionsSchema.extend({
   timerange,
 });
 
+export type TotalUsersKpiRequestOptionsInput = z.input<typeof totalUsersKpiSchema>;
+
 export type TotalUsersKpiRequestOptions = z.infer<typeof totalUsersKpiSchema>;

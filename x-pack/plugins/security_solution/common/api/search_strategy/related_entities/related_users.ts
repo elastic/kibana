@@ -14,7 +14,9 @@ export const relatedUsersRequestOptionsSchema = requestBasicOptionsSchema.extend
   skip: z.boolean().optional(),
   from: z.string(),
   inspect,
-  isNewRiskScoreModuleAvailable: z.boolean(),
+  isNewRiskScoreModuleAvailable: z.boolean().default(false),
 });
+
+export type RelatedUsersRequestOptionsInput = z.input<typeof relatedUsersRequestOptionsSchema>;
 
 export type RelatedUsersRequestOptions = z.infer<typeof relatedUsersRequestOptionsSchema>;

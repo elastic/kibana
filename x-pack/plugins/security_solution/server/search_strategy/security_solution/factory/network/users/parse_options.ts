@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { NetworkUsersRequestOptions } from '../../../../../../common/api/search_strategy';
 import { networkUsersSchema } from '../../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): NetworkUsersRequestOptions =>
-  networkUsersSchema.parse(options);
+export const parseOptions = (options: unknown) => networkUsersSchema.parse(options);

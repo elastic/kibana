@@ -14,4 +14,8 @@ export const eventEnrichmentRequestOptionsSchema = requestBasicOptionsSchema.ext
   timerange,
 });
 
+export type EventEnrichmentRequestOptionsInput = z.input<
+  typeof eventEnrichmentRequestOptionsSchema
+>;
+
 export type EventEnrichmentRequestOptions = z.infer<typeof eventEnrichmentRequestOptionsSchema>;

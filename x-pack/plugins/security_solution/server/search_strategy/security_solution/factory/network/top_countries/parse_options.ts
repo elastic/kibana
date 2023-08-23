@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { NetworkTopCountriesRequestOptions } from '../../../../../../common/api/search_strategy';
 import { networkTopCountriesSchema } from '../../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): NetworkTopCountriesRequestOptions =>
-  networkTopCountriesSchema.parse(options);
+export const parseOptions = (options: unknown) => networkTopCountriesSchema.parse(options);

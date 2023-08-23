@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { NetworkKpiTlsHandshakesRequestOptions } from '../../../../../../../common/api/search_strategy';
 import { networkKpiTlsHandshakes } from '../../../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): NetworkKpiTlsHandshakesRequestOptions =>
-  networkKpiTlsHandshakes.parse(options);
+export const parseOptions = (options: unknown) => networkKpiTlsHandshakes.parse(options);

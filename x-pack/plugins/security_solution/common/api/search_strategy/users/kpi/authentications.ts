@@ -14,4 +14,6 @@ export const authenticationsKpiSchema = requestBasicOptionsSchema.extend({
   timerange,
 });
 
+export type AuthenticationsKpiRequestOptionsInput = z.input<typeof authenticationsKpiSchema>;
+
 export type AuthenticationsKpiRequestOptions = z.infer<typeof authenticationsKpiSchema>;

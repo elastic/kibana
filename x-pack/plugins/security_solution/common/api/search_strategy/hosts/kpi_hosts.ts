@@ -17,4 +17,6 @@ export const kpiHostsSchema = requestBasicOptionsSchema.extend({
   timerange,
 });
 
+export type KpiHostsRequestOptionsInput = z.input<typeof kpiHostsSchema>;
+
 export type KpiHostsRequestOptions = z.infer<typeof kpiHostsSchema>;

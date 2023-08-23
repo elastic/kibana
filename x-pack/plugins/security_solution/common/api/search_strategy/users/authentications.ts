@@ -25,4 +25,6 @@ export const userAuthenticationsSchema = requestOptionsPaginatedSchema.extend({
   timerange,
 });
 
+export type UserAuthenticationsRequestOptionsInputInput = z.input<typeof userAuthenticationsSchema>;
+
 export type UserAuthenticationsRequestOptions = z.infer<typeof userAuthenticationsSchema>;

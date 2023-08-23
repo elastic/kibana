@@ -37,6 +37,8 @@ export const mockOptions: MatrixHistogramRequestOptions = {
   timerange: { interval: '12h', from: '2020-09-08T16:11:26.215Z', to: '2020-09-09T16:11:26.215Z' },
   stackByField: 'event.action',
   runtimeMappings,
+  includeMissingData: true,
+  isPtrIncluded: false,
 };
 
 export const expectedDsl = {

@@ -14,4 +14,6 @@ export const networkKpiUniqueFlows = requestBasicOptionsSchema.extend({
   timerange,
 });
 
+export type NetworkKpiUniqueFlowsRequestOptionsInput = z.input<typeof networkKpiUniqueFlows>;
+
 export type NetworkKpiUniqueFlowsRequestOptions = z.infer<typeof networkKpiUniqueFlows>;

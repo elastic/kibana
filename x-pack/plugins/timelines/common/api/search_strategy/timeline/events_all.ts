@@ -39,6 +39,8 @@ export const timelineEventsAllSchema = requestPaginated.extend({
   language,
 });
 
+export type TimelineEventsAllOptionsInput = z.input<typeof timelineEventsAllSchema>;
+
 export type TimelineEventsAllOptions = z.infer<typeof timelineEventsAllSchema>;
 
 export type SortItem = z.infer<typeof extendedSortItem>;

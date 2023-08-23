@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { NetworkTopNFlowRequestOptions } from '../../../../../../common/api/search_strategy';
 import { networkTopNFlowSchema } from '../../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): NetworkTopNFlowRequestOptions =>
-  networkTopNFlowSchema.parse(options);
+export const parseOptions = (options: unknown) => networkTopNFlowSchema.parse(options);

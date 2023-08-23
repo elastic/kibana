@@ -14,4 +14,6 @@ export const networkKpiTlsHandshakes = requestBasicOptionsSchema.extend({
   timerange,
 });
 
+export type NetworkKpiTlsHandshakesRequestOptionsInput = z.input<typeof networkKpiTlsHandshakes>;
+
 export type NetworkKpiTlsHandshakesRequestOptions = z.infer<typeof networkKpiTlsHandshakes>;

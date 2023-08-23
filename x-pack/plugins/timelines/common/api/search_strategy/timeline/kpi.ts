@@ -10,4 +10,6 @@ import { timelineRequestBasicOptionsSchema } from './request_basic';
 
 export const timelineKpiRequestOptionsSchema = timelineRequestBasicOptionsSchema;
 
+export type TimelineKpiRequestOptionsInput = z.input<typeof timelineKpiRequestOptionsSchema>;
+
 export type TimelineKpiRequestOptions = z.infer<typeof timelineKpiRequestOptionsSchema>;

@@ -15,4 +15,6 @@ export const managedUserDetailsSchema = requestBasicOptionsSchema
     userName: z.string(),
   });
 
+export type ManagedUserDetailsRequestOptionsInput = z.input<typeof managedUserDetailsSchema>;
+
 export type ManagedUserDetailsRequestOptions = z.infer<typeof managedUserDetailsSchema>;

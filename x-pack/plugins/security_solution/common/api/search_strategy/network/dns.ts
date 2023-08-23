@@ -19,21 +19,20 @@ export enum NetworkDnsFields {
 }
 
 export const networkDnsSchema = requestOptionsPaginatedSchema.extend({
-  isPtrIncluded: z.boolean(),
+  isPtrIncluded: z.boolean().default(false),
   stackByField: z.string().nullable().optional(),
-  sort: sort
-    .unwrap()
-    .required()
-    .extend({
-      field: z.enum([
-        NetworkDnsFields.dnsName,
-        NetworkDnsFields.queryCount,
-        NetworkDnsFields.uniqueDomains,
-        NetworkDnsFields.dnsBytesIn,
-        NetworkDnsFields.dnsBytesOut,
-      ]),
-    }),
+  sort: sort.removeDefault().extend({
+    field: z.enum([
+      NetworkDnsFields.dnsName,
+      NetworkDnsFields.queryCount,
+      NetworkDnsFields.uniqueDomains,
+      NetworkDnsFields.dnsBytesIn,
+      NetworkDnsFields.dnsBytesOut,
+    ]),
+  }),
   timerange,
 });
+
+export type NetworkDnsRequestOptionsInputInput = z.input<typeof networkDnsSchema>;
 
 export type NetworkDnsRequestOptions = z.infer<typeof networkDnsSchema>;

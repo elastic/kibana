@@ -12,9 +12,11 @@ import { sort } from '../model/sort';
 import { timerange } from '../model/timerange';
 
 export const hostUncommonProcessesSchema = requestBasicOptionsSchema.extend({
-  sort: sort.optional(),
+  sort,
   pagination,
   timerange,
 });
+
+export type HostUncommonProcessesRequestOptionsInput = z.input<typeof hostUncommonProcessesSchema>;
 
 export type HostUncommonProcessesRequestOptions = z.infer<typeof hostUncommonProcessesSchema>;

@@ -13,12 +13,14 @@ import { sort } from './model/sort';
 
 export const allHostsSchema = z
   .object({
-    sort: sort.optional(),
+    sort,
     pagination,
-    isNewRiskScoreModuleAvailable: z.boolean(),
+    isNewRiskScoreModuleAvailable: z.boolean().default(false),
   })
   .extend(requestBasicOptionsSchema.partial().shape)
   .extend(z.object({ timerange }).shape)
   .passthrough();
+
+export type HostsRequestOptionsInput = z.input<typeof allHostsSchema>;
 
 export type HostsRequestOptions = z.infer<typeof allHostsSchema>;

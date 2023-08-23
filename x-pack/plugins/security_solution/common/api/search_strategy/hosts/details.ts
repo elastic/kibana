@@ -22,4 +22,6 @@ export const hostDetailsSchema = z
   .extend(requestBasicOptionsSchema.shape)
   .extend({ timerange, sort: sort.optional() });
 
+export type HostDetailsRequestOptionsInput = z.input<typeof hostDetailsSchema>;
+
 export type HostDetailsRequestOptions = z.infer<typeof hostDetailsSchema>;

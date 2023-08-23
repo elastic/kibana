@@ -39,6 +39,10 @@ export const timelineEventsLastEventTimeRequestSchema = timelineRequestBasicOpti
     }),
   });
 
+export type TimelineEventsLastEventTimeRequestOptionsInput = z.input<
+  typeof timelineEventsLastEventTimeRequestSchema
+>;
+
 export type TimelineEventsLastEventTimeRequestOptions = z.infer<
   typeof timelineEventsLastEventTimeRequestSchema
 >;

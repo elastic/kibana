@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { HostOverviewRequestOptions } from '../../../../../../common/api/search_strategy';
 import { hostOverviewSchema } from '../../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): HostOverviewRequestOptions =>
-  hostOverviewSchema.parse(options);
+export const parseOptions = (options: unknown) => hostOverviewSchema.parse(options);

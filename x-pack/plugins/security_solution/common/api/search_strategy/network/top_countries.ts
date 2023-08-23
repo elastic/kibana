@@ -16,11 +16,13 @@ import { topTablesFields } from './model/top_tables_fields';
 export const networkTopCountriesSchema = requestOptionsPaginatedSchema.extend({
   ip: z.string().ip().optional(),
   flowTarget,
-  sort: sort.unwrap().required().extend({
+  sort: sort.removeDefault().extend({
     field: topTablesFields,
   }),
   filterQuery,
   timerange,
 });
+
+export type NetworkTopCountriesRequestOptionsInput = z.input<typeof networkTopCountriesSchema>;
 
 export type NetworkTopCountriesRequestOptions = z.infer<typeof networkTopCountriesSchema>;

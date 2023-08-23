@@ -21,6 +21,8 @@ export const firstLastSeenRequestOptionsSchema = z
   })
   .extend(requestBasicOptionsSchema.partial().shape);
 
+export type FirstLastSeenRequestOptionsInput = z.input<typeof firstLastSeenRequestOptionsSchema>;
+
 export type FirstLastSeenRequestOptions = z.infer<typeof firstLastSeenRequestOptionsSchema>;
 
 export const firstLastSeenResponseSchema = z
@@ -31,5 +33,5 @@ export const firstLastSeenResponseSchema = z
   })
   .partial();
 
-export type FirstLastSeenStrategyResponse = z.infer<typeof firstLastSeenResponseSchema> &
+export type FirstLastSeenStrategyResponse = z.input<typeof firstLastSeenResponseSchema> &
   IKibanaSearchResponse;

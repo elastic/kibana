@@ -7,7 +7,7 @@
 
 import { z } from 'zod';
 
-export type PaginationInputPaginated = z.infer<typeof pagination>;
+export type PaginationInputPaginatedInput = z.input<typeof pagination>;
 
 export const pagination = z
   .object({

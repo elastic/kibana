@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { UserAuthenticationsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { userAuthenticationsSchema } from '../../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): UserAuthenticationsRequestOptions =>
-  userAuthenticationsSchema.parse(options);
+export const parseOptions = (options: unknown) => userAuthenticationsSchema.parse(options);

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { HostUncommonProcessesRequestOptions } from '../../../../../../common/api/search_strategy';
 import { hostUncommonProcessesSchema } from '../../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): HostUncommonProcessesRequestOptions =>
-  hostUncommonProcessesSchema.parse(options);
+export const parseOptions = (options: unknown) => hostUncommonProcessesSchema.parse(options);

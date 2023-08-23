@@ -14,4 +14,6 @@ export const networkKpiDns = requestBasicOptionsSchema.extend({
   timerange,
 });
 
+export type NetworkKpiDnsRequestOptionsInput = z.input<typeof networkKpiDns>;
+
 export type NetworkKpiDnsRequestOptions = z.infer<typeof networkKpiDns>;

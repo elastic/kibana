@@ -26,4 +26,6 @@ export const timelineEqlRequestOptionsSchema = z.object({
   runTimeMappings: runtimeMappings.optional(),
 });
 
+export type TimelineEqlRequestOptionsInput = z.input<typeof timelineEqlRequestOptionsSchema>;
+
 export type TimelineEqlRequestOptions = z.infer<typeof timelineEqlRequestOptionsSchema>;

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { ObservedUserDetailsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { observedUserDetailsSchema } from '../../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): ObservedUserDetailsRequestOptions =>
-  observedUserDetailsSchema.parse(options);
+export const parseOptions = (options: unknown) => observedUserDetailsSchema.parse(options);

@@ -14,4 +14,6 @@ export const networkKpiEvents = requestBasicOptionsSchema.extend({
   timerange,
 });
 
+export type NetworkKpiEventsRequestOptionsInput = z.input<typeof networkKpiEvents>;
+
 export type NetworkKpiEventsRequestOptions = z.infer<typeof networkKpiEvents>;

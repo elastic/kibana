@@ -6,7 +6,7 @@
  */
 
 import type { HostUncommonProcessesRequestOptions } from '../../../../../../../common/api/search_strategy';
-import { HostsQueries } from '../../../../../../../common/search_strategy';
+import { Direction, HostsQueries } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: HostUncommonProcessesRequestOptions = {
   defaultIndex: [
@@ -27,6 +27,10 @@ export const mockOptions: HostUncommonProcessesRequestOptions = {
     cursorStart: 0,
     fakePossibleCount: 50,
     querySize: 10,
+  },
+  sort: {
+    direction: Direction.desc,
+    field: '@timestamp',
   },
   timerange: {
     interval: '12h',

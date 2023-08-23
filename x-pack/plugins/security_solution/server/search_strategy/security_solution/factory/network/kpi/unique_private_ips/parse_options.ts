@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { NetworkKpiUniquePrivateIpsRequestOptions } from '../../../../../../../common/api/search_strategy';
 import { networkKpiUniquePrivateIps } from '../../../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): NetworkKpiUniquePrivateIpsRequestOptions =>
-  networkKpiUniquePrivateIps.parse(options);
+export const parseOptions = (options: unknown) => networkKpiUniquePrivateIps.parse(options);

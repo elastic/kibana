@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { HostDetailsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { hostDetailsSchema } from '../../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): HostDetailsRequestOptions =>
-  hostDetailsSchema.parse(options);
+export const parseOptions = (options: unknown) => hostDetailsSchema.parse(options);

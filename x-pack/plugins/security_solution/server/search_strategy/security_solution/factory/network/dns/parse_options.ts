@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { NetworkDnsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { networkDnsSchema } from '../../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): NetworkDnsRequestOptions =>
-  networkDnsSchema.parse(options);
+export const parseOptions = (options: unknown) => networkDnsSchema.parse(options);

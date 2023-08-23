@@ -16,4 +16,6 @@ export const timelineEventsDetailsSchema = requestPaginated.partial().extend({
   runtimeMappings,
 });
 
+export type TimelineEventsDetailsRequestOptionsInput = z.input<typeof timelineEventsDetailsSchema>;
+
 export type TimelineEventsDetailsRequestOptions = z.infer<typeof timelineEventsDetailsSchema>;

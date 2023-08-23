@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { ManagedUserDetailsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { managedUserDetailsSchema } from '../../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): ManagedUserDetailsRequestOptions =>
-  managedUserDetailsSchema.parse(options);
+export const parseOptions = (options: unknown) => managedUserDetailsSchema.parse(options);

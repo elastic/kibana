@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { NetworkKpiEventsRequestOptions } from '../../../../../../../common/api/search_strategy';
 import { networkKpiEvents } from '../../../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): NetworkKpiEventsRequestOptions =>
-  networkKpiEvents.parse(options);
+export const parseOptions = (options: unknown) => networkKpiEvents.parse(options);

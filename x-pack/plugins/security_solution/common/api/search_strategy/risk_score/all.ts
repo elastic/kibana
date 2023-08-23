@@ -34,8 +34,7 @@ export const riskScoreRequestOptionsSchema = requestBasicOptionsSchema.extend({
     })
     .optional(),
   sort: sort
-    .unwrap()
-    .required()
+    .removeDefault()
     .extend({
       field: z.enum([
         RiskScoreFields.timestamp,
@@ -50,5 +49,7 @@ export const riskScoreRequestOptionsSchema = requestBasicOptionsSchema.extend({
     })
     .optional(),
 });
+
+export type RiskScoreRequestOptionsInput = z.input<typeof riskScoreRequestOptionsSchema>;
 
 export type RiskScoreRequestOptions = z.infer<typeof riskScoreRequestOptionsSchema>;

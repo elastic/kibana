@@ -14,7 +14,9 @@ export const relatedHostsRequestOptionsSchema = requestBasicOptionsSchema.extend
   skip: z.boolean().optional(),
   from: z.string(),
   inspect,
-  isNewRiskScoreModuleAvailable: z.boolean(),
+  isNewRiskScoreModuleAvailable: z.boolean().default(false),
 });
+
+export type RelatedHostsRequestOptionsInput = z.input<typeof relatedHostsRequestOptionsSchema>;
 
 export type RelatedHostsRequestOptions = z.infer<typeof relatedHostsRequestOptionsSchema>;

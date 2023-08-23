@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { NetworkOverviewRequestOptions } from '../../../../../../common/api/search_strategy';
 import { networkOverviewSchema } from '../../../../../../common/api/search_strategy';
 
-export const parseOptions = (options: unknown): NetworkOverviewRequestOptions =>
-  networkOverviewSchema.parse(options);
+export const parseOptions = (options: unknown) => networkOverviewSchema.parse(options);

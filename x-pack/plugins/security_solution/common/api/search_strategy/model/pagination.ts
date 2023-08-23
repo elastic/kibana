@@ -7,7 +7,7 @@
 
 import { z } from 'zod';
 
-export type PaginationInputPaginated = z.infer<typeof pagination>;
+export type PaginationInputPaginatedInput = z.input<typeof pagination>;
 
 export const pagination = z
   .object({
@@ -21,4 +21,9 @@ export const pagination = z
     querySize: z.number(),
   })
   .passthrough()
-  .optional();
+  .default({
+    activePage: 0,
+    cursorStart: 0,
+    fakePossibleCount: 0,
+    querySize: 0,
+  });

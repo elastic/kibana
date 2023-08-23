@@ -18,4 +18,6 @@ export const observedUserDetailsSchema = requestBasicOptionsSchema.partial().ext
   inspect,
 });
 
+export type ObservedUserDetailsRequestOptionsInput = z.input<typeof observedUserDetailsSchema>;
+
 export type ObservedUserDetailsRequestOptions = z.infer<typeof observedUserDetailsSchema>;

@@ -23,4 +23,6 @@ export const requestBasicOptionsSchema = z
   })
   .passthrough();
 
+export type RequestBasicOptionsInput = z.input<typeof requestBasicOptionsSchema>;
+
 export type RequestBasicOptions = z.infer<typeof requestBasicOptionsSchema>;
