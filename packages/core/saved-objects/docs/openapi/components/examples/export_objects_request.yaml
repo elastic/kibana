@@ -3,9 +3,10 @@ value:
   {
     "objects": [
       {
-        "type": "dashboard",
-        "id": "be3733a0-9efe-11e7-acb3-3dab96693fab7"
+        "type": "map",
+        "id": "de71f4f0-1902-11e9-919b-ffe5949a18d2"
         }
     ],
-    "includeReferencesDeep": false
+    "includeReferencesDeep": false,
+    "excludeExportDetails": true
   }

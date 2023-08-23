@@ -45,9 +45,10 @@ post:
     '200':
       description: Indicates a successful call.
       content:
-        application/json:
+        application/x-ndjson:
           schema:
             type: object
+            additionalProperties: true
           examples:
             exportSavedObjectsResponse:
               $ref: '../components/examples/export_objects_response.yaml'
