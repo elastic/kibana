@@ -50,6 +50,18 @@ describe('FeatureCatalogueRegistry', () => {
         `"Solution with id [kibana] has already been registered. Use a unique id."`
       );
     });
+
+    test('throws when getting features before start()', async () => {
+      const getFeaturesBeforeStart = async () => {
+        const service = new FeatureCatalogueRegistry();
+        const catalogue = service.setup();
+        catalogue.register(DASHBOARD_FEATURE);
+        await firstValueFrom(service.getFeatures$());
+      };
+      expect(getFeaturesBeforeStart).rejects.toEqual(
+        new Error(`Catalogue entries are only available after start phase`)
+      );
+    });
   });
 
   describe('start', () => {

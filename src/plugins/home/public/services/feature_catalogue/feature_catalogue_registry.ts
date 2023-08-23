@@ -107,9 +107,6 @@ export class FeatureCatalogueRegistry {
   }
 
   public getFeatures$(): Observable<FeatureCatalogueEntry[]> {
-    if (this.capabilities === null) {
-      throw new Error('Catalogue entries are only available after start phase');
-    }
     return this.featuresSubject.pipe(map((feats) => this.get(feats)));
   }
 
