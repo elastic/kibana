@@ -85,6 +85,8 @@ type TransactionErrorRateParamsType = TypeOf<
   typeof transactionErrorRateParamsSchema
 >;
 
+export type SearchConfigurationType = TypeOf<typeof searchConfigurationSchema>;
+
 export interface ApmRuleParamsType {
   [ApmRuleType.TransactionDuration]: TransactionDurationParamsType;
   [ApmRuleType.ErrorCount]: ErrorCountParamsType;

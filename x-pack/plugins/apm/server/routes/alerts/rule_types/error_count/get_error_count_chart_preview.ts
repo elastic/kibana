@@ -63,9 +63,7 @@ export async function getTransactionErrorCountChartPreview({
     bool: {
       filter: [
         ...termFilterQuery,
-        ...getParsedFilterQuery(
-          searchConfiguration ? JSON.parse(searchConfiguration) : undefined
-        ),
+        ...getParsedFilterQuery(searchConfiguration),
         ...rangeQuery(start, end),
         { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
       ],

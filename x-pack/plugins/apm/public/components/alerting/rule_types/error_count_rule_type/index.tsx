@@ -17,6 +17,7 @@ import {
 import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiSwitchEvent } from '@elastic/eui';
+import { SearchConfigurationType } from '../../../../../common/rules/schema';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { asInteger } from '../../../../../common/utils/formatters';
 import {
@@ -32,11 +33,7 @@ import {
   IsAboveField,
   ServiceField,
 } from '../../utils/fields';
-import {
-  AlertMetadata,
-  getIntervalAndTimeRange,
-  SearchConfiguration,
-} from '../../utils/helper';
+import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
 import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
 import { APMRuleGroupBy } from '../../ui_components/apm_rule_group_by';
 import {
@@ -62,7 +59,7 @@ export interface ErrorCountRuleParams {
   groupBy?: string[] | undefined;
   errorGroupingKey?: string;
   useKqlFilter?: boolean;
-  searchConfiguration?: SearchConfiguration;
+  searchConfiguration?: SearchConfigurationType;
 }
 
 interface Props {

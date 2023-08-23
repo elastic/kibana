@@ -18,6 +18,7 @@ import {
 import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiSwitchEvent } from '@elastic/eui';
+import { SearchConfigurationType } from '../../../../../common/rules/schema';
 import { AggregationType } from '../../../../../common/rules/apm_rule_types';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
@@ -39,11 +40,7 @@ import {
   TransactionTypeField,
   TransactionNameField,
 } from '../../utils/fields';
-import {
-  AlertMetadata,
-  getIntervalAndTimeRange,
-  SearchConfiguration,
-} from '../../utils/helper';
+import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
 import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
 import { PopoverExpression } from '../../ui_components/popover_expression';
 import { APMRuleGroupBy } from '../../ui_components/apm_rule_group_by';
@@ -71,7 +68,7 @@ export interface TransactionDurationRuleParams {
   windowUnit: string;
   groupBy?: string[] | undefined;
   useKqlFilter?: boolean;
-  searchConfiguration?: SearchConfiguration;
+  searchConfiguration?: SearchConfigurationType;
 }
 
 const TRANSACTION_ALERT_AGGREGATION_TYPES: Record<AggregationType, string> = {

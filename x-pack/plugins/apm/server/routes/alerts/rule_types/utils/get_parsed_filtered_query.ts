@@ -6,10 +6,10 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { SearchConfiguration } from '../../route';
+import { SearchConfigurationType } from '../../../../../common/rules/schema';
 
 export const getParsedFilterQuery: (
-  searchConfiguration: SearchConfiguration | undefined
+  searchConfiguration: SearchConfigurationType | undefined
 ) => Array<Record<string, any>> = (searchConfiguration) => {
   const filter = searchConfiguration?.query?.query;
   if (!filter) return [];

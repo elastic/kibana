@@ -84,9 +84,7 @@ export async function getTransactionDurationChartPreview({
     bool: {
       filter: [
         ...termFilterQuery,
-        ...getParsedFilterQuery(
-          searchConfiguration ? JSON.parse(searchConfiguration) : undefined
-        ),
+        ...getParsedFilterQuery(searchConfiguration),
         ...rangeQuery(start, end),
         ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
       ] as QueryDslQueryContainer[],

@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { jsonRt } from '@kbn/io-ts-utils';
 import { Coordinate } from '../../../typings/timeseries';
 import { getTransactionDurationChartPreview } from './rule_types/transaction_duration/get_transaction_duration_chart_preview';
 import { getTransactionErrorCountChartPreview } from './rule_types/error_count/get_error_count_chart_preview';
@@ -41,7 +42,7 @@ const alertParamsRt = t.intersection([
   }),
   t.partial({
     groupBy: t.array(t.string),
-    searchConfiguration: t.string,
+    searchConfiguration: jsonRt.pipe(searchConfigurationRt),
   }),
 ]);
 
@@ -56,8 +57,6 @@ export interface PreviewChartResponse {
 }
 
 export type AlertParams = t.TypeOf<typeof alertParamsRt>;
-
-export type SearchConfiguration = t.TypeOf<typeof searchConfigurationRt>;
 
 const transactionErrorRateChartPreview = createApmServerRoute({
   endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',

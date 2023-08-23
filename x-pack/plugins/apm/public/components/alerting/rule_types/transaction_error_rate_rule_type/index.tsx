@@ -17,6 +17,7 @@ import {
 import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiSwitchEvent } from '@elastic/eui';
+import { SearchConfigurationType } from '../../../../../common/rules/schema';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { asPercent } from '../../../../../common/utils/formatters';
 import {
@@ -33,11 +34,7 @@ import {
   TransactionTypeField,
   TransactionNameField,
 } from '../../utils/fields';
-import {
-  AlertMetadata,
-  getIntervalAndTimeRange,
-  SearchConfiguration,
-} from '../../utils/helper';
+import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
 import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
 import { APMRuleGroupBy } from '../../ui_components/apm_rule_group_by';
 import {
@@ -63,7 +60,7 @@ export interface ErrorRateRuleParams {
   environment?: string;
   groupBy?: string[] | undefined;
   useKqlFilter?: boolean;
-  searchConfiguration?: SearchConfiguration;
+  searchConfiguration?: SearchConfigurationType;
 }
 
 export interface Props {
