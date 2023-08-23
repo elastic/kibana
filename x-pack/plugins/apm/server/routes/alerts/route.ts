@@ -17,7 +17,7 @@ import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const searchConfigurationRt = t.type({
   query: t.type({
-    query: t.union([t.string, t.record(t.string, t.unknown)]),
+    query: t.union([t.string, t.record(t.string, t.any)]),
     language: t.string,
   }),
 });

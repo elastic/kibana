@@ -18,7 +18,7 @@ export interface AlertMetadata {
 
 export interface SearchConfiguration {
   query: {
-    query: string | { [x: string]: unknown };
+    query: string | { [x: string]: any };
     language: string;
   };
 }
