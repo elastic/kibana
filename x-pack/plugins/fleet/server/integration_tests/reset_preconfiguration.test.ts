@@ -16,6 +16,7 @@ import {
 
 import type { AgentPolicySOAttributes } from '../types';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../../common';
+import { OLDEST_INTERNAL_VERSION } from '../../common/constants';
 
 import { useDockerRegistry, waitForFleetSetup, getSupertestWithAdminUser } from './helpers';
 
@@ -184,7 +185,11 @@ describe('Fleet preconfiguration reset', () => {
         'post',
         '/internal/fleet/reset_preconfigured_agent_policies'
       );
-      await resetAPI.set('kbn-sxrf', 'xx').expect(200).send();
+      await resetAPI
+        .set('kbn-sxrf', 'xx')
+        .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
+        .expect(200)
+        .send();
 
       const agentPolicies = await kbnServer.coreStart.savedObjects
         .createInternalRepository()
@@ -226,7 +231,11 @@ describe('Fleet preconfiguration reset', () => {
         'post',
         '/internal/fleet/reset_preconfigured_agent_policies/test-12345'
       );
-      await resetAPI.set('kbn-sxrf', 'xx').expect(200).send();
+      await resetAPI
+        .set('kbn-sxrf', 'xx')
+        .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
+        .expect(200)
+        .send();
 
       const agentPolicies = await kbnServer.coreStart.savedObjects
         .createInternalRepository()
@@ -260,7 +269,11 @@ describe('Fleet preconfiguration reset', () => {
         'post',
         '/internal/fleet/reset_preconfigured_agent_policies/test-12345'
       );
-      await resetAPI.set('kbn-sxrf', 'xx').expect(200).send();
+      await resetAPI
+        .set('kbn-sxrf', 'xx')
+        .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
+        .expect(200)
+        .send();
 
       const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
         type: 'ingest-agent-policies',
@@ -292,7 +305,11 @@ describe('Fleet preconfiguration reset', () => {
         'post',
         `/internal/fleet/reset_preconfigured_agent_policies/${POLICY_ID}`
       );
-      await resetAPI.set('kbn-sxrf', 'xx').expect(200).send();
+      await resetAPI
+        .set('kbn-sxrf', 'xx')
+        .set('Elastic-Api-Version', `${OLDEST_INTERNAL_VERSION}`)
+        .expect(200)
+        .send();
 
       const agentPolicies = await kbnServer.coreStart.savedObjects
         .createInternalRepository()
