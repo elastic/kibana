@@ -170,6 +170,11 @@ const fetchHistoricalSummaryResponseSchema = t.array(
   })
 );
 
+/**
+ * The query params schema for /internal/observability/slo/_definitions
+ *
+ * @private
+ */
 const findSloDefinitionsParamsSchema = t.type({
   query: t.type({
     search: t.string,
