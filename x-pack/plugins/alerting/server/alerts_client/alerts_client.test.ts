@@ -1312,7 +1312,8 @@ describe('Alerts Client', () => {
     });
   });
 
-  describe('getSummarizedAlerts', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/163192
+  describe.skip('getSummarizedAlerts', () => {
     beforeEach(() => {
       clusterClient.search.mockReturnValue({
         // @ts-ignore
