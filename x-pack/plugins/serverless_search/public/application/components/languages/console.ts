@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { LanguageDefinition } from '@kbn/search-api-panels';
 import { INDEX_NAME_PLACEHOLDER } from '../../constants';
-import { LanguageDefinition } from './types';
 
 export const consoleDefinition: Partial<LanguageDefinition> = {
   buildSearchQuery: `POST /books/_search?pretty

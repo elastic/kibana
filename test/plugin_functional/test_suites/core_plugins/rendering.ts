@@ -23,7 +23,7 @@ declare global {
 }
 
 const EXPOSED_CONFIG_SETTINGS_ERROR =
-  'Actual config settings exposed to the browser do not match what is expected; this assertion fails if extra settings are present and/or expected settings are missing';
+  'Actual config settings exposed to the browser do not match list defined in test; this assertion fails if extra settings are present and/or expected settings are missing';
 
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const appsMenu = getService('appsMenu');
@@ -104,6 +104,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.search.sessions.management.refreshTimeout (duration)',
         'data.search.sessions.maxUpdateRetries (number)',
         'data.search.sessions.notTouchedTimeout (duration)',
+        'data_views.scriptedFieldsEnabled (any)', // It's a boolean (any because schema.conditional)
         'dev_tools.deeplinks.navLinkStatus (string)',
         'enterpriseSearch.canDeployEntSearch (boolean)',
         'enterpriseSearch.host (string)',
@@ -240,6 +241,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.ilm.ui.enabled (boolean)',
         'xpack.index_management.ui.enabled (boolean)',
         'xpack.index_management.enableIndexActions (any)',
+        'xpack.index_management.enableLegacyTemplates (any)',
+        'xpack.index_management.dev.enableIndexDetailsPage (boolean)',
         'xpack.infra.sources.default.fields.message (array)',
         /**
          * xpack.infra.logs is conditional and will resolve to an object of properties

@@ -255,6 +255,14 @@ export const getDocsCount = ({
   stats: Record<string, IndicesStatsIndicesStats> | null;
 }): number => (stats && stats[indexName]?.primaries?.docs?.count) ?? 0;
 
+export const getIndexId = ({
+  indexName,
+  stats,
+}: {
+  indexName: string;
+  stats: Record<string, IndicesStatsIndicesStats> | null;
+}): string | null | undefined => stats && stats[indexName]?.uuid;
+
 export const getSizeInBytes = ({
   indexName,
   stats,

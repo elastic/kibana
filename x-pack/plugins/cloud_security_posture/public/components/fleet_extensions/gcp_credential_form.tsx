@@ -335,8 +335,8 @@ export const GcpCredentialsForm = ({
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           setup_access: {
-            // Restoring last manual credentials type or defaulting to the first option
-            value: lastSetupAccessType.current || SETUP_ACCESS_MANUAL,
+            // Restoring last manual credentials type
+            value: SETUP_ACCESS_MANUAL,
             type: 'text',
           },
           // Restoring fields from manual setup format if any

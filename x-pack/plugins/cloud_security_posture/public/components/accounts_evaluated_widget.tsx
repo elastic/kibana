@@ -38,12 +38,12 @@ export const AccountsEvaluatedWidget = ({
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="m">
         {cisAwsClusterAmount > 0 && (
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs">
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
               <EuiFlexItem>
-                <CISBenchmarkIcon type={CIS_AWS} name={cisAwsBenchmarkName} />
+                <CISBenchmarkIcon type={CIS_AWS} name={cisAwsBenchmarkName} size={'l'} />
               </EuiFlexItem>
               <EuiFlexItem
                 grow={false}
@@ -61,9 +61,9 @@ export const AccountsEvaluatedWidget = ({
         )}
         {cisGcpClusterAmount > 0 && (
           <EuiFlexItem>
-            <EuiFlexGroup gutterSize="xs">
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
               <EuiFlexItem>
-                <CISBenchmarkIcon type={CIS_GCP} name={cisGcpBenchmarkName} />
+                <CISBenchmarkIcon type={CIS_GCP} name={cisGcpBenchmarkName} size={'l'} />
               </EuiFlexItem>
               <EuiFlexItem
                 grow={false}

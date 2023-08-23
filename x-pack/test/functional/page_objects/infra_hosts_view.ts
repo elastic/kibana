@@ -45,60 +45,6 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return await testSubjects.click('inventory-hostsView-link-badge');
     },
 
-    // Asset Details Flyout
-
-    async clickOverviewFlyoutTab() {
-      return testSubjects.click('infraAssetDetailsOverviewTab');
-    },
-
-    async clickMetadataFlyoutTab() {
-      return testSubjects.click('infraAssetDetailsMetadataTab');
-    },
-
-    async clickProcessesFlyoutTab() {
-      return testSubjects.click('infraAssetDetailsProcessesTab');
-    },
-
-    async clickLogsFlyoutTab() {
-      return testSubjects.click('infraAssetDetailsLogsTab');
-    },
-
-    async clickOverviewLinkToAlerts() {
-      return testSubjects.click('infraAssetDetailsAlertsShowAllButton');
-    },
-
-    async clickOverviewOpenAlertsFlyout() {
-      return testSubjects.click('infraAssetDetailsCreateAlertsRuleButton');
-    },
-
-    async clickShowAllMetadataOverviewTab() {
-      return testSubjects.click('infraAssetDetailsMetadataShowAllButton');
-    },
-
-    async clickProcessesTableExpandButton() {
-      return testSubjects.click('infraProcessRowButton');
-    },
-
-    async clickFlyoutApmServicesLink() {
-      return testSubjects.click('infraAssetDetailsViewAPMServicesButton');
-    },
-
-    async clickAddMetadataPin() {
-      return testSubjects.click('infraAssetDetailsMetadataAddPin');
-    },
-
-    async clickRemoveMetadataPin() {
-      return testSubjects.click('infraAssetDetailsMetadataRemovePin');
-    },
-
-    async clickAddMetadataFilter() {
-      return testSubjects.click('infraAssetDetailsMetadataAddFilterButton');
-    },
-
-    async clickRemoveMetadataFilter() {
-      return testSubjects.click('infraAssetDetailsMetadataRemoveFilterButton');
-    },
-
     // Splash screen
 
     async getHostsLandingPageDisabled() {
@@ -206,65 +152,6 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       const element = await container.findByTestSubject(`hostsViewKPI-${type}`);
       const div = await element.findByClassName('echMetricText__value');
       return div.getAttribute('title');
-    },
-
-    // Asset Details Flyout Tabs
-    async getAssetDetailsKPITileValue(type: string) {
-      const container = await testSubjects.find('infraAssetDetailsKPIGrid');
-      const element = await container.findByTestSubject(`infraAssetDetailsKPI${type}`);
-      const div = await element.findByClassName('echMetricText__value');
-      return div.getAttribute('title');
-    },
-
-    overviewAlertsTitleExist() {
-      return testSubjects.exists('infraAssetDetailsAlertsTitle');
-    },
-
-    async getAssetDetailsMetricsCharts() {
-      const container = await testSubjects.find('infraAssetDetailsMetricsChartGrid');
-      return container.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricsChart"]');
-    },
-
-    metadataTableExist() {
-      return testSubjects.exists('infraAssetDetailsMetadataTable');
-    },
-
-    async getRemovePinExist() {
-      return testSubjects.exists('infraAssetDetailsMetadataRemovePin');
-    },
-
-    async getAppliedFilter() {
-      const filter = await testSubjects.find(
-        "filter-badge-'host.architecture: arm64' filter filter-enabled filter-key-host.architecture filter-value-arm64 filter-unpinned filter-id-0"
-      );
-      return filter.getVisibleText();
-    },
-
-    async getRemoveFilterExist() {
-      return testSubjects.exists('infraAssetDetailsMetadataRemoveFilterButton');
-    },
-
-    async getProcessesTabContentTitle(index: number) {
-      const processesListElements = await testSubjects.findAll(
-        'infraAssetDetailsProcessesSummaryTableItem'
-      );
-      return processesListElements[index].findByCssSelector('dt');
-    },
-
-    async getProcessesTabContentTotalValue() {
-      const processesListElements = await testSubjects.findAll(
-        'infraAssetDetailsProcessesSummaryTableItem'
-      );
-      return processesListElements[0].findByCssSelector('dd');
-    },
-
-    getProcessesTable() {
-      return testSubjects.find('infraAssetDetailsProcessesTable');
-    },
-
-    async getProcessesTableBody() {
-      const processesTable = await this.getProcessesTable();
-      return processesTable.findByCssSelector('tbody');
     },
 
     // Logs Tab

@@ -97,6 +97,7 @@ export interface AuthenticatorOptions {
   session: PublicMethodsOf<Session>;
   getServerBaseURL: () => string;
   isElasticCloudDeployment: () => boolean;
+  customLogoutURL?: string;
 }
 
 /** @internal */
@@ -1013,6 +1014,10 @@ export class Authenticator {
    * provider in the chain (default) is assumed.
    */
   private getLoggedOutURL(request: KibanaRequest, providerType?: string) {
+    if (this.options.customLogoutURL) {
+      return this.options.customLogoutURL;
+    }
+
     // The app that handles logout needs to know the reason of the logout and the URL we may need to
     // redirect user to once they log in again (e.g. when session expires).
     const searchParams = new URLSearchParams();

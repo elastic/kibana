@@ -28,7 +28,7 @@ curl --request POST \
 	],
 	"timeWindow": {
 		"duration": "7d",
-		"isRolling": true
+		"type": "rolling"
 	},
 	"budgetingMethod": "occurrences",
 	"objective": {

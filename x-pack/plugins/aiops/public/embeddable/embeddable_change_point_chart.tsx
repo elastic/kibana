@@ -21,6 +21,7 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { pick } from 'lodash';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { Subject } from 'rxjs';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { EmbeddableInputTracker } from './embeddable_chart_component_wrapper';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../common/constants';
 import { AiopsAppContext, type AiopsAppDependencies } from '../hooks/use_aiops_app_context';
@@ -29,7 +30,7 @@ import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart
 
 export type EmbeddableChangePointChartInput = EmbeddableInput & EmbeddableChangePointChartProps;
 
-export type EmbeddableChangePointChartOutput = EmbeddableOutput;
+export type EmbeddableChangePointChartOutput = EmbeddableOutput & { indexPatterns?: DataView[] };
 
 export interface EmbeddableChangePointChartDeps {
   theme: ThemeServiceStart;
@@ -113,6 +114,10 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
                   input$={input$}
                   initialInput={input}
                   reload$={this.reload$}
+                  onOutputChange={this.updateOutput.bind(this)}
+                  onRenderComplete={this.onRenderComplete.bind(this)}
+                  onLoading={this.onLoading.bind(this)}
+                  onError={this.onError.bind(this)}
                 />
               </Suspense>
             </DatePickerContextProvider>

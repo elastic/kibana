@@ -43,24 +43,33 @@ export class UpsellingService {
     this.messages$ = this.messagesSubject$.asObservable();
   }
 
-  registerSections(sections: SectionUpsellings) {
+  setSections(sections: SectionUpsellings) {
+    this.sections.clear();
+
     Object.entries(sections).forEach(([sectionId, component]) => {
       this.sections.set(sectionId as UpsellingSectionId, component);
     });
+
     this.sectionsSubject$.next(this.sections);
   }
 
-  registerPages(pages: PageUpsellings) {
+  setPages(pages: PageUpsellings) {
+    this.pages.clear();
+
     Object.entries(pages).forEach(([pageId, component]) => {
       this.pages.set(pageId as SecurityPageName, component);
     });
+
     this.pagesSubject$.next(this.pages);
   }
 
-  registerMessages(messages: MessageUpsellings) {
+  setMessages(messages: MessageUpsellings) {
+    this.messages.clear();
+
     Object.entries(messages).forEach(([messageId, component]) => {
       this.messages.set(messageId as UpsellingMessageId, component);
     });
+
     this.messagesSubject$.next(this.messages);
   }
 

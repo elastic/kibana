@@ -5,33 +5,39 @@
  * 2.0.
  */
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
 import type { RiskEngineConfiguration } from '../types';
 import { riskEngineConfigurationTypeName } from '../saved_object';
 
-export interface SavedObjectsClients {
+export interface SavedObjectsClientArg {
   savedObjectsClient: SavedObjectsClientContract;
-}
-
-export interface UpdateConfigOpts extends SavedObjectsClients {
-  user: AuthenticatedUser | null | undefined;
 }
 
 const getConfigurationSavedObject = async ({
   savedObjectsClient,
-}: SavedObjectsClients): Promise<SavedObject<RiskEngineConfiguration> | undefined> => {
+}: SavedObjectsClientArg): Promise<SavedObject<RiskEngineConfiguration> | undefined> => {
   const savedObjectsResponse = await savedObjectsClient.find<RiskEngineConfiguration>({
     type: riskEngineConfigurationTypeName,
   });
   return savedObjectsResponse.saved_objects?.[0];
 };
 
+export const getEnabledRiskEngineAmount = async ({
+  savedObjectsClient,
+}: SavedObjectsClientArg): Promise<number> => {
+  const savedObjectsResponse = await savedObjectsClient.find<RiskEngineConfiguration>({
+    type: riskEngineConfigurationTypeName,
+    namespaces: ['*'],
+  });
+
+  return savedObjectsResponse.saved_objects?.filter((config) => config?.attributes?.enabled)
+    ?.length;
+};
+
 export const updateSavedObjectAttribute = async ({
   savedObjectsClient,
   attributes,
-  user,
-}: UpdateConfigOpts & {
+}: SavedObjectsClientArg & {
   attributes: {
     enabled: boolean;
   };
@@ -58,7 +64,7 @@ export const updateSavedObjectAttribute = async ({
   return result;
 };
 
-export const initSavedObjects = async ({ savedObjectsClient, user }: UpdateConfigOpts) => {
+export const initSavedObjects = async ({ savedObjectsClient }: SavedObjectsClientArg) => {
   const configuration = await getConfigurationSavedObject({ savedObjectsClient });
   if (configuration) {
     return configuration;
@@ -71,7 +77,7 @@ export const initSavedObjects = async ({ savedObjectsClient, user }: UpdateConfi
 
 export const getConfiguration = async ({
   savedObjectsClient,
-}: SavedObjectsClients): Promise<RiskEngineConfiguration | null> => {
+}: SavedObjectsClientArg): Promise<RiskEngineConfiguration | null> => {
   try {
     const savedObjectConfiguration = await getConfigurationSavedObject({
       savedObjectsClient,

@@ -33,13 +33,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const synthtraceEsClient = getService('synthtraceEsClient');
 
   registry.when('transaction error rate alert', { config: 'basic', archives: [] }, () => {
-    let ruleId: string;
+    let ruleId1: string;
+    let ruleId2: string;
     let alertId: string;
     let startedAt: string;
-    let actionId: string | undefined;
+    let actionId1: string | undefined;
+    let actionId2: string | undefined;
 
     const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
-    const ALERT_ACTION_INDEX_NAME = 'alert-action-transaction-error-rate';
+    const ALERT_ACTION_INDEX_NAME1 = 'alert-action-transaction-error-rate1';
+    const ALERT_ACTION_INDEX_NAME2 = 'alert-action-transaction-error-rate2';
 
     before(async () => {
       const opbeansJava = apm
@@ -66,6 +69,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .transaction({ transactionName: 'tx-node' })
               .timestamp(timestamp)
               .duration(400)
+              .failure(),
+            opbeansNode
+              .transaction({ transactionName: 'tx-node' })
+              .timestamp(timestamp)
+              .duration(800)
               .success(),
           ];
         });
@@ -74,12 +82,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     after(async () => {
       await synthtraceEsClient.clean();
-      await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
-      await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
-      await esDeleteAllIndices([ALERT_ACTION_INDEX_NAME]);
+      await supertest.delete(`/api/alerting/rule/${ruleId1}`).set('kbn-xsrf', 'foo');
+      await supertest.delete(`/api/actions/connector/${actionId1}`).set('kbn-xsrf', 'foo');
+      await supertest.delete(`/api/alerting/rule/${ruleId2}`).set('kbn-xsrf', 'foo');
+      await supertest.delete(`/api/actions/connector/${actionId2}`).set('kbn-xsrf', 'foo');
+      await esDeleteAllIndices([ALERT_ACTION_INDEX_NAME1, ALERT_ACTION_INDEX_NAME2]);
       await es.deleteByQuery({
         index: APM_ALERTS_INDEX,
-        query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+        query: { term: { 'kibana.alert.rule.uuid': ruleId1 } },
+      });
+      await es.deleteByQuery({
+        index: APM_ALERTS_INDEX,
+        query: { term: { 'kibana.alert.rule.uuid': ruleId2 } },
       });
       await es.deleteByQuery({
         index: '.kibana-event-log-*',
@@ -87,17 +101,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('create alert with transaction.name group by', () => {
+    describe('create alert without filter query', () => {
       before(async () => {
-        actionId = await createIndexConnector({
+        actionId1 = await createIndexConnector({
           supertest,
-          name: 'Transation error rate API test',
-          indexName: ALERT_ACTION_INDEX_NAME,
+          name: 'Transation error rate without filter query',
+          indexName: ALERT_ACTION_INDEX_NAME1,
         });
         const createdRule = await createApmRule({
           supertest,
           ruleTypeId: ApmRuleType.TransactionErrorRate,
-          name: 'Apm error rate duration',
+          name: 'Apm transaction error rate without filter query',
           params: {
             threshold: 50,
             windowSize: 5,
@@ -105,6 +119,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             transactionType: 'request',
             serviceName: 'opbeans-java',
             environment: 'production',
+            kqlFilter: '',
             groupBy: [
               'service.name',
               'service.environment',
@@ -115,7 +130,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           actions: [
             {
               group: 'threshold_met',
-              id: actionId,
+              id: actionId1,
               params: {
                 documents: [
                   {
@@ -133,12 +148,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ],
         });
         expect(createdRule.id).to.not.eql(undefined);
-        ruleId = createdRule.id;
+        ruleId1 = createdRule.id;
       });
 
       it('checks if rule is active', async () => {
         const executionStatus = await waitForRuleStatus({
-          id: ruleId,
+          id: ruleId1,
           expectedStatus: 'active',
           supertest,
         });
@@ -149,7 +164,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const resp = await waitForAlertInIndex({
           es,
           indexName: APM_ALERTS_INDEX,
-          ruleId,
+          ruleId: ruleId1,
         });
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
         startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
@@ -164,7 +179,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
         const resp = await waitForDocumentInIndex<{ message: string }>({
           es,
-          indexName: ALERT_ACTION_INDEX_NAME,
+          indexName: ALERT_ACTION_INDEX_NAME1,
         });
 
         expect(resp.hits.hits[0]._source?.message).eql(`Transaction Name: tx-java
@@ -193,6 +208,117 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           serviceName: 'opbeans-node',
         });
         expect(serviceTabAlertCount).to.be(0);
+      });
+    });
+
+    describe('create alert with filter query', () => {
+      before(async () => {
+        actionId2 = await createIndexConnector({
+          supertest,
+          name: 'Transation error rate without filter query',
+          indexName: ALERT_ACTION_INDEX_NAME2,
+        });
+        const createdRule = await createApmRule({
+          supertest,
+          ruleTypeId: ApmRuleType.TransactionErrorRate,
+          name: 'Apm transaction error rate without filter query',
+          params: {
+            threshold: 50,
+            windowSize: 5,
+            windowUnit: 'm',
+            transactionType: undefined,
+            serviceName: undefined,
+            environment: 'ENVIRONMENT_ALL',
+            kqlFilter:
+              'service.name: opbeans-node and transaction.type: request and service.environment: production',
+            groupBy: [
+              'service.name',
+              'service.environment',
+              'transaction.type',
+              'transaction.name',
+            ],
+          },
+          actions: [
+            {
+              group: 'threshold_met',
+              id: actionId2,
+              params: {
+                documents: [
+                  {
+                    message: `Transaction Name: {{context.transactionName}}
+- Alert URL: {{context.alertDetailsUrl}}`,
+                  },
+                ],
+              },
+              frequency: {
+                notify_when: 'onActionGroupChange',
+                throttle: null,
+                summary: false,
+              },
+            },
+          ],
+        });
+        expect(createdRule.id).to.not.eql(undefined);
+        ruleId2 = createdRule.id;
+      });
+
+      it('checks if rule is active', async () => {
+        const executionStatus = await waitForRuleStatus({
+          id: ruleId2,
+          expectedStatus: 'active',
+          supertest,
+        });
+        expect(executionStatus.status).to.be('active');
+      });
+
+      it('indexes alert document with all group-by fields', async () => {
+        const resp = await waitForAlertInIndex({
+          es,
+          indexName: APM_ALERTS_INDEX,
+          ruleId: ruleId2,
+        });
+        alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
+        startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
+
+        expect(resp.hits.hits[0]._source).property('service.name', 'opbeans-node');
+        expect(resp.hits.hits[0]._source).property('service.environment', 'production');
+        expect(resp.hits.hits[0]._source).property('transaction.type', 'request');
+        expect(resp.hits.hits[0]._source).property('transaction.name', 'tx-node');
+      });
+
+      it('returns correct message', async () => {
+        const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
+        const resp = await waitForDocumentInIndex<{ message: string }>({
+          es,
+          indexName: ALERT_ACTION_INDEX_NAME2,
+        });
+
+        expect(resp.hits.hits[0]._source?.message).eql(`Transaction Name: tx-node
+- Alert URL: http://mockedpublicbaseurl/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`);
+      });
+
+      it('shows the correct alert count for each service on service inventory', async () => {
+        const serviceInventoryAlertCounts = await fetchServiceInventoryAlertCounts(apmApiClient);
+        expect(serviceInventoryAlertCounts).to.eql({
+          'opbeans-node': 1,
+          'opbeans-java': 1,
+        });
+      });
+
+      it('shows the correct alert count in opbeans-java service', async () => {
+        const serviceTabAlertCount = await fetchServiceTabAlertCount({
+          apmApiClient,
+          serviceName: 'opbeans-java',
+        });
+        expect(serviceTabAlertCount).to.be(1);
+      });
+
+      it('shows the correct alert count in opbeans-node service', async () => {
+        const serviceTabAlertCount = await fetchServiceTabAlertCount({
+          apmApiClient,
+          serviceName: 'opbeans-node',
+        });
+        expect(serviceTabAlertCount).to.be(1);
       });
     });
   });
