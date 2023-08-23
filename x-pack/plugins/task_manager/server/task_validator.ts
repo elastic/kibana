@@ -64,13 +64,6 @@ export class TaskValidator {
     const taskTypeDef = this.definitions.get(task.taskType);
     const latestStateSchema = this.cachedGetLatestStateSchema(taskTypeDef);
 
-    // TODO: Remove once all task types have defined their state schema.
-    // https://github.com/elastic/kibana/issues/159347
-    // Otherwise, failures on read / write would occur. (don't forget to unskip test)
-    if (!latestStateSchema) {
-      return task;
-    }
-
     let state = task.state;
     try {
       state = this.getValidatedStateSchema(
@@ -110,13 +103,6 @@ export class TaskValidator {
 
     const taskTypeDef = this.definitions.get(task.taskType);
     const latestStateSchema = this.cachedGetLatestStateSchema(taskTypeDef);
-
-    // TODO: Remove once all task types have defined their state schema.
-    // https://github.com/elastic/kibana/issues/159347
-    // Otherwise, failures on read / write would occur. (don't forget to unskip test)
-    if (!latestStateSchema) {
-      return task;
-    }
 
     // We are doing a write operation which must validate against the latest state schema
     return {

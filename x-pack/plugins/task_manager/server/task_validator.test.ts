@@ -64,9 +64,7 @@ describe('TaskValidator', () => {
       expect(result).toEqual(task);
     });
 
-    // TODO: Remove skip once all task types have defined their state schema.
-    // https://github.com/elastic/kibana/issues/159347
-    it.skip(`should fail to validate the state schema when the task type doesn't have stateSchemaByVersion defined`, () => {
+    it(`should fail to validate the state schema when the task type doesn't have stateSchemaByVersion defined`, () => {
       const definitions = new TaskTypeDictionary(mockLogger());
       definitions.registerTaskDefinitions({
         foo: fooTaskDefinition,
@@ -322,9 +320,7 @@ describe('TaskValidator', () => {
       expect(result).toEqual(task);
     });
 
-    // TODO: Remove skip once all task types have defined their state schema.
-    // https://github.com/elastic/kibana/issues/159347
-    it.skip(`should fail to validate the state schema when the task type doesn't have stateSchemaByVersion defined`, () => {
+    it(`should fail to validate the state schema when the task type doesn't have stateSchemaByVersion defined`, () => {
       const definitions = new TaskTypeDictionary(mockLogger());
       definitions.registerTaskDefinitions({
         foo: fooTaskDefinition,
