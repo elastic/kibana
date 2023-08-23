@@ -9,12 +9,14 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../types';
-import { CreateListRequestDecoded, createListRequest, createListResponse } from '../../common/api';
-
-import { buildRouteValidation, buildSiemResponse } from './utils';
-
-import { getListClient } from '.';
+import type { ListsPluginRouter } from '../../types';
+import {
+  CreateListRequestDecoded,
+  createListRequest,
+  createListResponse,
+} from '../../../common/api';
+import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { getListClient } from '..';
 
 export const createListRoute = (router: ListsPluginRouter): void => {
   router.post(
@@ -35,13 +37,19 @@ export const createListRoute = (router: ListsPluginRouter): void => {
         const { name, description, deserializer, id, serializer, type, meta, version } =
           request.body;
         const lists = await getListClient(context);
-        const listExists = await lists.getListIndexExists();
-        if (!listExists) {
+        const dataStreamExists = await lists.getListDataStreamExists();
+        const indexExists = await lists.getListIndexExists();
+
+        if (!dataStreamExists && !indexExists) {
           return siemResponse.error({
-            body: `To create a list, the index must exist first. Index "${lists.getListIndex()}" does not exist`,
+            body: `To create a list, the data stream must exist first. Data stream "${lists.getListName()}" does not exist`,
             statusCode: 400,
           });
         } else {
+          // needs to be migrated to data stream
+          if (!dataStreamExists && indexExists) {
+            await lists.migrateListIndexToDataStream();
+          }
           if (id != null) {
             const list = await lists.getList({ id });
             if (list != null) {

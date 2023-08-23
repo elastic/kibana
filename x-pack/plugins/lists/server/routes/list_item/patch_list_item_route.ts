@@ -9,12 +9,10 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../types';
-import { patchListItemRequest, patchListItemResponse } from '../../common/api';
-
-import { buildRouteValidation, buildSiemResponse } from './utils';
-
-import { getListClient } from '.';
+import type { ListsPluginRouter } from '../../types';
+import { patchListItemRequest, patchListItemResponse } from '../../../common/api';
+import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { getListClient } from '..';
 
 export const patchListItemRoute = (router: ListsPluginRouter): void => {
   router.patch(
@@ -32,7 +30,17 @@ export const patchListItemRoute = (router: ListsPluginRouter): void => {
       try {
         const { value, id, meta, _version } = request.body;
         const lists = await getListClient(context);
-        const listItem = await lists.updateListItem({
+
+        const dataStreamExists = await lists.getListItemDataStreamExists();
+        // needs to be migrated to data stream if index exists
+        if (!dataStreamExists) {
+          const indexExists = await lists.getListItemIndexExists();
+          if (indexExists) {
+            await lists.migrateListItemIndexToDataStream();
+          }
+        }
+
+        const listItem = await lists.patchListItem({
           _version,
           id,
           meta,

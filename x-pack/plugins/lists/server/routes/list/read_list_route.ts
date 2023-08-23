@@ -9,37 +9,35 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../types';
-import { updateListRequest, updateListResponse } from '../../common/api';
+import type { ListsPluginRouter } from '../../types';
+import { readListRequestQuery, readListResponse } from '../../../common/api';
+import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { getListClient } from '..';
 
-import { buildRouteValidation, buildSiemResponse } from './utils';
-
-import { getListClient } from '.';
-
-export const updateListRoute = (router: ListsPluginRouter): void => {
-  router.put(
+export const readListRoute = (router: ListsPluginRouter): void => {
+  router.get(
     {
       options: {
-        tags: ['access:lists-all'],
+        tags: ['access:lists-read'],
       },
       path: LIST_URL,
       validate: {
-        body: buildRouteValidation(updateListRequest),
+        query: buildRouteValidation(readListRequestQuery),
       },
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { name, description, id, meta, _version, version } = request.body;
+        const { id } = request.query;
         const lists = await getListClient(context);
-        const list = await lists.updateList({ _version, description, id, meta, name, version });
+        const list = await lists.getList({ id });
         if (list == null) {
           return siemResponse.error({
-            body: `list id: "${id}" not found`,
+            body: `list id: "${id}" does not exist`,
             statusCode: 404,
           });
         } else {
-          const [validated, errors] = validate(list, updateListResponse);
+          const [validated, errors] = validate(list, readListResponse);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {

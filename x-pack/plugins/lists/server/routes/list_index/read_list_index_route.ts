@@ -9,12 +9,10 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../types';
-import { readListIndexResponse } from '../../common/api';
-
-import { buildSiemResponse } from './utils';
-
-import { getListClient } from '.';
+import type { ListsPluginRouter } from '../../types';
+import { readListIndexResponse } from '../../../common/api';
+import { buildSiemResponse } from '../utils';
+import { getListClient } from '..';
 
 export const readListIndexRoute = (router: ListsPluginRouter): void => {
   router.get(
@@ -30,12 +28,12 @@ export const readListIndexRoute = (router: ListsPluginRouter): void => {
 
       try {
         const lists = await getListClient(context);
-        const listIndexExists = await lists.getListIndexExists();
-        const listItemIndexExists = await lists.getListItemIndexExists();
+        const listDataStreamExists = await lists.getListDataStreamExists();
+        const listItemDataStreamExists = await lists.getListItemDataStreamExists();
 
-        if (listIndexExists || listItemIndexExists) {
+        if (listDataStreamExists && listItemDataStreamExists) {
           const [validated, errors] = validate(
-            { list_index: listIndexExists, list_item_index: listItemIndexExists },
+            { list_index: listDataStreamExists, list_item_index: listItemDataStreamExists },
             readListIndexResponse
           );
           if (errors != null) {
@@ -43,19 +41,19 @@ export const readListIndexRoute = (router: ListsPluginRouter): void => {
           } else {
             return response.ok({ body: validated ?? {} });
           }
-        } else if (!listIndexExists && listItemIndexExists) {
+        } else if (!listDataStreamExists && listItemDataStreamExists) {
           return siemResponse.error({
-            body: `index ${lists.getListIndex()} does not exist`,
+            body: `data stream ${lists.getListName()} does not exist`,
             statusCode: 404,
           });
-        } else if (!listItemIndexExists && listIndexExists) {
+        } else if (!listItemDataStreamExists && listDataStreamExists) {
           return siemResponse.error({
-            body: `index ${lists.getListItemIndex()} does not exist`,
+            body: `data stream ${lists.getListItemName()} does not exist`,
             statusCode: 404,
           });
         } else {
           return siemResponse.error({
-            body: `index ${lists.getListIndex()} and index ${lists.getListItemIndex()} does not exist`,
+            body: `data stream ${lists.getListName()} and data stream ${lists.getListItemName()} does not exist`,
             statusCode: 404,
           });
         }

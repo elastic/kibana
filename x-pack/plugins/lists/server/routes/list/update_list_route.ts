@@ -9,37 +9,45 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../types';
-import { readListRequestQuery, readListResponse } from '../../common/api';
+import type { ListsPluginRouter } from '../../types';
+import { updateListRequest, updateListResponse } from '../../../common/api';
+import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { getListClient } from '..';
 
-import { buildRouteValidation, buildSiemResponse } from './utils';
-
-import { getListClient } from '.';
-
-export const readListRoute = (router: ListsPluginRouter): void => {
-  router.get(
+export const updateListRoute = (router: ListsPluginRouter): void => {
+  router.put(
     {
       options: {
-        tags: ['access:lists-read'],
+        tags: ['access:lists-all'],
       },
       path: LIST_URL,
       validate: {
-        query: buildRouteValidation(readListRequestQuery),
+        body: buildRouteValidation(updateListRequest),
       },
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { id } = request.query;
+        const { name, description, id, meta, _version, version } = request.body;
         const lists = await getListClient(context);
-        const list = await lists.getList({ id });
+
+        const dataStreamExists = await lists.getListDataStreamExists();
+        // needs to be migrated to data stream if index exists
+        if (!dataStreamExists) {
+          const indexExists = await lists.getListIndexExists();
+          if (indexExists) {
+            await lists.migrateListIndexToDataStream();
+          }
+        }
+
+        const list = await lists.updateList({ _version, description, id, meta, name, version });
         if (list == null) {
           return siemResponse.error({
-            body: `list id: "${id}" does not exist`,
+            body: `list id: "${id}" not found`,
             statusCode: 404,
           });
         } else {
-          const [validated, errors] = validate(list, readListResponse);
+          const [validated, errors] = validate(list, updateListResponse);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {

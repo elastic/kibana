@@ -9,12 +9,10 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../types';
-import { patchListRequest, patchListResponse } from '../../common/api';
-
-import { buildRouteValidation, buildSiemResponse } from './utils';
-
-import { getListClient } from '.';
+import type { ListsPluginRouter } from '../../types';
+import { patchListRequest, patchListResponse } from '../../../common/api';
+import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { getListClient } from '..';
 
 export const patchListRoute = (router: ListsPluginRouter): void => {
   router.patch(
@@ -32,7 +30,17 @@ export const patchListRoute = (router: ListsPluginRouter): void => {
       try {
         const { name, description, id, meta, _version, version } = request.body;
         const lists = await getListClient(context);
-        const list = await lists.updateList({ _version, description, id, meta, name, version });
+
+        const dataStreamExists = await lists.getListDataStreamExists();
+        // needs to be migrated to data stream if index exists
+        if (!dataStreamExists) {
+          const indexExists = await lists.getListIndexExists();
+          if (indexExists) {
+            await lists.migrateListIndexToDataStream();
+          }
+        }
+
+        const list = await lists.patchList({ _version, description, id, meta, name, version });
         if (list == null) {
           return siemResponse.error({
             body: `list id: "${id}" not found`,

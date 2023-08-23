@@ -18,14 +18,12 @@ import {
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../types';
-import type { ExceptionListClient } from '../services/exception_lists/exception_list_client';
-import { escapeQuotes } from '../services/utils/escape_query';
-import { deleteListRequestQuery, deleteListResponse } from '../../common/api';
-
-import { buildRouteValidation, buildSiemResponse } from './utils';
-
-import { getExceptionListClient, getListClient } from '.';
+import type { ListsPluginRouter } from '../../types';
+import type { ExceptionListClient } from '../../services/exception_lists/exception_list_client';
+import { escapeQuotes } from '../../services/utils/escape_query';
+import { deleteListRequestQuery, deleteListResponse } from '../../../common/api';
+import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { getExceptionListClient, getListClient } from '..';
 
 export const deleteListRoute = (router: ListsPluginRouter): void => {
   router.delete(

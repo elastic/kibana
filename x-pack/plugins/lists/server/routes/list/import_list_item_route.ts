@@ -10,14 +10,12 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../types';
-import { ConfigType } from '../config';
-import { importListItemRequestQuery, importListItemResponse } from '../../common/api';
-
-import { buildRouteValidation, buildSiemResponse } from './utils';
-import { createStreamFromBuffer } from './utils/create_stream_from_buffer';
-
-import { getListClient } from '.';
+import type { ListsPluginRouter } from '../../types';
+import { ConfigType } from '../../config';
+import { importListItemRequestQuery, importListItemResponse } from '../../../common/api';
+import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { createStreamFromBuffer } from '../utils/create_stream_from_buffer';
+import { getListClient } from '..';
 
 export const importListItemRoute = (router: ListsPluginRouter, config: ConfigType): void => {
   router.post(
@@ -45,13 +43,33 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
         const stream = createStreamFromBuffer(request.body);
         const { deserializer, list_id: listId, serializer, type } = request.query;
         const lists = await getListClient(context);
-        const listExists = await lists.getListIndexExists();
-        if (!listExists) {
-          return siemResponse.error({
-            body: `To import a list item, the index must exist first. Index "${lists.getListIndex()}" does not exist`,
-            statusCode: 400,
-          });
+
+        const listDataExists = await lists.getListDataStreamExists();
+        if (!listDataExists) {
+          const listIndexExists = await lists.getListIndexExists();
+          if (!listIndexExists) {
+            return siemResponse.error({
+              body: `To import a list item, the data steam must exist first. Data stream "${lists.getListName()}" does not exist`,
+              statusCode: 400,
+            });
+          }
+          // otherwise migration is needed
+          await lists.migrateListIndexToDataStream();
         }
+
+        const listItemDataExists = await lists.getListItemDataStreamExists();
+        if (!listItemDataExists) {
+          const listItemIndexExists = await lists.getListItemIndexExists();
+          if (!listItemIndexExists) {
+            return siemResponse.error({
+              body: `To import a list item, the data steam must exist first. Data stream "${lists.getListItemName()}" does not exist`,
+              statusCode: 400,
+            });
+          }
+          // otherwise migration is needed
+          await lists.migrateListItemIndexToDataStream();
+        }
+
         if (listId != null) {
           const list = await lists.getList({ id: listId });
           if (list == null) {
