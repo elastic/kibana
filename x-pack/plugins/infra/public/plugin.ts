@@ -130,6 +130,7 @@ export class Plugin implements InfraClientPluginClass {
                     label: 'Logs',
                     sortKey: 200,
                     entries: [
+                      { label: 'Explorer', app: 'observability-log-explorer', path: '/' },
                       { label: 'Stream', app: 'logs', path: '/stream' },
                       { label: 'Anomalies', app: 'logs', path: '/anomalies' },
                       { label: 'Categories', app: 'logs', path: '/log-categories' },
