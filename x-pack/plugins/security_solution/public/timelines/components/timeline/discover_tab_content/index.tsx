@@ -10,9 +10,9 @@ import { useHistory } from 'react-router-dom';
 import type { CustomizationCallback } from '@kbn/discover-plugin/public/customizations/types';
 import { createGlobalStyle } from 'styled-components';
 import type { ScopedHistory } from '@kbn/core/public';
-import type { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import type { Subscription } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { useDiscoverInTimelineContext } from '../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useDiscoverState } from './use_discover_state';
@@ -36,7 +36,7 @@ export const DiscoverTabContent = () => {
 
   const [dataView, setDataView] = useState<DataView | undefined>();
 
-  const stateContainerRef = useRef<DiscoverStateContainer>();
+  const { discoverStateContainer, setDiscoverStateContainer } = useDiscoverInTimelineContext();
 
   const discoverAppStateSubscription = useRef<Subscription>();
   const discoverInternalStateSubscription = useRef<Subscription>();
@@ -70,11 +70,11 @@ export const DiscoverTabContent = () => {
     };
 
     return unSubscribeAll;
-  }, []);
+  }, [discoverStateContainer]);
 
   const initialDiscoverCustomizationCallback: CustomizationCallback = useCallback(
     async ({ stateContainer }) => {
-      stateContainerRef.current = stateContainer;
+      setDiscoverStateContainer(stateContainer);
 
       if (discoverAppState && discoverInternalState && discoverSavedSearchState) {
         stateContainer.appState.set(discoverAppState);
@@ -113,6 +113,7 @@ export const DiscoverTabContent = () => {
       setDiscoverInternalState,
       setDiscoverAppState,
       dataView,
+      setDiscoverStateContainer,
     ]
   );
 

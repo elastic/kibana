@@ -49,7 +49,8 @@
       "savedObjectsManagement",
       "stackConnectors",
       "discover",
-      "notifications"
+      "notifications",
+      "savedObjects"
     ],
     "optionalPlugins": [
       "cloudExperiments",

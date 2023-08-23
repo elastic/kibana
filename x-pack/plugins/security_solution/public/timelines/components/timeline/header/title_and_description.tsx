@@ -21,6 +21,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import usePrevious from 'react-use/lib/usePrevious';
 
+import { useDiscoverInTimelineContext } from '../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { getUseField, Field, Form, useForm } from '../../../../shared_imports';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
@@ -33,6 +34,7 @@ import * as i18n from './translations';
 import { formSchema } from './schema';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { TIMELINE_ACTIONS } from '../../../../common/lib/apm/user_actions';
+import { useDiscoverInTimelineActions } from '../../../../common/components/discover_in_timeline/use_discover_in_timeline_actions';
 
 const CommonUseField = getUseField({ component: Field });
 interface TimelineTitleAndDescriptionProps {
@@ -103,10 +105,15 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
     });
     const { isSubmitted, isSubmitting, submit } = form;
 
+    const { discoverStateContainer } = useDiscoverInTimelineContext();
+    const { saveCurrentSearch } = useDiscoverInTimelineActions(discoverStateContainer);
+
     const onSubmit = useCallback(() => {
+      debugger;
+      saveCurrentSearch();
       startTransaction({ name: TIMELINE_ACTIONS.SAVE });
       submit();
-    }, [submit, startTransaction]);
+    }, [submit, startTransaction, saveCurrentSearch]);
 
     const handleCancel = useCallback(() => {
       if (showWarning) {
@@ -248,7 +255,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
                     onClick={onSubmit}
                     data-test-subj="save-button"
                   >
-                    {saveButtonTitle}
+                    {`Save this Heloo`}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
