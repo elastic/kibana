@@ -9,7 +9,6 @@ import { useCallback, useRef, useState } from 'react';
 import {
   type IKibanaSearchResponse,
   isCompleteResponse,
-  isErrorResponse,
 } from '@kbn/data-plugin/common';
 import { tap } from 'rxjs/operators';
 import { useAiopsAppContext } from './use_aiops_app_context';
@@ -38,8 +37,6 @@ export function useCancellableSearch() {
               if (isCompleteResponse(result)) {
                 setIsFetching(false);
                 resolve(result);
-              } else if (isErrorResponse(result)) {
-                reject(result);
               } else {
                 // partial results
                 // Ignore partial results for now.

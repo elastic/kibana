@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
 import type { DataView } from '@kbn/data-plugin/common';
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isCompleteResponse } from '@kbn/data-plugin/common';
 import type { ESQuery } from '../../../common/typed_json';
 
 import type { inputsModel } from '../../common/store';
@@ -275,11 +275,6 @@ export const useTimelineEventsHandler = ({
                   return newTimelineResponse;
                 });
 
-                searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                endTracking('invalid');
-                setLoading(false);
-                addWarning(i18n.ERROR_TIMELINE_EVENTS);
                 searchSubscription$.current.unsubscribe();
               }
             },

@@ -12,7 +12,7 @@ import { noop } from 'lodash';
 import { useCallback, useEffect, useReducer, useRef, useMemo } from 'react';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isCompleteResponse } from '@kbn/data-plugin/common';
 import type {
   RuleRegistrySearchRequest,
   RuleRegistrySearchRequestPagination,
@@ -259,10 +259,6 @@ const useFetchAlerts = ({
                     ecsAlertsData,
                     totalAlerts,
                   });
-                  searchSubscription$.current.unsubscribe();
-                } else if (isErrorResponse(response)) {
-                  dispatch({ type: 'loading', loading: false });
-                  data.search.showError(new Error(i18n.ERROR_FETCH_ALERTS));
                   searchSubscription$.current.unsubscribe();
                 }
               },

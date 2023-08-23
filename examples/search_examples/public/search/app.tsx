@@ -247,9 +247,6 @@ export const SearchExamplesApp = ({
                 text: toMountPoint(res.warning),
               });
             }
-          } else if (isErrorResponse(res)) {
-            // TODO: Make response error status clearer
-            notifications.toasts.addDanger('An error has occurred');
           }
         },
         error: (e) => {
@@ -401,10 +398,6 @@ export const SearchExamplesApp = ({
               title: 'Query result',
               text: 'Query finished',
             });
-          } else if (isErrorResponse(res)) {
-            setIsLoading(false);
-            // TODO: Make response error status clearer
-            notifications.toasts.addWarning('An error has occurred');
           }
         },
         error: (e) => {

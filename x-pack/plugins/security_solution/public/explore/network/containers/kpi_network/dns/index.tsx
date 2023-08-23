@@ -10,7 +10,7 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isCompleteResponse } from '@kbn/data-plugin/common';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { inputsModel } from '../../../../../common/store';
 import { createFilter } from '../../../../../common/containers/helpers';
@@ -96,10 +96,6 @@ export const useNetworkKpiDns = ({
                   inspect: getInspectResponse(response, prevResponse.inspect),
                   refetch: refetch.current,
                 }));
-                searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_NETWORK_KPI_DNS);
                 searchSubscription$.current.unsubscribe();
               }
             },

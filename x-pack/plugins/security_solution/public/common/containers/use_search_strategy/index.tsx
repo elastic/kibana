@@ -65,16 +65,11 @@ export const useSearch = <QueryType extends FactoryQueryTypes>(
             abortSignal,
           }
         )
-        .pipe(filter((response) => isErrorResponse(response) || isCompleteResponse(response)));
+        .pipe(filter((response) => isCompleteResponse(response)));
 
       observable.subscribe({
         next: (response) => {
-          if (isErrorResponse(response)) {
-            addWarning(i18n.INVALID_RESPONSE_WARNING_SEARCH_STRATEGY(factoryQueryType));
-            endTracking('invalid');
-          } else {
-            endTracking('success');
-          }
+          endTracking('success');
         },
         error: () => {
           endTracking(abortSignal.aborted ? 'aborted' : 'error');

@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isCompleteResponse } from '@kbn/data-plugin/common';
 import type {
   Inspect,
   PaginationInputPaginated,
@@ -270,11 +270,6 @@ export const useTimelineEventsHandler = ({
                   setFilterStatus(request.filterStatus);
                   setLoading(false);
 
-                  searchSubscription$.current.unsubscribe();
-                } else if (isErrorResponse(response)) {
-                  setLoading(false);
-                  endTracking('invalid');
-                  addWarning(ERROR_TIMELINE_EVENTS);
                   searchSubscription$.current.unsubscribe();
                 }
               },
