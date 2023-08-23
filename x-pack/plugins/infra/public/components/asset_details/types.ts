@@ -83,3 +83,5 @@ export type TabsStateChangeFn = (state: TabState & { activeTabId?: TabIds }) => 
 export interface ContentTemplateProps {
   header: Pick<AssetDetailsProps, 'tabs' | 'links'>;
 }
+
+export type DataViewOrigin = 'logs' | 'metrics';

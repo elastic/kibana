@@ -7,30 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { DataViewOrigin } from '../../../../../../components/asset_details/types';
 import { hostLensFormulas } from '../../../../constants';
 import type { XYChartLayerParams } from '../../../../types';
 import { REFERENCE_LINE, XY_OVERRIDES } from '../../constants';
 
-export const DataViewOrigin = {
-  Logs: 'logs',
-  Metrics: 'metrics',
-} as const;
-export type DataViewOrigin = typeof DataViewOrigin[keyof typeof DataViewOrigin];
+const TOP_VALUES_TYPE = 'top_values';
 
-const LayerParamsType = {
-  Visualization: 'visualization',
-  ReferenceLines: 'referenceLines',
-} as const;
+type XYConfig = Pick<TypedLensByValueInput, 'id' | 'title' | 'overrides'> & {
+  dataViewOrigin: DataViewOrigin;
+  layers: XYChartLayerParams[];
+};
 
-const seriesType = {
-  Area: 'area',
-  AreaPercentageStacked: 'area_percentage_stacked',
-  AreaStacked: 'area_stacked',
-} as const;
-
-const TOP_VALUES_TYPE = 'top_values' as const;
-
-const cpuUsage = {
+const cpuUsage: XYConfig = {
   id: 'cpuUsage',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.cpuUsage', {
     defaultMessage: 'CPU Usage',
@@ -39,16 +28,16 @@ const cpuUsage = {
   layers: [
     {
       data: [hostLensFormulas.cpuUsage],
-      type: LayerParamsType.Visualization,
+      type: 'visualization',
     },
   ],
-  dataViewOrigin: DataViewOrigin.Metrics,
+  dataViewOrigin: 'metrics',
   overrides: {
     axisLeft: XY_OVERRIDES.axisLeft,
   },
 };
 
-const cpuUsageBreakdown = {
+const cpuUsageBreakdown: XYConfig = {
   id: 'cpuUsageBreakdown',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.cpuUsage', {
     defaultMessage: 'CPU Usage',
@@ -65,19 +54,19 @@ const cpuUsageBreakdown = {
         hostLensFormulas.cpuUsageSystem,
       ],
       options: {
-        seriesType: seriesType.AreaPercentageStacked,
+        seriesType: 'area_percentage_stacked',
       },
-      type: LayerParamsType.Visualization,
+      type: 'visualization',
     },
   ],
   overrides: {
     axisLeft: XY_OVERRIDES.axisLeft,
     settings: XY_OVERRIDES.settings,
   },
-  dataViewOrigin: DataViewOrigin.Metrics,
+  dataViewOrigin: 'metrics',
 };
 
-const memoryUsage = {
+const memoryUsage: XYConfig = {
   id: 'memoryUsage',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.memoryUsage', {
     defaultMessage: 'Memory Usage',
@@ -85,16 +74,16 @@ const memoryUsage = {
   layers: [
     {
       data: [hostLensFormulas.memoryUsage],
-      type: LayerParamsType.Visualization,
+      type: 'visualization',
     },
   ],
-  dataViewOrigin: DataViewOrigin.Metrics,
+  dataViewOrigin: 'metrics',
   overrides: {
     axisLeft: XY_OVERRIDES.axisLeft,
   },
 };
 
-const memoryUsageBreakdown = {
+const memoryUsageBreakdown: XYConfig = {
   id: 'memoryUsage',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.memoryUsage', {
     defaultMessage: 'Memory Usage',
@@ -122,18 +111,18 @@ const memoryUsageBreakdown = {
         },
       ],
       options: {
-        seriesType: seriesType.AreaStacked,
+        seriesType: 'area_stacked',
       },
-      type: LayerParamsType.Visualization,
+      type: 'visualization',
     },
   ],
   overrides: {
     settings: XY_OVERRIDES.settings,
   },
-  dataViewOrigin: DataViewOrigin.Metrics,
+  dataViewOrigin: 'metrics',
 };
 
-const normalizedLoad1m = {
+const normalizedLoad1m: XYConfig = {
   id: 'normalizedLoad1m',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.normalizedLoad1m', {
     defaultMessage: 'Normalized Load',
@@ -141,18 +130,18 @@ const normalizedLoad1m = {
   layers: [
     {
       data: [hostLensFormulas.normalizedLoad1m],
-      type: LayerParamsType.Visualization,
+      type: 'visualization',
     },
     {
       data: [REFERENCE_LINE],
-      type: LayerParamsType.ReferenceLines,
+      type: 'referenceLines',
     },
   ],
-  dataViewOrigin: DataViewOrigin.Metrics,
+  dataViewOrigin: 'metrics',
 };
 
-const loadBreakdown = {
-  id: 'cpuUsageBreakdown',
+const loadBreakdown: XYConfig = {
+  id: 'loadBreakdown',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.load', {
     defaultMessage: 'Load',
   }),
@@ -160,19 +149,19 @@ const loadBreakdown = {
     {
       data: [hostLensFormulas.load1m, hostLensFormulas.load5m, hostLensFormulas.load15m],
       options: {
-        seriesType: seriesType.Area,
+        seriesType: 'area',
       },
-      type: LayerParamsType.Visualization,
+      type: 'visualization',
     },
   ],
   overrides: {
     axisLeft: XY_OVERRIDES.axisLeft,
     settings: XY_OVERRIDES.settings,
   },
-  dataViewOrigin: DataViewOrigin.Metrics,
+  dataViewOrigin: 'metrics',
 };
 
-const logRate = {
+const logRate: XYConfig = {
   id: 'logRate',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.logRate', {
     defaultMessage: 'Log Rate',
@@ -180,13 +169,13 @@ const logRate = {
   layers: [
     {
       data: [hostLensFormulas.logRate],
-      type: LayerParamsType.Visualization,
+      type: 'visualization',
     },
   ],
-  dataViewOrigin: DataViewOrigin.Logs,
+  dataViewOrigin: 'logs',
 };
 
-const diskSpaceUsageAvailable = {
+const diskSpaceUsageAvailable: XYConfig = {
   id: 'diskSpaceUsageAvailable',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskSpace', {
     defaultMessage: 'Disk Space',
@@ -211,19 +200,19 @@ const diskSpaceUsageAvailable = {
         },
       ],
       options: {
-        seriesType: seriesType.Area,
+        seriesType: 'area',
       },
-      type: LayerParamsType.Visualization,
+      type: 'visualization',
     },
   ],
   overrides: {
     axisLeft: XY_OVERRIDES.axisLeft,
     settings: XY_OVERRIDES.settings,
   },
-  dataViewOrigin: DataViewOrigin.Metrics,
+  dataViewOrigin: 'metrics',
 };
 
-const diskSpaceUsageByMountPoint = {
+const diskSpaceUsageByMountPoint: XYConfig = {
   id: 'DiskSpaceUsageByMountPoint',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskSpaceByMountingPoint', {
     defaultMessage: 'Disk Space by Mount Point',
@@ -239,7 +228,7 @@ const diskSpaceUsageByMountPoint = {
         },
       ],
       options: {
-        seriesType: seriesType.Area,
+        seriesType: 'area',
         breakdown: {
           type: TOP_VALUES_TYPE,
           field: 'system.filesystem.mount_point',
@@ -248,16 +237,16 @@ const diskSpaceUsageByMountPoint = {
           },
         },
       },
-      type: LayerParamsType.Visualization,
+      type: 'visualization',
     },
   ],
   overrides: {
     axisLeft: XY_OVERRIDES.axisLeft,
   },
-  dataViewOrigin: DataViewOrigin.Metrics,
+  dataViewOrigin: 'metrics',
 };
 
-const diskThroughputReadWrite = {
+const diskThroughputReadWrite: XYConfig = {
   id: 'diskThroughputReadWrite',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskIOPS', {
     defaultMessage: 'Disk IOPS',
@@ -279,18 +268,18 @@ const diskThroughputReadWrite = {
         },
       ],
       options: {
-        seriesType: seriesType.Area,
+        seriesType: 'area',
       },
-      type: LayerParamsType.Visualization,
+      type: 'visualization',
     },
   ],
   overrides: {
     settings: XY_OVERRIDES.settings,
   },
-  dataViewOrigin: DataViewOrigin.Metrics,
+  dataViewOrigin: 'metrics',
 };
 
-const diskIOReadWrite = {
+const diskIOReadWrite: XYConfig = {
   id: 'diskIOReadWrite',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskThroughput', {
     defaultMessage: 'Disk Throughput',
@@ -312,18 +301,18 @@ const diskIOReadWrite = {
         },
       ],
       options: {
-        seriesType: seriesType.Area,
+        seriesType: 'area',
       },
-      type: LayerParamsType.Visualization,
+      type: 'visualization',
     },
   ],
   overrides: {
     settings: XY_OVERRIDES.settings,
   },
-  dataViewOrigin: DataViewOrigin.Metrics,
+  dataViewOrigin: 'metrics',
 };
 
-const rxTx = {
+const rxTx: XYConfig = {
   id: 'rxTx',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.network', {
     defaultMessage: 'Network',
@@ -345,15 +334,15 @@ const rxTx = {
         },
       ],
       options: {
-        seriesType: seriesType.Area,
+        seriesType: 'area',
       },
-      type: LayerParamsType.Visualization,
+      type: 'visualization',
     },
   ],
   overrides: {
     settings: XY_OVERRIDES.settings,
   },
-  dataViewOrigin: DataViewOrigin.Metrics,
+  dataViewOrigin: 'metrics',
 };
 
 export const hostMetricCharts: Array<
@@ -372,12 +361,7 @@ export const hostMetricCharts: Array<
   rxTx,
 ];
 
-export const hostMetricChartsFullPage: Array<
-  Pick<TypedLensByValueInput, 'id' | 'title' | 'overrides'> & {
-    dataViewOrigin: DataViewOrigin;
-    layers: XYChartLayerParams[];
-  }
-> = [
+export const hostMetricChartsFullPage: XYConfig[] = [
   cpuUsage,
   cpuUsageBreakdown,
   memoryUsage,

@@ -18,8 +18,7 @@ import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { LensChart, HostMetricsExplanationContent } from '../../../../lens';
 import { METRIC_CHART_HEIGHT } from '../../../constants';
 import { Popover } from '../../common/popover';
-
-type DataViewOrigin = 'logs' | 'metrics';
+import type { DataViewOrigin } from '../../../types';
 
 interface Props {
   nodeName: string;
