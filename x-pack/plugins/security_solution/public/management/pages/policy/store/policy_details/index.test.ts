@@ -269,6 +269,7 @@ describe('policy details: ', () => {
               },
               policy: {
                 value: {
+                  manifest_version: 'latest',
                   meta: {
                     license: '',
                     cloud: false,

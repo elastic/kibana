@@ -117,7 +117,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
           toasts.addDanger({
             'data-test-subj': 'protectionUpdatesFailureMessage',
             title: i18n.translate(
-              'xxpack.securitySolution.endpoint.protectionUpdates.updateErrorTitle',
+              'xpack.securitySolution.endpoint.protectionUpdates.updateErrorTitle',
               {
                 defaultMessage: 'Failed!',
               }
