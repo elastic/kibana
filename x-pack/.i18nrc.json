@@ -83,7 +83,8 @@
     ],
     "xpack.painlessLab": "plugins/painless_lab",
     "xpack.profiling": [
-      "plugins/profiling"
+      "plugins/profiling",
+      "packages/kbn-profiling-shared-ui"
     ],
     "xpack.profilingDataAccess": [
       "plugins/profiling_data_access"
