@@ -21,11 +21,11 @@ import {
   ApmAlertFields,
   createIndexConnector,
   deleteActionConnector,
-  getIndexConnectorResults,
   getIndexAction,
 } from './helpers/alerting_api_helper';
 import { cleanupAllState } from './helpers/cleanup_state';
 import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
+import { waitForIndexConnectorResults } from './helpers/wait_for_index_connector_results';
 import { waitForRuleStatus } from './helpers/wait_for_rule_status';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -152,7 +152,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let results: Array<Record<string, string>>;
 
         before(async () => {
-          results = await getIndexConnectorResults(es);
+          results = await waitForIndexConnectorResults({ es, minCount: 2 });
         });
 
         it('produces a index action document for each service', async () => {

@@ -16,6 +16,7 @@ import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { ApmApiClient } from '../../../common/config';
 
 export const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-*';
+export const APM_ACTION_VARIABLE_INDEX = 'apm-index-connector-test';
 
 export async function createApmRule<T extends ApmRuleType>({
   supertest,
@@ -177,8 +178,6 @@ export type ApmAlertFields = ParsedTechnicalFields & {
   'error.grouping_name': string;
 };
 
-const APM_ACTION_VARIABLE_INDEX = 'apm-index-connector-test';
-
 export async function createIndexConnector({
   supertest,
   name,
@@ -251,11 +250,4 @@ export async function deleteActionConnectorIndex(es: Client) {
 
     throw e;
   }
-}
-
-export async function getIndexConnectorResults(es: Client) {
-  return pRetry(async () => {
-    const res = await es.search({ index: APM_ACTION_VARIABLE_INDEX });
-    return res.hits.hits.map((hit) => hit._source) as Array<Record<string, string>>;
-  });
 }

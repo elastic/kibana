@@ -21,12 +21,12 @@ import {
   ApmAlertFields,
   createIndexConnector,
   getIndexAction,
-  getIndexConnectorResults,
   deleteActionConnector,
 } from './helpers/alerting_api_helper';
 import { cleanupAllState } from './helpers/cleanup_state';
 import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
 import { waitForRuleStatus } from './helpers/wait_for_rule_status';
+import { waitForIndexConnectorResults } from './helpers/wait_for_index_connector_results';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -125,7 +125,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let results: Array<Record<string, string>>;
 
         before(async () => {
-          results = await getIndexConnectorResults(es);
+          results = await waitForIndexConnectorResults({ es });
         });
 
         it('populates the action connector index with every action variable', async () => {
