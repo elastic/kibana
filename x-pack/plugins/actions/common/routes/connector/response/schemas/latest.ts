@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { connectorResponseSchema, connectorTypesResponseSchema } from './v1';
+export { connectorResponseSchema } from './v1';
+export { connectorTypesResponseSchema } from './v1';
