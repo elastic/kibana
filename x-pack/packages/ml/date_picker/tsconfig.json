@@ -25,7 +25,7 @@
     "@kbn/core",
     "@kbn/data-views-plugin",
     "@kbn/ml-is-populated-object",
-    "@kbn/kibana-react-plugin",
     "@kbn/ml-query-utils",
+    "@kbn/react-kibana-mount",
   ]
 }
