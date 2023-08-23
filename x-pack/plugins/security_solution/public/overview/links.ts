@@ -29,6 +29,8 @@ import overviewPageImg from '../common/images/overview_page.png';
 import dataQualityDashboardPageImg from '../common/images/data_quality_dashboard_page.png';
 import detectionResponsePageImg from '../common/images/detection_response_page.png';
 import entityAnalyticsDashboard from '../common/images/entity_analytics_dashboard.png';
+import coverageOverviewDashboardImg from '../common/images/coverage_overview_dashboard.png';
+import { IconDashboards } from '../common/icons/dashboards';
 
 export const overviewLinks: LinkItem = {
   id: SecurityPageName.overview,
@@ -117,12 +119,12 @@ export const ecsDataQualityDashboardLinks: LinkItem = {
 export const coverageOverviewDashboardLinks: LinkItem = {
   id: SecurityPageName.coverageOverview,
   title: COVERAGE_OVERVIEW,
-  landingImage: overviewPageImg, // TODO: change with updated image before removing feature flag https://github.com/elastic/security-team/issues/2905
+  landingImage: coverageOverviewDashboardImg,
+  landingIcon: IconDashboards,
   description: i18n.translate(
     'xpack.securitySolution.appLinks.coverageOverviewDashboardDescription',
     {
-      defaultMessage:
-        'An overview of rule coverage according to the MITRE ATT&CK\u00AE specifications',
+      defaultMessage: 'Review and maintain your protections MITRE ATT&CK® coverage',
     }
   ),
   path: COVERAGE_OVERVIEW_PATH,

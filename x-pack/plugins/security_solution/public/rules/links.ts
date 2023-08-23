@@ -20,6 +20,7 @@ import { benchmarksLink } from '../cloud_security_posture/links';
 import type { LinkItem } from '../common/links';
 import { IconConsoleCloud } from '../common/icons/console_cloud';
 import { IconRollup } from '../common/icons/rollup';
+import { coverageOverviewDashboardLinks } from '../overview/links';
 
 export const links: LinkItem = {
   id: SecurityPageName.rulesLanding,
@@ -78,6 +79,7 @@ export const links: LinkItem = {
       ],
     },
     benchmarksLink,
+    coverageOverviewDashboardLinks,
   ],
   categories: [
     {
@@ -89,6 +91,12 @@ export const links: LinkItem = {
         SecurityPageName.cloudSecurityPostureBenchmarks,
         SecurityPageName.exceptions,
       ],
+    },
+    {
+      label: i18n.translate('xpack.securitySolution.appLinks.category.discover', {
+        defaultMessage: 'Discover',
+      }),
+      linkIds: [SecurityPageName.coverageOverview],
     },
   ],
 };
