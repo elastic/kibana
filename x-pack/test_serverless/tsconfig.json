@@ -51,5 +51,6 @@
     "@kbn/rison",
     "@kbn/discover-plugin",
     "@kbn/data-plugin",
+    "@kbn/security-api-integration-helpers",
   ]
 }

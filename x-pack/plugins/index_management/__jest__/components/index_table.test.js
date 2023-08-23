@@ -172,6 +172,7 @@ describe('index table', () => {
       config: {
         enableLegacyTemplates: true,
         enableIndexActions: true,
+        enableIndexStats: true,
       },
     };
 

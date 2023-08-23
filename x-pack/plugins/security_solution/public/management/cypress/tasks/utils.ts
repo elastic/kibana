@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { createFilter } from './helpers';
+export const generateRandomStringName = (length: number) =>
+  Array.from({ length }, () => Math.random().toString(36).substring(2));
