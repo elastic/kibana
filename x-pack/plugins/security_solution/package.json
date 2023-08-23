@@ -10,7 +10,7 @@
     "cypress": "../../../node_modules/.bin/cypress",
     "cypress:burn": "yarn cypress:dw run --env burn=2 --concurrency=1 --headed",
     "cypress:changed-specs-only": "yarn cypress:dw run --changed-specs-only --env burn=2",
-    "cypress:dw": "node ./scripts/start_cypress_parallel open --config-file ./public/management/cypress.config.ts ts --ftr-config-file ../../test/defend_workflows_cypress/cli_config --concurrency 1",
+    "cypress:dw": "node ./scripts/start_cypress_parallel --config-file ./public/management/cypress.config.ts ts --ftr-config-file ../../test/defend_workflows_cypress/cli_config --concurrency 1",
     "cypress:dw:open": "yarn cypress:dw open",
     "cypress:dw:run": "yarn cypress:dw run",
     "cypress:dw:endpoint": "node ./scripts/start_cypress_parallel --config-file ./public/management/cypress_endpoint.config.ts --ftr-config-file ../../test/defend_workflows_cypress/endpoint_config",

@@ -12,7 +12,7 @@ import { dataLoaders } from './cypress/support/data_loaders';
 export default defineCypressConfig({
   reporter: '../../../../node_modules/cypress-multi-reporters',
   reporterOptions: {
-    configFile: './management/reporter_config.json',
+    configFile: './public/management/reporter_config.json',
   },
 
   defaultCommandTimeout: 60000,

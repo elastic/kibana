@@ -15,7 +15,7 @@ import { responseActionTasks } from './cypress/support/response_actions';
 export default defineCypressConfig({
   reporter: '../../../../node_modules/cypress-multi-reporters',
   reporterOptions: {
-    configFile: './management/reporter_config.json',
+    configFile: './public/management/reporter_config.json',
   },
 
   defaultCommandTimeout: 60000,
