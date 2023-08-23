@@ -75,9 +75,7 @@ export class KibanaPage {
 
   async clearInput(locator: string) {
     const textArea = this.page.locator(locator);
-    await textArea.focus();
-    await this.page.keyboard.press('Meta+A');
-    await this.page.keyboard.press('Backspace');
+    await textArea.clear();
   }
 
   async clickAndWaitFor(
