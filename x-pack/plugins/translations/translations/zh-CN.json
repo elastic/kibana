@@ -11952,8 +11952,6 @@
     "xpack.elasticAssistant.dataAnonymizationEditor.stats.availableStat.availableTooltip": "可在对话中包含此上下文中的 {total} 个字段",
     "xpack.elasticAssistant.assistant.apiErrorTitle": "发送消息时出错。如果问题持续存在，请测试连接器配置。",
     "xpack.elasticAssistant.assistant.clearChat": "清除聊天",
-    "xpack.elasticAssistant.assistant.connectors.addConnectorButton.connectorAddedDescription": "准备继续对话……",
-    "xpack.elasticAssistant.assistant.connectors.addConnectorButton.connectorAddedTitle": "已添加生成式 AI 连接器！",
     "xpack.elasticAssistant.assistant.connectors.addConnectorButton.description": "配置连接器以继续对话",
     "xpack.elasticAssistant.assistant.connectors.addConnectorButton.title": "添加生成式 AI 连接器",
     "xpack.elasticAssistant.assistant.connectors.connectorSelector.ariaLabel": "对话选择器",
