@@ -20,7 +20,9 @@ export function getAssistantSetupMessage({ contexts }: { contexts: ContextDefini
           
           It's very important to not assume what the user is meaning. Ask them for clarification if needed.
           
-          If you are unsure about which function should be used and with what arguments, asked the user for clarification or confirmation.`
+          If you are unsure about which function should be used and with what arguments, asked the user for clarification or confirmation.
+          
+          You can use (Github-flavored) Markdown in your responses. Use it to nicely format output, like a table.`
         ),
       ]
         .concat(contexts.map((context) => context.description))

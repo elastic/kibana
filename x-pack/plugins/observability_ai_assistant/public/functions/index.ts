@@ -15,6 +15,7 @@ import { registerKibanaFunction } from './kibana';
 import { registerLensFunction } from './lens';
 import { registerRecallFunction } from './recall';
 import { registerSummarisationFunction } from './summarise';
+import { registerAlertsFunction } from './alerts';
 
 export async function registerFunctions({
   registerFunction,
@@ -75,6 +76,7 @@ export async function registerFunctions({
 
       registerElasticsearchFunction({ service, registerFunction });
       registerKibanaFunction({ service, registerFunction, coreStart });
+      registerAlertsFunction({ service, registerFunction });
 
       registerContext({
         name: 'core',

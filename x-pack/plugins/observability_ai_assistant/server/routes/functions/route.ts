@@ -4,11 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
+import datemath from '@elastic/datemath';
+import type {
+  AggregationsBuckets,
+  AggregationsDateHistogramBucket,
+} from '@elastic/elasticsearch/lib/api/types';
 import { notImplemented } from '@hapi/boom';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
+import * as t from 'io-ts';
+import { omit } from 'lodash';
+import { ParsedTechnicalFields } from '../../../../rule_registry/common';
+import type { KnowledgeBaseEntry } from '../../../common/types';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { KnowledgeBaseEntry } from '../../../common/types';
 
 const functionElasticsearchRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/functions/elasticsearch',
@@ -44,6 +52,94 @@ const functionElasticsearchRoute = createObservabilityAIAssistantServerRoute({
     });
 
     return response;
+  },
+});
+
+const OMITTED_ALERT_FIELDS = [
+  'tags',
+  'event.action',
+  'event.kind',
+  'kibana.alert.rule.execution.uuid',
+  'kibana.alert.rule.revision',
+  'kibana.alert.rule.tags',
+  'kibana.alert.rule.uuid',
+  'kibana.alert.workflow_status',
+  'kibana.space_ids',
+  'kibana.alert.time_range',
+  'kibana.version',
+] as const;
+
+const functionAlertsRoute = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/functions/alerts',
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  params: t.type({
+    body: t.intersection([
+      t.type({
+        featureIds: t.array(t.string),
+        start: t.string,
+        end: t.string,
+      }),
+      t.partial({
+        filter: t.string,
+      }),
+    ]),
+  }),
+  handler: async (
+    resources
+  ): Promise<{
+    content: {
+      total: number;
+      alerts: ParsedTechnicalFields[];
+    };
+  }> => {
+    const {
+      featureIds,
+      start: startAsDatemath,
+      end: endAsDatemath,
+      filter,
+    } = resources.params.body;
+
+    const racContext = await resources.context.rac;
+    const alertsClient = await racContext.getAlertsClient();
+
+    const start = datemath.parse(startAsDatemath)!.valueOf();
+    const end = datemath.parse(endAsDatemath)!.valueOf();
+
+    const kqlQuery = !filter ? [] : [toElasticsearchQuery(fromKueryExpression(filter))];
+
+    const response = await alertsClient.find({
+      featureIds,
+
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: start,
+                  lte: end,
+                },
+              },
+            },
+            ...kqlQuery,
+          ],
+        },
+      },
+    });
+
+    // trim some fields
+    const alerts = response.hits.hits.map((hit) =>
+      omit(hit._source, ...OMITTED_ALERT_FIELDS)
+    ) as unknown as ParsedTechnicalFields[];
+
+    return {
+      content: {
+        total: (response.hits as { total: { value: number } }).total.value,
+        alerts,
+      },
+    };
   },
 });
 
@@ -164,4 +260,5 @@ export const functionRoutes = {
   ...functionSummariseRoute,
   ...setupKnowledgeBaseRoute,
   ...getKnowledgeBaseStatus,
+  ...functionAlertsRoute,
 };
