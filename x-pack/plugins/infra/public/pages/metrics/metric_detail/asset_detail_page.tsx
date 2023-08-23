@@ -125,7 +125,7 @@ export const AssetDetailPage = () => {
         onTabsStateChange={handleTabStateChange}
         activeTabId={FlyoutTabIds.OVERVIEW}
         tabs={orderedFlyoutTabs}
-        links={['uptime', 'apmServices']}
+        links={['apmServices']}
         renderMode={{
           mode: 'page',
         }}

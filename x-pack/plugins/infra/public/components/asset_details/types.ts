@@ -62,7 +62,7 @@ export interface Tab {
   name: string;
 }
 
-export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices' | 'uptime';
+export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices';
 
 export interface AssetDetailsProps {
   asset: Asset;
