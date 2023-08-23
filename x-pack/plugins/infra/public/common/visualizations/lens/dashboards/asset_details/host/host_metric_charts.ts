@@ -153,7 +153,7 @@ const normalizedLoad1m = {
 
 const loadBreakdown = {
   id: 'cpuUsageBreakdown',
-  title: i18n.translate('xpack.infra.assetDetails.metricsCharts.cpuUsage', {
+  title: i18n.translate('xpack.infra.assetDetails.metricsCharts.load', {
     defaultMessage: 'Load',
   }),
   layers: [
@@ -225,7 +225,7 @@ const diskSpaceUsageAvailable = {
 
 const diskSpaceUsageByMountPoint = {
   id: 'DiskSpaceUsageByMountPoint',
-  title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskSpace', {
+  title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskSpaceByMountingPoint', {
     defaultMessage: 'Disk Space by Mount Point',
   }),
   layers: [
