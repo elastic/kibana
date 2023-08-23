@@ -33,7 +33,8 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
   const toastNotifications = useToastNotifications();
 
   const userCanDeleteDataView =
-    capabilities.savedObjectsManagement.delete === true || capabilities.indexPatterns.save === true;
+    (capabilities.savedObjectsManagement && capabilities.savedObjectsManagement.delete === true) ||
+    (capabilities.indexPatterns && capabilities.indexPatterns.save === true);
 
   const [deleteDestIndex, setDeleteDestIndex] = useState<boolean>(true);
   const [deleteDataView, setDeleteDataView] = useState<boolean>(userCanDeleteDataView);

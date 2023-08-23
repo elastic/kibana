@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 
 import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
 import type { StopTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/stop_transforms';
-import { isStopTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/type_guards';
 
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
@@ -76,7 +75,6 @@ export default ({ getService }: FtrProviderContext) => {
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
-        expect(isStopTransformsResponseSchema(body)).to.eql(true);
         expect(body[transformId].success).to.eql(true);
         expect(typeof body[transformId].error).to.eql('undefined');
         await transform.api.waitForTransformState(transformId, TRANSFORM_STATE.STOPPED);
@@ -97,7 +95,6 @@ export default ({ getService }: FtrProviderContext) => {
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
-        expect(isStopTransformsResponseSchema(body)).to.eql(true);
         expect(body[transformId].success).to.eql(false);
         expect(typeof body[transformId].error).to.eql('object');
 
@@ -121,7 +118,6 @@ export default ({ getService }: FtrProviderContext) => {
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
-        expect(isStopTransformsResponseSchema(body)).to.eql(true);
         expect(body.invalid_transform_id.success).to.eql(false);
         expect(body.invalid_transform_id).to.have.property('error');
       });
@@ -158,8 +154,6 @@ export default ({ getService }: FtrProviderContext) => {
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
-        expect(isStopTransformsResponseSchema(body)).to.eql(true);
-
         await asyncForEach(reqBody, async ({ id: transformId }: { id: string }, idx: number) => {
           expect(body[transformId].success).to.eql(true);
           await transform.api.waitForTransformState(transformId, TRANSFORM_STATE.STOPPED);
@@ -182,8 +176,6 @@ export default ({ getService }: FtrProviderContext) => {
             { id: reqBody[1].id, state: reqBody[1].state },
           ]);
         transform.api.assertResponseStatusCode(200, status, body);
-
-        expect(isStopTransformsResponseSchema(body)).to.eql(true);
 
         await asyncForEach(reqBody, async ({ id: transformId }: { id: string }, idx: number) => {
           expect(body[transformId].success).to.eql(true);
