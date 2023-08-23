@@ -191,7 +191,7 @@ export const getSyntheticsMonitorSavedObjectType = (
         savedObject.attributes.name +
         ' - ' +
         i18n.translate('xpack.synthetics.syntheticsMonitors', {
-          defaultMessage: 'Uptime - Monitor',
+          defaultMessage: 'Synthetics - Monitor',
         }),
     },
   };
