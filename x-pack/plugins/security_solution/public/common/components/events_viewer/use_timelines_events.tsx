@@ -155,7 +155,7 @@ export const useTimelineEventsHandler = ({
   filterStatus,
 }: UseTimelineEventsProps): [boolean, TimelineArgs, TimelineEventsSearchHandler] => {
   const dispatch = useDispatch();
-  useApmTracking(id);
+  const { startTracking } = useApmTracking(id);
   const refetch = useRef<Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -230,6 +230,7 @@ export const useTimelineEventsHandler = ({
         abortCtrl.current = new AbortController();
         setLoading(true);
         if (data && data.search) {
+          startTracking();
           const abortSignal = abortCtrl.current.signal;
           searchSubscription$.current = data.search
             .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(
