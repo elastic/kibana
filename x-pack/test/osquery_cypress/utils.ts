@@ -16,12 +16,17 @@ import {
 } from '@kbn/fleet-plugin/common/types';
 import { ToolingLog } from '@kbn/tooling-log';
 
+export const DEFAULT_HEADERS = Object.freeze({
+  'x-elastic-internal-product': 'security-solution',
+});
+
 export const getInstalledIntegration = async (kbnClient: KbnClient, integrationName: string) => {
   const {
     data: { item },
   } = await kbnClient.request<{ item: PackagePolicy }>({
     method: 'GET',
     path: `/api/fleet/epm/packages/${integrationName}`,
+    headers: DEFAULT_HEADERS,
   });
 
   return item;

@@ -19,9 +19,9 @@ export const COLLAPSE_DETAILS_BUTTON = i18n.translate(
   { defaultMessage: 'Collapse details' }
 );
 
-export const DOCUMENT_DETAILS = i18n.translate(
+export const EVENT_DETAILS = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.headerTitle',
-  { defaultMessage: 'Document details' }
+  { defaultMessage: 'Event details' }
 );
 
 export const SEVERITY_TITLE = i18n.translate(

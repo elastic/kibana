@@ -137,6 +137,7 @@ export const searchSourceRequiredUiSettings = [
 export interface SearchSourceDependencies extends FetchHandlers {
   aggs: AggsStart;
   search: ISearchGeneric;
+  scriptedFieldsEnabled: boolean;
 }
 
 interface ExpressionAstOptions {
@@ -797,10 +798,12 @@ export class SearchSource {
     // set defaults
     let fieldsFromSource = searchRequest.fieldsFromSource || [];
     body.fields = body.fields || [];
-    body.script_fields = {
-      ...body.script_fields,
-      ...scriptFields,
-    };
+    body.script_fields = this.dependencies.scriptedFieldsEnabled
+      ? {
+          ...body.script_fields,
+          ...scriptFields,
+        }
+      : {};
     body.stored_fields = storedFields;
     body.runtime_mappings = runtimeFields || {};
 
