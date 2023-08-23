@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tag } from '../../../../tags';
 import { grantClipboardReadPerm } from '../../../../tasks/common/clipboard';
 import {
   DISCOVER_CELL_ACTIONS,
@@ -24,7 +25,10 @@ const TIMESTAMP_COLUMN_NAME = '@timestamp';
 
 describe(
   `Discover Datagrid Cell Actions`,
-  { env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } } },
+  {
+    env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
+    tags: [tag.ESS, tag.SERVERLESS],
+  },
   () => {
     beforeEach(() => {
       login();

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tag } from '../../../../tags';
 import { GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON } from '../../../../screens/date_picker';
 import { fillAddFilterForm, fillAddFilterFormAsQueryDSL } from '../../../../tasks/search_bar';
 import {
@@ -39,7 +40,10 @@ const NEW_START_DATE = 'Jan 18, 2023 @ 20:33:29.186';
 
 describe(
   'Basic discover search and filter operations',
-  { env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } } },
+  {
+    env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
+    tags: [tag.ESS, tag.SERVERLESS],
+  },
   () => {
     beforeEach(() => {
       login();

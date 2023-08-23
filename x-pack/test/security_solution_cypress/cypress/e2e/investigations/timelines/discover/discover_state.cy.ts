@@ -6,6 +6,7 @@
  */
 
 import { fillAddFilterForm } from '../../../../tasks/search_bar';
+import { tag } from '../../../../tags';
 import {
   addDiscoverKqlQuery,
   addFieldToTable,
@@ -29,14 +30,17 @@ import {
   openActiveTimeline,
 } from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
-import { CSP_FINDINGS, TIMELINES } from '../../../../screens/security_header';
+import { ALERTS, CSP_FINDINGS } from '../../../../screens/security_header';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 
 describe(
   'Discover State',
-  { env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } } },
+  {
+    env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } },
+    tags: [tag.ESS, tag.SERVERLESS],
+  },
   () => {
     beforeEach(() => {
       login();
@@ -50,7 +54,7 @@ describe(
       addDiscoverKqlQuery(kqlQuery);
       submitDiscoverSearchBar();
       navigateFromHeaderTo(CSP_FINDINGS);
-      navigateFromHeaderTo(TIMELINES);
+      navigateFromHeaderTo(ALERTS);
       openActiveTimeline();
       gotToDiscoverTab();
       cy.get(DISCOVER_QUERY_INPUT).should('have.text', kqlQuery);
@@ -62,7 +66,7 @@ describe(
         value: 'winlogbeat',
       });
       navigateFromHeaderTo(CSP_FINDINGS);
-      navigateFromHeaderTo(TIMELINES);
+      navigateFromHeaderTo(ALERTS);
       openActiveTimeline();
       gotToDiscoverTab();
       cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
@@ -71,7 +75,7 @@ describe(
       const dataviewName = '.kibana-event-log';
       switchDataViewTo(dataviewName);
       navigateFromHeaderTo(CSP_FINDINGS);
-      navigateFromHeaderTo(TIMELINES);
+      navigateFromHeaderTo(ALERTS);
       openActiveTimeline();
       gotToDiscoverTab();
       cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', dataviewName);
@@ -80,7 +84,7 @@ describe(
       addFieldToTable('host.name');
       addFieldToTable('user.name');
       navigateFromHeaderTo(CSP_FINDINGS);
-      navigateFromHeaderTo(TIMELINES);
+      navigateFromHeaderTo(ALERTS);
       openActiveTimeline();
       gotToDiscoverTab();
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('host.name')).should('be.visible');
