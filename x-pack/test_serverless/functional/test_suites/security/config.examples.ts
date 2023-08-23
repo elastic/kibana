@@ -11,10 +11,10 @@ import { resolve } from 'path';
 import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
-  serverlessProject: 'es',
-  testFiles: [require.resolve('.')],
+  serverlessProject: 'security',
+  testFiles: [require.resolve('../common/index.examples')],
   junit: {
-    reportName: 'Serverless Examples Functional Tests',
+    reportName: 'Serverless Security Examples Functional Tests',
   },
   serverArgs: findTestPluginPaths([
     resolve(REPO_ROOT, 'examples'),

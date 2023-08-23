@@ -88,13 +88,15 @@ disabled:
   - x-pack/test_serverless/api_integration/test_suites/security/config.ts
   - x-pack/test_serverless/api_integration/test_suites/security/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/common/config.ts
-  - x-pack/test_serverless/functional/test_suites/examples/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.feature_flags.ts
+  - x-pack/test_serverless/functional/test_suites/observability/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/search/config.ts
   - x-pack/test_serverless/functional/test_suites/search/config.feature_flags.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/security/config.ts
   - x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.examples.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:
