@@ -114,6 +114,7 @@ export function MobileStats({
       valueFormatter: (value: number) =>
         valueFormatter(Number((value * 100).toPrecision(2)), '%'),
       trend: data?.currentPeriod?.crashRate?.timeseries,
+      extra: getComparisonValueFormatter(data?.previousPeriod.crashRate?.value),
       trendShape: MetricTrendShape.Area,
     },
     {
