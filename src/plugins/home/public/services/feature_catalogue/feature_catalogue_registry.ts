@@ -93,12 +93,12 @@ export class FeatureCatalogueRegistry {
    * @deprecated
    * Use getFeatures$() instead
    */
-  public get(): FeatureCatalogueEntry[] {
+  public get(features = this.features): FeatureCatalogueEntry[] {
     if (this.capabilities === null) {
       throw new Error('Catalogue entries are only available after start phase');
     }
     const capabilities = this.capabilities;
-    return [...this.features.values()]
+    return [...features.values()]
       .filter(
         (entry) =>
           capabilities.catalogue[entry.id] !== false && (entry.visible ? entry.visible() : true)
@@ -110,17 +110,7 @@ export class FeatureCatalogueRegistry {
     if (this.capabilities === null) {
       throw new Error('Catalogue entries are only available after start phase');
     }
-    const capabilities = this.capabilities;
-    return this.featuresSubject.pipe(
-      map((features) =>
-        [...features.values()]
-          .filter(
-            (entry) =>
-              capabilities.catalogue[entry.id] !== false && (entry.visible ? entry.visible() : true)
-          )
-          .sort(compareByKey('title'))
-      )
-    );
+    return this.featuresSubject.pipe(map((features) => this.get(features)));
   }
 
   public getSolutions(): FeatureCatalogueSolution[] {
