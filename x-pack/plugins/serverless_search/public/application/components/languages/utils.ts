@@ -5,24 +5,7 @@
  * 2.0.
  */
 
-import { LanguageDefinition, LanguageDefinitionSnippetArguments } from '@kbn/search-api-panels';
+import { LanguageDefinition } from '@kbn/search-api-panels';
 import { consoleDefinition } from './console';
 
 export const showTryInConsole = (code: keyof LanguageDefinition) => code in consoleDefinition;
-
-export const getCodeSnippet = (
-  language: Partial<LanguageDefinition>,
-  key: keyof LanguageDefinition,
-  args: LanguageDefinitionSnippetArguments
-): string => {
-  const snippetVal = language[key];
-  if (snippetVal === undefined) return '';
-  switch (typeof snippetVal) {
-    case 'string':
-      return snippetVal;
-    case 'function':
-      return snippetVal(args);
-    default:
-      return '';
-  }
-};
