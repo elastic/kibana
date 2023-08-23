@@ -62,6 +62,8 @@ describe('listAlertTypesRoute', () => {
         },
         producer: 'test',
         enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
       } as RegistryAlertTypeWithAuth,
     ];
     rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(listTypes));
@@ -137,6 +139,8 @@ describe('listAlertTypesRoute', () => {
         },
         producer: 'alerts',
         enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
       } as RegistryAlertTypeWithAuth,
     ];
 
@@ -190,6 +194,8 @@ describe('listAlertTypesRoute', () => {
         },
         producer: 'alerts',
         enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
       } as RegistryAlertTypeWithAuth,
     ];
 
