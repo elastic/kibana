@@ -34701,7 +34701,6 @@
     "xpack.serverlessSearch.apiKey.userFieldLabel": "用户",
     "xpack.serverlessSearch.back": "返回",
     "xpack.serverlessSearch.cancel": "取消",
-    "xpack.serverlessSearch.configureClient.advancedConfigLabel": "高级配置",
     "xpack.serverlessSearch.configureClient.basicConfigLabel": "基本配置",
     "xpack.serverlessSearch.configureClient.description": "使用唯一 API 密钥和云 ID 对客户端进行初始化",
     "xpack.serverlessSearch.configureClient.title": "配置客户端",
