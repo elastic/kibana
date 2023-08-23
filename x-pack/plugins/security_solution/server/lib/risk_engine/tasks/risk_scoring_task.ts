@@ -163,7 +163,6 @@ export const runTask = async ({
   taskInstance: ConcreteTaskInstance;
 }): Promise<{
   state: RiskScoringTaskState;
-  // TODO when do we need to return schedule?
 }> => {
   const state = taskInstance.state as RiskScoringTaskState;
   const taskId = taskInstance.id;
