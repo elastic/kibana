@@ -1465,6 +1465,7 @@ describe('Alerts Service', () => {
           expect(AlertsClient).toHaveBeenCalledWith({
             logger,
             elasticsearchClientPromise: Promise.resolve(clusterClient),
+            dataStreamAdapter,
             ruleType: ruleTypeWithAlertDefinition,
             namespace: 'default',
             rule: {
@@ -1579,6 +1580,7 @@ describe('Alerts Service', () => {
           expect(AlertsClient).toHaveBeenCalledWith({
             logger,
             elasticsearchClientPromise: Promise.resolve(clusterClient),
+            dataStreamAdapter,
             ruleType: ruleTypeWithAlertDefinition,
             namespace: 'default',
             rule: {
@@ -1693,6 +1695,7 @@ describe('Alerts Service', () => {
           expect(AlertsClient).toHaveBeenCalledWith({
             logger,
             elasticsearchClientPromise: Promise.resolve(clusterClient),
+            dataStreamAdapter,
             ruleType: ruleTypeWithAlertDefinition,
             namespace: 'default',
             rule: {
@@ -1768,6 +1771,7 @@ describe('Alerts Service', () => {
           expect(AlertsClient).toHaveBeenCalledWith({
             logger,
             elasticsearchClientPromise: Promise.resolve(clusterClient),
+            dataStreamAdapter,
             ruleType: ruleTypeWithAlertDefinition,
             namespace: 'default',
             rule: {
@@ -1858,6 +1862,7 @@ describe('Alerts Service', () => {
           expect(AlertsClient).toHaveBeenCalledWith({
             logger,
             elasticsearchClientPromise: Promise.resolve(clusterClient),
+            dataStreamAdapter,
             ruleType: ruleTypeWithAlertDefinition,
             namespace: 'default',
             rule: {

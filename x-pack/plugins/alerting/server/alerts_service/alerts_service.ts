@@ -19,8 +19,13 @@ import {
   getComponentTemplateName,
   getIndexTemplateAndPattern,
 } from './resource_installer_utils';
-import { AlertInstanceContext, AlertInstanceState, IRuleTypeAlerts, RuleAlertData } from '../types';
-import { DataStreamAdapter } from './lib/data_stream_adapter';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  IRuleTypeAlerts,
+  RuleAlertData,
+  DataStreamAdapter,
+} from '../types';
 import {
   createResourceInstallationHelper,
   errorResult,
@@ -226,6 +231,7 @@ export class AlertsService implements IAlertsService {
       namespace: opts.namespace,
       rule: opts.rule,
       kibanaVersion: this.options.kibanaVersion,
+      dataStreamAdapter: this.dataStreamAdapter,
     });
   }
 
