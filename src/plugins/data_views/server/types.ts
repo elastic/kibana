@@ -48,6 +48,10 @@ export interface DataViewsServerPluginStart {
    * Returns a DataViews service instance
    */
   dataViewsServiceFactory: ServiceFactory;
+  /**
+   *
+   */
+  getScriptedFieldsEnabled: () => boolean;
 }
 
 /**
