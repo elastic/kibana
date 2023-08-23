@@ -44,8 +44,6 @@ export function prepareKQLStringParam(value: string): string {
  * @returns an escaped string param value
  */
 export function escapeKQLStringParam(value = ''): string {
-  const escapeStringValue = flow(escapeQuotes, escapeTabs);
-
   return escapeStringValue(value);
 }
 
@@ -53,3 +51,5 @@ const escapeQuotes = (val: string) => val.replace(/["]/g, '\\$&'); // $& means t
 
 const escapeTabs = (val: string) =>
   val.replace(/\t/g, '\\t').replace(/\r/g, '\\r').replace(/\n/g, '\\n');
+
+const escapeStringValue = flow(escapeQuotes, escapeTabs);
