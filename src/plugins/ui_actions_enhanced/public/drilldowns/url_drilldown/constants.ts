@@ -6,14 +6,9 @@
  * Side Public License, v 1.
  */
 
-/**
- * Link types
- */
-export const DASHBOARD_LINK_TYPE = 'dashboardLink';
-export const EXTERNAL_LINK_TYPE = 'externalLink';
+import { UrlDrilldownOptions } from './types';
 
-/**
- * Layout options
- */
-export const NAV_HORIZONTAL_LAYOUT = 'horizontal';
-export const NAV_VERTICAL_LAYOUT = 'vertical';
+export const DEFAULT_URL_LINK_OPTIONS: UrlDrilldownOptions = {
+  encodeUrl: true,
+  openInNewTab: true,
+};

@@ -9,7 +9,7 @@
 import React from 'react';
 
 import { EuiListGroupItem } from '@elastic/eui';
-import { UrlDrilldownOptions } from '@kbn/ui-actions-enhanced-plugin/common';
+import { UrlDrilldownOptions } from '@kbn/ui-actions-enhanced-plugin/public';
 
 import { coreServices } from '../../services/kibana_services';
 import { NavigationEmbeddableLink } from '../../../common/content_management';

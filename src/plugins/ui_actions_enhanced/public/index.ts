@@ -45,6 +45,7 @@ export type {
   UrlDrilldownConfig,
   UrlDrilldownGlobalScope,
   UrlDrilldownScope,
+  UrlDrilldownOptions,
 } from './drilldowns/url_drilldown';
 export {
   urlDrilldownCompileUrl,
@@ -53,4 +54,5 @@ export {
   urlDrilldownGlobalScopeProvider,
   urlDrilldownValidateUrl,
   urlDrilldownValidateUrlTemplate,
+  DEFAULT_URL_LINK_OPTIONS,
 } from './drilldowns/url_drilldown';

@@ -46,6 +46,11 @@ export const LazyDashboardDrilldownOptionsComponent = React.lazy(
   () => import('./dashboard_drilldown_options/dashboard_drilldown_options')
 );
 
+export {
+  type DashboardDrilldownOptions,
+  DEFAULT_DASHBOARD_LINK_OPTIONS,
+} from './dashboard_drilldown_options/types';
+
 export { FloatingActions } from './floating_actions/floating_actions';
 
 /**

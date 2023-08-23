@@ -19,6 +19,7 @@ import {
 } from './i18n';
 import { VariablePopover } from '../variable_popover';
 import { UrlDrilldownOptionsComponent } from './lazy';
+import { DEFAULT_URL_LINK_OPTIONS } from '../../constants';
 
 export interface UrlDrilldownCollectConfigProps {
   config: UrlDrilldownConfig;
@@ -105,7 +106,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps>
         <EuiSpacer size={'s'} />
         <EuiPanel color="subdued" borderRadius="none" hasShadow={false} style={{ border: 'none' }}>
           <UrlDrilldownOptionsComponent
-            options={config}
+            options={{ ...DEFAULT_URL_LINK_OPTIONS, ...config }}
             onOptionChange={(change) => {
               onConfig({ ...config, ...change });
             }}

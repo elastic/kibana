@@ -8,7 +8,8 @@
 
 import React from 'react';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { DashboardDrilldownOptions } from '../../../common';
+
+import { DashboardDrilldownOptions } from './types';
 import { dashboardDrilldownConfigStrings } from '../../i18n/dashboard_drilldown_config';
 
 export interface DashboardDrilldownOptionsProps {

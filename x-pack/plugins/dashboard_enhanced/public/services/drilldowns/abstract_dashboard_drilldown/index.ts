@@ -7,4 +7,4 @@
 
 export type { Params as AbstractDashboardDrilldownParams } from './abstract_dashboard_drilldown';
 export { AbstractDashboardDrilldown } from './abstract_dashboard_drilldown';
-// export type { DrilldownConfig as AbstractDashboardDrilldownConfig } from './types';
+export type { DashboardDrilldownConfig as AbstractDashboardDrilldownConfig } from '../../../../common/drilldowns/dashboard_drilldown/types';

@@ -14,6 +14,7 @@ import {
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
   UiActionsEnhancedDrilldownDefinition as Drilldown,
 } from '@kbn/ui-actions-enhanced-plugin/public';
+import { DEFAULT_DASHBOARD_LINK_OPTIONS } from '@kbn/presentation-util-plugin/public';
 import { CollectConfigProps, StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 
 import { txtGoToDashboard } from './i18n';
@@ -60,9 +61,7 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
 
   public readonly createConfig = () => ({
     dashboardId: '',
-    useCurrentFilters: true,
-    useCurrentDateRange: true,
-    openInNewTab: false,
+    ...DEFAULT_DASHBOARD_LINK_OPTIONS,
   });
 
   public readonly isConfigValid = (config: Config): config is Config => {

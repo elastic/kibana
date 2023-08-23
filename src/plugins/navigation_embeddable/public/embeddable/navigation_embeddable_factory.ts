@@ -35,7 +35,8 @@ export interface NavigationEmbeddableCreationOptions {
   getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
 }
 
-// TODO: Replace string 'OPEN_FLYOUT_ADD_DRILLDOWN' with constant as part of https://github.com/elastic/kibana/issues/154381
+// TODO: Replace string 'OPEN_FLYOUT_ADD_DRILLDOWN' with constant once the dashboardEnhanced plugin is removed
+// and it is no longer locked behind `x-pack`
 const getDefaultNavigationEmbeddableInput = (): Omit<NavigationEmbeddableByValueInput, 'id'> => ({
   attributes: {
     title: '',

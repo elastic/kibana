@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/common';
+import { type DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
 
 export type DashboardDrilldownConfig = {
   dashboardId?: string;

@@ -26,14 +26,18 @@ import {
   EuiFlyoutHeader,
   EuiRadioGroupOption,
 } from '@elastic/eui';
-import { UrlDrilldownOptions } from '@kbn/ui-actions-enhanced-plugin/common';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
-import { UrlDrilldownOptionsComponent } from '@kbn/ui-actions-enhanced-plugin/public';
 import {
   withSuspense,
+  DashboardDrilldownOptions,
+  DEFAULT_DASHBOARD_LINK_OPTIONS,
   LazyDashboardDrilldownOptionsComponent,
 } from '@kbn/presentation-util-plugin/public';
-import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/common';
+import {
+  UrlDrilldownOptions,
+  DEFAULT_URL_LINK_OPTIONS,
+  UrlDrilldownOptionsComponent,
+} from '@kbn/ui-actions-enhanced-plugin/public';
+import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
   NavigationLinkType,
@@ -41,8 +45,6 @@ import {
   DASHBOARD_LINK_TYPE,
   NavigationLinkOptions,
   NavigationEmbeddableLink,
-  DEFAULT_URL_LINK_OPTIONS,
-  DEFAULT_DASHBOARD_LINK_OPTIONS,
 } from '../../../common/content_management';
 import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
 import { DashboardItem, NavigationLinkInfo } from '../../embeddable/types';
@@ -72,9 +74,10 @@ export const NavigationEmbeddableLinkEditor = ({
   const [defaultLinkLabel, setDefaultLinkLabel] = useState<string | undefined>();
   const [currentLinkLabel, setCurrentLinkLabel] = useState<string>(link?.label ?? '');
   const [linkDestination, setLinkDestination] = useState<string | undefined>(link?.destination);
-  const [linkOptions, setLinkOptions] = useState<NavigationLinkOptions | undefined>(
-    link?.options ?? DEFAULT_DASHBOARD_LINK_OPTIONS
-  );
+  const [linkOptions, setLinkOptions] = useState<NavigationLinkOptions | undefined>({
+    ...DEFAULT_DASHBOARD_LINK_OPTIONS,
+    ...link?.options,
+  });
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
     return ([DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE] as NavigationLinkType[]).map((type) => {

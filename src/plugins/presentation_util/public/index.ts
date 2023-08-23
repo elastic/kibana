@@ -38,6 +38,8 @@ export {
   LazyFieldPicker,
   FloatingActions,
   LazyDashboardDrilldownOptionsComponent,
+  type DashboardDrilldownOptions,
+  DEFAULT_DASHBOARD_LINK_OPTIONS,
 } from './components';
 
 export {

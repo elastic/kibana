@@ -8,12 +8,13 @@
 
 import React from 'react';
 import { EuiFormRow, EuiSpacer, EuiSwitch, EuiTextColor } from '@elastic/eui';
-import { UrlDrilldownOptions } from '../../../../../common';
+
 import {
   txtUrlTemplateEncodeDescription,
   txtUrlTemplateEncodeUrl,
   txtUrlTemplateOpenInNewTab,
 } from './i18n';
+import { UrlDrilldownOptions } from '../../types';
 
 export interface UrlDrilldownOptionsProps {
   options: UrlDrilldownOptions;
@@ -47,8 +48,8 @@ export const UrlDrilldownOptionsComponent = ({
               <EuiTextColor color="subdued">{txtUrlTemplateEncodeDescription}</EuiTextColor>
             </>
           }
-          checked={options.encodeUrl ?? true}
-          onChange={() => onOptionChange({ encodeUrl: !(options.encodeUrl ?? true) })}
+          checked={options.encodeUrl}
+          onChange={() => onOptionChange({ encodeUrl: !options.encodeUrl })}
         />
       </EuiFormRow>
     </>

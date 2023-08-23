@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { UrlDrilldownOptions } from '../../../common';
-
 export type UrlDrilldownConfig = {
   url: { format?: 'handlebars_v1'; template: string };
 } & UrlDrilldownOptions;
@@ -38,3 +36,11 @@ export interface UrlDrilldownScope<
 export interface UrlDrilldownGlobalScope {
   kibanaUrl: string;
 }
+
+/**
+ * User-configurable options for URL drilldowns
+ */
+export type UrlDrilldownOptions = {
+  openInNewTab: boolean;
+  encodeUrl: boolean;
+};

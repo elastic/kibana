@@ -16,18 +16,20 @@ import {
   DashboardAppLocatorParams,
   getEmbeddableParams,
 } from '@kbn/dashboard-plugin/public';
+import {
+  DashboardDrilldownOptions,
+  DEFAULT_DASHBOARD_LINK_OPTIONS,
+} from '@kbn/presentation-util-plugin/public';
 import { isFilterPinned } from '@kbn/es-query';
 import { KibanaLocation } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import { EuiButtonEmpty, EuiListGroupItem, EuiToolTip } from '@elastic/eui';
-import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/common';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
   NAV_VERTICAL_LAYOUT,
   NavigationLayoutType,
   NavigationEmbeddableLink,
-  DEFAULT_DASHBOARD_LINK_OPTIONS,
 } from '../../../common/content_management';
 import { fetchDashboard } from './dashboard_link_tools';
 import { DashboardLinkStrings } from './dashboard_link_strings';
