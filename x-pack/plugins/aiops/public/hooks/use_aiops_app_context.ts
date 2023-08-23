@@ -93,6 +93,10 @@ export interface AiopsAppDependencies {
    */
   lens: LensPublicStart;
   /**
+   * Internationalisation service
+   */
+  i18n: CoreStart['i18n'];
+  /**
    * Deps for unified fields stats.
    */
   fieldStats?: {
