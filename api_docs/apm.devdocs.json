@@ -263,21 +263,9 @@
               "APMPluginSetupDependencies",
               ") => { config$: ",
               "Observable",
-              "<Readonly<{} & { indices: Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; }>; enabled: boolean; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; serviceMapTerminateAfter: number; serviceMapMaxTraces: number; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; searchAggregatedTransactions: ",
+              "<Readonly<{} & { enabled: boolean; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; serviceMapTerminateAfter: number; serviceMapMaxTraces: number; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; searchAggregatedTransactions: ",
               "SearchAggregatedTransactionSetting",
-              "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; forceSyntheticSource: boolean; latestAgentVersionsUrl: string; serverlessOnboarding: boolean; serverless: Readonly<{} & { enabled: true; }>; managedServiceUrl: string; featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; }>; }>>; getApmIndices: () => Promise<Readonly<{ error: string; onboarding: string; span: string; transaction: string; metric: string; }>>; createApmEventClient: ({ request, context, debug, }: { debug?: boolean | undefined; request: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any>; context: ",
-              "ApmPluginRequestHandlerContext",
-              "; }) => Promise<",
-              "APMEventClient",
-              ">; }"
+              "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; forceSyntheticSource: boolean; latestAgentVersionsUrl: string; serverless: Readonly<{} & { enabled: true; }>; serverlessOnboarding: boolean; managedServiceUrl: string; featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; }>; }>>; }"
             ],
             "path": "x-pack/plugins/apm/server/plugin.ts",
             "deprecated": false,
@@ -409,518 +397,7 @@
       }
     ],
     "functions": [],
-    "interfaces": [
-      {
-        "parentPluginId": "apm",
-        "id": "def-server.APMRouteHandlerResources",
-        "type": "Interface",
-        "tags": [],
-        "label": "APMRouteHandlerResources",
-        "description": [],
-        "path": "x-pack/plugins/apm/server/routes/typings.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "apm",
-            "id": "def-server.APMRouteHandlerResources.request",
-            "type": "Object",
-            "tags": [],
-            "label": "request",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any>"
-            ],
-            "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "apm",
-            "id": "def-server.APMRouteHandlerResources.context",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "context",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
-              " & { licensing: Promise<",
-              {
-                "pluginId": "licensing",
-                "scope": "server",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-server.LicensingApiRequestHandlerContext",
-                "text": "LicensingApiRequestHandlerContext"
-              },
-              ">; alerting: Promise<",
-              {
-                "pluginId": "alerting",
-                "scope": "server",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-server.AlertingApiRequestHandlerContext",
-                "text": "AlertingApiRequestHandlerContext"
-              },
-              ">; rac: Promise<",
-              {
-                "pluginId": "ruleRegistry",
-                "scope": "server",
-                "docId": "kibRuleRegistryPluginApi",
-                "section": "def-server.RacApiRequestHandlerContext",
-                "text": "RacApiRequestHandlerContext"
-              },
-              ">; }"
-            ],
-            "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "apm",
-            "id": "def-server.APMRouteHandlerResources.params",
-            "type": "Object",
-            "tags": [],
-            "label": "params",
-            "description": [],
-            "signature": [
-              "{ query: { _inspect: boolean; }; }"
-            ],
-            "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "apm",
-            "id": "def-server.APMRouteHandlerResources.config",
-            "type": "Object",
-            "tags": [],
-            "label": "config",
-            "description": [],
-            "signature": [
-              "{ readonly indices: Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; }>; readonly enabled: boolean; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly serviceMapTerminateAfter: number; readonly serviceMapMaxTraces: number; readonly ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
-              "SearchAggregatedTransactionSetting",
-              "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly forceSyntheticSource: boolean; readonly latestAgentVersionsUrl: string; readonly serverlessOnboarding: boolean; readonly serverless: Readonly<{} & { enabled: true; }>; readonly managedServiceUrl: string; readonly featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; }>; }"
-            ],
-            "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "apm",
-            "id": "def-server.APMRouteHandlerResources.featureFlags",
-            "type": "Object",
-            "tags": [],
-            "label": "featureFlags",
-            "description": [],
-            "signature": [
-              "{ agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; }"
-            ],
-            "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "apm",
-            "id": "def-server.APMRouteHandlerResources.logger",
-            "type": "Object",
-            "tags": [],
-            "label": "logger",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "common",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-common.Logger",
-                "text": "Logger"
-              }
-            ],
-            "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "apm",
-            "id": "def-server.APMRouteHandlerResources.core",
-            "type": "Object",
-            "tags": [],
-            "label": "core",
-            "description": [],
-            "signature": [
-              "APMCore"
-            ],
-            "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "apm",
-            "id": "def-server.APMRouteHandlerResources.plugins",
-            "type": "Object",
-            "tags": [],
-            "label": "plugins",
-            "description": [],
-            "signature": [
-              "{ data: { setup: ",
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataPluginApi",
-                "section": "def-server.DataPluginSetup",
-                "text": "DataPluginSetup"
-              },
-              "; start: () => Promise<",
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataPluginApi",
-                "section": "def-server.DataPluginStart",
-                "text": "DataPluginStart"
-              },
-              ">; }; features: { setup: ",
-              {
-                "pluginId": "features",
-                "scope": "server",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-server.PluginSetupContract",
-                "text": "PluginSetupContract"
-              },
-              "; start: () => Promise<",
-              {
-                "pluginId": "features",
-                "scope": "server",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-server.PluginStartContract",
-                "text": "PluginStartContract"
-              },
-              ">; }; licensing: { setup: ",
-              {
-                "pluginId": "licensing",
-                "scope": "server",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-server.LicensingPluginSetup",
-                "text": "LicensingPluginSetup"
-              },
-              "; start: () => Promise<",
-              {
-                "pluginId": "licensing",
-                "scope": "server",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-server.LicensingPluginStart",
-                "text": "LicensingPluginStart"
-              },
-              ">; }; observability: { setup: { getAlertDetailsConfig(): Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
-              " & { licensing: Promise<",
-              {
-                "pluginId": "licensing",
-                "scope": "server",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-server.LicensingApiRequestHandlerContext",
-                "text": "LicensingApiRequestHandlerContext"
-              },
-              ">; }, request: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any>) => Promise<{ readonly index: string; create: (createParams: { annotation: { type: string; }; '@timestamp': string; message: string; } & { tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; }) => Promise<{ _id: string; _index: string; _source: ",
-              "Annotation",
-              "; }>; getById: (getByIdParams: { id: string; }) => Promise<",
-              "GetResponse",
-              "<unknown>>; delete: (deleteParams: { id: string; }) => Promise<",
-              "WriteResponseBase",
-              ">; } | undefined>; alertsLocator: ",
-              {
-                "pluginId": "share",
-                "scope": "common",
-                "docId": "kibSharePluginApi",
-                "section": "def-common.LocatorPublic",
-                "text": "LocatorPublic"
-              },
-              "<",
-              {
-                "pluginId": "observability",
-                "scope": "common",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-common.AlertsLocatorParams",
-                "text": "AlertsLocatorParams"
-              },
-              ">; }; start: () => Promise<undefined>; }; ruleRegistry: { setup: ",
-              {
-                "pluginId": "ruleRegistry",
-                "scope": "server",
-                "docId": "kibRuleRegistryPluginApi",
-                "section": "def-server.RuleRegistryPluginSetupContract",
-                "text": "RuleRegistryPluginSetupContract"
-              },
-              "; start: () => Promise<",
-              {
-                "pluginId": "ruleRegistry",
-                "scope": "server",
-                "docId": "kibRuleRegistryPluginApi",
-                "section": "def-server.RuleRegistryPluginStartContract",
-                "text": "RuleRegistryPluginStartContract"
-              },
-              ">; }; infra: { setup: ",
-              {
-                "pluginId": "infra",
-                "scope": "server",
-                "docId": "kibInfraPluginApi",
-                "section": "def-server.InfraPluginSetup",
-                "text": "InfraPluginSetup"
-              },
-              "; start: () => Promise<",
-              {
-                "pluginId": "infra",
-                "scope": "server",
-                "docId": "kibInfraPluginApi",
-                "section": "def-server.InfraPluginStart",
-                "text": "InfraPluginStart"
-              },
-              ">; }; dataViews: { setup: {}; start: () => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "server",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-server.DataViewsServerPluginStart",
-                "text": "DataViewsServerPluginStart"
-              },
-              ">; }; share: { setup: ",
-              {
-                "pluginId": "share",
-                "scope": "server",
-                "docId": "kibSharePluginApi",
-                "section": "def-server.SharePluginSetup",
-                "text": "SharePluginSetup"
-              },
-              "; start: () => Promise<undefined>; }; actions?: { setup: ",
-              {
-                "pluginId": "actions",
-                "scope": "server",
-                "docId": "kibActionsPluginApi",
-                "section": "def-server.PluginSetupContract",
-                "text": "PluginSetupContract"
-              },
-              "; start: () => Promise<",
-              {
-                "pluginId": "actions",
-                "scope": "server",
-                "docId": "kibActionsPluginApi",
-                "section": "def-server.PluginStartContract",
-                "text": "PluginStartContract"
-              },
-              ">; } | undefined; alerting?: { setup: ",
-              {
-                "pluginId": "alerting",
-                "scope": "server",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-server.PluginSetupContract",
-                "text": "PluginSetupContract"
-              },
-              "; start: () => Promise<",
-              {
-                "pluginId": "alerting",
-                "scope": "server",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-server.PluginStartContract",
-                "text": "PluginStartContract"
-              },
-              ">; } | undefined; cloud?: { setup: ",
-              {
-                "pluginId": "cloud",
-                "scope": "server",
-                "docId": "kibCloudPluginApi",
-                "section": "def-server.CloudSetup",
-                "text": "CloudSetup"
-              },
-              "; start: () => Promise<never>; } | undefined; fleet?: { setup: never; start: () => Promise<",
-              {
-                "pluginId": "fleet",
-                "scope": "server",
-                "docId": "kibFleetPluginApi",
-                "section": "def-server.FleetStartContract",
-                "text": "FleetStartContract"
-              },
-              ">; } | undefined; home?: { setup: ",
-              {
-                "pluginId": "home",
-                "scope": "server",
-                "docId": "kibHomePluginApi",
-                "section": "def-server.HomeServerPluginSetup",
-                "text": "HomeServerPluginSetup"
-              },
-              "; start: () => Promise<",
-              {
-                "pluginId": "home",
-                "scope": "server",
-                "docId": "kibHomePluginApi",
-                "section": "def-server.HomeServerPluginStart",
-                "text": "HomeServerPluginStart"
-              },
-              ">; } | undefined; ml?: { setup: ",
-              {
-                "pluginId": "ml",
-                "scope": "server",
-                "docId": "kibMlPluginApi",
-                "section": "def-server.MlPluginSetup",
-                "text": "MlPluginSetup"
-              },
-              "; start: () => Promise<never>; } | undefined; security?: { setup: ",
-              {
-                "pluginId": "security",
-                "scope": "server",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-server.SecurityPluginSetup",
-                "text": "SecurityPluginSetup"
-              },
-              "; start: () => Promise<",
-              {
-                "pluginId": "security",
-                "scope": "server",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-server.SecurityPluginStart",
-                "text": "SecurityPluginStart"
-              },
-              ">; } | undefined; spaces?: { setup: ",
-              {
-                "pluginId": "spaces",
-                "scope": "server",
-                "docId": "kibSpacesPluginApi",
-                "section": "def-server.SpacesPluginSetup",
-                "text": "SpacesPluginSetup"
-              },
-              "; start: () => Promise<",
-              {
-                "pluginId": "spaces",
-                "scope": "server",
-                "docId": "kibSpacesPluginApi",
-                "section": "def-server.SpacesPluginStart",
-                "text": "SpacesPluginStart"
-              },
-              ">; } | undefined; taskManager?: { setup: ",
-              {
-                "pluginId": "taskManager",
-                "scope": "server",
-                "docId": "kibTaskManagerPluginApi",
-                "section": "def-server.TaskManagerSetupContract",
-                "text": "TaskManagerSetupContract"
-              },
-              "; start: () => Promise<",
-              {
-                "pluginId": "taskManager",
-                "scope": "server",
-                "docId": "kibTaskManagerPluginApi",
-                "section": "def-server.TaskManagerStartContract",
-                "text": "TaskManagerStartContract"
-              },
-              ">; } | undefined; usageCollection?: { setup: ",
-              {
-                "pluginId": "usageCollection",
-                "scope": "server",
-                "docId": "kibUsageCollectionPluginApi",
-                "section": "def-server.UsageCollectionSetup",
-                "text": "UsageCollectionSetup"
-              },
-              "; start: () => Promise<never>; } | undefined; customIntegrations?: { setup: ",
-              {
-                "pluginId": "customIntegrations",
-                "scope": "server",
-                "docId": "kibCustomIntegrationsPluginApi",
-                "section": "def-server.CustomIntegrationsPluginSetup",
-                "text": "CustomIntegrationsPluginSetup"
-              },
-              "; start: () => Promise<",
-              {
-                "pluginId": "customIntegrations",
-                "scope": "server",
-                "docId": "kibCustomIntegrationsPluginApi",
-                "section": "def-server.CustomIntegrationsPluginStart",
-                "text": "CustomIntegrationsPluginStart"
-              },
-              ">; } | undefined; }"
-            ],
-            "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "apm",
-            "id": "def-server.APMRouteHandlerResources.ruleDataClient",
-            "type": "Object",
-            "tags": [],
-            "label": "ruleDataClient",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "ruleRegistry",
-                "scope": "server",
-                "docId": "kibRuleRegistryPluginApi",
-                "section": "def-server.IRuleDataClient",
-                "text": "IRuleDataClient"
-              }
-            ],
-            "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "apm",
-            "id": "def-server.APMRouteHandlerResources.telemetryUsageCounter",
-            "type": "Object",
-            "tags": [],
-            "label": "telemetryUsageCounter",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "usageCollection",
-                "scope": "server",
-                "docId": "kibUsageCollectionPluginApi",
-                "section": "def-server.IUsageCounter",
-                "text": "IUsageCounter"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "apm",
-            "id": "def-server.APMRouteHandlerResources.kibanaVersion",
-            "type": "string",
-            "tags": [],
-            "label": "kibanaVersion",
-            "description": [],
-            "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
     "enums": [],
     "misc": [
       {
@@ -961,24 +438,9 @@
         "label": "APMConfig",
         "description": [],
         "signature": [
-          "{ readonly indices: Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; }>; readonly enabled: boolean; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly serviceMapTerminateAfter: number; readonly serviceMapMaxTraces: number; readonly ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
+          "{ readonly enabled: boolean; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly serviceMapTerminateAfter: number; readonly serviceMapMaxTraces: number; readonly ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
           "SearchAggregatedTransactionSetting",
-          "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly forceSyntheticSource: boolean; readonly latestAgentVersionsUrl: string; readonly serverlessOnboarding: boolean; readonly serverless: Readonly<{} & { enabled: true; }>; readonly managedServiceUrl: string; readonly featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; }>; }"
-        ],
-        "path": "x-pack/plugins/apm/server/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "apm",
-        "id": "def-server.ApmIndicesConfigName",
-        "type": "Type",
-        "tags": [],
-        "label": "ApmIndicesConfigName",
-        "description": [],
-        "signature": [
-          "\"error\" | \"metric\" | \"transaction\" | \"span\" | \"onboarding\""
+          "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly forceSyntheticSource: boolean; readonly latestAgentVersionsUrl: string; readonly serverless: Readonly<{} & { enabled: true; }>; readonly serverlessOnboarding: boolean; readonly managedServiceUrl: string; readonly featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; }>; }"
         ],
         "path": "x-pack/plugins/apm/server/index.ts",
         "deprecated": false,
@@ -1010,13 +472,7 @@
           "<{ 'service.environment': ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { 'service.name': string; start: string; end: string; } & { 'service.environment'?: string | undefined; }; }; }) => Promise<{ content: ",
           "APMDownstreamDependency",
           "[]; }>; } & ",
@@ -1112,13 +568,7 @@
           "<",
           "CorrelationsEventType",
           ".Error>]>; }>>; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { body: { sets: { foreground: { start: string; end: string; 'service.name': string; label: string; } & { filter?: string | undefined; 'service.environment'?: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -1156,13 +606,7 @@
           "; 'error.grouping_name': ",
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { start: string; end: string; 'error.grouping_name': string; }; }; }) => Promise<{ content: Partial<",
           "APMError",
           "> | undefined; }>; } & ",
@@ -1186,13 +630,7 @@
           "; 'transaction.type': ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { 'service.name': string; start: string; end: string; } & { 'service.environment'?: string | undefined; 'transaction.type'?: string | undefined; }; }; }) => Promise<{ content: ",
           "ServiceSummary",
           "; }>; } & ",
@@ -1314,13 +752,7 @@
           "; end: ",
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { body: { stats: ({ 'service.environment': \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -1364,30 +796,24 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params?: { query?: { kuery?: string | undefined; start?: number | undefined; end?: number | undefined; } | undefined; } | undefined; }) => Promise<{ esResponses: { existingIndexTemplates: ",
           "IndicesGetIndexTemplateIndexTemplateItem",
-          "[]; fieldCaps: ",
+          "[]; fieldCaps?: ",
           "FieldCapsResponse",
-          "; indices: ",
+          " | undefined; indices?: ",
           "IndicesGetResponse",
-          "; ingestPipelines: ",
+          " | undefined; ingestPipelines?: ",
           "IngestGetPipelineResponse",
-          "; }; diagnosticsPrivileges: { index: Record<string, ",
+          " | undefined; }; diagnosticsPrivileges: { index: Record<string, ",
           "SecurityHasPrivilegesPrivileges",
-          ">; cluster: Record<string, boolean>; hasAllClusterPrivileges: boolean; hasAllIndexPrivileges: boolean; hasAllPrivileges: boolean; }; apmIndices: Readonly<{ error: string; onboarding: string; span: string; transaction: string; metric: string; }>; apmIndexTemplates: { name: string; isNonStandard: boolean; exists: boolean; }[]; fleetPackageInfo: { isInstalled: boolean; version?: string | undefined; }; kibanaVersion: string; elasticsearchVersion: string; apmEvents: ",
+          ">; cluster: Record<string, boolean>; hasAllClusterPrivileges: boolean; hasAllIndexPrivileges: boolean; hasAllPrivileges: boolean; }; apmIndices: Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; }>; apmIndexTemplates: { name: string; isNonStandard: boolean; exists: boolean; }[]; fleetPackageInfo: { isInstalled: boolean; version?: string | undefined; }; kibanaVersion: string; elasticsearchVersion: string; apmEvents: ",
           "ApmEvent",
-          "[]; invalidIndices: ",
+          "[]; invalidIndices?: ",
           "IndiciesItem",
-          "[]; validIndices: ",
+          "[] | undefined; validIndices?: ",
           "IndiciesItem",
-          "[]; dataStreams: ",
+          "[] | undefined; dataStreams: ",
           "IndicesDataStream",
           "[]; nonDataStreamIndices: string[]; indexTemplatesByIndexPattern: { indexPattern: string; indexTemplates: { priority: number | undefined; isNonStandard: boolean; templateIndexPatterns: string[]; templateName: string; }[]; }[]; params: { start: number; end: number; kuery?: string | undefined; }; }>; } & ",
           "APMRouteCreateOptions",
@@ -1440,13 +866,7 @@
           "; fieldValues: ",
           "Type",
           "<string[], string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { kuery: string; } & { start: number; end: number; } & { offset?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -1504,13 +924,7 @@
           "<{ field: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { kuery: string; } & { start: number; end: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -1570,13 +984,7 @@
           "<number, number, unknown>; fieldName: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { kuery: string; } & { start: number; end: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -1638,13 +1046,7 @@
           "<{ locationField: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { kuery: string; } & { start: number; end: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -1706,13 +1108,7 @@
           "<{ transactionType: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { kuery: string; } & { start: number; end: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -1776,13 +1172,7 @@
           "; transactionName: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { kuery: string; } & { start: number; end: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -1846,13 +1236,7 @@
           "; transactionName: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { kuery: string; } & { start: number; end: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -1910,13 +1294,7 @@
           "<{ transactionType: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { kuery: string; } & { start: number; end: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -1974,13 +1352,7 @@
           "<{ transactionType: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { kuery: string; } & { start: number; end: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -2038,13 +1410,7 @@
           "<{ probability: ",
           "Type",
           "<number, number, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -2060,13 +1426,7 @@
           "; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/get_latest_agent_versions\": { endpoint: \"GET /internal/apm/get_latest_agent_versions\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<",
           "AgentLatestVersionsResponse",
           ">; } & ",
@@ -2116,13 +1476,7 @@
           "; agentLanguage: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -2138,13 +1492,7 @@
           ">; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/settings/labs\": { endpoint: \"GET /internal/apm/settings/labs\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<{ labsItems: string[]; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/time_range_metadata\": { endpoint: \"GET /internal/apm/time_range_metadata\"; params?: ",
@@ -2170,25 +1518,13 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { useSpanName: boolean; enableServiceTransactionMetrics: boolean; enableContinuousRollups: boolean; } & { kuery: string; } & { start: number; end: number; }; }; }) => Promise<",
           "TimeRangeMetadata",
           ">; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/debug-telemetry\": { endpoint: \"GET /internal/apm/debug-telemetry\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<unknown>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/services/{serviceName}/infrastructure_attributes\": { endpoint: \"GET /internal/apm/services/{serviceName}/infrastructure_attributes\"; params?: ",
@@ -2230,13 +1566,7 @@
             "text": "NonEmptyStringBrand"
           },
           ">]>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { kuery: string; } & { start: number; end: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -2270,13 +1600,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { traceId: string; spanId: string; }; query: { kuery: string; } & { start: number; end: number; }; }; }) => Promise<{ spanLinksDetails: ",
           "SpanLinkDetails",
           "[]; }>; } & ",
@@ -2346,13 +1670,7 @@
             "text": "ProcessorEvent"
           },
           ".span>]>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { traceId: string; spanId: string; }; query: { kuery: string; } & { start: number; end: number; } & { processorEvent: ",
           {
             "pluginId": "observability",
@@ -2424,13 +1742,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { indexLifecyclePhase: ",
           "IndexLifecyclePhaseSelectOption",
           "; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
@@ -2446,13 +1758,7 @@
           ">; } & { kuery: string; } & { start: number; end: number; }; }; }) => Promise<{ services: { serviceName: string; }[]; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/storage_explorer/is_cross_cluster_search\": { endpoint: \"GET /internal/apm/storage_explorer/is_cross_cluster_search\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<{ isCrossClusterSearch: boolean; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/storage_explorer_summary_stats\": { endpoint: \"GET /internal/apm/storage_explorer_summary_stats\"; params?: ",
@@ -2518,13 +1824,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { indexLifecyclePhase: ",
           "IndexLifecyclePhaseSelectOption",
           "; } & { probability: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
@@ -2542,13 +1842,7 @@
           ">; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/storage_explorer/privileges\": { endpoint: \"GET /internal/apm/storage_explorer/privileges\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<{ hasPrivileges: boolean; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/storage_chart\": { endpoint: \"GET /internal/apm/storage_chart\"; params?: ",
@@ -2614,13 +1908,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { indexLifecyclePhase: ",
           "IndexLifecyclePhaseSelectOption",
           "; } & { probability: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
@@ -2704,13 +1992,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { indexLifecyclePhase: ",
           "IndexLifecyclePhaseSelectOption",
           "; } & { probability: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
@@ -2790,13 +2072,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { indexLifecyclePhase: ",
           "IndexLifecyclePhaseSelectOption",
           "; } & { probability: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
@@ -2832,13 +2108,7 @@
           "<",
           "PrivilegeType",
           ".AGENT_CONFIG>]>>; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { body: { name: string; privileges: ",
           "PrivilegeType",
           "[]; }; }; }) => Promise<",
@@ -2852,37 +2122,19 @@
           "<{ id: ",
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { body: { id: string; }; }; }) => Promise<",
           "InvalidateAgentKeyResponse",
           ">; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/agent_keys/privileges\": { endpoint: \"GET /internal/apm/agent_keys/privileges\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<",
           "AgentKeysPrivilegesResponse",
           ">; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/agent_keys\": { endpoint: \"GET /internal/apm/agent_keys\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<",
           "AgentKeysResponse",
           ">; } & ",
@@ -2936,13 +2188,7 @@
           ".span>]>; id: ",
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { processorEvent: ",
           {
             "pluginId": "observability",
@@ -2954,13 +2200,7 @@
           "; id: string; }; }; }) => Promise<{ metadata: Partial<Record<string, unknown[]>>; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/has_data\": { endpoint: \"GET /internal/apm/has_data\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<{ hasData: boolean; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/fallback_to_transactions\": { endpoint: \"GET /internal/apm/fallback_to_transactions\"; params?: ",
@@ -2978,13 +2218,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params?: { query?: ({ kuery: string; } & { start?: number | undefined; end?: number | undefined; }) | undefined; } | undefined; }) => Promise<{ fallbackToTransactions: boolean; }>; } & ",
           "APMRouteCreateOptions",
           "; \"POST /internal/apm/correlations/p_values/transactions\": { endpoint: \"POST /internal/apm/correlations/p_values/transactions\"; params?: ",
@@ -3040,13 +2274,7 @@
           "<",
           "StringC",
           ">; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { body: { serviceName?: string | undefined; transactionName?: string | undefined; transactionType?: string | undefined; durationMin?: number | undefined; durationMax?: number | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -3122,13 +2350,7 @@
           ", ",
           "Type",
           "<number, number, unknown>]>; }>>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { body: { serviceName?: string | undefined; transactionName?: string | undefined; transactionType?: string | undefined; durationMin?: number | undefined; durationMax?: number | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -3192,13 +2414,7 @@
           "<",
           "StringC",
           ">; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { body: { serviceName?: string | undefined; transactionName?: string | undefined; transactionType?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -3268,13 +2484,7 @@
           ", ",
           "NumberC",
           "]>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { serviceName?: string | undefined; transactionName?: string | undefined; transactionType?: string | undefined; samplerShardSize?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -3332,13 +2542,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { serviceName?: string | undefined; transactionName?: string | undefined; transactionType?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -3400,13 +2604,7 @@
           "<number, number, unknown>; sampleRangeTo: ",
           "Type",
           "<number, number, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { start: number; end: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -3464,13 +2662,7 @@
             "text": "NonEmptyStringBrand"
           },
           ">]>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { dependencyName: string; spanName: string; percentileThreshold: number; } & { start: number; end: number; } & { kuery: string; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -3530,13 +2722,7 @@
           "; searchServiceDestinationMetrics: ",
           "Type",
           "<boolean, boolean, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { start: number; end: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -3598,13 +2784,7 @@
           "<{ offset: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { dependencyName: string; spanName: string; searchServiceDestinationMetrics: boolean; } & { start: number; end: number; } & { kuery: string; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -3664,13 +2844,7 @@
           "<{ offset: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { dependencyName: string; spanName: string; searchServiceDestinationMetrics: boolean; } & { start: number; end: number; } & { kuery: string; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -3732,13 +2906,7 @@
           "<{ offset: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { dependencyName: string; spanName: string; searchServiceDestinationMetrics: boolean; } & { start: number; end: number; } & { kuery: string; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -3768,13 +2936,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { dependencyName: string; } & { start: number; end: number; }; }; }) => Promise<{ metadata: ",
           "MetadataForDependencyResponse",
           "; }>; } & ",
@@ -3832,13 +2994,7 @@
           "<{ kuery: ",
           "StringC",
           "; }>]>; }>]> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { dependencyName: string; } & { start: number; end: number; } & { numBuckets: number; }; } & { query?: ({ environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -3900,13 +3056,7 @@
           "<{ offset: ",
           "StringC",
           "; }>; }>]> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { start: number; end: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -3922,23 +3072,11 @@
           ">; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/fleet/java_agent_versions\": { endpoint: \"GET /internal/apm/fleet/java_agent_versions\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<{ versions: string[] | undefined; }>; } & ",
           "APMRouteCreateOptions",
           "; \"POST /internal/apm/fleet/cloud_apm_package_policy\": { endpoint: \"POST /internal/apm/fleet/cloud_apm_package_policy\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<{ cloudApmPackagePolicy: ",
           {
             "pluginId": "fleet",
@@ -3950,25 +3088,13 @@
           "; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/fleet/migration_check\": { endpoint: \"GET /internal/apm/fleet/migration_check\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<",
           "RunMigrationCheckResponse",
           ">; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/fleet/apm_server_schema/unsupported\": { endpoint: \"GET /internal/apm/fleet/apm_server_schema/unsupported\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<{ unsupported: ",
           "UnsupportedApmServerSchema",
           "; }>; } & ",
@@ -3984,45 +3110,21 @@
           ", ",
           "UnknownC",
           ">; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { body: { schema: { [x: string]: unknown; }; }; }; }) => Promise<void>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/fleet/agents\": { endpoint: \"GET /internal/apm/fleet/agents\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<",
           "FleetAgentResponse",
           ">; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/fleet/has_apm_policies\": { endpoint: \"GET /internal/apm/fleet/has_apm_policies\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<{ hasApmPolicies: boolean; }>; } & ",
           "APMRouteCreateOptions",
           "; \"POST /internal/apm/sourcemaps/migrate_fleet_artifacts\": { endpoint: \"POST /internal/apm/sourcemaps/migrate_fleet_artifacts\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<void>; } & ",
           "APMRouteCreateOptions",
           "; \"POST /api/apm/androidmaps 2023-10-31\": { endpoint: \"POST /api/apm/androidmaps 2023-10-31\"; params?: ",
@@ -4036,13 +3138,7 @@
           "; map_file: ",
           "Type",
           "<string, string | Buffer, unknown>; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { body: { service_name: string; service_version: string; map_file: string; }; }; }) => Promise<",
           {
             "pluginId": "fleet",
@@ -4060,13 +3156,7 @@
           "<{ id: ",
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { id: string; }; }; }) => Promise<void>; } & ",
           "APMRouteCreateOptions",
           "; \"POST /api/apm/sourcemaps 2023-10-31\": { endpoint: \"POST /api/apm/sourcemaps 2023-10-31\"; params?: ",
@@ -4082,13 +3172,7 @@
           "; sourcemap: ",
           "Type",
           "<{ version: number; sources: string[]; mappings: string; } & { names?: string[] | undefined; file?: string | undefined; sourceRoot?: string | undefined; sourcesContent?: (string | null)[] | undefined; }, string | Buffer, unknown>; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { body: { service_name: string; service_version: string; bundle_filepath: string; sourcemap: { version: number; sources: string[]; mappings: string; } & { names?: string[] | undefined; file?: string | undefined; sourceRoot?: string | undefined; sourcesContent?: (string | null)[] | undefined; }; }; }; }) => Promise<",
           {
             "pluginId": "fleet",
@@ -4108,13 +3192,7 @@
           "<number, number, unknown>; perPage: ",
           "Type",
           "<number, number, unknown>; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params?: { query?: { page?: number | undefined; perPage?: number | undefined; } | undefined; } | undefined; }) => Promise<",
           "ListSourceMapArtifactsResponse",
           " | undefined>; } & ",
@@ -4126,13 +3204,7 @@
           "<{ id: ",
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { id: string; }; }; }) => Promise<{ result: string; }>; } & ",
           "APMRouteCreateOptions",
           "; \"PUT /internal/apm/settings/custom_links/{id}\": { endpoint: \"PUT /internal/apm/settings/custom_links/{id}\"; params?: ",
@@ -4174,13 +3246,7 @@
           "; }>]>; value: ",
           "StringC",
           "; }>>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { id: string; }; body: { label: string; url: string; } & { id?: string | undefined; filters?: { key: \"\" | \"service.name\" | \"service.environment\" | \"transaction.name\" | \"transaction.type\"; value: string; }[] | undefined; }; }; }) => Promise<void>; } & ",
           "APMRouteCreateOptions",
           "; \"POST /internal/apm/settings/custom_links\": { endpoint: \"POST /internal/apm/settings/custom_links\"; params?: ",
@@ -4218,13 +3284,7 @@
           "; }>]>; value: ",
           "StringC",
           "; }>>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { body: { label: string; url: string; } & { id?: string | undefined; filters?: { key: \"\" | \"service.name\" | \"service.environment\" | \"transaction.name\" | \"transaction.type\"; value: string; }[] | undefined; }; }; }) => Promise<void>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/settings/custom_links\": { endpoint: \"GET /internal/apm/settings/custom_links\"; params?: ",
@@ -4240,13 +3300,7 @@
           "; 'transaction.type': ",
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params?: { query?: { 'service.name'?: string | undefined; 'service.environment'?: string | undefined; 'transaction.name'?: string | undefined; 'transaction.type'?: string | undefined; } | undefined; } | undefined; }) => Promise<{ customLinks: ",
           "CustomLink",
           "[]; }>; } & ",
@@ -4264,13 +3318,7 @@
           "; 'transaction.type': ",
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params?: { query?: { 'service.name'?: string | undefined; 'service.environment'?: string | undefined; 'transaction.name'?: string | undefined; 'transaction.type'?: string | undefined; } | undefined; } | undefined; }) => Promise<",
           "Transaction",
           ">; } & ",
@@ -4280,13 +3328,7 @@
           "<{ body: ",
           "PartialC",
           "<SaveApmIndicesBodySchema>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { body: { readonly error?: string | undefined; readonly metric?: string | undefined; readonly transaction?: string | undefined; readonly span?: string | undefined; readonly onboarding?: string | undefined; }; }; }) => Promise<",
           {
             "pluginId": "@kbn/core-saved-objects-common",
@@ -4298,45 +3340,21 @@
           "<{}>>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/settings/apm-indices\": { endpoint: \"GET /internal/apm/settings/apm-indices\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
-          ") => Promise<Readonly<{ error: string; onboarding: string; span: string; transaction: string; metric: string; }>>; } & ",
+          "APMRouteHandlerResources",
+          ") => Promise<Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; }>>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/settings/apm-index-settings\": { endpoint: \"GET /internal/apm/settings/apm-index-settings\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<{ apmIndexSettings: ",
           "ApmIndexSettingsResponse",
           "; }>; } & ",
           "APMRouteCreateOptions",
           "; \"POST /internal/apm/settings/anomaly-detection/update_to_v3\": { endpoint: \"POST /internal/apm/settings/anomaly-detection/update_to_v3\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<{ update: boolean; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/settings/anomaly-detection/environments\": { endpoint: \"GET /internal/apm/settings/anomaly-detection/environments\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<{ environments: string[]; }>; } & ",
           "APMRouteCreateOptions",
           "; \"POST /internal/apm/settings/anomaly-detection/jobs\": { endpoint: \"POST /internal/apm/settings/anomaly-detection/jobs\"; params?: ",
@@ -4364,13 +3382,7 @@
             "text": "NonEmptyStringBrand"
           },
           ">]>>; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { body: { environments: (\"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -4384,13 +3396,7 @@
           ">)[]; }; }; }) => Promise<{ jobCreated: true; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/settings/anomaly-detection/jobs\": { endpoint: \"GET /internal/apm/settings/anomaly-detection/jobs\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<{ jobs: ",
           "ApmMlJob",
           "[]; hasLegacyJobs: boolean; }>; } & ",
@@ -4402,13 +3408,7 @@
           "<{ serviceName: ",
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { serviceName: string; }; }; }) => Promise<{ agentName: string | undefined; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /api/apm/settings/agent-configuration/environments 2023-10-31\": { endpoint: \"GET /api/apm/settings/agent-configuration/environments 2023-10-31\"; params?: ",
@@ -4418,13 +3418,7 @@
           "<{ serviceName: ",
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params?: { query?: { serviceName?: string | undefined; } | undefined; } | undefined; }) => Promise<{ environments: ",
           "EnvironmentsResponse",
           "; }>; } & ",
@@ -4448,13 +3442,7 @@
           "; mark_as_applied_by_agent: ",
           "BooleanC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { body: { service: { name?: string | undefined; environment?: string | undefined; }; } & { etag?: string | undefined; mark_as_applied_by_agent?: boolean | undefined; }; }; }) => Promise<",
           {
             "pluginId": "@kbn/es-types",
@@ -4504,13 +3492,7 @@
           "<Record<string, ",
           "SettingValidation",
           ">>]>; }>]>; }>]> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query?: { overwrite?: boolean | undefined; } | undefined; } & { body: { agent_name?: string | undefined; } & { service: { name?: string | undefined; environment?: string | undefined; }; settings: { [x: string]: string; } & { [x: string]: any; }; }; }; }) => Promise<void>; } & ",
           "APMRouteCreateOptions",
           "; \"DELETE /api/apm/settings/agent-configuration 2023-10-31\": { endpoint: \"DELETE /api/apm/settings/agent-configuration 2023-10-31\"; params?: ",
@@ -4524,13 +3506,7 @@
           "; environment: ",
           "StringC",
           "; }>; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { body: { service: { name?: string | undefined; environment?: string | undefined; }; }; }; }) => Promise<{ result: string; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /api/apm/settings/agent-configuration/view 2023-10-31\": { endpoint: \"GET /api/apm/settings/agent-configuration/view 2023-10-31\"; params?: ",
@@ -4542,25 +3518,13 @@
           "; environment: ",
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params?: { query?: { name?: string | undefined; environment?: string | undefined; } | undefined; } | undefined; }) => Promise<",
           "AgentConfiguration",
           ">; } & ",
           "APMRouteCreateOptions",
           "; \"GET /api/apm/settings/agent-configuration 2023-10-31\": { endpoint: \"GET /api/apm/settings/agent-configuration 2023-10-31\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<{ configurations: ",
           "AgentConfiguration",
           "[]; }>; } & ",
@@ -4632,13 +3596,7 @@
           ">; kqlFilter: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { aggregationType?: ",
           "AggregationType",
           " | undefined; serviceName?: string | undefined; errorGroupingKey?: string | undefined; transactionType?: string | undefined; transactionName?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
@@ -4722,13 +3680,7 @@
           ">; kqlFilter: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { aggregationType?: ",
           "AggregationType",
           " | undefined; serviceName?: string | undefined; errorGroupingKey?: string | undefined; transactionType?: string | undefined; transactionName?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
@@ -4812,13 +3764,7 @@
           ">; kqlFilter: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { aggregationType?: ",
           "AggregationType",
           " | undefined; serviceName?: string | undefined; errorGroupingKey?: string | undefined; transactionType?: string | undefined; transactionName?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
@@ -4886,13 +3832,7 @@
           "<{ offset: ",
           "StringC",
           "; }>]>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { transactionType: string; transactionName: string; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -4956,13 +3896,7 @@
           "<{ offset: ",
           "StringC",
           "; }>]>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { transactionType: string; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -5066,13 +4000,7 @@
           "<",
           "RollupInterval",
           ".None>]>; }>]>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { transactionType: string; bucketSizeInSeconds: number; } & { transactionName?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -5142,13 +4070,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { transactionType: string; } & { transactionName?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -5218,13 +4140,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { transactionType: string; transactionName: string; } & { transactionId?: string | undefined; traceId?: string | undefined; sampleRangeFrom?: number | undefined; sampleRangeTo?: number | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -5344,13 +4260,7 @@
           "<",
           "RollupInterval",
           ".None>]>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { transactionType: string; latencyAggregationType: ",
           "LatencyAggregationType",
           "; bucketSizeInSeconds: number; useDurationSummary: boolean; } & { transactionName?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
@@ -5476,13 +4386,7 @@
           "<",
           "LatencyAggregationType",
           ".p99>]>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -5594,13 +4498,7 @@
           "<",
           "RollupInterval",
           ".None>]>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -5648,13 +4546,7 @@
           "; }>, ",
           "UndefinedC",
           "]>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { traceId: string; spanId: string; }; query: { start: number; end: number; } & { parentTransactionId?: string | undefined; }; }; }) => Promise<{ span?: ",
           "Span",
           " | undefined; parentTransaction?: ",
@@ -5676,13 +4568,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { traceId: string; transactionId: string; }; query: { start: number; end: number; }; }; }) => Promise<",
           "Transaction",
           ">; } & ",
@@ -5736,13 +4622,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { body: { traceIds: string[]; serviceName: ",
           "Branded",
           "<string, ",
@@ -5812,13 +4692,7 @@
           "<",
           "TraceSearchType",
           ".eql>]>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { start: number; end: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -5848,13 +4722,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { transactionId: string; }; query: { start: number; end: number; }; }; }) => Promise<{ transaction: ",
           "Transaction",
           "; }>; } & ",
@@ -5872,13 +4740,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { traceId: string; }; query: { start: number; end: number; }; }; }) => Promise<{ transaction: ",
           "Transaction",
           "; }>; } & ",
@@ -5922,13 +4784,7 @@
           "<{ probability: ",
           "Type",
           "<number, number, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -5962,13 +4818,7 @@
           "<{ entryTransactionId: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { traceId: string; }; query: { start: number; end: number; } & { entryTransactionId: string; }; }; }) => Promise<{ traceItems: ",
           "TraceItems",
           "; entryTransaction?: ",
@@ -5996,23 +4846,11 @@
           "<{ serviceName: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { fieldName: string; fieldValue: string; } & { start: number; end: number; } & { serviceName?: string | undefined; }; }; }) => Promise<{ terms: string[]; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/service-group/counts\": { endpoint: \"GET /internal/apm/service-group/counts\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<ServiceGroupCounts>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/service-group/services\": { endpoint: \"GET /internal/apm/service-group/services\"; params?: ",
@@ -6030,13 +4868,7 @@
           "<{ kuery: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { start: number; end: number; } & { kuery?: string | undefined; }; }; }) => Promise<{ items: ",
           "LookupServicesResponse",
           "; }>; } & ",
@@ -6048,13 +4880,7 @@
           "<{ serviceGroupId: ",
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { serviceGroupId: string; }; }; }) => Promise<void>; } & ",
           "APMRouteCreateOptions",
           "; \"POST /internal/apm/service-group\": { endpoint: \"POST /internal/apm/service-group\"; params?: ",
@@ -6086,13 +4912,7 @@
           ", ",
           "UndefinedC",
           "]>; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { serviceGroupId?: string | undefined; } | undefined; body: { groupName: string; kuery: string; description: string | undefined; color: string | undefined; }; }; }) => Promise<",
           "SavedServiceGroup",
           ">; } & ",
@@ -6104,25 +4924,13 @@
           "<{ serviceGroup: ",
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { serviceGroup: string; }; }; }) => Promise<{ serviceGroup: ",
           "SavedServiceGroup",
           "; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/service-groups\": { endpoint: \"GET /internal/apm/service-groups\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<{ serviceGroups: ",
           "SavedServiceGroup",
           "[]; }>; } & ",
@@ -6162,13 +4970,7 @@
             "text": "NonEmptyStringBrand"
           },
           ">]>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { start: number; end: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -6220,13 +5022,7 @@
           "<{ transactionType: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { start: number; end: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -6280,13 +5076,7 @@
           "<{ kuery: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -6344,13 +5134,7 @@
           "<{ offset: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { numBuckets: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -6430,13 +5214,7 @@
           "<{ offset: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { latencyAggregationType: ",
           "LatencyAggregationType",
           "; transactionType: string; serviceNodeIds: string[]; numBuckets: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
@@ -6514,13 +5292,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { latencyAggregationType: ",
           "LatencyAggregationType",
           "; transactionType: string; } & { offset?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
@@ -6628,13 +5400,7 @@
           "<",
           "RollupInterval",
           ".None>]>; }>]>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { transactionType: string; bucketSizeInSeconds: number; } & { transactionName?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -6674,13 +5440,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; serviceNodeName: string; }; query: { start: number; end: number; }; }; }) => Promise<",
           "ServiceInstanceMetadataDetailsResponse",
           " & ({} | ",
@@ -6718,13 +5478,7 @@
           "<",
           "StringC",
           ">; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; body: { '@timestamp': number; service: { version: string; } & { environment?: string | undefined; }; } & { message?: string | undefined; tags?: string[] | undefined; }; }; }) => Promise<{ _id: string; _index: string; _source: ",
           "Annotation",
           "; }>; } & ",
@@ -6764,13 +5518,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -6826,13 +5574,7 @@
             "text": "NonEmptyStringBrand"
           },
           ">]>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; serviceNodeName: string; }; query: { kuery: string; } & { start: number; end: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -6860,13 +5602,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { start: number; end: number; }; }; }) => Promise<",
           "ServiceTransactionTypesResponse",
           ">; } & ",
@@ -6884,13 +5620,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { start: number; end: number; }; }; }) => Promise<",
           "ServiceAgentResponse",
           ">; } & ",
@@ -6908,13 +5638,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { start: number; end: number; }; }; }) => Promise<",
           "ServiceMetadataIcons",
           ">; } & ",
@@ -6932,13 +5656,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { start: number; end: number; }; }; }) => Promise<",
           "ServiceMetadataDetails",
           ">; } & ",
@@ -7030,13 +5748,7 @@
           "<{ serviceNames: ",
           "Type",
           "<string[], string, unknown>; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -7138,13 +5850,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { serviceGroup?: string | undefined; } & { probability: number; } & { documentType: ",
           "ApmDocumentType",
           ".TransactionMetric | ",
@@ -7206,13 +5912,7 @@
           "<{ offset: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { dependencyName: string; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -7266,13 +5966,7 @@
           "<{ offset: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -7326,13 +6020,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { serviceName?: string | undefined; serviceGroup?: string | undefined; kuery?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -7348,13 +6036,7 @@
           ">; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/observability_overview/has_data\": { endpoint: \"GET /internal/apm/observability_overview/has_data\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<",
           "HasDataResponse",
           ">; } & ",
@@ -7376,13 +6058,7 @@
           "<number, number, unknown>; intervalString: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { start: number; end: number; } & { bucketSize: number; intervalString: string; }; }; }) => Promise<",
           "ObservabilityOverviewResponse",
           ">; } & ",
@@ -7430,13 +6106,7 @@
           "<{ serverlessId: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -7492,13 +6162,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -7556,13 +6220,7 @@
           "<{ serverlessId: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -7656,13 +6314,7 @@
           "<{ bucketSizeInSeconds: ",
           "Type",
           "<number, number, unknown>; }>]>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -7722,13 +6374,7 @@
             "text": "NonEmptyStringBrand"
           },
           ">]>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { kuery: string; } & { start: number; end: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -7790,13 +6436,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { agentName: string; } & { serviceNodeName?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -7892,13 +6532,7 @@
           "<",
           "LatencyDistributionChartType",
           ".dependencyLatency>]>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { body: { serviceName?: string | undefined; transactionName?: string | undefined; transactionType?: string | undefined; termFilters?: { fieldName: string; fieldValue: string | number; }[] | undefined; durationMin?: number | undefined; durationMax?: number | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -7964,13 +6598,7 @@
           "<{ numBuckets: ",
           "Type",
           "<number, number, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; groupId: string; }; query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -8032,13 +6660,7 @@
           "<{ offset: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { groupId?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -8096,13 +6718,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; groupId: string; errorId: string; }; query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -8158,13 +6774,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; groupId: string; }; query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -8230,13 +6840,7 @@
           "<{ groupIds: ",
           "Type",
           "<string[], string, unknown>; }>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -8298,13 +6902,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { transactionType: string; transactionName: string; maxNumberOfErrorGroups: number; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -8368,13 +6966,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { sortField?: string | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -8404,13 +6996,7 @@
           "<number, string, unknown>; end: ",
           "Type",
           "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           " & { params: { query: { serviceName?: string | undefined; } & { start: number; end: number; }; }; }) => Promise<{ environments: (\"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
@@ -8424,23 +7010,11 @@
           ">)[]; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/data_view/title\": { endpoint: \"GET /internal/apm/data_view/title\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<{ apmDataViewTitle: string; }>; } & ",
           "APMRouteCreateOptions",
           "; \"POST /internal/apm/data_view/static\": { endpoint: \"POST /internal/apm/data_view/static\"; params?: undefined; handler: ({}: ",
-          {
-            "pluginId": "apm",
-            "scope": "server",
-            "docId": "kibApmPluginApi",
-            "section": "def-server.APMRouteHandlerResources",
-            "text": "APMRouteHandlerResources"
-          },
+          "APMRouteHandlerResources",
           ") => Promise<{ created: boolean; dataView: ",
           {
             "pluginId": "dataViews",
@@ -8480,151 +7054,13 @@
           "description": [],
           "signature": [
             "Observable",
-            "<Readonly<{} & { indices: Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; }>; enabled: boolean; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; serviceMapTerminateAfter: number; serviceMapMaxTraces: number; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; searchAggregatedTransactions: ",
+            "<Readonly<{} & { enabled: boolean; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; serviceMapTerminateAfter: number; serviceMapMaxTraces: number; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; searchAggregatedTransactions: ",
             "SearchAggregatedTransactionSetting",
-            "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; forceSyntheticSource: boolean; latestAgentVersionsUrl: string; serverlessOnboarding: boolean; serverless: Readonly<{} & { enabled: true; }>; managedServiceUrl: string; featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; }>; }>>"
+            "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; forceSyntheticSource: boolean; latestAgentVersionsUrl: string; serverless: Readonly<{} & { enabled: true; }>; serverlessOnboarding: boolean; managedServiceUrl: string; featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; }>; }>>"
           ],
           "path": "x-pack/plugins/apm/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
-        },
-        {
-          "parentPluginId": "apm",
-          "id": "def-server.APMPluginSetup.getApmIndices",
-          "type": "Function",
-          "tags": [],
-          "label": "getApmIndices",
-          "description": [],
-          "signature": [
-            "() => Promise<Readonly<{ error: string; onboarding: string; span: string; transaction: string; metric: string; }>>"
-          ],
-          "path": "x-pack/plugins/apm/server/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "apm",
-          "id": "def-server.APMPluginSetup.createApmEventClient",
-          "type": "Function",
-          "tags": [],
-          "label": "createApmEventClient",
-          "description": [],
-          "signature": [
-            "(params: { debug?: boolean | undefined; request: ",
-            {
-              "pluginId": "@kbn/core-http-server",
-              "scope": "common",
-              "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-common.KibanaRequest",
-              "text": "KibanaRequest"
-            },
-            "<unknown, unknown, unknown, any>; context: ",
-            "ApmPluginRequestHandlerContext",
-            "; }) => Promise<",
-            "APMEventClient",
-            ">"
-          ],
-          "path": "x-pack/plugins/apm/server/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "apm",
-              "id": "def-server.APMPluginSetup.createApmEventClient.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "params",
-              "description": [],
-              "path": "x-pack/plugins/apm/server/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "children": [
-                {
-                  "parentPluginId": "apm",
-                  "id": "def-server.APMPluginSetup.createApmEventClient.$1.debug",
-                  "type": "CompoundType",
-                  "tags": [],
-                  "label": "debug",
-                  "description": [],
-                  "signature": [
-                    "boolean | undefined"
-                  ],
-                  "path": "x-pack/plugins/apm/server/types.ts",
-                  "deprecated": false,
-                  "trackAdoption": false
-                },
-                {
-                  "parentPluginId": "apm",
-                  "id": "def-server.APMPluginSetup.createApmEventClient.$1.request",
-                  "type": "Object",
-                  "tags": [],
-                  "label": "request",
-                  "description": [],
-                  "signature": [
-                    {
-                      "pluginId": "@kbn/core-http-server",
-                      "scope": "common",
-                      "docId": "kibKbnCoreHttpServerPluginApi",
-                      "section": "def-common.KibanaRequest",
-                      "text": "KibanaRequest"
-                    },
-                    "<unknown, unknown, unknown, any>"
-                  ],
-                  "path": "x-pack/plugins/apm/server/types.ts",
-                  "deprecated": false,
-                  "trackAdoption": false
-                },
-                {
-                  "parentPluginId": "apm",
-                  "id": "def-server.APMPluginSetup.createApmEventClient.$1.context",
-                  "type": "CompoundType",
-                  "tags": [],
-                  "label": "context",
-                  "description": [],
-                  "signature": [
-                    {
-                      "pluginId": "@kbn/core-http-request-handler-context-server",
-                      "scope": "common",
-                      "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                      "section": "def-common.RequestHandlerContext",
-                      "text": "RequestHandlerContext"
-                    },
-                    " & { licensing: Promise<",
-                    {
-                      "pluginId": "licensing",
-                      "scope": "server",
-                      "docId": "kibLicensingPluginApi",
-                      "section": "def-server.LicensingApiRequestHandlerContext",
-                      "text": "LicensingApiRequestHandlerContext"
-                    },
-                    ">; alerting: Promise<",
-                    {
-                      "pluginId": "alerting",
-                      "scope": "server",
-                      "docId": "kibAlertingPluginApi",
-                      "section": "def-server.AlertingApiRequestHandlerContext",
-                      "text": "AlertingApiRequestHandlerContext"
-                    },
-                    ">; rac: Promise<",
-                    {
-                      "pluginId": "ruleRegistry",
-                      "scope": "server",
-                      "docId": "kibRuleRegistryPluginApi",
-                      "section": "def-server.RacApiRequestHandlerContext",
-                      "text": "RacApiRequestHandlerContext"
-                    },
-                    ">; }"
-                  ],
-                  "path": "x-pack/plugins/apm/server/types.ts",
-                  "deprecated": false,
-                  "trackAdoption": false
-                }
-              ]
-            }
-          ],
-          "returnComment": []
         }
       ],
       "lifecycle": "setup",
