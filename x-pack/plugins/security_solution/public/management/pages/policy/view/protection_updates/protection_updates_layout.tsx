@@ -28,6 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Moment } from 'moment';
 import moment from 'moment';
 import { cloneDeep } from 'lodash';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { useUpdateEndpointPolicy } from '../../../../hooks/policy/use_update_endpoint_policy';
 import type { PolicyData, MaybeImmutable } from '../../../../../../common/endpoint/types';
@@ -36,11 +37,27 @@ interface ProtectionUpdatesLayoutProps {
   policy: MaybeImmutable<PolicyData>;
 }
 
+const AUTOMATIC_UPDATES_CHECKBOX_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.protectionUpdates.useAutomaticUpdates',
+  {
+    defaultMessage: 'Use automatic updates',
+  }
+);
+
+const AUTOMATIC_UPDATES_OFF_CHECKBOX_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.protectionUpdates.useAutomaticUpdatesOff',
+  {
+    defaultMessage: "Don't use automatic updates",
+  }
+);
+
 export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
   ({ policy: _policy }) => {
     const toasts = useToasts();
     const dispatch = useDispatch();
     const { isLoading: isUpdating, mutateAsync: sendPolicyUpdate } = useUpdateEndpointPolicy();
+    const { canWritePolicyManagement } = useUserPrivileges().endpointPrivileges;
+
     const paddingSize = useContext(ThemeContext).eui.euiPanelPaddingModifiers.paddingMedium;
 
     const policy = _policy as PolicyData;
@@ -55,6 +72,10 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
     const displayDateFormat = 'MMMM DD, YYYY';
     const formattedDate = moment(deployedVersion, internalDateFormat).format(displayDateFormat);
     const cutoffDate = moment().subtract(18, 'months'); // Earliest selectable date
+
+    const viewModeSwitchLabel = automaticUpdatesEnabled
+      ? AUTOMATIC_UPDATES_CHECKBOX_LABEL
+      : AUTOMATIC_UPDATES_OFF_CHECKBOX_LABEL;
 
     useEffect(() => {
       if (automaticUpdatesEnabled && selectedDate !== today) {
@@ -143,17 +164,23 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
             </h5>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <EuiDatePicker
-            popoverPlacement={'upCenter'}
-            dateFormat={displayDateFormat}
-            selected={selectedDate}
-            maxDate={today}
-            minDate={cutoffDate}
-            onChange={(date) => {
-              setSelectedDate(date || today);
-              setManifestVersion(date?.format(internalDateFormat) || 'latest');
-            }}
-          />
+          {canWritePolicyManagement ? (
+            <EuiDatePicker
+              popoverPlacement={'upCenter'}
+              dateFormat={displayDateFormat}
+              selected={selectedDate}
+              maxDate={today}
+              minDate={cutoffDate}
+              onChange={(date) => {
+                setSelectedDate(date || today);
+                setManifestVersion(date?.format(internalDateFormat) || 'latest');
+              }}
+            />
+          ) : (
+            <EuiText size="m" data-test-subj="protection-updates-version-to-deploy-view-mode">
+              {selectedDate.format(displayDateFormat)}
+            </EuiText>
+          )}
         </>
       );
     };
@@ -282,6 +309,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
 
           <EuiButton
             fill={true}
+            disabled={!canWritePolicyManagement}
             iconType="save"
             data-test-subj="policyDetailsSaveButton"
             onClick={onSave}
@@ -322,14 +350,18 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
             </EuiText>
           </EuiFlexItem>
           <EuiShowFor sizes={['l', 'xl', 'm']}>
-            <EuiSwitch
-              disabled={isUpdating}
-              label={'Update manifest automatically'}
-              labelProps={{ 'data-test-subj': 'protection-updates-manifest-switch-label' }}
-              checked={automaticUpdatesEnabled}
-              onChange={toggleAutomaticUpdates}
-              data-test-subj={'protection-updates-manifest-switch'}
-            />
+            {canWritePolicyManagement ? (
+              <EuiSwitch
+                disabled={isUpdating}
+                label={'Update manifest automatically'}
+                labelProps={{ 'data-test-subj': 'protection-updates-manifest-switch-label' }}
+                checked={automaticUpdatesEnabled}
+                onChange={toggleAutomaticUpdates}
+                data-test-subj={'protection-updates-manifest-switch'}
+              />
+            ) : (
+              <>{viewModeSwitchLabel}</>
+            )}
           </EuiShowFor>
         </EuiFlexGroup>
 

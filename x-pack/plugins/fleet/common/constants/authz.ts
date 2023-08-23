@@ -96,18 +96,6 @@ export const ENDPOINT_PRIVILEGES: Record<string, PrivilegeMapObject> = deepFreez
     privilegeType: 'api',
     privilegeName: 'readBlocklist',
   },
-  writeProtectionUpdates: {
-    appId: DEFAULT_APP_CATEGORIES.security.id,
-    privilegeSplit: '-',
-    privilegeType: 'api',
-    privilegeName: 'writeProtectionUpdates',
-  },
-  readProtectionUpdates: {
-    appId: DEFAULT_APP_CATEGORIES.security.id,
-    privilegeSplit: '-',
-    privilegeType: 'api',
-    privilegeName: 'readProtectionUpdates',
-  },
   writeEventFilters: {
     appId: DEFAULT_APP_CATEGORIES.security.id,
     privilegeSplit: '-',

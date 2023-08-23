@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { ProtectionUpdatesLayout } from '../protection_updates/protection_updates_layout';
 import { PolicySettingsLayout } from '../policy_settings_layout';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
@@ -96,20 +97,18 @@ export const PolicyTabs = React.memo(() => {
     canWriteHostIsolationExceptions,
     canReadBlocklist,
     canWriteBlocklist,
-    canWriteProtectionUpdates,
-    canReadProtectionUpdates,
     loading: privilegesLoading,
   } = useUserPrivileges().endpointPrivileges;
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
 
+  const isProtectionUpdatesEnabled = useIsExperimentalFeatureEnabled('protectionUpdatesEnabled');
   // move the user out of this route if they can't access it
   useEffect(() => {
     if (
       (isInTrustedAppsTab && !canReadTrustedApplications) ||
       (isInEventFiltersTab && !canReadEventFilters) ||
       (isInHostIsolationExceptionsTab && !canReadHostIsolationExceptions) ||
-      (isInBlocklistsTab && !canReadBlocklist) ||
-      (isInProtectionUpdatesTab && !canReadProtectionUpdates)
+      (isInBlocklistsTab && !canReadBlocklist)
     ) {
       history.replace(getPolicyDetailPath(policyId));
       toasts.addDanger(
@@ -123,7 +122,6 @@ export const PolicyTabs = React.memo(() => {
     canReadBlocklist,
     canReadEventFilters,
     canReadHostIsolationExceptions,
-    canReadProtectionUpdates,
     canReadTrustedApplications,
     history,
     isInBlocklistsTab,
@@ -142,11 +140,6 @@ export const PolicyTabs = React.memo(() => {
 
   const getEventFiltersApiClientInstance = useCallback(
     () => EventFiltersApiClient.getInstance(http),
-    [http]
-  );
-
-  const getProtectionUpdatesApiClientInstance = useCallback(
-    () => EventFiltersApiClient.getInstance(http), // TODO: change to ProtectionUpdatesApiClient
     [http]
   );
 
@@ -317,7 +310,7 @@ export const PolicyTabs = React.memo(() => {
           }
         : undefined,
 
-      [PolicyTabKeys.PROTECTION_UPDATES]: canReadProtectionUpdates
+      [PolicyTabKeys.PROTECTION_UPDATES]: isProtectionUpdatesEnabled
         ? {
             id: PolicyTabKeys.PROTECTION_UPDATES,
             name: i18n.translate(
@@ -349,7 +342,7 @@ export const PolicyTabs = React.memo(() => {
     canReadBlocklist,
     getBlocklistsApiClientInstance,
     canWriteBlocklist,
-    canReadProtectionUpdates,
+    isProtectionUpdatesEnabled,
   ]);
 
   // convert tabs object into an array EuiTabbedContent can understand

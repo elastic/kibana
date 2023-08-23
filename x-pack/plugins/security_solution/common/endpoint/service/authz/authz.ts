@@ -81,10 +81,6 @@ export const calculateEndpointAuthz = (
   const canWriteEventFilters = hasKibanaPrivilege(fleetAuthz, 'writeEventFilters');
   const canReadEventFilters = hasKibanaPrivilege(fleetAuthz, 'readEventFilters');
   const canWriteFileOperations = hasKibanaPrivilege(fleetAuthz, 'writeFileOperations');
-  // TODO: const canWriteProtectionUpdates = hasKibanaPrivilege(fleetAuthz, 'writeProtectionUpdates');
-  const canWriteProtectionUpdates = true;
-  // TODO: const canReadProtectionUpdates = hasKibanaPrivilege(fleetAuthz, 'readProtectionUpdates');
-  const canReadProtectionUpdates = true;
 
   const canWriteExecuteOperations = hasKibanaPrivilege(fleetAuthz, 'writeExecuteOperations');
 
@@ -127,8 +123,6 @@ export const calculateEndpointAuthz = (
     canReadBlocklist,
     canWriteEventFilters,
     canReadEventFilters,
-    canWriteProtectionUpdates,
-    canReadProtectionUpdates,
   };
 
   // Response console is only accessible when license is Enterprise and user has access to any
@@ -178,7 +172,5 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canReadBlocklist: false,
     canWriteEventFilters: false,
     canReadEventFilters: false,
-    canReadProtectionUpdates: true,
-    canWriteProtectionUpdates: true,
   };
 };

@@ -78,8 +78,6 @@ export interface EndpointAuthz {
   canWriteEventFilters: boolean;
   /** if user has read permissions for event filters */
   canReadEventFilters: boolean;
-  canWriteProtectionUpdates: boolean;
-  canReadProtectionUpdates: boolean;
 }
 
 export type EndpointAuthzKeyList = Array<keyof EndpointAuthz>;
