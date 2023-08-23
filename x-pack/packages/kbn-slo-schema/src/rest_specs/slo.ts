@@ -247,6 +247,11 @@ type FetchHistoricalSummaryParams = t.TypeOf<typeof fetchHistoricalSummaryParams
 type FetchHistoricalSummaryResponse = t.OutputOf<typeof fetchHistoricalSummaryResponseSchema>;
 type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
 
+/**
+ * The response type for /internal/observability/slo/_definitions
+ *
+ * @private
+ */
 type FindSloDefinitionsResponse = t.OutputOf<typeof findSloDefinitionsResponseSchema>;
 
 type GetPreviewDataParams = t.TypeOf<typeof getPreviewDataParamsSchema.props.body>;
