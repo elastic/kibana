@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export async function getLatestVersion(): Promise<string> {
-  return '8.10.0-SNAPSHOT';
-}
+export const tag = {
+  SERVERLESS: '@serverless',
+  ESS: '@ess',
+  BROKEN_IN_SERVERLESS: '@brokenInServerless',
+};
