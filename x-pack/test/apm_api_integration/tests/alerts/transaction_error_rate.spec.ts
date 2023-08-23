@@ -6,8 +6,10 @@
  */
 
 import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { transactionErrorRateActionVariables } from '@kbn/apm-plugin/server/routes/alerts/rule_types/transaction_error_rate/register_transaction_error_rate_rule_type';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import { omit } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createApmRule,
@@ -17,7 +19,12 @@ import {
   clearKibanaApmEventLog,
   deleteRuleById,
   ApmAlertFields,
+  getIndexAction,
+  createIndexConnector,
+  deleteActionConnector,
+  getIndexConnectorResults,
 } from './helpers/alerting_api_helper';
+import { cleanupAllState } from './helpers/cleanup_state';
 import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
 import { waitForRuleStatus } from './helpers/wait_for_rule_status';
 
@@ -30,6 +37,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('transaction error rate alert', { config: 'basic', archives: [] }, () => {
     before(async () => {
+      await synthtraceEsClient.clean();
+      cleanupAllState({ es, supertest });
+
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');
@@ -72,9 +82,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('create rule without kql query', () => {
       let ruleId: string;
+      let actionId: string;
       let alerts: ApmAlertFields[];
 
       before(async () => {
+        actionId = await createIndexConnector({ supertest, name: 'Transation error rate' });
+        const indexAction = getIndexAction({
+          actionId,
+          actionVariables: transactionErrorRateActionVariables,
+        });
+
         const createdRule = await createApmRule({
           supertest,
           ruleTypeId: ApmRuleType.TransactionErrorRate,
@@ -94,13 +111,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               'transaction.name',
             ],
           },
-          actions: [],
+          actions: [indexAction],
         });
         ruleId = createdRule.id;
         alerts = await waitForAlertsForRule({ es, ruleId });
       });
 
       after(async () => {
+        await deleteActionConnector({ supertest, es, actionId });
         await deleteRuleById({ supertest, ruleId });
         await deleteAlertsByRuleId({ es, ruleId });
       });
@@ -112,6 +130,46 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           supertest,
         });
         expect(ruleStatus).to.be('active');
+      });
+
+      describe('action variables', () => {
+        let results: Array<Record<string, string>>;
+
+        before(async () => {
+          results = await getIndexConnectorResults(es);
+        });
+
+        it('has the right keys', async () => {
+          expect(results.length).to.be(1);
+          expect(Object.keys(results[0]).sort()).to.eql([
+            'alertDetailsUrl',
+            'environment',
+            'interval',
+            'reason',
+            'serviceName',
+            'threshold',
+            'transactionName',
+            'transactionType',
+            'triggerValue',
+            'viewInAppUrl',
+          ]);
+        });
+
+        it('has the right values', () => {
+          expect(omit(results[0], 'alertDetailsUrl')).to.eql({
+            environment: 'production',
+            interval: '5 mins',
+            reason:
+              'Failed transactions is 50% in the last 5 mins for service: opbeans-java, env: production, type: request, name: tx-java. Alert when > 40%.',
+            serviceName: 'opbeans-java',
+            transactionName: 'tx-java',
+            threshold: '40',
+            transactionType: 'request',
+            triggerValue: '50',
+            viewInAppUrl:
+              'http://mockedPublicBaseUrl/app/apm/services/opbeans-java?transactionType=request&environment=production',
+          });
+        });
       });
 
       it('indexes alert document with all group-by fields', async () => {

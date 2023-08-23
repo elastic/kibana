@@ -6,8 +6,10 @@
  */
 
 import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { transactionDurationActionVariables } from '@kbn/apm-plugin/server/routes/alerts/rule_types/transaction_duration/register_transaction_duration_rule_type';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import { omit } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createApmRule,
@@ -17,7 +19,12 @@ import {
   deleteRuleById,
   clearKibanaApmEventLog,
   ApmAlertFields,
+  createIndexConnector,
+  getIndexAction,
+  getIndexConnectorResults,
+  deleteActionConnector,
 } from './helpers/alerting_api_helper';
+import { cleanupAllState } from './helpers/cleanup_state';
 import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
 import { waitForRuleStatus } from './helpers/wait_for_rule_status';
 
@@ -41,6 +48,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('transaction duration alert', { config: 'basic', archives: [] }, () => {
     before(async () => {
+      await synthtraceEsClient.clean();
+      cleanupAllState({ es, supertest });
+
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');
@@ -73,9 +83,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('create rule for opbeans-java without kql filter', () => {
       let ruleId: string;
+      let actionId: string;
       let alerts: ApmAlertFields[];
 
       before(async () => {
+        actionId = await createIndexConnector({ supertest, name: 'Transation duration' });
+        const indexAction = getIndexAction({
+          actionId,
+          actionVariables: transactionDurationActionVariables,
+        });
+
         const createdRule = await createApmRule({
           supertest,
           ruleTypeId: ApmRuleType.TransactionDuration,
@@ -84,13 +101,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             kqlFilter: '',
             ...ruleParams,
           },
-          actions: [],
+          actions: [indexAction],
         });
         ruleId = createdRule.id;
         alerts = await waitForAlertsForRule({ es, ruleId });
       });
 
       after(async () => {
+        await deleteActionConnector({ supertest, es, actionId });
         await deleteAlertsByRuleId({ es, ruleId });
         await deleteRuleById({ supertest, ruleId });
       });
@@ -102,6 +120,46 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           supertest,
         });
         expect(ruleStatus).to.be('active');
+      });
+
+      describe('action variables', () => {
+        let results: Array<Record<string, string>>;
+
+        before(async () => {
+          results = await getIndexConnectorResults(es);
+        });
+
+        it('populates the action connector index with every action variable', async () => {
+          expect(results.length).to.be(1);
+          expect(Object.keys(results[0]).sort()).to.eql([
+            'alertDetailsUrl',
+            'environment',
+            'interval',
+            'reason',
+            'serviceName',
+            'threshold',
+            'transactionName',
+            'transactionType',
+            'triggerValue',
+            'viewInAppUrl',
+          ]);
+        });
+
+        it('populates the document with the correct values', async () => {
+          expect(omit(results[0], 'alertDetailsUrl')).to.eql({
+            environment: 'production',
+            interval: '5 mins',
+            reason:
+              'Avg. latency is 5.0 s in the last 5 mins for service: opbeans-java, env: production, type: request, name: tx-java. Alert when > 3.0 s.',
+            serviceName: 'opbeans-java',
+            transactionType: 'request',
+            transactionName: 'tx-java',
+            threshold: '3000',
+            triggerValue: '5,000 ms',
+            viewInAppUrl:
+              'http://mockedPublicBaseUrl/app/apm/services/opbeans-java?transactionType=request&environment=production',
+          });
+        });
       });
 
       it('produces an alert for opbeans-java with the correct reason', async () => {

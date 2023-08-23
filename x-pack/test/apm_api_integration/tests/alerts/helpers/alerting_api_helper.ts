@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
 import type {
   AggregationsAggregate,
   SearchResponse,
@@ -231,4 +231,87 @@ export async function getActiveApmAlerts({
   };
   const response = await esClient.search(searchParams);
   return response.hits.hits.map((hit) => hit._source);
+}
+
+const APM_ACTION_VARIABLE_INDEX = 'apm-index-connector-test';
+
+export async function createIndexConnector({
+  supertest,
+  name,
+}: {
+  supertest: SuperTest<Test>;
+  name: string;
+}) {
+  const { body } = await supertest
+    .post(`/api/actions/connector`)
+    .set('kbn-xsrf', 'foo')
+    .send({
+      name,
+      config: {
+        index: APM_ACTION_VARIABLE_INDEX,
+        refresh: true,
+      },
+      connector_type_id: '.index',
+    });
+  return body.id as string;
+}
+
+export function getIndexAction({
+  actionId,
+  actionVariables,
+}: {
+  actionId: string;
+  actionVariables: Array<{ name: string }>;
+}) {
+  return {
+    group: 'threshold_met',
+    id: actionId,
+    params: {
+      documents: [
+        actionVariables.reduce<Record<string, string>>((acc, actionVariable) => {
+          acc[actionVariable.name] = `{{context.${actionVariable.name}}}`;
+          return acc;
+        }, {}),
+      ],
+    },
+    frequency: {
+      notify_when: 'onActionGroupChange',
+      throttle: null,
+      summary: false,
+    },
+  };
+}
+
+export async function deleteActionConnector({
+  supertest,
+  es,
+  actionId,
+}: {
+  supertest: SuperTest<Test>;
+  es: Client;
+  actionId: string;
+}) {
+  return Promise.all([
+    await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo'),
+    await deleteActionConnectorIndex(es),
+  ]);
+}
+
+export async function deleteActionConnectorIndex(es: Client) {
+  try {
+    await es.indices.delete({ index: APM_ACTION_VARIABLE_INDEX });
+  } catch (e) {
+    if (e instanceof errors.ResponseError && e.statusCode === 404) {
+      return;
+    }
+
+    throw e;
+  }
+}
+
+export async function getIndexConnectorResults(es: Client) {
+  return pRetry(async () => {
+    const res = await es.search({ index: APM_ACTION_VARIABLE_INDEX });
+    return res.hits.hits.map((hit) => hit._source) as Array<Record<string, string>>;
+  });
 }

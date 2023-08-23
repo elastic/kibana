@@ -6,27 +6,30 @@
  */
 
 import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { errorCountActionVariables } from '@kbn/apm-plugin/server/routes/alerts/rule_types/error_count/register_error_count_rule_type';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';
 import expect from '@kbn/expect';
+import { omit } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createApmRule,
-  deleteApmAlerts,
-  deleteApmRules,
   deleteRuleById,
-  clearKibanaApmEventLog,
   deleteAlertsByRuleId,
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
   ApmAlertFields,
+  createIndexConnector,
+  deleteActionConnector,
+  getIndexConnectorResults,
+  getIndexAction,
 } from './helpers/alerting_api_helper';
+import { cleanupAllState } from './helpers/cleanup_state';
 import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
 import { waitForRuleStatus } from './helpers/wait_for_rule_status';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-
   const supertest = getService('supertest');
   const es = getService('es');
   const apmApiClient = getService('apmApiClient');
@@ -51,9 +54,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
-      await deleteApmRules(supertest);
-      await deleteApmAlerts(es);
-      await clearKibanaApmEventLog(es);
+      await synthtraceEsClient.clean();
+      cleanupAllState({ es, supertest });
 
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
@@ -109,8 +111,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('create rule without kql filter', () => {
       let ruleId: string;
       let alerts: ApmAlertFields[];
+      let actionId: string;
 
       before(async () => {
+        actionId = await createIndexConnector({ supertest, name: 'Transation error count' });
+        const indexAction = getIndexAction({
+          actionId,
+          actionVariables: errorCountActionVariables,
+        });
         const createdRule = await createApmRule({
           supertest,
           ruleTypeId: ApmRuleType.ErrorCount,
@@ -119,7 +127,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             kqlFilter: '',
             ...ruleParams,
           },
-          actions: [],
+          actions: [indexAction],
         });
 
         ruleId = createdRule.id;
@@ -127,6 +135,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await deleteActionConnector({ supertest, es, actionId });
         await deleteRuleById({ supertest, ruleId });
         await deleteAlertsByRuleId({ es, ruleId });
       });
@@ -138,6 +147,56 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           supertest,
         });
         expect(ruleStatus).to.be('active');
+      });
+
+      describe('action variables', () => {
+        let results: Array<Record<string, string>>;
+
+        before(async () => {
+          results = await getIndexConnectorResults(es);
+        });
+
+        it('produces a index action document for each service', async () => {
+          expect(results.map(({ serviceName }) => serviceName).sort()).to.eql([
+            'opbeans-java',
+            'opbeans-php',
+          ]);
+        });
+
+        it('has the right keys', async () => {
+          const phpEntry = results.find((result) => result.serviceName === 'opbeans-php')!;
+          expect(Object.keys(phpEntry).sort()).to.eql([
+            'alertDetailsUrl',
+            'environment',
+            'errorGroupingKey',
+            'errorGroupingName',
+            'interval',
+            'reason',
+            'serviceName',
+            'threshold',
+            'transactionName',
+            'triggerValue',
+            'viewInAppUrl',
+          ]);
+        });
+
+        it('has the right values', () => {
+          const phpEntry = results.find((result) => result.serviceName === 'opbeans-php')!;
+          expect(omit(phpEntry, 'alertDetailsUrl')).to.eql({
+            environment: 'production',
+            interval: '1 hr',
+            reason:
+              'Error count is 30 in the last 1 hr for service: opbeans-php, env: production, name: tx-php, error key: c85df8159a74b47b461d6ddaa6ba7da38cfc3e74019aef66257d10df74adeb99, error name: a php error. Alert when > 1.',
+            serviceName: 'opbeans-php',
+            transactionName: 'tx-php',
+            errorGroupingKey: 'c85df8159a74b47b461d6ddaa6ba7da38cfc3e74019aef66257d10df74adeb99',
+            errorGroupingName: 'a php error',
+            threshold: '1',
+            triggerValue: '30',
+            viewInAppUrl:
+              'http://mockedPublicBaseUrl/app/apm/services/opbeans-php/errors?environment=production',
+          });
+        });
       });
 
       it('produces one alert for each of the opbeans-java and opbeans-php', async () => {
