@@ -171,6 +171,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
       // the confirm button closes modal
       cy.get(MODAL_CONFIRMATION_BTN).should('have.text', 'Close').click();
       cy.get(MODAL_CONFIRMATION_BODY).should('not.exist');
+      cy.get(MODAL_CONFIRMATION_BODY).should('not.exist');
     });
 
     it('Prebuilt and custom rules selected: user proceeds with custom rules editing', () => {
