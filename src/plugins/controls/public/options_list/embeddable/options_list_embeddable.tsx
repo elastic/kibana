@@ -397,6 +397,8 @@ export class OptionsListEmbeddable
         newFilter = buildPhrasesFilter(field, validSelections, dataView);
       }
     }
+
+    console.log({ newFilter });
     if (!newFilter) return [];
 
     newFilter.meta.key = field?.name;

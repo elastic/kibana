@@ -234,19 +234,39 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
    * regardless of if it is keyword only, keyword+text, or some nested keyword/keyword+text field.
    */
   date: {
-    buildAggregation: ({ searchString, fieldName, sort, size }: OptionsListRequestBody) => {
+    buildRuntimeFieldMapping: ({ fieldSpec, fieldName }: OptionsListRequestBody) => ({
+      [`${fieldName}_formatted`]: {
+        type: 'keyword',
+        script: {
+          source: `
+            ZonedDateTime timestamp = doc['${fieldName}'].value;
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("${
+              fieldSpec?.format || 'yyyy/MM/dd'
+            }");
+            emit(timestamp.format(dtf));
+          `,
+        },
+      },
+    }),
+    buildAggregation: ({
+      fieldName,
+      searchString = '',
+      sort,
+      size,
+      searchTechnique,
+    }: OptionsListRequestBody) => {
       let dateQuery: any = {
         suggestions: {
           terms: {
             size,
-            field: fieldName,
+            field: `${fieldName}_formatted`,
             shard_size: 10,
             order: getSortType(sort),
           },
         },
         unique_terms: {
           cardinality: {
-            field: fieldName,
+            field: `${fieldName}_formatted`,
           },
         },
       };
@@ -254,9 +274,14 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
         dateQuery = {
           filteredSuggestions: {
             filter: {
-              [fieldName]: {
-                value: searchString,
-                case_insensitive: true,
+              [(searchTechnique ?? OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE) as string]: {
+                [`${fieldName}`]: {
+                  value:
+                    searchTechnique === 'wildcard'
+                      ? `*${getEscapedWildcardQuery(searchString)}*`
+                      : searchString,
+                  case_insensitive: true,
+                },
               },
             },
             aggs: { ...dateQuery },
@@ -265,14 +290,15 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
       }
       return dateQuery;
     },
+
     parse: (rawEsResult, request) => {
       let basePath = 'aggregations';
       basePath += request.searchString ? '.filteredSuggestions' : '';
 
       const suggestions = get(rawEsResult, `${basePath}.suggestions.buckets`)?.reduce(
-        (acc: OptionsListSuggestions, suggestion: EsBucket & { key_as_string: string }) => {
+        (acc: OptionsListSuggestions, suggestion: EsBucket) => {
           acc.push({
-            value: suggestion.key_as_string,
+            value: suggestion.key,
             docCount: suggestion.doc_count,
           });
           return acc;

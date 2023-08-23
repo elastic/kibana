@@ -23,6 +23,9 @@ export interface OptionsListValidationAggregationBuilder {
 }
 
 export interface OptionsListSuggestionAggregationBuilder {
+  buildRuntimeFieldMapping?: (
+    req: OptionsListRequestBody
+  ) => OptionsListRequestBody['runtimeFieldMap'];
   buildAggregation: (req: OptionsListRequestBody) => unknown;
   parse: (response: SearchResponse, req: OptionsListRequestBody) => OptionsListParsedSuggestions;
 }
