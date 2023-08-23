@@ -17,21 +17,9 @@ import {
   EuiTitle,
   EuiText,
   EuiLoadingSpinner,
+  useEuiTheme,
 } from '@elastic/eui';
-import styled from 'styled-components';
-
-const StyledEuiFlexItem = styled(EuiFlexItem)`
-  margin-right: ${({ theme }) => theme.eui.euiSizeM};
-`;
-
-const StyledEuiIcon = styled(EuiIcon)`
-  margin: ${({ theme }) => theme.eui.euiSizeS} 0;
-`;
-
-const StyledEuiLink = styled(EuiLink)`
-  font-size: 12px;
-  font-weight: 700;
-`;
+import { css } from '@emotion/react';
 
 export interface ExpandablePanelPanelProps {
   header: {
@@ -114,6 +102,8 @@ export const ExpandablePanel: React.FC<ExpandablePanelPanelProps> = ({
     [dataTestSubj, toggleStatus, toggleQuery]
   );
 
+  const { euiTheme } = useEuiTheme();
+
   const headerLeftSection = useMemo(
     () => (
       <EuiFlexItem>
@@ -124,17 +114,27 @@ export const ExpandablePanel: React.FC<ExpandablePanelPanelProps> = ({
         >
           <EuiFlexItem grow={false}>{expandable && children && toggleIcon}</EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <StyledEuiIcon
+            <EuiIcon
               color={callback ? 'primary' : 'text'}
               type={iconType}
+              css={css`
+                margin: ${euiTheme.size.s} 0;
+              `}
               data-test-subj={`${dataTestSubj}TitleIcon`}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {callback ? (
-              <StyledEuiLink data-test-subj={`${dataTestSubj}TitleLink`} onClick={callback}>
+              <EuiLink
+                css={css`
+                  font-size: 12px;
+                  font-weight: 700;
+                `}
+                data-test-subj={`${dataTestSubj}TitleLink`}
+                onClick={callback}
+              >
                 {title}
-              </StyledEuiLink>
+              </EuiLink>
             ) : (
               <EuiTitle size="xxxs">
                 <EuiText data-test-subj={`${dataTestSubj}TitleText`}>{title}</EuiText>
@@ -144,17 +144,23 @@ export const ExpandablePanel: React.FC<ExpandablePanelPanelProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
     ),
-    [dataTestSubj, expandable, children, toggleIcon, callback, iconType, title]
+    [dataTestSubj, expandable, children, toggleIcon, callback, iconType, euiTheme.size.s, title]
   );
 
   const headerRightSection = useMemo(
     () =>
       headerContent && (
-        <StyledEuiFlexItem grow={false} data-test-subj={`${dataTestSubj}RightSection`}>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            margin-right: ${euiTheme.size.m};
+          `}
+          data-test-subj={`${dataTestSubj}RightSection`}
+        >
           {headerContent}
-        </StyledEuiFlexItem>
+        </EuiFlexItem>
       ),
-    [dataTestSubj, headerContent]
+    [dataTestSubj, euiTheme.size.m, headerContent]
   );
 
   const showContent = useMemo(() => {
@@ -175,7 +181,7 @@ export const ExpandablePanel: React.FC<ExpandablePanelPanelProps> = ({
   );
 
   return (
-    <EuiSplitPanel.Outer grow hasBorder data-test-subj={dataTestSubj}>
+    <EuiSplitPanel.Outer grow hasBorder>
       <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize={'xs'}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           {headerLeftSection}
