@@ -7,28 +7,48 @@
 
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-// import { ENDPOINT_HEARTBEAT_INDEX } from '@kbn/security-solution-plugin/common/endpoint/constants';
+import { ENDPOINT_HEARTBEAT_INDEX } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import type { EndpointHeartbeat } from '@kbn/security-solution-plugin/common/endpoint/types';
 
+import { ProductLine, type ProductTier } from '../../../common/product';
+
 import type { UsageRecord, MeteringCallbackInput } from '../../types';
+import type { ServerlessSecurityConfig } from '../../config';
 
 // 1 hour
 const SAMPLE_PERIOD_SECONDS = 3600;
-// const THRESHOLD_MINUTES = 30;
+const THRESHOLD_MINUTES = 30;
 
 export class EndpointMeteringService {
-  public async getUsageRecords({
+  private tier: ProductTier | undefined;
+
+  public getUsageRecords = async ({
     taskId,
     cloudSetup,
     esClient,
     abortController,
     lastSuccessfulReport,
-  }: MeteringCallbackInput): Promise<UsageRecord[]> {
+    config,
+  }: MeteringCallbackInput): Promise<UsageRecord[]> => {
+    this.setTier(config);
+
     const heartbeatsResponse = await this.getHeartbeatsSince(
       esClient,
       abortController,
       lastSuccessfulReport
     );
+
+    if (!heartbeatsResponse?.hits?.hits) {
+      return [];
+    }
+
+    if (!this.tier) {
+      throw new Error(
+        `no product tier information found for heartbeats: ${JSON.stringify(
+          heartbeatsResponse.hits.hits
+        )}`
+      );
+    }
 
     return heartbeatsResponse.hits.hits.reduce((acc, { _source }) => {
       if (!_source) {
@@ -45,50 +65,30 @@ export class EndpointMeteringService {
 
       return [...acc, record];
     }, [] as UsageRecord[]);
-  }
+  };
 
   private async getHeartbeatsSince(
     esClient: ElasticsearchClient,
     abortController: AbortController,
     since?: Date
   ): Promise<SearchResponse<EndpointHeartbeat, Record<string, AggregationsAggregate>>> {
-    const timestamp = new Date().toISOString();
-    return {
-      hits: {
-        hits: [
-          {
-            _source: {
-              '@timestamp': timestamp,
-              agent: {
-                id: '123',
-              },
-              event: {
-                ingested: timestamp,
-              },
+    const thresholdDate = new Date(Date.now() - THRESHOLD_MINUTES * 60 * 1000);
+    const searchFrom = since && since > thresholdDate ? since : thresholdDate;
+
+    return esClient.search<EndpointHeartbeat>(
+      {
+        index: ENDPOINT_HEARTBEAT_INDEX,
+        sort: 'event.ingested',
+        query: {
+          range: {
+            'event.ingested': {
+              gt: searchFrom.toISOString(),
             },
           },
-        ],
+        },
       },
-    } as SearchResponse<EndpointHeartbeat, Record<string, AggregationsAggregate>>;
-
-    // TODO: enable when heartbeat index is ready
-    // const thresholdDate = new Date(Date.now() - THRESHOLD_MINUTES * 60 * 1000);
-    // const searchFrom = since && since > thresholdDate ? since : thresholdDate;
-
-    // return esClient.search<EndpointHeartbeat>(
-    //   {
-    //     index: ENDPOINT_HEARTBEAT_INDEX,
-    //     sort: 'event.ingested',
-    //     query: {
-    //       range: {
-    //         'event.ingested': {
-    //           gt: searchFrom.toISOString(),
-    //         },
-    //       },
-    //     },
-    //   },
-    //   { signal: abortController.signal }
-    // );
+      { signal: abortController.signal, ignore: [404] }
+    );
   }
 
   private buildMeteringRecord({
@@ -113,16 +113,28 @@ export class EndpointMeteringService {
       creation_timestamp: timestampStr,
       usage: {
         type: 'security_solution_endpoint',
-        // TODO: get actual sub_type
-        sub_type: 'essential',
         period_seconds: SAMPLE_PERIOD_SECONDS,
         quantity: 1,
       },
       source: {
         id: taskId,
         instance_group_id: projectId,
+        metadata: {
+          tier: this.tier,
+        },
       },
     };
+  }
+
+  private setTier(config: ServerlessSecurityConfig) {
+    if (this.tier) {
+      return;
+    }
+
+    const endpoint = config.productTypes.find(
+      (productType) => productType.product_line === ProductLine.endpoint
+    );
+    this.tier = endpoint?.product_tier;
   }
 }
 

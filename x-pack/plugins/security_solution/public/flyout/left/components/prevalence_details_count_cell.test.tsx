@@ -24,7 +24,6 @@ const highlightedField = {
   name: 'field',
   values: ['values'],
 };
-const scopeId = 'scopeId';
 const type = {
   eventKind: EventKind.signal,
   include: true,
@@ -39,11 +38,7 @@ describe('PrevalenceDetailsAlertCountCell', () => {
     });
 
     const { getByTestId } = render(
-      <PrevalenceDetailsCountCell
-        highlightedField={highlightedField}
-        scopeId={scopeId}
-        type={type}
-      />
+      <PrevalenceDetailsCountCell highlightedField={highlightedField} type={type} />
     );
 
     expect(getByTestId(PREVALENCE_DETAILS_COUNT_CELL_LOADING_TEST_ID)).toBeInTheDocument();
@@ -57,11 +52,7 @@ describe('PrevalenceDetailsAlertCountCell', () => {
     });
 
     const { getByTestId } = render(
-      <PrevalenceDetailsCountCell
-        highlightedField={highlightedField}
-        scopeId={scopeId}
-        type={type}
-      />
+      <PrevalenceDetailsCountCell highlightedField={highlightedField} type={type} />
     );
 
     expect(getByTestId(PREVALENCE_DETAILS_COUNT_CELL_ERROR_TEST_ID)).toBeInTheDocument();
@@ -75,11 +66,7 @@ describe('PrevalenceDetailsAlertCountCell', () => {
     });
 
     const { getByTestId } = render(
-      <PrevalenceDetailsCountCell
-        highlightedField={highlightedField}
-        scopeId={scopeId}
-        type={type}
-      />
+      <PrevalenceDetailsCountCell highlightedField={highlightedField} type={type} />
     );
 
     expect(getByTestId(PREVALENCE_DETAILS_COUNT_CELL_VALUE_TEST_ID)).toBeInTheDocument();
@@ -94,11 +81,7 @@ describe('PrevalenceDetailsAlertCountCell', () => {
     });
 
     const { getByTestId } = render(
-      <PrevalenceDetailsCountCell
-        highlightedField={highlightedField}
-        scopeId={scopeId}
-        type={type}
-      />
+      <PrevalenceDetailsCountCell highlightedField={highlightedField} type={type} />
     );
 
     expect(getByTestId(PREVALENCE_DETAILS_COUNT_CELL_VALUE_TEST_ID)).toBeInTheDocument();

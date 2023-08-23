@@ -35,7 +35,7 @@ const RenderWrapper: React.FunctionComponent = ({ children }) => {
 
 describe('use_upselling', () => {
   test('useUpsellingComponent returns sections', () => {
-    mockUpselling.registerSections({
+    mockUpselling.setSections({
       entity_analytics_panel: TestComponent,
     });
 
@@ -43,10 +43,11 @@ describe('use_upselling', () => {
       wrapper: RenderWrapper,
     });
     expect(result.current).toBe(TestComponent);
+    expect(result.all.length).toBe(1); // assert that it should not cause unnecessary re-renders
   });
 
   test('useUpsellingPage returns pages', () => {
-    mockUpselling.registerPages({
+    mockUpselling.setPages({
       [SecurityPageName.hosts]: TestComponent,
     });
 
@@ -56,9 +57,9 @@ describe('use_upselling', () => {
     expect(result.current).toBe(TestComponent);
   });
 
-  test('useUpsellingMessage returns pages', () => {
+  test('useUpsellingMessage returns messages', () => {
     const testMessage = 'test message';
-    mockUpselling.registerMessages({
+    mockUpselling.setMessages({
       investigation_guide: testMessage,
     });
 
@@ -66,11 +67,12 @@ describe('use_upselling', () => {
       wrapper: RenderWrapper,
     });
     expect(result.current).toBe(testMessage);
+    expect(result.all.length).toBe(1); // assert that it should not cause unnecessary re-renders
   });
 
   test('useUpsellingMessage returns null when upsellingMessageId not found', () => {
     const emptyMessages = {};
-    mockUpselling.registerMessages(emptyMessages);
+    mockUpselling.setPages(emptyMessages);
 
     const { result } = renderHook(
       () => useUpsellingMessage('my_fake_message_id' as 'investigation_guide'),

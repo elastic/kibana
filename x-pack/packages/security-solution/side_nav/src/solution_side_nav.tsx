@@ -22,7 +22,7 @@ import partition from 'lodash/fp/partition';
 import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import type { LinkCategories, SeparatorLinkCategory } from '@kbn/security-solution-navigation';
+import type { SeparatorLinkCategory } from '@kbn/security-solution-navigation';
 import { SolutionSideNavPanel } from './solution_side_nav_panel';
 import { SolutionSideNavItemPosition } from './types';
 import type { SolutionSideNavItem, Tracker } from './types';
@@ -148,7 +148,7 @@ interface SolutionSideNavItemsProps {
   activePanelNavId: ActivePanelNav;
   isMobileSize: boolean;
   onOpenPanelNav: (id: string) => void;
-  categories?: LinkCategories;
+  categories?: SeparatorLinkCategory[];
 }
 /**
  * The Solution side navigation items component.

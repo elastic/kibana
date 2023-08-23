@@ -52,6 +52,11 @@ t1_analyst:
       privileges:
         - all
       resources: "*"
+    - application: osquery
+      privileges:
+        - read
+        - run_saved_queries
+      resources: "*"
 
 t2_analyst:
   cluster:
@@ -106,6 +111,11 @@ t2_analyst:
       privileges:
         - all
       resources: "*"
+    - application: osquery
+      privileges:
+        - read
+        - run_saved_queries
+      resources: "*"
 
 t3_analyst:
   cluster:
@@ -155,7 +165,7 @@ t3_analyst:
         - event_filters_all
         - host_isolation_exceptions_all
         - blocklist_all
-        - policy_management_all # Elastic Defend Policy Management
+        - policy_management_read # Elastic Defend Policy Management
         - host_isolation_all
         - process_operations_all
         - actions_log_management_all # Response actions history
@@ -236,6 +246,10 @@ threat_intelligence_analyst:
         - read
       resources: "*"
     - application: spaces
+      privileges:
+        - all
+      resources: "*"
+    - application: osquery
       privileges:
         - all
       resources: "*"
@@ -386,6 +400,14 @@ soc_manager:
       privileges:
         - all
       resources: "*"
+    - application: osquery
+      privileges:
+        - all
+      resources: "*"
+    - application: savedObjectsManagement
+      privileges:
+        - all
+      resources: "*"
 
 detections_admin:
   cluster:
@@ -507,6 +529,10 @@ platform_engineer:
         - all
       resources: "*"
     - application: spaces
+      privileges:
+        - all
+      resources: "*"
+    - application: osquery
       privileges:
         - all
       resources: "*"

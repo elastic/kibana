@@ -16,10 +16,6 @@ import Axios from 'axios';
 import { isAxiosResponseError } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 
-// https://github.com/axios/axios/tree/ffea03453f77a8176c51554d5f6c3c6829294649/lib/adapters
-// @ts-expect-error untyped internal module used to prevent axios from using xhr adapter in tests
-import AxiosHttpAdapter from 'axios/lib/adapters/http';
-
 import { mkdirp } from './fs';
 
 function tryUnlink(path: string) {
@@ -78,7 +74,7 @@ export async function downloadToDisk({
       const response = await Axios.request({
         url,
         responseType: 'stream',
-        adapter: AxiosHttpAdapter,
+        adapter: 'http',
       });
 
       if (response.status !== 200) {
@@ -171,7 +167,7 @@ export async function downloadToString({
       const resp = await Axios.request<string>({
         url,
         method: 'GET',
-        adapter: AxiosHttpAdapter,
+        adapter: 'http',
         responseType: 'text',
         validateStatus: !expectStatus ? undefined : (status) => status === expectStatus,
       });

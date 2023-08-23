@@ -11,6 +11,9 @@ export type PageUpsellings = Partial<Record<SecurityPageName, React.ComponentTyp
 export type MessageUpsellings = Partial<Record<UpsellingMessageId, string>>;
 export type SectionUpsellings = Partial<Record<UpsellingSectionId, React.ComponentType>>;
 
-export type UpsellingSectionId = 'entity_analytics_panel' | 'endpointPolicyProtections';
+export type UpsellingSectionId =
+  | 'entity_analytics_panel'
+  | 'endpointPolicyProtections'
+  | 'osquery_automated_response_actions';
 
 export type UpsellingMessageId = 'investigation_guide';

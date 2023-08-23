@@ -18,15 +18,17 @@ import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { findInventoryFields } from '../../../../../common/inventory_models';
 import { InfraLoadingPanel } from '../../../loading';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
+import { useDataViewsProviderContext } from '../../hooks/use_data_views';
 
 const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 
 export const Logs = () => {
-  const { node, nodeType, overrides, onTabsStateChange, dateRangeTs } =
+  const { asset, assetType, overrides, onTabsStateChange, dateRangeTs } =
     useAssetDetailsStateContext();
+  const { logs } = useDataViewsProviderContext();
 
-  const { logView: overrideLogView, query: overrideQuery } = overrides?.logs ?? {};
-  const { loading: logViewLoading, reference: logViewReference } = overrideLogView ?? {};
+  const { query: overrideQuery } = overrides?.logs ?? {};
+  const { loading: logViewLoading, reference: logViewReference } = logs ?? {};
 
   const { services } = useKibanaContextForPlugin();
   const { locators } = services;
@@ -49,7 +51,7 @@ export const Logs = () => {
 
   const filter = useMemo(() => {
     const query = [
-      `${findInventoryFields(nodeType).id}: "${node.name}"`,
+      `${findInventoryFields(assetType).id}: "${asset.name}"`,
       ...(textQueryDebounced !== '' ? [textQueryDebounced] : []),
     ].join(' and ');
 
@@ -57,7 +59,7 @@ export const Logs = () => {
       language: 'kuery',
       query,
     };
-  }, [nodeType, node.name, textQueryDebounced]);
+  }, [assetType, asset.name, textQueryDebounced]);
 
   const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTextQuery(e.target.value);
@@ -70,13 +72,20 @@ export const Logs = () => {
 
   const logsUrl = useMemo(() => {
     return locators.nodeLogsLocator.getRedirectUrl({
-      nodeType,
-      nodeId: node.name,
+      nodeType: assetType,
+      nodeId: asset.name,
       time: startTimestamp,
       filter: textQueryDebounced,
       logView,
     });
-  }, [locators.nodeLogsLocator, node.name, nodeType, startTimestamp, textQueryDebounced, logView]);
+  }, [
+    locators.nodeLogsLocator,
+    asset.name,
+    assetType,
+    startTimestamp,
+    textQueryDebounced,
+    logView,
+  ]);
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="infraAssetDetailsLogsTabContent">

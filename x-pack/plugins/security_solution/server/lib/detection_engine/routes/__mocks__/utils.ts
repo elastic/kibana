@@ -100,4 +100,5 @@ export const getOutputRuleAlertForRest = (): RuleResponse => ({
   namespace: undefined,
   data_view_id: undefined,
   alert_suppression: undefined,
+  investigation_fields: [],
 });

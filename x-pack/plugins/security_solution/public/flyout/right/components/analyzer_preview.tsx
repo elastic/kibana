@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { find } from 'lodash/fp';
-import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
+import { ANCESTOR_ID, RULE_PARAMETERS_INDEX } from '../../shared/constants/field_names';
 import { useRightPanelContext } from '../context';
 import { useAlertPrevalenceFromProcessTree } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
 import type { StatsNode } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
@@ -31,11 +31,11 @@ export const AnalyzerPreview: React.FC = () => {
   const [cache, setCache] = useState<Partial<Cache>>({});
   const { dataFormattedForFieldBrowser: data, scopeId } = useRightPanelContext();
 
-  const documentId = find({ category: 'kibana', field: 'kibana.alert.ancestors.id' }, data);
+  const documentId = find({ category: 'kibana', field: ANCESTOR_ID }, data);
   const processDocumentId =
     documentId && Array.isArray(documentId.values) ? documentId.values[0] : '';
 
-  const index = find({ category: 'kibana', field: 'kibana.alert.rule.parameters.index' }, data);
+  const index = find({ category: 'kibana', field: RULE_PARAMETERS_INDEX }, data);
   const indices = index?.values ?? [];
 
   const { loading, error, statsNodes } = useAlertPrevalenceFromProcessTree({
@@ -50,19 +50,19 @@ export const AnalyzerPreview: React.FC = () => {
     }
   }, [statsNodes, setCache]);
 
+  if (!documentId || !index) {
+    return null;
+  }
+
   return (
-    <div data-test-subj={ANALYZER_PREVIEW_TEST_ID}>
-      {documentId && index && (
-        <AnalyzerTree
-          statsNodes={cache.statsNodes}
-          loading={loading}
-          error={error}
-          childCountLimit={CHILD_COUNT_LIMIT}
-          ancestorLevel={ANCESTOR_LEVEL}
-          descendantLevel={DESCENDANT_LEVEL}
-        />
-      )}
-    </div>
+    <AnalyzerTree
+      statsNodes={cache.statsNodes}
+      loading={loading}
+      error={error}
+      childCountLimit={CHILD_COUNT_LIMIT}
+      ancestorLevel={ANCESTOR_LEVEL}
+      descendantLevel={DESCENDANT_LEVEL}
+    />
   );
 };
 

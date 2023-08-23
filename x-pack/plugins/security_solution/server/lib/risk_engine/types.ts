@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { MappingRuntimeFields, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   AfterKey,
   AfterKeys,
   IdentifierType,
-  RiskCategories,
   RiskWeights,
+  RiskEngineStatus,
+  RiskScore,
 } from '../../../common/risk_engine';
-import type { RiskEngineStatus } from '../../../common/risk_engine/types';
 
 export interface CalculateScoresParams {
   afterKeys: AfterKeys;
@@ -61,6 +60,7 @@ export interface CalculateScoresResponse {
 export interface GetRiskEngineStatusResponse {
   legacy_risk_engine_status: RiskEngineStatus;
   risk_engine_status: RiskEngineStatus;
+  is_max_amount_of_risk_engines_reached: boolean;
 }
 
 interface InitRiskEngineResultResponse {
@@ -99,40 +99,6 @@ export interface EnableRiskEngineResponse {
 
 export interface DisableRiskEngineResponse {
   success: boolean;
-}
-
-export interface SimpleRiskInput {
-  id: string;
-  index: string;
-  category: RiskCategories;
-  description: string;
-  risk_score: string | number | undefined;
-  timestamp: string | undefined;
-}
-
-export type RiskInput = Ecs;
-
-export interface EcsRiskScore {
-  '@timestamp': string;
-  host?: {
-    risk: Omit<RiskScore, '@timestamp'>;
-  };
-  user?: {
-    risk: Omit<RiskScore, '@timestamp'>;
-  };
-}
-
-export interface RiskScore {
-  '@timestamp': string;
-  id_field: string;
-  id_value: string;
-  calculated_level: string;
-  calculated_score: number;
-  calculated_score_norm: number;
-  category_1_score: number;
-  category_1_count: number;
-  notes: string[];
-  inputs: SimpleRiskInput[] | RiskInput[];
 }
 
 export interface CalculateRiskScoreAggregations {

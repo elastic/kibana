@@ -168,7 +168,12 @@ describe('index table', () => {
       },
       plugins: {},
       url: urlServiceMock,
-      enableIndexActions: true,
+      // Default stateful configuration
+      config: {
+        enableLegacyTemplates: true,
+        enableIndexActions: true,
+        enableIndexStats: true,
+      },
     };
 
     component = (
@@ -515,8 +520,8 @@ describe('index table', () => {
 
   describe('Common index actions', () => {
     beforeEach(() => {
-      // Mock initialization of services
-      setupMockComponent({ enableIndexActions: false });
+      // Mock initialization of services; set enableIndexActions=false to verify config behavior
+      setupMockComponent({ config: { enableIndexActions: false, enableLegacyTemplates: true } });
     });
 
     test('Common index actions should be hidden when feature is turned off', async () => {

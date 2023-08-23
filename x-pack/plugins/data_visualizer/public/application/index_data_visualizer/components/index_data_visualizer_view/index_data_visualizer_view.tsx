@@ -14,10 +14,7 @@ import {
   useIsWithinMaxBreakpoint,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageBody,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
+  EuiPageTemplate,
   EuiPanel,
   EuiProgress,
   EuiSpacer,
@@ -496,59 +493,61 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   });
 
   return (
-    <EuiPageBody data-test-subj="dataVisualizerIndexPage" paddingSize="none" panelled={false}>
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem>
-          <EuiPageContentHeader data-test-subj="dataVisualizerPageHeader" css={dvPageHeader}>
-            <EuiPageContentHeaderSection>
-              <EuiFlexGroup
-                data-test-subj="dataViewTitleHeader"
-                direction="row"
-                alignItems="center"
-                css={{ padding: `${euiTheme.euiSizeS} 0`, marginRight: `${euiTheme.euiSize}` }}
-              >
-                <EuiTitle size={'s'}>
-                  <h2>{currentDataView.getName()}</h2>
-                </EuiTitle>
-                <DataVisualizerDataViewManagement
-                  currentDataView={currentDataView}
-                  useNewFieldsApi={true}
-                />
-              </EuiFlexGroup>
-            </EuiPageContentHeaderSection>
+    <EuiPageTemplate
+      offset={0}
+      restrictWidth={false}
+      bottomBorder={false}
+      grow={false}
+      data-test-subj="dataVisualizerIndexPage"
+      paddingSize="none"
+    >
+      <EuiPageTemplate.Section>
+        <EuiPageTemplate.Header data-test-subj="dataVisualizerPageHeader" css={dvPageHeader}>
+          <EuiFlexGroup
+            data-test-subj="dataViewTitleHeader"
+            direction="row"
+            alignItems="center"
+            css={{ padding: `${euiTheme.euiSizeS} 0`, marginRight: `${euiTheme.euiSize}` }}
+          >
+            <EuiTitle size={'s'}>
+              <h2>{currentDataView.getName()}</h2>
+            </EuiTitle>
+            <DataVisualizerDataViewManagement
+              currentDataView={currentDataView}
+              useNewFieldsApi={true}
+            />
+          </EuiFlexGroup>
 
-            {isWithinLargeBreakpoint ? <EuiSpacer size="m" /> : null}
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexEnd"
-              gutterSize="s"
-              data-test-subj="dataVisualizerTimeRangeSelectorSection"
-            >
-              {hasValidTimeField ? (
-                <EuiFlexItem grow={false}>
-                  <FullTimeRangeSelector
-                    frozenDataPreference={frozenDataPreference}
-                    setFrozenDataPreference={setFrozenDataPreference}
-                    dataView={currentDataView}
-                    query={undefined}
-                    disabled={false}
-                    timefilter={timefilter}
-                  />
-                </EuiFlexItem>
-              ) : null}
+          {isWithinLargeBreakpoint ? <EuiSpacer size="m" /> : null}
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexEnd"
+            gutterSize="s"
+            data-test-subj="dataVisualizerTimeRangeSelectorSection"
+          >
+            {hasValidTimeField ? (
               <EuiFlexItem grow={false}>
-                <DatePickerWrapper
-                  isAutoRefreshOnly={!hasValidTimeField}
-                  showRefresh={!hasValidTimeField}
-                  width="full"
+                <FullTimeRangeSelector
+                  frozenDataPreference={frozenDataPreference}
+                  setFrozenDataPreference={setFrozenDataPreference}
+                  dataView={currentDataView}
+                  query={undefined}
+                  disabled={false}
+                  timefilter={timefilter}
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageContentHeader>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiPageContentBody>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <DatePickerWrapper
+                isAutoRefreshOnly={!hasValidTimeField}
+                showRefresh={!hasValidTimeField}
+                width="full"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageTemplate.Header>
+        <EuiSpacer size="m" />
+
         <EuiFlexGroup gutterSize="m" direction={isWithinLargeBreakpoint ? 'column' : 'row'}>
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder>
@@ -621,7 +620,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPageContentBody>
-    </EuiPageBody>
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
   );
 };

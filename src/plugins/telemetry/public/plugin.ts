@@ -26,7 +26,7 @@ import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-brow
 
 import { BehaviorSubject, map, tap } from 'rxjs';
 import type { TelemetryConfigLabels } from '../server/config';
-import { FetchTelemetryConfigRoute } from '../common/routes';
+import { FetchTelemetryConfigRoute, INTERNAL_VERSION } from '../common/routes';
 import type { v2 } from '../common/types';
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
@@ -354,7 +354,10 @@ export class TelemetryPlugin
       sendUsageFrom,
       telemetryNotifyUserAboutOptInDefault,
       labels,
-    } = await http.get<v2.FetchTelemetryConfigResponse>(FetchTelemetryConfigRoute);
+    } = await http.get<v2.FetchTelemetryConfigResponse>(
+      FetchTelemetryConfigRoute,
+      INTERNAL_VERSION
+    );
 
     return {
       ...this.config,

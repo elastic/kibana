@@ -11,6 +11,9 @@
 export const mockDataAsNestedObject = {
   _id: '123',
   '@timestamp': ['2023-01-01T01:01:01.000Z'],
+  agent: {
+    type: ['endpoint'],
+  },
   event: {
     category: ['malware'],
     kind: ['signal'],
@@ -28,6 +31,7 @@ export const mockDataAsNestedObject = {
   },
   process: {
     name: ['process-name'],
+    entity_id: ['process-entity_id'],
   },
 };
 

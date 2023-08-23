@@ -1,11 +1,21 @@
 {
   "autoscaling.delete_autoscaling_policy": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "DELETE"
     ],
     "patterns": [
       "_autoscaling/policy/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/autoscaling-delete-autoscaling-policy.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/autoscaling-delete-autoscaling-policy.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

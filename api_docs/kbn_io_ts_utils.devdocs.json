@@ -996,7 +996,7 @@
         "description": [],
         "signature": [
           "Type",
-          "<boolean, unknown, unknown>"
+          "<boolean, boolean, unknown>"
         ],
         "path": "packages/kbn-io-ts-utils/src/to_boolean_rt/index.ts",
         "deprecated": false,

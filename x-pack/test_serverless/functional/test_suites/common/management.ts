@@ -50,6 +50,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           appName: 'License Management',
           url: 'stack/license_management',
         },
+        {
+          appName: 'Watcher',
+          url: 'insightsAndAlerting/watcher',
+        },
       ];
 
       DISABLED_PLUGINS.forEach(({ appName, url }) => {

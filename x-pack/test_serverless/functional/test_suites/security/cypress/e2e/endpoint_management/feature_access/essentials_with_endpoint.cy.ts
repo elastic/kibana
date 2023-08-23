@@ -12,7 +12,7 @@ import { getEndpointManagementPageMap } from '../../../screens/endpoint_manageme
 import { ensureResponseActionAuthzAccess } from '../../../tasks/endpoint_management';
 
 describe(
-  'App Features for Essentials PLI with Endpoint Essentials',
+  'App Features for Security Essentials PLI with Endpoint Essentials Addon',
   {
     env: {
       ftrConfig: {
@@ -57,11 +57,17 @@ describe(
       });
     }
 
-    for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES) {
+    for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
+      (apiName) => apiName !== 'unisolate'
+    )) {
       it(`should not allow access to Response Action: ${actionName}`, () => {
         ensureResponseActionAuthzAccess('none', actionName, username, password);
       });
     }
+
+    it('should have access to `unisolate` api', () => {
+      ensureResponseActionAuthzAccess('all', 'unisolate', username, password);
+    });
 
     it(`should have access to Fleet`, () => {
       visitFleetAgentList();

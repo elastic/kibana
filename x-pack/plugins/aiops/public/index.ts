@@ -13,8 +13,6 @@ export function plugin() {
   return new AiopsPlugin();
 }
 
-export { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '../common/constants';
-
 export type { AiopsAppDependencies } from './hooks/use_aiops_app_context';
 export type { LogRateAnalysisAppStateProps } from './components/log_rate_analysis';
 export type { LogRateAnalysisContentWrapperProps } from './components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper';

@@ -7,11 +7,13 @@
 import React from 'react';
 import { EuiDataGridColumn, EuiDataGridColumnCellAction, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { VulnerabilityRecord } from '../types';
+import { CspVulnerabilityFinding } from '../../../../common/schemas';
 import { getFilters } from './get_filters';
 import { FILTER_IN, FILTER_OUT } from '../translations';
 
-export const getVulnerabilitiesGridCellActions = <T extends Array<Partial<VulnerabilityRecord>>>({
+export const getVulnerabilitiesGridCellActions = <
+  T extends Array<Partial<CspVulnerabilityFinding>>
+>({
   data,
   columns,
   columnGridFn,
@@ -38,7 +40,10 @@ export const getVulnerabilitiesGridCellActions = <T extends Array<Partial<Vulner
     if (columnId === columns.cvss) {
       return vulnerabilityRow.vulnerability?.score.base;
     }
-    if (columnId === columns.resource) {
+    if (columnId === columns.resourceId) {
+      return vulnerabilityRow.resource?.id;
+    }
+    if (columnId === columns.resourceName) {
       return vulnerabilityRow.resource?.name;
     }
     if (columnId === columns.severity) {
@@ -50,14 +55,8 @@ export const getVulnerabilitiesGridCellActions = <T extends Array<Partial<Vulner
     if (columnId === columns.version) {
       return vulnerabilityRow.vulnerability?.package?.version;
     }
-    if (columnId === columns.fix_version) {
+    if (columnId === columns.fixedVersion) {
       return vulnerabilityRow.vulnerability?.package?.fixed_version;
-    }
-    if (columnId === columns.resource_id) {
-      return vulnerabilityRow.resource?.id;
-    }
-    if (columnId === columns.resource_name) {
-      return vulnerabilityRow.resource?.name;
     }
     if (columnId === columns.region) {
       return vulnerabilityRow.cloud?.region;

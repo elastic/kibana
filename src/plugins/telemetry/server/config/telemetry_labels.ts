@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 
 /**
  * Labels to enrich the context of the telemetry generated.
@@ -32,9 +32,7 @@ export const labelsSchema = schema.object(
      * The serverless project type.
      * Flagging it as maybe because these settings should never affect how Kibana runs.
      */
-    serverless: schema.maybe(
-      schema.conditional(schema.contextRef('serverless'), true, schema.string(), schema.never())
-    ),
+    serverless: offeringBasedSchema({ serverless: schema.maybe(schema.string()) }),
   },
   { defaultValue: {} }
 );

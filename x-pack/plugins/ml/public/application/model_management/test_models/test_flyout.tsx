@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useMemo } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -21,6 +21,7 @@ import {
   useEuiPaddingSize,
 } from '@elastic/eui';
 
+import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { SelectedModel } from './selected_model';
 import { INPUT_TYPE } from './models/inference_base';
 import { type ModelItem } from '../models_list';
@@ -34,6 +35,12 @@ export const TestTrainedModelFlyout: FC<Props> = ({ model, onClose }) => {
   const mediumPadding = useEuiPaddingSize('m');
 
   const [inputType, setInputType] = useState<INPUT_TYPE>(INPUT_TYPE.TEXT);
+
+  const onlyShowTab: INPUT_TYPE | undefined = useMemo(() => {
+    return (model.type ?? []).includes(SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION)
+      ? INPUT_TYPE.INDEX
+      : undefined;
+  }, [model]);
 
   return (
     <>
@@ -79,37 +86,41 @@ export const TestTrainedModelFlyout: FC<Props> = ({ model, onClose }) => {
             </>
           ) : null}
 
-          <EuiTabs
-            size="m"
-            css={{
-              marginTop: `-${mediumPadding}`,
-            }}
-          >
-            <EuiTab
-              isSelected={inputType === INPUT_TYPE.TEXT}
-              onClick={() => setInputType(INPUT_TYPE.TEXT)}
-            >
-              <FormattedMessage
-                id="xpack.ml.trainedModels.testModelsFlyout.textTab"
-                defaultMessage="Test using text"
-              />
-            </EuiTab>
-            <EuiTab
-              isSelected={inputType === INPUT_TYPE.INDEX}
-              onClick={() => setInputType(INPUT_TYPE.INDEX)}
-            >
-              <FormattedMessage
-                id="xpack.ml.trainedModels.testModelsFlyout.indexTab"
-                defaultMessage="Test using existing index"
-              />
-            </EuiTab>
-          </EuiTabs>
+          {onlyShowTab === undefined ? (
+            <>
+              <EuiTabs
+                size="m"
+                css={{
+                  marginTop: `-${mediumPadding}`,
+                }}
+              >
+                <EuiTab
+                  isSelected={inputType === INPUT_TYPE.TEXT}
+                  onClick={() => setInputType(INPUT_TYPE.TEXT)}
+                >
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.testModelsFlyout.textTab"
+                    defaultMessage="Test using text"
+                  />
+                </EuiTab>
+                <EuiTab
+                  isSelected={inputType === INPUT_TYPE.INDEX}
+                  onClick={() => setInputType(INPUT_TYPE.INDEX)}
+                >
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.testModelsFlyout.indexTab"
+                    defaultMessage="Test using existing index"
+                  />
+                </EuiTab>
+              </EuiTabs>
 
-          <EuiSpacer size="m" />
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
 
           <SelectedModel
             model={model}
-            inputType={inputType}
+            inputType={onlyShowTab ?? inputType}
             deploymentId={deploymentId ?? model.model_id}
           />
         </EuiFlyoutBody>

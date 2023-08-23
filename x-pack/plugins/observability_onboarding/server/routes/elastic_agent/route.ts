@@ -7,12 +7,14 @@
 
 import * as t from 'io-ts';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  generateSystemLogsYml,
+  generateCustomLogsYml,
+} from '../../../common/elastic_agent_logs';
 import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { getObservabilityOnboardingFlow } from '../../lib/state';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
-import { generateCustomLogsYml } from './custom_logs/generate_custom_logs_yml';
-import { generateSystemLogsYml } from './system_logs/generate_system_logs_yml';
 
 const generateConfig = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/elastic_agent/config',

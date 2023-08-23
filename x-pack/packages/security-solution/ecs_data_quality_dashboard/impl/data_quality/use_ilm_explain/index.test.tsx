@@ -14,8 +14,16 @@ import { ERROR_LOADING_ILM_EXPLAIN } from '../translations';
 import { useIlmExplain, UseIlmExplain } from '.';
 
 const mockHttpFetch = jest.fn();
+const mockReportDataQualityIndexChecked = jest.fn();
+const mockReportDataQualityCheckAllClicked = jest.fn();
+const mockTelemetryEvents = {
+  reportDataQualityIndexChecked: mockReportDataQualityIndexChecked,
+  reportDataQualityCheckAllCompleted: mockReportDataQualityCheckAllClicked,
+};
 const ContextWrapper: React.FC = ({ children }) => (
-  <DataQualityProvider httpFetch={mockHttpFetch}>{children}</DataQualityProvider>
+  <DataQualityProvider httpFetch={mockHttpFetch} telemetryEvents={mockTelemetryEvents}>
+    {children}
+  </DataQualityProvider>
 );
 
 const pattern = 'packetbeat-*';

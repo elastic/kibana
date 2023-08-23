@@ -689,6 +689,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await this.selectOptionFromComboBox(`indexPattern-dimension-field-${lastIndex}`, field);
       });
     },
+    async getNumericFieldReady(testSubj: string) {
+      const numericInput = await find.byCssSelector(
+        `input[data-test-subj=${testSubj}][type='number']`
+      );
+      await numericInput.click();
+      await numericInput.clearValue();
+      return numericInput;
+    },
+
+    async setTermsNumberOfValues(value: number) {
+      const valuesInput = await this.getNumericFieldReady('indexPattern-terms-values');
+      await valuesInput.type(`${value}`);
+      await PageObjects.common.sleep(500);
+    },
 
     async checkTermsAreNotAvailableToAgg(fields: string[]) {
       const lastIndex = (

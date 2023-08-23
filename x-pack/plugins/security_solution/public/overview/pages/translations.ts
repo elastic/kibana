@@ -104,13 +104,6 @@ export const DETECTION_RESPONSE_TITLE = i18n.translate(
   }
 );
 
-export const ENTITY_ANALYTICS_LICENSE_DESC = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.pageDesc',
-  {
-    defaultMessage: 'Detect threats from users and hosts within your network with Entity Analytics',
-  }
-);
-
 export const TECHNICAL_PREVIEW = i18n.translate(
   'xpack.securitySolution.entityAnalytics.technicalPreviewLabel',
   {

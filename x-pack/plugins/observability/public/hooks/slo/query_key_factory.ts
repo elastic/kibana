@@ -29,7 +29,8 @@ export const sloKeys = {
   rules: () => [...sloKeys.all, 'rules'] as const,
   rule: (sloIds: string[]) => [...sloKeys.rules(), sloIds] as const,
   activeAlerts: () => [...sloKeys.all, 'activeAlerts'] as const,
-  activeAlert: (sloIds: string[]) => [...sloKeys.activeAlerts(), sloIds] as const,
+  activeAlert: (sloIdsAndInstanceIds: Array<[string, string]>) =>
+    [...sloKeys.activeAlerts(), ...sloIdsAndInstanceIds.flat()] as const,
   historicalSummaries: () => [...sloKeys.all, 'historicalSummary'] as const,
   historicalSummary: (list: Array<{ sloId: string; instanceId: string }>) =>
     [...sloKeys.historicalSummaries(), list] as const,

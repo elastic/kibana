@@ -7,13 +7,13 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 
-import type { SpacesService } from '../plugin';
 import type {
   CheckPrivilegesOptions,
   CheckPrivilegesPayload,
   CheckPrivilegesResponse,
   CheckPrivilegesWithRequest,
 } from './types';
+import type { SpacesService } from '../plugin';
 
 export type CheckPrivilegesDynamically = (
   privileges: CheckPrivilegesPayload,

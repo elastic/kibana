@@ -10,10 +10,6 @@ import { i18n } from '@kbn/i18n';
 
 export const RangeSliderStrings = {
   popover: {
-    getNoDataHelpText: () =>
-      i18n.translate('controls.rangeSlider.popover.noDataHelpText', {
-        defaultMessage: 'Selected range resulted in no data. No filter was applied.',
-      }),
     getNoAvailableDataHelpText: () =>
       i18n.translate('controls.rangeSlider.popover.noAvailableDataHelpText', {
         defaultMessage: 'There is no data to display. Adjust the time range and filters.',

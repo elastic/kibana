@@ -1,0 +1,48 @@
+post:
+  summary: Resolve errors from the Import objects API.
+  operationId: resolveImportErrors
+  description: >
+    This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+    To resolve errors, you can:
+    * Retry certain saved objects
+    * Overwrite specific saved objects
+    * Change references to different saved objects
+    NOTE: One object can result in multiple errors, which requires separate steps to resolve. For instance, a missing_references error and a conflict error. Objects are only created when all resolvable errors are addressed.
+  tags:
+    - saved objects 
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: array
+          properties:
+            compatibilityMode:
+              description: Applies various adjustments to the saved objects that are being imported to maintain compatibility between different Kibana versions. When enabled during the initial import, also enable when resolving import errors. This option cannot be used with the `createNewCopies` option.
+              type: array       
+            createNewCopies:
+              description: Creates copies of the saved objects, regenerates each object ID, and resets the origin. When enabled during the initial import, also enable when resolving import errors.
+              type: array      
+        examples:
+          resolveImportErrorsRequest:
+            $ref: '../components/examples/resolve_missing_reference.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+         application/json:
+          schema:
+            type: object 
+    '400':
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: true 
+  servers:
+    - url: https://localhost:5601
+servers:
+  - url: https://localhost:5601
