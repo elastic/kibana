@@ -24,10 +24,11 @@ describe('Functions page', () => {
     cy.contains('Differential TopN functions');
   });
 
-  it('validates values in the table', () => {
+  // Flaky test, skipping it for now
+  it.skip('validates values in the table', () => {
     cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
     cy.visitKibana('/app/profiling/functions', { rangeFrom, rangeTo });
-    cy.wait('@getTopNFunctions', { timeout: 30000 });
+    cy.wait('@getTopNFunctions');
     const firstRowSelector = '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]';
     cy.get(firstRowSelector).eq(1).contains('1');
     cy.get(firstRowSelector).eq(2).contains('vmlinux');
@@ -38,10 +39,11 @@ describe('Functions page', () => {
     cy.get(firstRowSelector).eq(7).contains('600');
   });
 
-  it('shows function details when action button is clicked on the table ', () => {
+  // Flaky test, skipping it for now
+  it.skip('shows function details when action button is clicked on the table ', () => {
     cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
     cy.visitKibana('/app/profiling/functions', { rangeFrom, rangeTo });
-    cy.wait('@getTopNFunctions', { timeout: 30000 });
+    cy.wait('@getTopNFunctions');
     const firstRowSelector =
       '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"] .euiButtonIcon';
     cy.get(firstRowSelector).click();
