@@ -58,20 +58,20 @@ export interface FeatureCatalogueSolution {
 export class FeatureCatalogueRegistry {
   private capabilities: Capabilities | null = null;
   private solutions = new Map<string, FeatureCatalogueSolution>();
-  private features = new Map<string, FeatureCatalogueEntry>();
   private featuresSubject = new BehaviorSubject<Map<string, FeatureCatalogueEntry>>(new Map());
 
   public setup() {
     return {
       register: (feature: FeatureCatalogueEntry) => {
-        if (this.features.has(feature.id)) {
+        const { value: features } = this.featuresSubject;
+        if (features.has(feature.id)) {
           throw new Error(
             `Feature with id [${feature.id}] has already been registered. Use a unique id.`
           );
         }
 
-        this.features.set(feature.id, feature);
-        this.featuresSubject.next(new Map(this.features));
+        features.set(feature.id, feature);
+        this.featuresSubject.next(new Map(features));
       },
       registerSolution: (solution: FeatureCatalogueSolution) => {
         if (this.solutions.has(solution.id)) {
@@ -93,7 +93,7 @@ export class FeatureCatalogueRegistry {
    * @deprecated
    * Use getFeatures$() instead
    */
-  public get(features = this.features): FeatureCatalogueEntry[] {
+  public get(features = this.featuresSubject.value): FeatureCatalogueEntry[] {
     if (this.capabilities === null) {
       throw new Error('Catalogue entries are only available after start phase');
     }
@@ -110,7 +110,7 @@ export class FeatureCatalogueRegistry {
     if (this.capabilities === null) {
       throw new Error('Catalogue entries are only available after start phase');
     }
-    return this.featuresSubject.pipe(map((features) => this.get(features)));
+    return this.featuresSubject.pipe(map((feats) => this.get(feats)));
   }
 
   public getSolutions(): FeatureCatalogueSolution[] {
@@ -124,8 +124,9 @@ export class FeatureCatalogueRegistry {
   }
 
   public removeFeature(appId: string) {
-    this.features.delete(appId);
-    this.featuresSubject.next(new Map(this.features));
+    const { value: features } = this.featuresSubject;
+    features.delete(appId);
+    this.featuresSubject.next(new Map(features));
   }
 }
 
