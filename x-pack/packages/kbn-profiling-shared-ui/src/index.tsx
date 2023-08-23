@@ -7,6 +7,10 @@
 
 import React from 'react';
 
-export function Caue() {
-  return <div>caue</div>;
+interface Props {
+  label: string;
+}
+
+export function Caue({ label }: Props) {
+  return <div>{label}</div>;
 }

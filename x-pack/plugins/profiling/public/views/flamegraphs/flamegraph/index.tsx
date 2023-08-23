@@ -5,10 +5,11 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useState } from 'react';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { FlameGraph } from '@kbn/profiling-shared-ui';
+import React from 'react';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
-import { FlameGraph } from '../../../components/flamegraph';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
@@ -20,11 +21,15 @@ export function FlameGraphView() {
     query,
     query: { rangeFrom, rangeTo, kuery, searchText },
   } = useProfilingParams('/flamegraphs/flamegraph');
+  const trackProfilingEvent = useUiTracker({ app: 'profiling' });
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
 
   const {
     services: { fetchElasticFlamechart },
+    start: {
+      core: { docLinks },
+    },
   } = useProfilingDependencies();
 
   const state = useTimeRangeAsync(
@@ -45,11 +50,6 @@ export function FlameGraphView() {
 
   const profilingRouter = useProfilingRouter();
 
-  const [showInformationWindow, setShowInformationWindow] = useState(false);
-  function toggleShowInformationWindow() {
-    setShowInformationWindow((prev) => !prev);
-  }
-
   function handleSearchTextChange(newSearchText: string) {
     // @ts-expect-error Code gets too complicated to satisfy TS constraints
     profilingRouter.push(routePath, { query: { ...query, searchText: newSearchText } });
@@ -60,12 +60,21 @@ export function FlameGraphView() {
       <EuiFlexItem>
         <AsyncComponent {...state} style={{ height: '100%' }} size="xl">
           <FlameGraph
-            id="flamechart"
-            primaryFlamegraph={data}
-            showInformationWindow={showInformationWindow}
-            toggleShowInformationWindow={toggleShowInformationWindow}
+            data={data}
+            id="profiling-flamechart"
             searchText={searchText}
-            onChangeSearchText={handleSearchTextChange}
+            onSearchTextChange={handleSearchTextChange}
+            onShowInformationWindowOpen={() => {
+              trackProfilingEvent({ metric: 'flamegraph_node_details_click' });
+            }}
+            elasticWebsiteUrl={docLinks.ELASTIC_WEBSITE_URL}
+            dockLinkVersion={docLinks.DOC_LINK_VERSION}
+            onUploadSymbolsClick={(selectedTab) => {
+              profilingRouter.push('/add-data-instructions', {
+                path: {},
+                query: { selectedTab },
+              });
+            }}
           />
         </AsyncComponent>
       </EuiFlexItem>

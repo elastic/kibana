@@ -11,8 +11,8 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import url from 'url';
 import { ObservabilityAIAssistantActionMenuItem } from '@kbn/observability-ai-assistant-plugin/public';
+import { AddDataTabs } from '@kbn/profiling-shared-ui/common';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
-import { AddDataTabs } from '../views/add_data_view';
 
 export function ProfilingHeaderActionMenu() {
   const router = useProfilingRouter();

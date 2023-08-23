@@ -5070,6 +5070,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/profiling-shared-ui@link:x-pack/packages/kbn-profiling-shared-ui":
+  version "0.0.0"
+  uid ""
+
 "@kbn/random-sampling@link:x-pack/packages/kbn-random-sampling":
   version "0.0.0"
   uid ""

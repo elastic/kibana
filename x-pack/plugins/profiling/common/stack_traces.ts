@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProfilingESField } from './elasticsearch';
+import { ProfilingESField } from '@kbn/profiling-data-access-plugin/common/elasticsearch';
 import {
   Executable,
   FileID,
@@ -13,7 +13,7 @@ import {
   StackFrameID,
   StackTrace,
   StackTraceID,
-} from './profiling';
+} from '@kbn/profiling-data-access-plugin/common/profiling';
 
 export interface ProfilingStatusResponse {
   profiling: {

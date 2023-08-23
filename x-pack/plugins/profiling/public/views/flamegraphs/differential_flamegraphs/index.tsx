@@ -5,11 +5,14 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React, { useState } from 'react';
+import { FlameGraph } from '@kbn/profiling-shared-ui';
+import {
+  NormalizationMode,
+  NormalizationOptions,
+} from '@kbn/profiling-shared-ui/common/normalization_options';
+import React from 'react';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
-import { FlameGraph } from '../../../components/flamegraph';
-import { NormalizationMode, NormalizationOptions } from '../../../components/normalization_menu';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
@@ -36,7 +39,6 @@ export function DifferentialFlameGraphsView() {
   } = useProfilingParams('/flamegraphs/differential');
   const routePath = useProfilingRoutePath();
   const profilingRouter = useProfilingRouter();
-  const [showInformationWindow, setShowInformationWindow] = useState(false);
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
 
@@ -48,6 +50,9 @@ export function DifferentialFlameGraphsView() {
 
   const {
     services: { fetchElasticFlamechart },
+    start: {
+      core: { docLinks },
+    },
   } = useProfilingDependencies();
 
   const state = useTimeRangeAsync(
@@ -105,10 +110,6 @@ export function DifferentialFlameGraphsView() {
 
   const isNormalizedByTime = normalizationMode === NormalizationMode.Time;
 
-  function toggleShowInformationWindow() {
-    setShowInformationWindow((prev) => !prev);
-  }
-
   function handleSearchTextChange(newSearchText: string) {
     // @ts-expect-error Code gets too complicated to satisfy TS constraints
     profilingRouter.push(routePath, { query: { ...query, searchText: newSearchText } });
@@ -129,15 +130,21 @@ export function DifferentialFlameGraphsView() {
         <AsyncComponent {...state} style={{ height: '100%' }} size="xl">
           <FlameGraph
             id="flamechart"
-            primaryFlamegraph={data?.primaryFlamegraph}
-            comparisonFlamegraph={data?.comparisonFlamegraph}
-            comparisonMode={comparisonMode}
-            baseline={isNormalizedByTime ? baselineTime : baseline}
-            comparison={isNormalizedByTime ? comparisonTime : comparison}
-            showInformationWindow={showInformationWindow}
-            toggleShowInformationWindow={toggleShowInformationWindow}
+            data={data?.primaryFlamegraph}
+            comparisonData={data?.comparisonFlamegraph}
             searchText={searchText}
-            onChangeSearchText={handleSearchTextChange}
+            onSearchTextChange={handleSearchTextChange}
+            comparisonMode={comparisonMode}
+            baselineScaleFactor={isNormalizedByTime ? baselineTime : baseline}
+            comparisonScaleFactor={isNormalizedByTime ? comparisonTime : comparison}
+            elasticWebsiteUrl={docLinks.ELASTIC_WEBSITE_URL}
+            dockLinkVersion={docLinks.DOC_LINK_VERSION}
+            onUploadSymbolsClick={(selectedTab) => {
+              profilingRouter.push('/add-data-instructions', {
+                path: {},
+                query: { selectedTab },
+              });
+            }}
           />
         </AsyncComponent>
       </EuiFlexItem>

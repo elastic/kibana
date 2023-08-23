@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { calculateImpactEstimates } from '../../../common/calculate_impact_estimates';
+import { calculateImpactEstimates } from '@kbn/profiling-shared-ui/common/calculate_impact_estimates';
 import { TopNFunctions } from '../../../common/functions';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';

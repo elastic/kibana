@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NOT_AVAILABLE_LABEL } from '../../../common';
+import { NOT_AVAILABLE_LABEL } from '@kbn/profiling-shared-ui/common';
 
 export function asNumber(value: number): string {
   if (isNaN(value)) {

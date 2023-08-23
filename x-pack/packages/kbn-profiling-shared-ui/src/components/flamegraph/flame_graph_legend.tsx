@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { asPercentage } from '../../utils/formatters/as_percentage';
-import { Legend, LegendItem } from '../legend';
+import { Legend, LegendItem } from './legend';
 
 export function FlameGraphLegend({
   legendItems,

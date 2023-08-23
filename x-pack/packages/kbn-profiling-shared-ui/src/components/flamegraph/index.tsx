@@ -13,68 +13,71 @@ import {
   PartialTheme,
   Settings,
   Tooltip,
-  FlameSpec,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { Maybe } from '@kbn/observability-plugin/common/typings';
+import type { ElasticFlameGraph } from '@kbn/profiling-data-access-plugin/common/flamegraph';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import { ElasticFlameGraph } from '../../../common/flamegraph';
+import { AddDataTabs } from '../../../common';
+import { ComparisonMode } from '../../../common/normalization_options';
 import { getFlamegraphModel } from '../../utils/get_flamegraph_model';
-import { FlameGraphLegend } from './flame_graph_legend';
 import { FrameInformationWindow } from '../frame_information_window';
-import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
+import { FrameInformationFlyout } from '../frame_information_window/frame_information_flyout';
 import { FlameGraphTooltip } from './flamegraph_tooltip';
-import { ComparisonMode } from '../normalization_menu';
+import { FlameGraphLegend } from './flame_graph_legend';
 
 interface Props {
   id: string;
-  comparisonMode?: ComparisonMode;
-  primaryFlamegraph?: ElasticFlameGraph;
-  comparisonFlamegraph?: ElasticFlameGraph;
-  baseline?: number;
-  comparison?: number;
-  showInformationWindow: boolean;
-  toggleShowInformationWindow: () => void;
+  data?: ElasticFlameGraph;
+  comparisonData?: ElasticFlameGraph;
   searchText?: string;
-  onChangeSearchText?: FlameSpec['onSearchTextChange'];
+  onSearchTextChange?: (searchText: string) => void;
+  onShowInformationWindowOpen?: () => void;
+  comparisonMode?: ComparisonMode;
+  baselineScaleFactor?: number;
+  comparisonScaleFactor?: number;
+  elasticWebsiteUrl: string;
+  dockLinkVersion: string;
+  onUploadSymbolsClick: (tab: AddDataTabs) => void;
 }
 
 export function FlameGraph({
   id,
-  comparisonMode,
-  primaryFlamegraph,
-  comparisonFlamegraph,
-  baseline,
-  comparison,
-  showInformationWindow,
-  toggleShowInformationWindow,
+  data,
+  comparisonData,
   searchText,
-  onChangeSearchText,
+  onSearchTextChange,
+  onShowInformationWindowOpen,
+  comparisonMode,
+  baselineScaleFactor,
+  comparisonScaleFactor,
+  dockLinkVersion,
+  elasticWebsiteUrl,
+  onUploadSymbolsClick,
 }: Props) {
   const theme = useEuiTheme();
-  const trackProfilingEvent = useUiTracker({ app: 'profiling' });
+  const [showInformationWindow, setShowInformationWindow] = useState(false);
 
   const columnarData = useMemo(() => {
     return getFlamegraphModel({
-      primaryFlamegraph,
-      comparisonFlamegraph,
+      primaryFlamegraph: data,
+      comparisonFlamegraph: comparisonData,
       colorSuccess: theme.euiTheme.colors.success,
       colorDanger: theme.euiTheme.colors.danger,
       colorNeutral: theme.euiTheme.colors.lightShade,
       comparisonMode,
-      baseline,
-      comparison,
+      baseline: baselineScaleFactor,
+      comparison: comparisonScaleFactor,
     });
   }, [
-    primaryFlamegraph,
-    comparisonFlamegraph,
-    theme.euiTheme.colors.success,
+    baselineScaleFactor,
+    comparisonData,
+    comparisonMode,
+    comparisonScaleFactor,
+    data,
     theme.euiTheme.colors.danger,
     theme.euiTheme.colors.lightShade,
-    comparisonMode,
-    baseline,
-    comparison,
+    theme.euiTheme.colors.success,
   ]);
 
   const chartTheme: PartialTheme = {
@@ -88,17 +91,17 @@ export function FlameGraph({
   const [highlightedVmIndex, setHighlightedVmIndex] = useState<number | undefined>(undefined);
 
   const selected: undefined | React.ComponentProps<typeof FrameInformationWindow>['frame'] =
-    primaryFlamegraph && highlightedVmIndex !== undefined
+    data && highlightedVmIndex !== undefined
       ? {
-          fileID: primaryFlamegraph.FileID[highlightedVmIndex],
-          frameType: primaryFlamegraph.FrameType[highlightedVmIndex],
-          exeFileName: primaryFlamegraph.ExeFilename[highlightedVmIndex],
-          addressOrLine: primaryFlamegraph.AddressOrLine[highlightedVmIndex],
-          functionName: primaryFlamegraph.FunctionName[highlightedVmIndex],
-          sourceFileName: primaryFlamegraph.SourceFilename[highlightedVmIndex],
-          sourceLine: primaryFlamegraph.SourceLine[highlightedVmIndex],
-          countInclusive: primaryFlamegraph.CountInclusive[highlightedVmIndex],
-          countExclusive: primaryFlamegraph.CountExclusive[highlightedVmIndex],
+          fileID: data.FileID[highlightedVmIndex],
+          frameType: data.FrameType[highlightedVmIndex],
+          exeFileName: data.ExeFilename[highlightedVmIndex],
+          addressOrLine: data.AddressOrLine[highlightedVmIndex],
+          functionName: data.FunctionName[highlightedVmIndex],
+          sourceFileName: data.SourceFilename[highlightedVmIndex],
+          sourceLine: data.SourceLine[highlightedVmIndex],
+          countInclusive: data.CountInclusive[highlightedVmIndex],
+          countExclusive: data.CountExclusive[highlightedVmIndex],
         }
       : undefined;
 
@@ -128,16 +131,16 @@ export function FlameGraph({
                   <Tooltip
                     actions={[{ label: '', onSelect: () => {} }]}
                     customTooltip={(props) => {
-                      if (!primaryFlamegraph) {
+                      if (!data) {
                         return <></>;
                       }
 
                       const valueIndex = props.values[0].valueAccessor as number;
-                      const label = primaryFlamegraph.Label[valueIndex];
-                      const countInclusive = primaryFlamegraph.CountInclusive[valueIndex];
-                      const countExclusive = primaryFlamegraph.CountExclusive[valueIndex];
-                      const totalSeconds = primaryFlamegraph.TotalSeconds;
-                      const nodeID = primaryFlamegraph.ID[valueIndex];
+                      const label = data.Label[valueIndex];
+                      const countInclusive = data.CountInclusive[valueIndex];
+                      const countExclusive = data.CountExclusive[valueIndex];
+                      const totalSeconds = data.TotalSeconds;
+                      const nodeID = data.ID[valueIndex];
 
                       const comparisonNode = columnarData.comparisonNodesById[nodeID];
 
@@ -151,14 +154,16 @@ export function FlameGraph({
                           totalSeconds={totalSeconds}
                           comparisonCountInclusive={comparisonNode?.CountInclusive}
                           comparisonCountExclusive={comparisonNode?.CountExclusive}
-                          comparisonTotalSamples={comparisonFlamegraph?.CountInclusive[0]}
-                          comparisonTotalSeconds={comparisonFlamegraph?.TotalSeconds}
-                          baselineScaleFactor={baseline}
-                          comparisonScaleFactor={comparison}
+                          comparisonTotalSamples={comparisonData?.CountInclusive[0]}
+                          comparisonTotalSeconds={comparisonData?.TotalSeconds}
+                          baselineScaleFactor={baselineScaleFactor}
+                          comparisonScaleFactor={comparisonScaleFactor}
                           onShowMoreClick={() => {
-                            trackProfilingEvent({ metric: 'flamegraph_node_details_click' });
                             if (!showInformationWindow) {
-                              toggleShowInformationWindow();
+                              if (onShowInformationWindowOpen) {
+                                onShowInformationWindowOpen();
+                              }
+                              setShowInformationWindow(true);
                             }
                             setHighlightedVmIndex(valueIndex);
                           }}
@@ -174,7 +179,7 @@ export function FlameGraph({
                     animation={{ duration: 100 }}
                     controlProviderCallback={{}}
                     search={searchText ? { text: searchText } : undefined}
-                    onSearchTextChange={onChangeSearchText}
+                    onSearchTextChange={onSearchTextChange}
                   />
                 </Chart>
               </EuiFlexItem>
@@ -182,19 +187,19 @@ export function FlameGraph({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <FlameGraphLegend
-            legendItems={columnarData.legendItems}
-            asScale={!!comparisonFlamegraph}
-          />
+          <FlameGraphLegend legendItems={columnarData.legendItems} asScale={!!comparisonData} />
         </EuiFlexItem>
       </EuiFlexGroup>
       {showInformationWindow && (
-        <FrameInformationTooltip
-          onClose={toggleShowInformationWindow}
+        <FrameInformationFlyout
+          onClose={() => setShowInformationWindow(false)}
           frame={selected}
-          totalSeconds={primaryFlamegraph?.TotalSeconds ?? 0}
+          totalSeconds={data?.TotalSeconds ?? 0}
           totalSamples={totalSamples}
-          samplingRate={primaryFlamegraph?.SamplingRate ?? 1.0}
+          samplingRate={data?.SamplingRate ?? 1.0}
+          dockLinkVersion={dockLinkVersion}
+          elasticWebsiteUrl={elasticWebsiteUrl}
+          onUploadSymbolsClick={onUploadSymbolsClick}
         />
       )}
     </>

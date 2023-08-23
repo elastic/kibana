@@ -52,7 +52,3 @@ export function fromMapToRecord<K extends string, V>(m: Map<K, V>): Record<strin
 
   return output;
 }
-
-export const NOT_AVAILABLE_LABEL = i18n.translate('xpack.profiling.notAvailableLabel', {
-  defaultMessage: 'N/A',
-});

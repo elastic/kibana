@@ -6,16 +6,16 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { useProfilingParams } from '../../../hooks/use_profiling_params';
-import { useProfilingRouter } from '../../../hooks/use_profiling_router';
-import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
-import { PrimaryAndComparisonSearchBar } from '../../../components/primary_and_comparison_search_bar';
 import {
   ComparisonMode,
   NormalizationMode,
   NormalizationOptions,
-  NormalizationMenu,
-} from '../../../components/normalization_menu';
+} from '@kbn/profiling-shared-ui/common/normalization_options';
+import { useProfilingParams } from '../../../hooks/use_profiling_params';
+import { useProfilingRouter } from '../../../hooks/use_profiling_router';
+import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
+import { PrimaryAndComparisonSearchBar } from '../../../components/primary_and_comparison_search_bar';
+import { NormalizationMenu } from '../../../components/normalization_menu';
 import { DifferentialComparisonMode } from '../../../components/differential_comparison_mode';
 
 interface Props {

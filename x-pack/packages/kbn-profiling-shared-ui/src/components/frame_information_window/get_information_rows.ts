@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { describeFrameType } from '@kbn/profiling-data-access-plugin/common/profiling';
 import { NOT_AVAILABLE_LABEL } from '../../../common';
-import { describeFrameType } from '../../../common/profiling';
 
 export function getInformationRows({
   fileID,

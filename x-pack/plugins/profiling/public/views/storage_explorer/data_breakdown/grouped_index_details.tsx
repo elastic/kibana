@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { asDynamicBytes, asInteger } from '@kbn/observability-plugin/common';
 import React from 'react';
-import { NOT_AVAILABLE_LABEL } from '../../../../common';
+import { NOT_AVAILABLE_LABEL } from '@kbn/profiling-shared-ui/common';
 import type {
   StorageDetailsGroupedByIndex,
   StorageGroupedIndexNames,

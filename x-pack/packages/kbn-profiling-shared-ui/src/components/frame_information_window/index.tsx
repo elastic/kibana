@@ -13,12 +13,16 @@ import {
   useObservabilityAIAssistant,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useMemo } from 'react';
-import { FrameSymbolStatus, getFrameSymbolStatus } from '../../../common/profiling';
+import {
+  FrameSymbolStatus,
+  getFrameSymbolStatus,
+} from '@kbn/profiling-data-access-plugin/common/profiling';
 import { FrameInformationPanel } from './frame_information_panel';
 import { getImpactRows } from './get_impact_rows';
 import { getInformationRows } from './get_information_rows';
 import { KeyValueList } from './key_value_list';
 import { MissingSymbolsCallout } from './missing_symbols_callout';
+import { AddDataTabs } from '../../../common';
 
 export interface Props {
   frame?: {
@@ -35,9 +39,20 @@ export interface Props {
   totalSamples: number;
   totalSeconds: number;
   samplingRate: number;
+  elasticWebsiteUrl: string;
+  dockLinkVersion: string;
+  onUploadSymbolsClick: (tab: AddDataTabs) => void;
 }
 
-export function FrameInformationWindow({ frame, totalSamples, totalSeconds, samplingRate }: Props) {
+export function FrameInformationWindow({
+  frame,
+  totalSamples,
+  totalSeconds,
+  samplingRate,
+  dockLinkVersion,
+  elasticWebsiteUrl,
+  onUploadSymbolsClick,
+}: Props) {
   const aiAssistant = useObservabilityAIAssistant();
 
   const promptMessages = useMemo<Message[] | undefined>(() => {
@@ -187,7 +202,12 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds, samp
         ) : undefined}
         {symbolStatus !== FrameSymbolStatus.SYMBOLIZED && (
           <EuiFlexItem>
-            <MissingSymbolsCallout frameType={frame.frameType} />
+            <MissingSymbolsCallout
+              frameType={frame.frameType}
+              dockLinkVersion={dockLinkVersion}
+              elasticWebsiteUrl={elasticWebsiteUrl}
+              onUploadSymbolsClick={onUploadSymbolsClick}
+            />
           </EuiFlexItem>
         )}
         <EuiFlexItem>

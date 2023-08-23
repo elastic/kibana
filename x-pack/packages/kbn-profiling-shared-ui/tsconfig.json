@@ -15,5 +15,12 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/profiling-data-access-plugin",
+    "@kbn/kibana-react-plugin", 
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/charts-plugin",
+    "@kbn/i18n-react"
+  ]
 }

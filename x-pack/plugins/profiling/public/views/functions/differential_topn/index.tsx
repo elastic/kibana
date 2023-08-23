@@ -15,14 +15,14 @@ import {
 } from '@elastic/eui';
 import React, { useRef } from 'react';
 import { GridOnScrollProps } from 'react-window';
+import {
+  NormalizationMode,
+  NormalizationOptions,
+} from '@kbn/profiling-shared-ui/common/normalization_options';
 import { TopNFunctionSortField } from '../../../../common/functions';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
-import {
-  NormalizationMenu,
-  NormalizationMode,
-  NormalizationOptions,
-} from '../../../components/normalization_menu';
+import { NormalizationMenu } from '../../../components/normalization_menu';
 import { PrimaryAndComparisonSearchBar } from '../../../components/primary_and_comparison_search_bar';
 import { TopNFunctionsGrid } from '../../../components/topn_functions';
 import { TopNFunctionsSummary } from '../../../components/topn_functions_summary';

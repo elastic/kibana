@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { charCodeAt } from './base64';
+import { charCodeAt } from '@kbn/profiling-data-access-plugin/common/base64';
 
 // runLengthEncode run-length encodes the input array.
 //

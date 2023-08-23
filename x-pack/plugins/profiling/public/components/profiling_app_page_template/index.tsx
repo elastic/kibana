@@ -18,10 +18,9 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
+import { PROFILING_FEEDBACK_LINK } from '@kbn/profiling-shared-ui/common';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
-
-export const PROFILING_FEEDBACK_LINK = 'https://ela.st/profiling-feedback';
 
 export function ProfilingAppPageTemplate({
   children,

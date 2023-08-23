@@ -7,10 +7,13 @@
 
 import { sum } from 'lodash';
 
-import { createCalleeTree } from './callee';
+import { createCalleeTree } from '@kbn/profiling-data-access-plugin/common/callee';
 import { createColumnarViewModel } from './columnar_view_model';
-import { createBaseFlameGraph, createFlameGraph } from './flamegraph';
-import { decodeStackTraceResponse } from './stack_traces';
+import {
+  createBaseFlameGraph,
+  createFlameGraph,
+} from '@kbn/profiling-data-access-plugin/common/flamegraph';
+import { decodeStackTraceResponse } from '@kbn/profiling-data-access-plugin/common/stack_traces';
 
 import { stackTraceFixtures } from './__fixtures__/stacktraces';
 

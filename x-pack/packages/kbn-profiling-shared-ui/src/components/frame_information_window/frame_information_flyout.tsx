@@ -7,12 +7,16 @@
 import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
 import React from 'react';
 import { FrameInformationWindow, Props as FrameInformationWindowProps } from '.';
+import { AddDataTabs } from '../../../common';
 
 interface Props extends FrameInformationWindowProps {
   onClose: () => void;
+  elasticWebsiteUrl: string;
+  dockLinkVersion: string;
+  onUploadSymbolsClick: (tab: AddDataTabs) => void;
 }
 
-export function FrameInformationTooltip({ onClose, ...props }: Props) {
+export function FrameInformationFlyout({ onClose, ...props }: Props) {
   return (
     <EuiFlyout onClose={onClose} size="m">
       <EuiFlyoutBody>
