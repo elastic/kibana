@@ -275,12 +275,15 @@ const DataQualityComponent: React.FC = () => {
               </EuiToolTip>
             )}
             {!isILMAvailable && startDate && endDate && (
-              <EuiSuperDatePicker
-                start={startDate}
-                end={endDate}
-                onTimeChange={onTimeChange}
-                showUpdateButton={false}
-              />
+              <EuiToolTip content={i18n.DATE_PICKER_TOOLTIP}>
+                <EuiSuperDatePicker
+                  start={startDate}
+                  end={endDate}
+                  onTimeChange={onTimeChange}
+                  showUpdateButton={false}
+                  isDisabled={true}
+                />
+              </EuiToolTip>
             )}
           </HeaderPage>
 
