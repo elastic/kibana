@@ -8,19 +8,19 @@
 import expect from '@kbn/expect';
 import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { SeverityAll } from '@kbn/cases-plugin/common/ui';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
-  const svlCommonNavigation = getPageObject('svlCommonNavigation');
-  const svlObltNavigation = getService('svlObltNavigation');
+  const svlSecNavigation = getService('svlSecNavigation');
 
   describe('cases list', () => {
     before(async () => {
-      await svlObltNavigation.navigateToLandingPage();
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+      await svlSecNavigation.navigateToLandingPage();
+
+      await testSubjects.click('solutionSideNavItemLink-cases');
     });
 
     after(async () => {
@@ -36,7 +36,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('listing', () => {
       before(async () => {
-        await cases.api.createNthRandomCases(2, 'observability');
+        await cases.api.createNthRandomCases(2, 'securitySolution');
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
       });
@@ -54,8 +54,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('bulk actions', () => {
       describe('delete', () => {
         before(async () => {
-          await cases.api.createNthRandomCases(8, 'observability');
-          await cases.api.createCase({ title: 'delete me', tags: ['one'], owner: 'observability' });
+          await cases.api.createNthRandomCases(8, 'securitySolution');
+          await cases.api.createCase({ title: 'delete me', tags: ['one'], owner: 'securitySolution' });
           await header.waitUntilLoadingHasFinished();
           await cases.casesTable.waitForCasesToBeListed();
         });
@@ -74,7 +74,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       describe('status', () => {
         before(async () => {
-          await cases.api.createNthRandomCases(2, 'observability');
+          await cases.api.createNthRandomCases(2, 'securitySolution');
           await header.waitUntilLoadingHasFinished();
           await cases.casesTable.waitForCasesToBeListed();
         });
@@ -93,7 +93,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       describe('severity', () => {
         before(async () => {
-          await cases.api.createNthRandomCases(2, 'observability');
+          await cases.api.createNthRandomCases(2, 'securitySolution');
           await header.waitUntilLoadingHasFinished();
           await cases.casesTable.waitForCasesToBeListed();
         });
@@ -114,9 +114,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         let caseIds: string[] = [];
         beforeEach(async () => {
           caseIds = [];
-          const case1 = await cases.api.createCase({ title: 'case 1', tags: ['one', 'three'], owner: 'observability' });
-          const case2 = await cases.api.createCase({ title: 'case 2', tags: ['two', 'four'], owner: 'observability' });
-          const case3 = await cases.api.createCase({ title: 'case 3', tags: ['two', 'five'], owner: 'observability' });
+          const case1 = await cases.api.createCase({ title: 'case 1', tags: ['one', 'three'], owner: 'securitySolution' });
+          const case2 = await cases.api.createCase({ title: 'case 2', tags: ['two', 'four'], owner: 'securitySolution' });
+          const case3 = await cases.api.createCase({ title: 'case 3', tags: ['two', 'five'], owner: 'securitySolution' });
 
           caseIds.push(case1.id);
           caseIds.push(case2.id);
@@ -170,13 +170,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('severity filtering', () => {
       before(async () => {
-        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
-        
-        await cases.api.createCase({ severity: CaseSeverity.LOW, owner: 'observability' });
-        await cases.api.createCase({ severity: CaseSeverity.LOW, owner: 'observability' });
-        await cases.api.createCase({ severity: CaseSeverity.HIGH, owner: 'observability' });
-        await cases.api.createCase({ severity: CaseSeverity.HIGH, owner: 'observability' });
-        await cases.api.createCase({ severity: CaseSeverity.CRITICAL, owner: 'observability' });
+        await testSubjects.click('solutionSideNavItemLink-cases');
+
+        await cases.api.createCase({ severity: CaseSeverity.LOW, owner: 'securitySolution' });
+        await cases.api.createCase({ severity: CaseSeverity.LOW, owner: 'securitySolution' });
+        await cases.api.createCase({ severity: CaseSeverity.HIGH, owner: 'securitySolution' });
+        await cases.api.createCase({ severity: CaseSeverity.HIGH, owner: 'securitySolution' });
+        await cases.api.createCase({ severity: CaseSeverity.CRITICAL, owner: 'securitySolution' });
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
       });
@@ -186,7 +186,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
          * There is no easy way to clear the filtering.
          * Refreshing the page seems to be easier.
          */
-        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+        await testSubjects.click('solutionSideNavItemLink-cases');
       });
 
       after(async () => {
@@ -218,7 +218,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('pagination', () => {
       before(async () => {
-        await cases.api.createNthRandomCases(12, 'observability');
+        await cases.api.createNthRandomCases(12, 'securitySolution');
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
       });
@@ -243,7 +243,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('row actions', () => {
       describe('Status', () => {
         before(async () => {
-          await cases.api.createNthRandomCases(1, 'observability');
+          await cases.api.createNthRandomCases(1, 'securitySolution');
           await header.waitUntilLoadingHasFinished();
           await cases.casesTable.waitForCasesToBeListed();
         });
@@ -271,7 +271,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       describe('Severity', () => {
         before(async () => {
-          await cases.api.createNthRandomCases(1, 'observability');
+          await cases.api.createNthRandomCases(1, 'securitySolution');
           await header.waitUntilLoadingHasFinished();
           await cases.casesTable.waitForCasesToBeListed();
         });
@@ -304,7 +304,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       describe('Delete', () => {
         before(async () => {
-          await cases.api.createNthRandomCases(1, 'observability');
+          await cases.api.createNthRandomCases(1, 'securitySolution');
           await header.waitUntilLoadingHasFinished();
           await cases.casesTable.waitForCasesToBeListed();
         });
