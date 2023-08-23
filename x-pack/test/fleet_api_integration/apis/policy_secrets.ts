@@ -44,7 +44,7 @@ function createdPolicyToUpdatePolicy(policy: any) {
 
 const SECRETS_INDEX_NAME = '.fleet-secrets';
 export default function (providerContext: FtrProviderContext) {
-  describe('TMPDEBUGME fleet policy secrets', () => {
+  describe('fleet policy secrets', () => {
     const { getService } = providerContext;
 
     const es: Client = getService('es');
