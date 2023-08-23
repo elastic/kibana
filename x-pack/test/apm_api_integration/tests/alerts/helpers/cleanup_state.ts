@@ -21,8 +21,15 @@ export async function cleanupAllState({
   es: Client;
   supertest: SuperTest<Test>;
 }) {
-  await deleteActionConnectorIndex(es);
-  await deleteApmRules(supertest);
-  await deleteApmAlerts(es);
-  await clearKibanaApmEventLog(es);
+  try {
+    await Promise.all([
+      await deleteActionConnectorIndex(es),
+      await deleteApmRules(supertest),
+      await deleteApmAlerts(es),
+      await clearKibanaApmEventLog(es),
+    ]);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error(`An error occured while cleaning up the state: ${e}`);
+  }
 }
