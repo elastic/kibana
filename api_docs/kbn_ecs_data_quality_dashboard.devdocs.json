@@ -11,7 +11,7 @@
         "label": "DATA_QUALITY_PROMPT_CONTEXT_PILL",
         "description": [],
         "signature": [
-          "(indexName: string) => any"
+          "(indexName: string) => string"
         ],
         "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
         "deprecated": false,
@@ -112,13 +112,10 @@
       {
         "parentPluginId": "@kbn/ecs-data-quality-dashboard",
         "id": "def-public.DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -141,13 +138,10 @@
       {
         "parentPluginId": "@kbn/ecs-data-quality-dashboard",
         "id": "def-public.DATA_QUALITY_SUGGESTED_USER_PROMPT",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "DATA_QUALITY_SUGGESTED_USER_PROMPT",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
         "deprecated": false,
         "trackAdoption": false,

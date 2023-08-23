@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ROLE, login } from '../../tasks/login';
+import { tag } from '../../tags';
 import { navigateTo } from '../../tasks/navigation';
 import {
   cleanupPack,
@@ -14,8 +14,9 @@ import {
   loadPack,
   loadSavedQuery,
 } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../support/roles';
 
-describe('Reader - only READ', () => {
+describe('Reader - only READ', { tags: [tag.ESS] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
   let packName: string;
@@ -37,7 +38,7 @@ describe('Reader - only READ', () => {
   });
 
   beforeEach(() => {
-    login(ROLE.reader);
+    cy.login(ServerlessRoleName.READER);
   });
 
   after(() => {

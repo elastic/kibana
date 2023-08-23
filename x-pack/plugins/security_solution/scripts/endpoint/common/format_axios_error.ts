@@ -25,9 +25,9 @@ export class FormattedAxiosError extends Error {
     super(axiosError.message);
 
     this.request = {
-      method: axiosError.config.method ?? '?',
-      url: axiosError.config.url ?? '?',
-      data: axiosError.config.data ?? '',
+      method: axiosError.config?.method ?? '?',
+      url: axiosError.config?.url ?? '?',
+      data: axiosError.config?.data ?? '',
     };
 
     this.response = {
