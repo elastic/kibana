@@ -51,7 +51,7 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import { registerManagementSection } from './application/management';
 import { MlLocatorDefinition, type MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
-import { registerFeature } from './register_feature';
+import { registerHomeFeature } from './register_home_feature';
 import { isFullLicense, isMlEnabled } from '../common/license';
 import { ML_APP_ROUTE, PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
 import type { MlCapabilities } from './shared';
@@ -171,30 +171,22 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       const { capabilities } = coreStart.application;
       const mlCapabilities = capabilities.ml as MlCapabilities;
 
+      // register various ML plugin features which require a full license
+      // note including registerHomeFeature in register_helper would cause the page bundle size to increase significantly
       if (mlEnabled) {
         // add ML to home page
         if (pluginsSetup.home) {
-          registerFeature(pluginsSetup.home);
+          registerHomeFeature(pluginsSetup.home);
         }
-      } else {
-        // if ml is disabled in elasticsearch, disable ML in kibana
-        this.appUpdater$.next(() => ({
-          status: AppStatus.inaccessible,
-        }));
-      }
 
-      // register various ML plugin features which require a full license
-      // note including registerFeature in register_helper would cause the page bundle size to increase significantly
-      const {
-        registerEmbeddables,
-        registerMlUiActions,
-        registerSearchLinks,
-        registerMlAlerts,
-        registerMapExtension,
-        registerCasesAttachments,
-      } = await import('./register_helper');
-
-      if (mlEnabled) {
+        const {
+          registerEmbeddables,
+          registerMlUiActions,
+          registerSearchLinks,
+          registerMlAlerts,
+          registerMapExtension,
+          registerCasesAttachments,
+        } = await import('./register_helper');
         registerSearchLinks(this.appUpdater$, fullLicense, mlCapabilities);
 
         if (fullLicense) {
@@ -220,6 +212,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             }
           }
         }
+      } else {
+        // if ml is disabled in elasticsearch, disable ML in kibana
+        this.appUpdater$.next(() => ({
+          status: AppStatus.inaccessible,
+        }));
       }
     });
 

@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { PLUGIN_ID } from '../common/constants/app';
+import { ML_APP_ROUTE, PLUGIN_ID } from '../common/constants/app';
 
-export const registerFeature = (home: HomePublicPluginSetup) => {
+export const registerHomeFeature = (home: HomePublicPluginSetup) => {
   // register ML so it appears on the Kibana home page
   home.featureCatalogue.register({
     id: PLUGIN_ID,
@@ -24,7 +24,7 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
         'Automatically model the normal behavior of your time series data to detect anomalies.',
     }),
     icon: 'machineLearningApp',
-    path: '/app/ml',
+    path: ML_APP_ROUTE,
     showOnHomePage: false,
     category: 'data',
     solutionId: 'kibana',
