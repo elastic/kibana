@@ -978,9 +978,18 @@ export default function ({
     context.method = ret.method?.toUpperCase();
     context.token = ret.token;
     context.otherTokenValues = ret.otherTokenValues;
-    context.urlTokenPath = ret.urlTokenPath;
+    context.urlTokenPath = _.clone(ret.urlTokenPath);
+    if (
+      context.autoCompleteType === 'path' &&
+      context.urlTokenPath?.length > 0 &&
+      Array.isArray(context.urlTokenPath) &&
+      Array.isArray(context.urlTokenPath[context.urlTokenPath.length - 1])
+    ) {
+      context.urlTokenPath.pop();
+    }
     const components = getTopLevelUrlCompleteComponents(context.method);
-    populateContext(ret.urlTokenPath, context, editor, true, components);
+    populateContext(context.urlTokenPath, context, editor, true, components);
+    context.urlTokenPath = ret.urlTokenPath;
 
     context.autoCompleteSet = addMetaToTermsList(context.autoCompleteSet!, 'endpoint');
   }
@@ -1109,11 +1118,11 @@ export default function ({
     if (
       lastEvaluatedToken.position.column + 1 === currentToken.position.column &&
       lastEvaluatedToken.position.lineNumber === currentToken.position.lineNumber &&
-      lastEvaluatedToken.type === 'url.slash' &&
+      (lastEvaluatedToken.type === 'url.slash' || lastEvaluatedToken.type === 'url.comma')&&
       currentToken.type === 'url.part' &&
       currentToken.value.length === 1
     ) {
-      // do not suppress autocomplete for a single character immediately following a slash in URL
+      // do not suppress autocomplete for a single character immediately following a slash or comma in URL
     } else if (
       lastEvaluatedToken.position.column < currentToken.position.column &&
       lastEvaluatedToken.position.lineNumber === currentToken.position.lineNumber &&
