@@ -67,8 +67,6 @@ export const DiscoverTabContent = () => {
       ].forEach((sub) => {
         if (sub) sub.unsubscribe();
       });
-
-      stateContainerRef.current?.appState.syncState().stop();
     };
 
     return unSubscribeAll;
