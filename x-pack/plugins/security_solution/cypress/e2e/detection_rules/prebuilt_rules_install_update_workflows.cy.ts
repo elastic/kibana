@@ -25,6 +25,7 @@ import {
   getRuleAssets,
 } from '../../tasks/api_calls/prebuilt_rules';
 import { deleteAlertsAndRules, reload, resetRulesTableState } from '../../tasks/common';
+import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import {
   addElasticRulesButtonClick,
@@ -45,7 +46,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     login();
     resetRulesTableState();
     deleteAlertsAndRules();
-    cy.task('esArchiverResetKibana');
+    esArchiverResetKibana();
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
   });
