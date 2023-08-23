@@ -331,7 +331,7 @@ ${JSON.stringify(config.getAll(), null, 2)}
                   config,
                   log,
                   name: `ftr-${esPort}`,
-                  esFrom: 'snapshot',
+                  esFrom: config.get('esTestCluster')?.from || 'snapshot',
                   onEarlyExit,
                 }),
               { retries: 2, forever: false }
@@ -469,11 +469,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
           return result;
         },
         {
-          concurrency: (argv.concurrency as number | undefined)
-            ? (argv.concurrency as number)
-            : !isOpen
-            ? 2
-            : 1,
+          concurrency: 1,
         }
       ).then((results) => {
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
