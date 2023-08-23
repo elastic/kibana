@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.10.0>>
 * <<release-notes-8.9.1>>
 * <<release-notes-8.9.0>>
 * <<release-notes-8.8.2>>
@@ -46,6 +47,781 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.10.0]]
+== {kib} 8.10.0
+
+coming::[8.10.0]
+
+For information about the {kib} 8.10.0 release, review the following information.
+
+[float]
+[[breaking-changes-8.10.0]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 8.10.0, review the breaking changes, then mitigate the impact to your application.
+
+[discrete]
+[[breaking-163150]]
+* Updating a case comment is now included in the 10000 user actions restriction.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}163150[#163150]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-162665]]
+* Feat(slo): introduce new search capabilities.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}162665[#162665]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-162506]]
+* The get case metrics APIs are now internal.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}162506[#162506]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-162492]]
+* Update docs for remaining guardrails.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}162492[#162492]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-162411]]
+* The Find Cases API now limits.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}162411[#162411]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-162245]]
+* Restrict searchFields, sortField and remove rootSearchFields from find_cases API.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}162245[#162245]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-162071]]
+* A case can now only have 100 external references and persistable state(excluding files) attachments combined.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}162071[#162071]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-161871]]
+* The function `addExtensionSpecFilePath` is removed from the Console plugin setup contract (server side).
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}161871[#161871]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-161848]]
+* Updating a case will now fail if the operation makes it reach more than 10000 user actions.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}161848[#161848]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-161357]]
+* The total number of characters per comment is limited to 30000.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}161357[#161357]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-161282]]
+* The getConnectors API will now limit the number of supported connectors returned to 1000.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}161282[#161282]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-161200]]
+* The total number of characters per comment is limited to 30000.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}161200[#161200]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-161111]]
+* Max value for perPage parameter in find Cases API is now 100.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}161111[#161111]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-161087]]
+* The Create Case and Update Case APIs put the following limits.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}161087[#161087]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-161076]]
+* The maximum number of cases that can be updated simultaneously is now 100. The minimum is 1.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}161076[#161076]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-160846]]
+* The Delete cases API now limits the number of cases to be deleted to 100.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}160846[#160846]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-160844]]
+* The Create Case and Update Case APIs put the following limits.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}160844[#160844]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-160705]]
+* The Find Cases API now limits the array fields tags, assignees, and categories to 100 items.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}160705[#160705]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-159839]]
+* Use header-based versioned APIs instead of path-based.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}159839[#159839]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-159041]]
+* The function `addProcessorDefinition` is removed from the Console plugin start contract (server side).
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}159041[#159041]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[float]
+[[deprecations-8.10.0]]
+=== Deprecations
+
+The following functionality is deprecated in 8.10.0, and will be removed in 9.0.0.
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
+you make the necessary updates after you upgrade to 8.10.0.
+
+[discrete]
+[[deprecation-161136]]
+.Action variables in the UI and in tests that were no longer used have been replaced
+[%collapsible]
+====
+*Details* +
+The following rule action variables have been deprecated; use the recommended variables (in parentheses) instead:
+
+* alertActionGroup (alert.actionGroup)
+* alertActionGroupName (alert.actionGroupName)
+* alertActionSubgroup (alert.actionSubgroup)
+* alertId (rule.id)
+* alertInstanceId (alert.id)
+* alertName (rule.name)
+* params (rule.params)
+* spaceId (rule.spaceId)
+* tags (rule.tags)
+
+For more information, refer to ({kibana-pull}161136[#161136]).
+====  
+      
+[float]
+[[features-8.10.0]]
+=== Features
+{kib} 8.10.0 adds the following new and notable features.
+
+APM::
+* Adds KQL filtering in APM rules ({kibana-pull}163825[#163825]).
+* Make service group saved objects exportable ({kibana-pull}163569[#163569]).
+* Added ability to manage Cross-Cluster API keys ({kibana-pull}162363[#162363]).
+* Enable Trace Explorer by default ({kibana-pull}162308[#162308]).
+* Adds error.grouping_name to group alerts in Error Count rule ({kibana-pull}161810[#161810]).
+* Adds query to check for overflow bucket in service groups ({kibana-pull}159990[#159990]).
+Elastic Security::
+For the Elastic Security 8.10.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Only enable secret storage once all fleet servers are above 8.10.0 ({kibana-pull}163627[#163627]).
+* Kafka integration API ({kibana-pull}159110[#159110]).
+Machine Learning::
+* AIOps: Adds/edits change point charts embeddable from the Dashboard app ({kibana-pull}163694[#163694]).
+* AIOps: Adds change point detection charts embeddable ({kibana-pull}162796[#162796]).
+* Adds ability to deploy trained models for data frame analytics jobs ({kibana-pull}162537[#162537]).
+* Adds map view for models in Trained Models and expands support for models in Analytics map ({kibana-pull}162443[#162443]).
+* Adds new Data comparison view ({kibana-pull}161365[#161365]).
+Management::
+* REST endpoint for swapping saved object references ({kibana-pull}157665[#157665]).
+Presentation::
+* Time series geo line ({kibana-pull}159267[#159267]).
+Other::
+* Handle lens actions in Serverless ({kibana-pull}163581[#163581]).
+* UI for crawler that enables to register multiple schedules with different crawl configurations ({kibana-pull}163425[#163425]).
+* ## Risk score from new Risk Engine showing in UI ({kibana-pull}163237[#163237]).
+* Hide cases in stack management UI ({kibana-pull}163037[#163037]).
+* Feat(slo): introduce new search capabilities ({kibana-pull}162665[#162665]).
+////
+!!TODO!! The above PR had a lengthy release note description:
+SLO definition and computed values are now summarized periodically into a summary search index, allowing users to **search** by name, tags, SLO budgeting type or time window, and even by and **sort** by error budget consumed, error budget remaining, SLI value or status.
+////
+* Risk engine initialisation, update from legacy risk engine workflow and status change ({kibana-pull}162400[#162400]).
+* Process blocking now enabled for process responses ({kibana-pull}162082[#162082]).
+* Adds support for self-signed SSL certificate auth in webhook connector ({kibana-pull}161894[#161894]).
+* Adds indicator to support histogram fields ({kibana-pull}161582[#161582]).
+* Risk score management page ({kibana-pull}160507[#160507]).
+* Allow runtime fields to be selected for Elasticsearch query rule type group by or aggregate over options ({kibana-pull}160319[#160319]).
+
+For more information about the features introduced in 8.10.0, refer to <<whats-new,What's new in 8.10>>.
+
+[[enhancements-and-bug-fixes-v8.10.0]]
+=== Enhancements and bug fixes
+
+For detailed information about the 8.10.0 release, review the enhancements and bug fixes.
+
+[float]
+[[breaking-v8.10.0]]
+=== Breaking
+[discrete]
+[[breaking-163150]]
+* Updating a case comment is now included in the 10000 user actions restriction.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}163150[#163150]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-162665]]
+* Feat(slo): introduce new search capabilities.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}162665[#162665]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-162506]]
+* The get case metrics APIs are now internal.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}162506[#162506]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-162492]]
+* Update docs for remaining guardrails.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}162492[#162492]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-162411]]
+* The Find Cases API now limits.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}162411[#162411]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-162245]]
+* Restrict searchFields, sortField and remove rootSearchFields from find_cases API.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}162245[#162245]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-162071]]
+* A case can now only have 100 external references and persistable state(excluding files) attachments combined.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}162071[#162071]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-161871]]
+* The function `addExtensionSpecFilePath` is removed from the Console plugin setup contract (server side).
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}161871[#161871]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-161848]]
+* Updating a case will now fail if the operation makes it reach more than 10000 user actions.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}161848[#161848]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-161357]]
+* The total number of characters per comment is limited to 30000.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}161357[#161357]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-161282]]
+* The getConnectors API will now limit the number of supported connectors returned to 1000.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}161282[#161282]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-161200]]
+* The total number of characters per comment is limited to 30000.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}161200[#161200]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-161111]]
+* Max value for perPage parameter in find Cases API is now 100.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}161111[#161111]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-161087]]
+* The Create Case and Update Case APIs put the following limits.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}161087[#161087]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-161076]]
+* The maximum number of cases that can be updated simultaneously is now 100. The minimum is 1.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}161076[#161076]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-160846]]
+* The Delete cases API now limits the number of cases to be deleted to 100.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}160846[#160846]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-160844]]
+* The Create Case and Update Case APIs put the following limits.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}160844[#160844]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-160705]]
+* The Find Cases API now limits the array fields tags, assignees, and categories to 100 items.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}160705[#160705]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-159839]]
+* Use header-based versioned APIs instead of path-based.
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}159839[#159839]).
+
+*Impact* +
+!!TODO!!
+====
+      
+[discrete]
+[[breaking-159041]]
+* The function `addProcessorDefinition` is removed from the Console plugin start contract (server side).
+[%collapsible]
+====
+*Details* +
+!!TODO!! For more information, refer to ({kibana-pull}159041[#159041]).
+
+*Impact* +
+!!TODO!!
+====
+      
+
+[float]
+[[deprecation-v8.10.0]]
+=== Deprecations
+
+[discrete]
+[[deprecation-161136]]
+.Action variables in the UI and in tests that were no longer used have been replaced
+[%collapsible]
+====
+*Details* +
+The following rule action variables have been deprecated; use the recommended variables (in parentheses) instead:
+alertActionGroup (alert.actionGroup)
+alertActionGroupName (alert.actionGroupName)
+alertActionSubgroup (alert.actionSubgroup)
+alertId (rule.id)
+alertInstanceId (alert.id)
+alertName (rule.name)
+params (rule.params)
+spaceId (rule.spaceId)
+tags (rule.tags)
+For more information, refer to ({kibana-pull}161136[#161136]).
+====  
+
+[float]
+[[enhancement-v8.10.0]]
+=== Enhancements
+APM::
+* Lens function ({kibana-pull}163872[#163872]).
+* Adds KQL filtering in APM rules ({kibana-pull}163825[#163825]).
+* Adds several function implementations to the AI Asssistant ({kibana-pull}163764[#163764]).
+* Make service group saved objects exportable ({kibana-pull}163569[#163569]).
+* Feature controls ({kibana-pull}163232[#163232]).
+* Added improved JVM runtime metrics dashboard ({kibana-pull}162460[#162460]).
+* Added ability to manage Cross-Cluster API keys ({kibana-pull}162363[#162363]).
+* Enable Trace Explorer by default ({kibana-pull}162308[#162308]).
+* Move to new plugin, update design and use connectors ({kibana-pull}162243[#162243]).
+* Adds error.grouping_name to group alerts in Error Count rule ({kibana-pull}161810[#161810]).
+* Adding endpoint to upload android map files ({kibana-pull}161252[#161252]).
+* Adds query to check for overflow bucket in service groups ({kibana-pull}159990[#159990]).
+* Navigate from the transaction details view into the Profiling ({kibana-pull}159686[#159686]).
+Dashboard::
+* Change badge color in options list ({kibana-pull}161401[#161401]).
+* Edit title, description, and tags from dashboard listing page ({kibana-pull}161399[#161399]).
+* Editing toolbar update ({kibana-pull}154966[#154966]).
+Data Discovery::
+* Inline shard failures warnings ({kibana-pull}161271[#161271]).
+* Improve shard error message formatting ({kibana-pull}161098[#161098]).
+Elastic Security::
+For the Elastic Security 8.10.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Only enable secret storage once all fleet servers are above 8.10.0 ({kibana-pull}163627[#163627]).
+* Adds support for Runtime Fields ({kibana-pull}161129[#161129]).
+* Kafka integration API ({kibana-pull}159110[#159110]).
+Lens & Visualizations::
+* Migrate range slider to `EuiDualRange` and make styling consistent across all controls ({kibana-pull}162651[#162651]).
+* Introduce new duration formatter in *Lens* ({kibana-pull}162246[#162246]).
+* Create a filter with field:value when last value metric is used on a datatable in *Lens* ({kibana-pull}160509[#160509]).
+Machine Learning::
+* Hides paging controls in anomaly swim lane if only one page is available ({kibana-pull}163931[#163931]).
+* AIOps: Adds/edits change point charts embeddable from the Dashboard app ({kibana-pull}163694[#163694]).
+* Adds a throughput description in the Trained Models Deployment stats table ({kibana-pull}163481[#163481]).
+* Provides hints for empty fields in dropdown options in Anomaly detection & Transform creation wizards, Change point detection view ({kibana-pull}163371[#163371]).
+* AIOps: Adds dip support to log rate analysis in ML AIOps Labs ({kibana-pull}163100[#163100]).
+* AIOps: Improves table hovering for log rate analysis ({kibana-pull}162941[#162941]).
+* AIOps: Adds change point detection charts embeddable ({kibana-pull}162796[#162796]).
+* Adds ability to deploy trained models for data frame analytics jobs ({kibana-pull}162537[#162537]).
+* AIOps: Adds dip support for log rate analysis in observability alert details page ({kibana-pull}162476[#162476]).
+* Adds map view for models in Trained Models and expands support for models in Analytics map ({kibana-pull}162443[#162443]).
+* Adds validation of field selected for log pattern analysis ({kibana-pull}162319[#162319]).
+* AIOps: Renames Explain Log Rate Spikes to Log Rate Analysis ({kibana-pull}161764[#161764]).
+* Adds new Data comparison view ({kibana-pull}161365[#161365]).
+* Adds test UI for text expansion models ({kibana-pull}159150[#159150]).
+Management::
+* REST endpoint for swapping saved object references ({kibana-pull}157665[#157665]).
+* Adds Multi format for geopoint and consolidate geo converstion tools i… ({kibana-pull}147272[#147272]).
+Operations::
+* Change dev-cli's config merging logic ({kibana-pull}163928[#163928]).
+Presentation::
+* Support time series split for top hits per entity source ({kibana-pull}161799[#161799]).
+* Time series geo line ({kibana-pull}159267[#159267]).
+Reporting::
+* Enable CSV reporting in serverless ({kibana-pull}162358[#162358]).
+* Separate internal and public API endpoints in Reporting ({kibana-pull}162288[#162288]).
+////
+!!TODO!! The above PR had a lengthy release note description:
+Updated API endpoint paths for Reporting to clarify which routes are public and which are not. Make sure that any custom script or application that uses Reporting endpoints only uses the public endpoints.
+////
+Security::
+* Change the default value of `session.idleTimeout` from 8 hours to 3 days ({kibana-pull}162313[#162313]).
+* Security ({kibana-pull}161375[#161375]).
+SharedUX::
+* Merge similar toast messages in case of a toast-flood/storm ({kibana-pull}161738[#161738]).
+* Increase max size bytes default to 250mb ({kibana-pull}161318[#161318]).
+Sharing::
+* Adds tooltip for partition and heatmap filtering ({kibana-pull}162716[#162716]).
+Uptime::
+* Implement private location run once ({kibana-pull}162582[#162582]).
+Other::
+* Adds Webhook connector configuration details ({kibana-pull}163899[#163899]).
+* Adds update index mappings step to ML pipeline config workflow ({kibana-pull}163723[#163723]).
+* Handle lens actions in Serverless ({kibana-pull}163581[#163581]).
+* Adds support for group by to SLO burn rate rule ({kibana-pull}163434[#163434]).
+* UI for crawler that enables to register multiple schedules with different crawl configurations ({kibana-pull}163425[#163425]).
+* ## Risk score from new Risk Engine showing in UI ({kibana-pull}163237[#163237]).
+* Change to use Data stream lifecycle instead of ILM ({kibana-pull}163210[#163210]).
+////
+!!TODO!! The above PR had a lengthy release note description:
+Fixes the event log data stream to use Data stream lifecycle instead of Index Lifecycle Management.  If you had previously customized the Kibana event log ILM policy, you should now update the lifecycle of the event log data stream itself.
+////
+* Hide cases in stack management UI ({kibana-pull}163037[#163037]).
+* Remove improve_these_results link ({kibana-pull}163001[#163001]).
+* Prepopulate ingest pipeline name using index name ({kibana-pull}162933[#162933]).
+* Rename Search Preview tab ({kibana-pull}162829[#162829]).
+* Make defaultModel a property of the connector ({kibana-pull}162754[#162754]).
+* Risk engine initialisation, update from legacy risk engine workflow and status change ({kibana-pull}162400[#162400]).
+* Applying consistent design to Histogram and Custom Metric forms ({kibana-pull}162083[#162083]).
+* Process blocking now enabled for process responses ({kibana-pull}162082[#162082]).
+* Adds support for self-signed SSL certificate auth in webhook connector ({kibana-pull}161894[#161894]).
+* Adds preview chart to custom metric indicator ({kibana-pull}161597[#161597]).
+* Adds indicator to support histogram fields ({kibana-pull}161582[#161582]).
+* Support filters for good/total custom metrics ({kibana-pull}161308[#161308]).
+* Allow runtime fields to be selected for Elasticsearch query rule type group by or aggregate over options ({kibana-pull}160319[#160319]).
+* KQL search bar for rules ({kibana-pull}158106[#158106]).
+
+[float]
+[[fixes-v8.10.0]]
+=== Bug Fixes
+APM::
+* Fixes styling and port issue with new onboarding ({kibana-pull}163922[#163922]).
+* Fixes missing alert index issue ({kibana-pull}163600[#163600]).
+* Fixes trace waterfall loading logic to handle empty scenarios ({kibana-pull}163397[#163397]).
+* 162224 fix action menu overlaps flyout ({kibana-pull}162664[#162664]).
+* Adds range query to terms enum call ({kibana-pull}162614[#162614]).
+* Improve service groups error messages and validatons ({kibana-pull}162556[#162556]).
+* Fixes throwing appropriate error when user is missing necessary permission ({kibana-pull}162466[#162466]).
+* Hide components when there is no support from agents ({kibana-pull}161970[#161970]).
+* Fixes link to onboarding page in the Observability Onboarding plugin ({kibana-pull}161847[#161847]).
+Dashboard::
+* Disables top nav actions when cloning or overlay is showing ({kibana-pull}162091[#162091]).
+Data Discovery::
+* Encode context anchor ID ({kibana-pull}160239[#160239]).
+Discover::
+* Adjust NoData screen ({kibana-pull}160747[#160747]).
+Elastic Security::
+For the Elastic Security 8.10.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Only show agent dashboard links if there is more than one non-server agent and if the dashboards exist ({kibana-pull}164469[#164469]).
+* Exclude Synthetics from per-policy-outputs ({kibana-pull}161949[#161949]).
+* Fixing the path of manifets for hints autodiscover ({kibana-pull}161075[#161075]).
+Lens & Visualizations::
+* Fixes params._interval conversion to Lens formula ({kibana-pull}164150[#164150]).
+* Fixes issues with field name that contains `:` char in it in *Lens* ({kibana-pull}163626[#163626]).
+* Fixes other request merge behaviour when empty string key is retrieved ({kibana-pull}163187[#163187]).
+* Fixes editing of multi values filters whend adding a custom item ({kibana-pull}161940[#161940]).
+* Allow setting custom colours to collapsed by slices pie's multiple metrics in *Lens* ({kibana-pull}160592[#160592]).
+* Fixes datatable sorting for keyword values in *Lens* ({kibana-pull}160163[#160163]).
+Logs::
+* Amend lazy imports in logs_shared plugin ({kibana-pull}164102[#164102]).
+Machine Learning::
+* Fixes Trained models list crashes on browser refresh if not on page 1 ({kibana-pull}164163[#164163]).
+* Fixes query bar not switching from KQL to Lucene and vice versa in Anomaly explorer ({kibana-pull}163625[#163625]).
+* Data Frame Analytics creation wizard: ensures validation works correctly ({kibana-pull}163446[#163446]).
+* Fixes capabilities polling in manage page ({kibana-pull}163399[#163399]).
+* Fixes unhandled promise rejection from ML plugin ({kibana-pull}163129[#163129]).
+* AIOps: Uses Kibana's http service instead of fetch and fixes throttling ({kibana-pull}162335[#162335]).
+* Uses model supplied mask token for testing trained models ({kibana-pull}162168[#162168]).
+Management::
+* Fixes a problem in a way to process bulk request body with variables ({kibana-pull}162745[#162745]).
+* Improves a way of variable substitution and its documentation ({kibana-pull}162382[#162382]).
+* Transforms: Reduces rerenders and multiple fetches of source index on transform wizard load ({kibana-pull}160979[#160979]).
+* Fixes overwrite param for create ({kibana-pull}160953[#160953]).
+Metrics::
+* Smooth out spikey charts ({kibana-pull}163608[#163608]).
+Monitoring::
+* Rewrite CPU usage rule to improve accuracy ({kibana-pull}159351[#159351]).
+Platform::
+* Default route access to `internal` ({kibana-pull}161672[#161672]).
+Presentation::
+* Fixes Map layer preview blocks adding layer until all tiles are loaded ({kibana-pull}161994[#161994]).
+SharedUX::
+* Make download route public ({kibana-pull}163408[#163408]).
+* Allow Chromium to work by default in Docker ({kibana-pull}149080[#149080]).
+////
+!!TODO!! The above PR had a lengthy release note description:
+Fixed a bug where Kibana Reporting would not work in Elastic Docker without adding a special setting in kibana.yml to disable the Chromium sandbox.
+////
+Uptime::
+* Fixes auto-expand feature for failed step detail ({kibana-pull}162747[#162747]).
+Other::
+* Enable requeue_invalid_tasks config for functional tests ({kibana-pull}163768[#163768]).
+* Disable the "View rule details" option from the Alert Details' Actions list when the rule is deleted ({kibana-pull}163183[#163183]).
+* Fixes email connector rule URL ({kibana-pull}162954[#162954]).
+* Fixing skipped unit tests for metric threshold rule ({kibana-pull}162189[#162189]).
+* Fix(slo): timeslice objective definition ({kibana-pull}161863[#161863]).
+* Fixes wrong regex for CJK character detection ({kibana-pull}161825[#161825]).
+* Risk score management page ({kibana-pull}160507[#160507]).
+
 [[release-notes-8.9.1]]
 == {kib} 8.9.1
 
