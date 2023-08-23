@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
-  PERFORM_RULE_INSTALLATION_URL,
-  RuleVersionSpecifier,
-  PerformRuleInstallationResponseBody,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type { Client } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
+import { RuleVersionSpecifier } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_request_schema';
+import {
+  PerformRuleInstallationResponseBody,
+  PERFORM_RULE_INSTALLATION_URL,
+} from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
 
 /**
  * Installs available prebuilt rules in Kibana. Rules are

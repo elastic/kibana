@@ -6,7 +6,7 @@
  */
 import type SuperTest from 'supertest';
 import { DETECTION_ENGINE_RULES_URL_FIND } from '@kbn/security-solution-plugin/common/constants';
-import { FindRulesResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 /**
  * Get all installed security rules (both prebuilt + custom)
@@ -17,9 +17,16 @@ import { FindRulesResponse } from '@kbn/security-solution-plugin/common/api/dete
  * @returns Fleet install package response
  */
 
+interface GetInstalledRulesResponse {
+  page: number;
+  perPage: number;
+  total: number;
+  data: RuleResponse[];
+}
+
 export const getInstalledRules = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>
-): Promise<FindRulesResponse> => {
+): Promise<GetInstalledRulesResponse> => {
   const { body: rulesResponse } = await supertest
     .get(`${DETECTION_ENGINE_RULES_URL_FIND}?per_page=10000`)
     .set('kbn-xsrf', 'true')

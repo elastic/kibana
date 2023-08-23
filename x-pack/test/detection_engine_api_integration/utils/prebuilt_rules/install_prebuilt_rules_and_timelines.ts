@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
-  InstallPrebuiltRulesAndTimelinesResponse,
-  PREBUILT_RULES_URL,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type { Client } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
+import {
+  InstallPrebuiltRulesAndTimelinesResponse,
+  PREBUILT_RULES_URL,
+} from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
 
 /**
  * (LEGACY)
