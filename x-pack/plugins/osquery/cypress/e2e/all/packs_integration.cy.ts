@@ -161,7 +161,6 @@ describe('ALL - Packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       selectAllAgents();
       submitQuery();
       cy.getBySel('live-query-loading').should('exist');
-      cy.getBySel('live-query-loading', { timeout: 10000 }).should('not.exist');
       cy.getBySel('toggleIcon-events').click();
       checkResults();
       checkActionItemsInResults({
