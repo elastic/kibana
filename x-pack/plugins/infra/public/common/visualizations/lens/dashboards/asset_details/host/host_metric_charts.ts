@@ -155,7 +155,6 @@ const loadBreakdown: XYConfig = {
     },
   ],
   overrides: {
-    axisLeft: XY_OVERRIDES.axisLeft,
     settings: XY_OVERRIDES.settings,
   },
   dataViewOrigin: 'metrics',
