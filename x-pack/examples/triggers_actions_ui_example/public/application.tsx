@@ -25,6 +25,7 @@ import { RulesListNotifyBadgeSandbox } from './components/rules_list_notify_badg
 import { RuleTagBadgeSandbox } from './components/rule_tag_badge_sandbox';
 import { RuleTagFilterSandbox } from './components/rule_tag_filter_sandbox';
 import { RuleEventLogListSandbox } from './components/rule_event_log_list_sandbox';
+import { GlobalRuleEventLogListSandbox } from './components/global_rule_event_log_list_sandbox';
 import { RuleStatusDropdownSandbox } from './components/rule_status_dropdown_sandbox';
 import { RuleStatusFilterSandbox } from './components/rule_status_filter_sandbox';
 import { AlertsTableSandbox } from './components/alerts_table_sandbox';
@@ -99,6 +100,14 @@ const TriggersActionsUiExampleApp = ({
           render={() => (
             <Page title="Run History List">
               <RuleEventLogListSandbox triggersActionsUi={triggersActionsUi} />
+            </Page>
+          )}
+        />
+        <Route
+          path="/global_rule_event_log_list"
+          render={() => (
+            <Page title="Global Run History List">
+              <GlobalRuleEventLogListSandbox triggersActionsUi={triggersActionsUi} />
             </Page>
           )}
         />
