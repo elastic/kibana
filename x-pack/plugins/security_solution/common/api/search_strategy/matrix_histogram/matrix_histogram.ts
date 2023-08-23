@@ -43,10 +43,10 @@ export const matrixHistogramSchema = requestBasicOptionsSchema.extend({
     .optional(),
   inspect,
   isPtrIncluded: z.boolean().optional(),
-  includeMissingData: z.boolean().optional(),
+  includeMissingData: z.boolean(),
   // TODO: add stricter type here
   runtimeMappings: z.record(z.any()).optional(),
   timerange,
 });
 
-export type MatrixHistogramRequestOptions = z.infer<typeof matrixHistogramSchema>;
+export type MatrixHistogramRequestOptions = z.input<typeof matrixHistogramSchema>;

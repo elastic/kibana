@@ -33,7 +33,6 @@ export const mockOptions: HostUncommonProcessesRequestOptions = {
     from: '2020-09-06T15:23:52.757Z',
     to: '2020-09-07T15:23:52.757Z',
   },
-  sort: {},
 };
 
 export const mockSearchStrategyResponse = {

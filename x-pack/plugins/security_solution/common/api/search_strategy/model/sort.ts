@@ -13,6 +13,5 @@ export const sort = z
     direction: order,
     field: z.string(),
   })
-  .deepPartial()
   .passthrough()
   .optional();
