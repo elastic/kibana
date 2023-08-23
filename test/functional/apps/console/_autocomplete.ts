@@ -130,6 +130,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
       });
+
+      it('should activate auto-complete for multiple indices after comma in URL', async () => {
+        await PageObjects.console.enterText('GET /_cat/indices/.kibana');
+
+        await PageObjects.console.sleepForDebouncePeriod();
+        log.debug('Key type "%s"', ',');
+        await PageObjects.console.enterText(','); // e.g. 'GET /_cat/indices/.kibana,'
+
+        await PageObjects.console.sleepForDebouncePeriod();
+        log.debug('Key type Ctrl+SPACE');
+        await PageObjects.console.pressCtrlSpace();
+
+        await retry.waitFor('autocomplete to be visible', () =>
+          PageObjects.console.isAutocompleteVisible()
+        );
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+      });
     });
 
     describe('with a missing comma in query', () => {
