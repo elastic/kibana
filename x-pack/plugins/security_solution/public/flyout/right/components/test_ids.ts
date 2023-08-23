@@ -124,9 +124,6 @@ export const INSIGHTS_PREVALENCE_ROW_TEST_ID =
 export const VISUALIZATIONS_SECTION_TEST_ID = 'securitySolutionDocumentDetailsVisualizationsTitle';
 export const VISUALIZATIONS_SECTION_HEADER_TEST_ID =
   'securitySolutionDocumentDetailsVisualizationsTitleHeader';
-
-/* Visualizations analyzer preview */
-
 export const ANALYZER_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsAnalyzerPreview';
 export const SESSION_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsSessionPreview';
 

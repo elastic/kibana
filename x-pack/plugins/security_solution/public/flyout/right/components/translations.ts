@@ -145,6 +145,13 @@ export const CORRELATIONS_TITLE = i18n.translate(
   { defaultMessage: 'Correlations' }
 );
 
+export const CORRELATIONS_ERROR = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.correlations.error',
+  {
+    defaultMessage: 'No correlations data available',
+  }
+);
+
 export const PREVALENCE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.prevalenceTitle',
   { defaultMessage: 'Prevalence' }

@@ -28,7 +28,7 @@ const timelineId = 'timeline-1';
 export const AnalyzerPreviewContainer: React.FC = () => {
   const { dataAsNestedObject } = useRightPanelContext();
 
-  // decide whether to show the session view or not
+  // decide whether to show the analyzer preview or not
   const isEnabled = isInvestigateInResolverActionEnabled(dataAsNestedObject || undefined);
 
   const dispatch = useDispatch();
@@ -38,7 +38,7 @@ export const AnalyzerPreviewContainer: React.FC = () => {
   });
 
   // open timeline to the analyzer tab because the expandable flyout left panel Visualize => Analyzer tab is not ready
-  const goToAnalyserTab = useCallback(() => {
+  const goToAnalyzerTab = useCallback(() => {
     // open timeline
     investigateInTimelineAlertClick();
 
@@ -58,7 +58,7 @@ export const AnalyzerPreviewContainer: React.FC = () => {
       header={{
         title: ANALYZER_PREVIEW_TITLE,
         iconType: 'timeline',
-        ...(isEnabled && { callback: goToAnalyserTab }),
+        ...(isEnabled && { callback: goToAnalyzerTab }),
       }}
       data-test-subj={ANALYZER_PREVIEW_TEST_ID}
     >
