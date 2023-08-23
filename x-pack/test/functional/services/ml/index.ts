@@ -57,6 +57,7 @@ import { MachineLearningDashboardJobSelectionTableProvider } from './dashboard_j
 import { MachineLearningDashboardEmbeddablesProvider } from './dashboard_embeddables';
 import { TrainedModelsProvider } from './trained_models';
 import { TrainedModelsTableProvider } from './trained_models_table';
+import { DeployTrainedModelsFlyoutProvider } from './deploy_models_flyout';
 import { MachineLearningJobAnnotationsProvider } from './job_annotations_table';
 import { MlNodesPanelProvider } from './ml_nodes_list';
 import { MachineLearningCasesProvider } from './cases';
@@ -158,6 +159,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const swimLane = SwimLaneProvider(context);
   const trainedModels = TrainedModelsProvider(context, commonUI);
   const trainedModelsTable = TrainedModelsTableProvider(context, commonUI, trainedModels);
+  const trainedModelsFlyout = DeployTrainedModelsFlyoutProvider(context, commonUI);
   const mlNodesPanel = MlNodesPanelProvider(context);
   const notifications = NotificationsProvider(context, commonUI, tableService);
 
@@ -220,6 +222,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     testExecution,
     testResources,
     trainedModels,
+    trainedModelsFlyout,
     trainedModelsTable,
   };
 }
