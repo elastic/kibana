@@ -97,7 +97,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
               margin-top: 4px;
             `}
           >
-            {i18n.MAX_CASES(totalCases)}
+            {i18n.MAX_CASES(MAX_DOCS_PER_PAGE)}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -203,7 +203,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
         </EuiFlexGroup>
         {modals}
         {flyouts}
-        {hasReachedMaxCases && !isMessageDismissed && !isDoNotShowAgainSelected ? (
+        {hasReachedMaxCases && !isMessageDismissed && !isDoNotShowAgainSelected && (
           <>
             <EuiSpacer size="m" />
             <EuiFlexGroup>
@@ -218,7 +218,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
             </EuiFlexGroup>
             <EuiSpacer size="m" />
           </>
-        ) : null}
+        )}
       </>
     );
   }

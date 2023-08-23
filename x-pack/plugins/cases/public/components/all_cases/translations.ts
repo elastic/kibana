@@ -31,18 +31,18 @@ export const SHOWING_SELECTED_CASES = (totalRules: number) =>
     defaultMessage: 'Selected {totalRules} {totalRules, plural, =1 {case} other {cases}}',
   });
 
-export const SHOWING_CASES = (totalCases: number, pageSize: number) =>
-  i18n.translate('xpack.cases.caseTable.showingCasesTitle', {
-    values: { totalCases, pageSize },
+export const SHOWING_CASES = (totalRules: number, pageSize: number) =>
+  i18n.translate('xpack.cases.caseTable.showingCases', {
+    values: { totalRules, pageSize },
     defaultMessage:
-      'Showing {pageSize} of {totalCases} {totalCases, plural, =1 {case} other {cases}}',
+      'Showing {pageSize} of {totalRules} {totalRules, plural, =1 {case} other {cases}}',
   });
 
-export const MAX_CASES = (totalCases: number) =>
+export const MAX_CASES = (maxCases: number) =>
   i18n.translate('xpack.cases.caseTable.maxCases', {
-    values: { totalCases },
+    values: { maxCases },
     defaultMessage:
-      'The results were capped at {totalCases} to maintain performance. Try limiting your search to reduce the results.',
+      'The results were capped at {maxCases} to maintain performance. Try limiting your search to reduce the results.',
   });
 
 export const DISMISS = i18n.translate('xpack.cases.caseTable.dismiss', {
