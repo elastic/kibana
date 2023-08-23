@@ -49,9 +49,8 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
 
       it('renders lens visualization using savedLens expression', async () => {
         // load test workpad
-        await PageObjects.common.navigateToApp('canvas', {
-          hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1',
-        });
+        await PageObjects.canvas.goToLoadingPage();
+        await PageObjects.canvas.loadFirstWorkpad('Test Workpad');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '16,788');

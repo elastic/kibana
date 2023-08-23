@@ -14,9 +14,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Map embeddable in canvas', () => {
     before(async () => {
-      await PageObjects.common.navigateToApp('canvas', {
-        hash: '/workpad/workpad-c74f9c27-a142-4664-bf8a-69bf782fc268/page/1',
-      });
+      await PageObjects.common.navigateToUrl(
+        'canvas',
+        '/workpad/workpad-c74f9c27-a142-4664-bf8a-69bf782fc268/page/1'
+      );
     });
 
     it('should render map embeddable', async () => {
