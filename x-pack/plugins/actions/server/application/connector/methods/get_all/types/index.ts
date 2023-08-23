@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createFilter } from './helpers';
+export type { GetAllParams, InjectExtraFindDataParams } from './params';

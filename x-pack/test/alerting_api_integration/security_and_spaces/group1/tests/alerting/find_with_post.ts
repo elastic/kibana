@@ -19,8 +19,7 @@ const findTestUtils = (
   supertest: SuperTest<Test>,
   supertestWithoutAuth: any
 ) => {
-  // FLAKY: https://github.com/elastic/kibana/issues/148660
-  describe.skip(describeType, () => {
+  describe(describeType, () => {
     afterEach(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -81,6 +80,8 @@ const findTestUtils = (
                 actions: [],
                 params: {},
                 created_by: 'elastic',
+                api_key_created_by_user: false,
+                revision: 0,
                 scheduled_task_id: match.scheduled_task_id,
                 created_at: match.created_at,
                 updated_at: match.updated_at,
@@ -297,10 +298,13 @@ const findTestUtils = (
                     group: 'default',
                     connector_type_id: 'test.noop',
                     params: {},
+                    uuid: match.actions[0].uuid,
                   },
                 ],
                 params: {},
                 created_by: 'elastic',
+                api_key_created_by_user: null,
+                revision: 0,
                 throttle: '1m',
                 updated_by: 'elastic',
                 api_key_owner: null,
@@ -367,7 +371,7 @@ const findTestUtils = (
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
-              filter: 'alert.attributes.alertTypeId: "test.restricted - noop"',
+              filter: 'alert.attributes.alertTypeId:test.restricted-noop',
               fields: ['tags'],
               sort_field: 'createdAt',
             });
@@ -456,7 +460,7 @@ const findTestUtils = (
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
-              filter: 'alert.attributes.alertTypeId: "test.restricted - noop"',
+              filter: 'alert.attributes.alertTypeId:test.restricted-noop',
               fields: ['tags', 'executionStatus'],
               sort_field: 'createdAt',
             });
@@ -518,7 +522,7 @@ const findTestUtils = (
 
           const response = await supertestWithoutAuth
             .post(
-              `${getUrlPrefix(space.id)}/${
+              `${getUrlPrefix('other')}/${
                 describeType === 'public' ? 'api' : 'internal'
               }/alerting/rules/_find`
             )

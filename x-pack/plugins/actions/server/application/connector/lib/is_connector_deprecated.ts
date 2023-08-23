@@ -6,7 +6,7 @@
  */
 
 import { isPlainObject } from 'lodash';
-import { InMemoryConnector, RawAction } from '../types';
+import { RawAction, InMemoryConnector } from '../../../types';
 
 export type ConnectorWithOptionalDeprecation = Omit<InMemoryConnector, 'isDeprecated'> &
   Pick<Partial<InMemoryConnector>, 'isDeprecated'>;
