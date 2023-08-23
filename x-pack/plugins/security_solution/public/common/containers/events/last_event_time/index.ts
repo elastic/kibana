@@ -59,7 +59,7 @@ export const useTimelineLastEventTime = ({
       refetch: refetch.current,
       errorMessage: undefined,
     });
-  const { addError, addWarning } = useAppToasts();
+  const { addError } = useAppToasts();
 
   const timelineLastEventTimeSearch = useCallback(
     (request: TimelineEventsLastEventTimeRequestOptions) => {
@@ -104,7 +104,7 @@ export const useTimelineLastEventTime = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, addError, addWarning]
+    [data.search, addError]
   );
 
   useEffect(() => {

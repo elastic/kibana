@@ -69,7 +69,7 @@ export const useNetworkKpiDns = ({
     isInspected: false,
     refetch: refetch.current,
   });
-  const { addError, addWarning } = useAppToasts();
+  const { addError } = useAppToasts();
 
   const networkKpiDnsSearch = useCallback(
     (request: NetworkKpiDnsRequestOptions | null) => {
@@ -113,7 +113,7 @@ export const useNetworkKpiDns = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, addError, addWarning, skip]
+    [data.search, addError, skip]
   );
 
   useEffect(() => {

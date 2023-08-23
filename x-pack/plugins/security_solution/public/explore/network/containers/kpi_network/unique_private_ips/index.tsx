@@ -77,7 +77,7 @@ export const useNetworkKpiUniquePrivateIps = ({
       isInspected: false,
       refetch: refetch.current,
     });
-  const { addError, addWarning } = useAppToasts();
+  const { addError } = useAppToasts();
 
   const networkKpiUniquePrivateIpsSearch = useCallback(
     (request: NetworkKpiUniquePrivateIpsRequestOptions | null) => {
@@ -128,7 +128,7 @@ export const useNetworkKpiUniquePrivateIps = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, addError, addWarning, skip]
+    [data.search, addError, skip]
   );
 
   useEffect(() => {

@@ -92,7 +92,7 @@ export const useMatrixHistogram = ({
       ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
       ...(includeMissingData != null ? { includeMissingData } : {}),
     });
-  const { addError, addWarning } = useAppToasts();
+  const { addError } = useAppToasts();
 
   const [matrixHistogramResponse, setMatrixHistogramResponse] = useState<UseMatrixHistogramArgs>({
     data: [],
@@ -155,7 +155,7 @@ export const useMatrixHistogram = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, histogramType, addWarning, addError, errorMessage, startTracking]
+    [data.search, histogramType, addError, errorMessage, startTracking]
   );
 
   useEffect(() => {

@@ -47,7 +47,6 @@ export const useSearch = <QueryType extends FactoryQueryTypes>(
   factoryQueryType: QueryType
 ): UseSearchFunction<QueryType> => {
   const { data } = useKibana().services;
-  const { addWarning } = useAppToasts();
   const { startTracking } = useTrackHttpRequest();
 
   const search = useCallback<UseSearchFunction<QueryType>>(
@@ -78,7 +77,7 @@ export const useSearch = <QueryType extends FactoryQueryTypes>(
 
       return observable;
     },
-    [addWarning, data.search, factoryQueryType, startTracking]
+    [data.search, factoryQueryType, startTracking]
   );
 
   return search;

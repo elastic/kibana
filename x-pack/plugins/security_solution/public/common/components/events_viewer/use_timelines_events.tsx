@@ -32,7 +32,6 @@ import type { RunTimeMappings } from '../../store/sourcerer/model';
 import { TimelineEventsQueries } from '../../../../common/search_strategy';
 import type { KueryFilterQueryKind } from '../../../../common/types';
 import type { ESQuery } from '../../../../common/typed_json';
-import { useAppToasts } from '../../hooks/use_app_toasts';
 import { ERROR_TIMELINE_EVENTS } from './translations';
 import type { AlertWorkflowStatus } from '../../types';
 import { getSearchTransactionName, useStartTransaction } from '../../lib/apm/use_start_transaction';
@@ -220,7 +219,6 @@ export const useTimelineEventsHandler = ({
     loadPage: wrappedLoadPage,
     updatedAt: 0,
   });
-  const { addWarning } = useAppToasts();
 
   const timelineSearch = useCallback(
     (request: TimelineRequest<typeof language> | null, onNextHandler?: OnNextResponseHandler) => {
@@ -287,7 +285,7 @@ export const useTimelineEventsHandler = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [skip, data, entityType, dataViewId, addWarning, startTracking, dispatch, id, prevFilterStatus]
+    [skip, data, entityType, dataViewId, startTracking, dispatch, id, prevFilterStatus]
   );
 
   useEffect(() => {

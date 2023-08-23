@@ -42,7 +42,6 @@ import type {
   TimelineEqlRequestOptions,
   TimelineEqlResponse,
 } from '../../../common/search_strategy/timeline/events/eql';
-import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useTrackHttpRequest } from '../../common/lib/apm/use_track_http_request';
 import { APP_UI_ID } from '../../../common/constants';
 
@@ -221,8 +220,6 @@ export const useTimelineEventsHandler = ({
     }
   }, [setUpdated, timelineResponse.updatedAt]);
 
-  const { addWarning } = useAppToasts();
-
   const timelineSearch = useCallback(
     async (
       request: TimelineRequest<typeof language> | null,
@@ -337,7 +334,6 @@ export const useTimelineEventsHandler = ({
       startTracking,
       data.search,
       dataViewId,
-      addWarning,
       refetchGrid,
       wrappedLoadPage,
     ]

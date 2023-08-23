@@ -70,7 +70,7 @@ export const useNetworkKpiUniqueFlows = ({
       isInspected: false,
       refetch: refetch.current,
     });
-  const { addError, addWarning } = useAppToasts();
+  const { addError } = useAppToasts();
 
   const networkKpiUniqueFlowsSearch = useCallback(
     (request: NetworkKpiUniqueFlowsRequestOptions | null) => {
@@ -116,7 +116,7 @@ export const useNetworkKpiUniqueFlows = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, addError, addWarning, skip]
+    [data.search, addError, skip]
   );
 
   useEffect(() => {

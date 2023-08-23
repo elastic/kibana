@@ -46,7 +46,7 @@ export const useTimelineKpis = ({
   );
   const [timelineKpiResponse, setTimelineKpiResponse] =
     useState<TimelineKpiStrategyResponse | null>(null);
-  const { addError, addWarning } = useAppToasts();
+  const { addError } = useAppToasts();
 
   const timelineKpiSearch = useCallback(
     (request: TimelineKpiStrategyRequest | null) => {
@@ -82,7 +82,7 @@ export const useTimelineKpis = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, addError, addWarning]
+    [data.search, addError]
   );
 
   useEffect(() => {
