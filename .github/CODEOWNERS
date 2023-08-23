@@ -988,6 +988,7 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 /.buildkite/ @elastic/kibana-operations
 /kbn_pm/ @elastic/kibana-operations
 /x-pack/dev-tools @elastic/kibana-operations
+catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
 
 # Appex QA
 /src/dev/code_coverage @elastic/appex-qa
@@ -1288,6 +1289,7 @@ x-pack/test/security_solution_cypress/cli_config.ts @elastic/security-engineerin
 x-pack/test/security_solution_cypress/config.ts @elastic/security-engineering-productivity
 x-pack/test/security_solution_cypress/runner.ts @elastic/security-engineering-productivity
 x-pack/test/security_solution_cypress/serverless_config.ts @elastic/security-engineering-productivity
+x-pack/test/security_solution_cypress/cypress/tags.ts @elastic/security-engineering-productivity
 
 ## Security Solution sub teams - adaptive-workload-protection
 x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/kibana-cloud-security-posture

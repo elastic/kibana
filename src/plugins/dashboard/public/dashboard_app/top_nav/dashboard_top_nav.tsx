@@ -16,8 +16,9 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-
+import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
+
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -74,6 +75,9 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
   const dashboard = useDashboardAPI();
   const PresentationUtilContextProvider = getPresentationUtilContextProvider();
 
+  const hasRunMigrations = dashboard.select(
+    (state) => state.componentState.hasRunClientsideMigrations
+  );
   const hasUnsavedChanges = dashboard.select((state) => state.componentState.hasUnsavedChanges);
   const fullScreenMode = dashboard.select((state) => state.componentState.fullScreenMode);
   const savedQueryId = dashboard.select((state) => state.componentState.savedQueryId);
@@ -232,6 +236,37 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
     dashboard.clearOverlays();
   });
 
+  const badges = useMemo(() => {
+    if (viewMode !== ViewMode.EDIT) return;
+    const allBadges: TopNavMenuProps['badges'] = [];
+    if (hasUnsavedChanges) {
+      allBadges.push({
+        'data-test-subj': 'dashboardUnsavedChangesBadge',
+        badgeText: unsavedChangesBadgeStrings.getUnsavedChangedBadgeText(),
+        title: '',
+        color: 'warning',
+        toolTipProps: {
+          content: unsavedChangesBadgeStrings.getUnsavedChangedBadgeToolTipContent(),
+          position: 'bottom',
+        } as EuiToolTipProps,
+      });
+    }
+    if (hasRunMigrations) {
+      allBadges.push({
+        'data-test-subj': 'dashboardSaveRecommendedBadge',
+        badgeText: unsavedChangesBadgeStrings.getHasRunMigrationsText(),
+        title: '',
+        color: 'success',
+        iconType: 'save',
+        toolTipProps: {
+          content: unsavedChangesBadgeStrings.getHasRunMigrationsToolTipContent(),
+          position: 'bottom',
+        } as EuiToolTipProps,
+      });
+    }
+    return allBadges;
+  }, [hasRunMigrations, hasUnsavedChanges, viewMode]);
+
   return (
     <div className="dashboardTopNav">
       <h1
@@ -243,10 +278,11 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
       <TopNavMenu
         {...visibilityProps}
         query={query}
+        badges={badges}
         screenTitle={title}
         useDefaultBehaviors={true}
-        indexPatterns={allDataViews}
         savedQueryId={savedQueryId}
+        indexPatterns={allDataViews}
         showSaveQuery={showSaveQuery}
         appName={LEGACY_DASHBOARD_APP_ID}
         visible={viewMode !== ViewMode.PRINT}
@@ -257,22 +293,6 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
             ? viewMode === ViewMode.EDIT
               ? editModeTopNavConfig
               : viewModeTopNavConfig
-            : undefined
-        }
-        badges={
-          hasUnsavedChanges && viewMode === ViewMode.EDIT
-            ? [
-                {
-                  'data-test-subj': 'dashboardUnsavedChangesBadge',
-                  badgeText: unsavedChangesBadgeStrings.getUnsavedChangedBadgeText(),
-                  title: '',
-                  color: 'warning',
-                  toolTipProps: {
-                    content: unsavedChangesBadgeStrings.getUnsavedChangedBadgeToolTipContent(),
-                    position: 'bottom',
-                  } as EuiToolTipProps,
-                },
-              ]
             : undefined
         }
         onQuerySubmit={(_payload, isUpdate) => {
