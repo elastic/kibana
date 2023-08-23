@@ -910,18 +910,6 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/placeholder_embeddable/placeholder_embeddable.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/placeholder_embeddable/placeholder_embeddable.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/placeholder_embeddable/placeholder_embeddable.tsx"
-          },
-          {
-            "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
           },
           {
@@ -6221,13 +6209,10 @@
       {
         "parentPluginId": "kibanaReact",
         "id": "def-public.NO_DATA_RECOMMENDED",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "NO_DATA_RECOMMENDED",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
         "deprecated": false,
         "trackAdoption": false,
