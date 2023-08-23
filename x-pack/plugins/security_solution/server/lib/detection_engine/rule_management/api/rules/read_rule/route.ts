@@ -5,34 +5,32 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import type { ReadRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
-  QueryRuleByIds,
+  ReadRuleRequestQuery,
   validateQueryRuleByIds,
-} from '../../../../../../../common/detection_engine/rule_management';
-
+} from '../../../../../../../common/api/detection_engine/rule_management';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
-import { getIdError, transform } from '../../../utils/utils';
-
 import { readRules } from '../../../logic/crud/read_rules';
+import { getIdError, transform } from '../../../utils/utils';
 
 export const readRuleRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.get(
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        query: buildRouteValidation(QueryRuleByIds),
+        query: buildRouteValidation(ReadRuleRequestQuery),
       },
       options: {
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<ReadRuleResponse>> => {
       const siemResponse = buildSiemResponse(response);
       const validationErrors = validateQueryRuleByIds(request.query);
       if (validationErrors.length) {
@@ -44,6 +42,7 @@ export const readRuleRoute = (router: SecuritySolutionPluginRouter, logger: Logg
       try {
         const rulesClient = (await context.alerting).getRulesClient();
 
+        // TODO: https://github.com/elastic/kibana/issues/125642 Reuse fetchRuleById
         const rule = await readRules({
           id,
           rulesClient,

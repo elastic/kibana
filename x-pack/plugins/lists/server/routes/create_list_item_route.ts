@@ -7,9 +7,9 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { createListItemSchema, listItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
+import { createListItemRequest, createListItemResponse } from '../../common/api';
 import type { ListsPluginRouter } from '../types';
 
 import { buildRouteValidation, buildSiemResponse } from './utils';
@@ -24,7 +24,7 @@ export const createListItemRoute = (router: ListsPluginRouter): void => {
       },
       path: LIST_ITEM_URL,
       validate: {
-        body: buildRouteValidation(createListItemSchema),
+        body: buildRouteValidation(createListItemRequest),
       },
     },
     async (context, request, response) => {
@@ -58,7 +58,7 @@ export const createListItemRoute = (router: ListsPluginRouter): void => {
             value,
           });
           if (createdListItem != null) {
-            const [validated, errors] = validate(createdListItem, listItemSchema);
+            const [validated, errors] = validate(createdListItem, createListItemResponse);
             if (errors != null) {
               return siemResponse.error({ body: errors, statusCode: 500 });
             } else {

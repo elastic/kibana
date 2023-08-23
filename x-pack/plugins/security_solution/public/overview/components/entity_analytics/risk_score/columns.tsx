@@ -54,10 +54,9 @@ export const getRiskScoreColumns = (
           <>
             <HostDetailsLink hostName={entityName} hostTab={HostsTableType.risk} />
             <StyledCellActions
-              field={{
-                name: 'host.name',
+              data={{
                 value: entityName,
-                type: 'keyword',
+                field: 'host.name',
               }}
               triggerId={SecurityCellActionsTrigger.DEFAULT}
               mode={CellActionsMode.INLINE}
@@ -75,10 +74,9 @@ export const getRiskScoreColumns = (
           <>
             <UserDetailsLink userName={entityName} userTab={UsersTableType.risk} />
             <StyledCellActions
-              field={{
-                name: 'user.name',
+              data={{
                 value: entityName,
-                type: 'keyword',
+                field: 'user.name',
               }}
               triggerId={SecurityCellActionsTrigger.DEFAULT}
               mode={CellActionsMode.INLINE}
@@ -155,11 +153,9 @@ export const getRiskScoreColumns = (
           <FormattedCount count={alertCount} />
         </EuiLink>
         <StyledCellActions
-          field={{
-            name: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
+          data={{
             value: riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name,
-            type: 'keyword',
-            aggregatable: true,
+            field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
           }}
           mode={CellActionsMode.INLINE}
           triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}

@@ -20,7 +20,7 @@ export interface PanelContentProps {
 
 /**
  * Document details expandable flyout left section. Appears after the user clicks on the expand details button in the right section.
- * Will display the content of the visualize, investigation, insights and history tabs.
+ * Will display the content of the visualize, investigation and insights tabs.
  */
 export const PanelContent: VFC<PanelContentProps> = ({ selectedTabId }) => {
   const selectedTabContent = useMemo(() => {

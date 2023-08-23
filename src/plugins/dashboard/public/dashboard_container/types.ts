@@ -16,6 +16,11 @@ export type DashboardReduxState = ReduxEmbeddableState<
   DashboardPublicState
 >;
 
+export type DashboardRedirect = (props: RedirectToProps) => void;
+export type RedirectToProps =
+  | { destination: 'dashboard'; id?: string; useReplace?: boolean; editMode?: boolean }
+  | { destination: 'listing'; filter?: string; useReplace?: boolean };
+
 export type DashboardStateFromSaveModal = Pick<
   DashboardContainerInput,
   'title' | 'description' | 'tags' | 'timeRestore' | 'timeRange' | 'refreshInterval'

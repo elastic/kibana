@@ -59,6 +59,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
@@ -110,6 +111,7 @@ import {
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
+import { ListingViewRegistry } from './types';
 import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
 
 /**
@@ -118,8 +120,10 @@ import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
  * @public
  */
 
-export type VisualizationsSetup = TypesSetup & { visEditorsRegistry: VisEditorsRegistry };
-
+export type VisualizationsSetup = TypesSetup & {
+  visEditorsRegistry: VisEditorsRegistry;
+  listingViewRegistry: ListingViewRegistry;
+};
 export interface VisualizationsStart extends TypesStart {
   showNewVisModal: typeof showNewVisModal;
 }
@@ -161,6 +165,7 @@ export interface VisualizationsStartDeps {
   usageCollection: UsageCollectionStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   contentManagement: ContentManagementPublicStart;
+  serverless?: ServerlessPluginStart;
 }
 
 /**
@@ -246,6 +251,7 @@ export class VisualizationsPlugin
     };
 
     const start = createStartServicesGetter(core.getStartServices);
+    const listingViewRegistry: ListingViewRegistry = new Set();
     const visEditorsRegistry = createVisEditorsRegistry();
 
     core.application.register({
@@ -321,7 +327,9 @@ export class VisualizationsPlugin
           getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
           spaces: pluginsStart.spaces,
           visEditorsRegistry,
+          listingViewRegistry,
           unifiedSearch: pluginsStart.unifiedSearch,
+          serverless: pluginsStart.serverless,
         };
 
         params.element.classList.add('visAppWrapper');
@@ -388,6 +396,7 @@ export class VisualizationsPlugin
     return {
       ...this.types.setup(),
       visEditorsRegistry,
+      listingViewRegistry,
     };
   }
 

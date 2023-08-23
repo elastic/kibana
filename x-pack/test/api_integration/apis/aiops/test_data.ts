@@ -13,7 +13,7 @@ import { finalSignificantTermGroups as artificialLogsSignificantTermGroups } fro
 
 import type { TestData } from './types';
 
-export const explainLogRateSpikesTestData: TestData[] = [
+export const logRateAnalysisTestData: TestData[] = [
   {
     testName: 'ecommerce',
     esArchive: 'x-pack/test/functional/es_archives/ml/ecommerce',

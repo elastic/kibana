@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import { getConnectorTypesRoute } from './default_alerts/get_connector_types';
+import { getActionConnectorsRoute } from './default_alerts/get_action_connectors';
+import { SyntheticsRestApiRouteFactory } from './types';
+import { getSyntheticsCertsRoute } from './certs/get_certificates';
+import { getAgentPoliciesRoute } from './settings/private_locations/get_agent_policies';
+import { inspectSyntheticsMonitorRoute } from './monitor_cruds/inspect_monitor';
 import { deletePackagePolicyRoute } from './monitor_cruds/delete_integration';
 import { createJourneyScreenshotRoute } from './pings/journey_screenshots';
 import { createJourneyScreenshotBlocksRoute } from './pings/journey_screenshot_blocks';
@@ -35,13 +41,8 @@ import { installIndexTemplatesRoute } from './synthetics_service/install_index_t
 import { editSyntheticsMonitorRoute } from './monitor_cruds/edit_monitor';
 import { addSyntheticsMonitorRoute } from './monitor_cruds/add_monitor';
 import { addSyntheticsProjectMonitorRoute } from './monitor_cruds/add_monitor_project';
-import { addSyntheticsProjectMonitorRouteLegacy } from './monitor_cruds/add_monitor_project_legacy';
 import { syntheticsGetPingsRoute, syntheticsGetPingStatusesRoute } from './pings';
 import { createGetCurrentStatusRoute } from './overview_status/overview_status';
-import {
-  SyntheticsRestApiRouteFactory,
-  SyntheticsStreamingRouteFactory,
-} from '../legacy_uptime/routes';
 import { getHasIntegrationMonitorsRoute } from './fleet/get_has_integration_monitors';
 import { addSyntheticsParamsRoute } from './settings/add_param';
 import { deleteSyntheticsParamsRoute } from './settings/delete_param';
@@ -98,8 +99,9 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getLocationMonitors,
   getPrivateLocationsRoute,
   getSyntheticsFilters,
-];
-
-export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [
-  addSyntheticsProjectMonitorRouteLegacy,
+  inspectSyntheticsMonitorRoute,
+  getAgentPoliciesRoute,
+  getSyntheticsCertsRoute,
+  getActionConnectorsRoute,
+  getConnectorTypesRoute,
 ];

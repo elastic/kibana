@@ -79,6 +79,9 @@
           "id": "kibBuildingBlocks"
         },
         {
+          "id": "kibDevDocsSecurityIntro"
+        },
+        {
           "id": "kibDevDocsSavedObjectsIntro",
           "label": "Saved objects"
         },
@@ -177,12 +180,24 @@
         },
         {
           "id": "kibDevTutorialScreenshotting"
+        },
+        {
+          "id": "kibDevTutorialsContentManagementOnboarding"
+        },
+        {
+          "id": "kibDevTutorialsServerlessProjectNavigation"
         }
       ]
     },
     {
       "label": "Contributors Newsletters",
       "items": [
+        {
+          "id": "kibJuly2023ContributorNewsletter"
+        },
+        {
+          "id": "kibMay2023ContributorNewsletter"
+        },
         {
           "id": "kibMarch2023ContributorNewsletter"
         },

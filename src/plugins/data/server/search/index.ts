@@ -15,3 +15,4 @@ export { usageProvider, searchUsageObserver } from './collectors/search';
 export * from './aggs';
 export * from './session';
 export * from './errors/no_search_id_in_session';
+export { INITIAL_SEARCH_SESSION_REST_VERSION } from './routes/session';

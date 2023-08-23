@@ -7,11 +7,11 @@
 
 import {
   getLogViewResponsePayloadRT,
-  getLogViewUrl,
   PutLogViewRequestPayload,
   putLogViewRequestPayloadRT,
   putLogViewResponsePayloadRT,
-} from '@kbn/infra-plugin/common/http_api/log_views';
+} from '@kbn/logs-shared-plugin/common/http_api';
+import { getLogViewUrl } from '@kbn/logs-shared-plugin/common/http_api/log_views';
 import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -24,6 +24,7 @@ export function InfraLogViewsServiceProvider({ getService }: FtrProviderContext)
       .get(getLogViewUrl(logViewId))
       .set({
         'kbn-xsrf': 'some-xsrf-token',
+        'Elastic-Api-Version': '1',
       })
       .send();
 
@@ -40,6 +41,7 @@ export function InfraLogViewsServiceProvider({ getService }: FtrProviderContext)
       .put(getLogViewUrl(logViewId))
       .set({
         'kbn-xsrf': 'some-xsrf-token',
+        'Elastic-Api-Version': '1',
       })
       .send(putLogViewRequestPayloadRT.encode(payload));
 

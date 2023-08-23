@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import {
   formatDurationFromTimeUnitChar,
   getAlertUrl,
+  observabilityPaths,
   ProcessorEvent,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
 import { asPercent } from '@kbn/observability-plugin/common/utils/formatters';
-import { termQuery } from '@kbn/observability-plugin/server';
+import {
+  getParsedFilterQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -59,6 +64,7 @@ import {
 } from '../get_service_group_fields';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
+import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionErrorRate];
 
@@ -106,14 +112,9 @@ export function registerTransactionErrorRateRuleType({
         params: ruleParams,
         startedAt,
       }) => {
-        const predefinedGroupby = [
-          SERVICE_NAME,
-          SERVICE_ENVIRONMENT,
-          TRANSACTION_TYPE,
-        ];
-
-        const allGroupbyFields = Array.from(
-          new Set([...predefinedGroupby, ...(ruleParams.groupBy ?? [])])
+        const allGroupByFields = getAllGroupByFields(
+          ApmRuleType.TransactionErrorRate,
+          ruleParams.groupBy
         );
 
         const config = await firstValueFrom(config$);
@@ -141,6 +142,21 @@ export function registerTransactionErrorRateRuleType({
           ? indices.metric
           : indices.transaction;
 
+        const termFilterQuery = !ruleParams.kqlFilter
+          ? [
+              ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
+                queryEmptyString: false,
+              }),
+              ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
+                queryEmptyString: false,
+              }),
+              ...termQuery(TRANSACTION_NAME, ruleParams.transactionName, {
+                queryEmptyString: false,
+              }),
+              ...environmentQuery(ruleParams.environment),
+            ]
+          : [];
+
         const searchParams = {
           index,
           body: {
@@ -167,23 +183,15 @@ export function registerTransactionErrorRateRuleType({
                       ],
                     },
                   },
-                  ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
-                    queryEmptyString: false,
-                  }),
-                  ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
-                    queryEmptyString: false,
-                  }),
-                  ...termQuery(TRANSACTION_NAME, ruleParams.transactionName, {
-                    queryEmptyString: false,
-                  }),
-                  ...environmentQuery(ruleParams.environment),
+                  ...termFilterQuery,
+                  ...getParsedFilterQuery(ruleParams.kqlFilter),
                 ],
               },
             },
             aggs: {
               series: {
                 multi_terms: {
-                  terms: [...getGroupByTerms(allGroupbyFields)],
+                  terms: [...getGroupByTerms(allGroupByFields)],
                   size: 1000,
                   order: { _count: 'desc' as const },
                 },
@@ -214,7 +222,7 @@ export function registerTransactionErrorRateRuleType({
         for (const bucket of response.aggregations.series.buckets) {
           const groupByFields = bucket.key.reduce(
             (obj, bucketKey, bucketIndex) => {
-              obj[allGroupbyFields[bucketIndex]] = bucketKey;
+              obj[allGroupByFields[bucketIndex]] = bucketKey;
               return obj;
             },
             {} as Record<string, string>
@@ -310,6 +318,8 @@ export function registerTransactionErrorRateRuleType({
         return { state: {} };
       },
       alerts: ApmRuleTypeAlertDefinition,
+      getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+        observabilityPaths.ruleDetails(rule.id),
     })
   );
 }

@@ -10,6 +10,7 @@ import type { ESQuery } from '../../../../typed_json';
 
 import type { Inspect, Maybe, SortField, TimerangeInput } from '../../../common';
 import type { RiskScoreEntity } from '../common';
+import type { RiskInputs } from '../../../../risk_engine';
 
 export interface RiskScoreRequestOptions extends IEsSearchRequest {
   defaultIndex: string[];
@@ -43,6 +44,7 @@ export interface RiskStats {
   calculated_score_norm: number;
   multipliers: string[];
   calculated_level: RiskSeverity;
+  inputs?: RiskInputs;
 }
 
 export interface HostRiskScore {

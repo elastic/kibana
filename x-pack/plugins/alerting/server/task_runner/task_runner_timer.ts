@@ -13,6 +13,7 @@ export enum TaskRunnerTimerSpan {
   PrepareRule = 'prepare_rule_duration_ms',
   RuleTypeRun = 'rule_type_run_duration_ms',
   ProcessAlerts = 'process_alerts_duration_ms',
+  PersistAlerts = 'persist_alerts_duration_ms',
   TriggerActions = 'trigger_actions_duration_ms',
   ProcessRuleRun = 'process_rule_duration_ms',
 }
@@ -62,6 +63,7 @@ export class TaskRunnerTimer {
       [TaskRunnerTimerSpan.PrepareRule]: this.timings[TaskRunnerTimerSpan.PrepareRule] ?? 0,
       [TaskRunnerTimerSpan.RuleTypeRun]: this.timings[TaskRunnerTimerSpan.RuleTypeRun] ?? 0,
       [TaskRunnerTimerSpan.ProcessAlerts]: this.timings[TaskRunnerTimerSpan.ProcessAlerts] ?? 0,
+      [TaskRunnerTimerSpan.PersistAlerts]: this.timings[TaskRunnerTimerSpan.PersistAlerts] ?? 0,
       [TaskRunnerTimerSpan.TriggerActions]: this.timings[TaskRunnerTimerSpan.TriggerActions] ?? 0,
       [TaskRunnerTimerSpan.ProcessRuleRun]: this.timings[TaskRunnerTimerSpan.ProcessRuleRun] ?? 0,
     };

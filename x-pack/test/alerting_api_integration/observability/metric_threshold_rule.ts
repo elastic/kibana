@@ -15,7 +15,7 @@ import {
   waitForRuleStatus,
 } from './helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../common/ftr_provider_context';
-import { createIndexConnector, createMetricThresholdRule } from './helpers/alerting_api_helper';
+import { createIndexConnector, createRule } from './helpers/alerting_api_helper';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -42,9 +42,11 @@ export default function ({ getService }: FtrProviderContext) {
           name: 'Index Connector: Metric threshold API test',
           indexName: ALERT_ACTION_INDEX,
         });
-        const createdRule = await createMetricThresholdRule({
+        const createdRule = await createRule({
           supertest,
           ruleTypeId: InfraRuleType.MetricThreshold,
+          consumer: 'infrastructure',
+          tags: ['infrastructure'],
           name: 'Metric threshold rule',
           params: {
             criteria: [

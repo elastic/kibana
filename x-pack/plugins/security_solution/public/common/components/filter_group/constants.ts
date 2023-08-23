@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AddOptionsListControlProps } from '@kbn/controls-plugin/public';
+
 export const TEST_IDS = {
   FILTER_CONTROLS: 'filter-group__items',
   FILTER_LOADING: 'filter-group__loading',
@@ -22,4 +24,21 @@ export const TEST_IDS = {
     EDIT: 'filter-group__context--edit',
     DISCARD: `filter-group__context--discard`,
   },
+};
+
+export const COMMON_OPTIONS_LIST_CONTROL_INPUTS: Partial<AddOptionsListControlProps> = {
+  hideExclude: true,
+  hideSort: true,
+  hidePanelTitles: true,
+  placeholder: '',
+  ignoreParentSettings: {
+    ignoreValidations: true,
+  },
+};
+
+export const TIMEOUTS = {
+  /* because of recent changes in controls-plugin debounce time may not be needed
+   * still keeping the config for some time for any recent changes
+   * */
+  FILTER_UPDATES_DEBOUNCE_TIME: 0,
 };

@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataFrameAnalyticsId } from '@kbn/ml-data-frame-analytics-utils';
-import { useMlContext } from '../../../contexts/ml';
+import { useDataSource } from '../../../contexts/ml/data_source_context';
 import { ml } from '../../../services/ml_api_service';
 import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form';
 import { CreateAnalyticsAdvancedEditor } from './components/create_analytics_advanced_editor';
@@ -54,8 +54,7 @@ export const Page: FC<Props> = ({ jobId }) => {
     false,
   ]);
 
-  const mlContext = useMlContext();
-  const { currentDataView } = mlContext;
+  const { selectedDataView } = useDataSource();
 
   const createAnalyticsForm = useCreateAnalyticsForm();
   const { state } = createAnalyticsForm;
@@ -67,7 +66,7 @@ export const Page: FC<Props> = ({ jobId }) => {
   useEffect(() => {
     initiateWizard();
 
-    if (currentDataView) {
+    if (selectedDataView) {
       (async function () {
         if (jobId !== undefined) {
           const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId, true);
@@ -189,7 +188,7 @@ export const Page: FC<Props> = ({ jobId }) => {
                   <FormattedMessage
                     id="xpack.ml.dataframe.analytics.creationPageSourceIndexTitle"
                     defaultMessage="Source data view: {dataViewTitle}"
-                    values={{ dataViewTitle: currentDataView.title }}
+                    values={{ dataViewTitle: selectedDataView.title }}
                   />
                 </h2>
               </EuiFlexItem>

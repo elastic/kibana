@@ -65,7 +65,7 @@ const ACTION_BUTTON_COUNT = 4;
 const testProps: EventsViewerProps = {
   defaultModel: eventsDefaultModel,
   end: to,
-  entityType: EntityType.ALERTS,
+  entityType: EntityType.EVENTS,
   indexNames: [],
   tableId: TableId.test,
   leadingControlColumns: getDefaultControlColumn(ACTION_BUTTON_COUNT),

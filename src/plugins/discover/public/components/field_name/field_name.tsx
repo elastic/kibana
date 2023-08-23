@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon, FieldIconProps } from '@kbn/react-field';
 import { type DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
-import { getFieldTypeName } from '@kbn/unified-field-list-plugin/public';
+import { getFieldTypeName } from '@kbn/unified-field-list/src/utils/field_types/get_field_type_name';
 
 interface Props {
   fieldName: string;

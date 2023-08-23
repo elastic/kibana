@@ -18,22 +18,26 @@ import { WELCOME_CONVERSATION_TITLE } from '../use_conversation/translations';
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 const StyledEuiModal = styled(EuiModal)`
-  min-width: 1200px;
-  max-height: 100%;
-  height: 100%;
+  ${({ theme }) => `margin-top: ${theme.eui.euiSizeXXL};`}
+  min-width: 95vw;
+  min-height: 25vh;
 `;
+interface Props {
+  isAssistantEnabled: boolean;
+}
 
 /**
- * Modal container for Security Assistant conversations, receiving the page contents as context, plus whatever
+ * Modal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever
  * component currently has focus and any specific context it may provide through the SAssInterface.
  */
-export const AssistantOverlay: React.FC = React.memo(() => {
+export const AssistantOverlay = React.memo<Props>(({ isAssistantEnabled }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [conversationId, setConversationId] = useState<string | undefined>(
     WELCOME_CONVERSATION_TITLE
   );
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
-  const { setShowAssistantOverlay } = useAssistantContext();
+  const { assistantTelemetry, setShowAssistantOverlay, localStorageLastConversationId } =
+    useAssistantContext();
 
   // Bind `showAssistantOverlay` in SecurityAssistantContext to this modal instance
   const showOverlay = useCallback(
@@ -43,25 +47,44 @@ export const AssistantOverlay: React.FC = React.memo(() => {
         promptContextId: pid,
         conversationId: cid,
       }: ShowAssistantOverlayProps) => {
+        if (so)
+          assistantTelemetry?.reportAssistantInvoked({
+            conversationId: cid ?? 'unknown',
+            invokedBy: 'click',
+          });
         setIsModalVisible(so);
         setPromptContextId(pid);
         setConversationId(cid);
       },
-    [setIsModalVisible]
+    [assistantTelemetry]
   );
   useEffect(() => {
     setShowAssistantOverlay(showOverlay);
   }, [setShowAssistantOverlay, showOverlay]);
+
+  // Called whenever platform specific shortcut for assistant is pressed
+  const handleShortcutPress = useCallback(() => {
+    // Try to restore the last conversation on shortcut pressed
+    if (!isModalVisible) {
+      setConversationId(localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE);
+      assistantTelemetry?.reportAssistantInvoked({
+        invokedBy: 'shortcut',
+        conversationId: localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE,
+      });
+    }
+
+    setIsModalVisible(!isModalVisible);
+  }, [assistantTelemetry, isModalVisible, localStorageLastConversationId]);
 
   // Register keyboard listener to show the modal when cmd + ; is pressed
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === ';' && (isMac ? event.metaKey : event.ctrlKey)) {
         event.preventDefault();
-        setIsModalVisible(!isModalVisible);
+        handleShortcutPress();
       }
     },
-    [isModalVisible]
+    [handleShortcutPress]
   );
   useEvent('keydown', onKeyDown);
 
@@ -79,8 +102,12 @@ export const AssistantOverlay: React.FC = React.memo(() => {
   return (
     <>
       {isModalVisible && (
-        <StyledEuiModal onClose={handleCloseModal}>
-          <Assistant conversationId={conversationId} promptContextId={promptContextId} />
+        <StyledEuiModal onClose={handleCloseModal} data-test-subj="ai-assistant-modal">
+          <Assistant
+            isAssistantEnabled={isAssistantEnabled}
+            conversationId={conversationId}
+            promptContextId={promptContextId}
+          />
         </StyledEuiModal>
       )}
     </>

@@ -14,8 +14,8 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 import type { JobCreatorType } from '../common/job_creator';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
@@ -33,17 +33,17 @@ import {
   getChartInfoFromVisualization,
 } from './utils';
 import { VisualizationExtractor } from './visualization_extractor';
-import { QuickJobCreatorBase, CreateState } from '../job_from_dashboard';
+import { QuickJobCreatorBase, type CreateState } from '../job_from_dashboard';
 
 export class QuickLensJobCreator extends QuickJobCreatorBase {
   constructor(
     private readonly lens: LensPublicStart,
-    public readonly kibanaConfig: IUiSettingsClient,
-    public readonly timeFilter: TimefilterContract,
-    public readonly share: SharePluginStart,
-    public readonly mlApiServices: MlApiServices
+    kibanaConfig: IUiSettingsClient,
+    timeFilter: TimefilterContract,
+    dashboardService: DashboardStart,
+    mlApiServices: MlApiServices
   ) {
-    super(kibanaConfig, timeFilter, share, mlApiServices);
+    super(kibanaConfig, timeFilter, dashboardService, mlApiServices);
   }
 
   public async createAndSaveJob(

@@ -2,6 +2,16 @@
 .shardFailureModal {
   min-height: 75vh;
   width: 768px;
+
+  // show buttons at the bottom of the modal
+  .kbnOverlayMountWrapper {
+    flex-grow: 1;
+  }
+
+  // smaller gap between the modal title and body
+  .euiModalHeader {
+    padding-bottom: 0;
+  }
 }
 
 .shardFailureModal__desc {
@@ -11,31 +21,19 @@
 }
 
 .shardFailureModal__descTitle {
-  width: 20% !important;
-  margin-top: $euiSizeS;
+  width: 12% !important;
 }
 
 .shardFailureModal__descValue {
-  width: 80% !important;
-  margin-top: $euiSizeS;
-}
-.shardFailureModal__keyValueTitle {
-  padding-right: $euiSizeS;
+  width: 88% !important;
 }
 
 @include euiBreakpoint('xs','s') {
-  .shardFailureModal__keyValueTitle {
-    display: block;
-    width: 100%;
-  }
-
   .shardFailureModal__descTitle {
-    display: block;
     width: 100% !important;
   }
 
   .shardFailureModal__descValue {
-    display: block;
     width: 100% !important;
   }
 }

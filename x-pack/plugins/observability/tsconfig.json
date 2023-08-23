@@ -37,7 +37,6 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/security-plugin",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/navigation-plugin",
     "@kbn/std",
     "@kbn/i18n-react",
     "@kbn/utility-types",
@@ -70,7 +69,23 @@
     "@kbn/observability-shared-plugin",
     "@kbn/exploratory-view-plugin",
     "@kbn/rison",
-    "@kbn/core-http-server"
+    "@kbn/io-ts-utils",
+    "@kbn/ml-anomaly-utils",
+    "@kbn/observability-alert-details",
+    "@kbn/ui-actions-plugin",
+    "@kbn/field-types",
+    "@kbn/safer-lodash-set",
+    "@kbn/core-http-server",
+    "@kbn/cloud-chat-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/stack-alerts-plugin",
+    "@kbn/data-view-editor-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/core-capabilities-common",
+    "@kbn/deeplinks-analytics",
+    "@kbn/observability-ai-assistant-plugin"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

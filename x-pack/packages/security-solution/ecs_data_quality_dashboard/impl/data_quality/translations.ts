@@ -87,7 +87,8 @@ export const DATA_QUALITY_SUBTITLE: string = i18n.translate(
 export const DATA_QUALITY_SUGGESTED_USER_PROMPT = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.dataQualitySuggestedUserPrompt',
   {
-    defaultMessage: 'Explain how to fix issues step by step, and provide API calls.',
+    defaultMessage:
+      'Explain the results above, and describe some options to fix incompatibilities.',
   }
 );
 

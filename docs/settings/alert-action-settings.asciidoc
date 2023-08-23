@@ -36,9 +36,9 @@ Be sure to back up the encryption key value somewhere safe, as your alerting rul
 === Action settings
 
 `xpack.actions.allowedHosts` {ess-icon}::
-A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `[*]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.
+A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `["*"]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.
 +
-Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `[*]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.
+Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `["*"]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.
 
 `xpack.actions.customHostSettings` {ess-icon}::
 A list of custom host settings to override existing global settings.
@@ -138,7 +138,7 @@ WARNING: This feature is available in {kib} 7.17.4 and 8.3.0 onwards but is not 
 A boolean value indicating that a footer with a relevant link should be added to emails sent as alerting actions. Default: true.
 
 `xpack.actions.enabledActionTypes` {ess-icon}::
-A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`,  `.gen-ai`, and `.webhook`. An empty list `[]` will disable all action types.
+A list of action types that are enabled. It defaults to `["*"]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`,  `.gen-ai`,  `.d3security`, and `.webhook`. An empty list `[]` will disable all action types.
 +
 Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
 
@@ -198,10 +198,8 @@ This setting can be overridden for specific URLs by using the setting
 Specifies the max number of bytes of the http response for requests to external resources. Default: 1000000 (1MB).
 
 `xpack.actions.responseTimeout` {ess-icon}::
-Specifies the time allowed for requests to external resources. Requests that take longer are aborted. The time is formatted as:
-+
-`<count>[ms,s,m,h,d,w,M,Y]` 
-+
+Specifies the time allowed for requests to external resources. Requests that take longer are canceled.
+The time is formatted as a number and a time unit (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, or `Y`).
 For example, `20m`, `24h`, `7d`, `1w`. Default: `60s`.
 
 `xpack.actions.run.maxAttempts` {ess-icon}::
@@ -235,10 +233,8 @@ processing was cancelled due to a timeout. Default: `true`. This setting can be
 overridden by individual rule types.
 
 `xpack.alerting.rules.minimumScheduleInterval.value` {ess-icon}::
-Specifies the minimum schedule interval for rules. This minimum is applied to all rules created or updated after you set this value. The time is formatted as:
-+
-`<count>[s,m,h,d]` 
-+
+Specifies the minimum schedule interval for rules. This minimum is applied to all rules created or updated after you set this value.
+The time is formatted as a number and a time unit (`s`, `m`, `h`, or `d`). 
 For example, `20m`, `24h`, `7d`. This duration cannot exceed `1d`. Default: `1m`.
 
 `xpack.alerting.rules.minimumScheduleInterval.enforce` {ess-icon}::
@@ -251,10 +247,8 @@ Specifies the maximum number of actions that a rule can generate each time detec
 Specifies the maximum number of alerts that a rule can generate each time detection checks run. Default: 1000.
 
 `xpack.alerting.rules.run.timeout` {ess-icon}::
-Specifies the default timeout for tasks associated with all types of rules. The time is formatted as:
-+
-`<count>[ms,s,m,h,d,w,M,Y]`
-+
+Specifies the default timeout for tasks associated with all types of rules.
+The time is formatted as a number and a time unit (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, or `Y`).
 For example, `20m`, `24h`, `7d`, `1w`. Default: `5m`.
 
 `xpack.alerting.rules.run.ruleTypeOverrides` {ess-icon}::

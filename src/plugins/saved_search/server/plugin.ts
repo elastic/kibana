@@ -7,21 +7,41 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import { StartServicesAccessor } from '@kbn/core/server';
+import type {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from '@kbn/data-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { getSavedSearchObjectType } from './saved_objects';
 import { SavedSearchType, LATEST_VERSION } from '../common';
 import { SavedSearchStorage } from './content_management';
+import { kibanaContext } from '../common/expressions';
+import { getKibanaContext } from './expressions/kibana_context';
+import { getSavedSearch } from '../common/service/get_saved_searches';
 
-export class SavedSearchServerPlugin implements Plugin<object, object> {
+/**
+ * Saved search plugin server Setup contract
+ */
+export interface SavedSearchPublicSetupDependencies {
+  data: DataPluginSetup;
+  contentManagement: ContentManagementServerSetup;
+  expressions: ExpressionsServerSetup;
+}
+
+export interface SavedSearchServerStartDeps {
+  data: DataPluginStart;
+}
+
+export class SavedSearchServerPlugin
+  implements Plugin<object, object, object, SavedSearchServerStartDeps>
+{
   public setup(
     core: CoreSetup,
-    plugins: {
-      data: DataPluginSetup;
-      contentManagement: ContentManagementServerSetup;
-    }
+    { data, contentManagement, expressions }: SavedSearchPublicSetupDependencies
   ) {
-    plugins.contentManagement.register({
+    contentManagement.register({
       id: SavedSearchType,
       storage: new SavedSearchStorage(),
       version: {
@@ -29,16 +49,23 @@ export class SavedSearchServerPlugin implements Plugin<object, object> {
       },
     });
 
-    const getSearchSourceMigrations = plugins.data.search.searchSource.getAllMigrations.bind(
-      plugins.data.search.searchSource
-    );
+    const searchSource = data.search.searchSource;
+
+    const getSearchSourceMigrations = searchSource.getAllMigrations.bind(searchSource);
     core.savedObjects.registerType(getSavedSearchObjectType(getSearchSourceMigrations));
+
+    expressions.registerType(kibanaContext);
+    expressions.registerFunction(
+      getKibanaContext(core.getStartServices as StartServicesAccessor<SavedSearchServerStartDeps>)
+    );
 
     return {};
   }
 
   public start(core: CoreStart) {
-    return {};
+    return {
+      getSavedSearch,
+    };
   }
 
   public stop() {}

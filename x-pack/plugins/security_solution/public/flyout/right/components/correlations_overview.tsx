@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiPanel } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { InsightsSummaryRow } from './insights_summary_row';
-import { useCorrelations } from '../hooks/use_correlations';
+import { useCorrelations } from '../../shared/hooks/use_correlations';
 import { INSIGHTS_CORRELATIONS_TEST_ID } from './test_ids';
-import { InsightsSubSection } from './insights_subsection';
 import { useRightPanelContext } from '../context';
-import { CORRELATIONS_TEXT, CORRELATIONS_TITLE, VIEW_ALL } from './translations';
-import { LeftPanelKey, LeftPanelInsightsTabPath } from '../../left';
+import { CORRELATIONS_TITLE } from './translations';
+import { LeftPanelKey, LeftPanelInsightsTab } from '../../left';
+import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 
 /**
  * Correlations section under Insights section, overview tab.
@@ -29,13 +30,17 @@ export const CorrelationsOverview: React.FC = () => {
   const goToCorrelationsTab = useCallback(() => {
     openLeftPanel({
       id: LeftPanelKey,
-      path: LeftPanelInsightsTabPath,
+      path: {
+        tab: LeftPanelInsightsTab,
+        subTab: CORRELATIONS_TAB_ID,
+      },
       params: {
         id: eventId,
         indexName,
+        scopeId,
       },
     });
-  }, [eventId, openLeftPanel, indexName]);
+  }, [eventId, openLeftPanel, indexName, scopeId]);
 
   const { loading, error, data } = useCorrelations({
     eventId,
@@ -44,35 +49,34 @@ export const CorrelationsOverview: React.FC = () => {
     scopeId,
   });
 
+  const correlationRows = useMemo(
+    () =>
+      data.map((d) => (
+        <InsightsSummaryRow
+          icon={d.icon}
+          value={d.value}
+          text={d.text}
+          data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID}
+          key={`correlation-row-${d.text}`}
+        />
+      )),
+    [data]
+  );
+
   return (
-    <InsightsSubSection
-      loading={loading}
-      error={error}
-      title={CORRELATIONS_TITLE}
+    <ExpandablePanel
+      header={{
+        title: CORRELATIONS_TITLE,
+        callback: goToCorrelationsTab,
+        iconType: 'arrowStart',
+      }}
+      content={{ loading, error }}
       data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID}
     >
-      <EuiPanel hasShadow={false} hasBorder={true} paddingSize="s">
-        <EuiFlexGroup direction="column" gutterSize="none">
-          {data.map((d) => (
-            <InsightsSummaryRow
-              icon={d.icon}
-              value={d.value}
-              text={d.text}
-              data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID}
-            />
-          ))}
-        </EuiFlexGroup>
-      </EuiPanel>
-      <EuiButtonEmpty
-        onClick={goToCorrelationsTab}
-        iconType="arrowStart"
-        iconSide="left"
-        size="s"
-        data-test-subj={`${INSIGHTS_CORRELATIONS_TEST_ID}ViewAllButton`}
-      >
-        {VIEW_ALL(CORRELATIONS_TEXT)}
-      </EuiButtonEmpty>
-    </InsightsSubSection>
+      <EuiFlexGroup direction="column" gutterSize="none">
+        {correlationRows}
+      </EuiFlexGroup>
+    </ExpandablePanel>
   );
 };
 

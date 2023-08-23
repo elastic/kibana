@@ -6,7 +6,7 @@
  */
 
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import type { EmailService, PlainTextEmail } from './types';
+import type { EmailService, PlainTextEmail, HTMLEmail } from './types';
 
 export class ConnectorsEmailService implements EmailService {
   constructor(
@@ -25,6 +25,21 @@ export class ConnectorsEmailService implements EmailService {
       },
       relatedSavedObjects: params.context?.relatedObjects,
     }));
+    return await this.actionsClient.bulkEnqueueExecution(this.requesterId, actions);
+  }
+
+  async sendHTMLEmail(params: HTMLEmail): Promise<void> {
+    const actions = params.to.map((to) => ({
+      id: this.connectorId,
+      params: {
+        to: [to],
+        subject: params.subject,
+        message: params.message,
+        messageHTML: params.messageHTML,
+      },
+      relatedSavedObjects: params.context?.relatedObjects,
+    }));
+
     return await this.actionsClient.bulkEnqueueExecution(this.requesterId, actions);
   }
 }

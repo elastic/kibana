@@ -26,6 +26,7 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   status: StatusAll,
   tags: [],
   owner: [],
+  category: [],
 };
 
 export const DEFAULT_QUERY_PARAMS: QueryParams = {
@@ -54,8 +55,7 @@ export const useGetCases = (
   const toasts = useToasts();
   return useQuery(
     casesQueriesKeys.cases(params),
-    () => {
-      const abortCtrl = new AbortController();
+    ({ signal }) => {
       return getCases({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
@@ -65,7 +65,7 @@ export const useGetCases = (
           ...DEFAULT_QUERY_PARAMS,
           ...(params.queryParams ?? {}),
         },
-        signal: abortCtrl.signal,
+        signal,
       });
     },
     {

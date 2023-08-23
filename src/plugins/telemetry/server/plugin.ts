@@ -205,8 +205,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     return {
       getTelemetryUrl: async () => {
-        const { sendUsageTo } = await firstValueFrom(config$);
+        const { appendServerlessChannelsSuffix, sendUsageTo } = await firstValueFrom(config$);
         const telemetryUrl = getTelemetryChannelEndpoint({
+          appendServerlessChannelsSuffix,
           env: sendUsageTo,
           channelName: 'snapshot',
         });

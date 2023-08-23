@@ -347,9 +347,7 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.isClassificationFeatureImportanceBaseline",
         "type": "Function",
-        "tags": [
-          "export"
-        ],
+        "tags": [],
         "label": "isClassificationFeatureImportanceBaseline",
         "description": [
           "\nType guard for classification feature importance baseline\n"
@@ -386,9 +384,7 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.isClassificationTotalFeatureImportance",
         "type": "Function",
-        "tags": [
-          "export"
-        ],
+        "tags": [],
         "label": "isClassificationTotalFeatureImportance",
         "description": [
           "\nType guard for total feature importance\n"
@@ -425,9 +421,7 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.isDataFrameAnalyticsConfigs",
         "type": "Function",
-        "tags": [
-          "export"
-        ],
+        "tags": [],
         "label": "isDataFrameAnalyticsConfigs",
         "description": [
           "\nType guard for a DFA config\n"
@@ -552,9 +546,7 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.isRegressionFeatureImportanceBaseline",
         "type": "Function",
-        "tags": [
-          "export"
-        ],
+        "tags": [],
         "label": "isRegressionFeatureImportanceBaseline",
         "description": [
           "\nType guard for regression feature importance baseline\n"
@@ -591,9 +583,7 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.isRegressionTotalFeatureImportance",
         "type": "Function",
-        "tags": [
-          "export"
-        ],
+        "tags": [],
         "label": "isRegressionTotalFeatureImportance",
         "description": [
           "\nType guard for regression total feature importance\n"
@@ -717,14 +707,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.AnalyticsMapEdgeElement",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "AnalyticsMapEdgeElement",
         "description": [
-          "\nInterface for an edge element for the map view\n"
+          "\nInterface for an edge element for the map view"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
@@ -734,9 +720,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.AnalyticsMapEdgeElement.data",
             "type": "Object",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "data",
             "description": [
               "\nInner data of the edge element"
@@ -755,14 +739,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.AnalyticsMapNodeElement",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "AnalyticsMapNodeElement",
         "description": [
-          "\nInterface for a node element for the map view\n"
+          "\nInterface for a node element for the map view"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
@@ -772,15 +752,13 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.AnalyticsMapNodeElement.data",
             "type": "Object",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "data",
             "description": [
               "\nInner data of the node element"
             ],
             "signature": [
-              "{ id: string; label: string; type: string; analysisType?: string | undefined; }"
+              "{ id: string; label: string; type: string; analysisType?: string | undefined; isRoot?: boolean | undefined; }"
             ],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
@@ -793,14 +771,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.AnalyticsMapReturnType",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "AnalyticsMapReturnType",
         "description": [
-          "\nInterface for DFA map return type\n"
+          "\nInterface for DFA map return type"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
@@ -810,9 +784,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.AnalyticsMapReturnType.elements",
             "type": "Array",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "elements",
             "description": [
               "\nMap elements"
@@ -835,9 +807,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.AnalyticsMapReturnType.details",
             "type": "Object",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "details",
             "description": [
               "\nTransform, job or index details"
@@ -853,9 +823,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.AnalyticsMapReturnType.error",
             "type": "Any",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "error",
             "description": [
               "\nError"
@@ -874,14 +842,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.ClassFeatureImportance",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "ClassFeatureImportance",
         "description": [
-          "\nES result class feature importance\n"
+          "\nES result class feature importance"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
@@ -891,9 +855,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.ClassFeatureImportance.class_name",
             "type": "CompoundType",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "class_name",
             "description": [
               "\nThe class name"
@@ -909,9 +871,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.ClassFeatureImportance.importance",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "importance",
             "description": [
               "\nThe importance"
@@ -927,14 +887,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.ClassFeatureImportanceSummary",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "ClassFeatureImportanceSummary",
         "description": [
-          "\nES result for class feature importance summary\n"
+          "\nES result for class feature importance summary"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
@@ -944,9 +900,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.ClassFeatureImportanceSummary.class_name",
             "type": "CompoundType",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "class_name",
             "description": [
               "\nThe class name"
@@ -962,9 +916,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.ClassFeatureImportanceSummary.importance",
             "type": "Object",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "importance",
             "description": [
               "\nThe importance"
@@ -983,14 +935,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.ClassificationAnalysis",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "ClassificationAnalysis",
         "description": [
-          "\nInterface for classification job configuation\n"
+          "\nInterface for classification job configuation"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
@@ -1016,9 +964,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.ClassificationAnalysis.classification",
             "type": "Object",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "classification",
             "description": [
               "\nOutlier detection options"
@@ -1037,14 +983,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.ClassificationEvaluateResponse",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "ClassificationEvaluateResponse",
         "description": [
-          "\nInterface for classification evaluate response\n"
+          "\nInterface for classification evaluate response"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
@@ -1054,12 +996,10 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.ClassificationEvaluateResponse.classification",
             "type": "Object",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "classification",
             "description": [
-              "\nClassificatio evaluation"
+              "\nClassification evaluation"
             ],
             "signature": [
               "{ multiclass_confusion_matrix?: { confusion_matrix: ",
@@ -1091,14 +1031,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.ClassificationFeatureImportanceBaseline",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "ClassificationFeatureImportanceBaseline",
         "description": [
-          "\nBaseline interface for ES result classification feature importance\n"
+          "\nBaseline interface for ES result classification feature importance"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
@@ -1108,9 +1044,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.ClassificationFeatureImportanceBaseline.classes",
             "type": "Array",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "classes",
             "description": [
               "\nClasses"
@@ -1136,14 +1070,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.ClassificationTotalFeatureImportance",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "ClassificationTotalFeatureImportance",
         "description": [
-          "\nES result classification total feature importance\n"
+          "\nES result classification total feature importance"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
@@ -1153,9 +1083,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.ClassificationTotalFeatureImportance.feature_name",
             "type": "string",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "feature_name",
             "description": [
               "\nThe feature name"
@@ -1168,9 +1096,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.ClassificationTotalFeatureImportance.classes",
             "type": "Array",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "classes",
             "description": [
               "\nThe classes, array of ClassFeatureImportanceSummary"
@@ -1196,14 +1122,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.ConfusionMatrix",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "ConfusionMatrix",
         "description": [
-          "\nInterface for confusion matrix\n"
+          "\nInterface for confusion matrix"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
@@ -1213,9 +1135,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.ConfusionMatrix.actual_class",
             "type": "string",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "actual_class",
             "description": [
               "\nActual class"
@@ -1228,9 +1148,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.ConfusionMatrix.actual_class_doc_count",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "actual_class_doc_count",
             "description": [
               "\nActual class doc count"
@@ -1243,9 +1161,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.ConfusionMatrix.predicted_classes",
             "type": "Array",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "predicted_classes",
             "description": [
               "\nArray of predicted classes"
@@ -1268,9 +1184,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.ConfusionMatrix.other_predicted_class_doc_count",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "other_predicted_class_doc_count",
             "description": [
               "\nDoc count of other predicted classes"
@@ -1286,15 +1200,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.DataFrameAnalyticsConfig",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef",
-          "extends"
-        ],
+        "tags": [],
         "label": "DataFrameAnalyticsConfig",
         "description": [
-          "\nInterface for a DFA config with fix for estypes provided types\n"
+          "\nInterface for a DFA config with fix for estypes provided types"
         ],
         "signature": [
           {
@@ -1316,9 +1225,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.DataFrameAnalyticsConfig.analyzed_fields",
             "type": "Object",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "analyzed_fields",
             "description": [
               "\nOptional analyzed fields"
@@ -1335,9 +1242,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.DataFrameAnalyticsConfig._meta",
             "type": "Object",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "_meta",
             "description": [
               "\nOptional meta data"
@@ -1363,14 +1268,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.DataFrameAnalyticsMeta",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "DataFrameAnalyticsMeta",
         "description": [
-          "\nMeta data for a DFA job\n"
+          "\nMeta data for a DFA job"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
@@ -1380,9 +1281,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.DataFrameAnalyticsMeta.custom_urls",
             "type": "Array",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "custom_urls",
             "description": [
               "\nOptional custom urls"
@@ -1424,15 +1323,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.DataFrameAnalyticsStats",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef",
-          "extends"
-        ],
+        "tags": [],
         "label": "DataFrameAnalyticsStats",
         "description": [
-          "\nInterface for DFA stats\n"
+          "\nInterface for DFA stats"
         ],
         "signature": [
           {
@@ -1454,9 +1348,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.DataFrameAnalyticsStats.failure_reason",
             "type": "string",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "failure_reason",
             "description": [
               "\nOptional failure reason"
@@ -1472,9 +1364,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.DataFrameAnalyticsStats.state",
             "type": "CompoundType",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "state",
             "description": [
               "\nTask state"
@@ -1494,14 +1384,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.DeleteDataFrameAnalyticsWithIndexStatus",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "DeleteDataFrameAnalyticsWithIndexStatus",
         "description": [
-          "\nInterface for DFA API response for deletion status\n"
+          "\nInterface for DFA API response for deletion status"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
@@ -1511,9 +1397,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.DeleteDataFrameAnalyticsWithIndexStatus.success",
             "type": "boolean",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "success",
             "description": [
               "\nSuccess"
@@ -1526,9 +1410,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.DeleteDataFrameAnalyticsWithIndexStatus.error",
             "type": "CompoundType",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "error",
             "description": [
               "\nOptional error"
@@ -1550,14 +1432,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.EvaluateMetrics",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "EvaluateMetrics",
         "description": [
-          "\nInterface for evalute metrics\n"
+          "\nInterface for evalute metrics"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
@@ -1567,9 +1445,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.EvaluateMetrics.classification",
             "type": "Object",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "classification",
             "description": [
               "\nClassification evalute metrics"
@@ -1585,9 +1461,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.EvaluateMetrics.regression",
             "type": "Object",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "regression",
             "description": [
               "\nRegression evaluate metrics"
@@ -1606,14 +1480,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.FeatureImportance",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "FeatureImportance",
         "description": [
-          "\nES result feature importance interface\nTODO We should separate the interface because classes/importance\nisn't both optional but either/or.\n"
+          "\nES result feature importance interface\nTODO We should separate the interface because classes/importance\nisn't both optional but either/or."
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
@@ -1623,9 +1493,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.FeatureImportance.feature_name",
             "type": "string",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "feature_name",
             "description": [
               "\nThe feature name"
@@ -1638,9 +1506,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.FeatureImportance.classes",
             "type": "Array",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "classes",
             "description": [
               "\nOptional classes"
@@ -1663,9 +1529,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.FeatureImportance.importance",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "importance",
             "description": [
               "\nOptional importance"
@@ -1684,14 +1548,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.FeatureImportanceClassBaseline",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "FeatureImportanceClassBaseline",
         "description": [
-          "\nBaseline interface for ES result feature importance class\n"
+          "\nBaseline interface for ES result feature importance class"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
@@ -1701,9 +1561,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.FeatureImportanceClassBaseline.class_name",
             "type": "CompoundType",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "class_name",
             "description": [
               "\nClass name"
@@ -1719,9 +1577,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.FeatureImportanceClassBaseline.baseline",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "baseline",
             "description": [
               "\nBaseline"
@@ -1737,15 +1593,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.FieldSelectionItem",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef",
-          "extends"
-        ],
+        "tags": [],
         "label": "FieldSelectionItem",
         "description": [
-          "\nInterface for field selection item\n"
+          "\nInterface for field selection item"
         ],
         "signature": [
           {
@@ -1788,14 +1639,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.OutlierAnalysis",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "OutlierAnalysis",
         "description": [
-          "\nInterface for outlier analysis job configuation\n"
+          "\nInterface for outlier analysis job configuation"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
@@ -1821,9 +1668,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.OutlierAnalysis.outlier_detection",
             "type": "Object",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "outlier_detection",
             "description": [
               "\nOutlier detection options"
@@ -1842,14 +1687,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.PredictedClass",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "PredictedClass",
         "description": [
-          "\nInterface for predicted class\n"
+          "\nInterface for predicted class"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
@@ -1859,9 +1700,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.PredictedClass.predicted_class",
             "type": "string",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "predicted_class",
             "description": [
               "\nPredicted class"
@@ -1874,9 +1713,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.PredictedClass.count",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "count",
             "description": [
               "\nCount"
@@ -1892,14 +1729,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.RegressionAnalysis",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "RegressionAnalysis",
         "description": [
-          "\nInterface for regression analysis job configuation\n"
+          "\nInterface for regression analysis job configuation"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
@@ -1925,9 +1758,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.RegressionAnalysis.regression",
             "type": "Object",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "regression",
             "description": [
               "\nRegression options"
@@ -1946,14 +1777,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.RegressionFeatureImportanceBaseline",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "RegressionFeatureImportanceBaseline",
         "description": [
-          "\nBaseline interface for ES result regression feature importance\n"
+          "\nBaseline interface for ES result regression feature importance"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
@@ -1963,9 +1790,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.RegressionFeatureImportanceBaseline.baseline",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "baseline",
             "description": [
               "\nBaseline"
@@ -1981,14 +1806,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.RegressionFeatureImportanceSummary",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "RegressionFeatureImportanceSummary",
         "description": [
-          "\nES result regression feature importance summary\n"
+          "\nES result regression feature importance summary"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
@@ -1998,9 +1819,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.RegressionFeatureImportanceSummary.max",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "max",
             "description": [
               "\nMax feature importance"
@@ -2013,9 +1832,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.RegressionFeatureImportanceSummary.min",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "min",
             "description": [
               "\nMin feature importance"
@@ -2028,9 +1845,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.RegressionFeatureImportanceSummary.mean_magnitude",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "mean_magnitude",
             "description": [
               "\nMean magnitude"
@@ -2046,14 +1861,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.RegressionTotalFeatureImportance",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "RegressionTotalFeatureImportance",
         "description": [
-          "\nES result for regression total feature importance\n"
+          "\nES result for regression total feature importance"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
@@ -2063,9 +1874,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.RegressionTotalFeatureImportance.feature_name",
             "type": "string",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "feature_name",
             "description": [
               "\nFeature name"
@@ -2078,9 +1887,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.RegressionTotalFeatureImportance.importance",
             "type": "Object",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "importance",
             "description": [
               "\nImportance"
@@ -2105,14 +1912,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.RocCurveItem",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "RocCurveItem",
         "description": [
-          "\nData item for ROC curve\n"
+          "\nData item for ROC curve"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
@@ -2122,9 +1925,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.RocCurveItem.fpr",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "fpr",
             "description": [
               "\nFPR"
@@ -2137,9 +1938,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.RocCurveItem.threshold",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "threshold",
             "description": [
               "\nThreshold"
@@ -2152,9 +1951,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.RocCurveItem.tpr",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "tpr",
             "description": [
               "\nTPR"
@@ -2170,14 +1967,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.TopClass",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "TopClass",
         "description": [
-          "\nES result top class interface\n"
+          "\nES result top class interface"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
         "deprecated": false,
@@ -2187,9 +1980,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.TopClass.class_name",
             "type": "CompoundType",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "class_name",
             "description": [
               "\nThe class name"
@@ -2205,9 +1996,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.TopClass.class_probability",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "class_probability",
             "description": [
               "\nThe class probability"
@@ -2220,9 +2009,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.TopClass.class_score",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "class_score",
             "description": [
               "\nThe class score"
@@ -2238,14 +2025,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.TrackTotalHitsSearchResponse",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "TrackTotalHitsSearchResponse",
         "description": [
-          "\nInterface for a search response's track total hits option\n"
+          "\nInterface for a search response's track total hits option"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
@@ -2255,9 +2038,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.TrackTotalHitsSearchResponse.hits",
             "type": "Object",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "hits",
             "description": [
               "\nInner structure of the response"
@@ -2276,14 +2057,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.UpdateDataFrameAnalyticsConfig",
         "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
+        "tags": [],
         "label": "UpdateDataFrameAnalyticsConfig",
         "description": [
-          "\nInterface for a requect object to update a DFA job\n"
+          "\nInterface for a requect object to update a DFA job"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
@@ -2293,9 +2070,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.UpdateDataFrameAnalyticsConfig.allow_lazy_start",
             "type": "string",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "allow_lazy_start",
             "description": [
               "\nOptional allow lazy start"
@@ -2311,9 +2086,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.UpdateDataFrameAnalyticsConfig.description",
             "type": "string",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "description",
             "description": [
               "\nOptional description"
@@ -2329,9 +2102,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.UpdateDataFrameAnalyticsConfig.model_memory_limit",
             "type": "string",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "model_memory_limit",
             "description": [
               "\nOptional model memory limit"
@@ -2347,9 +2118,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.UpdateDataFrameAnalyticsConfig.max_num_threads",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "max_num_threads",
             "description": [
               "\nOptional max num threads"
@@ -2365,9 +2134,7 @@
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.UpdateDataFrameAnalyticsConfig._meta",
             "type": "Object",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "_meta",
             "description": [
               "\nOptional meta data"
@@ -2395,30 +2162,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.ANALYSIS_ADVANCED_FIELDS",
         "type": "Enum",
-        "tags": [
-          "export",
-          "enum"
-        ],
+        "tags": [],
         "label": "ANALYSIS_ADVANCED_FIELDS",
         "description": [
-          "\nEnum for a DFA configuration's advanced fields\n"
-        ],
-        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
-        "id": "def-common.INDEX_STATUS",
-        "type": "Enum",
-        "tags": [
-          "export",
-          "enum"
-        ],
-        "label": "INDEX_STATUS",
-        "description": [
-          "\nEnum for index status\n"
+          "\nEnum for a DFA configuration's advanced fields"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
         "deprecated": false,
@@ -2429,13 +2176,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.OUTLIER_ANALYSIS_METHOD",
         "type": "Enum",
-        "tags": [
-          "export",
-          "enum"
-        ],
+        "tags": [],
         "label": "OUTLIER_ANALYSIS_METHOD",
         "description": [
-          "\nEnum for a DFA configuration's outlier analysis method\n"
+          "\nEnum for a DFA configuration's outlier analysis method"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
         "deprecated": false,
@@ -2448,13 +2192,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.AnalysisConfig",
         "type": "Type",
-        "tags": [
-          "export",
-          "typedef"
-        ],
+        "tags": [],
         "label": "AnalysisConfig",
         "description": [
-          "\nAlias of estypes.MlDataframeAnalysisContainer\n"
+          "\nAlias of estypes.MlDataframeAnalysisContainer"
         ],
         "signature": [
           "MlDataframeAnalysisContainer"
@@ -2468,13 +2209,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.DataFrameAnalysisConfigType",
         "type": "Type",
-        "tags": [
-          "export",
-          "typedef"
-        ],
+        "tags": [],
         "label": "DataFrameAnalysisConfigType",
         "description": [
-          "\nUnion type of DFA anlaysis config types\n"
+          "\nUnion type of DFA anlaysis config types"
         ],
         "signature": [
           "\"classification\" | \"outlier_detection\" | \"regression\""
@@ -2488,10 +2226,7 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.DataFrameAnalyticsId",
         "type": "Type",
-        "tags": [
-          "export",
-          "typedef"
-        ],
+        "tags": [],
         "label": "DataFrameAnalyticsId",
         "description": [
           "\nData frame analytics id"
@@ -2508,13 +2243,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.DataFrameTaskStateType",
         "type": "Type",
-        "tags": [
-          "export",
-          "typedef"
-        ],
+        "tags": [],
         "label": "DataFrameTaskStateType",
         "description": [
-          "\nUnion type of DFA task states\n"
+          "\nUnion type of DFA task states"
         ],
         "signature": [
           "\"analyzing\" | \"reindexing\" | ",
@@ -2529,9 +2261,7 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.DEFAULT_REGRESSION_COLUMNS",
         "type": "number",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "DEFAULT_REGRESSION_COLUMNS",
         "description": [
           "\nDefault regression columns"
@@ -2548,12 +2278,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.DEFAULT_RESULTS_FIELD",
         "type": "string",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "DEFAULT_RESULTS_FIELD",
         "description": [
-          "\nDefault results field\n"
+          "\nDefault results field"
         ],
         "signature": [
           "\"ml\""
@@ -2567,13 +2295,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.DfAnalyticsExplainResponse",
         "type": "Type",
-        "tags": [
-          "export",
-          "typedef"
-        ],
+        "tags": [],
         "label": "DfAnalyticsExplainResponse",
         "description": [
-          "\nAlias for estypes.MlExplainDataFrameAnalyticsResponse\n"
+          "\nAlias for estypes.MlExplainDataFrameAnalyticsResponse"
         ],
         "signature": [
           "MlExplainDataFrameAnalyticsResponse"
@@ -2587,12 +2312,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.FEATURE_IMPORTANCE",
         "type": "string",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "FEATURE_IMPORTANCE",
         "description": [
-          "\nFeature importance constant\n"
+          "\nFeature importance constant"
         ],
         "signature": [
           "\"feature_importance\""
@@ -2606,12 +2329,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.FEATURE_INFLUENCE",
         "type": "string",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "FEATURE_INFLUENCE",
         "description": [
-          "\nFeature influence constant\n"
+          "\nFeature influence constant"
         ],
         "signature": [
           "\"feature_influence\""
@@ -2625,13 +2346,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.FeatureImportanceBaseline",
         "type": "Type",
-        "tags": [
-          "export",
-          "typedef"
-        ],
+        "tags": [],
         "label": "FeatureImportanceBaseline",
         "description": [
-          "\nUnion type of feature importance baseline types\n"
+          "\nUnion type of feature importance baseline types"
         ],
         "signature": [
           {
@@ -2659,13 +2377,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.FeatureImportanceClassName",
         "type": "Type",
-        "tags": [
-          "export",
-          "typedef"
-        ],
+        "tags": [],
         "label": "FeatureImportanceClassName",
         "description": [
-          "\nUnion type for ES result feature importance class name\n"
+          "\nUnion type for ES result feature importance class name"
         ],
         "signature": [
           "string | number | boolean"
@@ -2679,13 +2394,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.FeatureProcessor",
         "type": "Type",
-        "tags": [
-          "export",
-          "typedef"
-        ],
+        "tags": [],
         "label": "FeatureProcessor",
         "description": [
-          "\nAlias for estypes.MlDataframeAnalysisFeatureProcessor\n"
+          "\nAlias for estypes.MlDataframeAnalysisFeatureProcessor"
         ],
         "signature": [
           "MlDataframeAnalysisFeatureProcessor"
@@ -2699,16 +2411,13 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.JobMapNodeTypes",
         "type": "Type",
-        "tags": [
-          "export",
-          "typedef"
-        ],
+        "tags": [],
         "label": "JobMapNodeTypes",
         "description": [
-          "\nUnion type of JOB_MAP_NODE_TYPES\n"
+          "\nUnion type of JOB_MAP_NODE_TYPES"
         ],
         "signature": [
-          "\"index\" | \"transform\" | \"analytics\" | \"trainedModel\""
+          "\"index\" | \"transform\" | \"analytics\" | \"trainedModel\" | \"ingestPipeline\""
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
         "deprecated": false,
@@ -2719,13 +2428,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.MapElements",
         "type": "Type",
-        "tags": [
-          "export",
-          "typedef"
-        ],
+        "tags": [],
         "label": "MapElements",
         "description": [
-          "\nUnion type of map node and edge elements\n"
+          "\nUnion type of map node and edge elements"
         ],
         "signature": [
           {
@@ -2753,9 +2459,7 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.ML__ID_COPY",
         "type": "string",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "ML__ID_COPY",
         "description": [
           "\nES field name for copy of the doc _id"
@@ -2772,9 +2476,7 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.ML__INCREMENTAL_ID",
         "type": "string",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "ML__INCREMENTAL_ID",
         "description": [
           "\nES field name for ML's incremental id"
@@ -2791,12 +2493,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN",
         "type": "number",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN",
         "description": [
-          "\nMinimum value for feature importance\n"
+          "\nMinimum value for feature importance"
         ],
         "signature": [
           "0"
@@ -2810,12 +2510,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.OUTLIER_SCORE",
         "type": "string",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "OUTLIER_SCORE",
         "description": [
-          "\nOutlier score constant\n"
+          "\nOutlier score constant"
         ],
         "signature": [
           "\"outlier_score\""
@@ -2829,12 +2527,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.TOP_CLASSES",
         "type": "string",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "TOP_CLASSES",
         "description": [
-          "\nTop classes constant\n"
+          "\nTop classes constant"
         ],
         "signature": [
           "\"top_classes\""
@@ -2848,13 +2544,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.TopClasses",
         "type": "Type",
-        "tags": [
-          "export",
-          "typedef"
-        ],
+        "tags": [],
         "label": "TopClasses",
         "description": [
-          "\nArray of TopClass\n"
+          "\nArray of TopClass"
         ],
         "signature": [
           {
@@ -2875,13 +2568,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.TotalFeatureImportance",
         "type": "Type",
-        "tags": [
-          "export",
-          "typedef"
-        ],
+        "tags": [],
         "label": "TotalFeatureImportance",
         "description": [
-          "\nUnion type of total feature importance types\n"
+          "\nUnion type of total feature importance types"
         ],
         "signature": [
           {
@@ -2909,12 +2599,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.TRAINING_PERCENT_MAX",
         "type": "number",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "TRAINING_PERCENT_MAX",
         "description": [
-          "\nMaximum training percent\n"
+          "\nMaximum training percent"
         ],
         "signature": [
           "100"
@@ -2928,12 +2616,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.TRAINING_PERCENT_MIN",
         "type": "number",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "TRAINING_PERCENT_MIN",
         "description": [
-          "\nMinimum training percent\n"
+          "\nMinimum training percent"
         ],
         "signature": [
           "1"
@@ -2949,12 +2635,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.ANALYSIS_CONFIG_TYPE",
         "type": "Object",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "ANALYSIS_CONFIG_TYPE",
         "description": [
-          "\nCustom enum for DFA config types\n"
+          "\nCustom enum for DFA config types"
         ],
         "signature": [
           "{ readonly OUTLIER_DETECTION: \"outlier_detection\"; readonly REGRESSION: \"regression\"; readonly CLASSIFICATION: \"classification\"; }"
@@ -2968,9 +2652,7 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.BASIC_NUMERICAL_TYPES",
         "type": "Object",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "BASIC_NUMERICAL_TYPES",
         "description": [
           "\nSet of basic numerical types"
@@ -2995,12 +2677,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.DATA_FRAME_TASK_STATE",
         "type": "Object",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "DATA_FRAME_TASK_STATE",
         "description": [
-          "\nCustom enum for DFA task states\n"
+          "\nCustom enum for DFA task states"
         ],
         "signature": [
           "{ readonly ANALYZING: \"analyzing\"; readonly FAILED: \"failed\"; readonly REINDEXING: \"reindexing\"; readonly STARTED: \"started\"; readonly STARTING: \"starting\"; readonly STOPPED: \"stopped\"; }"
@@ -3014,9 +2694,7 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.EXTENDED_NUMERICAL_TYPES",
         "type": "Object",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "EXTENDED_NUMERICAL_TYPES",
         "description": [
           "\nSet of extended numerical types"
@@ -3041,12 +2719,10 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.INDEX_CREATED_BY",
         "type": "Object",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "INDEX_CREATED_BY",
         "description": [
-          "\nCustom enum for the metadata to be stored about which tool was used to create an index\n"
+          "\nCustom enum for the metadata to be stored about which tool was used to create an index"
         ],
         "signature": [
           "{ readonly FILE_DATA_VISUALIZER: \"file-data-visualizer\"; readonly DATA_FRAME_ANALYTICS: \"data-frame-analytics\"; }"
@@ -3060,15 +2736,13 @@
         "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
         "id": "def-common.JOB_MAP_NODE_TYPES",
         "type": "Object",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "JOB_MAP_NODE_TYPES",
         "description": [
-          "\nCustom enum for job map node types for the DFA map view\n"
+          "\nCustom enum for job map node types for the DFA map view"
         ],
         "signature": [
-          "{ readonly ANALYTICS: \"analytics\"; readonly TRANSFORM: \"transform\"; readonly INDEX: \"index\"; readonly TRAINED_MODEL: \"trainedModel\"; }"
+          "{ readonly ANALYTICS: \"analytics\"; readonly TRANSFORM: \"transform\"; readonly INDEX: \"index\"; readonly TRAINED_MODEL: \"trainedModel\"; readonly INGEST_PIPELINE: \"ingestPipeline\"; }"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
         "deprecated": false,

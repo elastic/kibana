@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import {
   ANALYSIS_CONFIG_TYPE,
   BASIC_NUMERICAL_TYPES,
   EXTENDED_NUMERICAL_TYPES,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 
 export const CATEGORICAL_TYPES = new Set(['ip', 'keyword']);

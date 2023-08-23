@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiPopover, EuiButtonEmpty, EuiContextMenuPanel } from '@elastic/eui';
-import React, { useState, useCallback } from 'react';
+import { EuiPopover, EuiButtonEmpty, EuiContextMenu } from '@elastic/eui';
+import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
 
 interface OwnProps {
   selectText: string;
@@ -15,7 +16,7 @@ interface OwnProps {
   showClearSelection: boolean;
   onSelectAll: () => void;
   onClearSelection: () => void;
-  bulkActionItems?: JSX.Element[];
+  bulkActionItems: AlertTableContextMenuItem[];
 }
 
 const BulkActionsContainer = styled.div`
@@ -60,6 +61,16 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
     }
   }, [onClearSelection, onSelectAll, showClearSelection]);
 
+  const panels = useMemo(
+    () => [
+      {
+        id: 0,
+        items: bulkActionItems,
+      },
+    ],
+    [bulkActionItems]
+  );
+
   return (
     <BulkActionsContainer
       onClick={closeIfPopoverIsOpen}
@@ -84,7 +95,7 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
         }
         closePopover={closeActionPopover}
       >
-        <EuiContextMenuPanel size="s" items={bulkActionItems} />
+        <EuiContextMenu size="s" panels={panels} initialPanelId={0} />
       </EuiPopover>
 
       <EuiButtonEmpty

@@ -45,14 +45,20 @@ export interface ConversationTheme {
 export interface Conversation {
   apiConfig: {
     connectorId?: string;
+    defaultSystemPromptId?: string;
     provider?: OpenAiProviderType;
+    model?: string;
   };
   id: string;
   messages: Message[];
+  replacements?: Record<string, string>;
   theme?: ConversationTheme;
+  isDefault?: boolean;
+  excludeFromLastConversationStorage?: boolean;
 }
 
-export interface OpenAIConfig {
-  temperature: number;
-  model: string;
+export interface AssistantTelemetry {
+  reportAssistantInvoked: (params: { invokedBy: string; conversationId: string }) => void;
+  reportAssistantMessageSent: (params: { conversationId: string; role: string }) => void;
+  reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
 }

@@ -9,18 +9,16 @@ import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-import isEmpty from 'lodash/isEmpty';
-import omitBy from 'lodash/omitBy';
 import { FlyoutTabIds } from '../../../../components/asset_details/types';
 import { useUrlState } from '../../../../utils/use_url_state';
 
 export const DEFAULT_STATE: HostFlyout = {
-  clickedItemId: '',
-  selectedTabId: FlyoutTabIds.METADATA,
+  itemId: '',
+  tabId: FlyoutTabIds.OVERVIEW,
   processSearch: undefined,
   metadataSearch: undefined,
 };
-const HOST_FLYOUT_URL_STATE_KEY = 'hostFlyoutOpen';
+const HOST_FLYOUT_URL_STATE_KEY = 'flyout';
 
 type SetHostFlyoutState = (newProp: Payload | null) => void;
 
@@ -36,7 +34,9 @@ export const useHostFlyoutUrlState = (): [HostFlyoutUrl, SetHostFlyoutState] => 
     if (!newProps) {
       setUrlState(DEFAULT_STATE);
     } else {
-      const payload = omitBy(newProps, isEmpty);
+      const payload = Object.fromEntries(
+        Object.entries(newProps).filter(([_, v]) => !!v || v === '')
+      );
       setUrlState({ ...(urlState ?? DEFAULT_STATE), ...payload });
     }
   };
@@ -45,18 +45,23 @@ export const useHostFlyoutUrlState = (): [HostFlyoutUrl, SetHostFlyoutState] => 
 };
 
 const FlyoutTabIdRT = rt.union([
+  rt.literal(FlyoutTabIds.OVERVIEW),
   rt.literal(FlyoutTabIds.METADATA),
   rt.literal(FlyoutTabIds.PROCESSES),
+  rt.literal(FlyoutTabIds.LOGS),
+  rt.literal(FlyoutTabIds.ANOMALIES),
+  rt.literal(FlyoutTabIds.OSQUERY),
 ]);
 
 const HostFlyoutStateRT = rt.intersection([
   rt.type({
-    clickedItemId: rt.string,
-    selectedTabId: FlyoutTabIdRT,
+    itemId: rt.string,
+    tabId: FlyoutTabIdRT,
   }),
   rt.partial({
     processSearch: rt.string,
     metadataSearch: rt.string,
+    logsSearch: rt.string,
   }),
 ]);
 

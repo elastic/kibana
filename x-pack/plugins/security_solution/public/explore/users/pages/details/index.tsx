@@ -41,7 +41,6 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { UsersDetailsTabs } from './details_tabs';
 import { navTabsUsersDetails } from './nav_tabs';
 import type { UsersDetailsProps } from './types';
-import { type } from './utils';
 import { getUsersDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../../timelines/components/timeline/helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
@@ -257,7 +256,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               userDetailFilter={usersDetailsPageFilters}
               setQuery={setQuery}
               to={to}
-              type={type}
+              type={UsersType.details}
               usersDetailsPagePath={usersDetailsPagePath}
             />
           </SecuritySolutionPageWrapper>

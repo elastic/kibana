@@ -6,21 +6,21 @@
  */
 
 import React, { useState } from 'react';
-import { LogAnalysisCapabilitiesProvider } from '../../containers/logs/log_analysis';
-import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import { LogViewProvider } from '../../hooks/use_log_view';
 import {
+  LogViewProvider,
   initializeFromUrl as createInitializeFromUrl,
   updateContextInUrl as createUpdateContextInUrl,
   listenForUrlChanges as createListenForUrlChanges,
-} from '../../observability_logs/log_view_state/src/url_state_storage_service';
+} from '@kbn/logs-shared-plugin/public';
+import { LogAnalysisCapabilitiesProvider } from '../../containers/logs/log_analysis';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useKbnUrlStateStorageFromRouterContext } from '../../utils/kbn_url_state_context';
 
 export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
   const {
     services: {
       notifications: { toasts: toastsService },
-      logViews: { client },
+      logsShared,
     },
   } = useKibanaContextForPlugin();
 
@@ -38,7 +38,7 @@ export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
 
   return (
     <LogViewProvider
-      logViews={client}
+      logViews={logsShared.logViews.client}
       initializeFromUrl={initializeFromUrl}
       updateContextInUrl={updateContextInUrl}
       listenForUrlChanges={listenForUrlChanges}

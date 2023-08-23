@@ -100,7 +100,6 @@ const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
     top: ${({ theme: { eui } }) => eui.euiHeaderHeightCompensation};
     height: calc(100% - (${({ theme: { eui } }) => eui.euiHeaderHeightCompensation}));
   }
-
 `;
 
 const setDocumentBodyOverlayIsVisible = () => {

@@ -8,16 +8,16 @@
 import React from 'react';
 import { VisualizeTab } from './tabs/visualize_tab';
 import { InvestigationTab } from './tabs/investigation_tab';
-import { HISTORY_TAB, INSIGHTS_TAB, INVESTIGATIONS_TAB, VISUALIZE_TAB } from './translations';
+import { INSIGHTS_TAB, INVESTIGATIONS_TAB, RESPONSE_TAB, VISUALIZE_TAB } from './translations';
 import { InsightsTab } from './tabs/insights_tab';
-import { HistoryTab } from './tabs/history_tab';
 import type { LeftPanelPaths } from '.';
 import {
-  HISTORY_TAB_TEST_ID,
   INSIGHTS_TAB_TEST_ID,
   INVESTIGATION_TAB_TEST_ID,
+  RESPONSE_TAB_TEST_ID,
   VISUALIZE_TAB_TEST_ID,
 } from './test_ids';
+import { ResponseTab } from './tabs/response_tab';
 
 export type LeftPanelTabsType = Array<{
   id: LeftPanelPaths;
@@ -46,9 +46,9 @@ export const tabs: LeftPanelTabsType = [
     content: <InvestigationTab />,
   },
   {
-    id: 'history',
-    'data-test-subj': HISTORY_TAB_TEST_ID,
-    name: HISTORY_TAB,
-    content: <HistoryTab />,
+    id: 'response',
+    'data-test-subj': RESPONSE_TAB_TEST_ID,
+    name: RESPONSE_TAB,
+    content: <ResponseTab />,
   },
 ];

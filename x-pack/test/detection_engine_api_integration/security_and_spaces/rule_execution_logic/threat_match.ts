@@ -17,11 +17,12 @@ import {
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
   VERSION,
+  ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { ENRICHMENT_TYPES } from '@kbn/security-solution-plugin/common/cti/constants';
 import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
@@ -33,7 +34,7 @@ import {
   ALERT_ORIGINAL_EVENT_MODULE,
   ALERT_ORIGINAL_TIME,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
+import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   previewRule,
@@ -132,7 +133,10 @@ function alertsAreTheSame(alertsA: any[], alertsB: any[]): void {
     ]);
   };
 
-  expect(alertsA.map(mapAlert)).to.eql(alertsB.map(mapAlert));
+  const sort = (alerts: any[]) =>
+    alerts.sort((a: any, b: any) => a.message.localeCompare(b.message));
+
+  expect(sort(alertsA.map(mapAlert))).to.eql(sort(alertsB.map(mapAlert)));
 }
 
 // eslint-disable-next-line import/no-default-export
@@ -146,7 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
    * Specific api integration tests for threat matching rule type
    */
   // FLAKY: https://github.com/elastic/kibana/issues/155304
-  describe.skip('Threat match type rules', () => {
+  describe('Threat match type rules', () => {
     before(async () => {
       // await deleteSignalsIndex(supertest, log);
       // await deleteAllAlerts(supertest, log);
@@ -284,6 +288,7 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_STATUS]: 'active',
         [ALERT_UUID]: fullSignal[ALERT_UUID],
         [ALERT_WORKFLOW_STATUS]: 'open',
+        [ALERT_WORKFLOW_TAGS]: [],
         [SPACE_IDS]: ['default'],
         [VERSION]: fullSignal[VERSION],
         threat: {
@@ -511,8 +516,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('terms and match should have the same alerts with pagination', async () => {
       const termRule: ThreatMatchRuleCreateProps = createThreatMatchRule({
+        query: 'source.ip: 8.42.77.171', // narrow amount of alerts to 6
         override: {
-          items_per_search: 1,
+          items_per_search: 2,
           concurrent_searches: 1,
         },
       });
@@ -522,6 +528,7 @@ export default ({ getService }: FtrProviderContext) => {
           items_per_search: 1,
           concurrent_searches: 1,
         },
+        query: 'source.ip: 8.42.77.171', // narrow amount of alerts to 6
         name: 'Math rule',
         rule_id: 'rule-2',
         threat_mapping: [
@@ -1569,11 +1576,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('alerts should be enriched', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
       });
 
       it('should be enriched with host risk score', async () => {

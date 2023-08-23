@@ -146,7 +146,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it(`shouldn't delete action from preconfigured list`, async () => {
+        it(`shouldn't delete preconfigured action`, async () => {
           const response = await supertestWithoutAuth
             .delete(`${getUrlPrefix(space.id)}/api/actions/connector/my-slack1`)
             .auth(user.username, user.password)
@@ -171,6 +171,41 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message: 'Preconfigured action my-slack1 is not allowed to delete.',
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it(`shouldn't delete system action`, async () => {
+          const response = await supertestWithoutAuth
+            .delete(
+              `${getUrlPrefix(space.id)}/api/actions/connector/system-connector-test.system-action`
+            )
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'foo');
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to delete actions',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message:
+                  'System action system-connector-test.system-action is not allowed to delete.',
               });
               break;
             default:

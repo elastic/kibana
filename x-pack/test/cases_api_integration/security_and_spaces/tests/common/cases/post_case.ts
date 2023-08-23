@@ -8,12 +8,8 @@
 import expect from '@kbn/expect';
 
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
-import {
-  ConnectorTypes,
-  ConnectorJiraTypeFields,
-  CaseStatuses,
-  CaseSeverity,
-} from '@kbn/cases-plugin/common/api';
+import { CaseStatuses, CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
+import { ConnectorJiraTypeFields, ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
 import {
   deleteCasesByESQuery,
@@ -129,6 +125,13 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
+      it('should post a case with default category', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest()); // category is undefined
+        const data = removeServerGeneratedPropertiesFromCase(postedCase);
+
+        expect(data.category).to.eql(null);
+      });
+
       it('should create a user action when creating a case', async () => {
         const postedCase = await createCase(supertest, getPostCaseRequest());
         const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
@@ -151,6 +154,7 @@ export default ({ getService }: FtrProviderContext): void => {
             status: CaseStatuses.open,
             severity: CaseSeverity.LOW,
             assignees: [],
+            category: null,
           },
         });
       });
@@ -257,6 +261,12 @@ export default ({ getService }: FtrProviderContext): void => {
         await createCase(supertest, getPostCaseRequest({ title: longTitle }), 400);
       });
 
+      it('400s if the description is too long', async () => {
+        const longDescription = 'a'.repeat(30001);
+
+        await createCase(supertest, getPostCaseRequest({ description: longDescription }), 400);
+      });
+
       describe('tags', async () => {
         it('400s if the a tag is a whitespace', async () => {
           const tags = ['test', ' '];
@@ -268,6 +278,50 @@ export default ({ getService }: FtrProviderContext): void => {
           const tags = ['test', ''];
 
           await createCase(supertest, getPostCaseRequest({ tags }), 400);
+        });
+
+        it('400s if the a tag is too long', async () => {
+          const tag = 'a'.repeat(257);
+
+          await createCase(supertest, getPostCaseRequest({ tags: [tag] }), 400);
+        });
+
+        it('400s if the a tags array is too long', async () => {
+          const tags = Array(201).fill('foo');
+
+          await createCase(supertest, getPostCaseRequest({ tags }), 400);
+        });
+      });
+
+      describe('categories', async () => {
+        it('400s when the category is too long', async () => {
+          await createCase(
+            supertest,
+            getPostCaseRequest({
+              category: 'A very long category with more than fifty characters!',
+            }),
+            400
+          );
+        });
+
+        it('400s when the category is an empty string', async () => {
+          await createCase(
+            supertest,
+            getPostCaseRequest({
+              category: '',
+            }),
+            400
+          );
+        });
+
+        it('400s when the category is a string just with spaces', async () => {
+          await createCase(
+            supertest,
+            getPostCaseRequest({
+              category: '   ',
+            }),
+            400
+          );
         });
       });
     });

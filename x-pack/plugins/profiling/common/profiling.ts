@@ -159,6 +159,8 @@ export interface StackFrameMetadata {
   // unused atm due to lack of symbolization metadata
   SourcePackageURL: string;
   // unused atm due to lack of symbolization metadata
+
+  SamplingRate: number;
 }
 
 export function createStackFrameMetadata(
@@ -181,6 +183,7 @@ export function createStackFrameMetadata(
   metadata.SourceFilename = options.SourceFilename ?? '';
   metadata.SourcePackageHash = options.SourcePackageHash ?? '';
   metadata.SourcePackageURL = options.SourcePackageURL ?? '';
+  metadata.SamplingRate = options.SamplingRate ?? 1.0;
 
   // Unknown/invalid offsets are currently set to 0.
   //

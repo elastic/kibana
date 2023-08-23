@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, memo, useMemo, useEffect, useRef, useCallback } from 'react';
+import React, { useState, Fragment, memo, useMemo, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import { uniq } from 'lodash';
@@ -21,15 +21,16 @@ import {
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 
+import { useQuery } from '@tanstack/react-query';
+
 import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 
-import { useConfig, useGetDataStreams } from '../../../../../../../../hooks';
+import { useConfig, sendGetDataStreams } from '../../../../../../../../hooks';
 
 import {
   getRegistryDataStreamAssetBaseName,
   mapPackageReleaseToIntegrationCardRelease,
 } from '../../../../../../../../../common/services';
-import type { ExperimentalDataStreamFeature } from '../../../../../../../../../common/types/models/epm';
 
 import type {
   NewPackagePolicy,
@@ -46,7 +47,6 @@ import { PackagePolicyEditorDatastreamMappings } from '../../datastream_mappings
 
 import { useIndexTemplateExists } from '../../datastream_hooks';
 
-import { ExperimentDatastreamSettings } from './experimental_datastream_settings';
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId } from './hooks';
 import { sortDatastreamsByDataset } from './sort_datastreams';
@@ -148,23 +148,9 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       [advancedVars, inputStreamValidationResults?.vars]
     );
 
-    const setNewExperimentalDataFeatures = useCallback(
-      (newFeatures: ExperimentalDataStreamFeature[]) => {
-        if (!packagePolicy.package) {
-          return;
-        }
-
-        updatePackagePolicy({
-          package: {
-            ...packagePolicy.package,
-            experimental_data_stream_features: newFeatures,
-          },
-        });
-      },
-      [updatePackagePolicy, packagePolicy]
-    );
-
-    const { data: dataStreamsData } = useGetDataStreams();
+    const { data: dataStreamsData } = useQuery(['datastreams'], () => sendGetDataStreams(), {
+      enabled: packageInfo.type === 'input', // Only fetch datastream for input type package
+    });
     const datasetList = uniq(dataStreamsData?.data_streams) ?? [];
     const datastreams = sortDatastreamsByDataset(datasetList, packageInfo.name);
 
@@ -352,16 +338,6 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                             />
                           </EuiFlexItem>
                         </>
-                      )}
-                      {/* Experimental index/datastream settings e.g. synthetic source */}
-                      {isExperimentalDataStreamSettingsEnabled && (
-                        <ExperimentDatastreamSettings
-                          registryDataStream={packageInputStream.data_stream}
-                          experimentalDataFeatures={
-                            packagePolicy.package?.experimental_data_stream_features
-                          }
-                          setNewExperimentalDataFeatures={setNewExperimentalDataFeatures}
-                        />
                       )}
                     </>
                   ) : null}

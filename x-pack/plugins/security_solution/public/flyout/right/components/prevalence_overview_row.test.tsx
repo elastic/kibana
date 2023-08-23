@@ -8,15 +8,16 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { PrevalenceOverviewRow } from './prevalence_overview_row';
-import { useFetchUniqueHostsWithFieldPair } from '../hooks/use_fetch_unique_hosts_with_field_value_pair';
-import { useFetchUniqueHosts } from '../hooks/use_fetch_unique_hosts';
+import { useFetchFieldValuePairWithAggregation } from '../../shared/hooks/use_fetch_field_value_pair_with_aggregation';
+import { useFetchUniqueByField } from '../../shared/hooks/use_fetch_unique_by_field';
 
-jest.mock('../hooks/use_fetch_unique_hosts_with_field_value_pair');
-jest.mock('../hooks/use_fetch_unique_hosts');
+jest.mock('../../shared/hooks/use_fetch_field_value_pair_with_aggregation');
+jest.mock('../../shared/hooks/use_fetch_unique_by_field');
 
-const field = 'field';
-const values = ['values'];
-const scopeId = 'scopeId';
+const highlightedField = {
+  name: 'field',
+  values: ['values'],
+};
 const dataTestSubj = 'test';
 const iconDataTestSubj = 'testIcon';
 const valueDataTestSubj = 'testValue';
@@ -25,107 +26,81 @@ const loadingDataTestSubj = 'testLoading';
 
 describe('<PrevalenceOverviewRow />', () => {
   it('should display row if prevalence is below or equal threshold', () => {
-    (useFetchUniqueHostsWithFieldPair as jest.Mock).mockReturnValue({
+    (useFetchFieldValuePairWithAggregation as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
       count: 1,
     });
-    (useFetchUniqueHosts as jest.Mock).mockReturnValue({
+    (useFetchUniqueByField as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
       count: 10,
     });
 
     const { getByTestId, getAllByText, queryByTestId } = render(
-      <PrevalenceOverviewRow
-        field={field}
-        values={values}
-        scopeId={scopeId}
-        callbackIfNull={() => {}}
-        data-test-subj={dataTestSubj}
-      />
+      <PrevalenceOverviewRow highlightedField={highlightedField} data-test-subj={dataTestSubj} />
     );
+
+    const { name, values } = highlightedField;
 
     expect(getByTestId(iconDataTestSubj)).toBeInTheDocument();
     expect(getByTestId(valueDataTestSubj)).toBeInTheDocument();
-    expect(getAllByText(`${field}, ${values} is uncommon`)).toHaveLength(1);
+    expect(getAllByText(`${name}, ${values} is uncommon`)).toHaveLength(1);
     expect(queryByTestId(colorDataTestSubj)).not.toBeInTheDocument();
   });
 
   it('should not display row if prevalence is higher than threshold', () => {
-    (useFetchUniqueHostsWithFieldPair as jest.Mock).mockReturnValue({
+    (useFetchFieldValuePairWithAggregation as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
       count: 1,
     });
-    (useFetchUniqueHosts as jest.Mock).mockReturnValue({
+    (useFetchUniqueByField as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
       count: 2,
     });
-    const callbackIfNull = jest.fn();
 
     const { queryAllByAltText } = render(
-      <PrevalenceOverviewRow
-        field={field}
-        values={values}
-        scopeId={scopeId}
-        callbackIfNull={callbackIfNull}
-        data-test-subj={dataTestSubj}
-      />
+      <PrevalenceOverviewRow highlightedField={highlightedField} data-test-subj={dataTestSubj} />
     );
 
     expect(queryAllByAltText('is uncommon')).toHaveLength(0);
-    expect(callbackIfNull).toHaveBeenCalled();
   });
 
   it('should not display row if error retrieving data', () => {
-    (useFetchUniqueHostsWithFieldPair as jest.Mock).mockReturnValue({
+    (useFetchFieldValuePairWithAggregation as jest.Mock).mockReturnValue({
       loading: false,
       error: true,
       count: 0,
     });
-    (useFetchUniqueHosts as jest.Mock).mockReturnValue({
+    (useFetchUniqueByField as jest.Mock).mockReturnValue({
       loading: false,
       error: true,
       count: 0,
     });
-    const callbackIfNull = jest.fn();
 
     const { queryAllByAltText } = render(
-      <PrevalenceOverviewRow
-        field={field}
-        values={values}
-        scopeId={scopeId}
-        callbackIfNull={callbackIfNull}
-        data-test-subj={dataTestSubj}
-      />
+      <PrevalenceOverviewRow highlightedField={highlightedField} data-test-subj={dataTestSubj} />
     );
 
     expect(queryAllByAltText('is uncommon')).toHaveLength(0);
-    expect(callbackIfNull).toHaveBeenCalled();
   });
 
   it('should display loading', () => {
-    (useFetchUniqueHostsWithFieldPair as jest.Mock).mockReturnValue({
+    (useFetchFieldValuePairWithAggregation as jest.Mock).mockReturnValue({
       loading: true,
       error: false,
       count: 1,
     });
-    (useFetchUniqueHosts as jest.Mock).mockReturnValue({
+    (useFetchUniqueByField as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
       count: 10,
     });
 
     const { getByTestId } = render(
-      <PrevalenceOverviewRow
-        field={field}
-        values={values}
-        scopeId={scopeId}
-        callbackIfNull={() => {}}
-        data-test-subj={dataTestSubj}
-      />
+      <PrevalenceOverviewRow highlightedField={highlightedField} data-test-subj={dataTestSubj} />
     );
 
     expect(getByTestId(loadingDataTestSubj)).toBeInTheDocument();

@@ -122,7 +122,7 @@ describe('CaseView actions', () => {
     wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
 
     await waitFor(() => {
-      expect(deleteCasesSpy).toHaveBeenCalledWith(['basic-case-id'], expect.anything());
+      expect(deleteCasesSpy).toHaveBeenCalledWith({ caseIds: ['basic-case-id'] });
     });
   });
 

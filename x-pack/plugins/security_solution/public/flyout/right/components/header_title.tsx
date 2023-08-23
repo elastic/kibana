@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { VFC } from 'react';
 import React, { memo } from 'react';
+import { NewChatById } from '@kbn/elastic-assistant';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { isEmpty } from 'lodash';
+import { css } from '@emotion/react';
+import { DocumentStatus } from './status';
+import { useAssistant } from '../hooks/use_assistant';
+import {
+  ALERT_SUMMARY_CONVERSATION_ID,
+  EVENT_SUMMARY_CONVERSATION_ID,
+} from '../../../common/components/event_details/translations';
 import { DocumentSeverity } from './severity';
 import { RiskScore } from './risk_score';
 import { DOCUMENT_DETAILS } from './translations';
@@ -18,31 +26,73 @@ import { PreferenceFormattedDate } from '../../../common/components/formatted_da
 import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 import { ShareButton } from './share_button';
 
+export interface HeaderTitleProps {
+  /**
+   * If false, update the margin-top to compensate the fact that the expand detail button is not displayed
+   */
+  flyoutIsExpandable: boolean;
+}
+
 /**
  * Document details flyout right section header
  */
-export const HeaderTitle: FC = memo(() => {
+export const HeaderTitle: VFC<HeaderTitleProps> = memo(({ flyoutIsExpandable }) => {
   const { dataFormattedForFieldBrowser } = useRightPanelContext();
   const { isAlert, ruleName, timestamp, alertUrl } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );
+  const { showAssistant, promptContextId } = useAssistant({
+    dataFormattedForFieldBrowser,
+    isAlert,
+  });
+  const showShareAlertButton = isAlert && alertUrl;
 
   return (
     <>
-      <EuiTitle size="s" data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem>
-            <h4>{isAlert && !isEmpty(ruleName) ? ruleName : DOCUMENT_DETAILS}</h4>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {isAlert && alertUrl && <ShareButton alertUrl={alertUrl} />}
-          </EuiFlexItem>
+      {(showShareAlertButton || showAssistant) && (
+        <EuiFlexGroup
+          direction="row"
+          justifyContent="flexEnd"
+          gutterSize="none"
+          css={css`
+            margin-top: ${flyoutIsExpandable ? '-44px' : '-28px'};
+            padding: 0 25px;
+          `}
+        >
+          {showAssistant && (
+            <EuiFlexItem grow={false}>
+              <NewChatById
+                conversationId={
+                  isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID
+                }
+                promptContextId={promptContextId}
+              />
+            </EuiFlexItem>
+          )}
+          {showShareAlertButton && (
+            <EuiFlexItem grow={false}>
+              <ShareButton alertUrl={alertUrl} />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
+      )}
+      <EuiSpacer size="s" />
+      <EuiTitle size="s">
+        <h4 data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>
+          {isAlert && !isEmpty(ruleName) ? ruleName : DOCUMENT_DETAILS}
+        </h4>
       </EuiTitle>
-      <EuiSpacer size="m" />
-      {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
-      <EuiSpacer size="m" />
-      <EuiFlexGroup direction="row" gutterSize="l">
+      <EuiSpacer size="s" />
+      <EuiFlexGroup direction="row" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <DocumentStatus />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup direction="row" gutterSize="m">
         <EuiFlexItem grow={false}>
           <DocumentSeverity />
         </EuiFlexItem>

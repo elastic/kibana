@@ -5,11 +5,10 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiComboBox, EuiFormLabel, EuiSpacer, type EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormLabel, type EuiComboBoxOptionOption } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
 import type { FindingsGroupByKind } from '../../../common/types';
 import { findingsNavigation } from '../../../common/navigation/constants';
 import * as TEST_SUBJECTS from '../test_subjects';
@@ -31,6 +30,7 @@ const getGroupByOptions = (): Array<EuiComboBoxOptionOption<FindingsGroupByKind>
 
 interface Props {
   type: FindingsGroupByKind;
+  pathnameHandler?: (opts: Array<EuiComboBoxOptionOption<FindingsGroupByKind>>) => string;
 }
 
 const getFindingsGroupPath = (opts: Array<EuiComboBoxOptionOption<FindingsGroupByKind>>) => {
@@ -45,27 +45,27 @@ const getFindingsGroupPath = (opts: Array<EuiComboBoxOptionOption<FindingsGroupB
   }
 };
 
-export const FindingsGroupBySelector = ({ type }: Props) => {
+export const FindingsGroupBySelector = ({
+  type,
+  pathnameHandler = getFindingsGroupPath,
+}: Props) => {
   const groupByOptions = useMemo(getGroupByOptions, []);
   const history = useHistory();
 
-  if (!INTERNAL_FEATURE_FLAGS.showFindingsGroupBy) return null;
-
   const onChange = (options: Array<EuiComboBoxOptionOption<FindingsGroupByKind>>) =>
-    history.push({ pathname: getFindingsGroupPath(options) });
+    history.push({ pathname: pathnameHandler(options) });
 
   return (
-    <div>
-      <EuiComboBox
-        data-test-subj={TEST_SUBJECTS.FINDINGS_GROUP_BY_SELECTOR}
-        prepend={<GroupByLabel />}
-        singleSelection={{ asPlainText: true }}
-        options={groupByOptions}
-        selectedOptions={groupByOptions.filter((o) => o.value === type)}
-        onChange={onChange}
-      />
-      <EuiSpacer />
-    </div>
+    <EuiComboBox
+      data-test-subj={TEST_SUBJECTS.FINDINGS_GROUP_BY_SELECTOR}
+      prepend={<GroupByLabel />}
+      singleSelection={{ asPlainText: true }}
+      options={groupByOptions}
+      selectedOptions={groupByOptions.filter((o) => o.value === type)}
+      onChange={onChange}
+      isClearable={false}
+      compressed
+    />
   );
 };
 

@@ -25,15 +25,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 
+import type { FieldValidationResults } from '@kbn/ml-category-validator';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
-import type { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
-  getDefaultAiOpsListState,
-  isFullAiOpsListState,
-  type AiOpsPageUrlState,
+  getDefaultLogCategorizationAppState,
+  type LogCategorizationPageUrlState,
 } from '../../application/utils/url_state';
 
 import { SearchPanel } from '../search_panel';
@@ -45,8 +45,11 @@ import { CategoryTable } from './category_table';
 import { DocumentCountChart } from './document_count_chart';
 import { InformationText } from './information_text';
 import { SamplingMenu } from './sampling_menu';
+import { useValidateFieldRequest } from './use_validate_category_field';
+import { FieldValidationCallout } from './category_validation_callout';
 
 const BAR_TARGET = 20;
+const DEFAULT_SELECTED_FIELD = 'message';
 
 export const LogCategorizationPage: FC = () => {
   const {
@@ -54,10 +57,16 @@ export const LogCategorizationPage: FC = () => {
   } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
-  const { runCategorizeRequest, cancelRequest, randomSampler } = useCategorizeRequest();
-  const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
-    'AIOPS_INDEX_VIEWER',
-    getDefaultAiOpsListState()
+  const {
+    runCategorizeRequest,
+    cancelRequest: cancelCategorizationRequest,
+    randomSampler,
+  } = useCategorizeRequest();
+  const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
+    useValidateFieldRequest();
+  const [stateFromUrl, setUrlState] = usePageUrlState<LogCategorizationPageUrlState>(
+    'logCategorization',
+    getDefaultLogCategorizationAppState()
   );
   const [globalState, setGlobalState] = useUrlState('_g');
   const [selectedField, setSelectedField] = useState<string | undefined>();
@@ -71,6 +80,14 @@ export const LogCategorizationPage: FC = () => {
     categories: Category[];
     sparkLines: SparkLinesPerCategory;
   } | null>(null);
+  const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
+    null
+  );
+
+  const cancelRequest = useCallback(() => {
+    cancelValidationRequest();
+    cancelCategorizationRequest();
+  }, [cancelCategorizationRequest, cancelValidationRequest]);
 
   useEffect(() => {
     if (savedSearch) {
@@ -100,20 +117,20 @@ export const LogCategorizationPage: FC = () => {
         setSelectedDataView(null);
       }
 
-      setAiopsListState({
-        ...aiopsListState,
+      setUrlState({
+        ...stateFromUrl,
         searchQuery: searchParams.searchQuery,
         searchString: searchParams.searchString,
         searchQueryLanguage: searchParams.queryLanguage,
         filters: searchParams.filters,
       });
     },
-    [selectedSavedSearch, aiopsListState, setAiopsListState]
+    [selectedSavedSearch, stateFromUrl, setUrlState]
   );
 
   const { searchQueryLanguage, searchString, searchQuery } = useSearch(
     { dataView, savedSearch: selectedSavedSearch },
-    aiopsListState
+    stateFromUrl
   );
 
   const { documentStats, timefilter, earliest, latest, intervalMs } = useData(
@@ -149,15 +166,6 @@ export const LogCategorizationPage: FC = () => {
     [dataView]
   );
 
-  useEffect(
-    function setSingleFieldAsSelected() {
-      if (fields.length === 1) {
-        setSelectedField(fields[0].label);
-      }
-    },
-    [fields]
-  );
-
   useEffect(() => {
     if (documentStats.documentCountStats?.buckets) {
       randomSampler.setDocCount(documentStats.totalCount);
@@ -168,6 +176,7 @@ export const LogCategorizationPage: FC = () => {
         }))
       );
       setData(null);
+      setFieldValidationResult(null);
       setTotalCount(documentStats.totalCount);
     }
   }, [
@@ -183,26 +192,37 @@ export const LogCategorizationPage: FC = () => {
   const loadCategories = useCallback(async () => {
     setLoading(true);
     setData(null);
-    const { title: index, timeFieldName: timeField } = dataView;
+    setFieldValidationResult(null);
+
+    const { getIndexPattern, timeFieldName: timeField } = dataView;
+    const index = getIndexPattern();
 
     if (selectedField === undefined || timeField === undefined) {
+      setLoading(false);
       return;
     }
 
     cancelRequest();
 
     try {
-      const resp = await runCategorizeRequest(
-        index,
-        selectedField,
-        timeField,
-        earliest,
-        latest,
-        searchQuery,
-        intervalMs
-      );
+      const [validationResult, categorizationResult] = await Promise.all([
+        runValidateFieldRequest(index, selectedField, timeField, earliest, latest, searchQuery),
+        runCategorizeRequest(
+          index,
+          selectedField,
+          timeField,
+          earliest,
+          latest,
+          searchQuery,
+          intervalMs
+        ),
+      ]);
 
-      setData({ categories: resp.categories, sparkLines: resp.sparkLinesPerCategory });
+      setFieldValidationResult(validationResult);
+      setData({
+        categories: categorizationResult.categories,
+        sparkLines: categorizationResult.sparkLinesPerCategory,
+      });
     } catch (error) {
       toasts.addError(error, {
         title: i18n.translate('xpack.aiops.logCategorization.errorLoadingCategories', {
@@ -213,24 +233,49 @@ export const LogCategorizationPage: FC = () => {
 
     setLoading(false);
   }, [
-    selectedField,
     dataView,
-    searchQuery,
+    selectedField,
+    cancelRequest,
+    runValidateFieldRequest,
     earliest,
     latest,
+    searchQuery,
     runCategorizeRequest,
-    cancelRequest,
     intervalMs,
     toasts,
   ]);
 
+  useEffect(
+    function autoSelectField() {
+      if (selectedField !== undefined) {
+        return;
+      }
+
+      const field = stateFromUrl.field;
+      if (field !== undefined && fields.find((f) => f.label === field)) {
+        // select field from URL, if it exists
+        setSelectedField(field);
+      } else if (fields.length === 1) {
+        // otherwise, if there is only one field in the list, select it
+        setSelectedField(fields[0].label);
+      } else if (fields.find((f) => f.label === DEFAULT_SELECTED_FIELD)) {
+        // otherwise, if there is a field called `message`, select it
+        setSelectedField(DEFAULT_SELECTED_FIELD);
+      }
+    },
+    [fields, loadCategories, selectedField, stateFromUrl.field]
+  );
+
   const onFieldChange = (value: EuiComboBoxOptionOption[] | undefined) => {
     setData(null);
-    setSelectedField(value && value.length ? value[0].label : undefined);
+    setFieldValidationResult(null);
+    const field = value && value.length ? value[0].label : undefined;
+    setSelectedField(field);
+    setUrlState({ field });
   };
 
   return (
-    <EuiPageBody data-test-subj="aiopsLogCategorizationPage" paddingSize="none" panelled={false}>
+    <EuiPageBody data-test-subj="aiopsLogPatternAnalysisPage" paddingSize="none" panelled={false}>
       <PageHeader />
       <EuiSpacer />
       <EuiFlexGroup gutterSize="none">
@@ -258,6 +303,7 @@ export const LogCategorizationPage: FC = () => {
               onChange={onFieldChange}
               selectedOptions={selectedField === undefined ? undefined : [{ label: selectedField }]}
               singleSelection={{ asPlainText: true }}
+              data-test-subj="aiopsLogPatternAnalysisCategoryField"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -268,6 +314,7 @@ export const LogCategorizationPage: FC = () => {
               onClick={() => {
                 loadCategories();
               }}
+              data-test-subj="aiopsLogPatternAnalysisRunButton"
             >
               <FormattedMessage
                 id="xpack.aiops.logCategorization.runButton"
@@ -299,6 +346,8 @@ export const LogCategorizationPage: FC = () => {
         </>
       ) : null}
 
+      <FieldValidationCallout validationResults={fieldValidationResult} />
+
       {loading === true ? <EuiSkeletonText lines={10} /> : null}
 
       <InformationText
@@ -308,13 +357,10 @@ export const LogCategorizationPage: FC = () => {
         fieldSelected={selectedField !== null}
       />
 
-      {selectedField !== undefined &&
-      data !== null &&
-      data.categories.length > 0 &&
-      isFullAiOpsListState(aiopsListState) ? (
+      {selectedField !== undefined && data !== null && data.categories.length > 0 ? (
         <CategoryTable
           categories={data.categories}
-          aiopsListState={aiopsListState}
+          aiopsListState={stateFromUrl}
           dataViewId={dataView.id!}
           eventRate={eventRate}
           sparkLines={data.sparkLines}

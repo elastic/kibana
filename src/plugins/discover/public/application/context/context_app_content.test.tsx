@@ -14,15 +14,16 @@ import { GetStateReturn } from './services/context_state';
 import { SortDirection } from '@kbn/data-plugin/public';
 import { ContextAppContent, ContextAppContentProps } from './context_app_content';
 import { LoadingStatus } from './services/context_query_state';
-import { dataViewMock } from '../../__mocks__/data_view';
-import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../__mocks__/services';
+import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
 import { DocTableWrapper } from '../../components/doc_table/doc_table_wrapper';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataTableRecord } from '../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { act } from 'react-dom/test-utils';
 
 describe('ContextAppContent test', () => {
-  const mountComponent = ({
+  const mountComponent = async ({
     anchorStatus,
     isLegacy,
   }: {
@@ -73,30 +74,35 @@ describe('ContextAppContent test', () => {
       addFilter: () => {},
     } as unknown as ContextAppContentProps;
 
-    return mountWithIntl(
+    const component = mountWithIntl(
       <KibanaContextProvider services={discoverServiceMock}>
         <ContextAppContent {...props} />
       </KibanaContextProvider>
     );
+    await act(async () => {
+      // needed by cell actions to complete async loading
+      component.update();
+    });
+    return component;
   };
 
-  it('should render legacy table correctly', () => {
-    const component = mountComponent({});
+  it('should render legacy table correctly', async () => {
+    const component = await mountComponent({});
     expect(component.find(DocTableWrapper).length).toBe(1);
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(loadingIndicator.length).toBe(0);
     expect(component.find(ActionBar).length).toBe(2);
   });
 
-  it('renders loading indicator', () => {
-    const component = mountComponent({ anchorStatus: LoadingStatus.LOADING });
+  it('renders loading indicator', async () => {
+    const component = await mountComponent({ anchorStatus: LoadingStatus.LOADING });
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(component.find(DocTableWrapper).length).toBe(1);
     expect(loadingIndicator.length).toBe(1);
   });
 
-  it('should render discover grid correctly', () => {
-    const component = mountComponent({ isLegacy: false });
+  it('should render discover grid correctly', async () => {
+    const component = await mountComponent({ isLegacy: false });
     expect(component.find(DiscoverGrid).length).toBe(1);
   });
 });

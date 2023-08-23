@@ -28,7 +28,10 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
-import { persistableControlGroupInputIsEqual } from '@kbn/controls-plugin/common';
+import {
+  getDefaultControlGroupInput,
+  persistableControlGroupInputIsEqual,
+} from '@kbn/controls-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
 import {
@@ -38,7 +41,6 @@ import {
   runQuickSave,
   replacePanel,
   addFromLibrary,
-  showPlaceholderUntil,
   addOrUpdateEmbeddable,
 } from './api';
 
@@ -172,6 +174,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
           ...DEFAULT_DASHBOARD_INPUT,
           id: initialInput.id,
         },
+        isEmbeddedExternally: creationOptions?.isEmbeddedExternally,
         animatePanelTransforms: false, // set panel transforms to false initially to avoid panels animating on initial render.
         hasUnsavedChanges: false, // if there is initial unsaved changes, the initial diff will catch them.
         lastSavedId: savedObjectId,
@@ -255,12 +258,16 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       hidePanelTitles,
       refreshInterval,
       executionContext,
+      panels,
     } = this.input;
 
     let combinedFilters = filters;
     if (this.controlGroup) {
       combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroup);
     }
+    const hasCustomTimeRange = Boolean(
+      (panels[id]?.explicitInput as Partial<InheritedChildInput>)?.timeRange
+    );
     return {
       searchSessionId: this.searchSessionId,
       refreshConfig: refreshInterval,
@@ -269,11 +276,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       executionContext,
       syncTooltips,
       syncColors,
-      timeRange,
-      timeslice,
       viewMode,
       query,
       id,
+      // do not pass any time information from dashboard to panel when panel has custom time range
+      // to avoid confusing panel which timeRange should be used
+      timeRange: hasCustomTimeRange ? undefined : timeRange,
+      timeslice: hasCustomTimeRange ? undefined : timeslice,
     };
   }
 
@@ -302,7 +311,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public addFromLibrary = addFromLibrary;
 
   public replacePanel = replacePanel;
-  public showPlaceholderUntil = showPlaceholderUntil;
   public addOrUpdateEmbeddable = addOrUpdateEmbeddable;
 
   public forceRefresh(refreshControlGroup: boolean = true) {
@@ -326,10 +334,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
     if (
       this.controlGroup &&
-      lastSavedControlGroupInput &&
       !persistableControlGroupInputIsEqual(this.controlGroup.getInput(), lastSavedControlGroupInput)
     ) {
-      this.controlGroup.updateInput(lastSavedControlGroupInput);
+      this.controlGroup.updateInput(lastSavedControlGroupInput ?? getDefaultControlGroupInput());
     }
 
     // if we are using the unified search integration, we need to force reset the time picker.
@@ -355,12 +362,12 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.stopSyncingWithUnifiedSearch?.();
 
     const {
-      dashboardSavedObject: { loadDashboardStateFromSavedObject },
+      dashboardContentManagement: { loadDashboardState },
     } = pluginServices.getServices();
     if (newCreationOptions) {
       this.creationOptions = { ...this.creationOptions, ...newCreationOptions };
     }
-    const loadDashboardReturn = await loadDashboardStateFromSavedObject({ id: newSavedObjectId });
+    const loadDashboardReturn = await loadDashboardState({ id: newSavedObjectId });
 
     const dashboardContainerReady$ = new Subject<DashboardContainer>();
     const untilDashboardReady = () =>
@@ -371,12 +378,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         });
       });
 
-    const { input: newInput, searchSessionId } = await initializeDashboard({
+    const initializeResult = await initializeDashboard({
       creationOptions: this.creationOptions,
       controlGroup: this.controlGroup,
       untilDashboardReady,
       loadDashboardReturn,
     });
+    if (!initializeResult) return;
+    const { input: newInput, searchSessionId } = initializeResult;
 
     this.searchSessionId = searchSessionId;
 
@@ -416,10 +425,12 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public openOverlay = (ref: OverlayRef) => {
     this.clearOverlays();
+    this.dispatch.setHasOverlays(true);
     this.overlayRef = ref;
   };
 
   public clearOverlays = () => {
+    this.dispatch.setHasOverlays(false);
     this.controlGroup?.closeAllFlyouts();
     this.overlayRef?.close();
   };

@@ -10,7 +10,7 @@ import { RunNowResult, TaskManagerStartContract } from '@kbn/task-manager-plugin
 import {
   RawAction,
   ActionTypeRegistryContract,
-  PreConfiguredAction,
+  InMemoryConnector,
   ActionTaskExecutorParams,
 } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
@@ -21,7 +21,7 @@ interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
   isESOCanEncrypt: boolean;
   actionTypeRegistry: ActionTypeRegistryContract;
-  preconfiguredActions: PreConfiguredAction[];
+  inMemoryConnectors: InMemoryConnector[];
 }
 
 export interface ExecuteOptions
@@ -39,8 +39,8 @@ interface ActionTaskParams
 }
 
 export interface GetConnectorsResult {
-  connector: PreConfiguredAction | RawAction;
-  isPreconfigured: boolean;
+  connector: InMemoryConnector | RawAction;
+  isInMemory: boolean;
   id: string;
 }
 
@@ -58,7 +58,7 @@ export function createExecutionEnqueuerFunction({
   taskManager,
   actionTypeRegistry,
   isESOCanEncrypt,
-  preconfiguredActions,
+  inMemoryConnectors,
 }: CreateExecuteFunctionOptions): ExecutionEnqueuer<void> {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
@@ -79,9 +79,9 @@ export function createExecutionEnqueuerFunction({
       );
     }
 
-    const { action, isPreconfigured } = await getAction(
+    const { action, isInMemory } = await getAction(
       unsecuredSavedObjectsClient,
-      preconfiguredActions,
+      inMemoryConnectors,
       id
     );
     validateCanActionBeUsed(action);
@@ -94,7 +94,7 @@ export function createExecutionEnqueuerFunction({
     // Get saved object references from action ID and relatedSavedObjects
     const { references, relatedSavedObjectWithRefs } = extractSavedObjectReferences(
       id,
-      isPreconfigured,
+      isInMemory,
       relatedSavedObjects
     );
     const executionSourceReference = executionSourceAsSavedObjectReferences(source);
@@ -139,7 +139,7 @@ export function createBulkExecutionEnqueuerFunction({
   taskManager,
   actionTypeRegistry,
   isESOCanEncrypt,
-  preconfiguredActions,
+  inMemoryConnectors,
 }: CreateExecuteFunctionOptions): BulkExecutionEnqueuer<void> {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
@@ -153,15 +153,16 @@ export function createBulkExecutionEnqueuerFunction({
 
     const actionTypeIds: Record<string, string> = {};
     const spaceIds: Record<string, string> = {};
-    const connectorIsPreconfigured: Record<string, boolean> = {};
+    const connectorIsInMemory: Record<string, boolean> = {};
     const connectorIds = [...new Set(actionsToExecute.map((action) => action.id))];
     const connectors = await getConnectors(
       unsecuredSavedObjectsClient,
-      preconfiguredActions,
+      inMemoryConnectors,
       connectorIds
     );
+
     connectors.forEach((c) => {
-      const { id, connector, isPreconfigured } = c;
+      const { id, connector, isInMemory } = c;
       validateCanActionBeUsed(connector);
 
       const { actionTypeId } = connector;
@@ -170,16 +171,17 @@ export function createBulkExecutionEnqueuerFunction({
       }
 
       actionTypeIds[id] = actionTypeId;
-      connectorIsPreconfigured[id] = isPreconfigured;
+      connectorIsInMemory[id] = isInMemory;
     });
 
     const actions = actionsToExecute.map((actionToExecute) => {
       // Get saved object references from action ID and relatedSavedObjects
       const { references, relatedSavedObjectWithRefs } = extractSavedObjectReferences(
         actionToExecute.id,
-        connectorIsPreconfigured[actionToExecute.id],
+        connectorIsInMemory[actionToExecute.id],
         actionToExecute.relatedSavedObjects
       );
+
       const executionSourceReference = executionSourceAsSavedObjectReferences(
         actionToExecute.source
       );
@@ -229,13 +231,13 @@ export function createBulkExecutionEnqueuerFunction({
 export function createEphemeralExecutionEnqueuerFunction({
   taskManager,
   actionTypeRegistry,
-  preconfiguredActions,
+  inMemoryConnectors,
 }: CreateExecuteFunctionOptions): ExecutionEnqueuer<RunNowResult> {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
     { id, params, spaceId, source, consumer, apiKey, executionId }: ExecuteOptions
   ): Promise<RunNowResult> {
-    const { action } = await getAction(unsecuredSavedObjectsClient, preconfiguredActions, id);
+    const { action } = await getAction(unsecuredSavedObjectsClient, inMemoryConnectors, id);
     validateCanActionBeUsed(action);
 
     const { actionTypeId } = action;
@@ -266,7 +268,7 @@ export function createEphemeralExecutionEnqueuerFunction({
   };
 }
 
-function validateCanActionBeUsed(action: PreConfiguredAction | RawAction) {
+function validateCanActionBeUsed(action: InMemoryConnector | RawAction) {
   const { name, isMissingSecrets } = action;
   if (isMissingSecrets) {
     throw new Error(
@@ -290,30 +292,32 @@ function executionSourceAsSavedObjectReferences(executionSource: ActionExecutorO
 
 async function getAction(
   unsecuredSavedObjectsClient: SavedObjectsClientContract,
-  preconfiguredActions: PreConfiguredAction[],
+  inMemoryConnectors: InMemoryConnector[],
   actionId: string
-): Promise<{ action: PreConfiguredAction | RawAction; isPreconfigured: boolean }> {
-  const pcAction = preconfiguredActions.find((action) => action.id === actionId);
-  if (pcAction) {
-    return { action: pcAction, isPreconfigured: true };
+): Promise<{ action: InMemoryConnector | RawAction; isInMemory: boolean }> {
+  const inMemoryAction = inMemoryConnectors.find((action) => action.id === actionId);
+
+  if (inMemoryAction) {
+    return { action: inMemoryAction, isInMemory: true };
   }
 
   const { attributes } = await unsecuredSavedObjectsClient.get<RawAction>('action', actionId);
-  return { action: attributes, isPreconfigured: false };
+  return { action: attributes, isInMemory: false };
 }
 
 async function getConnectors(
   unsecuredSavedObjectsClient: SavedObjectsClientContract,
-  preconfiguredConnectors: PreConfiguredAction[],
+  inMemoryConnectors: InMemoryConnector[],
   connectorIds: string[]
 ): Promise<GetConnectorsResult[]> {
   const result: GetConnectorsResult[] = [];
 
   const connectorIdsToFetch = [];
   for (const connectorId of connectorIds) {
-    const pcConnector = preconfiguredConnectors.find((connector) => connector.id === connectorId);
+    const pcConnector = inMemoryConnectors.find((connector) => connector.id === connectorId);
+
     if (pcConnector) {
-      result.push({ connector: pcConnector, isPreconfigured: true, id: connectorId });
+      result.push({ connector: pcConnector, isInMemory: true, id: connectorId });
     } else {
       connectorIdsToFetch.push(connectorId);
     }
@@ -330,7 +334,7 @@ async function getConnectors(
     for (const item of bulkGetResult.saved_objects) {
       if (item.error) throw item.error;
       result.push({
-        isPreconfigured: false,
+        isInMemory: false,
         connector: item.attributes,
         id: item.id,
       });

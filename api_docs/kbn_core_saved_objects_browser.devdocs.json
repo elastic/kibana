@@ -66,36 +66,12 @@
             "path": "src/plugins/visualizations/public/services.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
-          },
-          {
             "plugin": "exploratoryView",
             "path": "x-pack/plugins/exploratory_view/public/application/types.ts"
           },
           {
             "plugin": "exploratoryView",
             "path": "x-pack/plugins/exploratory_view/public/application/types.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/types.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/types.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/services/platform.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/services/platform.ts"
           },
           {
             "plugin": "transform",

@@ -9,13 +9,13 @@ import { getAPIKeyForSyntheticsService, syntheticsIndex } from './get_api_key';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
-import { syntheticsServiceApiKey } from '../legacy_uptime/lib/saved_objects/service_api_key';
+import { syntheticsServiceApiKey } from '../saved_objects/service_api_key';
 import { KibanaRequest } from '@kbn/core/server';
-import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
-import { getUptimeESMockClient } from '../legacy_uptime/lib/requests/test_helpers';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import * as authUtils from './authentication/check_has_privilege';
+import { SyntheticsServerSetup } from '../types';
+import { getUptimeESMockClient } from '../legacy_uptime/lib/requests/test_helpers';
 
 describe('getAPIKeyTest', function () {
   const core = coreMock.createStart();
@@ -31,7 +31,7 @@ describe('getAPIKeyTest', function () {
     encryptedSavedObjects,
     savedObjectsClient: core.savedObjects.getScopedClient(request),
     uptimeEsClient: getUptimeESMockClient().uptimeEsClient,
-  } as unknown as UptimeServerSetup;
+  } as unknown as SyntheticsServerSetup;
 
   security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValue(true);
   security.authc.apiKeys.validate = jest.fn().mockReturnValue(true);

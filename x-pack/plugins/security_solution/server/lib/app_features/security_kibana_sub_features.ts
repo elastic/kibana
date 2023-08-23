@@ -142,7 +142,7 @@ const hostIsolationExceptionsSubFeature: SubFeatureConfig = {
             'lists-all',
             'lists-read',
             'lists-summary',
-            `${APP_ID}-writeHostIsolationExceptions`,
+            `${APP_ID}-deleteHostIsolationExceptions`,
             `${APP_ID}-readHostIsolationExceptions`,
           ],
           id: 'host_isolation_exceptions_all',
@@ -152,7 +152,7 @@ const hostIsolationExceptionsSubFeature: SubFeatureConfig = {
             all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
             read: [],
           },
-          ui: ['writeHostIsolationExceptions', 'readHostIsolationExceptions'],
+          ui: ['readHostIsolationExceptions', 'deleteHostIsolationExceptions'],
         },
         {
           api: ['lists-read', 'lists-summary', `${APP_ID}-readHostIsolationExceptions`],
@@ -396,7 +396,6 @@ const hostIsolationSubFeature: SubFeatureConfig = {
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          api: [`${APP_ID}-writeHostIsolation`],
           id: 'host_isolation_all',
           includeIn: 'none',
           name: 'All',
@@ -404,7 +403,12 @@ const hostIsolationSubFeature: SubFeatureConfig = {
             all: [],
             read: [],
           },
-          ui: ['writeHostIsolation'],
+          // FYI: The current set of values below (`api`, `ui`) cover only `release` response action.
+          // There is a second set of values for API and UI that are added later if `endpointResponseActions`
+          // appFeature is enabled. Needed to ensure that in a downgrade of license condition,
+          // users are still able to un-isolate a host machine.
+          api: [`${APP_ID}-writeHostIsolationRelease`],
+          ui: ['writeHostIsolationRelease'],
         },
       ],
     },

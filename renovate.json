@@ -1,9 +1,20 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:base"],
-  "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**"],
-  "enabledManagers": ["npm"],
-  "baseBranches": ["main", "7.16", "7.15"],
+  "extends": [
+    "config:base"
+  ],
+  "ignorePaths": [
+    "**/__fixtures__/**",
+    "**/fixtures/**"
+  ],
+  "enabledManagers": [
+    "npm"
+  ],
+  "baseBranches": [
+    "main",
+    "7.16",
+    "7.15"
+  ],
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,
   "separateMajorMinor": false,
@@ -17,17 +28,31 @@
   },
   "packageRules": [
     {
-      "matchPackagePatterns": [".*"],
+      "matchPackagePatterns": [
+        ".*"
+      ],
       "enabled": false,
       "prCreation": "not-pending",
       "stabilityDays": 7
     },
     {
       "groupName": "@elastic/charts",
-      "matchPackageNames": ["@elastic/charts"],
-      "reviewers": ["team:visualizations", "markov00", "nickofthyme"],
-      "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "Team:Visualizations"],
+      "matchPackageNames": [
+        "@elastic/charts"
+      ],
+      "reviewers": [
+        "team:visualizations",
+        "markov00",
+        "nickofthyme"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:skip",
+        "Team:Visualizations"
+      ],
       "draftPR": true,
       "enabled": true,
       "assignAutomerge": true,
@@ -35,86 +60,201 @@
     },
     {
       "groupName": "@elastic/elasticsearch",
-      "matchPackageNames": ["@elastic/elasticsearch"],
-      "reviewers": ["team:kibana-operations", "team:kibana-core"],
-      "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "Team:Operations", "Team:Core"],
+      "matchPackageNames": [
+        "@elastic/elasticsearch"
+      ],
+      "reviewers": [
+        "team:kibana-operations",
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:skip",
+        "Team:Operations",
+        "Team:Core"
+      ],
       "enabled": true
     },
     {
       "groupName": "@elastic/elasticsearch",
-      "matchPackageNames": ["@elastic/elasticsearch"],
-      "reviewers": ["team:kibana-operations", "team:kibana-core"],
-      "matchBaseBranches": ["8.1"],
-      "labels": ["release_note:skip", "Team:Operations", "Team:Core", "backport:skip"],
+      "matchPackageNames": [
+        "@elastic/elasticsearch"
+      ],
+      "reviewers": [
+        "team:kibana-operations",
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "8.1"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Operations",
+        "Team:Core",
+        "backport:skip"
+      ],
       "enabled": true
     },
     {
       "groupName": "@elastic/elasticsearch",
-      "matchPackageNames": ["@elastic/elasticsearch"],
-      "reviewers": ["team:kibana-operations", "team:kibana-core"],
-      "matchBaseBranches": ["7.17"],
-      "labels": ["release_note:skip", "Team:Operations", "Team:Core", "backport:skip"],
+      "matchPackageNames": [
+        "@elastic/elasticsearch"
+      ],
+      "reviewers": [
+        "team:kibana-operations",
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "7.17"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Operations",
+        "Team:Core",
+        "backport:skip"
+      ],
       "enabled": true
     },
     {
       "groupName": "APM",
-      "matchPackageNames": ["elastic-apm-node", "@elastic/apm-rum", "@elastic/apm-rum-react"],
-      "reviewers": ["team:kibana-core"],
-      "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
+      "matchPackageNames": [
+        "elastic-apm-node",
+        "@elastic/apm-rum",
+        "@elastic/apm-rum-react"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Core",
+        "backport:skip"
+      ],
       "enabled": true,
       "prCreation": "immediate"
     },
     {
       "groupName": "babel",
-      "matchPackageNames": ["@types/babel__core"],
-      "matchPackagePatterns": ["^@babel", "^babel-plugin"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "release_note:skip"],
+      "matchPackageNames": [
+        "@types/babel__core"
+      ],
+      "matchPackagePatterns": [
+        "^@babel",
+        "^babel-plugin"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip"
+      ],
       "enabled": true
     },
     {
       "groupName": "typescript",
-      "matchPackageNames": ["typescript", "prettier", "@types/jsdom"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "release_note:skip"],
+      "matchPackageNames": [
+        "typescript",
+        "prettier",
+        "@types/jsdom"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip"
+      ],
       "enabled": true
     },
     {
       "groupName": "typescript-eslint",
-      "matchPackagePatterns": ["^@typescript-eslint"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "release_note:skip"],
+      "matchPackagePatterns": [
+        "^@typescript-eslint"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip"
+      ],
       "enabled": true
     },
     {
       "groupName": "polyfills",
-      "matchPackageNames": ["core-js"],
-      "matchPackagePatterns": ["polyfill"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "release_note:skip"],
+      "matchPackageNames": [
+        "core-js"
+      ],
+      "matchPackagePatterns": [
+        "polyfill"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip"
+      ],
       "enabled": true
     },
     {
       "groupName": "vega related modules",
-      "matchPackageNames": ["vega", "vega-lite", "vega-schema-url-parser", "vega-tooltip"],
-      "reviewers": ["team:kibana-visualizations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Feature:Vega", "Team:Visualizations"],
+      "matchPackageNames": [
+        "vega",
+        "vega-lite",
+        "vega-schema-url-parser",
+        "vega-tooltip"
+      ],
+      "reviewers": [
+        "team:kibana-visualizations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Feature:Vega",
+        "Team:Visualizations"
+      ],
       "enabled": true
     },
     {
       "groupName": "cypress",
-      "matchPackageNames": ["eslint-plugin-cypress"],
-      "matchPackagePatterns": ["^cypress"],
-      "reviewers": ["Team:apm", "Team: SecuritySolution"],
-      "matchBaseBranches": ["main"],
-      "labels": ["buildkite-ci", "ci:all-cypress-suites"],
+      "matchPackageNames": [
+        "eslint-plugin-cypress"
+      ],
+      "matchPackagePatterns": [
+        "^cypress"
+      ],
+      "reviewers": [
+        "Team:apm",
+        "Team: SecuritySolution"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "buildkite-ci",
+        "ci:all-cypress-suites"
+      ],
       "enabled": true
     },
     {
@@ -129,9 +269,17 @@
         "xml-crypto",
         "@types/xml-crypto"
       ],
-      "reviewers": ["team:kibana-security"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Security", "release_note:skip", "backport:all-open"],
+      "reviewers": [
+        "team:kibana-security"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Security",
+        "release_note:skip",
+        "backport:all-open"
+      ],
       "enabled": true
     },
     {
@@ -144,9 +292,16 @@
         "ms-chromium-edge-driver",
         "selenium-webdriver"
       ],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "release_note:skip"],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip"
+      ],
       "enabled": true
     },
     {
@@ -154,9 +309,17 @@
       "packageNames": [
         "node-sass"
       ],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "release_note:skip", "backport:all-open"],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "backport:all-open"
+      ],
       "enabled": true
     },
     {
@@ -165,9 +328,16 @@
         "gulp-terser",
         "terser"
       ],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "release_note:skip"],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip"
+      ],
       "enabled": true
     },
     {
@@ -180,9 +350,16 @@
         "@testing-library/user-event",
         "@types/testing-library__jest-dom"
       ],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "release_note:skip"],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip"
+      ],
       "enabled": true
     },
     {
@@ -203,22 +380,41 @@
         "jest-runtime",
         "jest-snapshot"
       ],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "release_note:skip"],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip"
+      ],
       "enabled": true
     },
     {
       "groupName": "@storybook",
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "matchPackagePatterns": ["^@storybook"],
-      "labels": ["Team:Operations", "release_note:skip"],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "matchPackagePatterns": [
+        "^@storybook"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip"
+      ],
       "enabled": true
     },
     {
       "groupName": "react-query",
-      "packageNames": ["@tanstack/react-query", "@tanstack/react-query-devtools"],
+      "packageNames": [
+        "@tanstack/react-query",
+        "@tanstack/react-query-devtools"
+      ],
       "reviewers": [
         "team:response-ops",
         "team:kibana-cloud-security-posture",
@@ -227,25 +423,42 @@
         "team:awp-platform",
         "team:security-onboarding-and-lifecycle-mgt"
       ],
-      "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:skip",
+        "ci:all-cypress-suites"
+      ],
       "enabled": true
     },
     {
       "groupName": "react-hook-form",
-      "packageNames": ["react-hook-form"],
+      "packageNames": [
+        "react-hook-form"
+      ],
       "reviewers": [
         "team:security-asset-management",
         "team:uptime"
       ],
-      "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:skip",
+        "ci:all-cypress-suites"
+      ],
       "enabled": true
     },
     {
       "groupName": "redux",
-      "packageNames": ["redux", "react-redux"],
-      "reviewers":[
+      "packageNames": [
+        "redux",
+        "react-redux"
+      ],
+      "reviewers": [
         "team:enterprise-search-frontend",
         "team:kibana-presentation",
         "team:kibana-data-discovery",
@@ -254,57 +467,129 @@
         "team:kibana-gis",
         "team:security-solution"
       ],
-      "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:skip",
+        "ci:all-cypress-suites"
+      ],
       "enabled": true
     },
     {
       "groupName": "Profiling",
-      "matchPackageNames": ["peggy", "@types/dagre"],
-      "reviewers": ["team:profiling-ui"],
-      "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip"],
+      "matchPackageNames": [
+        "peggy",
+        "@types/dagre"
+      ],
+      "reviewers": [
+        "team:profiling-ui"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:skip"
+      ],
       "enabled": true,
       "prCreation": "immediate"
     },
     {
       "groupName": "TTY Output",
-      "matchPackageNames": ["xterm", "byte-size", "@types/byte-size"],
-      "reviewers": ["team:sec-cloudnative-integrations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team: AWP: Visualization", "release_note:skip", "backport:skip"],
+      "matchPackageNames": [
+        "xterm",
+        "byte-size",
+        "@types/byte-size"
+      ],
+      "reviewers": [
+        "team:sec-cloudnative-integrations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team: AWP: Visualization",
+        "release_note:skip",
+        "backport:skip"
+      ],
       "enabled": true,
       "prCreation": "immediate"
     },
     {
       "groupName": "Cloud Defend",
-      "matchPackageNames": ["monaco-yaml"],
-      "reviewers": ["team:sec-cloudnative-integrations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team: Cloud Native Integrations", "release_note:skip", "backport:skip"],
+      "matchPackageNames": [
+        "monaco-yaml"
+      ],
+      "reviewers": [
+        "team:sec-cloudnative-integrations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team: Cloud Native Integrations",
+        "release_note:skip",
+        "backport:skip"
+      ],
       "enabled": true,
       "prCreation": "immediate"
     },
     {
       "groupName": "JSON Web Token",
-      "matchPackageNames": ["jsonwebtoken"],
+      "matchPackageNames": [
+        "jsonwebtoken"
+      ],
       "reviewers": [
         "team:response-ops",
         "team:kibana-core"
       ],
-      "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:all-open"],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
+      ],
       "enabled": true
     },
     {
       "groupName": "XState",
-      "matchPackageNames": ["xstate"],
-      "matchPackagePrefixes": ["@xstate/"],
-      "reviewers": ["team:infra-monitoring-ui"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Infra Monitoring UI", "release_note:skip"],
+      "matchPackageNames": [
+        "xstate"
+      ],
+      "matchPackagePrefixes": [
+        "@xstate/"
+      ],
+      "reviewers": [
+        "team:infra-monitoring-ui"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Infra Monitoring UI",
+        "release_note:skip"
+      ],
       "enabled": true,
       "prCreation": "immediate"
+    },
+    {
+      "groupName": "OpenTelemetry modules",
+      "matchPackagePrefixes": [
+        "@opentelemetry/"
+      ],
+      "reviewers": [
+        "team:infra-monitoring-ui"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Infra Monitoring UI"
+      ],
+      "enabled": true
     }
   ]
 }

@@ -17,6 +17,7 @@ import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 import { AppSearch } from './app_search';
 import { EnterpriseSearchOverview } from './enterprise_search_overview';
@@ -36,6 +37,8 @@ describe('renderApp', () => {
       lens: lensPluginMock.createStartContract(),
       licensing: licensingMock.createStart(),
       security: securityMock.createStart(),
+      share: sharePluginMock.createStartContract(),
+      userProfile: { user: {} },
     },
   } as any;
   const pluginData = {

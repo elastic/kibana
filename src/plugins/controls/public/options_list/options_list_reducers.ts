@@ -144,4 +144,10 @@ export const optionsListReducers = {
   ) => {
     state.output.dataViewId = action.payload;
   },
+  setExplicitInputDataViewId: (
+    state: WritableDraft<OptionsListReduxState>,
+    action: PayloadAction<string>
+  ) => {
+    state.explicitInput.dataViewId = action.payload;
+  },
 };

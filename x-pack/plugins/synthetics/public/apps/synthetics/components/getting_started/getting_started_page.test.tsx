@@ -10,6 +10,10 @@ import * as permissionsHooks from '../../hooks/use_fleet_permissions';
 import { render } from '../../utils/testing/rtl_helpers';
 import { GettingStartedPage } from './getting_started_page';
 import * as privateLocationsHooks from '../settings/private_locations/hooks/use_locations_api';
+import * as settingsHooks from '../../contexts/synthetics_settings_context';
+import { SyntheticsSettingsContextValues } from '../../contexts/synthetics_settings_context';
+import { fireEvent } from '@testing-library/react';
+import { kibanaService } from '../../../../utils/kibana_service';
 
 describe('GettingStartedPage', () => {
   beforeEach(() => {
@@ -66,6 +70,10 @@ describe('GettingStartedPage', () => {
   });
 
   it('shows need agent flyout when isAddingNewPrivateLocation is true and agentPolicies.length === 0', async () => {
+    jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
+      canSave: true,
+    } as SyntheticsSettingsContextValues);
+
     const { getByText, getByRole, queryByLabelText } = render(<GettingStartedPage />, {
       state: {
         serviceLocations: {
@@ -87,7 +95,7 @@ describe('GettingStartedPage', () => {
 
     expect(getByRole('heading', { name: 'Create private location', level: 2 }));
     expect(getByText('No agent policies found')).toBeInTheDocument();
-    expect(getByRole('link', { name: 'Create agent policy' })).toBeEnabled();
+    expect(getByRole('button', { name: 'Create agent policy' })).not.toBeEnabled();
     expect(queryByLabelText('Location name')).not.toBeInTheDocument();
     expect(queryByLabelText('Agent policy')).not.toBeInTheDocument();
   });
@@ -119,57 +127,60 @@ describe('GettingStartedPage', () => {
     expect(getByLabelText('Agent policy')).toBeInTheDocument();
   });
 
-  it('shows permissions callout and hides form when agent policies are available but the user does not have permissions', async () => {
-    jest.spyOn(permissionsHooks, 'useCanManagePrivateLocation').mockReturnValue(false);
-    const { getByText, getByRole, queryByLabelText, queryByRole } = render(<GettingStartedPage />, {
-      state: {
-        serviceLocations: {
-          locations: [],
-          locationsLoaded: true,
-          loading: false,
-        },
-        agentPolicies: {
-          data: {
-            total: 1,
-            items: [{}],
+  it('shows permissions tooltip when the user does not have permissions', async () => {
+    jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
+      canSave: false,
+    } as SyntheticsSettingsContextValues);
+    const { getByText, getByRole, queryByLabelText, queryByRole, findByText } = render(
+      <GettingStartedPage />,
+      {
+        state: {
+          serviceLocations: {
+            locations: [],
+            locationsLoaded: true,
+            loading: false,
           },
-          isAddingNewPrivateLocation: true,
+          agentPolicies: {
+            data: {
+              total: 1,
+              items: [{}],
+            },
+            isAddingNewPrivateLocation: true,
+          },
         },
-      },
-    });
+      }
+    );
 
     // page is loaded
     expect(getByText('Get started with synthetic monitoring')).toBeInTheDocument();
 
     expect(getByRole('heading', { name: 'Create private location', level: 2 }));
-    expect(queryByLabelText('Location name')).not.toBeInTheDocument();
-    expect(queryByLabelText('Agent policy')).not.toBeInTheDocument();
-    expect(queryByRole('button', { name: 'Save' })).not.toBeInTheDocument();
-    expect(getByText("You're missing some Kibana privileges to manage private locations"));
+    expect(queryByLabelText('Location name')).toBeInTheDocument();
+    expect(queryByLabelText('Agent policy')).toBeInTheDocument();
+    expect(queryByRole('button', { name: 'Save' })).toBeInTheDocument();
+    expect(queryByRole('button', { name: 'Save' })).toBeDisabled();
+    fireEvent.mouseOver(getByRole('button', { name: 'Save' }));
+    expect(
+      await findByText(/You do not have sufficient permissions to perform this action./)
+    ).toBeInTheDocument();
   });
 
-  it('shows permissions callout when agent policy is needed but the user does not have permissions', async () => {
-    jest.spyOn(permissionsHooks, 'useCanManagePrivateLocation').mockReturnValue(false);
-    const { getByText, getByRole, queryByLabelText } = render(<GettingStartedPage />, {
+  it('should call enablement API and redirect to monitors', function () {
+    render(<GettingStartedPage />, {
       state: {
-        serviceLocations: {
-          locations: [],
-          locationsLoaded: true,
+        syntheticsEnablement: {
           loading: false,
-        },
-        agentPolicies: {
-          data: undefined, // data will be undefined when user does not have permissions
-          isAddingNewPrivateLocation: true,
+          enablement: {
+            canEnable: false,
+            isEnabled: false,
+          },
         },
       },
     });
 
     // page is loaded
-    expect(getByText('Get started with synthetic monitoring')).toBeInTheDocument();
-
-    expect(getByRole('heading', { name: 'Create private location', level: 2 }));
-    expect(queryByLabelText('Location name')).not.toBeInTheDocument();
-    expect(queryByLabelText('Agent policy')).not.toBeInTheDocument();
-    expect(getByText("You're missing some Kibana privileges to manage private locations"));
+    expect(kibanaService.core.application.navigateToApp).toHaveBeenCalledWith('synthetics', {
+      path: '/monitors',
+    });
   });
 });

@@ -9,6 +9,7 @@ import type {
   FlameElementEvent,
   HeatmapElementEvent,
   MetricElementEvent,
+  PartialTheme,
   PartitionElementEvent,
   Theme,
   WordCloudElementEvent,
@@ -51,7 +52,8 @@ interface Props {
   }) => void;
   patterns: string[];
   setLastChecked: (lastChecked: string) => void;
-  theme: Theme;
+  theme?: PartialTheme;
+  baseTheme: Theme;
 }
 
 const BodyComponent: React.FC<Props> = ({
@@ -67,6 +69,7 @@ const BodyComponent: React.FC<Props> = ({
   patterns,
   setLastChecked,
   theme,
+  baseTheme,
 }) => {
   const {
     onCheckCompleted,
@@ -79,7 +82,10 @@ const BodyComponent: React.FC<Props> = ({
     totalSizeInBytes,
     updatePatternIndexNames,
     updatePatternRollup,
-  } = useResultsRollup({ ilmPhases, patterns });
+  } = useResultsRollup({
+    ilmPhases,
+    patterns,
+  });
 
   return (
     <EuiFlexGroup data-test-subj="body" direction="column" gutterSize="none">
@@ -120,6 +126,7 @@ const BodyComponent: React.FC<Props> = ({
           patternIndexNames={patternIndexNames}
           patternRollups={patternRollups}
           theme={theme}
+          baseTheme={baseTheme}
           updatePatternIndexNames={updatePatternIndexNames}
           updatePatternRollup={updatePatternRollup}
         />

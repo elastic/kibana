@@ -7,14 +7,14 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  ReadEndpointListItemSchemaDecoded,
-  exceptionListItemSchema,
-  readEndpointListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
+import {
+  ReadEndpointListItemRequestQueryDecoded,
+  readEndpointListItemRequestQuery,
+  readEndpointListItemResponse,
+} from '../../common/api';
 
 import {
   buildRouteValidation,
@@ -32,9 +32,9 @@ export const readEndpointListItemRoute = (router: ListsPluginRouter): void => {
       path: ENDPOINT_LIST_ITEM_URL,
       validate: {
         query: buildRouteValidation<
-          typeof readEndpointListItemSchema,
-          ReadEndpointListItemSchemaDecoded
-        >(readEndpointListItemSchema),
+          typeof readEndpointListItemRequestQuery,
+          ReadEndpointListItemRequestQueryDecoded
+        >(readEndpointListItemRequestQuery),
       },
     },
     async (context, request, response) => {
@@ -53,7 +53,7 @@ export const readEndpointListItemRoute = (router: ListsPluginRouter): void => {
               statusCode: 404,
             });
           } else {
-            const [validated, errors] = validate(exceptionListItem, exceptionListItemSchema);
+            const [validated, errors] = validate(exceptionListItem, readEndpointListItemResponse);
             if (errors != null) {
               return siemResponse.error({ body: errors, statusCode: 500 });
             } else {

@@ -17,6 +17,7 @@ import type {
   TypedLensByValueInput,
   Suggestion,
 } from '@kbn/lens-plugin/public';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { fieldSupportsBreakdown } from './field_supports_breakdown';
 
 export interface LensRequestData {
@@ -160,6 +161,8 @@ export const getLensAttributes = ({
         legend: {
           isVisible: true,
           position: 'right',
+          legendSize: LegendSize.EXTRA_LARGE,
+          shouldTruncate: false,
         },
         preferredSeriesType: 'bar_stacked',
         valueLabels: 'hide',
@@ -184,6 +187,7 @@ export const getLensAttributes = ({
   const attributes = {
     title:
       title ??
+      suggestion?.title ??
       i18n.translate('unifiedHistogram.lensTitle', {
         defaultMessage: 'Edit visualization',
       }),
@@ -204,6 +208,13 @@ export const getLensAttributes = ({
       filters,
       query,
       visualization,
+      ...(dataView &&
+        dataView.id &&
+        !dataView.isPersisted() && {
+          adHocDataViews: {
+            [dataView.id]: dataView.toSpec(false),
+          },
+        }),
     },
     visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
   } as TypedLensByValueInput['attributes'];

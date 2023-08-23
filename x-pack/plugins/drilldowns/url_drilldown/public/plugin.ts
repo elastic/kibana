@@ -49,6 +49,7 @@ export class UrlDrilldownPlugin
         getVariablesHelpDocsLink: () =>
           startServices().core.docLinks.links.dashboard.urlDrilldownVariables,
         settings: core.settings,
+        theme: () => startServices().core.theme,
       })
     );
 

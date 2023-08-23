@@ -6,6 +6,13 @@
  */
 
 import {
+  CrawlerCustomScheduleMappingClient,
+  CrawlerCustomSchedulesServer,
+  CrawlerCustomScheduleClient,
+  CrawlerCustomScheduleConfigOverridesClient,
+} from '../../../../../common/types/crawler';
+
+import {
   CrawlerDomain,
   CrawlerDomainFromServer,
   CrawlerData,
@@ -31,6 +38,7 @@ import {
   RawCrawlerAuth,
   CrawlScheduleFromServer,
   CrawlSchedule,
+  CrawlerCustomSchedule,
 } from './types';
 
 export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): CrawlerDomain {
@@ -236,6 +244,74 @@ export const domainConfigServerToClient = (
   seedUrls: domainConfigFromServer.seed_urls,
   sitemapUrls: domainConfigFromServer.sitemap_urls,
 });
+
+export const crawlerCustomSchedulingServerToClient = (
+  customSchedulingFromServer: CrawlerCustomSchedulesServer
+): CrawlerCustomSchedule[] =>
+  Object.entries(customSchedulingFromServer.custom_scheduling).map((scheduleMapping) => {
+    const {
+      name,
+      interval,
+      configuration_overrides: configurationOverrides,
+      enabled,
+    } = scheduleMapping[1];
+    const {
+      max_crawl_depth: maxCrawlDepth = 2,
+      sitemap_discovery_disabled: notIncludeSitemapsInRobotsTxt = false,
+      domain_allowlist: selectedDomainUrls = [],
+      sitemap_urls: customSitemapUrls = [],
+      seed_urls: customEntryPointUrls = [],
+    } = configurationOverrides;
+
+    return {
+      name,
+      interval,
+      enabled,
+      maxCrawlDepth,
+      includeSitemapsInRobotsTxt: !notIncludeSitemapsInRobotsTxt,
+      selectedDomainUrls,
+      selectedEntryPointUrls: [],
+      selectedSitemapUrls: [],
+      customEntryPointUrls,
+      customSitemapUrls,
+    };
+  });
+
+export const crawlerCustomSchedulingClientToServer = (
+  crawlerCustomSchedules: CrawlerCustomSchedule[]
+): CrawlerCustomScheduleMappingClient => {
+  const mapToServerFormat = (
+    crawlerSchedule: CrawlerCustomSchedule
+  ): CrawlerCustomScheduleClient => {
+    const configurationOverrides: CrawlerCustomScheduleConfigOverridesClient = {
+      maxCrawlDepth: crawlerSchedule.maxCrawlDepth,
+      sitemapDiscoveryDisabled: !crawlerSchedule.includeSitemapsInRobotsTxt,
+      domainAllowlist: crawlerSchedule.selectedDomainUrls,
+      sitemapUrls: [...crawlerSchedule.selectedSitemapUrls, ...crawlerSchedule.customSitemapUrls],
+      seedUrls: [
+        ...crawlerSchedule.selectedEntryPointUrls,
+        ...crawlerSchedule.customEntryPointUrls,
+      ],
+    };
+
+    return {
+      name: crawlerSchedule.name,
+      interval: crawlerSchedule.interval,
+      configurationOverrides,
+      enabled: crawlerSchedule.enabled,
+    };
+  };
+
+  const customSchedules: CrawlerCustomScheduleMappingClient = crawlerCustomSchedules.reduce(
+    (map, schedule) => {
+      const scheduleNameFormatted = schedule.name.replace(/\s+/g, '_').toLowerCase();
+      map.set(scheduleNameFormatted, mapToServerFormat(schedule));
+      return map;
+    },
+    new Map()
+  );
+  return customSchedules;
+};
 
 export const crawlerDomainsWithMetaServerToClient = ({
   results,

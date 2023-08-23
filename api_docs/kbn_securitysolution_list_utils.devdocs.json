@@ -1170,23 +1170,7 @@
             "section": "def-common.FormattedBuilderEntry",
             "text": "FormattedBuilderEntry"
           },
-          ", type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\", preFilter?: ((i: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.DataViewBase",
-            "text": "DataViewBase"
-          },
-          ", t: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\", o?: (\"windows\" | \"linux\" | \"macos\")[] | undefined) => ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.DataViewBase",
-            "text": "DataViewBase"
-          },
-          ") | undefined, osTypes?: (\"windows\" | \"linux\" | \"macos\")[] | undefined) => ",
+          ") => ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1244,67 +1228,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-list-utils",
-            "id": "def-common.getFilteredIndexPatterns.$3",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "\"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\""
-            ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-list-utils",
-            "id": "def-common.getFilteredIndexPatterns.$4",
-            "type": "Function",
-            "tags": [],
-            "label": "preFilter",
-            "description": [],
-            "signature": [
-              "((i: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.DataViewBase",
-                "text": "DataViewBase"
-              },
-              ", t: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\", o?: (\"windows\" | \"linux\" | \"macos\")[] | undefined) => ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.DataViewBase",
-                "text": "DataViewBase"
-              },
-              ") | undefined"
-            ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-list-utils",
-            "id": "def-common.getFilteredIndexPatterns.$5",
-            "type": "Array",
-            "tags": [],
-            "label": "osTypes",
-            "description": [],
-            "signature": [
-              "(\"windows\" | \"linux\" | \"macos\")[] | undefined"
-            ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],

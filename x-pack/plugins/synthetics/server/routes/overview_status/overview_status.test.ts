@@ -6,14 +6,14 @@
  */
 import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { getUptimeESMockClient } from '../../legacy_uptime/lib/requests/test_helpers';
 import { periodToMs } from './overview_status';
 import { queryMonitorStatus } from '../../queries/query_monitor_status';
-import { RouteContext } from '../../legacy_uptime/routes';
 import { getStatus } from './overview_status';
 import times from 'lodash/times';
 import * as monitorsFns from '../../saved_objects/synthetics_monitor/get_all_monitors';
-import { EncryptedSyntheticsMonitor } from '../../../common/runtime_types';
+import { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
+import { RouteContext } from '../types';
+import { getUptimeESMockClient } from '../../legacy_uptime/lib/requests/test_helpers';
 
 jest.mock('../../saved_objects/synthetics_monitor/get_all_monitors', () => ({
   ...jest.requireActual('../../saved_objects/synthetics_monitor/get_all_monitors'),
@@ -45,14 +45,6 @@ jest.mock('../common', () => ({
     ],
   }),
   getMonitorFilters: () => '',
-}));
-
-jest.mock('../../legacy_uptime/lib/requests/get_snapshot_counts', () => ({
-  getSnapshotCount: jest.fn().mockReturnValue({
-    up: 2,
-    down: 1,
-    total: 3,
-  }),
 }));
 
 describe('current status route', () => {
@@ -632,7 +624,7 @@ describe('current status route', () => {
           namespaces: ['default'],
           score: null,
           sort: ['a', 3013],
-        } as unknown as SavedObjectsFindResult<EncryptedSyntheticsMonitor>,
+        } as unknown as SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>,
       ]);
       const { esClient, uptimeEsClient } = getUptimeESMockClient();
       esClient.search.mockResponseOnce(
@@ -798,7 +790,7 @@ describe('current status route', () => {
           namespaces: ['default'],
           score: null,
           sort: ['a', 3013],
-        } as unknown as SavedObjectsFindResult<EncryptedSyntheticsMonitor>,
+        } as unknown as SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>,
       ]);
       const { esClient, uptimeEsClient } = getUptimeESMockClient();
       esClient.search.mockResponseOnce(getEsResponse([]));

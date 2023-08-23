@@ -21,10 +21,20 @@ const ContextWrapper: React.FC = ({ children }) => (
   <AssistantProvider
     actionTypeRegistry={actionTypeRegistry}
     augmentMessageCodeBlocks={jest.fn()}
+    baseAllow={[]}
+    baseAllowReplacement={[]}
+    defaultAllow={[]}
+    defaultAllowReplacement={[]}
+    docLinks={{
+      ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+      DOC_LINK_VERSION: 'current',
+    }}
     getInitialConversations={mockGetInitialConversations}
     getComments={mockGetComments}
     http={mockHttp}
     setConversations={jest.fn()}
+    setDefaultAllow={jest.fn()}
+    setDefaultAllowReplacement={jest.fn()}
   >
     {children}
   </AssistantProvider>

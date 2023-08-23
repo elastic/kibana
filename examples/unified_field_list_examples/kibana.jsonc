@@ -13,12 +13,12 @@
       "inspector",
       "kibanaUtils",
       "unifiedSearch",
-      "unifiedFieldList",
       "data",
       "dataViews",
       "dataViewFieldEditor",
       "charts",
-      "fieldFormats"
+      "fieldFormats",
+      "uiActions"
     ]
   }
 }

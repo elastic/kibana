@@ -6,12 +6,12 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import type { EndpointActionFileDownloadParams } from '../../../../common/api/endpoint';
+import { EndpointActionFileDownloadSchema } from '../../../../common/api/endpoint';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { validateActionId } from '../../services';
 import { errorHandler } from '../error_handler';
 import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
-import type { EndpointActionFileDownloadParams } from '../../../../common/endpoint/schema/actions';
-import { EndpointActionFileDownloadSchema } from '../../../../common/endpoint/schema/actions';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import type { EndpointAppContext } from '../../types';
 import type {
@@ -25,18 +25,29 @@ export const registerActionFileDownloadRoutes = (
 ) => {
   const logger = endpointContext.logFactory.get('actionFileDownload');
 
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
+      // NOTE:
+      // Because this API is used in the browser via `href` (ex. on link to download a file),
+      // we need to enable setting the version number via query params
+      enableQueryVersion: true,
       path: ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
-      validate: EndpointActionFileDownloadSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canWriteFileOperations'] },
-      logger,
-      getActionFileDownloadRouteHandler(endpointContext)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: EndpointActionFileDownloadSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteFileOperations'] },
+        logger,
+        getActionFileDownloadRouteHandler(endpointContext)
+      )
+    );
 };
 
 export const getActionFileDownloadRouteHandler = (

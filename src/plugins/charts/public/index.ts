@@ -56,8 +56,6 @@ export {
   vislibColorMaps,
   colorSchemas,
   getHeatmapColors,
-  truncatedColorMaps,
-  truncatedColorSchemas,
   ColorMode,
   LabelRotation,
   defaultCountLabel,

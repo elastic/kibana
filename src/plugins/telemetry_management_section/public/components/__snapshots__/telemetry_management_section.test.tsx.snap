@@ -63,7 +63,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
               "description": <React.Fragment>
                 <p>
                   <FormattedMessage
-                    defaultMessage="Enabling usage collection (also known as Telemetry) allows us to learn what our users are most interested in, so we can improve our products and services. Refer to our {privacyStatementLink}."
+                    defaultMessage="Enabling usage collection allows us to learn what our users are most interested in, so we can improve our products and services. Refer to our {privacyStatementLink}."
                     id="telemetry.telemetryConfigAndLinkDescription"
                     values={
                       Object {
@@ -116,7 +116,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
               "displayName": "Share usage with Elastic",
               "isCustom": true,
               "isOverridden": false,
-              "name": "telemetry:enabled",
+              "name": "Usage collection",
               "requiresPageReload": false,
               "type": "boolean",
               "value": true,
@@ -253,7 +253,6 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
       "timeZone": null,
     }
   }
-  onQueryMatchChange={[MockFunction]}
   showAppliesSettingMessage={true}
   telemetryService={
     TelemetryService {
@@ -261,6 +260,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
       "currentKibanaVersion": "mock_kibana_version",
       "defaultConfig": Object {
         "allowChangingOptInStatus": false,
+        "appendServerlessChannelsSuffix": false,
         "banner": true,
         "labels": Object {},
         "optIn": true,

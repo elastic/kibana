@@ -40,7 +40,11 @@ export const PageTitle: React.FC = ({ children }) => (
   </EuiTitle>
 );
 
-export const PageTitleText = ({ title }: { title: React.ReactNode }) => <h2>{title}</h2>;
+export const PageTitleText = ({ title }: { title: React.ReactNode }) => (
+  <EuiText grow={false} size="s">
+    <h1>{title}</h1>
+  </EuiText>
+);
 
 export const getExpandColumn = <T extends unknown>({
   onClick,
@@ -160,7 +164,7 @@ const baseColumns = [
         )}
         tooltipContent={i18n.translate(
           'xpack.csp.findings.findingsTable.findingsTableColumn.ruleBenchmarkColumnTooltipLabel',
-          { defaultMessage: 'The benchmark(s) rules used to evaluate this resource came from' }
+          { defaultMessage: 'The benchmark used to evaluate this resource' }
         )}
       />
     ),

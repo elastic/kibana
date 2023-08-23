@@ -437,6 +437,7 @@ export default function ({ getService }: FtrProviderContext) {
             const title = indexPattern.title;
             await supertest.delete(`${config.path}/${indexPattern.id}`);
             const response1 = await supertest.post(config.path).send({
+              override: true,
               [config.serviceKey]: {
                 title,
                 fields: {

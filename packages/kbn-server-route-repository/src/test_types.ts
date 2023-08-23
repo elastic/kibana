@@ -81,7 +81,7 @@ createServerRouteFactory<{}, { options: { tags: string[] } }>()({
 });
 
 createServerRouteFactory<{}, { options: { tags: string[] } }>()({
-  endpoint: 'GET /api/endpoint_with_params 2023-05-22',
+  endpoint: 'GET /api/endpoint_with_params 2023-10-31',
   options: {
     tags: [],
   },

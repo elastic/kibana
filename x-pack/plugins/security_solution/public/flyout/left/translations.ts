@@ -28,9 +28,9 @@ export const INVESTIGATIONS_TAB = i18n.translate(
   }
 );
 
-export const HISTORY_TAB = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.historyTab',
+export const RESPONSE_TAB = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.responseTab',
   {
-    defaultMessage: 'History',
+    defaultMessage: 'Response',
   }
 );

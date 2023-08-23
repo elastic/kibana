@@ -15,7 +15,7 @@ import { expandDottedObject } from '../../../../../../common/utils/expand_dotted
 import type { RuleParams } from '../../../rule_schema';
 import aadFieldConversion from '../../../routes/index/signal_aad_mapping.json';
 import { isDetectionAlert } from '../../../rule_types/utils/utils';
-import type { DetectionAlert } from '../../../../../../common/detection_engine/schemas/alerts';
+import type { DetectionAlert } from '../../../../../../common/api/detection_engine/model/alerts';
 
 export type NotificationRuleTypeParams = RuleParams & {
   id: string;

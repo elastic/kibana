@@ -26,6 +26,22 @@ export const ConfigSchema = schema.object({
     })
   ),
   maxSpaces: schema.number({ defaultValue: 1000 }),
+  allowFeatureVisibility: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.literal(false),
+    schema.boolean({
+      validate: (rawValue) => {
+        // This setting should not be configurable on-prem to avoid bugs when e.g. existing spaces
+        // have feature visibility customized but admins would be unable to change them back if the
+        // UI/APIs are disabled.
+        if (rawValue === false) {
+          return 'Feature visibility can only be disabled on serverless';
+        }
+      },
+      defaultValue: true,
+    })
+  ),
 });
 
 export function createConfig$(context: PluginInitializerContext) {

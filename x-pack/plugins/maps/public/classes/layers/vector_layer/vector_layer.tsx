@@ -51,6 +51,7 @@ import {
 import { IVectorSource } from '../../sources/vector_source';
 import { LayerIcon, ILayer } from '../layer';
 import { InnerJoin } from '../../joins/inner_join';
+import { isSpatialJoin } from '../../joins/is_spatial_join';
 import { IField } from '../../fields/field';
 import { DataRequestContext } from '../../../actions';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
@@ -76,7 +77,7 @@ export function isVectorLayer(layer: ILayer) {
 export interface VectorLayerArguments {
   source: IVectorSource;
   joins?: InnerJoin[];
-  layerDescriptor: VectorLayerDescriptor;
+  layerDescriptor: Partial<VectorLayerDescriptor>;
   customIcons: CustomIcon[];
   chartsPaletteServiceGetColor?: (value: string) => string | null;
 }
@@ -159,7 +160,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     this._joins = joins;
     this._descriptor = AbstractVectorLayer.createDescriptor(layerDescriptor);
     this._style = new VectorStyle(
-      layerDescriptor.style,
+      this._descriptor.style,
       source,
       this,
       customIcons,
@@ -259,12 +260,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     return this.getValidJoins().length > 0;
   }
 
-  isLayerLoading() {
-    const isSourceLoading = super.isLayerLoading();
-    if (isSourceLoading) {
-      return true;
-    }
-
+  _isLoadingJoins() {
     return this.getValidJoins().some((join) => {
       const joinDataRequest = this.getDataRequest(join.getSourceDataRequestId());
       return !joinDataRequest || joinDataRequest.isLoading();
@@ -359,9 +355,12 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     isFeatureEditorOpenForLayer: boolean
   ): Promise<VectorSourceRequestMeta> {
     const fieldNames = [
-      ...source.getFieldNames(),
       ...style.getSourceFieldNames(),
-      ...this.getValidJoins().map((join) => join.getLeftField().getName()),
+      ...this.getValidJoins()
+        .filter((join) => {
+          return !isSpatialJoin(join.toDescriptor());
+        })
+        .map((join) => join.getLeftField().getName()),
     ];
 
     const timesliceMaskFieldName = await source.getTimesliceMaskFieldName();
@@ -555,7 +554,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
     const joinRequestMeta = buildVectorRequestMeta(
       joinSource,
-      joinSource.getFieldNames(),
+      [], // fieldNames is empty because join sources only support metrics
       dataFilters,
       joinSource.getWhereQuery(),
       isForceRefresh,

@@ -24,8 +24,7 @@ export const getPendingActionsSummary = async (
   metadataService: EndpointMetadataService,
   logger: Logger,
   /** The Fleet Agent IDs to be checked */
-  agentIDs: string[],
-  isPendingActionResponsesWithAckEnabled: boolean
+  agentIDs: string[]
 ): Promise<EndpointPendingActions[]> => {
   const { data: unExpiredActionList } = await getActionList({
     esClient,
@@ -60,12 +59,8 @@ export const getPendingActionsSummary = async (
   for (const agentID of agentIDs) {
     const agentPendingActions: EndpointPendingActions['pending_actions'] = {};
     const setActionAsPending = (commandName: string) => {
-      // Add the command to the list of pending actions, but set it to zero if the
-      // `pendingActionResponsesWithAck` feature flag is false.
-      // Otherwise, just increment the count for this command
-      agentPendingActions[commandName] = !isPendingActionResponsesWithAckEnabled
-        ? 0
-        : (agentPendingActions[commandName] ?? 0) + 1;
+      // Add the command to the list of pending actions and increment the count for this command
+      agentPendingActions[commandName] = (agentPendingActions[commandName] ?? 0) + 1;
     };
 
     pending.push({

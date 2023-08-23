@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { CASE_CONFIGURE_URL } from '@kbn/cases-plugin/common/constants';
+import { ConfigurationRequest } from '@kbn/cases-plugin/common/types/api';
 import {
   CaseConnector,
-  ConfigurationRequest,
   Configuration,
   ConnectorTypes,
-} from '@kbn/cases-plugin/common/api';
-import { CASE_CONFIGURE_URL } from '@kbn/cases-plugin/common/constants';
+} from '@kbn/cases-plugin/common/types/domain';
 import type SuperTest from 'supertest';
 import { User } from '../authentication/types';
 

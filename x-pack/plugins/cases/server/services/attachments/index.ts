@@ -14,8 +14,14 @@ import type {
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CommentType, decodeOrThrow } from '../../../common/api';
-import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
+import { fromKueryExpression } from '@kbn/es-query';
+import { AttachmentAttributesRt, AttachmentType } from '../../../common/types/domain';
+import { decodeOrThrow } from '../../../common/api';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  FILE_ATTACHMENT_TYPE,
+} from '../../../common/constants';
 import { buildFilter, combineFilters } from '../../client/utils';
 import { defaultSortField, isSOError } from '../../common/utils';
 import type { AggregationResponse } from '../../client/metrics/types';
@@ -66,7 +72,7 @@ export class AttachmentService {
       this.context.log.debug(`Attempting to count alerts for case id ${params.caseId}`);
       const res = await this.executeCaseAggregations<{ alerts: { value: number } }>({
         ...params,
-        attachmentType: CommentType.alert,
+        attachmentType: AttachmentType.alert,
         aggregations: this.buildAlertsAggs(),
       });
 
@@ -125,6 +131,50 @@ export class AttachmentService {
   }
 
   /**
+   * Counts the persistableState and externalReference attachments that are not .files
+   */
+  public async countPersistableStateAndExternalReferenceAttachments({
+    caseId,
+  }: {
+    caseId: string;
+  }): Promise<number> {
+    try {
+      this.context.log.debug(
+        `Attempting to count persistableState and externalReference attachments for case id ${caseId}`
+      );
+
+      const typeFilter = buildFilter({
+        filters: [AttachmentType.persistableState, AttachmentType.externalReference],
+        field: 'type',
+        operator: 'or',
+        type: CASE_COMMENT_SAVED_OBJECT,
+      });
+
+      const excludeFilesFilter = fromKueryExpression(
+        `not ${CASE_COMMENT_SAVED_OBJECT}.attributes.externalReferenceAttachmentTypeId: ${FILE_ATTACHMENT_TYPE}`
+      );
+
+      const combinedFilter = combineFilters([typeFilter, excludeFilesFilter]);
+
+      const response = await this.context.unsecuredSavedObjectsClient.find<{ total: number }>({
+        type: CASE_COMMENT_SAVED_OBJECT,
+        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+        page: 1,
+        perPage: 1,
+        sortField: defaultSortField,
+        filter: combinedFilter,
+      });
+
+      return response.total;
+    } catch (error) {
+      this.context.log.error(
+        `Error while attempting to count persistableState and externalReference attachments for case id ${caseId}: ${error}`
+      );
+      throw error;
+    }
+  }
+
+  /**
    * Executes the aggregations against the actions attached to a case.
    */
   public async executeCaseActionsAggregations(
@@ -132,7 +182,10 @@ export class AttachmentService {
   ): Promise<AggregationResponse | undefined> {
     try {
       this.context.log.debug(`Attempting to count actions for case id ${params.caseId}`);
-      return await this.executeCaseAggregations({ ...params, attachmentType: CommentType.actions });
+      return await this.executeCaseAggregations({
+        ...params,
+        attachmentType: AttachmentType.actions,
+      });
     } catch (error) {
       this.context.log.error(`Error while counting actions for case id ${params.caseId}: ${error}`);
       throw error;
@@ -167,9 +220,11 @@ export class AttachmentService {
     try {
       this.context.log.debug(`Attempting to POST a new comment`);
 
+      const decodedAttributes = decodeOrThrow(AttachmentAttributesRt)(attributes);
+
       const { attributes: extractedAttributes, references: extractedReferences } =
         extractAttachmentSORefsFromAttributes(
-          attributes,
+          decodedAttributes,
           references,
           this.context.persistableStateAttachmentTypeRegistry
         );
@@ -210,9 +265,11 @@ export class AttachmentService {
       const res =
         await this.context.unsecuredSavedObjectsClient.bulkCreate<AttachmentPersistedAttributes>(
           attachments.map((attachment) => {
+            const decodedAttributes = decodeOrThrow(AttachmentAttributesRt)(attachment.attributes);
+
             const { attributes: extractedAttributes, references: extractedReferences } =
               extractAttachmentSORefsFromAttributes(
-                attachment.attributes,
+                decodedAttributes,
                 attachment.references,
                 this.context.persistableStateAttachmentTypeRegistry
               );
@@ -267,12 +324,14 @@ export class AttachmentService {
     try {
       this.context.log.debug(`Attempting to UPDATE comment ${attachmentId}`);
 
+      const decodedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(updatedAttributes);
+
       const {
         attributes: extractedAttributes,
         references: extractedReferences,
         didDeleteOperation,
       } = extractAttachmentSORefsFromAttributes(
-        updatedAttributes,
+        decodedAttributes,
         options?.references ?? [],
         this.context.persistableStateAttachmentTypeRegistry
       );
@@ -327,12 +386,16 @@ export class AttachmentService {
       const res =
         await this.context.unsecuredSavedObjectsClient.bulkUpdate<AttachmentPersistedAttributes>(
           comments.map((c) => {
+            const decodedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(
+              c.updatedAttributes
+            );
+
             const {
               attributes: extractedAttributes,
               references: extractedReferences,
               didDeleteOperation,
             } = extractAttachmentSORefsFromAttributes(
-              c.updatedAttributes,
+              decodedAttributes,
               c.options?.references ?? [],
               this.context.persistableStateAttachmentTypeRegistry
             );

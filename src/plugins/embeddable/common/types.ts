@@ -80,6 +80,9 @@ export interface PanelState<E extends EmbeddableInput & { id: string } = { id: s
   // Stores input for this embeddable that is specific to this embeddable. Other parts of embeddable input
   // will be derived from the container's input. **State in here will override state derived from the container.**
   explicitInput: Partial<E> & { id: string };
+
+  // allows individual embeddable panels to maintain versioning information separate from the main Kibana version
+  version?: string;
 }
 
 export type EmbeddableStateWithType = EmbeddableInput & { type: string };

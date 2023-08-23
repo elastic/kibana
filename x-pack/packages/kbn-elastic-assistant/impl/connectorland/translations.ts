@@ -11,7 +11,7 @@ export const LOAD_ACTIONS_ERROR_MESSAGE = i18n.translate(
   'xpack.elasticAssistant.connectors.useLoadActionTypes.errorMessage',
   {
     defaultMessage:
-      'Welcome to your Elastic Assistant! I am your 100% open-source portal into your Elastic Life. ',
+      'Welcome to your Elastic AI Assistant! I am your 100% open-source portal into your Elastic Life. ',
   }
 );
 
@@ -19,7 +19,7 @@ export const LOAD_CONNECTORS_ERROR_MESSAGE = i18n.translate(
   'xpack.elasticAssistant.connectors.useLoadConnectors.errorMessage',
   {
     defaultMessage:
-      'Welcome to your Elastic Assistant! I am your 100% open-source portal into your Elastic Life. ',
+      'Welcome to your Elastic AI Assistant! I am your 100% open-source portal into your Elastic Life. ',
   }
 );
 
@@ -27,7 +27,7 @@ export const WELCOME_SECURITY = i18n.translate(
   'xpack.elasticAssistant.content.prompts.welcome.welcomeSecurityPrompt',
   {
     defaultMessage:
-      'Welcome to your Elastic Assistant! I am your 100% open-source portal into Elastic Security. ',
+      'Welcome to your Elastic AI Assistant! I am your 100% open-source portal into Elastic Security. ',
   }
 );
 
@@ -42,6 +42,20 @@ export const ADD_NEW_CONNECTOR = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.connectorSelector.newConnectorOptions',
   {
     defaultMessage: 'Add new Connector...',
+  }
+);
+
+export const INLINE_CONNECTOR_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.connectorSelectorInline.connectorLabel',
+  {
+    defaultMessage: 'Connector:',
+  }
+);
+
+export const INLINE_CONNECTOR_PLACEHOLDER = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.connectorSelectorInline.connectorPlaceholder',
+  {
+    defaultMessage: 'Select a Connector',
   }
 );
 
@@ -98,5 +112,19 @@ export const CONNECTOR_SETUP_SKIP = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.setup.skipTitle',
   {
     defaultMessage: 'Click to skip...',
+  }
+);
+
+export const MISSING_CONNECTOR_CALLOUT_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.connectorMissingCallout.calloutTitle',
+  {
+    defaultMessage: 'The current conversation is missing a connector configuration',
+  }
+);
+
+export const MISSING_CONNECTOR_CONVERSATION_SETTINGS_LINK = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.connectorMissingCallout.conversationSettingsLink',
+  {
+    defaultMessage: 'Conversation Settings',
   }
 );

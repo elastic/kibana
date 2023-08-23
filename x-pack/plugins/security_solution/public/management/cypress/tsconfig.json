@@ -34,5 +34,7 @@
     "@kbn/cases-plugin",
     "@kbn/test",
     "@kbn/repo-info",
+    "@kbn/data-views-plugin",
+    "@kbn/osquery-plugin/cypress",
   ]
 }

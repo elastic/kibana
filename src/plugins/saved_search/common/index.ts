@@ -21,5 +21,5 @@ export enum VIEW_MODE {
   AGGREGATED_LEVEL = 'aggregated',
 }
 
-export { SavedSearchType } from './constants';
-export { LATEST_VERSION } from './constants';
+export { SavedSearchType, LATEST_VERSION } from './constants';
+export { getKibanaContextFn } from './expressions/kibana_context';

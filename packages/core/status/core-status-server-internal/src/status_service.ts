@@ -24,13 +24,16 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginName } from '@kbn/core-base-common';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { InternalEnvironmentServiceSetup } from '@kbn/core-environment-server-internal';
-import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import type {
+  InternalHttpServiceSetup,
+  InternalHttpServicePreboot,
+} from '@kbn/core-http-server-internal';
 import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
 import type { InternalMetricsServiceSetup } from '@kbn/core-metrics-server-internal';
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { ServiceStatus, CoreStatus } from '@kbn/core-status-common';
-import { registerStatusRoute } from './routes';
+import { registerStatusRoute, registerPrebootStatusRoute } from './routes';
 
 import { statusConfig as config, StatusConfigType } from './status_config';
 import type { InternalStatusServiceSetup } from './types';
@@ -45,6 +48,10 @@ interface StatusLogMeta extends LogMeta {
 interface StatusAnalyticsPayload {
   overall_status_level: string;
   overall_status_summary: string;
+}
+
+export interface StatusServicePrebootDeps {
+  http: InternalHttpServicePreboot;
 }
 
 export interface StatusServiceSetupDeps {
@@ -70,6 +77,12 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('status');
     this.config$ = coreContext.configService.atPath<StatusConfigType>(config.path);
+  }
+
+  public async preboot({ http }: StatusServicePrebootDeps) {
+    http.registerRoutes('', (router) => {
+      registerPrebootStatusRoute({ router });
+    });
   }
 
   public async setup({
@@ -148,19 +161,6 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       router,
       ...commonRouteDeps,
     });
-
-    if (commonRouteDeps.config.allowAnonymous) {
-      http.registerPrebootRoutes('', (prebootRouter) => {
-        registerStatusRoute({
-          router: prebootRouter,
-          ...commonRouteDeps,
-          config: {
-            ...commonRouteDeps.config,
-            allowAnonymous: true,
-          },
-        });
-      });
-    }
 
     return {
       core$,

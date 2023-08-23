@@ -257,7 +257,7 @@ describe('createApi', () => {
         expect(response.ok).not.toHaveBeenCalled();
         expect(response.custom).toHaveBeenCalledWith({
           body: {
-            attributes: { _inspect: [] },
+            attributes: { _inspect: [], data: null },
             message:
               'Invalid value 1 supplied to : Partial<{| query: Partial<{| _inspect: pipe(JSON, boolean) |}> |}>/query: Partial<{| _inspect: pipe(JSON, boolean) |}>/_inspect: pipe(JSON, boolean)',
           },

@@ -31,7 +31,7 @@ import {
 } from '../../../state/global_params';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { ListParamItem } from './params_list';
-import { SyntheticsParamSO } from '../../../../../../common/runtime_types';
+import { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { AddParamForm } from './add_param_form';
 import { syncGlobalParamsAction } from '../../../state/settings';
@@ -49,7 +49,7 @@ export const AddParamFlyout = ({
 
   const { id, ...dataToSave } = isEditingItem ?? {};
 
-  const form = useFormWrapped<SyntheticsParamSO>({
+  const form = useFormWrapped<SyntheticsParams>({
     mode: 'onSubmit',
     reValidateMode: 'onChange',
     shouldFocusError: true,
@@ -77,7 +77,7 @@ export const AddParamFlyout = ({
 
   const { isSaving, savedData } = useSelector(selectGlobalParamState);
 
-  const onSubmit = (formData: SyntheticsParamSO) => {
+  const onSubmit = (formData: SyntheticsParams) => {
     const { namespaces, ...paramRequest } = formData;
     const shareAcrossSpaces = namespaces?.includes(ALL_SPACES_ID);
 

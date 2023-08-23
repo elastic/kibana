@@ -38,7 +38,7 @@
             "section": "def-common.DeeplyMockedKeys",
             "text": "DeeplyMockedKeys"
           },
-          "<T[P][0]>[] : T[P] extends (...args: any[]) => any ? jest.MockInstance<ReturnType<T[P]>, Parameters<T[P]>> : T[P] extends object ? ",
+          "<T[P][0]>[] : T[P] extends (...args: any[]) => any ? jest.MockInstance<ReturnType<T[P]>, Parameters<T[P]>, any> : T[P] extends object ? ",
           {
             "pluginId": "@kbn/utility-types-jest",
             "scope": "common",

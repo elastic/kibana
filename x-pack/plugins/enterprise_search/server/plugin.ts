@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   Plugin,
   PluginInitializerContext,
@@ -20,7 +21,7 @@ import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
-import { InfraPluginSetup } from '@kbn/infra-plugin/server';
+import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -82,11 +83,12 @@ import { getSearchResultProvider } from './utils/search_result_provider';
 import { ConfigType } from '.';
 
 interface PluginsSetup {
+  cloud: CloudSetup;
   customIntegrations?: CustomIntegrationsPluginSetup;
   features: FeaturesPluginSetup;
   globalSearch: GlobalSearchPluginSetup;
   guidedOnboarding: GuidedOnboardingPluginSetup;
-  infra: InfraPluginSetup;
+  logsShared: LogsSharedPluginSetup;
   ml?: MlPluginSetup;
   security: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
@@ -123,10 +125,11 @@ export class EnterpriseSearchPlugin implements Plugin {
       security,
       features,
       globalSearch,
-      infra,
+      logsShared,
       customIntegrations,
       ml,
       guidedOnboarding,
+      cloud,
     }: PluginsSetup
   ) {
     const config = this.config;
@@ -139,9 +142,10 @@ export class EnterpriseSearchPlugin implements Plugin {
       ...(config.canDeployEntSearch ? [APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID] : []),
       SEARCH_EXPERIENCES_PLUGIN.ID,
     ];
+    const isCloud = !!cloud.cloudId;
 
     if (customIntegrations) {
-      registerEnterpriseSearchIntegrations(config, http, customIntegrations);
+      registerEnterpriseSearchIntegrations(config, http, customIntegrations, isCloud);
     }
 
     /*
@@ -185,6 +189,8 @@ export class EnterpriseSearchPlugin implements Plugin {
           enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchAnalytics: showEnterpriseSearch,
           enterpriseSearchApplications: showEnterpriseSearch,
+          enterpriseSearchEsre: showEnterpriseSearch,
+          enterpriseSearchVectorSearch: showEnterpriseSearch,
           elasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess && config.canDeployEntSearch,
           workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
@@ -195,6 +201,8 @@ export class EnterpriseSearchPlugin implements Plugin {
           enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchAnalytics: showEnterpriseSearch,
           enterpriseSearchApplications: showEnterpriseSearch,
+          enterpriseSearchEsre: showEnterpriseSearch,
+          enterpriseSearchVectorSearch: showEnterpriseSearch,
           elasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess && config.canDeployEntSearch,
           workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
@@ -215,7 +223,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerEnterpriseSearchRoutes(dependencies);
     if (config.canDeployEntSearch) registerWorkplaceSearchRoutes(dependencies);
     // Enterprise Search Routes
-    if (config.hasNativeConnectors) registerConnectorRoutes(dependencies);
+    if (config.hasConnectors) registerConnectorRoutes(dependencies);
     if (config.hasWebCrawler) registerCrawlerRoutes(dependencies);
     registerStatsRoutes(dependencies);
 
@@ -253,9 +261,9 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     /*
      * Register logs source configuration, used by LogStream components
-     * @see https://github.com/elastic/kibana/blob/main/x-pack/plugins/infra/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
+     * @see https://github.com/elastic/kibana/blob/main/x-pack/plugins/logs_shared/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
      */
-    infra.logViews.defineInternalLogView(ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID, {
+    logsShared.logViews.defineInternalLogView(ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID, {
       logIndices: {
         indexName: 'logs-app_search.search_relevance_suggestions-*',
         type: 'index_name',
@@ -263,7 +271,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       name: 'Enterprise Search Search Relevance Logs',
     });
 
-    infra.logViews.defineInternalLogView(ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID, {
+    logsShared.logViews.defineInternalLogView(ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID, {
       logIndices: {
         indexName: 'logs-enterprise_search*',
         type: 'index_name',
@@ -271,7 +279,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       name: 'Enterprise Search Audit Logs',
     });
 
-    infra.logViews.defineInternalLogView(ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID, {
+    logsShared.logViews.defineInternalLogView(ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID, {
       logIndices: {
         indexName: 'behavioral_analytics-events-*',
         type: 'index_name',
@@ -288,7 +296,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (config.hasWebCrawler) {
       guidedOnboarding.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
     }
-    if (config.hasNativeConnectors) {
+    if (config.hasConnectors) {
       guidedOnboarding.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
     }
 

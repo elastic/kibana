@@ -6,10 +6,14 @@
  */
 import React from 'react';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
 
 const triggersActionsUiStartMock = {
   createStart() {
     return {
+      getAlertSummaryWidget: jest.fn(() => (
+        <div data-test-subj="alerts-summary-widget">mocked component</div>
+      )),
       getAlertsSearchBar: jest.fn(() => (
         <div data-test-subj="alerts-search-bar">mocked component</div>
       )),
@@ -67,10 +71,37 @@ const data = {
         create: jest.fn(),
       },
       query: {
-        timefilter: {
-          timefilter: jest.fn(),
+        timefilter: timefilterServiceMock.createSetupContract(),
+      },
+      search: {
+        searchSource: {
+          create: jest.fn(),
         },
       },
+    };
+  },
+};
+
+const dataViewEditor = {
+  createStart() {
+    return {
+      userPermissions: {
+        editDataView: jest.fn(),
+      },
+    };
+  },
+};
+
+const dataViews = {
+  createStart() {
+    return {
+      getIds: jest.fn().mockImplementation(() => []),
+      get: jest.fn(),
+      create: jest.fn().mockImplementation(() => ({
+        fields: {
+          getByName: jest.fn(),
+        },
+      })),
     };
   },
 };
@@ -81,6 +112,8 @@ export const observabilityPublicPluginsStartMock = {
       cases: mockCasesContract(),
       triggersActionsUi: triggersActionsUiStartMock.createStart(),
       data: data.createStart(),
+      dataViews: dataViews.createStart(),
+      dataViewEditor: dataViewEditor.createStart(),
       lens: null,
       discover: null,
     };

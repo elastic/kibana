@@ -14,7 +14,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'security', 'savedObjects', 'tagManagement']);
   const tagManagementPage = PageObjects.tagManagement;
 
-  describe('table listing', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/90578
+  describe.skip('table listing', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/functional_base/data.json'

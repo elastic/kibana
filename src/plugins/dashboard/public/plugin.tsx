@@ -20,7 +20,6 @@ import {
   AppMountParameters,
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
-  SavedObjectsClientContract,
 } from '@kbn/core/public';
 import type {
   ScreenshotModePluginSetup,
@@ -45,9 +44,14 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
@@ -63,8 +67,8 @@ import {
   SEARCH_SESSION_ID,
 } from './dashboard_constants';
 import { DashboardMountContextProps } from './dashboard_app/types';
-import { PlaceholderEmbeddableFactory } from './placeholder_embeddable';
-import type { FindDashboardsService } from './services/dashboard_saved_object/types';
+import type { FindDashboardsService } from './services/dashboard_content_management/types';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -74,6 +78,7 @@ export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
   embeddable: EmbeddableSetup;
   home?: HomePublicPluginSetup;
+  contentManagement: ContentManagementPublicSetup;
   screenshotMode: ScreenshotModePluginSetup;
   share?: SharePluginSetup;
   usageCollection?: UsageCollectionSetup;
@@ -90,7 +95,7 @@ export interface DashboardStartDependencies {
   navigation: NavigationPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   savedObjects: SavedObjectsStart;
-  savedObjectsClient: SavedObjectsClientContract;
+  contentManagement: ContentManagementPublicStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   screenshotMode: ScreenshotModePluginStart;
@@ -102,6 +107,7 @@ export interface DashboardStartDependencies {
   usageCollection?: UsageCollectionStart;
   visualizations: VisualizationsStart;
   customBranding: CustomBrandingStart;
+  serverless?: ServerlessPluginStart;
 }
 
 export interface DashboardSetup {
@@ -141,7 +147,7 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    { share, embeddable, home, urlForwarding, data }: DashboardSetupDependencies
+    { share, embeddable, home, urlForwarding, data, contentManagement }: DashboardSetupDependencies
   ): DashboardSetup {
     this.dashboardFeatureFlagConfig =
       this.initializerContext.config.get<DashboardFeatureFlagConfig>();
@@ -153,12 +159,9 @@ export class DashboardPlugin
           getDashboardFilterFields: async (dashboardId: string) => {
             const { pluginServices } = await import('./services/plugin_services');
             const {
-              dashboardSavedObject: { loadDashboardStateFromSavedObject },
+              dashboardContentManagement: { loadDashboardState },
             } = pluginServices.getServices();
-            return (
-              (await loadDashboardStateFromSavedObject({ id: dashboardId })).dashboardInput
-                ?.filters ?? []
-            );
+            return (await loadDashboardState({ id: dashboardId })).dashboardInput?.filters ?? [];
           },
         })
       );
@@ -216,9 +219,6 @@ export class DashboardPlugin
         dashboardContainerFactory.type,
         dashboardContainerFactory
       );
-
-      const placeholderFactory = new PlaceholderEmbeddableFactory();
-      embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
     });
 
     this.stopUrlTracking = () => {
@@ -274,13 +274,14 @@ export class DashboardPlugin
       // persisted dashboard, probably with url state
       return `#/view/${id}${tail || ''}`;
     });
+    const dashboardAppTitle = i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
+      defaultMessage: 'Dashboard',
+    });
 
     if (home) {
       home.featureCatalogue.register({
         id: LEGACY_DASHBOARD_APP_ID,
-        title: i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
-          defaultMessage: 'Dashboard',
-        }),
+        title: dashboardAppTitle,
         subtitle: i18n.translate('dashboard.featureCatalogue.dashboardSubtitle', {
           defaultMessage: 'Analyze data in dashboards.',
         }),
@@ -295,6 +296,15 @@ export class DashboardPlugin
         order: 100,
       });
     }
+
+    // register content management
+    contentManagement.registry.register({
+      id: CONTENT_ID,
+      version: {
+        latest: LATEST_VERSION,
+      },
+      name: dashboardAppTitle,
+    });
 
     return {
       locator: this.locator,
@@ -317,7 +327,7 @@ export class DashboardPlugin
       findDashboardsService: async () => {
         const { pluginServices } = await import('./services/plugin_services');
         const {
-          dashboardSavedObject: { findDashboards },
+          dashboardContentManagement: { findDashboards },
         } = pluginServices.getServices();
         return findDashboards;
       },

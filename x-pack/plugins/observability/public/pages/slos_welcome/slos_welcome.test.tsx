@@ -16,7 +16,7 @@ import { useLicense } from '../../hooks/use_license';
 import { SlosWelcomePage } from './slos_welcome';
 import { emptySloList, sloList } from '../../data/slo/slo';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
-import { paths } from '../../config/paths';
+import { paths } from '../../../common/locators/paths';
 
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../utils/kibana_react');
@@ -36,6 +36,7 @@ const mockNavigate = jest.fn();
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
+      theme: {},
       application: { navigateToUrl: mockNavigate },
       http: {
         basePath: {

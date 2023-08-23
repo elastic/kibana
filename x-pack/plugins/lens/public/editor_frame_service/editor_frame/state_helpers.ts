@@ -12,12 +12,12 @@ import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import {
-  EventAnnotationGroupConfig,
+  type EventAnnotationGroupConfig,
   EVENT_ANNOTATION_GROUP_TYPE,
-} from '@kbn/event-annotation-plugin/common';
+} from '@kbn/event-annotation-common';
 import type {
   Datasource,
   DatasourceMap,
@@ -346,6 +346,7 @@ export async function persistedStateToExpression(
     storage: IStorageWrapper;
     dataViews: DataViewsContract;
     timefilter: TimefilterContract;
+    nowProvider: DataPublicPluginStart['nowProvider'];
     eventAnnotationService: EventAnnotationServiceType;
   }
 ): Promise<DocumentToExpressionReturnType> {
@@ -432,6 +433,7 @@ export async function persistedStateToExpression(
       datasourceLayers,
       indexPatterns,
       dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
+      nowInstant: services.nowProvider.get(),
     }),
     activeVisualizationState,
     indexPatterns,

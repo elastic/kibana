@@ -21,9 +21,11 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
+import type { RawEventData } from '../../../../common/types/response_actions';
 import { useResponseActionsView } from './response_actions_view';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import type { RawEventData } from './types';
 import type { SearchHit } from '../../../../common/search_strategy';
 import { getMitreComponentParts } from '../../../detections/mitre/get_mitre_threat_component';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
@@ -86,7 +88,6 @@ interface Props {
   data: TimelineEventsDetailsItem[];
   detailsEcsData: Ecs | null;
   id: string;
-  indexName: string;
   isAlert: boolean;
   isDraggable?: boolean;
   rawEventData: object | undefined;
@@ -154,7 +155,6 @@ const EventDetailsComponent: React.FC<Props> = ({
   data,
   detailsEcsData,
   id,
-  indexName,
   isAlert,
   isDraggable,
   rawEventData,
@@ -171,6 +171,8 @@ const EventDetailsComponent: React.FC<Props> = ({
   const goToTableTab = useCallback(() => setSelectedTabId(EventsViewType.tableView), []);
 
   const eventFields = useMemo(() => getEnrichmentFields(data), [data]);
+  const { ruleId } = useBasicDataFromDetailsData(data);
+  const { rule: maybeRule } = useRuleWithFallback(ruleId);
   const existingEnrichments = useMemo(
     () =>
       isAlert
@@ -200,7 +202,7 @@ const EventDetailsComponent: React.FC<Props> = ({
 
   const enrichmentCount = allEnrichments.length;
 
-  const { hostRisk, userRisk, isLicenseValid } = useRiskScoreData(data);
+  const { hostRisk, userRisk, isAuthorized } = useRiskScoreData(data);
 
   const renderer = useMemo(
     () =>
@@ -214,9 +216,9 @@ const EventDetailsComponent: React.FC<Props> = ({
 
   const showThreatSummary = useMemo(() => {
     const hasEnrichments = enrichmentCount > 0;
-    const hasRiskInfoWithLicense = isLicenseValid && (hostRisk || userRisk);
+    const hasRiskInfoWithLicense = isAuthorized && (hostRisk || userRisk);
     return hasEnrichments || hasRiskInfoWithLicense;
-  }, [enrichmentCount, hostRisk, isLicenseValid, userRisk]);
+  }, [enrichmentCount, hostRisk, isAuthorized, userRisk]);
   const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
     'endpointResponseActionsEnabled'
   );
@@ -235,7 +237,6 @@ const EventDetailsComponent: React.FC<Props> = ({
                   contextId={scopeId}
                   data={data}
                   eventId={id}
-                  indexName={indexName}
                   scopeId={scopeId}
                   handleOnEventClosed={handleOnEventClosed}
                   isReadOnly={isReadOnly}
@@ -287,6 +288,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                     isReadOnly,
                   }}
                   goToTable={goToTableTab}
+                  investigationFields={maybeRule?.investigation_fields ?? []}
                 />
                 <EuiSpacer size="xl" />
                 <Insights
@@ -328,7 +330,6 @@ const EventDetailsComponent: React.FC<Props> = ({
       scopeId,
       data,
       id,
-      indexName,
       handleOnEventClosed,
       isReadOnly,
       renderer,
@@ -341,6 +342,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       userRisk,
       allEnrichments,
       isEnrichmentsLoading,
+      maybeRule,
     ]
   );
 

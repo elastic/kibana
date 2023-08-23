@@ -29,18 +29,14 @@ export const useUpdateComment = () => {
   const owner = useCasesContext().owner[0];
 
   return useMutation(
-    ({ caseId, commentId, commentUpdate, version }: UpdateComment) => {
-      const abortCtrlRef = new AbortController();
-
-      return patchComment({
+    ({ caseId, commentId, commentUpdate, version }: UpdateComment) =>
+      patchComment({
         caseId,
         commentId,
         commentUpdate,
         version,
-        signal: abortCtrlRef.signal,
         owner,
-      });
-    },
+      }),
     {
       mutationKey: casesMutationsKeys.updateComment,
       onSuccess: () => {

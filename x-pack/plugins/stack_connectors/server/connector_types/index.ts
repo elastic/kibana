@@ -26,6 +26,7 @@ import { getConnectorType as getSlackApiConnectorType } from './slack_api';
 import { getConnectorType as getWebhookConnectorType } from './webhook';
 import { getConnectorType as getXmattersConnectorType } from './xmatters';
 import { getConnectorType as getTeamsConnectorType } from './teams';
+import { getConnectorType as getD3SecurityConnectorType } from './d3security';
 import { getOpsgenieConnectorType } from './opsgenie';
 import type { ActionParamsType as ServiceNowITSMActionParams } from './servicenow_itsm';
 import type { ActionParamsType as ServiceNowSIRActionParams } from './servicenow_sir';
@@ -100,4 +101,5 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());
   actions.registerSubActionConnectorType(getGenerativeAiConnectorType());
+  actions.registerSubActionConnectorType(getD3SecurityConnectorType());
 }

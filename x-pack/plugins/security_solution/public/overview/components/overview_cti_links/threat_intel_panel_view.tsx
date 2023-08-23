@@ -69,7 +69,7 @@ export const ThreatIntelPanelView: React.FC<LinkPanelViewProps> = ({
           () => (
             <SecuritySolutionLinkButton
               data-test-subj="cti-view-indicators"
-              deepLinkId={SecurityPageName.threatIntelligenceIndicators}
+              deepLinkId={SecurityPageName.threatIntelligence}
             >
               <FormattedMessage
                 id="xpack.securitySolution.overview.threatIndicatorsAction"

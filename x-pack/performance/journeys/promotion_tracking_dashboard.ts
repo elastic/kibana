@@ -7,7 +7,6 @@
 
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
-import { waitForVisualizations } from '../utils';
 
 export const journey = new Journey({
   kbnArchives: ['x-pack/performance/kbn_archives/promotion_tracking_dashboard'],
@@ -50,6 +49,6 @@ export const journey = new Journey({
     await page.click(subj('superDatePickerCommonlyUsed_Last_30 days'));
   })
 
-  .step('Wait for visualization animations to finish', async ({ page, log }) => {
-    await waitForVisualizations(page, log, 1);
+  .step('Wait for visualization animations to finish', async ({ kibanaPage }) => {
+    await kibanaPage.waitForVisualizations(1);
   });

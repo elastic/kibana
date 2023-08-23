@@ -411,6 +411,51 @@ describe('pie_visualization', () => {
         `);
       });
 
+      it("applies color swatch icons on multiple metrics if there's a collapsed slice-by", () => {
+        const palette = paletteServiceMock.get('default');
+        palette.getCategoricalColor.mockClear();
+        const state = getExampleState();
+        state.layers[0].allowMultipleMetrics = true;
+        state.layers[0].metrics = colIds;
+        state.layers[0].colorsByDimension = {};
+        state.layers[0].colorsByDimension[colIds[0]] = 'overridden-color';
+        state.layers[0].primaryGroups = ['primaryGroup'];
+        state.layers[0].collapseFns = { ['primaryGroup']: 'sum' };
+
+        const config = pieVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: state.layers[0].layerId,
+        });
+
+        expect(findMetricGroup(config)?.accessors).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "color": "overridden-color",
+              "columnId": "1",
+              "triggerIconType": "color",
+            },
+            Object {
+              "color": "black",
+              "columnId": "2",
+              "triggerIconType": "color",
+            },
+            Object {
+              "color": "black",
+              "columnId": "3",
+              "triggerIconType": "color",
+            },
+            Object {
+              "color": "black",
+              "columnId": "4",
+              "triggerIconType": "color",
+            },
+          ]
+        `);
+
+        expect(palette.getCategoricalColor).toHaveBeenCalledTimes(3); // one for each of the defaultly assigned colors
+      });
+
       it("applies disabled icons on multiple metrics if there's a slice-by", () => {
         const state = getExampleState();
         state.layers[0].allowMultipleMetrics = true;

@@ -5,239 +5,396 @@
  * 2.0.
  */
 
-import { Buffer } from 'buffer';
-import { flatten, zip } from 'lodash';
-import React, { useState } from 'react';
 import {
-  EuiText,
   EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
   EuiSpacer,
-  EuiButtonGroup,
-  EuiCodeBlock,
-  EuiSteps,
-  EuiSkeletonRectangle,
+  EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { default as React, useCallback, useEffect, useState } from 'react';
+import { ObservabilityOnboardingPluginSetupDeps } from '../../../../plugin';
+import { useWizard } from '.';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import {
+  ElasticAgentPlatform,
+  getElasticAgentSetupCommand,
+} from '../../../shared/get_elastic_agent_setup_command';
+import {
+  InstallElasticAgentSteps,
+  ProgressStepId,
+  EuiStepStatus,
+} from '../../../shared/install_elastic_agent_steps';
 import {
   StepPanel,
   StepPanelContent,
   StepPanelFooter,
 } from '../../../shared/step_panel';
-import { useWizard } from '.';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { ApiKeyBanner } from './api_key_banner';
+import { BackButton } from './back_button';
+import { getDiscoverNavigationParams } from '../../utils';
+import { WindowsInstallStep } from '../../../shared/windows_install_step';
+import { TroubleshootingLink } from '../../../shared/troubleshooting_link';
 
-type ElasticAgentPlatform = 'linux-tar' | 'macos' | 'windows';
 export function InstallElasticAgent() {
-  const { goToStep, goBack, getState, CurrentStep } = useWizard();
+  const {
+    services: {
+      discover: { locator },
+    },
+  } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
+  const { goBack, goToStep, getState, setState } = useWizard();
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
 
-  function onContinue() {
-    goToStep('collectLogs');
+  function onInspect() {
+    goToStep('inspect');
+  }
+  async function onContinue() {
+    await locator?.navigate(
+      getDiscoverNavigationParams([wizardState.datasetName])
+    );
   }
 
-  function onBack() {
-    goBack();
+  function onAutoDownloadConfig() {
+    setState((state) => ({
+      ...state,
+      autoDownloadConfig: !state.autoDownloadConfig,
+    }));
   }
 
-  const { data: installShipperSetup, status: installShipperSetupStatus } =
-    useFetcher((callApi) => {
-      if (CurrentStep === InstallElasticAgent) {
+  const { data: monitoringRole, status: monitoringRoleStatus } = useFetcher(
+    (callApi) => {
+      if (!hasAlreadySavedFlow(getState())) {
         return callApi(
-          'POST /internal/observability_onboarding/custom_logs/install_shipper_setup',
-          {
-            params: {
-              body: {
-                name: wizardState.datasetName,
-                state: {
-                  datasetName: wizardState.datasetName,
-                  namespace: wizardState.namespace,
-                  customConfigurations: wizardState.customConfigurations,
-                  logFilePaths: wizardState.logFilePaths,
-                },
-              },
-            },
-          }
+          'GET /internal/observability_onboarding/logs/setup/privileges'
         );
       }
-    }, []);
+    },
+    []
+  );
+
+  const { data: setup } = useFetcher((callApi) => {
+    return callApi(
+      'GET /internal/observability_onboarding/logs/setup/environment'
+    );
+  }, []);
+
+  const {
+    data: installShipperSetup,
+    status: installShipperSetupStatus,
+    error,
+  } = useFetcher(
+    (callApi) => {
+      const {
+        datasetName,
+        serviceName,
+        namespace,
+        customConfigurations,
+        logFilePaths,
+      } = getState();
+      if (!hasAlreadySavedFlow(getState()) && monitoringRole?.hasPrivileges) {
+        return callApi('POST /internal/observability_onboarding/logs/flow', {
+          params: {
+            body: {
+              name: datasetName,
+              type: 'logFiles',
+              state: {
+                datasetName,
+                serviceName,
+                namespace,
+                customConfigurations,
+                logFilePaths,
+              },
+            },
+          },
+        });
+      }
+    },
+    [monitoringRole?.hasPrivileges]
+  );
+
+  const { status: saveOnboardingStateDataStatus } = useFetcher((callApi) => {
+    const {
+      onboardingId,
+      datasetName,
+      serviceName,
+      namespace,
+      customConfigurations,
+      logFilePaths,
+    } = getState();
+    if (onboardingId) {
+      return callApi(
+        'PUT /internal/observability_onboarding/flow/{onboardingId}',
+        {
+          params: {
+            path: { onboardingId },
+            body: {
+              state: {
+                datasetName,
+                serviceName,
+                namespace,
+                customConfigurations,
+                logFilePaths,
+              },
+            },
+          },
+        }
+      );
+    }
+  }, []);
+
+  const { apiKeyEncoded, onboardingId } = installShipperSetup ?? getState();
 
   const { data: yamlConfig = '', status: yamlConfigStatus } = useFetcher(
     (callApi) => {
-      if (CurrentStep === InstallElasticAgent && installShipperSetup) {
+      if (apiKeyEncoded && onboardingId) {
         return callApi(
-          'GET /api/observability_onboarding/elastic_agent/config 2023-05-24',
+          'GET /internal/observability_onboarding/elastic_agent/config',
           {
-            headers: {
-              authorization: `ApiKey ${installShipperSetup.apiKeyEncoded}`,
-            },
+            headers: { authorization: `ApiKey ${apiKeyEncoded}` },
+            params: { query: { onboardingId } },
           }
         );
       }
     },
-    [installShipperSetup?.apiKeyId, installShipperSetup?.apiKeyEncoded]
+    [
+      apiKeyEncoded,
+      onboardingId,
+      saveOnboardingStateDataStatus === FETCH_STATUS.SUCCESS,
+    ]
   );
 
-  const apiKeyEncoded = installShipperSetup?.apiKeyEncoded;
+  useEffect(() => {
+    setState((state) => ({ ...state, onboardingId, apiKeyEncoded }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onboardingId, apiKeyEncoded]);
+
+  const {
+    data: progressData,
+    status: progressStatus,
+    refetch: refetchProgress,
+  } = useFetcher(
+    (callApi) => {
+      if (onboardingId) {
+        return callApi(
+          'GET /internal/observability_onboarding/flow/{onboardingId}/progress',
+          { params: { path: { onboardingId } } }
+        );
+      }
+    },
+    [onboardingId]
+  );
+
+  const progressSucceded = progressStatus === FETCH_STATUS.SUCCESS;
+
+  useEffect(() => {
+    if (progressSucceded) {
+      setTimeout(() => {
+        refetchProgress();
+      }, 2000);
+    }
+  }, [progressSucceded, refetchProgress]);
+
+  const getCheckLogsStep = useCallback(() => {
+    const progress = progressData?.progress;
+    if (progress) {
+      const stepStatus = progress?.['logs-ingest']?.status as EuiStepStatus;
+      const title =
+        stepStatus === 'loading'
+          ? CHECK_LOGS_LABELS.loading
+          : stepStatus === 'complete'
+          ? CHECK_LOGS_LABELS.completed
+          : CHECK_LOGS_LABELS.incomplete;
+      return { title, status: stepStatus };
+    }
+    return {
+      title: CHECK_LOGS_LABELS.incomplete,
+      status: 'incomplete' as const,
+    };
+  }, [progressData?.progress]);
+
+  const isInstallStarted = progressData?.progress['ea-download'] !== undefined;
+  const isInstallCompleted =
+    progressData?.progress?.['ea-status']?.status === 'complete';
+  const autoDownloadConfigStatus = (progressData?.progress?.['ea-config']
+    ?.status ?? 'incomplete') as EuiStepStatus;
 
   return (
-    <StepPanel title="Install shipper to collect data">
+    <StepPanel
+      panelFooter={
+        <StepPanelFooter
+          items={[
+            <BackButton onBack={goBack} />,
+            <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={onInspect}>
+                  {i18n.translate(
+                    'xpack.observability_onboarding.steps.inspect',
+                    { defaultMessage: 'Inspect' }
+                  )}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="success"
+                  fill
+                  iconType="magnifyWithPlus"
+                  onClick={onContinue}
+                >
+                  {i18n.translate(
+                    'xpack.observability_onboarding.steps.exploreLogs',
+                    { defaultMessage: 'Explore logs' }
+                  )}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>,
+          ]}
+        />
+      }
+    >
       <StepPanelContent>
         <EuiText color="subdued">
           <p>
-            Add Elastic Agent to your hosts to begin sending data to your
-            Elastic Cloud. Run standalone if you want to download and manage
-            each agent configuration file on your own, or enroll in Fleet, for
-            centralized management of all your agents through our Fleet managed
-            interface.
+            {i18n.translate(
+              'xpack.observability_onboarding.installElasticAgent.description',
+              {
+                defaultMessage:
+                  'To collect the data from your system and stream it to Elastic, you first need to install a shipping tool on the machine generating the logs. In this case, the shipper is an Agent developed by Elastic.',
+              }
+            )}
           </p>
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiSteps
-          steps={[
+        {wizardState.integrationName && (
+          <>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.integrationSuccessCallout.title',
+                {
+                  defaultMessage: '{integrationName} integration installed.',
+                  values: {
+                    integrationName: wizardState.integrationName,
+                  },
+                }
+              )}
+              color="success"
+              iconType="check"
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {apiKeyEncoded && onboardingId ? (
+          <ApiKeyBanner
+            payload={{ apiKeyEncoded, onboardingId }}
+            hasPrivileges
+            status={FETCH_STATUS.SUCCESS}
+          />
+        ) : (
+          monitoringRoleStatus !== FETCH_STATUS.NOT_INITIATED &&
+          monitoringRoleStatus !== FETCH_STATUS.LOADING && (
+            <ApiKeyBanner
+              payload={installShipperSetup}
+              hasPrivileges={monitoringRole?.hasPrivileges}
+              status={installShipperSetupStatus}
+              error={error}
+            />
+          )
+        )}
+        <EuiSpacer size="m" />
+        <InstallElasticAgentSteps
+          installAgentPlatformOptions={[
             {
-              title: 'Install the Elastic Agent',
-              status:
-                installShipperSetupStatus === FETCH_STATUS.LOADING
-                  ? 'loading'
-                  : 'current',
-              children: (
-                <>
-                  <EuiText color="subdued">
-                    <p>
-                      Select a platform and run the command to install in your
-                      Terminal, enroll, and start the Elastic Agent. Do this for
-                      each host. For other platforms, see our downloads page.
-                      Review host requirements and other installation options.
-                    </p>
-                  </EuiText>
-                  <EuiSpacer size="m" />
-                  <EuiButtonGroup
-                    isFullWidth
-                    legend="Choose platform"
-                    options={[
-                      { id: 'linux-tar', label: 'Linux' },
-                      { id: 'macos', label: 'MacOs', isDisabled: true },
-                      { id: 'windows', label: 'Windows', isDisabled: true },
-                    ]}
-                    type="single"
-                    idSelected={elasticAgentPlatform}
-                    onChange={(id: string) =>
-                      setElasticAgentPlatform(id as typeof elasticAgentPlatform)
-                    }
-                  />
-                  <EuiSpacer size="m" />
-                  <EuiSkeletonRectangle
-                    isLoading={
-                      installShipperSetupStatus === FETCH_STATUS.LOADING
-                    }
-                    contentAriaLabel="Command to install elastic agent"
-                    width="100%"
-                    height={80}
-                    borderRadius="s"
-                  >
-                    <EuiCodeBlock language="bash" isCopyable>
-                      {getInstallShipperCommand({
-                        elasticAgentPlatform,
-                        apiKeyEncoded,
-                        apiEndpoint: installShipperSetup?.apiEndpoint,
-                        scriptDownloadUrl:
-                          installShipperSetup?.scriptDownloadUrl,
-                      })}
-                    </EuiCodeBlock>
-                  </EuiSkeletonRectangle>
-                </>
+              label: i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.linux',
+                { defaultMessage: 'Linux' }
               ),
+              id: 'linux-tar',
             },
             {
-              title: 'Configure the agent',
-              status:
-                yamlConfigStatus === FETCH_STATUS.LOADING
-                  ? 'loading'
-                  : 'incomplete',
+              label: i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.macOS',
+                { defaultMessage: 'MacOS' }
+              ),
+              id: 'macos',
+            },
+            {
+              label: i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.windows',
+                { defaultMessage: 'Windows' }
+              ),
+              id: 'windows',
+              disableSteps: true,
               children: (
-                <>
-                  <EuiText color="subdued">
-                    <p>
-                      Copy the config below to the elastic agent.yml on the host
-                      where the Elastic Agent is installed.
-                    </p>
-                  </EuiText>
-                  <EuiSpacer size="m" />
-                  <EuiSkeletonRectangle
-                    isLoading={yamlConfigStatus === FETCH_STATUS.LOADING}
-                    contentAriaLabel="Elastic agent yaml configuration"
-                    width="100%"
-                    height={300}
-                    borderRadius="s"
-                  >
-                    <EuiCodeBlock language="yaml" isCopyable>
-                      {yamlConfig}
-                    </EuiCodeBlock>
-                  </EuiSkeletonRectangle>
-                  <EuiSpacer size="m" />
-                  <EuiButton
-                    iconType="download"
-                    color="primary"
-                    href={`data:application/yaml;base64,${Buffer.from(
-                      yamlConfig,
-                      'utf8'
-                    ).toString('base64')}`}
-                    download="elastic-agent.yml"
-                    target="_blank"
-                  >
-                    Download config file
-                  </EuiButton>
-                </>
+                <WindowsInstallStep docsLink="https://www.elastic.co/guide/en/observability/current/logs-stream.html" />
               ),
             },
           ]}
+          onSelectPlatform={(id) => setElasticAgentPlatform(id)}
+          selectedPlatform={elasticAgentPlatform}
+          installAgentCommand={getElasticAgentSetupCommand({
+            elasticAgentPlatform,
+            apiKeyEncoded,
+            apiEndpoint: setup?.apiEndpoint,
+            scriptDownloadUrl: setup?.scriptDownloadUrl,
+            elasticAgentVersion: setup?.elasticAgentVersion,
+            autoDownloadConfig: wizardState.autoDownloadConfig,
+            onboardingId,
+          })}
+          autoDownloadConfig={wizardState.autoDownloadConfig}
+          onToggleAutoDownloadConfig={onAutoDownloadConfig}
+          installAgentStatus={
+            installShipperSetupStatus === FETCH_STATUS.LOADING
+              ? 'loading'
+              : isInstallCompleted
+              ? 'complete'
+              : 'current'
+          }
+          showInstallProgressSteps={isInstallStarted}
+          installProgressSteps={
+            (progressData?.progress ?? {}) as Partial<
+              Record<
+                ProgressStepId,
+                { status: EuiStepStatus; message?: string }
+              >
+            >
+          }
+          configureAgentStatus={
+            yamlConfigStatus === FETCH_STATUS.LOADING
+              ? 'loading'
+              : autoDownloadConfigStatus
+          }
+          configureAgentYaml={yamlConfig}
+          appendedSteps={[getCheckLogsStep()]}
         />
       </StepPanelContent>
-      <StepPanelFooter
-        items={[
-          <EuiButton color="ghost" fill onClick={onBack}>
-            Back
-          </EuiButton>,
-          <EuiButton color="primary" fill onClick={onContinue}>
-            Continue
-          </EuiButton>,
-        ]}
-      />
+      <EuiHorizontalRule />
+      <TroubleshootingLink />
     </StepPanel>
   );
 }
 
-function getInstallShipperCommand({
-  elasticAgentPlatform,
-  apiKeyEncoded = '$API_KEY',
-  apiEndpoint = '$API_ENDPOINT',
-  scriptDownloadUrl = '$SCRIPT_DOWNLOAD_URL',
-}: {
-  elasticAgentPlatform: ElasticAgentPlatform;
-  apiKeyEncoded: string | undefined;
-  apiEndpoint: string | undefined;
-  scriptDownloadUrl: string | undefined;
-}) {
-  const setupScriptFilename = 'standalone_agent_setup.sh';
-  const PLATFORM_COMMAND: Record<ElasticAgentPlatform, string> = {
-    'linux-tar': oneLine`
-      curl ${scriptDownloadUrl} -o ${setupScriptFilename} &&
-      sudo bash ${setupScriptFilename} ${apiKeyEncoded} ${apiEndpoint}
-    `,
-    macos: oneLine`
-      curl -O https://elastic.co/agent-setup.sh &&
-      sudo bash agent-setup.sh -- service.name=my-service --url=https://elasticsearch:8220 --enrollment-token=SRSc2ozWUItWXNuWE5oZzdERFU6anJtY0FIzhSRGlzeTJYcUF5UklfUQ==
-    `,
-    windows: oneLine`
-      curl -O https://elastic.co/agent-setup.sh &&
-      sudo bash agent-setup.sh -- service.name=my-service --url=https://elasticsearch:8220 --enrollment-token=SRSc2ozWUItWXNuWE5oZzdERFU6anJtY0FIzhSRGlzeTJYcUF5UklfUQ==
-    `,
-  };
-  return PLATFORM_COMMAND[elasticAgentPlatform];
+type WizardState = ReturnType<ReturnType<typeof useWizard>['getState']>;
+function hasAlreadySavedFlow({ apiKeyEncoded, onboardingId }: WizardState) {
+  return Boolean(apiKeyEncoded && onboardingId);
 }
 
-function oneLine(parts: TemplateStringsArray, ...args: string[]) {
-  const str = flatten(zip(parts, args)).join('');
-  return str.replace(/\s+/g, ' ').trim();
-}
+const CHECK_LOGS_LABELS = {
+  incomplete: i18n.translate(
+    'xpack.observability_onboarding.installElasticAgent.progress.logsIngest.incompleteTitle',
+    { defaultMessage: 'Ship logs to Elastic Observability' }
+  ),
+  loading: i18n.translate(
+    'xpack.observability_onboarding.installElasticAgent.progress.logsIngest.loadingTitle',
+    { defaultMessage: 'Waiting for Logs to be shipped...' }
+  ),
+  completed: i18n.translate(
+    'xpack.observability_onboarding.installElasticAgent.progress.logsIngest.completedTitle',
+    { defaultMessage: 'Logs are being shipped!' }
+  ),
+};

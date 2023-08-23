@@ -23,7 +23,7 @@ import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
 import type { UnifiedSearchPublicPluginStart } from '../types';
 
-interface StatefulSearchBarDeps {
+export interface StatefulSearchBarDeps {
   core: CoreStart;
   data: DataPublicPluginStart;
   storage: IStorageWrapper;
@@ -227,7 +227,11 @@ export function createSearchBar({
             filters={filters}
             query={query}
             onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
-            onRefreshChange={defaultOnRefreshChange(data.query, props.onRefreshChange)}
+            onRefreshChange={
+              !props.isAutoRefreshDisabled
+                ? defaultOnRefreshChange(data.query, props.onRefreshChange)
+                : undefined
+            }
             savedQuery={savedQuery}
             onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
             onRefresh={props.onRefresh}
@@ -237,6 +241,7 @@ export function createSearchBar({
             iconType={props.iconType}
             nonKqlMode={props.nonKqlMode}
             customSubmitButton={props.customSubmitButton}
+            dataViewPickerOverride={props.dataViewPickerOverride}
             isClearable={props.isClearable}
             placeholder={props.placeholder}
             {...overrideDefaultBehaviors(props)}
@@ -247,6 +252,7 @@ export function createSearchBar({
             isScreenshotMode={isScreenshotMode}
             dataTestSubj={props.dataTestSubj}
             filtersForSuggestions={props.filtersForSuggestions}
+            prependFilterBar={props.prependFilterBar}
           />
         </core.i18n.Context>
       </KibanaContextProvider>

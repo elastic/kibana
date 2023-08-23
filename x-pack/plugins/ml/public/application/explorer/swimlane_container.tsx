@@ -18,6 +18,7 @@ import {
   BrushEndListener,
   Chart,
   ElementClickListener,
+  CustomTooltip,
   Heatmap,
   HeatmapBrushEvent,
   HeatmapElementEvent,
@@ -27,8 +28,9 @@ import {
   Position,
   ScaleType,
   Settings,
-  TooltipSettings,
+  TooltipProps,
   TooltipValue,
+  Tooltip,
 } from '@elastic/charts';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
@@ -39,6 +41,7 @@ import {
   ML_ANOMALY_THRESHOLD,
   ML_SEVERITY_COLORS,
 } from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { useIsDarkTheme } from '@kbn/ml-kibana-theme';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
@@ -46,7 +49,6 @@ import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
 import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';
 import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
-import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { Y_AXIS_LABEL_PADDING, Y_AXIS_LABEL_WIDTH } from './swimlane_annotation_container';
@@ -80,7 +82,7 @@ export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
  * Provides a custom tooltip for the anomaly swim lane chart.
  */
 const SwimLaneTooltip =
-  (fieldName?: string): FC<{ values: TooltipValue[] }> =>
+  (fieldName?: string): CustomTooltip =>
   ({ values }) => {
     const tooltipData: TooltipValue[] = [];
 
@@ -242,6 +244,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   const isPaginationVisible =
     (showSwimlane || isLoading) &&
     swimlaneLimit !== undefined &&
+    swimlaneLimit > (perPage ?? 5) &&
     onPaginationChange &&
     fromPage &&
     perPage;
@@ -367,7 +370,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     [swimlaneType, swimlaneData?.fieldName, swimlaneData?.interval, onCellsSelection]
   ) as ElementClickListener;
 
-  const tooltipOptions: TooltipSettings = useMemo(
+  const tooltipOptions = useMemo<TooltipProps>(
     () => ({
       placement: 'auto',
       fallbackPlacements: ['left'],
@@ -438,6 +441,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                 >
                   {showSwimlane && !isLoading && (
                     <Chart className={'mlSwimLaneContainer'} ref={chartRef}>
+                      <Tooltip {...tooltipOptions} />
                       <Settings
                         // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                         theme={themeOverrides}
@@ -446,7 +450,6 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                         showLegend={showLegend}
                         legendPosition={Position.Top}
                         xDomain={xDomain}
-                        tooltip={tooltipOptions}
                         debugState={window._echDebugStateFlag ?? false}
                         onBrushEnd={onBrushEnd as BrushEndListener}
                       />

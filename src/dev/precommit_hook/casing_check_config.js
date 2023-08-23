@@ -30,6 +30,7 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/plugins/cases/docs/**/*',
   'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
   'x-pack/plugins/fleet/cypress/packages/*.zip',
+  '**/apm-diagnostics-*.json',
   '**/.*',
   '**/__mocks__/**/*',
   'x-pack/docs/**/*',
@@ -43,6 +44,7 @@ export const IGNORE_FILE_GLOBS = [
   'packages/kbn-test/jest-preset.js',
   'packages/kbn-test/*/jest-preset.js',
   'test/package/Vagrantfile',
+  'x-pack/plugins/security_solution/scripts/endpoint/endpoint_agent_runner/Vagrantfile',
   '**/test/**/fixtures/**/*',
 
   // Required to match the name in the docs.elastic.dev repo.

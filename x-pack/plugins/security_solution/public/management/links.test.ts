@@ -19,10 +19,7 @@ import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/
 import { licenseService as _licenseService } from '../common/hooks/use_license';
 import type { LicenseService } from '../../common/license';
 import { createLicenseServiceMock } from '../../common/license/mocks';
-import type { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
-import type { DeepPartial } from '@kbn/utility-types';
-import { merge } from 'lodash';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 jest.mock('../common/hooks/use_license');
@@ -48,21 +45,17 @@ describe('links', () => {
     links: links.links?.filter((link) => !excludedLinks.includes(link.id)),
   });
 
-  const getPlugins = (
-    roles: string[],
-    fleetAuthzOverrides: DeepPartial<FleetAuthz> = {},
-    noUserAuthz: boolean = false
-  ): StartPlugins => {
+  const getPlugins = (noUserAuthz: boolean = false): StartPlugins => {
     return {
       security: {
         authc: {
           getCurrentUser: noUserAuthz
-            ? jest.fn().mockReturnValue('')
-            : jest.fn().mockReturnValue({ roles }),
+            ? jest.fn().mockReturnValue(undefined)
+            : jest.fn().mockReturnValue([]),
         },
       },
       fleet: {
-        authz: merge(createFleetAuthzMock(), fleetAuthzOverrides),
+        authz: createFleetAuthzMock(),
       },
     } as unknown as StartPlugins;
   };
@@ -86,15 +79,12 @@ describe('links', () => {
   it('should return all links for user with all sub-feature privileges', async () => {
     (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
 
-    const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
+    const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
     expect(filteredLinks).toEqual(links);
   });
 
   it('should not return any endpoint management link for user with all sub-feature privileges when no user authz', async () => {
-    const filteredLinks = await getManagementFilteredLinks(
-      coreMockStarted,
-      getPlugins([], {}, true)
-    );
+    const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins(true));
     expect(filteredLinks).toEqual(
       getLinksWithout(
         SecurityPageName.blocklist,
@@ -113,144 +103,88 @@ describe('links', () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({
           canReadActionsLogManagement: false,
+          canDeleteHostIsolationExceptions: false,
         })
       );
       fakeHttpServices.get.mockResolvedValue({ total: 0 });
 
-      const filteredLinks = await getManagementFilteredLinks(
-        coreMockStarted,
-        getPlugins(['superuser'])
-      );
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.responseActionsHistory));
     });
   });
 
   describe('Host Isolation Exception', () => {
-    it('should NOT return HIE if `canReadHostIsolationExceptions` is false', async () => {
+    it('should return HIE if user has access permission (licensed)', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
-        getEndpointAuthzInitialStateMock({ canReadHostIsolationExceptions: false })
+        getEndpointAuthzInitialStateMock({ canAccessHostIsolationExceptions: true })
       );
 
-      const filteredLinks = await getManagementFilteredLinks(
-        coreMockStarted,
-        getPlugins(['superuser'])
-      );
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
 
-      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.hostIsolationExceptions));
+      expect(filteredLinks).toEqual(links);
+      expect(fakeHttpServices.get).not.toHaveBeenCalled();
     });
 
-    it('should NOT return HIE if license is lower than Enterprise and NO HIE entries exist', async () => {
+    it('should NOT return HIE if the user has no HIE permission', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
-        getEndpointAuthzInitialStateMock({ canReadHostIsolationExceptions: false })
+        getEndpointAuthzInitialStateMock({
+          canAccessHostIsolationExceptions: false,
+          canReadHostIsolationExceptions: false,
+        })
+      );
+
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
+
+      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.hostIsolationExceptions));
+      expect(fakeHttpServices.get).not.toHaveBeenCalled();
+    });
+
+    it('should NOT return HIE if user has read permission (no license) and NO HIE entries exist', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canAccessHostIsolationExceptions: false,
+          canReadHostIsolationExceptions: true,
+        })
       );
 
       fakeHttpServices.get.mockResolvedValue({ total: 0 });
-      licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
-      ExperimentalFeaturesService.init({
-        experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: true },
-      });
 
-      const filteredLinks = await getManagementFilteredLinks(
-        coreMockStarted,
-        getPlugins([], {
-          packagePrivileges: {
-            endpoint: {
-              actions: {
-                readHostIsolationExceptions: {
-                  executePackageAction: true,
-                },
-              },
-            },
-          },
-        })
-      );
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
 
+      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.hostIsolationExceptions));
       expect(fakeHttpServices.get).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
         query: expect.objectContaining({
           list_id: [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id],
         }),
       });
-      expect(calculateEndpointAuthz as jest.Mock).toHaveBeenLastCalledWith(
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        false
-      );
-      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.hostIsolationExceptions));
     });
 
-    it('should return HIE if license is lower than Enterprise, but HIE entries exist', async () => {
+    it('should return HIE if user has read permission (no license) but HIE entries exist', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
-        getEndpointAuthzInitialStateMock({ canReadHostIsolationExceptions: true })
+        getEndpointAuthzInitialStateMock({
+          canAccessHostIsolationExceptions: false,
+          canReadHostIsolationExceptions: true,
+        })
       );
 
       fakeHttpServices.get.mockResolvedValue({ total: 100 });
-      licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
-      ExperimentalFeaturesService.init({
-        experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: true },
-      });
 
-      const filteredLinks = await getManagementFilteredLinks(
-        coreMockStarted,
-        getPlugins([], {
-          packagePrivileges: {
-            endpoint: {
-              actions: {
-                readHostIsolationExceptions: {
-                  executePackageAction: true,
-                },
-              },
-            },
-          },
-        })
-      );
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
 
+      expect(filteredLinks).toEqual(links);
       expect(fakeHttpServices.get).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
         query: expect.objectContaining({
           list_id: [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id],
         }),
       });
-      expect(calculateEndpointAuthz as jest.Mock).toHaveBeenLastCalledWith(
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        true
-      );
-      expect(filteredLinks).toEqual(getLinksWithout());
     });
   });
 
-  // this can be removed after removing endpointRbacEnabled feature flag
-  describe('without endpointRbacEnabled', () => {
-    beforeAll(() => {
-      ExperimentalFeaturesService.init({
-        experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: false },
-      });
-    });
-
-    it('shows Trusted Applications for non-superuser, too', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
-
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
-
-      expect(filteredLinks).toEqual(links);
-    });
-  });
-
-  // this can be the default after removing endpointRbacEnabled feature flag
-  describe('with endpointRbacEnabled', () => {
-    beforeAll(() => {
-      ExperimentalFeaturesService.init({
-        experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: true },
-      });
-    });
-
+  describe('RBAC checks', () => {
     it('should return all links for user with all sub-feature privileges', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
 
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
 
       expect(filteredLinks).toEqual(links);
     });
@@ -262,7 +196,7 @@ describe('links', () => {
         })
       );
 
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
 
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.trustedApps));
     });
@@ -274,7 +208,7 @@ describe('links', () => {
         })
       );
 
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
 
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.eventFilters));
     });
@@ -286,7 +220,7 @@ describe('links', () => {
         })
       );
 
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
 
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.blocklist));
     });
@@ -298,7 +232,7 @@ describe('links', () => {
         })
       );
 
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
 
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.policies));
     });
@@ -311,10 +245,7 @@ describe('links', () => {
           canReadEndpointList: false,
         })
       );
-      const filteredLinks = await getManagementFilteredLinks(
-        coreMockStarted,
-        getPlugins(['superuser'])
-      );
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.endpoints));
     });
   });

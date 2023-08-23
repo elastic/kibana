@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CONNECTORS_INDEX } from '../..';
 
+import { isConfigEntry } from '../../../common/connectors/is_category_entry';
 import {
   ConnectorConfiguration,
   ConnectorDocument,
@@ -33,15 +34,16 @@ export const updateConnectorConfiguration = async (
         ? ConnectorStatus.CONFIGURED
         : connector.status;
     const updatedConfig = Object.keys(connector.configuration)
-      .map((key) =>
-        connector.configuration[key]
+      .map((key) => {
+        const configEntry = connector.configuration[key];
+        return isConfigEntry(configEntry)
           ? {
-              ...connector.configuration[key]!, // ugly but needed because typescript refuses to believe this is defined
+              ...configEntry, // ugly but needed because typescript refuses to believe this is defined
               key,
-              value: configuration[key] ?? connector.configuration[key]?.value ?? '',
+              value: configuration[key] ?? configEntry.value,
             }
-          : undefined
-      )
+          : undefined;
+      })
       .filter(isNotNullish)
       .reduce((prev: ConnectorConfiguration, curr) => {
         const { key, ...config } = curr;

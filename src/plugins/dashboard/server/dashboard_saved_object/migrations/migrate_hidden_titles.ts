@@ -12,8 +12,8 @@ import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 import {
   convertSavedDashboardPanelToPanelState,
   convertPanelStateToSavedDashboardPanel,
-  SavedDashboardPanel,
 } from '../../../common';
+import { SavedDashboardPanel } from '../../../common/content_management';
 
 /**
  * Before 7.10, hidden panel titles were stored as a blank string on the title attribute. In 7.10, this was replaced

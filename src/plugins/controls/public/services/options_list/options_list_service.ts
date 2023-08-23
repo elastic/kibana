@@ -50,6 +50,7 @@ class OptionsListService implements ControlsOptionsListService {
       searchString,
       runPastTimeout,
       selectedOptions,
+      searchTechnique,
       field: { name: fieldName },
       dataView: { title: dataViewTitle },
     } = request;
@@ -60,6 +61,7 @@ class OptionsListService implements ControlsOptionsListService {
       JSON.stringify(filters),
       JSON.stringify(query),
       JSON.stringify(sort),
+      searchTechnique,
       runPastTimeout,
       dataViewTitle,
       searchString,
@@ -149,6 +151,9 @@ export type OptionsListServiceFactory = KibanaPluginServiceFactory<
   OptionsListServiceRequiredServices
 >;
 
-export const optionsListServiceFactory: OptionsListServiceFactory = (core, requiredServices) => {
-  return new OptionsListService(core.coreStart, requiredServices);
+export const optionsListServiceFactory: OptionsListServiceFactory = (
+  startParams,
+  requiredServices
+) => {
+  return new OptionsListService(startParams.coreStart, requiredServices);
 };

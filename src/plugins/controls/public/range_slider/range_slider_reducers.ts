@@ -16,8 +16,6 @@ import { RangeSliderReduxState } from './types';
 import { RangeValue } from '../../common/range_slider/types';
 
 export const getDefaultComponentState = (): RangeSliderReduxState['componentState'] => ({
-  min: '',
-  max: '',
   isInvalid: false,
 });
 
@@ -51,10 +49,10 @@ export const rangeSliderReducers = {
   },
   setMinMax: (
     state: WritableDraft<RangeSliderReduxState>,
-    action: PayloadAction<{ min: string; max: string }>
+    action: PayloadAction<{ min?: number; max?: number }>
   ) => {
-    state.componentState.min = action.payload.min;
-    state.componentState.max = action.payload.max;
+    if (action.payload.min !== undefined) state.componentState.min = Math.floor(action.payload.min);
+    if (action.payload.max !== undefined) state.componentState.max = Math.ceil(action.payload.max);
   },
   publishFilters: (
     state: WritableDraft<RangeSliderReduxState>,

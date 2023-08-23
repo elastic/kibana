@@ -9,6 +9,7 @@ import type {
   FlameElementEvent,
   HeatmapElementEvent,
   MetricElementEvent,
+  PartialTheme,
   PartitionElementEvent,
   Theme,
   WordCloudElementEvent,
@@ -74,6 +75,7 @@ export const getTabs = ({
   setSelectedTabId,
   stats,
   theme,
+  baseTheme,
 }: {
   addSuccessToast: (toast: { title: string }) => void;
   addToNewCaseDisabled: boolean;
@@ -102,7 +104,8 @@ export const getTabs = ({
   patternDocsCount: number;
   setSelectedTabId: (tabId: string) => void;
   stats: Record<string, IndicesStatsIndicesStats> | null;
-  theme: Theme;
+  theme?: PartialTheme;
+  baseTheme: Theme;
 }) => [
   {
     content: (
@@ -123,6 +126,7 @@ export const getTabs = ({
         setSelectedTabId={setSelectedTabId}
         sizeInBytes={getSizeInBytes({ indexName, stats })}
         theme={theme}
+        baseTheme={baseTheme}
       />
     ),
     id: SUMMARY_TAB_ID,

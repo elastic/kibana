@@ -8,74 +8,56 @@
 import {
   EuiAccordion,
   EuiButtonIcon,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { isEmpty, omit } from 'lodash/fp';
+import React, { useCallback } from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
-import { SYSTEM_PROMPT_CONTEXT_NON_I18N } from '../../../content/prompts/system/translations';
-import type { PromptContext } from '../../prompt_context/types';
+import { DataAnonymizationEditor } from '../../../data_anonymization_editor';
+import type { PromptContext, SelectedPromptContext } from '../../prompt_context/types';
 import * as i18n from './translations';
-
-const PromptContextContainer = styled.div`
-  max-width: 60vw;
-  overflow-x: auto;
-`;
 
 export interface Props {
   isNewConversation: boolean;
   promptContexts: Record<string, PromptContext>;
-  selectedPromptContextIds: string[];
-  setSelectedPromptContextIds: React.Dispatch<React.SetStateAction<string[]>>;
+  selectedPromptContexts: Record<string, SelectedPromptContext>;
+  setSelectedPromptContexts: React.Dispatch<
+    React.SetStateAction<Record<string, SelectedPromptContext>>
+  >;
 }
+
+export const EditorContainer = styled.div<{
+  $accordionState: 'closed' | 'open';
+}>`
+  ${({ $accordionState }) => ($accordionState === 'closed' ? 'height: 0px;' : '')}
+  ${({ $accordionState }) => ($accordionState === 'closed' ? 'overflow: hidden;' : '')}
+  ${({ $accordionState }) => ($accordionState === 'closed' ? 'position: absolute;' : '')}
+`;
 
 const SelectedPromptContextsComponent: React.FC<Props> = ({
   isNewConversation,
   promptContexts,
-  selectedPromptContextIds,
-  setSelectedPromptContextIds,
+  selectedPromptContexts,
+  setSelectedPromptContexts,
 }) => {
-  const selectedPromptContexts = useMemo(
-    () => selectedPromptContextIds.map((id) => promptContexts[id]),
-    [promptContexts, selectedPromptContextIds]
-  );
+  const [accordionState, setAccordionState] = React.useState<'closed' | 'open'>('closed');
 
-  const [accordionContent, setAccordionContent] = useState<Record<string, string>>({});
+  const onToggle = useCallback(
+    () => setAccordionState((prev) => (prev === 'open' ? 'closed' : 'open')),
+    []
+  );
 
   const unselectPromptContext = useCallback(
     (unselectedId: string) => {
-      setSelectedPromptContextIds((prev) => prev.filter((id) => id !== unselectedId));
+      setSelectedPromptContexts((prev) => omit(unselectedId, prev));
     },
-    [setSelectedPromptContextIds]
+    [setSelectedPromptContexts]
   );
-
-  useEffect(() => {
-    const abortController = new AbortController();
-
-    const fetchAccordionContent = async () => {
-      const newAccordionContent = await Promise.all(
-        selectedPromptContexts.map(async ({ getPromptContext, id }) => ({
-          [id]: await getPromptContext(),
-        }))
-      );
-
-      if (!abortController.signal.aborted) {
-        setAccordionContent(newAccordionContent.reduce((acc, curr) => ({ ...acc, ...curr }), {}));
-      }
-    };
-
-    fetchAccordionContent();
-
-    return () => {
-      abortController.abort();
-    };
-  }, [selectedPromptContexts]);
 
   if (isEmpty(promptContexts)) {
     return null;
@@ -83,39 +65,41 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
 
   return (
     <EuiFlexGroup data-test-subj="selectedPromptContexts" direction="column" gutterSize="none">
-      {selectedPromptContexts.map(({ description, id }) => (
-        <EuiFlexItem data-test-subj={`selectedPromptContext-${id}`} grow={false} key={id}>
-          {isNewConversation || selectedPromptContexts.length > 1 ? (
-            <EuiSpacer data-test-subj="spacer" />
-          ) : null}
-          <EuiAccordion
-            buttonContent={description}
-            extraAction={
-              <EuiToolTip content={i18n.REMOVE_CONTEXT}>
-                <EuiButtonIcon
-                  aria-label={i18n.REMOVE_CONTEXT}
-                  data-test-subj={`removePromptContext-${id}`}
-                  iconType="cross"
-                  onClick={() => unselectPromptContext(id)}
+      {Object.keys(selectedPromptContexts)
+        .sort()
+        .map((id) => (
+          <EuiFlexItem data-test-subj={`selectedPromptContext-${id}`} grow={false} key={id}>
+            {isNewConversation || Object.keys(selectedPromptContexts).length > 1 ? (
+              <EuiSpacer data-test-subj="spacer" />
+            ) : null}
+            <EuiAccordion
+              buttonContent={promptContexts[id]?.description}
+              forceState={accordionState}
+              extraAction={
+                <EuiToolTip content={i18n.REMOVE_CONTEXT}>
+                  <EuiButtonIcon
+                    aria-label={i18n.REMOVE_CONTEXT}
+                    data-test-subj={`removePromptContext-${id}`}
+                    iconType="cross"
+                    onClick={() => unselectPromptContext(id)}
+                  />
+                </EuiToolTip>
+              }
+              id={id}
+              onToggle={onToggle}
+              paddingSize="s"
+            >
+              <EditorContainer $accordionState={accordionState}>
+                <DataAnonymizationEditor
+                  selectedPromptContext={selectedPromptContexts[id]}
+                  setSelectedPromptContexts={setSelectedPromptContexts}
                 />
-              </EuiToolTip>
-            }
-            id={id}
-            paddingSize="s"
-          >
-            <PromptContextContainer>
-              <EuiCodeBlock data-test-subj="promptCodeBlock" isCopyable>
-                {id != null && accordionContent[id] != null
-                  ? SYSTEM_PROMPT_CONTEXT_NON_I18N(accordionContent[id])
-                  : ''}
-              </EuiCodeBlock>
-            </PromptContextContainer>
-          </EuiAccordion>
-        </EuiFlexItem>
-      ))}
+              </EditorContainer>
+            </EuiAccordion>
+          </EuiFlexItem>
+        ))}
     </EuiFlexGroup>
   );
 };
 
-SelectedPromptContextsComponent.displayName = 'SelectedPromptContextsComponent';
 export const SelectedPromptContexts = React.memo(SelectedPromptContextsComponent);

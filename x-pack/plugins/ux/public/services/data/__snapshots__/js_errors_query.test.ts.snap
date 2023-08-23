@@ -77,11 +77,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "service.language.name": "javascript",
-            },
-          },
-          Object {
             "terms": Object {
               "processor.event": Array [
                 "error",

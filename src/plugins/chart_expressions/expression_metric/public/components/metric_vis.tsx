@@ -8,7 +8,6 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import {
   Chart,
@@ -31,35 +30,39 @@ import type {
   RenderMode,
 } from '@kbn/expressions-plugin/common';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
-import { FORMATS_UI_SETTINGS, type SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
+import {
+  FieldFormatConvertFunction,
+  SerializedFieldFormat,
+} from '@kbn/field-formats-plugin/common';
 import { CUSTOM_PALETTE } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useResizeObserver, useEuiScrollBar, EuiIcon } from '@elastic/eui';
-import { AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
+import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { VisParams } from '../../common';
-import {
-  getPaletteService,
-  getThemeService,
-  getFormatService,
-  getUiSettingsService,
-} from '../services';
-import { getCurrencyCode } from './currency_codes';
+import { getPaletteService, getThemeService, getFormatService } from '../services';
 import { getDataBoundsForPalette } from '../utils';
 
 export const defaultColor = euiThemeVars.euiColorLightestShade;
 
-function getFormatId(serializedFieldFormat: SerializedFieldFormat | undefined): string | undefined {
-  if (serializedFieldFormat?.id === 'suffix') {
-    return `${serializedFieldFormat.params?.id || ''}`;
+function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undefined) {
+  const formatId = serializedFieldFormat?.id || 'number';
+  if (formatId === 'duration' && !serializedFieldFormat?.params?.formatOverride) {
+    return {
+      ...serializedFieldFormat,
+      params: {
+        // by default use the compact precise format
+        outputFormat: 'humanizePrecise',
+        outputPrecision: 1,
+        useShortSuffix: true,
+        // but if user configured something else, use it
+        ...serializedFieldFormat!.params,
+      },
+    };
   }
-  if (/bitd/.test(`${serializedFieldFormat?.params?.pattern || ''}`)) {
-    return 'bit';
-  }
-  return serializedFieldFormat?.id;
+  return serializedFieldFormat ?? { id: formatId };
 }
 
 const getMetricFormatter = (
@@ -67,78 +70,8 @@ const getMetricFormatter = (
   columns: Datatable['columns']
 ) => {
   const serializedFieldFormat = getFormatByAccessor(accessor, columns);
-  const formatId = getFormatId(serializedFieldFormat) || 'number';
-
-  if (
-    !['number', 'currency', 'percent', 'bytes', 'bit', 'duration', 'string', 'null'].includes(
-      formatId
-    )
-  ) {
-    throw new Error(
-      i18n.translate('expressionMetricVis.errors.unsupportedColumnFormat', {
-        defaultMessage: 'Metric visualization expression - Unsupported column format: "{id}"',
-        values: {
-          id: formatId,
-        },
-      })
-    );
-  }
-
-  // this formats are coming when formula is empty
-  if (formatId === 'string') {
-    return getFormatService().deserialize(serializedFieldFormat).getConverterFor('text');
-  }
-
-  if (formatId === 'duration') {
-    const formatter = getFormatService().deserialize({
-      ...serializedFieldFormat,
-      params: {
-        ...serializedFieldFormat!.params,
-        outputFormat: 'humanizePrecise',
-        outputPrecision: 1,
-        useShortSuffix: true,
-      },
-    });
-    return formatter.getConverterFor('text');
-  }
-
-  const uiSettings = getUiSettingsService();
-
-  const locale = uiSettings.get(FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE) || 'en';
-
-  const intlOptions: Intl.NumberFormatOptions = {
-    maximumFractionDigits: 2,
-  };
-
-  if (['number', 'currency', 'percent'].includes(formatId)) {
-    intlOptions.notation = 'compact';
-  }
-
-  if (formatId === 'currency') {
-    const currentNumeralLang = numeral.language();
-    numeral.language(locale);
-
-    const {
-      currency: { symbol: currencySymbol },
-      // @ts-expect-error
-    } = numeral.languageData();
-
-    // restore previous value
-    numeral.language(currentNumeralLang);
-
-    intlOptions.currency = getCurrencyCode(locale, currencySymbol);
-    intlOptions.style = 'currency';
-  }
-
-  if (formatId === 'percent') {
-    intlOptions.style = 'percent';
-  }
-
-  return ['bit', 'bytes'].includes(formatId)
-    ? (rawValue: number) => {
-        return numeral(rawValue).format(`0,0[.]00 ${formatId === 'bytes' ? 'b' : 'bitd'}`);
-      }
-    : new Intl.NumberFormat(locale, intlOptions).format;
+  const enhancedFieldFormat = enhanceFieldFormat(serializedFieldFormat);
+  return getFormatService().deserialize(enhancedFieldFormat).getConverterFor('text');
 };
 
 const getColor = (
@@ -185,7 +118,7 @@ export interface MetricVisComponentProps {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderMode: RenderMode;
   filterable: boolean;
-  overrides?: AllowedSettingsOverrides;
+  overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
 }
 
 export const MetricVis = ({
@@ -197,6 +130,25 @@ export const MetricVis = ({
   filterable,
   overrides,
 }: MetricVisComponentProps) => {
+  const chartTheme = getThemeService().useChartsTheme();
+  const onRenderChange = useCallback<RenderChangeListener>(
+    (isRendered) => {
+      if (isRendered) {
+        // this requestAnimationFrame call is a temporary fix for https://github.com/elastic/elastic-charts/issues/2124
+        window.requestAnimationFrame(() => {
+          renderComplete();
+        });
+      }
+    },
+    [renderComplete]
+  );
+
+  const [scrollChildHeight, setScrollChildHeight] = useState<string>('100%');
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollDimensions = useResizeObserver(scrollContainerRef.current);
+
+  const baseTheme = getThemeService().useChartsBaseTheme();
+
   const primaryMetricColumn = getColumnByAccessor(config.dimensions.metric, data.columns)!;
   const formatPrimaryMetric = getMetricFormatter(config.dimensions.metric, data.columns);
 
@@ -295,26 +247,36 @@ export const MetricVis = ({
   });
 
   if (config.metric.minTiles) {
-    while (metricConfigs.length < config.metric.minTiles) metricConfigs.push(undefined);
+    while (metricConfigs.length < config.metric.minTiles) {
+      metricConfigs.push(undefined);
+    }
   }
 
-  const grid: MetricSpec['data'] = [];
   const {
     metric: { maxCols },
   } = config;
+  const numRows = metricConfigs.length / maxCols;
+
+  const minHeight = chartTheme.metric?.minHeight ?? baseTheme.metric.minHeight;
+
+  useEffect(() => {
+    const minimumRequiredVerticalSpace = minHeight * numRows;
+    setScrollChildHeight(
+      (scrollDimensions.height ?? -Infinity) > minimumRequiredVerticalSpace
+        ? '100%'
+        : `${minimumRequiredVerticalSpace}px`
+    );
+  }, [numRows, minHeight, scrollDimensions.height]);
+
+  const { theme: settingsThemeOverrides = {}, ...settingsOverrides } = getOverridesFor(
+    overrides,
+    'settings'
+  ) as Partial<SettingsProps>;
+
+  const grid: MetricSpec['data'] = [];
   for (let i = 0; i < metricConfigs.length; i += maxCols) {
     grid.push(metricConfigs.slice(i, i + maxCols));
   }
-
-  const chartTheme = getThemeService().useChartsTheme();
-  const onRenderChange = useCallback<RenderChangeListener>(
-    (isRendered) => {
-      if (isRendered) {
-        renderComplete();
-      }
-    },
-    [renderComplete]
-  );
 
   let pixelHeight;
   let pixelWidth;
@@ -324,28 +286,6 @@ export const MetricVis = ({
     pixelHeight = grid.length * maxTileSideLength;
     pixelWidth = grid[0]?.length * maxTileSideLength;
   }
-
-  const [scrollChildHeight, setScrollChildHeight] = useState<string>('100%');
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const scrollDimensions = useResizeObserver(scrollContainerRef.current);
-
-  const baseTheme = getThemeService().useChartsBaseTheme();
-
-  const minHeight = chartTheme.metric?.minHeight ?? baseTheme.metric.minHeight;
-
-  useEffect(() => {
-    const minimumRequiredVerticalSpace = minHeight * grid.length;
-    setScrollChildHeight(
-      (scrollDimensions.height ?? -Infinity) > minimumRequiredVerticalSpace
-        ? '100%'
-        : `${minimumRequiredVerticalSpace}px`
-    );
-  }, [grid.length, minHeight, scrollDimensions.height]);
-
-  const { theme: settingsThemeOverrides = {}, ...settingsOverrides } = getOverridesFor(
-    overrides,
-    'settings'
-  ) as Partial<SettingsProps>;
 
   return (
     <div
@@ -364,7 +304,7 @@ export const MetricVis = ({
           height: ${scrollChildHeight};
         `}
       >
-        <Chart>
+        <Chart {...getOverridesFor(overrides, 'chart')}>
           <Settings
             theme={[
               {
@@ -384,12 +324,11 @@ export const MetricVis = ({
             onElementClick={
               filterable
                 ? (events) => {
+                    const colRef = breakdownByColumn ?? primaryMetricColumn;
+                    const rowLength = grid[0].length;
                     events.forEach((event) => {
                       if (isMetricElementEvent(event)) {
-                        const colIdx = breakdownByColumn
-                          ? data.columns.findIndex((col) => col === breakdownByColumn)
-                          : data.columns.findIndex((col) => col === primaryMetricColumn);
-                        const rowLength = grid[0].length;
+                        const colIdx = data.columns.findIndex((col) => col === colRef);
                         fireEvent(
                           buildFilterEvent(
                             event.rowIndex * rowLength + event.columnIndex,

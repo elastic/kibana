@@ -269,7 +269,14 @@ describe('policy details: ', () => {
               },
               policy: {
                 value: {
-                  meta: { license: '', cloud: false },
+                  meta: {
+                    license: '',
+                    cloud: false,
+                    license_uid: '',
+                    cluster_name: '',
+                    cluster_uuid: '',
+                    serverless: false,
+                  },
                   windows: {
                     events: {
                       credential_access: true,
@@ -283,7 +290,11 @@ describe('policy details: ', () => {
                     },
                     malware: { mode: 'prevent', blocklist: true },
                     memory_protection: { mode: 'off', supported: false },
-                    behavior_protection: { mode: 'off', supported: false },
+                    behavior_protection: {
+                      mode: 'off',
+                      supported: false,
+                      reputation_service: false,
+                    },
                     ransomware: { mode: 'off', supported: false },
                     attack_surface_reduction: {
                       credential_hardening: {
@@ -316,7 +327,11 @@ describe('policy details: ', () => {
                   mac: {
                     events: { process: true, file: true, network: true },
                     malware: { mode: 'prevent', blocklist: true },
-                    behavior_protection: { mode: 'off', supported: false },
+                    behavior_protection: {
+                      mode: 'off',
+                      supported: false,
+                      reputation_service: false,
+                    },
                     memory_protection: { mode: 'off', supported: false },
                     popup: {
                       malware: {
@@ -348,7 +363,11 @@ describe('policy details: ', () => {
                     },
                     logging: { file: 'info' },
                     malware: { mode: 'prevent', blocklist: true },
-                    behavior_protection: { mode: 'off', supported: false },
+                    behavior_protection: {
+                      mode: 'off',
+                      supported: false,
+                      reputation_service: false,
+                    },
                     memory_protection: { mode: 'off', supported: false },
                     popup: {
                       malware: {

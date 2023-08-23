@@ -36,6 +36,16 @@ export const mockGetFieldsData = (field: string): string[] => {
 export const mockContextValue: LeftPanelContext = {
   eventId: 'eventId',
   indexName: 'index',
-  getFieldsData: mockGetFieldsData,
+  scopeId: 'scopeId',
+  browserFields: null,
   dataFormattedForFieldBrowser: null,
+  getFieldsData: mockGetFieldsData,
+  searchHit: {
+    _id: 'testId',
+    _index: 'testIndex',
+  },
+  dataAsNestedObject: {
+    _id: 'testId',
+  },
+  investigationFields: [],
 };

@@ -7,6 +7,7 @@
 
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ProjectSwitcher, ProjectSwitcherKibanaProvider } from '@kbn/serverless-project-switcher';
 import { ProjectType } from '@kbn/serverless-types';
@@ -54,6 +55,7 @@ export class ServerlessPlugin
       const { currentType } = developer.projectSwitcher;
 
       core.chrome.navControls.registerRight({
+        order: 500,
         mount: (target) => this.mountProjectSwitcher(target, core, currentType),
       });
     }
@@ -61,12 +63,20 @@ export class ServerlessPlugin
     core.chrome.setChromeStyle('project');
     management.setIsSidebarEnabled(false);
 
+    // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
+    const { project } = core.chrome as InternalChromeStart;
+    if (dependencies.cloud.projectsUrl) {
+      project.setProjectsUrl(dependencies.cloud.projectsUrl);
+    }
+
     return {
-      // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
       setSideNavComponent: (sideNavigationComponent) =>
-        (core.chrome as InternalChromeStart).project.setSideNavComponent(sideNavigationComponent),
-      setNavigation: (projectNavigation) =>
-        (core.chrome as InternalChromeStart).project.setNavigation(projectNavigation),
+        project.setSideNavComponent(sideNavigationComponent),
+      setNavigation: (projectNavigation) => project.setNavigation(projectNavigation),
+      setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
+      setProjectHome: (homeHref: string) => project.setHome(homeHref),
+      getActiveNavigationNodes$: () =>
+        (core.chrome as InternalChromeStart).project.getActiveNavigationNodes$(),
     };
   }
 
@@ -78,11 +88,13 @@ export class ServerlessPlugin
     currentProjectType: ProjectType
   ) {
     ReactDOM.render(
-      <KibanaThemeProvider theme$={coreStart.theme.theme$}>
-        <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
-          <ProjectSwitcher {...{ currentProjectType }} />
-        </ProjectSwitcherKibanaProvider>
-      </KibanaThemeProvider>,
+      <I18nProvider>
+        <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+          <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
+            <ProjectSwitcher {...{ currentProjectType }} />
+          </ProjectSwitcherKibanaProvider>
+        </KibanaThemeProvider>
+      </I18nProvider>,
       targetDomElement
     );
 

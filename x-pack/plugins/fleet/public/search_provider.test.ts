@@ -32,7 +32,7 @@ const testResponse: GetPackagesResponse['items'] = [
     name: 'test',
     path: 'test',
     release: 'experimental',
-    savedObject: {} as any,
+    installationInfo: {} as any,
     status: 'installed',
     title: 'test',
     version: 'test',

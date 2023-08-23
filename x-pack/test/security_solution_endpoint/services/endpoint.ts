@@ -139,7 +139,11 @@ export class EndpointTestResources extends FtrService {
           alertsPerHost,
           enableFleetIntegration,
           undefined,
-          CurrentKibanaVersionDocGenerator
+          CurrentKibanaVersionDocGenerator,
+          undefined,
+          undefined,
+          undefined,
+          this.log
         );
 
     if (waitUntilTransformed && customIndexFn) {
@@ -272,7 +276,7 @@ export class EndpointTestResources extends FtrService {
   async installOrUpgradeEndpointFleetPackage(): ReturnType<
     typeof installOrUpgradeEndpointFleetPackage
   > {
-    return installOrUpgradeEndpointFleetPackage(this.kbnClient);
+    return installOrUpgradeEndpointFleetPackage(this.kbnClient, this.log);
   }
 
   /**
@@ -283,6 +287,7 @@ export class EndpointTestResources extends FtrService {
     const metadata = this.supertest
       .get(HOST_METADATA_GET_ROUTE.replace('{id}', endpointAgentId))
       .set('kbn-xsrf', 'true')
+      .set('Elastic-Api-Version', '2023-10-31')
       .send()
       .expect(200)
       .then((response) => response.body as HostInfo);

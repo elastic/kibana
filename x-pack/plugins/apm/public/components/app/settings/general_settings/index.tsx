@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { LazyField } from '@kbn/advanced-settings-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   apmLabsButton,
   apmServiceGroupMaxNumberOfServices,
@@ -19,6 +18,8 @@ import {
   apmAWSLambdaRequestCostPerMillion,
   apmEnableServiceMetrics,
   apmEnableContinuousRollups,
+  enableAgentExplorerView,
+  apmEnableProfilingIntegration,
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React from 'react';
@@ -36,10 +37,12 @@ const apmSettingsKeys = [
   apmAWSLambdaRequestCostPerMillion,
   apmEnableServiceMetrics,
   apmEnableContinuousRollups,
+  enableAgentExplorerView,
+  apmEnableProfilingIntegration,
 ];
 
 export function GeneralSettings() {
-  const { docLinks, notifications, application } = useApmPluginContext().core;
+  const { docLinks, notifications } = useApmPluginContext().core;
   const {
     handleFieldChange,
     settingsEditableConfig,
@@ -71,33 +74,6 @@ export function GeneralSettings() {
 
   return (
     <>
-      <EuiCallOut
-        title={i18n.translate('xpack.apm.apmSettings.callOutTitle', {
-          defaultMessage: 'Looking for all settings?',
-        })}
-        iconType="search"
-      >
-        <p>
-          <FormattedMessage
-            id="xpack.apm.apmSettings.kibanaLink"
-            defaultMessage="The full list of APM options can be found in {link}"
-            values={{
-              link: (
-                <EuiLink
-                  data-test-subj="apmGeneralSettingsKibanaAdvancedSettingsLink"
-                  href={application.getUrlForApp('management', {
-                    path: `/kibana/settings?query=category:(observability)`,
-                  })}
-                >
-                  {i18n.translate('xpack.apm.apmSettings.kibanaLink.label', {
-                    defaultMessage: 'Kibana advanced settings.',
-                  })}
-                </EuiLink>
-              ),
-            }}
-          />
-        </p>
-      </EuiCallOut>
       <EuiSpacer />
       {apmSettingsKeys.map((settingKey) => {
         const editableConfig = settingsEditableConfig[settingKey];

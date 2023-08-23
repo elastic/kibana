@@ -60,11 +60,13 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
     if (
       (await doAnyChangesMatch([
+        /^src\/plugins\/controls/,
         /^packages\/kbn-securitysolution-.*/,
         /^x-pack\/plugins\/lists/,
         /^x-pack\/plugins\/security_solution/,
         /^x-pack\/plugins\/timelines/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
+        /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/alerts_table/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
         /^x-pack\/test\/defend_workflows_cypress/,
         /^x-pack\/test\/security_solution_cypress/,
@@ -73,10 +75,8 @@ const uploadPipeline = (pipelineContent: string | object) => {
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution.yml'));
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution_investigations.yml')
-      );
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/defend_workflows.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/osquery_cypress.yml'));
     }
 
     if (
@@ -152,6 +152,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
       ])
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime_plugin.yml'));
     }
 
     if (await doAnyChangesMatch([/^x-pack\/plugins\/ux/, /^x-pack\/plugins\/exploratory_view/])) {
@@ -164,6 +165,10 @@ const uploadPipeline = (pipelineContent: string | object) => {
       GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_cloud.yml'));
+    }
+
+    if (GITHUB_PR_LABELS.includes('ci:build-serverless-image')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/artifacts_container_image.yml'));
     }
 
     if (
@@ -192,7 +197,8 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
-    uploadPipeline(pipeline.join('\n'));
+    // remove duplicated steps
+    uploadPipeline([...new Set(pipeline)].join('\n'));
   } catch (ex) {
     console.error('PR pipeline generation error', ex.message);
     process.exit(1);

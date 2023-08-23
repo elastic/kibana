@@ -25,13 +25,14 @@ import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/pu
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
-import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { AppStatus, type AppUpdater, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import type { MapsStartApi, MapsSetupApi } from '@kbn/maps-plugin/public';
 import {
@@ -46,12 +47,14 @@ import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/publi
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { registerManagementSection } from './application/management';
-import { MlLocatorDefinition, MlLocator } from './locator';
+import { MlLocatorDefinition, type MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
 import { registerFeature } from './register_feature';
 import { isFullLicense, isMlEnabled } from '../common/license';
 import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
+import type { MlCapabilities } from './shared';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -72,6 +75,8 @@ export interface MlStartDependencies {
   security: SecurityPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
+  contentManagement: ContentManagementPublicStart;
+  presentationUtil: PresentationUtilPluginStart;
 }
 
 export interface MlSetupDependencies {
@@ -141,6 +146,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             cases: pluginsStart.cases,
             savedObjectsManagement: pluginsStart.savedObjectsManagement,
             savedSearch: pluginsStart.savedSearch,
+            contentManagement: pluginsStart.contentManagement,
+            presentationUtil: pluginsStart.presentationUtil,
           },
           params
         );
@@ -195,7 +202,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       }
 
       if (mlEnabled) {
-        registerSearchLinks(this.appUpdater$, fullLicense);
+        registerSearchLinks(this.appUpdater$, fullLicense, capabilities.ml as MlCapabilities);
 
         if (fullLicense) {
           registerEmbeddables(pluginsSetup.embeddable, core);

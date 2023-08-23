@@ -119,7 +119,6 @@ export class RuleRegistryPlugin
     core.getStartServices().then(([_, depsStart]) => {
       const ruleRegistrySearchStrategy = ruleRegistrySearchStrategyProvider(
         depsStart.data,
-        this.ruleDataService!,
         depsStart.alerting,
         logger,
         plugins.security,
@@ -163,6 +162,7 @@ export class RuleRegistryPlugin
       },
       securityPluginSetup: security,
       ruleDataService,
+      getRuleType: plugins.alerting.getType,
     });
 
     const getRacClientWithRequest = (request: KibanaRequest) => {

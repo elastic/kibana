@@ -23,7 +23,7 @@ import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 
 import { siemMock } from '../../../../mocks';
 import { createMockConfig } from '../../../../config.mock';
-import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
+import { detectionEngineHealthClientMock, ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { requestMock } from './request';
 import { internalFrameworkRequest } from '../../../framework';
 
@@ -34,6 +34,7 @@ import type {
 
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
+import { riskEngineDataClientMock } from '../../../risk_engine/__mocks__/risk_engine_data_client_mock';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -58,7 +59,10 @@ export const createMockClients = () => {
 
     config: createMockConfig(),
     appClient: siemMock.createClient(),
+
+    detectionEngineHealthClient: detectionEngineHealthClientMock.create(),
     ruleExecutionLog: ruleExecutionLogMock.forRoutes.create(),
+    riskEngineDataClient: riskEngineDataClientMock.create(),
   };
 };
 
@@ -109,6 +113,7 @@ const createSecuritySolutionRequestContextMock = (
 
   return {
     core,
+    getServerBasePath: jest.fn(() => ''),
     getEndpointAuthz: jest.fn(async () =>
       getEndpointAuthzInitialStateMock(overrides.endpointAuthz)
     ),
@@ -129,12 +134,14 @@ const createSecuritySolutionRequestContextMock = (
     }),
     getSpaceId: jest.fn(() => 'default'),
     getRuleDataService: jest.fn(() => clients.ruleDataService),
+    getDetectionEngineHealthClient: jest.fn(() => clients.detectionEngineHealthClient),
     getRuleExecutionLog: jest.fn(() => clients.ruleExecutionLog),
     getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
     getInternalFleetServices: jest.fn(() => {
       // TODO: Mock EndpointInternalFleetServicesInterface and return the mocked object.
       throw new Error('Not implemented');
     }),
+    getRiskEngineDataClient: jest.fn(() => clients.riskEngineDataClient),
   };
 };
 

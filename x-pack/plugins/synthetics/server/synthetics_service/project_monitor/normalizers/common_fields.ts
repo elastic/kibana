@@ -8,13 +8,13 @@
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
+import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { formatLocation } from '../../../../common/utils/location_formatter';
 import {
   BrowserFields,
   ConfigKey,
   CommonFields,
   DataStream,
-  PrivateLocation,
   Locations,
   ProjectMonitor,
   ScheduleUnit,
@@ -26,7 +26,7 @@ import { formatKibanaNamespace } from '../../formatters/private_formatters';
 
 export interface NormalizedProjectProps {
   locations: Locations;
-  privateLocations: PrivateLocation[];
+  privateLocations: PrivateLocationAttributes[];
   monitor: ProjectMonitor;
   projectId: string;
   namespace: string;
@@ -88,20 +88,33 @@ export const getNormalizeCommonFields = ({
       ? JSON.stringify(monitor.params)
       : defaultFields[ConfigKey.PARAMS],
     // picking out keys specifically, so users can't add arbitrary fields
-    [ConfigKey.ALERT_CONFIG]: monitor.alert
-      ? {
-          ...defaultFields[ConfigKey.ALERT_CONFIG],
-          status: {
-            ...defaultFields[ConfigKey.ALERT_CONFIG]?.status,
-            enabled:
-              monitor.alert?.status?.enabled ??
-              defaultFields[ConfigKey.ALERT_CONFIG]?.status?.enabled ??
-              true,
-          },
-        }
-      : defaultFields[ConfigKey.ALERT_CONFIG],
+    [ConfigKey.ALERT_CONFIG]: getAlertConfig(monitor),
   };
   return { normalizedFields, errors };
+};
+
+const getAlertConfig = (monitor: ProjectMonitor) => {
+  const defaultFields = DEFAULT_COMMON_FIELDS;
+
+  return monitor.alert
+    ? {
+        ...defaultFields[ConfigKey.ALERT_CONFIG],
+        status: {
+          ...defaultFields[ConfigKey.ALERT_CONFIG]?.status,
+          enabled:
+            monitor.alert?.status?.enabled ??
+            defaultFields[ConfigKey.ALERT_CONFIG]?.status?.enabled ??
+            true,
+        },
+        tls: {
+          ...defaultFields[ConfigKey.ALERT_CONFIG]?.tls,
+          enabled:
+            monitor.alert?.tls?.enabled ??
+            defaultFields[ConfigKey.ALERT_CONFIG]?.tls?.enabled ??
+            true,
+        },
+      }
+    : defaultFields[ConfigKey.ALERT_CONFIG];
 };
 
 export const getCustomHeartbeatId = (
@@ -118,7 +131,7 @@ export const getMonitorLocations = ({
   monitor,
 }: {
   monitor: ProjectMonitor;
-  privateLocations: PrivateLocation[];
+  privateLocations: PrivateLocationAttributes[];
   publicLocations: Locations;
 }) => {
   const publicLocs =

@@ -7,26 +7,24 @@
 import React from 'react';
 import { stringify } from 'querystring';
 import { encode } from '@kbn/rison';
-import { css } from '@emotion/react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export interface LinkToApmServicesProps {
-  hostName: string;
+  assetName: string;
   apmField: string;
 }
 
-export const LinkToApmServices = ({ hostName, apmField }: LinkToApmServicesProps) => {
+export const LinkToApmServices = ({ assetName, apmField }: LinkToApmServicesProps) => {
   const { services } = useKibanaContextForPlugin();
   const { http } = services;
-  const { euiTheme } = useEuiTheme();
 
   const queryString = new URLSearchParams(
     encode(
       stringify({
-        kuery: `${apmField}:"${hostName}"`,
+        kuery: `${apmField}:"${assetName}"`,
       })
     )
   );
@@ -35,18 +33,17 @@ export const LinkToApmServices = ({ hostName, apmField }: LinkToApmServicesProps
 
   return (
     <RedirectAppLinks coreStart={services}>
-      <EuiLink href={linkToApmServices} data-test-subj="hostsView-flyout-apm-services-link">
-        <EuiIcon
-          type="popout"
-          css={css`
-            margin-right: ${euiTheme.size.xs};
-          `}
-        />
+      <EuiButtonEmpty
+        data-test-subj="infraAssetDetailsViewAPMServicesButton"
+        size="xs"
+        flush="both"
+        href={linkToApmServices}
+      >
         <FormattedMessage
-          id="xpack.infra.hostsViewPage.flyout.apmServicesLinkLabel"
-          defaultMessage="APM Services"
+          id="xpack.infra.hostsViewPage.flyout.viewApmServicesLinkLabel"
+          defaultMessage="View APM Services"
         />
-      </EuiLink>
+      </EuiButtonEmpty>
     </RedirectAppLinks>
   );
 };

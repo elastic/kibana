@@ -7,8 +7,6 @@
 
 /* eslint-disable no-continue */
 
-/* eslint-disable react/display-name */
-
 import React, { memo, useMemo, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,7 +30,6 @@ import * as eventModel from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
 import { PanelLoading } from './panel_loading';
 import { PanelContentError } from './panel_content_error';
-import type { ResolverState } from '../../types';
 import { DescriptiveName } from './descriptive_name';
 import { useLinkProps } from '../use_link_props';
 import type { SafeResolverEvent } from '../../../../common/endpoint/types';
@@ -40,6 +37,7 @@ import { deepObjectEntries } from './deep_object_entries';
 import { useFormattedDate } from './use_formatted_date';
 import * as nodeDataModel from '../../models/node_data';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
+import type { State } from '../../../common/store/types';
 
 const eventDetailRequestError = i18n.translate(
   'xpack.securitySolution.resolver.panel.eventDetail.requestError',
@@ -49,31 +47,40 @@ const eventDetailRequestError = i18n.translate(
 );
 
 export const EventDetail = memo(function EventDetail({
+  id,
   nodeID,
   eventCategory: eventType,
 }: {
+  id: string;
   nodeID: string;
   /** The event type to show in the breadcrumbs */
   eventCategory: string;
 }) {
-  const isEventLoading = useSelector(selectors.isCurrentRelatedEventLoading);
-  const isTreeLoading = useSelector(selectors.isTreeLoading);
-  const processEvent = useSelector((state: ResolverState) =>
-    nodeDataModel.firstEvent(selectors.nodeDataForID(state)(nodeID))
+  const isEventLoading = useSelector((state: State) =>
+    selectors.isCurrentRelatedEventLoading(state.analyzer[id])
   );
-  const nodeStatus = useSelector((state: ResolverState) => selectors.nodeDataStatus(state)(nodeID));
+  const isTreeLoading = useSelector((state: State) => selectors.isTreeLoading(state.analyzer[id]));
+  const processEvent = useSelector((state: State) =>
+    nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(nodeID))
+  );
+  const nodeStatus = useSelector((state: State) =>
+    selectors.nodeDataStatus(state.analyzer[id])(nodeID)
+  );
 
   const isNodeDataLoading = nodeStatus === 'loading';
   const isLoading = isEventLoading || isTreeLoading || isNodeDataLoading;
 
-  const event = useSelector(selectors.currentRelatedEventData);
+  const event = useSelector((state: State) =>
+    selectors.currentRelatedEventData(state.analyzer[id])
+  );
 
   return isLoading ? (
     <StyledPanel hasBorder>
-      <PanelLoading />
+      <PanelLoading id={id} />
     </StyledPanel>
   ) : event ? (
     <EventDetailContents
+      id={id}
       nodeID={nodeID}
       event={event}
       processEvent={processEvent}
@@ -81,7 +88,7 @@ export const EventDetail = memo(function EventDetail({
     />
   ) : (
     <StyledPanel hasBorder>
-      <PanelContentError translatedErrorMessage={eventDetailRequestError} />
+      <PanelContentError id={id} translatedErrorMessage={eventDetailRequestError} />
     </StyledPanel>
   );
 });
@@ -90,12 +97,15 @@ export const EventDetail = memo(function EventDetail({
  * This view presents a detailed view of all the available data for a related event, split and titled by the "section"
  * it appears in the underlying ResolverEvent
  */
+// eslint-disable-next-line react/display-name
 const EventDetailContents = memo(function ({
+  id,
   nodeID,
   event,
   eventType,
   processEvent,
 }: {
+  id: string;
   nodeID: string;
   event: SafeResolverEvent;
   /**
@@ -116,6 +126,7 @@ const EventDetailContents = memo(function ({
   return (
     <StyledPanel hasBorder data-test-subj="resolver:panel:event-detail">
       <EventDetailBreadcrumbs
+        id={id}
         nodeID={nodeID}
         nodeName={nodeName}
         event={event}
@@ -222,37 +233,39 @@ function EventDetailFields({ event }: { event: SafeResolverEvent }) {
 }
 
 function EventDetailBreadcrumbs({
+  id,
   nodeID,
   nodeName,
   event,
   breadcrumbEventCategory,
 }: {
+  id: string;
   nodeID: string;
   nodeName: string | null | undefined;
   event: SafeResolverEvent;
   breadcrumbEventCategory: string;
 }) {
-  const countByCategory = useSelector((state: ResolverState) =>
-    selectors.relatedEventCountOfTypeForNode(state)(nodeID, breadcrumbEventCategory)
+  const countByCategory = useSelector((state: State) =>
+    selectors.relatedEventCountOfTypeForNode(state.analyzer[id])(nodeID, breadcrumbEventCategory)
   );
-  const relatedEventCount: number | undefined = useSelector((state: ResolverState) =>
-    selectors.relatedEventTotalCount(state)(nodeID)
+  const relatedEventCount: number | undefined = useSelector((state: State) =>
+    selectors.relatedEventTotalCount(state.analyzer[id])(nodeID)
   );
-  const nodesLinkNavProps = useLinkProps({
+  const nodesLinkNavProps = useLinkProps(id, {
     panelView: 'nodes',
   });
 
-  const nodeDetailLinkNavProps = useLinkProps({
+  const nodeDetailLinkNavProps = useLinkProps(id, {
     panelView: 'nodeDetail',
     panelParameters: { nodeID },
   });
 
-  const nodeEventsLinkNavProps = useLinkProps({
+  const nodeEventsLinkNavProps = useLinkProps(id, {
     panelView: 'nodeEvents',
     panelParameters: { nodeID },
   });
 
-  const nodeEventsInCategoryLinkNavProps = useLinkProps({
+  const nodeEventsInCategoryLinkNavProps = useLinkProps(id, {
     panelView: 'nodeEventsInCategory',
     panelParameters: { nodeID, eventCategory: breadcrumbEventCategory },
   });
@@ -339,6 +352,7 @@ const StyledFlexTitle = memo(styled('h3')`
   font-size: 1.2em;
 `);
 
+// eslint-disable-next-line react/display-name
 const TitleHr = memo(() => {
   return <EuiHorizontalRule margin="none" size="half" />;
 });

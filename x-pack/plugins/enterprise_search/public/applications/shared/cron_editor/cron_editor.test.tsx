@@ -72,6 +72,20 @@ describe('CronEditor', () => {
         const minuteSelect = findTestSubject(component, 'cronFrequencyYearlyMinuteSelect');
         expect(minuteSelect.props().value).toBe('20');
       });
+
+      it('sets the values of the fields for minute', () => {
+        const component = mountWithI18nProvider(
+          <CronEditor
+            fieldToPreferredValueMap={{}}
+            frequency={'MINUTE'}
+            cronExpression="0 */18 * * * ?"
+            onChange={() => {}}
+          />
+        );
+
+        const monthSelect = findTestSubject(component, 'cronFrequencyMinutelyMinuteSelect');
+        expect(monthSelect.prop('value')).toBe('*/18');
+      });
     });
 
     describe('onChange', () => {

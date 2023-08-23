@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const globalNav = getService('globalNav');
-  const PageObjects = getPageObjects(['newsfeed']);
+  const PageObjects = getPageObjects(['newsfeed', 'common']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/135251
   describe.skip('Newsfeed', () => {

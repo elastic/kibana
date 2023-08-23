@@ -5,12 +5,22 @@
  * 2.0.
  */
 
-import { HttpStart, HttpHandler } from '@kbn/core/public';
-import { Parameters } from '@storybook/react';
+import type { HttpStart, HttpHandler } from '@kbn/core/public';
+import type { Parameters } from '@storybook/react';
 import { INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH } from '../../../../../common/http_api/infra_ml';
-import { metadataHttpResponse, type MetadataResponseMocks } from './fixtures/metadata';
-import { processesHttpResponse, type ProcessesHttpMocks } from './fixtures/processes';
-import { anomaliesHttpResponse, type AnomaliesHttpMocks } from './fixtures/anomalies';
+import {
+  alertsSummaryHttpResponse,
+  anomaliesHttpResponse,
+  metadataHttpResponse,
+  processesChartHttpResponse,
+  processesHttpResponse,
+  snapshotAPItHttpResponse,
+  type AlertsSummaryHttpMocks,
+  type AnomaliesHttpMocks,
+  type MetadataResponseMocks,
+  type ProcessesHttpMocks,
+  type SnapshotAPIHttpMocks,
+} from './fixtures';
 
 export const getHttp = (params: Parameters): HttpStart => {
   const http = {
@@ -19,15 +29,26 @@ export const getHttp = (params: Parameters): HttpStart => {
         return '';
       },
     },
-
     fetch: (async (path: string) => {
       switch (path) {
-        case '/api/metrics/process_list':
-          return processesHttpResponse[params.mock as ProcessesHttpMocks]();
         case '/api/infra/metadata':
           return metadataHttpResponse[params.mock as MetadataResponseMocks]();
+        case '/api/metrics/process_list':
+          return processesHttpResponse[params.mock as ProcessesHttpMocks]();
+        case '/api/metrics/process_list/chart':
+          return processesChartHttpResponse.default();
+        case '/api/metrics/snapshot':
+          return snapshotAPItHttpResponse[params.mock as SnapshotAPIHttpMocks]();
         case INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH:
           return anomaliesHttpResponse[params.mock as AnomaliesHttpMocks]();
+        default:
+          return Promise.resolve({});
+      }
+    }) as HttpHandler,
+    post: (async (path: string) => {
+      switch (path) {
+        case '/internal/rac/alerts/_alert_summary':
+          return alertsSummaryHttpResponse[params.mock as AlertsSummaryHttpMocks]();
         default:
           return Promise.resolve({});
       }

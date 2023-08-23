@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { useLocation } from 'react-router-dom';
 
@@ -14,6 +14,9 @@ import { useValues } from 'kea';
 import {
   EuiButton,
   EuiCallOut,
+  EuiFacetButton,
+  EuiFacetGroup,
+  EuiFieldSearch,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +24,7 @@ import {
   EuiFormFieldset,
   EuiLink,
   EuiSpacer,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -51,14 +55,37 @@ import { ConnectorCheckable } from './connector_checkable';
 
 export const SelectConnector: React.FC = () => {
   const { search } = useLocation();
+  const { isCloud } = useValues(KibanaLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const hasNativeAccess = isCloud;
   const { service_type: serviceType } = parseQueryParams(search);
+  const [useNativeFilter, setUseNativeFilter] = useState(false);
+  const [useNonGAFilter, setUseNonGAFilter] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const filteredConnectors = useMemo(() => {
+    const nativeConnectors = hasNativeAccess
+      ? CONNECTORS.filter((connector) => connector.isNative).sort((a, b) =>
+          a.name.localeCompare(b.name)
+        )
+      : [];
+    const nonNativeConnectors = hasNativeAccess
+      ? CONNECTORS.filter((connector) => !connector.isNative).sort((a, b) =>
+          a.name.localeCompare(b.name)
+        )
+      : CONNECTORS.sort((a, b) => a.name.localeCompare(b.name));
+    const connectors = [...nativeConnectors, ...nonNativeConnectors];
+    return connectors
+      .filter((connector) =>
+        useNonGAFilter ? true : !connector.isBeta && !connector.isTechPreview
+      )
+      .filter((connector) => (useNativeFilter ? connector.isNative : true))
+      .filter((connector) =>
+        searchTerm ? connector.name.toLowerCase().includes(searchTerm.toLowerCase()) : true
+      );
+  }, [useNonGAFilter, useNativeFilter, searchTerm]);
   const [selectedConnector, setSelectedConnector] = useState<string | null>(
     Array.isArray(serviceType) ? serviceType[0] : serviceType ?? null
   );
-  const { isCloud } = useValues(KibanaLogic);
-  const { hasPlatinumLicense } = useValues(LicensingLogic);
-
-  const hasNativeAccess = isCloud || hasPlatinumLicense;
 
   return (
     <EnterpriseSearchContentPageTemplate
@@ -145,52 +172,106 @@ export const SelectConnector: React.FC = () => {
             ),
           }}
         >
-          <EuiSpacer size="s" />
-          <EuiFlexGrid columns={3}>
-            {CONNECTORS.map((connector) => (
-              <EuiFlexItem key={connector.serviceType} grow>
-                <ConnectorCheckable
-                  icon={connector.icon}
-                  isBeta={connector.isBeta}
-                  isTechPreview={Boolean(connector.isTechPreview)}
-                  showNativeBadge={connector.isNative && hasNativeAccess}
-                  name={connector.name}
-                  serviceType={connector.serviceType}
-                  onChange={() => {
-                    setSelectedConnector(connector.serviceType);
-                  }}
-                  documentationUrl={connector.docsUrl}
-                  checked={selectedConnector === connector.serviceType}
-                />
+          <EuiFlexGroup>
+            {/* Only facet is for native connectors, so only show facets if we can show native connectors */}
+            {hasNativeAccess && (
+              <EuiFlexItem grow={false}>
+                <EuiFacetGroup>
+                  <EuiFacetButton
+                    quantity={CONNECTORS.length}
+                    isSelected={!useNativeFilter}
+                    onClick={() => setUseNativeFilter(!useNativeFilter)}
+                  >
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.indices.selectConnector.allConnectorsLabel',
+                      { defaultMessage: 'All connectors' }
+                    )}
+                  </EuiFacetButton>
+                  <EuiFacetButton
+                    quantity={CONNECTORS.filter((connector) => connector.isNative).length}
+                    isSelected={useNativeFilter}
+                    onClick={() => setUseNativeFilter(!useNativeFilter)}
+                  >
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.indices.selectConnector.nativeLabel',
+                      { defaultMessage: 'Native connectors' }
+                    )}
+                  </EuiFacetButton>
+                </EuiFacetGroup>
               </EuiFlexItem>
-            ))}
-          </EuiFlexGrid>
-          <EuiSpacer />
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            )}
             <EuiFlexItem>
-              <span>
-                <EuiButton
-                  data-telemetry-id="entSearchContent-connector-selectConnector-backButton"
-                  color="primary"
-                  onClick={() => KibanaLogic.values.navigateToUrl(NEW_INDEX_PATH)}
-                >
-                  {BACK_BUTTON_LABEL}
-                </EuiButton>
-              </span>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <span>
-                <EuiButton
-                  data-test-subj="entSearchContent-connector-selectConnector-selectAndConfigure"
-                  data-telemetry-id="entSearchContent-connector-selectConnector-selectAndConfigure"
-                  disabled={selectedConnector === null}
-                  fill
-                  color="primary"
-                  type="submit"
-                >
-                  {CONTINUE_BUTTON_LABEL}
-                </EuiButton>
-              </span>
+              <EuiFieldSearch
+                aria-label={i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.selectConnector.search.ariaLabel',
+                  { defaultMessage: 'Search through connectors' }
+                )}
+                isClearable
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder={i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.selectConnector.searchPlaceholder',
+                  { defaultMessage: 'Search' }
+                )}
+                value={searchTerm}
+              />
+              <EuiSpacer size="s" />
+              <EuiSwitch
+                checked={useNonGAFilter}
+                label={i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.selectConnector.showNonGALabel',
+                  { defaultMessage: 'Display Beta and Tech Preview connectors' }
+                )}
+                onChange={(e) => setUseNonGAFilter(e.target.checked)}
+              />
+              <EuiSpacer size="s" />
+              <EuiFlexGrid columns={3}>
+                {filteredConnectors.map((connector) => (
+                  <EuiFlexItem key={connector.serviceType} grow>
+                    <ConnectorCheckable
+                      disabled={connector.platinumOnly && !hasPlatinumLicense}
+                      icon={connector.icon}
+                      isBeta={connector.isBeta}
+                      isTechPreview={Boolean(connector.isTechPreview)}
+                      showNativeBadge={connector.isNative && hasNativeAccess}
+                      name={connector.name}
+                      serviceType={connector.serviceType}
+                      onChange={() => {
+                        setSelectedConnector(connector.serviceType);
+                      }}
+                      documentationUrl={connector.docsUrl}
+                      checked={selectedConnector === connector.serviceType}
+                    />
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGrid>
+              <EuiSpacer />
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem>
+                  <span>
+                    <EuiButton
+                      data-telemetry-id="entSearchContent-connector-selectConnector-backButton"
+                      color="primary"
+                      onClick={() => KibanaLogic.values.navigateToUrl(NEW_INDEX_PATH)}
+                    >
+                      {BACK_BUTTON_LABEL}
+                    </EuiButton>
+                  </span>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <span>
+                    <EuiButton
+                      data-test-subj="entSearchContent-connector-selectConnector-selectAndConfigure"
+                      data-telemetry-id="entSearchContent-connector-selectConnector-selectAndConfigure"
+                      disabled={selectedConnector === null}
+                      fill
+                      color="primary"
+                      type="submit"
+                    >
+                      {CONTINUE_BUTTON_LABEL}
+                    </EuiButton>
+                  </span>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFormFieldset>

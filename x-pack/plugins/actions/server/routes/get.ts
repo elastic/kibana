@@ -21,6 +21,7 @@ const rewriteBodyRes: RewriteResponseCase<ActionResult> = ({
   isPreconfigured,
   isMissingSecrets,
   isDeprecated,
+  isSystemAction,
   ...res
 }) => ({
   ...res,
@@ -28,6 +29,7 @@ const rewriteBodyRes: RewriteResponseCase<ActionResult> = ({
   is_preconfigured: isPreconfigured,
   is_deprecated: isDeprecated,
   is_missing_secrets: isMissingSecrets,
+  is_system_action: isSystemAction,
 });
 
 export const getActionRoute = (

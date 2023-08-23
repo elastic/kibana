@@ -221,10 +221,10 @@ describe('format_column', () => {
       expect(result.columns[0].meta.params).toEqual({
         id: 'wrapper',
         params: {
+          formatOverride: true,
           wrapperParam: 123,
           id: 'number',
           params: { formatOverride: true, pattern: '0,0.00000' },
-          formatOverride: true,
           pattern: '0,0.00000',
         },
       });
@@ -264,5 +264,127 @@ describe('format_column', () => {
     datatable.columns.push(extraColumn);
     const result = await fn(datatable, { columnId: 'test', format: 'number' });
     expect(result.columns[1]).toEqual(extraColumn);
+  });
+
+  it('does support compact format', async () => {
+    const result = await fn(datatable, {
+      columnId: 'test',
+      format: 'number',
+      compact: true,
+    });
+    expect(result.columns[0].meta).toEqual({
+      type: 'number',
+      params: {
+        id: 'number',
+        params: { pattern: '0,0.00a', formatOverride: true },
+      },
+    });
+  });
+
+  it('does support a Lens custom format', async () => {
+    const result = await fn(datatable, {
+      columnId: 'test',
+      format: 'custom',
+      pattern: '00:00',
+    });
+    expect(result.columns[0].meta).toEqual({
+      type: 'number',
+      params: {
+        id: 'number',
+        params: { pattern: '00:00', formatOverride: true },
+      },
+    });
+  });
+
+  it('does support both decimals and compact format', async () => {
+    const result = await fn(datatable, {
+      columnId: 'test',
+      format: 'number',
+      decimals: 5,
+      compact: true,
+    });
+    expect(result.columns[0].meta).toEqual({
+      type: 'number',
+      params: {
+        id: 'number',
+        params: { pattern: '0,0.00000a', formatOverride: true },
+      },
+    });
+  });
+
+  it("does not apply the custom pattern unless it's a custom format", async () => {
+    const result = await fn(datatable, {
+      columnId: 'test',
+      format: 'number',
+      pattern: '00:00',
+    });
+    expect(result.columns[0].meta).toEqual({
+      type: 'number',
+      params: {
+        id: 'number',
+        params: { pattern: '0,0.00', formatOverride: true },
+      },
+    });
+  });
+
+  it('does translate the duration params into native parameters', async () => {
+    const result = await fn(datatable, {
+      columnId: 'test',
+      format: 'duration',
+      fromUnit: 'seconds',
+      toUnit: 'asHours',
+      compact: true,
+      decimals: 2,
+    });
+
+    expect(result.columns[0].meta).toEqual({
+      type: 'number',
+      params: {
+        id: 'duration',
+        params: {
+          pattern: '',
+          formatOverride: true,
+          inputFormat: 'seconds',
+          outputFormat: 'asHours',
+          outputPrecision: 2,
+          useShortSuffix: true,
+          showSuffix: true,
+          includeSpaceWithSuffix: true,
+        },
+      },
+    });
+  });
+
+  it('should apply custom suffix to duration format when configured', async () => {
+    const result = await fn(datatable, {
+      columnId: 'test',
+      format: 'duration',
+      fromUnit: 'seconds',
+      toUnit: 'asHours',
+      compact: true,
+      decimals: 2,
+      suffix: ' on Earth',
+    });
+    expect(result.columns[0].meta).toEqual({
+      type: 'number',
+      params: {
+        id: 'suffix',
+        params: {
+          suffixString: ' on Earth',
+          id: 'duration',
+          formatOverride: true,
+          params: {
+            pattern: '',
+            formatOverride: true,
+            inputFormat: 'seconds',
+            outputFormat: 'asHours',
+            outputPrecision: 2,
+            useShortSuffix: true,
+            showSuffix: true,
+            includeSpaceWithSuffix: true,
+          },
+        },
+      },
+    });
   });
 });

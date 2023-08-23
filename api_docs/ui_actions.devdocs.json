@@ -172,10 +172,10 @@
             "signature": [
               "(trigger: ",
               {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Trigger",
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.Trigger",
                 "text": "Trigger"
               },
               ") => void"
@@ -193,10 +193,10 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.Trigger",
+                    "pluginId": "@kbn/ui-actions-browser",
+                    "scope": "common",
+                    "docId": "kibKbnUiActionsBrowserPluginApi",
+                    "section": "def-common.Trigger",
                     "text": "Trigger"
                   }
                 ],
@@ -677,6 +677,10 @@
               {
                 "plugin": "data",
                 "path": "src/plugins/data/public/utils/table_inspector_view/components/data_table.tsx"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
               },
               {
                 "plugin": "discover",
@@ -1571,10 +1575,10 @@
             ],
             "signature": [
               {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Trigger",
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.Trigger",
                 "text": "Trigger"
               }
             ],
@@ -1966,7 +1970,7 @@
         "tags": [],
         "label": "RowClickContext",
         "description": [],
-        "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1980,7 +1984,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2002,7 +2006,7 @@
               },
               "; columns?: string[] | undefined; }"
             ],
-            "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2018,7 +2022,7 @@
         "description": [
           "\nThis is a convenience interface used to register a *trigger*.\n\n`Trigger` specifies a named anchor to which `Action` can be attached. When\n`Trigger` is being *called* it creates a `Context` object and passes it to\nthe `execute` method of an `Action`.\n\nMore than one action can be attached to a single trigger, in which case when\ntrigger is *called* it first displays a context menu for user to pick a\nsingle action to execute."
         ],
-        "path": "src/plugins/ui_actions/public/triggers/trigger.ts",
+        "path": "packages/kbn-ui-actions-browser/src/triggers/trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2031,7 +2035,7 @@
             "description": [
               "\nUnique name of the trigger as identified in `ui_actions` plugin trigger registry."
             ],
-            "path": "src/plugins/ui_actions/public/triggers/trigger.ts",
+            "path": "packages/kbn-ui-actions-browser/src/triggers/trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2047,7 +2051,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/triggers/trigger.ts",
+            "path": "packages/kbn-ui-actions-browser/src/triggers/trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2063,7 +2067,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/triggers/trigger.ts",
+            "path": "packages/kbn-ui-actions-browser/src/triggers/trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2239,6 +2243,27 @@
           },
           {
             "parentPluginId": "uiActions",
+            "id": "def-public.VisualizeFieldContext.textBasedColumns",
+            "type": "Array",
+            "tags": [],
+            "label": "textBasedColumns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
             "id": "def-public.VisualizeFieldContext.originatingApp",
             "type": "string",
             "tags": [],
@@ -2372,7 +2397,7 @@
         "signature": [
           "\"CATEGORIZE_FIELD_TRIGGER\""
         ],
-        "path": "src/plugins/ui_actions/public/triggers/categorize_field_trigger.ts",
+        "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2409,7 +2434,7 @@
         "signature": [
           "\"ROW_CLICK_TRIGGER\""
         ],
-        "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2424,7 +2449,7 @@
         "signature": [
           "\"VISUALIZE_FIELD_TRIGGER\""
         ],
-        "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
+        "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2439,7 +2464,7 @@
         "signature": [
           "\"VISUALIZE_GEO_FIELD_TRIGGER\""
         ],
-        "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
+        "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2453,7 +2478,7 @@
         "tags": [],
         "label": "categorizeFieldTrigger",
         "description": [],
-        "path": "src/plugins/ui_actions/public/triggers/categorize_field_trigger.ts",
+        "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2464,7 +2489,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/ui_actions/public/triggers/categorize_field_trigger.ts",
+            "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2475,7 +2500,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "src/plugins/ui_actions/public/triggers/categorize_field_trigger.ts",
+            "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2486,7 +2511,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "src/plugins/ui_actions/public/triggers/categorize_field_trigger.ts",
+            "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2500,7 +2525,7 @@
         "tags": [],
         "label": "rowClickTrigger",
         "description": [],
-        "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2511,7 +2536,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2525,7 +2550,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2539,7 +2564,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2553,7 +2578,7 @@
         "tags": [],
         "label": "visualizeFieldTrigger",
         "description": [],
-        "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
+        "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2564,7 +2589,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
+            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2575,7 +2600,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
+            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2586,7 +2611,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
+            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2600,7 +2625,7 @@
         "tags": [],
         "label": "visualizeGeoFieldTrigger",
         "description": [],
-        "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
+        "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2611,7 +2636,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
+            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2622,7 +2647,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
+            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2633,7 +2658,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
+            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2675,10 +2700,10 @@
         },
         "<Context>; readonly registerTrigger: (trigger: ",
         {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.Trigger",
+          "pluginId": "@kbn/ui-actions-browser",
+          "scope": "common",
+          "docId": "kibKbnUiActionsBrowserPluginApi",
+          "section": "def-common.Trigger",
           "text": "Trigger"
         },
         ") => void; readonly unregisterAction: (actionId: string) => void; }"
@@ -2723,10 +2748,10 @@
         },
         "<Context>; readonly registerTrigger: (trigger: ",
         {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.Trigger",
+          "pluginId": "@kbn/ui-actions-browser",
+          "scope": "common",
+          "docId": "kibKbnUiActionsBrowserPluginApi",
+          "section": "def-common.Trigger",
           "text": "Trigger"
         },
         ") => void; readonly unregisterAction: (actionId: string) => void; readonly getTrigger: (triggerId: string) => ",

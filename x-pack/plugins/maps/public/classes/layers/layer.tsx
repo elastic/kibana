@@ -33,7 +33,7 @@ import {
   Timeslice,
   StyleMetaDescriptor,
 } from '../../../common/descriptor_types';
-import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
+import { ISource, SourceEditorArgs } from '../sources/source';
 import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
 import { LICENSED_FEATURES } from '../../licensed_features';
@@ -66,9 +66,8 @@ export interface ILayer {
   getStyle(): IStyle;
   getStyleForEditing(): IStyle;
   getCurrentStyle(): IStyle;
-  getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
-  isLayerLoading(): boolean;
+  isLayerLoading(zoom: number): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
@@ -126,7 +125,7 @@ export type LayerIcon = {
 };
 
 export interface ILayerArguments {
-  layerDescriptor: LayerDescriptor;
+  layerDescriptor: Partial<LayerDescriptor>;
   source: ISource;
 }
 
@@ -338,11 +337,6 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.query ? this._descriptor.query : null;
   }
 
-  async getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]> {
-    const source = this.getSource();
-    return await source.getImmutableProperties();
-  }
-
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs) {
     return this.getSourceForEditing().renderSourceSettingsEditor(sourceEditorArgs);
   }
@@ -375,7 +369,10 @@ export class AbstractLayer implements ILayer {
     return this._dataRequests.find((dataRequest) => dataRequest.getDataId() === id);
   }
 
-  isLayerLoading(): boolean {
+  isLayerLoading(zoom: number): boolean {
+    if (!this.isVisible() || !this.showAtZoomLevel(zoom)) {
+      return false;
+    }
     const hasOpenDataRequests = this._dataRequests.some((dataRequest) => dataRequest.isLoading());
 
     if (this._isTiled()) {

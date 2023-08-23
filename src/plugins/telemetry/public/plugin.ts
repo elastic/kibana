@@ -16,12 +16,15 @@ import type {
   DocLinksStart,
   HttpSetup,
 } from '@kbn/core/public';
-import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import type {
+  ScreenshotModePluginSetup,
+  ScreenshotModePluginStart,
+} from '@kbn/screenshot-mode-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
 
 import { of } from 'rxjs';
-import { FetchTelemetryConfigRoute } from '../common/routes';
+import { FetchTelemetryConfigRoute, INTERNAL_VERSION } from '../common/routes';
 import type { v2 } from '../common/types';
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
@@ -81,6 +84,10 @@ interface TelemetryPluginSetupDependencies {
   home?: HomePublicPluginSetup;
 }
 
+interface TelemetryPluginStartDependencies {
+  screenshotMode: ScreenshotModePluginStart;
+}
+
 /**
  * Public-exposed configuration
  */
@@ -103,6 +110,8 @@ export interface TelemetryPluginConfig {
   hidePrivacyStatement?: boolean;
   /** Extra labels to add to the telemetry context */
   labels: Record<string, unknown>;
+  /** Whether to use Serverless-specific channels when reporting Snapshot Telemetry */
+  appendServerlessChannelsSuffix: boolean;
 }
 
 function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
@@ -111,7 +120,15 @@ function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
   };
 }
 
-export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
+export class TelemetryPlugin
+  implements
+    Plugin<
+      TelemetryPluginSetup,
+      TelemetryPluginStart,
+      TelemetryPluginSetupDependencies,
+      TelemetryPluginStartDependencies
+    >
+{
   private readonly currentKibanaVersion: string;
   private readonly config: TelemetryPluginConfig;
   private telemetrySender?: TelemetrySender;
@@ -165,7 +182,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {
       await this.refreshConfig(http);
-      analytics.optIn({ global: { enabled: this.telemetryService!.isOptedIn } });
+      analytics.optIn({
+        global: { enabled: this.telemetryService!.isOptedIn && !screenshotMode.isScreenshotMode() },
+      });
     });
 
     if (home && !this.config.hidePrivacyStatement) {
@@ -189,14 +208,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  public start({
-    analytics,
-    http,
-    overlays,
-    theme,
-    application,
-    docLinks,
-  }: CoreStart): TelemetryPluginStart {
+  public start(
+    { analytics, http, overlays, theme, application, docLinks }: CoreStart,
+    { screenshotMode }: TelemetryPluginStartDependencies
+  ): TelemetryPluginStart {
     if (!this.telemetryService) {
       throw Error('Telemetry plugin failed to initialize properly.');
     }
@@ -223,7 +238,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       // Refresh and get telemetry config
       const updatedConfig = await this.refreshConfig(http);
 
-      analytics.optIn({ global: { enabled: this.telemetryService!.isOptedIn } });
+      analytics.optIn({
+        global: { enabled: this.telemetryService!.isOptedIn && !screenshotMode.isScreenshotMode() },
+      });
 
       const telemetryBanner = updatedConfig?.banner;
 
@@ -312,7 +329,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
    */
   private async fetchUpdatedConfig(http: HttpStart | HttpSetup): Promise<TelemetryPluginConfig> {
     const { allowChangingOptInStatus, optIn, sendUsageFrom, telemetryNotifyUserAboutOptInDefault } =
-      await http.get<v2.FetchTelemetryConfigResponse>(FetchTelemetryConfigRoute);
+      await http.get<v2.FetchTelemetryConfigResponse>(FetchTelemetryConfigRoute, INTERNAL_VERSION);
 
     return {
       ...this.config,

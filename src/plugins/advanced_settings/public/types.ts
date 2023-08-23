@@ -10,19 +10,16 @@ import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { ComponentRegistry } from './component_registry';
+import type {
+  SectionRegistrySetup,
+  SectionRegistryStart,
+} from '@kbn/management-settings-section-registry';
 
-export interface AdvancedSettingsSetup {
-  component: ComponentRegistry['setup'];
-}
-export interface AdvancedSettingsStart {
-  component: ComponentRegistry['start'];
-}
+export type AdvancedSettingsSetup = SectionRegistrySetup;
+export type AdvancedSettingsStart = SectionRegistryStart;
 
 export interface AdvancedSettingsPluginSetup {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
-
-export { ComponentRegistry };

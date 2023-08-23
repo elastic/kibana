@@ -11,18 +11,20 @@ import { useApplicationCapabilities, useToasts } from '../../common/lib/kibana';
 import * as i18n from './translations';
 import { casesQueriesKeys } from '../constants';
 import type { ServerError } from '../../types';
+import { useCasesContext } from '../../components/cases_context/use_cases_context';
 
 export function useGetSupportedActionConnectors() {
   const toasts = useToasts();
   const { actions } = useApplicationCapabilities();
+  const { permissions } = useCasesContext();
+
   return useQuery(
     casesQueriesKeys.connectorsList(),
-    async () => {
-      if (!actions.read) {
+    async ({ signal }) => {
+      if (!actions.read || !permissions.connectors) {
         return [];
       }
-      const abortCtrl = new AbortController();
-      return getSupportedActionConnectors({ signal: abortCtrl.signal });
+      return getSupportedActionConnectors({ signal });
     },
     {
       onError: (error: ServerError) => {

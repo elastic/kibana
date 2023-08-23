@@ -18,15 +18,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  CategorizationAnalyzer,
-  FieldExampleCheck,
-} from '../../../../../../../../../common/types/categories';
-import { EditCategorizationAnalyzerFlyout } from '../../../common/edit_categorization_analyzer_flyout';
-import {
+  type CategorizationAnalyzer,
+  type FieldExampleCheck,
+  VALIDATION_RESULT,
   CATEGORY_EXAMPLES_VALIDATION_STATUS,
   VALIDATION_CHECK_DESCRIPTION,
-} from '../../../../../../../../../common/constants/categorization_job';
-import { VALIDATION_RESULT } from '../../../../../../../../../common/types/categories';
+} from '@kbn/ml-category-validator';
+
+import { EditCategorizationAnalyzerFlyout } from '../../../common/edit_categorization_analyzer_flyout';
 
 interface Props {
   validationChecks: FieldExampleCheck[];
@@ -96,9 +95,12 @@ export const ExamplesValidCallout: FC<Props> = ({
 const AnalyzerUsed: FC<{ categorizationAnalyzer: CategorizationAnalyzer }> = ({
   categorizationAnalyzer,
 }) => {
-  let analyzer = '';
+  let analyzer: string | null = null;
 
-  if (categorizationAnalyzer?.tokenizer !== undefined) {
+  if (
+    categorizationAnalyzer?.tokenizer !== undefined &&
+    typeof categorizationAnalyzer.tokenizer === 'string'
+  ) {
     analyzer = categorizationAnalyzer.tokenizer;
   } else if (categorizationAnalyzer?.analyzer !== undefined) {
     analyzer = categorizationAnalyzer.analyzer;
@@ -106,13 +108,15 @@ const AnalyzerUsed: FC<{ categorizationAnalyzer: CategorizationAnalyzer }> = ({
 
   return (
     <>
-      <div>
-        <FormattedMessage
-          id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldAnalyzer"
-          defaultMessage="Analyzer used: {analyzer}"
-          values={{ analyzer }}
-        />
-      </div>
+      {analyzer !== null ? (
+        <div>
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldAnalyzer"
+            defaultMessage="Analyzer used: {analyzer}"
+            values={{ analyzer }}
+          />
+        </div>
+      ) : null}
       <div>
         <EditCategorizationAnalyzerFlyout />
       </div>

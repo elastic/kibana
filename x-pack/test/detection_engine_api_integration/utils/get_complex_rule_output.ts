@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 // TODO: Follow up https://github.com/elastic/kibana/pull/137628 and add an explicit type to this object
 // without using Partial
@@ -102,4 +102,5 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RuleResponse> =
   related_integrations: [],
   required_fields: [],
   setup: '',
+  investigation_fields: [],
 });

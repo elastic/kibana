@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
@@ -45,6 +45,8 @@ import { AgentPolicyDeleteProvider } from '../agent_policy_delete_provider';
 import type { ValidationResults } from '../agent_policy_validation';
 
 import { ExperimentalFeaturesService, policyHasFleetServer } from '../../../../services';
+
+import { policyHasEndpointSecurity as hasElasticDefend } from '../../../../../../../common/services';
 
 import {
   useOutputOptions,
@@ -106,6 +108,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
   const licenseService = useLicense();
   const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
+  const policyHasElasticDefend = useMemo(() => hasElasticDefend(agentPolicy), [agentPolicy]);
 
   return (
     <>
@@ -125,7 +128,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         }
       >
-        {isUninstallCommandFlyoutOpen && (
+        {isUninstallCommandFlyoutOpen && agentPolicy.id && (
           <UninstallCommandFlyout
             target="agent"
             policyId={agentPolicy.id}
@@ -317,27 +320,52 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }
         >
           <EuiSwitch
-            label={i18n.translate('xpack.fleet.agentPolicyForm.tamperingSwitchLabel', {
-              defaultMessage: 'Prevent agent tampering',
-            })}
+            label={
+              <>
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyForm.tamperingSwitchLabel"
+                  defaultMessage="Prevent agent tampering"
+                />{' '}
+                {!policyHasElasticDefend && (
+                  <span data-test-subj="tamperMissingIntegrationTooltip">
+                    <EuiIconTip
+                      type="iInCircle"
+                      color="subdued"
+                      content={i18n.translate(
+                        'xpack.fleet.agentPolicyForm.tamperingSwitchLabel.disabledWarning',
+                        {
+                          defaultMessage:
+                            'Elastic Defend integration is required to enable this feature',
+                        }
+                      )}
+                    />
+                  </span>
+                )}
+              </>
+            }
             checked={agentPolicy.is_protected ?? false}
             onChange={(e) => {
               updateAgentPolicy({ is_protected: e.target.checked });
             }}
+            disabled={!policyHasElasticDefend}
             data-test-subj="tamperProtectionSwitch"
           />
-          <EuiSpacer size="s" />
-          <EuiLink
-            onClick={() => {
-              setIsUninstallCommandFlyoutOpen(true);
-            }}
-            disabled={agentPolicy.is_protected === false}
-            data-test-subj="uninstallCommandLink"
-          >
-            {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
-              defaultMessage: 'Get uninstall command',
-            })}
-          </EuiLink>
+          {agentPolicy.id && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiLink
+                onClick={() => {
+                  setIsUninstallCommandFlyoutOpen(true);
+                }}
+                disabled={!agentPolicy.is_protected || !policyHasElasticDefend}
+                data-test-subj="uninstallCommandLink"
+              >
+                {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
+                  defaultMessage: 'Get uninstall command',
+                })}
+              </EuiLink>
+            </>
+          )}
         </EuiDescribedFormGroup>
       )}
       <EuiDescribedFormGroup

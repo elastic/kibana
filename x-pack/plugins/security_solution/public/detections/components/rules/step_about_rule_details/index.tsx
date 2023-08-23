@@ -28,7 +28,7 @@ import type {
   AboutStepRuleDetails,
 } from '../../../pages/detection_engine/rules/types';
 import * as i18n from './translations';
-import { StepAboutRule } from '../step_about_rule';
+import { StepAboutRuleReadOnly } from '../step_about_rule';
 import { fullHeight } from './styles';
 
 const detailsOption: EuiButtonGroupOptionProps = {
@@ -124,10 +124,9 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                       </VerticalOverflowContent>
                     </VerticalOverflowContainer>
                     <EuiSpacer size="m" />
-                    <StepAboutRule
+                    <StepAboutRuleReadOnly
+                      addPadding={false}
                       descriptionColumns="singleSplit"
-                      isReadOnlyView={true}
-                      isLoading={false}
                       defaultValues={stepData}
                     />
                   </div>

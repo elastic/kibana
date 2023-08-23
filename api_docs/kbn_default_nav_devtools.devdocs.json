@@ -1,0 +1,189 @@
+{
+  "id": "@kbn/default-nav-devtools",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/default-nav-devtools",
+        "id": "def-common.DevToolsNodeDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "DevToolsNodeDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.NodeDefinition",
+            "text": "NodeDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/deeplinks-devtools",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksDevtoolsPluginApi",
+            "section": "def-common.DeepLinkId",
+            "text": "DeepLinkId"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/default-nav-devtools",
+            "scope": "common",
+            "docId": "kibKbnDefaultNavDevtoolsPluginApi",
+            "section": "def-common.NavigationID",
+            "text": "NavigationID"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/default-nav-devtools",
+            "scope": "common",
+            "docId": "kibKbnDefaultNavDevtoolsPluginApi",
+            "section": "def-common.NavigationID",
+            "text": "NavigationID"
+          },
+          "> & { children: NonEmptyArray<",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.NodeDefinition",
+            "text": "NodeDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/deeplinks-devtools",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksDevtoolsPluginApi",
+            "section": "def-common.DeepLinkId",
+            "text": "DeepLinkId"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/default-nav-devtools",
+            "scope": "common",
+            "docId": "kibKbnDefaultNavDevtoolsPluginApi",
+            "section": "def-common.NavigationID",
+            "text": "NavigationID"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/default-nav-devtools",
+            "scope": "common",
+            "docId": "kibKbnDefaultNavDevtoolsPluginApi",
+            "section": "def-common.NavigationID",
+            "text": "NavigationID"
+          },
+          ">>; }"
+        ],
+        "path": "packages/default-nav/devtools/default_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/default-nav-devtools",
+        "id": "def-common.NavigationID",
+        "type": "Type",
+        "tags": [],
+        "label": "NavigationID",
+        "description": [],
+        "signature": [
+          "\"root\" | \"rootNav:devtools\""
+        ],
+        "path": "packages/default-nav/devtools/default_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/default-nav-devtools",
+        "id": "def-common.defaultNavigation",
+        "type": "Object",
+        "tags": [],
+        "label": "defaultNavigation",
+        "description": [],
+        "path": "packages/default-nav/devtools/default_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/default-nav-devtools",
+            "id": "def-common.defaultNavigation.title",
+            "type": "Any",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/default-nav/devtools/default_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/default-nav-devtools",
+            "id": "def-common.defaultNavigation.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"rootNav:devtools\""
+            ],
+            "path": "packages/default-nav/devtools/default_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/default-nav-devtools",
+            "id": "def-common.defaultNavigation.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [],
+            "path": "packages/default-nav/devtools/default_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/default-nav-devtools",
+            "id": "def-common.defaultNavigation.children",
+            "type": "Object",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "[{ id: \"root\"; children: [{ link: \"dev_tools:console\"; }, { link: \"dev_tools:searchprofiler\"; }, { link: \"dev_tools:grokdebugger\"; }, { link: \"dev_tools:painless_lab\"; }]; }]"
+            ],
+            "path": "packages/default-nav/devtools/default_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

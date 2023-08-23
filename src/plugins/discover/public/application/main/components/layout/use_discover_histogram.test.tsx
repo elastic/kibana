@@ -49,8 +49,10 @@ jest.mock('../../../../hooks/use_discover_services', () => {
   };
 });
 
-jest.mock('@kbn/unified-field-list-plugin/public', () => {
-  const originalModule = jest.requireActual('@kbn/unified-field-list-plugin/public');
+jest.mock('@kbn/unified-field-list/src/hooks/use_query_subscriber', () => {
+  const originalModule = jest.requireActual(
+    '@kbn/unified-field-list/src/hooks/use_query_subscriber'
+  );
   return {
     ...originalModule,
     useQuerySubscriber: jest.fn(() => ({
@@ -152,7 +154,7 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.ref(api);
       });
-      expect(api.state$.subscribe).toHaveBeenCalledTimes(3);
+      expect(api.state$.subscribe).toHaveBeenCalledTimes(2);
     });
 
     it('should sync Unified Histogram state with the state container', async () => {
@@ -360,7 +362,10 @@ describe('useDiscoverHistogram', () => {
   describe('refetching', () => {
     it('should call refetch when savedSearchFetch$ is triggered', async () => {
       const savedSearchFetch$ = new Subject<{
-        reset: boolean;
+        options: {
+          reset: boolean;
+          fetchMore: boolean;
+        };
         searchSessionId: string;
       }>();
       const stateContainer = getStateContainer();
@@ -372,14 +377,20 @@ describe('useDiscoverHistogram', () => {
       });
       expect(api.refetch).not.toHaveBeenCalled();
       act(() => {
-        savedSearchFetch$.next({ reset: false, searchSessionId: '1234' });
+        savedSearchFetch$.next({
+          options: { reset: false, fetchMore: false },
+          searchSessionId: '1234',
+        });
       });
       expect(api.refetch).toHaveBeenCalled();
     });
 
     it('should skip the next refetch when hideChart changes from true to false', async () => {
       const savedSearchFetch$ = new Subject<{
-        reset: boolean;
+        options: {
+          reset: boolean;
+          fetchMore: boolean;
+        };
         searchSessionId: string;
       }>();
       const stateContainer = getStateContainer();
@@ -396,9 +407,44 @@ describe('useDiscoverHistogram', () => {
         hook.rerender({ ...initialProps, hideChart: false });
       });
       act(() => {
-        savedSearchFetch$.next({ reset: false, searchSessionId: '1234' });
+        savedSearchFetch$.next({
+          options: { reset: false, fetchMore: false },
+          searchSessionId: '1234',
+        });
       });
       expect(api.refetch).not.toHaveBeenCalled();
+    });
+
+    it('should skip the next refetch when fetching more', async () => {
+      const savedSearchFetch$ = new Subject<{
+        options: {
+          reset: boolean;
+          fetchMore: boolean;
+        };
+        searchSessionId: string;
+      }>();
+      const stateContainer = getStateContainer();
+      stateContainer.dataState.fetch$ = savedSearchFetch$;
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const api = createMockUnifiedHistogramApi();
+      act(() => {
+        hook.result.current.ref(api);
+      });
+      act(() => {
+        savedSearchFetch$.next({
+          options: { reset: false, fetchMore: true },
+          searchSessionId: '1234',
+        });
+      });
+      expect(api.refetch).not.toHaveBeenCalled();
+
+      act(() => {
+        savedSearchFetch$.next({
+          options: { reset: false, fetchMore: false },
+          searchSessionId: '1234',
+        });
+      });
+      expect(api.refetch).toHaveBeenCalled();
     });
   });
 });

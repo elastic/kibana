@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { ComponentStory } from '@storybook/react';
-
-import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
+import React from 'react';
 import {
   HEALTHY_ROLLING_SLO,
   historicalSummaryData,
 } from '../../../data/slo/historical_summary_data';
 import { buildSlo } from '../../../data/slo/slo';
-import { SloSummary as Component, Props } from './slo_summary';
+import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
+import { Props, SloSummary as Component } from './slo_summary';
 
 export default {
   component: Component,
@@ -26,7 +25,8 @@ const Template: ComponentStory<typeof Component> = (props: Props) => <Component 
 
 const defaultProps = {
   slo: buildSlo(),
-  historicalSummary: historicalSummaryData[HEALTHY_ROLLING_SLO],
+  historicalSummary: historicalSummaryData.find((datum) => datum.sloId === HEALTHY_ROLLING_SLO)!
+    .data,
   historicalSummaryLoading: false,
 };
 

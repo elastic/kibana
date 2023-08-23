@@ -272,6 +272,7 @@ _meta:
         {
           transform_id: 'logs-endpoint.metadata_current-default-0.1.0',
           force: true,
+          delete_dest_index: false,
         },
         { ignore: [404] },
       ],
@@ -552,17 +553,7 @@ _meta:
         {
           transform_id: 'endpoint.metadata_current-default-0.1.0',
           force: true,
-        },
-        { ignore: [404] },
-      ],
-    ]);
-
-    // Destination index from previous version using legacy schema should be deleted
-    expect(esClient.transport.request.mock.calls).toEqual([
-      [
-        {
-          method: 'DELETE',
-          path: '/mock-old-destination-index',
+          delete_dest_index: true,
         },
         { ignore: [404] },
       ],
@@ -838,6 +829,7 @@ _meta:
         {
           transform_id: 'logs-endpoint.metadata_current-default-0.1.0',
           force: true,
+          delete_dest_index: false,
         },
         { ignore: [404] },
       ],
@@ -1148,7 +1140,11 @@ _meta:
 
     expect(esClient.transform.deleteTransform.mock.calls).toEqual([
       [
-        { force: true, transform_id: 'logs-endpoint.metadata_current-default-0.2.0' },
+        {
+          force: true,
+          transform_id: 'logs-endpoint.metadata_current-default-0.2.0',
+          delete_dest_index: false,
+        },
         { ignore: [404] },
       ],
     ]);

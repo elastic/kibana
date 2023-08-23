@@ -29,7 +29,14 @@ export type Props = AllowedButtonProps &
 /**
  * A button which opens a popover of additional actions within the toolbar.
  */
-export const ToolbarPopover = ({ type, label, iconType, children, ...popover }: Props) => {
+export const ToolbarPopover = ({
+  type,
+  label,
+  iconType,
+  size = 'm',
+  children,
+  ...popover
+}: Props) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const onButtonClick = () => setIsOpen((status) => !status);
@@ -38,6 +45,7 @@ export const ToolbarPopover = ({ type, label, iconType, children, ...popover }: 
   const button = (
     <ToolbarButton
       onClick={onButtonClick}
+      size={size}
       {...{ type, label, iconType: iconType || 'arrowDown', iconSide: iconType ? 'left' : 'right' }}
     />
   );

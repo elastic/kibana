@@ -38,6 +38,7 @@ export function mockTelemetryService({
     optIn: true,
     banner: true,
     allowChangingOptInStatus: true,
+    appendServerlessChannelsSuffix: false,
     telemetryNotifyUserAboutOptInDefault: true,
     userCanChangeSettings: true,
     labels: {},

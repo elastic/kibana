@@ -82,6 +82,7 @@ export class HasData {
   }): Promise<boolean> =>
     http
       .post<IndicesViaSearchResponse>(`/internal/search/ese`, {
+        version: '1',
         body: JSON.stringify({
           params: {
             ignore_unavailable: true,
@@ -156,7 +157,7 @@ export class HasData {
   // Data Views
 
   private getHasDataViews = async ({ http }: { http: HttpStart }): Promise<HasDataViewsResponse> =>
-    http.get<HasDataViewsResponse>(`/internal/data_views/has_data_views`);
+    http.get<HasDataViewsResponse>(`/internal/data_views/has_data_views`, { version: '1' });
 
   private hasDataViews = (http: HttpStart): Promise<boolean> => {
     return this.getHasDataViews({ http })

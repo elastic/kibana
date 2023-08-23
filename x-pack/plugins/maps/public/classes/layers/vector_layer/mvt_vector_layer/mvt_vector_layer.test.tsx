@@ -125,7 +125,7 @@ describe('isLayerLoading', () => {
         },
       } as unknown as IVectorSource,
     });
-    expect(layer.isLayerLoading()).toBe(true);
+    expect(layer.isLayerLoading(1)).toBe(true);
   });
 
   test('should be true when tiles are loading', () => {
@@ -144,7 +144,7 @@ describe('isLayerLoading', () => {
         },
       } as unknown as IVectorSource,
     });
-    expect(layer.isLayerLoading()).toBe(true);
+    expect(layer.isLayerLoading(1)).toBe(true);
   });
 
   test('should be false when tiles are loaded', () => {
@@ -163,7 +163,7 @@ describe('isLayerLoading', () => {
         },
       } as unknown as IVectorSource,
     });
-    expect(layer.isLayerLoading()).toBe(false);
+    expect(layer.isLayerLoading(1)).toBe(false);
   });
 
   test('should be true when tiles are loaded but join is loading', () => {
@@ -202,7 +202,7 @@ describe('isLayerLoading', () => {
         },
       } as unknown as IVectorSource,
     });
-    expect(layer.isLayerLoading()).toBe(true);
+    expect(layer.isLayerLoading(1)).toBe(true);
   });
 
   test('should be false when tiles are loaded and joins are loaded', () => {
@@ -243,6 +243,6 @@ describe('isLayerLoading', () => {
         },
       } as unknown as IVectorSource,
     });
-    expect(layer.isLayerLoading()).toBe(false);
+    expect(layer.isLayerLoading(1)).toBe(false);
   });
 });

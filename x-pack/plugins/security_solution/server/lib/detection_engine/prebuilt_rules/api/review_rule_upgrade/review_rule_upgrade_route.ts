@@ -7,13 +7,13 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { pickBy } from 'lodash';
-import { REVIEW_RULE_UPGRADE_URL } from '../../../../../../common/detection_engine/prebuilt_rules';
+import { REVIEW_RULE_UPGRADE_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type {
   ReviewRuleUpgradeResponseBody,
   RuleUpgradeInfoForReview,
   RuleUpgradeStatsForReview,
-} from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
-import type { ThreeWayDiff } from '../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
+  ThreeWayDiff,
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { invariant } from '../../../../../../common/utils/invariant';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
@@ -87,12 +87,15 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
     const { ruleDiff, ruleVersions } = result;
     const installedCurrentVersion = ruleVersions.input.current;
     const diffableCurrentVersion = ruleVersions.output.current;
+    const diffableTargetVersion = ruleVersions.output.target;
     invariant(installedCurrentVersion != null, 'installedCurrentVersion not found');
 
     return {
       id: installedCurrentVersion.id,
       rule_id: installedCurrentVersion.rule_id,
+      revision: installedCurrentVersion.revision,
       rule: diffableCurrentVersion,
+      target_rule: diffableTargetVersion,
       diff: {
         fields: pickBy<ThreeWayDiff<unknown>>(
           ruleDiff.fields,

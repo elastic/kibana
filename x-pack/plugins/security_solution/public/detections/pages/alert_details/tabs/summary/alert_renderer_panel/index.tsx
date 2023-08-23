@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { defaultRowRenderers } from '../../../../../../timelines/components/timeline/body/renderers';
 import { getRowRenderer } from '../../../../../../timelines/components/timeline/body/renderers/get_row_renderer';
-import { TimelineId } from '../../../../../../../common/types';
+import { TimelineId } from '../../../../../../../common/types/timeline';
 import { SummaryPanel } from '../wrappers';
 import { ALERT_REASON_PANEL_TITLE } from '../translation';
 

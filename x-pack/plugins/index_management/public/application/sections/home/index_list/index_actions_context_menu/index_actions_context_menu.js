@@ -25,9 +25,11 @@ import {
 
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN } from '../../../../../../common/constants';
-import { AppContextConsumer } from '../../../../app_context';
+import { AppContextConsumer, AppContext } from '../../../../app_context';
 
 export class IndexActionsContextMenu extends Component {
+  static contextType = AppContext;
+
   constructor(props) {
     super(props);
 
@@ -47,6 +49,10 @@ export class IndexActionsContextMenu extends Component {
     this.setState({ isActionConfirmed });
   };
   panels({ services: { extensionsService }, core: { getUrlForApp } }) {
+    const {
+      config: { enableIndexActions },
+    } = this.context;
+
     const {
       closeIndices,
       openIndices,
@@ -94,7 +100,7 @@ export class IndexActionsContextMenu extends Component {
           this.closePopoverAndExecute(showMapping);
         },
       });
-      if (allOpen) {
+      if (allOpen && enableIndexActions) {
         items.push({
           'data-test-subj': 'showStatsIndexMenuButton',
           name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexStatsLabel', {
@@ -118,7 +124,7 @@ export class IndexActionsContextMenu extends Component {
         },
       });
     }
-    if (allOpen) {
+    if (allOpen && enableIndexActions) {
       items.push({
         'data-test-subj': 'closeIndexMenuButton',
         name: i18n.translate('xpack.idxMgmt.indexActionsMenu.closeIndexLabel', {
@@ -187,7 +193,7 @@ export class IndexActionsContextMenu extends Component {
           },
         });
       }
-    } else {
+    } else if (!allOpen && enableIndexActions) {
       items.push({
         'data-test-subj': 'openIndexMenuButton',
         name: i18n.translate('xpack.idxMgmt.indexActionsMenu.openIndexLabel', {

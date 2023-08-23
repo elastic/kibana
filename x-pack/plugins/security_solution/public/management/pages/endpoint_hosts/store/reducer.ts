@@ -11,11 +11,10 @@ import type {
   MetadataTransformStatsChanged,
 } from './action';
 import {
-  isOnEndpointPage,
-  hasSelectedEndpoint,
-  uiQueryParams,
-  getIsOnEndpointDetailsActivityLog,
   getCurrentIsolationRequestState,
+  hasSelectedEndpoint,
+  isOnEndpointPage,
+  uiQueryParams,
 } from './selectors';
 import type { EndpointState } from '../types';
 import { initialEndpointPageState } from './builders';
@@ -64,13 +63,15 @@ const handleMetadataTransformStatsChanged: CaseReducer<MetadataTransformStatsCha
 /* eslint-disable-next-line complexity */
 export const endpointListReducer: StateReducer = (state = initialEndpointPageState(), action) => {
   if (action.type === 'serverReturnedEndpointList') {
-    const { data, total, page, pageSize } = action.payload;
+    const { data, total, page, pageSize, sortDirection, sortField } = action.payload;
     return {
       ...state,
       hosts: data,
       total,
       pageIndex: page,
       pageSize,
+      sortField,
+      sortDirection,
       loading: false,
       error: undefined,
     };
@@ -97,7 +98,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       },
     };
   } else if (action.type === 'serverReturnedMetadataPatterns') {
-    // handle error case
+    // handle an error case
     return {
       ...state,
       patterns: action.payload,
@@ -107,34 +108,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
     return {
       ...state,
       patternsError: action.payload,
-    };
-  } else if (action.type === 'serverReturnedEndpointDetails') {
-    return {
-      ...state,
-      endpointDetails: {
-        ...state.endpointDetails,
-        hostInfo: action.payload,
-        hostDetails: {
-          ...state.endpointDetails.hostDetails,
-          details: action.payload.metadata,
-          detailsLoading: false,
-          detailsError: undefined,
-        },
-      },
-      policyVersionInfo: action.payload.policy_info,
-      hostStatus: action.payload.host_status,
-    };
-  } else if (action.type === 'serverFailedToReturnEndpointDetails') {
-    return {
-      ...state,
-      endpointDetails: {
-        ...state.endpointDetails,
-        hostDetails: {
-          ...state.endpointDetails.hostDetails,
-          detailsError: action.payload,
-          detailsLoading: false,
-        },
-      },
     };
   } else if (action.type === 'endpointPendingActionsStateChanged') {
     return handleEndpointPendingActionsStateChanged(state, action);
@@ -150,24 +123,10 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       error: action.payload,
       policyItemsLoading: false,
     };
-  } else if (action.type === 'serverReturnedEndpointPolicyResponse') {
-    return {
-      ...state,
-      policyResponse: action.payload.policy_response,
-      policyResponseLoading: false,
-      policyResponseError: undefined,
-    };
-  } else if (action.type === 'serverFailedToReturnEndpointPolicyResponse') {
-    return {
-      ...state,
-      policyResponseError: action.payload,
-      policyResponseLoading: false,
-    };
   } else if (action.type === 'userSelectedEndpointPolicy') {
     return {
       ...state,
       selectedPolicyId: action.payload.selectedPolicyId,
-      policyResponseLoading: false,
     };
   } else if (action.type === 'serverCancelledEndpointListLoading') {
     return {
@@ -225,25 +184,10 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
     const wasPreviouslyOnListPage = isOnEndpointPage(state) && !hasSelectedEndpoint(state);
     const isCurrentlyOnDetailsPage = isOnEndpointPage(newState) && hasSelectedEndpoint(newState);
     const wasPreviouslyOnDetailsPage = isOnEndpointPage(state) && hasSelectedEndpoint(state);
-    const wasPreviouslyOnActivityLogPage =
-      isOnEndpointPage(state) &&
-      hasSelectedEndpoint(state) &&
-      getIsOnEndpointDetailsActivityLog(state);
-
-    const isCurrentlyOnActivityLogPage =
-      isOnEndpointPage(newState) &&
-      hasSelectedEndpoint(newState) &&
-      getIsOnEndpointDetailsActivityLog(newState);
-
-    const isNotLoadingDetails =
-      isCurrentlyOnActivityLogPage ||
-      (wasPreviouslyOnActivityLogPage &&
-        uiQueryParams(state).selected_endpoint === uiQueryParams(newState).selected_endpoint);
 
     const stateUpdates: Partial<EndpointState> = {
       location: action.payload,
       error: undefined,
-      policyResponseError: undefined,
     };
 
     // Reset `isolationRequestState` if needed
@@ -260,64 +204,33 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         return {
           ...state,
           ...stateUpdates,
-          endpointDetails: {
-            ...state.endpointDetails,
-            hostDetails: {
-              ...state.endpointDetails.hostDetails,
-              detailsError: undefined,
-            },
-          },
           loading: true,
           policyItemsLoading: true,
         };
       }
     } else if (isCurrentlyOnDetailsPage) {
-      // if previous page was the list or another endpoint details page, load endpoint details only
+      // if the previous page was the list or another endpoint details page, load endpoint details only
       if (wasPreviouslyOnDetailsPage || wasPreviouslyOnListPage) {
         return {
           ...state,
           ...stateUpdates,
-          endpointDetails: {
-            ...state.endpointDetails,
-            hostDetails: {
-              ...state.endpointDetails.hostDetails,
-              detailsLoading: !isNotLoadingDetails,
-              detailsError: undefined,
-            },
-          },
           detailsLoading: true,
-          policyResponseLoading: true,
         };
       } else {
-        // if previous page was not endpoint list or endpoint details, load both list and details
+        // if the previous page was not endpoint list or endpoint details, load both list and details
         return {
           ...state,
           ...stateUpdates,
-          endpointDetails: {
-            ...state.endpointDetails,
-            hostDetails: {
-              ...state.endpointDetails.hostDetails,
-              detailsLoading: true,
-              detailsError: undefined,
-            },
-          },
           loading: true,
-          policyResponseLoading: true,
+
           policyItemsLoading: true,
         };
       }
     }
-    // otherwise we are not on a endpoint list or details page
+    // otherwise, we are not on an endpoint list or details page
     return {
       ...state,
       ...stateUpdates,
-      endpointDetails: {
-        ...state.endpointDetails,
-        hostDetails: {
-          ...state.endpointDetails.hostDetails,
-          detailsError: undefined,
-        },
-      },
       endpointsExist: true,
     };
   } else if (action.type === 'metadataTransformStatsChanged') {

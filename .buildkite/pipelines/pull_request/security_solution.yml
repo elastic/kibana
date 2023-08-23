@@ -1,14 +1,53 @@
 steps:
   - command: .buildkite/scripts/steps/functional/security_solution.sh
-    label: 'Security Solution Tests'
+    label: 'Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 10
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+    artifact_paths:
+      - "target/kibana-security-solution/**/*"
+
+  - command: .buildkite/scripts/steps/functional/security_solution_explore.sh
+    label: 'Explore - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 2
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+    artifact_paths:
+      - "target/kibana-security-solution/**/*"
+
+  - command: .buildkite/scripts/steps/functional/security_solution_investigations.sh
+    label: 'Investigations - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
-    parallelism: 15
+    parallelism: 4
     retry:
       automatic:
-        - exit_status: '-1'
-          limit: 3
         - exit_status: '*'
           limit: 1
+    artifact_paths:
+      - "target/kibana-security-solution/**/*"
+
+  - command: .buildkite/scripts/steps/functional/security_solution_burn.sh
+    label: 'Security Solution Cypress tests, burning changed specs'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 120
+    parallelism: 1
+    soft_fail: true
+    artifact_paths:
+      - "target/kibana-security-solution/**/*"

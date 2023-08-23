@@ -7,10 +7,10 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { listItemIndexExistSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
+import { readListIndexResponse } from '../../common/api';
 
 import { buildSiemResponse } from './utils';
 
@@ -36,7 +36,7 @@ export const readListIndexRoute = (router: ListsPluginRouter): void => {
         if (listIndexExists || listItemIndexExists) {
           const [validated, errors] = validate(
             { list_index: listIndexExists, list_item_index: listItemIndexExists },
-            listItemIndexExistSchema
+            readListIndexResponse
           );
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });

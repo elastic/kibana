@@ -151,16 +151,25 @@ export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetai
 });
 
 export const ENDPOINT_COMMANDS = Object.freeze({
-  isolated: i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.isolate', {
-    defaultMessage: 'isolated the host',
-  }),
-  released: i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.release', {
-    defaultMessage: 'released the host',
-  }),
-  generic: (command: string) =>
-    i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.generic', {
+  tried: (command: string) =>
+    i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.tried', {
       values: { command },
-      defaultMessage: 'executed command {command}',
+      defaultMessage: 'tried to execute {command} command',
+    }),
+  executed: (command: string) =>
+    i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.executed', {
+      values: { command },
+      defaultMessage: 'executed {command} command',
+    }),
+  pending: (command: string) =>
+    i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.pending', {
+      values: { command },
+      defaultMessage: 'is executing {command} command',
+    }),
+  failed: (command: string) =>
+    i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.failed', {
+      values: { command },
+      defaultMessage: 'failed to execute {command} command',
     }),
 });
 

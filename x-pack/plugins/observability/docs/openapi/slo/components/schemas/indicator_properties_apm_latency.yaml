@@ -1,4 +1,4 @@
-title: APM latency indicator type definition
+title: APM latency
 required:
   - type
   - params

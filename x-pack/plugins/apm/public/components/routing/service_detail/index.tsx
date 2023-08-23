@@ -94,7 +94,7 @@ function RedirectNodeMetricsToMetricsDetails() {
   );
 }
 
-export const serviceDetail = {
+export const serviceDetailRoute = {
   '/services/{serviceName}': {
     element: (
       <ApmTimeRangeMetadataContextProvider>

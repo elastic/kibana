@@ -19,10 +19,10 @@ import {
   SAVED_QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
+import type { ExperimentalFeatures } from '../../../common';
+import { SecuritySubFeatureId } from './security_kibana_sub_features';
 import { APP_ID, LEGACY_NOTIFICATIONS_ID, SERVER_APP_ID } from '../../../common/constants';
 import { savedObjectTypes } from '../../saved_objects';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import { SecuritySubFeatureId } from './security_kibana_sub_features';
 import type { AppFeaturesSecurityConfig, BaseKibanaFeatureConfig } from './types';
 import { AppFeatureSecurityKey } from '../../../common/types/app_features';
 
@@ -122,39 +122,14 @@ export const getSecurityBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   },
 });
 
+/**
+ * Returns the list of Security SubFeature IDs that should be loaded and available in
+ * kibana regardless of PLI or License level.
+ * @param _
+ */
 export const getSecurityBaseKibanaSubFeatureIds = (
-  experimentalFeatures: ExperimentalFeatures
-): SecuritySubFeatureId[] => {
-  const subFeatureIds: SecuritySubFeatureId[] = [];
-
-  if (experimentalFeatures.endpointRbacEnabled) {
-    subFeatureIds.push(
-      SecuritySubFeatureId.endpointList,
-      SecuritySubFeatureId.trustedApplications,
-      SecuritySubFeatureId.hostIsolationExceptions,
-      SecuritySubFeatureId.blocklist,
-      SecuritySubFeatureId.eventFilters,
-      SecuritySubFeatureId.policyManagement
-    );
-  }
-
-  if (experimentalFeatures.endpointRbacEnabled || experimentalFeatures.endpointRbacV1Enabled) {
-    subFeatureIds.push(
-      SecuritySubFeatureId.responseActionsHistory,
-      SecuritySubFeatureId.hostIsolation,
-      SecuritySubFeatureId.processOperations
-    );
-  }
-  if (experimentalFeatures.responseActionGetFileEnabled) {
-    subFeatureIds.push(SecuritySubFeatureId.fileOperations);
-  }
-  // planned for 8.8
-  if (experimentalFeatures.responseActionExecuteEnabled) {
-    subFeatureIds.push(SecuritySubFeatureId.executeAction);
-  }
-
-  return subFeatureIds;
-};
+  _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
+): SecuritySubFeatureId[] => [SecuritySubFeatureId.hostIsolation];
 
 /**
  * Maps the AppFeatures keys to Kibana privileges that will be merged
@@ -165,7 +140,9 @@ export const getSecurityBaseKibanaSubFeatureIds = (
  * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
  */
-export const getSecurityAppFeaturesConfig = (): AppFeaturesSecurityConfig => {
+export const getSecurityAppFeaturesConfig = (
+  _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
+): AppFeaturesSecurityConfig => {
   return {
     [AppFeatureSecurityKey.advancedInsights]: {
       privileges: {
@@ -179,5 +156,84 @@ export const getSecurityAppFeaturesConfig = (): AppFeaturesSecurityConfig => {
         },
       },
     },
+    [AppFeatureSecurityKey.investigationGuide]: {
+      privileges: {
+        all: {
+          ui: ['investigation-guide'],
+        },
+        read: {
+          ui: ['investigation-guide'],
+        },
+      },
+    },
+
+    [AppFeatureSecurityKey.threatIntelligence]: {
+      privileges: {
+        all: {
+          ui: ['threat-intelligence'],
+          api: [`${APP_ID}-threat-intelligence`],
+        },
+        read: {
+          ui: ['threat-intelligence'],
+          api: [`${APP_ID}-threat-intelligence`],
+        },
+      },
+    },
+
+    [AppFeatureSecurityKey.endpointHostManagement]: {
+      subFeatureIds: [SecuritySubFeatureId.endpointList],
+    },
+
+    [AppFeatureSecurityKey.endpointPolicyManagement]: {
+      subFeatureIds: [SecuritySubFeatureId.policyManagement],
+    },
+
+    // Adds no additional kibana feature controls
+    [AppFeatureSecurityKey.endpointPolicyProtections]: {},
+
+    [AppFeatureSecurityKey.endpointArtifactManagement]: {
+      subFeatureIds: [
+        SecuritySubFeatureId.trustedApplications,
+        SecuritySubFeatureId.blocklist,
+        SecuritySubFeatureId.eventFilters,
+      ],
+      subFeaturesPrivileges: [
+        {
+          id: 'host_isolation_exceptions_all',
+          api: [
+            `${APP_ID}-accessHostIsolationExceptions`,
+            `${APP_ID}-writeHostIsolationExceptions`,
+          ],
+          ui: ['accessHostIsolationExceptions', 'writeHostIsolationExceptions'],
+        },
+        {
+          id: 'host_isolation_exceptions_read',
+          api: [`${APP_ID}-accessHostIsolationExceptions`],
+          ui: ['accessHostIsolationExceptions'],
+        },
+      ],
+    },
+
+    [AppFeatureSecurityKey.endpointResponseActions]: {
+      subFeatureIds: [
+        SecuritySubFeatureId.hostIsolationExceptions,
+
+        SecuritySubFeatureId.responseActionsHistory,
+        SecuritySubFeatureId.processOperations,
+        SecuritySubFeatureId.fileOperations,
+        SecuritySubFeatureId.executeAction,
+      ],
+      subFeaturesPrivileges: [
+        // Adds the privilege to Isolate hosts to the already loaded `host_isolation_all`
+        // sub-feature (always loaded), which included the `release` privilege already
+        {
+          id: 'host_isolation_all',
+          api: [`${APP_ID}-writeHostIsolation`],
+          ui: ['writeHostIsolation'],
+        },
+      ],
+    },
+
+    [AppFeatureSecurityKey.osqueryAutomatedResponseActions]: {},
   };
 };

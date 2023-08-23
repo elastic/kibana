@@ -8,14 +8,14 @@
 import { NewChat } from '@kbn/elastic-assistant';
 import React, { useCallback, useMemo } from 'react';
 
+import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { getPromptContextFromDetectionRules } from '../../../../assistant/helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRulesTableContext } from '../../components/rules_table/rules_table/rules_table_context';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 
 export const SuperHeader: React.FC<{ children: React.ReactNode }> = React.memo(({ children }) => {
-  const isAssistantEnabled = useIsExperimentalFeatureEnabled('assistantEnabled');
+  const { hasAssistantPrivilege } = useAssistantAvailability();
   const memoizedChildren = useMemo(() => children, [children]);
   // Rules state
   const {
@@ -37,7 +37,7 @@ export const SuperHeader: React.FC<{ children: React.ReactNode }> = React.memo((
       title={
         <>
           {i18n.PAGE_TITLE}{' '}
-          {isAssistantEnabled && selectedRules.length > 0 && (
+          {hasAssistantPrivilege && selectedRules.length > 0 && (
             <NewChat
               category="detection-rules"
               conversationId={i18n.DETECTION_RULES_CONVERSATION_ID}

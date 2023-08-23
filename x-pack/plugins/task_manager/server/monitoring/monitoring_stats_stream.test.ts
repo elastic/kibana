@@ -8,8 +8,9 @@
 import { TaskManagerConfig } from '../config';
 import { of, Subject } from 'rxjs';
 import { take, bufferCount } from 'rxjs/operators';
-import { createMonitoringStatsStream, AggregatedStat } from './monitoring_stats_stream';
+import { createMonitoringStatsStream } from './monitoring_stats_stream';
 import { JsonValue } from '@kbn/utility-types';
+import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -20,6 +21,7 @@ describe('createMonitoringStatsStream', () => {
     max_workers: 10,
     max_attempts: 9,
     poll_interval: 6000000,
+    allow_reading_invalid_state: false,
     version_conflict_threshold: 80,
     monitored_stats_required_freshness: 6000000,
     request_capacity: 1000,
@@ -50,6 +52,12 @@ describe('createMonitoringStatsStream', () => {
       warn_threshold: 5000,
     },
     worker_utilization_running_average_window: 5,
+    requeue_invalid_tasks: {
+      enabled: false,
+      delay: 3000,
+      max_attempts: 20,
+    },
+    metrics_reset_interval: 3000,
   };
 
   it('returns the initial config used to configure Task Manager', async () => {

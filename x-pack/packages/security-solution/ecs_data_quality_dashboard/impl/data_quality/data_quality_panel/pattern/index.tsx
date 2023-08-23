@@ -9,6 +9,7 @@ import type {
   FlameElementEvent,
   HeatmapElementEvent,
   MetricElementEvent,
+  PartialTheme,
   PartitionElementEvent,
   Theme,
   WordCloudElementEvent,
@@ -32,6 +33,7 @@ import {
 } from './helpers';
 import {
   getDocsCount,
+  getIndexId,
   getIndexNames,
   getTotalDocsCount,
   getTotalPatternIncompatible,
@@ -88,7 +90,8 @@ interface Props {
   patternRollup: PatternRollup | undefined;
   selectedIndex: SelectedIndex | null;
   setSelectedIndex: (selectedIndex: SelectedIndex | null) => void;
-  theme: Theme;
+  theme?: PartialTheme;
+  baseTheme: Theme;
   updatePatternIndexNames: ({
     indexNames,
     pattern,
@@ -96,7 +99,7 @@ interface Props {
     indexNames: string[];
     pattern: string;
   }) => void;
-  updatePatternRollup: (patternRollup: PatternRollup) => void;
+  updatePatternRollup: (patternRollup: PatternRollup, requestTime?: number) => void;
 }
 
 const PatternComponent: React.FC<Props> = ({
@@ -114,6 +117,7 @@ const PatternComponent: React.FC<Props> = ({
   selectedIndex,
   setSelectedIndex,
   theme,
+  baseTheme,
   updatePatternIndexNames,
   updatePatternRollup,
 }) => {
@@ -151,12 +155,14 @@ const PatternComponent: React.FC<Props> = ({
                 docsCount={getDocsCount({ stats, indexName })}
                 getGroupByFieldsOnClick={getGroupByFieldsOnClick}
                 ilmPhase={ilmExplain != null ? getIlmPhase(ilmExplain[indexName]) : undefined}
+                indexId={getIndexId({ stats, indexName })}
                 indexName={indexName}
                 isAssistantEnabled={isAssistantEnabled}
                 openCreateCaseFlyout={openCreateCaseFlyout}
                 pattern={pattern}
                 patternRollup={patternRollup}
                 theme={theme}
+                baseTheme={baseTheme}
                 updatePatternRollup={updatePatternRollup}
               />
             </IndexPropertiesContainer>
@@ -165,19 +171,20 @@ const PatternComponent: React.FC<Props> = ({
       }
     },
     [
+      itemIdToExpandedRowMap,
       addSuccessToast,
       canUserCreateAndReadCases,
       formatBytes,
       formatNumber,
+      stats,
       getGroupByFieldsOnClick,
       ilmExplain,
       isAssistantEnabled,
-      itemIdToExpandedRowMap,
       openCreateCaseFlyout,
       pattern,
       patternRollup,
-      stats,
       theme,
+      baseTheme,
       updatePatternRollup,
     ]
   );

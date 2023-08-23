@@ -12,6 +12,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { getRedirectToTransactionDetailPageUrl } from '../trace_link/get_redirect_to_transaction_detail_page_url';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../hooks/use_time_range';
 
 const CentralizedContainer = euiStyled.div`
   height: 100%;
@@ -24,6 +25,11 @@ export function TransactionLink() {
     query: { rangeFrom, rangeTo, waterfallItemId },
   } = useApmParams('/link-to/transaction/{transactionId}');
 
+  const { start, end } = useTimeRange({
+    rangeFrom: rangeFrom || new Date(0).toISOString(),
+    rangeTo: rangeTo || new Date().toISOString(),
+  });
+
   const { data = { transaction: null }, status } = useFetcher(
     (callApmApi) => {
       if (transactionId) {
@@ -32,11 +38,15 @@ export function TransactionLink() {
             path: {
               transactionId,
             },
+            query: {
+              start,
+              end,
+            },
           },
         });
       }
     },
-    [transactionId]
+    [transactionId, start, end]
   );
   if (transactionId && status === FETCH_STATUS.SUCCESS) {
     if (data.transaction) {

@@ -5,22 +5,29 @@
  * 2.0.
  */
 
+import { MAX_BULK_GET_CASES } from '../../../common/constants';
 import { createCasesClientMockArgs } from '../mocks';
 import { bulkGet } from './bulk_get';
 
 describe('bulkGet', () => {
-  describe('throwErrorIfCaseIdsReachTheLimit', () => {
+  describe('errors', () => {
     const clientArgs = createCasesClientMockArgs();
 
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
-    it('throws if the requested cases are more than 1000', async () => {
-      const ids = Array(1001).fill('test');
+    it(`throws when trying to fetch more than ${MAX_BULK_GET_CASES} cases`, async () => {
+      await expect(
+        bulkGet({ ids: Array(MAX_BULK_GET_CASES + 1).fill('foobar') }, clientArgs)
+      ).rejects.toThrow(
+        `Error: The length of the field ids is too long. Array must be of length <= ${MAX_BULK_GET_CASES}.`
+      );
+    });
 
-      await expect(bulkGet({ ids }, clientArgs)).rejects.toThrow(
-        'Maximum request limit of 1000 cases reached'
+    it('throws when trying to fetch zero cases', async () => {
+      await expect(bulkGet({ ids: [] }, clientArgs)).rejects.toThrow(
+        'Error: The length of the field ids is too short. Array must be of length >= 1.'
       );
     });
 

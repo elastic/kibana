@@ -79,16 +79,15 @@ describe('useAssigneesAction', () => {
     await waitFor(() => {
       expect(result.current.isFlyoutOpen).toBe(false);
       expect(onActionSuccess).toHaveBeenCalled();
-      expect(updateSpy).toHaveBeenCalledWith(
-        [
+      expect(updateSpy).toHaveBeenCalledWith({
+        cases: [
           {
             assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }, { uid: '1' }],
             id: basicCase.id,
             version: basicCase.version,
           },
         ],
-        expect.anything()
-      );
+      });
     });
   });
 

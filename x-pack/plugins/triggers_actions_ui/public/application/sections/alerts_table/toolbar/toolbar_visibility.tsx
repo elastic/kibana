@@ -12,7 +12,12 @@ import {
 import React, { lazy, Suspense } from 'react';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { AlertsCount } from './components/alerts_count/alerts_count';
-import type { Alerts, BulkActionsConfig, GetInspectQuery, RowSelection } from '../../../../types';
+import type {
+  Alerts,
+  BulkActionsPanelConfig,
+  GetInspectQuery,
+  RowSelection,
+} from '../../../../types';
 import { LastUpdatedAt } from './components/last_updated_at';
 import { FieldBrowser } from '../../field_browser';
 import { FieldBrowserOptions } from '../../field_browser/types';
@@ -116,7 +121,7 @@ export const getToolbarVisibility = ({
   showInspectButton,
   toolbarVisiblityProp,
 }: {
-  bulkActions: BulkActionsConfig[];
+  bulkActions: BulkActionsPanelConfig[];
   alertsCount: number;
   rowSelection: RowSelection;
   alerts: Alerts;
@@ -169,7 +174,7 @@ export const getToolbarVisibility = ({
             <Suspense fallback={null}>
               <BulkActionsToolbar
                 totalItems={alertsCount}
-                items={bulkActions}
+                panels={bulkActions}
                 alerts={alerts}
                 setIsBulkActionsLoading={setIsBulkActionsLoading}
                 clearSelection={clearSelection}

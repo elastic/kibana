@@ -8,7 +8,7 @@ import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import type { Logger, StartServicesAccessor } from '@kbn/core/server';
+import type { Logger, StartServicesAccessor, IKibanaResponse } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type {
   AlertInstanceContext,
@@ -23,10 +23,13 @@ import {
   DEFAULT_PREVIEW_INDEX,
   DETECTION_ENGINE_RULES_PREVIEW,
 } from '../../../../../../common/constants';
-import { validateCreateRuleProps } from '../../../../../../common/detection_engine/rule_management';
-import { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring';
-import type { RulePreviewLogs } from '../../../../../../common/detection_engine/rule_schema';
-import { previewRulesSchema } from '../../../../../../common/detection_engine/rule_schema';
+import { validateCreateRuleProps } from '../../../../../../common/api/detection_engine/rule_management';
+import { RuleExecutionStatus } from '../../../../../../common/api/detection_engine/rule_monitoring';
+import type {
+  PreviewResponse,
+  RulePreviewLogs,
+} from '../../../../../../common/api/detection_engine';
+import { previewRulesSchema } from '../../../../../../common/api/detection_engine';
 
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
@@ -85,7 +88,7 @@ export const previewRulesRoute = async (
         tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<PreviewResponse>> => {
       const siemResponse = buildSiemResponse(response);
       const validationErrors = validateCreateRuleProps(request.body);
       const coreContext = await context.core;
@@ -102,7 +105,11 @@ export const previewRulesRoute = async (
         let invocationCount = request.body.invocationCount;
         if (invocationCount < 1) {
           return response.ok({
-            body: { logs: [{ errors: ['Invalid invocation count'], warnings: [], duration: 0 }] },
+            body: {
+              logs: [{ errors: ['Invalid invocation count'], warnings: [], duration: 0 }],
+              previewId: undefined,
+              isAborted: undefined,
+            },
           });
         }
 
@@ -153,6 +160,8 @@ export const previewRulesRoute = async (
                   duration: 0,
                 },
               ],
+              previewId: undefined,
+              isAborted: undefined,
             },
           });
         }
@@ -194,6 +203,7 @@ export const previewRulesRoute = async (
               | 'getContext'
               | 'hasContext'
               | 'getUuid'
+              | 'getStart'
             >;
             alertLimit: {
               getValue: () => number;
@@ -249,6 +259,7 @@ export const previewRulesRoute = async (
               services: {
                 shouldWriteAlerts,
                 shouldStopExecution: () => false,
+                alertsClient: null,
                 alertFactory,
                 savedObjectsClient: coreContext.savedObjects.client,
                 scopedClusterClient: wrapScopedClusterClient({

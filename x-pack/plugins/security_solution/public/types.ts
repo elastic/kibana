@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import type { AppLeaveHandler, CoreStart } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -50,6 +50,10 @@ import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
+import type { RouteProps } from 'react-router-dom';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -65,11 +69,14 @@ import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { Explore } from './explore';
-import type { NavigationLink } from './common/links';
+import type { AppLinksSwitcher, NavigationLink } from './common/links';
+import type { EntityAnalytics } from './entity_analytics';
 
 import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
 import type { UpsellingService } from './common/lib/upsellings';
+import type { BreadcrumbsNav } from './common/breadcrumbs/types';
+import type { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -81,6 +88,15 @@ export interface SetupPlugins {
   ml?: MlPluginSetup;
 }
 
+/**
+ * IMPORTANT - PLEASE READ: When adding new plugins to the
+ * security solution, please ensure you add that plugin
+ * name to the kibana.jsonc file located in ../kibana.jsonc
+ *
+ * Without adding the plugin name there, the plugin will not
+ * fulfill at runtime, despite the types showing up correctly
+ * in the code.
+ */
 export interface StartPlugins {
   cases: CasesUiStart;
   data: DataPublicPluginStart;
@@ -111,6 +127,9 @@ export interface StartPlugins {
   cloudExperiments?: CloudExperimentsPluginStart;
   dataViews: DataViewsServicePublic;
   fieldFormats: FieldFormatsStartCommon;
+  discover: DiscoverStart;
+  navigation: NavigationPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -118,8 +137,16 @@ export interface StartPluginsDependencies extends StartPlugins {
   savedObjectsTaggingOss: SavedObjectTaggingOssPluginStart;
 }
 
+export interface ContractStartServices {
+  extraRoutes$: Observable<RouteProps[]>;
+  isSidebarEnabled$: Observable<boolean>;
+  getStartedComponent$: Observable<React.ComponentType | null>;
+  upselling: UpsellingService;
+}
+
 export type StartServices = CoreStart &
-  StartPlugins & {
+  StartPlugins &
+  ContractStartServices & {
     storage: Storage;
     sessionStorage: Storage;
     apm: ApmBase;
@@ -134,26 +161,24 @@ export type StartServices = CoreStart &
       getPluginWrapper: () => typeof SecuritySolutionTemplateWrapper;
     };
     savedObjectsManagement: SavedObjectsManagementPluginStart;
-    isSidebarEnabled$: BehaviorSubject<boolean>;
-    getStartedComponent: GetStartedComponent | undefined;
-    upselling: UpsellingService;
     telemetry: TelemetryClientStart;
+    discoverFilterManager: FilterManager;
+    customDataService: DataPublicPluginStart;
+    topValuesPopover: TopValuesPopoverService;
   };
 
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
-  upselling: UpsellingService;
+  setAppLinksSwitcher: (appLinksSwitcher: AppLinksSwitcher) => void;
 }
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type GetStartedComponentProps = {};
-
-export type GetStartedComponent = (props?: GetStartedComponentProps) => JSX.Element;
 
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
+  setExtraRoutes: (extraRoutes: RouteProps[]) => void;
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
-  setGetStartedPage: (getStartedComponent: GetStartedComponent) => void;
+  setGetStartedPage: (getStartedComponent: React.ComponentType) => void;
+  getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
+  getUpselling: () => UpsellingService;
 }
 
 export interface AppObservableLibs {
@@ -177,6 +202,7 @@ export interface SubPlugins {
   rules: Rules;
   threatIntelligence: ThreatIntelligence;
   timelines: Timelines;
+  entityAnalytics: EntityAnalytics;
 }
 
 // TODO: find a better way to defined these types
@@ -194,4 +220,5 @@ export interface StartedSubPlugins {
   rules: ReturnType<Rules['start']>;
   threatIntelligence: ReturnType<ThreatIntelligence['start']>;
   timelines: ReturnType<Timelines['start']>;
+  entityAnalytics: ReturnType<EntityAnalytics['start']>;
 }

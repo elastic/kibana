@@ -60,7 +60,7 @@ export async function indexAlerts({
       },
       []
     );
-    await client.bulk({ body, refresh: true });
+    await client.bulk({ body, refresh: 'wait_for' });
   }
 
   await client.indices.refresh({

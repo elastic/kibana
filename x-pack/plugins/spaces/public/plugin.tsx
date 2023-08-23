@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { AdvancedSettingsSetup } from '@kbn/advanced-settings-plugin/public';
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 
-import { AdvancedSettingsService } from './advanced_settings';
+import type { ConfigType } from './config';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
 import { ManagementService } from './management';
 import { initSpacesNavControl } from './nav_control';
@@ -21,7 +20,6 @@ import type { SpacesApi } from './types';
 import { getUiApi } from './ui_api';
 
 export interface PluginsSetup {
-  advancedSettings?: AdvancedSettingsSetup;
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
 }
@@ -46,6 +44,11 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   private spacesApi!: SpacesApi;
 
   private managementService?: ManagementService;
+  private readonly config: ConfigType;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = this.initializerContext.config.get<ConfigType>();
+  }
 
   public setup(core: CoreSetup<PluginsStart, SpacesPluginStart>, plugins: PluginsSetup) {
     this.spacesManager = new SpacesManager(core.http);
@@ -68,14 +71,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
         management: plugins.management,
         getStartServices: core.getStartServices,
         spacesManager: this.spacesManager,
-      });
-    }
-
-    if (plugins.advancedSettings) {
-      const advancedSettingsService = new AdvancedSettingsService();
-      advancedSettingsService.setup({
-        getActiveSpace: () => this.spacesManager.getActiveSpace(),
-        componentRegistry: plugins.advancedSettings.component,
+        config: this.config,
       });
     }
 

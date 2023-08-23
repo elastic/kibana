@@ -132,6 +132,103 @@ describe('File kind HTTP API', () => {
     expect(files2).toHaveLength(5);
   });
 
+  test('can filter by mime type', async () => {
+    await createFile({ name: 'test', mimeType: 'image/png' });
+    await createFile({ name: 'test 2', mimeType: 'text/html' });
+
+    const {
+      body: { files },
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        mimeType: 'image/png',
+      })
+      .expect(200);
+
+    expect(files.length).toBe(1);
+    expect(files[0]).toMatchObject({ name: 'test' });
+
+    const {
+      body: { files: files2 },
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        mimeType: 'text/html',
+      })
+      .expect(200);
+
+    expect(files2.length).toBe(1);
+    expect(files2[0]).toMatchObject({ name: 'test 2' });
+
+    const {
+      body: { files: files3 },
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        mimeType: ['text/html', 'image/png'],
+      })
+      .expect(200);
+
+    expect(files3.length).toBe(2);
+  });
+
+  test('can filter by mime type with special characters', async () => {
+    await createFile({ name: 'test', mimeType: 'image/x:123' });
+    await createFile({ name: 'test 2', mimeType: 'text/html' });
+
+    const {
+      body: { files },
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        mimeType: 'image/x:123',
+      })
+      .expect(200);
+
+    expect(files.length).toBe(1);
+    expect(files[0]).toMatchObject({ name: 'test' });
+  });
+
+  test('can filter by file extension', async () => {
+    await createFile({ name: 'test', mimeType: 'image/png' });
+    await createFile({ name: 'test 2', mimeType: 'text/html' });
+
+    const {
+      body: { files },
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        extension: 'png',
+      })
+      .expect(200);
+
+    expect(files.length).toBe(1);
+    expect(files[0]).toMatchObject({ name: 'test' });
+
+    const {
+      body: { files: files2 },
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        extension: 'html',
+      })
+      .expect(200);
+
+    expect(files2.length).toBe(1);
+    expect(files2[0]).toMatchObject({ name: 'test 2' });
+
+    const {
+      body: { files: files3 },
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        extension: ['html', 'png'],
+      })
+      .expect(200);
+
+    expect(files3.length).toBe(2);
+  });
+
   const twoDaysFromNow = (): number => Date.now() + 2 * (1000 * 60 * 60 * 24);
 
   test('gets a single share object', async () => {

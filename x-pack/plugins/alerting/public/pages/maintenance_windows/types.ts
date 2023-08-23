@@ -5,23 +5,17 @@
  * 2.0.
  */
 
+import { Frequency } from '@kbn/rrule';
 import {
   MaintenanceWindow as MaintenanceWindowServerSide,
   MaintenanceWindowModificationMetadata,
 } from '../../../common';
 
-export enum RRuleFrequency {
-  YEARLY = 0,
-  MONTHLY = 1,
-  WEEKLY = 2,
-  DAILY = 3,
-}
-
 export const RRuleFrequencyMap = {
-  '0': RRuleFrequency.YEARLY,
-  '1': RRuleFrequency.MONTHLY,
-  '2': RRuleFrequency.WEEKLY,
-  '3': RRuleFrequency.DAILY,
+  '0': Frequency.YEARLY,
+  '1': Frequency.MONTHLY,
+  '2': Frequency.WEEKLY,
+  '3': Frequency.DAILY,
 };
 
 export type MaintenanceWindow = Pick<MaintenanceWindowServerSide, 'title' | 'duration' | 'rRule'>;

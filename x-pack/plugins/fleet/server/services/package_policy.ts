@@ -117,6 +117,7 @@ import {
   extractAndUpdateSecrets,
   extractAndWriteSecrets,
   deleteSecretsIfNotReferenced as deleteSecrets,
+  isSecretStorageEnabled,
 } from './secrets';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
@@ -243,8 +244,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
       validatePackagePolicyOrThrow(enrichedPackagePolicy, pkgInfo);
 
-      const { secretsStorage: secretsStorageEnabled } = appContextService.getExperimentalFeatures();
-      if (secretsStorageEnabled) {
+      if (await isSecretStorageEnabled(esClient, soClient)) {
         const secretsRes = await extractAndWriteSecrets({
           packagePolicy: { ...enrichedPackagePolicy, inputs },
           packageInfo: pkgInfo,
@@ -442,6 +442,49 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         ...newSo.attributes,
       })),
       failed: failedPolicies,
+    };
+  }
+
+  /** Purpose of this function is to take a package policy and compile the inputs
+   This is primarily used by the Synthetics UI to display the inputs which are passed to agent
+   Purpose is to debug the inputs which are passed to the agent and also compared them to the config
+   which is passed to public service locations */
+  public async inspect(
+    soClient: SavedObjectsClientContract,
+    packagePolicy: NewPackagePolicyWithId
+  ): Promise<NewPackagePolicy> {
+    if (!packagePolicy.id) {
+      packagePolicy.id = SavedObjectsUtils.generateId();
+    }
+
+    const packageInfos = await getPackageInfoForPackagePolicies([packagePolicy], soClient);
+    const agentPolicyId = packagePolicy.policy_id;
+
+    let inputs = getInputsWithStreamIds(packagePolicy, packagePolicy.id);
+    const { id, ...pkgPolicyWithoutId } = packagePolicy;
+
+    let elasticsearch: PackagePolicy['elasticsearch'];
+    if (packagePolicy.package) {
+      const pkgInfo = packageInfos.get(
+        `${packagePolicy.package.name}-${packagePolicy.package.version}`
+      );
+
+      inputs = pkgInfo
+        ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs)
+        : inputs;
+
+      elasticsearch = pkgInfo?.elasticsearch;
+    }
+
+    return {
+      id: packagePolicy.id,
+      ...pkgPolicyWithoutId,
+      ...(packagePolicy.package
+        ? { package: omit(packagePolicy.package, 'experimental_data_stream_features') }
+        : {}),
+      inputs,
+      elasticsearch,
+      policy_id: agentPolicyId,
     };
   }
 
@@ -704,15 +747,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
-      const { secretsStorage: secretsStorageEnabled } = appContextService.getExperimentalFeatures();
-      if (secretsStorageEnabled) {
+      if (await isSecretStorageEnabled(esClient, soClient)) {
         const secretsRes = await extractAndUpdateSecrets({
           oldPackagePolicy,
           packagePolicyUpdate: { ...restOfPackagePolicy, inputs },
           packageInfo: pkgInfo,
           esClient,
         });
-
         restOfPackagePolicy = secretsRes.packagePolicyUpdate;
         secretReferences = secretsRes.secretReferences;
         secretsToDelete = secretsRes.secretsToDelete;
@@ -871,9 +912,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           );
           if (pkgInfo) {
             validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
-            const { secretsStorage: secretsStorageEnabled } =
-              appContextService.getExperimentalFeatures();
-            if (secretsStorageEnabled) {
+            if (await isSecretStorageEnabled(esClient, soClient)) {
               const secretsRes = await extractAndUpdateSecrets({
                 oldPackagePolicy,
                 packagePolicyUpdate: { ...restOfPackagePolicy, inputs },
@@ -1119,13 +1158,22 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         ...new Set(result.filter((r) => r.success && r.policy_id).map((r) => r.policy_id!)),
       ];
 
+      const agentPoliciesWithEndpointPackagePolicies = result.reduce((acc, cur) => {
+        if (cur.success && cur.policy_id && cur.package?.name === 'endpoint') {
+          return acc.add(cur.policy_id);
+        }
+        return acc;
+      }, new Set());
+
       const agentPolicies = await agentPolicyService.getByIDs(soClient, uniquePolicyIdsR);
 
       for (const policyId of uniquePolicyIdsR) {
         const agentPolicy = agentPolicies.find((p) => p.id === policyId);
         if (agentPolicy) {
+          // is the agent policy attached to package policy with endpoint
           await agentPolicyService.bumpRevision(soClient, esClient, policyId, {
             user: options?.user,
+            removeProtection: agentPoliciesWithEndpointPackagePolicies.has(policyId),
           });
         }
       }

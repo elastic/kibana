@@ -27,6 +27,7 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
+import { getSourcererScopeId } from '../../../../helpers';
 
 const fieldColumn: EuiBasicTableColumn<ObservedUserTable | ManagedUserTable> = {
   name: i18n.FIELD_COLUMN_TITLE,
@@ -45,6 +46,7 @@ const fieldColumn: EuiBasicTableColumn<ObservedUserTable | ManagedUserTable> = {
 
 export const getManagedUserTableColumns = (
   contextID: string,
+  scopeId: string,
   isDraggable: boolean
 ): ManagedUsersTableColumns => [
   fieldColumn,
@@ -58,6 +60,7 @@ export const getManagedUserTableColumns = (
           attrName={field}
           idPrefix={contextID ? `managedUser-${contextID}` : 'managedUser'}
           isDraggable={isDraggable}
+          sourcererScopeId={getSourcererScopeId(scopeId)}
         />
       ) : (
         defaultToEmptyTag(value)
@@ -75,6 +78,7 @@ function isAnomalies(
 
 export const getObservedUserTableColumns = (
   contextID: string,
+  scopeId: string,
   isDraggable: boolean
 ): ObservedUsersTableColumns => [
   fieldColumn,
@@ -96,6 +100,7 @@ export const getObservedUserTableColumns = (
           attrName={field}
           idPrefix={contextID ? `observedUser-${contextID}` : 'observedUser'}
           isDraggable={isDraggable}
+          sourcererScopeId={getSourcererScopeId(scopeId)}
         />
       );
     },

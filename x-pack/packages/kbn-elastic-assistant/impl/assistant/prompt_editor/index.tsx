@@ -10,22 +10,26 @@ import React, { useMemo } from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
-import type { PromptContext } from '../prompt_context/types';
+import { Conversation } from '../../..';
+import type { PromptContext, SelectedPromptContext } from '../prompt_context/types';
 import { SystemPrompt } from './system_prompt';
-import type { Prompt } from '../types';
 
 import * as i18n from './translations';
 import { SelectedPromptContexts } from './selected_prompt_contexts';
 
 export interface Props {
+  conversation: Conversation | undefined;
+  editingSystemPromptId: string | undefined;
   isNewConversation: boolean;
+  isSettingsModalVisible: boolean;
   promptContexts: Record<string, PromptContext>;
   promptTextPreview: string;
-  selectedPromptContextIds: string[];
-  selectedSystemPromptId: string | null;
-  setSelectedPromptContextIds: React.Dispatch<React.SetStateAction<string[]>>;
-  setSelectedSystemPromptId: React.Dispatch<React.SetStateAction<string | null>>;
-  systemPrompts: Prompt[];
+  onSystemPromptSelectionChange: (systemPromptId: string | undefined) => void;
+  selectedPromptContexts: Record<string, SelectedPromptContext>;
+  setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setSelectedPromptContexts: React.Dispatch<
+    React.SetStateAction<Record<string, SelectedPromptContext>>
+  >;
 }
 
 const PreviewText = styled(EuiText)`
@@ -33,31 +37,35 @@ const PreviewText = styled(EuiText)`
 `;
 
 const PromptEditorComponent: React.FC<Props> = ({
+  conversation,
+  editingSystemPromptId,
   isNewConversation,
+  isSettingsModalVisible,
   promptContexts,
   promptTextPreview,
-  selectedPromptContextIds,
-  selectedSystemPromptId,
-  setSelectedPromptContextIds,
-  setSelectedSystemPromptId,
-  systemPrompts,
+  onSystemPromptSelectionChange,
+  selectedPromptContexts,
+  setIsSettingsModalVisible,
+  setSelectedPromptContexts,
 }) => {
   const commentBody = useMemo(
     () => (
       <>
         {isNewConversation && (
           <SystemPrompt
-            selectedSystemPromptId={selectedSystemPromptId}
-            setSelectedSystemPromptId={setSelectedSystemPromptId}
-            systemPrompts={systemPrompts}
+            conversation={conversation}
+            editingSystemPromptId={editingSystemPromptId}
+            onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+            isSettingsModalVisible={isSettingsModalVisible}
+            setIsSettingsModalVisible={setIsSettingsModalVisible}
           />
         )}
 
         <SelectedPromptContexts
           isNewConversation={isNewConversation}
           promptContexts={promptContexts}
-          selectedPromptContextIds={selectedPromptContextIds}
-          setSelectedPromptContextIds={setSelectedPromptContextIds}
+          selectedPromptContexts={selectedPromptContexts}
+          setSelectedPromptContexts={setSelectedPromptContexts}
         />
 
         <PreviewText color="subdued" data-test-subj="previewText">
@@ -66,14 +74,16 @@ const PromptEditorComponent: React.FC<Props> = ({
       </>
     ),
     [
+      conversation,
+      editingSystemPromptId,
       isNewConversation,
+      isSettingsModalVisible,
+      onSystemPromptSelectionChange,
       promptContexts,
       promptTextPreview,
-      selectedPromptContextIds,
-      selectedSystemPromptId,
-      setSelectedPromptContextIds,
-      setSelectedSystemPromptId,
-      systemPrompts,
+      selectedPromptContexts,
+      setIsSettingsModalVisible,
+      setSelectedPromptContexts,
     ]
   );
 

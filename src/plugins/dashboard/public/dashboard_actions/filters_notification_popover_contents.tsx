@@ -26,9 +26,13 @@ import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_
 
 export interface FiltersNotificationProps {
   context: FiltersNotificationActionContext;
+  setDisableEditButton: (flag: boolean) => void;
 }
 
-export function FiltersNotificationPopoverContents({ context }: FiltersNotificationProps) {
+export function FiltersNotificationPopoverContents({
+  context,
+  setDisableEditButton,
+}: FiltersNotificationProps) {
   const { embeddable } = context;
   const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<Filter[]>([]);
@@ -48,11 +52,16 @@ export function FiltersNotificationPopoverContents({ context }: FiltersNotificat
       setFilters(embeddableFilters);
       if (embeddableQuery) {
         if (isOfQueryType(embeddableQuery)) {
-          setQueryString(embeddableQuery.query as string);
+          if (typeof embeddableQuery.query === 'string') {
+            setQueryString(embeddableQuery.query);
+          } else {
+            setQueryString(JSON.stringify(embeddableQuery.query, null, 2));
+          }
         } else {
           const language = getAggregateQueryMode(embeddableQuery);
           setQueryLanguage(language);
           setQueryString(embeddableQuery[language as keyof AggregateQuery]);
+          setDisableEditButton(true);
         }
       }
       setIsLoading(false);
@@ -74,8 +83,7 @@ export function FiltersNotificationPopoverContents({ context }: FiltersNotificat
           >
             <EuiCodeBlock
               language={queryLanguage}
-              paddingSize="none"
-              transparentBackground
+              paddingSize="s"
               aria-labelledby={`${dashboardFilterNotificationActionStrings.getQueryTitle()}: ${queryString}`}
               tabIndex={0} // focus so that keyboard controls will not skip over the code block
             >

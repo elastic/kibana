@@ -13,6 +13,8 @@ import type {
   AgentMetadata,
   OutputType,
   ShipperOutput,
+  KafkaAcknowledgeReliabilityLevel,
+  KafkaConnectionTypeType,
 } from '../../common/types';
 import type { AgentType, FleetServerAgentComponent } from '../../common/types/models';
 
@@ -23,6 +25,12 @@ import type {
   PackagePolicyConfigRecord,
 } from '../../common/types/models/package_policy';
 import type { PolicySecretReference } from '../../common/types/models/secret';
+import type { KafkaAuthType, KafkaCompressionType } from '../../common/types';
+import type {
+  KafkaPartitionType,
+  KafkaSaslMechanism,
+  KafkaTopicWhenType,
+} from '../../common/types';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -52,6 +60,7 @@ export interface AgentPolicySOAttributes {
   status: ValueOf<AgentPolicyStatus>;
   package_policies?: PackagePolicy[];
   agents?: number;
+  overrides?: any | null;
 }
 
 export interface AgentSOAttributes {
@@ -119,11 +128,10 @@ export interface PackagePolicySOAttributes {
   agents?: number;
 }
 
-export interface OutputSOAttributes {
+interface OutputSoBaseAttributes {
   is_default: boolean;
   is_default_monitoring: boolean;
   name: string;
-  type: ValueOf<OutputType>;
   hosts?: string[];
   ca_sha256?: string | null;
   ca_trusted_fingerprint?: string | null;
@@ -136,8 +144,75 @@ export interface OutputSOAttributes {
   ssl?: string | null; // encrypted ssl field
 }
 
+interface OutputSoElasticsearchAttributes extends OutputSoBaseAttributes {
+  type: OutputType['Elasticsearch'];
+}
+
+interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {
+  type: OutputType['Logstash'];
+}
+
+export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
+  type: OutputType['Kafka'];
+  client_id?: string;
+  version?: string;
+  key?: string;
+  compression?: ValueOf<KafkaCompressionType>;
+  compression_level?: number;
+  auth_type?: ValueOf<KafkaAuthType>;
+  connection_type?: ValueOf<KafkaConnectionTypeType>;
+  username?: string;
+  password?: string;
+  sasl?: {
+    mechanism?: ValueOf<KafkaSaslMechanism>;
+  };
+  partition?: ValueOf<KafkaPartitionType>;
+  random?: {
+    group_events?: number;
+  };
+  round_robin?: {
+    group_events?: number;
+  };
+  hash?: {
+    hash?: string;
+    random?: boolean;
+  };
+  topics?: Array<{
+    topic: string;
+    when?: {
+      type?: ValueOf<KafkaTopicWhenType>;
+      condition?: string;
+    };
+  }>;
+  headers?: Array<{
+    key: string;
+    value: string;
+  }>;
+  timeout?: number;
+  broker_timeout?: number;
+  required_acks?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
+}
+
+export type OutputSOAttributes =
+  | OutputSoElasticsearchAttributes
+  | OutputSoLogstashAttributes
+  | OutputSoKafkaAttributes;
+
 export interface SettingsSOAttributes {
+  prerelease_integrations_enabled: boolean;
   has_seen_add_data_notice?: boolean;
   fleet_server_hosts?: string[];
-  prerelease_integrations_enabled: boolean;
+  secret_storage_requirements_met?: boolean;
+}
+
+export interface DownloadSourceSOAttributes {
+  name: string;
+  host: string;
+  is_default: boolean;
+  source_id?: string;
+  proxy_id?: string | null;
+}
+export interface SimpleSOAssetAttributes {
+  title?: string;
+  description?: string;
 }

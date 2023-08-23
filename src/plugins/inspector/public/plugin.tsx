@@ -106,6 +106,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
               uiSettings: core.uiSettings,
               share: startDeps.share,
               settings: core.settings,
+              theme: core.theme,
             }}
           />,
           { theme$: core.theme.theme$ }

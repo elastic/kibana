@@ -7,6 +7,7 @@
 
 export interface UserDetailsProps {
   contextID: string;
+  scopeId: string;
   userName: string;
   handleOnClose: () => void;
   isFlyoutView?: boolean;

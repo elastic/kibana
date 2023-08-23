@@ -33,6 +33,7 @@ const rt = {
     kindToExclude: schema.maybe(stringOrArrayOfStrings),
     status: schema.maybe(stringOrArrayOfStrings),
     extension: schema.maybe(stringOrArrayOfStrings),
+    mimeType: schema.maybe(stringOrArrayOfStrings),
     name: schema.maybe(nameStringOrArrayOfNameStrings),
     meta: fileMeta,
   }),
@@ -51,7 +52,7 @@ export type Endpoint = CreateRouteDefinition<
 const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
   const { fileService } = await files;
   const {
-    body: { meta, extension, kind, name, status, kindToExclude },
+    body: { meta, extension, mimeType, kind, name, status, kindToExclude },
     query,
   } = req;
 
@@ -61,6 +62,7 @@ const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
     name: toArrayOrUndefined(name),
     status: toArrayOrUndefined(status),
     extension: toArrayOrUndefined(extension),
+    mimeType: toArrayOrUndefined(mimeType),
     meta: meta as Record<string, string>,
     ...query,
   });

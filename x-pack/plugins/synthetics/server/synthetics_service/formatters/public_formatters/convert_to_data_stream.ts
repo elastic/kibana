@@ -8,7 +8,7 @@
 import { DEFAULT_NAMESPACE_STRING } from '../../../../common/constants/monitor_defaults';
 import { DataStream, MonitorFields } from '../../../../common/runtime_types';
 
-interface DataStreamConfig {
+export interface DataStreamConfig {
   type: DataStream;
   id: string;
   schedule: string;

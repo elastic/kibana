@@ -19,11 +19,14 @@ import {
   createStartServerUnix,
   createStartServerUnixSysv,
   createWindowsServerInstructions,
+  createDownloadServerOtherLinux,
+  createStartServerUnixBinari,
 } from '../../../common/tutorial/instructions/apm_server_instructions';
 
 const EDIT_CONFIG = createEditConfig();
 const START_SERVER_UNIX = createStartServerUnix();
 const START_SERVER_UNIX_SYSV = createStartServerUnixSysv();
+const START_SERVER_UNIX_BINARI = createStartServerUnixBinari();
 
 export function getOnPremApmServerInstructionSet({
   apmConfig,
@@ -61,6 +64,14 @@ export function getOnPremApmServerInstructionSet({
           createDownloadServerRpm(),
           EDIT_CONFIG,
           START_SERVER_UNIX_SYSV,
+        ],
+      },
+      {
+        id: INSTRUCTION_VARIANT.OTHER_LINUX,
+        instructions: [
+          createDownloadServerOtherLinux(),
+          EDIT_CONFIG,
+          START_SERVER_UNIX_BINARI,
         ],
       },
       {

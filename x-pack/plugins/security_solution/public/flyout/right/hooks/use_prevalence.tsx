@@ -7,10 +7,10 @@
 
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { ReactElement } from 'react';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { getSummaryRows } from '../../../common/components/event_details/get_alert_summary_rows';
 import { PrevalenceOverviewRow } from '../components/prevalence_overview_row';
-import { INSIGHTS_PREVALENCE_TEST_ID } from '../components/test_ids';
+import { INSIGHTS_PREVALENCE_ROW_TEST_ID } from '../components/test_ids';
 
 export interface UsePrevalenceParams {
   /**
@@ -29,16 +29,10 @@ export interface UsePrevalenceParams {
    * Maintain backwards compatibility // TODO remove when possible
    */
   scopeId: string;
-}
-export interface UsePrevalenceResult {
   /**
-   * Returns all row children to render
+   * User defined fields to highlight (defined on rule)
    */
-  prevalenceRows: ReactElement[];
-  /**
-   * Returns true if all row children render null
-   */
-  empty: boolean;
+  investigationFields?: string[];
 }
 
 /**
@@ -51,39 +45,39 @@ export const usePrevalence = ({
   eventId,
   browserFields,
   dataFormattedForFieldBrowser,
+  investigationFields,
   scopeId,
-}: UsePrevalenceParams): UsePrevalenceResult => {
-  const [count, setCount] = useState(0);
-
+}: UsePrevalenceParams): ReactElement[] => {
   // retrieves the highlighted fields
   const summaryRows = useMemo(
     () =>
       getSummaryRows({
         browserFields: browserFields || {},
         data: dataFormattedForFieldBrowser || [],
+        investigationFields: investigationFields || [],
         eventId,
         scopeId,
         isReadOnly: false,
       }),
-    [browserFields, dataFormattedForFieldBrowser, eventId, scopeId]
+    [browserFields, investigationFields, dataFormattedForFieldBrowser, eventId, scopeId]
   );
 
-  const prevalenceRows = useMemo(
+  return useMemo(
     () =>
-      summaryRows.map((row) => (
-        <PrevalenceOverviewRow
-          field={row.description.data.field}
-          values={row.description.values || []}
-          scopeId={scopeId}
-          callbackIfNull={() => setCount((prevCount) => prevCount + 1)}
-          data-test-subj={INSIGHTS_PREVALENCE_TEST_ID}
-        />
-      )),
-    [summaryRows, scopeId]
-  );
+      summaryRows.map((row) => {
+        const highlightedField = {
+          name: row.description.data.field,
+          values: row.description.values || [],
+        };
 
-  return {
-    prevalenceRows,
-    empty: count >= summaryRows.length,
-  };
+        return (
+          <PrevalenceOverviewRow
+            highlightedField={highlightedField}
+            data-test-subj={INSIGHTS_PREVALENCE_ROW_TEST_ID}
+            key={row.description.data.field}
+          />
+        );
+      }),
+    [summaryRows]
+  );
 };

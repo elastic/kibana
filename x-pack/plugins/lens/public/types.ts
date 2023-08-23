@@ -9,7 +9,7 @@ import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { CoreStart, SavedObjectReference, ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import type { MutableRefObject } from 'react';
+import type { MutableRefObject, ReactElement } from 'react';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
@@ -39,14 +39,9 @@ import { SearchRequest } from '@kbn/data-plugin/public';
 import { estypes } from '@elastic/elasticsearch';
 import React from 'react';
 import { CellValueContext } from '@kbn/embeddable-plugin/public';
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
-import type {
-  DraggingIdentifier,
-  DragDropIdentifier,
-  DragContextState,
-  DropType,
-} from '@kbn/dom-drag-drop';
-import type { AccessorConfig } from '@kbn/visualization-ui-components/public';
+import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import type { DraggingIdentifier, DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { DateRange, LayerType, SortingHint } from '../common/types';
 import type {
   LensSortActionData,
@@ -62,7 +57,6 @@ import {
   LENS_EDIT_PAGESIZE_ACTION,
 } from './visualizations/datatable/components/constants';
 import type { LensInspector } from './lens_inspector_service';
-import type { FormatSelectorOptions } from './datasources/form_based/dimension_panel/format_selector';
 import type { DataViewsState } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { Document } from './persistence/saved_object_store';
@@ -99,7 +93,7 @@ export type IndexPatternField = FieldSpec & {
    * Map of fields which can be used, but may fail partially (ranked lower than others)
    */
   partiallyApplicableFunctions?: Partial<Record<string, boolean>>;
-  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter';
+  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter' | 'position';
   timeSeriesRollup?: boolean;
   meta?: boolean;
   runtime?: boolean;
@@ -319,6 +313,7 @@ export function isMessageRemovable(message: UserMessage): message is RemovableUs
  */
 export interface Datasource<T = unknown, P = unknown> {
   id: string;
+  alias?: string[];
 
   // For initializing, either from an empty state or from persisted state
   // Because this will be called at runtime, state might have a type of `any` and
@@ -349,7 +344,7 @@ export interface Datasource<T = unknown, P = unknown> {
     prevState: T;
     layerId: string;
     columnId: string;
-    indexPatterns: IndexPatternMap;
+    indexPatterns?: IndexPatternMap;
   }) => T;
   initializeDimension?: (
     state: T,
@@ -372,35 +367,19 @@ export interface Datasource<T = unknown, P = unknown> {
   }) => T;
   getSelectedFields?: (state: T) => string[];
 
-  renderLayerSettings?: (
-    domElement: Element,
+  LayerSettingsComponent?: (
     props: DatasourceLayerSettingsProps<T>
-  ) => ((cleanupElement: Element) => void) | void;
-  renderDataPanel: (
-    domElement: Element,
-    props: DatasourceDataPanelProps<T>
-  ) => ((cleanupElement: Element) => void) | void;
-  renderDimensionTrigger: (
-    domElement: Element,
-    props: DatasourceDimensionTriggerProps<T>
-  ) => ((cleanupElement: Element) => void) | void;
-  renderDimensionEditor: (
-    domElement: Element,
+  ) => React.ReactElement<DatasourceLayerSettingsProps<T>> | null;
+  DataPanelComponent: (props: DatasourceDataPanelProps<T>) => JSX.Element | null;
+  DimensionTriggerComponent: (props: DatasourceDimensionTriggerProps<T>) => JSX.Element | null;
+  DimensionEditorComponent: (
     props: DatasourceDimensionEditorProps<T>
-  ) => ((cleanupElement: Element) => void) | void;
-  renderLayerPanel: (
-    domElement: Element,
-    props: DatasourceLayerPanelProps<T>
-  ) => ((cleanupElement: Element) => void) | void;
+  ) => ReactElement<DatasourceDimensionEditorProps<T>> | null;
+  LayerPanelComponent: (props: DatasourceLayerPanelProps<T>) => JSX.Element | null;
   getDropProps: (
     props: GetDropPropsArgs<T>
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
-  onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => boolean | undefined;
-  /**
-   * The datasource is allowed to cancel a close event on the dimension editor,
-   * mainly used for formulas
-   */
-  canCloseDimensionEditor?: (state: T) => boolean;
+  onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => T | undefined;
   getCustomWorkspaceRenderer?: (
     state: T,
     dragging: DraggingIdentifier,
@@ -437,6 +416,7 @@ export interface Datasource<T = unknown, P = unknown> {
     layerId: string,
     indexPatterns: IndexPatternMap,
     dateRange: DateRange,
+    nowInstant: Date,
     searchSessionId?: string
   ) => ExpressionAstExpression | string | null;
 
@@ -468,7 +448,7 @@ export interface Datasource<T = unknown, P = unknown> {
   /**
    * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
    */
-  uniqueLabels: (state: T) => Record<string, string>;
+  uniqueLabels: (state: T, indexPatterns: IndexPatternMap) => Record<string, string>;
   /**
    * Check the internal state integrity and returns a list of missing references
    */
@@ -539,6 +519,7 @@ export interface DatasourceFixAction<T> {
  */
 export interface DatasourcePublicAPI {
   datasourceId: string;
+  datasourceAliasIds?: string[];
   getTableSpec: () => Array<{ columnId: string; fields: string[] }>;
   getOperationForColumnId: (columnId: string) => OperationDescriptor | null;
   /**
@@ -586,7 +567,6 @@ export interface DatasourceLayerSettingsProps<T = unknown> {
 
 export interface DatasourceDataPanelProps<T = unknown> {
   state: T;
-  dragDropContext: DragContextState;
   setState: StateSetter<T, { applyImmediately?: boolean }>;
   showNoDataPopover: () => void;
   core: Pick<
@@ -657,7 +637,10 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
       forceRender?: boolean;
     }
   >;
-  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme'>;
+  core: Pick<
+    CoreStart,
+    'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme' | 'docLinks'
+  >;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
@@ -668,7 +651,6 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector: boolean;
   dataSectionExtra?: React.ReactNode;
-  formatSelectorOptions: FormatSelectorOptions | undefined;
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
@@ -705,24 +687,14 @@ export function isOperation(operationCandidate: unknown): operationCandidate is 
   );
 }
 
-export interface DatasourceDimensionDropProps<T> {
+export interface DatasourceDimensionDropHandlerProps<T> {
   target: DragDropOperation;
   state: T;
-  setState: StateSetter<
-    T,
-    {
-      isDimensionComplete?: boolean;
-      forceRender?: boolean;
-    }
-  >;
   targetLayerDimensionGroups: VisualizationDimensionGroupConfig[];
-}
-
-export type DatasourceDimensionDropHandlerProps<S> = DatasourceDimensionDropProps<S> & {
   source: DragDropIdentifier;
   dropType: DropType;
   indexPatterns: IndexPatternMap;
-};
+}
 
 export type FieldOnlyDataType =
   | 'document'
@@ -842,9 +814,9 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   supportStaticValue?: boolean;
   // used by text based datasource to restrict the field selection only to number fields for the metric dimensions
   isMetricDimension?: boolean;
+  isBreakdownDimension?: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector?: boolean;
-  formatSelectorOptions?: FormatSelectorOptions; // only relevant if supportFieldFormat is true
   labels?: { buttonAriaLabel: string; buttonLabel: string };
 };
 
@@ -1027,9 +999,22 @@ export interface VisualizationLayerDescription {
     autoTimeField?: boolean;
   }>;
 }
+
+export type RegisterLibraryAnnotationGroupFunction = (groupInfo: {
+  id: string;
+  group: EventAnnotationGroupConfig;
+}) => void;
+interface AddLayerButtonProps {
+  supportedLayers: VisualizationLayerDescription[];
+  addLayer: AddLayerFunction;
+  ensureIndexPattern: (specOrId: DataViewSpec | string) => Promise<void>;
+  registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
+}
+
 export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown> {
   /** Plugin ID, such as "lnsXY" */
   id: string;
+  alias?: string[];
 
   /**
    * Initialize is allowed to modify the state stored in memory. The initialize function
@@ -1114,8 +1099,18 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     layerId: string,
     state: T,
     setState: StateSetter<T>,
+    registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction,
     isSaveable?: boolean
   ) => LayerAction[];
+
+  /**
+   * This method is a clunky solution to the problem, but I'm banking on the confirm modal being removed
+   * with undo/redo anyways
+   */
+  getCustomRemoveLayerText?: (
+    layerId: string,
+    state: T
+  ) => { title?: string; description?: string } | undefined;
 
   /** returns the type string of the given layer */
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
@@ -1145,27 +1140,24 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * Header rendered as layer title. This can be used for both static and dynamic content like
    * for extra configurability, such as for switch chart type
    */
-  renderLayerHeader?: (
-    domElement: Element,
+  LayerHeaderComponent?: (
     props: VisualizationLayerWidgetProps<T>
-  ) => ((cleanupElement: Element) => void) | void;
+  ) => null | ReactElement<VisualizationLayerWidgetProps<T>>;
 
   /**
    * Layer panel content rendered. This can be used to render a custom content below the title,
    * like a custom dataview switch
    */
-  renderLayerPanel?: (
-    domElement: Element,
+  LayerPanelComponent?: (
     props: VisualizationLayerWidgetProps<T>
-  ) => ((cleanupElement: Element) => void) | void;
+  ) => null | ReactElement<VisualizationLayerWidgetProps<T>>;
   /**
    * Toolbar rendered above the visualization. This is meant to be used to provide chart-level
    * settings for the visualization.
    */
-  renderToolbar?: (
-    domElement: Element,
+  ToolbarComponent?: (
     props: VisualizationToolbarProps<T>
-  ) => ((cleanupElement: Element) => void) | void;
+  ) => null | ReactElement<VisualizationToolbarProps<T>>;
 
   /**
    * The frame is telling the visualization to update or set a dimension based on user interaction
@@ -1200,52 +1192,42 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    */
   hasLayerSettings?: (props: VisualizationConfigProps<T>) => Record<'data' | 'appearance', boolean>;
 
-  renderLayerSettings?: (
-    domElement: Element,
+  LayerSettingsComponent?: (
     props: VisualizationLayerSettingsProps<T> & { section: 'data' | 'appearance' }
-  ) => ((cleanupElement: Element) => void) | void;
+  ) => null | ReactElement<VisualizationLayerSettingsProps<T>>;
 
   /**
    * Additional editor that gets rendered inside the dimension popover in the "appearance" section.
    * This can be used to configure dimension-specific options
    */
-  renderDimensionEditor?: (
-    domElement: Element,
+  DimensionEditorComponent?: (
     props: VisualizationDimensionEditorProps<T>
-  ) => ((cleanupElement: Element) => void) | void;
+  ) => null | ReactElement<VisualizationDimensionEditorProps<T>>;
   /**
    * Additional editor that gets rendered inside the dimension popover in an additional section below "appearance".
    * This can be used to configure dimension-specific options
    */
-  renderDimensionEditorAdditionalSection?: (
-    domElement: Element,
+  DimensionEditorAdditionalSectionComponent?: (
     props: VisualizationDimensionEditorProps<T>
-  ) => ((cleanupElement: Element) => void) | void;
+  ) => null | ReactElement<VisualizationDimensionEditorProps<T>>;
   /**
    * Additional editor that gets rendered inside the data section.
    * This can be used to configure dimension-specific options
    */
-  renderDimensionEditorDataExtra?: (
-    domElement: Element,
+  DimensionEditorDataExtraComponent?: (
     props: VisualizationDimensionEditorProps<T>
-  ) => ((cleanupElement: Element) => void) | void;
+  ) => null | ReactElement<VisualizationDimensionEditorProps<T>>;
   /**
    * Renders dimension trigger. Used only for noDatasource layers
    */
-  renderDimensionTrigger?: (props: {
+  DimensionTriggerComponent?: (props: {
     columnId: string;
     label: string;
     hideTooltip?: boolean;
-  }) => JSX.Element | null;
-  getAddLayerButtonComponent?: (props: {
-    supportedLayers: VisualizationLayerDescription[];
-    addLayer: AddLayerFunction;
-    ensureIndexPattern: (specOrId: DataViewSpec | string) => Promise<void>;
-    registerLibraryAnnotationGroup: (groupInfo: {
-      id: string;
-      group: EventAnnotationGroupConfig;
-    }) => void;
-  }) => JSX.Element | null;
+  }) => null | ReactElement<{ columnId: string; label: string; hideTooltip?: boolean }>;
+  getAddLayerButtonComponent?: (
+    props: AddLayerButtonProps
+  ) => null | ReactElement<AddLayerButtonProps>;
   /**
    * Creates map of columns ids and unique lables. Used only for noDatasource layers
    */
@@ -1349,6 +1331,12 @@ export interface LensTableRowContextMenuEvent {
   name: 'tableRowContextMenuClick';
   data: RowClickContext['data'];
 }
+
+export type TriggerEvent =
+  | BrushTriggerEvent
+  | ClickTriggerEvent
+  | MultiClickTriggerEvent
+  | LensTableRowContextMenuEvent;
 
 export function isLensFilterEvent(event: ExpressionRendererEvent): event is ClickTriggerEvent {
   return event.name === 'filter';

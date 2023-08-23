@@ -11,7 +11,7 @@ export const YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT = i18n.translate(
   'xpack.elasticAssistant.assistant.content.prompts.system.youAreAHelpfulExpertAssistant',
   {
     defaultMessage:
-      'You are a helpful, expert assistant who only answers questions about Elastic Security.',
+      'You are a helpful, expert assistant who answers questions about Elastic Security.',
   }
 );
 
@@ -43,7 +43,7 @@ ${USE_THE_FOLLOWING_CONTEXT_TO_ANSWER}`;
 export const DEFAULT_SYSTEM_PROMPT_NAME = i18n.translate(
   'xpack.elasticAssistant.assistant.content.prompts.system.defaultSystemPromptName',
   {
-    defaultMessage: 'default system prompt',
+    defaultMessage: 'Default system prompt',
   }
 );
 

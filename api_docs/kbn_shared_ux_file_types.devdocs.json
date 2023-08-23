@@ -79,7 +79,7 @@
               "\nFind a set of files given some filters.\n"
             ],
             "signature": [
-              "(args: { kind?: string | string[] | undefined; kindToExclude?: string | string[] | undefined; status?: string | string[] | undefined; extension?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
+              "(args: { kind?: string | string[] | undefined; kindToExclude?: string | string[] | undefined; status?: string | string[] | undefined; extension?: string | string[] | undefined; mimeType?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
               {
                 "pluginId": "@kbn/shared-ux-file-types",
                 "scope": "common",
@@ -119,7 +119,7 @@
                   "- File filters"
                 ],
                 "signature": [
-                  "{ kind?: string | string[] | undefined; kindToExclude?: string | string[] | undefined; status?: string | string[] | undefined; extension?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
+                  "{ kind?: string | string[] | undefined; kindToExclude?: string | string[] | undefined; status?: string | string[] | undefined; extension?: string | string[] | undefined; mimeType?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
                   {
                     "pluginId": "@kbn/shared-ux-file-types",
                     "scope": "common",
@@ -374,7 +374,7 @@
               "\nList all file objects, of a given {@link FileKindBrowser}.\n"
             ],
             "signature": [
-              "(args: { kind: string; status?: string | string[] | undefined; extension?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
+              "(args: { kind: string; status?: string | string[] | undefined; extension?: string | string[] | undefined; mimeType?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
               {
                 "pluginId": "@kbn/shared-ux-file-types",
                 "scope": "common",
@@ -414,7 +414,7 @@
                   "- list files args"
                 ],
                 "signature": [
-                  "{ kind: string; status?: string | string[] | undefined; extension?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
+                  "{ kind: string; status?: string | string[] | undefined; extension?: string | string[] | undefined; mimeType?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
                   {
                     "pluginId": "@kbn/shared-ux-file-types",
                     "scope": "common",

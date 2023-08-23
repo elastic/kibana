@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export {
-  composeValidators,
-  isRuntimeMappings,
-  patternValidator,
-  isRuntimeField,
-  type ChartData,
-} from '@kbn/ml-plugin/common';
+export { composeValidators, patternValidator } from '@kbn/ml-plugin/common';

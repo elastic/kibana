@@ -9,7 +9,11 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless common API', function () {
-    loadTestFile(require.resolve('./switch_project'));
     loadTestFile(require.resolve('./security_users'));
+    loadTestFile(require.resolve('./spaces'));
+    loadTestFile(require.resolve('./security_response_headers'));
+    loadTestFile(require.resolve('./rollups'));
+    loadTestFile(require.resolve('./index_management'));
+    loadTestFile(require.resolve('./alerting'));
   });
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { JSXElementConstructor, ReactElement } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
   KibanaContextProvider,
@@ -15,21 +15,27 @@ import { of } from 'rxjs';
 import { action } from '@storybook/addon-actions';
 import type { DecoratorFn } from '@storybook/react';
 import { useParameter } from '@storybook/addons';
-import { DeepPartial } from 'utility-types';
-import { LocatorPublic } from '@kbn/share-plugin/public';
+import type { DeepPartial } from 'utility-types';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
+import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/data-plugin/public';
+import { AlertSummaryWidget } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alert_summary_widget/alert_summary_widget';
+import type { Theme } from '@elastic/charts/dist/utils/themes/theme';
+import type { AlertSummaryWidgetProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alert_summary_widget';
 import type { PluginKibanaContextValue } from '../../../hooks/use_kibana';
 import { SourceProvider } from '../../../containers/metrics_source';
 import { getHttp } from './context/http';
-import { ProcessesHttpMocks } from './context/fixtures/processes';
-import { MetadataResponseMocks } from './context/fixtures/metadata';
+import { assetDetailsState, getLogEntries } from './context/fixtures';
+import { AssetDetailsStateProvider } from '../hooks/use_asset_details_state';
+
+const settings: Record<string, any> = {
+  'dateFormat:scaled': [['', 'HH:mm:ss.SSS']],
+};
+const getSettings = (key: string): any => settings[key];
 
 export const DecorateWithKibanaContext: DecoratorFn = (story) => {
-  const initialProcesses = useParameter<{ mock: ProcessesHttpMocks | MetadataResponseMocks }>(
-    'apiResponse',
-    {
-      mock: 'default',
-    }
-  )!;
+  const initialProcesses = useParameter<{ mock: string }>('apiResponse', {
+    mock: 'default',
+  })!;
 
   const mockServices: DeepPartial<KibanaReactContextValue<PluginKibanaContextValue>['services']> = {
     application: {
@@ -40,17 +46,54 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
       getUrlForApp: (url: string) => url,
     },
     data: {
+      search: {
+        search: (request: IKibanaSearchRequest, options?: ISearchOptions) => {
+          return getLogEntries(request, options) as any;
+        },
+      },
       query: {
         filterManager: {
-          addFilters: () => action(`addFilters`),
-          removeFilter: () => action(`removeFilter`),
+          addFilters: () => {},
+          removeFilter: () => {},
         },
+      },
+    },
+    locators: {
+      nodeLogsLocator: {
+        getRedirectUrl: () => {
+          return '';
+        },
+      },
+    },
+    uiActions: {
+      getTriggerCompatibleActions: () => {
+        return Promise.resolve([]);
+      },
+    },
+    uiSettings: {
+      get: () => ({ key: 'mock', defaultOverride: undefined } as any),
+    },
+    triggersActionsUi: {
+      getAlertSummaryWidget: AlertSummaryWidget as (
+        props: AlertSummaryWidgetProps
+      ) => ReactElement<AlertSummaryWidgetProps, string | JSXElementConstructor<any>>,
+    },
+    charts: {
+      theme: {
+        useChartsTheme: () => ({} as Theme),
+        useChartsBaseTheme: () => ({} as Theme),
+      },
+    },
+    settings: {
+      client: {
+        get$: (key: string) => of(getSettings(key)),
+        get: getSettings,
       },
     },
     notifications: {
       toasts: {
-        add: () => {
-          action('toast');
+        add: (params) => {
+          action('notifications.toats.add')(params);
           return { id: 'id' };
         },
       },
@@ -61,15 +104,19 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
         locators: {
           get: (_id: string) =>
             ({
-              navigate: async () =>
-                Promise.resolve(() => {
-                  action(
-                    'https://kibana:8080/base-path/app/uptime/?search=host.name: "host1" OR host.ip: "192.168.0.1" OR monitor.ip: "192.168.0.1"'
-                  );
-                }),
+              navigate: async () => {
+                return Promise.resolve();
+              },
             } as unknown as LocatorPublic<any>),
         },
       },
+    },
+    lens: {
+      navigateToPrefilledEditor: () => {},
+      stateHelperApi: () => new Promise(() => {}),
+    },
+    telemetry: {
+      reportAssetDetailsFlyoutViewed: () => {},
     },
   };
 
@@ -80,4 +127,8 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
       </KibanaContextProvider>
     </I18nProvider>
   );
+};
+
+export const DecorateWithAssetDetailsStateContext: DecoratorFn = (story) => {
+  return <AssetDetailsStateProvider state={assetDetailsState}>{story()}</AssetDetailsStateProvider>;
 };

@@ -36,11 +36,11 @@ describe('getSeverityStatusColor', () => {
   });
 
   it('should return the correct color for MEDIUM severity', () => {
-    expect(getSeverityStatusColor('MEDIUM')).toBe(euiThemeVars.euiColorVis7);
+    expect(getSeverityStatusColor('MEDIUM')).toBe(euiThemeVars.euiColorVis5_behindText);
   });
 
   it('should return the correct color for HIGH severity', () => {
-    expect(getSeverityStatusColor('HIGH')).toBe(euiThemeVars.euiColorVis9);
+    expect(getSeverityStatusColor('HIGH')).toBe(euiThemeVars.euiColorVis9_behindText);
   });
 
   it('should return the correct color for CRITICAL severity', () => {

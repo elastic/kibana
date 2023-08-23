@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import {
   formatDurationFromTimeUnitChar,
   getAlertUrl,
+  observabilityPaths,
   ProcessorEvent,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
@@ -17,7 +19,10 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
-import { termQuery } from '@kbn/observability-plugin/server';
+import {
+  getParsedFilterQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { firstValueFrom } from 'rxjs';
@@ -50,6 +55,7 @@ import {
 } from '../get_service_group_fields';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
+import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.ErrorCount];
 
@@ -82,6 +88,7 @@ export function registerErrorCountRuleType({
           apmActionVariables.serviceName,
           apmActionVariables.transactionName,
           apmActionVariables.errorGroupingKey,
+          apmActionVariables.errorGroupingName,
           apmActionVariables.threshold,
           apmActionVariables.triggerValue,
           apmActionVariables.viewInAppUrl,
@@ -96,10 +103,9 @@ export function registerErrorCountRuleType({
         spaceId,
         startedAt,
       }) => {
-        const predefinedGroupby = [SERVICE_NAME, SERVICE_ENVIRONMENT];
-
-        const allGroupbyFields = Array.from(
-          new Set([...predefinedGroupby, ...(ruleParams.groupBy ?? [])])
+        const allGroupByFields = getAllGroupByFields(
+          ApmRuleType.ErrorCount,
+          ruleParams.groupBy
         );
 
         const config = await firstValueFrom(config$);
@@ -115,6 +121,18 @@ export function registerErrorCountRuleType({
           config,
           savedObjectsClient,
         });
+
+        const termFilterQuery = !ruleParams.kqlFilter
+          ? [
+              ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
+                queryEmptyString: false,
+              }),
+              ...termQuery(ERROR_GROUP_ID, ruleParams.errorGroupingKey, {
+                queryEmptyString: false,
+              }),
+              ...environmentQuery(ruleParams.environment),
+            ]
+          : [];
 
         const searchParams = {
           index: indices.error,
@@ -132,20 +150,15 @@ export function registerErrorCountRuleType({
                     },
                   },
                   { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
-                  ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
-                    queryEmptyString: false,
-                  }),
-                  ...termQuery(ERROR_GROUP_ID, ruleParams.errorGroupingKey, {
-                    queryEmptyString: false,
-                  }),
-                  ...environmentQuery(ruleParams.environment),
+                  ...termFilterQuery,
+                  ...getParsedFilterQuery(ruleParams.kqlFilter),
                 ],
               },
             },
             aggs: {
               error_counts: {
                 multi_terms: {
-                  terms: getGroupByTerms(allGroupbyFields),
+                  terms: getGroupByTerms(allGroupByFields),
                   size: 1000,
                   order: { _count: 'desc' as const },
                 },
@@ -164,7 +177,7 @@ export function registerErrorCountRuleType({
           response.aggregations?.error_counts.buckets.map((bucket) => {
             const groupByFields = bucket.key.reduce(
               (obj, bucketKey, bucketIndex) => {
-                obj[allGroupbyFields[bucketIndex]] = bucketKey;
+                obj[allGroupByFields[bucketIndex]] = bucketKey;
                 return obj;
               },
               {} as Record<string, string>
@@ -253,6 +266,8 @@ export function registerErrorCountRuleType({
         return { state: {} };
       },
       alerts: ApmRuleTypeAlertDefinition,
+      getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+        observabilityPaths.ruleDetails(rule.id),
     })
   );
 }

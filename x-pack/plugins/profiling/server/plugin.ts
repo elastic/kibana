@@ -7,7 +7,7 @@
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { ProfilingConfig } from '.';
-import { PROFILING_FEATURE } from './feature';
+import { PROFILING_FEATURE, PROFILING_SERVER_FEATURE_ID } from './feature';
 import { registerRoutes } from './routes';
 import {
   ProfilingPluginSetup,
@@ -35,12 +35,16 @@ export class ProfilingPlugin
   }
 
   public setup(core: CoreSetup<ProfilingPluginStartDeps>, deps: ProfilingPluginSetupDeps) {
-    this.logger.debug('profiling: Setup');
     const router = core.http.createRouter<ProfilingRequestHandlerContext>();
 
     deps.features.registerKibanaFeature(PROFILING_FEATURE);
 
     const config = this.initializerContext.config.get();
+    const stackVersion = this.initializerContext.env.packageInfo.version;
+
+    const telemetryUsageCounter = deps.usageCollection?.createUsageCounter(
+      PROFILING_SERVER_FEATURE_ID
+    );
 
     core.getStartServices().then(([coreStart, depsStart]) => {
       const profilingSpecificEsClient = config.elasticsearch
@@ -57,6 +61,9 @@ export class ProfilingPlugin
         dependencies: {
           start: depsStart,
           setup: deps,
+          config,
+          stackVersion,
+          telemetryUsageCounter,
         },
         services: {
           createProfilingEsClient: ({
@@ -79,7 +86,6 @@ export class ProfilingPlugin
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('profiling: Started');
     return {};
   }
 

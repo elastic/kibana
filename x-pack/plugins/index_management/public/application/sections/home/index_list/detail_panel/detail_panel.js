@@ -6,8 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
-// eslint-disable-next-line no-restricted-imports
-import { Route } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiCallOut,

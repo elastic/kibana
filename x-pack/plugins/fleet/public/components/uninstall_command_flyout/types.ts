@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { PLATFORM_TYPE } from '../../hooks';
-
 export const UNINSTALL_COMMAND_TARGETS = ['agent', 'endpoint'] as const;
 export type UninstallCommandTarget = typeof UNINSTALL_COMMAND_TARGETS[number];
 
+export type PLATFORMS_FOR_UNINSTALL = 'linuxOrMac' | 'windows';
+
 export type Commands = {
-  [key in PLATFORM_TYPE]?: string;
+  [key in PLATFORMS_FOR_UNINSTALL]: string;
 };

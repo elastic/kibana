@@ -7,11 +7,12 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
+import { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
-import { EncryptedSyntheticsMonitor, ServiceLocations } from '../../common/runtime_types';
+import { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
+import { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
 import { monitorAttributes, syntheticsMonitorType } from '../../common/types/saved_objects';
-import { RouteContext } from '../legacy_uptime/routes';
 
 const StringOrArraySchema = schema.maybe(
   schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
@@ -31,6 +32,7 @@ export const QuerySchema = schema.object({
   schedules: StringOrArraySchema,
   status: StringOrArraySchema,
   searchAfter: schema.maybe(schema.arrayOf(schema.string())),
+  monitorQueryIds: StringOrArraySchema,
 });
 
 export type MonitorsQuery = TypeOf<typeof QuerySchema>;
@@ -62,7 +64,7 @@ export const SEARCH_FIELDS = [
 export const getMonitors = async (
   context: RouteContext<MonitorsQuery>,
   { fields }: { fields?: string[] } = {}
-): Promise<SavedObjectsFindResponse<EncryptedSyntheticsMonitor>> => {
+): Promise<SavedObjectsFindResponse<EncryptedSyntheticsMonitorAttributes>> => {
   const {
     perPage = 50,
     page,
@@ -76,6 +78,7 @@ export const getMonitors = async (
     searchAfter,
     projects,
     schedules,
+    monitorQueryIds,
   } = context.request.query;
 
   const filterStr = await getMonitorFilters({
@@ -85,10 +88,11 @@ export const getMonitors = async (
     locations,
     projects,
     schedules,
+    monitorQueryIds,
     context,
   });
 
-  return context.savedObjectsClient.find({
+  const findParams = {
     type: syntheticsMonitorType,
     perPage,
     page,
@@ -99,7 +103,9 @@ export const getMonitors = async (
     filter: filterStr,
     searchAfter,
     fields,
-  });
+  };
+
+  return context.savedObjectsClient.find(findParams);
 };
 
 export const getMonitorFilters = async ({
@@ -109,6 +115,7 @@ export const getMonitorFilters = async ({
   projects,
   monitorTypes,
   schedules,
+  monitorQueryIds,
   context,
 }: {
   filter?: string;
@@ -117,6 +124,7 @@ export const getMonitorFilters = async ({
   locations?: string | string[];
   projects?: string | string[];
   schedules?: string | string[];
+  monitorQueryIds?: string | string[];
   context: RouteContext;
 }) => {
   const locationFilter = await parseLocationFilter(context, locations);
@@ -128,6 +136,7 @@ export const getMonitorFilters = async ({
     getKqlFilter({ field: 'type', values: monitorTypes }),
     getKqlFilter({ field: 'locations.id', values: locationFilter }),
     getKqlFilter({ field: 'schedule.number', values: schedules }),
+    getKqlFilter({ field: 'id', values: monitorQueryIds }),
   ]
     .filter((f) => !!f)
     .join(' AND ');
@@ -177,7 +186,10 @@ const parseLocationFilter = async (context: RouteContext, locations?: string | s
   return findLocationItem(locations, allLocations)?.id ?? '';
 };
 
-export const findLocationItem = (query: string, locations: ServiceLocations) => {
+export const findLocationItem = (
+  query: string,
+  locations: Array<ServiceLocation | PrivateLocation>
+) => {
   return locations.find(({ id, label }) => query === id || label === query);
 };
 
@@ -187,8 +199,17 @@ export const findLocationItem = (query: string, locations: ServiceLocations) => 
  * @param monitorQuery { MonitorsQuery }
  */
 export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
-  const { query, tags, monitorTypes, locations, status, filter, projects, schedules } =
-    monitorQuery;
+  const {
+    query,
+    tags,
+    monitorTypes,
+    locations,
+    status,
+    filter,
+    projects,
+    schedules,
+    monitorQueryIds,
+  } = monitorQuery;
 
   return (
     !!query ||
@@ -198,7 +219,8 @@ export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
     !!tags?.length ||
     !!status?.length ||
     !!projects?.length ||
-    !!schedules?.length
+    !!schedules?.length ||
+    !!monitorQueryIds?.length
   );
 };
 

@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import { CASES_URL } from '@kbn/cases-plugin/common/constants';
-import { CommentType } from '@kbn/cases-plugin/common/api';
+import { CASES_URL, MAX_COMMENTS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getPostCaseRequest,
@@ -106,7 +106,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       expect(caseComments.comments.length).to.eql(1);
-      expect(caseComments.comments[0].type).to.eql(CommentType.user);
+      expect(caseComments.comments[0].type).to.eql(AttachmentType.user);
     });
 
     describe('unhappy paths', () => {
@@ -114,7 +114,7 @@ export default ({ getService }: FtrProviderContext): void => {
         { name: 'field is wrong type', queryParams: { perPage: true } },
         { name: 'field is unknown', queryParams: { foo: 'bar' } },
         { name: 'page > 10k', queryParams: { page: 10001 } },
-        { name: 'perPage > 10k', queryParams: { perPage: 10001 } },
+        { name: 'perPage > 100', queryParams: { perPage: MAX_COMMENTS_PER_PAGE + 1 } },
         { name: 'page * perPage > 10k', queryParams: { page: 2, perPage: 9001 } },
       ]) {
         it(`400s when ${errorScenario.name}`, async () => {

@@ -6,31 +6,40 @@
  */
 
 import {
-  cpu,
+  cpuUsage,
   diskIORead,
   diskIOWrite,
-  load,
-  memory,
-  memoryAvailable,
+  diskReadThroughput,
+  diskWriteThroughput,
+  diskSpaceAvailability,
+  diskSpaceAvailable,
+  diskSpaceUsage,
+  logRate,
+  normalizedLoad1m,
+  memoryUsage,
+  memoryFree,
   rx,
   tx,
   hostCount,
 } from './lens/formulas/host';
-import { LineChart, MetricChart } from './lens/visualization_types';
 
 export const hostLensFormulas = {
-  cpu,
+  cpuUsage,
   diskIORead,
   diskIOWrite,
+  diskReadThroughput,
+  diskWriteThroughput,
+  diskSpaceAvailability,
+  diskSpaceAvailable,
+  diskSpaceUsage,
   hostCount,
-  load,
-  memory,
-  memoryAvailable,
+  logRate,
+  normalizedLoad1m,
+  memoryUsage,
+  memoryFree,
   rx,
   tx,
 };
 
-export const visualizationTypes = {
-  lineChart: LineChart,
-  metricChart: MetricChart,
-};
+export const HOST_METRICS_DOC_HREF = 'https://ela.st/docs-infra-host-metrics';
+export const HOST_METRICS_DOTTED_LINES_DOC_HREF = 'https://ela.st/docs-infra-why-dotted';

@@ -11,26 +11,26 @@ import { wait } from '@testing-library/user-event/dist/utils';
 import React from 'react';
 
 import { emptySloList } from '../../data/slo/slo';
-import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
+import { useFetchSloDefinitions } from '../../hooks/slo/use_fetch_slo_definitions';
 import { render } from '../../utils/test_helper';
 import { SloSelector } from './slo_selector';
 
-jest.mock('../../hooks/slo/use_fetch_slo_list');
+jest.mock('../../hooks/slo/use_fetch_slo_definitions');
 
-const useFetchSloListMock = useFetchSloList as jest.Mock;
+const useFetchSloDefinitionsMock = useFetchSloDefinitions as jest.Mock;
 
 describe('SLO Selector', () => {
   const onSelectedSpy = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
-    useFetchSloListMock.mockReturnValue({ isLoading: true, sloList: emptySloList });
+    useFetchSloDefinitionsMock.mockReturnValue({ isLoading: true, data: emptySloList });
   });
 
   it('fetches SLOs asynchronously', async () => {
     render(<SloSelector onSelected={onSelectedSpy} />);
 
     expect(screen.getByTestId('sloSelector')).toBeTruthy();
-    expect(useFetchSloListMock).toHaveBeenCalledWith({ name: '' });
+    expect(useFetchSloDefinitionsMock).toHaveBeenCalledWith({ name: '' });
   });
 
   it('searches SLOs when typing', async () => {
@@ -42,6 +42,6 @@ describe('SLO Selector', () => {
       await wait(310); // debounce delay
     });
 
-    expect(useFetchSloListMock).toHaveBeenCalledWith({ name: 'latency' });
+    expect(useFetchSloDefinitionsMock).toHaveBeenCalledWith({ name: 'latency' });
   });
 });

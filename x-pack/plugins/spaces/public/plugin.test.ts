@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { advancedSettingsMock } from '@kbn/advanced-settings-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import {
@@ -14,13 +13,14 @@ import {
 } from '@kbn/management-plugin/public/mocks';
 
 import { SpacesPlugin } from './plugin';
+// import { ConfigSchema } from './config';
 
 describe('Spaces plugin', () => {
   describe('#setup', () => {
     it('should register the spaces API and the space selector app', () => {
       const coreSetup = coreMock.createSetup();
 
-      const plugin = new SpacesPlugin();
+      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext());
       plugin.setup(coreSetup, {});
 
       expect(coreSetup.application.register).toHaveBeenCalledWith(
@@ -43,7 +43,7 @@ describe('Spaces plugin', () => {
 
       management.sections.section.kibana = mockSection;
 
-      const plugin = new SpacesPlugin();
+      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext());
       plugin.setup(coreSetup, {
         management,
         home,
@@ -62,29 +62,6 @@ describe('Spaces plugin', () => {
         })
       );
     });
-
-    it('should register the advanced settings components if the advanced_settings plugin is available', () => {
-      const coreSetup = coreMock.createSetup();
-      const advancedSettings = advancedSettingsMock.createSetupContract();
-
-      const plugin = new SpacesPlugin();
-      plugin.setup(coreSetup, { advancedSettings });
-
-      expect(advancedSettings.component.register.mock.calls).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "advanced_settings_page_title",
-            [Function],
-            true,
-          ],
-          Array [
-            "advanced_settings_page_subtitle",
-            [Function],
-            true,
-          ],
-        ]
-      `);
-    });
   });
 
   describe('#start', () => {
@@ -92,7 +69,7 @@ describe('Spaces plugin', () => {
       const coreSetup = coreMock.createSetup();
       const coreStart = coreMock.createStart();
 
-      const plugin = new SpacesPlugin();
+      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext());
       plugin.setup(coreSetup, {});
 
       plugin.start(coreStart);

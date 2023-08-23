@@ -11,10 +11,15 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
-import type { Field, NewJobCaps, RollupFields } from '../../../../common/types/fields';
+import {
+  type Field,
+  type NewJobCaps,
+  type RollupFields,
+  mlJobAggregations,
+  mlJobAggregationsWithoutEsEquivalent,
+} from '@kbn/ml-anomaly-utils';
 import { combineFieldsAndAggs } from '../../../../common/util/fields_utils';
 import { rollupServiceProvider } from './rollup';
-import { aggregations, mlOnlyAggregations } from '../../../../common/constants/aggregation_types';
 
 const supportedTypes: string[] = [
   ES_FIELD_TYPES.DATE,
@@ -144,7 +149,7 @@ class FieldsService {
       }
     }
 
-    const aggs = cloneDeep([...aggregations, ...mlOnlyAggregations]);
+    const aggs = cloneDeep([...mlJobAggregations, ...mlJobAggregationsWithoutEsEquivalent]);
     const fields: Field[] = await this.createFields(includeNested);
 
     return combineFieldsAndAggs(fields, aggs, rollupFields);

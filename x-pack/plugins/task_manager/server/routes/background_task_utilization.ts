@@ -115,6 +115,7 @@ export function backgroundTaskUtilizationRoute(
         // options: { tags: ['access:taskManager'] },
         validate: false,
         options: {
+          access: 'public', // access must be public to allow "system" users, like metrics collectors, to access these routes
           authRequired: routeOption.isAuthenticated ?? true,
         },
       },

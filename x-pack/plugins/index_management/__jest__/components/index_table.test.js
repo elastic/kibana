@@ -144,7 +144,7 @@ const getActionMenuButtons = (rendered) => {
 describe('index table', () => {
   const { httpSetup, httpRequestsMockHelpers } = initHttpRequests();
 
-  beforeEach(() => {
+  const setupMockComponent = (dependenciesOverride) => {
     // Mock initialization of services
     const services = {
       extensionsService: new ExtensionsService(),
@@ -168,12 +168,17 @@ describe('index table', () => {
       },
       plugins: {},
       url: urlServiceMock,
+      // Default stateful configuration
+      config: {
+        enableLegacyTemplates: true,
+        enableIndexActions: true,
+      },
     };
 
     component = (
       <Provider store={store}>
         <MemoryRouter initialEntries={[`${BASE_PATH}indices`]}>
-          <AppContextProvider value={appDependencies}>
+          <AppContextProvider value={{ ...appDependencies, ...dependenciesOverride }}>
             <AppWithoutRouter />
           </AppContextProvider>
         </MemoryRouter>
@@ -181,6 +186,11 @@ describe('index table', () => {
     );
 
     store.dispatch(loadIndicesSuccess({ indices }));
+  };
+
+  beforeEach(() => {
+    // Mock initialization of services
+    setupMockComponent();
 
     httpRequestsMockHelpers.setLoadIndicesResponse(indices);
     httpRequestsMockHelpers.setReloadIndicesResponse(indices);
@@ -505,5 +515,26 @@ describe('index table', () => {
     await runAllPromises();
     rendered.update();
     testEditor(rendered, 'editIndexMenuButton');
+  });
+
+  describe('Common index actions', () => {
+    beforeEach(() => {
+      // Mock initialization of services; set enableIndexActions=false to verify config behavior
+      setupMockComponent({ config: { enableIndexActions: false, enableLegacyTemplates: true } });
+    });
+
+    test('Common index actions should be hidden when feature is turned off', async () => {
+      const rendered = mountWithIntl(component);
+      await runAllPromises();
+      rendered.update();
+
+      expect(findTestSubject(rendered, 'showStatsIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'closeIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'forcemergeIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'refreshIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'clearCacheIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'flushIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'unfreezeIndexMenuButton').length).toBe(0);
+    });
   });
 });

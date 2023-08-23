@@ -33,12 +33,16 @@ import type {
 import { i18n } from '@kbn/i18n';
 import {
   BrowserFields,
-  CellValueElementProps,
+  DeprecatedCellValueElementProps,
   ColumnHeaderOptions,
-  RowRenderer,
+  DeprecatedRowRenderer,
   TimelineItem,
 } from '@kbn/timelines-plugin/common';
-import { useDataGridColumnsCellActions } from '@kbn/cell-actions';
+import {
+  useDataGridColumnsCellActions,
+  UseDataGridColumnsCellActionsProps,
+} from '@kbn/cell-actions';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { DataTableModel, DataTableState } from '../../store/data_table/types';
 
 import { getColumnHeader, getColumnHeaders } from './column_headers/helpers';
@@ -84,15 +88,16 @@ interface BaseDataTableProps {
   id: string;
   leadingControlColumns: EuiDataGridControlColumn[];
   loadPage: (newActivePage: number) => void;
-  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
-  rowRenderers: RowRenderer[];
+  renderCellValue: (props: DeprecatedCellValueElementProps) => React.ReactNode;
+  rowRenderers: DeprecatedRowRenderer[];
   hasCrudPermissions?: boolean;
   unitCountText: string;
-  pagination: EuiDataGridPaginationProps;
+  pagination: EuiDataGridPaginationProps & { pageSize: number };
   totalItems: number;
   rowHeightsOptions?: EuiDataGridRowHeightsOptions;
   isEventRenderedView?: boolean;
   getFieldBrowser: GetFieldBrowser;
+  getFieldSpec: (fieldName: string) => FieldSpec | undefined;
   cellActionsTriggerId?: string;
 }
 
@@ -132,6 +137,7 @@ const memoizedGetColumnHeaders: (
   isEventRenderedView: boolean
 ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
+// eslint-disable-next-line react/display-name
 export const DataTableComponent = React.memo<DataTableProps>(
   ({
     additionalControls,
@@ -151,6 +157,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
     rowHeightsOptions,
     isEventRenderedView = false,
     getFieldBrowser,
+    getFieldSpec,
     cellActionsTriggerId,
     ...otherProps
   }) => {
@@ -327,30 +334,38 @@ export const DataTableComponent = React.memo<DataTableProps>(
       [dispatch, id]
     );
 
-    const columnsCellActionsProps = useMemo(() => {
-      const fields = !cellActionsTriggerId
-        ? []
-        : columnHeaders.map((column) => ({
-            name: column.id,
-            type: column.type ?? 'keyword',
-            values: data.map(
-              ({ data: columnData }) =>
-                columnData.find((rowData) => rowData.field === column.id)?.value
-            ),
-            aggregatable: column.aggregatable,
-          }));
+    const cellActionsMetadata = useMemo(() => ({ scopeId: id }), [id]);
+    const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
+      () =>
+        cellActionsTriggerId
+          ? columnHeaders.map(
+              (column) =>
+                getFieldSpec(column.id) ?? {
+                  name: column.id,
+                  type: '', // When type is an empty string all cell actions are incompatible
+                  aggregatable: false,
+                  searchable: false,
+                }
+            )
+          : undefined,
+      [cellActionsTriggerId, columnHeaders, getFieldSpec]
+    );
 
-      return {
-        triggerId: cellActionsTriggerId || '',
-        fields,
-        metadata: {
-          scopeId: id,
-        },
-        dataGridRef,
-      };
-    }, [columnHeaders, cellActionsTriggerId, id, data]);
+    const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
+      (fieldName, rowIndex) => {
+        const pageIndex = rowIndex % data.length;
+        return data[pageIndex].data.find((rowData) => rowData.field === fieldName)?.value;
+      },
+      [data]
+    );
 
-    const columnsCellActions = useDataGridColumnsCellActions(columnsCellActionsProps);
+    const columnsCellActions = useDataGridColumnsCellActions({
+      triggerId: cellActionsTriggerId,
+      fields: cellActionsFields,
+      getCellValue,
+      metadata: cellActionsMetadata,
+      dataGridRef,
+    });
 
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>
@@ -463,5 +478,3 @@ export const DataTableComponent = React.memo<DataTableProps>(
     );
   }
 );
-
-DataTableComponent.displayName = 'DataTableComponent';

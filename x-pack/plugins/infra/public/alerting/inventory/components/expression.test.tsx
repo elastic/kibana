@@ -211,7 +211,7 @@ describe('ExpressionRow', () => {
       wrapper
         .html()
         .match(
-          '<span class="euiExpression__value css-xlzuv8-euiExpression__value">Rate of some.system.field</span>'
+          '<span class="euiExpression__value css-1lfq7nz-euiExpression__value">Rate of some.system.field</span>'
         ) ?? [];
     expect(valueMatch).toBeTruthy();
   });

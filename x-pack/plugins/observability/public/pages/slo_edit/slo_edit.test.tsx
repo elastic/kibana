@@ -16,13 +16,14 @@ import { render } from '../../utils/test_helper';
 import { useKibana } from '../../utils/kibana_react';
 import { useLicense } from '../../hooks/use_license';
 import { useFetchIndices } from '../../hooks/use_fetch_indices';
+import { useFetchDataViews } from '../../hooks/use_fetch_data_views';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useCreateSlo } from '../../hooks/slo/use_create_slo';
 import { useUpdateSlo } from '../../hooks/slo/use_update_slo';
 import { useFetchApmSuggestions } from '../../hooks/slo/use_fetch_apm_suggestions';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { buildSlo } from '../../data/slo/slo';
-import { paths } from '../../config/paths';
+import { paths } from '../../../common/locators/paths';
 import { SloEditPage } from './slo_edit';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 
@@ -34,6 +35,7 @@ jest.mock('react-router-dom', () => ({
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_fetch_indices');
+jest.mock('../../hooks/use_fetch_data_views');
 jest.mock('../../hooks/slo/use_fetch_slo_details');
 jest.mock('../../hooks/slo/use_create_slo');
 jest.mock('../../hooks/slo/use_update_slo');
@@ -49,6 +51,7 @@ jest.mock('../../utils/kibana_react', () => ({
 const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
 const useFetchIndicesMock = useFetchIndices as jest.Mock;
+const useFetchDataViewsMock = useFetchDataViews as jest.Mock;
 const useFetchSloMock = useFetchSloDetails as jest.Mock;
 const useCreateSloMock = useCreateSlo as jest.Mock;
 const useUpdateSloMock = useUpdateSlo as jest.Mock;
@@ -63,8 +66,15 @@ const mockBasePathPrepend = jest.fn();
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
+      theme: {},
       application: {
         navigateToUrl: mockNavigate,
+      },
+      charts: {
+        theme: {
+          useChartsTheme: () => {},
+          useChartsBaseTheme: () => {},
+        },
       },
       data: {
         dataViews: {
@@ -141,8 +151,9 @@ describe('SLO Edit Page', () => {
 
       useFetchIndicesMock.mockReturnValue({
         isLoading: false,
-        indices: [{ name: 'some-index' }],
+        data: ['some-index'],
       });
+      useFetchDataViewsMock.mockReturnValue({ isLoading: false, data: [] });
 
       useCreateSloMock.mockReturnValue({
         isLoading: false,
@@ -173,6 +184,7 @@ describe('SLO Edit Page', () => {
         hasReadCapabilities: true,
       });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+      useFetchDataViewsMock.mockReturnValue({ isLoading: false, data: [] });
     });
 
     describe('with no write permission', () => {
@@ -193,7 +205,7 @@ describe('SLO Edit Page', () => {
 
         useFetchIndicesMock.mockReturnValue({
           isLoading: false,
-          indices: [{ name: 'some-index' }],
+          data: ['some-index'],
         });
 
         useCreateSloMock.mockReturnValue({
@@ -229,7 +241,7 @@ describe('SLO Edit Page', () => {
 
         useFetchIndicesMock.mockReturnValue({
           isLoading: false,
-          indices: [{ name: 'some-index' }],
+          data: ['some-index'],
         });
 
         useCreateSloMock.mockReturnValue({
@@ -272,7 +284,7 @@ describe('SLO Edit Page', () => {
 
         useFetchIndicesMock.mockReturnValue({
           isLoading: false,
-          indices: [{ name: 'some-index' }],
+          data: ['some-index'],
         });
 
         useFetchSloMock.mockReturnValue({ isLoading: false, slo: undefined });
@@ -338,7 +350,7 @@ describe('SLO Edit Page', () => {
                   },
                   "timeWindow": Object {
                     "duration": "7d",
-                    "isRolling": true,
+                    "type": "rolling",
                   },
                 },
               ],
@@ -374,7 +386,7 @@ describe('SLO Edit Page', () => {
 
         useFetchIndicesMock.mockReturnValue({
           isLoading: false,
-          indices: [{ name: 'some-index' }],
+          data: ['some-index'],
         });
 
         useCreateSloMock.mockReturnValue({
@@ -424,7 +436,7 @@ describe('SLO Edit Page', () => {
 
         useFetchIndicesMock.mockReturnValue({
           isLoading: false,
-          indices: [{ name: 'some-index' }],
+          data: ['some-index'],
         });
 
         useCreateSloMock.mockReturnValue({
@@ -485,7 +497,7 @@ describe('SLO Edit Page', () => {
 
         useFetchIndicesMock.mockReturnValue({
           isLoading: false,
-          indices: [{ name: 'some-index' }],
+          data: ['some-index'],
         });
 
         useFetchSloMock.mockReturnValue({ isLoading: false, slo });
@@ -538,7 +550,7 @@ describe('SLO Edit Page', () => {
 
         useFetchIndicesMock.mockReturnValue({
           isLoading: false,
-          indices: [{ name: 'some-index' }],
+          data: ['some-index'],
         });
 
         useCreateSloMock.mockReturnValue({
@@ -603,7 +615,7 @@ describe('SLO Edit Page', () => {
 
         useFetchIndicesMock.mockReturnValue({
           isLoading: false,
-          indices: [{ name: 'some-index' }],
+          data: ['some-index'],
         });
 
         useCreateSloMock.mockReturnValue({
@@ -644,7 +656,7 @@ describe('SLO Edit Page', () => {
 
         useFetchIndicesMock.mockReturnValue({
           isLoading: false,
-          indices: [{ name: 'some-index' }],
+          data: ['some-index'],
         });
 
         useCreateSloMock.mockReturnValue({
@@ -689,7 +701,7 @@ describe('SLO Edit Page', () => {
 
         useFetchIndicesMock.mockReturnValue({
           isLoading: false,
-          indices: [{ name: 'some-index' }],
+          data: ['some-index'],
         });
 
         useCreateSloMock.mockReturnValue({

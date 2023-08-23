@@ -31,7 +31,7 @@ export const WaffleInventorySwitcher: React.FC = () => {
   } = useWaffleOptionsContext();
   const [isOpen, setIsOpen] = useState(false);
   const closePopover = useCallback(() => setIsOpen(false), []);
-  const openPopover = useCallback(() => setIsOpen(true), []);
+  const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
   const goToNodeType = useCallback(
     (targetNodeType: InventoryItemType) => {
       closePopover();
@@ -86,6 +86,7 @@ export const WaffleInventorySwitcher: React.FC = () => {
             {
               name: 'AWS',
               panel: 'awsPanel',
+              'data-test-subj': 'goToAWS-open',
             },
           ],
         },
@@ -96,18 +97,22 @@ export const WaffleInventorySwitcher: React.FC = () => {
             {
               name: getDisplayNameForType('awsEC2'),
               onClick: goToAwsEC2,
+              'data-test-subj': 'goToAWS-EC2',
             },
             {
               name: getDisplayNameForType('awsS3'),
               onClick: goToAwsS3,
+              'data-test-subj': 'goToAWS-S3',
             },
             {
               name: getDisplayNameForType('awsRDS'),
               onClick: goToAwsRDS,
+              'data-test-subj': 'goToAWS-RDS',
             },
             {
               name: getDisplayNameForType('awsSQS'),
               onClick: goToAwsSQS,
+              'data-test-subj': 'goToAWS-SQS',
             },
           ],
         },
@@ -122,7 +127,7 @@ export const WaffleInventorySwitcher: React.FC = () => {
   const button = (
     <DropdownButton
       data-test-subj={'openInventorySwitcher'}
-      onClick={openPopover}
+      onClick={togglePopover}
       label={i18n.translate('xpack.infra.waffle.showLabel', { defaultMessage: 'Show' })}
       showKubernetesInfo={true}
     >

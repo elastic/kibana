@@ -11,6 +11,18 @@ import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './consta
 import { CspRuleTemplateMetadata } from './schemas/csp_rule_template_metadata';
 import { CspRuleTemplate } from './schemas';
 import { findCspRuleTemplateRequest } from './schemas/csp_rule_template_api/get_csp_rule_template';
+import { getComplianceDashboardSchema } from './schemas/stats';
+
+export type AwsCredentialsType =
+  | 'assume_role'
+  | 'direct_access_keys'
+  | 'temporary_keys'
+  | 'shared_credentials'
+  | 'cloud_formation';
+
+export type AwsCredentialsTypeFieldMap = {
+  [key in AwsCredentialsType]: string[];
+};
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
 
@@ -110,7 +122,7 @@ export type PostureInput = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];
 export type CloudSecurityPolicyTemplate = typeof SUPPORTED_POLICY_TEMPLATES[number];
 export type PosturePolicyTemplate = Extract<CloudSecurityPolicyTemplate, 'kspm' | 'cspm'>;
 
-export interface BenchmarkResponse {
+export interface GetBenchmarkResponse {
   items: Benchmark[];
   total: number;
   page: number;
@@ -119,9 +131,94 @@ export interface BenchmarkResponse {
 
 export type GetCspRuleTemplateRequest = TypeOf<typeof findCspRuleTemplateRequest>;
 
+export type GetComplianceDashboardRequest = TypeOf<typeof getComplianceDashboardSchema>;
+
 export interface GetCspRuleTemplateResponse {
   items: CspRuleTemplate[];
   total: number;
   page: number;
   perPage: number;
+}
+
+// CNVM DASHBOARD
+
+interface AccountVulnStats {
+  cloudAccountId: string;
+  cloudAccountName: string;
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+}
+
+export interface VulnStatsTrend {
+  '@timestamp': string;
+  policy_template: 'vuln_mgmt';
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+  vulnerabilities_stats_by_cloud_account?: Record<
+    AccountVulnStats['cloudAccountId'],
+    AccountVulnStats
+  >;
+}
+
+export interface CnvmStatistics {
+  criticalCount: number | undefined;
+  highCount: number | undefined;
+  mediumCount: number | undefined;
+  resourcesScanned: number | undefined;
+  cloudRegions: number | undefined;
+}
+
+export interface CnvmDashboardData {
+  cnvmStatistics: CnvmStatistics;
+  vulnTrends: VulnStatsTrend[];
+  topVulnerableResources: VulnerableResourceStat[];
+  topPatchableVulnerabilities: PatchableVulnerabilityStat[];
+  topVulnerabilities: VulnerabilityStat[];
+}
+
+export type VulnSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
+
+export interface VulnerableResourceStat {
+  vulnerabilityCount: number | undefined;
+  resource: {
+    id: string | undefined;
+    name: string | undefined;
+  };
+  cloudRegion: string | undefined;
+}
+
+export interface PatchableVulnerabilityStat {
+  vulnerabilityCount: number | undefined;
+  packageFixVersion: string | undefined;
+  cve: string | undefined;
+  cvss: {
+    score: number | undefined;
+    version: string | undefined;
+  };
+}
+
+export interface VulnerabilityStat {
+  packageFixVersion: string | undefined;
+  packageName: string | undefined;
+  packageVersion: string | undefined;
+  severity: string | undefined;
+  vulnerabilityCount: number | undefined;
+  cvss: {
+    score: number | undefined;
+    version: string | undefined;
+  };
+  cve: string | undefined;
+}
+
+export interface AggFieldBucket {
+  doc_count_error_upper_bound: number;
+  sum_other_doc_count: number;
+  buckets: Array<{
+    key?: string;
+    doc_count?: string;
+  }>;
 }

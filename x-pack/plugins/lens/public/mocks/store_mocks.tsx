@@ -100,6 +100,7 @@ export const mountWithProvider = async (
     wrappingComponent?: React.FC<{
       children: React.ReactNode;
     }>;
+    wrappingComponentProps?: Record<string, unknown>;
     attachTo?: HTMLElement;
   }
 ) => {
@@ -120,6 +121,7 @@ export const getMountWithProviderParams = (
     wrappingComponent?: React.FC<{
       children: React.ReactNode;
     }>;
+    wrappingComponentProps?: Record<string, unknown>;
     attachTo?: HTMLElement;
   }
 ) => {
@@ -133,12 +135,13 @@ export const getMountWithProviderParams = (
     attachTo?: HTMLElement | undefined;
   } = {};
   if (options) {
-    const { wrappingComponent: _wrappingComponent, ...rest } = options;
+    const { wrappingComponent: _wrappingComponent, wrappingComponentProps, ...rest } = options;
     restOptions = rest;
 
     if (_wrappingComponent) {
       wrappingComponent = ({ children }) => {
         return _wrappingComponent({
+          ...wrappingComponentProps,
           children: <Provider store={lensStore}>{children}</Provider>,
         });
       };

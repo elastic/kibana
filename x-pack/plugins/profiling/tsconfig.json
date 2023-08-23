@@ -1,16 +1,16 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     // add all the folders containing files to be compiled
     "index.ts",
     "common/**/*.ts",
+    "common/**/*.json",
     "public/**/*.ts",
     "public/**/*.tsx",
-    "server/**/*.ts",
-    "server/**/*.json"
+    "server/**/*.ts"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -36,7 +36,6 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/fleet-plugin",
     "@kbn/shared-ux-page-no-data-types",
-    "@kbn/es-errors",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/spaces-plugin",
     "@kbn/cloud-plugin",
@@ -46,6 +45,9 @@
     "@kbn/share-plugin",
     "@kbn/observability-shared-plugin",
     "@kbn/licensing-plugin",
+    "@kbn/utility-types",
+    "@kbn/usage-collection-plugin",
+    "@kbn/observability-ai-assistant-plugin"
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
@@ -67,6 +69,6 @@
     // "@kbn/kibana-utils-plugin",
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

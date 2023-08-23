@@ -31,6 +31,7 @@
     "@kbn/datemath",
     "@kbn/rison",
     "@kbn/kibana-utils-plugin",
+    "@kbn/shared-ux-router",
   ],
   "exclude": ["target/**/*"]
 }

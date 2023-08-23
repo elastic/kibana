@@ -20,6 +20,8 @@ import {
   waitForHostToEnroll,
 } from './fleet_services';
 
+export const VAGRANT_CWD = `${__dirname}/../endpoint_agent_runner/`;
+
 export interface CreateAndEnrollEndpointHostOptions
   extends Pick<CreateMultipassVmOptions, 'disk' | 'cpus' | 'memory'> {
   kbnClient: KbnClient;
@@ -60,38 +62,48 @@ export const createAndEnrollEndpointHost = async ({
     deleted: [],
   });
 
-  const [vm, agentDownload, fleetServerUrl, enrollmentToken] = await Promise.all([
-    createMultipassVm({
-      vmName: hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`,
-      disk,
-      cpus,
-      memory,
-    }),
+  const vmName = hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`;
 
-    getAgentDownloadUrl(version, useClosestVersionMatch, log).then<{
-      url: string;
-      cache?: DownloadedAgentInfo;
-    }>((url) => {
-      if (useCache) {
-        cacheCleanupPromise = cleanupDownloads();
+  const agentDownload = await getAgentDownloadUrl(version, useClosestVersionMatch, log).then<{
+    url: string;
+    cache?: DownloadedAgentInfo;
+  }>((url) => {
+    if (useCache) {
+      cacheCleanupPromise = cleanupDownloads();
 
-        return downloadAndStoreAgent(url).then((cache) => {
-          return {
-            url,
-            cache,
-          };
-        });
-      }
+      return downloadAndStoreAgent(url).then((cache) => {
+        return {
+          url,
+          cache,
+        };
+      });
+    }
 
-      return { url };
-    }),
+    return { url };
+  });
+
+  const [vm, fleetServerUrl, enrollmentToken] = await Promise.all([
+    process.env.CI
+      ? createVagrantVm({
+          vmName,
+          log,
+          cachedAgentDownload: agentDownload.cache as DownloadedAgentInfo,
+        })
+      : createMultipassVm({
+          vmName,
+          disk,
+          cpus,
+          memory,
+        }),
 
     fetchFleetServerUrl(kbnClient),
 
     fetchAgentPolicyEnrollmentKey(kbnClient, agentPolicyId),
   ]);
 
-  log.verbose(await execa('multipass', ['info', vm.vmName]));
+  if (!process.env.CI) {
+    log.verbose(await execa('multipass', ['info', vm.vmName]));
+  }
 
   // Some validations before we proceed
   assert(agentDownload.url, 'Missing agent download URL');
@@ -143,6 +155,54 @@ export const destroyEndpointHost = async (
   ]);
 };
 
+interface CreateVmResponse {
+  vmName: string;
+}
+
+interface CreateVagrantVmOptions {
+  vmName: string;
+  cachedAgentDownload: DownloadedAgentInfo;
+  log: ToolingLog;
+}
+
+/**
+ * Creates a new VM using `vagrant`
+ */
+const createVagrantVm = async ({
+  vmName,
+  cachedAgentDownload,
+  log,
+}: CreateVagrantVmOptions): Promise<CreateVmResponse> => {
+  try {
+    await execa.command(`vagrant destroy -f`, {
+      env: {
+        VAGRANT_CWD,
+      },
+    });
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
+
+  try {
+    await execa.command(`vagrant up`, {
+      env: {
+        VAGRANT_DISABLE_VBOXSYMLINKCREATE: '1',
+        VAGRANT_CWD,
+        VMNAME: vmName,
+        CACHED_AGENT_SOURCE: cachedAgentDownload.fullFilePath,
+        CACHED_AGENT_FILENAME: cachedAgentDownload.filename,
+      },
+      stdio: ['inherit', 'inherit', 'inherit'],
+    });
+  } catch (e) {
+    log.error(e);
+    throw e;
+  }
+
+  return {
+    vmName,
+  };
+};
+
 interface CreateMultipassVmOptions {
   vmName: string;
   /** Number of CPUs */
@@ -153,10 +213,6 @@ interface CreateMultipassVmOptions {
   memory?: string;
 }
 
-interface CreateMultipassVmResponse {
-  vmName: string;
-}
-
 /**
  * Creates a new VM using `multipass`
  */
@@ -165,7 +221,7 @@ const createMultipassVm = async ({
   disk = '8G',
   cpus = 1,
   memory = '1G',
-}: CreateMultipassVmOptions): Promise<CreateMultipassVmResponse> => {
+}: CreateMultipassVmOptions): Promise<CreateVmResponse> => {
   await execa.command(
     `multipass launch --name ${vmName} --disk ${disk} --cpus ${cpus} --memory ${memory}`
   );
@@ -176,7 +232,15 @@ const createMultipassVm = async ({
 };
 
 const deleteMultipassVm = async (vmName: string): Promise<void> => {
-  await execa.command(`multipass delete -p ${vmName}`);
+  if (process.env.CI) {
+    await execa.command(`vagrant destroy -f`, {
+      env: {
+        VAGRANT_CWD,
+      },
+    });
+  } else {
+    await execa.command(`multipass delete -p ${vmName}`);
+  }
 };
 
 interface EnrollHostWithFleetOptions {
@@ -206,35 +270,30 @@ const enrollHostWithFleet = async ({
       `Installing agent on host using cached download from [${cachedAgentDownload.fullFilePath}]`
     );
 
-    // mount local folder on VM
-    await execa.command(
-      `multipass mount ${cachedAgentDownload.directory} ${vmName}:~/_agent_downloads`
-    );
-    await execa.command(
-      `multipass exec ${vmName} -- tar -zxf _agent_downloads/${cachedAgentDownload.filename}`
-    );
-    await execa.command(`multipass unmount ${vmName}:~/_agent_downloads`);
+    if (!process.env.CI) {
+      // mount local folder on VM
+      await execa.command(
+        `multipass mount ${cachedAgentDownload.directory} ${vmName}:~/_agent_downloads`
+      );
+      await execa.command(
+        `multipass exec ${vmName} -- tar -zxf _agent_downloads/${cachedAgentDownload.filename}`
+      );
+      await execa.command(`multipass unmount ${vmName}:~/_agent_downloads`);
+    }
   } else {
     log.verbose(`downloading and installing agent from URL [${agentDownloadUrl}]`);
 
-    // download into VM
-    await execa.command(
-      `multipass exec ${vmName} -- curl -L ${agentDownloadUrl} -o ${agentDownloadedFile}`
-    );
-    await execa.command(`multipass exec ${vmName} -- tar -zxf ${agentDownloadedFile}`);
-    await execa.command(`multipass exec ${vmName} -- rm -f ${agentDownloadedFile}`);
+    if (!process.env.CI) {
+      // download into VM
+      await execa.command(
+        `multipass exec ${vmName} -- curl -L ${agentDownloadUrl} -o ${agentDownloadedFile}`
+      );
+      await execa.command(`multipass exec ${vmName} -- tar -zxf ${agentDownloadedFile}`);
+      await execa.command(`multipass exec ${vmName} -- rm -f ${agentDownloadedFile}`);
+    }
   }
 
   const agentInstallArguments = [
-    'exec',
-
-    vmName,
-
-    '--working-directory',
-    `/home/ubuntu/${vmDirName}`,
-
-    '--',
-
     'sudo',
 
     './elastic-agent',
@@ -253,10 +312,28 @@ const enrollHostWithFleet = async ({
   ];
 
   log.info(`Enrolling elastic agent with Fleet`);
-  log.verbose(`Command: multipass ${agentInstallArguments.join(' ')}`);
+  if (process.env.CI) {
+    log.verbose(`Command: vagrant ${agentInstallArguments.join(' ')}`);
 
-  await execa(`multipass`, agentInstallArguments);
+    await execa(`vagrant`, ['ssh', '--', `cd ${vmDirName} && ${agentInstallArguments.join(' ')}`], {
+      env: {
+        VAGRANT_CWD,
+      },
+      stdio: ['inherit', 'inherit', 'inherit'],
+    });
+  } else {
+    log.verbose(`Command: multipass ${agentInstallArguments.join(' ')}`);
 
+    await execa(`multipass`, [
+      'exec',
+      vmName,
+      '--working-directory',
+      `/home/ubuntu/${vmDirName}`,
+
+      '--',
+      ...agentInstallArguments,
+    ]);
+  }
   log.info(`Waiting for Agent to check-in with Fleet`);
   const agent = await waitForHostToEnroll(kbnClient, vmName, 120000);
 
@@ -273,9 +350,24 @@ export async function getEndpointHosts(): Promise<
 }
 
 export function stopEndpointHost(hostName: string) {
+  if (process.env.CI) {
+    return execa('vagrant', ['suspend'], {
+      env: {
+        VAGRANT_CWD,
+        VMNAME: hostName,
+      },
+    });
+  }
   return execa('multipass', ['stop', hostName]);
 }
 
 export function startEndpointHost(hostName: string) {
+  if (process.env.CI) {
+    return execa('vagrant', ['up'], {
+      env: {
+        VAGRANT_CWD,
+      },
+    });
+  }
   return execa('multipass', ['start', hostName]);
 }

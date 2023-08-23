@@ -18,7 +18,7 @@ import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/s
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
-} from '../../../../../../common/detection_engine/schemas/alerts';
+} from '../../../../../../common/api/detection_engine/model/alerts';
 import type { ConfigType } from '../../../../../config';
 import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';

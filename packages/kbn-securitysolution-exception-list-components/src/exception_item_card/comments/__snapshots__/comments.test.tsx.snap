@@ -105,7 +105,7 @@ Object {
           >
             <div>
               <div
-                class=" emotion-euiAccordion__children"
+                class="euiAccordion__children emotion-euiAccordion__children"
               >
                 <div
                   class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
@@ -243,7 +243,7 @@ Object {
         >
           <div>
             <div
-              class=" emotion-euiAccordion__children"
+              class="euiAccordion__children emotion-euiAccordion__children"
             >
               <div
                 class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
@@ -438,7 +438,7 @@ Object {
           >
             <div>
               <div
-                class=" emotion-euiAccordion__children"
+                class="euiAccordion__children emotion-euiAccordion__children"
               >
                 <div
                   class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
@@ -576,7 +576,7 @@ Object {
         >
           <div>
             <div
-              class=" emotion-euiAccordion__children"
+              class="euiAccordion__children emotion-euiAccordion__children"
             >
               <div
                 class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"

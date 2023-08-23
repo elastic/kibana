@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { pipe } from 'fp-ts/lib/pipeable';
 import * as Option from 'fp-ts/lib/Option';
+import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { omit } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { Defer } from './kibana_migrator_utils';
+import type { WaitGroup } from './kibana_migrator_utils';
 import type {
   AllActionStates,
   CalculateExcludeFiltersState,
@@ -72,8 +74,9 @@ export type ResponseType<ControlState extends AllActionStates> = Awaited<
 export const nextActionMap = (
   client: ElasticsearchClient,
   transformRawDocs: TransformRawDocs,
-  readyToReindex: Defer<void>,
-  doneReindexing: Defer<void>
+  readyToReindex: WaitGroup<void>,
+  doneReindexing: WaitGroup<void>,
+  updateRelocationAliases: WaitGroup<Actions.AliasAction[]>
 ) => {
   return {
     INIT: (state: InitState) =>
@@ -142,7 +145,10 @@ export const nextActionMap = (
         aliases: [state.tempIndexAlias],
         mappings: state.tempIndexMappings,
       }),
-    READY_TO_REINDEX_SYNC: () => Actions.synchronizeMigrators(readyToReindex),
+    READY_TO_REINDEX_SYNC: () =>
+      Actions.synchronizeMigrators({
+        waitGroup: readyToReindex,
+      }),
     REINDEX_SOURCE_TO_TEMP_OPEN_PIT: (state: ReindexSourceToTempOpenPit) =>
       Actions.openPit({ client, index: state.sourceIndex.value }),
     REINDEX_SOURCE_TO_TEMP_READ: (state: ReindexSourceToTempRead) =>
@@ -181,7 +187,10 @@ export const nextActionMap = (
          */
         refresh: false,
       }),
-    DONE_REINDEXING_SYNC: () => Actions.synchronizeMigrators(doneReindexing),
+    DONE_REINDEXING_SYNC: () =>
+      Actions.synchronizeMigrators({
+        waitGroup: doneReindexing,
+      }),
     SET_TEMP_WRITE_BLOCK: (state: SetTempWriteBlock) =>
       Actions.setWriteBlock({ client, index: state.tempIndex }),
     CLONE_TEMP_TO_TARGET: (state: CloneTempToTarget) =>
@@ -199,6 +208,7 @@ export const nextActionMap = (
         index: state.targetIndex,
         mappings: omit(state.targetIndexMappings, ['_meta']), // ._meta property will be updated on a later step
         batchSize: state.batchSize,
+        query: Option.toUndefined(state.updatedTypesQuery),
       }),
     UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK: (
       state: UpdateTargetMappingsPropertiesWaitForTaskState
@@ -249,6 +259,19 @@ export const nextActionMap = (
       }),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases({ client, aliasActions: state.versionIndexReadyActions.value }),
+    MARK_VERSION_INDEX_READY_SYNC: (state: MarkVersionIndexReady) =>
+      pipe(
+        // First, we wait for all the migrators involved in a relocation to reach this point.
+        Actions.synchronizeMigrators<Actions.AliasAction[]>({
+          waitGroup: updateRelocationAliases,
+          payload: state.versionIndexReadyActions.value,
+        }),
+        // Then, all migrators will try to update all aliases (from all indices). Only the first one will succeed.
+        // The others will receive alias_not_found_exception and cause MARK_VERSION_INDEX_READY_CONFLICT (that's acceptable).
+        TaskEither.chainW(({ data }) =>
+          Actions.updateAliases({ client, aliasActions: data.flat() })
+        )
+      ),
     MARK_VERSION_INDEX_READY_CONFLICT: (state: MarkVersionIndexReadyConflict) =>
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     LEGACY_SET_WRITE_BLOCK: (state: LegacySetWriteBlockState) =>
@@ -279,10 +302,17 @@ export const nextActionMap = (
 export const next = (
   client: ElasticsearchClient,
   transformRawDocs: TransformRawDocs,
-  readyToReindex: Defer<void>,
-  doneReindexing: Defer<void>
+  readyToReindex: WaitGroup<void>,
+  doneReindexing: WaitGroup<void>,
+  updateRelocationAliases: WaitGroup<Actions.AliasAction[]>
 ) => {
-  const map = nextActionMap(client, transformRawDocs, readyToReindex, doneReindexing);
+  const map = nextActionMap(
+    client,
+    transformRawDocs,
+    readyToReindex,
+    doneReindexing,
+    updateRelocationAliases
+  );
   return (state: State) => {
     const delay = createDelayFn(state);
 

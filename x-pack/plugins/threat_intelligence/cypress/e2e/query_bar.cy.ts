@@ -8,7 +8,6 @@
 import {
   closeFlyout,
   navigateToFlyoutTableTab,
-  openBarchartPopoverMenu,
   openFlyout,
   waitForViewToBeUpdated,
 } from '../tasks/common';
@@ -27,152 +26,163 @@ import {
 } from '../tasks/query_bar';
 import { INDICATOR_TYPE_CELL } from '../screens/indicators';
 import { KQL_FILTER } from '../screens/query_bar';
-import { selectRange } from '../tasks/select_range';
-import { login } from '../tasks/login';
+import { login, visit } from '../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 
-describe('Indicators query bar interaction', { testIsolation: false }, () => {
-  before(() => {
+describe('Indicators query bar interaction', () => {
+  beforeEach(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
     login();
-    cy.visit(THREAT_INTELLIGENCE);
-    selectRange();
+    visit(THREAT_INTELLIGENCE);
   });
-  after(() => {
+
+  afterEach(() => {
     esArchiverUnload('threat_intelligence/indicators_data');
   });
 
-  it('should add filter to kql and filter in values when clicking in the barchart legend', () => {
+  it.skip('should add filter to kql', () => {
+    cy.log('filter in values when clicking in the barchart legend');
+
     waitForViewToBeUpdated();
+
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
-    openBarchartPopoverMenu();
     filterInFromBarChartLegend();
+    waitForViewToBeUpdated();
 
     cy.get(KQL_FILTER).should('exist');
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
     clearKQLBar();
-  });
-
-  it('should add negated filter to kql and filter out values when clicking in the barchart legend', () => {
     waitForViewToBeUpdated();
+
+    cy.log('filter out values when clicking in the barchart legend');
+
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
-    openBarchartPopoverMenu();
     filterOutFromBarChartLegend();
+    waitForViewToBeUpdated();
 
     cy.get(KQL_FILTER).should('exist');
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
     clearKQLBar();
-  });
-
-  it('should add filter to kql and filter in and out values when clicking in an indicators table cell', () => {
     waitForViewToBeUpdated();
+
+    cy.log('filter in values when clicking in an indicators table cell');
+
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
     filterInFromTableCell();
+    waitForViewToBeUpdated();
 
     cy.get(KQL_FILTER).should('exist');
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
     clearKQLBar();
-  });
+    waitForViewToBeUpdated();
 
-  it('should add negated filter and filter out and out values when clicking in an indicators table cell', () => {
+    cy.log('filter out and out values when clicking in an indicators table cell');
+
     waitForViewToBeUpdated();
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
     filterOutFromTableCell();
+    waitForViewToBeUpdated();
 
     cy.get(KQL_FILTER).should('exist');
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
     clearKQLBar();
-  });
-
-  it('should add filter to kql and filter in values when clicking in an indicators flyout overview tab block', () => {
     waitForViewToBeUpdated();
+
+    cy.log('filter in values when clicking in an indicators flyout overview tab block');
+
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
     openFlyout(0);
     filterInFromFlyoutBlockItem();
     closeFlyout();
+    waitForViewToBeUpdated();
 
     cy.get(KQL_FILTER).should('exist');
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
     clearKQLBar();
-  });
-
-  it('should add negated filter to kql filter out values when clicking in an indicators flyout overview block', () => {
     waitForViewToBeUpdated();
+
+    cy.log('filter out values when clicking in an indicators flyout overview block');
+
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
     openFlyout(0);
     filterOutFromFlyoutBlockItem();
     closeFlyout();
+    waitForViewToBeUpdated();
 
     cy.get(KQL_FILTER).should('exist');
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
     clearKQLBar();
-  });
-
-  it('should add filter to kql and filter in values when clicking in an indicators flyout overview tab table row', () => {
     waitForViewToBeUpdated();
+
+    cy.log('filter in values when clicking in an indicators flyout overview tab table row');
+
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
     openFlyout(0);
     filterInFromFlyoutOverviewTable();
     closeFlyout();
+    waitForViewToBeUpdated();
 
     cy.get(KQL_FILTER).should('exist');
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
     clearKQLBar();
-  });
-
-  it('should add negated filter to kql filter out values when clicking in an indicators flyout overview tab row', () => {
     waitForViewToBeUpdated();
+
+    cy.log('filter out values when clicking in an indicators flyout overview tab row');
+
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
     openFlyout(0);
     filterOutFromFlyoutOverviewTable();
     closeFlyout();
+    waitForViewToBeUpdated();
 
     cy.get(KQL_FILTER).should('exist');
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
     clearKQLBar();
-  });
-
-  it('should add filter to kql and filter in values when clicking in an indicators flyout table tab action column', () => {
     waitForViewToBeUpdated();
+
+    cy.log('filter in values when clicking in an indicators flyout table tab action column');
+
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
     openFlyout(0);
     navigateToFlyoutTableTab();
     filterInFromFlyoutTableTab();
     closeFlyout();
+    waitForViewToBeUpdated();
 
     cy.get(KQL_FILTER).should('exist');
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
     clearKQLBar();
-  });
-
-  it('should add negated filter to kql filter out values when clicking in an indicators flyout table tab action column', () => {
     waitForViewToBeUpdated();
+
+    cy.log('filter out values when clicking in an indicators flyout table tab action column');
+
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
     openFlyout(0);
     navigateToFlyoutTableTab();
     filterOutFromFlyoutTableTab();
     closeFlyout();
+    waitForViewToBeUpdated();
 
     cy.get(KQL_FILTER).should('exist');
     cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);

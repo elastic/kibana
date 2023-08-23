@@ -1038,9 +1038,9 @@ Example of the index document for Index Threshold alert:
 
 ```
 {
-    "alert_id": "{{alertId}}",
-    "alert_name": "{{alertName}}",
-    "alert_instance_id": "{{alertInstanceId}}",
+    "rule_id": "{{rule.id}}",
+    "rule_name": "{{rule.name}}",
+    "alert_id": "{{alert.id}}",
     "context_title": "{{context.title}}",
     "context_value": "{{context.value}}",
     "context_message": "{{context.message}}"
@@ -1114,6 +1114,40 @@ export function getActionType(): ActionTypeModel {
 
 and action params form available in Create Alert form:
 ![PagerDuty action form](https://i.imgur.com/xxXmhMK.png)
+
+} 
+```
+
+### D3Security
+
+Action type model definition:
+```
+export function getActionType(): ActionTypeModel {
+  return {
+    id: '.d3security',
+    iconClass: lazy(() => import('./logo')),
+    selectMessage: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.D3SecurityAction.selectMessageText',
+      {
+        defaultMessage: 'Create event or trigger playbook workflow actions in D3 SOAR.',
+      }
+    ),
+    validateParams: (actionParams: D3ActionParams): Promise<ValidationResult> => {
+      // validation of action params implementation
+    },
+    actionConnectorFields: D3SecurityActionConnectorFields,
+    actionParamsFields: D3SecurityParamsFields,
+  };
+}
+```
+
+![D3Security connector card](https://i.imgur.com/pbmXBVy.png)
+
+![D3security connector form](https://i.imgur.com/HEUF6qC.png)
+
+and action params form available in Create Alert form:
+
+![D3Security action form](https://i.imgur.com/wIPjkbp.png)
 
 ## Action type model definition
 

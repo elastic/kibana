@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  COVERAGE_OVERVIEW_PATH,
   DATA_QUALITY_PATH,
   DETECTION_RESPONSE_PATH,
   ENTITY_ANALYTICS_PATH,
@@ -21,6 +22,7 @@ import {
   GETTING_STARTED,
   OVERVIEW,
   ENTITY_ANALYTICS,
+  COVERAGE_OVERVIEW,
 } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import overviewPageImg from '../common/images/overview_page.png';
@@ -55,6 +57,7 @@ export const gettingStartedLinks: LinkItem = {
       defaultMessage: 'Getting started',
     }),
   ],
+  sideNavIcon: 'launch',
   skipUrlState: true,
   hideTimeline: true,
 };
@@ -85,8 +88,9 @@ export const entityAnalyticsLinks: LinkItem = {
       'Entity analytics, anomalies, and threats to narrow down the monitoring surface area.',
   }),
   path: ENTITY_ANALYTICS_PATH,
-  capabilities: [`${SERVER_APP_ID}.entity-analytics`],
+  capabilities: [`${SERVER_APP_ID}.show`],
   isBeta: false,
+  licenseType: 'platinum',
   globalSearchKeywords: [ENTITY_ANALYTICS],
 };
 
@@ -108,4 +112,25 @@ export const ecsDataQualityDashboardLinks: LinkItem = {
       defaultMessage: 'Data Quality',
     }),
   ],
+};
+
+export const coverageOverviewDashboardLinks: LinkItem = {
+  id: SecurityPageName.coverageOverview,
+  title: COVERAGE_OVERVIEW,
+  landingImage: overviewPageImg, // TODO: change with updated image before removing feature flag https://github.com/elastic/security-team/issues/2905
+  description: i18n.translate(
+    'xpack.securitySolution.appLinks.coverageOverviewDashboardDescription',
+    {
+      defaultMessage:
+        'An overview of rule coverage according to the MITRE ATT&CK\u00AE specifications',
+    }
+  ),
+  path: COVERAGE_OVERVIEW_PATH,
+  capabilities: [`${SERVER_APP_ID}.show`],
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.coverageOverviewDashboard', {
+      defaultMessage: 'MITRE ATT&CK Coverage',
+    }),
+  ],
+  experimentalKey: 'detectionsCoverageOverview',
 };

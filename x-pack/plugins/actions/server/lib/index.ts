@@ -33,6 +33,7 @@ export {
   isHttpRequestExecutionSource,
   asNotificationExecutionSource,
   isNotificationExecutionSource,
+  ActionExecutionSourceType,
 } from './action_execution_source';
 export { validateEmptyStrings } from './validate_empty_strings';
 export { parseDate } from './parse_date';

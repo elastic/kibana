@@ -6,7 +6,7 @@
  */
 
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { TimelineResponse } from '@kbn/security-solution-plugin/common/types';
+import { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 import { type IndexedEndpointRuleAlerts } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -197,6 +197,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       let indexedAlerts: IndexedEndpointRuleAlerts;
 
       before(async () => {
+        await getService('kibanaServer').request({
+          path: `internal/kibana/settings`,
+          method: 'POST',
+          body: { changes: { 'securitySolution:enableExpandableFlyout': false } },
+        });
+
         indexedAlerts = await detectionsTestService.loadEndpointRuleAlerts(endpointAgentId);
 
         await detectionsTestService.waitForAlerts(

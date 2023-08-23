@@ -8,8 +8,20 @@
 import { v1 as uuidv1 } from 'uuid';
 
 import expect from '@kbn/expect';
-import { CASES_URL } from '@kbn/cases-plugin/common/constants';
-import { Case, CaseSeverity, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
+import {
+  CASES_URL,
+  MAX_ASSIGNEES_FILTER_LENGTH,
+  MAX_CASES_PER_PAGE,
+  MAX_CATEGORY_FILTER_LENGTH,
+  MAX_REPORTERS_FILTER_LENGTH,
+  MAX_TAGS_FILTER_LENGTH,
+} from '@kbn/cases-plugin/common/constants';
+import {
+  Case,
+  CaseSeverity,
+  CaseStatuses,
+  AttachmentType,
+} from '@kbn/cases-plugin/common/types/domain';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -92,6 +104,29 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('can filter by reserved kql characters in tags', async () => {
+        const tagsColon = ['super:bad:case'];
+        const tagsSlashQuote = ['awesome\\"'];
+
+        const postedCase1 = await createCase(supertest, { ...postCaseReq, tags: tagsSlashQuote });
+        const postedCase2 = await createCase(supertest, {
+          ...postCaseReq,
+          tags: tagsColon,
+        });
+
+        const cases = await findCases({
+          supertest,
+          query: { tags: [...tagsColon, ...tagsSlashQuote] },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 2,
+          cases: [postedCase1, postedCase2],
+          count_open_cases: 2,
+        });
+      });
+
       it('filters by status', async () => {
         await createCase(supertest, postCaseReq);
         const toCloseCase = await createCase(supertest, postCaseReq);
@@ -156,6 +191,38 @@ export default ({ getService }: FtrProviderContext): void => {
           ...findCasesResp,
           total: 0,
           cases: [],
+        });
+      });
+
+      it('filters by a single category', async () => {
+        await createCase(supertest, postCaseReq);
+        const foobarCategory = await createCase(supertest, { ...postCaseReq, category: 'foobar' });
+
+        const cases = await findCases({ supertest, query: { category: ['foobar'] } });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 1,
+          cases: [foobarCategory],
+          count_open_cases: 1,
+        });
+      });
+
+      it('filters by multiple categories', async () => {
+        await createCase(supertest, postCaseReq);
+        const foobarCategory = await createCase(supertest, { ...postCaseReq, category: 'foobar' });
+        const otherCategory = await createCase(supertest, { ...postCaseReq, category: 'other' });
+
+        const cases = await findCases({
+          supertest,
+          query: { category: ['foobar', 'other'] },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 2,
+          cases: [foobarCategory, otherCategory],
+          count_open_cases: 2,
         });
       });
 
@@ -252,20 +319,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('unhappy path - 400s when bad query supplied', async () => {
-        await findCases({ supertest, query: { perPage: true }, expectedHttpCode: 400 });
-      });
-
-      for (const field of ['owner', 'tags', 'severity', 'status']) {
-        it(`should return a 400 when attempting to query a keyword field [${field}] when using a wildcard query`, async () => {
-          await findCases({
-            supertest,
-            query: { searchFields: [field], search: 'some search string*' },
-            expectedHttpCode: 400,
-          });
-        });
-      }
-
       it('sorts by severity', async () => {
         const case4 = await createCase(supertest, {
           ...postCaseReq,
@@ -346,7 +399,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(cases.cases[0].title).to.equal(uuid);
         });
 
-        it('should successfully find a case with a valid uuid in title', async () => {
+        it('should successfully find a case with a valid uuid in description', async () => {
           const uuid = uuidv1();
           await createCase(supertest, { ...postCaseReq, description: uuid });
 
@@ -379,6 +432,83 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    describe('errors', () => {
+      it('unhappy path - 400s when bad query supplied', async () => {
+        await findCases({ supertest, query: { perPage: true }, expectedHttpCode: 400 });
+      });
+
+      for (const field of ['owner', 'tags', 'severity', 'status']) {
+        it(`should return a 400 when attempting to query a keyword field [${field}] when using a wildcard query`, async () => {
+          await findCases({
+            supertest,
+            query: { searchFields: [field], search: 'some search string*' },
+            expectedHttpCode: 400,
+          });
+        });
+      }
+
+      for (const scenario of [
+        { fieldName: 'category', sizeLimit: MAX_CATEGORY_FILTER_LENGTH },
+        { fieldName: 'tags', sizeLimit: MAX_TAGS_FILTER_LENGTH },
+        { fieldName: 'assignees', sizeLimit: MAX_ASSIGNEES_FILTER_LENGTH },
+        { fieldName: 'reporters', sizeLimit: MAX_REPORTERS_FILTER_LENGTH },
+      ]) {
+        it(`unhappy path - 400s when the field ${scenario.fieldName} exceeds the size limit`, async () => {
+          const value = Array(scenario.sizeLimit + 1).fill('foobar');
+
+          await findCases({
+            supertest,
+            query: { [scenario.fieldName]: value },
+            expectedHttpCode: 400,
+          });
+        });
+      }
+
+      it('400s when trying to fetch with invalid searchField', async () => {
+        await findCases({
+          supertest,
+          query: { searchFields: 'closed_by.username', search: 'some search string*' },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when trying to fetch with invalid array of searchFields', async () => {
+        await findCases({
+          supertest,
+          query: { searchFields: ['closed_by.username', 'title'], search: 'some search string*' },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when trying to fetch with invalid sortField', async () => {
+        await findCases({
+          supertest,
+          query: { sortField: 'foobar', search: 'some search string*' },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when trying to fetch with rootSearchFields', async () => {
+        await findCases({
+          supertest,
+          query: { rootSearchFields: ['_id'], search: 'some search string*' },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it(`400s when perPage > ${MAX_CASES_PER_PAGE} supplied`, async () => {
+        await findCases({
+          supertest,
+          query: { perPage: MAX_CASES_PER_PAGE + 1 },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when trying to fetch more than 10,000 documents', async () => {
+        await findCases({ supertest, query: { page: 209, perPage: 100 }, expectedHttpCode: 400 });
+      });
+    });
+
     describe('alerts', () => {
       const defaultSignalsIndex = '.siem-signals-default-000001';
       const signalID = '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78';
@@ -408,7 +538,7 @@ export default ({ getService }: FtrProviderContext): void => {
               alertId,
               index: defaultSignalsIndex,
               rule: { id: 'test-rule-id', name: 'test-index-id' },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
             },
           });

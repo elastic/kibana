@@ -24,6 +24,25 @@ function makeSequence(min: number, max: number): number[] {
   return values;
 }
 
+export const EVERY_MINUTE_OPTIONS = [
+  {
+    text: '5',
+    value: '0,5,10,15,20,25,30,35,40,45,50,55',
+  },
+  {
+    text: '10',
+    value: '0,10,20,30,40,50',
+  },
+  {
+    text: '15',
+    value: '0,15,30,45',
+  },
+  {
+    text: '30',
+    value: '0,30',
+  },
+];
+
 export const MINUTE_OPTIONS = makeSequence(0, 59).map((value) => ({
   value: value.toString(),
   text: padStart(value.toString(), 2, '0'),
@@ -77,7 +96,7 @@ export const UNITS: EuiSelectOption[] = [
 ];
 
 export const frequencyToFieldsMap: Record<Frequency, FieldFlags> = {
-  MINUTE: {},
+  MINUTE: { minute: true },
   HOUR: {
     minute: true,
   },
@@ -106,7 +125,7 @@ export const frequencyToFieldsMap: Record<Frequency, FieldFlags> = {
 export const frequencyToBaselineFieldsMap: Record<Frequency, FieldToValueMap> = {
   MINUTE: {
     second: '0',
-    minute: '*',
+    minute: '0,5,10,15,20,25,30,35,40,45,50,55',
     hour: '*',
     date: '*',
     month: '*',

@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { replace } from 'lodash';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring';
+import { RuleExecutionStatus } from '../../../../../../common/api/detection_engine/rule_monitoring';
 import { ExecutionStatusFilter } from '../../../../rule_monitoring';
 
 import * as i18n from './translations';

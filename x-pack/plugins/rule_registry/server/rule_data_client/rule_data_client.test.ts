@@ -61,6 +61,10 @@ function getRuleDataClientOptions({
 describe('RuleDataClient', () => {
   const getFieldsForWildcardMock = jest.fn();
 
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   test('options are set correctly in constructor', () => {
     const namespace = 'test';
     const ruleDataClient = new RuleDataClient(getRuleDataClientOptions({}));
@@ -252,21 +256,18 @@ describe('RuleDataClient', () => {
       );
       expect(logger.error).toHaveBeenNthCalledWith(
         2,
-        `The writer for the Rule Data Client for the observability.apm registration context was not initialized properly, bulk() cannot continue, and writing will be disabled.`
+        `The writer for the Rule Data Client for the observability.apm registration context was not initialized properly, bulk() cannot continue.`
       );
-      expect(ruleDataClient.isWriteEnabled()).toBe(false);
+      expect(ruleDataClient.isWriteEnabled()).not.toBe(false);
 
       // getting the writer again at this point should throw another error
       await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
         `"There has been a catastrophic error trying to install index level resources for the following registration context: observability.apm. This may have been due to a non-additive change to the mappings, removal and type changes are not permitted. Full error: Error: could not get cluster client"`
       );
-      expect(logger.debug).toHaveBeenCalledWith(
-        `Writing is disabled, bulk() will not write any data.`
-      );
     });
 
     test('throws error if initialization of writer fails due to namespace error', async () => {
-      mockResourceInstaller.installAndUpdateNamespaceLevelResources.mockRejectedValueOnce(
+      mockResourceInstaller.installAndUpdateNamespaceLevelResources.mockRejectedValue(
         new Error('bad resource installation')
       );
       const ruleDataClient = new RuleDataClient(getRuleDataClientOptions({}));
@@ -284,16 +285,13 @@ describe('RuleDataClient', () => {
       );
       expect(logger.error).toHaveBeenNthCalledWith(
         2,
-        `The writer for the Rule Data Client for the observability.apm registration context was not initialized properly, bulk() cannot continue, and writing will be disabled.`
+        `The writer for the Rule Data Client for the observability.apm registration context was not initialized properly, bulk() cannot continue.`
       );
-      expect(ruleDataClient.isWriteEnabled()).toBe(false);
+      expect(ruleDataClient.isWriteEnabled()).not.toBe(false);
 
       // getting the writer again at this point should throw another error
       await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
         `"There has been a catastrophic error trying to install namespace level resources for the following registration context: observability.apm. This may have been due to a non-additive change to the mappings, removal and type changes are not permitted. Full error: Error: bad resource installation"`
-      );
-      expect(logger.debug).toHaveBeenCalledWith(
-        `Writing is disabled, bulk() will not write any data.`
       );
     });
 

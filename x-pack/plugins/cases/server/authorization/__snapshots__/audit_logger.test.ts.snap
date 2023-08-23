@@ -1764,6 +1764,90 @@ Object {
 }
 `;
 
+exports[`audit_logger log function event structure creates the correct audit event for operation: "getCategories" with an error and entity 1`] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_categories_get",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "access",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "1",
+      "type": "cases",
+    },
+  },
+  "message": "Failed attempt to access cases [id=1] as owner \\"awesome\\"",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "getCategories" with an error but no entity 1`] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_categories_get",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "access",
+    ],
+  },
+  "message": "Failed attempt to access a cases as any owners",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "getCategories" without an error but with an entity 1`] = `
+Object {
+  "event": Object {
+    "action": "case_categories_get",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "success",
+    "type": Array [
+      "access",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "5",
+      "type": "cases",
+    },
+  },
+  "message": "User has accessed cases [id=5] as owner \\"super\\"",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "getCategories" without an error or entity 1`] = `
+Object {
+  "event": Object {
+    "action": "case_categories_get",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "success",
+    "type": Array [
+      "access",
+    ],
+  },
+  "message": "User has accessed a cases as any owners",
+}
+`;
+
 exports[`audit_logger log function event structure creates the correct audit event for operation: "getComment" with an error and entity 1`] = `
 Object {
   "error": Object {
@@ -2374,7 +2458,7 @@ Object {
       "type": "cases",
     },
   },
-  "message": "Failed attempt to update cases [id=1] as owner \\"awesome\\"",
+  "message": "Failed attempt to push cases [id=1] as owner \\"awesome\\"",
 }
 `;
 
@@ -2394,7 +2478,7 @@ Object {
       "change",
     ],
   },
-  "message": "Failed attempt to update a case as any owners",
+  "message": "Failed attempt to push a case as any owners",
 }
 `;
 
@@ -2416,7 +2500,7 @@ Object {
       "type": "cases",
     },
   },
-  "message": "User is updating cases [id=5] as owner \\"super\\"",
+  "message": "User is pushing cases [id=5] as owner \\"super\\"",
 }
 `;
 
@@ -2432,7 +2516,7 @@ Object {
       "change",
     ],
   },
-  "message": "User is updating a case as any owners",
+  "message": "User is pushing a case as any owners",
 }
 `;
 

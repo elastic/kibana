@@ -25,7 +25,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/data-views-plugin",
     "@kbn/screenshot-mode-plugin",
-    "@kbn/task-manager-plugin",
     "@kbn/security-plugin",
     "@kbn/expressions-plugin",
     "@kbn/field-types",
@@ -49,6 +48,8 @@
     "@kbn/core-application-browser",
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-utils-server",
+    "@kbn/data-service",
+    "@kbn/react-kibana-context-render"
   ],
   "exclude": [
     "target/**/*",

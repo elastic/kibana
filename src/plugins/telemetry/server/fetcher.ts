@@ -202,6 +202,7 @@ export class FetcherTask {
     const allowChangingOptInStatus = config.allowChangingOptInStatus;
     const configTelemetryOptIn = typeof config.optIn === 'undefined' ? null : config.optIn;
     const telemetryUrl = getTelemetryChannelEndpoint({
+      appendServerlessChannelsSuffix: config.appendServerlessChannelsSuffix,
       channelName: 'snapshot',
       env: config.sendUsageTo,
     });

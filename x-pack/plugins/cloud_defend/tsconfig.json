@@ -33,7 +33,9 @@
     "@kbn/data-views-plugin",
     "@kbn/utility-types",
     "@kbn/utility-types-jest",
-    "@kbn/kubernetes-security-plugin"
+    "@kbn/kubernetes-security-plugin",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/core-elasticsearch-server"
   ],
   "exclude": ["target/**/*"]
 }

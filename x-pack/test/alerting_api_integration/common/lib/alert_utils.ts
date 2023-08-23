@@ -417,12 +417,12 @@ function getDefaultAlwaysFiringAlertData(
   notifyWhen = 'onActiveAlert'
 ) {
   const messageTemplate = `
-alertId: {{alertId}},
-alertName: {{alertName}},
-spaceId: {{spaceId}},
-tags: {{tags}},
-alertInstanceId: {{alertInstanceId}},
-alertActionGroup: {{alertActionGroup}},
+ruleId: {{rule.id}},
+ruleName: {{rule.name}},
+spaceId: {{rule.spaceId}},
+tags: {{rule.tags}},
+alertId: {{alert.id}},
+alertActionGroup: {{alert.actionGroup}},
 instanceContextValue: {{context.instanceContextValue}},
 instanceStateValue: {{state.instanceStateValue}}
 `.trim();
@@ -461,12 +461,12 @@ function getAlwaysFiringAlertWithThrottledActionData(
   summary = false
 ) {
   const messageTemplate = `
-alertId: {{alertId}},
-alertName: {{alertName}},
-spaceId: {{spaceId}},
-tags: {{tags}},
-alertInstanceId: {{alertInstanceId}},
-alertActionGroup: {{alertActionGroup}},
+ruleId: {{rule.id}},
+ruleName: {{rule.name}},
+spaceId: {{rule.spaceId}},
+tags: {{rule.tags}},
+alertId: {{alert.id}},
+alertActionGroup: {{alert.actionGroup}},
 instanceContextValue: {{context.instanceContextValue}},
 instanceStateValue: {{state.instanceStateValue}}
 `.trim();

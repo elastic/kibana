@@ -11,18 +11,25 @@ import {
   AggregationsSumAggregate,
   AggregationsValueCountAggregate,
   MsearchMultisearchBody,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { occurrencesBudgetingMethodSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  occurrencesBudgetingMethodSchema,
+  timeslicesBudgetingMethodSchema,
+  toMomentUnitOfTime,
+} from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
+import moment from 'moment';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
 import { DateRange, Duration, IndicatorData, SLO } from '../../domain/models';
-import { toDateRange } from '../../domain/services/date_range';
 import { InternalQueryError } from '../../errors';
 
 export interface SLIClient {
   fetchSLIDataFrom(
     slo: SLO,
+    instanceId: string,
     lookbackWindows: LookbackWindow[]
   ): Promise<Record<WindowName, IndicatorData>>;
 }
@@ -41,20 +48,18 @@ export class DefaultSLIClient implements SLIClient {
 
   async fetchSLIDataFrom(
     slo: SLO,
+    instanceId: string,
     lookbackWindows: LookbackWindow[]
   ): Promise<Record<WindowName, IndicatorData>> {
     const sortedLookbackWindows = [...lookbackWindows].sort((a, b) =>
       a.duration.isShorterThan(b.duration) ? 1 : -1
     );
     const longestLookbackWindow = sortedLookbackWindows[0];
-    const longestDateRange = toDateRange({
-      duration: longestLookbackWindow.duration,
-      isRolling: true,
-    });
+    const longestDateRange = getLookbackDateRange(longestLookbackWindow.duration);
 
     if (occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
-        ...commonQuery(slo, longestDateRange),
+        ...commonQuery(slo, instanceId, longestDateRange),
         index: SLO_DESTINATION_INDEX_PATTERN,
         aggs: toLookbackWindowsAggregationsQuery(sortedLookbackWindows),
       });
@@ -64,7 +69,7 @@ export class DefaultSLIClient implements SLIClient {
 
     if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
-        ...commonQuery(slo, longestDateRange),
+        ...commonQuery(slo, instanceId, longestDateRange),
         index: SLO_DESTINATION_INDEX_PATTERN,
         aggs: toLookbackWindowsSlicedAggregationsQuery(slo, sortedLookbackWindows),
       });
@@ -78,21 +83,28 @@ export class DefaultSLIClient implements SLIClient {
 
 function commonQuery(
   slo: SLO,
+  instanceId: string,
   dateRange: DateRange
 ): Pick<MsearchMultisearchBody, 'size' | 'query'> {
+  const filter: QueryDslQueryContainer[] = [
+    { term: { 'slo.id': slo.id } },
+    { term: { 'slo.revision': slo.revision } },
+    {
+      range: {
+        '@timestamp': { gte: dateRange.from.toISOString(), lt: dateRange.to.toISOString() },
+      },
+    },
+  ];
+
+  if (instanceId !== ALL_VALUE) {
+    filter.push({ term: { 'slo.instanceId': instanceId } });
+  }
+
   return {
     size: 0,
     query: {
       bool: {
-        filter: [
-          { term: { 'slo.id': slo.id } },
-          { term: { 'slo.revision': slo.revision } },
-          {
-            range: {
-              '@timestamp': { gte: dateRange.from.toISOString(), lt: dateRange.to.toISOString() },
-            },
-          },
-        ],
+        filter,
       },
     },
   };
@@ -178,4 +190,16 @@ function handleWindowedResult(
   }
 
   return indicatorDataPerLookbackWindow;
+}
+
+function getLookbackDateRange(duration: Duration): { from: Date; to: Date } {
+  const unit = toMomentUnitOfTime(duration.unit);
+  const now = moment.utc().startOf('minute');
+  const from = now.clone().subtract(duration.value, unit);
+  const to = now.clone();
+
+  return {
+    from: from.toDate(),
+    to: to.toDate(),
+  };
 }

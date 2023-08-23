@@ -73,10 +73,13 @@ export class ConnectorMappingsService {
   }: PostConnectorMappingsArgs): Promise<ConnectorMappingsSavedObjectTransformed> {
     try {
       this.log.debug(`Attempting to POST a new connector mappings`);
+
+      const decodedAttributes = decodeOrThrow(ConnectorMappingsAttributesTransformedRt)(attributes);
+
       const connectorMappings =
         await unsecuredSavedObjectsClient.create<ConnectorMappingsPersistedAttributes>(
           CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
-          attributes,
+          decodedAttributes,
           {
             references,
             refresh,
@@ -105,11 +108,14 @@ export class ConnectorMappingsService {
   > {
     try {
       this.log.debug(`Attempting to UPDATE connector mappings ${mappingId}`);
+
+      const decodedAttributes = decodeOrThrow(ConnectorMappingsAttributesPartialRt)(attributes);
+
       const updatedMappings =
         await unsecuredSavedObjectsClient.update<ConnectorMappingsPersistedAttributes>(
           CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
           mappingId,
-          attributes,
+          decodedAttributes,
           {
             references,
             refresh,

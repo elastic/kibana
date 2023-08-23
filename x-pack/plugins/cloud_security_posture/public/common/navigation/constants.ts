@@ -27,7 +27,7 @@ const NAV_ITEMS_NAMES = {
     defaultMessage: 'Findings',
   }),
   BENCHMARKS: i18n.translate('xpack.csp.navigation.myBenchmarksNavItemLabel', {
-    defaultMessage: 'Cloud Posture Benchmarks',
+    defaultMessage: 'Benchmark rules',
   }),
   RULES: i18n.translate('xpack.csp.navigation.rulesNavItemLabel', {
     defaultMessage: 'Rules',
@@ -88,6 +88,16 @@ export const findingsNavigation = {
     name: NAV_ITEMS_NAMES.FINDINGS,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/vulnerabilities`,
     id: 'cloud_security_posture-findings-vulnerabilities',
+  },
+  vulnerabilities_by_resource: {
+    name: NAV_ITEMS_NAMES.FINDINGS,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/vulnerabilities/resource`,
+    id: 'cloud_security_posture-findings-vulnerabilities-resource',
+  },
+  resource_vulnerabilities: {
+    name: NAV_ITEMS_NAMES.FINDINGS,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/vulnerabilities/resource/:resourceId`,
+    id: 'cloud_security_posture-findings-vulnerabilities-resourceId',
   },
 };
 

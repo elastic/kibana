@@ -6,11 +6,12 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiPageBody, EuiSpacer } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 
 import type { HeaderProps } from './header';
 import { Header } from './header';
-import { Page, ContentWrapper } from './without_header';
+import { contentCss } from './without_header';
+import { pageCss } from './without_header';
 
 export interface WithHeaderLayoutProps extends HeaderProps {
   restrictWidth?: number;
@@ -36,16 +37,17 @@ export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
     >
       {headerChildren}
     </Header>
-    <Page
+    <EuiPage
+      css={pageCss}
       restrictWidth={restrictWidth || 1200}
       data-test-subj={dataTestSubj ? `${dataTestSubj}_page` : undefined}
     >
       <EuiPageBody>
-        <ContentWrapper>
+        <div css={contentCss}>
           <EuiSpacer size="l" />
           {children}
-        </ContentWrapper>
+        </div>
       </EuiPageBody>
-    </Page>
+    </EuiPage>
   </Fragment>
 );

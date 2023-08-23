@@ -10,7 +10,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import type { ServerError } from '../../../types';
-import type { ActionConnector } from '../../../../common/api';
+import type { ActionConnector } from '../../../../common/types/domain';
 import { connectorsQueriesKeys } from '../constants';
 import { getIncidentTypes } from './api';
 import * as i18n from './translations';
@@ -26,11 +26,10 @@ export const useGetIncidentTypes = ({ http, connector }: Props) => {
   const { showErrorToast } = useCasesToast();
   return useQuery<ActionTypeExecutorResult<IncidentTypes>, ServerError>(
     connectorsQueriesKeys.resilientGetIncidentTypes(connector?.id ?? ''),
-    () => {
-      const abortCtrlRef = new AbortController();
+    ({ signal }) => {
       return getIncidentTypes({
         http,
-        signal: abortCtrlRef.signal,
+        signal,
         connectorId: connector?.id ?? '',
       });
     },

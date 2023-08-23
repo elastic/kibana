@@ -96,7 +96,7 @@ const invalidateAgentKeyRoute = createApmServerRoute({
 });
 
 const createAgentKeyRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/agent_keys 2023-05-22',
+  endpoint: 'POST /api/apm/agent_keys 2023-10-31',
   options: { tags: ['access:apm', 'access:apm_write'] },
   params: t.type({
     body: t.type({

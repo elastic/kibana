@@ -37,6 +37,7 @@ describe('addConnector lib function', () => {
           custom_scheduling: {},
           error: null,
           index_name: 'index_name',
+          last_access_control_sync_error: null,
           last_access_control_sync_scheduled_at: null,
           last_access_control_sync_status: null,
           last_seen: null,
@@ -44,7 +45,11 @@ describe('addConnector lib function', () => {
           last_sync_scheduled_at: null,
           last_sync_status: null,
           last_synced: null,
-          scheduling: { enabled: false, interval: '* * * * *' },
+          scheduling: {
+            access_control: { enabled: false, interval: '* * * * *' },
+            full: { enabled: false, interval: '* * * * *' },
+            incremental: { enabled: false, interval: '* * * * *' },
+          },
           service_type: null,
           status: 'not connected',
           sync_now: false,
@@ -56,8 +61,12 @@ describe('addConnector lib function', () => {
 
     await expect(
       updateConnectorScheduling(mockClient as unknown as IScopedClusterClient, 'connectorId', {
-        enabled: true,
-        interval: '1 2 3 4 5',
+        access_control: { enabled: false, interval: '* * * * *' },
+        full: {
+          enabled: true,
+          interval: '1 2 3 4 5',
+        },
+        incremental: { enabled: false, interval: '* * * * *' },
       })
     ).resolves.toEqual({ _id: 'fakeId' });
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
@@ -68,6 +77,7 @@ describe('addConnector lib function', () => {
         custom_scheduling: {},
         error: null,
         index_name: 'index_name',
+        last_access_control_sync_error: null,
         last_access_control_sync_scheduled_at: null,
         last_access_control_sync_status: null,
         last_seen: null,
@@ -75,7 +85,11 @@ describe('addConnector lib function', () => {
         last_sync_scheduled_at: null,
         last_sync_status: null,
         last_synced: null,
-        scheduling: { enabled: true, interval: '1 2 3 4 5' },
+        scheduling: {
+          access_control: { enabled: false, interval: '* * * * *' },
+          full: { enabled: true, interval: '1 2 3 4 5' },
+          incremental: { enabled: false, interval: '* * * * *' },
+        },
         service_type: null,
         status: 'not connected',
         sync_now: false,
@@ -94,8 +108,12 @@ describe('addConnector lib function', () => {
     });
     await expect(
       updateConnectorScheduling(mockClient as unknown as IScopedClusterClient, 'connectorId', {
-        enabled: true,
-        interval: '1 2 3 4 5',
+        access_control: { enabled: false, interval: '* * * * *' },
+        full: {
+          enabled: true,
+          interval: '1 2 3 4 5',
+        },
+        incremental: { enabled: false, interval: '* * * * *' },
       })
     ).rejects.toEqual(new Error('Could not find document'));
     expect(mockClient.asCurrentUser.index).not.toHaveBeenCalled();

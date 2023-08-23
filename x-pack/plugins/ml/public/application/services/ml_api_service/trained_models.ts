@@ -6,6 +6,7 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 import { useMemo } from 'react';
 import type { HttpFetchQuery } from '@kbn/core/public';
@@ -58,7 +59,6 @@ export function trainedModelsApiProvider(httpService: HttpService) {
   return {
     /**
      * Fetches configuration information for a trained inference model.
-     *
      * @param modelId - Model ID, collection of Model IDs or Model ID pattern.
      *                  Fetches all In case nothing is provided.
      * @param params - Optional query params
@@ -76,7 +76,6 @@ export function trainedModelsApiProvider(httpService: HttpService) {
 
     /**
      * Fetches usage information for trained inference models.
-     *
      * @param modelId - Model ID, collection of Model IDs or Model ID pattern.
      *                  Fetches all In case nothing is provided.
      * @param params - Optional query params
@@ -93,7 +92,6 @@ export function trainedModelsApiProvider(httpService: HttpService) {
 
     /**
      * Fetches pipelines associated with provided models
-     *
      * @param modelId - Model ID, collection of Model IDs.
      */
     getTrainedModelPipelines(modelId: string | string[]) {
@@ -110,15 +108,44 @@ export function trainedModelsApiProvider(httpService: HttpService) {
     },
 
     /**
+     * Fetches all ingest pipelines
+     */
+    getAllIngestPipelines() {
+      return httpService.http<NodesOverviewResponse>({
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/ingest_pipelines`,
+        method: 'GET',
+        version: '1',
+      });
+    },
+
+    /**
+     * Creates inference pipeline
+     */
+    createInferencePipeline(pipelineName: string, pipeline: IngestPipeline) {
+      return httpService.http<estypes.IngestSimulateResponse>({
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/create_inference_pipeline`,
+        method: 'POST',
+        body: JSON.stringify({ pipeline, pipelineName }),
+        version: '1',
+      });
+    },
+
+    /**
      * Deletes an existing trained inference model.
-     *
      * @param modelId - Model ID
      */
-    deleteTrainedModel(modelId: string) {
+    deleteTrainedModel(
+      modelId: string,
+      options: { with_pipelines?: boolean; force?: boolean } = {
+        with_pipelines: false,
+        force: false,
+      }
+    ) {
       return httpService.http<{ acknowledge: boolean }>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}`,
         method: 'DELETE',
         version: '1',
+        query: options,
       });
     },
 

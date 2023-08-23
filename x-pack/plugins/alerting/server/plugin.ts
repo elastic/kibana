@@ -52,6 +52,7 @@ import {
   PluginStartContract as FeaturesPluginStart,
   PluginSetupContract as FeaturesPluginSetup,
 } from '@kbn/features-plugin/server';
+import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import { SharePluginStart } from '@kbn/share-plugin/server';
@@ -96,6 +97,7 @@ import {
 } from './alerts_service';
 import { rulesSettingsFeature } from './rules_settings_feature';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
+import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias } from './lib';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -143,6 +145,8 @@ export interface PluginStartContract {
   listTypes: RuleTypeRegistry['list'];
 
   getAllTypes: RuleTypeRegistry['getAllTypes'];
+  getType: RuleTypeRegistry['get'];
+  getAlertIndicesAlias: GetAlertIndicesAlias;
 
   getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
 
@@ -165,6 +169,7 @@ export interface AlertingPluginsSetup {
   monitoringCollection: MonitoringCollectionSetup;
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
+  unifiedSearch: UnifiedSearchServerPluginSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -342,7 +347,9 @@ export class AlertingPlugin {
       router,
       licenseState: this.licenseState,
       usageCounter: this.usageCounter,
+      getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       encryptedSavedObjects: plugins.encryptedSavedObjects,
+      config$: plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
     });
 
     return {
@@ -550,7 +557,9 @@ export class AlertingPlugin {
 
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
+      getType: ruleTypeRegistry!.get.bind(this.ruleTypeRegistry),
       getAllTypes: ruleTypeRegistry!.getAllTypes.bind(this.ruleTypeRegistry!),
+      getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       getAlertingAuthorizationWithRequest,
       getRulesClientWithRequest,
       getFrameworkHealth: async () =>

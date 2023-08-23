@@ -16,17 +16,19 @@ import {
   Chart,
   Settings,
   Position,
-  TooltipValue,
   niceTimeFormatter,
   ElementClickListener,
   RectAnnotation,
   RectAnnotationDatum,
   XYChartElementEvent,
+  TooltipProps,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useTimelineChartTheme } from '../../../../../utils/use_timeline_chart_theme';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
@@ -37,12 +39,10 @@ import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 import { useWaffleFiltersContext } from '../../hooks/use_waffle_filters';
 import { MetricExplorerSeriesChart } from '../../../metrics_explorer/components/series_chart';
 import { MetricsExplorerChartType } from '../../../metrics_explorer/hooks/use_metrics_explorer_options';
-import { getTimelineChartTheme } from '../../../../../utils/get_chart_theme';
 import { calculateDomain } from '../../../metrics_explorer/components/helpers/calculate_domain';
 import { InfraFormatter } from '../../../../../lib/lib';
 import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
 import { useMetricsK8sAnomaliesResults } from '../../hooks/use_metrics_k8s_anomalies';
-import { useIsDarkMode } from '../../../../../hooks/use_is_dark_mode';
 
 interface Props {
   interval: string;
@@ -55,6 +55,8 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   const { metric, nodeType, accountId, region } = useWaffleOptionsContext();
   const { currentTime, jumpToTime, stopAutoReload } = useWaffleTimeContext();
   const { filterQueryAsJson } = useWaffleFiltersContext();
+
+  const chartTheme = useTimelineChartTheme();
 
   const { loading, error, startTime, endTime, timeseries, reload } = useTimeline(
     filterQueryAsJson,
@@ -122,10 +124,8 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     return niceTimeFormatter([firstTimestamp, lastTimestamp]);
   }, [timeseries]);
 
-  const isDarkMode = useIsDarkMode();
-  const tooltipProps = {
-    headerFormatter: (tooltipValue: TooltipValue) =>
-      moment(tooltipValue.value).format('Y-MM-DD HH:mm:ss.SSS'),
+  const tooltipProps: TooltipProps = {
+    headerFormatter: ({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS'),
   };
 
   const dataDomain = timeseries ? calculateDomain(timeseries, [chartMetric], false) : null;
@@ -292,12 +292,13 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
             tickFormat={yAxisFormatter}
             domain={domain}
             ticks={6}
-            showGridLines
+            gridLine={{ visible: true }}
           />
+          <Tooltip {...tooltipProps} />
           <Settings
-            tooltip={tooltipProps}
-            theme={getTimelineChartTheme(isDarkMode)}
             onElementClick={onClickPoint}
+            baseTheme={chartTheme.baseTheme}
+            theme={chartTheme.theme}
           />
         </Chart>
       </TimelineChartContainer>

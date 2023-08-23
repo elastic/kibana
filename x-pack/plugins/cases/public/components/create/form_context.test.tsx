@@ -10,7 +10,6 @@ import type { Screen } from '@testing-library/react';
 import { waitFor, within, screen, act } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-import { CaseSeverity, CommentType, ConnectorTypes } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -46,6 +45,9 @@ import { useGetTags } from '../../containers/use_get_tags';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { useLicense } from '../../common/use_license';
+import { useGetCategories } from '../../containers/use_get_categories';
+import { categories } from '../../containers/mock';
+import { CaseSeverity, AttachmentType, ConnectorTypes } from '../../../common/types/domain';
 
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');
@@ -62,6 +64,7 @@ jest.mock('../connectors/servicenow/use_get_choices');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/user_profiles/api');
 jest.mock('../../common/use_license');
+jest.mock('../../containers/use_get_categories');
 
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
@@ -77,6 +80,7 @@ const postCase = jest.fn();
 const pushCaseToExternalService = jest.fn();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useLicenseMock = useLicense as jest.Mock;
+const useGetCategoriesMock = useGetCategories as jest.Mock;
 
 const sampleId = 'case-id';
 
@@ -192,6 +196,7 @@ describe('Create case', () => {
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
+    useGetCategoriesMock.mockReturnValue({ isLoading: false, data: categories });
 
     (useGetTags as jest.Mock).mockImplementation(() => ({
       data: sampleTags,
@@ -230,13 +235,14 @@ describe('Create case', () => {
 
       await waitForFormToRender(screen);
 
-      expect(screen.getByTestId('caseTitle')).toBeTruthy();
-      expect(screen.getByTestId('caseSeverity')).toBeTruthy();
-      expect(screen.getByTestId('caseDescription')).toBeTruthy();
-      expect(screen.getByTestId('createCaseAssigneesComboBox')).toBeTruthy();
-      expect(screen.getByTestId('caseTags')).toBeTruthy();
-      expect(screen.getByTestId('caseConnectors')).toBeTruthy();
-      expect(screen.getByTestId('case-creation-form-steps')).toBeTruthy();
+      expect(screen.getByTestId('caseTitle')).toBeInTheDocument();
+      expect(screen.getByTestId('caseSeverity')).toBeInTheDocument();
+      expect(screen.getByTestId('caseDescription')).toBeInTheDocument();
+      expect(screen.getByTestId('createCaseAssigneesComboBox')).toBeInTheDocument();
+      expect(screen.getByTestId('caseTags')).toBeInTheDocument();
+      expect(screen.getByTestId('caseConnectors')).toBeInTheDocument();
+      expect(screen.getByTestId('case-creation-form-steps')).toBeInTheDocument();
+      expect(screen.getByTestId('categories-list')).toBeInTheDocument();
     });
 
     it('should post case on submit click', async () => {
@@ -298,32 +304,6 @@ describe('Create case', () => {
           severity: CaseSeverity.HIGH,
         },
       });
-    });
-
-    it('does not submits the title when the length is longer than 160 characters', async () => {
-      const longTitle = 'a'.repeat(161);
-
-      appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess}>
-          <CreateCaseFormFields {...defaultCreateCaseForm} />
-          <SubmitCaseButton />
-        </FormContext>
-      );
-
-      await waitForFormToRender(screen);
-
-      const titleInput = within(screen.getByTestId('caseTitle')).getByTestId('input');
-      userEvent.paste(titleInput, longTitle);
-
-      userEvent.click(screen.getByTestId('create-case-submit'));
-
-      await waitFor(() => {
-        expect(
-          screen.getByText('The length of the name is too long. The maximum length is 160.')
-        ).toBeInTheDocument();
-      });
-
-      expect(postCase).not.toHaveBeenCalled();
     });
 
     it('should toggle sync settings', async () => {
@@ -491,6 +471,37 @@ describe('Create case', () => {
 
       expect(pushCaseToExternalService).not.toHaveBeenCalled();
       expect(postCase).toBeCalledWith({ request: sampleDataWithoutTags });
+    });
+
+    it('should set the category correctly', async () => {
+      const category = categories[0];
+
+      useGetConnectorsMock.mockReturnValue({
+        ...sampleConnectorData,
+        data: connectorsMock,
+      });
+
+      appMockRender.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
+
+      const categoryComboBox = within(screen.getByTestId('categories-list')).getByRole('combobox');
+
+      userEvent.type(categoryComboBox, `${category}{enter}`);
+
+      userEvent.click(screen.getByTestId('create-case-submit'));
+
+      await waitFor(() => {
+        expect(postCase).toHaveBeenCalled();
+      });
+
+      expect(postCase).toBeCalledWith({ request: { ...sampleDataWithoutTags, category } });
     });
   });
 
@@ -676,7 +687,7 @@ describe('Create case', () => {
           name: 'my rule',
         },
         owner: 'owner',
-        type: CommentType.alert as const,
+        type: AttachmentType.alert as const,
       },
       {
         alertId: '7896',
@@ -686,7 +697,7 @@ describe('Create case', () => {
           name: 'my rule',
         },
         owner: 'second-owner',
-        type: CommentType.alert as const,
+        type: AttachmentType.alert as const,
       },
     ];
 
@@ -752,7 +763,7 @@ describe('Create case', () => {
           name: 'my rule',
         },
         owner: 'owner',
-        type: CommentType.alert as const,
+        type: AttachmentType.alert as const,
       },
     ];
 

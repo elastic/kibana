@@ -6,14 +6,19 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import {
   asDuration,
   formatDurationFromTimeUnitChar,
   getAlertDetailsUrl,
+  observabilityPaths,
   ProcessorEvent,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
-import { termQuery } from '@kbn/observability-plugin/server';
+import {
+  getParsedFilterQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -64,6 +69,7 @@ import {
   getMultiTermsSortOrder,
 } from './average_or_percentile_agg';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
+import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 
@@ -103,14 +109,9 @@ export function registerTransactionDurationRuleType({
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: async ({ params: ruleParams, services, spaceId }) => {
-      const predefinedGroupby = [
-        SERVICE_NAME,
-        SERVICE_ENVIRONMENT,
-        TRANSACTION_TYPE,
-      ];
-
-      const allGroupbyFields = Array.from(
-        new Set([...predefinedGroupby, ...(ruleParams.groupBy ?? [])])
+      const allGroupByFields = getAllGroupByFields(
+        ApmRuleType.TransactionDuration,
+        ruleParams.groupBy
       );
 
       const config = await firstValueFrom(config$);
@@ -138,6 +139,21 @@ export function registerTransactionDurationRuleType({
         searchAggregatedTransactions
       );
 
+      const termFilterQuery = !ruleParams.kqlFilter
+        ? [
+            ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
+              queryEmptyString: false,
+            }),
+            ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
+              queryEmptyString: false,
+            }),
+            ...termQuery(TRANSACTION_NAME, ruleParams.transactionName, {
+              queryEmptyString: false,
+            }),
+            ...environmentQuery(ruleParams.environment),
+          ]
+        : [];
+
       const searchParams = {
         index,
         body: {
@@ -156,23 +172,15 @@ export function registerTransactionDurationRuleType({
                 ...getDocumentTypeFilterForTransactions(
                   searchAggregatedTransactions
                 ),
-                ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
-                  queryEmptyString: false,
-                }),
-                ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
-                  queryEmptyString: false,
-                }),
-                ...termQuery(TRANSACTION_NAME, ruleParams.transactionName, {
-                  queryEmptyString: false,
-                }),
-                ...environmentQuery(ruleParams.environment),
+                ...termFilterQuery,
+                ...getParsedFilterQuery(ruleParams.kqlFilter),
               ] as QueryDslQueryContainer[],
             },
           },
           aggs: {
             series: {
               multi_terms: {
-                terms: [...getGroupByTerms(allGroupbyFields)],
+                terms: [...getGroupByTerms(allGroupByFields)],
                 size: 1000,
                 ...getMultiTermsSortOrder(ruleParams.aggregationType),
               },
@@ -205,7 +213,7 @@ export function registerTransactionDurationRuleType({
       for (const bucket of response.aggregations.series.buckets) {
         const groupByFields = bucket.key.reduce(
           (obj, bucketKey, bucketIndex) => {
-            obj[allGroupbyFields[bucketIndex]] = bucketKey;
+            obj[allGroupByFields[bucketIndex]] = bucketKey;
             return obj;
           },
           {} as Record<string, string>
@@ -302,6 +310,8 @@ export function registerTransactionDurationRuleType({
       return { state: {} };
     },
     alerts: ApmRuleTypeAlertDefinition,
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
   });
 
   alerting.registerType(ruleType);

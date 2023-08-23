@@ -7,63 +7,86 @@
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
 
-import { getPromptById } from '../helpers';
+import { css } from '@emotion/react';
+import { isEmpty } from 'lodash/fp';
+import { useAssistantContext } from '../../../assistant_context';
+import { Conversation } from '../../../..';
 import * as i18n from './translations';
-import type { Prompt } from '../../types';
 import { SelectSystemPrompt } from './select_system_prompt';
 
-const SystemPromptText = styled(EuiText)`
-  white-space: pre-line;
-`;
-
 interface Props {
-  selectedSystemPromptId: string | null;
-  setSelectedSystemPromptId: React.Dispatch<React.SetStateAction<string | null>>;
-  systemPrompts: Prompt[];
+  conversation: Conversation | undefined;
+  editingSystemPromptId: string | undefined;
+  isSettingsModalVisible: boolean;
+  onSystemPromptSelectionChange: (systemPromptId: string | undefined) => void;
+  setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const SystemPromptComponent: React.FC<Props> = ({
-  selectedSystemPromptId,
-  setSelectedSystemPromptId,
-  systemPrompts,
+  conversation,
+  editingSystemPromptId,
+  isSettingsModalVisible,
+  onSystemPromptSelectionChange,
+  setIsSettingsModalVisible,
 }) => {
-  const [showSelectSystemPrompt, setShowSelectSystemPrompt] = React.useState<boolean>(false);
+  const { allSystemPrompts } = useAssistantContext();
 
-  const selectedPrompt: Prompt | undefined = useMemo(
-    () => getPromptById({ prompts: systemPrompts, id: selectedSystemPromptId ?? '' }),
-    [systemPrompts, selectedSystemPromptId]
-  );
+  const selectedPrompt = useMemo(() => {
+    if (editingSystemPromptId !== undefined) {
+      return (
+        allSystemPrompts?.find((p) => p.id === editingSystemPromptId) ??
+        allSystemPrompts?.find((p) => p.id === conversation?.apiConfig.defaultSystemPromptId)
+      );
+    } else {
+      return undefined;
+    }
+  }, [allSystemPrompts, conversation?.apiConfig.defaultSystemPromptId, editingSystemPromptId]);
 
-  const clearSystemPrompt = useCallback(() => {
-    setSelectedSystemPromptId(null);
-    setShowSelectSystemPrompt(false);
-  }, [setSelectedSystemPromptId]);
+  const [isEditing, setIsEditing] = React.useState<boolean>(false);
 
-  const onShowSelectSystemPrompt = useCallback(() => setShowSelectSystemPrompt(true), []);
+  const handleClearSystemPrompt = useCallback(() => {
+    if (conversation) {
+      onSystemPromptSelectionChange(undefined);
+    }
+  }, [conversation, onSystemPromptSelectionChange]);
+
+  const handleEditSystemPrompt = useCallback(() => setIsEditing(true), []);
 
   return (
-    <div data-test-subj="systemPrompt">
-      {selectedPrompt == null || showSelectSystemPrompt ? (
+    <div>
+      {selectedPrompt == null || isEditing ? (
         <SelectSystemPrompt
+          allSystemPrompts={allSystemPrompts}
+          clearSelectedSystemPrompt={handleClearSystemPrompt}
+          conversation={conversation}
+          data-test-subj="systemPrompt"
+          isClearable={true}
+          isEditing={isEditing}
+          isOpen={isEditing}
+          isSettingsModalVisible={isSettingsModalVisible}
+          onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           selectedPrompt={selectedPrompt}
-          setSelectedSystemPromptId={setSelectedSystemPromptId}
-          setShowSelectSystemPrompt={setShowSelectSystemPrompt}
-          showSelectSystemPrompt={showSelectSystemPrompt}
-          systemPrompts={systemPrompts}
+          setIsEditing={setIsEditing}
+          setIsSettingsModalVisible={setIsSettingsModalVisible}
         />
       ) : (
         <EuiFlexGroup alignItems="flexStart" gutterSize="none">
           <EuiFlexItem grow>
-            <SystemPromptText
+            <EuiText
               color="subdued"
               data-test-subj="systemPromptText"
-              onClick={onShowSelectSystemPrompt}
+              onClick={handleEditSystemPrompt}
+              css={css`
+                white-space: pre-line;
+                &:hover {
+                  cursor: pointer;
+                  text-decoration: underline;
+                }
+              `}
             >
-              {selectedPrompt?.content ?? ''}
-            </SystemPromptText>
+              {isEmpty(selectedPrompt?.content) ? i18n.EMPTY_PROMPT : selectedPrompt?.content}
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="none">
@@ -73,7 +96,7 @@ const SystemPromptComponent: React.FC<Props> = ({
                     aria-label={i18n.SELECT_A_SYSTEM_PROMPT}
                     data-test-subj="edit"
                     iconType="documentEdit"
-                    onClick={onShowSelectSystemPrompt}
+                    onClick={handleEditSystemPrompt}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
@@ -84,7 +107,7 @@ const SystemPromptComponent: React.FC<Props> = ({
                     aria-label={i18n.CLEAR_SYSTEM_PROMPT}
                     data-test-subj="clear"
                     iconType="cross"
-                    onClick={clearSystemPrompt}
+                    onClick={handleClearSystemPrompt}
                   />
                 </EuiToolTip>
               </EuiFlexItem>

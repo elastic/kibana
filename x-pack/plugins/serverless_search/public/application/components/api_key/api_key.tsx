@@ -195,8 +195,7 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
                 overflow-wrap: anywhere;
               `}
             >
-              {cloud.cloudId ||
-                'ProjectXDHS:dXMtd2VzdDIuZ2NwLmVsYXN0aWMtY2xvdWQuY29tJDEwMDYxN2IwMzM3ODRiYWJhODc5NzZiOTA0MTA3NGYwJDQ5ZWM'}
+              {cloud.cloudId}
             </EuiCodeBlock>
           </EuiSplitPanel.Inner>
         </EuiThemeProvider>

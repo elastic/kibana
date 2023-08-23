@@ -10,19 +10,21 @@ import React from 'react';
 
 interface Props {
   rows: Array<{ label: string | React.ReactNode; value: React.ReactNode }>;
+  prependString?: string;
 }
 
-export function KeyValueList({ rows }: Props) {
+export function KeyValueList({ rows, prependString = '' }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       {rows.map((row, index) => (
-        <>
+        <React.Fragment key={index}>
           <EuiFlexItem>
             <EuiFlexGroup direction="row">
               <EuiFlexItem grow style={{ display: 'flex', flexDirection: 'row' }}>
                 {row.label}:
               </EuiFlexItem>
               <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end', overflowWrap: 'anywhere' }}>
+                {prependString}
                 {row.value}
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -32,7 +34,7 @@ export function KeyValueList({ rows }: Props) {
               <EuiHorizontalRule size="full" margin="none" />
             </EuiFlexItem>
           ) : undefined}
-        </>
+        </React.Fragment>
       ))}
     </EuiFlexGroup>
   );

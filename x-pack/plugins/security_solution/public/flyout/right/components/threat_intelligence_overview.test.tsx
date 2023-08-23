@@ -9,16 +9,20 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
-import {
-  INSIGHTS_THREAT_INTELLIGENCE_CONTENT_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_LOADING_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_TITLE_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON_TEST_ID,
-} from './test_ids';
 import { TestProviders } from '../../../common/mock';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
-import { LeftPanelInsightsTabPath, LeftPanelKey } from '../../left';
+import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
+import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
+import {
+  INSIGHTS_THREAT_INTELLIGENCE_CONTAINER_TEST_ID,
+  INSIGHTS_THREAT_INTELLIGENCE_CONTENT_TEST_ID,
+  INSIGHTS_THREAT_INTELLIGENCE_LOADING_TEST_ID,
+  INSIGHTS_THREAT_INTELLIGENCE_TITLE_ICON_TEST_ID,
+  INSIGHTS_THREAT_INTELLIGENCE_TITLE_LINK_TEST_ID,
+  INSIGHTS_THREAT_INTELLIGENCE_TITLE_TEXT_TEST_ID,
+  INSIGHTS_THREAT_INTELLIGENCE_TOGGLE_ICON_TEST_ID,
+} from './test_ids';
 
 jest.mock('../hooks/use_fetch_threat_intelligence');
 
@@ -37,6 +41,21 @@ const renderThreatIntelligenceOverview = (contextValue: RightPanelContext) => (
 );
 
 describe('<ThreatIntelligenceOverview />', () => {
+  it('should render wrapper component', () => {
+    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
+      loading: false,
+    });
+
+    const { getByTestId, queryByTestId } = render(
+      renderThreatIntelligenceOverview(panelContextValue)
+    );
+
+    expect(queryByTestId(INSIGHTS_THREAT_INTELLIGENCE_TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_TITLE_ICON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_TITLE_LINK_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(INSIGHTS_THREAT_INTELLIGENCE_TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
+  });
+
   it('should render 1 match detected and 1 field enriched', () => {
     (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
       loading: false,
@@ -46,7 +65,7 @@ describe('<ThreatIntelligenceOverview />', () => {
 
     const { getByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
 
-    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_TITLE_TEST_ID)).toHaveTextContent(
+    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_TITLE_LINK_TEST_ID)).toHaveTextContent(
       'Threat Intelligence'
     );
     expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_CONTENT_TEST_ID)).toHaveTextContent(
@@ -55,7 +74,6 @@ describe('<ThreatIntelligenceOverview />', () => {
     expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_CONTENT_TEST_ID)).toHaveTextContent(
       '1 field enriched with threat intelligence'
     );
-    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render 2 matches detected and 2 fields enriched', () => {
@@ -67,7 +85,7 @@ describe('<ThreatIntelligenceOverview />', () => {
 
     const { getByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
 
-    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_TITLE_TEST_ID)).toHaveTextContent(
+    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_TITLE_LINK_TEST_ID)).toHaveTextContent(
       'Threat Intelligence'
     );
     expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_CONTENT_TEST_ID)).toHaveTextContent(
@@ -76,7 +94,6 @@ describe('<ThreatIntelligenceOverview />', () => {
     expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_CONTENT_TEST_ID)).toHaveTextContent(
       '2 fields enriched with threat intelligence'
     );
-    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render 0 field enriched', () => {
@@ -126,9 +143,9 @@ describe('<ThreatIntelligenceOverview />', () => {
       eventId: null,
     } as unknown as RightPanelContext;
 
-    const { container } = render(renderThreatIntelligenceOverview(contextValue));
+    const { getByTestId } = render(renderThreatIntelligenceOverview(contextValue));
 
-    expect(container).toBeEmptyDOMElement();
+    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_CONTAINER_TEST_ID)).toBeEmptyDOMElement();
   });
 
   it('should render null when dataFormattedForFieldBrowser is null', () => {
@@ -141,9 +158,9 @@ describe('<ThreatIntelligenceOverview />', () => {
       dataFormattedForFieldBrowser: null,
     } as unknown as RightPanelContext;
 
-    const { container } = render(renderThreatIntelligenceOverview(contextValue));
+    const { getByTestId } = render(renderThreatIntelligenceOverview(contextValue));
 
-    expect(container).toBeEmptyDOMElement();
+    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_CONTAINER_TEST_ID)).toBeEmptyDOMElement();
   });
 
   it('should navigate to left section Insights tab when clicking on button', () => {
@@ -166,10 +183,10 @@ describe('<ThreatIntelligenceOverview />', () => {
       </TestProviders>
     );
 
-    getByTestId(INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON_TEST_ID).click();
+    getByTestId(INSIGHTS_THREAT_INTELLIGENCE_TITLE_LINK_TEST_ID).click();
     expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
       id: LeftPanelKey,
-      path: LeftPanelInsightsTabPath,
+      path: { tab: LeftPanelInsightsTab, subTab: THREAT_INTELLIGENCE_TAB_ID },
       params: {
         id: panelContextValue.eventId,
         indexName: panelContextValue.indexName,

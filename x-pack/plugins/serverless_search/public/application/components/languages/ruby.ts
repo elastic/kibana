@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { docLinks } from '../../../../common/doc_links';
-import { LanguageDefinition, Languages } from './types';
+import { INDEX_NAME_PLACEHOLDER } from '../../constants';
 
 export const rubyDefinition: LanguageDefinition = {
   advancedConfig: docLinks.rubyAdvancedConfig,
@@ -31,6 +32,18 @@ export const rubyDefinition: LanguageDefinition = {
   { index: { _index: 'books', data: {name: "The Handmaid's Tale", "author": "Margaret Atwood", "release_date": "1985-06-01", "page_count": 311} } }
 ]
 client.bulk(body: documents)`,
+  ingestDataIndex: ({ apiKey, url, indexName }) => `client = ElasticsearchServerless::Client.new(
+  api_key: '${apiKey}',
+  url: '${url}'
+)
+
+documents = [
+  { index: { _index: '${
+    indexName ?? INDEX_NAME_PLACEHOLDER
+  }', data: {name: "foo", "title": "bar"} } },
+]
+client.bulk(body: documents)
+`,
   installClient: `# Requires Ruby version 3.0 or higher
 
 # From the project's root directory:$ gem build elasticsearch-serverless.gemspec

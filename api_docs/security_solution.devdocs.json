@@ -101,7 +101,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly policyResponseInFleetEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly endpointRbacEnabled: boolean; readonly endpointRbacV1Enabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionGetFileEnabled: boolean; readonly responseActionExecuteEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly assistantEnabled: boolean; readonly riskyHostsEnabled: boolean; readonly riskyUsersEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; }"
+              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly discoverInTimeline: boolean; }"
             ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
@@ -411,7 +411,15 @@
             "description": [],
             "signature": [
               "Observable",
-              "<Map<\"entity_analytics_panel\", React.ComponentType<{}>>>"
+              "<Map<",
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.UpsellingSectionId",
+                "text": "UpsellingSectionId"
+              },
+              ", React.ComponentType<{}>>>"
             ],
             "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
             "deprecated": false,
@@ -428,13 +436,28 @@
               "Observable",
               "<Map<",
               {
-                "pluginId": "securitySolution",
+                "pluginId": "@kbn/security-solution-navigation",
                 "scope": "common",
-                "docId": "kibSecuritySolutionPluginApi",
+                "docId": "kibKbnSecuritySolutionNavigationPluginApi",
                 "section": "def-common.SecurityPageName",
                 "text": "SecurityPageName"
               },
               ", React.ComponentType<{}>>>"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.UpsellingService.messages$",
+            "type": "Object",
+            "tags": [],
+            "label": "messages$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<Map<\"investigation_guide\", string>>"
             ],
             "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
             "deprecated": false,
@@ -458,13 +481,21 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.UpsellingService.registerSections",
+            "id": "def-public.UpsellingService.setSections",
             "type": "Function",
             "tags": [],
-            "label": "registerSections",
+            "label": "setSections",
             "description": [],
             "signature": [
-              "(sections: Partial<Record<\"entity_analytics_panel\", React.ComponentType<{}>>>) => void"
+              "(sections: Partial<Record<",
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.UpsellingSectionId",
+                "text": "UpsellingSectionId"
+              },
+              ", React.ComponentType<{}>>>) => void"
             ],
             "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
             "deprecated": false,
@@ -472,13 +503,21 @@
             "children": [
               {
                 "parentPluginId": "securitySolution",
-                "id": "def-public.UpsellingService.registerSections.$1",
+                "id": "def-public.UpsellingService.setSections.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "sections",
                 "description": [],
                 "signature": [
-                  "Partial<Record<\"entity_analytics_panel\", React.ComponentType<{}>>>"
+                  "Partial<Record<",
+                  {
+                    "pluginId": "securitySolution",
+                    "scope": "public",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-public.UpsellingSectionId",
+                    "text": "UpsellingSectionId"
+                  },
+                  ", React.ComponentType<{}>>>"
                 ],
                 "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
                 "deprecated": false,
@@ -490,17 +529,17 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.UpsellingService.registerPages",
+            "id": "def-public.UpsellingService.setPages",
             "type": "Function",
             "tags": [],
-            "label": "registerPages",
+            "label": "setPages",
             "description": [],
             "signature": [
               "(pages: Partial<Record<",
               {
-                "pluginId": "securitySolution",
+                "pluginId": "@kbn/security-solution-navigation",
                 "scope": "common",
-                "docId": "kibSecuritySolutionPluginApi",
+                "docId": "kibKbnSecuritySolutionNavigationPluginApi",
                 "section": "def-common.SecurityPageName",
                 "text": "SecurityPageName"
               },
@@ -512,7 +551,7 @@
             "children": [
               {
                 "parentPluginId": "securitySolution",
-                "id": "def-public.UpsellingService.registerPages.$1",
+                "id": "def-public.UpsellingService.setPages.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "pages",
@@ -520,13 +559,45 @@
                 "signature": [
                   "Partial<Record<",
                   {
-                    "pluginId": "securitySolution",
+                    "pluginId": "@kbn/security-solution-navigation",
                     "scope": "common",
-                    "docId": "kibSecuritySolutionPluginApi",
+                    "docId": "kibKbnSecuritySolutionNavigationPluginApi",
                     "section": "def-common.SecurityPageName",
                     "text": "SecurityPageName"
                   },
                   ", React.ComponentType<{}>>>"
+                ],
+                "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.UpsellingService.setMessages",
+            "type": "Function",
+            "tags": [],
+            "label": "setMessages",
+            "description": [],
+            "signature": [
+              "(messages: Partial<Record<\"investigation_guide\", string>>) => void"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.UpsellingService.setMessages.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "messages",
+                "description": [],
+                "signature": [
+                  "Partial<Record<\"investigation_guide\", string>>"
                 ],
                 "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
                 "deprecated": false,
@@ -546,9 +617,9 @@
             "signature": [
               "(id: ",
               {
-                "pluginId": "securitySolution",
+                "pluginId": "@kbn/security-solution-navigation",
                 "scope": "common",
-                "docId": "kibSecuritySolutionPluginApi",
+                "docId": "kibKbnSecuritySolutionNavigationPluginApi",
                 "section": "def-common.SecurityPageName",
                 "text": "SecurityPageName"
               },
@@ -567,9 +638,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "securitySolution",
+                    "pluginId": "@kbn/security-solution-navigation",
                     "scope": "common",
-                    "docId": "kibSecuritySolutionPluginApi",
+                    "docId": "kibKbnSecuritySolutionNavigationPluginApi",
                     "section": "def-common.SecurityPageName",
                     "text": "SecurityPageName"
                   }
@@ -592,9 +663,9 @@
             "signature": [
               "(id: ",
               {
-                "pluginId": "securitySolution",
+                "pluginId": "@kbn/security-solution-navigation",
                 "scope": "common",
-                "docId": "kibSecuritySolutionPluginApi",
+                "docId": "kibKbnSecuritySolutionNavigationPluginApi",
                 "section": "def-common.SecurityPageName",
                 "text": "SecurityPageName"
               },
@@ -613,9 +684,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "securitySolution",
+                    "pluginId": "@kbn/security-solution-navigation",
                     "scope": "common",
-                    "docId": "kibSecuritySolutionPluginApi",
+                    "docId": "kibKbnSecuritySolutionNavigationPluginApi",
                     "section": "def-common.SecurityPageName",
                     "text": "SecurityPageName"
                   }
@@ -627,6 +698,46 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.UpsellingService.getSectionsValue",
+            "type": "Function",
+            "tags": [],
+            "label": "getSectionsValue",
+            "description": [],
+            "signature": [
+              "() => Map<",
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.UpsellingSectionId",
+                "text": "UpsellingSectionId"
+              },
+              ", React.ComponentType<{}>>"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.UpsellingService.getMessagesValue",
+            "type": "Function",
+            "tags": [],
+            "label": "getMessagesValue",
+            "description": [],
+            "signature": [
+              "() => Map<\"investigation_guide\", string>"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -634,6 +745,398 @@
     ],
     "functions": [],
     "interfaces": [
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-public.LinkItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "LinkItem",
+        "description": [],
+        "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.capabilities",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "capabilities",
+            "description": [
+              "\nCapabilities strings (using object dot notation) to enable the link.\n\nThe format of defining features supports OR and AND mechanism. To specify features in an OR fashion\nthey can be defined in a single level array like: [requiredFeature1, requiredFeature2]. If either of these features\nis satisfied the link would be included. To require that the features be AND'd together a second level array\ncan be specified: [feature1, [feature2, feature3]] this would result in feature1 || (feature2 && feature3). To specify\nfeatures that all must be and'd together an example would be: [[feature1, feature2]], this would result in the boolean\noperation feature1 && feature2.\n\nThe final format is to specify a single feature, this would be like: features: feature1, which is the same as\nfeatures: [feature1]"
+            ],
+            "signature": [
+              "RequiredCapabilities",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.categories",
+            "type": "Object",
+            "tags": [],
+            "label": "categories",
+            "description": [
+              "\nCategories to display in the navigation"
+            ],
+            "signature": [
+              "readonly ",
+              {
+                "pluginId": "@kbn/security-solution-navigation",
+                "scope": "common",
+                "docId": "kibKbnSecuritySolutionNavigationPluginApi",
+                "section": "def-common.LinkCategory",
+                "text": "LinkCategory"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/security-solution-navigation",
+                "scope": "common",
+                "docId": "kibKbnSecuritySolutionNavigationPluginApi",
+                "section": "def-common.SecurityPageName",
+                "text": "SecurityPageName"
+              },
+              ">[] | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nThe description of the link content"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.experimentalKey",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "experimentalKey",
+            "description": [
+              "\nExperimental flag needed to enable the link"
+            ],
+            "signature": [
+              "\"tGridEnabled\" | \"tGridEventRenderedViewEnabled\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"chartEmbeddablesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"alertsPreviewChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"insightsRelatedAlertsByProcessAncestry\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsEnabled\" | \"endpointResponseActionsEnabled\" | \"alertDetailsPageEnabled\" | \"responseActionUploadEnabled\" | \"alertsPageChartsEnabled\" | \"alertTypeEnabled\" | \"alertsPageFiltersEnabled\" | \"newUserDetailsFlyout\" | \"detectionsCoverageOverview\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"discoverInTimeline\" | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.globalNavPosition",
+            "type": "number",
+            "tags": [],
+            "label": "globalNavPosition",
+            "description": [
+              "\nGlobal navigation position number.\nDefine this property only if the link needs to be visible within\nthe Security section of the Kibana collapsible global navigation"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.globalSearchDisabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "globalSearchDisabled",
+            "description": [
+              "\nDisables link in the global search. Defaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.globalSearchKeywords",
+            "type": "Array",
+            "tags": [],
+            "label": "globalSearchKeywords",
+            "description": [
+              "\nKeywords for the global search to search."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.hideTimeline",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideTimeline",
+            "description": [
+              "\nDisables the timeline call to action on the bottom of the page. Defaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.hideWhenExperimentalKey",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideWhenExperimentalKey",
+            "description": [
+              "\nExperimental flag needed to disable the link. Opposite of experimentalKey"
+            ],
+            "signature": [
+              "\"tGridEnabled\" | \"tGridEventRenderedViewEnabled\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"chartEmbeddablesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"alertsPreviewChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"insightsRelatedAlertsByProcessAncestry\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsEnabled\" | \"endpointResponseActionsEnabled\" | \"alertDetailsPageEnabled\" | \"responseActionUploadEnabled\" | \"alertsPageChartsEnabled\" | \"alertTypeEnabled\" | \"alertsPageFiltersEnabled\" | \"newUserDetailsFlyout\" | \"detectionsCoverageOverview\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"discoverInTimeline\" | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.id",
+            "type": "Enum",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nLink id. Refers to a SecurityPageName"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-solution-navigation",
+                "scope": "common",
+                "docId": "kibKbnSecuritySolutionNavigationPluginApi",
+                "section": "def-common.SecurityPageName",
+                "text": "SecurityPageName"
+              }
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.isBeta",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isBeta",
+            "description": [
+              "\nDisplays the \"Beta\" badge. Defaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.betaOptions",
+            "type": "Object",
+            "tags": [],
+            "label": "betaOptions",
+            "description": [
+              "\nCustomize the \"Beta\" badge content."
+            ],
+            "signature": [
+              "{ text: string; } | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.landingIcon",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "landingIcon",
+            "description": [
+              "\nIcon that is displayed on menu navigation landing page.\nOnly required for pages that are displayed inside a landing page."
+            ],
+            "signature": [
+              "IconType",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.landingImage",
+            "type": "string",
+            "tags": [],
+            "label": "landingImage",
+            "description": [
+              "\nImage that is displayed on menu navigation landing page.\nOnly required for pages that are displayed inside a landing page."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.licenseType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "licenseType",
+            "description": [
+              "\nMinimum license required to enable the link"
+            ],
+            "signature": [
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.links",
+            "type": "Array",
+            "tags": [],
+            "label": "links",
+            "description": [
+              "\nNested links"
+            ],
+            "signature": [
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.LinkItem",
+                "text": "LinkItem"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [
+              "\nLink path relative to security root"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.sideNavDisabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sideNavDisabled",
+            "description": [
+              "\nDisables link in the side navigation. Defaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.sideNavIcon",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sideNavIcon",
+            "description": [
+              "\nIcon that is displayed on the side navigation menu."
+            ],
+            "signature": [
+              "IconType",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.skipUrlState",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "skipUrlState",
+            "description": [
+              "\nDisables the state query string in the URL. Defaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [
+              "\nTitle of the link"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.unauthorized",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "unauthorized",
+            "description": [
+              "\nReserved for links management, this property is set automatically"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "securitySolution",
         "id": "def-public.TimelineModel",
@@ -1345,6 +1848,8 @@
               "ExpandedDetailType",
               " | undefined; securityAssistant?: ",
               "ExpandedDetailType",
+              " | undefined; discover?: ",
+              "ExpandedDetailType",
               " | undefined; }"
             ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
@@ -1565,7 +2070,7 @@
         "label": "PageUpsellings",
         "description": [],
         "signature": [
-          "{ administration?: React.ComponentType<{}> | undefined; alerts?: React.ComponentType<{}> | undefined; blocklist?: React.ComponentType<{}> | undefined; cases?: React.ComponentType<{}> | undefined; cases_configure?: React.ComponentType<{}> | undefined; cases_create?: React.ComponentType<{}> | undefined; \"cloud_security_posture-benchmarks\"?: React.ComponentType<{}> | undefined; \"cloud_security_posture-dashboard\"?: React.ComponentType<{}> | undefined; \"cloud_security_posture-findings\"?: React.ComponentType<{}> | undefined; \"cloud_security_posture-rules\"?: React.ComponentType<{}> | undefined; \"cloud_defend-policies\"?: React.ComponentType<{}> | undefined; dashboards?: React.ComponentType<{}> | undefined; data_quality?: React.ComponentType<{}> | undefined; detections?: React.ComponentType<{}> | undefined; detection_response?: React.ComponentType<{}> | undefined; endpoints?: React.ComponentType<{}> | undefined; event_filters?: React.ComponentType<{}> | undefined; exceptions?: React.ComponentType<{}> | undefined; explore?: React.ComponentType<{}> | undefined; host_isolation_exceptions?: React.ComponentType<{}> | undefined; hosts?: React.ComponentType<{}> | undefined; \"hosts-anomalies\"?: React.ComponentType<{}> | undefined; \"hosts-risk\"?: React.ComponentType<{}> | undefined; \"hosts-events\"?: React.ComponentType<{}> | undefined; investigate?: React.ComponentType<{}> | undefined; kubernetes?: React.ComponentType<{}> | undefined; get_started?: React.ComponentType<{}> | undefined; network?: React.ComponentType<{}> | undefined; \"network-anomalies\"?: React.ComponentType<{}> | undefined; \"network-dns\"?: React.ComponentType<{}> | undefined; \"network-events\"?: React.ComponentType<{}> | undefined; \"network-http\"?: React.ComponentType<{}> | undefined; \"network-tls\"?: React.ComponentType<{}> | undefined; \"\"?: React.ComponentType<{}> | undefined; overview?: React.ComponentType<{}> | undefined; policy?: React.ComponentType<{}> | undefined; response_actions_history?: React.ComponentType<{}> | undefined; rules?: React.ComponentType<{}> | undefined; \"rules-create\"?: React.ComponentType<{}> | undefined; sessions?: React.ComponentType<{}> | undefined; \"threat_intelligence-indicators\"?: React.ComponentType<{}> | undefined; timelines?: React.ComponentType<{}> | undefined; \"timelines-templates\"?: React.ComponentType<{}> | undefined; trusted_apps?: React.ComponentType<{}> | undefined; uncommon_processes?: React.ComponentType<{}> | undefined; users?: React.ComponentType<{}> | undefined; \"users-anomalies\"?: React.ComponentType<{}> | undefined; \"users-authentications\"?: React.ComponentType<{}> | undefined; \"users-events\"?: React.ComponentType<{}> | undefined; \"users-risk\"?: React.ComponentType<{}> | undefined; \"entity-analytics\"?: React.ComponentType<{}> | undefined; }"
+          "{ administration?: React.ComponentType<{}> | undefined; alerts?: React.ComponentType<{}> | undefined; assets?: React.ComponentType<{}> | undefined; blocklist?: React.ComponentType<{}> | undefined; cases?: React.ComponentType<{}> | undefined; cases_configure?: React.ComponentType<{}> | undefined; cases_create?: React.ComponentType<{}> | undefined; \"cloud_security_posture-benchmarks\"?: React.ComponentType<{}> | undefined; \"cloud_security_posture-dashboard\"?: React.ComponentType<{}> | undefined; \"cloud_security_posture-findings\"?: React.ComponentType<{}> | undefined; \"cloud_security_posture-rules\"?: React.ComponentType<{}> | undefined; cloud_defend?: React.ComponentType<{}> | undefined; \"cloud_defend-policies\"?: React.ComponentType<{}> | undefined; dashboards?: React.ComponentType<{}> | undefined; data_quality?: React.ComponentType<{}> | undefined; detections?: React.ComponentType<{}> | undefined; detection_response?: React.ComponentType<{}> | undefined; endpoints?: React.ComponentType<{}> | undefined; event_filters?: React.ComponentType<{}> | undefined; exceptions?: React.ComponentType<{}> | undefined; explore?: React.ComponentType<{}> | undefined; host_isolation_exceptions?: React.ComponentType<{}> | undefined; hosts?: React.ComponentType<{}> | undefined; \"hosts-anomalies\"?: React.ComponentType<{}> | undefined; \"hosts-risk\"?: React.ComponentType<{}> | undefined; \"hosts-events\"?: React.ComponentType<{}> | undefined; investigations?: React.ComponentType<{}> | undefined; kubernetes?: React.ComponentType<{}> | undefined; get_started?: React.ComponentType<{}> | undefined; \"machine_learning-landing\"?: React.ComponentType<{}> | undefined; network?: React.ComponentType<{}> | undefined; \"network-anomalies\"?: React.ComponentType<{}> | undefined; \"network-dns\"?: React.ComponentType<{}> | undefined; \"network-events\"?: React.ComponentType<{}> | undefined; \"network-http\"?: React.ComponentType<{}> | undefined; \"network-tls\"?: React.ComponentType<{}> | undefined; \"\"?: React.ComponentType<{}> | undefined; overview?: React.ComponentType<{}> | undefined; policy?: React.ComponentType<{}> | undefined; project_settings?: React.ComponentType<{}> | undefined; response_actions_history?: React.ComponentType<{}> | undefined; rules?: React.ComponentType<{}> | undefined; \"rules-add\"?: React.ComponentType<{}> | undefined; \"rules-create\"?: React.ComponentType<{}> | undefined; \"rules-landing\"?: React.ComponentType<{}> | undefined; sessions?: React.ComponentType<{}> | undefined; threat_intelligence?: React.ComponentType<{}> | undefined; timelines?: React.ComponentType<{}> | undefined; \"timelines-templates\"?: React.ComponentType<{}> | undefined; trusted_apps?: React.ComponentType<{}> | undefined; uncommon_processes?: React.ComponentType<{}> | undefined; users?: React.ComponentType<{}> | undefined; \"users-anomalies\"?: React.ComponentType<{}> | undefined; \"users-authentications\"?: React.ComponentType<{}> | undefined; \"users-events\"?: React.ComponentType<{}> | undefined; \"users-risk\"?: React.ComponentType<{}> | undefined; entity_analytics?: React.ComponentType<{}> | undefined; \"entity_analytics-management\"?: React.ComponentType<{}> | undefined; \"coverage-overview\"?: React.ComponentType<{}> | undefined; }"
         ],
         "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/types.ts",
         "deprecated": false,
@@ -1580,7 +2085,7 @@
         "label": "SectionUpsellings",
         "description": [],
         "signature": [
-          "{ entity_analytics_panel?: React.ComponentType<{}> | undefined; }"
+          "{ entity_analytics_panel?: React.ComponentType<{}> | undefined; endpointPolicyProtections?: React.ComponentType<{}> | undefined; osquery_automated_response_actions?: React.ComponentType<{}> | undefined; }"
         ],
         "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/types.ts",
         "deprecated": false,
@@ -1595,7 +2100,7 @@
         "label": "UpsellingSectionId",
         "description": [],
         "signature": [
-          "\"entity_analytics_panel\""
+          "\"entity_analytics_panel\" | \"endpointPolicyProtections\" | \"osquery_automated_response_actions\""
         ],
         "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/types.ts",
         "deprecated": false,
@@ -1635,23 +2140,37 @@
         },
         {
           "parentPluginId": "securitySolution",
-          "id": "def-public.PluginSetup.upselling",
-          "type": "Object",
+          "id": "def-public.PluginSetup.setAppLinksSwitcher",
+          "type": "Function",
           "tags": [],
-          "label": "upselling",
+          "label": "setAppLinksSwitcher",
           "description": [],
           "signature": [
-            {
-              "pluginId": "securitySolution",
-              "scope": "public",
-              "docId": "kibSecuritySolutionPluginApi",
-              "section": "def-public.UpsellingService",
-              "text": "UpsellingService"
-            }
+            "(appLinksSwitcher: ",
+            "AppLinksSwitcher",
+            ") => void"
           ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "securitySolution",
+              "id": "def-public.PluginSetup.setAppLinksSwitcher.$1",
+              "type": "Function",
+              "tags": [],
+              "label": "appLinksSwitcher",
+              "description": [],
+              "signature": [
+                "AppLinksSwitcher"
+              ],
+              "path": "x-pack/plugins/security_solution/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -1686,6 +2205,41 @@
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-public.PluginStart.setExtraRoutes",
+          "type": "Function",
+          "tags": [],
+          "label": "setExtraRoutes",
+          "description": [],
+          "signature": [
+            "(extraRoutes: ",
+            "RouteProps",
+            "<string, { [x: string]: string | undefined; }>[]) => void"
+          ],
+          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "securitySolution",
+              "id": "def-public.PluginStart.setExtraRoutes.$1",
+              "type": "Array",
+              "tags": [],
+              "label": "extraRoutes",
+              "description": [],
+              "signature": [
+                "RouteProps",
+                "<string, { [x: string]: string | undefined; }>[]"
+              ],
+              "path": "x-pack/plugins/security_solution/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
           "returnComment": []
         },
         {
@@ -1728,9 +2282,7 @@
           "label": "setGetStartedPage",
           "description": [],
           "signature": [
-            "(getStartedComponent: ",
-            "GetStartedComponent",
-            ") => void"
+            "(getStartedComponent: React.ComponentType<{}>) => void"
           ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
           "deprecated": false,
@@ -1739,12 +2291,12 @@
             {
               "parentPluginId": "securitySolution",
               "id": "def-public.PluginStart.setGetStartedPage.$1",
-              "type": "Function",
+              "type": "CompoundType",
               "tags": [],
               "label": "getStartedComponent",
               "description": [],
               "signature": [
-                "GetStartedComponent"
+                "React.ComponentType<{}>"
               ],
               "path": "x-pack/plugins/security_solution/public/types.ts",
               "deprecated": false,
@@ -1752,6 +2304,49 @@
               "isRequired": true
             }
           ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-public.PluginStart.getBreadcrumbsNav$",
+          "type": "Function",
+          "tags": [],
+          "label": "getBreadcrumbsNav$",
+          "description": [],
+          "signature": [
+            "() => ",
+            "Observable",
+            "<",
+            "BreadcrumbsNav",
+            ">"
+          ],
+          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-public.PluginStart.getUpselling",
+          "type": "Function",
+          "tags": [],
+          "label": "getUpselling",
+          "description": [],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "securitySolution",
+              "scope": "public",
+              "docId": "kibSecuritySolutionPluginApi",
+              "section": "def-public.UpsellingService",
+              "text": "UpsellingService"
+            }
+          ],
+          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
           "returnComment": []
         }
       ],
@@ -1853,6 +2448,22 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.AppClient.getAlertsIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "getAlertsIndex",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/security_solution/server/client/client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -2225,6 +2836,22 @@
           },
           {
             "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getServerBasePath",
+            "type": "Function",
+            "tags": [],
+            "label": "getServerBasePath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-server.SecuritySolutionApiRequestHandlerContext.getEndpointAuthz",
             "type": "Function",
             "tags": [],
@@ -2347,6 +2974,23 @@
           },
           {
             "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getDetectionEngineHealthClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getDetectionEngineHealthClient",
+            "description": [],
+            "signature": [
+              "() => ",
+              "IDetectionEngineHealthClient"
+            ],
+            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-server.SecuritySolutionApiRequestHandlerContext.getRuleExecutionLog",
             "type": "Function",
             "tags": [],
@@ -2457,6 +3101,23 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getRiskEngineDataClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getRiskEngineDataClient",
+            "description": [],
+            "signature": [
+              "() => ",
+              "RiskEngineDataClient"
+            ],
+            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2472,7 +3133,7 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "Readonly<{ prebuiltRulesPackageVersion?: string | undefined; } & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; maxUploadResponseActionFileBytes: number; }> & { experimentalFeatures: ",
+          "Readonly<{ prebuiltRulesPackageVersion?: string | undefined; } & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; packagerTaskPackagePolicyUpdateBatchSize: number; maxUploadResponseActionFileBytes: number; }> & { experimentalFeatures: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -2579,13 +3240,28 @@
         "tags": [],
         "label": "SecurityPageName",
         "description": [],
-        "path": "x-pack/plugins/security_solution/common/constants.ts",
+        "path": "x-pack/packages/security-solution/navigation/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.ADD_DATA_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ADD_DATA_PATH",
+        "description": [],
+        "signature": [
+          "\"/app/integrations/browse/security\""
+        ],
+        "path": "x-pack/plugins/security_solution/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "securitySolution",
         "id": "def-common.APP_ID",
@@ -2597,6 +3273,21 @@
         ],
         "signature": [
           "\"securitySolution\""
+        ],
+        "path": "x-pack/plugins/security_solution/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.APP_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "APP_PATH",
+        "description": [],
+        "signature": [
+          "\"/app/security\""
         ],
         "path": "x-pack/plugins/security_solution/common/constants.ts",
         "deprecated": false,
@@ -2628,7 +3319,9 @@
         "signature": [
           "AppFeatureSecurityKey",
           " | ",
-          "AppFeatureCasesKey"
+          "AppFeatureCasesKey",
+          " | ",
+          "AppFeatureAssistantKey"
         ],
         "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
         "deprecated": false,
@@ -2697,9 +3390,24 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly policyResponseInFleetEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly endpointRbacEnabled: boolean; readonly endpointRbacV1Enabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionGetFileEnabled: boolean; readonly responseActionExecuteEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly assistantEnabled: boolean; readonly riskyHostsEnabled: boolean; readonly riskyUsersEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; }"
+          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly discoverInTimeline: boolean; }"
         ],
         "path": "x-pack/plugins/security_solution/common/experimental_features.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.MANAGE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "MANAGE_PATH",
+        "description": [],
+        "signature": [
+          "\"/manage\""
+        ],
+        "path": "x-pack/plugins/security_solution/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2731,9 +3439,11 @@
         "signature": [
           "readonly (",
           "AppFeatureSecurityKey",
-          ".advancedInsights | ",
+          " | ",
           "AppFeatureCasesKey",
-          ".casesConnectors)[]"
+          ".casesConnectors | ",
+          "AppFeatureAssistantKey",
+          ".assistant)[]"
         ],
         "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
         "deprecated": false,
@@ -2750,7 +3460,7 @@
           "\nA list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly policyResponseInFleetEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly endpointRbacEnabled: boolean; readonly endpointRbacV1Enabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionGetFileEnabled: boolean; readonly responseActionExecuteEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly assistantEnabled: boolean; readonly riskyHostsEnabled: boolean; readonly riskyUsersEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; }"
+          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly discoverInTimeline: boolean; }"
         ],
         "path": "x-pack/plugins/security_solution/common/experimental_features.ts",
         "deprecated": false,
@@ -2768,6 +3478,20 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.AppFeatureKey.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "securitySolution",
             "id": "def-common.AppFeatureKey.Unnamed",

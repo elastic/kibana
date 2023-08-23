@@ -16,8 +16,8 @@ import { AgentManager } from './agent_manager';
 jest.mock('http');
 jest.mock('https');
 
-const HttpAgentMock = HttpAgent as jest.Mock<HttpAgent>;
-const HttpsAgentMock = HttpsAgent as jest.Mock<HttpsAgent>;
+const HttpAgentMock = HttpAgent as unknown as jest.Mock<HttpAgent>;
+const HttpsAgentMock = HttpsAgent as unknown as jest.Mock<HttpsAgent>;
 
 describe('AgentManager', () => {
   let logger: MockedLogger;

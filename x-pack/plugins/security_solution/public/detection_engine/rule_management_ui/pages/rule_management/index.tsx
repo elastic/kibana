@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import React, { useCallback } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-
 import { APP_UI_ID } from '../../../../../common/constants';
 import { SecurityPageName } from '../../../../app/types';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
@@ -18,42 +18,40 @@ import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { useKibana } from '../../../../common/lib/kibana';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-
 import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
 import { MlJobCompatibilityCallout } from '../../../../detections/components/callouts/ml_job_compatibility_callout';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
-import { LoadPrePackagedRules } from '../../../../detections/components/rules/pre_packaged_rules/load_prepackaged_rules';
-import { LoadPrePackagedRulesButton } from '../../../../detections/components/rules/pre_packaged_rules/load_prepackaged_rules_button';
-import { UpdatePrePackagedRulesCallOut } from '../../../../detections/components/rules/pre_packaged_rules/update_callout';
+import { AddElasticRulesButton } from '../../../../detections/components/rules/pre_packaged_rules/add_elastic_rules_button';
 import { ValueListsFlyout } from '../../../../detections/components/value_lists_management_flyout';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { redirectToDetections } from '../../../../detections/pages/detection_engine/rules/helpers';
-
-import { useInvalidateFindRulesQuery } from '../../../rule_management/api/hooks/use_find_rules_query';
-import { importRules } from '../../../rule_management/logic';
-import { usePrePackagedRulesInstallationStatus } from '../../../rule_management/logic/use_pre_packaged_rules_installation_status';
-import { usePrePackagedTimelinesInstallationStatus } from '../../../rule_management/logic/use_pre_packaged_timelines_installation_status';
-
-import { AllRules } from '../../components/rules_table';
-import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
-
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
-
-import { MaintenanceWindowCallout } from '../../components/maintenance_window_callout/maintenance_window_callout';
+import { useInvalidateFindRulesQuery } from '../../../rule_management/api/hooks/use_find_rules_query';
+import { importRules } from '../../../rule_management/logic';
+import { AllRules } from '../../components/rules_table';
+import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 import { SuperHeader } from './super_header';
+import { useInvalidateFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
-  const { navigateToApp } = useKibana().services.application;
+  const kibanaServices = useKibana().services;
+  const { navigateToApp } = kibanaServices.application;
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
+  const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
   const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
   const invalidateRules = useCallback(() => {
     invalidateFindRulesQuery();
     invalidateFetchRuleManagementFilters();
-  }, [invalidateFindRulesQuery, invalidateFetchRuleManagementFilters]);
+    invalidateFetchCoverageOverviewQuery();
+  }, [
+    invalidateFindRulesQuery,
+    invalidateFetchRuleManagementFilters,
+    invalidateFetchCoverageOverviewQuery,
+  ]);
 
   const [
     {
@@ -70,8 +68,6 @@ const RulesPageComponent: React.FC = () => {
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
-  const prePackagedRuleStatus = usePrePackagedRulesInstallationStatus();
-  const prePackagedTimelineStatus = usePrePackagedTimelinesInstallationStatus();
 
   if (
     redirectToDetections(
@@ -117,31 +113,29 @@ const RulesPageComponent: React.FC = () => {
           <SuperHeader>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
               <EuiFlexItem grow={false}>
-                <LoadPrePackagedRules>
-                  {(renderProps) => <LoadPrePackagedRulesButton {...renderProps} />}
-                </LoadPrePackagedRules>
+                <AddElasticRulesButton isDisabled={!canUserCRUD || loading} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip position="top" content={i18n.UPLOAD_VALUE_LISTS_TOOLTIP}>
-                  <EuiButton
+                  <EuiButtonEmpty
                     data-test-subj="open-value-lists-modal-button"
                     iconType="importAction"
                     isDisabled={!canWriteListsIndex || !canUserCRUD || loading}
                     onClick={showValueListFlyout}
                   >
                     {i18n.IMPORT_VALUE_LISTS}
-                  </EuiButton>
+                  </EuiButtonEmpty>
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
+                <EuiButtonEmpty
                   data-test-subj="rules-import-modal-button"
                   iconType="importAction"
                   isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
                   onClick={showImportModal}
                 >
                   {i18n.IMPORT_RULE}
-                </EuiButton>
+                </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <SecuritySolutionLinkButton
@@ -156,11 +150,7 @@ const RulesPageComponent: React.FC = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </SuperHeader>
-          {(prePackagedRuleStatus === 'ruleNeedUpdate' ||
-            prePackagedTimelineStatus === 'timelineNeedUpdate') && (
-            <UpdatePrePackagedRulesCallOut data-test-subj="update-callout-button" />
-          )}
-          <MaintenanceWindowCallout />
+          <MaintenanceWindowCallout kibanaServices={kibanaServices} />
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>

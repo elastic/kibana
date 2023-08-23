@@ -30,6 +30,7 @@ const createSetupMock = () => {
     getSubActionConnectorClass: jest.fn(),
     getCaseConnectorClass: jest.fn(),
     getActionsHealth: jest.fn(),
+    getActionsConfigurationUtilities: jest.fn(),
   };
   return mock;
 };
@@ -44,7 +45,7 @@ const createStartMock = () => {
     getActionsAuthorizationWithRequest: jest
       .fn()
       .mockReturnValue(actionsAuthorizationMock.create()),
-    preconfiguredActions: [],
+    inMemoryConnectors: [],
     renderActionParameterTemplates: jest.fn(),
   };
   return mock;

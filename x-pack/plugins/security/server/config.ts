@@ -214,7 +214,7 @@ export const ConfigSchema = schema.object({
   ),
   session: schema.object({
     idleTimeout: schema.oneOf([schema.duration(), schema.literal(null)], {
-      defaultValue: schema.duration().validate('8h'),
+      defaultValue: schema.duration().validate('3d'),
     }),
     lifespan: schema.oneOf([schema.duration(), schema.literal(null)], {
       defaultValue: schema.duration().validate('30d'),
@@ -303,9 +303,9 @@ export const ConfigSchema = schema.object({
     schema.contextRef('serverless'),
     true,
     schema.object({
-      userManagementEnabled: schema.boolean({ defaultValue: false }),
-      roleManagementEnabled: schema.boolean({ defaultValue: false }),
-      roleMappingManagementEnabled: schema.boolean({ defaultValue: false }),
+      userManagementEnabled: schema.boolean({ defaultValue: true }),
+      roleManagementEnabled: schema.boolean({ defaultValue: true }),
+      roleMappingManagementEnabled: schema.boolean({ defaultValue: true }),
     }),
     schema.never()
   ),

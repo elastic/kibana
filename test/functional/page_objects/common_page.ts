@@ -138,10 +138,12 @@ export class CommonPageObject extends FtrService {
       pathname: `${basePath}${this.config.get(['apps', appName]).pathname}`,
     };
 
-    if (shouldUseHashForSubUrl) {
-      appConfig.hash = useActualUrl ? subUrl : `/${appName}/${subUrl}`;
-    } else {
-      appConfig.pathname += `/${subUrl}`;
+    if (typeof subUrl === 'string') {
+      if (shouldUseHashForSubUrl) {
+        appConfig.hash = useActualUrl ? subUrl : `/${appName}/${subUrl}`;
+      } else {
+        appConfig.pathname += `/${subUrl}`;
+      }
     }
 
     await this.navigate({
@@ -335,7 +337,7 @@ export class CommonPageObject extends FtrService {
 
   async ensureModalOverlayHidden() {
     return this.retry.try(async () => {
-      const shown = await this.testSubjects.exists('confirmModalTitleText');
+      const shown = await this.testSubjects.exists('confirmModalTitleText', { timeout: 500 });
       if (shown) {
         throw new Error('Modal overlay is showing');
       }

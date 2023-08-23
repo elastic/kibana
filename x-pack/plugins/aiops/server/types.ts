@@ -7,10 +7,12 @@
 
 import type { PluginSetup, PluginStart } from '@kbn/data-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { CasesSetup } from '@kbn/cases-plugin/server';
 
 export interface AiopsPluginSetupDeps {
   data: PluginSetup;
   licensing: LicensingPluginStart;
+  cases?: CasesSetup;
 }
 
 export interface AiopsPluginStartDeps {

@@ -65,12 +65,9 @@ describe('None', () => {
       cy.visit(`/app/security/rules/id/${ruleId}/alerts`);
       cy.getBySel('expand-event').first().click();
       cy.getBySel('take-action-dropdown-btn').click();
-      cy.getBySel('osquery-action-item').should('not.exist');
-
-      cy.getBySel('osquery-actions-notification').contains('0');
-      cy.contains('Osquery Results').click();
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseButton').click();
       cy.contains('Permission denied').should('exist');
-      cy.contains('Error while fetching live queries').should('exist');
     });
   });
 });

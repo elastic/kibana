@@ -16,8 +16,8 @@ import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plug
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { enableComparisonByDefault } from '@kbn/observability-plugin/public';
-import type { InfraLocators } from '@kbn/infra-plugin/public/locators';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import type { InfraLocators } from '@kbn/infra-plugin/common/locators';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
 import { ConfigSchema } from '../..';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
@@ -69,6 +69,18 @@ const mockConfig: ConfigSchema = {
     enabled: false,
   },
   latestAgentVersionsUrl: '',
+  serverlessOnboarding: false,
+  managedServiceUrl: '',
+  featureFlags: {
+    agentConfigurationAvailable: true,
+    configurableIndicesAvailable: true,
+    infrastructureTabAvailable: true,
+    infraUiAvailable: true,
+    migrationToFleetAvailable: true,
+    sourcemapApiAvailable: true,
+    storageExplorerAvailable: true,
+  },
+  serverless: { enabled: false },
 };
 
 const urlService = new UrlService({
@@ -87,6 +99,13 @@ const mockPlugin = {
   data: {
     query: {
       timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
+    },
+  },
+  share: {
+    url: {
+      locators: {
+        get: jest.fn(),
+      },
     },
   },
 };

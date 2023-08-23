@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+import { numberValidator } from '@kbn/ml-agg-utils';
+import {
+  numberOfRetriesInvalidErrorMessage,
+  numberRange10To10000NotValidErrorMessage,
+  numberRangeMinus1To100NotValidErrorMessage,
+  pageSearchSizeInvalidErrorMessage,
+} from './constants/validation_messages';
+
 const RETENTION_POLICY_MIN_AGE_SECONDS = 60;
 const TIME_UNITS = ['nanos', 'micros', 'ms', 's', 'm', 'h', 'd'];
 
@@ -119,14 +127,26 @@ export const transformFrequencyValidator = (value: string): boolean => {
   return isValidFrequency({ number, timeUnit });
 };
 
+// A Validator function takes in a value to check and returns an array of error messages.
+// If no messages (empty array) get returned, the value is valid.
+export type Validator = (value: any, isOptional?: boolean) => string[];
+
 /**
  * Validates transform max_page_search_size input.
- * Must be a number between 10 and 10000.
+ * Must be a number between 10 and 65536.
  * @param value User input value.
  */
-export function transformSettingsMaxPageSearchSizeValidator(value: number): boolean {
-  return value >= 10 && value <= 10000;
-}
+export const transformSettingsPageSearchSizeValidator: Validator = (value) =>
+  !(value + '').includes('.') &&
+  numberValidator({ min: 10, max: 65536, integerOnly: true })(+value) === null
+    ? []
+    : [pageSearchSizeInvalidErrorMessage];
+
+export const transformSettingsNumberOfRetriesValidator: Validator = (value) =>
+  !(value + '').includes('.') &&
+  numberValidator({ min: -1, max: 100, integerOnly: true })(+value) === null
+    ? []
+    : [numberOfRetriesInvalidErrorMessage];
 
 /**
  * Validates whether string input can be parsed as a valid JSON
@@ -144,3 +164,15 @@ export function jsonStringValidator(value: unknown): boolean {
   }
   return true;
 }
+
+export const integerRangeMinus1To100Validator: Validator = (value) =>
+  !(value + '').includes('.') &&
+  numberValidator({ min: -1, max: 100, integerOnly: true })(+value) === null
+    ? []
+    : [numberRangeMinus1To100NotValidErrorMessage];
+
+export const integerRange10To10000Validator: Validator = (value) =>
+  !(value + '').includes('.') &&
+  numberValidator({ min: 10, max: 100001, integerOnly: true })(+value) === null
+    ? []
+    : [numberRange10To10000NotValidErrorMessage];
