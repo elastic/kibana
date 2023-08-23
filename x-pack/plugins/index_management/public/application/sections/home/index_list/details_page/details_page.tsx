@@ -22,6 +22,8 @@ import { useLoadIndex } from '../../../../services';
 import { Section } from '../../home';
 import { DetailsPageError } from './details_page_error';
 import { IndexActionsContextMenuWithoutRedux } from '../index_actions_context_menu/index_actions_context_menu.without_redux';
+import { OverviewTab } from './tabs';
+
 export enum IndexDetailsSection {
   Overview = 'overview',
   Documents = 'documents',
@@ -87,6 +89,7 @@ export const DetailsPage: React.FunctionComponent<
   }, [indexDetailsSection, onSectionChange]);
 
   const { isLoading, error, resendRequest, data } = useLoadIndex(indexName);
+
   if (isLoading) {
     return (
       <SectionLoading>
@@ -142,7 +145,7 @@ export const DetailsPage: React.FunctionComponent<
         <Routes>
           <Route
             path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Overview}`}
-            render={() => <div>Overview</div>}
+            render={() => <OverviewTab indexDetails={data} />}
           />
           <Route
             path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Documents}`}
