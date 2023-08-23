@@ -242,7 +242,7 @@ const diskSpaceUsageAvailableByMountPoint = {
       options: {
         seriesType: 'area' as const,
         breakdown: {
-          type: 'top_values',
+          type: 'top_values' as const,
           field: 'system.filesystem.mount_point',
           params: {
             size: 5,
@@ -254,7 +254,6 @@ const diskSpaceUsageAvailableByMountPoint = {
   ],
   overrides: {
     axisLeft: XY_OVERRIDES.axisLeft,
-    settings: XY_OVERRIDES.settings,
   },
   dataViewOrigin: DataViewOrigin.Metrics,
 };
