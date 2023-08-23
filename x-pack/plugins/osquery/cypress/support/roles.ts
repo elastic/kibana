@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export async function getLatestVersion(): Promise<string> {
-  return '8.10.0-SNAPSHOT';
-}
+export { ServerlessRoleName } from '../../../../test_serverless/shared/lib/security/types';
