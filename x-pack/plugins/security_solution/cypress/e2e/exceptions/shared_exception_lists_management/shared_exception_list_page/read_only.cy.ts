@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
 import { ROLES } from '../../../../../common/test';
 import { getExceptionList } from '../../../../objects/exception';
 import {
@@ -24,7 +25,7 @@ const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 
 describe('Shared exception lists - read only', () => {
   before(() => {
-    cy.task('esArchiverResetKibana');
+    esArchiverResetKibana();
   });
 
   beforeEach(() => {
