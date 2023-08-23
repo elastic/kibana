@@ -15,6 +15,7 @@ import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { writeFileSync } from 'fs';
 import { ES_CLIENT_HEADERS } from '../client_headers';
 
 import {
@@ -38,6 +39,9 @@ const pipeline = (...streams: Readable[]) =>
     source.once('error', (error) => dest.destroy(error)).pipe(dest as any)
   );
 
+const recordArchiveNameToFile = (allArchivesListFilePath: string) => (name: string) =>
+  writeFileSync(allArchivesListFilePath, `'${name}',\n`, { flag: 'a', encoding: 'utf8' });
+
 export async function loadAction({
   inputDir,
   skipExisting,
@@ -56,6 +60,11 @@ export async function loadAction({
   kbnClient: KbnClient;
 }) {
   const name = relative(REPO_ROOT, inputDir);
+
+  const dest = 'all_archives_list.txt';
+  const allArchivesListFilePath = relative(REPO_ROOT, dest);
+  recordArchiveNameToFile(allArchivesListFilePath)(name);
+
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
   const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
