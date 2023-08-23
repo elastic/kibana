@@ -7,10 +7,10 @@
 
 describe('Differential Functions page', () => {
   const rangeFrom = '2023-04-18T00:00:00.000Z';
-  const rangeTo = '2023-04-18T00:02:00.000Z';
+  const rangeTo = '2023-04-18T00:00:30.000Z';
 
-  const comparisonRangeFrom = '2023-04-18T00:02:00.000Z';
-  const comparisonRangeTo = '2023-04-18T00:04:00.000Z';
+  const comparisonRangeFrom = '2023-04-18T00:01:00.000Z';
+  const comparisonRangeTo = '2023-04-18T00:01:30.000Z';
 
   beforeEach(() => {
     cy.loginAsElastic();
@@ -23,8 +23,7 @@ describe('Differential Functions page', () => {
   });
 
   describe('summary', () => {
-    // Flaky test, skipping it for now
-    it.skip('shows only the baseline values when comparison data is not available', () => {
+    it('shows only the baseline values when comparison data is not available', () => {
       cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions/differential', { rangeFrom, rangeTo });
       // wait for both apis to finisto move on
@@ -32,16 +31,16 @@ describe('Differential Functions page', () => {
       cy.wait('@getTopNFunctions');
       [
         { id: 'overallPerformance', value: '0%' },
-        { id: 'annualizedCo2', value: '672.14 lbs / 304.88 kg' },
-        { id: 'annualizedCost', value: '$776.25' },
-        { id: 'totalNumberOfSamples', value: '5,004' },
+        { id: 'annualizedCo2', value: '275.62 lbs / 125.02 kg' },
+        { id: 'annualizedCost', value: '$318.32' },
+        { id: 'totalNumberOfSamples', value: '513' },
       ].forEach((item) => {
         cy.get(`[data-test-subj="${item.id}_value"]`).contains(item.value);
         cy.get(`[data-test-subj="${item.id}_comparison_value"]`).should('not.exist');
       });
     });
-    // Flaky test, skipping it for now
-    it.skip('shows empty baseline values when data is not available', () => {
+
+    it('shows empty baseline values when data is not available', () => {
       cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions/differential', {
         comparisonRangeFrom: rangeFrom,
@@ -51,9 +50,9 @@ describe('Differential Functions page', () => {
       cy.wait('@getTopNFunctions');
       [
         { id: 'overallPerformance', value: '0%' },
-        { id: 'annualizedCo2', value: '0 lbs / 0 kg', comparisonValue: '672.14 lbs / 304.88 kg' },
-        { id: 'annualizedCost', value: '$0', comparisonValue: '$776.25' },
-        { id: 'totalNumberOfSamples', value: '0', comparisonValue: '37,530' },
+        { id: 'annualizedCo2', value: '0 lbs / 0 kg', comparisonValue: '275.62 lbs / 125.02 kg' },
+        { id: 'annualizedCost', value: '$0', comparisonValue: '$318.32' },
+        { id: 'totalNumberOfSamples', value: '0', comparisonValue: '15,390' },
       ].forEach((item) => {
         cy.get(`[data-test-subj="${item.id}_value"]`).contains(item.value);
         if (item.comparisonValue) {
@@ -61,8 +60,8 @@ describe('Differential Functions page', () => {
         }
       });
     });
-    // Flaky test, skipping it for now
-    it.skip('show gained performance when comparison data has less samples than baseline', () => {
+
+    it('show gained performance when comparison data has less samples than baseline', () => {
       cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions/differential', {
         rangeFrom,
@@ -74,23 +73,23 @@ describe('Differential Functions page', () => {
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
       [
-        { id: 'overallPerformance', value: '33.09%', icon: 'sortUp_success' },
+        { id: 'overallPerformance', value: '65.89%', icon: 'sortUp_success' },
         {
           id: 'annualizedCo2',
-          value: '672.14 lbs / 304.88 kg',
-          comparisonValue: '449.7 lbs / 203.98 kg (33.09%)',
+          value: '275.62 lbs / 125.02 kg',
+          comparisonValue: '94.02 lbs / 42.65 kg (65.89%)',
           icon: 'comparison_sortUp_success',
         },
         {
           id: 'annualizedCost',
-          value: '$776.25',
-          comparisonValue: '$519.36 (33.09%)',
+          value: '$318.32',
+          comparisonValue: '$108.59 (65.89%)',
           icon: 'comparison_sortUp_success',
         },
         {
           id: 'totalNumberOfSamples',
-          value: '5,004',
-          comparisonValue: '3,348 (33.09%)',
+          value: '513',
+          comparisonValue: '175 (65.89%)',
           icon: 'comparison_sortUp_success',
         },
       ].forEach((item) => {
@@ -102,7 +101,7 @@ describe('Differential Functions page', () => {
       });
     });
     // Flaky test, skipping it for now
-    it.skip('show lost performance when comparison data has more samples than baseline', () => {
+    it('show lost performance when comparison data has more samples than baseline', () => {
       cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions/differential', {
         rangeFrom: comparisonRangeFrom,
@@ -114,23 +113,23 @@ describe('Differential Functions page', () => {
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
       [
-        { id: 'overallPerformance', value: '49.46%', icon: 'sortDown_danger' },
+        { id: 'overallPerformance', value: '193.14%', icon: 'sortDown_danger' },
         {
           id: 'annualizedCo2',
-          value: '449.7 lbs / 203.98 kg',
-          comparisonValue: '672.14 lbs / 304.88 kg (49.46%)',
+          value: '94.02 lbs / 42.65 kg',
+          comparisonValue: '275.62 lbs / 125.02 kg (193.14%)',
           icon: 'comparison_sortDown_danger',
         },
         {
           id: 'annualizedCost',
-          value: '$519.36',
-          comparisonValue: '$776.25 (49.46%)',
+          value: '$108.59',
+          comparisonValue: '$318.32 (193.14%)',
           icon: 'comparison_sortDown_danger',
         },
         {
           id: 'totalNumberOfSamples',
-          value: '3,348',
-          comparisonValue: '5,004 (49.46%)',
+          value: '175',
+          comparisonValue: '513 (193.14%)',
           icon: 'comparison_sortDown_danger',
         },
       ].forEach((item) => {
