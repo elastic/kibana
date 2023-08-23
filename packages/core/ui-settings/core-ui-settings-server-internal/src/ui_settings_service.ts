@@ -50,6 +50,7 @@ export class UiSettingsService
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();
   private readonly uiSettingsGlobalDefaults = new Map<string, UiSettingsParams>();
   private overrides: Record<string, any> = {};
+  private allowlist: string[] | null = null;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('ui-settings-service');
@@ -94,10 +95,14 @@ export class UiSettingsService
     return {
       register: this.register,
       registerGlobal: this.registerGlobal,
+      setAllowlist: this.setAllowlist,
     };
   }
 
   public async start(): Promise<InternalUiSettingsServiceStart> {
+    if (this.allowlist) {
+      this.applyAllowlist(this.allowlist);
+    }
     this.validatesDefinitions();
     this.validatesOverrides();
 
@@ -135,7 +140,7 @@ export class UiSettingsService
       if (this.uiSettingsDefaults.has(key)) {
         throw new Error(`uiSettings for the key [${key}] has been already registered`);
       }
-      value.allowlisted = false;
+      value.allowlisted = true;
       this.uiSettingsDefaults.set(key, value);
     });
   };
@@ -145,10 +150,31 @@ export class UiSettingsService
       if (this.uiSettingsGlobalDefaults.has(key)) {
         throw new Error(`Global uiSettings for the key [${key}] has been already registered`);
       }
-      value.allowlisted = false;
+      value.allowlisted = true;
       this.uiSettingsGlobalDefaults.set(key, value);
     });
   };
+
+  private setAllowlist = (keys: string[]) => {
+    if (!this.allowlist) {
+      this.allowlist = keys;
+    } else {
+      this.allowlist = this.allowlist.concat(keys);
+    }
+  };
+
+  private applyAllowlist(keys: string[]) {
+    for (const [key, definition] of this.uiSettingsDefaults) {
+      if (!keys.includes(key)) {
+        definition.allowlisted = false;
+      }
+    }
+    for (const [key, definition] of this.uiSettingsGlobalDefaults) {
+      if (!keys.includes(key)) {
+        definition.allowlisted = false;
+      }
+    }
+  }
 
   private validatesDefinitions() {
     for (const [key, definition] of this.uiSettingsDefaults) {

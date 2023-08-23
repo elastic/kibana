@@ -92,9 +92,7 @@ export interface UiSettingsParams<T = unknown> {
    * scoped to a namespace. The default value is 'namespace'
    */
   scope?: UiSettingsScope;
-  /**
-   * Specifies whether the setting should be displayed in the Advanced settings app.
-   */
+  /** a flag indicating that the setting cannot be accessed or changed */
   allowlisted?: boolean;
 }
 

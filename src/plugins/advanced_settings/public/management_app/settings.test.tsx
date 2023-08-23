@@ -54,14 +54,11 @@ function mockConfig() {
     defVal: 'defVal',
     type: 'string' as UiSettingsType,
     category: ['category'],
-    allowlisted: true,
   };
 
   const config = {
     set: (key: string, value: any) => Promise.resolve(true),
     remove: (key: string) => Promise.resolve(true),
-    allowlist: () => {},
-    allowlistAll: () => {},
     isCustom: (key: string) => false,
     isOverridden: (key: string) => Boolean(config.getAll()[key].isOverridden),
     getRegistered: () => ({} as Readonly<Record<string, PublicUiSettingsParams>>),

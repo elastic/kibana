@@ -48,7 +48,12 @@ export abstract class UiSettingsClientCommon implements IUiSettingsClient {
   }
 
   getAll() {
-    return cloneDeep(this.cache);
+    const allSettings = cloneDeep(this.cache);
+    return Object.keys(allSettings)
+      .filter((key) => allSettings[key].allowlisted)
+      .reduce((cur, key) => {
+        return Object.assign(cur, { [key]: allSettings[key] });
+      }, {});
   }
 
   get<T = any>(key: string, defaultOverride?: T) {
@@ -98,22 +103,6 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
 
   async remove(key: string) {
     return await this.update(key, null);
-  }
-
-  allowlist(keys: string[]) {
-    keys.forEach((key) => {
-      if (this.defaults.hasOwnProperty(key)) {
-        this.defaults[key].allowlisted = true;
-      }
-      if (this.cache.hasOwnProperty(key)) {
-        this.cache[key].allowlisted = true;
-      }
-    });
-  }
-
-  allowlistAll() {
-    Object.entries(this.defaults).forEach(([key, value]) => (value.allowlisted = true));
-    Object.entries(this.cache).forEach(([key, value]) => (value.allowlisted = true));
   }
 
   isDeclared(key: string) {

@@ -259,6 +259,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     uiSettings: {
       register: deps.uiSettings.register,
       registerGlobal: deps.uiSettings.registerGlobal,
+      setAllowlist: deps.uiSettings.setAllowlist,
     },
     userSettings: {
       setUserProfileSettings: deps.userSettings.setUserProfileSettings,
