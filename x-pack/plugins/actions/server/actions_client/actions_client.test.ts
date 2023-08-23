@@ -9,19 +9,19 @@ import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 
-import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
+import { ActionTypeRegistry, ActionTypeRegistryOpts } from '../action_type_registry';
 import { ActionsClient } from './actions_client';
-import { ExecutorType, ActionType } from './types';
+import { ExecutorType, ActionType } from '../types';
 import {
   ActionExecutor,
   TaskRunnerFactory,
   ILicenseState,
   asHttpRequestExecutionSource,
-} from './lib';
+} from '../lib';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { actionsConfigMock } from './actions_config.mock';
-import { getActionsConfigurationUtilities } from './actions_config';
-import { licenseStateMock } from './lib/license_state.mock';
+import { actionsConfigMock } from '../actions_config.mock';
+import { getActionsConfigurationUtilities } from '../actions_config';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import {
   httpServerMock,
@@ -31,26 +31,26 @@ import {
 } from '@kbn/core/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { actionExecutorMock } from './lib/action_executor.mock';
+import { actionExecutorMock } from '../lib/action_executor.mock';
 import { v4 as uuidv4 } from 'uuid';
-import { ActionsAuthorization } from './authorization/actions_authorization';
+import { ActionsAuthorization } from '../authorization/actions_authorization';
 import {
   getAuthorizationModeBySource,
   AuthorizationMode,
   getBulkAuthorizationModeBySource,
-} from './authorization/get_authorization_mode_by_source';
-import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
-import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
-import { ConnectorTokenClient } from './lib/connector_token_client';
+} from '../authorization/get_authorization_mode_by_source';
+import { actionsAuthorizationMock } from '../authorization/actions_authorization.mock';
+import { trackLegacyRBACExemption } from '../lib/track_legacy_rbac_exemption';
+import { ConnectorTokenClient } from '../lib/connector_token_client';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { Logger } from '@kbn/core/server';
-import { connectorTokenClientMock } from './lib/connector_token_client.mock';
-import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
-import { getOAuthJwtAccessToken } from './lib/get_oauth_jwt_access_token';
-import { getOAuthClientCredentialsAccessToken } from './lib/get_oauth_client_credentials_access_token';
-import { OAuthParams } from './routes/get_oauth_access_token';
+import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
+import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
+import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
+import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_credentials_access_token';
+import { OAuthParams } from '../routes/get_oauth_access_token';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
-import { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../common';
+import { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../../common';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -62,11 +62,11 @@ jest.mock('@kbn/core-saved-objects-utils-server', () => {
   };
 });
 
-jest.mock('./lib/track_legacy_rbac_exemption', () => ({
+jest.mock('../lib/track_legacy_rbac_exemption', () => ({
   trackLegacyRBACExemption: jest.fn(),
 }));
 
-jest.mock('./authorization/get_authorization_mode_by_source', () => {
+jest.mock('../authorization/get_authorization_mode_by_source', () => {
   return {
     getAuthorizationModeBySource: jest.fn(() => {
       return 1;
@@ -81,10 +81,10 @@ jest.mock('./authorization/get_authorization_mode_by_source', () => {
   };
 });
 
-jest.mock('./lib/get_oauth_jwt_access_token', () => ({
+jest.mock('../lib/get_oauth_jwt_access_token', () => ({
   getOAuthJwtAccessToken: jest.fn(),
 }));
-jest.mock('./lib/get_oauth_client_credentials_access_token', () => ({
+jest.mock('../lib/get_oauth_client_credentials_access_token', () => ({
   getOAuthClientCredentialsAccessToken: jest.fn(),
 }));
 
@@ -1239,364 +1239,6 @@ describe('get()', () => {
       isSystemAction: true,
       name: 'System action: .cases',
     });
-  });
-});
-
-describe('getAll()', () => {
-  describe('authorization', () => {
-    function getAllOperation(): ReturnType<ActionsClient['getAll']> {
-      const expectedResult = {
-        total: 1,
-        per_page: 10,
-        page: 1,
-        saved_objects: [
-          {
-            id: '1',
-            type: 'type',
-            attributes: {
-              name: 'test',
-              config: {
-                foo: 'bar',
-              },
-            },
-            score: 1,
-            references: [],
-          },
-        ],
-      };
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
-      scopedClusterClient.asInternalUser.search.mockResponse(
-        // @ts-expect-error not full search response
-        {
-          aggregations: {
-            '1': { doc_count: 6 },
-            testPreconfigured: { doc_count: 2 },
-          },
-        }
-      );
-
-      actionsClient = new ActionsClient({
-        logger,
-        actionTypeRegistry,
-        unsecuredSavedObjectsClient,
-        scopedClusterClient,
-        kibanaIndices,
-        actionExecutor,
-        executionEnqueuer,
-        ephemeralExecutionEnqueuer,
-        bulkExecutionEnqueuer,
-        request,
-        authorization: authorization as unknown as ActionsAuthorization,
-        inMemoryConnectors: [
-          {
-            id: 'testPreconfigured',
-            actionTypeId: '.slack',
-            secrets: {},
-            isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
-            name: 'test',
-            config: {
-              foo: 'bar',
-            },
-          },
-        ],
-        connectorTokenClient: connectorTokenClientMock.create(),
-        getEventLogClient,
-      });
-      return actionsClient.getAll();
-    }
-
-    test('ensures user is authorised to get the type of action', async () => {
-      await getAllOperation();
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
-    });
-
-    test('throws when user is not authorised to create the type of action', async () => {
-      authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to get all actions`)
-      );
-
-      await expect(getAllOperation()).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to get all actions]`
-      );
-
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
-    });
-  });
-
-  describe('auditLogger', () => {
-    test('logs audit event when searching connectors', async () => {
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-        total: 1,
-        per_page: 10,
-        page: 1,
-        saved_objects: [
-          {
-            id: '1',
-            type: 'type',
-            attributes: {
-              name: 'test',
-              isMissingSecrets: false,
-              config: {
-                foo: 'bar',
-              },
-            },
-            score: 1,
-            references: [],
-          },
-        ],
-      });
-      scopedClusterClient.asInternalUser.search.mockResponse(
-        // @ts-expect-error not full search response
-        {
-          aggregations: {
-            '1': { doc_count: 6 },
-            testPreconfigured: { doc_count: 2 },
-          },
-        }
-      );
-
-      await actionsClient.getAll();
-
-      expect(auditLogger.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          event: expect.objectContaining({
-            action: 'connector_find',
-            outcome: 'success',
-          }),
-          kibana: { saved_object: { id: '1', type: 'action' } },
-        })
-      );
-    });
-
-    test('logs audit event when not authorised to search connectors', async () => {
-      authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
-
-      await expect(actionsClient.getAll()).rejects.toThrow();
-
-      expect(auditLogger.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          event: expect.objectContaining({
-            action: 'connector_find',
-            outcome: 'failure',
-          }),
-          error: { code: 'Error', message: 'Unauthorized' },
-        })
-      );
-    });
-  });
-
-  test('calls unsecuredSavedObjectsClient with parameters and returns inMemoryConnectors correctly', async () => {
-    const expectedResult = {
-      total: 1,
-      per_page: 10,
-      page: 1,
-      saved_objects: [
-        {
-          id: '1',
-          type: 'type',
-          attributes: {
-            name: 'test',
-            isMissingSecrets: false,
-            config: {
-              foo: 'bar',
-            },
-          },
-          score: 1,
-          references: [],
-        },
-      ],
-    };
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
-    scopedClusterClient.asInternalUser.search.mockResponse(
-      // @ts-expect-error not full search response
-      {
-        aggregations: {
-          '1': { doc_count: 6 },
-          testPreconfigured: { doc_count: 2 },
-          'system-connector-.cases': { doc_count: 2 },
-        },
-      }
-    );
-
-    actionsClient = new ActionsClient({
-      logger,
-      actionTypeRegistry,
-      unsecuredSavedObjectsClient,
-      scopedClusterClient,
-      kibanaIndices,
-      actionExecutor,
-      executionEnqueuer,
-      ephemeralExecutionEnqueuer,
-      bulkExecutionEnqueuer,
-      request,
-      authorization: authorization as unknown as ActionsAuthorization,
-      inMemoryConnectors: [
-        {
-          id: 'testPreconfigured',
-          actionTypeId: '.slack',
-          secrets: {},
-          isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
-          name: 'test',
-          config: {
-            foo: 'bar',
-          },
-        },
-        /**
-         * System actions will not
-         * be returned from getAll
-         * if no options are provided
-         */
-        {
-          id: 'system-connector-.cases',
-          actionTypeId: '.cases',
-          name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
-          isSystemAction: true,
-        },
-      ],
-      connectorTokenClient: connectorTokenClientMock.create(),
-      getEventLogClient,
-    });
-
-    const result = await actionsClient.getAll();
-
-    expect(result).toEqual([
-      {
-        id: '1',
-        name: 'test',
-        isMissingSecrets: false,
-        config: { foo: 'bar' },
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-        referencedByCount: 6,
-      },
-      {
-        id: 'testPreconfigured',
-        actionTypeId: '.slack',
-        name: 'test',
-        isPreconfigured: true,
-        isSystemAction: false,
-        isDeprecated: false,
-        referencedByCount: 2,
-      },
-    ]);
-  });
-
-  test('get system actions correctly', async () => {
-    const expectedResult = {
-      total: 1,
-      per_page: 10,
-      page: 1,
-      saved_objects: [
-        {
-          id: '1',
-          type: 'type',
-          attributes: {
-            name: 'test',
-            isMissingSecrets: false,
-            config: {
-              foo: 'bar',
-            },
-          },
-          score: 1,
-          references: [],
-        },
-      ],
-    };
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
-    scopedClusterClient.asInternalUser.search.mockResponse(
-      // @ts-expect-error not full search response
-      {
-        aggregations: {
-          '1': { doc_count: 6 },
-          testPreconfigured: { doc_count: 2 },
-          'system-connector-.cases': { doc_count: 2 },
-        },
-      }
-    );
-
-    actionsClient = new ActionsClient({
-      logger,
-      actionTypeRegistry,
-      unsecuredSavedObjectsClient,
-      scopedClusterClient,
-      kibanaIndices,
-      actionExecutor,
-      executionEnqueuer,
-      ephemeralExecutionEnqueuer,
-      bulkExecutionEnqueuer,
-      request,
-      authorization: authorization as unknown as ActionsAuthorization,
-      inMemoryConnectors: [
-        {
-          id: 'testPreconfigured',
-          actionTypeId: '.slack',
-          secrets: {},
-          isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
-          name: 'test',
-          config: {
-            foo: 'bar',
-          },
-        },
-        {
-          id: 'system-connector-.cases',
-          actionTypeId: '.cases',
-          name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
-          isSystemAction: true,
-        },
-      ],
-      connectorTokenClient: connectorTokenClientMock.create(),
-      getEventLogClient,
-    });
-
-    const result = await actionsClient.getAll({ includeSystemActions: true });
-
-    expect(result).toEqual([
-      {
-        actionTypeId: '.cases',
-        id: 'system-connector-.cases',
-        isDeprecated: false,
-        isPreconfigured: false,
-        isSystemAction: true,
-        name: 'System action: .cases',
-        referencedByCount: 2,
-      },
-      {
-        id: '1',
-        name: 'test',
-        isMissingSecrets: false,
-        config: { foo: 'bar' },
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-        referencedByCount: 6,
-      },
-      {
-        id: 'testPreconfigured',
-        actionTypeId: '.slack',
-        name: 'test',
-        isPreconfigured: true,
-        isSystemAction: false,
-        isDeprecated: false,
-        referencedByCount: 2,
-      },
-    ]);
   });
 });
 
