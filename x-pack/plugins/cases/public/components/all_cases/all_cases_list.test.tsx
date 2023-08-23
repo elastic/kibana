@@ -194,6 +194,7 @@ describe('AllCasesListGeneric', () => {
       expect(screen.getByTestId('case-table-case-count')).toHaveTextContent(
         `Showing 10 of ${useGetCasesMockState.data.total} cases`
       );
+      expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
     });
   });
 
