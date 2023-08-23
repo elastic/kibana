@@ -14,7 +14,7 @@ export default createTestConfig({
   serverlessProject: 'oblt',
   testFiles: [require.resolve('../common/index.examples')],
   junit: {
-    reportName: 'Serverless ObservabilityExamples Functional Tests',
+    reportName: 'Serverless Observability Examples Functional Tests',
   },
   serverArgs: findTestPluginPaths([
     resolve(REPO_ROOT, 'examples'),
