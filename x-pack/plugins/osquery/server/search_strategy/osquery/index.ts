@@ -41,13 +41,12 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
         mergeMap((exists) => {
           const strictRequest = {
             factoryQueryType: request.factoryQueryType,
-            filterQuery: request.filterQuery,
-            ...('aggregations' in request ? { aggregations: request.aggregations } : {}),
+            kuery: request.kuery,
             ...('pagination' in request ? { pagination: request.pagination } : {}),
             ...('sort' in request ? { sort: request.sort } : {}),
             ...('actionId' in request ? { actionId: request.actionId } : {}),
             ...('agentId' in request ? { agentId: request.agentId } : {}),
-          };
+          } as StrategyRequestType<T>;
 
           const dsl = queryFactory.buildDsl({
             ...strictRequest,
