@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         for (const char of ['/', '_']) {
           await PageObjects.console.sleepForDebouncePeriod();
           log.debug('Key type "%s"', char);
-          await PageObjects.console.enterText(char); // e.g. 'GET .kibana/' -> 'GET .kibana/_'
+          await PageObjects.console.enterText(char); // i.e. 'GET .kibana/' -> 'GET .kibana/_'
         }
 
         await retry.waitFor('autocomplete to be visible', () =>
@@ -135,8 +135,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.enterText('GET /_cat/indices/.kibana');
 
         await PageObjects.console.sleepForDebouncePeriod();
-        log.debug('Key type "%s"', ',');
-        await PageObjects.console.enterText(','); // e.g. 'GET /_cat/indices/.kibana,'
+        log.debug('Key type ","');
+        await PageObjects.console.enterText(','); // i.e. 'GET /_cat/indices/.kibana,'
 
         await PageObjects.console.sleepForDebouncePeriod();
         log.debug('Key type Ctrl+SPACE');
