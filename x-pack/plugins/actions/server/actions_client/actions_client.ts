@@ -25,7 +25,9 @@ import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { KueryNode } from '@kbn/es-query';
 import { FindConnectorResult } from '../application/connector/types';
+import { ConnectorType } from '../application/connector/types';
 import { getAll } from '../application/connector/methods/get_all';
+import { listTypes } from '../application/connector/methods/list_types';
 import {
   GetGlobalExecutionKPIParams,
   GetGlobalExecutionLogParams,
@@ -86,7 +88,7 @@ import {
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../application/connector/lib';
-import { ListTypesParams } from '../application/connector/methods/list_types';
+import { ListTypesParams } from '../application/connector/methods/list_types/types';
 
 interface ActionUpdate {
   name: string;
@@ -125,11 +127,6 @@ export interface ConstructorOptions {
 export interface UpdateOptions {
   id: string;
   action: ActionUpdate;
-}
-
-interface ListTypesOptions {
-  featureId?: string;
-  includeSystemActionTypes?: boolean;
 }
 
 export interface ActionsClientContext {
@@ -838,7 +835,12 @@ export class ActionsClient {
     );
   }
 
-  public listTypes = (params: ListTypesParams) => listTypes(this.context, params);
+  public async listTypes({
+    featureId,
+    includeSystemActionTypes = false,
+  }: ListTypesParams = {}): Promise<ConnectorType[]> {
+    return listTypes(this.context, { featureId, includeSystemActionTypes });
+  }
 
   public isActionTypeEnabled(
     actionTypeId: string,

@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import { ActionType } from '../../../../../common';
-import { ActionsClientContext } from '../../../../actions_client/types';
-
-export interface ListTypesParams {
-  featureId?: string;
-  includeSystemActionTypes?: boolean;
-}
+import { ActionsClientContext } from '../../../../actions_client';
+import { ConnectorType } from '../../types';
+import { ListTypesParams } from './types';
 
 export async function listTypes(
   context: ActionsClientContext,
-  listTypesParams: ListTypesParams
-): Promise<ActionType[]> {
-  const { featureId, includeSystemActionTypes } = listTypesParams;
+  { featureId, includeSystemActionTypes }: ListTypesParams
+): Promise<ConnectorType[]> {
   const connectorTypes = context.actionTypeRegistry.list(featureId);
 
   const filteredConnectorTypes = includeSystemActionTypes

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export type { ListTypesParams } from './list_types';
 export { listTypes } from './list_types';
