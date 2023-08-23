@@ -13,9 +13,7 @@ import { createEsFileClient } from '../create_es_file_client';
 import { FileClient } from '../types';
 import { FileMetadata } from '../../../common';
 
-// FLAKY: https://github.com/elastic/kibana/issues/144505
-// FLAKY: https://github.com/elastic/kibana/issues/144506
-describe.skip('ES-index-backed file client', () => {
+describe('ES-index-backed file client', () => {
   let esClient: TestEnvironmentUtils['esClient'];
   let fileClient: FileClient;
   let testHarness: TestEnvironmentUtils;
