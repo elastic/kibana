@@ -160,3 +160,38 @@ export const CASES_WEBHOOK_MAPPINGS = i18n.translate(
       'Webhook - Case Management field mappings are configured in the connector settings in the third-party REST API JSON.',
   }
 );
+
+export const NO_CUSTOM_FIELDS = i18n.translate(
+  'xpack.cases.configureCases.noCustomFields',
+  {
+    defaultMessage: 'You do not have any fields yet'
+  }
+);
+
+export const ADD_CUSTOM_FIELD = i18n.translate(
+  'xpack.cases.configureCases.addCustomField',
+  {
+    defaultMessage: 'Add field'
+  }
+);
+
+export const SAVE_AND_ADD_ANOTHER = i18n.translate(
+  'xpack.cases.configureCases.saveAndAddAnother',
+  {
+    defaultMessage: 'Save and add another'
+  }
+);
+
+export const SAVE_FIELD = i18n.translate(
+  'xpack.cases.configureCases.saveField',
+  {
+    defaultMessage: 'Save field'
+  }
+);
+
+export const FIELD_LABEL = i18n.translate(
+  'xpack.cases.configureCases.fieldLabel',
+  {
+    defaultMessage: 'Field label'
+  }
+);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
@@ -22,6 +22,8 @@ import * as i18n from './translations';
 
 import type { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
 import { Mapping } from './mapping';
+import { CustomFields } from './custom_fields/index';
+import { AddFieldFlyout } from './custom_fields/add_field_flyout';
 import type { ActionTypeConnector } from '../../../common/types/domain';
 import { ConnectorTypes } from '../../../common/types/domain';
 import { DeprecatedCallout } from '../connectors/deprecated_callout';
@@ -45,6 +47,7 @@ export interface Props {
   isLoading: boolean;
   mappings: CaseConnectorMapping[];
   onChangeConnector: (id: string) => void;
+  // handleAddCustomField: () => void;
   selectedConnector: { id: string; type: ConnectorTypes };
   updateConnectorDisabled: boolean;
 }
@@ -56,6 +59,7 @@ const ConnectorsComponent: React.FC<Props> = ({
   isLoading,
   mappings,
   onChangeConnector,
+  // handleAddCustomField,
   selectedConnector,
   updateConnectorDisabled,
 }) => {
@@ -65,9 +69,26 @@ const ConnectorsComponent: React.FC<Props> = ({
     [connectors, selectedConnector.id]
   );
   const { permissions } = useCasesContext();
+  const [addFieldFlyoutVisible, setAddFieldFlyoutVisibility] = useState<boolean>(false);
   const canUseConnectors = permissions.connectors && actions.read;
 
   const connectorsName = connector?.name ?? 'none';
+
+  const onAddCustomFields = useCallback(
+    () => {
+      setAddFieldFlyoutVisibility(true);
+    },
+    []
+  );
+
+  const onCloseAddFieldFlyout = useCallback(() => {
+    setAddFieldFlyoutVisibility(false);
+  }, []);
+
+  const CustomFieldAddFlyout = useMemo(
+    () => addFieldFlyoutVisible ? <AddFieldFlyout onCloseFlyout={onCloseAddFieldFlyout} onSaveAndAddAnotherField={onCloseAddFieldFlyout} onSaveField={onCloseAddFieldFlyout} /> : null,
+    [addFieldFlyoutVisible]
+  );
 
   const actionTypeName = useMemo(
     () => actionTypes.find((c) => c.id === selectedConnector.type)?.name ?? i18n.UNKNOWN,
@@ -139,9 +160,13 @@ const ConnectorsComponent: React.FC<Props> = ({
                 />
               </EuiFlexItem>
             ) : null}
+            <EuiFlexItem grow={false}>
+              <CustomFields isLoading={isLoading} disabled={disabled} handleAddCustomField={onAddCustomFields} />
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFormRowExtended>
       </EuiDescribedFormGroup>
+      {CustomFieldAddFlyout}
     </>
   );
 };
