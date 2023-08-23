@@ -32,7 +32,6 @@ import type {
 } from '../../../common/search_strategy';
 import { Direction, TimelineEventsQueries } from '../../../common/search_strategy';
 import type { InspectResponse } from '../../types';
-import * as i18n from './translations';
 import type { KueryFilterQueryKind } from '../../../common/types/timeline';
 import { TimelineId } from '../../../common/types/timeline';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
@@ -327,16 +326,7 @@ export const useTimelineEventsHandler = ({
       await asyncSearch();
       refetch.current = asyncSearch;
     },
-    [
-      pageName,
-      skip,
-      id,
-      startTracking,
-      data.search,
-      dataViewId,
-      refetchGrid,
-      wrappedLoadPage,
-    ]
+    [pageName, skip, id, startTracking, data.search, dataViewId, refetchGrid, wrappedLoadPage]
   );
 
   useEffect(() => {

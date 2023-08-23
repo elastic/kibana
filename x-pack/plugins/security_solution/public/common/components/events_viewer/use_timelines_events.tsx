@@ -32,7 +32,6 @@ import type { RunTimeMappings } from '../../store/sourcerer/model';
 import { TimelineEventsQueries } from '../../../../common/search_strategy';
 import type { KueryFilterQueryKind } from '../../../../common/types';
 import type { ESQuery } from '../../../../common/typed_json';
-import { ERROR_TIMELINE_EVENTS } from './translations';
 import type { AlertWorkflowStatus } from '../../types';
 import { getSearchTransactionName, useStartTransaction } from '../../lib/apm/use_start_transaction';
 export type InspectResponse = Inspect & { response: string[] };
