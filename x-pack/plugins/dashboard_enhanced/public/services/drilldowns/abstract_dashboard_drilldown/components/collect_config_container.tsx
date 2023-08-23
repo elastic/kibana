@@ -12,8 +12,8 @@ import { SimpleSavedObject } from '@kbn/core/public';
 import { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
 import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
 import { txtDestinationDashboardNotFound } from './i18n';
+import { Config } from '../types';
 import { Params } from '../abstract_dashboard_drilldown';
-import { DashboardDrilldownConfig as DrilldownConfig } from '../../../../../common/drilldowns/dashboard_drilldown/types';
 
 const mergeDashboards = (
   dashboards: Array<EuiComboBoxOptionOption<string>>,
@@ -35,8 +35,7 @@ const dashboardSavedObjectToMenuItem = (
   label: savedObject.attributes.title,
 });
 
-export interface DashboardDrilldownCollectConfigProps
-  extends CollectConfigProps<DrilldownConfig, object> {
+export interface DashboardDrilldownCollectConfigProps extends CollectConfigProps<Config, object> {
   params: Params;
 }
 
@@ -81,12 +80,9 @@ export class CollectConfigContainer extends React.Component<
 
     return (
       <DashboardDrilldownConfig
-        error={error}
-        config={config}
+        dashboards={mergeDashboards(dashboards, selectedDashboard)}
         isLoading={isLoading}
-        onConfigChange={(changes: Partial<DrilldownConfig>) => {
-          onConfig({ ...config, ...changes });
-        }}
+        error={error}
         onDashboardSelect={(dashboardId) => {
           onConfig({ ...config, dashboardId });
           if (this.state.error) {
@@ -94,7 +90,10 @@ export class CollectConfigContainer extends React.Component<
           }
         }}
         onSearchChange={this.debouncedLoadDashboards}
-        dashboards={mergeDashboards(dashboards, selectedDashboard)}
+        config={config}
+        onConfigChange={(changes: Partial<Config>) => {
+          onConfig({ ...config, ...changes });
+        }}
       />
     );
   }

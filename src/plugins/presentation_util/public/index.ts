@@ -24,8 +24,8 @@ export type {
 } from './services/create';
 export { PluginServices, PluginServiceProvider, PluginServiceRegistry } from './services/create';
 
-export type { SaveModalDashboardProps } from './components/types';
 export type { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
+export type { SaveModalDashboardProps } from './components/types';
 
 export {
   LazyExpressionInput,
@@ -39,7 +39,7 @@ export {
   FloatingActions,
   LazyDashboardDrilldownOptionsComponent,
   type DashboardDrilldownOptions,
-  DEFAULT_DASHBOARD_LINK_OPTIONS,
+  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
 } from './components';
 
 export {

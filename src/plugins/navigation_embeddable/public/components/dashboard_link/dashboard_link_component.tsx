@@ -18,7 +18,7 @@ import {
 } from '@kbn/dashboard-plugin/public';
 import {
   DashboardDrilldownOptions,
-  DEFAULT_DASHBOARD_LINK_OPTIONS,
+  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
 } from '@kbn/presentation-util-plugin/public';
 import { isFilterPinned } from '@kbn/es-query';
 import { KibanaLocation } from '@kbn/share-plugin/public';
@@ -102,7 +102,7 @@ export const DashboardLinkComponent = ({
   const navigateToDashboard = useCallback(
     async (modifiedClick: boolean) => {
       const options: DashboardDrilldownOptions = {
-        ...DEFAULT_DASHBOARD_LINK_OPTIONS,
+        ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
         ...link.options,
       };
       const params: DashboardAppLocatorParams = {

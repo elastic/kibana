@@ -13,28 +13,28 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 
 import { txtChooseDestinationDashboard } from './i18n';
-import { DashboardDrilldownConfig as DrilldownConfig } from '../../../../../../common/drilldowns/dashboard_drilldown/types';
+import { Config as DrilldownConfig } from '../../types';
 
 const DashboardDrilldownOptions = withSuspense(LazyDashboardDrilldownOptionsComponent, null);
 
 export interface DashboardDrilldownConfigProps {
-  error?: string;
-  isLoading: boolean;
-  config: DrilldownConfig;
-  onSearchChange: (searchString: string) => void;
-  onDashboardSelect: (dashboardId: string) => void;
   dashboards: Array<EuiComboBoxOptionOption<string>>;
+  onDashboardSelect: (dashboardId: string) => void;
+  onSearchChange: (searchString: string) => void;
+  isLoading: boolean;
+  error?: string;
+  config: DrilldownConfig;
   onConfigChange: (changes: Partial<DrilldownConfig>) => void;
 }
 
 export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> = ({
+  dashboards,
+  onDashboardSelect,
+  onSearchChange,
+  isLoading,
   error,
   config,
-  dashboards,
-  isLoading,
   onConfigChange,
-  onSearchChange,
-  onDashboardSelect,
 }: DashboardDrilldownConfigProps) => {
   const selectedTitle = dashboards.find((item) => item.value === config.dashboardId)?.label || '';
 
@@ -43,17 +43,17 @@ export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> =
       <EuiFormRow label={txtChooseDestinationDashboard} fullWidth isInvalid={!!error} error={error}>
         <EuiComboBox<string>
           async
-          fullWidth
-          isInvalid={!!error}
-          options={dashboards}
-          isLoading={isLoading}
-          onSearchChange={onSearchChange}
-          singleSelection={{ asPlainText: true }}
-          data-test-subj={'dashboardDrilldownSelectDashboard'}
-          onChange={([{ value = '' } = { value: '' }]) => onDashboardSelect(value)}
           selectedOptions={
             config.dashboardId ? [{ label: selectedTitle, value: config.dashboardId }] : []
           }
+          options={dashboards}
+          onChange={([{ value = '' } = { value: '' }]) => onDashboardSelect(value)}
+          onSearchChange={onSearchChange}
+          isLoading={isLoading}
+          singleSelection={{ asPlainText: true }}
+          fullWidth
+          data-test-subj={'dashboardDrilldownSelectDashboard'}
+          isInvalid={!!error}
         />
       </EuiFormRow>
       <DashboardDrilldownOptions options={config} onOptionChange={onConfigChange} />

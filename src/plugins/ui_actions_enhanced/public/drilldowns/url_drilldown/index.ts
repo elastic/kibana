@@ -12,7 +12,7 @@ export type {
   UrlDrilldownOptions,
   UrlDrilldownGlobalScope,
 } from './types';
-export { DEFAULT_URL_LINK_OPTIONS } from './constants';
+export { DEFAULT_URL_DRILLDOWN_OPTIONS } from './constants';
 export { UrlDrilldownCollectConfig, UrlDrilldownOptionsComponent } from './components';
 export {
   validateUrlTemplate as urlDrilldownValidateUrlTemplate,

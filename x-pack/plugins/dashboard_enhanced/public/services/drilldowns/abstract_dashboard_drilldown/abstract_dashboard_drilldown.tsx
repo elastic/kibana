@@ -14,13 +14,12 @@ import {
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
   UiActionsEnhancedDrilldownDefinition as Drilldown,
 } from '@kbn/ui-actions-enhanced-plugin/public';
-import { DEFAULT_DASHBOARD_LINK_OPTIONS } from '@kbn/presentation-util-plugin/public';
 import { CollectConfigProps, StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
 
-import { txtGoToDashboard } from './i18n';
 import { CollectConfigContainer } from './components';
-import { DashboardDrilldownConfig as Config } from '../../../../common/drilldowns/dashboard_drilldown/types';
-
+import { txtGoToDashboard } from './i18n';
+import { Config } from './types';
 export interface Params {
   start: StartServicesGetter<{
     uiActionsEnhanced: AdvancedUiActionsStart;
@@ -61,7 +60,7 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
 
   public readonly createConfig = () => ({
     dashboardId: '',
-    ...DEFAULT_DASHBOARD_LINK_OPTIONS,
+    ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
   });
 
   public readonly isConfigValid = (config: Config): config is Config => {

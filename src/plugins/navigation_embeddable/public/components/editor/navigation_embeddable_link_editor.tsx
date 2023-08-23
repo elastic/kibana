@@ -29,13 +29,13 @@ import {
 import {
   withSuspense,
   DashboardDrilldownOptions,
-  DEFAULT_DASHBOARD_LINK_OPTIONS,
+  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
   LazyDashboardDrilldownOptionsComponent,
 } from '@kbn/presentation-util-plugin/public';
 import {
   UrlDrilldownOptions,
-  DEFAULT_URL_LINK_OPTIONS,
   UrlDrilldownOptionsComponent,
+  DEFAULT_URL_DRILLDOWN_OPTIONS,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
@@ -75,7 +75,7 @@ export const NavigationEmbeddableLinkEditor = ({
   const [currentLinkLabel, setCurrentLinkLabel] = useState<string>(link?.label ?? '');
   const [linkDestination, setLinkDestination] = useState<string | undefined>(link?.destination);
   const [linkOptions, setLinkOptions] = useState<NavigationLinkOptions | undefined>({
-    ...DEFAULT_DASHBOARD_LINK_OPTIONS,
+    ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
     ...link?.options,
   });
 
@@ -163,9 +163,9 @@ export const NavigationEmbeddableLinkEditor = ({
                   setLinkDestination(undefined);
                   setCurrentLinkLabel('');
                   if (id === DASHBOARD_LINK_TYPE) {
-                    setLinkOptions(DEFAULT_DASHBOARD_LINK_OPTIONS);
+                    setLinkOptions(DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS);
                   } else {
-                    setLinkOptions(DEFAULT_URL_LINK_OPTIONS);
+                    setLinkOptions(DEFAULT_URL_DRILLDOWN_OPTIONS);
                   }
                 }
                 setDefaultLinkLabel(undefined);

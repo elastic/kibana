@@ -11,6 +11,14 @@ export type UrlDrilldownConfig = {
 } & UrlDrilldownOptions;
 
 /**
+ * User-configurable options for URL drilldowns
+ */
+export type UrlDrilldownOptions = {
+  openInNewTab: boolean;
+  encodeUrl: boolean;
+};
+
+/**
  * URL drilldown has 3 sources for variables: global, context and event variables
  */
 export interface UrlDrilldownScope<
@@ -36,11 +44,3 @@ export interface UrlDrilldownScope<
 export interface UrlDrilldownGlobalScope {
   kibanaUrl: string;
 }
-
-/**
- * User-configurable options for URL drilldowns
- */
-export type UrlDrilldownOptions = {
-  openInNewTab: boolean;
-  encodeUrl: boolean;
-};

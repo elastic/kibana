@@ -22,7 +22,7 @@ import {
 } from '../abstract_dashboard_drilldown';
 import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';
 import { createExtract, createInject } from '../../../../common';
-import { DashboardDrilldownConfig } from '../../../../common/drilldowns/dashboard_drilldown/types';
+import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
 
 type Context = EnhancedEmbeddableContext & ApplyGlobalFilterActionContext;
 export type Params = AbstractDashboardDrilldownParams;
@@ -40,7 +40,7 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
   public readonly supportedTriggers = () => [APPLY_FILTER_TRIGGER, IMAGE_CLICK_TRIGGER];
 
   protected async getLocation(
-    config: DashboardDrilldownConfig,
+    config: Config,
     context: Context,
     useUrlForState: boolean
   ): Promise<KibanaLocation> {
