@@ -24,7 +24,7 @@ export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
           return wp({
             webpackOptions: {
               resolve: {
-                extensions: ['.ts', '.tsx', '.js'],
+                extensions: ['.ts', '.tsx', '.js', '.peggy'],
               },
               module: {
                 rules: [
@@ -39,6 +39,10 @@ export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
                         presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
                       },
                     },
+                  },
+                  {
+                    test: /\.peggy$/,
+                    loader: require.resolve('@kbn/peggy-loader'),
                   },
                 ],
               },

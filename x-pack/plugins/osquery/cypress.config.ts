@@ -8,6 +8,11 @@
 import { defineCypressConfig } from '@kbn/cypress-config';
 
 export default defineCypressConfig({
+  reporter: '../../../../../../node_modules/cypress-multi-reporters',
+  reporterOptions: {
+    configFile: './cypress/reporter_config.json',
+  },
+
   defaultCommandTimeout: 60000,
   execTimeout: 120000,
   pageLoadTimeout: 12000,
@@ -17,10 +22,10 @@ export default defineCypressConfig({
     openMode: 0,
   },
 
-  screenshotsFolder: '../../../target/kibana-osquery/cypress/screenshots',
+  screenshotsFolder: '../../../../target/kibana-osquery/cypress/screenshots',
   trashAssetsBeforeRuns: false,
-  video: false,
-  videosFolder: '../../../target/kibana-osquery/cypress/videos',
+  video: true,
+  videosFolder: '../../../../target/kibana-osquery/cypress/videos',
   viewportHeight: 900,
   viewportWidth: 1440,
   experimentalStudio: true,

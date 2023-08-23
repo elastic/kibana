@@ -33,7 +33,7 @@ export const getFtrConfig = async ({
   const config = await readConfigFile(
     log,
     EsVersion.getDefault(),
-    _.isArray(ftrConfigFile) ? _.last(ftrConfigFile) : ftrConfigFile,
+    ftrConfigFile,
     {
       servers: {
         elasticsearch: {

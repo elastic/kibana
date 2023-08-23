@@ -52,7 +52,7 @@ steps:
     artifact_paths:
       - "target/kibana-security-solution/**/*"
 
-  - label: 'SorryCypress Security Solution  Tests'
+  - label: 'SorryCypress Security Solution Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
