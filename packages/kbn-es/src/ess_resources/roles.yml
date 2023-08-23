@@ -1,6 +1,5 @@
 ---
 system_indices_superuser:
-  refresh: 'wait_for'
   cluster: ['all']
   indices:
     - names: ['*']
@@ -9,5 +8,5 @@ system_indices_superuser:
   applications:
     - application: '*'
       privileges: ['*']
-      resources: '*'
-  run_as: '*'
+      resources: ['*']
+  run_as: ['*']
