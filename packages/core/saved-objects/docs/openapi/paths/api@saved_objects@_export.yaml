@@ -1,9 +1,13 @@
 post:
   summary: Retrieve sets of saved objects that you want to import into Kibana.
   operationId: exportSavedObjects
-  description: >
-    This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+  description: |        
+
+    You must include `type` or `objects` in the request body.
+
     NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
+
+    This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
   tags:
     - saved objects
   parameters:
@@ -14,9 +18,6 @@ post:
       application/json:
         schema:
           type: object
-          anyOf:
-            - required: [type]
-            - required: [objects]
           properties:
             excludeExportDetails:
               description: Do not add export details entry at the end of the stream.
@@ -31,7 +32,7 @@ post:
               items:
                 type: object
             type:
-              description: The saved object types to include in the export.
+              description: The saved object types to include in the export. Use `*` to export all the types.
               oneOf:
                 - type: string
                 - type: array
@@ -44,9 +45,9 @@ post:
     '200':
       description: Indicates a successful call.
       content:
-         multipart/form-data:
+        application/json:
           schema:
-            type: string
+            type: object
           examples:
             exportSavedObjectsResponse:
               $ref: '../components/examples/export_objects_response.yaml'
@@ -58,6 +59,6 @@ post:
             type: object
             additionalProperties: true
   servers:
-     - url: https://localhost:5601
+    - url: https://localhost:5601
 servers:
-      - url: https://localhost:5601
+  - url: https://localhost:5601

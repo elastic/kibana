@@ -33,11 +33,104 @@
     }
   ],
   "paths": {
+    "/api/encrypted_saved_objects/_rotate_key": {
+      "post": {
+        "summary": "Rotate the encryption key for encrypted saved objects.",
+        "operationId": "rotateEncryptionKey",
+        "description": "Superuser role required.\n\nIf a saved object cannot be decrypted using the primary encryption key, then Kibana will attempt to decrypt it using the specified decryption-only keys. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "tags": [
+          "saved objects"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "batch_size",
+            "schema": {
+              "type": "number",
+              "default": 10000
+            },
+            "required": false,
+            "description": "Specifies a maximum number of saved objects that Kibana can process in a single batch. Bulk key rotation is an iterative process since Kibana may not be able to fetch and process all required saved objects in one go and splits processing into consequent batches. By default, the batch size is 10000, which is also a maximum allowed value.\n"
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Limits encryption key rotation only to the saved objects with the specified type. By default, Kibana tries to rotate the encryption key for all saved object types that may contain encrypted attributes.\n"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "number",
+                      "description": "Indicates the total number of all encrypted saved objects (optionally filtered by the requested `type`), regardless of the key Kibana used for encryption.\n"
+                    },
+                    "successful": {
+                      "type": "number",
+                      "description": "Indicates the total number of all encrypted saved objects (optionally filtered by the requested `type`), regardless of the key Kibana used for encryption.\n\nNOTE: In most cases, `total` will be greater than `successful` even if `failed` is zero. The reason is that Kibana may not need or may not be able to rotate encryption keys for all encrypted saved objects.\n"
+                    },
+                    "failed": {
+                      "type": "number",
+                      "description": "Indicates the number of the saved objects that were still encrypted with one of the old encryption keys that Kibana failed to re-encrypt with the primary key.\n"
+                    }
+                  }
+                },
+                "examples": {
+                  "rotateEncryptionKeyResponse": {
+                    "$ref": "#/components/examples/key_rotation_response"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Already in progress.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
     "/api/saved_objects/_export": {
       "post": {
         "summary": "Retrieve sets of saved objects that you want to import into Kibana.",
         "operationId": "exportSavedObjects",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.\n",
+        "description": "\nYou must include `type` or `objects` in the request body.\n\nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "saved objects"
         ],
@@ -52,18 +145,6 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "anyOf": [
-                  {
-                    "required": [
-                      "type"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "objects"
-                    ]
-                  }
-                ],
                 "properties": {
                   "excludeExportDetails": {
                     "description": "Do not add export details entry at the end of the stream.",
@@ -82,7 +163,7 @@
                     }
                   },
                   "type": {
-                    "description": "The saved object types to include in the export.",
+                    "description": "The saved object types to include in the export. Use `*` to export all the types.",
                     "oneOf": [
                       {
                         "type": "string"
@@ -109,9 +190,9 @@
           "200": {
             "description": "Indicates a successful call.",
             "content": {
-              "multipart/form-data": {
+              "application/json": {
                 "schema": {
-                  "type": "string"
+                  "type": "object"
                 },
                 "examples": {
                   "exportSavedObjectsResponse": {
@@ -149,22 +230,13 @@
       "post": {
         "summary": "Create sets of Kibana saved objects from a file created by the export API.",
         "operationId": "importSavedObjects",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n",
+        "description": "Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "saved objects"
         ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
-          },
-          {
-            "in": "query",
-            "name": "compatibilityMode",
-            "schema": {
-              "type": "boolean"
-            },
-            "required": false,
-            "description": "Applies various adjustments to the saved objects that are being imported to maintain compatibility between different Kibana versions. Use this option only if you encounter issues with imported saved objects. NOTE: This option cannot be used with the `createNewCopies` option.\n"
           },
           {
             "in": "query",
@@ -183,6 +255,15 @@
             },
             "required": false,
             "description": "Overwrites saved objects when they already exist. When used, potential conflict errors are automatically resolved by overwriting the destination object. NOTE: This option cannot be used with the `createNewCopies` option.\n"
+          },
+          {
+            "in": "query",
+            "name": "compatibilityMode",
+            "schema": {
+              "type": "boolean"
+            },
+            "required": false,
+            "description": "Applies various adjustments to the saved objects that are being imported to maintain compatibility between different Kibana versions. Use this option only if you encounter issues with imported saved objects. NOTE: This option cannot be used with the `createNewCopies` option.\n"
           }
         ],
         "requestBody": {
@@ -191,7 +272,16 @@
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "description": "A file exported using the export API. NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be included in this file. Similarly, the `savedObjects.maxImportPayloadBytes` setting limits the overall size of the file that can be imported.\n"
+                "properties": {
+                  "file": {
+                    "description": "A file exported using the export API. NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be included in this file. Similarly, the `savedObjects.maxImportPayloadBytes` setting limits the overall size of the file that can be imported.\n"
+                  }
+                }
+              },
+              "examples": {
+                "importObjectsRequest": {
+                  "$ref": "#/components/examples/import_objects_request"
+                }
               }
             }
           }
@@ -204,10 +294,6 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "errors": {
-                      "type": "array",
-                      "description": "Indicates the import was unsuccessful and specifies the objects that failed to import. One object may result in multiple errors, which requires separate steps to resolve. For instance, a `missing_references` error and conflict error.\n"
-                    },
                     "success": {
                       "type": "boolean",
                       "description": "Indicates when the import was successfully completed. When set to false, some objects may not have been created. For additional information, refer to the `errors` and `successResults` properties.\n"
@@ -216,15 +302,19 @@
                       "type": "integer",
                       "description": "Indicates the number of successfully imported records."
                     },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      },
+                      "description": "Indicates the import was unsuccessful and specifies the objects that failed to import.\n\nNOTE: One object may result in multiple errors, which requires separate steps to resolve. For instance, a `missing_references` error and conflict error.\n"
+                    },
                     "successResults": {
                       "type": "array",
                       "items": {
                         "type": "object"
                       },
-                      "description": "Indicates the objects that are successfully imported, with any metadata if applicable. Objects are created only when all resolvable errors are addressed, including conflicts and missing references. If objects are created as new copies, each entry in the `successResults` array includes a `destinationId` attribute.\n"
-                    },
-                    "warnings": {
-                      "type": "array"
+                      "description": "Indicates the objects that are successfully imported, with any metadata if applicable.\n\nNOTE: Objects are created only when all resolvable errors are addressed, including conflicts and missing references. If objects are created as new copies, each entry in the `successResults` array includes a `destinationId` attribute.\n"
                     }
                   }
                 },
@@ -264,35 +354,104 @@
       "post": {
         "summary": "Resolve errors from the Import objects API.",
         "operationId": "resolveImportErrors",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. To resolve errors, you can: * Retry certain saved objects * Overwrite specific saved objects * Change references to different saved objects NOTE: One object can result in multiple errors, which requires separate steps to resolve. For instance, a missing_references error and a conflict error. Objects are only created when all resolvable errors are addressed.\n",
+        "description": "To resolve errors, you can: \n\n* Retry certain saved objects\n* Overwrite specific saved objects\n* Change references to different saved objects\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "saved objects"
         ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "in": "query",
+            "name": "compatibilityMode",
+            "schema": {
+              "type": "boolean"
+            },
+            "required": false,
+            "description": "Applies various adjustments to the saved objects that are being imported to maintain compatibility between different Kibana versions. When enabled during the initial import, also enable when resolving import errors. This option cannot be used with the `createNewCopies` option.\n"
+          },
+          {
+            "in": "query",
+            "name": "createNewCopies",
+            "schema": {
+              "type": "boolean"
+            },
+            "required": false,
+            "description": "Creates copies of the saved objects, regenerates each object ID, and resets the origin. When enabled during the initial import, also enable when resolving import errors.\n"
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "type": "array",
+                "type": "object",
+                "required": [
+                  "retries"
+                ],
                 "properties": {
-                  "compatibilityMode": {
-                    "description": "Applies various adjustments to the saved objects that are being imported to maintain compatibility between different Kibana versions. When enabled during the initial import, also enable when resolving import errors. This option cannot be used with the `createNewCopies` option.",
-                    "type": "array"
+                  "file": {
+                    "description": "The same file given to the import API.",
+                    "type": "string",
+                    "format": "binary"
                   },
-                  "createNewCopies": {
-                    "description": "Creates copies of the saved objects, regenerates each object ID, and resets the origin. When enabled during the initial import, also enable when resolving import errors.",
-                    "type": "array"
+                  "retries": {
+                    "description": "The retry operations, which can specify how to resolve different types of errors.",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "type",
+                        "id"
+                      ],
+                      "properties": {
+                        "type": {
+                          "description": "The saved object type.",
+                          "type": "string"
+                        },
+                        "id": {
+                          "description": "The saved object ID.",
+                          "type": "string"
+                        },
+                        "overwrite": {
+                          "description": "When set to `true`, the source object overwrites the conflicting destination object. When set to `false`, does nothing.",
+                          "type": "boolean"
+                        },
+                        "destinationId": {
+                          "description": "Specifies the destination ID that the imported object should have, if different from the current ID.",
+                          "type": "string"
+                        },
+                        "replaceReferences": {
+                          "description": "A list of `type`, `from`, and `to` used to change the object references.",
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string"
+                              },
+                              "from": {
+                                "type": "string"
+                              },
+                              "to": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "ignoreMissingReferences": {
+                          "description": "When set to `true`, ignores missing reference errors. When set to `false`, does nothing.",
+                          "type": "boolean"
+                        }
+                      }
+                    }
                   }
                 }
               },
               "examples": {
                 "resolveImportErrorsRequest": {
-                  "$ref": "#/components/examples/resolve_missing_reference"
+                  "$ref": "#/components/examples/resolve_missing_reference_request"
                 }
               }
             }
@@ -304,82 +463,37 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request.",
-            "content": {
-              "application/json": {
-                "schema": {
                   "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
-        }
-      ]
-    },
-    "/api/encrypted_saved_objects/_rotate_key": {
-      "post": {
-        "summary": "Rotate the encryption key for encrypted saved objects.",
-        "operationId": "rotateEncryptionKey",
-        "description": "Superuser role required. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. NOTE: In most cases, total will be greater than successful even if failed is zero. The reason is that Kibana may not need or may not be able to rotate encryption keys for all encrypted saved objects. \n",
-        "tags": [
-          "saved objects"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/kbn_xsrf"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "batch_size": {
-                    "description": "Specifies a maximum number of saved objects that Kibana can process in a single batch. Bulk key rotation is an iterative process since Kibana may not be able to fetch and process all required saved objects in one go and splits processing into consequent batches. By default, the batch size is 10000, which is also a maximum allowed value.",
-                    "type": "number",
-                    "default": 10000
-                  },
-                  "type": {
-                    "description": "Limits encryption key rotation only to the saved objects with the specified type. By default, Kibana tries to rotate the encryption key for all saved object types that may contain encrypted attributes.",
-                    "type": "string"
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Indicates a successful import. When set to `false`, some objects may not have been created. For additional information, refer to the `errors` and `successResults` properties.\n"
+                    },
+                    "successCount": {
+                      "type": "number",
+                      "description": "Indicates the number of successfully resolved records.\n"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "description": "Specifies the objects that failed to resolve.\n\nNOTE: One object can result in multiple errors, which requires separate steps to resolve. For instance, a `missing_references` error and a `conflict` error.\n",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "successResults": {
+                      "type": "array",
+                      "description": "Indicates the objects that are successfully imported, with any metadata if applicable.\n\nNOTE: Objects are only created when all resolvable errors are addressed, including conflict and missing references.\n",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "resolveImportErrorsResponse": {
+                    "$ref": "#/components/examples/resolve_missing_reference_response"
                   }
                 }
-              },
-              "examples": {
-                "rotateEncryptionKeyRequest": {
-                  "$ref": "#/components/examples/key_rotation_request"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
               }
             }
           },
@@ -390,16 +504,6 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": true
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Already in progress.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
                 }
               }
             }
@@ -430,25 +534,22 @@
         "name": "ApiKey"
       }
     },
-    "parameters": {
-      "kbn_xsrf": {
-        "schema": {
-          "type": "string"
-        },
-        "in": "header",
-        "name": "kbn-xsrf",
-        "description": "Cross-site request forgery protection",
-        "required": true
-      }
-    },
     "examples": {
+      "key_rotation_response": {
+        "summary": "Encryption key rotation using default parameters.",
+        "value": {
+          "total": 1000,
+          "successful": 300,
+          "failed": 0
+        }
+      },
       "export_objects_request": {
         "summary": "Export a specific saved object.",
         "value": {
           "objects": [
             {
-              "type": "index-pattern",
-              "id": "90943e30-9a47-11e8-b64d-95841ca0b247"
+              "type": "dashboard",
+              "id": "be3733a0-9efe-11e7-acb3-3dab96693fab7"
             }
           ],
           "includeReferencesDeep": false
@@ -458,12 +559,16 @@
         "summary": "The export objects API response contains a JSON record for each exported object and an export result details record.",
         "value": "{\"attributes\":{\"fieldFormatMap\":\"{\\\"hour_of_day\\\":{}}\",\"name\":\"Kibana Sample Data Logs\",\"runtimeFieldMap\":\"{\\\"hour_of_day\\\":{\\\"type\\\":\\\"long\\\",\\\"script\\\":{\\\"source\\\":\\\"emit(doc['timestamp'].value.getHour());\\\"}}}\",\"timeFieldName\":\"timestamp\",\"title\":\"kibana_sample_data_logs\"},\"coreMigrationVersion\":\"8.8.0\",\"created_at\":\"2023-07-25T19:36:36.695Z\",\"id\":\"90943e30-9a47-11e8-b64d-95841ca0b247\",\"managed\":false,\"references\":[],\"type\":\"index-pattern\",\"typeMigrationVersion\":\"8.0.0\",\"updated_at\":\"2023-07-25T19:36:36.695Z\",\"version\":\"WzM5LDJd\"}\n{\"excludedObjects\":[],\"excludedObjectsCount\":0,\"exportedCount\":1,\"missingRefCount\":0,\"missingReferences\":[]}\n"
       },
+      "import_objects_request": {
+        "value": {
+          "file": "file.ndjson"
+        }
+      },
       "import_objects_response": {
         "summary": "The import objects API response indicates a successful import and the objects are created. Since these objects are created as new copies, each entry in the successResults array includes a destinationId attribute.",
         "value": {
           "successCount": 1,
           "success": true,
-          "warnings": [],
           "successResults": [
             {
               "type": "index-pattern",
@@ -478,7 +583,35 @@
           ]
         }
       },
-      "resolve_missing_reference": {
+      "resolve_missing_reference_request": {
+        "value": {
+          "file": "file.ndjson",
+          "retries": [
+            {
+              "type": "index-pattern",
+              "id": "my-pattern",
+              "overwrite": true
+            },
+            {
+              "type": "visualization",
+              "id": "my-vis",
+              "overwrite": true,
+              "destinationId": "another-vis"
+            },
+            {
+              "type": "canvas",
+              "id": "my-canvas",
+              "overwrite": true,
+              "destinationId": "yet-another-canvas"
+            },
+            {
+              "type": "dashboard",
+              "id": "my-dashboard"
+            }
+          ]
+        }
+      },
+      "resolve_missing_reference_response": {
         "summary": "Resolve missing reference errors.",
         "value": {
           "success": true,
@@ -510,14 +643,17 @@
             }
           ]
         }
-      },
-      "key_rotation_request": {
-        "summary": "Encryption key rotation using default parameters.",
-        "value": {
-          "total": 1000,
-          "successful": 300,
-          "failed": 0
-        }
+      }
+    },
+    "parameters": {
+      "kbn_xsrf": {
+        "schema": {
+          "type": "string"
+        },
+        "in": "header",
+        "name": "kbn-xsrf",
+        "description": "Cross-site request forgery protection",
+        "required": true
       }
     }
   }

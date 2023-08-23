@@ -3,8 +3,8 @@ value:
   {
     "objects": [
       {
-        "type": "index-pattern",
-        "id": "90943e30-9a47-11e8-b64d-95841ca0b247"
+        "type": "dashboard",
+        "id": "be3733a0-9efe-11e7-acb3-3dab96693fab7"
         }
     ],
     "includeReferencesDeep": false
