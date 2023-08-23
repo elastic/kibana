@@ -5545,13 +5545,10 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.AlertingConnectorFeature.name",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5559,13 +5556,10 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.AlertingConnectorFeature.compatibility",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "compatibility",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5598,13 +5592,10 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.CasesConnectorFeature.name",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5612,13 +5603,10 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.CasesConnectorFeature.compatibility",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "compatibility",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5724,13 +5712,10 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.GeneralFeature.name",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5738,13 +5723,10 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.GeneralFeature.compatibility",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "compatibility",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5792,13 +5774,10 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.SecuritySolutionFeature.name",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5806,13 +5785,10 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.SecuritySolutionFeature.compatibility",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "compatibility",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5845,13 +5821,10 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.UptimeConnectorFeature.name",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5859,13 +5832,10 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.UptimeConnectorFeature.compatibility",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "compatibility",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "trackAdoption": false
