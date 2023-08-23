@@ -10,7 +10,7 @@ import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
 import { Observable } from 'rxjs';
-import { ILicenseState } from '../lib';
+import { GetAlertIndicesAlias, ILicenseState } from '../lib';
 import { defineLegacyRoutes } from './legacy';
 import { AlertingRequestHandlerContext } from '../types';
 import { createRuleRoute } from './rule/apis/create';
@@ -57,20 +57,29 @@ import { findMaintenanceWindowsRoute } from './maintenance_window/find_maintenan
 import { archiveMaintenanceWindowRoute } from './maintenance_window/archive_maintenance_window';
 import { finishMaintenanceWindowRoute } from './maintenance_window/finish_maintenance_window';
 import { activeMaintenanceWindowsRoute } from './maintenance_window/active_maintenance_windows';
-import { registerValueSuggestionsRoute } from './suggestions/values_suggestion_rules';
+import { registerRulesValueSuggestionsRoute } from './suggestions/values_suggestion_rules';
 import { registerFieldsRoute } from './suggestions/fields_rules';
 import { bulkGetMaintenanceWindowRoute } from './maintenance_window/bulk_get_maintenance_windows';
+import { registerAlertsValueSuggestionsRoute } from './suggestions/values_suggestion_alerts';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
   licenseState: ILicenseState;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  getAlertIndicesAlias?: GetAlertIndicesAlias;
   usageCounter?: UsageCounter;
   config$?: Observable<ConfigSchema>;
 }
 
 export function defineRoutes(opts: RouteOptions) {
-  const { router, licenseState, encryptedSavedObjects, usageCounter, config$ } = opts;
+  const {
+    router,
+    licenseState,
+    encryptedSavedObjects,
+    usageCounter,
+    config$,
+    getAlertIndicesAlias,
+  } = opts;
 
   defineLegacyRoutes(opts);
   createRuleRoute(opts);
@@ -117,7 +126,8 @@ export function defineRoutes(opts: RouteOptions) {
   archiveMaintenanceWindowRoute(router, licenseState);
   finishMaintenanceWindowRoute(router, licenseState);
   activeMaintenanceWindowsRoute(router, licenseState);
-  registerValueSuggestionsRoute(router, licenseState, config$!);
+  registerAlertsValueSuggestionsRoute(router, licenseState, config$!, getAlertIndicesAlias);
+  registerRulesValueSuggestionsRoute(router, licenseState, config$!);
   registerFieldsRoute(router, licenseState);
   bulkGetMaintenanceWindowRoute(router, licenseState);
   getScheduleFrequencyRoute(router, licenseState);

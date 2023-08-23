@@ -38,7 +38,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.getNoMetricsIndicesPrompt();
       });
 
-      it('renders the correct error page title', async () => {
+      // Unskip once asset details error handling has been implemented
+      it.skip('renders the correct error page title', async () => {
         await pageObjects.common.navigateToUrlWithBrowserHistory(
           'infraOps',
           '/detail/host/test',
@@ -55,7 +56,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with metrics present', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/164164
+    describe.skip('with metrics present', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.common.navigateToApp('infraOps');
