@@ -611,7 +611,21 @@ class AgentPolicyService {
       );
     }
 
-    // Get updated agent policy
+    // Tamper protection is dependent on endpoint package policy
+    // Match tamper protection setting to the original policy
+    await this._update(
+      soClient,
+      esClient,
+      newAgentPolicy.id,
+      { is_protected: baseAgentPolicy.is_protected },
+      options?.user,
+      {
+        bumpRevision: false,
+        removeProtection: false,
+      }
+    );
+
+    // Get updated agent policy with package policies and adjusted tamper protection
     const updatedAgentPolicy = await this.get(soClient, newAgentPolicy.id, true);
     if (!updatedAgentPolicy) {
       throw new Error('Copied agent policy not found');
