@@ -25,6 +25,7 @@ import {
   getRuleForSignalTesting,
   countDownTest,
   waitFor,
+  routeWithNamespace,
 } from '../../../utils';
 
 const sanitizeScore = (score: Partial<RiskScore>): Partial<RiskScore> => {
@@ -55,7 +56,15 @@ export const buildDocument = (body: object, id?: string) => {
 };
 
 export const createAndSyncRuleAndAlertsFactory =
-  ({ supertest, log }: { supertest: SuperTest.SuperTest<SuperTest.Test>; log: ToolingLog }) =>
+  ({
+    supertest,
+    log,
+    namespace,
+  }: {
+    supertest: SuperTest.SuperTest<SuperTest.Test>;
+    log: ToolingLog;
+    namespace?: string;
+  }) =>
   async ({
     alerts = 1,
     riskScore = 21,
@@ -70,21 +79,26 @@ export const createAndSyncRuleAndAlertsFactory =
     riskScoreOverride?: string;
   }): Promise<void> => {
     const rule = getRuleForSignalTesting(['ecs_compliant']);
-    const { id } = await createRule(supertest, log, {
-      ...rule,
-      risk_score: riskScore,
-      query,
-      max_signals: maxSignals,
-      ...(riskScoreOverride
-        ? {
-            risk_score_mapping: [
-              { field: riskScoreOverride, operator: 'equals', value: '', risk_score: undefined },
-            ],
-          }
-        : {}),
-    });
-    await waitForRuleSuccess({ supertest, log, id });
-    await waitForSignalsToBePresent(supertest, log, alerts, [id]);
+    const { id } = await createRule(
+      supertest,
+      log,
+      {
+        ...rule,
+        risk_score: riskScore,
+        query,
+        max_signals: maxSignals,
+        ...(riskScoreOverride
+          ? {
+              risk_score_mapping: [
+                { field: riskScoreOverride, operator: 'equals', value: '', risk_score: undefined },
+              ],
+            }
+          : {}),
+      },
+      namespace
+    );
+    await waitForRuleSuccess({ supertest, log, id, namespace });
+    await waitForSignalsToBePresent(supertest, log, alerts, [id], namespace);
   };
 
 /**
@@ -365,16 +379,35 @@ export const createLegacyTransforms = async ({ es }: { es: Client }): Promise<vo
   await Promise.all(transforms);
 };
 
-export const riskEngineRouteHelpersFactory = (supertest: SuperTest.SuperTest<SuperTest.Test>) => ({
+export const riskEngineRouteHelpersFactory = (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  namespace?: string
+) => ({
   init: async () =>
-    await supertest.post(RISK_ENGINE_INIT_URL).set('kbn-xsrf', 'true').send().expect(200),
+    await supertest
+      .post(routeWithNamespace(RISK_ENGINE_INIT_URL, namespace))
+      .set('kbn-xsrf', 'true')
+      .send()
+      .expect(200),
 
   getStatus: async () =>
-    await supertest.get(RISK_ENGINE_STATUS_URL).set('kbn-xsrf', 'true').send().expect(200),
+    await supertest
+      .get(routeWithNamespace(RISK_ENGINE_STATUS_URL, namespace))
+      .set('kbn-xsrf', 'true')
+      .send()
+      .expect(200),
 
   enable: async () =>
-    await supertest.post(RISK_ENGINE_ENABLE_URL).set('kbn-xsrf', 'true').send().expect(200),
+    await supertest
+      .post(routeWithNamespace(RISK_ENGINE_ENABLE_URL, namespace))
+      .set('kbn-xsrf', 'true')
+      .send()
+      .expect(200),
 
   disable: async () =>
-    await supertest.post(RISK_ENGINE_DISABLE_URL).set('kbn-xsrf', 'true').send().expect(200),
+    await supertest
+      .post(routeWithNamespace(RISK_ENGINE_DISABLE_URL, namespace))
+      .set('kbn-xsrf', 'true')
+      .send()
+      .expect(200),
 });

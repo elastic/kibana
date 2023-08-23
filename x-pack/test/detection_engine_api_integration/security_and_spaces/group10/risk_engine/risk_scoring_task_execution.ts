@@ -221,6 +221,73 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(scoredIdentifiers.includes('user.name')).to.be(true);
         });
       });
+
+      describe('with alerts in a non-default space', () => {
+        let namespace: string;
+        let index: string[];
+        let documentId: string;
+        let createAndSyncRuleAndAlertsForOtherSpace: ReturnType<
+          typeof createAndSyncRuleAndAlertsFactory
+        >;
+
+        beforeEach(async () => {
+          documentId = uuidv4();
+          namespace = uuidv4();
+          index = [`risk-score.risk-score-${namespace}`];
+
+          createAndSyncRuleAndAlertsForOtherSpace = createAndSyncRuleAndAlertsFactory({
+            supertest,
+            log,
+            namespace,
+          });
+          const riskEngineRoutesForNamespace = riskEngineRouteHelpersFactory(supertest, namespace);
+
+          const spaces = getService('spaces');
+          await spaces.create({
+            id: namespace,
+            name: namespace,
+            disabledFeatures: [],
+          });
+
+          const baseEvent = buildDocument({ host: { name: 'host-1' } }, documentId);
+          await indexListOfDocuments(
+            Array(10)
+              .fill(baseEvent)
+              .map((_baseEvent, _index) => ({
+                ..._baseEvent,
+                'host.name': `host-${_index}`,
+              }))
+          );
+
+          await createAndSyncRuleAndAlertsForOtherSpace({
+            query: `id: ${documentId}`,
+            alerts: 10,
+            riskScore: 40,
+          });
+
+          await riskEngineRoutesForNamespace.init();
+        });
+
+        afterEach(async () => {
+          await getService('spaces').delete(namespace);
+        });
+
+        it('calculates and persists risk scores for alert documents', async () => {
+          await waitForRiskScoresToBePresent({
+            es,
+            log,
+            scoreCount: 10,
+            index,
+          });
+
+          const scores = await readRiskScores(es, index);
+          expect(normalizeScores(scores).map(({ id_value: idValue }) => idValue)).to.eql(
+            Array(10)
+              .fill(0)
+              .map((_, _index) => `host-${_index}`)
+          );
+        });
+      });
     });
   });
 };

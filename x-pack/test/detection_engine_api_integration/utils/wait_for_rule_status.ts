@@ -10,11 +10,13 @@ import type SuperTest from 'supertest';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { waitFor } from './wait_for';
+import { routeWithNamespace } from './route_with_namespace';
 
 interface WaitForRuleStatusBaseParams {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   log: ToolingLog;
   afterDate?: Date;
+  namespace?: string;
 }
 
 interface WaitForRuleStatusWithId extends WaitForRuleStatusBaseParams {
@@ -38,16 +40,13 @@ export type WaitForRuleStatusParams = WaitForRuleStatusWithId | WaitForRuleStatu
  */
 export const waitForRuleStatus = async (
   expectedStatus: RuleExecutionStatus,
-  { supertest, log, afterDate, ...idOrRuleId }: WaitForRuleStatusParams
+  { supertest, log, afterDate, namespace, ...idOrRuleId }: WaitForRuleStatusParams
 ): Promise<void> => {
   await waitFor(
     async () => {
       const query = 'id' in idOrRuleId ? { id: idOrRuleId.id } : { rule_id: idOrRuleId.ruleId };
-      const response = await supertest
-        .get(DETECTION_ENGINE_RULES_URL)
-        .set('kbn-xsrf', 'true')
-        .query(query)
-        .expect(200);
+      const route = routeWithNamespace(DETECTION_ENGINE_RULES_URL, namespace);
+      const response = await supertest.get(route).set('kbn-xsrf', 'true').query(query).expect(200);
 
       // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
       const rule = response.body;
