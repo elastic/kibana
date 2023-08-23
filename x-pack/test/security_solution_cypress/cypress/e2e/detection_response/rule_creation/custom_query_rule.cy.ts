@@ -116,7 +116,8 @@ import { enablesRule, getDetails } from '../../../tasks/rule_details';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Custom query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+// Test flake
+describe.only('Custom query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
   });
