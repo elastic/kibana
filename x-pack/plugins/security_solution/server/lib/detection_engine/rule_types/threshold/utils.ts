@@ -93,4 +93,4 @@ export const searchResultHasAggs = <
   T extends ThresholdSingleBucketAggregationResult | ThresholdMultiBucketAggregationResult
 >(
   obj: SignalSearchResponse<Record<estypes.AggregateName, estypes.AggregationsAggregate>>
-): obj is T => (obj as T).aggregations != null;
+): obj is T => obj?.aggregations != null;

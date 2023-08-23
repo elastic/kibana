@@ -148,7 +148,12 @@ export const findThresholdSignals = async ({
     searchAfterResults.searchDurations.push(searchDuration);
     searchAfterResults.searchErrors.push(...searchErrors);
 
-    if (searchResultHasAggs<ThresholdSingleBucketAggregationResult>(searchResult)) {
+    if (
+      !searchResultHasAggs<ThresholdSingleBucketAggregationResult>(searchResult) &&
+      isEmpty(searchErrors)
+    ) {
+      throw new Error('Aggregations were missing on threshold rule search result');
+    } else if (searchResultHasAggs<ThresholdSingleBucketAggregationResult>(searchResult)) {
       const docCount = searchResult.hits.total.value;
       if (
         docCount >= threshold.value &&
@@ -166,11 +171,6 @@ export const findThresholdSignals = async ({
             : {}),
         });
       }
-    } else if (
-      !searchResultHasAggs<ThresholdSingleBucketAggregationResult>(searchResult) &&
-      isEmpty(searchErrors)
-    ) {
-      throw new Error('Aggregations were missing on threshold rule search result');
     }
   }
 
