@@ -419,7 +419,10 @@ export class ConsolePageObject extends FtrService {
 
   public async pressCtrlSpace() {
     const textArea = await this.testSubjects.find('console-textarea');
-    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], Key.SPACE]);
+    await textArea.pressKeys([
+      Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+      Key.SPACE,
+    ]);
   }
 
   public async clickContextMenu() {
