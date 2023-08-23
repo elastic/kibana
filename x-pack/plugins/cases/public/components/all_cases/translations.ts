@@ -32,7 +32,7 @@ export const SHOWING_SELECTED_CASES = (totalRules: number) =>
   });
 
 export const SHOWING_CASES = (totalRules: number, pageSize: number) =>
-  i18n.translate('xpack.cases.caseTable.showingCases', {
+  i18n.translate('xpack.cases.caseTable.showingCasesTitle', {
     values: { totalRules, pageSize },
     defaultMessage:
       'Showing {pageSize} of {totalRules} {totalRules, plural, =1 {case} other {cases}}',
