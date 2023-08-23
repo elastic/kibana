@@ -219,7 +219,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns same crashes', () => {
         const { value, timeseries } = response.currentPeriod.crashRate;
         const timeseriesMean = meanBy(
-          timeseries.filter((bucket) => bucket.y === 0),
+          timeseries.filter((bucket) => bucket.y !== 0),
           'y'
         );
         expect(value).to.be(timeseriesMean);
