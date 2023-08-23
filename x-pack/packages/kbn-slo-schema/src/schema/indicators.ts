@@ -125,13 +125,17 @@ const histogramMetricDef = t.union([
 const histogramIndicatorTypeSchema = t.literal('sli.histogram.custom');
 const histogramIndicatorSchema = t.type({
   type: histogramIndicatorTypeSchema,
-  params: t.type({
-    index: t.string,
-    timestampField: t.string,
-    filter: t.string,
-    good: histogramMetricDef,
-    total: histogramMetricDef,
-  }),
+  params: t.intersection([
+    t.type({
+      index: t.string,
+      timestampField: t.string,
+      good: histogramMetricDef,
+      total: histogramMetricDef,
+    }),
+    t.partial({
+      filter: t.string,
+    }),
+  ]),
 });
 
 const indicatorDataSchema = t.type({
