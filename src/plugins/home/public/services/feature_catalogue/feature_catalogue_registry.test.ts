@@ -114,6 +114,37 @@ describe('FeatureCatalogueRegistry', () => {
     });
   });
 
+  describe('reactivity', () => {
+    const DASHBOARD_FEATURE_2: FeatureCatalogueEntry = {
+      ...DASHBOARD_FEATURE,
+      id: 'dashboard_2',
+    };
+
+    test('addition of catalogue entry after start()', async () => {
+      const service = new FeatureCatalogueRegistry();
+      const catalogue = service.setup();
+      const capabilities = { catalogue: { dashboard: true } } as any;
+      service.start({ capabilities });
+      catalogue.register(DASHBOARD_FEATURE);
+      catalogue.register(DASHBOARD_FEATURE_2);
+      expect(await firstValueFrom(service.getFeatures$())).toEqual([
+        DASHBOARD_FEATURE,
+        DASHBOARD_FEATURE_2,
+      ]);
+    });
+
+    test('removal of catalogue entry after start()', async () => {
+      const service = new FeatureCatalogueRegistry();
+      const catalogue = service.setup();
+      catalogue.register(DASHBOARD_FEATURE);
+      catalogue.register(DASHBOARD_FEATURE_2);
+      const capabilities = { catalogue: { dashboard: true } } as any;
+      service.start({ capabilities });
+      service.removeFeature('dashboard');
+      expect(await firstValueFrom(service.getFeatures$())).toEqual([DASHBOARD_FEATURE_2]);
+    });
+  });
+
   describe('title sorting', () => {
     test('sorts by title ascending', async () => {
       const service = new FeatureCatalogueRegistry();
