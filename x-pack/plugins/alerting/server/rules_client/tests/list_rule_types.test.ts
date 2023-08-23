@@ -67,6 +67,8 @@ describe('listRuleTypes', () => {
     name: 'alertingAlertType',
     producer: 'alerts',
     enabledInLicense: true,
+    hasAlertsMappings: false,
+    hasFieldsForAAD: false,
   };
   const myAppAlertType: RegistryRuleType = {
     actionGroups: [],
@@ -79,6 +81,8 @@ describe('listRuleTypes', () => {
     name: 'myAppAlertType',
     producer: 'myApp',
     enabledInLicense: true,
+    hasAlertsMappings: false,
+    hasFieldsForAAD: false,
   };
   const setOfAlertTypes = new Set([myAppAlertType, alertingAlertType]);
 
@@ -121,6 +125,8 @@ describe('listRuleTypes', () => {
         name: 'myType',
         producer: 'myApp',
         enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
       },
       {
         id: 'myOtherType',
@@ -132,6 +138,8 @@ describe('listRuleTypes', () => {
         recoveryActionGroup: RecoveredActionGroup,
         producer: 'alerts',
         enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
       },
     ]);
     beforeEach(() => {
@@ -153,6 +161,8 @@ describe('listRuleTypes', () => {
             myApp: { read: true, all: true },
           },
           enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
         },
       ]);
       authorization.filterByRuleTypeAuthorization.mockResolvedValue(authorizedTypes);
