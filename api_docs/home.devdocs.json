@@ -201,7 +201,7 @@
           "\nConvert instruction variant id into display text.\n"
         ],
         "signature": [
-          "(id: \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\" | \"OPEN_TELEMETRY\" | \"OTHER_LINUX\") => any"
+          "(id: \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\" | \"OPEN_TELEMETRY\" | \"OTHER_LINUX\") => string"
         ],
         "path": "src/plugins/home/common/instruction_variant.ts",
         "deprecated": false,

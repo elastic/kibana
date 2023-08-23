@@ -10,9 +10,9 @@ import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetActiveSpaceApi(deps: InternalRouteDeps) {
-  const { internalRouter, getSpacesService } = deps;
+  const { router, getSpacesService } = deps;
 
-  internalRouter.get(
+  router.get(
     {
       path: '/internal/spaces/_active_space',
       validate: false,

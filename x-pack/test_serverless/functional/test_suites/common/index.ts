@@ -18,5 +18,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./index_management'));
     loadTestFile(require.resolve('./ingest_pipelines'));
+
+    // Data View Management
+    loadTestFile(require.resolve('./data_view_mgmt'));
   });
 }
