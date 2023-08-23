@@ -77,10 +77,12 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
      */
     const showBulkActions = (permissions.update || permissions.delete) && selectedCases.length > 0;
 
-    const visibleCases = pagination?.pageSize && totalCases > pagination.pageSize ? pagination.pageSize : totalCases;
+    const visibleCases =
+      pagination?.pageSize && totalCases > pagination.pageSize ? pagination.pageSize : totalCases;
 
     const hasReachedMaxCases =
-    pagination.pageSize && totalCases >= MAX_DOCS_PER_PAGE &&
+      pagination.pageSize &&
+      totalCases >= MAX_DOCS_PER_PAGE &&
       pagination.pageSize * (pagination.pageIndex + 1) >= MAX_DOCS_PER_PAGE;
 
     const isDoNotShowAgainSelected = localStorageWarning && localStorageWarning === true;
