@@ -18,6 +18,7 @@ import {
   INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID,
   INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID,
   INSIGHTS_CORRELATIONS_RELATED_CASES_TEST_ID,
+  INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
   INSIGHTS_CORRELATIONS_TEST_ID,
   SUMMARY_ROW_VALUE_TEST_ID,
 } from './test_ids';
@@ -35,6 +36,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../shared/components/test_ids';
+import { mockGetFieldsData } from '../mocks/mock_context';
 
 jest.mock('../../shared/hooks/use_show_related_alerts_by_ancestry');
 jest.mock('../../shared/hooks/use_show_related_alerts_by_same_source_event');
@@ -56,6 +58,9 @@ const TITLE_TEXT_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
   INSIGHTS_CORRELATIONS_TEST_ID
 );
 
+const SUPPRESSED_ALERTS_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(
+  INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID
+);
 const RELATED_ALERTS_BY_ANCESTRY_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(
   INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID
 );
@@ -132,11 +137,14 @@ describe('<CorrelationsOverview />', () => {
       dataCount: 1,
     });
 
-    const { getByTestId } = render(renderCorrelationsOverview(panelContextValue));
+    const { getByTestId } = render(
+      renderCorrelationsOverview({ ...panelContextValue, getFieldsData: mockGetFieldsData })
+    );
     expect(getByTestId(RELATED_ALERTS_BY_ANCESTRY_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RELATED_ALERTS_BY_SESSION_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RELATED_CASES_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(SUPPRESSED_ALERTS_TEST_ID)).toBeInTheDocument();
   });
 
   it('should hide rows if show values are false', () => {
@@ -156,6 +164,7 @@ describe('<CorrelationsOverview />', () => {
     expect(queryByTestId(RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(RELATED_ALERTS_BY_SESSION_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(RELATED_CASES_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(SUPPRESSED_ALERTS_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should hide rows if values are null', () => {
@@ -169,6 +178,7 @@ describe('<CorrelationsOverview />', () => {
     expect(queryByTestId(RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(RELATED_ALERTS_BY_SESSION_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(RELATED_CASES_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(SUPPRESSED_ALERTS_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should navigate to the left section Insights tab when clicking on button', () => {
