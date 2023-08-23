@@ -22,6 +22,14 @@ const LayerParamsType = {
   ReferenceLines: 'referenceLines',
 } as const;
 
+const seriesType = {
+  Area: 'area',
+  AreaPercentageStacked: 'area_percentage_stacked',
+  AreaStacked: 'area_stacked',
+} as const;
+
+const TOP_VALUES_TYPE = 'top_values' as const;
+
 const cpuUsage = {
   id: 'cpuUsage',
   title: i18n.translate('xpack.infra.assetDetails.metricsCharts.cpuUsage', {
@@ -57,7 +65,7 @@ const cpuUsageBreakdown = {
         hostLensFormulas.cpuUsageSystem,
       ],
       options: {
-        seriesType: 'area_percentage_stacked' as const,
+        seriesType: seriesType.AreaPercentageStacked,
       },
       type: LayerParamsType.Visualization,
     },
@@ -114,7 +122,7 @@ const memoryUsageBreakdown = {
         },
       ],
       options: {
-        seriesType: 'area_stacked' as const,
+        seriesType: seriesType.AreaStacked,
       },
       type: LayerParamsType.Visualization,
     },
@@ -152,7 +160,7 @@ const loadBreakdown = {
     {
       data: [hostLensFormulas.load1m, hostLensFormulas.load5m, hostLensFormulas.load15m],
       options: {
-        seriesType: 'area' as const,
+        seriesType: seriesType.Area,
       },
       type: LayerParamsType.Visualization,
     },
@@ -203,7 +211,7 @@ const diskSpaceUsageAvailable = {
         },
       ],
       options: {
-        seriesType: 'area' as const,
+        seriesType: seriesType.Area,
       },
       type: LayerParamsType.Visualization,
     },
@@ -231,9 +239,9 @@ const diskSpaceUsageByMountPoint = {
         },
       ],
       options: {
-        seriesType: 'area' as const,
+        seriesType: seriesType.Area,
         breakdown: {
-          type: 'top_values' as const,
+          type: TOP_VALUES_TYPE,
           field: 'system.filesystem.mount_point',
           params: {
             size: 5,
@@ -271,7 +279,7 @@ const diskThroughputReadWrite = {
         },
       ],
       options: {
-        seriesType: 'area' as const,
+        seriesType: seriesType.Area,
       },
       type: LayerParamsType.Visualization,
     },
@@ -304,7 +312,7 @@ const diskIOReadWrite = {
         },
       ],
       options: {
-        seriesType: 'area' as const,
+        seriesType: seriesType.Area,
       },
       type: LayerParamsType.Visualization,
     },
@@ -337,7 +345,7 @@ const rxTx = {
         },
       ],
       options: {
-        seriesType: 'area' as const,
+        seriesType: seriesType.Area,
       },
       type: LayerParamsType.Visualization,
     },
