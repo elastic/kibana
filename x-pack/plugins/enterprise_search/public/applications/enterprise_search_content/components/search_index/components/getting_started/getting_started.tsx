@@ -65,6 +65,7 @@ export const APIGettingStarted = () => {
 
   const codeArgs = {
     apiKey,
+    indexName,
     url: cloudContext.elasticsearchUrl || DEFAULT_URL,
   };
 

@@ -34,5 +34,6 @@ client.bulk(body: documents)`,
   name: i18n.translate('xpack.enterpriseSearch.languages.ruby', {
     defaultMessage: 'Ruby',
   }),
-  testConnection: `client.info`,
+  testConnection: `# API Key should have cluster monitoring rights.
+client.info`,
 };

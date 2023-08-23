@@ -11,8 +11,8 @@ import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { docLinks } from '../../../../../../shared/doc_links';
 
 export const goDefinition: LanguageDefinition = {
-  buildSearchQuery: `searchResp, err := es.Search().
-  Index("books").
+  buildSearchQuery: ({ indexName }) => `searchResp, err := es.Search().
+  Index("${indexName}").
   Q("snow").
   Do(context.Background())
 
@@ -22,8 +22,7 @@ fmt.Println(searchResp, err)`,
   "fmt"
   "log"
   "strings"
-​
-  "github.com/elastic/elasticsearch-serverless-go"
+  "github.com/elastic/go-elasticsearch"
 )
 
 func main() {
@@ -39,8 +38,8 @@ func main() {
   docLink: docLinks.clientsGoIndex,
   iconType: 'go.svg',
   id: Languages.GO,
-  ingestData: `ingestResult, err := es.Bulk().
-  Index("books").
+  ingestData: ({ indexName }) => `ingestResult, err := es.Bulk().
+  Index("${indexName}").
   Raw(strings.NewReader(\`
 {"index":{"_id":"9780553351927"}}
 {"name":"Snow Crash","author":"Neal Stephenson","release_date":"1992-06-01","page_count": 470}

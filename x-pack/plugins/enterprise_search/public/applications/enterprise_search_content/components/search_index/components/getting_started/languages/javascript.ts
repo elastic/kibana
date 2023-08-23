@@ -11,9 +11,9 @@ import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { docLinks } from '../../../../../../shared/doc_links';
 
 export const javascriptDefinition: LanguageDefinition = {
-  buildSearchQuery: `// Let's search!
+  buildSearchQuery: ({ indexName }) => `// Let's search!
 const searchResult = await client.search({
-  index: 'my-index-name',
+  index: '${indexName}',
   q: '9HY9SWR'
 });
 
@@ -29,7 +29,7 @@ const client = new Client({
   docLink: docLinks.clientsJsIntro,
   iconType: 'javascript.svg',
   id: Languages.JAVASCRIPT,
-  ingestData: `// Sample flight data
+  ingestData: ({ indexName }) => `// Sample flight data
 const dataset = [
   {'flight': '9HY9SWR', 'price': 841.2656419677076, 'delayed': false},
   {'flight': 'X98CCZO', 'price': 882.9826615595518, 'delayed': false},
@@ -40,7 +40,7 @@ const dataset = [
 const result = await client.helpers.bulk({
   datasource: dataset,
   onDocument (doc) {
-    return { index: { _index: 'my-index-name' }};
+    return { index: { _index: '${indexName}' }};
   }
 });
 
@@ -62,7 +62,8 @@ console.log(result);
   name: i18n.translate('xpack.enterpriseSearch.languages.javascript', {
     defaultMessage: 'JavaScript',
   }),
-  testConnection: `const resp = await client.info();
+  testConnection: `// API Key should have cluster monitor rights.
+const resp = await client.info();
 
 console.log(resp);
 /**
