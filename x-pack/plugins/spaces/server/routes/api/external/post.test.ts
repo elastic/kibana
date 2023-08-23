@@ -62,7 +62,7 @@ describe('Spaces Public API', () => {
     });
 
     initPostSpacesApi({
-      externalRouter: router,
+      router,
       getStartServices: async () => [coreStart, {}, {}],
       log,
       getSpacesService: () => spacesServiceStart,
