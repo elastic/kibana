@@ -6,10 +6,6 @@
  */
 
 import { Client, errors } from '@elastic/elasticsearch';
-import type {
-  AggregationsAggregate,
-  SearchResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import pRetry from 'p-retry';
 import type { SuperTest, Test } from 'supertest';
@@ -180,58 +176,6 @@ export type ApmAlertFields = ParsedTechnicalFields & {
   'error.grouping_key': string;
   'error.grouping_name': string;
 };
-
-export async function getAlertByRuleId({ es, ruleId }: { es: Client; ruleId: string }) {
-  const response = (await es.search({
-    index: APM_ALERTS_INDEX,
-    body: {
-      query: {
-        term: {
-          'kibana.alert.rule.uuid': ruleId,
-        },
-      },
-    },
-  })) as SearchResponse<ApmAlertFields, Record<string, AggregationsAggregate>>;
-
-  return response.hits.hits.map((hit) => hit._source) as ApmAlertFields[];
-}
-
-export async function getActiveApmAlerts({
-  ruleId,
-  esClient,
-}: {
-  ruleId: string;
-  waitMillis?: number;
-  esClient: Client;
-}): Promise<Record<string, any>> {
-  const searchParams = {
-    index: APM_ALERTS_INDEX,
-    size: 1,
-    query: {
-      bool: {
-        filter: [
-          {
-            term: {
-              'kibana.alert.rule.producer': 'apm',
-            },
-          },
-          {
-            term: {
-              'kibana.alert.status': 'active',
-            },
-          },
-          {
-            term: {
-              'kibana.alert.rule.uuid': ruleId,
-            },
-          },
-        ],
-      },
-    },
-  };
-  const response = await esClient.search(searchParams);
-  return response.hits.hits.map((hit) => hit._source);
-}
 
 const APM_ACTION_VARIABLE_INDEX = 'apm-index-connector-test';
 

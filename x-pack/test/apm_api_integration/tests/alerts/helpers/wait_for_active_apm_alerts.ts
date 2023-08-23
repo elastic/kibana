@@ -7,7 +7,44 @@
 import type { Client } from '@elastic/elasticsearch';
 import pRetry from 'p-retry';
 import { ToolingLog } from '@kbn/tooling-log';
-import { getActiveApmAlerts } from './alerting_api_helper';
+import { APM_ALERTS_INDEX } from './alerting_api_helper';
+
+export async function getActiveApmAlerts({
+  ruleId,
+  esClient,
+}: {
+  ruleId: string;
+  waitMillis?: number;
+  esClient: Client;
+}): Promise<Record<string, any>> {
+  const searchParams = {
+    index: APM_ALERTS_INDEX,
+    size: 1,
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              'kibana.alert.rule.producer': 'apm',
+            },
+          },
+          {
+            term: {
+              'kibana.alert.status': 'active',
+            },
+          },
+          {
+            term: {
+              'kibana.alert.rule.uuid': ruleId,
+            },
+          },
+        ],
+      },
+    },
+  };
+  const response = await esClient.search(searchParams);
+  return response.hits.hits.map((hit) => hit._source);
+}
 
 export function waitForActiveApmAlert({
   ruleId,
