@@ -2,13 +2,11 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/common/util.sh
+source .buildkite/scripts/steps/functional/common.sh
 source .buildkite/scripts/steps/functional/common_cypress.sh
 
-.buildkite/scripts/bootstrap.sh
-node scripts/build_kibana_platform_plugins.js
-
 export JOB=kibana-osquery-cypress
+export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" 'false'
 
