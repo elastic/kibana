@@ -28,15 +28,10 @@ describe('smoke', () => {
   });
   test('it can start Kibana and ES serverless', async () => {
     async function doIt() {
-      console.log('ES STARTING');
       await serverlessES.start();
-      console.log('ES STARTED');
       await serverlessKibana.preboot();
-      console.log('KIBANA PREBOOTED');
       await serverlessKibana.setup();
-      console.log('KIBANA SETUP');
       await serverlessKibana.start();
-      console.log('KIBANA STARTED');
     }
     await expect(doIt()).resolves.toBe(undefined);
     const { body } = await request.get(serverlessKibana, '/api/status').expect(200);
