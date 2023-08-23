@@ -8,8 +8,8 @@
 import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '@kbn/alerting-plugin/common';
 import type { MaintenanceWindowCreateBody } from '@kbn/alerting-plugin/common';
 import type { AsApiContract } from '@kbn/alerting-plugin/server/routes/lib';
+import { cleanKibana, rootRequest } from '../../../../tasks/common';
 import { tag } from '../../../../tags';
-import { cleanKibana } from '../../../../tasks/common';
 import { login, visit } from '../../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
 
@@ -18,7 +18,6 @@ describe('Maintenance window callout on Rule Management page', { tags: [tag.ESS]
 
   before(() => {
     cleanKibana();
-    login();
 
     const body: AsApiContract<MaintenanceWindowCreateBody> = {
       title: 'My maintenance window',
@@ -32,7 +31,7 @@ describe('Maintenance window callout on Rule Management page', { tags: [tag.ESS]
     };
 
     // Create a test maintenance window
-    cy.request({
+    rootRequest<{ id: string }>({
       method: 'POST',
       url: INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
       headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
@@ -44,11 +43,15 @@ describe('Maintenance window callout on Rule Management page', { tags: [tag.ESS]
 
   after(() => {
     // Delete a test maintenance window
-    cy.request({
+    rootRequest({
       method: 'DELETE',
       url: `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/${maintenanceWindowId}`,
       headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     });
+  });
+
+  beforeEach(() => {
+    login();
   });
 
   it('Displays the callout when there are running maintenance windows', () => {

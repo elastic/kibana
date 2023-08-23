@@ -51,6 +51,7 @@ export const LICENSE_ALLOWED = [
   'CC-BY-4.0',
   'Eclipse Distribution License - v 1.0',
   'FreeBSD',
+  'GPL-3.0-or-later',
   'ISC',
   'ISC*',
   'MIT OR GPL-2.0',

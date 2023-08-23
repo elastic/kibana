@@ -51,3 +51,28 @@ steps:
     soft_fail: true
     artifact_paths:
       - "target/kibana-security-solution/**/*"
+
+  - label: 'SorryCypress Security Solution Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    soft_fail: true
+    command: |
+      source .buildkite/scripts/steps/functional/common.sh
+      export PARALLELISM=$(node x-pack/plugins/security_solution/scripts/get_parallelism.js)
+      buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" 'false'
+      buildkite-agent pipeline upload <<YAML
+      steps:
+      - command: .buildkite/scripts/steps/functional/security_solution_cloud.sh
+        label: Security Solution SorryCypress Tests
+        parallelism: $${PARALLELISM:-12}
+        agents:
+          queue: n2-4-spot
+        depends_on: build
+        timeout_in_minutes: 60
+        soft_fail: true
+        artifact_paths:
+          - "target/kibana-security-solution/**/*"
+      YAML
+      exit 0
