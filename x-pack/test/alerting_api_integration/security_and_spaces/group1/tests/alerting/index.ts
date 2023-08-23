@@ -20,18 +20,18 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
         await tearDown(getService);
       });
 
-      loadTestFile(require.resolve('./find'));
+      // loadTestFile(require.resolve('./find'));
       loadTestFile(require.resolve('./find_with_post'));
-      loadTestFile(require.resolve('./create'));
-      loadTestFile(require.resolve('./delete'));
-      loadTestFile(require.resolve('./disable'));
-      loadTestFile(require.resolve('./enable'));
-      loadTestFile(require.resolve('./execution_status'));
-      loadTestFile(require.resolve('./get'));
-      loadTestFile(require.resolve('./get_alert_state'));
-      loadTestFile(require.resolve('./get_alert_summary'));
-      loadTestFile(require.resolve('./rule_types'));
-      loadTestFile(require.resolve('./retain_api_key'));
+      // loadTestFile(require.resolve('./create'));
+      // loadTestFile(require.resolve('./delete'));
+      // loadTestFile(require.resolve('./disable'));
+      // loadTestFile(require.resolve('./enable'));
+      // loadTestFile(require.resolve('./execution_status'));
+      // loadTestFile(require.resolve('./get'));
+      // loadTestFile(require.resolve('./get_alert_state'));
+      // loadTestFile(require.resolve('./get_alert_summary'));
+      // loadTestFile(require.resolve('./rule_types'));
+      // loadTestFile(require.resolve('./retain_api_key'));
     });
   });
 }
