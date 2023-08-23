@@ -27,6 +27,7 @@ import {
   CodeBox,
   LanguageClientPanel,
   InstallClientPanel,
+  getLanguageDefinitionCodeSnippet,
 } from '@kbn/search-api-panels';
 
 import React, { useMemo, useState } from 'react';
@@ -42,7 +43,7 @@ import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
 import './overview.scss';
 import { ApiKeyPanel } from './api_key/api_key';
-import { getCodeSnippet, showTryInConsole } from './languages/utils';
+import { showTryInConsole } from './languages/utils';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] =
@@ -85,7 +86,11 @@ export const ElasticsearchOverview = () => {
 
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
         <InstallClientPanel
-          codeSnippet={getCodeSnippet(selectedLanguage, 'installClient', codeSnippetArguments)}
+          codeSnippet={getLanguageDefinitionCodeSnippet(
+            selectedLanguage,
+            'installClient',
+            codeSnippetArguments
+          )}
           showTryInConsole={showTryInConsole('installClient')}
           languages={languageDefinitions}
           language={selectedLanguage}
@@ -124,7 +129,7 @@ export const ElasticsearchOverview = () => {
           leftPanelContent={
             <CodeBox
               languages={languageDefinitions}
-              codeSnippet={getCodeSnippet(
+              codeSnippet={getLanguageDefinitionCodeSnippet(
                 selectedLanguage,
                 'configureClient',
                 codeSnippetArguments
@@ -180,7 +185,11 @@ export const ElasticsearchOverview = () => {
           leftPanelContent={
             <CodeBox
               languages={languageDefinitions}
-              codeSnippet={getCodeSnippet(selectedLanguage, 'testConnection', codeSnippetArguments)}
+              codeSnippet={getLanguageDefinitionCodeSnippet(
+                selectedLanguage,
+                'testConnection',
+                codeSnippetArguments
+              )}
               showTryInConsole={showTryInConsole('testConnection')}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
@@ -198,7 +207,11 @@ export const ElasticsearchOverview = () => {
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
         <IngestData
-          codeSnippet={getCodeSnippet(selectedLanguage, 'ingestData', codeSnippetArguments)}
+          codeSnippet={getLanguageDefinitionCodeSnippet(
+            selectedLanguage,
+            'ingestData',
+            codeSnippetArguments
+          )}
           showTryInConsole={showTryInConsole('ingestData')}
           languages={languageDefinitions}
           selectedLanguage={selectedLanguage}
@@ -219,7 +232,7 @@ export const ElasticsearchOverview = () => {
           leftPanelContent={
             <CodeBox
               languages={languageDefinitions}
-              codeSnippet={getCodeSnippet(
+              codeSnippet={getLanguageDefinitionCodeSnippet(
                 selectedLanguage,
                 'buildSearchQuery',
                 codeSnippetArguments

@@ -23,7 +23,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@tanstack/react-query';
-import { OverviewPanel, LanguageClientPanel, CodeBox } from '@kbn/search-api-panels';
+import {
+  OverviewPanel,
+  LanguageClientPanel,
+  CodeBox,
+  getLanguageDefinitionCodeSnippet,
+} from '@kbn/search-api-panels';
 import type {
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,
@@ -36,7 +41,7 @@ import { API_KEY_PLACEHOLDER, ELASTICSEARCH_URL_PLACEHOLDER } from '../constants
 import { useKibanaServices } from '../hooks/use_kibana';
 import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
-import { getCodeSnippet, showTryInConsole } from './languages/utils';
+import { showTryInConsole } from './languages/utils';
 
 const NoIndicesContent = () => (
   <>
@@ -211,7 +216,7 @@ export const ElasticsearchIndexingApi = () => {
               <EuiSpacer />
               <CodeBox
                 languages={languageDefinitions}
-                codeSnippet={getCodeSnippet(
+                codeSnippet={getLanguageDefinitionCodeSnippet(
                   selectedLanguage,
                   'ingestDataIndex',
                   codeSnippetArguments
