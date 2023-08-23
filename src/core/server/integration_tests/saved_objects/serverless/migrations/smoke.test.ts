@@ -7,34 +7,30 @@
  */
 
 import {
-  createServerlessES,
-  createServerlessKibana,
+  request,
   TestServerlessESUtils,
   TestServerlessKibanaUtils,
-  request,
+  createTestServerlessInstances,
 } from '@kbn/core-test-helpers-kbn-server';
 
 describe('smoke', () => {
   let serverlessES: TestServerlessESUtils;
   let serverlessKibana: TestServerlessKibanaUtils;
-  jest.setTimeout(600_000);
-  beforeEach(() => {
-    serverlessES = createServerlessES();
-    serverlessKibana = createServerlessKibana();
+  let root: TestServerlessKibanaUtils['root'];
+  beforeEach(async () => {
+    const { startES, startKibana } = createTestServerlessInstances({
+      adjustTimeout: jest.setTimeout,
+    });
+    serverlessES = await startES();
+    serverlessKibana = await startKibana();
+    root = serverlessKibana.root;
   });
   afterEach(async () => {
     await serverlessES?.stop();
-    await serverlessKibana?.shutdown();
+    await serverlessKibana?.stop();
   });
   test('it can start Kibana and ES serverless', async () => {
-    async function doIt() {
-      await serverlessES.start();
-      await serverlessKibana.preboot();
-      await serverlessKibana.setup();
-      await serverlessKibana.start();
-    }
-    await expect(doIt()).resolves.toBe(undefined);
-    const { body } = await request.get(serverlessKibana, '/api/status').expect(200);
+    const { body } = await request.get(root, '/api/status').expect(200);
     expect(body).toMatchObject({ status: { overall: { level: 'available' } } });
   });
 });

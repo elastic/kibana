@@ -12,8 +12,7 @@ export {
   createRoot,
   createRootWithCorePlugins,
   createTestServers,
-  createServerlessES,
-  createServerlessKibana,
+  createTestServerlessInstances,
   request,
 } from './src';
 
