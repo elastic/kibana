@@ -20,7 +20,7 @@ import type { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type { AppFeatures } from '../../../../lib/app_features';
+import type { AppFeaturesService } from '../../../../lib/app_features_service/app_features_service';
 import { AppFeatureKey, type ExperimentalFeatures } from '../../../../../common';
 import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import {
@@ -101,7 +101,7 @@ export interface ManifestManagerContext {
   experimentalFeatures: ExperimentalFeatures;
   packagerTaskPackagePolicyUpdateBatchSize: number;
   esClient: ElasticsearchClient;
-  appFeatures: AppFeatures;
+  appFeaturesService: AppFeaturesService;
 }
 
 const getArtifactIds = (manifest: ManifestSchema) =>
@@ -123,7 +123,7 @@ export class ManifestManager {
   protected cachedExceptionsListsByOs: Map<string, ExceptionListItemSchema[]>;
   protected packagerTaskPackagePolicyUpdateBatchSize: number;
   protected esClient: ElasticsearchClient;
-  protected appFeatures: AppFeatures;
+  protected appFeaturesService: AppFeaturesService;
 
   constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
@@ -137,7 +137,7 @@ export class ManifestManager {
     this.packagerTaskPackagePolicyUpdateBatchSize =
       context.packagerTaskPackagePolicyUpdateBatchSize;
     this.esClient = context.esClient;
-    this.appFeatures = context.appFeatures;
+    this.appFeaturesService = context.appFeaturesService;
   }
 
   /**
@@ -169,9 +169,9 @@ export class ManifestManager {
       let itemsByListId: ExceptionListItemSchema[] = [];
       if (
         (listId === ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID &&
-          this.appFeatures.isEnabled(AppFeatureKey.endpointResponseActions)) ||
+          this.appFeaturesService.isEnabled(AppFeatureKey.endpointResponseActions)) ||
         (listId !== ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID &&
-          this.appFeatures.isEnabled(AppFeatureKey.endpointArtifactManagement))
+          this.appFeaturesService.isEnabled(AppFeatureKey.endpointArtifactManagement))
       ) {
         itemsByListId = await getAllItemsFromEndpointExceptionList({
           elClient,
