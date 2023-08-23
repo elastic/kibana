@@ -106,7 +106,7 @@ const defaulCrawlerConfiguration: CrawlerCustomSchedule = {
   selectedDomainUrls: [],
   selectedEntryPointUrls: [],
   selectedSitemapUrls: [],
-  interval: '* * * * *',
+  interval: '0 0 0 * * ?',
   enabled: false,
   sitemapUrls: [],
   entryPointUrls: [],
