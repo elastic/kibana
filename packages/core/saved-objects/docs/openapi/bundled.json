@@ -33,11 +33,11 @@
     }
   ],
   "paths": {
-    "/api/saved_objects/_export": {
+    "/api/saved_objects/_resolve_import_errors": {
       "post": {
-        "summary": "Retrieve sets of saved objects that you want to import into Kibana.",
-        "operationId": "exportSavedObjects",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.\n",
+        "summary": "Resolve errors from the Import objects API.",
+        "operationId": "resolveImportErrors",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. To resolve errors, you can: * Retry certain saved objects * Overwrite specific saved objects * Change references to different saved objects NOTE: One object can result in multiple errors, which requires separate steps to resolve. For instance, a missing_references error and a conflict error. Objects are only created when all resolvable errors are addressed.\n",
         "tags": [
           "saved objects"
         ],
@@ -51,147 +51,22 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "anyOf": [
-                  {
-                    "required": [
-                      "type"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "objects"
-                    ]
-                  }
-                ],
+                "type": "array",
                 "properties": {
-                  "excludeExportDetails": {
-                    "description": "Do not add export details entry at the end of the stream.",
-                    "type": "boolean",
-                    "default": false
+                  "compatibilityMode": {
+                    "description": "Applies various adjustments to the saved objects that are being imported to maintain compatibility between different Kibana versions. When enabled during the initial import, also enable when resolving import errors. This option cannot be used with the `createNewCopies` option.",
+                    "type": "array"
                   },
-                  "includeReferencesDeep": {
-                    "description": "Includes all of the referenced objects in the exported objects.",
-                    "type": "boolean"
-                  },
-                  "objects": {
-                    "description": "A list of objects to export.",
-                    "type": "array",
-                    "items": {
-                      "type": "object"
-                    }
-                  },
-                  "type": {
-                    "description": "The saved object types to include in the export.",
-                    "oneOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      }
-                    ]
+                  "createNewCopies": {
+                    "description": "Creates copies of the saved objects, regenerates each object ID, and resets the origin. When enabled during the initial import, also enable when resolving import errors.",
+                    "type": "array"
                   }
                 }
               },
               "examples": {
-                "exportSavedObjectsRequest": {
-                  "$ref": "#/components/examples/export_objects_request"
+                "resolveImportErrorsRequest": {
+                  "$ref": "#/components/examples/resolve_missing_reference"
                 }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "multipart/form-data": {
-                "schema": {
-                  "type": "string"
-                },
-                "examples": {
-                  "exportSavedObjectsResponse": {
-                    "$ref": "#/components/examples/export_objects_response"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
-        }
-      ]
-    },
-    "/api/saved_objects/_import": {
-      "post": {
-        "summary": "Create sets of Kibana saved objects from a file created by the export API.",
-        "operationId": "importSavedObjects",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n",
-        "tags": [
-          "saved objects"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/kbn_xsrf"
-          },
-          {
-            "in": "query",
-            "name": "compatibilityMode",
-            "schema": {
-              "type": "boolean"
-            },
-            "required": false,
-            "description": "Applies various adjustments to the saved objects that are being imported to maintain compatibility between different Kibana versions. Use this option only if you encounter issues with imported saved objects. NOTE: This option cannot be used with the `createNewCopies` option.\n"
-          },
-          {
-            "in": "query",
-            "name": "createNewCopies",
-            "schema": {
-              "type": "boolean"
-            },
-            "required": false,
-            "description": "Creates copies of saved objects, regenerates each object ID, and resets the origin. When used, potential conflict errors are avoided. NOTE: This option cannot be used with the `overwrite` and `compatibilityMode` options.\n"
-          },
-          {
-            "in": "query",
-            "name": "overwrite",
-            "schema": {
-              "type": "boolean"
-            },
-            "required": false,
-            "description": "Overwrites saved objects when they already exist. When used, potential conflict errors are automatically resolved by overwriting the destination object. NOTE: This option cannot be used with the `createNewCopies` option.\n"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "description": "A file exported using the export API. NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be included in this file. Similarly, the `savedObjects.maxImportPayloadBytes` setting limits the overall size of the file that can be imported.\n"
               }
             }
           }
@@ -202,36 +77,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "errors": {
-                      "type": "array",
-                      "description": "Indicates the import was unsuccessful and specifies the objects that failed to import. One object may result in multiple errors, which requires separate steps to resolve. For instance, a `missing_references` error and conflict error.\n"
-                    },
-                    "success": {
-                      "type": "boolean",
-                      "description": "Indicates when the import was successfully completed. When set to false, some objects may not have been created. For additional information, refer to the `errors` and `successResults` properties.\n"
-                    },
-                    "successCount": {
-                      "type": "integer",
-                      "description": "Indicates the number of successfully imported records."
-                    },
-                    "successResults": {
-                      "type": "array",
-                      "items": {
-                        "type": "object"
-                      },
-                      "description": "Indicates the objects that are successfully imported, with any metadata if applicable. Objects are created only when all resolvable errors are addressed, including conflicts and missing references. If objects are created as new copies, each entry in the `successResults` array includes a `destinationId` attribute.\n"
-                    },
-                    "warnings": {
-                      "type": "array"
-                    }
-                  }
-                },
-                "examples": {
-                  "importObjectsResponse": {
-                    "$ref": "#/components/examples/import_objects_response"
-                  }
+                  "type": "object"
                 }
               }
             }
@@ -285,38 +131,35 @@
       }
     },
     "examples": {
-      "export_objects_request": {
-        "summary": "Export a specific saved object.",
+      "resolve_missing_reference": {
+        "summary": "Resolve missing reference errors.",
         "value": {
-          "objects": [
-            {
-              "type": "index-pattern",
-              "id": "90943e30-9a47-11e8-b64d-95841ca0b247"
-            }
-          ],
-          "includeReferencesDeep": false
-        }
-      },
-      "export_objects_response": {
-        "summary": "The export objects API response contains a JSON record for each exported object and an export result details record.",
-        "value": "{\"attributes\":{\"fieldFormatMap\":\"{\\\"hour_of_day\\\":{}}\",\"name\":\"Kibana Sample Data Logs\",\"runtimeFieldMap\":\"{\\\"hour_of_day\\\":{\\\"type\\\":\\\"long\\\",\\\"script\\\":{\\\"source\\\":\\\"emit(doc['timestamp'].value.getHour());\\\"}}}\",\"timeFieldName\":\"timestamp\",\"title\":\"kibana_sample_data_logs\"},\"coreMigrationVersion\":\"8.8.0\",\"created_at\":\"2023-07-25T19:36:36.695Z\",\"id\":\"90943e30-9a47-11e8-b64d-95841ca0b247\",\"managed\":false,\"references\":[],\"type\":\"index-pattern\",\"typeMigrationVersion\":\"8.0.0\",\"updated_at\":\"2023-07-25T19:36:36.695Z\",\"version\":\"WzM5LDJd\"}\n{\"excludedObjects\":[],\"excludedObjectsCount\":0,\"exportedCount\":1,\"missingRefCount\":0,\"missingReferences\":[]}\n"
-      },
-      "import_objects_response": {
-        "summary": "The import objects API response indicates a successful import and the objects are created. Since these objects are created as new copies, each entry in the successResults array includes a destinationId attribute.",
-        "value": {
-          "successCount": 1,
           "success": true,
-          "warnings": [],
+          "successCount": 3,
           "successResults": [
             {
-              "type": "index-pattern",
-              "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+              "id": "my-vis",
+              "type": "visualization",
               "meta": {
-                "title": "Kibana Sample Data Logs",
-                "icon": "indexPatternApp"
-              },
-              "managed": false,
-              "destinationId": "82d2760c-468f-49cf-83aa-b9a35b6a8943"
+                "icon": "visualizeApp",
+                "title": "Look at my visualization"
+              }
+            },
+            {
+              "id": "my-search",
+              "type": "search",
+              "meta": {
+                "icon": "searchApp",
+                "title": "Look at my search"
+              }
+            },
+            {
+              "id": "my-dashboard",
+              "type": "dashboard",
+              "meta": {
+                "icon": "dashboardApp",
+                "title": "Look at my dashboard"
+              }
             }
           ]
         }

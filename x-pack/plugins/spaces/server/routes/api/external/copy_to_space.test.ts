@@ -80,7 +80,7 @@ describe('copy to space', () => {
     });
 
     initCopyToSpacesApi({
-      externalRouter: router,
+      router,
       getStartServices: async () => [coreStart, {}, {}],
       log,
       getSpacesService: () => spacesServiceStart,

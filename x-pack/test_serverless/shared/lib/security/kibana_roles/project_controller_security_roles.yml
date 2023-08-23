@@ -404,6 +404,10 @@ soc_manager:
       privileges:
         - all
       resources: "*"
+    - application: savedObjectsManagement
+      privileges:
+        - all
+      resources: "*"
 
 detections_admin:
   cluster:
