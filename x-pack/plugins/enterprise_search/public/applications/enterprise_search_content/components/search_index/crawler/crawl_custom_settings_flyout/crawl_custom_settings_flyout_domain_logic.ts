@@ -22,6 +22,15 @@ export interface CrawlCustomSettingsFlyoutDomainConfigLogicValues {
   };
 }
 
+export const domainConfigsToDomainUrls = (domainConfigs: DomainConfig[]) =>
+  domainConfigs.map((domainConfig) => domainConfig.name);
+
+export const domainConfigsToDomainConfigMap = (domainConfigs: DomainConfig[]) =>
+  domainConfigs.reduce(
+    (acc, domainConfig) => ({ ...acc, [domainConfig.name]: domainConfig }),
+    {} as { [key: string]: DomainConfig }
+  );
+
 export interface CrawlCustomSettingsFlyoutDomainConfigLogicActions {
   fetchDomainConfigData(): void;
   onRecieveDomainConfigData(domainConfigs: DomainConfig[]): { domainConfigs: DomainConfig[] };
@@ -49,15 +58,11 @@ export const CrawlCustomSettingsFlyoutDomainConfigLogic = kea<
   selectors: () => ({
     domainUrls: [
       (selectors) => [selectors.domainConfigs],
-      (domainConfigs: DomainConfig[]) => domainConfigs.map((domainConfig) => domainConfig.name),
+      (domainConfigs: DomainConfig[]) => domainConfigsToDomainUrls(domainConfigs),
     ],
     domainConfigMap: [
       (selectors) => [selectors.domainConfigs],
-      (domainConfigs: DomainConfig[]) =>
-        domainConfigs.reduce(
-          (acc, domainConfig) => ({ ...acc, [domainConfig.name]: domainConfig }),
-          {} as { [key: string]: DomainConfig }
-        ),
+      (domainConfigs: DomainConfig[]) => domainConfigsToDomainConfigMap(domainConfigs),
     ],
   }),
   listeners: ({ actions }) => ({

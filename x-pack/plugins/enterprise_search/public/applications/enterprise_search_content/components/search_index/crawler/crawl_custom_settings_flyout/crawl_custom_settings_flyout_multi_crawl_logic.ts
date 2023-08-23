@@ -23,7 +23,10 @@ import { IndexNameLogic } from '../../index_name_logic';
 
 import { IndexViewLogic } from '../../index_view_logic';
 
-import { CrawlCustomSettingsFlyoutDomainConfigLogic } from './crawl_custom_settings_flyout_domain_logic';
+import {
+  CrawlCustomSettingsFlyoutDomainConfigLogic,
+  domainConfigsToDomainConfigMap,
+} from './crawl_custom_settings_flyout_domain_logic';
 
 import { filterSeedUrlsByDomainUrls } from './crawl_custom_settings_flyout_logic';
 import {
@@ -120,7 +123,12 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
 >({
   path: ['enterprise_search', 'crawler', 'crawl_custom_settings_flyout_multi_crawl_logic'],
   connect: {
-    actions: [PostCustomSchedulingApiLogic, ['makeRequest as makePostCustomSchedulingRequest']],
+    actions: [
+      PostCustomSchedulingApiLogic,
+      ['makeRequest as makePostCustomSchedulingRequest'],
+      CrawlCustomSettingsFlyoutDomainConfigLogic,
+      ['onRecieveDomainConfigData'],
+    ],
     values: [
       IndexViewLogic,
       ['index'],
@@ -244,6 +252,39 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
         setConnectorSchedulingInterval: (state, { index, newSchedule }) => {
           const { interval } = newSchedule;
           return state.map((crawler, i) => (i === index ? { ...crawler, interval } : crawler));
+        },
+        onRecieveDomainConfigData: (state, { domainConfigs }) => {
+          const domainConfigsMap = domainConfigsToDomainConfigMap(domainConfigs);
+          return state.map((crawler) => {
+            const entryPointUrls = crawler.selectedDomainUrls.flatMap(
+              (selectedDomainUrl) => domainConfigsMap[selectedDomainUrl].seedUrls
+            );
+            const selectedEntryPointUrls = crawler.customEntryPointUrls.filter((entryPointUrl) =>
+              entryPointUrls.includes(entryPointUrl)
+            );
+            const customEntryPointUrls = crawler.customEntryPointUrls.filter(
+              (entryPointUrl) => !entryPointUrls.includes(entryPointUrl)
+            );
+            const sitemapUrls = crawler.selectedDomainUrls.flatMap(
+              (selectedDomainUrl) => domainConfigsMap[selectedDomainUrl].sitemapUrls
+            );
+            const selectedSitemapUrls = crawler.customSitemapUrls.filter((sitemapUrl) =>
+              sitemapUrls.includes(sitemapUrl)
+            );
+            const customSitemapUrls = crawler.customSitemapUrls.filter(
+              (sitemapUrl) => !sitemapUrls.includes(sitemapUrl)
+            );
+
+            return {
+              ...crawler,
+              entryPointUrls,
+              selectedEntryPointUrls,
+              customEntryPointUrls,
+              sitemapUrls,
+              selectedSitemapUrls,
+              customSitemapUrls,
+            };
+          });
         },
       },
     ],
