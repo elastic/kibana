@@ -1,3 +1,9 @@
 #!/usr/bin/env bash
 
-source .buildkite/scripts/lifecycle/pre_command.sh
+env
+
+if [ "$SKIP_KIBANA_HOOKS" = "1" ]; then
+  echo "Pipeline file triggered with SKIP_KIBANA_HOOKS, skipping pre_command.sh"
+else
+  source .buildkite/scripts/lifecycle/pre_command.sh
+fi

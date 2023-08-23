@@ -1,20 +1,41 @@
 steps:
-  - label: ":pipeline::kibana::seedling: Trigger Kibana Tests for ${ENVIRONMENT}"
-    command: echo "replace me with Kibana specific tests"
-    agent:
-      image: "docker.elastic.co/ci-agent-images/basic-buildkite-agent:1688566364"
+  - label: ":pipeline::kibana::seedling: Trigger Kibana Serverless Tests for ${ENVIRONMENT}"
+    trigger: appex-qa-kibana-serverless-ftr-tests
+    build:
+      env:
+        ENVIRONMENT: ${ENVIRONMENT}
+      message: Triggered by pipeline.tests.qa.yaml
+      branch: $BUILDKITE_BRANCH
+      commit: $BUILDKITE_COMMIT
+      name: Serverless tests
 
-  - label: ":pipeline::fleet::seedling: Trigger Fleet Kibana Tests for ${ENVIRONMENT}"
-    command: echo "replace me with Fleet specific Kibana tests"
-    agent:
-      image: "docker.elastic.co/ci-agent-images/basic-buildkite-agent:1688566364"
+  - label: ":pipeline::weight_lifter::seedling: Trigger RAC Alert Load tests for ${ENVIRONMENT}"
+    trigger: appex-qa-rac-alert-load
+    build:
+      env:
+        ENVIRONMENT: ${ENVIRONMENT}
+      message: Triggered by pipeline.tests.qa.yaml
+      branch: $BUILDKITE_BRANCH
+      commit: $BUILDKITE_COMMIT
+      name: RAC Alert load tests
 
-  - label: ":pipeline::lock::seedling: Trigger Security Kibana Tests for ${ENVIRONMENT}"
-    command: echo "replace me with Security specific Kibana tests"
-    agent:
-      image: "docker.elastic.co/ci-agent-images/basic-buildkite-agent:1688566364"
+  - wait: ~
 
-  - label: ":pipeline::lock::seedling: Trigger Control Plane Kibana Tests for ${ENVIRONMENT}"
-    command: echo "replace me with Control Plane specific Kibana tests"
-    agent:
-      image: "docker.elastic.co/ci-agent-images/basic-buildkite-agent:1688566364"
+  - block: ":male-mechanic: Confirm QA tests"
+    prompt: "Do you confirm, that the QA testing is done and successful?"
+
+#  - label: ":pipeline::fleet::seedling: Trigger Fleet Kibana Tests for ${ENVIRONMENT}"
+#    command: echo "replace me with Fleet specific Kibana tests"
+#    agent:
+#      image: "docker.elastic.co/ci-agent-images/basic-buildkite-agent:1688566364"
+#
+#  - label: ":pipeline::lock::seedling: Trigger Security Kibana Tests for ${ENVIRONMENT}"
+#    command: echo "replace me with Security specific Kibana tests"
+#    agent:
+#      image: "docker.elastic.co/ci-agent-images/basic-buildkite-agent:1688566364"
+#
+#  - label: ":pipeline::lock::seedling: Trigger Control Plane Kibana Tests for ${ENVIRONMENT}"
+#    command: echo "replace me with Control Plane specific Kibana tests"
+#    agent:
+#      image: "docker.elastic.co/ci-agent-images/basic-buildkite-agent:1688566364"
+
