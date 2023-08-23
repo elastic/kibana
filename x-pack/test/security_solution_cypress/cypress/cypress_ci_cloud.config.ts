@@ -12,11 +12,12 @@ import path from 'path';
 import { isSkipped } from '@kbn/security-solution-plugin/scripts/run_cypress/utils';
 import { setupEnv } from '@kbn/osquery-plugin/cypress/support/setup_env';
 
+console.error('path', path.resolve('.'));
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
   reporter: '../../../node_modules/cypress-multi-reporters',
   reporterOptions: {
-    configFile: path.resolve(__dirname, './reporter_config.json'),
+    configFile: path.resolve('./reporter_config.json'),
   },
   defaultCommandTimeout: 150000,
   execTimeout: 150000,
@@ -43,7 +44,7 @@ export default defineCypressConfig({
       ELASTICSEARCH_URL: 'http://system_indices_superuser:changeme@localhost:9222',
       ELASTICSEARCH_USERNAME: 'system_indices_superuser',
       ELASTICSEARCH_PASSWORD: 'changeme',
-      FTR_CONFIG_FILE: path.resolve(__dirname, '../../test/security_solution_cypress/cli_config'),
+      FTR_CONFIG_FILE: path.resolve('../cli_config'),
     },
     async setupNodeEvents(on, config) {
       setupEnv(on, config);

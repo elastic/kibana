@@ -30,10 +30,10 @@ export const setupEnv = (on: Cypress.PluginEvents, cypressConfig: Cypress.Plugin
   let shutdownEs;
 
   on('before:run', async (details) => {
-    console.error(details);
+    // console.error(details);
     const specFile = details.specs[0];
     // log.error(specFile);
-      console.error('cypressConfig', specFile, cypressConfig);
+      // console.error('cypressConfig', specFile, cypressConfig);
       const { argv } = yargs(process.argv.slice(2)[0].split(' '))
         .coerce('specFilePath', (specFilePath) => path.resolve(specFile.absolute))
         // .coerce('ftrConfigFile', (ftrConfigFile) =>
@@ -44,8 +44,8 @@ export const setupEnv = (on: Cypress.PluginEvents, cypressConfig: Cypress.Plugin
         // .default('ftrConfigFile', path.resolve('../../test/osquery_cypress/cli_config'))
         // .coerce('specFilePath', (specFilePath) => path.resolve(specFilePath))
         // .coerce('ftrConfigFile', (ftrConfigFile) => path.resolve(ftrConfigFile))
-        .default('esPort', 9222)
-        .default('kibanaPort', 5622)
+        .default('esPort', 9220)
+        .default('kibanaPort', 5620)
         .default('fleetServerPort', 8220)
 
 
