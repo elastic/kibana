@@ -92,6 +92,10 @@ export async function mountManagementSection(
     savedObjectsManagement,
   };
 
+  const editPath = '/dataView/:id/field/:fieldName';
+  const createPath = '/dataView/:id/create-field/';
+  const createEditPath = dataViews.scriptedFieldsEnabled ? [editPath, createPath] : [editPath];
+
   ReactDOM.render(
     <KibanaRenderContextProvider theme={theme} i18n={coreI18n}>
       <KibanaContextProvider services={deps}>
@@ -100,7 +104,7 @@ export async function mountManagementSection(
             <Route path={['/create']}>
               <IndexPatternTableWithRouter canSave={canSave} showCreateDialog={true} />
             </Route>
-            <Route path={['/dataView/:id/field/:fieldName', '/dataView/:id/create-field/']}>
+            <Route path={createEditPath}>
               <CreateEditFieldContainer />
             </Route>
             <Route path={['/dataView/:id']}>

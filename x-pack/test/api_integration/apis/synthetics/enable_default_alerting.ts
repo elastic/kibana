@@ -14,8 +14,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
-  // FLAKY: https://github.com/elastic/kibana/issues/158408
-  describe.skip('EnableDefaultAlerting', function () {
+  describe('EnableDefaultAlerting', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
@@ -56,6 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
         'nextRun',
         'lastRun',
         'snoozeSchedule',
+        'viewInAppRelativeUrl',
       ];
 
       const statusRule = apiResponse.body.statusRule;
@@ -129,6 +129,7 @@ const defaultAlertRules = {
       lastDuration: 64,
     },
     ruleTypeId: 'xpack.synthetics.alerts.monitorStatus',
+    viewInAppRelativeUrl: '/app/observability/alerts/rules/574e82f0-1672-11ee-8e7d-c985c0ef6c2e',
   },
   tlsRule: {
     id: '574eaa00-1672-11ee-8e7d-c985c0ef6c2e',
@@ -160,5 +161,6 @@ const defaultAlertRules = {
       lastDuration: 193,
     },
     ruleTypeId: 'xpack.synthetics.alerts.tls',
+    viewInAppRelativeUrl: '/app/observability/alerts/rules/574e82f0-1672-11ee-8e7d-c985c0ef6c2e',
   },
 };
