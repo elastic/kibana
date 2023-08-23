@@ -61,7 +61,7 @@ export const FieldList: React.FC<FieldListProps> = ({
           size="xs"
           color="accent"
           position="absolute"
-          data-test-subj="fieldListLoading"
+          data-test-subj={`${dataTestSubject}Loading`}
         />
       )}
       {!!prepend && <EuiFlexItem grow={false}>{prepend}</EuiFlexItem>}
