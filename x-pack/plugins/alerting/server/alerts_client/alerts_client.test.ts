@@ -1133,6 +1133,7 @@ describe('Alerts Client', () => {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/163192
   // FLAKY: https://github.com/elastic/kibana/issues/163193
   // FLAKY: https://github.com/elastic/kibana/issues/163194
   // FLAKY: https://github.com/elastic/kibana/issues/163195
