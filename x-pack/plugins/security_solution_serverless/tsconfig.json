@@ -39,6 +39,7 @@
     "@kbn/security-solution-features",
     "@kbn/cases-plugin",
     "@kbn/fleet-plugin",
-    "@kbn/core-elasticsearch-server"
+    "@kbn/core-elasticsearch-server",
+    "@kbn/usage-collection-plugin"
   ]
 }
