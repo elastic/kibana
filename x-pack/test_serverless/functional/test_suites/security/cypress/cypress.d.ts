@@ -42,7 +42,7 @@ export interface LoadUserAndRoleCyTaskOptions {
 declare global {
   namespace Cypress {
     interface SuiteConfigOverrides {
-      env: {
+      env?: {
         ftrConfig: SecuritySolutionDescribeBlockFtrConfig;
       };
     }
