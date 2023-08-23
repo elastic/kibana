@@ -48,7 +48,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('transaction duration alert', { config: 'basic', archives: [] }, () => {
     before(async () => {
-      await synthtraceEsClient.clean();
       cleanupAllState({ es, supertest });
 
       const opbeansJava = apm

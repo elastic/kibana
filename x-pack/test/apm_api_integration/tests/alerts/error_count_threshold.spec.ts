@@ -54,7 +54,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
-      await synthtraceEsClient.clean();
       cleanupAllState({ es, supertest });
 
       const opbeansJava = apm
