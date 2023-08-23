@@ -24,9 +24,7 @@ export const Content = () => {
             FlyoutTabIds.PROCESSES,
             FlyoutTabIds.ANOMALIES,
           ]}
-        >
-          <DatePicker />
-        </DatePickerWrapper>
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <TabPanel activeWhen={FlyoutTabIds.ANOMALIES}>
@@ -52,16 +50,14 @@ export const Content = () => {
   );
 };
 
-const DatePickerWrapper = ({
-  visibleFor,
-  children,
-}: {
-  visibleFor: FlyoutTabIds[];
-  children: React.ReactNode;
-}) => {
+const DatePickerWrapper = ({ visibleFor }: { visibleFor: FlyoutTabIds[] }) => {
   const { activeTabId } = useTabSwitcherContext();
 
-  return <div hidden={!visibleFor.includes(activeTabId as FlyoutTabIds)}>{children}</div>;
+  return (
+    <div hidden={!visibleFor.includes(activeTabId as FlyoutTabIds)}>
+      <DatePicker />
+    </div>
+  );
 };
 
 const TabPanel = ({
