@@ -61,6 +61,7 @@ export const PageError: React.FunctionComponent<Props> = ({
         )
       }
       iconType="warning"
+      color="danger"
       actions={actions}
       {...rest}
     />
