@@ -54,7 +54,6 @@ describe('useStats', () => {
   });
 
   describe('query with date range when ILM is not available', () => {
-    let statsResult: UseStats | undefined;
     const queryParams = {
       isILMAvailable: false,
       startDate,
@@ -64,14 +63,10 @@ describe('useStats', () => {
     beforeEach(async () => {
       mockHttpFetch.mockResolvedValue(mockStatsGreenIndex);
 
-      const { result, waitForNextUpdate } = renderHook(
-        () => useStats({ pattern, startDate, endDate }),
-        {
-          wrapper: ContextWrapperILMNotAvailable,
-        }
-      );
+      const { waitForNextUpdate } = renderHook(() => useStats({ pattern, startDate, endDate }), {
+        wrapper: ContextWrapperILMNotAvailable,
+      });
       await waitForNextUpdate();
-      statsResult = await result.current;
     });
     test(`it calls the stats api with the expected params`, async () => {
       expect(mockHttpFetch.mock.calls[0][1].query).toEqual(queryParams);
