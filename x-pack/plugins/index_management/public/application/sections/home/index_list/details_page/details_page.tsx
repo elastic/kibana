@@ -120,7 +120,11 @@ export const DetailsPage: React.FunctionComponent<
         bottomBorder
         rightSideItems={[
           <DiscoverLink indexName={indexName} asButton={true} />,
-          <IndexActionsContextMenuWithoutRedux indexNames={[indexName]} indices={[data]} />,
+          <IndexActionsContextMenuWithoutRedux
+            indexNames={[indexName]}
+            indices={[data]}
+            fill={false}
+          />,
         ]}
         tabs={headerTabs}
       />

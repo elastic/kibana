@@ -58,6 +58,9 @@ interface Props {
   iconType?: EuiButtonProps['iconType'];
   label?: React.Component;
 
+  // a new prop to make the button secondary
+  fill?: boolean;
+
   // instead of getting indices data from the redux store, pass it as a prop
   indices: Index[];
 }
@@ -77,6 +80,7 @@ const getIndexStatusByName = (
 export const IndexActionsContextMenuWithoutRedux: FunctionComponent<Props> = ({
   indexNames,
   indices,
+  ...rest
 }) => {
   const props: ReduxProps = {
     closeIndices: async () => {},
@@ -99,5 +103,5 @@ export const IndexActionsContextMenuWithoutRedux: FunctionComponent<Props> = ({
 
     performExtensionAction: async () => {},
   };
-  return <IndexActionsContextMenu indexNames={indexNames} indices={indices} {...props} />;
+  return <IndexActionsContextMenu indexNames={indexNames} indices={indices} {...props} {...rest} />;
 };

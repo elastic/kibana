@@ -463,6 +463,7 @@ export class IndexActionsContextMenu extends Component {
               values: { selectedIndexCount },
             }),
             iconType = 'arrowDown',
+            fill = true,
           } = this.props;
 
           const panels = this.panels(appDependencies);
@@ -478,7 +479,7 @@ export class IndexActionsContextMenu extends Component {
               })}
               onClick={this.onButtonClick}
               iconType={iconType}
-              fill
+              fill={fill}
             >
               {label}
             </EuiButton>
