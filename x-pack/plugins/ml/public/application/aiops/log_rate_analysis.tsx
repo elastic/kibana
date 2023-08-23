@@ -57,6 +57,7 @@ export const LogRateAnalysisPage: FC = () => {
             'unifiedSearch',
             'theme',
             'lens',
+            'i18n',
           ])}
         />
       )}

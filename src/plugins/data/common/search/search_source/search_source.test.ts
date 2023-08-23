@@ -94,6 +94,7 @@ describe('SearchSource', () => {
       getConfig: getConfigMock,
       search: mockSearchMethod,
       onResponse: jest.fn().mockImplementation((_, res) => res),
+      scriptedFieldsEnabled: true,
     };
 
     searchSource = new SearchSource({}, searchSourceDependencies);
@@ -650,6 +651,22 @@ describe('SearchSource', () => {
 
         const request = searchSource.getSearchRequestBody();
         expect(request.script_fields).toEqual({ hello: {}, world: {} });
+      });
+
+      test('ignores scripted fields when scripted fields are disabled', async () => {
+        searchSource.setField('index', {
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: { hello: {}, world: {} },
+            docvalueFields: [],
+          }),
+        } as unknown as DataView);
+        searchSourceDependencies.scriptedFieldsEnabled = false;
+        searchSource.setField('fields', ['timestamp', '*']);
+
+        const request = searchSource.getSearchRequestBody();
+        expect(request.script_fields).toEqual({});
       });
     });
 
