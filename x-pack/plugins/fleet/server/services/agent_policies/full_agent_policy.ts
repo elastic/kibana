@@ -20,7 +20,7 @@ import type {
 } from '../../types';
 import type { FullAgentPolicyOutputPermissions, PackageInfo } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
-import { dataTypes, outputType } from '../../../common/constants';
+import { dataTypes, kafkaCompressionType, outputType } from '../../../common/constants';
 import { DEFAULT_OUTPUT } from '../../constants';
 
 import { getPackageInfo } from '../epm/packages';
@@ -336,7 +336,7 @@ export function transformOutputToFullPolicyOutput(
       version,
       key,
       compression,
-      compression_level,
+      ...(compression === kafkaCompressionType.Gzip ? { compression_level } : {}),
       ...(username ? { username } : {}),
       ...(password ? { password } : {}),
       ...(sasl ? { sasl } : {}),
