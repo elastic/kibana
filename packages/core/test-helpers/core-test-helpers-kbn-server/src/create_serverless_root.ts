@@ -23,7 +23,7 @@ export interface TestServerlessUtils {
 
 /**
  * See docs in {@link TestUtils}. This function provides the same utilities but
- * configured serverless.
+ * configured for serverless.
  *
  * @note requires a Docker installation to be running
  */
