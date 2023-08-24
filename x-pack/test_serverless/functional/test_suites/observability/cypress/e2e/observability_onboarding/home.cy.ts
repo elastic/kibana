@@ -10,13 +10,13 @@ describe('[Serverless Observability onboarding] Landing page', () => {
     cy.loginAsElasticUser();
   });
 
-  it('shows landing page', () => {
+  it('when user navigates to observability onboarding landing page is showed', () => {
     cy.visitKibana('/app/observabilityOnboarding');
     cy.contains('Get started with Observability');
   });
 
   describe('Entry point', () => {
-    it('from Add data', () => {
+    it('when clicking on Add data the user is navigated to the observability onboarding page', () => {
       cy.contains('Add data').click();
       cy.url().should('include', '/app/observabilityOnboarding');
     });
