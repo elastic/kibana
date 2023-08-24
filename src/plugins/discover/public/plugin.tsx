@@ -16,6 +16,7 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext,
+  AppNavLinkStatus,
 } from '@kbn/core/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -222,8 +223,7 @@ export interface DiscoverStartPlugins {
 export class DiscoverPlugin
   implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins>
 {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
-
+  private config: { headlessLocation?: string };
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private docViewsRegistry: DocViewsRegistry | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;
@@ -231,10 +231,13 @@ export class DiscoverPlugin
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
-
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = this.initializerContext.config.get();
+  }
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
     const isDev = this.initializerContext.env.mode.dev;
+    console.log(this.config.headlessLocation);
 
     if (plugins.share) {
       const useHash = core.uiSettings.get('state:storeInSessionStorage');
@@ -329,7 +332,9 @@ export class DiscoverPlugin
           })
       )
     );
-
+    const navLinkStatus =
+      this.config.headlessLocation !== undefined ? AppNavLinkStatus.hidden : undefined;
+    console.log(navLinkStatus);
     core.application.register({
       id: PLUGIN_ID,
       title: 'Discover',
@@ -338,6 +343,7 @@ export class DiscoverPlugin
       euiIconType: 'logoKibana',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
+      navLinkStatus,
       mount: async (params: AppMountParameters) => {
         const [coreStart, discoverStartPlugins] = await core.getStartServices();
         setScopedHistory(params.history);
@@ -378,6 +384,7 @@ export class DiscoverPlugin
           services,
           profileRegistry: this.profileRegistry,
           isDev,
+          config: this.config,
         });
         return () => {
           unlistenParentHistory();
@@ -386,7 +393,6 @@ export class DiscoverPlugin
         };
       },
     });
-
     plugins.urlForwarding.forwardApp('doc', 'discover', (path) => {
       return `#${path}`;
     });

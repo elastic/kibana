@@ -7,9 +7,11 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { ColumnsFromLocatorFn, SearchSourceFromLocatorFn, TitleFromLocatorFn } from './locator';
 import { DiscoverServerPlugin } from './plugin';
+import { configSchema, ConfigSchema } from './config';
 
 export interface DiscoverServerPluginStartDeps {
   data: DataPluginStart;
@@ -20,6 +22,13 @@ export interface LocatorServiceScopedClient {
   searchSourceFromLocator: SearchSourceFromLocatorFn;
   titleFromLocator: TitleFromLocatorFn;
 }
+
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  exposeToBrowser: {
+    headlessLocation: true,
+  },
+  schema: configSchema,
+};
 
 export interface DiscoverServerPluginLocatorService {
   asScopedClient: (req: KibanaRequest<unknown>) => Promise<LocatorServiceScopedClient>;
