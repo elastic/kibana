@@ -142,8 +142,8 @@ describe('Service overview: Time Comparison', () => {
     cy.contains('Day before');
     cy.contains('Week before');
 
-    cy.changeTimeRange('Last 7 days');
-    cy.wait('@throughputChartRequest');
+    cy.getByTestSubj('superDatePickerToggleQuickMenuButton').click();
+    cy.getByTestSubj('superDatePickerCommonlyUsed_Last_7 days').click();
     cy.contains('Last 7 days');
     cy.getByTestSubj('comparisonSelect').should('have.value', '1w');
     cy.getByTestSubj('comparisonSelect').should('contain.text', 'Week before');
