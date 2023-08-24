@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { uniq } from 'lodash';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { getMatchingIndices } from '../../../../services/api';
@@ -65,6 +65,11 @@ export const IndicesSelector = ({ field, ...rest }: Props) => {
     [setIsIndiciesLoading, setIndexOptions]
   );
 
+  // Load first 10 indices on mount so that the ComboBox has some options
+  useEffect(() => {
+    onSearchChange('*');
+  }, [onSearchChange]);
+
   return (
     <EuiFormRow
       label={field.label}
@@ -78,6 +83,7 @@ export const IndicesSelector = ({ field, ...rest }: Props) => {
         async
         isLoading={isIndiciesLoading}
         options={indexOptions}
+        noSuggestions={!indexOptions.length}
         selectedOptions={((field.value as string[]) || []).map((anIndex: string) => {
           return {
             label: anIndex,
@@ -88,6 +94,11 @@ export const IndicesSelector = ({ field, ...rest }: Props) => {
           field.setValue(selected.map((aSelected) => aSelected.value) as string[]);
         }}
         onSearchChange={onSearchChange}
+        onBlur={() => {
+          if (!field.value) {
+            field.setValue([]);
+          }
+        }}
       />
     </EuiFormRow>
   );

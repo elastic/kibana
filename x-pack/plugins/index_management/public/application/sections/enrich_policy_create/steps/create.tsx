@@ -21,6 +21,7 @@ import {
 
 import type { SerializedEnrichPolicy } from '../../../../../common';
 import { useCreatePolicyContext } from '../create_policy_context';
+import { serializeAsESPolicy, getESPolicyCreationApiCall } from '../../../../../common/lib';
 
 const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
   // Beyond a certain point, highlighting the syntax will bog down performance to unacceptable
@@ -112,7 +113,7 @@ const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
               <EuiCodeBlock language={language} isCopyable>
-                {JSON.stringify(policy.query, null, 2)}
+                {policy.query}
               </EuiCodeBlock>
             </EuiDescriptionListDescription>
           </>
@@ -122,9 +123,10 @@ const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
   );
 };
 
-const RequestTab = ({ request }: { request: string }) => {
+const RequestTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
   // Beyond a certain point, highlighting the syntax will bog down performance to unacceptable
   // levels. This way we prevent that happening for very large requests.
+  const request = JSON.stringify(serializeAsESPolicy(policy), null, 2);
   const language = request.length < 60000 ? 'json' : undefined;
 
   return (
@@ -143,6 +145,8 @@ const RequestTab = ({ request }: { request: string }) => {
       <EuiSpacer size="m" />
 
       <EuiCodeBlock language={language} isCopyable>
+        {getESPolicyCreationApiCall(policy.name)}
+        {`\n`}
         {request}
       </EuiCodeBlock>
     </>
@@ -169,7 +173,7 @@ export const CreateStep = ({ onSubmit }: Props) => {
       name: i18n.translate('xpack.idxMgmt.enrichPolicies.create.stepCreate.requestTabTitle', {
         defaultMessage: 'Request',
       }),
-      content: <RequestTab request={JSON.stringify(draft, null, 2)} />,
+      content: <RequestTab policy={draft as SerializedEnrichPolicy} />,
     },
   ];
 

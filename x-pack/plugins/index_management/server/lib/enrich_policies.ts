@@ -6,37 +6,9 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import type { EnrichSummary, EnrichPolicyType } from '@elastic/elasticsearch/lib/api/types';
+import type { EnrichSummary } from '@elastic/elasticsearch/lib/api/types';
 import type { SerializedEnrichPolicy } from '../../common/types';
-
-const getPolicyType = (policy: EnrichSummary): EnrichPolicyType => {
-  if (policy.config.match) {
-    return 'match';
-  }
-
-  if (policy.config.geo_match) {
-    return 'geo_match';
-  }
-
-  if (policy.config.range) {
-    return 'range';
-  }
-
-  throw new Error('Unknown policy type');
-};
-
-export const serializeAsESPolicy = (policy: SerializedEnrichPolicy) => {
-  const policyType = policy.type as EnrichPolicyType;
-
-  return {
-    [policyType]: {
-      indices: policy.sourceIndices,
-      match_field: policy.matchField,
-      enrich_fields: policy.enrichFields,
-      query: policy.query,
-    },
-  };
-};
+import { getPolicyType } from '../../common/lib';
 
 export const serializeEnrichmentPolicies = (
   policies: EnrichSummary[]

@@ -8,10 +8,12 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { forEach, keys, sortBy } from 'lodash';
+
 import { RouteDependencies } from '../../../types';
 import { addInternalBasePath } from '..';
 import { enrichPoliciesActions } from '../../../lib/enrich_policies';
-import { serializeAsESPolicy } from '../../../lib/enrich_policies';
+import { serializeAsESPolicy } from '../../../../common/lib';
 import type { SerializedEnrichPolicy } from '../../../../common';
 
 export const validationSchema = schema.object({
@@ -35,6 +37,48 @@ const getFieldsFromIndicesSchema = schema.object({
 
 interface IndicesAggs extends estypes.AggregationsMultiBucketAggregateBase {
   buckets: Array<{ key: unknown }>;
+}
+
+const normalizedFieldTypes = {
+  long: 'number',
+  integer: 'number',
+  short: 'number',
+  byte: 'number',
+  double: 'number',
+  float: 'number',
+  half_float: 'number',
+  scaled_float: 'number',
+};
+
+interface FieldItem {
+  name: string;
+  type: string;
+  normalizedType: string;
+}
+
+function buildFieldList(fields) {
+  const result: FieldItem[] = [];
+
+  forEach(fields, (field, name) => {
+    // If the field exists in multiple indexes, the types may be inconsistent.
+    // In this case, default to the first type.
+    const type = keys(field)[0];
+
+    // Do not include fields that have a type that starts with an underscore.
+    if (type[0] === '_') {
+      return;
+    }
+
+    const normalizedType = normalizedFieldTypes[type] || type;
+
+    result.push({
+      name,
+      type,
+      normalizedType,
+    });
+  });
+
+  return sortBy(result, 'name');
 }
 
 async function getIndices(dataClient: IScopedClusterClient, pattern: string, limit = 10) {
@@ -127,7 +171,7 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
 
         const json = fieldsResponse.statusCode === 404 ? { fields: [] } : fieldsResponse.body;
 
-        return response.ok({ body: json });
+        return response.ok({ body: buildFieldList(json.fields) });
       } catch (error) {
         return handleEsError({ error, response });
       }

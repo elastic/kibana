@@ -32,6 +32,7 @@ export type {
   FormSchema,
   FieldConfig,
   FieldHook,
+  FieldValidateResponse,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export {

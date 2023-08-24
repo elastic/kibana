@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { FieldIcon as KbnFieldIcon } from '@kbn/react-field';
 import {
   useForm,
   Form,
   fieldValidators,
   FormSchema,
   UseField,
-  SelectField,
-  ComboBoxField,
   FIELD_TYPES,
+  ComboBoxField,
 } from '../../../../shared_imports';
 
+import { getFieldsFromIndices } from '../../../services/api';
 import { useCreatePolicyContext, DraftPolicy } from '../create_policy_context';
 
 interface Props {
@@ -28,7 +29,8 @@ interface Props {
 
 export const fieldSelectionFormSchema: FormSchema = {
   matchField: {
-    type: FIELD_TYPES.SELECT,
+    defaultValue: [],
+    serializer: (v: string[]) => v.join(', '),
     label: i18n.translate('xpack.ingestPipelines.form.matchFieldFieldLabel', {
       defaultMessage: 'Match field',
     }),
@@ -62,7 +64,20 @@ export const fieldSelectionFormSchema: FormSchema = {
 };
 
 export const FieldSelectionStep = ({ onNext }: Props) => {
+  const [fields, setFields] = useState([]);
   const { draft, updateDraft, updateCompletionState } = useCreatePolicyContext();
+
+  useEffect(() => {
+    const fetchFields = async () => {
+      const { data } = await getFieldsFromIndices(draft.sourceIndices as string[]);
+
+      if (data?.length) {
+        setFields(data);
+      }
+    };
+
+    fetchFields();
+  }, [draft.sourceIndices]);
 
   const { form } = useForm({
     defaultValue: draft,
@@ -86,7 +101,6 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
     // Update draft state with the data of the form
     updateDraft((prevDraft: DraftPolicy) => ({
       ...prevDraft,
-      hasCompletedFieldSelectionStep: true,
       ...data,
     }));
 
@@ -98,33 +112,17 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
     <Form form={form}>
       <UseField
         path="matchField"
-        component={SelectField}
+        component={ComboBoxField}
         componentProps={{
           fullWidth: false,
           euiFieldProps: {
-            options: [
-              {
-                value: 'match',
-                text: i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.enrichForm.matchOption',
-                  { defaultMessage: 'Match' }
-                ),
-              },
-              {
-                value: 'geo_match',
-                text: i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.enrichFrom.geoMatchOption',
-                  { defaultMessage: 'Geo match' }
-                ),
-              },
-              {
-                value: 'range',
-                text: i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.enrichFrom.rangeOption',
-                  { defaultMessage: 'range' }
-                ),
-              },
-            ],
+            placeholder: 'Select a field',
+            noSuggestions: false,
+            singleSelection: { asPlainText: true },
+            options: fields.map((field: any) => ({
+              label: field.name,
+              prepend: <KbnFieldIcon type={field.normalizedType} />,
+            })),
           },
         }}
       />
@@ -134,6 +132,14 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
         component={ComboBoxField}
         componentProps={{
           fullWidth: false,
+          euiFieldProps: {
+            placeholder: 'Select fields to enrich',
+            noSuggestions: false,
+            options: fields.map((field: any) => ({
+              label: field.name,
+              prepend: <KbnFieldIcon type={field.normalizedType} />,
+            })),
+          },
         }}
       />
 

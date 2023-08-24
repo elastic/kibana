@@ -7,7 +7,7 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSteps, EuiStepStatus, EuiPageSection } from '@elastic/eui';
+import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
 import { ConfigurationStep, FieldSelectionStep, CreateStep } from './steps';
 import { useCreatePolicyContext } from './create_policy_context';
@@ -30,6 +30,10 @@ export const CreatePolicyWizard = () => {
     },
     [currentStep]
   );
+
+  const onSubmit = useCallback(() => {
+    console.log('create policy');
+  }, []);
 
   const stepDefinitions = useMemo(
     () => [
@@ -74,15 +78,11 @@ export const CreatePolicyWizard = () => {
             setCurrentStep(CREATE);
           }
         },
-        children: currentStep === CREATE && <CreateStep />,
+        children: currentStep === CREATE && <CreateStep onSubmit={onSubmit} />,
       },
     ],
     [currentStep, setCurrentStep, completionState, getStepStatus]
   );
 
-  return (
-    <EuiPageSection restrictWidth>
-      <EuiSteps steps={stepDefinitions} />
-    </EuiPageSection>
-  );
+  return <EuiSteps steps={stepDefinitions} />;
 };
