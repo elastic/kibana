@@ -32,13 +32,13 @@ export const getRowValueByColumnId = (
     return vulnerabilityRow.vulnerability?.severity;
   }
   if (columnId === columns.package) {
-    return vulnerabilityRow.vulnerability?.package?.name;
+    return vulnerabilityRow.package?.name;
   }
   if (columnId === columns.version) {
-    return vulnerabilityRow.vulnerability?.package?.version;
+    return vulnerabilityRow.package?.version;
   }
   if (columnId === columns.fixedVersion) {
-    return vulnerabilityRow.vulnerability?.package?.fixed_version;
+    return vulnerabilityRow.package?.fixed_version;
   }
   if (columnId === columns.region) {
     return vulnerabilityRow.cloud?.region;
