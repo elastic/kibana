@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { failedDependency, forbidden } from '@hapi/boom';
 import {
   createSLOParamsSchema,
@@ -312,7 +313,7 @@ const getDiagnosisRoute = createObservabilityServerRoute({
       const response = await getGlobalDiagnosis(esClient, licensing);
       return response;
     } catch (error) {
-      if (error.cause.statusCode === 403) {
+      if (error instanceof errors.ResponseError && error.statusCode === 403) {
         throw forbidden('Insufficient Elasticsearch cluster permissions to access feature.');
       }
       throw failedDependency(error);
