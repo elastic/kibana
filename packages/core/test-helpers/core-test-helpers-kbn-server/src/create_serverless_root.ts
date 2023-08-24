@@ -21,6 +21,12 @@ export interface TestServerlessUtils {
   startKibana: (abortSignal?: AbortSignal) => Promise<TestServerlessKibanaUtils>;
 }
 
+/**
+ * See docs in {@link TestUtils}. This function provides the same utilities but
+ * configured serverless.
+ *
+ * @note requires a Docker installation to be running
+ */
 export function createTestServerlessInstances({
   adjustTimeout,
 }: {
