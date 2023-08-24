@@ -46,7 +46,7 @@ export interface KibanaDependencies {
       };
     };
   };
-  noDataPage: {
+  noDataPage?: {
     getAnalyticsNoDataPageFlavor: () => AnalyticsNoDataPageFlavor;
   };
 }

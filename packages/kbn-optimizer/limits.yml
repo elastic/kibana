@@ -96,6 +96,7 @@ pageLoadAssetSize:
   monitoring: 80000
   navigation: 37269
   newsfeed: 42228
+  noDataPage: 5000
   observability: 115443
   observabilityAIAssistant: 25000
   observabilityOnboarding: 19573

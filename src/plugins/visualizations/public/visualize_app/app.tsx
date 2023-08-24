@@ -50,6 +50,9 @@ const NoDataComponent = ({
     coreStart: core,
     dataViews,
     dataViewEditor,
+    noDataPage: {
+      getAnalyticsNoDataPageFlavor: () => 'kibana' as const,
+    },
   };
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>

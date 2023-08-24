@@ -49,7 +49,7 @@ export const AnalyticsNoDataPageKibanaProvider: FC<AnalyticsNoDataPageKibanaDepe
       hasCustomBranding$: dependencies.coreStart.customBranding.hasCustomBranding$,
     },
     prependBasePath: dependencies.coreStart.http.basePath.prepend,
-    pageFlavor: dependencies.noDataPage.getAnalyticsNoDataPageFlavor(),
+    pageFlavor: dependencies.noDataPage?.getAnalyticsNoDataPageFlavor() ?? 'kibana',
   };
   return (
     <Context.Provider {...{ value }}>
