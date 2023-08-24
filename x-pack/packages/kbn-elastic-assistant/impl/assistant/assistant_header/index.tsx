@@ -82,6 +82,7 @@ export const AssistantHeader: React.FC<Props> = ({
         <EuiFlexItem grow={false}>
           <AssistantTitle
             {...currentTitle}
+            isDisabled={isDisabled}
             docLinks={docLinks}
             selectedConversation={currentConversation}
           />

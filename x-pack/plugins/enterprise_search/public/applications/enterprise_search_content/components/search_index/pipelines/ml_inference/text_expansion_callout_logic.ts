@@ -48,6 +48,11 @@ interface TextExpansionCalloutActions {
   textExpansionModel: FetchTextExpansionModelApiLogicActions['apiSuccess'];
 }
 
+export interface TextExpansionCalloutError {
+  title: string;
+  message: string;
+}
+
 export interface TextExpansionCalloutValues {
   createTextExpansionModelError: HttpError | undefined;
   createTextExpansionModelStatus: Status;
@@ -64,6 +69,7 @@ export interface TextExpansionCalloutValues {
   startTextExpansionModelStatus: Status;
   textExpansionModel: FetchTextExpansionModelResponse | undefined;
   textExpansionModelPollTimeoutId: null | ReturnType<typeof setTimeout>;
+  textExpansionError: TextExpansionCalloutError | null;
 }
 
 /**
@@ -256,6 +262,23 @@ export const TextExpansionCalloutLogic = kea<
       () => [selectors.textExpansionModelPollTimeoutId],
       (pollingTimeoutId: TextExpansionCalloutValues['textExpansionModelPollTimeoutId']) =>
         pollingTimeoutId !== null,
+    ],
+    textExpansionError: [
+      () => [
+        selectors.createTextExpansionModelError,
+        selectors.fetchTextExpansionModelError,
+        selectors.startTextExpansionModelError,
+      ],
+      (
+        createTextExpansionError: TextExpansionCalloutValues['createTextExpansionModelError'],
+        fetchTextExpansionError: TextExpansionCalloutValues['fetchTextExpansionModelError'],
+        startTextExpansionError: TextExpansionCalloutValues['startTextExpansionModelError']
+      ) =>
+        getTextExpansionError(
+          createTextExpansionError,
+          fetchTextExpansionError,
+          startTextExpansionError
+        ),
     ],
     isStartButtonDisabled: [
       () => [selectors.startTextExpansionModelStatus],
