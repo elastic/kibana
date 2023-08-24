@@ -38,6 +38,6 @@ export function createQueuedActionsLimitFunction({
         },
       },
     });
-    return tasks.length++ >= limit;
+    return tasks.length + 1 >= limit;
   };
 }
