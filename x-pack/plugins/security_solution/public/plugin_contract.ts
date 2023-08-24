@@ -7,7 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { RouteProps } from 'react-router-dom';
-import { UpsellingService } from './common/lib/upsellings';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { ContractStartServices, PluginSetup, PluginStart } from './types';
 import type { AppLinksSwitcher } from './common/links';
 import { navLinks$ } from './common/links/nav_links';

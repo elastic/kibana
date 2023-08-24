@@ -789,6 +789,54 @@
             "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx"
           },
           {
+            "plugin": "controls",
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/public/time_slider/embeddable/time_slider_embeddable.tsx"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/public/time_slider/embeddable/time_slider_embeddable.tsx"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/public/time_slider/embeddable/time_slider_embeddable.tsx"
+          },
+          {
             "plugin": "serverless",
             "path": "x-pack/plugins/serverless/public/plugin.tsx"
           },
@@ -859,54 +907,6 @@
           {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/time_slider/embeddable/time_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/time_slider/embeddable/time_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/time_slider/embeddable/time_slider_embeddable.tsx"
           },
           {
             "plugin": "dashboard",
@@ -1855,18 +1855,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/app/app.tsx"
-          },
-          {
-            "plugin": "serverlessSearch",
-            "path": "x-pack/plugins/serverless_search/public/application/elasticsearch.tsx"
-          },
-          {
-            "plugin": "serverlessSearch",
-            "path": "x-pack/plugins/serverless_search/public/application/elasticsearch.tsx"
-          },
-          {
-            "plugin": "serverlessSearch",
-            "path": "x-pack/plugins/serverless_search/public/application/elasticsearch.tsx"
           },
           {
             "plugin": "serverlessSearch",
@@ -3195,6 +3183,30 @@
             "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx"
           },
           {
+            "plugin": "controls",
+            "path": "src/plugins/controls/public/control_group/editor/open_add_data_control_flyout.tsx"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/public/control_group/editor/open_add_data_control_flyout.tsx"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/public/control_group/editor/open_edit_control_group_flyout.tsx"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/public/control_group/editor/open_edit_control_group_flyout.tsx"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/public/control_group/actions/edit_control_action.tsx"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/public/control_group/actions/edit_control_action.tsx"
+          },
+          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/utils/saved_objects_utils/confirm_modal_promise.tsx"
           },
@@ -3225,30 +3237,6 @@
           {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/editor/open_add_data_control_flyout.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/editor/open_add_data_control_flyout.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/editor/open_edit_control_group_flyout.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/editor/open_edit_control_group_flyout.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/actions/edit_control_action.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/actions/edit_control_action.tsx"
           },
           {
             "plugin": "dashboard",
@@ -3463,62 +3451,6 @@
             "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_existing_case.tsx"
           },
           {
-            "plugin": "@kbn/ml-date-picker",
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/embeddable/embeddable_change_point_chart.tsx"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/embeddable/embeddable_change_point_chart.tsx"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_app_state.tsx"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_app_state.tsx"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/components/log_categorization/show_flyout.tsx"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/components/log_categorization/show_flyout.tsx"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/components/log_categorization/show_flyout.tsx"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx"
-          },
-          {
             "plugin": "observabilityShared",
             "path": "x-pack/plugins/observability_shared/public/components/header_menu/header_menu_portal.tsx"
           },
@@ -3653,110 +3585,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/render_app.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/data_comparison/data_comparison_app_state.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/data_comparison/data_comparison_app_state.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_clone/clone_action_name.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_clone/clone_action_name.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/model_management/force_stop_dialog.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/model_management/force_stop_dialog.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/model_management/deployment_setup.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/model_management/deployment_setup.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/header_menu_portal/header_menu_portal.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/header_menu_portal/header_menu_portal.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/common/resolve_job_selection.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/common/resolve_job_selection.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/job_creation/common/create_flyout.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/job_creation/common/create_flyout.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_setup_flyout.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_setup_flyout.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/routing/use_active_route.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/routing/use_active_route.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/app.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/app.tsx"
           },
           {
             "plugin": "banners",
@@ -4141,14 +3969,6 @@
           {
             "plugin": "transform",
             "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_details/step_details_form.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/wizard/wizard.tsx"
-          },
-          {
-            "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/wizard/wizard.tsx"
           },
           {
             "plugin": "transform",

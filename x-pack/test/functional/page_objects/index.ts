@@ -41,6 +41,7 @@ import { RoleMappingsPageProvider } from './role_mappings_page';
 import { RollupPageObject } from './rollup_page';
 import { SearchSessionsPageProvider } from './search_sessions_management_page';
 import { SecurityPageObject } from './security_page';
+import { ShareSavedObjectsToSpacePageProvider } from './share_saved_objects_to_space_page';
 import { SnapshotRestorePageProvider } from './snapshot_restore_page';
 import { SpaceSelectorPageObject } from './space_selector_page';
 import { StatusPageObject } from './status_page';
@@ -87,6 +88,7 @@ export const pageObjects = {
   rollup: RollupPageObject,
   searchSessionsManagement: SearchSessionsPageProvider,
   security: SecurityPageObject,
+  shareSavedObjectsToSpace: ShareSavedObjectsToSpacePageProvider,
   snapshotRestore: SnapshotRestorePageProvider,
   spaceSelector: SpaceSelectorPageObject,
   statusPage: StatusPageObject,
