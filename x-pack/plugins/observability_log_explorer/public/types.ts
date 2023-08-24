@@ -16,8 +16,9 @@ export interface ObservabilityLogExplorerPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityLogExplorerPluginStart {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ObservabilityLogExplorerSetupDeps {}
+export interface ObservabilityLogExplorerSetupDeps {
+  serverless?: ServerlessPluginStart;
+}
 
 export interface ObservabilityLogExplorerStartDeps {
   data: DataPublicPluginStart;

@@ -36,12 +36,14 @@ export class ObservabilityLogExplorerPlugin
     core: CoreSetup<ObservabilityLogExplorerStartDeps, ObservabilityLogExplorerPluginStart>,
     pluginsSetup: ObservabilityLogExplorerSetupDeps
   ) {
+    const isServerless = !!pluginsSetup.serverless;
+
     core.application.register({
       id: 'observability-log-explorer',
       title: logExplorerAppTitle,
       category: DEFAULT_APP_CATEGORIES.observability,
       euiIconType: 'logoLogging',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      navLinkStatus: isServerless ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
       searchable: true,
       mount: async (appMountParams) => {
         const [coreStart, pluginsStart, ownPluginStart] = await core.getStartServices();
