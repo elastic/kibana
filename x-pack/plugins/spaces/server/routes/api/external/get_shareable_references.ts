@@ -12,9 +12,9 @@ import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetShareableReferencesApi(deps: ExternalRouteDeps) {
-  const { router, getStartServices } = deps;
+  const { externalRouter, getStartServices } = deps;
 
-  router.post(
+  externalRouter.post(
     {
       path: '/api/spaces/_get_shareable_references',
       validate: {

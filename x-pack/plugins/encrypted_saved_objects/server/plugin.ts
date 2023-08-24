@@ -95,23 +95,19 @@ export class EncryptedSavedObjectsPlugin
       getStartServices: core.getStartServices,
     });
 
-    // In the serverless environment, the encryption keys for saved objects is managed internally and never
-    // exposed to users and administrators, eliminating the need for any public Encrypted Saved Objects HTTP APIs
-    if (this.initializerContext.env.packageInfo.buildFlavor !== 'serverless') {
-      defineRoutes({
-        router: core.http.createRouter(),
-        logger: this.initializerContext.logger.get('routes'),
-        encryptionKeyRotationService: Object.freeze(
-          new EncryptionKeyRotationService({
-            logger: this.logger.get('key-rotation-service'),
-            service,
-            getStartServices: core.getStartServices,
-            security: deps.security,
-          })
-        ),
-        config,
-      });
-    }
+    defineRoutes({
+      router: core.http.createRouter(),
+      logger: this.initializerContext.logger.get('routes'),
+      encryptionKeyRotationService: Object.freeze(
+        new EncryptionKeyRotationService({
+          logger: this.logger.get('key-rotation-service'),
+          service,
+          getStartServices: core.getStartServices,
+          security: deps.security,
+        })
+      ),
+      config,
+    });
 
     return {
       canEncrypt,

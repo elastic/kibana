@@ -18,11 +18,7 @@ const createMockDebugLogger = () => {
 };
 
 const createMockConfig = (
-  mockConfig: ConfigType = {
-    enabled: true,
-    maxSpaces: 1000,
-    allowFeatureVisibility: true,
-  }
+  mockConfig: ConfigType = { enabled: true, maxSpaces: 1000, allowFeatureVisibility: true }
 ) => {
   return ConfigSchema.validate(mockConfig, { serverless: !mockConfig.allowFeatureVisibility });
 };
@@ -213,11 +209,7 @@ describe('#create', () => {
       total: maxSpaces - 1,
     } as any);
 
-    const mockConfig = createMockConfig({
-      enabled: true,
-      maxSpaces,
-      allowFeatureVisibility: true,
-    });
+    const mockConfig = createMockConfig({ enabled: true, maxSpaces, allowFeatureVisibility: true });
 
     const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
 
@@ -243,11 +235,7 @@ describe('#create', () => {
       total: maxSpaces,
     } as any);
 
-    const mockConfig = createMockConfig({
-      enabled: true,
-      maxSpaces,
-      allowFeatureVisibility: true,
-    });
+    const mockConfig = createMockConfig({ enabled: true, maxSpaces, allowFeatureVisibility: true });
 
     const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
 

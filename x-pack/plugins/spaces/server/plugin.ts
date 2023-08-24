@@ -103,7 +103,7 @@ export class SpacesPlugin
 
   private defaultSpaceService?: DefaultSpaceService;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<ConfigType>();
     this.log = initializerContext.logger.get();
     this.spacesService = new SpacesService();
@@ -148,21 +148,18 @@ export class SpacesPlugin
       logger: this.log,
     });
 
-    const router = core.http.createRouter<SpacesRequestHandlerContext>();
+    const externalRouter = core.http.createRouter<SpacesRequestHandlerContext>();
+    initExternalSpacesApi({
+      externalRouter,
+      log: this.log,
+      getStartServices: core.getStartServices,
+      getSpacesService,
+      usageStatsServicePromise,
+    });
 
-    initExternalSpacesApi(
-      {
-        router,
-        log: this.log,
-        getStartServices: core.getStartServices,
-        getSpacesService,
-        usageStatsServicePromise,
-      },
-      this.initializerContext.env.packageInfo.buildFlavor
-    );
-
+    const internalRouter = core.http.createRouter<SpacesRequestHandlerContext>();
     initInternalSpacesApi({
-      router,
+      internalRouter,
       getSpacesService,
     });
 

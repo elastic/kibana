@@ -12,7 +12,6 @@ describe('View routes', () => {
   it('does not register Login routes if both `basic` and `token` providers are disabled', () => {
     const routeParamsMock = routeDefinitionParamsMock.create({
       authc: { providers: { pki: { pki1: { order: 0 } } } },
-      accessAgreement: { message: 'some-message' },
     });
 
     defineViewRoutes(routeParamsMock);
@@ -20,12 +19,12 @@ describe('View routes', () => {
     expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
       .toMatchInlineSnapshot(`
       Array [
+        "/security/access_agreement",
         "/security/account",
-        "/internal/security/capture-url",
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
-        "/security/access_agreement",
+        "/internal/security/capture-url",
       ]
     `);
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
@@ -38,7 +37,6 @@ describe('View routes', () => {
   it('registers Login routes if `basic` provider is enabled', () => {
     const routeParamsMock = routeDefinitionParamsMock.create({
       authc: { providers: { basic: { basic1: { order: 0 } } } },
-      accessAgreement: { message: 'some-message' },
     });
 
     defineViewRoutes(routeParamsMock);
@@ -46,19 +44,19 @@ describe('View routes', () => {
     expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
       .toMatchInlineSnapshot(`
       Array [
+        "/login",
+        "/security/access_agreement",
         "/security/account",
-        "/internal/security/capture-url",
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
-        "/security/access_agreement",
-        "/login",
+        "/internal/security/capture-url",
       ]
     `);
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
       Array [
-        "/internal/security/access_agreement/state",
         "/internal/security/login_state",
+        "/internal/security/access_agreement/state",
       ]
     `);
   });
@@ -66,7 +64,6 @@ describe('View routes', () => {
   it('registers Login routes if `token` provider is enabled', () => {
     const routeParamsMock = routeDefinitionParamsMock.create({
       authc: { providers: { token: { token1: { order: 0 } } } },
-      accessAgreement: { message: 'some-message' },
     });
 
     defineViewRoutes(routeParamsMock);
@@ -74,19 +71,19 @@ describe('View routes', () => {
     expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
       .toMatchInlineSnapshot(`
       Array [
+        "/login",
+        "/security/access_agreement",
         "/security/account",
-        "/internal/security/capture-url",
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
-        "/security/access_agreement",
-        "/login",
+        "/internal/security/capture-url",
       ]
     `);
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
       Array [
-        "/internal/security/access_agreement/state",
         "/internal/security/login_state",
+        "/internal/security/access_agreement/state",
       ]
     `);
   });
@@ -94,7 +91,6 @@ describe('View routes', () => {
   it('registers Login routes if Login Selector is enabled even if both `token` and `basic` providers are not enabled', () => {
     const routeParamsMock = routeDefinitionParamsMock.create({
       authc: { selector: { enabled: true }, providers: { pki: { pki1: { order: 0 } } } },
-      accessAgreement: { message: 'some-message' },
     });
 
     defineViewRoutes(routeParamsMock);
@@ -102,44 +98,19 @@ describe('View routes', () => {
     expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
       .toMatchInlineSnapshot(`
       Array [
-        "/security/account",
-        "/internal/security/capture-url",
-        "/security/logged_out",
-        "/logout",
-        "/security/overwritten_session",
+        "/login",
         "/security/access_agreement",
-        "/login",
-      ]
-    `);
-    expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
-      Array [
-        "/internal/security/access_agreement/state",
-        "/internal/security/login_state",
-      ]
-    `);
-  });
-
-  it('does not register access agreement routes if access agreement is not enabled', () => {
-    const routeParamsMock = routeDefinitionParamsMock.create({
-      authc: { providers: { basic: { basic1: { order: 0 } } } },
-    });
-
-    defineViewRoutes(routeParamsMock);
-
-    expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
-      .toMatchInlineSnapshot(`
-      Array [
         "/security/account",
-        "/internal/security/capture-url",
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
-        "/login",
+        "/internal/security/capture-url",
       ]
     `);
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
       Array [
         "/internal/security/login_state",
+        "/internal/security/access_agreement/state",
       ]
     `);
   });

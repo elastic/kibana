@@ -15,9 +15,9 @@ import { spaceSchema } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initPostSpacesApi(deps: ExternalRouteDeps) {
-  const { router, log, getSpacesService } = deps;
+  const { externalRouter, log, getSpacesService } = deps;
 
-  router.post(
+  externalRouter.post(
     {
       path: '/api/spaces/space',
       validate: {

@@ -13,9 +13,9 @@ import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
-  const { router, log, getSpacesService } = deps;
+  const { externalRouter, log, getSpacesService } = deps;
 
-  router.get(
+  externalRouter.get(
     {
       path: '/api/spaces/space',
       validate: {

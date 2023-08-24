@@ -61,7 +61,7 @@ describe('get shareable references', () => {
       spacesClientService: clientServiceStart,
     });
     initGetShareableReferencesApi({
-      router,
+      externalRouter: router,
       getStartServices: async () => [coreStart, {}, {}],
       log,
       getSpacesService: () => spacesServiceStart,
