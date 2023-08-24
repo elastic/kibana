@@ -56,7 +56,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
   const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0, height: 0, width: 0 });
   const [isListOpen, setListOpen] = useState(false);
   const [selectableHasFocus, setSelectableHasFocus] = useState(false);
-  const [searchWord, setSearchWord] = useState<string | null>(null);
+  const [searchWord, setSearchWord] = useState<string>('');
 
   const optionsToShow: EuiSelectableOption[] = useMemo(() => {
     return matches?.map((variable) => ({
@@ -120,7 +120,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
         ? { top, left, width, height }
         : old
     );
-  }, [setPopupPosition, textAreaRef]);
+  }, [setPopupPosition]);
 
   useEffect(() => {
     if (!isListOpen) return;
