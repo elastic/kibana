@@ -16,20 +16,17 @@ export type StopAction = ReturnType<typeof useStopAction>;
 
 export const useStopAction = (forceDisable: boolean) => {
   const { canStartStopTransform } = useAuthorization().capabilities;
-
-  const { mutate: stopTransforms } = useStopTransforms();
+  const stopTransforms = useStopTransforms();
   const [isModalVisible, setModalVisible] = useState(false);
   const [items, setItems] = useState<TransformListRow[]>([]);
 
   const closeModal = () => setModalVisible(false);
-
   const openModal = (newItems: TransformListRow[]) => {
     if (Array.isArray(newItems)) {
       setItems(newItems);
       setModalVisible(true);
     }
   };
-
   const stopAndCloseModal = useCallback(
     (transformSelection: TransformListRow[]) => {
       setModalVisible(false);

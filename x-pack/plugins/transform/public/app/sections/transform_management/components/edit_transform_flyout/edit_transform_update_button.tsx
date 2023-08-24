@@ -27,7 +27,7 @@ export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ 
   const config = useEditTransformFlyout('config');
   const { apiError } = useEditTransformFlyout('actions');
 
-  const { mutate: updateTransfrom } = useUpdateTransform(config.id, requestConfig);
+  const updateTransfrom = useUpdateTransform(config.id, requestConfig);
 
   async function submitFormHandler() {
     apiError(undefined);

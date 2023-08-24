@@ -60,5 +60,5 @@ export const useCreateTransform = (
     },
   });
 
-  return mutation;
+  return mutation.mutate;
 };

@@ -36,5 +36,5 @@ export const useUpdateTransform = (
     onSuccess: () => refreshTransformList(),
   });
 
-  return mutation;
+  return mutation.mutate;
 };

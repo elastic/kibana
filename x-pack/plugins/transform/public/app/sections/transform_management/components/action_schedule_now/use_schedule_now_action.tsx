@@ -22,8 +22,7 @@ import {
 export type ScheduleNowAction = ReturnType<typeof useScheduleNowAction>;
 export const useScheduleNowAction = (forceDisable: boolean, transformNodes: number) => {
   const { canScheduleNowTransform } = useAuthorization().capabilities;
-
-  const { mutate: scheduleNowTransforms } = useScheduleNowTransforms();
+  const scheduleNowTransforms = useScheduleNowTransforms();
 
   const action: TransformListAction = useMemo(
     () => ({

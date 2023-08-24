@@ -77,5 +77,5 @@ export const useReauthorizeTransforms = () => {
     },
   });
 
-  return mutation;
+  return mutation.mutate;
 };

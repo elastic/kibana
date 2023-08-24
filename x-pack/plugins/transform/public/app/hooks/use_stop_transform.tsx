@@ -66,5 +66,5 @@ export const useStopTransforms = () => {
     },
   });
 
-  return mutation;
+  return mutation.mutate;
 };

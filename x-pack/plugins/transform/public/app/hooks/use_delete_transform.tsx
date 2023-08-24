@@ -211,5 +211,5 @@ export const useDeleteTransforms = () => {
     },
   });
 
-  return mutation;
+  return mutation.mutate;
 };

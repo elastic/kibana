@@ -78,5 +78,5 @@ export const useScheduleNowTransforms = () => {
     },
   });
 
-  return mutation;
+  return mutation.mutate;
 };

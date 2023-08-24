@@ -18,7 +18,7 @@ export type StartAction = ReturnType<typeof useStartAction>;
 export const useStartAction = (forceDisable: boolean, transformNodes: number) => {
   const { canStartStopTransform } = useAuthorization().capabilities;
 
-  const { mutate: startTransforms } = useStartTransforms();
+  const startTransforms = useStartTransforms();
 
   const [isModalVisible, setModalVisible] = useState(false);
   const [items, setItems] = useState<TransformListRow[]>([]);

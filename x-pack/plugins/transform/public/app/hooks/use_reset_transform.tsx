@@ -78,5 +78,5 @@ export const useResetTransforms = () => {
     },
   });
 
-  return mutation;
+  return mutation.mutate;
 };

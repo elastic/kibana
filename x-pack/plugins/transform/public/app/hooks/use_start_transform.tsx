@@ -70,5 +70,5 @@ export const useStartTransforms = () => {
     },
   });
 
-  return mutation;
+  return mutation.mutate;
 };

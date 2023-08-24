@@ -123,8 +123,8 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     }, [created, started, dataViewId]);
 
     const { overlays, theme } = useAppDependencies();
-    const { mutate: startTransforms } = useStartTransforms();
-    const { mutate: createTransform } = useCreateTransform(transformId, transformConfig);
+    const startTransforms = useStartTransforms();
+    const createTransform = useCreateTransform(transformId, transformConfig);
 
     function createTransformHandler(startAfterCreation = false) {
       setLoading(true);

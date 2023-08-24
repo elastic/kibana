@@ -44,7 +44,7 @@ import {
 export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
 
-  const { mutate: deleteTransforms } = useDeleteTransforms();
+  const deleteTransforms = useDeleteTransforms();
 
   const {
     isInitialLoading,
