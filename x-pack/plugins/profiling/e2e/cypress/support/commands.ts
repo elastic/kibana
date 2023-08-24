@@ -57,12 +57,17 @@ Cypress.Commands.add('visitKibana', (url, query) => {
 
 Cypress.Commands.add(
   'addKqlFilter',
-  ({ key, value, dataTestSubj = 'profilingUnifiedSearchBar' }) => {
+  ({ key, value, dataTestSubj = 'profilingUnifiedSearchBar', waitForSuggestion = true }) => {
     cy.getByTestSubj(dataTestSubj).type(key);
     cy.contains(key);
     cy.getByTestSubj(`autocompleteSuggestion-field-${key}-`).click();
-    cy.getByTestSubj(dataTestSubj).type(':');
-    cy.getByTestSubj(Cypress.$.escapeSelector(`autocompleteSuggestion-value-"${value}"-`)).click();
+    // Do not close quotes here as it will not display the suggestion box
+    cy.getByTestSubj(dataTestSubj).type(`: "${value}`);
+    if (waitForSuggestion) {
+      cy.getByTestSubj(
+        Cypress.$.escapeSelector(`autocompleteSuggestion-value-"${value}"-`)
+      ).click();
+    }
     cy.getByTestSubj(dataTestSubj).type('{enter}');
   }
 );

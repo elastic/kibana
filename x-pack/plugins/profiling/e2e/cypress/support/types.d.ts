@@ -25,6 +25,7 @@ declare namespace Cypress {
       key: string;
       value: string;
       dataTestSubj?: 'profilingUnifiedSearchBar' | 'profilingComparisonUnifiedSearchBar';
+      waitForSuggestion?: boolean;
     }): void;
   }
 }
