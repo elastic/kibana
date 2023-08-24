@@ -9,9 +9,19 @@ import React, { useCallback, useMemo } from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageHeader, EuiSpacer, EuiPageHeaderProps } from '@elastic/eui';
+import {
+  EuiPageHeader,
+  EuiSpacer,
+  EuiPageHeaderProps,
+  EuiPageSection,
+  EuiButton,
+} from '@elastic/eui';
+import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
+import { DiscoverLink } from '../../../../lib/discover_link';
+import { useLoadIndex } from '../../../../services';
 import { Section } from '../../home';
-
+import { DetailsPageError } from './details_page_error';
+import { IndexActionsContextMenuWithoutRedux } from '../index_actions_context_menu/index_actions_context_menu.without_redux';
 export enum IndexDetailsSection {
   Overview = 'overview',
   Documents = 'documents',
@@ -76,13 +86,53 @@ export const DetailsPage: React.FunctionComponent<
     }));
   }, [indexDetailsSection, onSectionChange]);
 
+  const { isLoading, error, resendRequest, data } = useLoadIndex(indexName);
+  if (isLoading) {
+    return (
+      <SectionLoading>
+        <FormattedMessage
+          id="xpack.idxMgmt.indexDetails.loadingDescription"
+          defaultMessage="Loading index details…"
+        />
+      </SectionLoading>
+    );
+  }
+  if (error || !data) {
+    return <DetailsPageError indexName={indexName} resendRequest={resendRequest} />;
+  }
+
   return (
     <>
+      <EuiPageSection paddingSize="none">
+        <EuiButton
+          data-test-subj="indexDetailsBackToIndicesButton"
+          color="text"
+          iconType="arrowLeft"
+          onClick={() => {
+            return history.push(`/${Section.Indices}`);
+          }}
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.indexDetails.backToIndicesButtonLabel"
+            defaultMessage="Back to all indices"
+          />
+        </EuiButton>
+      </EuiPageSection>
+
+      <EuiSpacer size="l" />
+
       <EuiPageHeader
         data-test-subj="indexDetailsHeader"
         pageTitle={indexName}
         bottomBorder
-        rightSideItems={[]}
+        rightSideItems={[
+          <DiscoverLink indexName={indexName} asButton={true} />,
+          <IndexActionsContextMenuWithoutRedux
+            indexNames={[indexName]}
+            indices={[data]}
+            fill={false}
+          />,
+        ]}
         tabs={headerTabs}
       />
 
