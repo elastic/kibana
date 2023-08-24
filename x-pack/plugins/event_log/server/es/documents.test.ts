@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-import { getIndexTemplate } from './documents';
+import { getIndexTemplate, getIlmPolicy } from './documents';
 import { getEsNames } from './names';
+
+describe('getIlmPolicy()', () => {
+  test('returns the basic structure of an ilm policy', () => {
+    expect(getIlmPolicy()).toMatchObject({
+      policy: {
+        phases: {},
+      },
+    });
+  });
+});
 
 describe('getIndexTemplate()', () => {
   const kibanaVersion = '1.2.3';
@@ -17,6 +27,7 @@ describe('getIndexTemplate()', () => {
     expect(indexTemplate.index_patterns).toEqual([esNames.dataStream]);
     expect(indexTemplate.template.settings.number_of_shards).toBeGreaterThanOrEqual(0);
     expect(indexTemplate.template.settings.auto_expand_replicas).toBe('0-1');
+    expect(indexTemplate.template.settings['index.lifecycle.name']).toBe(esNames.ilmPolicy);
     expect(indexTemplate.template.mappings).toMatchObject({});
   });
 });
