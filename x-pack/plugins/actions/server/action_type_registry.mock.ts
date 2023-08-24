@@ -20,6 +20,9 @@ const createActionTypeRegistryMock = () => {
     isSystemActionType: jest.fn(),
     getUtils: jest.fn(),
     getSystemActionKibanaPrivileges: jest.fn(),
+    getEnabledConnectorTypes: jest.fn(),
+    setEnabledConnectorTypes: jest.fn(),
+    validateEnabledConnectorTypes: jest.fn(),
   };
   return mocked;
 };

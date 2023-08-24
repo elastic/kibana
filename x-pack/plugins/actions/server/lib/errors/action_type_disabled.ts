@@ -10,6 +10,7 @@ import { ErrorThatHandlesItsOwnResponse } from './types';
 
 export type ActionTypeDisabledReason =
   | 'config'
+  | 'not_in_enabled_types'
   | 'license_unavailable'
   | 'license_invalid'
   | 'license_expired';

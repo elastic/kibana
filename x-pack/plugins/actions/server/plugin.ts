@@ -101,10 +101,8 @@ import { createSubActionConnectorFramework } from './sub_action_framework';
 import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import { CaseConnector } from './sub_action_framework/case';
-import {
-  type IUnsecuredActionsClient,
-  UnsecuredActionsClient,
-} from './unsecured_actions_client/unsecured_actions_client';
+import type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
+import { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 import { createSystemConnectors } from './create_system_actions';
 
@@ -131,6 +129,7 @@ export interface PluginSetupContract {
   getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
   getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
+  setEnabledConnectorTypes: (actionTypes: string[]) => void;
 }
 
 export interface PluginStartContract {
@@ -376,6 +375,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         };
       },
       getActionsConfigurationUtilities: () => actionsConfigUtils,
+      setEnabledConnectorTypes: (actionTypes) => {
+        actionTypeRegistry.setEnabledConnectorTypes(new Set(actionTypes));
+      },
     };
   }
 
@@ -548,6 +550,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         logger: this.logger,
       });
     }
+
+    actionTypeRegistry!.validateEnabledConnectorTypes();
 
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {

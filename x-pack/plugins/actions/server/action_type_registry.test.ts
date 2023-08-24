@@ -539,6 +539,22 @@ describe('actionTypeRegistry', () => {
       });
       expect(actionTypeRegistry.isActionTypeEnabled('foo')).toEqual(false);
     });
+
+    test('should return false when isActionTypeEnabled and isLicenseValidForActionType are true but connector is not in the enabled types list', () => {
+      mockedActionsConfig.isActionTypeEnabled.mockReturnValue(true);
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      actionTypeRegistry.setEnabledConnectorTypes(new Set(['.test-connector']));
+
+      expect(actionTypeRegistry.isActionTypeEnabled('foo')).toEqual(false);
+    });
+
+    test('should return true when the connector is enabled in everywhere', () => {
+      mockedActionsConfig.isActionTypeEnabled.mockReturnValue(true);
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      actionTypeRegistry.setEnabledConnectorTypes(new Set(['foo']));
+
+      expect(actionTypeRegistry.isActionTypeEnabled('foo')).toEqual(true);
+    });
   });
 
   describe('ensureActionTypeEnabled', () => {
@@ -558,9 +574,16 @@ describe('actionTypeRegistry', () => {
       },
     };
 
+    const barActionType: ActionType = {
+      ...fooActionType,
+      id: 'bar',
+      name: 'bar',
+    };
+
     beforeEach(() => {
       actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       actionTypeRegistry.register(fooActionType);
+      actionTypeRegistry.register(barActionType);
     });
 
     test('should call ensureActionTypeEnabled of the action config', async () => {
@@ -589,6 +612,18 @@ describe('actionTypeRegistry', () => {
       expect(() =>
         actionTypeRegistry.ensureActionTypeEnabled('foo')
       ).toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+    });
+
+    test('should throw when the connector is not in enabledConnectorTypes', async () => {
+      actionTypeRegistry.setEnabledConnectorTypes(new Set(['bar']));
+
+      expect(() =>
+        actionTypeRegistry.ensureActionTypeEnabled('foo')
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Connector type \\"foo\\" is not enabled in the registry"`
+      );
+
+      expect(() => actionTypeRegistry.ensureActionTypeEnabled('bar')).not.toThrow();
     });
   });
 
@@ -803,6 +838,84 @@ describe('actionTypeRegistry', () => {
 
       registry.getSystemActionKibanaPrivileges('test.system-action', { foo: 'bar' });
       expect(getKibanaPrivileges).toHaveBeenCalledWith({ params: { foo: 'bar' } });
+    });
+  });
+
+  describe('setEnabledConnectorTypes', () => {
+    it('should set and get the enabled connector types', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      const connectors = new Set(['.server-log', '.slack']);
+
+      registry.setEnabledConnectorTypes(connectors);
+      expect(registry.getEnabledConnectorTypes()).toEqual(connectors);
+    });
+
+    it('should not overwrite enabled connector types', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      const connectors = new Set(['.server-log', '.slack']);
+
+      registry.setEnabledConnectorTypes(connectors);
+      expect(() => registry.setEnabledConnectorTypes(connectors)).toThrow(
+        'Enabled connector types can be set only once'
+      );
+    });
+  });
+
+  describe('validateEnabledConnectorTypes', () => {
+    const fooConnectorType: ActionType = {
+      id: 'foo',
+      name: 'Foo',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor: async (options) => {
+        return { status: 'ok', actionId: options.actionId };
+      },
+    };
+
+    const barConnectorType: ActionType = {
+      ...fooConnectorType,
+      id: 'bar',
+      name: 'bar',
+    };
+
+    it('should not throw when enabledConnectorTypes is ["*"]', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+      registry.register(fooConnectorType);
+      registry.register(barConnectorType);
+
+      expect(() => registry.validateEnabledConnectorTypes()).not.toThrow();
+      expect(Array.from(registry.getEnabledConnectorTypes())).toEqual(['*']);
+    });
+
+    it('should not throw when all the connectors in enabledConnectorTypes are registered', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+      registry.register(fooConnectorType);
+      registry.register(barConnectorType);
+
+      const connectors = new Set(['foo', 'bar']);
+      registry.setEnabledConnectorTypes(connectors);
+
+      expect(() => registry.validateEnabledConnectorTypes()).not.toThrow();
+    });
+
+    it('should throw when any of the connectors in enabledConnectorTypes is not registered', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+      registry.register(fooConnectorType);
+      registry.register(barConnectorType);
+
+      const connectors = new Set(['foo', 'bar', 'baz', 'qux']);
+      registry.setEnabledConnectorTypes(connectors);
+
+      expect(() => registry.validateEnabledConnectorTypes()).toThrow(
+        'Action type "baz" is not registered.'
+      );
     });
   });
 });

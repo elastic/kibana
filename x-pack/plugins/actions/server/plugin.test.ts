@@ -348,6 +348,65 @@ describe('Actions Plugin', () => {
         expect(pluginSetup.isPreconfiguredConnector('anotherConnectorId')).toEqual(false);
       });
     });
+
+    describe('setEnabledConnectorTypes', () => {
+      function setup(config: ActionsConfig) {
+        context = coreMock.createPluginInitializerContext<ActionsConfig>(config);
+        plugin = new ActionsPlugin(context);
+        coreSetup = coreMock.createSetup();
+        pluginsSetup = {
+          taskManager: taskManagerMock.createSetup(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
+          licensing: licensingMock.createSetup(),
+          eventLog: eventLogMock.createSetup(),
+          usageCollection: usageCollectionPluginMock.createSetupContract(),
+          features: featuresPluginMock.createSetup(),
+        };
+      }
+
+      it('should set connector type enabled', async () => {
+        setup(getConfig());
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        const coreStart = coreMock.createStart();
+        const pluginsStart = {
+          licensing: licensingMock.createStart(),
+          taskManager: taskManagerMock.createStart(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+          eventLog: eventLogMock.createStart(),
+        };
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        pluginSetup.registerType({
+          id: '.server-log',
+          name: 'Server log',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        });
+        pluginSetup.registerType({
+          id: '.slack',
+          name: 'Slack',
+          minimumLicenseRequired: 'gold',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        });
+        pluginSetup.setEnabledConnectorTypes(['.server-log']);
+        expect(pluginStart.isActionTypeEnabled('.server-log')).toBeTruthy();
+        expect(pluginStart.isActionTypeEnabled('.slack')).toBeFalsy();
+      });
+    });
   });
 
   describe('start()', () => {
@@ -394,6 +453,37 @@ describe('Actions Plugin', () => {
         encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
         eventLog: eventLogMock.createStart(),
       };
+    });
+
+    it('should throw when there is an invalid connector type in enabledConnectorTypes', async () => {
+      const pluginSetup = await plugin.setup(coreSetup, {
+        ...pluginsSetup,
+        encryptedSavedObjects: {
+          ...pluginsSetup.encryptedSavedObjects,
+          canEncrypt: true,
+        },
+      });
+
+      pluginSetup.registerType({
+        id: '.server-log',
+        name: 'Server log',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        executor,
+      });
+
+      pluginSetup.setEnabledConnectorTypes(['.server-log', 'non-existing']);
+
+      await expect(async () =>
+        plugin.start(coreStart, pluginsStart)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Action type \\"non-existing\\" is not registered."`
+      );
     });
 
     describe('getActionsClientWithRequest()', () => {
