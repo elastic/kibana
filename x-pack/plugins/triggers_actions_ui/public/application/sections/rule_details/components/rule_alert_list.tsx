@@ -29,7 +29,6 @@ export const getConvertedAlertStatus = (
   status: AlertStatusValues,
   alert: AlertListItem
 ): AlertStatus => {
-  console.log('ALERT', alert);
   if (!alert.tracked) {
     return ALERT_STATUS_UNTRACKED;
   }

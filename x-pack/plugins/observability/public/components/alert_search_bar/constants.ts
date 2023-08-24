@@ -7,7 +7,12 @@
 
 import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, ALERT_STATUS } from '@kbn/rule-data-utils';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_UNTRACKED,
+  ALERT_STATUS,
+} from '@kbn/rule-data-utils';
 import { AlertStatusFilter } from '../../../common/typings';
 import { ALERT_STATUS_ALL } from '../../../common/constants';
 
@@ -35,6 +40,14 @@ export const RECOVERED_ALERTS: AlertStatusFilter = {
   query: `${ALERT_STATUS}: "${ALERT_STATUS_RECOVERED}"`,
   label: i18n.translate('xpack.observability.alerts.alertStatusFilter.recovered', {
     defaultMessage: 'Recovered',
+  }),
+};
+
+export const UNTRACKED_ALERTS: AlertStatusFilter = {
+  status: ALERT_STATUS_UNTRACKED,
+  query: `${ALERT_STATUS}: "${ALERT_STATUS_UNTRACKED}"`,
+  label: i18n.translate('xpack.observability.alerts.alertStatusFilter.untracked', {
+    defaultMessage: 'Untracked',
   }),
 };
 
