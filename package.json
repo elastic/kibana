@@ -1161,7 +1161,6 @@
     "@kbn/ftr-common-functional-services": "link:packages/kbn-ftr-common-functional-services",
     "@kbn/ftr-screenshot-filename": "link:packages/kbn-ftr-screenshot-filename",
     "@kbn/generate": "link:packages/kbn-generate",
-    "@kbn/generate-oas-cli": "link:packages/kbn-generate-oas-cli",
     "@kbn/get-repo-files": "link:packages/kbn-get-repo-files",
     "@kbn/import-locator": "link:packages/kbn-import-locator",
     "@kbn/import-resolver": "link:packages/kbn-import-resolver",
