@@ -14,7 +14,7 @@ import { SPACE_ID_REGEX } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initUpdateObjectsSpacesApi(deps: ExternalRouteDeps) {
-  const { router, getStartServices } = deps;
+  const { externalRouter, getStartServices } = deps;
 
   const spacesSchema = schema.arrayOf(
     schema.string({
@@ -33,7 +33,7 @@ export function initUpdateObjectsSpacesApi(deps: ExternalRouteDeps) {
     }
   );
 
-  router.post(
+  externalRouter.post(
     {
       path: '/api/spaces/_update_objects_spaces',
       validate: {

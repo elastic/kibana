@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { BuildFlavor } from '@kbn/config/src/types';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 
 import { initCopyToSpacesApi } from './copy_to_space';
@@ -22,28 +21,21 @@ import type { SpacesRouter } from '../../../types';
 import type { UsageStatsServiceSetup } from '../../../usage_stats';
 
 export interface ExternalRouteDeps {
-  router: SpacesRouter;
+  externalRouter: SpacesRouter;
   getStartServices: CoreSetup['getStartServices'];
   getSpacesService: () => SpacesServiceStart;
   usageStatsServicePromise: Promise<UsageStatsServiceSetup>;
   log: Logger;
 }
 
-export function initExternalSpacesApi(deps: ExternalRouteDeps, buildFlavor: BuildFlavor) {
-  // These two routes are always registered, internal in serverless by default
+export function initExternalSpacesApi(deps: ExternalRouteDeps) {
+  initDeleteSpacesApi(deps);
   initGetSpaceApi(deps);
   initGetAllSpacesApi(deps);
-
-  // In the serverless environment, Spaces are enabled but are effectively hidden from the user. We
-  // do not support more than 1 space: the default space. These HTTP APIs for creating, deleting,
-  // updating, and manipulating saved objects across multiple spaces are not needed.
-  if (buildFlavor !== 'serverless') {
-    initPutSpacesApi(deps);
-    initDeleteSpacesApi(deps);
-    initPostSpacesApi(deps);
-    initCopyToSpacesApi(deps);
-    initUpdateObjectsSpacesApi(deps);
-    initGetShareableReferencesApi(deps);
-    initDisableLegacyUrlAliasesApi(deps);
-  }
+  initPostSpacesApi(deps);
+  initPutSpacesApi(deps);
+  initCopyToSpacesApi(deps);
+  initUpdateObjectsSpacesApi(deps);
+  initGetShareableReferencesApi(deps);
+  initDisableLegacyUrlAliasesApi(deps);
 }

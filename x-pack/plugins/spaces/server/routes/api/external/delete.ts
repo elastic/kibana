@@ -15,9 +15,9 @@ import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
-  const { router, log, getSpacesService } = deps;
+  const { externalRouter, log, getSpacesService } = deps;
 
-  router.delete(
+  externalRouter.delete(
     {
       path: '/api/spaces/space/{id}',
       validate: {

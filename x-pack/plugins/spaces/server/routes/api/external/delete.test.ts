@@ -62,7 +62,7 @@ describe('Spaces Public API', () => {
     });
 
     initDeleteSpacesApi({
-      router,
+      externalRouter: router,
       getStartServices: async () => [coreStart, {}, {}],
       log,
       getSpacesService: () => spacesServiceStart,

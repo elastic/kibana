@@ -26,7 +26,7 @@ describe('GET /internal/spaces/_active_space', () => {
     });
 
     initGetActiveSpaceApi({
-      router,
+      internalRouter: router,
       getSpacesService: () =>
         service.start({
           basePath: coreStart.http.basePath,

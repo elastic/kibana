@@ -50,9 +50,6 @@ xpack.cloud_integrations.data_migration.enabled: false
 data.search.sessions.enabled: false
 advanced_settings.enabled: false
 
-# Disable the browser-side functionality that depends on SecurityCheckupGetStateRoutes
-xpack.security.showInsecureClusterWarning: false
-
 # Disable UI of security management plugins
 xpack.security.ui.userManagementEnabled: false
 xpack.security.ui.roleManagementEnabled: false
