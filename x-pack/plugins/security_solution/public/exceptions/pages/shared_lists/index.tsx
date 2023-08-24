@@ -87,7 +87,7 @@ export const SharedLists = React.memo(() => {
   const loading = userInfoLoading || listsConfigLoading;
   const canShowEndpointExceptions = useHasSecurityCapability('showEndpointExceptions');
 
-  const canAccessRuleExceptions = useMemo(
+  const canAccessEndpointExceptions = useMemo(
     () => !listsConfigLoading && !needsListsConfiguration && canShowEndpointExceptions,
     [canShowEndpointExceptions, listsConfigLoading, needsListsConfiguration]
   );
@@ -111,11 +111,11 @@ export const SharedLists = React.memo(() => {
 
   const exceptionListTypes = useMemo(() => {
     const lists = [ExceptionListTypeEnum.DETECTION];
-    if (canAccessRuleExceptions) {
+    if (canAccessEndpointExceptions) {
       lists.push(ExceptionListTypeEnum.ENDPOINT);
     }
     return lists;
-  }, [canAccessRuleExceptions]);
+  }, [canAccessEndpointExceptions]);
   const [
     loadingExceptions,
     exceptions,
