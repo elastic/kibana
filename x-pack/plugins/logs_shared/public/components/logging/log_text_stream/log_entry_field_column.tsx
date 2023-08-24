@@ -64,3 +64,6 @@ const FieldColumnContent = euiStyled(LogEntryColumnContent)<LogEntryColumnConten
       ? preWrappedContentStyle
       : unwrappedContentStyle};
 `;
+
+// eslint-disable-next-line import/no-default-export
+export default LogEntryFieldColumn;

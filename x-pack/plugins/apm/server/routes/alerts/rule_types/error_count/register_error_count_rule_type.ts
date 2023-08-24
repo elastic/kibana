@@ -25,7 +25,6 @@ import {
 } from '@kbn/observability-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
-import { firstValueFrom } from 'rxjs';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
 import {
   ERROR_GROUP_ID,
@@ -42,7 +41,6 @@ import {
 import { errorCountParamsSchema } from '../../../../../common/rules/schema';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { getAlertUrlErrorCount } from '../../../../../common/utils/formatters';
-import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
 import {
@@ -59,11 +57,25 @@ import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.ErrorCount];
 
+export const errorCountActionVariables = [
+  apmActionVariables.alertDetailsUrl,
+  apmActionVariables.environment,
+  apmActionVariables.errorGroupingKey,
+  apmActionVariables.errorGroupingName,
+  apmActionVariables.interval,
+  apmActionVariables.reason,
+  apmActionVariables.serviceName,
+  apmActionVariables.threshold,
+  apmActionVariables.transactionName,
+  apmActionVariables.triggerValue,
+  apmActionVariables.viewInAppUrl,
+];
+
 export function registerErrorCountRuleType({
   alerting,
   alertsLocator,
   basePath,
-  config$,
+  getApmIndices,
   logger,
   ruleDataClient,
 }: RegisterRuleDependencies) {
@@ -80,19 +92,7 @@ export function registerErrorCountRuleType({
       defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
       validate: { params: errorCountParamsSchema },
       actionVariables: {
-        context: [
-          apmActionVariables.alertDetailsUrl,
-          apmActionVariables.environment,
-          apmActionVariables.interval,
-          apmActionVariables.reason,
-          apmActionVariables.serviceName,
-          apmActionVariables.transactionName,
-          apmActionVariables.errorGroupingKey,
-          apmActionVariables.errorGroupingName,
-          apmActionVariables.threshold,
-          apmActionVariables.triggerValue,
-          apmActionVariables.viewInAppUrl,
-        ],
+        context: errorCountActionVariables,
       },
       producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
@@ -108,8 +108,6 @@ export function registerErrorCountRuleType({
           ruleParams.groupBy
         );
 
-        const config = await firstValueFrom(config$);
-
         const {
           getAlertUuid,
           getAlertStartedDate,
@@ -117,10 +115,7 @@ export function registerErrorCountRuleType({
           scopedClusterClient,
         } = services;
 
-        const indices = await getApmIndices({
-          config,
-          savedObjectsClient,
-        });
+        const indices = await getApmIndices(savedObjectsClient);
 
         const termFilterQuery = !ruleParams.kqlFilter
           ? [

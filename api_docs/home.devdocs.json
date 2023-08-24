@@ -107,11 +107,21 @@
             "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueRegistry.get",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "get",
             "description": [],
             "signature": [
-              "() => ",
+              "(features?: Map<string, ",
+              {
+                "pluginId": "home",
+                "scope": "public",
+                "docId": "kibHomePluginApi",
+                "section": "def-public.FeatureCatalogueEntry",
+                "text": "FeatureCatalogueEntry"
+              },
+              ">) => ",
               {
                 "pluginId": "home",
                 "scope": "public",
@@ -120,6 +130,57 @@
                 "text": "FeatureCatalogueEntry"
               },
               "[]"
+            ],
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [],
+            "children": [
+              {
+                "parentPluginId": "home",
+                "id": "def-public.FeatureCatalogueRegistry.get.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "features",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  {
+                    "pluginId": "home",
+                    "scope": "public",
+                    "docId": "kibHomePluginApi",
+                    "section": "def-public.FeatureCatalogueEntry",
+                    "text": "FeatureCatalogueEntry"
+                  },
+                  ">"
+                ],
+                "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-public.FeatureCatalogueRegistry.getFeatures$",
+            "type": "Function",
+            "tags": [],
+            "label": "getFeatures$",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "home",
+                "scope": "public",
+                "docId": "kibHomePluginApi",
+                "section": "def-public.FeatureCatalogueEntry",
+                "text": "FeatureCatalogueEntry"
+              },
+              "[]>"
             ],
             "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
             "deprecated": false,
@@ -201,7 +262,7 @@
           "\nConvert instruction variant id into display text.\n"
         ],
         "signature": [
-          "(id: \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\" | \"OPEN_TELEMETRY\" | \"OTHER_LINUX\") => any"
+          "(id: \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\" | \"OPEN_TELEMETRY\" | \"OTHER_LINUX\") => string"
         ],
         "path": "src/plugins/home/common/instruction_variant.ts",
         "deprecated": false,

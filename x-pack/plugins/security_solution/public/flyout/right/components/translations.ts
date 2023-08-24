@@ -19,9 +19,9 @@ export const COLLAPSE_DETAILS_BUTTON = i18n.translate(
   { defaultMessage: 'Collapse details' }
 );
 
-export const DOCUMENT_DETAILS = i18n.translate(
+export const EVENT_DETAILS = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.headerTitle',
-  { defaultMessage: 'Document details' }
+  { defaultMessage: 'Event details' }
 );
 
 export const SEVERITY_TITLE = i18n.translate(
@@ -45,6 +45,13 @@ export const RULE_SUMMARY_TEXT = i18n.translate(
   }
 );
 
+export const ALERT_REASON_DETAILS_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.alertReasonDetailsText',
+  {
+    defaultMessage: 'Show full reason',
+  }
+);
+
 /* About section */
 
 export const ABOUT_TITLE = i18n.translate(
@@ -64,6 +71,11 @@ export const RULE_DESCRIPTION_TITLE = i18n.translate(
 export const PREVIEW_RULE_DETAILS = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.previewRuleDetailsText',
   { defaultMessage: 'Preview rule details' }
+);
+
+export const PREVIEW_ALERT_REASON_DETAILS = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.previewAlertReasonDetailsText',
+  { defaultMessage: 'Preview alert reason' }
 );
 
 export const DOCUMENT_DESCRIPTION_TITLE = i18n.translate(

@@ -11,7 +11,7 @@ import {
   MlModules,
 } from '@kbn/ml-plugin/server';
 import { isActivePlatinumLicense } from '../../../common/license_check';
-import { APMRouteHandlerResources } from '../../routes/typings';
+import { APMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
 
 export interface MlClient {
   mlSystem: MlMlSystem;
