@@ -110,38 +110,77 @@ const GoogleCloudShellSetup = () => {
   );
 };
 
-type GcpFields = Record<string, { label: string; type?: 'password' | 'text' }>;
+type GcpFields = Record<string, { label: string; type?: 'password' | 'text'; value?: string }>;
 interface GcpInputFields {
   fields: GcpFields;
+  // fields: {
+  //   gcp: {
+  //     project_id: { label: string; type?: 'password' | 'text' }
+  //     credentials: GcpFields
+  //   }
+  // }
 }
+
+// export const gcpField: GcpInputFields = {
+//   fields: {
+//     gcp:{
+//       project_id: {
+//         label: i18n.translate('xpack.csp.gcpIntegration.projectidFieldLabel', {
+//           defaultMessage: 'Project ID',
+//         }),
+//         type: 'text',
+//     },
+//     credentials:{
+//       file: {
+//         label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialFileText', {
+//           defaultMessage: 'Path to JSON file containing the credentials and key used to subscribe',
+//         }),
+//         type: 'text',
+//       },
+//       json: {
+//         label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialJSONText', {
+//           defaultMessage: 'JSON blob containing the credentials and key used to subscribe',
+//         }),
+//         type: 'text',
+//       },
+//       type: {
+//         label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialJSONText', {
+//           defaultMessage: 'JSON blob containing the credentials and key used to subscribe',
+//         }),
+//         type: 'text',
+//       },
+//     }
+//   },
+//   },
+// };
 
 export const gcpField: GcpInputFields = {
   fields: {
-    project_id: {
-      label: i18n.translate('xpack.csp.gcpIntegration.projectidFieldLabel', {
-        defaultMessage: 'Project ID',
-      }),
-      type: 'text',
+      "gcp.project_id": {
+        label: i18n.translate('xpack.csp.gcpIntegration.projectidFieldLabel', {
+          defaultMessage: 'Project ID',
+        }),
+        type: 'text',
     },
-    credentials_file: {
-      label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialFileText', {
-        defaultMessage: 'Path to JSON file containing the credentials and key used to subscribe',
-      }),
-      type: 'text',
-    },
-    credentials_json: {
-      label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialJSONText', {
-        defaultMessage: 'JSON blob containing the credentials and key used to subscribe',
-      }),
-      type: 'text',
-    },
-    credentials_type: {
-      label: i18n.translate(
-        'xpack.csp.findings.gcpIntegration.gcpInputText.credentialSelectBoxTitle',
-        { defaultMessage: 'Credential' }
-      ),
-      type: 'text',
-    },
+      "gcp.credentials.file": {
+        label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialFileText', {
+          defaultMessage: 'Path to JSON file containing the credentials and key used to subscribe',
+        }),
+        type: 'text',
+      },
+      "gcp.credentials.json": {
+        label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialJSONText', {
+          defaultMessage: 'JSON blob containing the credentials and key used to subscribe',
+        }),
+        type: 'text',
+      },
+      "gcp.credentials.type": {
+        label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialJSONText', {
+          defaultMessage: 'Credential',
+        }),
+        type: 'text',
+        value: 'credentials-file'
+      },
   },
 };
 
@@ -195,7 +234,7 @@ interface GcpFormProps {
 
 const getInputVarsFields = (
   input: NewPackagePolicyInput,
-  fields: GcpInputFields[keyof GcpInputFields]
+  fields: GcpFields
 ) =>
   Object.entries(input.streams[0].vars || {})
     .filter(([id]) => id in fields)
@@ -205,7 +244,7 @@ const getInputVarsFields = (
         id,
         label: field.label,
         type: field.type || 'text',
-        value: inputVar.value,
+        value: inputVar.value || field.value,
       } as const;
     });
 
@@ -294,7 +333,9 @@ export const GcpCredentialsForm = ({
   setIsValid,
   onChange,
 }: GcpFormProps) => {
+  console.log(input)
   const fields = getInputVarsFields(input, gcpField.fields);
+  console.log(fields)
   const validSemantic = semverValid(packageInfo.version);
   const integrationVersionNumberOnly = semverCoerce(validSemantic) || '';
   const isInvalid = semverLt(integrationVersionNumberOnly, MIN_VERSION_GCP_CIS);
@@ -348,7 +389,7 @@ export const GcpCredentialsForm = ({
   // Integration is Invalid IF Version is not at least 1.5.0 OR Setup Access is manual but Project ID is empty
   useEffect(() => {
     const isProjectIdEmpty =
-      setupFormat === SETUP_ACCESS_MANUAL && !getFieldById('project_id')?.value;
+      setupFormat === SETUP_ACCESS_MANUAL && !getFieldById('gcp.project_id')?.value;
     const isInvalidPolicy = isInvalid || isProjectIdEmpty;
 
     setIsValid(!isInvalidPolicy);
@@ -411,10 +452,10 @@ const GcpInputVarFields = ({
   const getFieldById = (id: keyof GcpInputFields['fields']) => {
     return fields.find((element) => element.id === id);
   };
-  const projectIdFields = getFieldById('project_id');
-  const credentialsTypeFields = getFieldById('credentials_type') || credentialOptionsList[0];
-  const credentialFilesFields = getFieldById('credentials_file');
-  const credentialJSONFields = getFieldById('credentials_json');
+  const projectIdFields = getFieldById('gcp.project_id') || '';
+  const credentialsTypeFields = getFieldById('gcp.credentials.type') || credentialOptionsList[0];
+  const credentialFilesFields = getFieldById('gcp.credentials.file');
+  const credentialJSONFields = getFieldById('gcp.credentials.json');
 
   const credentialFieldValue = credentialOptionsList[0].value;
   const credentialJSONValue = credentialOptionsList[1].value;
@@ -423,7 +464,7 @@ const GcpInputVarFields = ({
     <div>
       <EuiForm component="form">
         {projectIdFields && (
-          <EuiFormRow fullWidth label={gcpField.fields.project_id.label}>
+          <EuiFormRow fullWidth label={gcpField.fields["gcp.project_id"].label}>
             <EuiFieldText
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
               id={projectIdFields.id}
@@ -434,21 +475,20 @@ const GcpInputVarFields = ({
           </EuiFormRow>
         )}
         {credentialFilesFields && credentialJSONFields && (
-          <EuiFormRow fullWidth label={gcpField.fields.credentials_type.label}>
+          <EuiFormRow fullWidth label={gcpField.fields["gcp.credentials.type"].label}>
             <EuiSelect
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE}
               fullWidth
               options={credentialOptionsList}
               value={credentialsTypeFields?.value || credentialOptionsList[0].value}
               onChange={(optionElem) => {
-                onChange('credentials_type', optionElem.target.value);
+                onChange('gcp.credentials.type', optionElem.target.value);
               }}
             />
           </EuiFormRow>
         )}
-
-        {credentialsTypeFields.value === credentialFieldValue && credentialFilesFields && (
-          <EuiFormRow fullWidth label={gcpField.fields.credentials_file.label}>
+        {credentialsTypeFields?.value === credentialFieldValue && credentialFilesFields && (
+          <EuiFormRow fullWidth label={gcpField.fields["gcp.credentials.file"].label}>
             <EuiFieldText
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE}
               id={credentialFilesFields.id}
@@ -459,7 +499,7 @@ const GcpInputVarFields = ({
           </EuiFormRow>
         )}
         {credentialsTypeFields?.value === credentialJSONValue && credentialJSONFields && (
-          <EuiFormRow fullWidth label={gcpField.fields.credentials_json.label}>
+          <EuiFormRow fullWidth label={gcpField.fields["gcp.credentials.json"].label}>
             <EuiTextArea
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON}
               id={credentialJSONFields.id}
