@@ -107,10 +107,14 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     app: experimentalFeaturesReducer,
   };
 
-  const store = createStore(mockGlobalState, storeReducer, kibanaObservable, storage, [
-    ...managementMiddlewareFactory(coreStart, depsStart),
-    middlewareSpy.actionSpyMiddleware,
-  ]);
+  const store = createStore(
+    mockGlobalState,
+    storeReducer,
+    kibanaObservable,
+    storage,
+    // @ts-expect-error ts upgrade v4.7.4
+    [...managementMiddlewareFactory(coreStart, depsStart), middlewareSpy.actionSpyMiddleware]
+  );
 
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
     <KibanaContextProvider services={startServices}>

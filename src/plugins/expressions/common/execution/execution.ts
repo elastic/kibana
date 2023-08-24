@@ -342,23 +342,23 @@ export class Execution<
           // actually have `then` or `subscribe` methods which would be treated as a `Promise`
           // or an `Observable` accordingly.
           return this.resolveArgs(fn, currentInput, fnArgs).pipe(
-            tap((args) => this.execution.params.debug && Object.assign(link.debug, { args })),
+            tap((args) => this.execution.params.debug && Object.assign(link.debug ?? {}, { args })),
             switchMap((args) => this.invokeFunction(fn, currentInput, args)),
             switchMap((output) => (getType(output) === 'error' ? throwError(output) : of(output))),
-            tap((output) => this.execution.params.debug && Object.assign(link.debug, { output })),
+            tap((output) => this.execution.params.debug && Object.assign(link.debug ?? {}, { output })),
             catchError((rawError) => {
               const error = createError(rawError);
               error.error.message = `[${fnName}] > ${error.error.message}`;
 
               if (this.execution.params.debug) {
-                Object.assign(link.debug, { error, rawError, success: false });
+                Object.assign(link.debug ?? {}, { error, rawError, success: false });
               }
 
               return throwError(error);
             }),
             finalize(() => {
               if (this.execution.params.debug) {
-                Object.assign(link.debug, { duration: now() - timeStart });
+                Object.assign(link.debug ?? {}, { duration: now() - timeStart });
               }
             })
           );

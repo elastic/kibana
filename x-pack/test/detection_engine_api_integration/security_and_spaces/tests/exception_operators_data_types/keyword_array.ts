@@ -152,6 +152,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
+        // @ts-expect-error ts upgrade v4.7.4
         expect(hits.flat(Number.MAX_SAFE_INTEGER)).to.eql([]);
       });
     });
