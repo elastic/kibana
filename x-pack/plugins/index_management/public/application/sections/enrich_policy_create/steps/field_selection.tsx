@@ -29,8 +29,16 @@ interface Props {
 
 export const fieldSelectionFormSchema: FormSchema = {
   matchField: {
-    defaultValue: [],
-    serializer: (v: string[]) => v.join(', '),
+    // Since this ComboBoxField is not a multi-select, we need to serialize/deserialize the value
+    // into a string to be able to save it in the policy.
+    defaultValue: '',
+    type: FIELD_TYPES.COMBO_BOX,
+    serializer: (v: string[]) => {
+      return v.join(', ');
+    },
+    deserializer: (v: string) => {
+      return v.length === 0 ? [] : v.split(', ');
+    },
     label: i18n.translate('xpack.ingestPipelines.form.matchFieldFieldLabel', {
       defaultMessage: 'Match field',
     }),
@@ -108,6 +116,8 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
     onNext();
   };
 
+  const hasSelectedMultipleIndices = (draft.sourceIndices?.length ?? 0) > 1;
+
   return (
     <Form form={form}>
       <UseField
@@ -115,6 +125,9 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
         component={ComboBoxField}
         componentProps={{
           fullWidth: false,
+          helpText: hasSelectedMultipleIndices ? (
+            'Since multiple source indices were selected in the previous step, the match field must be the same across all selected source indices.'
+          ) : undefined,
           euiFieldProps: {
             placeholder: 'Select a field',
             noSuggestions: false,

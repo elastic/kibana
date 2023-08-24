@@ -61,20 +61,6 @@ const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
           </>
         )}
 
-        {/* Policy source indices */}
-        {policy.sourceIndices && (
-          <>
-            <EuiDescriptionListTitle>
-              {i18n.translate('xpack.idxMgmt.enrich_policies.detailsFlyout.sourceIndicesTitle', {
-                defaultMessage: 'Source indices',
-              })}
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription data-test-subj="policyIndicesValue">
-              <span className="eui-textBreakWord">{policy.sourceIndices.join(', ')}</span>
-            </EuiDescriptionListDescription>
-          </>
-        )}
-
         {/* Policy match field */}
         {policy.matchField && (
           <>
@@ -89,6 +75,28 @@ const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
           </>
         )}
 
+        {/* Policy source indices */}
+        {policy.sourceIndices && (
+          <>
+            <EuiDescriptionListTitle>
+              {i18n.translate('xpack.idxMgmt.enrich_policies.detailsFlyout.sourceIndicesTitle', {
+                defaultMessage: 'Source indices',
+              })}
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription data-test-subj="policyIndicesValue">
+              <EuiText size="s">
+                <ul>
+                  {policy.sourceIndices.map((index: string) => (
+                    <li key={index} className="eui-textBreakWord">
+                      {index}
+                    </li>
+                  ))}
+                </ul>
+              </EuiText>
+            </EuiDescriptionListDescription>
+          </>
+        )}
+
         {/* Policy enrich fields */}
         {policy.enrichFields && (
           <>
@@ -98,7 +106,15 @@ const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
               })}
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription data-test-subj="policyEnrichFieldsValue">
-              <span className="eui-textBreakWord">{policy.enrichFields.join(', ')}</span>
+              <EuiText size="s">
+                <ul>
+                  {policy.enrichFields.map((field: string) => (
+                    <li key={field} className="eui-textBreakWord">
+                      {field}
+                    </li>
+                  ))}
+                </ul>
+              </EuiText>
             </EuiDescriptionListDescription>
           </>
         )}
