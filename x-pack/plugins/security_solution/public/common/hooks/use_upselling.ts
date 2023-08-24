@@ -8,10 +8,12 @@
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type React from 'react';
+import type {
+  UpsellingSectionId,
+  UpsellingMessageId,
+} from '@kbn/security-solution-upselling/service';
 import { useUpsellingService } from '../components/upselling_provider';
-import type { UpsellingSectionId } from '../lib/upsellings';
 import type { SecurityPageName } from '../../../common';
-import type { UpsellingMessageId } from '../lib/upsellings/types';
 
 export const useUpsellingComponent = (id: UpsellingSectionId): React.ComponentType | null => {
   const upselling = useUpsellingService();

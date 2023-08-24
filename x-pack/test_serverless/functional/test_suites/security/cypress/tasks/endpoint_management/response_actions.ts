@@ -33,7 +33,7 @@ export const ensureResponseActionAuthzAccess = (
   password: string
 ): Cypress.Chainable => {
   let url: string = '';
-  let apiPayload: unknown = {
+  let apiPayload: any = {
     endpoint_ids: ['some-id'],
   };
 
