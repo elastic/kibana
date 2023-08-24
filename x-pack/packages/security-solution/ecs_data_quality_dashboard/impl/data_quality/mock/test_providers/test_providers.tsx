@@ -7,7 +7,7 @@
 
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { AssistantProvider } from '@kbn/elastic-assistant';
+import { AssistantAvailability, AssistantProvider } from '@kbn/elastic-assistant';
 import { I18nProvider } from '@kbn/i18n-react';
 import { euiDarkVars } from '@kbn/ui-theme';
 import React from 'react';
@@ -33,11 +33,19 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
     reportDataQualityIndexChecked: jest.fn(),
     reportDataQualityCheckAllCompleted: jest.fn(),
   };
+  const mockAssistantAvailability: AssistantAvailability = {
+    hasAssistantPrivilege: false,
+    hasConnectorsAllPrivilege: true,
+    hasConnectorsReadPrivilege: true,
+    isAssistantEnabled: true,
+  };
+
   return (
     <I18nProvider>
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <AssistantProvider
           actionTypeRegistry={actionTypeRegistry}
+          assistantAvailability={mockAssistantAvailability}
           augmentMessageCodeBlocks={jest.fn()}
           baseAllow={[]}
           baseAllowReplacement={[]}

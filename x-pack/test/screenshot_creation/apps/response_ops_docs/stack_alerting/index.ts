@@ -100,8 +100,9 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
       await actions.api.deleteAllConnectors();
     });
 
-    loadTestFile(require.resolve('./list_view'));
+    loadTestFile(require.resolve('./es_query_rule'));
     loadTestFile(require.resolve('./index_threshold_rule'));
+    loadTestFile(require.resolve('./list_view'));
     loadTestFile(require.resolve('./metrics_threshold_rule'));
     loadTestFile(require.resolve('./tracking_containment_rule'));
   });

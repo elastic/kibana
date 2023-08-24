@@ -22,6 +22,7 @@ describe('Add to Cases', () => {
     loadLiveQuery({
       agent_all: true,
       query: "SELECT * FROM os_version where name='Ubuntu';",
+      kuery: '',
     }).then((liveQuery) => {
       liveQueryId = liveQuery.action_id;
       liveQueryQuery = liveQuery.queries[0].query;

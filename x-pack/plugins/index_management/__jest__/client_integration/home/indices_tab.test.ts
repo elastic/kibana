@@ -62,14 +62,13 @@ describe('<IndexManagementHome />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([]);
 
-      testBed = await setup(httpSetup);
-
       await act(async () => {
-        const { component } = testBed;
-
-        await nextTick();
-        component.update();
+        testBed = await setup(httpSetup);
       });
+
+      const { component } = testBed;
+
+      component.update();
     });
 
     test('toggles the include hidden button through URL hash correctly', () => {
@@ -421,6 +420,105 @@ describe('<IndexManagementHome />', () => {
       component.update();
 
       expect(exists('updateIndexSettingsErrorCallout')).toBe(true);
+    });
+  });
+
+  describe('Index stats', () => {
+    const indexName = 'test';
+
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
+
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+
+      const { component } = testBed;
+
+      component.update();
+    });
+
+    test('renders the table column with index stats by default', () => {
+      const { table } = testBed;
+      const { tableCellsValues } = table.getMetaData('indexTable');
+
+      expect(tableCellsValues).toEqual([
+        ['', 'test', 'green', 'open', '1', '1', '10000', '156kb', ''],
+      ]);
+    });
+
+    test('renders index stats in details flyout by default', async () => {
+      const { component, find } = testBed;
+
+      await act(async () => {
+        find('indexTableIndexNameLink').at(0).simulate('click');
+      });
+
+      component.update();
+
+      const descriptions = find('descriptionTitle');
+
+      const descriptionText = descriptions
+        .map((description) => {
+          return description.text();
+        })
+        .sort();
+
+      expect(descriptionText).toEqual([
+        'Aliases',
+        'Docs count',
+        'Docs deleted',
+        'Health',
+        'Primaries',
+        'Primary storage size',
+        'Replicas',
+        'Status',
+        'Storage size',
+      ]);
+    });
+
+    describe('Disabled', () => {
+      beforeEach(async () => {
+        await act(async () => {
+          testBed = await setup(httpSetup, {
+            config: {
+              enableLegacyTemplates: true,
+              enableIndexActions: true,
+              enableIndexStats: false,
+            },
+          });
+        });
+
+        const { component } = testBed;
+
+        component.update();
+      });
+
+      test('hides index stats information from table', async () => {
+        const { table } = testBed;
+        const { tableCellsValues } = table.getMetaData('indexTable');
+
+        expect(tableCellsValues).toEqual([['', 'test', '1', '1', '']]);
+      });
+
+      test('hides index stats information from details panel', async () => {
+        const { component, find } = testBed;
+        await act(async () => {
+          find('indexTableIndexNameLink').at(0).simulate('click');
+        });
+
+        component.update();
+
+        const descriptions = find('descriptionTitle');
+
+        const descriptionText = descriptions
+          .map((description) => {
+            return description.text();
+          })
+          .sort();
+
+        expect(descriptionText).toEqual(['Aliases', 'Primaries', 'Replicas']);
+      });
     });
   });
 });
