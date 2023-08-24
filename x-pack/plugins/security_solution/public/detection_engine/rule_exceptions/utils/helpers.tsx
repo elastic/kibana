@@ -869,7 +869,18 @@ export const buildRuleExceptionWithConditions = ({
     entries: addIdToEntries(exceptionEntries),
   };
 };
+/**
+ * Converting a singular value to a string or an array of strings
+ * is necessary because the "Match" or "Match any" operators
+ * are designed to operate with string value(s).
+ * @param value
+ * @returns string | string[]
+ */
 
+export const getFieldValueAsString = (value: any) => {
+  if (Array.isArray(value)) return value.map(String);
+  return value.toString();
+};
 /**
  Generate exception conditions based on the highlighted fields of the alert that 
  have corresponding values in the alert data.
@@ -884,18 +895,21 @@ export const buildExceptionEntriesFromAlertFields = ({
 }): EntriesArray => {
   return Object.values(highlightedFields).reduce((acc: EntriesArray, field) => {
     const fieldKey = field.id;
-    const fieldValue = get(alertData, fieldKey) || get(alertData, getKibanaAlertIdField(fieldKey));
+    const fieldValue = get(alertData, fieldKey) ?? get(alertData, getKibanaAlertIdField(fieldKey));
 
-    if (fieldValue) {
+    if (fieldValue !== null && fieldValue !== undefined) {
+      const listOperatorType = Array.isArray(fieldValue)
+        ? ListOperatorTypeEnum.MATCH_ANY
+        : ListOperatorTypeEnum.MATCH;
+
       acc.push({
         field: fieldKey,
         operator: ListOperatorEnum.INCLUDED,
-        type: Array.isArray(fieldValue)
-          ? ListOperatorTypeEnum.MATCH_ANY
-          : ListOperatorTypeEnum.MATCH,
-        value: fieldValue,
+        type: listOperatorType,
+        value: getFieldValueAsString(fieldValue),
       });
     }
+
     return acc;
   }, []);
 };
@@ -917,7 +931,10 @@ export const getPrepopulatedRuleExceptionWithHighlightFields = ({
   const highlightedFields = getAlertHighlightedFields(alertData, ruleCustomHighlightedFields);
   if (!highlightedFields.length) return null;
 
-  const exceptionEntries = buildExceptionEntriesFromAlertFields({ highlightedFields, alertData });
+  const exceptionEntries = buildExceptionEntriesFromAlertFields({
+    highlightedFields,
+    alertData,
+  });
   if (!exceptionEntries.length) return null;
 
   return buildRuleExceptionWithConditions({
