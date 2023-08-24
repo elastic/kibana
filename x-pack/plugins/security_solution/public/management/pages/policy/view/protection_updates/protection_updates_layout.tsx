@@ -165,17 +165,19 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
           </EuiTitle>
           <EuiSpacer size="m" />
           {canWritePolicyManagement ? (
-            <EuiDatePicker
-              popoverPlacement={'upCenter'}
-              dateFormat={displayDateFormat}
-              selected={selectedDate}
-              maxDate={today}
-              minDate={cutoffDate}
-              onChange={(date) => {
-                setSelectedDate(date || today);
-                setManifestVersion(date?.format(internalDateFormat) || 'latest');
-              }}
-            />
+            <div data-test-subj={'protection-updates-version-to-deploy-picker'}>
+              <EuiDatePicker
+                popoverPlacement={'upCenter'}
+                dateFormat={displayDateFormat}
+                selected={selectedDate}
+                maxDate={today}
+                minDate={cutoffDate}
+                onChange={(date) => {
+                  setSelectedDate(date || today);
+                  setManifestVersion(date?.format(internalDateFormat) || 'latest');
+                }}
+              />
+            </div>
           ) : (
             <EuiText size="m" data-test-subj="protection-updates-version-to-deploy-view-mode">
               {selectedDate.format(displayDateFormat)}
@@ -270,42 +272,6 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
           {renderVersionToDeployPicker()}
 
           <EuiSpacer size="m" />
-          {/* <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">*/}
-          {/*  <EuiTitle size="xxs" data-test-subj={'protection-updates-manifest-name-note-title'}>*/}
-          {/*    <h5>*/}
-          {/*      {i18n.translate('xpack.securitySolution.endpoint.protectionUpdates.note.label', {*/}
-          {/*        defaultMessage: 'Note',*/}
-          {/*      })}*/}
-          {/*    </h5>*/}
-          {/*  </EuiTitle>*/}
-          {/*  <EuiIconTip*/}
-          {/*    position="right"*/}
-          {/*    content={*/}
-          {/*      <>*/}
-          {/*        <FormattedMessage*/}
-          {/*          id="xpack.securitySolution.endpoint.protectionUpdates.note.tooltip"*/}
-          {/*          defaultMessage="Note will help you understand why you decided to deploy a particular version next time you access policy update."*/}
-          {/*        />*/}
-          {/*      </>*/}
-          {/*    }*/}
-          {/*  />*/}
-          {/* </EuiFlexGroup>*/}
-          {/* <EuiSpacer size="m" />*/}
-
-          {/* <EuiTextArea*/}
-          {/*  value={''}*/}
-          {/*  onChange={() => console.log('test')}*/}
-          {/*  fullWidth={true}*/}
-          {/*  rows={3}*/}
-          {/*  placeholder={i18n.translate(*/}
-          {/*    'xpack.securitySolution.endpoint.protectionUpdates.note.placeholder',*/}
-          {/*    {*/}
-          {/*      defaultMessage: 'Add relevant information about update here',*/}
-          {/*    }*/}
-          {/*  )}*/}
-          {/*  data-test-subj={'protection-updates-manifest-note'}*/}
-          {/* />*/}
-          {/* <EuiSpacer size="m" />*/}
 
           <EuiButton
             fill={true}
@@ -360,7 +326,9 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
                 data-test-subj={'protection-updates-manifest-switch'}
               />
             ) : (
-              <>{viewModeSwitchLabel}</>
+              <EuiText data-test-subj={'protection-updates-state-view-mode'}>
+                {viewModeSwitchLabel}
+              </EuiText>
             )}
           </EuiShowFor>
         </EuiFlexGroup>
