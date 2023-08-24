@@ -66,35 +66,7 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 40
-    parallelism: 12
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-    artifact_paths:
-      - "target/kibana-security-serverless/**/*"
-
-  - command: .buildkite/scripts/steps/functional/security_serverless.sh
-    label: 'Explore - Security Solution Cypress Tests'
-    agents:
-      queue: n2-4-spot
-    depends_on: build
-    timeout_in_minutes: 40
-    parallelism: 12
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-    artifact_paths:
-      - "target/kibana-security-serverless/**/*"
-
-  - command: .buildkite/scripts/steps/functional/security_serverless.sh
-    label: 'Serverless Security Cypress Tests'
-    agents:
-      queue: n2-4-spot
-    depends_on: build
-    timeout_in_minutes: 40
-    parallelism: 12
+    parallelism: 16
     retry:
       automatic:
         - exit_status: '*'
