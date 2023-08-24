@@ -121,6 +121,10 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     return this.isDeclared(key) && Boolean(this.cache[key].isOverridden);
   }
 
+  isAllowlisted(key: string) {
+    return this.isDeclared(key) && Boolean(this.cache[key].allowlisted);
+  }
+
   getUpdate$() {
     return this.update$.asObservable();
   }
@@ -134,6 +138,9 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
       throw new Error(
         `Unable to update "${key}" because its value is overridden by the Kibana server`
       );
+    }
+    if (!this.isAllowlisted(key)) {
+      throw new Error(`Unable to update "${key}" because this setting is not in the allowlist.`);
     }
   }
 
