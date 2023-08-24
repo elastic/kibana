@@ -44,7 +44,7 @@ describe('schedule_notification_actions', () => {
     responseActions: [],
     riskScore: 80,
     riskScoreMapping: [],
-    investigationOptions: undefined,
+    investigationFields: undefined,
     ruleNameOverride: undefined,
     dataViewId: undefined,
     outputIndex: 'output-1',

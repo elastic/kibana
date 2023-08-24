@@ -555,7 +555,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
-        investigation_options: { fields: ['foo', 'bar'] },
+        investigation_fields: { field_names: ['foo', 'bar'] },
       };
 
       expect(result).toEqual(expected);
@@ -636,7 +636,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
-        investigation_options: { fields: ['foo', 'bar'] },
+        investigation_fields: { field_names: ['foo', 'bar'] },
       };
 
       expect(result).toEqual(expected);
@@ -661,7 +661,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
-        investigation_options: { fields: ['foo', 'bar'] },
+        investigation_fields: { field_names: ['foo', 'bar'] },
       };
 
       expect(result).toEqual(expected);
@@ -705,7 +705,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
-        investigation_options: { fields: ['foo', 'bar'] },
+        investigation_fields: { field_names: ['foo', 'bar'] },
       };
 
       expect(result).toEqual(expected);
@@ -758,7 +758,7 @@ describe('helpers', () => {
             ],
           },
         ],
-        investigation_options: { fields: ['foo', 'bar'] },
+        investigation_fields: { field_names: ['foo', 'bar'] },
       };
 
       expect(result).toEqual(expected);
@@ -787,16 +787,16 @@ describe('helpers', () => {
         threat: getThreatMock(),
         timestamp_override: 'event.ingest',
         timestamp_override_fallback_disabled: true,
-        investigation_options: { fields: ['foo', 'bar'] },
+        investigation_fields: { field_names: ['foo', 'bar'] },
       };
 
       expect(result).toEqual(expected);
     });
 
-    test('returns formatted object if investigation_options is empty array', () => {
+    test('returns formatted object if investigationFields is empty array', () => {
       const mockStepData: AboutStepRule = {
         ...mockData,
-        investigationOptions: [],
+        investigationFields: [],
       };
       const result = formatAboutStepData(mockStepData);
       const expected: AboutStepRuleJson = {
@@ -817,16 +817,16 @@ describe('helpers', () => {
         timestamp_override: undefined,
         timestamp_override_fallback_disabled: undefined,
         threat: getThreatMock(),
-        investigation_options: undefined,
+        investigation_fields: undefined,
       };
 
       expect(result).toEqual(expected);
     });
 
-    test('returns formatted object with investigation_options', () => {
+    test('returns formatted object with investigation_fields', () => {
       const mockStepData: AboutStepRule = {
         ...mockData,
-        investigationOptions: ['foo', 'bar'],
+        investigationFields: ['foo', 'bar'],
       };
       const result = formatAboutStepData(mockStepData);
       const expected: AboutStepRuleJson = {
@@ -843,7 +843,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
-        investigation_options: { fields: ['foo', 'bar'] },
+        investigation_fields: { field_names: ['foo', 'bar'] },
         threat_indicator_path: undefined,
         timestamp_override: undefined,
         timestamp_override_fallback_disabled: undefined,
@@ -852,10 +852,10 @@ describe('helpers', () => {
       expect(result).toEqual(expected);
     });
 
-    test('returns formatted object if investigation_options includes empty string', () => {
+    test('returns formatted object if investigation_fields includes empty string', () => {
       const mockStepData: AboutStepRule = {
         ...mockData,
-        investigationOptions: ['  '],
+        investigationFields: ['  '],
       };
       const result = formatAboutStepData(mockStepData);
       const expected: AboutStepRuleJson = {
@@ -872,7 +872,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
-        investigation_options: undefined,
+        investigation_fields: undefined,
         threat_indicator_path: undefined,
         timestamp_override: undefined,
         timestamp_override_fallback_disabled: undefined,

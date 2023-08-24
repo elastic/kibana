@@ -57,7 +57,7 @@ const getBaseRuleParams = (): BaseRuleParams => {
     relatedIntegrations: [],
     requiredFields: [],
     setup: '',
-    investigationOptions: undefined,
+    investigationFields: undefined,
   };
 };
 

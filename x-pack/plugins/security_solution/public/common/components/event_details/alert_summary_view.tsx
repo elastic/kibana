@@ -21,7 +21,7 @@ const AlertSummaryViewComponent: React.FC<{
   title: string;
   goToTable: () => void;
   isReadOnly?: boolean;
-  investigationOptions?: string[];
+  investigationFields?: string[];
 }> = ({
   browserFields,
   data,
@@ -31,7 +31,7 @@ const AlertSummaryViewComponent: React.FC<{
   title,
   goToTable,
   isReadOnly,
-  investigationOptions,
+  investigationFields,
 }) => {
   const summaryRows = useMemo(
     () =>
@@ -42,9 +42,9 @@ const AlertSummaryViewComponent: React.FC<{
         isDraggable,
         scopeId,
         isReadOnly,
-        investigationOptions,
+        investigationFields,
       }),
-    [browserFields, data, eventId, isDraggable, scopeId, isReadOnly, investigationOptions]
+    [browserFields, data, eventId, isDraggable, scopeId, isReadOnly, investigationFields]
   );
 
   return (

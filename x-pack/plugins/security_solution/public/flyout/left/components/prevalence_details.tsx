@@ -108,7 +108,7 @@ const columns: Array<EuiBasicTableColumn<unknown>> = [
  * Prevalence table displayed in the document details expandable flyout left section under the Insights tab
  */
 export const PrevalenceDetails: React.FC = () => {
-  const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId, investigationOptions } =
+  const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId, investigationFields } =
     useLeftPanelContext();
 
   const data = useMemo(() => {
@@ -117,7 +117,7 @@ export const PrevalenceDetails: React.FC = () => {
       data: dataFormattedForFieldBrowser || [],
       eventId,
       scopeId,
-      investigationOptions,
+      investigationFields,
       isReadOnly: false,
     });
 
@@ -139,7 +139,7 @@ export const PrevalenceDetails: React.FC = () => {
         userPrevalence: fields,
       };
     });
-  }, [browserFields, investigationOptions, dataFormattedForFieldBrowser, eventId, scopeId]);
+  }, [browserFields, investigationFields, dataFormattedForFieldBrowser, eventId, scopeId]);
 
   if (!eventId || !dataFormattedForFieldBrowser || !browserFields || !data || data.length === 0) {
     return (

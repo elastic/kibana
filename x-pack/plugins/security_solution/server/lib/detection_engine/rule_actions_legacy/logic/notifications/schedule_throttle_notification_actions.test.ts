@@ -64,7 +64,7 @@ describe('schedule_throttle_notification_actions', () => {
       requiredFields: [],
       setup: '',
       alertSuppression: undefined,
-      investigationOptions: undefined,
+      investigationFields: undefined,
     };
   });
 

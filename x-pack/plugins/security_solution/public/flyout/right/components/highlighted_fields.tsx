@@ -64,7 +64,7 @@ export const HighlightedFields: FC = () => {
 
   const highlightedFields = useHighlightedFields({
     dataFormattedForFieldBrowser,
-    investigationOptions: maybeRule?.investigation_options?.fields ?? [],
+    investigationFields: maybeRule?.investigation_fields?.field_names ?? [],
   });
 
   if (!dataFormattedForFieldBrowser || highlightedFields.length === 0) {

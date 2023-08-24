@@ -261,15 +261,15 @@ export const RelatedIntegrationArray = t.array(RelatedIntegration);
 /**
  * Schema for fields relating to investigation fields, these are user defined fields we use to highlight
  * in various features in the UI such as alert details flyout and exceptions auto-population from alert.
- * Added in INSERT PR
+ * Added in PR #163235
  * Right now we only have a single field but anticipate adding more related fields to store various
  * configuration states such as `override` - where a user might say if they want only these fields to
  * display, or if they want these fields + the fields we select. When expanding this field, it may look
  * something like:
- * export const investigationOptions = t.intersection([
+ * export const investigationFields = t.intersection([
  * t.exact(
  *   t.type({
- *     fields: NonEmptyArray(NonEmptyString),
+ *     field_names: NonEmptyArray(NonEmptyString),
  *   })
  * ),
  * t.exact(
@@ -280,9 +280,9 @@ export const RelatedIntegrationArray = t.array(RelatedIntegration);
  * ]);
  *
  */
-export type InvestigationOptions = t.TypeOf<typeof InvestigationOptions>;
-export const InvestigationOptions = t.exact(
+export type InvestigationFields = t.TypeOf<typeof InvestigationFields>;
+export const InvestigationFields = t.exact(
   t.type({
-    fields: NonEmptyArray(NonEmptyString),
+    field_names: NonEmptyArray(NonEmptyString),
   })
 );

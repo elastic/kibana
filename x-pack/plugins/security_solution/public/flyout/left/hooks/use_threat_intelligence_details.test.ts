@@ -75,7 +75,7 @@ describe('useThreatIntelligenceDetails', () => {
         _index: 'testIndex',
       },
       dataAsNestedObject: null,
-      investigationOptions: [],
+      investigationFields: [],
     });
   });
 

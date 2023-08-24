@@ -35,7 +35,7 @@ describe('Alert details expandable flyout left panel prevalence', () => {
   beforeEach(() => {
     cleanKibana();
     login();
-    createRule({ ...getNewRule(), investigation_options: { fields: ['host.os.name'] } });
+    createRule({ ...getNewRule(), investigation_fields: { field_names: ['host.os.name'] } });
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
     expandFirstAlertExpandableFlyout();

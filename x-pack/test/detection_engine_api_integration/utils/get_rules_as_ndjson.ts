@@ -10,7 +10,7 @@
  * for testing uploads.
  * @param rules Array of rules
  */
-export const getRuleAsNdjson = (rules: unknown[]): Buffer => {
+export const getRulesAsNdjson = (rules: unknown[]): Buffer => {
   const stringOfRules = rules.map((rule) => {
     return JSON.stringify(rule);
   });

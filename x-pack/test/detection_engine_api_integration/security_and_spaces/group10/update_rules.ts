@@ -842,16 +842,16 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('investigation_options', () => {
-        it('should overwrite investigation_options value on update - non additive', async () => {
+      describe('investigation_fields', () => {
+        it('should overwrite investigation_fields value on update - non additive', async () => {
           await createRule(supertest, log, {
             ...getSimpleRule('rule-1'),
-            investigation_options: { fields: ['blob', 'boop'] },
+            investigation_fields: { field_names: ['blob', 'boop'] },
           });
 
           const ruleUpdate = {
             ...getSimpleRuleUpdate('rule-1'),
-            investigation_options: { fields: ['foo', 'bar'] },
+            investigation_fields: { field_names: ['foo', 'bar'] },
           };
 
           const { body } = await supertest
@@ -860,18 +860,18 @@ export default ({ getService }: FtrProviderContext) => {
             .send(ruleUpdate)
             .expect(200);
 
-          expect(body.investigation_options.fields).to.eql(['foo', 'bar']);
+          expect(body.investigation_fields.field_names).to.eql(['foo', 'bar']);
         });
 
-        it('should unset investigation_options', async () => {
+        it('should unset investigation_fields', async () => {
           await createRule(supertest, log, {
             ...getSimpleRule('rule-1'),
-            investigation_options: { fields: ['blob', 'boop'] },
+            investigation_fields: { field_names: ['blob', 'boop'] },
           });
 
           const ruleUpdate = {
             ...getSimpleRuleUpdate('rule-1'),
-            investigation_options: undefined,
+            investigation_fields: undefined,
           };
 
           const { body } = await supertest
@@ -880,7 +880,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(ruleUpdate)
             .expect(200);
 
-          expect(body.investigation_options).to.eql(undefined);
+          expect(body.investigation_fields).to.eql(undefined);
         });
       });
     });

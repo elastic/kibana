@@ -25,7 +25,7 @@ import {
   deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleAsNdjson,
-  getRuleAsNdjson,
+  getRulesAsNdjson,
   getSimpleRuleOutput,
   getThresholdRuleForSignalTesting,
   getWebHookAction,
@@ -1816,13 +1816,15 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should import a rule with "investigation_options', async () => {
+      it('should import a rule with "investigation_fields', async () => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            getRuleAsNdjson([{ ...getSimpleRule(), investigation_options: { fields: ['foo'] } }]),
+            getRulesAsNdjson([
+              { ...getSimpleRule(), investigation_fields: { field_names: ['foo'] } },
+            ]),
             'rules.ndjson'
           )
           .expect('Content-Type', 'application/json; charset=utf-8')

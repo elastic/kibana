@@ -523,7 +523,7 @@ export const sampleSignalHit = (): SignalHit => ({
       filters: undefined,
       saved_id: undefined,
       alert_suppression: undefined,
-      investigation_options: undefined,
+      investigation_fields: undefined,
     },
     depth: 1,
   },

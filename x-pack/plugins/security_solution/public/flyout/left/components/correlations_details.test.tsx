@@ -55,7 +55,7 @@ const contextValue: LeftPanelContext = {
   scopeId: '',
   browserFields: null,
   searchHit: undefined,
-  investigationOptions: [],
+  investigationFields: [],
 };
 
 const renderCorrelationDetails = () => {

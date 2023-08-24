@@ -62,7 +62,7 @@ describe('Alert details flyout', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     before(() => {
       cleanKibana();
       cy.task('esArchiverLoad', 'unmapped_fields');
-      createRule({ ...getUnmappedRule(), investigation_options: { fields: ['event.kind'] } });
+      createRule({ ...getUnmappedRule(), investigation_fields: { field_names: ['event.kind'] } });
     });
 
     beforeEach(() => {

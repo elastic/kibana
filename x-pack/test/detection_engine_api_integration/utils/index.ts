@@ -46,7 +46,7 @@ export * from './get_query_signal_ids';
 export * from './get_query_signals_ids';
 export * from './get_query_signals_rule_id';
 export * from './get_rule';
-export * from './get_rule_as_ndjson';
+export * from './get_rules_as_ndjson';
 export * from './get_rule_for_signal_testing';
 export * from './get_rule_so_by_id';
 export * from './get_rule_for_signal_testing_with_timestamp_override';

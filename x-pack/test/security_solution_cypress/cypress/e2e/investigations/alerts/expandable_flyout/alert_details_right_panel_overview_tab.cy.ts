@@ -71,7 +71,7 @@ describe(
   'Alert details expandable flyout right panel overview tab',
   { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
   () => {
-    const rule = { ...getNewRule(), investigation_options: { fields: ['host.os.name'] } };
+    const rule = { ...getNewRule(), investigation_fields: { field_names: ['host.os.name'] } };
 
     beforeEach(() => {
       cleanKibana();

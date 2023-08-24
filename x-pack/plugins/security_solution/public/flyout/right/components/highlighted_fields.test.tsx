@@ -20,7 +20,7 @@ jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallbac
 
 describe('<HighlightedFields />', () => {
   beforeEach(() => {
-    (useRuleWithFallback as jest.Mock).mockReturnValue({ investigation_options: undefined });
+    (useRuleWithFallback as jest.Mock).mockReturnValue({ investigation_fields: undefined });
   });
 
   it('should render the component', () => {

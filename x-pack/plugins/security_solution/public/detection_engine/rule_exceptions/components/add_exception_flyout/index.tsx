@@ -348,7 +348,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
             exceptionItemName,
             // With "rule_default" type, there is only ever one rule associated.
             // That is why it's ok to pull just the first item from rules array here.
-            ruleCustomHighlightedFields: rules?.[0]?.investigation_options?.fields ?? [],
+            ruleCustomHighlightedFields: rules?.[0]?.investigation_fields?.field_names ?? [],
           });
           if (populatedException) {
             setComment(i18n.ADD_RULE_EXCEPTION_FROM_ALERT_COMMENT(alertData._id));

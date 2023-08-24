@@ -262,7 +262,7 @@ export const getDescriptionItem = (
   } else if (field === 'falsePositives') {
     const values: string[] = get(field, data);
     return buildUnorderedListArrayDescription(label, field, values);
-  } else if (field === 'investigationOptions') {
+  } else if (field === 'investigationFields') {
     const values: string[] = get(field, data);
     return buildHighlightedFieldsOverrideDescription(label, values);
   } else if (field === 'riskScore') {

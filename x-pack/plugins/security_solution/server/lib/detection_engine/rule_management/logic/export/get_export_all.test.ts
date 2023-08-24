@@ -136,7 +136,7 @@ describe('getExportAll', () => {
       note: '# Investigative notes',
       version: 1,
       exceptions_list: getListArrayMock(),
-      investigation_options: undefined,
+      investigation_fields: undefined,
     });
     expect(detailsJson).toEqual({
       exported_exception_list_count: 1,
@@ -320,7 +320,7 @@ describe('getExportAll', () => {
       version: 1,
       revision: 0,
       exceptions_list: getListArrayMock(),
-      investigation_options: undefined,
+      investigation_fields: undefined,
     });
     expect(detailsJson).toEqual({
       exported_exception_list_count: 1,

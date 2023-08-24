@@ -62,7 +62,7 @@ describe('duplicateRule', () => {
       timestampOverrideFallbackDisabled: undefined,
       dataViewId: undefined,
       alertSuppression: undefined,
-      investigationOptions: undefined,
+      investigationFields: undefined,
     },
     schedule: {
       interval: '5m',

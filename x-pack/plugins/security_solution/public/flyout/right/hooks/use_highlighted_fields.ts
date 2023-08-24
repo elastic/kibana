@@ -22,7 +22,7 @@ export interface UseHighlightedFieldsParams {
   /**
    * An array of fields user has selected to highlight, defined on rule
    */
-  investigationOptions?: string[];
+  investigationFields?: string[];
 }
 
 export interface UseHighlightedFieldsResult {
@@ -47,7 +47,7 @@ export interface UseHighlightedFieldsResult {
  */
 export const useHighlightedFields = ({
   dataFormattedForFieldBrowser,
-  investigationOptions,
+  investigationFields,
 }: UseHighlightedFieldsParams): UseHighlightedFieldsResult[] => {
   if (!dataFormattedForFieldBrowser) return [];
 
@@ -75,7 +75,7 @@ export const useHighlightedFields = ({
     eventCategories,
     eventCode,
     eventRuleType,
-    highlightedFieldsOverride: investigationOptions ?? [],
+    highlightedFieldsOverride: investigationFields ?? [],
   });
 
   return tableFields.reduce<UseHighlightedFieldsResult[]>((acc, field) => {

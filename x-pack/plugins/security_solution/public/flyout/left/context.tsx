@@ -58,7 +58,7 @@ export interface LeftPanelContext {
   /**
    * User defined fields to highlight (defined on the rule)
    */
-  investigationOptions: string[];
+  investigationFields: string[];
   /**
    * Retrieves searchHit values for the provided field
    */
@@ -105,7 +105,7 @@ export const LeftPanelProvider = ({ id, indexName, scopeId, children }: LeftPane
             dataAsNestedObject,
             dataFormattedForFieldBrowser,
             searchHit,
-            investigationOptions: maybeRule?.investigation_options?.fields ?? [],
+            investigationFields: maybeRule?.investigation_fields?.field_names ?? [],
             getFieldsData,
           }
         : undefined,
@@ -117,7 +117,7 @@ export const LeftPanelProvider = ({ id, indexName, scopeId, children }: LeftPane
       dataAsNestedObject,
       dataFormattedForFieldBrowser,
       searchHit,
-      maybeRule?.investigation_options,
+      maybeRule?.investigation_fields,
       getFieldsData,
     ]
   );

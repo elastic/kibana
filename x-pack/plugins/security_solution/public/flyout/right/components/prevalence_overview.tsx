@@ -29,7 +29,7 @@ export const PrevalenceOverview: FC = () => {
     browserFields,
     dataFormattedForFieldBrowser,
     scopeId,
-    investigationOptions,
+    investigationFields,
   } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutContext();
 
@@ -52,7 +52,7 @@ export const PrevalenceOverview: FC = () => {
     eventId,
     browserFields,
     dataFormattedForFieldBrowser,
-    investigationOptions,
+    investigationFields,
     scopeId,
   });
 
