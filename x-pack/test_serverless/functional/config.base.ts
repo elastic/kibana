@@ -64,6 +64,10 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         discover: {
           pathname: '/app/discover',
         },
+        context: {
+          pathname: '/app/discover',
+          hash: '/context',
+        },
       },
       // choose where screenshots should be saved
       screenshots: {
