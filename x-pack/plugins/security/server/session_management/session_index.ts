@@ -26,7 +26,7 @@ import type { AuditLogger } from '../audit';
 import { sessionCleanupConcurrentLimitEvent, sessionCleanupEvent } from '../audit';
 import { AnonymousAuthenticationProvider } from '../authentication';
 import type { ConfigType } from '../config';
-import { getDetailedErrorMessage } from '../errors';
+import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 
 export interface SessionIndexOptions {
   readonly elasticsearchClient: ElasticsearchClient;
@@ -403,10 +403,15 @@ export class SessionIndex {
             }
           );
         } catch (err) {
-          this.options.logger.error(
-            `Failed to check if session legacy index template exists: ${err.message}`
-          );
-          return reject(err);
+          // The Template API is deprecated and may become unavailable at some point (404 Not Found). It's also
+          // unavailable in the Serverless offering (410 Gone). In either of these cases, we should disregard the error.
+          const errorStatusCode = getErrorStatusCode(err);
+          if (errorStatusCode !== 404 && errorStatusCode !== 410) {
+            this.options.logger.error(
+              `Failed to check if session legacy index template exists: ${err.message}`
+            );
+            return reject(err);
+          }
         }
 
         if (legacyIndexTemplateExists) {

@@ -42,7 +42,7 @@ describe(
       openEntitiesTab();
     });
 
-    it('should display analyzer graph and node list under Insights Entities', () => {
+    it('should display host details and user details under Insights Entities', () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB)
         .should('be.visible')
         .and('have.text', 'Insights');

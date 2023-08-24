@@ -227,6 +227,7 @@ export class CommonPageObject extends FtrService {
       search = '',
       disableWelcomePrompt = true,
       insertTimestamp = true,
+      retryOnFatalError = true,
     } = {}
   ) {
     let appUrl: string;
@@ -293,6 +294,13 @@ export class CommonPageObject extends FtrService {
           this.log.debug(msg);
           throw new Error(msg);
         }
+
+        if (retryOnFatalError && (await this.isFatalErrorScreen())) {
+          const msg = `Fatal error screen shown. Let's try refreshing the page once more.`;
+          this.log.debug(msg);
+          throw new Error(msg);
+        }
+
         if (appName === 'discover') {
           await this.browser.setLocalStorageItem('data.autocompleteFtuePopover', 'true');
         }
@@ -400,6 +408,10 @@ export class CommonPageObject extends FtrService {
 
   async isChromeHidden() {
     return await this.testSubjects.exists('kbnAppWrapper hiddenChrome');
+  }
+
+  async isFatalErrorScreen() {
+    return await this.testSubjects.exists('fatalErrorScreen');
   }
 
   async waitForTopNavToBeVisible() {

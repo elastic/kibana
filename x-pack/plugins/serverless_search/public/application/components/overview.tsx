@@ -35,6 +35,8 @@ import type {
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
+import { useQuery } from '@tanstack/react-query';
+import { Connector } from '@kbn/enterprise-search-plugin/common/types/connectors';
 import { docLinks } from '../../../common/doc_links';
 import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
@@ -60,6 +62,12 @@ export const ElasticsearchOverview = () => {
     url: elasticsearchURL,
     apiKey: clientApiKey,
   };
+
+  const { data } = useQuery({
+    queryKey: ['fetchConnectors'],
+    queryFn: () =>
+      http.fetch<{ connectors: Connector[] }>('/internal/serverless_search/connectors'),
+  });
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
