@@ -44,98 +44,102 @@ const getExceptionList2 = () => ({
   list_id: 'exception_list_2',
 });
 
-describe('Manage lists from "Shared Exception Lists" page', { tags: ['@ess', '@serverless'] }, () => {
-  describe('Create/Export/Delete List', () => {
-    before(() => {
-      createRule(getNewRule({ name: 'Another rule' }));
+describe(
+  'Manage lists from "Shared Exception Lists" page',
+  { tags: ['@ess', '@serverless'] },
+  () => {
+    describe('Create/Export/Delete List', () => {
+      before(() => {
+        createRule(getNewRule({ name: 'Another rule' }));
 
-      // Create exception list associated with a rule
-      createExceptionList(getExceptionList2(), getExceptionList2().list_id).then((response) =>
-        createRule(
-          getNewRule({
-            exceptions_list: [
-              {
-                id: response.body.id,
-                list_id: getExceptionList2().list_id,
-                type: getExceptionList2().type,
-                namespace_type: getExceptionList2().namespace_type,
-              },
-            ],
-          })
-        )
-      );
-
-      // Create exception list not used by any rules
-      createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
-        'exceptionListResponse'
-      );
-    });
-
-    beforeEach(() => {
-      login();
-      visitWithoutDateRange(EXCEPTIONS_URL);
-      waitForExceptionsTableToBeLoaded();
-    });
-
-    it('Export exception list', function () {
-      cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
-
-      exportExceptionList(getExceptionList1().list_id);
-
-      cy.wait('@export').then(({ response }) => {
-        cy.wrap(response?.body).should(
-          'eql',
-          expectedExportedExceptionList(this.exceptionListResponse)
+        // Create exception list associated with a rule
+        createExceptionList(getExceptionList2(), getExceptionList2().list_id).then((response) =>
+          createRule(
+            getNewRule({
+              exceptions_list: [
+                {
+                  id: response.body.id,
+                  list_id: getExceptionList2().list_id,
+                  type: getExceptionList2().type,
+                  namespace_type: getExceptionList2().namespace_type,
+                },
+              ],
+            })
+          )
         );
 
-        cy.get(TOASTER).should(
-          'have.text',
-          `Exception list "${EXCEPTION_LIST_NAME}" exported successfully`
+        // Create exception list not used by any rules
+        createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
+          'exceptionListResponse'
         );
       });
+
+      beforeEach(() => {
+        login();
+        visitWithoutDateRange(EXCEPTIONS_URL);
+        waitForExceptionsTableToBeLoaded();
+      });
+
+      it('Export exception list', function () {
+        cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
+
+        exportExceptionList(getExceptionList1().list_id);
+
+        cy.wait('@export').then(({ response }) => {
+          cy.wrap(response?.body).should(
+            'eql',
+            expectedExportedExceptionList(this.exceptionListResponse)
+          );
+
+          cy.get(TOASTER).should(
+            'have.text',
+            `Exception list "${EXCEPTION_LIST_NAME}" exported successfully`
+          );
+        });
+      });
+
+      it('Link rules to shared exception list', function () {
+        assertNumberLinkedRules(getExceptionList2().list_id, '1');
+        linkRulesToExceptionList(getExceptionList2().list_id, 1);
+        assertNumberLinkedRules(getExceptionList2().list_id, '2');
+      });
+
+      it('Create exception list', function () {
+        createSharedExceptionList(
+          { name: 'Newly created list', description: 'This is my list.' },
+          true
+        );
+
+        // After creation - directed to list detail page
+        cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', 'Newly created list');
+      });
+
+      it('Delete exception list without rule reference', () => {
+        // Using cy.contains because we do not care about the exact text,
+        // just checking number of lists shown
+        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '4');
+
+        deleteExceptionListWithoutRuleReferenceByListId(getExceptionList1().list_id);
+
+        // Using cy.contains because we do not care about the exact text,
+        // just checking number of lists shown
+        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
+      });
+
+      it('Deletes exception list with rule reference', () => {
+        waitForPageWithoutDateRange(EXCEPTIONS_URL);
+        waitForExceptionsTableToBeLoaded();
+
+        // Using cy.contains because we do not care about the exact text,
+        // just checking number of lists shown
+        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
+
+        deleteExceptionListWithRuleReferenceByListId(getExceptionList2().list_id);
+
+        // Using cy.contains because we do not care about the exact text,
+        // just checking number of lists shown
+        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
+      });
     });
-
-    it('Link rules to shared exception list', function () {
-      assertNumberLinkedRules(getExceptionList2().list_id, '1');
-      linkRulesToExceptionList(getExceptionList2().list_id, 1);
-      assertNumberLinkedRules(getExceptionList2().list_id, '2');
-    });
-
-    it('Create exception list', function () {
-      createSharedExceptionList(
-        { name: 'Newly created list', description: 'This is my list.' },
-        true
-      );
-
-      // After creation - directed to list detail page
-      cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', 'Newly created list');
-    });
-
-    it('Delete exception list without rule reference', () => {
-      // Using cy.contains because we do not care about the exact text,
-      // just checking number of lists shown
-      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '4');
-
-      deleteExceptionListWithoutRuleReferenceByListId(getExceptionList1().list_id);
-
-      // Using cy.contains because we do not care about the exact text,
-      // just checking number of lists shown
-      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
-    });
-
-    it('Deletes exception list with rule reference', () => {
-      waitForPageWithoutDateRange(EXCEPTIONS_URL);
-      waitForExceptionsTableToBeLoaded();
-
-      // Using cy.contains because we do not care about the exact text,
-      // just checking number of lists shown
-      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
-
-      deleteExceptionListWithRuleReferenceByListId(getExceptionList2().list_id);
-
-      // Using cy.contains because we do not care about the exact text,
-      // just checking number of lists shown
-      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
-    });
-  });
-});
+  }
+);

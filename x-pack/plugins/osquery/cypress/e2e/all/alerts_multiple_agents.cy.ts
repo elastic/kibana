@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import {
   clickRuleName,

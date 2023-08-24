@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
 import { SAVED_QUERY_ID } from '../../../public/saved_queries/constants';
 import { navigateTo } from '../../tasks/navigation';
 import {
