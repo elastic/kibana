@@ -34,6 +34,7 @@ describe('createEsContext', () => {
   test('should return is ready state as falsy if not initialized', () => {
     const context = createEsContext({
       logger,
+      isServerless: false,
       indexNameRoot: 'test0',
       kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
@@ -48,6 +49,7 @@ describe('createEsContext', () => {
   test('should return esNames', () => {
     const context = createEsContext({
       logger,
+      isServerless: false,
       indexNameRoot: 'test-index',
       kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
@@ -65,6 +67,7 @@ describe('createEsContext', () => {
   test('should return exist false for esAdapter index template and data stream before initialize', async () => {
     const context = createEsContext({
       logger,
+      isServerless: false,
       indexNameRoot: 'test1',
       kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
@@ -86,6 +89,7 @@ describe('createEsContext', () => {
   test('should return exist true for esAdapter index template and data stream after initialize', async () => {
     const context = createEsContext({
       logger,
+      isServerless: false,
       indexNameRoot: 'test2',
       kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
@@ -117,6 +121,7 @@ describe('createEsContext', () => {
 
     const context = createEsContext({
       logger,
+      isServerless: false,
       indexNameRoot: 'test2',
       kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
@@ -134,6 +139,7 @@ describe('createEsContext', () => {
     jest.requireMock('./init').initializeEs.mockResolvedValue(false);
     const context = createEsContext({
       logger,
+      isServerless: false,
       indexNameRoot: 'test2',
       kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),

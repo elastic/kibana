@@ -31,8 +31,11 @@ export async function initializeEs(esContext: EsContext): Promise<boolean> {
 async function initializeEsResources(esContext: EsContext) {
   const steps = new EsInitializationSteps(esContext);
 
-  // today, setExistingAssetsToHidden() never throws, but just in case ...
-  await retry(steps.setExistingAssetsToHidden);
+  // Only set existing assets to hidden if we're not in serverless
+  if (!esContext.isServerless) {
+    // today, setExistingAssetsToHidden() never throws, but just in case ...
+    await retry(steps.setExistingAssetsToHidden);
+  }
   await retry(steps.createIndexTemplateIfNotExists);
   await retry(steps.createDataStreamIfNotExists);
 

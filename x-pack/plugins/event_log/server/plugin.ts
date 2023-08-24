@@ -14,6 +14,7 @@ import {
   IClusterClient,
 } from '@kbn/core/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { ServerlessPluginSetup } from '@kbn/serverless/server';
 
 import type {
   IEventLogConfig,
@@ -34,6 +35,10 @@ const ACTIONS = {
   starting: 'starting',
   stopping: 'stopping',
 };
+
+interface PluginSetupDeps {
+  serverless?: ServerlessPluginSetup;
+}
 
 interface PluginStartDeps {
   spaces?: SpacesPluginStart;
@@ -56,11 +61,12 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     this.kibanaVersion = this.context.env.packageInfo.version;
   }
 
-  setup(core: CoreSetup): IEventLogService {
+  setup(core: CoreSetup, plugins: PluginSetupDeps): IEventLogService {
     const kibanaIndex = core.savedObjects.getDefaultIndex();
     this.systemLogger.debug('setting up plugin');
 
     this.esContext = createEsContext({
+      isServerless: !!plugins.serverless,
       logger: this.systemLogger,
       indexNameRoot: kibanaIndex,
       elasticsearchClientPromise: core

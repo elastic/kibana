@@ -20,6 +20,7 @@ const createContextMock = () => {
   } = {
     logger: loggingSystemMock.createLogger(),
     esNames: namesMock.create(),
+    isServerless: false,
     initialize: jest.fn(),
     shutdown: jest.fn(),
     waitTillReady: jest.fn(async () => true),

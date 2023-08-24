@@ -23,6 +23,7 @@ export interface EsContext {
   waitTillReady(): Promise<boolean>;
   readonly initialized: boolean;
   readonly retryDelay: number;
+  isServerless: boolean;
 }
 
 export interface EsError {
@@ -38,6 +39,7 @@ export interface EsContextCtorParams {
   logger: Logger;
   indexNameRoot: string;
   kibanaVersion: string;
+  isServerless: boolean;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
 }
 
@@ -48,6 +50,7 @@ class EsContextImpl implements EsContext {
   private readonly readySignal: ReadySignal<boolean>;
   public initialized: boolean;
   public readonly retryDelay: number;
+  public readonly isServerless: boolean;
 
   constructor(params: EsContextCtorParams) {
     this.logger = params.logger;
@@ -55,6 +58,7 @@ class EsContextImpl implements EsContext {
     this.readySignal = createReadySignal();
     this.initialized = false;
     this.retryDelay = RETRY_DELAY;
+    this.isServerless = params.isServerless;
     this.esAdapter = new ClusterClientAdapter({
       logger: params.logger,
       elasticsearchClientPromise: params.elasticsearchClientPromise,
