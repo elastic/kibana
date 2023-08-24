@@ -56,10 +56,10 @@ const flavors: {
     docsLink: kibanaGuideDocLink,
   }),
   serverless_search: ({ prependBasePath }) => ({
-    solution: i18n.translate('sharedUXPackages.noDataConfig.analytics', {
+    solution: i18n.translate('sharedUXPackages.noDataConfig.elasticsearch', {
       defaultMessage: 'Elasticsearch',
     }),
-    pageTitle: i18n.translate('sharedUXPackages.noDataConfig.analyticsPageTitle', {
+    pageTitle: i18n.translate('sharedUXPackages.noDataConfig.elasticsearchPageTitle', {
       defaultMessage: 'Welcome to Elasticsearch!',
     }),
     logo: 'logoElasticsearch',
