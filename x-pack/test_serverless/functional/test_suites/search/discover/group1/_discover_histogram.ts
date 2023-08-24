@@ -256,9 +256,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // go to dashboard
-      // TODO: Dashboard's path has changed from
-      // `/dashboard` to `/dashboards` in Serverless
-      await PageObjects.common.navigateToApp('dashboards');
+      await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // go to discover

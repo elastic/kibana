@@ -8,11 +8,11 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe.only('serverless search UI', function () {
-    // loadTestFile(require.resolve('./landing_page'));
+  describe('serverless search UI', function () {
+    loadTestFile(require.resolve('./landing_page'));
     loadTestFile(require.resolve('./empty_page'));
-    // loadTestFile(require.resolve('./navigation'));
-    // loadTestFile(require.resolve('./cases/attachment_framework'));
+    loadTestFile(require.resolve('./navigation'));
+    loadTestFile(require.resolve('./cases/attachment_framework'));
     loadTestFile(require.resolve('./discover/embeddable'));
     loadTestFile(require.resolve('./discover/group1'));
     loadTestFile(require.resolve('./discover/group2'));

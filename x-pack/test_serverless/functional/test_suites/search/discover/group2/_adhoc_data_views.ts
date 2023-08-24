@@ -172,9 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // open searches on dashboard
-      // TODO: Dashboard's path has changed from
-      // `/dashboard` to `/dashboards` in Serverless
-      await PageObjects.common.navigateToApp('dashboards');
+      await PageObjects.common.navigateToApp('dashboard');
       await filterBar.ensureFieldEditorModalIsClosed();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();

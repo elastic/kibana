@@ -118,9 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.saveSearch('expand-cell-search');
 
-      // TODO: Dashboard's path has changed from
-      // `/dashboard` to `/dashboards` in Serverless
-      await PageObjects.common.navigateToApp('dashboards');
+      await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.header.waitUntilLoadingHasFinished();

@@ -58,6 +58,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         indexManagement: {
           pathname: '/app/management/data/index_management',
         },
+        dashboard: {
+          pathname: '/app/dashboards',
+        },
         discover: {
           pathname: '/app/discover',
         },
