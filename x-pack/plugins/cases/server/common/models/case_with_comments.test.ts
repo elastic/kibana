@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttributesTypeAlerts } from '../../../common/api';
+import type { AlertAttachmentAttributes } from '../../../common/types/domain';
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { createCasesClientMockArgs } from '../../client/mocks';
 import { alertComment, comment, mockCaseComments, mockCases, multipleAlert } from '../../mocks';
@@ -343,8 +343,8 @@ describe('CaseCommentModel', () => {
       const attachments =
         clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
 
-      const singleAlertCall = attachments[1] as SavedObject<AttributesTypeAlerts>;
-      const multipleAlertsCall = attachments[2] as SavedObject<AttributesTypeAlerts>;
+      const singleAlertCall = attachments[1] as SavedObject<AlertAttachmentAttributes>;
+      const multipleAlertsCall = attachments[2] as SavedObject<AlertAttachmentAttributes>;
 
       expect(attachments.length).toBe(3);
       expect(attachments[0].attributes.type).toBe('user');
@@ -370,7 +370,7 @@ describe('CaseCommentModel', () => {
       });
 
       const attachments = clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0]
-        .attachments as Array<SavedObject<AttributesTypeAlerts>>;
+        .attachments as Array<SavedObject<AlertAttachmentAttributes>>;
 
       expect(attachments.length).toBe(1);
       expect(attachments[0].attributes.type).toBe('alert');
@@ -389,7 +389,7 @@ describe('CaseCommentModel', () => {
       });
 
       const attachments = clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0]
-        .attachments as Array<SavedObject<AttributesTypeAlerts>>;
+        .attachments as Array<SavedObject<AlertAttachmentAttributes>>;
 
       expect(attachments.length).toBe(1);
       expect(attachments[0].attributes.type).toBe('alert');
@@ -412,7 +412,7 @@ describe('CaseCommentModel', () => {
       });
 
       const attachments = clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0]
-        .attachments as Array<SavedObject<AttributesTypeAlerts>>;
+        .attachments as Array<SavedObject<AlertAttachmentAttributes>>;
 
       expect(attachments.length).toBe(1);
       expect(attachments[0].attributes.type).toBe('alert');
@@ -480,8 +480,8 @@ describe('CaseCommentModel', () => {
       const attachments =
         clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
 
-      const singleAlertCall = attachments[1] as SavedObject<AttributesTypeAlerts>;
-      const multipleAlertsCall = attachments[2] as SavedObject<AttributesTypeAlerts>;
+      const singleAlertCall = attachments[1] as SavedObject<AlertAttachmentAttributes>;
+      const multipleAlertsCall = attachments[2] as SavedObject<AlertAttachmentAttributes>;
 
       expect(attachments.length).toBe(3);
       expect(attachments[0].attributes.type).toBe('user');
@@ -524,9 +524,9 @@ describe('CaseCommentModel', () => {
       const attachments =
         clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
 
-      const alertOne = attachments[1] as SavedObject<AttributesTypeAlerts>;
-      const alertTwo = attachments[2] as SavedObject<AttributesTypeAlerts>;
-      const alertThree = attachments[3] as SavedObject<AttributesTypeAlerts>;
+      const alertOne = attachments[1] as SavedObject<AlertAttachmentAttributes>;
+      const alertTwo = attachments[2] as SavedObject<AlertAttachmentAttributes>;
+      const alertThree = attachments[3] as SavedObject<AlertAttachmentAttributes>;
 
       expect(attachments.length).toBe(4);
       expect(attachments[0].attributes.type).toBe('user');
@@ -569,7 +569,7 @@ describe('CaseCommentModel', () => {
       const attachments =
         clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
 
-      const multipleAlertsCall = attachments[1] as SavedObject<AttributesTypeAlerts>;
+      const multipleAlertsCall = attachments[1] as SavedObject<AlertAttachmentAttributes>;
 
       expect(attachments.length).toBe(2);
       expect(attachments[0].attributes.type).toBe('user');

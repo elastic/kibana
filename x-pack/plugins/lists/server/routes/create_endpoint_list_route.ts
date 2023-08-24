@@ -7,10 +7,10 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { createEndpointListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
+import { createEndpointListResponse } from '../../common/api';
 
 import { buildSiemResponse } from './utils';
 import { getExceptionListClient } from './utils/get_exception_list_client';
@@ -44,7 +44,7 @@ export const createEndpointListRoute = (router: ListsPluginRouter): void => {
         // and block the least amount of time with this route since it could end up in various parts of the
         // stack at some point such as repeatedly being called by endpoint agents.
         const body = createdList ?? {};
-        const [validated, errors] = validate(body, createEndpointListSchema);
+        const [validated, errors] = validate(body, createEndpointListResponse);
         if (errors != null) {
           return siemResponse.error({ body: errors, statusCode: 500 });
         } else {

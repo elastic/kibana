@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
-
 import {
   getSLOTransformId,
   SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_INDEX_TEMPLATE_NAME,
   SLO_INGEST_PIPELINE_NAME,
+  SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
+  SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
+  SLO_SUMMARY_INDEX_TEMPLATE_NAME,
+  SLO_SUMMARY_TRANSFORM_NAME_PREFIX,
 } from '../../assets/constants';
-import { StoredSLO } from '../../domain/models';
-import { SO_SLO_TYPE } from '../../saved_objects';
+import { SLO } from '../../domain/models';
+import { SLORepository } from './slo_repository';
 
 const OK = 'OK';
 const NOT_OK = 'NOT_OK';
@@ -26,59 +29,57 @@ export async function getGlobalDiagnosis(
   esClient: ElasticsearchClient,
   licensing: LicensingApiRequestHandlerContext
 ) {
-  try {
-    const licenseInfo = licensing.license.toJSON();
-    const userPrivileges = await esClient.security.getUserPrivileges();
-    const sloResources = await getSloResourcesDiagnosis(esClient);
+  const licenseInfo = licensing.license.toJSON();
+  const userPrivileges = await esClient.security.getUserPrivileges();
+  const sloResources = await getSloResourcesDiagnosis(esClient);
+  const sloSummaryResources = await getSloSummaryResourcesDiagnosis(esClient);
 
-    return {
-      licenseAndFeatures: licenseInfo,
-      userPrivileges,
-      sloResources,
-    };
-  } catch (error) {
-    throw error;
-  }
+  const sloSummaryTransformsStats = await esClient.transform.getTransformStats({
+    transform_id: `${SLO_SUMMARY_TRANSFORM_NAME_PREFIX}*`,
+    allow_no_match: true,
+  });
+
+  return {
+    licenseAndFeatures: licenseInfo,
+    userPrivileges,
+    sloResources,
+    sloSummaryResources,
+    sloSummaryTransformsStats,
+  };
 }
 
 export async function getSloDiagnosis(
   sloId: string,
-  services: { esClient: ElasticsearchClient; soClient: SavedObjectsClientContract }
+  services: { esClient: ElasticsearchClient; repository: SLORepository }
 ) {
-  const { esClient, soClient } = services;
+  const { esClient, repository } = services;
 
   const sloResources = await getSloResourcesDiagnosis(esClient);
+  const sloSummaryResources = await getSloSummaryResourcesDiagnosis(esClient);
 
-  let sloSavedObject;
+  let slo: SLO | undefined;
   try {
-    sloSavedObject = await soClient.get<StoredSLO>(SO_SLO_TYPE, sloId);
+    slo = await repository.findById(sloId);
   } catch (err) {
     // noop
   }
 
   const sloTransformStats = await esClient.transform.getTransformStats({
-    transform_id: getSLOTransformId(sloId, sloSavedObject?.attributes.revision ?? 1),
+    transform_id: getSLOTransformId(sloId, slo?.revision ?? 1),
+    allow_no_match: true,
   });
 
-  let dataSample;
-  if (sloSavedObject?.attributes.indicator.params.index) {
-    const slo = sloSavedObject.attributes;
-    const sortField =
-      'timestampField' in slo.indicator.params
-        ? slo.indicator.params.timestampField ?? '@timestamp'
-        : '@timestamp';
-    dataSample = await esClient.search({
-      index: slo.indicator.params.index,
-      sort: { [sortField]: 'desc' },
-      size: 5,
-    });
-  }
+  const sloSummaryTransformsStats = await esClient.transform.getTransformStats({
+    transform_id: `${SLO_SUMMARY_TRANSFORM_NAME_PREFIX}*`,
+    allow_no_match: true,
+  });
 
   return {
     sloResources,
-    sloSavedObject: sloSavedObject ?? NOT_OK,
+    sloSummaryResources,
+    slo: slo ?? NOT_OK,
     sloTransformStats,
-    dataSample: dataSample ?? NOT_OK,
+    sloSummaryTransformsStats,
   };
 }
 
@@ -111,7 +112,39 @@ async function getSloResourcesDiagnosis(esClient: ElasticsearchClient) {
       [SLO_INGEST_PIPELINE_NAME]: ingestPipelineExists ? OK : NOT_OK,
     };
   } catch (err) {
-    if (err.meta.statusCode === 403) {
+    if (
+      err instanceof errors.ResponseError &&
+      (err.statusCode === 403 || err.meta.statusCode === 403)
+    ) {
+      throw new Error('Insufficient permissions to access Elasticsearch Cluster', { cause: err });
+    }
+  }
+}
+
+async function getSloSummaryResourcesDiagnosis(esClient: ElasticsearchClient) {
+  try {
+    const indexTemplateExists = await esClient.indices.existsIndexTemplate({
+      name: SLO_SUMMARY_INDEX_TEMPLATE_NAME,
+    });
+
+    const mappingsTemplateExists = await esClient.cluster.existsComponentTemplate({
+      name: SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
+    });
+
+    const settingsTemplateExists = await esClient.cluster.existsComponentTemplate({
+      name: SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
+    });
+
+    return {
+      [SLO_SUMMARY_INDEX_TEMPLATE_NAME]: indexTemplateExists ? OK : NOT_OK,
+      [SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME]: mappingsTemplateExists ? OK : NOT_OK,
+      [SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME]: settingsTemplateExists ? OK : NOT_OK,
+    };
+  } catch (err) {
+    if (
+      err instanceof errors.ResponseError &&
+      (err.statusCode === 403 || err.meta.statusCode === 403)
+    ) {
       throw new Error('Insufficient permissions to access Elasticsearch Cluster', { cause: err });
     }
   }

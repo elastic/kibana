@@ -11,33 +11,35 @@ import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { getNodeDetailUrl } from '../../../pages/link_to';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
+import type { Asset } from '../types';
 
 export interface LinkToNodeDetailsProps {
   currentTimestamp: number;
-  nodeName: string;
-  nodeType: InventoryItemType;
+  asset: Asset;
+  assetType: InventoryItemType;
 }
 
 export const LinkToNodeDetails = ({
-  nodeName,
-  nodeType,
+  asset,
+  assetType,
   currentTimestamp,
 }: LinkToNodeDetailsProps) => {
-  const inventoryModel = findInventoryModel(nodeType);
+  const inventoryModel = findInventoryModel(assetType);
   const nodeDetailFrom = currentTimestamp - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
 
   const nodeDetailMenuItemLinkProps = useLinkProps({
     ...getNodeDetailUrl({
-      nodeType,
-      nodeId: nodeName,
+      nodeType: assetType,
+      nodeId: asset.id,
       from: nodeDetailFrom,
       to: currentTimestamp,
+      assetName: asset.name,
     }),
   });
 
   return (
     <EuiButtonEmpty
-      data-test-subj="infraNodeContextPopoverOpenAsPageButton"
+      data-test-subj="infraAssetDetailsOpenAsPageButton"
       size="xs"
       flush="both"
       {...nodeDetailMenuItemLinkProps}

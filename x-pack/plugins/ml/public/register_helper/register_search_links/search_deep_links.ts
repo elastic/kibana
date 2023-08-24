@@ -210,6 +210,17 @@ function getIndexDataVisualizerDeepLink(mlCapabilities: MlCapabilities): AppDeep
   };
 }
 
+function getDataComparisonDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
+  return {
+    id: 'dataComparison',
+    title: i18n.translate('xpack.ml.deepLink.dataComparison', {
+      defaultMessage: 'Data Comparison',
+    }),
+    path: `/${ML_PAGES.DATA_COMPARISON_INDEX_SELECT}`,
+    navLinkStatus: getNavStatus(mlCapabilities, false),
+  };
+}
+
 function getSettingsDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
   const navLinkStatus = getNavStatus(mlCapabilities, mlCapabilities.isADEnabled);
   return {
@@ -256,6 +267,7 @@ export function getDeepLinks(isFullLicense: boolean, mlCapabilities: MlCapabilit
     getDataVisualizerDeepLink(mlCapabilities),
     getFileUploadDeepLink(mlCapabilities),
     getIndexDataVisualizerDeepLink(mlCapabilities),
+    getDataComparisonDeepLink(mlCapabilities),
   ];
 
   if (isFullLicense === true) {

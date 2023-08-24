@@ -522,7 +522,7 @@ describe('Test discover state actions', () => {
       timeFieldName: 'mock-time-field-name',
     };
     const dataViewsCreateMock = discoverServiceMock.dataViews.create as jest.Mock;
-    dataViewsCreateMock.mockImplementation(() => ({
+    dataViewsCreateMock.mockImplementationOnce(() => ({
       ...dataViewMock,
       ...dataViewSpecMock,
       isPersisted: () => false,

@@ -135,7 +135,9 @@ export const logRateAnalysisIndexOrSearchRouteFactory = (
   breadcrumbs: getLogRateAnalysisBreadcrumbs(navigateToPath, basePath),
 });
 
-// Deprecated since 8.10, kept here to redirect old bookmarks.
+/**
+ * @deprecated since 8.10, kept here to redirect old bookmarks.
+ */
 export const explainLogRateSpikesIndexOrSearchRouteFactory = (): MlRoute => ({
   path: createPath(ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT),
   render: () => <Redirect to={createPath(ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT)} />,
@@ -181,6 +183,26 @@ export const changePointDetectionIndexOrSearchRouteFactory = (
     />
   ),
   breadcrumbs: getChangePointDetectionBreadcrumbs(navigateToPath, basePath),
+});
+
+export const dataComparisonIndexOrSearchRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
+  id: 'data_view_data_comparison',
+  path: createPath(ML_PAGES.DATA_COMPARISON_INDEX_SELECT),
+  title: i18n.translate('xpack.ml.selectDataViewLabel', {
+    defaultMessage: 'Select Data View',
+  }),
+  render: (props, deps) => (
+    <PageWrapper
+      {...props}
+      nextStepPath={createPath(ML_PAGES.DATA_COMPARISON)}
+      deps={deps}
+      mode={MODE.DATAVISUALIZER}
+    />
+  ),
+  breadcrumbs: getDataVisBreadcrumbs(navigateToPath, basePath),
 });
 
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, mode }) => {

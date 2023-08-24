@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FindRulesRequestQuery } from './request_schema';
+import type { FindRulesRequestQuery } from './find_rules_route';
 import { validateFindRulesRequestQuery } from './request_schema_validation';
 
 describe('Find rules request schema, additional validation', () => {

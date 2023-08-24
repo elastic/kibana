@@ -28,13 +28,12 @@ import {
   formatComments,
   addKibanaInformationToDescription,
 } from './utils';
-import { CaseStatuses } from '../../../common/api';
+import { CaseStatuses, UserActionActions } from '../../../common/types/domain';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
 import { userProfiles, userProfilesMap } from '../user_profiles.mock';
 import { mappings, mockCases } from '../../mocks';
-import { UserActionActions } from '../../../common/types/domain';
 
 const allComments = [
   commentObj,

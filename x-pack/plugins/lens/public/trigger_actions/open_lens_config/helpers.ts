@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import './helpers.scss';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { OverlayRef, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -54,6 +55,7 @@ export async function executeAction({ embeddable, startDependencies, overlays, t
         }
       ),
       {
+        className: 'lnsConfigPanel__overlay',
         size: 's',
         'data-test-subj': 'customizeLens',
         type: 'push',

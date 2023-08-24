@@ -20,13 +20,7 @@ import { createBucketSelector } from './create_bucket_selector';
 import { createPercentileAggregation } from './create_percentile_aggregation';
 import { createRateAggsBuckets, createRateAggsBucketScript } from './create_rate_aggregation';
 import { wrapInCurrentPeriod } from './wrap_in_period';
-
-const getParsedFilterQuery: (filterQuery: string | undefined) => Array<Record<string, any>> = (
-  filterQuery
-) => {
-  if (!filterQuery) return [];
-  return [JSON.parse(filterQuery)];
-};
+import { getParsedFilterQuery } from '../../../../utils/get_parsed_filtered_query';
 
 export const calculateCurrentTimeframe = (
   metricParams: MetricExpressionParams,
@@ -44,12 +38,13 @@ export const calculateCurrentTimeframe = (
 export const createBaseFilters = (
   metricParams: MetricExpressionParams,
   timeframe: { start: number; end: number },
+  timeFieldName: string,
   filterQuery?: string
 ) => {
   const rangeFilters = [
     {
       range: {
-        '@timestamp': {
+        [timeFieldName]: {
           gte: moment(timeframe.start).toISOString(),
           lte: moment(timeframe.end).toISOString(),
         },
@@ -76,6 +71,7 @@ export const createBaseFilters = (
 export const getElasticsearchMetricQuery = (
   metricParams: MetricExpressionParams,
   timeframe: { start: number; end: number },
+  timeFieldName: string,
   compositeSize: number,
   alertOnGroupDisappear: boolean,
   lastPeriodEnd?: number,
@@ -91,9 +87,12 @@ export const getElasticsearchMetricQuery = (
     );
   }
 
-  // We need to make a timeframe that represents the current timeframe as oppose
+  // We need to make a timeframe that represents the current timeframe as opposed
   // to the total timeframe (which includes the last period).
-  const currentTimeframe = calculateCurrentTimeframe(metricParams, timeframe);
+  const currentTimeframe = {
+    ...calculateCurrentTimeframe(metricParams, timeframe),
+    timeFieldName,
+  };
 
   const metricAggregations =
     aggType === Aggregators.COUNT
@@ -119,6 +118,7 @@ export const getElasticsearchMetricQuery = (
   const bucketSelectorAggregations = createBucketSelector(
     metricParams,
     alertOnGroupDisappear,
+    timeFieldName,
     groupBy,
     lastPeriodEnd
   );
@@ -232,7 +232,7 @@ export const getElasticsearchMetricQuery = (
     aggs.groupings.composite.after = afterKey;
   }
 
-  const baseFilters = createBaseFilters(metricParams, timeframe, filterQuery);
+  const baseFilters = createBaseFilters(metricParams, timeframe, timeFieldName, filterQuery);
 
   return {
     track_total_hits: true,

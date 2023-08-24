@@ -56,7 +56,7 @@ export const PolicyDetails = React.memo(() => {
         },
       ],
     };
-  }, [getAppUrl, routeState.backLink]);
+  }, [getAppUrl, routeState?.backLink]);
 
   const headerRightContent = (
     <AgentsSummary

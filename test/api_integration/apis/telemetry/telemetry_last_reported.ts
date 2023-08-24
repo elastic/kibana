@@ -7,23 +7,37 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function optInTest({ getService }: FtrProviderContext) {
   const client = getService('kibanaServer');
   const supertest = getService('supertest');
 
-  describe('/api/telemetry/v2/last_reported API Telemetry lastReported', () => {
+  describe('/internal/telemetry/last_reported API Telemetry lastReported', () => {
     before(async () => {
       await client.savedObjects.delete({ type: 'telemetry', id: 'telemetry' });
     });
 
     it('GET should return undefined when there is no stored telemetry.lastReported value', async () => {
-      await supertest.get('/api/telemetry/v2/last_reported').set('kbn-xsrf', 'xxx').expect(200, {});
+      await supertest
+        .get('/internal/telemetry/last_reported')
+        .set('kbn-xsrf', 'xxx')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect(200, {});
     });
 
     it('PUT should update telemetry.lastReported to now', async () => {
-      await supertest.put('/api/telemetry/v2/last_reported').set('kbn-xsrf', 'xxx').expect(200);
+      await supertest
+        .put('/internal/telemetry/last_reported')
+        .set('kbn-xsrf', 'xxx')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect(200);
 
       const {
         attributes: { lastReported },
@@ -46,8 +60,10 @@ export default function optInTest({ getService }: FtrProviderContext) {
       expect(lastReported).to.be.a('number');
 
       await supertest
-        .get('/api/telemetry/v2/last_reported')
+        .get('/internal/telemetry/last_reported')
         .set('kbn-xsrf', 'xxx')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200, { lastReported });
     });
   });

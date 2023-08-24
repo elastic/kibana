@@ -603,38 +603,6 @@
             "trackAdoption": true,
             "references": [
               {
-                "plugin": "@kbn/ebt-tools",
-                "path": "packages/kbn-ebt-tools/src/performance_metric_events/helpers.ts"
-              },
-              {
-                "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_clicks.ts"
-              },
-              {
-                "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.ts"
-              },
-              {
-                "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core-root-browser-internal",
-                "path": "packages/core/root/core-root-browser-internal/src/core_system.ts"
-              },
-              {
                 "plugin": "@kbn/core-status-server-internal",
                 "path": "packages/core/status/core-status-server-internal/src/status_service.ts"
               },
@@ -663,6 +631,10 @@
                 "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
               },
               {
+                "plugin": "@kbn/ebt-tools",
+                "path": "packages/kbn-ebt-tools/src/performance_metric_events/helpers.ts"
+              },
+              {
                 "plugin": "@kbn/core-analytics-server-internal",
                 "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
               },
@@ -689,6 +661,34 @@
               {
                 "plugin": "@kbn/core-root-server-internal",
                 "path": "packages/core/root/core-root-server-internal/src/server.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_clicks.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.ts"
               },
               {
                 "plugin": "security",
@@ -731,16 +731,16 @@
                 "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
               },
               {
-                "plugin": "globalSearchBar",
-                "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "globalSearchBar",
                 "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
               },
               {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
+                "plugin": "globalSearchBar",
+                "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
               },
               {
                 "plugin": "osquery",
@@ -753,6 +753,34 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -841,6 +869,14 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "infra",
@@ -1221,46 +1257,6 @@
             "trackAdoption": true,
             "references": [
               {
-                "plugin": "@kbn/core-application-browser-internal",
-                "path": "packages/core/application/core-application-browser-internal/src/register_analytics_context_provider.ts"
-              },
-              {
-                "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.ts"
-              },
-              {
-                "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
-              },
-              {
-                "plugin": "@kbn/core-execution-context-browser-internal",
-                "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_service.ts"
-              },
-              {
-                "plugin": "@kbn/core-chrome-browser-internal",
-                "path": "packages/core/chrome/core-chrome-browser-internal/src/register_analytics_context_provider.ts"
-              },
-              {
                 "plugin": "@kbn/core-elasticsearch-server-internal",
                 "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/register_analytics_context_provider.ts"
               },
@@ -1309,20 +1305,60 @@
                 "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
               },
               {
-                "plugin": "licensing",
-                "path": "x-pack/plugins/licensing/common/register_analytics_context_provider.ts"
+                "plugin": "@kbn/core-application-browser-internal",
+                "path": "packages/core/application/core-application-browser-internal/src/register_analytics_context_provider.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-execution-context-browser-internal",
+                "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-chrome-browser-internal",
+                "path": "packages/core/chrome/core-chrome-browser-internal/src/register_analytics_context_provider.ts"
               },
               {
                 "plugin": "cloud",
                 "path": "x-pack/plugins/cloud/common/register_cloud_deployment_id_analytics_context.ts"
               },
               {
-                "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/plugin.ts"
+                "plugin": "licensing",
+                "path": "x-pack/plugins/licensing/common/register_analytics_context_provider.ts"
               },
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/analytics/register_user_context.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/plugins/telemetry/server/plugin.ts"
               },
               {
                 "plugin": "telemetry",

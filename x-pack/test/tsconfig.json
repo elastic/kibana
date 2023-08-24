@@ -18,7 +18,7 @@
     "../../typings/**/*",
     "../../packages/kbn-test/types/ftr_globals/**/*"
   ],
-  "exclude": ["target/**/*", "*/plugins/**/*", "*/packages/**/*", "*/*/packages/**/*"],
+  "exclude": ["security_solution_cypress/cypress/**/*", "target/**/*", "*/plugins/**/*", "*/packages/**/*", "*/*/packages/**/*" ],
   "kbn_references": [
     { "path": "../../test/tsconfig.json" },
     "@kbn/core",
@@ -125,7 +125,6 @@
     "@kbn/observability-shared-plugin",
     "@kbn/maps-vector-tile-utils",
     "@kbn/server-route-repository",
-    "@kbn/core-saved-objects-common",
     "@kbn/core-http-common",
     "@kbn/slo-schema",
     "@kbn/lens-plugin",
@@ -136,6 +135,11 @@
     "@kbn/observability-onboarding-plugin",
     "@kbn/bfetch-plugin",
     "@kbn/uptime-plugin",
-    "@kbn/ml-category-validator"
+    "@kbn/ml-category-validator",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/aiops-utils",
+    "@kbn/stack-alerts-plugin",
+    "@kbn/apm-data-access-plugin",
   ]
 }

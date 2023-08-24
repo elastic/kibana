@@ -268,8 +268,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     for (const testData of testDataList) {
-      // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/162427
-      describe.skip(`${testData.suiteTitle}`, function () {
+      describe(`${testData.suiteTitle}`, function () {
         before(async () => {
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();

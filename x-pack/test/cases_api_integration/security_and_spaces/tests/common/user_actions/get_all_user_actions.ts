@@ -11,11 +11,12 @@ import {
   Case,
   CaseSeverity,
   CaseStatuses,
-  CommentRequestUserType,
-  CommentType,
-  getCaseUserActionUrl,
-} from '@kbn/cases-plugin/common/api';
-import { CreateCaseUserAction, ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
+  UserCommentAttachmentPayload,
+  AttachmentType,
+  CreateCaseUserAction,
+  ConnectorTypes,
+} from '@kbn/cases-plugin/common/types/domain';
+import { getCaseUserActionUrl } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq, postCommentUserReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
@@ -293,7 +294,7 @@ export default ({ getService }: FtrProviderContext): void => {
           id: caseWithComments.comments![0].id,
           version: caseWithComments.comments![0].version,
           comment: newComment,
-          type: CommentType.user,
+          type: AttachmentType.user,
           owner: 'securitySolutionFixture',
         },
       });
@@ -308,7 +309,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(commentUserAction.payload).to.eql({
         comment: {
           comment: newComment,
-          type: CommentType.user,
+          type: AttachmentType.user,
           owner: 'securitySolutionFixture',
         },
       });
@@ -332,7 +333,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const commentUserAction = userActions[2];
       const { id, version: _, ...restComment } = caseWithComments.comments![0];
 
-      const castedUserComment = restComment as CommentRequestUserType;
+      const castedUserComment = restComment as UserCommentAttachmentPayload;
 
       expect(userActions.length).to.eql(3);
       expect(commentUserAction.type).to.eql('comment');

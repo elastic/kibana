@@ -6,8 +6,8 @@
  */
 
 import type { UserProfile } from '@kbn/user-profile-components';
+import type { User } from '../../../common/types/domain';
 import type { AuthenticatedElasticUser } from '../../common/lib/kibana';
-import type { User } from '../../../common/api';
 import type { FilterMode as RecentCasesFilterMode } from './types';
 
 export interface ReporterFilter {

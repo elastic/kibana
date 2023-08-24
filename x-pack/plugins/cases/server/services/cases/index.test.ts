@@ -14,8 +14,8 @@
  */
 
 import { omit, unset } from 'lodash';
-import type { CaseAttributes, CaseFullExternalService } from '../../../common/api';
-import { CaseSeverity, CaseStatuses } from '../../../common/api';
+import type { CaseAttributes, ExternalService, CaseConnector } from '../../../common/types/domain';
+import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
@@ -50,7 +50,6 @@ import {
   CasePersistedStatus,
   CaseTransformedAttributesRt,
 } from '../../common/types/case';
-import type { CaseConnector } from '../../../common/types/domain';
 
 const createUpdateSOResponse = ({
   connector,
@@ -59,7 +58,7 @@ const createUpdateSOResponse = ({
   status,
 }: {
   connector?: ESCaseConnectorWithId;
-  externalService?: CaseFullExternalService;
+  externalService?: ExternalService | null;
   severity?: CasePersistedSeverity;
   status?: CasePersistedStatus;
 } = {}): SavedObjectsUpdateResponse<CasePersistedAttributes> => {
@@ -99,7 +98,7 @@ const createUpdateSOResponse = ({
 const createFindSO = (
   params: {
     connector?: ESCaseConnectorWithId;
-    externalService?: CaseFullExternalService;
+    externalService?: ExternalService | null;
     overrides?: Partial<CasePersistedAttributes>;
     caseId?: string;
   } = {}
@@ -115,7 +114,7 @@ const createCaseUpdateParams = ({
   status,
 }: {
   connector?: CaseConnector;
-  externalService?: CaseFullExternalService;
+  externalService?: ExternalService | null;
   severity?: CaseSeverity;
   status?: CaseStatuses;
 }): Partial<CaseAttributes> => ({
@@ -132,7 +131,7 @@ const createCasePostParams = ({
   status,
 }: {
   connector: CaseConnector;
-  externalService?: CaseFullExternalService;
+  externalService?: ExternalService | null;
   severity?: CaseSeverity;
   status?: CaseStatuses;
 }): CaseAttributes => ({
@@ -148,7 +147,7 @@ const createCasePatchParams = ({
   externalService,
 }: {
   connector?: CaseConnector;
-  externalService?: CaseFullExternalService;
+  externalService?: ExternalService | null;
 } = {}): Partial<CaseAttributes> => ({
   ...basicCaseFields,
   connector,

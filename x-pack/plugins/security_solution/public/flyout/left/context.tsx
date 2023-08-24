@@ -15,12 +15,16 @@ import type { LeftPanelProps } from '.';
 import type { GetFieldsData } from '../../common/hooks/use_get_fields_data';
 import { useGetFieldsData } from '../../common/hooks/use_get_fields_data';
 import { useTimelineEventsDetails } from '../../timelines/containers/details';
-import { getAlertIndexAlias } from '../../timelines/components/side_panel/event_details/helpers';
+import {
+  getAlertIndexAlias,
+  useBasicDataFromDetailsData,
+} from '../../timelines/components/side_panel/event_details/helpers';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { SecurityPageName } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useRuleWithFallback } from '../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
 export interface LeftPanelContext {
   /**
@@ -51,6 +55,10 @@ export interface LeftPanelContext {
    * The actual raw document object
    */
   searchHit: SearchHit | undefined;
+  /**
+   * User defined fields to highlight (defined on the rule)
+   */
+  investigationFields: string[];
   /**
    * Retrieves searchHit values for the provided field
    */
@@ -83,6 +91,8 @@ export const LeftPanelProvider = ({ id, indexName, scopeId, children }: LeftPane
       skip: !id,
     });
   const getFieldsData = useGetFieldsData(searchHit?.fields);
+  const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const { rule: maybeRule } = useRuleWithFallback(ruleId);
 
   const contextValue = useMemo(
     () =>
@@ -95,6 +105,7 @@ export const LeftPanelProvider = ({ id, indexName, scopeId, children }: LeftPane
             dataAsNestedObject,
             dataFormattedForFieldBrowser,
             searchHit,
+            investigationFields: maybeRule?.investigation_fields ?? [],
             getFieldsData,
           }
         : undefined,
@@ -103,10 +114,11 @@ export const LeftPanelProvider = ({ id, indexName, scopeId, children }: LeftPane
       indexName,
       scopeId,
       sourcererDataView.browserFields,
-      dataFormattedForFieldBrowser,
-      getFieldsData,
       dataAsNestedObject,
+      dataFormattedForFieldBrowser,
       searchHit,
+      maybeRule?.investigation_fields,
+      getFieldsData,
     ]
   );
 

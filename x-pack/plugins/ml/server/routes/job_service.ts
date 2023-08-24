@@ -12,7 +12,7 @@ import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
 import {
-  categorizationFieldExamplesSchema,
+  categorizationFieldValidationSchema,
   basicChartSchema,
   populationChartSchema,
   datafeedIdsSchema,
@@ -897,15 +897,15 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup JobService
    *
-   * @api {post} /internal/ml/jobs/categorization_field_examples Get categorization field examples
-   * @apiName ValidateCategoryExamples
-   * @apiDescription Validates category examples
+   * @api {post} /internal/ml/jobs/categorization_field_validation Get categorization field examples
+   * @apiName ValidateCategoryValidation
+   * @apiDescription Validates a field for categorization
    *
-   * @apiSchema (body) categorizationFieldExamplesSchema
+   * @apiSchema (body) categorizationFieldValidationSchema
    */
   router.versioned
     .post({
-      path: `${ML_INTERNAL_BASE_PATH}/jobs/categorization_field_examples`,
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/categorization_field_validation`,
       access: 'internal',
       options: {
         tags: ['access:ml:canCreateJob'],
@@ -916,7 +916,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         version: '1',
         validate: {
           request: {
-            body: schema.object(categorizationFieldExamplesSchema),
+            body: schema.object(categorizationFieldValidationSchema),
           },
         },
       },

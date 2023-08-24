@@ -12,11 +12,11 @@ import {
   LicensingPluginSetup,
   LicensingApiRequestHandlerContext,
 } from '@kbn/licensing-plugin/server';
+import { APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
 import {
   ApmRuleType,
   APM_SERVER_FEATURE_ID,
 } from '../common/rules/apm_rule_types';
-import { APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE } from '../common/apm_saved_object_constants';
 
 export const APM_FEATURE = {
   id: APM_SERVER_FEATURE_ID,
@@ -35,7 +35,7 @@ export const APM_FEATURE = {
   privileges: {
     all: {
       app: [APM_SERVER_FEATURE_ID, 'ux', 'kibana'],
-      api: [APM_SERVER_FEATURE_ID, 'apm_write', 'rac', 'ai_assistant'],
+      api: [APM_SERVER_FEATURE_ID, 'apm_write', 'rac'],
       catalogue: [APM_SERVER_FEATURE_ID],
       savedObject: {
         all: [],
@@ -56,7 +56,7 @@ export const APM_FEATURE = {
     },
     read: {
       app: [APM_SERVER_FEATURE_ID, 'ux', 'kibana'],
-      api: [APM_SERVER_FEATURE_ID, 'rac', 'ai_assistant'],
+      api: [APM_SERVER_FEATURE_ID, 'rac'],
       catalogue: [APM_SERVER_FEATURE_ID],
       savedObject: {
         all: [],

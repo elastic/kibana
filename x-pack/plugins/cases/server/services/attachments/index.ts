@@ -15,7 +15,8 @@ import type {
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression } from '@kbn/es-query';
-import { CommentAttributesRt, CommentType, decodeOrThrow } from '../../../common/api';
+import { AttachmentAttributesRt, AttachmentType } from '../../../common/types/domain';
+import { decodeOrThrow } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -71,7 +72,7 @@ export class AttachmentService {
       this.context.log.debug(`Attempting to count alerts for case id ${params.caseId}`);
       const res = await this.executeCaseAggregations<{ alerts: { value: number } }>({
         ...params,
-        attachmentType: CommentType.alert,
+        attachmentType: AttachmentType.alert,
         aggregations: this.buildAlertsAggs(),
       });
 
@@ -143,7 +144,7 @@ export class AttachmentService {
       );
 
       const typeFilter = buildFilter({
-        filters: [CommentType.persistableState, CommentType.externalReference],
+        filters: [AttachmentType.persistableState, AttachmentType.externalReference],
         field: 'type',
         operator: 'or',
         type: CASE_COMMENT_SAVED_OBJECT,
@@ -181,7 +182,10 @@ export class AttachmentService {
   ): Promise<AggregationResponse | undefined> {
     try {
       this.context.log.debug(`Attempting to count actions for case id ${params.caseId}`);
-      return await this.executeCaseAggregations({ ...params, attachmentType: CommentType.actions });
+      return await this.executeCaseAggregations({
+        ...params,
+        attachmentType: AttachmentType.actions,
+      });
     } catch (error) {
       this.context.log.error(`Error while counting actions for case id ${params.caseId}: ${error}`);
       throw error;
@@ -216,7 +220,7 @@ export class AttachmentService {
     try {
       this.context.log.debug(`Attempting to POST a new comment`);
 
-      const decodedAttributes = decodeOrThrow(CommentAttributesRt)(attributes);
+      const decodedAttributes = decodeOrThrow(AttachmentAttributesRt)(attributes);
 
       const { attributes: extractedAttributes, references: extractedReferences } =
         extractAttachmentSORefsFromAttributes(
@@ -261,7 +265,7 @@ export class AttachmentService {
       const res =
         await this.context.unsecuredSavedObjectsClient.bulkCreate<AttachmentPersistedAttributes>(
           attachments.map((attachment) => {
-            const decodedAttributes = decodeOrThrow(CommentAttributesRt)(attachment.attributes);
+            const decodedAttributes = decodeOrThrow(AttachmentAttributesRt)(attachment.attributes);
 
             const { attributes: extractedAttributes, references: extractedReferences } =
               extractAttachmentSORefsFromAttributes(

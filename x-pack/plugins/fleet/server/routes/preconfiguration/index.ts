@@ -17,6 +17,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: PRECONFIGURATION_API_ROUTES.RESET_PATTERN,
       validate: false,
+      options: {
+        access: 'internal',
+      },
       fleetAuthz: {
         fleet: { all: true },
       },
@@ -27,6 +30,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: PRECONFIGURATION_API_ROUTES.RESET_ONE_PATTERN,
       validate: PostResetOnePreconfiguredAgentPoliciesSchema,
+      options: {
+        access: 'internal',
+      },
       fleetAuthz: {
         fleet: { all: true },
       },

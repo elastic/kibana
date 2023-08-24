@@ -21,6 +21,7 @@ import {
   HOST_DETAILS_INFO_TEST_ID,
   HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID,
 } from './test_ids';
+import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../shared/components/test_ids';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -54,6 +55,11 @@ jest.mock('uuid', () => ({
 
 jest.mock('../../../common/components/ml/hooks/use_ml_capabilities');
 const mockUseMlUserPermissions = useMlCapabilities as jest.Mock;
+
+const mockUseHasSecurityCapability = jest.fn().mockReturnValue(false);
+jest.mock('../../../helper_hooks', () => ({
+  useHasSecurityCapability: () => mockUseHasSecurityCapability(),
+}));
 
 jest.mock('../../../common/containers/sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({ selectedPatterns: ['index'] }),
@@ -105,7 +111,7 @@ const mockRiskScoreResponse = {
       },
     },
   ],
-  isLicenseValid: true,
+  isAuthorized: true,
 };
 
 const mockRelatedUsersResponse = {
@@ -129,7 +135,7 @@ describe('<HostDetails />', () => {
         <HostDetails {...defaultProps} />
       </TestProviders>
     );
-    expect(getByTestId(HOST_DETAILS_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(HOST_DETAILS_TEST_ID))).toBeInTheDocument();
   });
 
   describe('Host overview', () => {
@@ -150,11 +156,13 @@ describe('<HostDetails />', () => {
       expect(getByTestId(HOST_DETAILS_INFO_TEST_ID)).toBeInTheDocument();
     });
 
-    it('should render host risk score when license is valid', () => {
+    it('should render host risk score when authorized', () => {
       mockUseMlUserPermissions.mockReturnValue({
         isPlatinumOrTrialLicense: true,
         capabilities: {},
       });
+      mockUseRiskScore.mockReturnValue({ data: [], isAuthorized: true });
+
       const { getByText } = render(
         <TestProviders>
           <HostDetails {...defaultProps} />
@@ -163,8 +171,8 @@ describe('<HostDetails />', () => {
       expect(getByText('Host risk score')).toBeInTheDocument();
     });
 
-    it('should not render host risk score when license is not valid', () => {
-      mockUseRiskScore.mockReturnValue({ data: [], isLicenseValid: false });
+    it('should not render host risk score when unauthorized', () => {
+      mockUseRiskScore.mockReturnValue({ data: [], isAuthorized: false });
       const { queryByText } = render(
         <TestProviders>
           <HostDetails {...defaultProps} />
@@ -190,11 +198,13 @@ describe('<HostDetails />', () => {
       expect(getByTestId(HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID)).toBeInTheDocument();
     });
 
-    it('should render user risk score column when license is valid', () => {
+    it('should render user risk score column when license and capabilities are valid', () => {
       mockUseMlUserPermissions.mockReturnValue({
         isPlatinumOrTrialLicense: true,
         capabilities: {},
       });
+      mockUseHasSecurityCapability.mockReturnValue(true);
+
       const { queryAllByRole } = render(
         <TestProviders>
           <HostDetails {...defaultProps} />
@@ -204,6 +214,21 @@ describe('<HostDetails />', () => {
       expect(queryAllByRole('row')[1].textContent).toContain('test user');
       expect(queryAllByRole('row')[1].textContent).toContain('100.XXX.XXX');
       expect(queryAllByRole('row')[1].textContent).toContain('Low');
+    });
+
+    it('should not render host risk score column when user has no entity-risk capability', () => {
+      mockUseMlUserPermissions.mockReturnValue({
+        isPlatinumOrTrialLicense: true,
+        capabilities: {},
+      });
+      mockUseHasSecurityCapability.mockReturnValue(false);
+
+      const { queryAllByRole } = render(
+        <TestProviders>
+          <HostDetails {...defaultProps} />
+        </TestProviders>
+      );
+      expect(queryAllByRole('columnheader').length).toBe(2);
     });
 
     it('should not render host risk score column when license is not valid', () => {

@@ -10,12 +10,12 @@ import React, { Component, Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { FieldRuleEditor } from './field_rule_editor';
+import { RuleGroupEditor } from './rule_group_editor';
 import type { Rule, RuleGroup } from '../../model';
 import { AllRule, FieldRule } from '../../model';
 import { isRuleGroup } from '../services/is_rule_group';
 import { VISUAL_MAX_RULE_DEPTH } from '../services/role_mapping_constants';
-import { FieldRuleEditor } from './field_rule_editor';
-import { RuleGroupEditor } from './rule_group_editor';
 
 interface Props {
   rules: Rule | null;

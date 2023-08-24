@@ -18,13 +18,13 @@ import type {
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
 import { formatFieldValue } from '@kbn/discover-utils';
+import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '@kbn/discover-utils';
 import { DocViewRenderProps } from '../../../services/doc_views/doc_views_types';
 import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../utils/row_formatter';
 import { DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
 import { TableRowDetails } from './table_row_details';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
 
 export type DocTableRow = EsHitRecord & {
   isAnchor?: boolean;
@@ -186,7 +186,9 @@ export const TableRow = ({
         // We should improve this and show a helpful tooltip why the filter buttons are not
         // there/disabled when there are ignored values.
         const isFilterable = Boolean(
-          mapping(column)?.filterable && filter && !row.raw._ignored?.includes(column)
+          mapping(column)?.filterable &&
+            typeof filter === 'function' &&
+            !row.raw._ignored?.includes(column)
         );
         rowCells.push(
           <TableCell

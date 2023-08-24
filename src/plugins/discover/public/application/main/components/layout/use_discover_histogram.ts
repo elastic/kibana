@@ -215,6 +215,7 @@ export const useDiscoverHistogram = ({
    * Request params
    */
   const { query, filters } = useQuerySubscriber({ data: services.data });
+  const customFilters = useInternalStateSelector((state) => state.customFilters);
   const timefilter = services.data.query.timefilter.timefilter;
   const timeRange = timefilter.getAbsoluteTime();
   const relativeTimeRange = useObservable(
@@ -238,8 +239,7 @@ export const useDiscoverHistogram = ({
   } = useObservable(textBasedFetchComplete$, {
     dataView: stateContainer.internalState.getState().dataView!,
     query: stateContainer.appState.getState().query,
-    columns:
-      savedSearchData$.documents$.getValue().textBasedQueryColumns?.map(({ name }) => name) ?? [],
+    columns: savedSearchData$.documents$.getValue().textBasedQueryColumns ?? [],
   });
 
   /**
@@ -279,7 +279,10 @@ export const useDiscoverHistogram = ({
         textBasedFetchComplete$.pipe(map(() => 'discover'))
       ).pipe(debounceTime(50));
     } else {
-      fetch$ = stateContainer.dataState.fetch$.pipe(map(() => 'discover'));
+      fetch$ = stateContainer.dataState.fetch$.pipe(
+        filter(({ options }) => !options.fetchMore), // don't update histogram for "Load more" in the grid
+        map(() => 'discover')
+      );
     }
 
     const subscription = fetch$.subscribe((source) => {
@@ -305,7 +308,7 @@ export const useDiscoverHistogram = ({
     services: { ...services, uiActions: getUiActions() },
     dataView: isPlainRecord ? textBasedDataView : dataView,
     query: isPlainRecord ? textBasedQuery : query,
-    filters,
+    filters: [...(filters ?? []), ...customFilters],
     timeRange,
     relativeTimeRange,
     columns,
@@ -386,7 +389,7 @@ const createFetchCompleteObservable = (stateContainer: DiscoverStateContainer) =
     map(({ textBasedQueryColumns }) => ({
       dataView: stateContainer.internalState.getState().dataView!,
       query: stateContainer.appState.getState().query!,
-      columns: textBasedQueryColumns?.map(({ name }) => name) ?? [],
+      columns: textBasedQueryColumns ?? [],
     }))
   );
 };

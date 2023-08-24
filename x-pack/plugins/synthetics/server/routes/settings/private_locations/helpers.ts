@@ -25,10 +25,7 @@ export const toClientContract = (
       isServiceManaged: false,
       isInvalid: !Boolean(agentPolicies?.find((policy) => policy.id === location.agentPolicyId)),
       tags: location.tags,
-      geo: {
-        lat: location.geo?.lat ?? null,
-        lon: location.geo?.lon ?? null,
-      },
+      geo: location.geo,
     })),
   };
 };
@@ -41,9 +38,6 @@ export const toSavedObjectContract = (location: PrivateLocation): PrivateLocatio
     concurrentMonitors: location.concurrentMonitors,
     tags: location.tags,
     isServiceManaged: false,
-    geo: {
-      lat: location.geo?.lat ?? null,
-      lon: location.geo?.lon ?? null,
-    },
+    geo: location.geo,
   };
 };

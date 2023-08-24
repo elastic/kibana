@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/api';
+import { Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { MAX_USER_ACTIONS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
 import {
   UserActionTypes,

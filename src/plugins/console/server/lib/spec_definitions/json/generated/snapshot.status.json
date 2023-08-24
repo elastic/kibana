@@ -1,8 +1,15 @@
 {
   "snapshot.status": {
     "url_params": {
-      "master_timeout": "",
-      "ignore_unavailable": "__flag__"
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "ignore_unavailable": "__flag__",
+      "master_timeout": [
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "GET"
@@ -12,6 +19,10 @@
       "_snapshot/{repository}/_status",
       "_snapshot/{repository}/{snapshot}/_status"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

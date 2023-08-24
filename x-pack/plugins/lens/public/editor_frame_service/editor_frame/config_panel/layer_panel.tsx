@@ -64,7 +64,7 @@ export function LayerPanel(
     addLayer: AddLayerFunction;
     registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
     updateVisualization: StateSetter<unknown>;
-    onDimensionDrop: (payload: {
+    onDropToDimension: (payload: {
       source: DragDropIdentifier;
       target: DragDropOperation;
       dropType: DropType;
@@ -122,7 +122,7 @@ export function LayerPanel(
     visualizationState,
     onChangeIndexPattern,
     core,
-    onDimensionDrop,
+    onDropToDimension,
   } = props;
 
   const isSaveable = useLensSelector((state) => state.lens.isSaveable);
@@ -211,9 +211,9 @@ export function LayerPanel(
         setNextFocusedButtonId(target.columnId);
       }
 
-      onDimensionDrop({ source, target, dropType });
+      onDropToDimension({ source, target, dropType });
     },
-    [setNextFocusedButtonId, onDimensionDrop]
+    [setNextFocusedButtonId, onDropToDimension]
   );
 
   const isDimensionPanelOpen = Boolean(activeId);
@@ -517,6 +517,7 @@ export function LayerPanel(
                               groupId: group.groupId,
                               filterOperations: group.filterOperations,
                               prioritizedOperation: group.prioritizedOperation,
+                              isMetricDimension: group?.isMetricDimension,
                               indexPatternId: layerDatasource
                                 ? layerDatasource.getUsedDataView(layerDatasourceState, layerId)
                                 : activeVisualization.getUsedDataView?.(

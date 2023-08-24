@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectIsViewOnly, getPolicySettingsFormTestSubjects, exactMatchText } from '../../mocks';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -31,9 +31,11 @@ describe('Policy Behaviour Protection Card', () => {
   let formProps: BehaviourProtectionCardProps;
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
+  let startServices: AppContextTestRender['startServices'];
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
+    startServices = mockedContext.startServices;
 
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
@@ -48,12 +50,20 @@ describe('Policy Behaviour Protection Card', () => {
   });
 
   it('should render the card with expected components', () => {
-    const { getByTestId } = render();
+    const { getByTestId, queryByTestId } = render();
 
     expect(getByTestId(testSubj.enableDisableSwitch));
     expect(getByTestId(testSubj.protectionPreventRadio));
     expect(getByTestId(testSubj.notifyUserCheckbox));
     expect(getByTestId(testSubj.rulesCallout));
+    expect(queryByTestId(testSubj.reputationServiceCheckbox)).not.toBeInTheDocument();
+  });
+
+  it('should show reputation service section for cloud user', () => {
+    startServices.cloud!.isCloudEnabled = true;
+    const { getByTestId } = render();
+
+    expect(getByTestId(testSubj.reputationServiceCheckbox));
   });
 
   it('should show supported OS values', () => {
@@ -84,79 +94,91 @@ describe('Policy Behaviour Protection Card', () => {
   });
 
   describe('and displayed in View mode', () => {
+    const cardTextContent = (
+      args: {
+        enabled?: boolean;
+        reputationServices?: boolean;
+        notifyUser?: boolean;
+        prebuiltRules?: boolean;
+      } = {}
+    ) => {
+      const defaults = {
+        enabled: true,
+        reputationServices: false,
+        notifyUser: true,
+        prebuiltRules: false,
+      };
+      const config = { ...defaults, ...args };
+      return [
+        'Type',
+        'Malicious behavior',
+        'Operating system',
+        'Windows, Mac, Linux ',
+        `Malicious behavior protections ${config.enabled ? 'enabled' : 'disabled'}`,
+        'Protection level',
+        'Prevent',
+        ...(config.reputationServices
+          ? ['Reputation serviceInfo', "Don't use reputation service"]
+          : []),
+        'User notification',
+        'Agent version 7.15+',
+        ...(config.notifyUser ? ['Notify user', 'Notification message', '—'] : ['Notify user']),
+        ...(config.prebuiltRules
+          ? [
+              'View related detection rules. ',
+              'Prebuilt rules are tagged “Elastic” on the Detection Rules page.',
+            ]
+          : ['View related detection rules.']),
+      ].join('');
+    };
+
     beforeEach(() => {
       formProps.mode = 'view';
     });
 
     it('should display correctly when overall card is enabled', () => {
       const { getByTestId } = render();
-
       expectIsViewOnly(getByTestId(testSubj.card));
+      expect(getByTestId(testSubj.card)).toHaveTextContent(cardTextContent());
+    });
 
+    it('should display correctly when overall card is enabled for cloud user', () => {
+      startServices.cloud!.isCloudEnabled = true;
+      const { getByTestId } = render();
+      expectIsViewOnly(getByTestId(testSubj.card));
       expect(getByTestId(testSubj.card)).toHaveTextContent(
-        'Type' +
-          'Malicious behavior' +
-          'Operating system' +
-          'Windows, Mac, Linux ' +
-          'Malicious behavior protections enabled' +
-          'Protection level' +
-          'Prevent' +
-          'User notification' +
-          'Agent version 7.15+' +
-          'Notify user' +
-          'Notification message' +
-          '—' +
-          'View related detection rules.'
+        cardTextContent({ reputationServices: true })
       );
     });
 
     it('should display correctly when overall card is disabled', () => {
       set(formProps.policy, 'windows.behavior_protection.mode', ProtectionModes.off);
       const { getByTestId } = render();
-
       expectIsViewOnly(getByTestId(testSubj.card));
-
       expect(getByTestId(testSubj.card)).toHaveTextContent(
-        exactMatchText(
-          'Type' +
-            'Malicious behavior' +
-            'Operating system' +
-            'Windows, Mac, Linux ' +
-            'Malicious behavior protections disabled' +
-            'Protection level' +
-            'Prevent' +
-            'User notification' +
-            'Agent version 7.15+' +
-            'Notify user' +
-            'Notification message' +
-            '—' +
-            'View related detection rules. Prebuilt rules are tagged “Elastic” on the Detection Rules page.'
-        )
+        cardTextContent({ enabled: false, prebuiltRules: true })
+      );
+    });
+
+    it('should display correctly when overall card is disabled for cloud user', () => {
+      startServices.cloud!.isCloudEnabled = true;
+      set(formProps.policy, 'windows.behavior_protection.mode', ProtectionModes.off);
+      const { getByTestId } = render();
+      expectIsViewOnly(getByTestId(testSubj.card));
+      expect(getByTestId(testSubj.card)).toHaveTextContent(
+        cardTextContent({
+          enabled: false,
+          reputationServices: true,
+          prebuiltRules: true,
+        })
       );
     });
 
     it('should display user notification disabled', () => {
       set(formProps.policy, 'windows.popup.behavior_protection.enabled', false);
-
       const { getByTestId } = render();
-
       expectIsViewOnly(getByTestId(testSubj.card));
-
-      expect(getByTestId(testSubj.card)).toHaveTextContent(
-        exactMatchText(
-          'Type' +
-            'Malicious behavior' +
-            'Operating system' +
-            'Windows, Mac, Linux ' +
-            'Malicious behavior protections enabled' +
-            'Protection level' +
-            'Prevent' +
-            'User notification' +
-            'Agent version 7.15+' +
-            "Don't notify user" +
-            'View related detection rules. Prebuilt rules are tagged “Elastic” on the Detection Rules page.'
-        )
-      );
+      expect(getByTestId(testSubj.card)).toHaveTextContent(cardTextContent({ notifyUser: false }));
     });
   });
 });

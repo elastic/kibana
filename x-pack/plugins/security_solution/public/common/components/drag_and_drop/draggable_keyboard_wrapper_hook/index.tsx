@@ -7,7 +7,7 @@
 
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import type { FluidDragActions } from 'react-beautiful-dnd';
+import type { FluidDragActions } from '@hello-pangea/dnd';
 import { useKibana } from '../../../lib/kibana';
 import { draggableKeyDownHandler } from './helpers';
 

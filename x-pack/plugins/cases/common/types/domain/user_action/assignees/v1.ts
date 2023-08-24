@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseAssigneesRt } from '../../../../api';
+import { CaseAssigneesRt } from '../../user/v1';
 import { UserActionTypes } from '../action/v1';
 
 export const AssigneesUserActionPayloadRt = rt.strict({ assignees: CaseAssigneesRt });

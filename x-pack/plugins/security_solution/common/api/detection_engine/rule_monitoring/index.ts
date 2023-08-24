@@ -8,6 +8,7 @@
 export * from './detection_engine_health/get_cluster_health/get_cluster_health_route';
 export * from './detection_engine_health/get_rule_health/get_rule_health_route';
 export * from './detection_engine_health/get_space_health/get_space_health_route';
+export * from './detection_engine_health/setup_health/setup_health_route';
 export * from './detection_engine_health/model';
 export * from './rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route';
 export * from './rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route';

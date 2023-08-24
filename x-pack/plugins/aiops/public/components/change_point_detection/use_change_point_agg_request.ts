@@ -8,8 +8,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
-import { useRefresh } from '@kbn/ml-date-picker';
 import { isDefined } from '@kbn/ml-is-defined';
+import { useReload } from '../../hooks/use_reload';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
   ChangePointAnnotation,
@@ -102,7 +102,7 @@ function getChangePointDetectionRequestBody(
       index,
       size: 0,
       body: {
-        query,
+        ...(query ? { query } : {}),
         aggregations,
       },
     },
@@ -121,7 +121,7 @@ export function useChangePointResults(
 
   const { dataView } = useDataSource();
 
-  const refresh = useRefresh();
+  const { refreshTimestamp: refresh } = useReload();
 
   const [results, setResults] = useState<ChangePointAnnotation[]>([]);
   /**
@@ -164,6 +164,7 @@ export function useChangePointResults(
           },
           query
         );
+
         const result = await runRequest<
           typeof requestPayload,
           { rawResponse: ChangePointAggResponse }

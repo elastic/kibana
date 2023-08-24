@@ -7,43 +7,67 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import type { EuiThemeComputed } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
-import type { CardId, SectionId, StepId } from './types';
+import type {
+  CardId,
+  ExpandedCardSteps,
+  OnCardClicked,
+  OnStepButtonClicked,
+  OnStepClicked,
+  SectionId,
+  StepId,
+} from './types';
 import * as i18n from './translations';
 import { CardStep } from './card_step';
-import { getSections } from './sections';
+import { getCard } from './helpers';
+import type { ProductLine } from '../../common/product';
 
 const CardItemComponent: React.FC<{
+  activeProducts: Set<ProductLine>;
+  activeStepIds: StepId[] | undefined;
+  cardId: CardId;
   euiTheme: EuiThemeComputed;
+  expandedCardSteps: ExpandedCardSteps;
+  finishedSteps: Record<CardId, Set<StepId>>;
+  onCardClicked: OnCardClicked;
+  onStepButtonClicked: OnStepButtonClicked;
+  onStepClicked: OnStepClicked;
+  sectionId: SectionId;
   shadow?: string;
   stepsLeft?: number;
   timeInMins?: number;
-  onStepClicked: (params: { stepId: StepId; cardId: CardId; sectionId: SectionId }) => void;
-  finishedSteps: Record<CardId, Set<StepId>>;
-  sectionId: SectionId;
-  cardId: CardId;
 }> = ({
+  activeProducts,
+  activeStepIds,
+  cardId,
+  euiTheme,
+  expandedCardSteps,
+  finishedSteps,
+  onCardClicked,
+  onStepButtonClicked,
+  onStepClicked,
+  sectionId,
+  shadow,
   stepsLeft,
   timeInMins,
-  shadow,
-  euiTheme,
-  onStepClicked,
-  finishedSteps,
-  sectionId,
-  cardId,
 }) => {
-  const section = getSections().find((s) => s.id === sectionId);
-  const cardItem = section?.cards?.find((c) => c.id === cardId);
-  const [expandCard, setExpandCard] = useState(false);
+  const cardItem = useMemo(() => getCard({ cardId, sectionId }), [cardId, sectionId]);
+  const expandCard = expandedCardSteps[cardId]?.isExpanded ?? false;
+  const expandedSteps = useMemo(
+    () => new Set(expandedCardSteps[cardId]?.expandedSteps ?? []),
+    [cardId, expandedCardSteps]
+  );
   const toggleCard = useCallback(
     (e) => {
       e.preventDefault();
-      setExpandCard(!expandCard);
+      const isExpanded = !expandCard;
+      onCardClicked({ cardId, isExpanded });
     },
-    [expandCard]
+    [cardId, expandCard, onCardClicked]
   );
-  return cardItem ? (
+  const hasActiveSteps = activeStepIds != null && activeStepIds.length > 0;
+  return cardItem && hasActiveSteps ? (
     <EuiPanel
       hasBorder
       paddingSize="m"
@@ -105,17 +129,20 @@ const CardItemComponent: React.FC<{
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {expandCard && cardItem.steps && (
+        {expandCard && hasActiveSteps && (
           <EuiFlexItem>
-            {cardItem.steps.map((step) => {
+            {[...activeStepIds].map((stepId) => {
               return (
                 <CardStep
-                  key={step.id}
-                  sectionId={sectionId}
+                  activeProducts={activeProducts}
                   cardId={cardItem.id}
-                  step={step}
-                  onStepClicked={onStepClicked}
+                  expandedSteps={expandedSteps}
                   finishedStepsByCard={finishedSteps[cardItem.id]}
+                  key={stepId}
+                  onStepButtonClicked={onStepButtonClicked}
+                  onStepClicked={onStepClicked}
+                  sectionId={sectionId}
+                  stepId={stepId}
                 />
               );
             })}

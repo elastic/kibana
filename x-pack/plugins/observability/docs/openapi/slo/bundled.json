@@ -136,27 +136,13 @@
             "$ref": "#/components/parameters/space_id"
           },
           {
-            "name": "name",
+            "name": "kqlQuery",
             "in": "query",
-            "description": "Filter by name",
+            "description": "A valid kql query to filter the SLO with",
             "schema": {
               "type": "string"
             },
-            "example": "awesome-service"
-          },
-          {
-            "name": "indicatorTypes",
-            "in": "query",
-            "description": "Filter by indicator type",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "example": [
-              "sli.kql.custom"
-            ]
+            "example": "slo.name:latency* and slo.tags : \"prod\""
           },
           {
             "name": "page",
@@ -176,7 +162,7 @@
               "type": "integer",
               "default": 25
             },
-            "example": 20
+            "example": 25
           },
           {
             "name": "sortBy",
@@ -185,12 +171,14 @@
             "schema": {
               "type": "string",
               "enum": [
-                "creationTime",
-                "indicatorType"
+                "sli_value",
+                "status",
+                "error_budget_consumed",
+                "error_budget_remaining"
               ],
-              "default": "creationTime"
+              "default": "status"
             },
-            "example": "creationTime"
+            "example": "status"
           },
           {
             "name": "sortDirection",
@@ -278,6 +266,15 @@
           },
           {
             "$ref": "#/components/parameters/slo_id"
+          },
+          {
+            "name": "instanceId",
+            "in": "query",
+            "description": "the specific instanceId used by the summary calculation",
+            "schema": {
+              "type": "string"
+            },
+            "example": "host-abcde"
           }
         ],
         "responses": {
@@ -801,7 +798,9 @@
             "nullable": false,
             "required": [
               "index",
-              "timestampField"
+              "timestampField",
+              "good",
+              "total"
             ],
             "properties": {
               "index": {
@@ -1267,6 +1266,12 @@
       "error_budget": {
         "title": "Error budget",
         "type": "object",
+        "required": [
+          "initial",
+          "consumed",
+          "remaining",
+          "isEstimated"
+        ],
         "properties": {
           "initial": {
             "type": "number",
@@ -1294,6 +1299,11 @@
         "title": "Summary",
         "type": "object",
         "description": "The SLO computed data",
+        "required": [
+          "status",
+          "sliValue",
+          "errorBudget"
+        ],
         "properties": {
           "status": {
             "$ref": "#/components/schemas/summary_status"
@@ -1310,6 +1320,23 @@
       "slo_response": {
         "title": "SLO response",
         "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "indicator",
+          "timeWindow",
+          "budgetingMethod",
+          "objective",
+          "settings",
+          "revision",
+          "summary",
+          "enabled",
+          "groupBy",
+          "instanceId",
+          "createdAt",
+          "updatedAt"
+        ],
         "properties": {
           "id": {
             "description": "The identifier of the SLO.",
@@ -1333,7 +1360,8 @@
                 "sli.apm.transactionErrorRate": "#/components/schemas/indicator_properties_apm_availability",
                 "sli.kql.custom": "#/components/schemas/indicator_properties_custom_kql",
                 "sli.apm.transactionDuration": "#/components/schemas/indicator_properties_apm_latency",
-                "sli.apm.sli.metric.custom": "#/components/schemas/indicator_properties_custom_metric"
+                "sli.metric.custom": "#/components/schemas/indicator_properties_custom_metric",
+                "sli.histogram.custom": "#/components/schemas/indicator_properties_histogram"
               }
             },
             "oneOf": [
@@ -1378,6 +1406,16 @@
             "description": "Indicate if the SLO is enabled",
             "type": "boolean",
             "example": true
+          },
+          "groupBy": {
+            "description": "optional group by field to use to generate an SLO per distinct value",
+            "type": "string",
+            "example": "some.field"
+          },
+          "instanceId": {
+            "description": "the value derived from the groupBy field, if present, otherwise '*'",
+            "type": "string",
+            "example": "host-abcde"
           },
           "createdAt": {
             "description": "The creation date",
@@ -1564,6 +1602,11 @@
           },
           "settings": {
             "$ref": "#/components/schemas/settings"
+          },
+          "groupBy": {
+            "description": "optional group by field to use to generate an SLO per distinct value",
+            "type": "string",
+            "example": "some.field"
           }
         }
       },

@@ -84,7 +84,6 @@ export const useBulkActions = ({
       const containsEnabled = selectedRules.some(({ enabled }) => enabled);
       const containsDisabled = selectedRules.some(({ enabled }) => !enabled);
       const containsLoading = selectedRuleIds.some((id) => loadingRuleIds.includes(id));
-      const containsImmutable = selectedRules.some(({ immutable }) => immutable);
 
       const missingActionPrivileges =
         !hasActionsPrivileges &&
@@ -152,11 +151,9 @@ export const useBulkActions = ({
       const handleDeleteAction = async () => {
         closePopover();
 
-        if (isAllSelected) {
-          // User has cancelled deletion
-          if ((await confirmDeletion()) === false) {
-            return;
-          }
+        if ((await confirmDeletion()) === false) {
+          // User has canceled deletion
+          return;
         }
 
         startTransaction({ name: BULK_RULE_ACTIONS.DELETE });
@@ -397,9 +394,6 @@ export const useBulkActions = ({
               'data-test-subj': 'deleteRuleBulk',
               disabled: isDeleteDisabled,
               onClick: handleDeleteAction,
-              toolTipContent: containsImmutable
-                ? i18n.BATCH_ACTION_DELETE_SELECTED_IMMUTABLE
-                : undefined,
               toolTipPosition: 'right',
               icon: undefined,
             },

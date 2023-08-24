@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { CustomizationCallback } from '@kbn/discover-plugin/public';
 import React from 'react';
 import { dynamic } from '../utils/dynamic';
 
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
+const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
 
 interface CreateLogExplorerProfileCustomizationsDeps {
   core: CoreStart;
+  data: DataPublicPluginStart;
 }
 
 export const createLogExplorerProfileCustomizations =
-  ({ core }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
+  ({ core, data }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
   async ({ customizations, stateContainer }) => {
     // Lazy load dependencies
     const datasetServiceModuleLoadable = import('../services/datasets');
@@ -44,6 +47,7 @@ export const createLogExplorerProfileCustomizations =
 
     /**
      * Replace the DataViewPicker with a custom `DatasetSelector` to pick integrations streams
+     * Prepend the search bar with custom filter control groups depending on the selected dataset
      */
     customizations.set({
       id: 'search_bar',
@@ -51,6 +55,12 @@ export const createLogExplorerProfileCustomizations =
         <LazyCustomDatasetSelector
           datasetsClient={datasetsService.client}
           logExplorerProfileStateService={logExplorerProfileStateService}
+        />
+      ),
+      PrependFilterBar: () => (
+        <LazyCustomDatasetFilters
+          logExplorerProfileStateService={logExplorerProfileStateService}
+          data={data}
         />
       ),
     });

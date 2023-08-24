@@ -24,8 +24,8 @@ export const responseActionTasks = (
     kibanaUrl: config.env.KIBANA_URL,
     elasticsearchUrl: config.env.ELASTICSEARCH_URL,
     fleetServerUrl: config.env.FLEET_SERVER_URL,
-    username: config.env.ELASTICSEARCH_USERNAME,
-    password: config.env.ELASTICSEARCH_PASSWORD,
+    username: config.env.KIBANA_USERNAME,
+    password: config.env.KIBANA_PASSWORD,
     asSuperuser: true,
   });
 

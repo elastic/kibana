@@ -25,51 +25,56 @@ import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_ver
 import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
 
 export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'internal',
       path: REVIEW_RULE_UPGRADE_URL,
-      validate: {},
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {},
+      },
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const ctx = await context.resolve(['core', 'alerting']);
-        const soClient = ctx.core.savedObjects.client;
-        const rulesClient = ctx.alerting.getRulesClient();
-        const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
-        const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
+        try {
+          const ctx = await context.resolve(['core', 'alerting']);
+          const soClient = ctx.core.savedObjects.client;
+          const rulesClient = ctx.alerting.getRulesClient();
+          const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
+          const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
-        const ruleVersionsMap = await fetchRuleVersionsTriad({
-          ruleAssetsClient,
-          ruleObjectsClient,
-        });
-        const { upgradeableRules } = getVersionBuckets(ruleVersionsMap);
+          const ruleVersionsMap = await fetchRuleVersionsTriad({
+            ruleAssetsClient,
+            ruleObjectsClient,
+          });
+          const { upgradeableRules } = getVersionBuckets(ruleVersionsMap);
 
-        const ruleDiffCalculationResults = upgradeableRules.map(({ current }) => {
-          const ruleVersions = ruleVersionsMap.get(current.rule_id);
-          invariant(ruleVersions != null, 'ruleVersions not found');
-          return calculateRuleDiff(ruleVersions);
-        });
+          const ruleDiffCalculationResults = upgradeableRules.map(({ current }) => {
+            const ruleVersions = ruleVersionsMap.get(current.rule_id);
+            invariant(ruleVersions != null, 'ruleVersions not found');
+            return calculateRuleDiff(ruleVersions);
+          });
 
-        const body: ReviewRuleUpgradeResponseBody = {
-          stats: calculateRuleStats(ruleDiffCalculationResults),
-          rules: calculateRuleInfos(ruleDiffCalculationResults),
-        };
+          const body: ReviewRuleUpgradeResponseBody = {
+            stats: calculateRuleStats(ruleDiffCalculationResults),
+            rules: calculateRuleInfos(ruleDiffCalculationResults),
+          };
 
-        return response.ok({ body });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+          return response.ok({ body });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };
 
 const calculateRuleStats = (results: CalculateRuleDiffResult[]): RuleUpgradeStatsForReview => {
@@ -87,6 +92,7 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
     const { ruleDiff, ruleVersions } = result;
     const installedCurrentVersion = ruleVersions.input.current;
     const diffableCurrentVersion = ruleVersions.output.current;
+    const diffableTargetVersion = ruleVersions.output.target;
     invariant(installedCurrentVersion != null, 'installedCurrentVersion not found');
 
     return {
@@ -94,6 +100,7 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
       rule_id: installedCurrentVersion.rule_id,
       revision: installedCurrentVersion.revision,
       rule: diffableCurrentVersion,
+      target_rule: diffableTargetVersion,
       diff: {
         fields: pickBy<ThreeWayDiff<unknown>>(
           ruleDiff.fields,

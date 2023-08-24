@@ -266,6 +266,7 @@
                   "properties": {
                     "cases": {
                       "type": "array",
+                      "maxItems": 10000,
                       "items": {
                         "$ref": "#/components/schemas/case_response_properties"
                       }
@@ -345,6 +346,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
+                  "maxItems": 10000,
                   "items": {
                     "type": "object",
                     "properties": {
@@ -954,6 +956,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
+                  "maxItems": 10000,
                   "items": {
                     "type": "object",
                     "properties": {
@@ -1094,6 +1097,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
+                  "maxItems": 10000,
                   "items": {
                     "type": "string"
                   }
@@ -1719,6 +1723,7 @@
                     },
                     "userActions": {
                       "type": "array",
+                      "maxItems": 10000,
                       "items": {
                         "$ref": "#/components/schemas/user_actions_find_response_properties"
                       }
@@ -4157,6 +4162,7 @@
       "assignees": {
         "type": "array",
         "description": "An array containing users that are assigned to the case.",
+        "maxItems": 10,
         "nullable": true,
         "items": {
           "type": "object",
@@ -5069,6 +5075,7 @@
             "title": "Case response properties for comments",
             "description": "An array of comment objects for the case.",
             "type": "array",
+            "maxItems": 10000,
             "items": {
               "discriminator": {
                 "propertyName": "type"
@@ -5464,7 +5471,8 @@
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "maxItems": 1000
           }
         ],
         "x-technical-preview": true,
@@ -5481,7 +5489,8 @@
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "maxItems": 1000
           }
         ],
         "x-technical-preview": true

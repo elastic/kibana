@@ -12,10 +12,12 @@ import { Subject } from 'rxjs';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { DocProps } from '../application/doc/components/doc';
 import { ElasticRequestState } from '../application/doc/types';
-import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../common';
+import {
+  SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource,
+  buildDataTableRecord,
+} from '@kbn/discover-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { buildDataTableRecord } from '@kbn/discover-utils';
 
 const index = 'test-index';
 const mockSearchResult = new Subject();

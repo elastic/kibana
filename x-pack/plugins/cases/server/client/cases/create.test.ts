@@ -10,13 +10,13 @@ import {
   MAX_TAGS_PER_CASE,
   MAX_LENGTH_PER_TAG,
   MAX_TITLE_LENGTH,
+  MAX_ASSIGNEES_PER_CASE,
 } from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import { CaseSeverity } from '../../../common/api';
-import { ConnectorTypes } from '../../../common/types/domain';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { create } from './create';
+import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
 
 describe('create', () => {
   const theCase = {
@@ -83,6 +83,14 @@ describe('create', () => {
         theCase: caseSO,
       });
     });
+
+    it('should throw an error if the assignees array length is too long', async () => {
+      const assignees = Array(MAX_ASSIGNEES_PER_CASE + 1).fill({ uid: 'foo' });
+
+      await expect(create({ ...theCase, assignees }, clientArgs)).rejects.toThrow(
+        `Failed to create case: Error: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_PER_CASE}.`
+      );
+    });
   });
 
   describe('Attributes', () => {
@@ -143,6 +151,31 @@ describe('create', () => {
         'Failed to create case: Error: The title field cannot be an empty string.'
       );
     });
+
+    it('should trim title', async () => {
+      await create({ ...theCase, title: 'title with spaces      ' }, clientArgs);
+
+      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: {
+            ...theCase,
+            closed_by: null,
+            closed_at: null,
+            title: 'title with spaces',
+            created_at: expect.any(String),
+            created_by: expect.any(Object),
+            updated_at: null,
+            updated_by: null,
+            external_service: null,
+            duration: null,
+            status: CaseStatuses.open,
+            category: null,
+          },
+          id: expect.any(String),
+          refresh: false,
+        })
+      );
+    });
   });
 
   describe('description', () => {
@@ -178,6 +211,34 @@ describe('create', () => {
     it('should throw an error if the description is a string with empty characters', async () => {
       await expect(create({ ...theCase, description: '   ' }, clientArgs)).rejects.toThrow(
         'Failed to create case: Error: The description field cannot be an empty string.'
+      );
+    });
+
+    it('should trim description', async () => {
+      await create(
+        { ...theCase, description: 'this is a description with spaces!!      ' },
+        clientArgs
+      );
+
+      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: {
+            ...theCase,
+            closed_by: null,
+            closed_at: null,
+            description: 'this is a description with spaces!!',
+            created_at: expect.any(String),
+            created_by: expect.any(Object),
+            updated_at: null,
+            updated_by: null,
+            external_service: null,
+            duration: null,
+            status: CaseStatuses.open,
+            category: null,
+          },
+          id: expect.any(String),
+          refresh: false,
+        })
       );
     });
   });
@@ -227,6 +288,31 @@ describe('create', () => {
         `Failed to create case: Error: The length of the tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`
       );
     });
+
+    it('should trim tags', async () => {
+      await create({ ...theCase, tags: ['pepsi     ', 'coke'] }, clientArgs);
+
+      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: {
+            ...theCase,
+            closed_by: null,
+            closed_at: null,
+            tags: ['pepsi', 'coke'],
+            created_at: expect.any(String),
+            created_by: expect.any(Object),
+            updated_at: null,
+            updated_by: null,
+            external_service: null,
+            duration: null,
+            status: CaseStatuses.open,
+            category: null,
+          },
+          id: expect.any(String),
+          refresh: false,
+        })
+      );
+    });
   });
 
   describe('Category', () => {
@@ -259,6 +345,30 @@ describe('create', () => {
     it('should throw an error if the category is a string with empty characters', async () => {
       await expect(create({ ...theCase, category: '   ' }, clientArgs)).rejects.toThrow(
         'Failed to create case: Error: The category field cannot be an empty string.,Invalid value "   " supplied to "category"'
+      );
+    });
+
+    it('should trim category', async () => {
+      await create({ ...theCase, category: 'reporting       ' }, clientArgs);
+
+      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: {
+            ...theCase,
+            closed_by: null,
+            closed_at: null,
+            category: 'reporting',
+            created_at: expect.any(String),
+            created_by: expect.any(Object),
+            updated_at: null,
+            updated_by: null,
+            external_service: null,
+            duration: null,
+            status: CaseStatuses.open,
+          },
+          id: expect.any(String),
+          refresh: false,
+        })
       );
     });
   });

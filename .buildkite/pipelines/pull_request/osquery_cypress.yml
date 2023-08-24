@@ -8,8 +8,30 @@ steps:
     parallelism: 6
     retry:
       automatic:
-        - exit_status: '-1'
-          limit: 3
+        - exit_status: '*'
+          limit: 1
+    artifact_paths:
+      - "target/kibana-osquery/**/*"
+
+  - command: .buildkite/scripts/steps/functional/osquery_cypress_burn.sh
+    label: 'Osquery Cypress Tests, burning changed specs'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 50
+    soft_fail: true
+    artifact_paths:
+      - "target/kibana-osquery/**/*"
+
+  - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
+    label: 'Serverless Osquery Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 50
+    parallelism: 6
+    retry:
+      automatic:
         - exit_status: '*'
           limit: 1
     artifact_paths:

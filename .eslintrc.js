@@ -596,6 +596,7 @@ module.exports = {
         'test/*/config_open.ts',
         'test/*/*.config.ts',
         'test/*/{tests,test_suites,apis,apps}/**/*',
+        'test/server_integration/**/*.ts',
         'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
@@ -725,7 +726,7 @@ module.exports = {
     {
       files: ['**/*.test.{js,mjs,ts,tsx}'],
       rules: {
-        'jest/valid-describe': 'error',
+        'jest/valid-describe-callback': 'error',
       },
     },
 
@@ -1160,12 +1161,12 @@ module.exports = {
         'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
+        'react/sort-default-props': 'error',
         'react/void-dom-elements-no-children': 'error',
         'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
         'react/jsx-no-target-blank': 'error',
         'react/jsx-fragments': 'error',
-        'react/jsx-sort-default-props': 'error',
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
@@ -1174,6 +1175,7 @@ module.exports = {
       overrides: [
         {
           files: [
+            'x-pack/packages/security-solution/navigation/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
@@ -1255,12 +1257,12 @@ module.exports = {
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
         'react/sort-comp': 'error',
+        'react/sort-default-props': 'error',
         'react/void-dom-elements-no-children': 'error',
         'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
         'react/jsx-no-target-blank': 'error',
         'react/jsx-fragments': 'error',
-        'react/jsx-sort-default-props': 'error',
       },
     },
     {

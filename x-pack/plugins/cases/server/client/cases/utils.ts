@@ -12,23 +12,20 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type {
   ActionConnector,
-  ConnectorMappingSource,
+  Attachment,
+  Case,
+  CaseAssignees,
+  CaseAttributes,
   ConnectorMappings,
+  ConnectorMappingSource,
   ConnectorMappingTarget,
+  ExternalService,
+  User,
 } from '../../../common/types/domain';
-import { UserActionTypes } from '../../../common/types/domain';
+import { CaseStatuses, UserActionTypes, AttachmentType } from '../../../common/types/domain';
 import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
-import type {
-  CaseFullExternalService,
-  Case,
-  Comment,
-  User,
-  CaseAttributes,
-  CaseAssignees,
-} from '../../../common/api';
-import { CommentType, CaseStatuses } from '../../../common/api';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';
 import type { ExternalServiceComment, ExternalServiceIncident } from './types';
 import { getAlertIds } from '../utils';
@@ -55,7 +52,7 @@ export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undef
   return uniqBy(assignees, 'uid');
 };
 
-type LatestPushInfo = { index: number; pushedInfo: CaseFullExternalService } | null;
+type LatestPushInfo = { index: number; pushedInfo: ExternalService | null } | null;
 
 export const getLatestPushInfo = (
   connectorId: string,
@@ -80,14 +77,14 @@ export const getLatestPushInfo = (
   return null;
 };
 
-const getCommentContent = (comment: Comment): string => {
-  if (comment.type === CommentType.user) {
+const getCommentContent = (comment: Attachment): string => {
+  if (comment.type === AttachmentType.user) {
     return comment.comment;
-  } else if (comment.type === CommentType.alert) {
+  } else if (comment.type === AttachmentType.alert) {
     const ids = getAlertIds(comment);
     return `Alert with ids ${ids.join(', ')} added to case`;
   } else if (
-    comment.type === CommentType.actions &&
+    comment.type === AttachmentType.actions &&
     (comment.actions.type === 'isolate' || comment.actions.type === 'unisolate')
   ) {
     const firstHostname =
@@ -115,7 +112,7 @@ const getAlertsInfo = (
 
   const res =
     comments?.reduce<CountAlertsInfo>(({ totalComments, pushed, totalAlerts }, comment) => {
-      if (comment.type === CommentType.alert) {
+      if (comment.type === AttachmentType.alert) {
         return {
           totalComments: totalComments + 1,
           pushed: comment.pushed_at != null ? pushed + 1 : pushed,
@@ -258,7 +255,7 @@ export const formatComments = ({
   const commentsToBeUpdated = theCase.comments?.filter(
     (comment) =>
       // We push only user's comments
-      (comment.type === CommentType.user || comment.type === CommentType.actions) &&
+      (comment.type === AttachmentType.user || comment.type === AttachmentType.actions) &&
       commentsIdsToBeUpdated.has(comment.id)
   );
 

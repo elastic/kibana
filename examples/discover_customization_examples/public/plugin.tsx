@@ -26,6 +26,10 @@ import { noop } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
+import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { css } from '@emotion/react';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { ControlsPanels } from '@kbn/controls-plugin/common';
 import image from './discover_customization_examples.png';
 
 export interface DiscoverCustomizationExamplesSetupPlugins {
@@ -223,6 +227,166 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                     ]}
                   />
                 </EuiPopover>
+              </EuiFlexItem>
+            );
+          },
+        });
+
+        customizations.set({
+          id: 'search_bar',
+          CustomDataViewPicker: () => {
+            const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+            const togglePopover = () => setIsPopoverOpen((open) => !open);
+            const closePopover = () => setIsPopoverOpen(false);
+            const [savedSearches, setSavedSearches] = useState<
+              Array<SimpleSavedObject<{ title: string }>>
+            >([]);
+
+            useEffect(() => {
+              core.savedObjects.client
+                .find<{ title: string }>({ type: 'search' })
+                .then((response) => {
+                  setSavedSearches(response.savedObjects);
+                });
+            }, []);
+
+            const currentSavedSearch = useObservable(
+              stateContainer.savedSearchState.getCurrent$(),
+              stateContainer.savedSearchState.getState()
+            );
+
+            return (
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  button={
+                    <EuiButton
+                      iconType="arrowDown"
+                      iconSide="right"
+                      fullWidth
+                      onClick={togglePopover}
+                      data-test-subj="logsViewSelectorButton"
+                    >
+                      {currentSavedSearch.title ?? 'None selected'}
+                    </EuiButton>
+                  }
+                  anchorClassName="eui-fullWidth"
+                  isOpen={isPopoverOpen}
+                  panelPaddingSize="none"
+                  closePopover={closePopover}
+                >
+                  <EuiContextMenu
+                    size="s"
+                    initialPanelId={0}
+                    panels={[
+                      {
+                        id: 0,
+                        title: 'Saved logs views',
+                        items: savedSearches.map((savedSearch) => ({
+                          name: savedSearch.get('title'),
+                          onClick: () => stateContainer.actions.onOpenSavedSearch(savedSearch.id),
+                          icon: savedSearch.id === currentSavedSearch.id ? 'check' : 'empty',
+                          'data-test-subj': `logsViewSelectorOption-${savedSearch.attributes.title.replace(
+                            /[^a-zA-Z0-9]/g,
+                            ''
+                          )}`,
+                        })),
+                      },
+                    ]}
+                  />
+                </EuiPopover>
+              </EuiFlexItem>
+            );
+          },
+          PrependFilterBar: () => {
+            const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupAPI>();
+            const stateStorage = stateContainer.stateStorage;
+            const dataView = useObservable(
+              stateContainer.internalState.state$,
+              stateContainer.internalState.getState()
+            ).dataView;
+
+            useEffect(() => {
+              if (!controlGroupAPI) {
+                return;
+              }
+
+              const stateSubscription = stateStorage
+                .change$<ControlsPanels>('controlPanels')
+                .subscribe((panels) =>
+                  controlGroupAPI.updateInput({ panels: panels ?? undefined })
+                );
+
+              const inputSubscription = controlGroupAPI.getInput$().subscribe((input) => {
+                if (input && input.panels) stateStorage.set('controlPanels', input.panels);
+              });
+
+              const filterSubscription = controlGroupAPI.onFiltersPublished$.subscribe(
+                (newFilters) => {
+                  stateContainer.internalState.transitions.setCustomFilters(newFilters);
+                  stateContainer.actions.fetchData();
+                }
+              );
+
+              return () => {
+                stateSubscription.unsubscribe();
+                inputSubscription.unsubscribe();
+                filterSubscription.unsubscribe();
+              };
+            }, [controlGroupAPI, stateStorage]);
+
+            const fieldToFilterOn = dataView?.fields.filter((field) =>
+              field.esTypes?.includes('keyword')
+            )[0];
+
+            if (!fieldToFilterOn) {
+              return null;
+            }
+
+            return (
+              <EuiFlexItem
+                data-test-subj="customPrependedFilter"
+                grow={false}
+                css={css`
+                  .controlGroup {
+                    min-height: unset;
+                  }
+
+                  .euiFormLabel {
+                    padding-top: 0;
+                    padding-bottom: 0;
+                    line-height: 32px !important;
+                  }
+
+                  .euiFormControlLayout {
+                    height: 32px;
+                  }
+                `}
+              >
+                <ControlGroupRenderer
+                  ref={setControlGroupAPI}
+                  getCreationOptions={async (initialInput, builder) => {
+                    const panels = stateStorage.get<ControlsPanels>('controlPanels');
+
+                    if (!panels) {
+                      await builder.addOptionsListControl(initialInput, {
+                        dataViewId: dataView?.id!,
+                        title: fieldToFilterOn.name.split('.')[0],
+                        fieldName: fieldToFilterOn.name,
+                        grow: false,
+                        width: 'small',
+                      });
+                    }
+
+                    return {
+                      initialInput: {
+                        ...initialInput,
+                        panels: panels ?? initialInput.panels,
+                        viewMode: ViewMode.VIEW,
+                        filters: stateContainer.appState.get().filters ?? [],
+                      },
+                    };
+                  }}
+                />
               </EuiFlexItem>
             );
           },

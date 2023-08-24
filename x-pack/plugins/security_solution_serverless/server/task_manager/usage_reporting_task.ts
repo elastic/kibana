@@ -15,7 +15,9 @@ import type {
   MeteringCallback,
   SecurityUsageReportingTaskStartContract,
   SecurityUsageReportingTaskSetupContract,
+  UsageRecord,
 } from '../types';
+import type { ServerlessSecurityConfig } from '../config';
 
 const SCOPE = ['serverlessSecurity'];
 const TIMEOUT = '1m';
@@ -26,14 +28,16 @@ export class SecurityUsageReportingTask {
   private wasStarted: boolean = false;
   private cloudSetup: CloudSetup;
   private taskType: string;
-  private taskId: string;
   private version: string;
   private logger: Logger;
+  private abortController = new AbortController();
+  private config: ServerlessSecurityConfig;
 
   constructor(setupContract: SecurityUsageReportingTaskSetupContract) {
     const {
       core,
       logFactory,
+      config,
       taskManager,
       cloudSetup,
       taskType,
@@ -45,8 +49,8 @@ export class SecurityUsageReportingTask {
     this.cloudSetup = cloudSetup;
     this.taskType = taskType;
     this.version = version;
-    this.taskId = this.getTaskId(taskType, version);
     this.logger = logFactory.get(this.taskId);
+    this.config = config;
 
     try {
       taskManager.registerTaskDefinitions({
@@ -115,13 +119,21 @@ export class SecurityUsageReportingTask {
 
     const lastSuccessfulReport = taskInstance.state.lastSuccessfulReport;
 
-    const usageRecords = await meteringCallback({
-      esClient,
-      cloudSetup: this.cloudSetup,
-      logger: this.logger,
-      taskId: this.taskId,
-      lastSuccessfulReport,
-    });
+    let usageRecords: UsageRecord[] = [];
+    try {
+      usageRecords = await meteringCallback({
+        esClient,
+        cloudSetup: this.cloudSetup,
+        logger: this.logger,
+        taskId: this.taskId,
+        lastSuccessfulReport,
+        abortController: this.abortController,
+        config: this.config,
+      });
+    } catch (err) {
+      this.logger.error(`failed to retrieve usage records: ${JSON.stringify(err)}`);
+      return;
+    }
 
     this.logger.debug(`received usage records: ${JSON.stringify(usageRecords)}`);
 
@@ -152,7 +164,7 @@ export class SecurityUsageReportingTask {
     return { state };
   };
 
-  private getTaskId = (taskType: string, version: string): string => {
-    return `${taskType}:${version}`;
-  };
+  private get taskId() {
+    return `${this.taskType}:${this.version}`;
+  }
 }

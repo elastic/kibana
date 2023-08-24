@@ -15,7 +15,7 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
-} from '../../common';
+} from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
 
@@ -76,7 +76,7 @@ describe('getSharingData', () => {
     index.timeFieldName = 'cool-timefield';
     const searchSourceMock = createSearchSourceMock({ index });
     const { getSearchSource } = await getSharingData(searchSourceMock, {}, services);
-    expect(getSearchSource()).toMatchInlineSnapshot(`
+    expect(getSearchSource({})).toMatchInlineSnapshot(`
       Object {
         "fields": Array [
           Object {
@@ -121,7 +121,7 @@ describe('getSharingData', () => {
       },
       services
     );
-    expect(getSearchSource()).toMatchInlineSnapshot(`
+    expect(getSearchSource({})).toMatchInlineSnapshot(`
       Object {
         "index": "the-data-view-id",
         "sort": Array [
@@ -151,7 +151,7 @@ describe('getSharingData', () => {
       },
       services
     );
-    expect(getSearchSource().fields).toStrictEqual([
+    expect(getSearchSource({}).fields).toStrictEqual([
       { field: 'cool-timefield', include_unmapped: 'true' },
       { field: 'cool-field-1', include_unmapped: 'true' },
       { field: 'cool-field-2', include_unmapped: 'true' },

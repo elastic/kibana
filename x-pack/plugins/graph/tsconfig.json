@@ -45,6 +45,7 @@
     "@kbn/object-versioning",
     "@kbn/content-management-table-list-view-table",
     "@kbn/content-management-table-list-view",
+    "@kbn/core-ui-settings-browser",
   ],
   "exclude": [
     "target/**/*",

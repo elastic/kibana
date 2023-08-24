@@ -18,11 +18,9 @@ export const PrivateLocationCodec = t.intersection([
     isServiceManaged: t.boolean,
     isInvalid: t.boolean,
     tags: t.array(t.string),
-    /* Empty Lat lon was accidentally saved as an empty string instead of undefined or null
-     * Need a migration to fix */
     geo: t.interface({
-      lat: t.union([t.string, t.number, t.null]),
-      lon: t.union([t.string, t.number, t.null]),
+      lat: t.number,
+      lon: t.number,
     }),
   }),
 ]);

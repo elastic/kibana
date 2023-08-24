@@ -40,7 +40,7 @@ export const RefineSearchPrompt = (props: RefineSearchFooterProps) => {
   }
 
   return (
-    <EuiText style={textStyles} textAlign="center" size="s">
+    <EuiText style={textStyles} textAlign="center" size="s" data-test-subj="refineSearchPrompt">
       <FormattedMessage
         id="xpack.triggersActionsUI.sections.refineSearchPrompt.prompt"
         defaultMessage="These are the first {visibleDocumentSize} documents matching your search, refine your search to see others."

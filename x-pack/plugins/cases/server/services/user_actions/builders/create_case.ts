@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
+import { UserActionActions, UserActionTypes, CaseStatuses } from '../../../../common/types/domain';
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
-import { CaseStatuses } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 
