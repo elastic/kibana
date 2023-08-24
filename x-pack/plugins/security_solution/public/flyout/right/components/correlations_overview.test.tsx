@@ -73,6 +73,7 @@ const RELATED_ALERTS_BY_SESSION_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(
 const RELATED_CASES_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(
   INSIGHTS_CORRELATIONS_RELATED_CASES_TEST_ID
 );
+const CORRELATIONS_ERROR_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}Error`;
 
 const panelContextValue = {
   eventId: 'event id',
@@ -147,7 +148,7 @@ describe('<CorrelationsOverview />', () => {
     expect(getByTestId(SUPPRESSED_ALERTS_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should hide rows if show values are false', () => {
+  it('should hide rows and show error message if show values are false', () => {
     jest
       .mocked(useShowRelatedAlertsByAncestry)
       .mockReturnValue({ show: false, documentId: 'documentId', indices: ['index1'] });
@@ -159,12 +160,13 @@ describe('<CorrelationsOverview />', () => {
       .mockReturnValue({ show: false, entityId: 'entityId' });
     jest.mocked(useShowRelatedCases).mockReturnValue(false);
 
-    const { queryByTestId } = render(renderCorrelationsOverview(panelContextValue));
+    const { getByTestId, queryByTestId } = render(renderCorrelationsOverview(panelContextValue));
     expect(queryByTestId(RELATED_ALERTS_BY_ANCESTRY_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(RELATED_ALERTS_BY_SESSION_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(RELATED_CASES_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(SUPPRESSED_ALERTS_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(CORRELATIONS_ERROR_TEST_ID)).toBeInTheDocument();
   });
 
   it('should hide rows if values are null', () => {
