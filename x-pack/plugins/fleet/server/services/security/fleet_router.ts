@@ -13,47 +13,40 @@ import type {
   Logger,
   RequestHandler,
   RouteMethod,
-  RouteConfig,
-  RouteConfigOptions,
 } from '@kbn/core/server';
+import type { VersionedRouteConfig } from '@kbn/core-http-server';
 
 import { routeValidationObject } from '@kbn/server-route-repository';
 
-import type { INTERNAL_API_ACCESS } from '../../../common/constants';
-import {
-  OLDEST_PUBLIC_VERSION,
-  OLDEST_INTERNAL_VERSION,
-  PUBLIC_API_ACCESS,
-} from '../../../common/constants';
+import { PUBLIC_API_ACCESS } from '../../../common/constants';
 
 import type { FleetRequestHandlerContext } from '../..';
 
 import { getRequestStore } from '../request_store';
 
-import type { FleetAuthzRouteConfig, FleetAuthzRouter } from './types';
+import type {
+  FleetAuthzRouteConfig,
+  FleetAuthzRouter,
+  FleetAddVersionOpts,
+  FleetHandler,
+} from './types';
 import {
   checkSecurityEnabled,
   getAuthzFromRequest,
   doesNotHaveRequiredFleetAuthz,
 } from './security';
 
-function withDefaultPublicAccess<P, Q, B, Method extends RouteMethod>(
-  routeConfig: RouteConfig<P, Q, B, Method>
-): RouteConfig<P, Q, B, Method> {
-  let newOptions: RouteConfigOptions<Method>;
-  if (routeConfig?.options) {
-    newOptions = { ...routeConfig?.options };
+function withDefaultPublicAccess<Method extends RouteMethod>(
+  options: VersionedRouteConfig<Method>
+): VersionedRouteConfig<Method> {
+  if (options?.access) {
+    return options;
   } else {
-    newOptions = {};
+    return {
+      ...options,
+      access: PUBLIC_API_ACCESS,
+    };
   }
-
-  if (!newOptions.access) {
-    newOptions.access = PUBLIC_API_ACCESS;
-  }
-  return {
-    ...routeConfig,
-    options: newOptions,
-  };
 }
 
 export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerContext>(
@@ -133,69 +126,100 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
         }),
     });
   };
-  const getDefaultVersion = (access: typeof PUBLIC_API_ACCESS | typeof INTERNAL_API_ACCESS) =>
-    access === PUBLIC_API_ACCESS ? OLDEST_PUBLIC_VERSION : OLDEST_INTERNAL_VERSION;
 
   const fleetAuthzRouter: FleetAuthzRouter<TContext> = {
-    get: ({ fleetAuthz: hasRequiredAuthz, version: headerVersion, ...options }, handler) => {
-      const access = withDefaultPublicAccess(options).options?.access || PUBLIC_API_ACCESS;
-      const version = headerVersion || getDefaultVersion(access);
-      return router.versioned
-        .get({ access, ...options })
-        .addVersion(
-          { version, validate: { request: routeValidationObject } },
-          (context, request, response) =>
-            fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+    versioned: {
+      get: ({ fleetAuthz, ...options }) => {
+        const { addVersion: originalAddVersion } = router.versioned.get(
+          withDefaultPublicAccess(options)
         );
-    },
-    delete: ({ fleetAuthz: hasRequiredAuthz, version: headerVersion, ...options }, handler) => {
-      const access = withDefaultPublicAccess(options).options?.access || PUBLIC_API_ACCESS;
-      const version = headerVersion || getDefaultVersion(access);
-      return router.versioned
-        .delete({ access, ...options })
-        .addVersion(
-          { version, validate: { request: routeValidationObject } },
-          (context, request, response) =>
-            fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+
+        function addVersion<P, Q, B>(
+          { fleetAuthz: hasRequiredAuthz, version }: FleetAddVersionOpts<P, Q, B>,
+          handler: FleetHandler<P, Q, B, TContext>
+        ) {
+          originalAddVersion(
+            { version, validate: { request: routeValidationObject } },
+            (context, request, response) =>
+              fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+          );
+          return { addVersion };
+        }
+        return { addVersion };
+      },
+      delete: ({ fleetAuthz, ...options }) => {
+        const { addVersion: originalAddVersion } = router.versioned.delete(
+          withDefaultPublicAccess(options)
         );
-    },
-    post: ({ fleetAuthz: hasRequiredAuthz, version: headerVersion, ...options }, handler) => {
-      const access = withDefaultPublicAccess(options).options?.access || PUBLIC_API_ACCESS;
-      const version = headerVersion || getDefaultVersion(access);
-      return router.versioned
-        .post({ access, ...options })
-        .addVersion(
-          { version, validate: { request: routeValidationObject } },
-          (context, request, response) =>
-            fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+
+        function addVersion<P, Q, B>(
+          { fleetAuthz: hasRequiredAuthz, version }: FleetAddVersionOpts<P, Q, B>,
+          handler: FleetHandler<P, Q, B, TContext>
+        ) {
+          originalAddVersion(
+            { version, validate: { request: routeValidationObject } },
+            (context, request, response) =>
+              fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+          );
+          return { addVersion };
+        }
+        return { addVersion };
+      },
+      put: ({ fleetAuthz, ...options }) => {
+        const { addVersion: originalAddVersion } = router.versioned.put(
+          withDefaultPublicAccess(options)
         );
-    },
-    put: ({ fleetAuthz: hasRequiredAuthz, version: headerVersion, ...options }, handler) => {
-      const access = withDefaultPublicAccess(options).options?.access || PUBLIC_API_ACCESS;
-      const version = headerVersion || getDefaultVersion(access);
-      return router.versioned
-        .put({ access, ...options })
-        .addVersion(
-          { version, validate: { request: routeValidationObject } },
-          (context, request, response) =>
-            fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+
+        function addVersion<P, Q, B>(
+          { fleetAuthz: hasRequiredAuthz, version }: FleetAddVersionOpts<P, Q, B>,
+          handler: FleetHandler<P, Q, B, TContext>
+        ) {
+          originalAddVersion(
+            { version, validate: { request: routeValidationObject } },
+            (context, request, response) =>
+              fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+          );
+          return { addVersion };
+        }
+        return { addVersion };
+      },
+      post: ({ fleetAuthz, ...options }) => {
+        const { addVersion: originalAddVersion } = router.versioned.post(
+          withDefaultPublicAccess(options)
         );
-    },
-    patch: ({ fleetAuthz: hasRequiredAuthz, version: headerVersion, ...options }, handler) => {
-      const access = withDefaultPublicAccess(options).options?.access || PUBLIC_API_ACCESS;
-      const version = headerVersion || getDefaultVersion(access);
-      return router.versioned
-        .patch({ access, ...options })
-        .addVersion(
-          { version, validate: { request: routeValidationObject } },
-          (context, request, response) =>
-            fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+
+        function addVersion<P, Q, B>(
+          { fleetAuthz: hasRequiredAuthz, version }: FleetAddVersionOpts<P, Q, B>,
+          handler: FleetHandler<P, Q, B, TContext>
+        ) {
+          originalAddVersion(
+            { version, validate: { request: routeValidationObject } },
+            (context, request, response) =>
+              fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+          );
+          return { addVersion };
+        }
+        return { addVersion };
+      },
+      patch: ({ fleetAuthz, ...options }) => {
+        const { addVersion: originalAddVersion } = router.versioned.patch(
+          withDefaultPublicAccess(options)
         );
+
+        function addVersion<P, Q, B>(
+          { fleetAuthz: hasRequiredAuthz, version }: FleetAddVersionOpts<P, Q, B>,
+          handler: FleetHandler<P, Q, B, TContext>
+        ) {
+          originalAddVersion(
+            { version, validate: { request: routeValidationObject } },
+            (context, request, response) =>
+              fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+          );
+          return { addVersion };
+        }
+        return { addVersion };
+      },
     },
-    handleLegacyErrors: (handler) => router.handleLegacyErrors(handler),
-    getRoutes: () => router.getRoutes(),
-    routerPath: router.routerPath,
-    versioned: router.versioned,
   };
 
   return fleetAuthzRouter;

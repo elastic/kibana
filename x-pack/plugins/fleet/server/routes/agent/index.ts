@@ -6,6 +6,7 @@
  */
 
 import type { FleetAuthz } from '../../../common';
+import { OLDEST_PUBLIC_VERSION } from '../../../common/constants';
 
 import { getRouteRequiredAuthz, type FleetAuthzRouter } from '../../services/security';
 
@@ -72,300 +73,430 @@ import {
 
 export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   // Get one
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: AGENT_API_ROUTES.INFO_PATTERN,
-      validate: GetOneAgentRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    getAgentHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: GetOneAgentRequestSchema },
+      },
+      getAgentHandler
+    );
+
   // Update
-  router.put(
-    {
+  router.versioned
+    .put({
+      access: 'public',
       path: AGENT_API_ROUTES.UPDATE_PATTERN,
-      validate: UpdateAgentRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    updateAgentHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: UpdateAgentRequestSchema },
+      },
+      updateAgentHandler
+    );
+
   // Bulk Update Tags
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: AGENT_API_ROUTES.BULK_UPDATE_AGENT_TAGS_PATTERN,
-      validate: PostBulkUpdateAgentTagsRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    bulkUpdateAgentTagsHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: PostBulkUpdateAgentTagsRequestSchema },
+      },
+      bulkUpdateAgentTagsHandler
+    );
+
   // Delete
-  router.delete(
-    {
+  router.versioned
+    .delete({
+      access: 'public',
       path: AGENT_API_ROUTES.DELETE_PATTERN,
-      validate: DeleteAgentRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    deleteAgentHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: DeleteAgentRequestSchema },
+      },
+      deleteAgentHandler
+    );
+
   // List
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: AGENT_API_ROUTES.LIST_PATTERN,
-      validate: GetAgentsRequestSchema,
+
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    getAgentsHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: GetAgentsRequestSchema },
+      },
+      getAgentsHandler
+    );
+
   // List Agent Tags
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: AGENT_API_ROUTES.LIST_TAGS_PATTERN,
-      validate: GetTagsRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    getAgentTagsHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: GetTagsRequestSchema },
+      },
+      getAgentTagsHandler
+    );
 
   // Agent actions
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: AGENT_API_ROUTES.ACTIONS_PATTERN,
-      validate: PostNewAgentActionRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    postNewAgentActionHandlerBuilder({
-      getAgent: AgentService.getAgentById,
-      cancelAgentAction: AgentService.cancelAgentAction,
-      createAgentAction: AgentService.createAgentAction,
-      getAgentActions: AgentService.getAgentActions,
     })
-  );
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: PostNewAgentActionRequestSchema },
+      },
+      postNewAgentActionHandlerBuilder({
+        getAgent: AgentService.getAgentById,
+        cancelAgentAction: AgentService.cancelAgentAction,
+        createAgentAction: AgentService.createAgentAction,
+        getAgentActions: AgentService.getAgentActions,
+      })
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: AGENT_API_ROUTES.CANCEL_ACTIONS_PATTERN,
-      validate: PostCancelActionRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    postCancelActionHandlerBuilder({
-      getAgent: AgentService.getAgentById,
-      cancelAgentAction: AgentService.cancelAgentAction,
-      createAgentAction: AgentService.createAgentAction,
-      getAgentActions: AgentService.getAgentActions,
     })
-  );
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: PostCancelActionRequestSchema },
+      },
+      postCancelActionHandlerBuilder({
+        getAgent: AgentService.getAgentById,
+        cancelAgentAction: AgentService.cancelAgentAction,
+        createAgentAction: AgentService.createAgentAction,
+        getAgentActions: AgentService.getAgentActions,
+      })
+    );
+
   // Get agents by Action_Ids
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: AGENT_API_ROUTES.LIST_PATTERN,
-      validate: PostRetrieveAgentsByActionsRequestSchema,
       fleetAuthz: {
         fleet: { all: true }, // Authorizations?
       },
-    },
-    postRetrieveAgentsByActionsHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: PostRetrieveAgentsByActionsRequestSchema },
+      },
+      postRetrieveAgentsByActionsHandler
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: AGENT_API_ROUTES.UNENROLL_PATTERN,
-      validate: PostAgentUnenrollRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    postAgentUnenrollHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: PostAgentUnenrollRequestSchema },
+      },
+      postAgentUnenrollHandler
+    );
 
   // mark as deprecated
-  router.put(
-    {
+  router.versioned
+    .put({
+      access: 'public',
       path: AGENT_API_ROUTES.REASSIGN_PATTERN,
-      validate: PutAgentReassignRequestSchemaDeprecated,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    putAgentsReassignHandlerDeprecated
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: PutAgentReassignRequestSchemaDeprecated },
+      },
+      putAgentsReassignHandlerDeprecated
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: AGENT_API_ROUTES.REASSIGN_PATTERN,
-      validate: PostAgentReassignRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    postAgentsReassignHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: PostAgentReassignRequestSchema },
+      },
+      postAgentsReassignHandler
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: AGENT_API_ROUTES.REQUEST_DIAGNOSTICS_PATTERN,
-      validate: PostRequestDiagnosticsActionRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    requestDiagnosticsHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: PostRequestDiagnosticsActionRequestSchema },
+      },
+      requestDiagnosticsHandler
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: AGENT_API_ROUTES.BULK_REQUEST_DIAGNOSTICS_PATTERN,
-      validate: PostBulkRequestDiagnosticsActionRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    bulkRequestDiagnosticsHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: PostBulkRequestDiagnosticsActionRequestSchema },
+      },
+      bulkRequestDiagnosticsHandler
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: AGENT_API_ROUTES.LIST_UPLOADS_PATTERN,
-      validate: ListAgentUploadsRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    getAgentUploadsHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: ListAgentUploadsRequestSchema },
+      },
+      getAgentUploadsHandler
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: AGENT_API_ROUTES.GET_UPLOAD_FILE_PATTERN,
-      validate: GetAgentUploadFileRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    getAgentUploadFileHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: GetAgentUploadFileRequestSchema },
+      },
+      getAgentUploadFileHandler
+    );
 
   // Get agent status for policy
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: AGENT_API_ROUTES.STATUS_PATTERN,
-      validate: GetAgentStatusRequestSchema,
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(
           fleetAuthz,
           getRouteRequiredAuthz('get', AGENT_API_ROUTES.STATUS_PATTERN)
         ).granted,
-    },
-    getAgentStatusForAgentPolicyHandler
-  );
-  router.get(
-    {
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: GetAgentStatusRequestSchema },
+      },
+      getAgentStatusForAgentPolicyHandler
+    );
+  router.versioned
+    .get({
+      access: 'internal',
       path: AGENT_API_ROUTES.STATUS_PATTERN_DEPRECATED,
-      validate: GetAgentStatusRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-      options: {
-        access: 'internal',
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: GetAgentStatusRequestSchema },
       },
-    },
-    getAgentStatusForAgentPolicyHandler
-  );
+      getAgentStatusForAgentPolicyHandler
+    );
   // Agent data
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: AGENT_API_ROUTES.DATA_PATTERN,
-      validate: GetAgentDataRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    getAgentDataHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: GetAgentDataRequestSchema },
+      },
+      getAgentDataHandler
+    );
 
   // upgrade agent
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: AGENT_API_ROUTES.UPGRADE_PATTERN,
-      validate: PostAgentUpgradeRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    postAgentUpgradeHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: PostAgentUpgradeRequestSchema },
+      },
+      postAgentUpgradeHandler
+    );
   // bulk upgrade
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
-      validate: PostBulkAgentUpgradeRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    postBulkAgentsUpgradeHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: PostBulkAgentUpgradeRequestSchema },
+      },
+      postBulkAgentsUpgradeHandler
+    );
 
   // Current actions
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: AGENT_API_ROUTES.ACTION_STATUS_PATTERN,
-      validate: GetActionStatusRequestSchema,
+
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    getActionStatusHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: GetActionStatusRequestSchema },
+      },
+      getActionStatusHandler
+    );
 
   // Bulk reassign
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
-      validate: PostBulkAgentReassignRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    postBulkAgentsReassignHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: PostBulkAgentReassignRequestSchema },
+      },
+      postBulkAgentsReassignHandler
+    );
 
   // Bulk unenroll
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: AGENT_API_ROUTES.BULK_UNENROLL_PATTERN,
-      validate: PostBulkAgentUnenrollRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    postBulkAgentsUnenrollHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: { request: PostBulkAgentUnenrollRequestSchema },
+      },
+      postBulkAgentsUnenrollHandler
+    );
 
   // Available versions for upgrades
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: AGENT_API_ROUTES.AVAILABLE_VERSIONS_PATTERN,
-      validate: false,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    getAvailableVersionsHandler
-  );
+    })
+    .addVersion(
+      {
+        version: OLDEST_PUBLIC_VERSION,
+        validate: false,
+      },
+      getAvailableVersionsHandler
+    );
 };
