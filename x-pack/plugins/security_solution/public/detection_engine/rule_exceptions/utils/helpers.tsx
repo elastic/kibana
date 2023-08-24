@@ -869,22 +869,14 @@ export const buildRuleExceptionWithConditions = ({
     entries: addIdToEntries(exceptionEntries),
   };
 };
-/**
- * Converting a singular value to a string or an array of strings
- * is necessary because the "Match" or "Match any" operators
- * are designed to operate with string value(s).
- * @param value
- * @returns string | string[]
- */
 
-export const getFieldValueAsString = (value: any) => {
-  if (Array.isArray(value)) return value.map(String);
-  return value.toString();
-};
 /**
  Generate exception conditions based on the highlighted fields of the alert that 
  have corresponding values in the alert data.
  For the initial implementation the nested conditions are not considered
+ Converting a singular value to a string or an array of strings
+ is necessary because the "Match" or "Match any" operators
+ are designed to operate with string value(s).
  */
 export const buildExceptionEntriesFromAlertFields = ({
   highlightedFields,
@@ -902,11 +894,14 @@ export const buildExceptionEntriesFromAlertFields = ({
         ? ListOperatorTypeEnum.MATCH_ANY
         : ListOperatorTypeEnum.MATCH;
 
+      const fieldValueAsString = Array.isArray(fieldValue)
+        ? fieldValue.map(String)
+        : fieldValue.toString();
       acc.push({
         field: fieldKey,
         operator: ListOperatorEnum.INCLUDED,
         type: listOperatorType,
-        value: getFieldValueAsString(fieldValue),
+        value: fieldValueAsString,
       });
     }
 
