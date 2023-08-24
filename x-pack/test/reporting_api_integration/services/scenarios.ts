@@ -68,7 +68,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     const logsSOPathCanvas = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs_canvas';
     await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
     await kibanaServer.importExport.load(logsSOPathCanvas);
-  }
+  };
   const teardownLogs = async () => {
     await kibanaServer.importExport.unload(logsSOPath);
     await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
