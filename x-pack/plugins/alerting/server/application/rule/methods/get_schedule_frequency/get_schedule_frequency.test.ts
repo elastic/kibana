@@ -49,10 +49,12 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAuthenticationAPIKey: jest.fn(),
 };
 
-const getMockAggregationResult = (intervalAggs: Array<{
-  interval: string,
-  count: number,
-}>) => {
+const getMockAggregationResult = (
+  intervalAggs: Array<{
+    interval: string;
+    count: number;
+  }>
+) => {
   return {
     aggregations: {
       schedule_intervals: {
@@ -71,20 +73,22 @@ const getMockAggregationResult = (intervalAggs: Array<{
 
 describe('getScheduleFrequency()', () => {
   beforeEach(() => {
-    unsecuredSavedObjectsClient.find.mockResolvedValue(getMockAggregationResult([
-      { interval: '1m', count: 1 },
-      { interval: '1m', count: 2 },
-      { interval: '1m', count: 3 },
-      { interval: '5m', count: 5 },
-      { interval: '5m', count: 10 },
-      { interval: '5m', count: 15 },
-    ]));
+    unsecuredSavedObjectsClient.find.mockResolvedValue(
+      getMockAggregationResult([
+        { interval: '1m', count: 1 },
+        { interval: '1m', count: 2 },
+        { interval: '1m', count: 3 },
+        { interval: '5m', count: 5 },
+        { interval: '5m', count: 10 },
+        { interval: '5m', count: 15 },
+      ])
+    );
   });
-  
+
   afterEach(() => {
     jest.clearAllMocks();
   });
-  
+
   test('should return the correct schedule frequency results', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     const result = await rulesClient.getScheduleFrequency();
@@ -97,14 +101,12 @@ describe('getScheduleFrequency()', () => {
   });
 
   test('should handle empty bucket correctly', async () => {
-    unsecuredSavedObjectsClient.find.mockResolvedValue(
-      {
-        page: 1,
-        per_page: 20,
-        total: 1,
-        saved_objects: [],
-      }
-    );
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      page: 1,
+      per_page: 20,
+      total: 1,
+      saved_objects: [],
+    });
 
     const rulesClient = new RulesClient(rulesClientParams);
     const result = await rulesClient.getScheduleFrequency();
@@ -114,15 +116,17 @@ describe('getScheduleFrequency()', () => {
   });
 
   test('should handle malformed schedule interval correctly', async () => {
-    unsecuredSavedObjectsClient.find.mockResolvedValue(getMockAggregationResult([
-      { interval: '1m', count: 1 },
-      { interval: '1m', count: 2 },
-      { interval: '1m', count: 3 },
-      { interval: '5m', count: 5 },
-      { interval: '5m', count: 10 },
-      { interval: '5m', count: 15 },
-      { interval: 'invalid', count: 15 },
-    ]));
+    unsecuredSavedObjectsClient.find.mockResolvedValue(
+      getMockAggregationResult([
+        { interval: '1m', count: 1 },
+        { interval: '1m', count: 2 },
+        { interval: '1m', count: 3 },
+        { interval: '5m', count: 5 },
+        { interval: '5m', count: 10 },
+        { interval: '5m', count: 15 },
+        { interval: 'invalid', count: 15 },
+      ])
+    );
 
     const rulesClient = new RulesClient(rulesClientParams);
     const result = await rulesClient.getScheduleFrequency();
@@ -133,58 +137,66 @@ describe('getScheduleFrequency()', () => {
 });
 
 describe('validateScheduleLimit', () => {
-  const context = { 
-    ...rulesClientParams, 
+  const context = {
+    ...rulesClientParams,
     maxScheduledPerMinute: 5,
     minimumScheduleIntervalInMs: 1000,
     fieldsToExcludeFromPublicApi: [],
   };
 
   beforeEach(() => {
-    unsecuredSavedObjectsClient.find.mockResolvedValue(getMockAggregationResult([
-      { interval: '1m', count: 2 },
-    ]));
+    unsecuredSavedObjectsClient.find.mockResolvedValue(
+      getMockAggregationResult([{ interval: '1m', count: 2 }])
+    );
   });
-  
+
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   test('should not throw if the updated interval does not exceed limits', () => {
-    return expect(validateScheduleLimit({
-      context,
-      updatedInterval: ['1m', '1m']
-    })).resolves.toBe(undefined);
+    return expect(
+      validateScheduleLimit({
+        context,
+        updatedInterval: ['1m', '1m'],
+      })
+    ).resolves.toBe(undefined);
   });
 
   test('should throw if the updated interval exceeds limits', () => {
-    return expect(validateScheduleLimit({
-      context,
-      updatedInterval: ['1m', '1m', '1m', '2m']
-    })).rejects.toThrowError('Failed to validate schedule limit: limit reached (3/min < 3.5/min)');
+    return expect(
+      validateScheduleLimit({
+        context,
+        updatedInterval: ['1m', '1m', '1m', '2m'],
+      })
+    ).rejects.toThrowError('Failed to validate schedule limit: limit reached (3/min < 3.5/min)');
   });
 
   test('should not throw if previous interval was modified to be under the limit', () => {
-    unsecuredSavedObjectsClient.find.mockResolvedValue(getMockAggregationResult([
-      { interval: '1m', count: 6 },
-    ]));
+    unsecuredSavedObjectsClient.find.mockResolvedValue(
+      getMockAggregationResult([{ interval: '1m', count: 6 }])
+    );
 
-    return expect(validateScheduleLimit({
-      context,
-      prevInterval: ['1m', '1m'],
-      updatedInterval: ['2m', '2m'],
-    })).resolves.toBe(undefined);
+    return expect(
+      validateScheduleLimit({
+        context,
+        prevInterval: ['1m', '1m'],
+        updatedInterval: ['2m', '2m'],
+      })
+    ).resolves.toBe(undefined);
   });
 
   test('should throw if the previous interval was modified to exceed the limit', () => {
-    unsecuredSavedObjectsClient.find.mockResolvedValue(getMockAggregationResult([
-      { interval: '1m', count: 5 },
-    ]));
+    unsecuredSavedObjectsClient.find.mockResolvedValue(
+      getMockAggregationResult([{ interval: '1m', count: 5 }])
+    );
 
-    return expect(validateScheduleLimit({
-      context,
-      prevInterval: ['1m'],
-      updatedInterval: ['30s']
-    })).rejects.toThrowError('Failed to validate schedule limit: limit reached (1/min < 2/min)');
+    return expect(
+      validateScheduleLimit({
+        context,
+        prevInterval: ['1m'],
+        updatedInterval: ['30s'],
+      })
+    ).rejects.toThrowError('Failed to validate schedule limit: limit reached (1/min < 2/min)');
   });
 });
