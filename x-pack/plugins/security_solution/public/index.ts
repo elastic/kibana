@@ -12,13 +12,6 @@ import type { PluginSetup, PluginStart } from './types';
 export type { TimelineModel } from './timelines/store/timeline/model';
 export type { LinkItem } from './common/links';
 
-export type {
-  UpsellingService,
-  PageUpsellings,
-  SectionUpsellings,
-  UpsellingSectionId,
-} from '@kbn/security-solution-upselling/service';
-
 export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);
 
 export type { PluginSetup, PluginStart };
