@@ -485,7 +485,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             itemIdToExpandedRowMap={itemIdToExpandedRowMap}
             isSelectable={false}
             onTableChange={onTableChange}
-            data-test-subj={'dataVisualizerTable'}
+            data-test-subj={`dataVisualizerTable ${loading ? 'loading' : 'loaded'}`}
             rowProps={(item) => ({
               'data-test-subj': `dataVisualizerRow row-${item.fieldName}`,
             })}

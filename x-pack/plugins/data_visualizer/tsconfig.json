@@ -67,7 +67,8 @@
     "@kbn/ml-string-hash",
     "@kbn/ml-random-sampler-utils",
     "@kbn/data-service",
-    "@kbn/core-notifications-browser"
+    "@kbn/core-notifications-browser",
+    "@kbn/ebt-tools"
   ],
   "exclude": [
     "target/**/*",
