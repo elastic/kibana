@@ -140,7 +140,6 @@ export class UiSettingsService
       if (this.uiSettingsDefaults.has(key)) {
         throw new Error(`uiSettings for the key [${key}] has been already registered`);
       }
-      value.allowlisted = true;
       this.uiSettingsDefaults.set(key, value);
     });
   };
@@ -150,7 +149,6 @@ export class UiSettingsService
       if (this.uiSettingsGlobalDefaults.has(key)) {
         throw new Error(`Global uiSettings for the key [${key}] has been already registered`);
       }
-      value.allowlisted = true;
       this.uiSettingsGlobalDefaults.set(key, value);
     });
   };
@@ -166,12 +164,12 @@ export class UiSettingsService
   private applyAllowlist(keys: string[]) {
     for (const [key, definition] of this.uiSettingsDefaults) {
       if (!keys.includes(key)) {
-        definition.allowlisted = false;
+        definition.readonly = 'strict';
       }
     }
     for (const [key, definition] of this.uiSettingsGlobalDefaults) {
       if (!keys.includes(key)) {
-        definition.allowlisted = false;
+        definition.readonly = 'strict';
       }
     }
   }

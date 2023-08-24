@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/serverless-settings",
+  "owner": "@elastic/appex-sharedux @elastic/platform-deployment-management"
+}

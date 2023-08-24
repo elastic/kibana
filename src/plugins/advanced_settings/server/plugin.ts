@@ -8,7 +8,6 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import { capabilitiesProvider } from './capabilities_provider';
-import { ALL_ALLOWLIST_SETTINGS } from './settings_allowlist';
 
 export class AdvancedSettingsServerPlugin implements Plugin<object, object> {
   private readonly logger: Logger;
@@ -21,8 +20,6 @@ export class AdvancedSettingsServerPlugin implements Plugin<object, object> {
     this.logger.debug('advancedSettings: Setup');
 
     core.capabilities.registerProvider(capabilitiesProvider);
-
-    core.uiSettings.setAllowlist(ALL_ALLOWLIST_SETTINGS);
 
     return {};
   }

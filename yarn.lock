@@ -4748,6 +4748,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/lens-embeddable-utils@link:packages/kbn-lens-embeddable-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/lens-plugin@link:x-pack/plugins/lens":
   version "0.0.0"
   uid ""
@@ -5412,6 +5416,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/serverless-settings@link:packages/serverless/settings":
+  version "0.0.0"
+  uid ""
+
 "@kbn/serverless-storybook-config@link:packages/serverless/storybook/config":
   version "0.0.0"
   uid ""
@@ -6017,10 +6025,6 @@
   uid ""
 
 "@kbn/visualization-ui-components@link:packages/kbn-visualization-ui-components":
-  version "0.0.0"
-  uid ""
-
-"@kbn/lens-embeddable-utils@link:packages/kbn-lens-embeddable-utils":
   version "0.0.0"
   uid ""
 

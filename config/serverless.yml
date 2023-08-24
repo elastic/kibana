@@ -46,7 +46,7 @@ management.deeplinks.navLinkStatus: visible
 xpack.canvas.enabled: false
 xpack.cloud_integrations.data_migration.enabled: false
 data.search.sessions.enabled: false
-advanced_settings.enabled: false
+advanced_settings.enabled: true
 
 # Disable UI of security management plugins
 xpack.security.ui.userManagementEnabled: false

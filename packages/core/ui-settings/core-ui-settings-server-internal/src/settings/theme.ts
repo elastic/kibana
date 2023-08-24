@@ -62,7 +62,7 @@ export const getThemeSettings = (
         defaultMessage: 'Theme version',
       }),
       value: 'v8' as ThemeVersion,
-      readonly: true,
+      readonly: 'ui',
       schema: schema.literal('v8'),
     },
   };

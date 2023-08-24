@@ -55,8 +55,12 @@ export interface UiSettingsParams<T = unknown> {
   optionLabels?: Record<string, string>;
   /** a flag indicating whether new value applying requires page reloading */
   requiresPageReload?: boolean;
-  /** a flag indicating that value cannot be changed */
-  readonly?: boolean;
+  /**
+   * a flag indicating that value cannot be changed
+   * 'strict' indicates that the value cannot be changed through API and is not displayed in the UI
+   * 'ui' indicates that the value is just not displayed in the UI
+   * */
+  readonly?: 'strict' | 'ui';
   /**
    * a flag indicating that value might contain user sensitive data.
    * used by telemetry to mask the value of the setting when sent.
@@ -92,8 +96,6 @@ export interface UiSettingsParams<T = unknown> {
    * scoped to a namespace. The default value is 'namespace'
    */
   scope?: UiSettingsScope;
-  /** a flag indicating that the setting cannot be accessed or changed */
-  allowlisted?: boolean;
 }
 
 /**

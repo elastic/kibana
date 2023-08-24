@@ -48,12 +48,7 @@ export abstract class UiSettingsClientCommon implements IUiSettingsClient {
   }
 
   getAll() {
-    const allSettings = cloneDeep(this.cache);
-    return Object.keys(allSettings)
-      .filter((key) => allSettings[key].allowlisted)
-      .reduce((cur, key) => {
-        return Object.assign(cur, { [key]: allSettings[key] });
-      }, {});
+    return cloneDeep(this.cache);
   }
 
   get<T = any>(key: string, defaultOverride?: T) {
@@ -121,8 +116,8 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     return this.isDeclared(key) && Boolean(this.cache[key].isOverridden);
   }
 
-  isAllowlisted(key: string) {
-    return this.isDeclared(key) && Boolean(this.cache[key].allowlisted);
+  isStrictReadonly(key: string) {
+    return this.isDeclared(key) && Boolean(this.cache[key].readonly === 'strict');
   }
 
   getUpdate$() {
@@ -139,7 +134,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
         `Unable to update "${key}" because its value is overridden by the Kibana server`
       );
     }
-    if (!this.isAllowlisted(key)) {
+    if (this.isStrictReadonly(key)) {
       throw new Error(`Unable to update "${key}" because this setting is not in the allowlist.`);
     }
   }

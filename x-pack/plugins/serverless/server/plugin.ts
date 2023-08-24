@@ -13,6 +13,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { getConfigDirectory } from '@kbn/utils';
 import { ProjectType } from '@kbn/serverless-types';
 
+import { ALL_ALLOWLIST_SETTINGS } from '@kbn/serverless-settings';
 import { ServerlessPluginSetup, ServerlessPluginStart } from './types';
 import { ServerlessConfig } from './config';
 import { API_SWITCH_PROJECT } from '../common';
@@ -74,6 +75,8 @@ export class ServerlessPlugin implements Plugin<ServerlessPluginSetup, Serverles
         }
       );
     }
+
+    core.uiSettings.setAllowlist(ALL_ALLOWLIST_SETTINGS);
 
     return {};
   }
