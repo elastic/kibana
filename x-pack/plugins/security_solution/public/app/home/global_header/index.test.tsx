@@ -172,4 +172,16 @@ describe('global header', () => {
 
     expect(queryByTestId('sourcerer-trigger')).not.toBeInTheDocument();
   });
+
+  it('shows AI Assistant header link', () => {
+    (useLocation as jest.Mock).mockReturnValue([
+      { pageName: SecurityPageName.overview, detailName: undefined },
+    ]);
+    const { getByText } = render(
+      <TestProviders store={store}>
+        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+      </TestProviders>
+    );
+    expect(getByText('AI Assistant')).toBeInTheDocument();
+  });
 });

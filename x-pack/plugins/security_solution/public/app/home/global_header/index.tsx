@@ -27,13 +27,14 @@ import { timelineSelectors } from '../../../timelines/store/timeline';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { getScopeFromPath, showSourcererByPath } from '../../../common/containers/sourcerer';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
+import { AssistantHeaderLink } from './assistant_header_link';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add integrations',
 });
 
 /**
- * This component uses the reverse portal to add the Add Data and ML job settings buttons on the
+ * This component uses the reverse portal to add the Add Data, ML job settings, and AI Assistant buttons on the
  * right hand side of the Kibana global header
  */
 export const GlobalHeader = React.memo(
@@ -87,6 +88,7 @@ export const GlobalHeader = React.memo(
               {showSourcerer && !showTimeline && (
                 <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />
               )}
+              <AssistantHeaderLink />
             </EuiHeaderLinks>
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
