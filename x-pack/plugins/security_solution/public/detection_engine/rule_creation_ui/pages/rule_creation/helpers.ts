@@ -502,7 +502,7 @@ export const formatAboutStepData = (
 
   const detectionExceptionLists =
     exceptionsList != null ? exceptionsList.filter((list) => list.type !== 'endpoint') : [];
-  const isinvestigationOptionsEmpty = investigationFields.every((item) => isEmpty(item.trim()));
+  const isinvestigationFieldsEmpty = investigationFields.every((item) => isEmpty(item.trim()));
 
   const resp = {
     author: author.filter((item) => !isEmpty(item)),
@@ -526,7 +526,7 @@ export const formatAboutStepData = (
       : {}),
     false_positives: falsePositives.filter((item) => !isEmpty(item)),
     references: references.filter((item) => !isEmpty(item)),
-    investigation_fields: isinvestigationOptionsEmpty
+    investigation_fields: isinvestigationFieldsEmpty
       ? undefined
       : { field_names: investigationFields },
     risk_score: riskScore.value,
