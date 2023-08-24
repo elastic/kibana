@@ -1577,10 +1577,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@87.1.0":
-  version "87.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-87.1.0.tgz#1ef2c5634d2efafbdd3fde6a68c037f3cad2f30e"
-  integrity sha512-dnvgTveGqyDoWrG1DRE3LbTWMlDaChDEENs3hw6B5sO6koNOCfsNm7JwJje7ARQbk82/kuymy+zfQsnkOA3sTA==
+"@elastic/eui@87.2.0":
+  version "87.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-87.2.0.tgz#6feabaea7daa03c1d9a906ed2f97312eec12bfe0"
+  integrity sha512-U4pDkDHTgYf39/D4o9inOcKMedDf+Y4sv42fRydg/blBYNbDCTlU/3z4fhpO2rA03kDyMFohMmRMt4aBrirBTA==
   dependencies:
     "@hello-pangea/dnd" "^16.2.0"
     "@types/lodash" "^4.14.194"
@@ -5307,6 +5307,10 @@
   uid ""
 
 "@kbn/security-solution-storybook-config@link:x-pack/packages/security-solution/storybook/config":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-solution-upselling@link:x-pack/packages/security-solution/upselling":
   version "0.0.0"
   uid ""
 
