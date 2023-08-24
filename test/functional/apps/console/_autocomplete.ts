@@ -47,7 +47,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('anti-regression watchdogs', () => {
       beforeEach(async () => {
         await PageObjects.console.clearTextArea();
-        await PageObjects.console.pressEnter();
       });
 
       it('should suppress auto-complete on arrow keys', async () => {
@@ -91,7 +90,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         for (const method of methods) {
           await PageObjects.console.clearTextArea();
-          await PageObjects.console.pressEnter();
 
           for (const char of method.slice(0, -1)) {
             await PageObjects.console.sleepForDebouncePeriod();
