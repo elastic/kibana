@@ -234,10 +234,11 @@ export const createLifecycleExecutor =
       result.forEach((hit) => {
         const alertInstanceId = hit._source ? hit._source[ALERT_INSTANCE_ID] : void 0;
         if (alertInstanceId && hit._source) {
+          const alertLabel = `${rule.ruleTypeId}:${rule.id} ${alertInstanceId}`;
           if (hit._seq_no == null) {
-            logger.error(`missing _seq_no on alert instance ${alertInstanceId}`);
+            logger.error(`missing _seq_no on alert instance ${alertLabel}`);
           } else if (hit._primary_term == null) {
-            logger.error(`missing _primary_term on alert instance ${alertInstanceId}`);
+            logger.error(`missing _primary_term on alert instance ${alertLabel}`);
           } else {
             trackedAlertsDataMap[alertInstanceId] = {
               indexName: hit._index,
