@@ -104,19 +104,19 @@ const getVulnerabilitiesQuery = (query: QueryDslQueryContainer): SearchRequest =
         },
         packageFixVersion: {
           terms: {
-            field: 'vulnerability.package.fixed_version',
+            field: 'package.fixed_version',
             size: 1,
           },
         },
         packageName: {
           terms: {
-            field: 'vulnerability.package.name',
+            field: 'package.name',
             size: 1,
           },
         },
         packageVersion: {
           terms: {
-            field: 'vulnerability.package.version',
+            field: 'package.version',
             size: 1,
           },
         },

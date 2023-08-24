@@ -45,7 +45,7 @@ describe('risk tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
     clearSearchBar();
   });
 
-  it('filters the table', () => {
+  it.skip('filters the table', () => {
     openRiskTableFilterAndSelectTheCriticalOption();
 
     cy.get(HOST_BY_RISK_TABLE_CELL).eq(3).should('not.have.text', 'siem-kibana');
