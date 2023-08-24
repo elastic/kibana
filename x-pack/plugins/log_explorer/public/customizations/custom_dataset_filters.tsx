@@ -45,16 +45,6 @@ const ControlGroupContainer = euiStyled.div`
   .controlGroup {
     min-height: unset;
   }
-
-  .euiFormLabel {
-    padding-top: 0;
-    padding-bottom: 0;
-    line-height: 32px !important;
-  }
-
-  .euiFormControlLayout {
-    height: 32px;
-  }
 `;
 
 // eslint-disable-next-line import/no-default-export
