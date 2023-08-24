@@ -5,31 +5,63 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider, type UseQueryResult } from '@tanstack/react-query';
+import * as ReactQuery from '@tanstack/react-query';
+
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
+import { INITIAL_CAPABILITIES } from '../../../../../../common/privilege/has_privilege_factory';
 
 import { TransformList } from './transform_list';
+
+const useQueryMock = jest.spyOn(ReactQuery, 'useQuery').mockImplementation((queryKey) => {
+  switch (queryKey[0]) {
+    case 'transform.data_view_exists':
+      return { error: null, data: true } as UseQueryResult<unknown, unknown>;
+    case 'transform.get_privileges':
+      return {
+        error: null,
+        isLoading: false,
+        data: {
+          privileges: {
+            hasAllPrivileges: true,
+            missingPrivileges: {},
+          },
+          capabilities: INITIAL_CAPABILITIES,
+        },
+      } as UseQueryResult<unknown, unknown>;
+  }
+
+  return { error: null, data: undefined } as UseQueryResult<unknown, unknown>;
+});
+
+const queryClient = new QueryClient();
 
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
 
 describe('Transform: Transform List <TransformList />', () => {
-  test('Minimal initialization', () => {
-    const queryClient = new QueryClient();
-    const wrapper = shallow(
-      <QueryClientProvider client={queryClient}>
-        <TransformList
-          errorMessage={''}
-          isLoading={false}
-          onCreateTransform={jest.fn()}
-          transformNodes={1}
-          transforms={[]}
-          transformsLoading={false}
-        />
-      </QueryClientProvider>
+  test('Minimal initialization', async () => {
+    const { container } = render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <TransformList
+            errorMessage={''}
+            isLoading={false}
+            onCreateTransform={jest.fn()}
+            transformNodes={1}
+            transforms={[]}
+            transformsLoading={false}
+          />
+        </QueryClientProvider>
+      </IntlProvider>
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(useQueryMock).toHaveBeenCalledTimes(22);
+      expect(container.textContent).toContain('Reload');
+    });
   });
 });

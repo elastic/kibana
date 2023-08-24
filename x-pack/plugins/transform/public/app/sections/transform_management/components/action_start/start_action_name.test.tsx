@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { TransformListRow } from '../../../../common';
@@ -29,12 +29,11 @@ describe('Transform: Transform List Actions <StartAction />', () => {
       transformNodes: 1,
     };
 
-    const wrapper = shallow(
+    const { container } = render(
       <QueryClientProvider client={queryClient}>
         <StartActionName {...props} />
       </QueryClientProvider>
     );
-
-    expect(wrapper).toMatchSnapshot();
+    expect(container.textContent).toBe('Start');
   });
 });
