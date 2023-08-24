@@ -1,0 +1,1253 @@
+Started by user Tre'
+Running as Tre'
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on ml-dev-ubuntu-1 in /home/jenkins/workspace/dev/es-archiver-benchmark
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Checkout)
+[Pipeline] git
+The recommended git tool is: NONE
+using credential qa_github_token
+Fetching changes from the remote Git repository
+Checking out Revision eb74d6e97f6ff143103c807622417d6741333857 (refs/remotes/origin/main)
+Commit message: "Define serverless-specific API hosts (#54)"
+ > git rev-parse --resolve-git-dir /home/jenkins/workspace/dev/es-archiver-benchmark/.git # timeout=10
+ > git config remote.origin.url https://github.com/elastic/qaf.git # timeout=10
+Fetching upstream changes from https://github.com/elastic/qaf.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.34.1'
+using GIT_ASKPASS to set credentials GitHub token for authenticating QA services
+ > git fetch --tags --force --progress -- https://github.com/elastic/qaf.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f eb74d6e97f6ff143103c807622417d6741333857 # timeout=10
+ > git branch -a -v --no-abbrev # timeout=10
+ > git branch -D main # timeout=10
+ > git checkout -b main eb74d6e97f6ff143103c807622417d6741333857 # timeout=10
+ > git rev-list --no-walk eb74d6e97f6ff143103c807622417d6741333857 # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (QAF setup)
+[Pipeline] sh
++ set +x
+nvm
+ ┌─────────────────────────────────────────────────────────────────────┐
+ │                 Elastic QA Framework - Build system                 │
+ └─────────────────────────────────────────────────────────────────────┘
+
+🔔 [1;33mUsing existing virtual environment in .venv[0m
+[1;96m➤ Install QAF in virtual environment[0m
+Requirement already satisfied: pip in ./.venv/lib/python3.11/site-packages (23.2.1)
+Obtaining file:///home/jenkins/workspace/dev/es-archiver-benchmark
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Requirement already satisfied: httpx==0.24.1 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (0.24.1)
+Requirement already satisfied: elasticsearch<9,>=8 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (8.8.2)
+Requirement already satisfied: hvac==1.1.1 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (1.1.1)
+Requirement already satisfied: google-cloud-storage==2.10.0 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (2.10.0)
+Requirement already satisfied: typer==0.9.0 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (0.9.0)
+Requirement already satisfied: rich==13.4.2 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (13.4.2)
+Requirement already satisfied: flask==2.3.2 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (2.3.2)
+Requirement already satisfied: pytest==7.4.0 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (7.4.0)
+Requirement already satisfied: PyHamcrest==2.0.4 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (2.0.4)
+Requirement already satisfied: junitparser==3.1.0 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (3.1.0)
+Requirement already satisfied: pydantic==1.10.9 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (1.10.9)
+Requirement already satisfied: Jinja2==3.1.2 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (3.1.2)
+Requirement already satisfied: PyYAML==6.0 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (6.0)
+Requirement already satisfied: build==0.10.0 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (0.10.0)
+Requirement already satisfied: coverage==7.2.7 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (7.2.7)
+Requirement already satisfied: flake8==6.0.0 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (6.0.0)
+Requirement already satisfied: isort==5.12.0 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (5.12.0)
+Requirement already satisfied: black==23.3.0 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (23.3.0)
+Requirement already satisfied: mkdocs==1.4.3 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (1.4.3)
+Requirement already satisfied: mkdocs-autorefs==0.4.1 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (0.4.1)
+Requirement already satisfied: mkdocs-material==9.1.17 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (9.1.17)
+Requirement already satisfied: mkdocs-material-extensions==1.1.1 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (1.1.1)
+Requirement already satisfied: mkdocstrings==0.22.0 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (0.22.0)
+Requirement already satisfied: mkdocstrings-python==1.1.2 in ./.venv/lib/python3.11/site-packages (from qaf==0.1.1) (1.1.2)
+Requirement already satisfied: click>=8.0.0 in ./.venv/lib/python3.11/site-packages (from black==23.3.0->qaf==0.1.1) (8.1.5)
+Requirement already satisfied: mypy-extensions>=0.4.3 in ./.venv/lib/python3.11/site-packages (from black==23.3.0->qaf==0.1.1) (1.0.0)
+Requirement already satisfied: packaging>=22.0 in ./.venv/lib/python3.11/site-packages (from black==23.3.0->qaf==0.1.1) (23.1)
+Requirement already satisfied: pathspec>=0.9.0 in ./.venv/lib/python3.11/site-packages (from black==23.3.0->qaf==0.1.1) (0.11.1)
+Requirement already satisfied: platformdirs>=2 in ./.venv/lib/python3.11/site-packages (from black==23.3.0->qaf==0.1.1) (3.8.1)
+Requirement already satisfied: pyproject_hooks in ./.venv/lib/python3.11/site-packages (from build==0.10.0->qaf==0.1.1) (1.0.0)
+Requirement already satisfied: mccabe<0.8.0,>=0.7.0 in ./.venv/lib/python3.11/site-packages (from flake8==6.0.0->qaf==0.1.1) (0.7.0)
+Requirement already satisfied: pycodestyle<2.11.0,>=2.10.0 in ./.venv/lib/python3.11/site-packages (from flake8==6.0.0->qaf==0.1.1) (2.10.0)
+Requirement already satisfied: pyflakes<3.1.0,>=3.0.0 in ./.venv/lib/python3.11/site-packages (from flake8==6.0.0->qaf==0.1.1) (3.0.1)
+Requirement already satisfied: Werkzeug>=2.3.3 in ./.venv/lib/python3.11/site-packages (from flask==2.3.2->qaf==0.1.1) (2.3.6)
+Requirement already satisfied: itsdangerous>=2.1.2 in ./.venv/lib/python3.11/site-packages (from flask==2.3.2->qaf==0.1.1) (2.1.2)
+Requirement already satisfied: blinker>=1.6.2 in ./.venv/lib/python3.11/site-packages (from flask==2.3.2->qaf==0.1.1) (1.6.2)
+Requirement already satisfied: google-auth<3.0dev,>=1.25.0 in ./.venv/lib/python3.11/site-packages (from google-cloud-storage==2.10.0->qaf==0.1.1) (2.22.0)
+Requirement already satisfied: google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.0,<3.0.0dev,>=1.31.5 in ./.venv/lib/python3.11/site-packages (from google-cloud-storage==2.10.0->qaf==0.1.1) (2.11.1)
+Requirement already satisfied: google-cloud-core<3.0dev,>=2.3.0 in ./.venv/lib/python3.11/site-packages (from google-cloud-storage==2.10.0->qaf==0.1.1) (2.3.3)
+Requirement already satisfied: google-resumable-media>=2.3.2 in ./.venv/lib/python3.11/site-packages (from google-cloud-storage==2.10.0->qaf==0.1.1) (2.5.0)
+Requirement already satisfied: requests<3.0.0dev,>=2.18.0 in ./.venv/lib/python3.11/site-packages (from google-cloud-storage==2.10.0->qaf==0.1.1) (2.31.0)
+Requirement already satisfied: certifi in ./.venv/lib/python3.11/site-packages (from httpx==0.24.1->qaf==0.1.1) (2023.5.7)
+Requirement already satisfied: httpcore<0.18.0,>=0.15.0 in ./.venv/lib/python3.11/site-packages (from httpx==0.24.1->qaf==0.1.1) (0.17.3)
+Requirement already satisfied: idna in ./.venv/lib/python3.11/site-packages (from httpx==0.24.1->qaf==0.1.1) (3.4)
+Requirement already satisfied: sniffio in ./.venv/lib/python3.11/site-packages (from httpx==0.24.1->qaf==0.1.1) (1.3.0)
+Requirement already satisfied: pyhcl<0.5.0,>=0.4.4 in ./.venv/lib/python3.11/site-packages (from hvac==1.1.1->qaf==0.1.1) (0.4.4)
+Requirement already satisfied: MarkupSafe>=2.0 in ./.venv/lib/python3.11/site-packages (from Jinja2==3.1.2->qaf==0.1.1) (2.1.3)
+Requirement already satisfied: future in ./.venv/lib/python3.11/site-packages (from junitparser==3.1.0->qaf==0.1.1) (0.18.3)
+Requirement already satisfied: ghp-import>=1.0 in ./.venv/lib/python3.11/site-packages (from mkdocs==1.4.3->qaf==0.1.1) (2.1.0)
+Requirement already satisfied: markdown<3.4,>=3.2.1 in ./.venv/lib/python3.11/site-packages (from mkdocs==1.4.3->qaf==0.1.1) (3.3.7)
+Requirement already satisfied: mergedeep>=1.3.4 in ./.venv/lib/python3.11/site-packages (from mkdocs==1.4.3->qaf==0.1.1) (1.3.4)
+Requirement already satisfied: pyyaml-env-tag>=0.1 in ./.venv/lib/python3.11/site-packages (from mkdocs==1.4.3->qaf==0.1.1) (0.1)
+Requirement already satisfied: watchdog>=2.0 in ./.venv/lib/python3.11/site-packages (from mkdocs==1.4.3->qaf==0.1.1) (3.0.0)
+Requirement already satisfied: colorama>=0.4 in ./.venv/lib/python3.11/site-packages (from mkdocs-material==9.1.17->qaf==0.1.1) (0.4.6)
+Requirement already satisfied: pygments>=2.14 in ./.venv/lib/python3.11/site-packages (from mkdocs-material==9.1.17->qaf==0.1.1) (2.15.1)
+Requirement already satisfied: pymdown-extensions>=9.9.1 in ./.venv/lib/python3.11/site-packages (from mkdocs-material==9.1.17->qaf==0.1.1) (10.1)
+Requirement already satisfied: regex>=2022.4.24 in ./.venv/lib/python3.11/site-packages (from mkdocs-material==9.1.17->qaf==0.1.1) (2023.6.3)
+Requirement already satisfied: griffe>=0.24 in ./.venv/lib/python3.11/site-packages (from mkdocstrings-python==1.1.2->qaf==0.1.1) (0.32.0)
+Requirement already satisfied: typing-extensions>=4.2.0 in ./.venv/lib/python3.11/site-packages (from pydantic==1.10.9->qaf==0.1.1) (4.7.1)
+Requirement already satisfied: iniconfig in ./.venv/lib/python3.11/site-packages (from pytest==7.4.0->qaf==0.1.1) (2.0.0)
+Requirement already satisfied: pluggy<2.0,>=0.12 in ./.venv/lib/python3.11/site-packages (from pytest==7.4.0->qaf==0.1.1) (1.2.0)
+Requirement already satisfied: markdown-it-py>=2.2.0 in ./.venv/lib/python3.11/site-packages (from rich==13.4.2->qaf==0.1.1) (3.0.0)
+Requirement already satisfied: elastic-transport<9,>=8 in ./.venv/lib/python3.11/site-packages (from elasticsearch<9,>=8->qaf==0.1.1) (8.4.0)
+Requirement already satisfied: urllib3<2,>=1.26.2 in ./.venv/lib/python3.11/site-packages (from elastic-transport<9,>=8->elasticsearch<9,>=8->qaf==0.1.1) (1.26.16)
+Requirement already satisfied: python-dateutil>=2.8.1 in ./.venv/lib/python3.11/site-packages (from ghp-import>=1.0->mkdocs==1.4.3->qaf==0.1.1) (2.8.2)
+Requirement already satisfied: googleapis-common-protos<2.0.dev0,>=1.56.2 in ./.venv/lib/python3.11/site-packages (from google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.0,<3.0.0dev,>=1.31.5->google-cloud-storage==2.10.0->qaf==0.1.1) (1.59.1)
+Requirement already satisfied: protobuf!=3.20.0,!=3.20.1,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5,<5.0.0.dev0,>=3.19.5 in ./.venv/lib/python3.11/site-packages (from google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.0,<3.0.0dev,>=1.31.5->google-cloud-storage==2.10.0->qaf==0.1.1) (4.23.4)
+Requirement already satisfied: cachetools<6.0,>=2.0.0 in ./.venv/lib/python3.11/site-packages (from google-auth<3.0dev,>=1.25.0->google-cloud-storage==2.10.0->qaf==0.1.1) (5.3.1)
+Requirement already satisfied: pyasn1-modules>=0.2.1 in ./.venv/lib/python3.11/site-packages (from google-auth<3.0dev,>=1.25.0->google-cloud-storage==2.10.0->qaf==0.1.1) (0.3.0)
+Requirement already satisfied: rsa<5,>=3.1.4 in ./.venv/lib/python3.11/site-packages (from google-auth<3.0dev,>=1.25.0->google-cloud-storage==2.10.0->qaf==0.1.1) (4.9)
+Requirement already satisfied: six>=1.9.0 in ./.venv/lib/python3.11/site-packages (from google-auth<3.0dev,>=1.25.0->google-cloud-storage==2.10.0->qaf==0.1.1) (1.16.0)
+Requirement already satisfied: google-crc32c<2.0dev,>=1.0 in ./.venv/lib/python3.11/site-packages (from google-resumable-media>=2.3.2->google-cloud-storage==2.10.0->qaf==0.1.1) (1.5.0)
+Requirement already satisfied: h11<0.15,>=0.13 in ./.venv/lib/python3.11/site-packages (from httpcore<0.18.0,>=0.15.0->httpx==0.24.1->qaf==0.1.1) (0.14.0)
+Requirement already satisfied: anyio<5.0,>=3.0 in ./.venv/lib/python3.11/site-packages (from httpcore<0.18.0,>=0.15.0->httpx==0.24.1->qaf==0.1.1) (3.7.1)
+Requirement already satisfied: mdurl~=0.1 in ./.venv/lib/python3.11/site-packages (from markdown-it-py>=2.2.0->rich==13.4.2->qaf==0.1.1) (0.1.2)
+Requirement already satisfied: charset-normalizer<4,>=2 in ./.venv/lib/python3.11/site-packages (from requests<3.0.0dev,>=2.18.0->google-cloud-storage==2.10.0->qaf==0.1.1) (3.2.0)
+Requirement already satisfied: pyasn1<0.6.0,>=0.4.6 in ./.venv/lib/python3.11/site-packages (from pyasn1-modules>=0.2.1->google-auth<3.0dev,>=1.25.0->google-cloud-storage==2.10.0->qaf==0.1.1) (0.5.0)
+Building wheels for collected packages: qaf
+  Building editable for qaf (pyproject.toml): started
+  Building editable for qaf (pyproject.toml): finished with status 'done'
+  Created wheel for qaf: filename=qaf-0.1.1-0.editable-py3-none-any.whl size=1924 sha256=9d3858b649cdee9416e1b9508be1b833122ffb77065a49d6ded1e338a47e5c96
+  Stored in directory: /tmp/pip-ephem-wheel-cache-dlvz14zy/wheels/bd/53/8b/1f32681ae18772b5251324beefe7220c7e7baf1570e5749773
+Successfully built qaf
+Installing collected packages: qaf
+  Attempting uninstall: qaf
+    Found existing installation: qaf 0.1.1
+    Uninstalling qaf-0.1.1:
+      Successfully uninstalled qaf-0.1.1
+Successfully installed qaf-0.1.1
+
+✅  Done!
+
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Kibana setup)
+[Pipeline] withCredentials
+Masking supported pattern matches of $VAULT_TOKEN
+[Pipeline] {
+[Pipeline] sh
++ set +x
+nvm
+2023-08-25 11:45:42,943 INFO : Resetting local Kibana repository
+2023-08-25 11:45:43,370 INFO : Fetching latest changes
+2023-08-25 11:45:44,241 INFO : Checking out branch 'wayneseymour/benchmark-all-archives'
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] sh
++ git -C /home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana show-branch --no-name HEAD
+[Pipeline] withCredentials
+Masking supported pattern matches of $VAULT_TOKEN
+[Pipeline] {
+[Pipeline] sh
++ set +x
+nvm
+2023-08-25 11:45:47,006 INFO : Installing node.js 18.17.1
+manpath: warning: $PATH not set
+v18.17.1 is already installed.
+Now using node v18.17.1 (npm v9.6.7)
+2023-08-25 11:45:48,152 INFO : Installing yarn
+manpath: warning: $PATH not set
+Found '/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/.nvmrc' with version <18.17.1>
+Now using node v18.17.1 (npm v9.6.7)
+
+changed 1 package in 931ms
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] withCredentials
+Masking supported pattern matches of $VAULT_TOKEN
+[Pipeline] {
+[Pipeline] sh
++ set +x
+nvm
+2023-08-25 11:45:51,434 INFO : Running bootstrap for for Kibana repository under /home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana
+manpath: warning: $PATH not set
+Found '/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/.nvmrc' with version <18.17.1>
+Now using node v18.17.1 (npm v9.6.7)
+yarn run v1.22.19
+$ node scripts/kbn bootstrap
+[94m[bazel][39m [32mINFO: [0mInvocation ID: 40c25010-d90a-4d28-8517-5dd8f87ac0b0
+[94m[bazel][39m [32mINFO: [0mAnalyzed 3 targets (1 packages loaded, 7 targets configured).
+[94m[bazel][39m [32mINFO: [0mFound 3 targets...
+[94m[bazel][39m [32mINFO: [0mElapsed time: 1.063s, Critical Path: 0.42s
+[94m[bazel][39m [32mINFO: [0m1 process: 1 internal.
+[94m[bazel][39m [0m
+[32msuccess[39m shared bundles built
+[32msuccess[39m yarn.lock analysis completed without any issues
+[32msuccess[39m vscode config updated
+Done in 6.61s.
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Create project)
+[Pipeline] withCredentials
+Masking supported pattern matches of $VAULT_TOKEN
+[Pipeline] {
+[Pipeline] sh
++ set +x
+nvm
+2023-08-25 11:46:00,454 INFO : Creating Observability project in Elastic Cloud - project name: ml-qa-es-archiver-benchmark-65, environment: qa, region: aws-eu-west-1, template name: default
+2023-08-25 11:46:00,457 INFO : Sending 'create project' request
+2023-08-25 11:46:02,218 INFO : Waiting for observability project with id c06a5f6ed7d1446b9357dc176d1e2589 to exist
+2023-08-25 11:46:02,570 INFO : Created observability project with id 'c06a5f6ed7d1446b9357dc176d1e2589'
+2023-08-25 11:46:02,571 INFO : Persisting Observability project information for project named ml-qa-es-archiver-benchmark-65
+2023-08-25 11:46:02,571 INFO : Resetting credentials for observability project named ml-qa-es-archiver-benchmark-65
+2023-08-25 11:46:03,105 INFO : Persisting Observability project information for project named ml-qa-es-archiver-benchmark-65
+2023-08-25 11:46:03,106 INFO : Waiting for project to finish initializing
+2023-08-25 11:48:08,739 INFO : Waiting for Elasticsearch and Kibana endpoints to be allocated
+2023-08-25 11:48:09,000 INFO : Waiting for Elasticsearch to be ready for project named 'ml-qa-es-archiver-benchmark-65'
+2023-08-25 11:48:10,488 INFO : Waiting for URL 'https://ml-qa-es-archiver-benchmark-65-c06a5f.es.eu-west-1.aws.qa.elastic.cloud:443' to respond with 200 (for no more than 600 seconds)
+2023-08-25 11:48:10,488 INFO : 599 seconds left for URL https://ml-qa-es-archiver-benchmark-65-c06a5f.es.eu-west-1.aws.qa.elastic.cloud:443 to respond with a 200
+2023-08-25 11:48:10,822 INFO : URL https://ml-qa-es-archiver-benchmark-65-c06a5f.es.eu-west-1.aws.qa.elastic.cloud:443 responded with 200
+2023-08-25 11:48:11,822 INFO : Waiting for Kibana to be ready for project named 'ml-qa-es-archiver-benchmark-65'
+2023-08-25 11:48:13,293 INFO : Waiting for URL 'https://ml-qa-es-archiver-benchmark-65-c06a5f.kb.eu-west-1.aws.qa.elastic.cloud:443/api/stats' to respond with 200 (for no more than 600 seconds)
+2023-08-25 11:48:13,293 INFO : 599 seconds left for URL https://ml-qa-es-archiver-benchmark-65-c06a5f.kb.eu-west-1.aws.qa.elastic.cloud:443/api/stats to respond with a 200
+2023-08-25 11:48:13,583 INFO : URL https://ml-qa-es-archiver-benchmark-65-c06a5f.kb.eu-west-1.aws.qa.elastic.cloud:443/api/stats responded with 200
+2023-08-25 11:48:14,583 INFO : Waiting for Elasticsearch cluster status to be green
+2023-08-25 11:49:22,629 WARNING : Timed out while waiting for Elasticsearch cluster status to be green - current status: yellow
+2023-08-25 11:49:22,629 INFO : Creating stack API key named 'elastic-qaf'
+2023-08-25 11:49:24,614 INFO : Persisting Observability project information for project named ml-qa-es-archiver-benchmark-65
+2023-08-25 11:49:24,615 INFO : Observability project 'ml-qa-es-archiver-benchmark-65' successfully created
+
+╭──────────────────────────── Project information ─────────────────────────────╮
+│ Elastic Cloud project                                                        │
+│        Name: ml-qa-es-archiver-benchmark-65                                  │
+│        Type: ECProjectType.OBSERVABILITY                                     │
+│ Environment: qa                                                              │
+│      Region: aws-eu-west-1                                                   │
+│                                                                              │
+│ Elasticsearch                                                                │
+│         URL:                                                                 │
+│ https://ml-qa-es-archiver-benchmark-65-c06a5f.es.eu-west-1.aws.qa.elastic.cl │
+│ oud:443                                                                      │
+│                                                                              │
+│ Kibana                                                                       │
+│     Version: 8.11.0                                                          │
+│  Build hash: 4b88b10b0f4e3539f697fecfbf2a2097aa620510                        │
+│         URL:                                                                 │
+│ https://ml-qa-es-archiver-benchmark-65-c06a5f.kb.eu-west-1.aws.qa.elastic.cl │
+│ oud:443                                                                      │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Run benchmark)
+[Pipeline] sh
++ rm -rf ftr-results
+[Pipeline] withCredentials
+Masking supported pattern matches of $VAULT_TOKEN
+[Pipeline] {
+[Pipeline] sh
++ set +x
+nvm
+2023-08-25 11:49:41,376 INFO : Using Elastic Cloud project 'ml-qa-es-archiver-benchmark-65' as the target for this session
+2023-08-25 11:49:41,566 INFO : Removing FTR results directory /home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/target/junit
+2023-08-25 11:49:41,567 INFO : Starting FTR session: ES Archiver - restore data, config: x-pack/test_serverless/api_integration/test_suites/serverless_is_es_archiver_slow/config.ts, headless: True, cloud: True
+2023-08-25 11:49:41,567 INFO : FTR command: TEST_ES_PROTOCOL=https TEST_ES_HOSTNAME=ml-qa-es-archiver-benchmark-65-c06a5f.es.eu-west-1.aws.qa.elastic.cloud TEST_ES_PORT=443 TEST_KIBANA_PROTOCOL=https TEST_KIBANA_HOSTNAME=ml-qa-es-archiver-benchmark-65-c06a5f.kb.eu-west-1.aws.qa.elastic.cloud TEST_KIBANA_PORT=443 TEST_ES_USERNAME=elastic TEST_ES_PASSWORD=<REDACTED> TEST_KIBANA_USERNAME=elastic TEST_KIBANA_PASSWORD=<REDACTED> CI=1 GCS_UPLOAD_PREFIX=no_upload TEST_CLOUD=1 TEST_BROWSER_HEADLESS=1 node scripts/functional_test_runner.js --config x-pack/test_serverless/api_integration/test_suites/serverless_is_es_archiver_slow/config.ts --info
+manpath: warning: $PATH not set
+Found '/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/.nvmrc' with version <18.17.1>
+Now using node v18.17.1 (npm v9.6.7)
+ info Starting tests
+ warn ci-stats reporter config is not available so test results will not be sent
+ warn debug logs are being captured, only error logs will be written to the console
+
+ └-: Es Archiver Load Action Performance
+   └-> "before all" hook: beforeTestSuite.trigger in "Es Archiver Load Action Performance"
+   └-: Loop for Measuring Es Archiver Perf on Serverless ONLY
+     └-> "before all" hook: beforeTestSuite.trigger for "Load #1 of Archive: [test/functional/fixtures/es_archiver/alias]"
+     └-> "before all" hook for "Load #1 of Archive: [test/functional/fixtures/es_archiver/alias]"
+
+λ Test Loop for Measuring Es Archiver Perf
+λ Looping 3 time(s)
+
+[
+  "test/functional/fixtures/es_archiver/alias",
+  "test/functional/fixtures/es_archiver/dashboard",
+  "test/functional/fixtures/es_archiver/date_nanos",
+  "test/functional/fixtures/es_archiver/date_nanos_custom",
+  "test/functional/fixtures/es_archiver/date_nanos_mixed",
+  "test/functional/fixtures/es_archiver/date_nested",
+  "test/functional/fixtures/es_archiver/deprecations_service",
+  "test/functional/fixtures/es_archiver/getting_started",
+  "test/functional/fixtures/es_archiver/hamlet",
+  "test/functional/fixtures/es_archiver/huge_fields",
+  "test/functional/fixtures/es_archiver/index_pattern_without_timefield",
+  "test/functional/fixtures/es_archiver/kibana_sample_data_flights",
+  "test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern",
+  "test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb",
+  "test/functional/fixtures/es_archiver/large_fields",
+  "test/functional/fixtures/es_archiver/logstash_functional",
+  "test/functional/fixtures/es_archiver/long_window_logstash",
+  "test/functional/fixtures/es_archiver/makelogs",
+  "test/functional/fixtures/es_archiver/many_fields",
+  "test/functional/fixtures/es_archiver/message_with_newline",
+  "test/functional/fixtures/es_archiver/saved_objects_management",
+  "test/functional/fixtures/es_archiver/search",
+  "test/functional/fixtures/es_archiver/stress_test",
+  "test/functional/fixtures/es_archiver/unmapped_fields",
+  "test/functional/fixtures/es_archiver/",
+  "test/functional/fixtures/es_archiver/dashboard/current/data",
+  "test/functional/fixtures/es_archiver/getting_started/shakespeare",
+  "test/functional/fixtures/es_archiver/index_pattern_without_timefield",
+  "test/functional/fixtures/es_archiver/kibana_sample_data_flights",
+  "test/functional/fixtures/es_archiver/logstash_functional",
+  "x-pack/test/apm_api_integration/common/fixtures/es_archiver",
+  "x-pack/test/functional/es_archives/dashboard/async_search",
+  "x-pack/test/functional/es_archives/fleet/agents",
+  "x-pack/test/functional/es_archives/getting_started/shakespeare",
+  "x-pack/test/functional/es_archives/graph/secrepo",
+  "x-pack/test/functional/es_archives/lens/rollup/data",
+  "x-pack/test/functional/es_archives/logstash_functional",
+  "x-pack/test/functional/es_archives/ml/bm_classification",
+  "x-pack/test/functional/es_archives/ml/categorization_small",
+  "x-pack/test/functional/es_archives/ml/ecommerce",
+  "x-pack/test/functional/es_archives/ml/egs_regression",
+  "x-pack/test/functional/es_archives/ml/event_rate_nanos",
+  "x-pack/test/functional/es_archives/ml/farequote",
+  "x-pack/test/functional/es_archives/ml/farequote_small",
+  "x-pack/test/functional/es_archives/ml/ihp_outlier",
+  "x-pack/test/functional/es_archives/ml/module_sample_ecommerce",
+  "x-pack/test/functional/es_archives/ml/module_sample_logs",
+  "x-pack/test/functional/es_archives/reporting/unmapped_fields",
+  "x-pack/test/functional/es_archives/security/dlstest",
+  "x-pack/test/functional/es_archives/uptime/blank",
+  "x-pack/test/functional/es_archives/visualize/default",
+  "x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional"
+]
+
+λ os.arch -> x64
+λ os.platform -> linux
+λ os.totalmem -> 15.7 GB
+λ os.freemem -> 14.2 GB
+λ CPU Count -> 4
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/alias]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/alias]"
+       └- ✓ pass  (12.7s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/alias]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/alias]"
+       └- ✓ pass  (11.2s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/alias]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/alias]"
+       └- ✓ pass  (10.8s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/dashboard]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/dashboard]"
+{
+  "code": "EISDIR",
+  "stack": "Error: EISDIR: illegal operation on a directory, read",
+  "message": "EISDIR: illegal operation on a directory, read",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/dashboard"
+}
+       └- ✓ pass  (95ms)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/dashboard]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/dashboard]"
+{
+  "code": "EISDIR",
+  "stack": "Error: EISDIR: illegal operation on a directory, read",
+  "message": "EISDIR: illegal operation on a directory, read",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/dashboard"
+}
+       └- ✓ pass  (95ms)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/dashboard]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/dashboard]"
+{
+  "code": "EISDIR",
+  "stack": "Error: EISDIR: illegal operation on a directory, read",
+  "message": "EISDIR: illegal operation on a directory, read",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/dashboard"
+}
+       └- ✓ pass  (92ms)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/date_nanos]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/date_nanos]"
+       └- ✓ pass  (1.5s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/date_nanos]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/date_nanos]"
+       └- ✓ pass  (1.4s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/date_nanos]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/date_nanos]"
+       └- ✓ pass  (1.4s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/date_nanos_custom]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/date_nanos_custom]"
+       └- ✓ pass  (1.4s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/date_nanos_custom]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/date_nanos_custom]"
+       └- ✓ pass  (1.2s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/date_nanos_custom]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/date_nanos_custom]"
+       └- ✓ pass  (1.4s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/date_nanos_mixed]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/date_nanos_mixed]"
+       └- ✓ pass  (2.0s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/date_nanos_mixed]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/date_nanos_mixed]"
+       └- ✓ pass  (2.2s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/date_nanos_mixed]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/date_nanos_mixed]"
+       └- ✓ pass  (2.2s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/date_nested]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/date_nested]"
+       └- ✓ pass  (1.2s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/date_nested]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/date_nested]"
+       └- ✓ pass  (1.2s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/date_nested]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/date_nested]"
+       └- ✓ pass  (1.0s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/deprecations_service]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/deprecations_service]"
+{
+  "stack": "ResponseError: security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics], this action is granted by the index privileges [delete,write,all]\n    at SniffingTransport.request (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/transport/src/Transport.ts:535:17)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at Client.DeleteByQueryApi [as deleteByQuery] (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/elasticsearch/src/api/api/delete_by_query.ts:75:10)\n    at cleanSavedObjectIndices (kibana_index.ts:121:18)\n    at handleDoc (create_index_stream.ts:76:11)\n    at Transform.transform [as _transform] (create_index_stream.ts:229:13)",
+  "message": "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics], this action is granted by the index privileges [delete,write,all]",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/deprecations_service"
+}
+       └- ✓ pass  (152ms)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/deprecations_service]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/deprecations_service]"
+{
+  "stack": "ResponseError: security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics], this action is granted by the index privileges [delete,write,all]\n    at SniffingTransport.request (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/transport/src/Transport.ts:535:17)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at Client.DeleteByQueryApi [as deleteByQuery] (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/elasticsearch/src/api/api/delete_by_query.ts:75:10)\n    at cleanSavedObjectIndices (kibana_index.ts:121:18)\n    at handleDoc (create_index_stream.ts:76:11)\n    at Transform.transform [as _transform] (create_index_stream.ts:229:13)",
+  "message": "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics], this action is granted by the index privileges [delete,write,all]",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/deprecations_service"
+}
+       └- ✓ pass  (134ms)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/deprecations_service]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/deprecations_service]"
+{
+  "stack": "ResponseError: security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics], this action is granted by the index privileges [delete,write,all]\n    at SniffingTransport.request (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/transport/src/Transport.ts:535:17)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at Client.DeleteByQueryApi [as deleteByQuery] (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/elasticsearch/src/api/api/delete_by_query.ts:75:10)\n    at cleanSavedObjectIndices (kibana_index.ts:121:18)\n    at handleDoc (create_index_stream.ts:76:11)\n    at Transform.transform [as _transform] (create_index_stream.ts:229:13)",
+  "message": "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics], this action is granted by the index privileges [delete,write,all]",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/deprecations_service"
+}
+       └- ✓ pass  (126ms)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/getting_started]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/getting_started]"
+{
+  "code": "EISDIR",
+  "stack": "Error: EISDIR: illegal operation on a directory, read",
+  "message": "EISDIR: illegal operation on a directory, read",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/getting_started"
+}
+       └- ✓ pass  (101ms)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/getting_started]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/getting_started]"
+{
+  "code": "EISDIR",
+  "stack": "Error: EISDIR: illegal operation on a directory, read",
+  "message": "EISDIR: illegal operation on a directory, read",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/getting_started"
+}
+       └- ✓ pass  (95ms)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/getting_started]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/getting_started]"
+{
+  "code": "EISDIR",
+  "stack": "Error: EISDIR: illegal operation on a directory, read",
+  "message": "EISDIR: illegal operation on a directory, read",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/getting_started"
+}
+       └- ✓ pass  (102ms)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/hamlet]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/hamlet]"
+       └- ✓ pass  (2.0s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/hamlet]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/hamlet]"
+       └- ✓ pass  (1.8s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/hamlet]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/hamlet]"
+       └- ✓ pass  (1.8s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/huge_fields]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/huge_fields]"
+{
+  "stack": "ResponseError: security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics], this action is granted by the index privileges [delete,write,all]\n    at SniffingTransport.request (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/transport/src/Transport.ts:535:17)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at Client.DeleteByQueryApi [as deleteByQuery] (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/elasticsearch/src/api/api/delete_by_query.ts:75:10)\n    at cleanSavedObjectIndices (kibana_index.ts:121:18)\n    at handleDoc (create_index_stream.ts:76:11)\n    at Transform.transform [as _transform] (create_index_stream.ts:229:13)",
+  "message": "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics], this action is granted by the index privileges [delete,write,all]",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/huge_fields"
+}
+       └- ✓ pass  (947ms)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/huge_fields]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/huge_fields]"
+{
+  "stack": "ResponseError: security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics], this action is granted by the index privileges [delete,write,all]\n    at SniffingTransport.request (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/transport/src/Transport.ts:535:17)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at Client.DeleteByQueryApi [as deleteByQuery] (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/elasticsearch/src/api/api/delete_by_query.ts:75:10)\n    at cleanSavedObjectIndices (kibana_index.ts:121:18)\n    at handleDoc (create_index_stream.ts:76:11)\n    at Transform.transform [as _transform] (create_index_stream.ts:229:13)",
+  "message": "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics], this action is granted by the index privileges [delete,write,all]",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/huge_fields"
+}
+       └- ✓ pass  (1.2s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/huge_fields]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/huge_fields]"
+{
+  "stack": "ResponseError: security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics], this action is granted by the index privileges [delete,write,all]\n    at SniffingTransport.request (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/transport/src/Transport.ts:535:17)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at Client.DeleteByQueryApi [as deleteByQuery] (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/elasticsearch/src/api/api/delete_by_query.ts:75:10)\n    at cleanSavedObjectIndices (kibana_index.ts:121:18)\n    at handleDoc (create_index_stream.ts:76:11)\n    at Transform.transform [as _transform] (create_index_stream.ts:229:13)",
+  "message": "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics], this action is granted by the index privileges [delete,write,all]",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/huge_fields"
+}
+       └- ✓ pass  (1.4s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/index_pattern_without_timefield]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/index_pattern_without_timefield]"
+       └- ✓ pass  (3.3s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/index_pattern_without_timefield]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/index_ggpattern_without_timefield]"
+       └- ✓ pass  (3.5s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/index_pattern_without_timefield]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/index_pattern_without_timefield]"
+       └- ✓ pass  (3.4s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_flights]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_flights]"
+       └- ✓ pass  (21.1s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_flights]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_flights]"
+       └- ✓ pass  (23.3s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_flights]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_flights]"
+       └- ✓ pass  (21.5s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern]"
+{
+  "stack": "ResponseError: security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics], this action is granted by the index privileges [delete,write,all]\n    at SniffingTransport.request (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/transport/src/Transport.ts:535:17)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at Client.DeleteByQueryApi [as deleteByQuery] (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/elasticsearch/src/api/api/delete_by_query.ts:75:10)\n    at cleanSavedObjectIndices (kibana_index.ts:121:18)\n    at handleDoc (create_index_stream.ts:76:11)\n    at Transform.transform [as _transform] (create_index_stream.ts:229:13)",
+  "message": "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics], this action is granted by the index privileges [delete,write,all]",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern"
+}
+       └- ✓ pass  (917ms)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern]"
+{
+  "stack": "ResponseError: security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics], this action is granted by the index privileges [delete,write,all]\n    at SniffingTransport.request (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/transport/src/Transport.ts:535:17)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at Client.DeleteByQueryApi [as deleteByQuery] (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/elasticsearch/src/api/api/delete_by_query.ts:75:10)\n    at cleanSavedObjectIndices (kibana_index.ts:121:18)\n    at handleDoc (create_index_stream.ts:76:11)\n    at Transform.transform [as _transform] (create_index_stream.ts:229:13)",
+  "message": "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics], this action is granted by the index privileges [delete,write,all]",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern"
+}
+       └- ✓ pass  (1.1s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern]"
+{
+  "stack": "ResponseError: security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics], this action is granted by the index privileges [delete,write,all]\n    at SniffingTransport.request (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/transport/src/Transport.ts:535:17)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at Client.DeleteByQueryApi [as deleteByQuery] (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/elasticsearch/src/api/api/delete_by_query.ts:75:10)\n    at cleanSavedObjectIndices (kibana_index.ts:121:18)\n    at handleDoc (create_index_stream.ts:76:11)\n    at Transform.transform [as _transform] (create_index_stream.ts:229:13)",
+  "message": "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager,.kibana,.kibana_ingest,.kibana_alerting_cases,.kibana_security_solution,.kibana_analytics], this action is granted by the index privileges [delete,write,all]",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern"
+}
+       └- ✓ pass  (1.0s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb]"
+       └- ✓ pass  (21.6s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb]"
+       └- ✓ pass  (21.1s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb]"
+       └- ✓ pass  (20.8s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/large_fields]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/large_fields]"
+       └- ✓ pass  (3.3s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/large_fields]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/large_fields]"
+       └- ✓ pass  (2.5s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/large_fields]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/large_fields]"
+       └- ✓ pass  (2.7s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/logstash_functional]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/logstash_functional]"
+       └- ✓ pass  (34.5s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/logstash_functional]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/logstash_functional]"
+       └- ✓ pass  (34.5s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/logstash_functional]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/logstash_functional]"
+       └- ✓ pass  (34.6s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/long_window_logstash]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/long_window_logstash]"
+       └- ✓ pass  (33.3s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/long_window_logstash]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/long_window_logstash]"
+       └- ✓ pass  (32.4s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/long_window_logstash]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/long_window_logstash]"
+       └- ✓ pass  (33.5s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/makelogs]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/makelogs]"
+       └- ✓ pass  (3.2s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/makelogs]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/makelogs]"
+       └- ✓ pass  (3.3s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/makelogs]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/makelogs]"
+       └- ✓ pass  (3.4s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/many_fields]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/many_fields]"
+       └- ✓ pass  (4.4s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/many_fields]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/many_fields]"
+       └- ✓ pass  (3.5s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/many_fields]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/many_fields]"
+       └- ✓ pass  (3.5s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/message_with_newline]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/message_with_newline]"
+       └- ✓ pass  (1.6s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/message_with_newline]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/message_with_newline]"
+       └- ✓ pass  (1.6s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/message_with_newline]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/message_with_newline]"
+       └- ✓ pass  (1.6s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/saved_objects_management]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/saved_objects_management]"
+{
+  "code": "EISDIR",
+  "stack": "Error: EISDIR: illegal operation on a directory, read",
+  "message": "EISDIR: illegal operation on a directory, read",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/saved_objects_management"
+}
+       └- ✓ pass  (97ms)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/saved_objects_management]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/saved_objects_management]"
+{
+  "code": "EISDIR",
+  "stack": "Error: EISDIR: illegal operation on a directory, read",
+  "message": "EISDIR: illegal operation on a directory, read",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/saved_objects_management"
+}
+       └- ✓ pass  (94ms)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/saved_objects_management]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/saved_objects_management]"
+{
+  "code": "EISDIR",
+  "stack": "Error: EISDIR: illegal operation on a directory, read",
+  "message": "EISDIR: illegal operation on a directory, read",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/saved_objects_management"
+}
+       └- ✓ pass  (100ms)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/search]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/search]"
+{
+  "code": "EISDIR",
+  "stack": "Error: EISDIR: illegal operation on a directory, read",
+  "message": "EISDIR: illegal operation on a directory, read",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/search"
+}
+       └- ✓ pass  (90ms)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/search]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/search]"
+{
+  "code": "EISDIR",
+  "stack": "Error: EISDIR: illegal operation on a directory, read",
+  "message": "EISDIR: illegal operation on a directory, read",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/search"
+}
+       └- ✓ pass  (84ms)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/search]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/search]"
+{
+  "code": "EISDIR",
+  "stack": "Error: EISDIR: illegal operation on a directory, read",
+  "message": "EISDIR: illegal operation on a directory, read",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/search"
+}
+       └- ✓ pass  (138ms)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/stress_test]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/stress_test]"
+       └- ✓ pass  (17.1s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/stress_test]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/stress_test]"
+       └- ✓ pass  (16.7s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/stress_test]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/stress_test]"
+       └- ✓ pass  (16.6s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/unmapped_fields]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/unmapped_fields]"
+       └- ✓ pass  (1.3s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/unmapped_fields]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/unmapped_fields]"
+       └- ✓ pass  (1.4s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/unmapped_fields]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/unmapped_fields]"
+       └- ✓ pass  (1.4s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/]"
+{
+  "stack": "SyntaxError: Unexpected token # in JSON at position 0\n    at JSON.parse (<anonymous>)\n    at fn (parse.ts:26:44)\n    at Transform.transform [as _transform] (map_stream.ts:18:25)\n    at Transform._write (node:internal/streams/transform:175:8)\n    at writeOrBuffer (node:internal/streams/writable:392:12)\n    at _write (node:internal/streams/writable:333:10)\n    at Transform.Writable.write (node:internal/streams/writable:337:10)\n    at Transform.ondata (node:internal/streams/readable:766:22)\n    at Transform.emit (node:events:514:28)\n    at addChunk (node:internal/streams/readable:324:12)\n    at readableAddChunk (node:internal/streams/readable:297:9)\n    at Transform.push (node:internal/streams/readable:234:10)\n    at Transform.transform [as _transform] (filter_stream.ts:17:14)\n    at Transform._write (node:internal/streams/transform:175:8)\n    at writeOrBuffer (node:internal/streams/writable:392:12)\n    at _write (node:internal/streams/writable:333:10)\n    at Transform.Writable.write (node:internal/streams/writable:337:10)\n    at Transform.ondata (node:internal/streams/readable:766:22)\n    at Transform.emit (node:events:514:28)\n    at addChunk (node:internal/streams/readable:324:12)\n    at readableAddChunk (node:internal/streams/readable:297:9)\n    at Transform.push (node:internal/streams/readable:234:10)\n    at Transform.transform [as _transform] (split_stream.ts:43:16)\n    at Transform._write (node:internal/streams/transform:175:8)\n    at writeOrBuffer (node:internal/streams/writable:392:12)\n    at _write (node:internal/streams/writable:333:10)\n    at Transform.Writable.write (node:internal/streams/writable:337:10)\n    at Transform.ondata (node:internal/streams/readable:766:22)\n    at Transform.emit (node:events:514:28)\n    at addChunk (node:internal/streams/readable:324:12)\n    at readableAddChunk (node:internal/streams/readable:297:9)\n    at Transform.push (node:internal/streams/readable:234:10)\n    at Transform.transform [as _transform] (replace_stream.ts:55:16)\n    at Transform._write (node:internal/streams/transform:175:8)\n    at writeOrBuffer (node:internal/streams/writable:392:12)\n    at _write (node:internal/streams/writable:333:10)\n    at Transform.Writable.write (node:internal/streams/writable:337:10)\n    at PassThrough.ondata (node:internal/streams/readable:766:22)\n    at PassThrough.emit (node:events:514:28)\n    at addChunk (node:internal/streams/readable:324:12)\n    at readableAddChunk (node:internal/streams/readable:297:9)\n    at PassThrough.Readable.push (node:internal/streams/readable:234:10)\n    at node:internal/streams/transform:182:12\n    at PassThrough._transform (node:internal/streams/passthrough:46:3)\n    at PassThrough.Transform._write (node:internal/streams/transform:175:8)\n    at writeOrBuffer (node:internal/streams/writable:392:12)\n    at _write (node:internal/streams/writable:333:10)\n    at PassThrough.Writable.write (node:internal/streams/writable:337:10)\n    at ReadStream.ondata (node:internal/streams/readable:766:22)\n    at ReadStream.emit (node:events:514:28)",
+  "message": "Unexpected token # in JSON at position 0",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/"
+}
+       └- ✓ pass  (101ms)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/]"
+{
+  "stack": "SyntaxError: Unexpected token # in JSON at position 0\n    at JSON.parse (<anonymous>)\n    at fn (parse.ts:26:44)\n    at Transform.transform [as _transform] (map_stream.ts:18:25)\n    at Transform._write (node:internal/streams/transform:175:8)\n    at writeOrBuffer (node:internal/streams/writable:392:12)\n    at _write (node:internal/streams/writable:333:10)\n    at Transform.Writable.write (node:internal/streams/writable:337:10)\n    at Transform.ondata (node:internal/streams/readable:766:22)\n    at Transform.emit (node:events:514:28)\n    at addChunk (node:internal/streams/readable:324:12)\n    at readableAddChunk (node:internal/streams/readable:297:9)\n    at Transform.push (node:internal/streams/readable:234:10)\n    at Transform.transform [as _transform] (filter_stream.ts:17:14)\n    at Transform._write (node:internal/streams/transform:175:8)\n    at writeOrBuffer (node:internal/streams/writable:392:12)\n    at _write (node:internal/streams/writable:333:10)\n    at Transform.Writable.write (node:internal/streams/writable:337:10)\n    at Transform.ondata (node:internal/streams/readable:766:22)\n    at Transform.emit (node:events:514:28)\n    at addChunk (node:internal/streams/readable:324:12)\n    at readableAddChunk (node:internal/streams/readable:297:9)\n    at Transform.push (node:internal/streams/readable:234:10)\n    at Transform.transform [as _transform] (split_stream.ts:43:16)\n    at Transform._write (node:internal/streams/transform:175:8)\n    at writeOrBuffer (node:internal/streams/writable:392:12)\n    at _write (node:internal/streams/writable:333:10)\n    at Transform.Writable.write (node:internal/streams/writable:337:10)\n    at Transform.ondata (node:internal/streams/readable:766:22)\n    at Transform.emit (node:events:514:28)\n    at addChunk (node:internal/streams/readable:324:12)\n    at readableAddChunk (node:internal/streams/readable:297:9)\n    at Transform.push (node:internal/streams/readable:234:10)\n    at Transform.transform [as _transform] (replace_stream.ts:55:16)\n    at Transform._write (node:internal/streams/transform:175:8)\n    at writeOrBuffer (node:internal/streams/writable:392:12)\n    at _write (node:internal/streams/writable:333:10)\n    at Transform.Writable.write (node:internal/streams/writable:337:10)\n    at PassThrough.ondata (node:internal/streams/readable:766:22)\n    at PassThrough.emit (node:events:514:28)\n    at addChunk (node:internal/streams/readable:324:12)\n    at readableAddChunk (node:internal/streams/readable:297:9)\n    at PassThrough.Readable.push (node:internal/streams/readable:234:10)\n    at node:internal/streams/transform:182:12\n    at PassThrough._transform (node:internal/streams/passthrough:46:3)\n    at PassThrough.Transform._write (node:internal/streams/transform:175:8)\n    at writeOrBuffer (node:internal/streams/writable:392:12)\n    at _write (node:internal/streams/writable:333:10)\n    at PassThrough.Writable.write (node:internal/streams/writable:337:10)\n    at ReadStream.ondata (node:internal/streams/readable:766:22)\n    at ReadStream.emit (node:events:514:28)",
+  "message": "Unexpected token # in JSON at position 0",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/"
+}
+       └- ✓ pass  (92ms)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/]"
+{
+  "stack": "SyntaxError: Unexpected token # in JSON at position 0\n    at JSON.parse (<anonymous>)\n    at fn (parse.ts:26:44)\n    at Transform.transform [as _transform] (map_stream.ts:18:25)\n    at Transform._write (node:internal/streams/transform:175:8)\n    at writeOrBuffer (node:internal/streams/writable:392:12)\n    at _write (node:internal/streams/writable:333:10)\n    at Transform.Writable.write (node:internal/streams/writable:337:10)\n    at Transform.ondata (node:internal/streams/readable:766:22)\n    at Transform.emit (node:events:514:28)\n    at addChunk (node:internal/streams/readable:324:12)\n    at readableAddChunk (node:internal/streams/readable:297:9)\n    at Transform.push (node:internal/streams/readable:234:10)\n    at Transform.transform [as _transform] (filter_stream.ts:17:14)\n    at Transform._write (node:internal/streams/transform:175:8)\n    at writeOrBuffer (node:internal/streams/writable:392:12)\n    at _write (node:internal/streams/writable:333:10)\n    at Transform.Writable.write (node:internal/streams/writable:337:10)\n    at Transform.ondata (node:internal/streams/readable:766:22)\n    at Transform.emit (node:events:514:28)\n    at addChunk (node:internal/streams/readable:324:12)\n    at readableAddChunk (node:internal/streams/readable:297:9)\n    at Transform.push (node:internal/streams/readable:234:10)\n    at Transform.transform [as _transform] (split_stream.ts:43:16)\n    at Transform._write (node:internal/streams/transform:175:8)\n    at writeOrBuffer (node:internal/streams/writable:392:12)\n    at _write (node:internal/streams/writable:333:10)\n    at Transform.Writable.write (node:internal/streams/writable:337:10)\n    at Transform.ondata (node:internal/streams/readable:766:22)\n    at Transform.emit (node:events:514:28)\n    at addChunk (node:internal/streams/readable:324:12)\n    at readableAddChunk (node:internal/streams/readable:297:9)\n    at Transform.push (node:internal/streams/readable:234:10)\n    at Transform.transform [as _transform] (replace_stream.ts:55:16)\n    at Transform._write (node:internal/streams/transform:175:8)\n    at writeOrBuffer (node:internal/streams/writable:392:12)\n    at _write (node:internal/streams/writable:333:10)\n    at Transform.Writable.write (node:internal/streams/writable:337:10)\n    at PassThrough.ondata (node:internal/streams/readable:766:22)\n    at PassThrough.emit (node:events:514:28)\n    at addChunk (node:internal/streams/readable:324:12)\n    at readableAddChunk (node:internal/streams/readable:297:9)\n    at PassThrough.Readable.push (node:internal/streams/readable:234:10)\n    at node:internal/streams/transform:182:12\n    at PassThrough._transform (node:internal/streams/passthrough:46:3)\n    at PassThrough.Transform._write (node:internal/streams/transform:175:8)\n    at writeOrBuffer (node:internal/streams/writable:392:12)\n    at _write (node:internal/streams/writable:333:10)\n    at PassThrough.Writable.write (node:internal/streams/writable:337:10)\n    at ReadStream.ondata (node:internal/streams/readable:766:22)\n    at ReadStream.emit (node:events:514:28)",
+  "message": "Unexpected token # in JSON at position 0",
+  "archiveThatFailed": "test/functional/fixtures/es_archiver/"
+}
+       └- ✓ pass  (100ms)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/dashboard/current/data]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/dashboard/current/data]"
+       └- ✓ pass  (40.2s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/dashboard/current/data]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/dashboard/current/data]"
+       └- ✓ pass  (38.7s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/dashboard/current/data]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/dashboard/current/data]"
+       └- ✓ pass  (37.5s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/getting_started/shakespeare]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/getting_started/shakespeare]"
+       └- ✓ pass  (2.0m)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/getting_started/shakespeare]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/getting_started/shakespeare]"
+       └- ✓ pass  (2.0m)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/getting_started/shakespeare]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/getting_started/shakespeare]"
+       └- ✓ pass  (2.0m)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/index_pattern_without_timefield]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/index_pattern_without_timefield]"
+       └- ✓ pass  (3.6s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/index_pattern_without_timefield]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/index_pattern_without_timefield]"
+       └- ✓ pass  (3.5s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/index_pattern_without_timefield]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/index_pattern_without_timefield]"
+       └- ✓ pass  (3.4s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_flights]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_flights]"
+       └- ✓ pass  (20.3s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_flights]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_flights]"
+       └- ✓ pass  (21.2s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_flights]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/kibana_sample_data_flights]"
+       └- ✓ pass  (19.5s)
+     └-> Load #1 of Archive: [test/functional/fixtures/es_archiver/logstash_functional]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [test/functional/fixtures/es_archiver/logstash_functional]"
+       └- ✓ pass  (34.1s)
+     └-> Load #2 of Archive: [test/functional/fixtures/es_archiver/logstash_functional]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [test/functional/fixtures/es_archiver/logstash_functional]"
+       └- ✓ pass  (33.6s)
+     └-> Load #3 of Archive: [test/functional/fixtures/es_archiver/logstash_functional]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [test/functional/fixtures/es_archiver/logstash_functional]"
+       └- ✓ pass  (34.0s)
+     └-> Load #1 of Archive: [x-pack/test/apm_api_integration/common/fixtures/es_archiver]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/apm_api_integration/common/fixtures/es_archiver]"
+{
+  "code": "EISDIR",
+  "stack": "Error: EISDIR: illegal operation on a directory, read",
+  "message": "EISDIR: illegal operation on a directory, read",
+  "archiveThatFailed": "x-pack/test/apm_api_integration/common/fixtures/es_archiver"
+}
+       └- ✓ pass  (109ms)
+     └-> Load #2 of Archive: [x-pack/test/apm_api_integration/common/fixtures/es_archiver]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/apm_api_integration/common/fixtures/es_archiver]"
+{
+  "code": "EISDIR",
+  "stack": "Error: EISDIR: illegal operation on a directory, read",
+  "message": "EISDIR: illegal operation on a directory, read",
+  "archiveThatFailed": "x-pack/test/apm_api_integration/common/fixtures/es_archiver"
+}
+       └- ✓ pass  (92ms)
+     └-> Load #3 of Archive: [x-pack/test/apm_api_integration/common/fixtures/es_archiver]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/apm_api_integration/common/fixtures/es_archiver]"
+{
+  "code": "EISDIR",
+  "stack": "Error: EISDIR: illegal operation on a directory, read",
+  "message": "EISDIR: illegal operation on a directory, read",
+  "archiveThatFailed": "x-pack/test/apm_api_integration/common/fixtures/es_archiver"
+}
+       └- ✓ pass  (99ms)
+     └-> Load #1 of Archive: [x-pack/test/functional/es_archives/dashboard/async_search]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/functional/es_archives/dashboard/async_search]"
+{
+  "stack": "ResponseError: security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager], this action is granted by the index privileges [delete,write,all]\n    at SniffingTransport.request (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/transport/src/Transport.ts:535:17)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at Client.DeleteByQueryApi [as deleteByQuery] (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/elasticsearch/src/api/api/delete_by_query.ts:75:10)\n    at cleanSavedObjectIndices (kibana_index.ts:121:18)\n    at handleDoc (create_index_stream.ts:70:11)\n    at Transform.transform [as _transform] (create_index_stream.ts:229:13)",
+  "message": "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager], this action is granted by the index privileges [delete,write,all]",
+  "archiveThatFailed": "x-pack/test/functional/es_archives/dashboard/async_search"
+}
+       └- ✓ pass  (115ms)
+     └-> Load #2 of Archive: [x-pack/test/functional/es_archives/dashboard/async_search]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/functional/es_archives/dashboard/async_search]"
+{
+  "stack": "ResponseError: security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager], this action is granted by the index privileges [delete,write,all]\n    at SniffingTransport.request (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/transport/src/Transport.ts:535:17)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at Client.DeleteByQueryApi [as deleteByQuery] (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/elasticsearch/src/api/api/delete_by_query.ts:75:10)\n    at cleanSavedObjectIndices (kibana_index.ts:121:18)\n    at handleDoc (create_index_stream.ts:70:11)\n    at Transform.transform [as _transform] (create_index_stream.ts:229:13)",
+  "message": "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager], this action is granted by the index privileges [delete,write,all]",
+  "archiveThatFailed": "x-pack/test/functional/es_archives/dashboard/async_search"
+}
+       └- ✓ pass  (117ms)
+     └-> Load #3 of Archive: [x-pack/test/functional/es_archives/dashboard/async_search]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/functional/es_archives/dashboard/async_search]"
+{
+  "stack": "ResponseError: security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager], this action is granted by the index privileges [delete,write,all]\n    at SniffingTransport.request (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/transport/src/Transport.ts:535:17)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at Client.DeleteByQueryApi [as deleteByQuery] (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/elasticsearch/src/api/api/delete_by_query.ts:75:10)\n    at cleanSavedObjectIndices (kibana_index.ts:121:18)\n    at handleDoc (create_index_stream.ts:70:11)\n    at Transform.transform [as _transform] (create_index_stream.ts:229:13)",
+  "message": "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_task_manager], this action is granted by the index privileges [delete,write,all]",
+  "archiveThatFailed": "x-pack/test/functional/es_archives/dashboard/async_search"
+}
+       └- ✓ pass  (133ms)
+     └-> Load #1 of Archive: [x-pack/test/functional/es_archives/fleet/agents]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/functional/es_archives/fleet/agents]"
+{
+  "stack": "ResponseError: security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:admin/settings/update] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_security_solution_1,.kibana_task_manager_1,.kibana_alerting_cases_1,.kibana_ingest_1,.kibana_1,.kibana_analytics_1], this action is granted by the index privileges [manage,all]\n    at SniffingTransport.request (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/transport/src/Transport.ts:535:17)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at Indices.putSettings (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/elasticsearch/src/api/api/indices.ts:1376:12)\n    at deleteSavedObjectIndices (kibana_index.ts:44:3)\n    at attemptToCreate (create_index_stream.ts:135:11)\n    at handleIndex (create_index_stream.ts:211:5)\n    at Transform.transform [as _transform] (create_index_stream.ts:221:13)",
+  "message": "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:admin/settings/update] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_security_solution_1,.kibana_task_manager_1,.kibana_alerting_cases_1,.kibana_ingest_1,.kibana_1,.kibana_analytics_1], this action is granted by the index privileges [manage,all]",
+  "archiveThatFailed": "x-pack/test/functional/es_archives/fleet/agents"
+}
+       └- ✓ pass  (179ms)
+     └-> Load #2 of Archive: [x-pack/test/functional/es_archives/fleet/agents]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/functional/es_archives/fleet/agents]"
+{
+  "stack": "ResponseError: security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:admin/settings/update] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_security_solution_1,.kibana_task_manager_1,.kibana_alerting_cases_1,.kibana_ingest_1,.kibana_1,.kibana_analytics_1], this action is granted by the index privileges [manage,all]\n    at SniffingTransport.request (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/transport/src/Transport.ts:535:17)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at Indices.putSettings (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/elasticsearch/src/api/api/indices.ts:1376:12)\n    at deleteSavedObjectIndices (kibana_index.ts:44:3)\n    at attemptToCreate (create_index_stream.ts:135:11)\n    at handleIndex (create_index_stream.ts:211:5)\n    at Transform.transform [as _transform] (create_index_stream.ts:221:13)",
+  "message": "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:admin/settings/update] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_security_solution_1,.kibana_task_manager_1,.kibana_alerting_cases_1,.kibana_ingest_1,.kibana_1,.kibana_analytics_1], this action is granted by the index privileges [manage,all]",
+  "archiveThatFailed": "x-pack/test/functional/es_archives/fleet/agents"
+}
+       └- ✓ pass  (145ms)
+     └-> Load #3 of Archive: [x-pack/test/functional/es_archives/fleet/agents]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/functional/es_archives/fleet/agents]"
+{
+  "stack": "ResponseError: security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:admin/settings/update] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_security_solution_1,.kibana_task_manager_1,.kibana_alerting_cases_1,.kibana_ingest_1,.kibana_1,.kibana_analytics_1], this action is granted by the index privileges [manage,all]\n    at SniffingTransport.request (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/transport/src/Transport.ts:535:17)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at Indices.putSettings (/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/node_modules/@elastic/elasticsearch/src/api/api/indices.ts:1376:12)\n    at deleteSavedObjectIndices (kibana_index.ts:44:3)\n    at attemptToCreate (create_index_stream.ts:135:11)\n    at handleIndex (create_index_stream.ts:211:5)\n    at Transform.transform [as _transform] (create_index_stream.ts:221:13)",
+  "message": "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:admin/settings/update] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_security_solution_1,.kibana_task_manager_1,.kibana_alerting_cases_1,.kibana_ingest_1,.kibana_1,.kibana_analytics_1], this action is granted by the index privileges [manage,all]",
+  "archiveThatFailed": "x-pack/test/functional/es_archives/fleet/agents"
+}
+       └- ✓ pass  (162ms)
+     └-> Load #1 of Archive: [x-pack/test/functional/es_archives/getting_started/shakespeare]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/functional/es_archives/getting_started/shakespeare]"
+       └- ✓ pass  (2.0m)
+     └-> Load #2 of Archive: [x-pack/test/functional/es_archives/getting_started/shakespeare]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/functional/es_archives/getting_started/shakespeare]"
+       └- ✓ pass  (2.0m)
+     └-> Load #3 of Archive: [x-pack/test/functional/es_archives/getting_started/shakespeare]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/functional/es_archives/getting_started/shakespeare]"
+       └- ✓ pass  (2.0m)
+     └-> Load #1 of Archive: [x-pack/test/functional/es_archives/graph/secrepo]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/functional/es_archives/graph/secrepo]"
+       └- ✓ pass  (15.3s)
+     └-> Load #2 of Archive: [x-pack/test/functional/es_archives/graph/secrepo]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/functional/es_archives/graph/secrepo]"
+       └- ✓ pass  (15.3s)
+     └-> Load #3 of Archive: [x-pack/test/functional/es_archives/graph/secrepo]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/functional/es_archives/graph/secrepo]"
+       └- ✓ pass  (16.2s)
+     └-> Load #1 of Archive: [x-pack/test/functional/es_archives/lens/rollup/data]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/functional/es_archives/lens/rollup/data]"
+       └- ✓ pass  (2.4s)
+     └-> Load #2 of Archive: [x-pack/test/functional/es_archives/lens/rollup/data]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/functional/es_archives/lens/rollup/data]"
+       └- ✓ pass  (2.2s)
+     └-> Load #3 of Archive: [x-pack/test/functional/es_archives/lens/rollup/data]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/functional/es_archives/lens/rollup/data]"
+       └- ✓ pass  (2.3s)
+     └-> Load #1 of Archive: [x-pack/test/functional/es_archives/logstash_functional]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/functional/es_archives/logstash_functional]"
+       └- ✓ pass  (34.3s)
+     └-> Load #2 of Archive: [x-pack/test/functional/es_archives/logstash_functional]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/functional/es_archives/logstash_functional]"
+       └- ✓ pass  (33.7s)
+     └-> Load #3 of Archive: [x-pack/test/functional/es_archives/logstash_functional]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/functional/es_archives/logstash_functional]"
+       └- ✓ pass  (33.8s)
+     └-> Load #1 of Archive: [x-pack/test/functional/es_archives/ml/bm_classification]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/functional/es_archives/ml/bm_classification]"
+       └- ✓ pass  (14.2s)
+     └-> Load #2 of Archive: [x-pack/test/functional/es_archives/ml/bm_classification]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/functional/es_archives/ml/bm_classification]"
+       └- ✓ pass  (15.0s)
+     └-> Load #3 of Archive: [x-pack/test/functional/es_archives/ml/bm_classification]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/functional/es_archives/ml/bm_classification]"
+       └- ✓ pass  (14.3s)
+     └-> Load #1 of Archive: [x-pack/test/functional/es_archives/ml/categorization_small]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/functional/es_archives/ml/categorization_small]"
+       └- ✓ pass  (3.4s)
+     └-> Load #2 of Archive: [x-pack/test/functional/es_archives/ml/categorization_small]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/functional/es_archives/ml/categorization_small]"
+       └- ✓ pass  (3.0s)
+     └-> Load #3 of Archive: [x-pack/test/functional/es_archives/ml/categorization_small]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/functional/es_archives/ml/categorization_small]"
+       └- ✓ pass  (3.3s)
+     └-> Load #1 of Archive: [x-pack/test/functional/es_archives/ml/ecommerce]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/functional/es_archives/ml/ecommerce]"
+       └- ✓ pass  (9.5s)
+     └-> Load #2 of Archive: [x-pack/test/functional/es_archives/ml/ecommerce]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/functional/es_archives/ml/ecommerce]"
+       └- ✓ pass  (8.7s)
+     └-> Load #3 of Archive: [x-pack/test/functional/es_archives/ml/ecommerce]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/functional/es_archives/ml/ecommerce]"
+       └- ✓ pass  (8.3s)
+     └-> Load #1 of Archive: [x-pack/test/functional/es_archives/ml/egs_regression]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/functional/es_archives/ml/egs_regression]"
+       └- ✓ pass  (4.1s)
+     └-> Load #2 of Archive: [x-pack/test/functional/es_archives/ml/egs_regression]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/functional/es_archives/ml/egs_regression]"
+       └- ✓ pass  (4.1s)
+     └-> Load #3 of Archive: [x-pack/test/functional/es_archives/ml/egs_regression]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/functional/es_archives/ml/egs_regression]"
+       └- ✓ pass  (3.8s)
+     └-> Load #1 of Archive: [x-pack/test/functional/es_archives/ml/event_rate_nanos]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/functional/es_archives/ml/event_rate_nanos]"
+       └- ✓ pass  (2.0m)
+     └-> Load #2 of Archive: [x-pack/test/functional/es_archives/ml/event_rate_nanos]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/functional/es_archives/ml/event_rate_nanos]"
+       └- ✓ pass  (2.0m)
+     └-> Load #3 of Archive: [x-pack/test/functional/es_archives/ml/event_rate_nanos]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/functional/es_archives/ml/event_rate_nanos]"
+       └- ✓ pass  (2.0m)
+     └-> Load #1 of Archive: [x-pack/test/functional/es_archives/ml/farequote]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/functional/es_archives/ml/farequote]"
+       └- ✓ pass  (1.0m)
+     └-> Load #2 of Archive: [x-pack/test/functional/es_archives/ml/farequote]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/functional/es_archives/ml/farequote]"
+       └- ✓ pass  (1.0m)
+     └-> Load #3 of Archive: [x-pack/test/functional/es_archives/ml/farequote]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/functional/es_archives/ml/farequote]"
+       └- ✓ pass  (1.0m)
+     └-> Load #1 of Archive: [x-pack/test/functional/es_archives/ml/farequote_small]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/functional/es_archives/ml/farequote_small]"
+       └- ✓ pass  (6.8s)
+     └-> Load #2 of Archive: [x-pack/test/functional/es_archives/ml/farequote_small]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/functional/es_archives/ml/farequote_small]"
+       └- ✓ pass  (6.8s)
+     └-> Load #3 of Archive: [x-pack/test/functional/es_archives/ml/farequote_small]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/functional/es_archives/ml/farequote_small]"
+       └- ✓ pass  (6.6s)
+     └-> Load #1 of Archive: [x-pack/test/functional/es_archives/ml/ihp_outlier]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/functional/es_archives/ml/ihp_outlier]"
+       └- ✓ pass  (3.9s)
+     └-> Load #2 of Archive: [x-pack/test/functional/es_archives/ml/ihp_outlier]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/functional/es_archives/ml/ihp_outlier]"
+       └- ✓ pass  (3.4s)
+     └-> Load #3 of Archive: [x-pack/test/functional/es_archives/ml/ihp_outlier]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/functional/es_archives/ml/ihp_outlier]"
+       └- ✓ pass  (3.5s)
+     └-> Load #1 of Archive: [x-pack/test/functional/es_archives/ml/module_sample_ecommerce]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/functional/es_archives/ml/module_sample_ecommerce]"
+       └- ✓ pass  (1.8s)
+     └-> Load #2 of Archive: [x-pack/test/functional/es_archives/ml/module_sample_ecommerce]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/functional/es_archives/ml/module_sample_ecommerce]"
+       └- ✓ pass  (1.7s)
+     └-> Load #3 of Archive: [x-pack/test/functional/es_archives/ml/module_sample_ecommerce]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/functional/es_archives/ml/module_sample_ecommerce]"
+       └- ✓ pass  (1.9s)
+     └-> Load #1 of Archive: [x-pack/test/functional/es_archives/ml/module_sample_logs]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/functional/es_archives/ml/module_sample_logs]"
+       └- ✓ pass  (2.1s)
+     └-> Load #2 of Archive: [x-pack/test/functional/es_archives/ml/module_sample_logs]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/functional/es_archives/ml/module_sample_logs]"
+       └- ✓ pass  (1.8s)
+     └-> Load #3 of Archive: [x-pack/test/functional/es_archives/ml/module_sample_logs]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/functional/es_archives/ml/module_sample_logs]"
+       └- ✓ pass  (1.7s)
+     └-> Load #1 of Archive: [x-pack/test/functional/es_archives/reporting/unmapped_fields]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/functional/es_archives/reporting/unmapped_fields]"
+       └- ✓ pass  (1.4s)
+     └-> Load #2 of Archive: [x-pack/test/functional/es_archives/reporting/unmapped_fields]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/functional/es_archives/reporting/unmapped_fields]"
+       └- ✓ pass  (1.4s)
+     └-> Load #3 of Archive: [x-pack/test/functional/es_archives/reporting/unmapped_fields]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/functional/es_archives/reporting/unmapped_fields]"
+       └- ✓ pass  (1.5s)
+     └-> Load #1 of Archive: [x-pack/test/functional/es_archives/security/dlstest]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/functional/es_archives/security/dlstest]"
+       └- ✓ pass  (1.6s)
+     └-> Load #2 of Archive: [x-pack/test/functional/es_archives/security/dlstest]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/functional/es_archives/security/dlstest]"
+       └- ✓ pass  (1.8s)
+     └-> Load #3 of Archive: [x-pack/test/functional/es_archives/security/dlstest]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/functional/es_archives/security/dlstest]"
+       └- ✓ pass  (1.8s)
+     └-> Load #1 of Archive: [x-pack/test/functional/es_archives/uptime/blank]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/functional/es_archives/uptime/blank]"
+       └- ✓ pass  (1.3s)
+     └-> Load #2 of Archive: [x-pack/test/functional/es_archives/uptime/blank]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/functional/es_archives/uptime/blank]"
+       └- ✓ pass  (1.1s)
+     └-> Load #3 of Archive: [x-pack/test/functional/es_archives/uptime/blank]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/functional/es_archives/uptime/blank]"
+       └- ✓ pass  (1.2s)
+     └-> Load #1 of Archive: [x-pack/test/functional/es_archives/visualize/default]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/functional/es_archives/visualize/default]"
+       └- ✓ pass  (1.1s)
+     └-> Load #2 of Archive: [x-pack/test/functional/es_archives/visualize/default]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/functional/es_archives/visualize/default]"
+       └- ✓ pass  (534ms)
+     └-> Load #3 of Archive: [x-pack/test/functional/es_archives/visualize/default]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/functional/es_archives/visualize/default]"
+       └- ✓ pass  (332ms)
+     └-> Load #1 of Archive: [x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional]
+       └-> "before each" hook: global before each for "Load #1 of Archive: [x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional]"
+       └- ✓ pass  (34.4s)
+     └-> Load #2 of Archive: [x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional]
+       └-> "before each" hook: global before each for "Load #2 of Archive: [x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional]"
+       └- ✓ pass  (34.2s)
+     └-> Load #3 of Archive: [x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional]
+       └-> "before each" hook: global before each for "Load #3 of Archive: [x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional]"
+       └- ✓ pass  (34.2s)
+     └-> "after all" hook for "Load #3 of Archive: [x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional]"
+
+test/functional/fixtures/es_archiver/alias
+| SERVERLESS avg / min / max | 9.9 / 9.1 / 10.9 | Cell |
+
+
+test/functional/fixtures/es_archiver/dashboard
+| SERVERLESS avg / min / max | NaN / Infinity / -Infinity | Cell |
+
+
+test/functional/fixtures/es_archiver/date_nanos
+| SERVERLESS avg / min / max | 1.2 / 1.2 / 1.3 | Cell |
+
+
+test/functional/fixtures/es_archiver/date_nanos_custom
+| SERVERLESS avg / min / max | 1.1 / 1.0 / 1.2 | Cell |
+
+
+test/functional/fixtures/es_archiver/date_nanos_mixed
+| SERVERLESS avg / min / max | 1.7 / 1.6 / 1.8 | Cell |
+
+
+test/functional/fixtures/es_archiver/date_nested
+| SERVERLESS avg / min / max | 0.9 / 0.8 / 1.0 | Cell |
+
+
+test/functional/fixtures/es_archiver/deprecations_service
+| SERVERLESS avg / min / max | NaN / Infinity / -Infinity | Cell |
+
+
+test/functional/fixtures/es_archiver/getting_started
+| SERVERLESS avg / min / max | NaN / Infinity / -Infinity | Cell |
+
+
+test/functional/fixtures/es_archiver/hamlet
+| SERVERLESS avg / min / max | 1.7 / 1.6 / 1.8 | Cell |
+
+
+test/functional/fixtures/es_archiver/huge_fields
+| SERVERLESS avg / min / max | NaN / Infinity / -Infinity | Cell |
+
+
+test/functional/fixtures/es_archiver/index_pattern_without_timefield
+| SERVERLESS avg / min / max | 2.9 / 2.7 / 2.9 | Cell |
+
+
+test/functional/fixtures/es_archiver/kibana_sample_data_flights
+| SERVERLESS avg / min / max | 20.5 / 18.9 / 22.2 | Cell |
+
+
+test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern
+| SERVERLESS avg / min / max | NaN / Infinity / -Infinity | Cell |
+
+
+test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb
+| SERVERLESS avg / min / max | 20.6 / 20.3 / 21.1 | Cell |
+
+
+test/functional/fixtures/es_archiver/large_fields
+| SERVERLESS avg / min / max | 2.6 / 2.3 / 2.8 | Cell |
+
+
+test/functional/fixtures/es_archiver/logstash_functional
+| SERVERLESS avg / min / max | 32.9 / 32.4 / 33.2 | Cell |
+
+
+test/functional/fixtures/es_archiver/long_window_logstash
+| SERVERLESS avg / min / max | 32.0 / 31.2 / 32.5 | Cell |
+
+
+test/functional/fixtures/es_archiver/makelogs
+| SERVERLESS avg / min / max | 2.9 / 2.8 / 3.0 | Cell |
+
+
+test/functional/fixtures/es_archiver/many_fields
+| SERVERLESS avg / min / max | 3.2 / 2.8 / 3.8 | Cell |
+
+
+test/functional/fixtures/es_archiver/message_with_newline
+| SERVERLESS avg / min / max | 1.4 / 1.4 / 1.4 | Cell |
+
+
+test/functional/fixtures/es_archiver/saved_objects_management
+| SERVERLESS avg / min / max | NaN / Infinity / -Infinity | Cell |
+
+
+test/functional/fixtures/es_archiver/search
+| SERVERLESS avg / min / max | NaN / Infinity / -Infinity | Cell |
+
+
+test/functional/fixtures/es_archiver/stress_test
+| SERVERLESS avg / min / max | 16.3 / 16.1 / 16.5 | Cell |
+
+
+test/functional/fixtures/es_archiver/unmapped_fields
+| SERVERLESS avg / min / max | 1.2 / 1.1 / 1.2 | Cell |
+
+
+test/functional/fixtures/es_archiver/
+| SERVERLESS avg / min / max | NaN / Infinity / -Infinity | Cell |
+
+
+test/functional/fixtures/es_archiver/dashboard/current/data
+| SERVERLESS avg / min / max | 36.9 / 35.6 / 38.3 | Cell |
+
+
+test/functional/fixtures/es_archiver/getting_started/shakespeare
+| SERVERLESS avg / min / max | 152.2 / 151.2 / 154.0 | Cell |
+
+
+test/functional/fixtures/es_archiver/index_pattern_without_timefield
+| SERVERLESS avg / min / max | NaN / Infinity / -Infinity | Cell |
+
+
+test/functional/fixtures/es_archiver/kibana_sample_data_flights
+| SERVERLESS avg / min / max | NaN / Infinity / -Infinity | Cell |
+
+
+test/functional/fixtures/es_archiver/logstash_functional
+| SERVERLESS avg / min / max | NaN / Infinity / -Infinity | Cell |
+
+
+x-pack/test/apm_api_integration/common/fixtures/es_archiver
+| SERVERLESS avg / min / max | NaN / Infinity / -Infinity | Cell |
+
+
+x-pack/test/functional/es_archives/dashboard/async_search
+| SERVERLESS avg / min / max | NaN / Infinity / -Infinity | Cell |
+
+
+x-pack/test/functional/es_archives/fleet/agents
+| SERVERLESS avg / min / max | NaN / Infinity / -Infinity | Cell |
+
+
+x-pack/test/functional/es_archives/getting_started/shakespeare
+| SERVERLESS avg / min / max | 151.0 / 150.8 / 151.2 | Cell |
+
+
+x-pack/test/functional/es_archives/graph/secrepo
+| SERVERLESS avg / min / max | 15.2 / 14.9 / 15.8 | Cell |
+
+
+x-pack/test/functional/es_archives/lens/rollup/data
+| SERVERLESS avg / min / max | 1.9 / 1.8 / 2.0 | Cell |
+
+
+x-pack/test/functional/es_archives/logstash_functional
+| SERVERLESS avg / min / max | 32.6 / 32.4 / 33.0 | Cell |
+
+
+x-pack/test/functional/es_archives/ml/bm_classification
+| SERVERLESS avg / min / max | 14.2 / 13.9 / 14.7 | Cell |
+
+
+x-pack/test/functional/es_archives/ml/categorization_small
+| SERVERLESS avg / min / max | 3.0 / 2.8 / 3.2 | Cell |
+
+
+x-pack/test/functional/es_archives/ml/ecommerce
+| SERVERLESS avg / min / max | 8.5 / 7.9 / 9.1 | Cell |
+
+
+x-pack/test/functional/es_archives/ml/egs_regression
+| SERVERLESS avg / min / max | 3.8 / 3.6 / 3.9 | Cell |
+
+
+x-pack/test/functional/es_archives/ml/event_rate_nanos
+| SERVERLESS avg / min / max | 142.3 / 141.9 / 142.9 | Cell |
+
+
+x-pack/test/functional/es_archives/ml/farequote
+| SERVERLESS avg / min / max | 117.0 / 116.5 / 117.6 | Cell |
+
+
+x-pack/test/functional/es_archives/ml/farequote_small
+| SERVERLESS avg / min / max | 6.5 / 6.4 / 6.6 | Cell |
+
+
+x-pack/test/functional/es_archives/ml/ihp_outlier
+| SERVERLESS avg / min / max | 3.4 / 3.1 / 3.6 | Cell |
+
+
+x-pack/test/functional/es_archives/ml/module_sample_ecommerce
+| SERVERLESS avg / min / max | 1.6 / 1.5 / 1.7 | Cell |
+
+
+x-pack/test/functional/es_archives/ml/module_sample_logs
+| SERVERLESS avg / min / max | 1.7 / 1.5 / 1.9 | Cell |
+
+
+x-pack/test/functional/es_archives/reporting/unmapped_fields
+| SERVERLESS avg / min / max | 1.2 / 1.2 / 1.2 | Cell |
+
+
+x-pack/test/functional/es_archives/security/dlstest
+| SERVERLESS avg / min / max | 1.6 / 1.4 / 1.6 | Cell |
+
+
+x-pack/test/functional/es_archives/uptime/blank
+| SERVERLESS avg / min / max | 1.0 / 1.0 / 1.1 | Cell |
+
+
+x-pack/test/functional/es_archives/visualize/default
+| SERVERLESS avg / min / max | 0.7 / 0.3 / 1.1 | Cell |
+
+
+x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional
+| SERVERLESS avg / min / max | 33.0 / 32.9 / 33.1 | Cell |
+
+
+λλλ Please see the log file:
+/home/jenkins/workspace/dev/es-archiver-benchmark/.data/git/kibana/x-pack/test_serverless/api_integration/test_suites/serverless_is_es_archiver_slow/logs/es_archiver_load_times_log.txt
+     └-> "after all" hook: afterTestSuite.trigger for "Load #3 of Archive: [x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional]"
+   └-> "after all" hook: afterTestSuite.trigger in "Es Archiver Load Action Performance"
+
+156 passing (48.0m)
+
+                                    Summary
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━┳━━━━━━━━━┳━━━━━━━┳━━━━━━━┳━━━━━━━┓
+┃ Name                      ┃ Durati… ┃ Tes… ┃ Failur… ┃ Erro… ┃ Skip… ┃ Stat… ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━╇━━━━━━━━━╇━━━━━━━╇━━━━━━━╇━━━━━━━┩
+│ ES Archiver - restore da… │   2900s │  156 │       0 │     0 │     0 │ PASS… │
+└───────────────────────────┴─────────┴──────┴─────────┴───────┴───────┴───────┘
+ ✅  No failures detected.
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] junit
+Recording test results
+[Checks API] No suitable checks publisher found.
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Notifications)
+[Pipeline] slackSend
+Slack Send Pipeline step running, values are - baseUrl: <empty>, teamDomain: elastic, channel: @dolaru, color: #0F0, botUser: false, tokenCredentialId: slack-token, notifyCommitters: false, iconEmoji: <empty>, username: <empty>, timestamp: <empty>
+ERROR: Slack notification failed. See Jenkins logs for details.
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Teardown)
+[Pipeline] withCredentials
+Masking supported pattern matches of $VAULT_TOKEN
+[Pipeline] {
+[Pipeline] sh
++ set +x
+nvm
+2023-08-25 12:38:09,913 INFO : Deleting Observability project with id c06a5f6ed7d1446b9357dc176d1e2589
+2023-08-25 12:38:10,357 INFO : Removing information persisted for Observability project named 'ml-qa-es-archiver-benchmark-65'
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS

@@ -7,7 +7,8 @@
 
 /* eslint no-console: ["error",{ allow: ["log"] }] */
 
-import { PathLike } from 'fs';
+import { pipe } from 'fp-ts/function';
+import { PathLike, readFileSync } from 'fs';
 import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
@@ -18,6 +19,7 @@ import {
   printInfoAndInitOutputLogging,
   testsLoop,
   archives,
+  errFilePath,
   // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 } from '../../../../../test/api_integration/apis/local_and_ess_is_es_archiver_slow/utils';
 import type {
@@ -26,7 +28,7 @@ import type {
   ArchiveWithManyFieldsAndOrManyDocs,
 } from '../../../../../test/api_integration/apis/local_and_ess_is_es_archiver_slow/shared.types';
 
-const LOOP_LIMIT_OVERRIDE_SERVERLESS_ONLY: number = 10;
+const LOOP_LIMIT_OVERRIDE_SERVERLESS_ONLY: number = 3;
 const LOGS_DIR: string =
   process.env.LOGS_DIR ??
   'x-pack/test_serverless/api_integration/test_suites/serverless_is_es_archiver_slow/logs';
@@ -72,5 +74,6 @@ export default function suiteFactory({ getService }: FtrProviderContext): void {
     );
 
     after(async (): Promise<any> => await afterAll('SERVERLESS', logDirAbsolutePath, results)(log));
+    after(() => pipe(errFilePath(), (x) => readFileSync(x, 'utf8'), console.log.bind(console)));
   });
 }

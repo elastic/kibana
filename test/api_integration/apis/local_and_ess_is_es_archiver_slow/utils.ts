@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-/* eslint no-console: ["error",{ allow: ["log"] }] */
+/* eslint no-console: ["error",{ allow: ["log", "error"] }] */
 
 import { resolve } from 'path';
 import { createFlagError } from '@kbn/dev-cli-errors';
@@ -95,6 +95,7 @@ export const luxonNow = (): DateTime => DateTime.fromISO(DateTime.now().toString
 export const formatLuxon = (d: DateTime): string => d.toLocaleString(DateTime.DATETIME_MED);
 export const lazyNow = flow(luxonNow, formatLuxon);
 export const diff: any = (before: any, after: any) => after.diff(before).toObject();
+
 export function metricsFactory(resultSet: LoadResults) {
   return function metricPushFactory(a: TimeTakenToLoadArchive): SideEffectVoid {
     const { archiveName, label, timeTaken } = a;
@@ -108,6 +109,8 @@ export function metricsFactory(resultSet: LoadResults) {
     resultSet.add(found);
   };
 }
+
+export const errFilePath = () => resolve(REPO_ROOT, 'esarch_failed_load_action_archives.txt');
 export const compositionChain =
   (
     loadUnloadAndGetMetrics: (
@@ -131,7 +134,26 @@ export const compositionChain =
       return await pipe(
         TE.tryCatch(
           async (): Promise<ArchiveLoadMetrics> => await loadUnloadAndGetMetrics(i, archive),
-          (reason: any) => toError(reason)
+          (reason) => {
+            const { code, stack, message } = reason;
+
+            const caught = {
+              code,
+              stack,
+              message,
+              archiveThatFailed: archive,
+            };
+            const failedMsg = `${JSON.stringify(caught, null, 2)}`;
+
+            try {
+              throw new Error(`${reason}`);
+            } catch (err) {
+              console.error(failedMsg);
+              writeFileSync(errFilePath(), `${failedMsg},\n`, { flag: 'a', encoding: 'utf8' });
+            }
+
+            return toError(reason);
+          }
         ),
         TE.map((x: ArchiveLoadMetrics) => {
           push({
@@ -177,6 +199,7 @@ const work = async (
   log: ToolingLog
 ): Promise<{ bef: DateTime; aft: DateTime }> =>
   dryRun ? await fake()(log) : await real(esArchiver)(archive);
+
 export function loadAndTime(esArchiver: EsArchiver, dryRun: boolean = false, log: ToolingLog) {
   return async function getMetrics(
     loopIndex: number,
@@ -194,6 +217,7 @@ export function loadAndTime(esArchiver: EsArchiver, dryRun: boolean = false, log
     };
   };
 }
+
 export const isYesOrNo = (value: YesOrNo): boolean => {
   let result: boolean = false;
   switch (value) {
@@ -294,6 +318,7 @@ export async function printInfoAndInitOutputLogging(
   );
   ioFlushAfter(logPathAndFileName(logDirAbsolutePath))(hardware());
 }
+
 export function testsLoop(
   esArchiver: EsArchiver,
   log: ToolingLog,
@@ -315,9 +340,63 @@ export function testsLoop(
     });
   };
 }
+
 export const LOOP_LIMIT: number = (process.env.LOOP_LIMIT as unknown as number) ?? 50;
-export const archives = [
-  'x-pack/test/functional/es_archives/logstash_functional',
+
+const oss = [
+  'test/functional/fixtures/es_archiver/alias',
+  'test/functional/fixtures/es_archiver/dashboard',
+  'test/functional/fixtures/es_archiver/date_nanos',
+  'test/functional/fixtures/es_archiver/date_nanos_custom',
+  'test/functional/fixtures/es_archiver/date_nanos_mixed',
+  'test/functional/fixtures/es_archiver/date_nested',
+  'test/functional/fixtures/es_archiver/deprecations_service',
+  'test/functional/fixtures/es_archiver/getting_started',
+  'test/functional/fixtures/es_archiver/hamlet',
+  'test/functional/fixtures/es_archiver/huge_fields',
+  'test/functional/fixtures/es_archiver/index_pattern_without_timefield',
+  'test/functional/fixtures/es_archiver/kibana_sample_data_flights',
+  'test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern',
+  'test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb',
+  'test/functional/fixtures/es_archiver/large_fields',
+  'test/functional/fixtures/es_archiver/logstash_functional',
+  'test/functional/fixtures/es_archiver/long_window_logstash',
+  'test/functional/fixtures/es_archiver/makelogs',
   'test/functional/fixtures/es_archiver/many_fields',
+  'test/functional/fixtures/es_archiver/message_with_newline',
+  'test/functional/fixtures/es_archiver/saved_objects_management',
+  'test/functional/fixtures/es_archiver/search',
+  'test/functional/fixtures/es_archiver/stress_test',
+  'test/functional/fixtures/es_archiver/unmapped_fields',
+];
+
+const xpack = [
+  'test/functional/fixtures/es_archiver/dashboard/current/data',
+  'test/functional/fixtures/es_archiver/getting_started/shakespeare',
+  'test/functional/fixtures/es_archiver/index_pattern_without_timefield',
+  'test/functional/fixtures/es_archiver/kibana_sample_data_flights',
+  'test/functional/fixtures/es_archiver/logstash_functional',
+  'x-pack/test/apm_api_integration/common/fixtures/es_archiver',
+  'x-pack/test/functional/es_archives/dashboard/async_search',
+  'x-pack/test/functional/es_archives/fleet/agents',
+  'x-pack/test/functional/es_archives/getting_started/shakespeare',
+  'x-pack/test/functional/es_archives/graph/secrepo',
+  'x-pack/test/functional/es_archives/lens/rollup/data',
+  'x-pack/test/functional/es_archives/logstash_functional',
+  'x-pack/test/functional/es_archives/ml/bm_classification',
+  'x-pack/test/functional/es_archives/ml/categorization_small',
+  'x-pack/test/functional/es_archives/ml/ecommerce',
+  'x-pack/test/functional/es_archives/ml/egs_regression',
+  'x-pack/test/functional/es_archives/ml/event_rate_nanos',
   'x-pack/test/functional/es_archives/ml/farequote',
-] as const;
+  'x-pack/test/functional/es_archives/ml/farequote_small',
+  'x-pack/test/functional/es_archives/ml/ihp_outlier',
+  'x-pack/test/functional/es_archives/ml/module_sample_ecommerce',
+  'x-pack/test/functional/es_archives/ml/module_sample_logs',
+  'x-pack/test/functional/es_archives/reporting/unmapped_fields',
+  'x-pack/test/functional/es_archives/security/dlstest',
+  'x-pack/test/functional/es_archives/uptime/blank',
+  'x-pack/test/functional/es_archives/visualize/default',
+  'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional',
+];
+export const archives = [...oss, ...xpack];

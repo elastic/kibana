@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+buildkite-agent artifact upload 'esarch_failed_load_action_archives.txt'
+
+
 BUILD_SUCCESSFUL=$(ts-node "$(dirname "${0}")/build_status.ts")
 export BUILD_SUCCESSFUL
 
