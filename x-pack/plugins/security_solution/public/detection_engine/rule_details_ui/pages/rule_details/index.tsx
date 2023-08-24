@@ -119,6 +119,8 @@ import * as detectionI18n from '../../../../detections/pages/detection_engine/tr
 import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
 
 import { RuleDetailsContextProvider } from './rule_details_context';
+// eslint-disable-next-line no-restricted-imports
+import { LegacyUrlConflictCallOut } from './legacy_url_conflict_callout';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
@@ -141,6 +143,7 @@ import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze
 import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
+import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -371,49 +374,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     }
   }, [maybeRule]);
 
-  useEffect(() => {
-    if (rule) {
-      const outcome = rule.outcome;
-      if (spacesApi && outcome === 'aliasMatch') {
-        // This rule has been resolved from a legacy URL - redirect the user to the new URL and display a toast.
-        const path = `rules/id/${rule.id}${window.location.search}${window.location.hash}`;
-        spacesApi.ui.redirectLegacyUrl({
-          path,
-          aliasPurpose: rule.alias_purpose,
-          objectNoun: i18nTranslate.translate(
-            'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
-            { defaultMessage: 'rule' }
-          ),
-        });
-      }
-    }
-  }, [rule, spacesApi]);
-
-  const getLegacyUrlConflictCallout = useMemo(() => {
-    if (rule?.alias_target_id != null && spacesApi && rule.outcome === 'conflict') {
-      const aliasTargetId = rule.alias_target_id;
-      // We have resolved to one rule, but there is another one with a legacy URL associated with this page. Display a
-      // callout with a warning for the user, and provide a way for them to navigate to the other rule.
-      const otherRulePath = `rules/id/${aliasTargetId}${window.location.search}${window.location.hash}`;
-      return (
-        <>
-          <EuiSpacer />
-          {spacesApi.ui.components.getLegacyUrlConflict({
-            objectNoun: i18nTranslate.translate(
-              'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
-              {
-                defaultMessage: 'rule',
-              }
-            ),
-            currentObjectId: rule.id,
-            otherObjectId: aliasTargetId,
-            otherObjectPath: otherRulePath,
-          })}
-        </>
-      );
-    }
-    return null;
-  }, [rule, spacesApi]);
+  useLegacyUrlRedirect({rule, spacesApi});
 
   const ruleExecutionSettings = useRuleExecutionSettings();
 
@@ -769,7 +730,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 </EuiFlexGroup>
               </HeaderPage>
               {ruleError}
-              {getLegacyUrlConflictCallout}
+              <LegacyUrlConflictCallOut rule={rule} spacesApi={spacesApi} />
               <EuiSpacer />
               <EuiFlexGroup>
                 <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>
