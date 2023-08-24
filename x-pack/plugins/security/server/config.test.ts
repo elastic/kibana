@@ -183,68 +183,6 @@ describe('config schema', () => {
         "showNavLinks": true,
       }
     `);
-
-    expect(ConfigSchema.validate({}, { serverless: true, dist: true })).toMatchInlineSnapshot(`
-      Object {
-        "audit": Object {
-          "enabled": false,
-        },
-        "authc": Object {
-          "http": Object {
-            "autoSchemesEnabled": true,
-            "enabled": true,
-            "jwt": Object {
-              "taggedRoutesOnly": true,
-            },
-            "schemes": Array [
-              "apikey",
-              "bearer",
-            ],
-          },
-          "providers": Object {
-            "anonymous": undefined,
-            "basic": Object {
-              "basic": Object {
-                "accessAgreement": undefined,
-                "description": undefined,
-                "enabled": true,
-                "hint": undefined,
-                "icon": undefined,
-                "order": 0,
-                "session": Object {
-                  "idleTimeout": undefined,
-                  "lifespan": undefined,
-                },
-                "showInSelector": true,
-              },
-            },
-            "kerberos": undefined,
-            "oidc": undefined,
-            "pki": undefined,
-            "saml": undefined,
-            "token": undefined,
-          },
-          "selector": Object {},
-        },
-        "cookieName": "sid",
-        "enabled": true,
-        "loginAssistanceMessage": "",
-        "public": Object {},
-        "secureCookies": false,
-        "session": Object {
-          "cleanupInterval": "PT1H",
-          "idleTimeout": "P3D",
-          "lifespan": "P30D",
-        },
-        "showInsecureClusterWarning": true,
-        "showNavLinks": true,
-        "ui": Object {
-          "roleManagementEnabled": true,
-          "roleMappingManagementEnabled": true,
-          "userManagementEnabled": true,
-        },
-      }
-    `);
   });
 
   it('should throw error if xpack.security.encryptionKey is less than 32 characters', () => {
@@ -1471,34 +1409,6 @@ describe('config schema', () => {
           },
         }
       `);
-    });
-  });
-
-  describe('authc.http', () => {
-    it('should not allow xpack.security.authc.http.jwt.* to be configured outside of the serverless context', () => {
-      expect(() =>
-        ConfigSchema.validate(
-          { authc: { http: { jwt: { taggedRoutesOnly: false } } } },
-          { serverless: false }
-        )
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[authc.http.jwt]: a value wasn't expected to be present"`
-      );
-    });
-
-    it('should allow xpack.security.authc.http.jwt.* to be configured inside of the serverless context', () => {
-      expect(
-        ConfigSchema.validate(
-          { authc: { http: { jwt: { taggedRoutesOnly: false } } } },
-          { serverless: true }
-        ).ui
-      ).toMatchInlineSnapshot(`
-          Object {
-            "roleManagementEnabled": true,
-            "roleMappingManagementEnabled": true,
-            "userManagementEnabled": true,
-          }
-        `);
     });
   });
 

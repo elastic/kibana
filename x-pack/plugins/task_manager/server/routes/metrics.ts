@@ -48,9 +48,6 @@ export function metricsRoute(params: MetricsRouteParams) {
       path: `/api/task_manager/metrics`,
       options: {
         access: 'public',
-        // The `security:acceptJWT` tag allows route to be accessed with JWT credentials. It points to
-        // ROUTE_TAG_ACCEPT_JWT from '@kbn/security-plugin/server' that cannot be imported here directly.
-        tags: ['security:acceptJWT'],
       },
       // Uncomment when we determine that we can restrict API usage to Global admins based on telemetry
       // options: { tags: ['access:taskManager'] },
