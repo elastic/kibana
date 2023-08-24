@@ -35,9 +35,8 @@ export class MigrationHelper {
    * Migrate the given SO document, accepting downgrades.
    * This function is meant to be used by read APIs (get, find) for documents fetched from the index.
    * It will therefore accept downgrading the document before returning it from the API.
-   * SO types needing to opt out of cross-version read operatations can set `allowDowngrade`: false for their documents by declaring
-   * the new SOR api call query option: versionModelMatch: 'strict' | undefined | null
-
+   *
+   * Note: to opt out of downgrades, use the versionModelMatch: 'strict' API option in READ API operations (get, resolve, find, bulk_get, bulk_resolve)
    */
   migrateStorageDocument(
     document: SavedObjectUnsanitizedDoc,

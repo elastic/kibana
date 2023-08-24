@@ -138,6 +138,18 @@ describe('Higher version doc conversion', () => {
         newField: 'someValue',
       });
     });
+    it('returns the documents in their original shape', async () => {
+      let error;
+      try {
+        await repositoryV1.get('test-type', 'doc-1', {
+          versionModelMatch: 'strict',
+        });
+      } catch (err) {
+        expect(err.message).toBe(
+          '[NewerModelVersionError]: Document "doc-1" belongs to a more recent version of Kibana [10.2.0] when the last known version is [10.1.0].'
+        );
+      }
+    });
   });
 
   describe('#bulkGet', () => {
