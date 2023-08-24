@@ -173,7 +173,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         await upgradeSpecificRulesRequest([
           {
             rule_id: ruleId,
-            version: rule.diff.fields.version?.target_version ?? rule.rule.version,
+            version: rule.diff.fields.version?.target_version ?? rule.current_rule.version,
             revision: rule.revision,
           },
         ]);
@@ -187,7 +187,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   const upgradeSelectedRules = useCallback(async () => {
     const rulesToUpgrade = selectedRules.map((rule) => ({
       rule_id: rule.rule_id,
-      version: rule.diff.fields.version?.target_version ?? rule.rule.version,
+      version: rule.diff.fields.version?.target_version ?? rule.current_rule.version,
       revision: rule.revision,
     }));
     setLoadingRules((prev) => [...prev, ...rulesToUpgrade.map((r) => r.rule_id)]);
