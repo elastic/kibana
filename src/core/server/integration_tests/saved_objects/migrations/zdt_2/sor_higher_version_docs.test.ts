@@ -138,8 +138,7 @@ describe('Higher version doc conversion', () => {
         newField: 'someValue',
       });
     });
-    it('returns the documents in their original shape', async () => {
-      let error;
+    it('throws error for documents using higher version model than current', async () => {
       try {
         await repositoryV1.get('test-type', 'doc-1', {
           versionModelMatch: 'strict',
@@ -167,6 +166,17 @@ describe('Higher version doc conversion', () => {
         newField: 'someValue',
       });
     });
+    it('throws error for documents using higher version model than current', async () => {
+      try {
+        const docv1 = await repositoryV2.bulkGet([{ type: 'test-type', id: 'doc-1' }], {
+          versionModelMatch: 'strict',
+        });
+      } catch (err) {
+        expect(err.message).toBe(
+          '[NewerModelVersionError]: Document "doc-1" belongs to a more recent version of Kibana [10.2.0] when the last known version is [10.1.0].'
+        );
+      }
+    });
   });
 
   describe('#resolve', () => {
@@ -184,6 +194,18 @@ describe('Higher version doc conversion', () => {
         newField: 'someValue',
       });
     });
+
+    it('throws error for documents using higher version model than current', async () => {
+      try {
+        const docv1 = await repositoryV2.resolve('test-type', 'doc-1', {
+          versionModelMatch: 'strict',
+        });
+      } catch (err) {
+        expect(err.message).toBe(
+          '[NewerModelVersionError]: Document "doc-1" belongs to a more recent version of Kibana [10.2.0] when the last known version is [10.1.0].'
+        );
+      }
+    });
   });
 
   describe('#bulkResolve', () => {
@@ -200,6 +222,17 @@ describe('Higher version doc conversion', () => {
         text: 'a_1',
         newField: 'someValue',
       });
+    });
+    it('throws error for documents using higher version model than current', async () => {
+      try {
+        const docv1 = await repositoryV2.bulkResolve([{ type: 'test-type', id: 'doc-1' }], {
+          versionModelMatch: 'strict',
+        });
+      } catch (err) {
+        expect(err.message).toBe(
+          '[NewerModelVersionError]: Document "doc-1" belongs to a more recent version of Kibana [10.2.0] when the last known version is [10.1.0].'
+        );
+      }
     });
   });
 });
