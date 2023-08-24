@@ -6,6 +6,7 @@
  */
 
 import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import { FleetFileNotFound } from '@kbn/fleet-plugin/server/errors';
 import { CustomHttpRequestError } from '../../utils/custom_http_request_error';
 import { NotFoundError } from '../errors';
 import { EndpointHostUnEnrolledError } from '../services/metadata';
@@ -30,7 +31,7 @@ export const errorHandler = <E extends Error>(
     });
   }
 
-  if (error instanceof NotFoundError) {
+  if (error instanceof NotFoundError || error instanceof FleetFileNotFound) {
     return res.notFound({ body: error });
   }
 
