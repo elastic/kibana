@@ -20,6 +20,7 @@ import {
 } from '../../../screens/alerts_detection_rules';
 import {
   deleteFirstRule,
+  disableAutoRefresh,
   getRulesManagementTableRows,
   selectAllRules,
   selectRulesByName,
@@ -63,6 +64,7 @@ describe('Prebuilt rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     createAndInstallMockedPrebuiltRules({ rules });
     cy.reload();
     waitForPrebuiltDetectionRulesToBeLoaded();
+    disableAutoRefresh();
   });
 
   describe('Alerts rules, prebuilt rules', () => {
