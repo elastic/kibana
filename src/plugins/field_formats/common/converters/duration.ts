@@ -101,7 +101,7 @@ export class DurationFormat extends FieldFormat {
 
     if (human && val === 0) {
       return i18n.translate('fieldFormats.duration.zeroSecondsLabel', {
-        defaultMessage: '0.00 seconds',
+        defaultMessage: '0 seconds',
       }); // Handle the case of 0 value for "Human Friendly"
     }
 
