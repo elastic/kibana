@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiButton, EuiPageTemplate, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiLink, EuiEmptyPrompt } from '@elastic/eui';
 import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
 import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
@@ -49,10 +49,10 @@ export const PolicyArtifactsEmptyUnassigned = memo<CommonProps>(
       [navigateCallback]
     );
     return (
-      <EuiPageTemplate>
-        <EuiPageTemplate.EmptyPrompt
+        <EuiEmptyPrompt
           iconType="plusInCircle"
           data-test-subj="policy-artifacts-empty-unassigned"
+          color="subdued"
           title={<h2>{labels.emptyUnassignedTitle}</h2>}
           body={
             canWriteArtifact
@@ -84,7 +84,6 @@ export const PolicyArtifactsEmptyUnassigned = memo<CommonProps>(
             ) : null,
           ]}
         />
-      </EuiPageTemplate>
     );
   }
 );

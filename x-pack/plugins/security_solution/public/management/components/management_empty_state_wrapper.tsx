@@ -21,9 +21,10 @@ export const ManagementEmptyStateWrapper = memo(
     children: React.ReactNode;
     'data-test-subj'?: string;
   }) => {
+    //TODO: Get this to work
     return (
       <StyledEuiFlexGroup direction="column" alignItems="center" data-test-subj={dataTestSubj}>
-        <EuiPageTemplate.EmptyPrompt>{children}</EuiPageTemplate.EmptyPrompt>
+        <EuiPageTemplate>{children}</EuiPageTemplate>
       </StyledEuiFlexGroup>
     );
   }

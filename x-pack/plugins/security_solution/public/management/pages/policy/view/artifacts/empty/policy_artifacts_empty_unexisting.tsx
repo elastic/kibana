@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiButton, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
 import type { POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS } from './translations';
 import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
@@ -39,7 +39,8 @@ export const PolicyArtifactsEmptyUnexisting = memo<CommonProps>(
       }
     );
     return (
-      <EuiPageTemplate.EmptyPrompt
+      <EuiEmptyPrompt
+        color="subdued"
         iconType="plusInCircle"
         data-test-subj="policy-artifacts-empty-unexisting"
         title={<h2>{labels.emptyUnexistingTitle}</h2>}

@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiButton,
-  EuiPageTemplate,
+  EuiPageSection,
 } from '@elastic/eui';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
@@ -140,6 +140,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
 
     const isEmptyState = useMemo(() => allAssigned && allAssigned.total === 0, [allAssigned]);
 
+    //TODO: Get this to work
     if (!policyItem || isGlobalLoading) {
       return <ManagementPageLoader data-test-subj="policy-artifacts-loading-spinner" />;
     }
@@ -181,7 +182,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
     }
 
     return (
-      <EuiPageTemplate>
+      <div>
         <EuiPageHeader alignItems="center">
           <EuiPageHeaderSection data-test-subj="policy-artifacts-header-section">
             <EuiTitle size="m">
@@ -218,7 +219,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
           />
         )}
         <EuiSpacer size="l" />
-        <EuiPageTemplate.Section paddingSize="none" color="transparent">
+        <EuiPageSection paddingSize="none" color="transparent">
           <PolicyArtifactsList
             policy={policyItem}
             apiClient={exceptionsListApiClient}
@@ -229,8 +230,8 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             getPolicyArtifactsPath={getPolicyArtifactsPath}
             getArtifactPath={getArtifactPath}
           />
-        </EuiPageTemplate.Section>
-      </EuiPageTemplate>
+        </EuiPageSection>
+      </div>
     );
   }
 );
