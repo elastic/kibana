@@ -8,6 +8,7 @@ import fetch from 'node-fetch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { v4 as uuidv4 } from 'uuid';
 import yargs from 'yargs';
+import { omit } from 'lodash';
 
 import type { AgentStatus } from '../../common';
 import type { Agent } from '../../common';
@@ -27,6 +28,7 @@ const printUsage = () =>
     [--password]: password for kibana, defaults to changeme
     [--batches]: run the script in batches, defaults to 1 e.g if count is 50 and batches is 10, 500 agents will be created and 10 agent policies
     [--concurrentBatches]: how many batches to run concurrently, defaults to 10
+    [--outdated]: agents will show as outdated (their revision is below the policies), defaults to false
 `);
 
 const DEFAULT_KIBANA_URL = 'http://localhost:5601';
@@ -51,7 +53,8 @@ const {
   agentVersion: agentVersionArg,
   username: kbnUsername = DEFAULT_KIBANA_USERNAME,
   password: kbnPassword = DEFAULT_KIBANA_PASSWORD,
-  batches: batchesArg,
+  batches: batchesArg = 1,
+  outdated: outdatedArg = false,
   concurrentBatches: concurrentBatchesArg = 10,
   // ignore yargs positional args, we only care about named args
   _,
@@ -256,12 +259,12 @@ async function createSuperUser() {
   return { role, user };
 }
 
-async function createAgentPolicy(id: string) {
+async function createAgentPolicy(id: string, name: string) {
   const res = await fetch(`${kibanaUrl}/api/fleet/agent_policies`, {
     method: 'post',
     body: JSON.stringify({
       id,
-      name: id,
+      name,
       namespace: 'default',
       description: '',
       monitoring_enabled: ['logs', 'metrics'],
@@ -278,6 +281,30 @@ async function createAgentPolicy(id: string) {
 
   if (!data.item) {
     logger.error('Agent policy not created, API response: ' + JSON.stringify(data));
+    process.exit(1);
+  }
+  return data;
+}
+
+async function bumpAgentPolicyRevision(id: string, policy: any) {
+  const res = await fetch(`${kibanaUrl}/api/fleet/agent_policies/${id}`, {
+    method: 'put',
+    body: JSON.stringify({
+      ...omit(policy, ['id', 'updated_at', 'updated_by', 'revision', 'status', 'schema_version']),
+      monitoring_enabled: ['logs'], // change monitoring to add  a revision
+    }),
+    headers: {
+      Authorization: kbnAuth,
+      'Content-Type': 'application/json',
+      'kbn-xsrf': 'kibana',
+      'x-elastic-product-origin': 'fleet',
+    },
+  });
+
+  const data = await res.json();
+
+  if (!data.item) {
+    logger.error('Agent policy not updated, API response: ' + JSON.stringify(data));
     process.exit(1);
   }
   return data;
@@ -338,13 +365,17 @@ export async function run() {
         .fill(0)
         .map(async (__, i) => {
           const agentPolicyId = uuidv4();
-          const agentPolicy = await createAgentPolicy(agentPolicyId);
+          const agentPolicy = await createAgentPolicy(agentPolicyId, `Policy ${i}`);
           logger.info(`Created agent policy ${agentPolicy.item.id}`);
 
           const statusMap = statusesArg.reduce((acc, status) => ({ ...acc, [status]: count }), {});
           logStatusMap(statusMap);
           const agents = createAgentsWithStatuses(statusMap, agentPolicyId, agentVersion);
           const createRes = await createAgentDocsBulk(agents);
+          if (outdatedArg) {
+            logger.info(`Bumping agent policy revision so that agents will have outdated policies`);
+            bumpAgentPolicyRevision(agentPolicyId, agentPolicy.item);
+          }
           logger.info(
             `Batch complete, created ${createRes.items.length} agent docs, took ${createRes.took}, errors: ${createRes.errors}`
           );
