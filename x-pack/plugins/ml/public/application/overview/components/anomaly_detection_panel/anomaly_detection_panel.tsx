@@ -31,6 +31,7 @@ import { AnomalyTimelineService } from '../../../services/anomaly_timeline_servi
 import type { OverallSwimlaneData } from '../../../explorer/explorer_utils';
 import { AnomalyDetectionEmptyState } from '../../../jobs/jobs_list/components/anomaly_detection_empty_state';
 import { overviewPanelDefaultState } from '../../overview_page';
+import { useIsServerless } from '../../../capabilities/serverless';
 
 export type GroupsDictionary = Dictionary<Group>;
 
@@ -57,6 +58,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLa
   } = useMlKibana();
 
   const { displayErrorToast } = useToastNotificationService();
+  const isServerless = useIsServerless();
 
   const refresh = useRefresh();
 
@@ -91,7 +93,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLa
         return job;
       });
       const { groups: jobsGroups, count } = getGroupsFromJobs(jobsSummaryList);
-      const stats = getStatsBarData(jobsSummaryList);
+      const stats = getStatsBarData(jobsSummaryList, isServerless);
 
       const statGroups = groupBy(
         Object.entries(stats)

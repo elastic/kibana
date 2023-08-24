@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 
 import {
   EuiBasicTableColumn,
@@ -25,6 +25,7 @@ import { JobMessage } from '../../../../common/types/audit_message';
 import { blurButtonOnClick } from '../../util/component_utils';
 
 import { JobIcon } from '../job_message_icon';
+import { useIsServerless } from '../../capabilities/serverless';
 
 interface JobMessagesProps {
   messages: JobMessage[];
@@ -45,54 +46,62 @@ export const JobMessages: FC<JobMessagesProps> = ({
   refreshMessage,
   actionHandler,
 }) => {
-  const columns: Array<EuiBasicTableColumn<JobMessage>> = [
-    {
-      name: refreshMessage ? (
-        <EuiToolTip
-          content={i18n.translate('xpack.ml.jobMessages.refreshLabel', {
-            defaultMessage: 'Refresh',
-          })}
-        >
-          <EuiButtonIcon
-            onClick={blurButtonOnClick(() => {
-              refreshMessage();
-            })}
-            iconType="refresh"
-            aria-label={i18n.translate('xpack.ml.jobMessages.refreshAriaLabel', {
+  const isServerless = useIsServerless();
+  const columns: Array<EuiBasicTableColumn<JobMessage>> = useMemo(() => {
+    const cols = [
+      {
+        name: refreshMessage ? (
+          <EuiToolTip
+            content={i18n.translate('xpack.ml.jobMessages.refreshLabel', {
               defaultMessage: 'Refresh',
             })}
-          />
-        </EuiToolTip>
-      ) : (
-        ''
-      ),
-      render: (message: JobMessage) => <JobIcon message={message} />,
-      width: `${theme.euiSizeL}`,
-    },
-    {
-      field: 'timestamp',
-      name: i18n.translate('xpack.ml.jobMessages.timeLabel', {
-        defaultMessage: 'Time',
-      }),
-      render: timeFormatter,
-      width: '120px',
-      sortable: true,
-    },
-    {
-      field: 'node_name',
-      name: i18n.translate('xpack.ml.jobMessages.nodeLabel', {
-        defaultMessage: 'Node',
-      }),
-      width: '150px',
-    },
-    {
-      field: 'message',
-      name: i18n.translate('xpack.ml.jobMessages.messageLabel', {
-        defaultMessage: 'Message',
-      }),
-      width: '50%',
-    },
-  ];
+          >
+            <EuiButtonIcon
+              onClick={blurButtonOnClick(() => {
+                refreshMessage();
+              })}
+              iconType="refresh"
+              aria-label={i18n.translate('xpack.ml.jobMessages.refreshAriaLabel', {
+                defaultMessage: 'Refresh',
+              })}
+            />
+          </EuiToolTip>
+        ) : (
+          ''
+        ),
+        render: (message: JobMessage) => <JobIcon message={message} />,
+        width: `${theme.euiSizeL}`,
+      },
+      {
+        field: 'timestamp',
+        name: i18n.translate('xpack.ml.jobMessages.timeLabel', {
+          defaultMessage: 'Time',
+        }),
+        render: timeFormatter,
+        width: '120px',
+        sortable: true,
+      },
+      {
+        field: 'message',
+        name: i18n.translate('xpack.ml.jobMessages.messageLabel', {
+          defaultMessage: 'Message',
+        }),
+        width: '50%',
+      },
+    ];
+
+    if (isServerless === false) {
+      cols.splice(2, 0, {
+        field: 'node_name',
+        name: i18n.translate('xpack.ml.jobMessages.nodeLabel', {
+          defaultMessage: 'Node',
+        }),
+        width: '150px',
+      });
+    }
+
+    return cols;
+  }, [isServerless, refreshMessage]);
 
   if (typeof actionHandler === 'function') {
     columns.push({

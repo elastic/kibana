@@ -61,6 +61,11 @@ export const mlNavCategories: ProjectLinkCategory[] = [
   },
   {
     type: LinkCategoryType.title,
+    label: i18n.MODEL_MANAGEMENT_CATEGORY,
+    linkIds: [ExternalPageName.mlNodesOverview],
+  },
+  {
+    type: LinkCategoryType.title,
     label: i18n.DATA_VISUALIZER_CATEGORY,
     linkIds: [ExternalPageName.mlFileUpload, ExternalPageName.mlIndexDataVisualizer],
   },

@@ -81,9 +81,9 @@ function applyEnabledFeatures(mlCaps: MlCapabilities, enabledFeatures: MlFeature
   if (enabledFeatures.dfa === false) {
     featureCapabilities.dfa.forEach((c) => (mlCaps[c] = false));
   }
-  if (enabledFeatures.nlp === false) {
-    featureCapabilities.nlp.forEach((c) => (mlCaps[c] = false));
-  }
+  // if (enabledFeatures.nlp === false) {
+  //   featureCapabilities.nlp.forEach((c) => (mlCaps[c] = false));
+  // }
 
   return mlCaps;
 }

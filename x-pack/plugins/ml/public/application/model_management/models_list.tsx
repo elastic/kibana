@@ -18,7 +18,7 @@ import {
   EuiTitle,
   SearchFilterConfig,
 } from '@elastic/eui';
-import { groupBy } from 'lodash';
+import { groupBy, intersection } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
@@ -40,6 +40,7 @@ import {
   MODEL_STATE,
   ModelState,
 } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import { ANALYSIS_CONFIG_TYPE } from '@kbn/ml-data-frame-analytics-utils';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { useModelActions } from './model_actions';
 import { ModelsTableToConfigMapping } from '.';
@@ -63,6 +64,7 @@ import { useRefresh } from '../routing/use_refresh';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { TestTrainedModelFlyout } from './test_models';
 import { AddInferencePipelineFlyout } from '../components/ml_inference';
+import { usePermissionCheck } from '../capabilities/check_capabilities';
 
 type Stats = Omit<TrainedModelStat, 'model_id' | 'deployment_stats'>;
 
@@ -103,6 +105,8 @@ export const ModelsList: FC<Props> = ({
       application: { capabilities },
     },
   } = useMlKibana();
+
+  const [isNLPEnabled] = usePermissionCheck(['isNLPEnabled']);
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
 
@@ -594,8 +598,18 @@ export const ModelsList: FC<Props> = ({
           description: modelDefinition.description,
         } as ModelItem;
       });
-    return [...items, ...notDownloaded];
-  }, [items]);
+    const result = [...items, ...notDownloaded];
+
+    if (isNLPEnabled === false) {
+      // if NLP is disabled, only show DFA models
+      const dfaModelTypes = Object.values(ANALYSIS_CONFIG_TYPE);
+      // is this correct? will 3rd party models ever be of type outlier_detection, regression, classification?!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      // otherwise this check needs to look for something else in the model to know that it is a DFA model
+      return result.filter((item) => intersection(dfaModelTypes, item.type).length);
+    }
+
+    return result;
+  }, [isNLPEnabled, items]);
 
   if (!isInitialized) return null;
 

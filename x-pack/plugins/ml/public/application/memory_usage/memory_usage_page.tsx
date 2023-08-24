@@ -13,7 +13,7 @@ import { NodesList } from './nodes_overview';
 import { MlPageHeader } from '../components/page_header';
 import { MemoryPage, JobMemoryTreeMap } from './memory_tree_map';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
-import { usePermissionCheck } from '../capabilities/check_capabilities';
+import { useIsServerless } from '../capabilities/serverless';
 
 enum TAB {
   NODES,
@@ -23,11 +23,8 @@ enum TAB {
 export const MemoryUsagePage: FC = () => {
   const [selectedTab, setSelectedTab] = useState<TAB>(TAB.NODES);
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
-  const [isADEnabled, isDFAEnabled, isNLPEnabled] = usePermissionCheck([
-    'isADEnabled',
-    'isDFAEnabled',
-    'isNLPEnabled',
-  ]);
+
+  const isServerless = useIsServerless();
 
   const refresh = useCallback(() => {
     mlTimefilterRefresh$.next({
@@ -50,7 +47,7 @@ export const MemoryUsagePage: FC = () => {
 
       <SavedObjectsWarning onCloseFlyout={refresh} />
 
-      {isADEnabled && isDFAEnabled && isNLPEnabled ? (
+      {isServerless === false ? (
         <>
           <EuiTabs>
             <EuiTab

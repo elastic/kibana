@@ -28,7 +28,7 @@ import { useDocTitle } from '../../routing/use_doc_title';
 import { MlPageHeaderRenderer } from '../page_header/page_header';
 
 import { useSideNavItems } from './side_nav';
-import { usePermissionCheck } from '../../capabilities/check_capabilities';
+import { useIsServerless } from '../../capabilities/serverless';
 
 const ML_APP_SELECTOR = '[data-test-subj="mlApp"]';
 
@@ -61,16 +61,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
   const [isHeaderMounted, setIsHeaderMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const [isADEnabled, isDFAEnabled, isNLPEnabled] = usePermissionCheck([
-    'isADEnabled',
-    'isDFAEnabled',
-    'isNLPEnabled',
-  ]);
-
-  const navMenuEnabled = useMemo(
-    () => isADEnabled && isDFAEnabled && isNLPEnabled,
-    [isADEnabled, isDFAEnabled, isNLPEnabled]
-  );
+  const isServerless = useIsServerless();
 
   useEffect(() => {
     const subscriptions = new Subscription();
@@ -138,7 +129,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         data-test-subj={'mlApp'}
         restrictWidth={false}
         solutionNav={
-          navMenuEnabled
+          isServerless === false
             ? {
                 name: i18n.translate('xpack.ml.plugin.title', {
                   defaultMessage: 'Machine Learning',

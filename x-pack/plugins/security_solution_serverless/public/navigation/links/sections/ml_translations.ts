@@ -156,13 +156,13 @@ export const ANALYTICS_MAP_DESC = i18n.translate(
 export const NODES_OVERVIEW_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.nodesOverview.title',
   {
-    defaultMessage: 'Nodes overview',
+    defaultMessage: 'Model Management',
   }
 );
 export const NODES_OVERVIEW_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.nodesOverview.desc',
   {
-    defaultMessage: 'Nodes overview page',
+    defaultMessage: 'Model Management page',
   }
 );
 export const NODES_TITLE = i18n.translate(

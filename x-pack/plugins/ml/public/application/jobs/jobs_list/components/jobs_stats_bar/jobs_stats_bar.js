@@ -7,20 +7,27 @@
 
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../../common/constants/states';
 import { StatsBar } from '../../../../components/stats_bar';
+import { isServerless } from '../../../../capabilities/serverless';
 
 import PropTypes from 'prop-types';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 function createJobStats(jobsSummaryList) {
+  const displayNodeInfo = !isServerless();
+
   const jobStats = {
-    activeNodes: {
-      label: i18n.translate('xpack.ml.jobsList.statsBar.activeMLNodesLabel', {
-        defaultMessage: 'Active ML nodes',
-      }),
-      value: 0,
-      show: true,
-    },
+    ...(displayNodeInfo
+      ? {
+          activeNodes: {
+            label: i18n.translate('xpack.ml.jobsList.statsBar.activeMLNodesLabel', {
+              defaultMessage: 'Active ML nodes',
+            }),
+            value: 0,
+            show: true,
+          },
+        }
+      : {}),
     total: {
       label: i18n.translate('xpack.ml.jobsList.statsBar.totalJobsLabel', {
         defaultMessage: 'Total jobs',
@@ -94,7 +101,9 @@ function createJobStats(jobsSummaryList) {
     jobStats.failed.show = false;
   }
 
-  jobStats.activeNodes.value = Object.keys(mlNodes).length;
+  if (displayNodeInfo) {
+    jobStats.activeNodes.value = Object.keys(mlNodes).length;
+  }
 
   return jobStats;
 }
