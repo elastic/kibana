@@ -193,7 +193,8 @@ GET _search
       });
     });
 
-    describe('anti-regression watchdogs', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/164584
+    describe.skip('anti-regression watchdogs', () => {
       beforeEach(async () => {
         await PageObjects.console.clearTextArea();
         await PageObjects.console.pressEnter();
