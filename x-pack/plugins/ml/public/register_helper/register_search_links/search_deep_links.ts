@@ -136,7 +136,10 @@ function getAiopsDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
 }
 
 function getModelManagementDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
-  const navLinkStatus = getNavStatus(mlCapabilities, mlCapabilities.isDFAEnabled);
+  const navLinkStatus = getNavStatus(
+    mlCapabilities,
+    mlCapabilities.isDFAEnabled || mlCapabilities.isNLPEnabled
+  );
   return {
     id: 'modelManagement',
     title: i18n.translate('xpack.ml.deepLink.modelManagement', {
