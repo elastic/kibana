@@ -35,4 +35,8 @@ describe('enrichFilterWithRuleTypeMapping', () => {
   test('it returns existing filter with no AND when not set [rule registry enabled: %p]', () => {
     expect(enrichFilterWithRuleTypeMapping(null)).toEqual(allAlertTypeIds);
   });
+
+  test('it returns existing filter with no AND when filter is an empty string', () => {
+    expect(enrichFilterWithRuleTypeMapping('')).toEqual(allAlertTypeIds);
+  });
 });

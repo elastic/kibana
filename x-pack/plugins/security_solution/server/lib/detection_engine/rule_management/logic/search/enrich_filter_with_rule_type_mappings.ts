@@ -21,7 +21,7 @@ const alertTypeFilter = `(${Object.values(ruleTypeMappings)
  * @returns modified filter
  */
 export const enrichFilterWithRuleTypeMapping = (filter: string | null | undefined) => {
-  if (filter == null) {
+  if (filter == null || filter.length === 0) {
     return alertTypeFilter;
   } else {
     return `${alertTypeFilter} AND ${filter}`;
