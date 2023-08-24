@@ -81,7 +81,7 @@ export const getEsqlQuery = (
     to: 'now',
   };
   const timerangeFilter = getTime(dataView, timeRange);
-  const dateStart = timerangeFilter?.query.range[params.timeField].gt;
+  const dateStart = timerangeFilter?.query.range[params.timeField].gte;
   const dateEnd = timerangeFilter?.query.range[params.timeField].lte;
   const rangeFilter: unknown[] = [
     {
