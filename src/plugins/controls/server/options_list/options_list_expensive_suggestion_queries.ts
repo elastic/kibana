@@ -240,10 +240,15 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
         script: {
           source: `
             ZonedDateTime timestamp = doc['${fieldName}'].value;
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("${
-              fieldSpec?.format || 'yyyy/MM/dd'
-            }");
+            ${
+              fieldSpec?.format
+                ? `DateTimeFormatter dtf = DateTimeFormatter.ofPattern("${fieldSpec?.format}");
             emit(timestamp.format(dtf));
+            `
+                : `
+            emit(timestamp.format(DateTimeFormatter.ISO_INSTANT));
+            `
+            }
           `,
         },
       },
@@ -254,7 +259,9 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
       sort,
       size,
       searchTechnique,
+      fieldSpec,
     }: OptionsListRequestBody) => {
+      console.log({ format: fieldSpec?.format });
       let dateQuery: any = {
         suggestions: {
           terms: {
@@ -263,6 +270,16 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
             shard_size: 10,
             order: getSortType(sort),
           },
+          aggs: {
+            timestamp: {
+              top_hits: {
+                size: 1,
+                _source: {
+                  includes: [fieldName],
+                },
+              },
+            },
+          },
         },
         unique_terms: {
           cardinality: {
@@ -270,12 +287,13 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
           },
         },
       };
+
       if (searchString && searchString.length > 0) {
         dateQuery = {
           filteredSuggestions: {
             filter: {
               [(searchTechnique ?? OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE) as string]: {
-                [`${fieldName}`]: {
+                [`${fieldName}_formatted`]: {
                   value:
                     searchTechnique === 'wildcard'
                       ? `*${getEscapedWildcardQuery(searchString)}*`
@@ -297,8 +315,10 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
 
       const suggestions = get(rawEsResult, `${basePath}.suggestions.buckets`)?.reduce(
         (acc: OptionsListSuggestions, suggestion: EsBucket) => {
+          console.log(JSON.stringify(suggestion, null, 2));
           acc.push({
-            value: suggestion.key,
+            value: suggestion.timestamp.hits.hits[0]._source['@timestamp'],
+            label: suggestion.key,
             docCount: suggestion.doc_count,
           });
           return acc;

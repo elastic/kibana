@@ -32,7 +32,7 @@ export interface OptionsListEmbeddableInput extends DataControlInput {
   exclude?: boolean;
 }
 
-export type OptionsListSuggestions = Array<{ value: string; docCount?: number }>;
+export type OptionsListSuggestions = Array<{ value: string; label?: string; docCount?: number }>;
 
 /**
  * The Options list response is returned from the serverside Options List route.

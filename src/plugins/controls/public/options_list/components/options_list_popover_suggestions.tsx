@@ -86,7 +86,7 @@ export const OptionsListPopoverSuggestions = ({
       }
       return {
         key: suggestion.value,
-        label: suggestion.value,
+        label: suggestion.label ?? suggestion.value,
         checked: selectedOptionsSet?.has(suggestion.value) ? 'on' : undefined,
         'data-test-subj': `optionsList-control-selection-${suggestion.value}`,
         className:
