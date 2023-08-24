@@ -504,6 +504,8 @@ components:
           required:
             - index
             - timestampField
+            - good
+            - total
           properties:
             index:
               description: The index or index pattern to use

@@ -3785,13 +3785,10 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.DEFER_BELOW_FOLD.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3799,13 +3796,10 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.DEFER_BELOW_FOLD.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3896,13 +3890,10 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.DASHBOARD_CONTROLS.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3910,13 +3901,10 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.DASHBOARD_CONTROLS.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4007,13 +3995,10 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.BY_VALUE_EMBEDDABLE.name",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4021,13 +4006,10 @@
               {
                 "parentPluginId": "presentationUtil",
                 "id": "def-common.projects.BY_VALUE_EMBEDDABLE.description",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
                 "deprecated": false,
                 "trackAdoption": false

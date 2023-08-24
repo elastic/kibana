@@ -19,9 +19,9 @@ export const COLLAPSE_DETAILS_BUTTON = i18n.translate(
   { defaultMessage: 'Collapse details' }
 );
 
-export const DOCUMENT_DETAILS = i18n.translate(
+export const EVENT_DETAILS = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.headerTitle',
-  { defaultMessage: 'Document details' }
+  { defaultMessage: 'Event details' }
 );
 
 export const SEVERITY_TITLE = i18n.translate(
@@ -145,6 +145,13 @@ export const CORRELATIONS_TITLE = i18n.translate(
   { defaultMessage: 'Correlations' }
 );
 
+export const CORRELATIONS_ERROR = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.correlations.error',
+  {
+    defaultMessage: 'No correlations data available',
+  }
+);
+
 export const PREVALENCE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.prevalenceTitle',
   { defaultMessage: 'Prevalence' }
@@ -195,6 +202,13 @@ export const ANALYZER_PREVIEW_TITLE = i18n.translate(
   { defaultMessage: 'Analyzer preview' }
 );
 
+export const ANALYZER_PREVIEW_ERROR = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.analyzerPreview.error',
+  {
+    defaultMessage: 'No analyzer graph data available',
+  }
+);
+
 export const SHARE = i18n.translate('xpack.securitySolution.flyout.documentDetails.share', {
   defaultMessage: 'Share Alert',
 });
@@ -210,6 +224,21 @@ export const SESSION_PREVIEW_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.sessionPreview.title',
   {
     defaultMessage: 'Session viewer preview',
+  }
+);
+
+export const SESSION_PREVIEW_UPSELL = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.upsell',
+  {
+    defaultMessage:
+      'Session preview is disabled because your license does not support it. Please upgrade your license.',
+  }
+);
+
+export const SESSION_PREVIEW_ERROR = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.error',
+  {
+    defaultMessage: 'No session view data available',
   }
 );
 
