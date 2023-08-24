@@ -125,9 +125,9 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
         component={ComboBoxField}
         componentProps={{
           fullWidth: false,
-          helpText: hasSelectedMultipleIndices ? (
-            'Since multiple source indices were selected in the previous step, the match field must be the same across all selected source indices.'
-          ) : undefined,
+          helpText: hasSelectedMultipleIndices
+            ? 'Since multiple source indices were selected in the previous step, the match field must be the same across all selected source indices.'
+            : undefined,
           euiFieldProps: {
             placeholder: 'Select a field',
             noSuggestions: false,
