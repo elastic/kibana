@@ -39,7 +39,10 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
     }
 
     try {
-      fetchedSavedSearch = await appDeps.savedSearch.get(id);
+      // If data view already found, no need to get saved search
+      if (!fetchedDataView){
+        fetchedSavedSearch = await appDeps.savedSearch.get(id);
+      }
     } catch (e) {
       // Just let fetchedSavedSearch stay undefined in case it doesn't exist.
     }
