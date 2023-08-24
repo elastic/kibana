@@ -55,6 +55,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
       config: {
         isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
         isLegacyTemplatesEnabled: this.config.enableLegacyTemplates,
+        isIndexStatsEnabled: this.config.enableIndexStats,
       },
       indexDataEnricher: this.indexDataEnricher,
       lib: {
