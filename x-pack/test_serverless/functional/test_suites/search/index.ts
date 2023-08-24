@@ -18,5 +18,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./discover/group2'));
     loadTestFile(require.resolve('./discover/group3'));
     loadTestFile(require.resolve('./context'));
+    loadTestFile(require.resolve('./management'));
   });
 }
