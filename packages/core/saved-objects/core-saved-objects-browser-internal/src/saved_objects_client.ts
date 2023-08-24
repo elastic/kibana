@@ -306,6 +306,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
       aggs: 'aggs',
       namespaces: 'namespaces',
       preference: 'preference',
+      versionModelMatch: 'versionModelMatch',
     };
 
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, options);
