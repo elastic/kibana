@@ -50,8 +50,7 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
     sorting.sort.field,
     sorting.sort.direction
   );
-  const messages = data?.messages ?? [];
-  const msgCount = data?.total ?? 0;
+  const { messages, total } = data;
   const errorMessage =
     error !== null
       ? i18n.translate('xpack.transform.transformList.transformDetails.messagesPane.errorMessage', {
@@ -122,7 +121,7 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
 
   const getPageOfMessages = ({ index, size }: { index: number; size: number }) => {
     let list = messages;
-    if (msgCount <= DEFAULT_MAX_AUDIT_MESSAGE_SIZE) {
+    if (total <= DEFAULT_MAX_AUDIT_MESSAGE_SIZE) {
       const sortField = sorting.sort.field ?? 'timestamp';
       list = messages.sort((a: TransformMessage, b: TransformMessage) => {
         const prev = a[sortField] as any;

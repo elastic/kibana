@@ -130,9 +130,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       setLoading(true);
 
       createTransform(undefined, {
-        onError: () => {
-          setCreated(false);
-        },
+        onError: () => setCreated(false),
         onSuccess: () => {
           setCreated(true);
           if (createDataView) {
@@ -142,9 +140,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
             startTransform();
           }
         },
-        onSettled: () => {
-          setLoading(false);
-        },
+        onSettled: () => setLoading(false),
       });
     }
 
