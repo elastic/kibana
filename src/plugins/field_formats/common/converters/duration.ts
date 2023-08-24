@@ -116,7 +116,7 @@ export class DurationFormat extends FieldFormat {
       : duration[outputFormat]();
 
     const precise = human || humanPrecise ? formatted : formatted.toFixed(outputPrecision);
-    const type = outputFormats.find(({ method }) => method === outputFormat);
+    const type = DURATION_OUTPUT_FORMATS.find(({ method }) => method === outputFormat);
 
     const unitText = useShortSuffix ? type?.shortText : type?.text.toLowerCase();
 
