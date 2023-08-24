@@ -23,13 +23,10 @@ import { DASHBOARDS_PAGE_SECTION_CUSTOM } from './translations';
 jest.mock('../../../common/containers/tags/api');
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
-jest.mock('@kbn/dashboard-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/dashboard-plugin/public');
-  return {
-    ...actual,
-    DashboardListingTable: jest.fn().mockReturnValue(<span data-test-subj="dashboardsTable" />),
-  };
-});
+jest.mock('@kbn/dashboard-plugin/public', () => ({
+  DashboardListingTable: jest.fn().mockReturnValue(<span data-test-subj="dashboardsTable" />),
+  DashboardTopNav: jest.fn().mockReturnValue(<span data-test-subj="dashboardTopNav" />),
+}));
 
 const DEFAULT_DASHBOARD_CAPABILITIES = { show: true, createNew: true };
 const mockUseCapabilities = useCapabilities as jest.Mock;
