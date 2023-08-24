@@ -34,9 +34,6 @@ export default function ({ getService }: FtrProviderContext) {
       // Retry the download URL until a "failed" response status is returned
       let body: any;
       await retry.tryForTime(120000, async () => {
-        const test = await supertest.get(downloadPath)
-        console.log('\n\n\n\n anything?', test.body)
-        console.log({test})
         body = (await supertest.get(downloadPath).expect(500)).body;
       });
 
