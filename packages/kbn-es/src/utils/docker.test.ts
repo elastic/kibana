@@ -417,12 +417,13 @@ describe('setupServerlessVolumes()', () => {
 
     const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath, ssl: true });
 
+    const requiredPaths = [`${baseEsPath}:/objectstore:z`, ES_P12_PATH, ...ESS_RESOURCES_PATHS];
+    const pathsNotIncludedInCmd = requiredPaths.filter(
+      (path) => !volumeCmd.some((cmd) => cmd.includes(path))
+    );
+
     expect(volumeCmd).toHaveLength(16);
-    expect(
-      [`${baseEsPath}:/objectstore:z`, ES_P12_PATH, ...ESS_RESOURCES_PATHS].every((path) =>
-        volumeCmd.some((cmd) => cmd.includes(path))
-      )
-    ).toBe(true);
+    expect(pathsNotIncludedInCmd).toEqual([]);
   });
 });
 
