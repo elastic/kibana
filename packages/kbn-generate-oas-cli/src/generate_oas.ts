@@ -160,10 +160,10 @@ function extractParameterObjects(
 
 function extractRequestBody(route: VersionedRouterRoute): OpenAPIV3.RequestBodyObject['content'] {
   return route.handlers.reduce<OpenAPIV3.RequestBodyObject['content']>((acc, handler) => {
-    if (!handler.options.validate) return acc;
-    if (!handler.options.validate.request) return acc;
-    const schema = instanceofZodType(handler.options.validate.request.body)
-      ? runtimeSchemaToJsonSchema(handler.options.validate.request.body)
+    const schemas = extractValidationSchemaFromHandler(handler);
+    if (!schemas?.request) return acc;
+    const schema = instanceofZodType(schemas.request.body)
+      ? runtimeSchemaToJsonSchema(schemas.request.body)
       : {};
     return {
       ...acc,
@@ -176,11 +176,11 @@ function extractRequestBody(route: VersionedRouterRoute): OpenAPIV3.RequestBodyO
 
 function extractResponses(route: VersionedRouterRoute): OpenAPIV3.ResponsesObject {
   return route.handlers.reduce<OpenAPIV3.ResponsesObject>((acc, handler) => {
-    if (!handler.options.validate) return acc;
-    if (!handler.options.validate.response) return acc;
-    const statusCodes = Object.keys(handler.options.validate.response);
+    const schemas = extractValidationSchemaFromHandler(handler);
+    if (!schemas?.response) return acc;
+    const statusCodes = Object.keys(schemas.response);
     for (const statusCode of statusCodes) {
-      const maybeSchema = handler.options.validate.response[statusCode as unknown as number].body;
+      const maybeSchema = schemas.response[statusCode as unknown as number].body;
       const schema = instanceofZodType(maybeSchema) ? runtimeSchemaToJsonSchema(maybeSchema) : {};
       acc[statusCode] = {
         ...acc[statusCode],
@@ -208,6 +208,12 @@ function getOperationId(name: string): string {
   return aliasedName;
 }
 
+function extractValidationSchemaFromHandler(handler: VersionedRouterRoute['handlers'][0]) {
+  if (handler.options.validate === false) return undefined;
+  if (typeof handler.options.validate === 'function') return handler.options.validate();
+  return handler.options.validate;
+}
+
 function getOpenApiPathsObject(appRouter: CoreVersionedRouter): OpenAPIV3.PathsObject {
   const routes = appRouter
     .getRoutes()
@@ -220,7 +226,7 @@ function getOpenApiPathsObject(appRouter: CoreVersionedRouter): OpenAPIV3.PathsO
   for (const route of routes) {
     const pathParams = getPathParameters(route.path);
     const hasBody = route.handlers.some(
-      (handler) => handler.options.validate !== false && handler.options.validate?.request?.body
+      (handler) => extractValidationSchemaFromHandler(handler)?.request?.body
     );
 
     /**
@@ -234,12 +240,13 @@ function getOpenApiPathsObject(appRouter: CoreVersionedRouter): OpenAPIV3.PathsO
       route.handlers.map(({ options: { version: v } }) => v)
     );
     const handler = route.handlers.find(({ options: { version: v } }) => v === version);
-    if (handler && handler.options.validate !== false) {
-      const params = handler.options.validate.request?.params as any;
+    const schemas = handler ? extractValidationSchemaFromHandler(handler) : undefined;
+    if (handler && schemas) {
+      const params = schemas.request?.params as any;
       if (params && instanceofZodType(params)) {
         pathObjects = extractParameterObjects(params, pathParams, 'path') ?? [];
       }
-      const query = handler.options.validate.request?.query as any;
+      const query = schemas.request?.query as any;
       if (query && instanceofZodType(query)) {
         queryObjects = extractParameterObjects(query, pathParams, 'query') ?? [];
       }
