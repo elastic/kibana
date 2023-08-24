@@ -16,12 +16,10 @@ export enum NetworkUsersFields {
   count = 'count',
 }
 
-const networkUsersFields = z.enum([NetworkUsersFields.name, NetworkUsersFields.count]);
-
 export const networkUsersSchema = requestOptionsPaginatedSchema.extend({
   ip: z.string().ip(),
   flowTarget,
-  sort: sort.removeDefault().extend({ field: networkUsersFields }),
+  sort,
   timerange,
 });
 

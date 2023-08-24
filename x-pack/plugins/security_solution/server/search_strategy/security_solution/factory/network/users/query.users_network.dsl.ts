@@ -98,6 +98,6 @@ const getQueryOrder = (sort: NetworkUsersRequestOptions['sort']): QueryOrder => 
   } else if (sort.field === NetworkUsersFields.count) {
     return { _count: sort.direction };
   } else {
-    return assertUnreachable(sort.field);
+    return assertUnreachable(sort.field as never);
   }
 };

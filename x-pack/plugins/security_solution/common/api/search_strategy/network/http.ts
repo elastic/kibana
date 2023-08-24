@@ -15,9 +15,7 @@ export const networkHttpSchema = requestOptionsPaginatedSchema.extend({
   ip: z.string().ip().optional(),
   defaultIndex: z.array(z.string()).min(1).optional(),
   timerange,
-  sort: sort.removeDefault().extend({
-    field: z.string(),
-  }),
+  sort,
 });
 
 export type NetworkHttpRequestOptionsInput = z.input<typeof networkHttpSchema>;

@@ -11,14 +11,11 @@ import { requestOptionsPaginatedSchema } from '../model/request_paginated_option
 import { sort } from '../model/sort';
 import { timerange } from '../model/timerange';
 import { flowTarget } from './model/flow_target';
-import { topTablesFields } from './model/top_tables_fields';
 
 export const networkTopCountriesSchema = requestOptionsPaginatedSchema.extend({
   ip: z.string().ip().optional(),
   flowTarget,
-  sort: sort.removeDefault().extend({
-    field: topTablesFields,
-  }),
+  sort,
   filterQuery,
   timerange,
 });

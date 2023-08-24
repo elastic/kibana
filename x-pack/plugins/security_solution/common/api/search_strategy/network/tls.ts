@@ -18,9 +18,7 @@ export enum NetworkTlsFields {
 export const networkTlsSchema = requestOptionsPaginatedSchema.extend({
   ip: z.string().optional(),
   flowTarget,
-  sort: sort.removeDefault().extend({
-    field: z.enum([NetworkTlsFields._id]),
-  }),
+  sort,
   timerange,
 });
 

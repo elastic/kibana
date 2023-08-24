@@ -9,7 +9,6 @@
 import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
-import { inspect } from 'util';
 import { getRequestAbortedSignal } from '../../lib';
 import type { DataPluginRouter } from '../types';
 
@@ -72,7 +71,6 @@ export function registerSearchRoute(router: DataPluginRouter): void {
 
           return res.ok({ body: response });
         } catch (err) {
-          console.log('TEMP ERROR LOG', inspect(err, false, null, true));
           return reportServerError(res, err);
         }
       }

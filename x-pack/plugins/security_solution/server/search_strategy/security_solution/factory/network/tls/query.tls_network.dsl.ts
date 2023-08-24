@@ -9,10 +9,10 @@ import type { NetworkTlsRequestOptions } from '../../../../../../common/api/sear
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
-import type { Direction, SortField } from '../../../../../../common/search_strategy';
+import type { Direction } from '../../../../../../common/search_strategy';
 import { NetworkTlsFields } from '../../../../../../common/search_strategy';
 
-const getAggs = (querySize: number, sort: SortField<NetworkTlsFields>) => ({
+const getAggs = (querySize: number, sort: NetworkTlsRequestOptions['sort']) => ({
   count: {
     cardinality: {
       field: 'tls.server.hash.sha1',
@@ -96,11 +96,11 @@ interface QueryOrder {
   _key: Direction;
 }
 
-const getQueryOrder = (sort: SortField<NetworkTlsFields>): QueryOrder => {
+const getQueryOrder = (sort: NetworkTlsRequestOptions['sort']): QueryOrder => {
   switch (sort.field) {
     case NetworkTlsFields._id:
       return { _key: sort.direction };
     default:
-      return assertUnreachable(sort.field);
+      return assertUnreachable(sort.field as never);
   }
 };
