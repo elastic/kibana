@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+buildkite-agent artifact upload 'all_archives_list.txt'
+
+
 BUILD_SUCCESSFUL=$(ts-node "$(dirname "${0}")/build_status.ts")
 export BUILD_SUCCESSFUL
 
