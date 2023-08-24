@@ -16,5 +16,8 @@
   "kbn_references": [
     "@kbn/dev-cli-runner",
     "@kbn/safer-lodash-set",
+    "@kbn/core-http-router-server-internal",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/core-plugins-server-internal",
   ]
 }
