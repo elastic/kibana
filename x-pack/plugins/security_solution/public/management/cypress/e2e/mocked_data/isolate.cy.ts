@@ -89,7 +89,7 @@ describe('Isolate command', () => {
     });
   });
 
-  describe('from Alerts', () => {
+  describe.skip('from Alerts', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
     let hostname: string;

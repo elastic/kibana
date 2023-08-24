@@ -85,7 +85,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     onConnectorSelectionChange,
   }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
-    const { actionTypeRegistry, http } = useAssistantContext();
+    const { actionTypeRegistry, assistantAvailability, http } = useAssistantContext();
     const { setApiConfig } = useConversation();
     // Connector Modal State
     const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
@@ -111,6 +111,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     const selectedConnectorName =
       connectors?.find((c) => c.id === selectedConnectorId)?.name ??
       i18n.INLINE_CONNECTOR_PLACEHOLDER;
+    const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
 
     const addNewConnectorOption = useMemo(() => {
       return {
@@ -159,6 +160,15 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         }) ?? []
       );
     }, [connectors]);
+
+    // Only include add new connector option if user has privilege
+    const allConnectorOptions = useMemo(
+      () =>
+        assistantAvailability.hasConnectorsAllPrivilege
+          ? [...connectorOptions, addNewConnectorOption]
+          : [...connectorOptions],
+      [addNewConnectorOption, assistantAvailability.hasConnectorsAllPrivilege, connectorOptions]
+    );
 
     const cleanupAndCloseModal = useCallback(() => {
       onConnectorModalVisibilityChange?.(false);
@@ -236,13 +246,13 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
             <EuiSuperSelect
               aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
               compressed={true}
-              disabled={isDisabled}
+              disabled={localIsDisabled}
               hasDividers={true}
               isLoading={isLoading}
               isOpen={isOpen}
               onBlur={handleOnBlur}
               onChange={onChange}
-              options={[...connectorOptions, addNewConnectorOption]}
+              options={allConnectorOptions}
               placeholder={placeholderComponent}
               valueOfSelected={selectedConnectorId}
             />
@@ -254,7 +264,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
                 data-test-subj="connectorSelectorPlaceholderButton"
                 iconSide={'right'}
                 iconType="arrowDown"
-                isDisabled={isDisabled}
+                isDisabled={localIsDisabled}
                 onClick={onConnectorClick}
                 size="xs"
               >
