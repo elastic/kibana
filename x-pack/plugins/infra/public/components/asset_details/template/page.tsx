@@ -18,7 +18,7 @@ import type { ContentTemplateProps } from '../types';
 
 export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps) => {
   const { asset, loading } = useAssetDetailsStateContext();
-  const { rightSideItems, tabEntries } = usePageHeader(tabs, links);
+  const { rightSideItems, tabEntries, breadcrumbs } = usePageHeader(tabs, links);
   const { headerHeight } = useKibanaHeader();
 
   return loading ? (
@@ -49,6 +49,7 @@ export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps
           pageTitle={asset.name}
           tabs={tabEntries}
           rightSideItems={rightSideItems}
+          breadcrumbs={breadcrumbs}
         />
         <EuiPageTemplate.Section grow>
           <Content />

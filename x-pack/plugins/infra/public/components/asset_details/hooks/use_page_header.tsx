@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import { useEuiTheme, EuiIcon, type EuiPageHeaderProps } from '@elastic/eui';
+import {
+  useEuiTheme,
+  EuiIcon,
+  type EuiPageHeaderProps,
+  type EuiBreadcrumbsProps,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import React, { useCallback, useMemo } from 'react';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/public';
 import { capitalize } from 'lodash';
+import { useHistory } from 'react-router-dom';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { APM_HOST_FILTER_FIELD } from '../constants';
 import { LinkToAlertsRule, LinkToApmServices, LinkToNodeDetails, LinkToUptime } from '../links';
@@ -26,8 +32,29 @@ type TabItem = NonNullable<Pick<EuiPageHeaderProps, 'tabs'>['tabs']>[number];
 export const usePageHeader = (tabs: Tab[], links?: LinkOptions[]) => {
   const { rightSideItems } = useRightSideItems(links);
   const { tabEntries } = useTabs(tabs);
+  const { goBack, length: historyLength } = useHistory();
 
-  return { rightSideItems, tabEntries };
+  const breadcrumbs: EuiBreadcrumbsProps['breadcrumbs'] =
+    historyLength <= 1
+      ? []
+      : [
+          {
+            text: (
+              <>
+                <EuiIcon size="s" type="arrowLeft" /> Return
+              </>
+            ),
+            color: 'primary',
+            'aria-current': false,
+            href: '#',
+            onClick: (e) => {
+              goBack();
+              e.preventDefault();
+            },
+          },
+        ];
+
+  return { rightSideItems, tabEntries, breadcrumbs };
 };
 
 const useRightSideItems = (links?: LinkOptions[]) => {
