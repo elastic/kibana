@@ -1,12 +1,133 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Transform: Transform List Actions <StopAction /> Minimal initialization 1`] = `
-<EuiToolTip
-  content="You do not have permission to start or stop transforms. Please contact your administrator."
-  delay="regular"
-  display="inlineBlock"
-  position="top"
+<ContextProvider
+  value={false}
 >
-  Stop
-</EuiToolTip>
+  <ContextProvider
+    value={
+      QueryClient {
+        "defaultOptions": Object {},
+        "logger": BufferedConsole {
+          "Console": [Function],
+          "_buffer": Array [],
+          "_counters": Object {},
+          "_groupDepth": 0,
+          "_timers": Object {},
+          "assert": [Function],
+          "clear": [Function],
+          "count": [Function],
+          "countReset": [Function],
+          "debug": [Function],
+          "dir": [Function],
+          "dirxml": [Function],
+          "error": [Function],
+          "group": [Function],
+          "groupCollapsed": [Function],
+          "groupEnd": [Function],
+          "info": [Function],
+          "log": [Function],
+          "table": [Function],
+          "time": [Function],
+          "timeEnd": [Function],
+          "timeLog": [Function],
+          "trace": [Function],
+          "warn": [Function],
+        },
+        "mountCount": 0,
+        "mutationCache": MutationCache {
+          "config": Object {},
+          "listeners": Set {},
+          "mutationId": 0,
+          "mutations": Array [],
+          "subscribe": [Function],
+        },
+        "mutationDefaults": Array [],
+        "queryCache": QueryCache {
+          "config": Object {},
+          "listeners": Set {},
+          "queries": Array [],
+          "queriesMap": Object {},
+          "subscribe": [Function],
+        },
+        "queryDefaults": Array [],
+      }
+    }
+  >
+    <StopActionName
+      forceDisable={false}
+      items={
+        Array [
+          Object {
+            "checkpointing": Object {
+              "changes_last_detected_at": 1564388281199,
+              "last": Object {
+                "checkpoint": 1,
+                "timestamp_millis": 1564388281199,
+              },
+            },
+            "config": Object {
+              "create_time": 1564388146667,
+              "dest": Object {
+                "index": "fq_date_histogram_1m_1441",
+              },
+              "id": "fq_date_histogram_1m_1441",
+              "pivot": Object {
+                "aggregations": Object {
+                  "responsetime.avg": Object {
+                    "avg": Object {
+                      "field": "responsetime",
+                    },
+                  },
+                },
+                "group_by": Object {
+                  "@timestamp": Object {
+                    "date_histogram": Object {
+                      "calendar_interval": "1m",
+                      "field": "@timestamp",
+                    },
+                  },
+                },
+              },
+              "source": Object {
+                "index": Array [
+                  "farequote-2019",
+                ],
+                "query": Object {
+                  "match_all": Object {},
+                },
+              },
+              "version": "8.0.0",
+            },
+            "id": "fq_date_histogram_1m_1441",
+            "mode": "batch",
+            "stats": Object {
+              "checkpointing": Object {
+                "changes_last_detected_at": 1564388281199,
+                "last": Object {
+                  "checkpoint": 1,
+                  "timestamp_millis": 1564388281199,
+                },
+              },
+              "id": "fq_date_histogram_1m_1441",
+              "state": "stopped",
+              "stats": Object {
+                "documents_indexed": 7200,
+                "documents_processed": 86274,
+                "index_failures": 0,
+                "index_time_in_ms": 1310,
+                "index_total": 15,
+                "pages_processed": 16,
+                "search_failures": 0,
+                "search_time_in_ms": 463,
+                "search_total": 16,
+                "trigger_count": 1,
+              },
+            },
+          },
+        ]
+      }
+    />
+  </ContextProvider>
+</ContextProvider>
 `;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type MouseEventHandler, type FC, useContext, useState } from 'react';
+import React, { type MouseEventHandler, type FC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -39,7 +39,7 @@ import {
   type TransformListRow,
   TRANSFORM_LIST_COLUMN,
 } from '../../../../common';
-import { AuthorizationContext } from '../../../../lib/authorization';
+import { useAuthorization } from '../../../../hooks';
 
 import { CreateTransformButton } from '../create_transform_button';
 import { RefreshTransformListButton } from '../refresh_transform_list_button';
@@ -147,7 +147,7 @@ export const TransformList: FC<TransformListProps> = ({
   const bulkStopAction = useStopAction(false);
   const bulkScheduleNowAction = useScheduleNowAction(false, transformNodes);
 
-  const { capabilities } = useContext(AuthorizationContext);
+  const { capabilities } = useAuthorization();
   const disabled =
     !capabilities.canCreateTransform ||
     !capabilities.canPreviewTransform ||

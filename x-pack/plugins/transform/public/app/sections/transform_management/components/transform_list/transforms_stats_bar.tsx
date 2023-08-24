@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 

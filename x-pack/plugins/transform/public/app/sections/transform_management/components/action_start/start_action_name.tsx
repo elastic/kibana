@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
-import {
-  createCapabilityFailureMessage,
-  AuthorizationContext,
-} from '../../../../lib/authorization';
+import { createCapabilityFailureMessage } from '../../../../lib/authorization';
+import { useAuthorization } from '../../../../hooks';
 import { TransformListRow, isCompletedBatchTransform } from '../../../../common';
 
 export const startActionNameText = i18n.translate(
@@ -55,7 +53,7 @@ export const StartActionName: FC<StartActionNameProps> = ({
   forceDisable,
   transformNodes,
 }) => {
-  const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
+  const { canStartStopTransform } = useAuthorization().capabilities;
   const isBulkAction = items.length > 1;
 
   // Disable start for batch transforms which have completed.

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useMemo, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -27,9 +27,9 @@ import {
 } from '../../../../common/constants';
 
 import { useDocumentationLinks } from '../../hooks';
-import { useDeleteTransforms, useGetTransforms } from '../../hooks';
+import { useDeleteTransforms, useAuthorization, useGetTransforms } from '../../hooks';
 import { RedirectToCreateTransform } from '../../common/navigation';
-import { AuthorizationContext, PrivilegesWrapper } from '../../lib/authorization';
+import { PrivilegesWrapper } from '../../lib/authorization';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 
 import { SearchSelection } from './components/search_selection';
@@ -57,7 +57,7 @@ export const TransformManagement: FC = () => {
   const transformNodes = data?.transformNodes ?? 0;
   const transformIdsWithoutConfig = data?.transformIdsWithoutConfig;
 
-  const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
+  const { canStartStopTransform } = useAuthorization().capabilities;
 
   const unauthorizedTransformsWarning = useMemo(() => {
     const unauthorizedCnt = transforms.filter((t) => needsReauthorization(t)).length;

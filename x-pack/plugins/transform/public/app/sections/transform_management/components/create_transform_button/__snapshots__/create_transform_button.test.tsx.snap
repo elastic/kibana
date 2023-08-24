@@ -1,26 +1,63 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Transform: Transform List <CreateTransformButton /> Minimal initialization 1`] = `
-<EuiToolTip
-  content="You do not have permission to create transforms. Please contact your administrator."
-  delay="regular"
-  display="inlineBlock"
-  position="top"
+<ContextProvider
+  value={false}
 >
-  <EuiButton
-    color="primary"
-    data-test-subj="transformButtonCreate"
-    disabled={true}
-    fill={true}
-    iconType="plusInCircle"
-    onClick={[MockFunction]}
-    size="m"
+  <ContextProvider
+    value={
+      QueryClient {
+        "defaultOptions": Object {},
+        "logger": BufferedConsole {
+          "Console": [Function],
+          "_buffer": Array [],
+          "_counters": Object {},
+          "_groupDepth": 0,
+          "_timers": Object {},
+          "assert": [Function],
+          "clear": [Function],
+          "count": [Function],
+          "countReset": [Function],
+          "debug": [Function],
+          "dir": [Function],
+          "dirxml": [Function],
+          "error": [Function],
+          "group": [Function],
+          "groupCollapsed": [Function],
+          "groupEnd": [Function],
+          "info": [Function],
+          "log": [Function],
+          "table": [Function],
+          "time": [Function],
+          "timeEnd": [Function],
+          "timeLog": [Function],
+          "trace": [Function],
+          "warn": [Function],
+        },
+        "mountCount": 0,
+        "mutationCache": MutationCache {
+          "config": Object {},
+          "listeners": Set {},
+          "mutationId": 0,
+          "mutations": Array [],
+          "subscribe": [Function],
+        },
+        "mutationDefaults": Array [],
+        "queryCache": QueryCache {
+          "config": Object {},
+          "listeners": Set {},
+          "queries": Array [],
+          "queriesMap": Object {},
+          "subscribe": [Function],
+        },
+        "queryDefaults": Array [],
+      }
+    }
   >
-    <FormattedMessage
-      defaultMessage="Create a transform"
-      id="xpack.transform.transformList.createTransformButton"
-      values={Object {}}
+    <CreateTransformButton
+      onClick={[MockFunction]}
+      transformNodes={1}
     />
-  </EuiButton>
-</EuiToolTip>
+  </ContextProvider>
+</ContextProvider>
 `;

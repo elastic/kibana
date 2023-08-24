@@ -7,14 +7,21 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { CreateTransformButton } from './create_transform_button';
 
 jest.mock('../../../../../shared_imports');
 
+const queryClient = new QueryClient();
+
 describe('Transform: Transform List <CreateTransformButton />', () => {
   test('Minimal initialization', () => {
-    const wrapper = shallow(<CreateTransformButton onClick={jest.fn()} transformNodes={1} />);
+    const wrapper = shallow(
+      <QueryClientProvider client={queryClient}>
+        <CreateTransformButton onClick={jest.fn()} transformNodes={1} />
+      </QueryClientProvider>
+    );
 
     expect(wrapper).toMatchSnapshot();
   });

@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
-import { AuthorizationContext } from '../../../../lib/authorization';
 import { TransformListAction, TransformListRow } from '../../../../common';
-import { useStopTransforms } from '../../../../hooks';
+import { useAuthorization, useStopTransforms } from '../../../../hooks';
 import { isStopActionDisabled, stopActionNameText, StopActionName } from './stop_action_name';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 
 export type StopAction = ReturnType<typeof useStopAction>;
 
 export const useStopAction = (forceDisable: boolean) => {
-  const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
+  const { canStartStopTransform } = useAuthorization().capabilities;
 
   const { mutate: stopTransforms } = useStopTransforms();
   const [isModalVisible, setModalVisible] = useState(false);

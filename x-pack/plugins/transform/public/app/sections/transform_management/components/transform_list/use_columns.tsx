@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -24,7 +24,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import { AuthorizationContext } from '../../../../lib/authorization';
+import { useAuthorization } from '../../../../hooks';
 import { needsReauthorization } from '../../../../common/reauthorization_utils';
 import {
   isLatestTransform,
@@ -52,7 +52,7 @@ export const useColumns = (
   transformNodes: number,
   transformSelection: TransformListRow[]
 ) => {
-  const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
+  const { canStartStopTransform } = useAuthorization().capabilities;
 
   const { actions, modals } = useActions({
     forceDisable: transformSelection.length > 0,

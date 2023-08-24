@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext, FC } from 'react';
+import React, { type FC } from 'react';
 
 import {
   EuiFlexItem,
@@ -19,7 +19,7 @@ import { MissingPrivileges } from '../../../../../common/types/privileges';
 
 import { SectionLoading } from '../../../components';
 
-import { AuthorizationContext } from './authorization_provider';
+import { useAuthorization } from '../../../hooks';
 import { NotAuthorizedSection } from './not_authorized_section';
 import {
   hasPrivilegeFactory,
@@ -42,7 +42,7 @@ interface Props {
 }
 
 export const WithPrivileges = ({ privileges: requiredPrivileges, children }: Props) => {
-  const { isLoading, privileges } = useContext(AuthorizationContext);
+  const { isLoading, privileges } = useAuthorization();
 
   const privilegesToArray: Privilege[] = toArray(requiredPrivileges).map((p) => {
     const [section, privilege] = p.split('.');

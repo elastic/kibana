@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import React, { useContext, FC, MouseEventHandler } from 'react';
+import React, { type FC, type MouseEventHandler } from 'react';
 
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  createCapabilityFailureMessage,
-  AuthorizationContext,
-} from '../../../../lib/authorization';
+import { createCapabilityFailureMessage } from '../../../../lib/authorization';
+import { useAuthorization } from '../../../../hooks';
 
 interface CreateTransformButtonProps {
   onClick: MouseEventHandler<HTMLButtonElement>;
@@ -25,7 +23,7 @@ export const CreateTransformButton: FC<CreateTransformButtonProps> = ({
   onClick,
   transformNodes,
 }) => {
-  const { capabilities } = useContext(AuthorizationContext);
+  const { capabilities } = useAuthorization();
 
   const disabled =
     !capabilities.canCreateTransform ||

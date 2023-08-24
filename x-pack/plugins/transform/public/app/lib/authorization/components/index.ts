@@ -6,6 +6,5 @@
  */
 
 export { createCapabilityFailureMessage } from '../../../../../common/privilege/has_privilege_factory';
-export { AuthorizationProvider, AuthorizationContext } from './authorization_provider';
 export { PrivilegesWrapper } from './with_privileges';
 export { NotAuthorizedSection } from './not_authorized_section';

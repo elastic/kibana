@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { sortTransformsToReauthorize } from './sort_transforms_to_reauthorize';
 import { needsReauthorization } from '../../../../common/reauthorization_utils';
@@ -17,11 +17,11 @@ import {
 } from './reauthorize_action_name';
 
 import { TransformListAction, TransformListRow } from '../../../../common';
-import { AuthorizationContext } from '../../../../lib/authorization';
+import { useAuthorization } from '../../../../hooks';
 
 export type ReauthorizeAction = ReturnType<typeof useReauthorizeAction>;
 export const useReauthorizeAction = (forceDisable: boolean, transformNodes: number) => {
-  const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
+  const { canStartStopTransform } = useAuthorization().capabilities;
 
   const { mutate: reauthorizeTransforms } = useReauthorizeTransforms();
 

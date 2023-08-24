@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { TransformListAction, TransformListRow } from '../../../../common';
-import { useDeleteIndexAndTargetIndex, useDeleteTransforms } from '../../../../hooks';
-import { AuthorizationContext } from '../../../../lib/authorization';
+import {
+  useDeleteIndexAndTargetIndex,
+  useDeleteTransforms,
+  useAuthorization,
+} from '../../../../hooks';
 
 import {
   deleteActionNameText,
@@ -21,7 +24,7 @@ import {
 
 export type DeleteAction = ReturnType<typeof useDeleteAction>;
 export const useDeleteAction = (forceDisable: boolean) => {
-  const { canDeleteTransform } = useContext(AuthorizationContext).capabilities;
+  const { canDeleteTransform } = useAuthorization().capabilities;
 
   const { mutate: deleteTransforms } = useDeleteTransforms();
 

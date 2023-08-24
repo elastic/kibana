@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { TransformListRow } from '../../../../common';
-import {
-  createCapabilityFailureMessage,
-  AuthorizationContext,
-} from '../../../../lib/authorization';
+import { createCapabilityFailureMessage } from '../../../../lib/authorization';
+import { useAuthorization } from '../../../../hooks';
 
 export const stopActionNameText = i18n.translate(
   'xpack.transform.transformList.stopActionNameText',
@@ -43,7 +41,7 @@ export interface StopActionNameProps {
 }
 export const StopActionName: FC<StopActionNameProps> = ({ items, forceDisable }) => {
   const isBulkAction = items.length > 1;
-  const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
+  const { canStartStopTransform } = useAuthorization().capabilities;
 
   // Disable stop action if one of the transforms is stopped already
   const stoppedTransform = items.some(
