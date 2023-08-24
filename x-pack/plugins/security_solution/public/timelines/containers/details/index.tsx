@@ -62,7 +62,7 @@ export const useTimelineEventsDetails = ({
   const [loading, setLoading] = useState(true);
   const [timelineDetailsRequest, setTimelineDetailsRequest] =
     useState<TimelineEventsDetailsRequestOptions | null>(null);
-  const { addError, addWarning } = useAppToasts();
+  const { addError } = useAppToasts();
 
   const [timelineDetailsResponse, setTimelineDetailsResponse] =
     useState<EventsArgs['detailsData']>(null);
@@ -113,7 +113,7 @@ export const useTimelineEventsDetails = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, addError, addWarning, skip]
+    [data.search, addError, skip]
   );
 
   useEffect(() => {
