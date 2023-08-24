@@ -108,6 +108,7 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
         render: (_, item) => {
           return (
             <EuiLink
+              data-test-subj={`hostName_${item.hostName}`}
               className="eui-textTruncate"
               href={profilingRouter.link('/flamegraphs/flamegraph', {
                 query: { rangeFrom, rangeTo, kuery: `${'host.id'}: "${item.hostId}"` },
