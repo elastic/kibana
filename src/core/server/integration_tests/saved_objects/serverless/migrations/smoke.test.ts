@@ -16,7 +16,7 @@ import {
 /**
  * Until we merge https://github.com/elastic/kibana/pull/162673 this test should remain skipped.
  */
-describe('smoke', () => {
+describe.skip('smoke', () => {
   let serverlessES: TestServerlessESUtils;
   let serverlessKibana: TestServerlessKibanaUtils;
   let root: TestServerlessKibanaUtils['root'];
