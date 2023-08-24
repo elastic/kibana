@@ -64,6 +64,11 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
     await kibanaServer.importExport.load(logsSOPath);
   };
+  const initCanvasLogs = async () => {
+    const logsSOPathCanvas = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs_canvas';
+    await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+    await kibanaServer.importExport.load(logsSOPathCanvas);
+  }
   const teardownLogs = async () => {
     await kibanaServer.importExport.unload(logsSOPath);
     await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
@@ -260,6 +265,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     initEcommerce,
     teardownEcommerce,
     initLogs,
+    initCanvasLogs,
     teardownLogs,
     DATA_ANALYST_USERNAME,
     DATA_ANALYST_PASSWORD,
