@@ -47,7 +47,7 @@ export interface OverridableTabState {
 
 export interface TabState extends OverridableTabState {
   activeTabId?: TabIds;
-  dateRange: TimeRange;
+  dateRange?: TimeRange;
 }
 export interface FlyoutProps {
   closeFlyout: () => void;
@@ -82,9 +82,7 @@ export interface AssetDetailsProps {
   metricAlias: string;
 }
 
-export type TabsStateChangeFn = (
-  state: OverridableTabState & { activeTabId?: TabIds; dateRange: TimeRange }
-) => void;
+export type TabsStateChangeFn = (state: TabState) => void;
 
 export interface ContentTemplateProps {
   header: Pick<AssetDetailsProps, 'tabs' | 'links'>;

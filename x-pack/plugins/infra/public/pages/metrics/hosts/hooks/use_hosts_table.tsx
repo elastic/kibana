@@ -128,7 +128,7 @@ const sortTableData =
 export const useHostsTable = () => {
   const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
   const { hostNodes } = useHostsViewContext();
-  const { searchCriteria, parsedDateRange } = useUnifiedSearchContext();
+  const { parsedDateRange } = useUnifiedSearchContext();
   const [{ pagination, sorting }, setProperties] = useHostsTableUrlState();
   const {
     services: {
