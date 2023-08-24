@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
-import { UpsellingService } from '../../lib/upsellings';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { updateAppLinks } from '../../links';
 import { links } from '../../links/app_links';
 import { useShowTimeline } from './use_show_timeline';
