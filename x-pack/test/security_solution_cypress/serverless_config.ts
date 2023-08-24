@@ -31,6 +31,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.warnLegacyBrowsers=false',
         '--serverless=security',
         '--xpack.encryptedSavedObjects.encryptionKey="abcdefghijklmnopqrstuvwxyz123456"',
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'riskScoringRoutesEnabled',
+        ])}`,
       ],
     },
     testRunner: SecuritySolutionConfigurableCypressTestRunner,
