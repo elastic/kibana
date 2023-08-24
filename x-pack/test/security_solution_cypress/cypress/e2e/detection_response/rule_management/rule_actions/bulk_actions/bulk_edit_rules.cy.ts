@@ -95,6 +95,7 @@ import {
 import {
   createAndInstallMockedPrebuiltRules,
   getAvailablePrebuiltRulesCount,
+  preventPrebuiltRulesPackageInstallation,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { setRowsPerPageTo, sortByTableColumn } from '../../../../../tasks/table_pagination';
 
@@ -122,6 +123,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@brokenInServerless'] }
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();
+    preventPrebuiltRulesPackageInstallation(); // Make prebuilt rules aren't pulled from Fleet API
     cy.task('esArchiverResetKibana');
     createRule(getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1', enabled: false }));
     createRule(
@@ -232,9 +234,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@brokenInServerless'] }
         clickAddTagsMenuItem();
         waitForMixedRulesBulkEditModal(rows.length);
 
-        getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
-          checkPrebuiltRulesCannotBeModified(availablePrebuiltRulesCount);
-        });
+        checkPrebuiltRulesCannotBeModified(PREBUILT_RULES.length);
 
         // user cancels action and modal disappears
         cancelConfirmationModal();
