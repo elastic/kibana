@@ -252,7 +252,7 @@ const validateEsqlQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esqlQu
       )
     );
   }
-  if (ruleParams.threshold !== [0]) {
+  if (ruleParams.threshold && ruleParams.threshold[0] !== 0) {
     errors.threshold0.push(
       i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredThreshold0Text', {
         defaultMessage: 'Threshold is required to be 0.',

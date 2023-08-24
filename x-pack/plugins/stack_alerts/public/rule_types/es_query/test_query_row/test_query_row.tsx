@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiSpacer,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -144,9 +145,10 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
         </EuiFormRow>
       )}
       {showTable && testQueryRawResults && (
-        <EuiFormRow>
+        <>
+          <EuiSpacer size="s" />
           <TestQueryRowTable rawResults={testQueryRawResults} alerts={testQueryAlerts} />
-        </EuiFormRow>
+        </>
       )}
     </>
   );
