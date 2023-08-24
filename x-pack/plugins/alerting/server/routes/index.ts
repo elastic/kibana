@@ -47,7 +47,7 @@ import { cloneRuleRoute } from './clone_rule';
 import { getFlappingSettingsRoute } from './get_flapping_settings';
 import { updateFlappingSettingsRoute } from './update_flapping_settings';
 import { getRuleTagsRoute } from './get_rule_tags';
-import { getScheduleFrequencyRoute } from '../routes/rule/apis/get_schedule_frequency'
+import { getScheduleFrequencyRoute } from './rule/apis/get_schedule_frequency';
 
 import { createMaintenanceWindowRoute } from './maintenance_window/create_maintenance_window';
 import { getMaintenanceWindowRoute } from './maintenance_window/get_maintenance_window';

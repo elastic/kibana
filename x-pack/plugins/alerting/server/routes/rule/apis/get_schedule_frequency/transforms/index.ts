@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+export { transformGetScheduleFrequencyResult } from './transform_get_schedule_frequency_result/latest';
 
-export const getScheduleFrequencyResponseSchema = schema.object({
-  total_scheduled_per_minute: schema.number(),
-  remaining_schedules_per_minute: schema.number(),
-});
+export { transformGetScheduleFrequencyResult as transformGetScheduleFrequencyResultV1 } from './transform_get_schedule_frequency_result/v1';

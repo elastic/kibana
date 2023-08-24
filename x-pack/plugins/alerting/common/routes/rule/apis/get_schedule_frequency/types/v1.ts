@@ -8,6 +8,8 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { getScheduleFrequencyResponseSchemaV1 } from '..';
 
-export type GetScheduleFrequencyResponse = {
-  body: TypeOf<typeof getScheduleFrequencyResponseSchemaV1>
+export type GetScheduleFrequencyResponseBody = TypeOf<typeof getScheduleFrequencyResponseSchemaV1>;
+
+export interface GetScheduleFrequencyResponse {
+  body: GetScheduleFrequencyResponseBody;
 }

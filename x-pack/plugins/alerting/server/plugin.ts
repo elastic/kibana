@@ -400,7 +400,7 @@ export class AlertingPlugin {
       },
       getConfig: () => {
         return {
-          ...pick(this.config.rules, 'minimumScheduleInterval'),
+          ...pick(this.config.rules, ['minimumScheduleInterval', 'maxScheduledPerMinute']),
           isUsingSecurity: this.licenseState ? !!this.licenseState.getIsSecurityEnabled() : false,
         };
       },
@@ -476,6 +476,7 @@ export class AlertingPlugin {
       authorization: alertingAuthorizationClientFactory,
       eventLogger: this.eventLogger,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
+      maxScheduledPerMinute: this.config.rules.maxScheduledPerMinute,
     });
 
     rulesSettingsClientFactory.initialize({

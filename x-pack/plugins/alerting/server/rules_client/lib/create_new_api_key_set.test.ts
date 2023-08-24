@@ -40,6 +40,7 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   minimumScheduleIntervalInMs: 1,
   fieldsToExcludeFromPublicApi: [],

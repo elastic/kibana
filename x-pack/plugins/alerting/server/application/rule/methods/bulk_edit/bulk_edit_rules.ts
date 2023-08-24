@@ -77,6 +77,11 @@ import {
   transformRuleDomainToRuleAttributes,
   transformRuleDomainToRule,
 } from '../../transforms';
+import { validateScheduleLimit } from '../get_schedule_frequency';
+
+const isValidInterval = (interval: string | undefined): interval is string => {
+  return interval !== undefined;
+};
 
 export const bulkEditFieldsToExcludeFromRevisionUpdates = new Set(['snoozeSchedule', 'apiKey']);
 
@@ -286,8 +291,15 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
   const errors: BulkOperationError[] = [];
   const apiKeysMap: ApiKeysMap = new Map();
   const username = await context.getUserName();
+  const prevInterval: string[] = [];
 
   for await (const response of rulesFinder.find()) {
+    const intervals = response.saved_objects
+      .map((rule) => rule.attributes.schedule?.interval)
+      .filter(isValidInterval);
+
+    prevInterval.concat(intervals);
+
     await pMap(
       response.saved_objects,
       async (rule: SavedObjectsFindResult<RuleAttributes>) =>
@@ -310,7 +322,12 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
 
   const { result, apiKeysToInvalidate } =
     rules.length > 0
-      ? await saveBulkUpdatedRules(context, rules, apiKeysMap)
+      ? await saveBulkUpdatedRules({
+          context,
+          rules,
+          apiKeysMap,
+          prevInterval,
+        })
       : {
           result: { saved_objects: [] },
           apiKeysToInvalidate: [],
@@ -821,14 +838,30 @@ function updateAttributes(
   };
 }
 
-async function saveBulkUpdatedRules(
-  context: RulesClientContext,
-  rules: Array<SavedObjectsBulkUpdateObject<RuleAttributes>>,
-  apiKeysMap: ApiKeysMap
-) {
+async function saveBulkUpdatedRules({
+  context,
+  rules,
+  apiKeysMap,
+  prevInterval,
+}: {
+  context: RulesClientContext;
+  rules: Array<SavedObjectsBulkUpdateObject<RuleAttributes>>;
+  apiKeysMap: ApiKeysMap;
+  prevInterval: string[];
+}) {
   const apiKeysToInvalidate: string[] = [];
   let result;
   try {
+    const updatedInterval = rules
+      .map((rule) => rule.attributes.schedule?.interval)
+      .filter(isValidInterval);
+
+    validateScheduleLimit({
+      context,
+      prevInterval,
+      updatedInterval,
+    });
+
     // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
     // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
     // bulk_disable, bulk_enable, etc. to fix this cast

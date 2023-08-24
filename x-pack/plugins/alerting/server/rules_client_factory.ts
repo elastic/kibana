@@ -40,6 +40,7 @@ export interface RulesClientFactoryOpts {
   authorization: AlertingAuthorizationClientFactory;
   eventLogger?: IEventLogger;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
+  maxScheduledPerMinute: AlertingRulesConfig['maxScheduledPerMinute'];
 }
 
 export class RulesClientFactory {
@@ -58,6 +59,7 @@ export class RulesClientFactory {
   private authorization!: AlertingAuthorizationClientFactory;
   private eventLogger?: IEventLogger;
   private minimumScheduleInterval!: AlertingRulesConfig['minimumScheduleInterval'];
+  private maxScheduledPerMinute!: AlertingRulesConfig['maxScheduledPerMinute'];
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -78,6 +80,7 @@ export class RulesClientFactory {
     this.authorization = options.authorization;
     this.eventLogger = options.eventLogger;
     this.minimumScheduleInterval = options.minimumScheduleInterval;
+    this.maxScheduledPerMinute = options.maxScheduledPerMinute;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): RulesClient {
@@ -95,6 +98,7 @@ export class RulesClientFactory {
       taskManager: this.taskManager,
       ruleTypeRegistry: this.ruleTypeRegistry,
       minimumScheduleInterval: this.minimumScheduleInterval,
+      maxScheduledPerMinute: this.maxScheduledPerMinute,
       unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
         excludedExtensions: [SECURITY_EXTENSION_ID],
         includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],

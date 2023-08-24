@@ -11,28 +11,27 @@ import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import {
   getScheduleFrequencyResponseSchemaV1,
-  GetScheduleFrequencyResponseV1
+  GetScheduleFrequencyResponseV1,
 } from '../../../../../common/routes/rule/apis/get_schedule_frequency';
+import { transformGetScheduleFrequencyResultV1 } from './transforms';
 
 export const getScheduleFrequencyRoute = (
-  router: IRouter<AlertingRequestHandlerContext>, 
+  router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_schedule_frequency`,
-      validate: {}
+      validate: {},
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async (context, req, res) => {
         const rulesClient = (await context.alerting).getRulesClient();
-        
-        const scheduleFrequency = await rulesClient.getScheduleFrequency();
+
+        const scheduleFrequencyResult = await rulesClient.getScheduleFrequency();
 
         const response: GetScheduleFrequencyResponseV1 = {
-          body: {
-            total_scheduled_per_minute: scheduleFrequency
-          }
+          body: transformGetScheduleFrequencyResultV1(scheduleFrequencyResult),
         };
 
         getScheduleFrequencyResponseSchemaV1.validate(response);
@@ -40,5 +39,5 @@ export const getScheduleFrequencyRoute = (
         return res.ok(response);
       })
     )
-  )
+  );
 };
