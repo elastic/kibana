@@ -20,7 +20,7 @@ import type {
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
-import { useCanDeleteIndex } from './use_can_delete_index';
+import { useAuthorization } from './use_authorization';
 import { useDataViewExists } from './use_data_view_exists';
 import { useRefreshTransformList, type TransformListRow } from '../common';
 import { ToastNotificationText } from '../components';
@@ -38,8 +38,8 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
   const [deleteDestIndex, setDeleteDestIndex] = useState<boolean>(true);
   const [deleteDataView, setDeleteDataView] = useState<boolean>(userCanDeleteDataView);
 
-  const { error: canDeleteIndexError, data: canDeleteIndex } = useCanDeleteIndex();
-  const userCanDeleteIndex = canDeleteIndex === true;
+  const { error: canDeleteIndexError, privileges } = useAuthorization();
+  const userCanDeleteIndex = privileges.hasAllPrivileges;
 
   useEffect(() => {
     if (canDeleteIndexError !== null) {
