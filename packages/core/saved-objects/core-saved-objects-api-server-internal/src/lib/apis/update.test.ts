@@ -15,6 +15,7 @@ import {
   type SavedObjectUnsanitizedDoc,
   type SavedObjectReference,
   SavedObjectsRawDocSource,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsRepository } from '../repository';
@@ -404,34 +405,66 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      // TODO: adapt retry_on_conflict tests
-      it.skip('default to a `retry_on_conflict` setting of `3` when `version` is not provided', async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, {});
-        expect(client.update).toHaveBeenCalledWith(
-          expect.objectContaining({ retry_on_conflict: 3 }),
-          expect.anything()
-        );
+      it('retries the operation in case of conflict error', async () => {
+        client.get.mockResponse(getMockGetResponse(registry, { type, id }));
+
+        client.index
+          .mockImplementationOnce(() => {
+            throw SavedObjectsErrorHelpers.createConflictError(type, id, 'conflict');
+          })
+          .mockImplementationOnce(() => {
+            throw SavedObjectsErrorHelpers.createConflictError(type, id, 'conflict');
+          })
+          .mockResponseImplementation((params) => {
+            return {
+              body: {
+                _id: params.id,
+                _seq_no: 1,
+                _primary_term: 1,
+              },
+            } as any;
+          });
+
+        await repository.update(type, id, attributes, { retryOnConflict: 3 });
+
+        expect(client.get).toHaveBeenCalledTimes(3);
+        expect(client.index).toHaveBeenCalledTimes(3);
       });
 
-      it.skip('default to a `retry_on_conflict` setting of `0` when `version` is provided', async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, {
-          version: encodeHitVersion({ _seq_no: 100, _primary_term: 200 }),
+      it('retries the operation a maximum of `retryOnConflict` times', async () => {
+        client.get.mockResponse(getMockGetResponse(registry, { type, id }));
+
+        client.index.mockImplementation(() => {
+          throw SavedObjectsErrorHelpers.createConflictError(type, id, 'conflict');
         });
-        expect(client.update).toHaveBeenCalledWith(
-          expect.objectContaining({ retry_on_conflict: 0, if_seq_no: 100, if_primary_term: 200 }),
-          expect.anything()
+
+        await expect(
+          repository.update(type, id, attributes, { retryOnConflict: 3 })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"Saved object [index-pattern/logstash-*] conflict"`
         );
+
+        expect(client.get).toHaveBeenCalledTimes(4);
+        expect(client.index).toHaveBeenCalledTimes(4);
       });
 
-      it.skip('accepts a `retryOnConflict` option', async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, {
-          version: encodeHitVersion({ _seq_no: 100, _primary_term: 200 }),
-          retryOnConflict: 42,
+      it('default to a `retry_on_conflict` setting of `0` when `version` is provided', async () => {
+        client.get.mockResponse(getMockGetResponse(registry, { type, id }));
+
+        client.index.mockImplementation(() => {
+          throw SavedObjectsErrorHelpers.createConflictError(type, id, 'conflict');
         });
-        expect(client.update).toHaveBeenCalledWith(
-          expect.objectContaining({ retry_on_conflict: 42, if_seq_no: 100, if_primary_term: 200 }),
-          expect.anything()
+
+        await expect(
+          repository.update(type, id, attributes, {
+            version: encodeHitVersion({ _seq_no: 100, _primary_term: 200 }),
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"Saved object [index-pattern/logstash-*] conflict"`
         );
+
+        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(client.index).toHaveBeenCalledTimes(1);
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
