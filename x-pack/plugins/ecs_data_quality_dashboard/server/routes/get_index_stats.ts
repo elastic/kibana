@@ -76,7 +76,7 @@ export const getIndexStatsRoute = (router: IRouter) => {
                 defaultMessage: 'startDate and endDate are required',
               }
             ),
-            statusCode: 403,
+            statusCode: 400,
           });
         }
       } catch (err) {

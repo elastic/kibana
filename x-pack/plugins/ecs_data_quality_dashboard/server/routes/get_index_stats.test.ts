@@ -81,8 +81,8 @@ describe('getIndexStatsRoute route', () => {
     });
 
     const response = await server.inject(request, requestContextMock.convertContext(context));
-    expect(response.status).toEqual(403);
-    expect(response.body.status_code).toEqual(403);
+    expect(response.status).toEqual(400);
+    expect(response.body.status_code).toEqual(400);
     expect(response.body.message).toEqual(`startDate and endDate are required`);
   });
 
