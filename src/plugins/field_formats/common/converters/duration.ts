@@ -99,6 +99,10 @@ export class DurationFormat extends FieldFormat {
     const human = this.isHuman();
     const humanPrecise = this.isHumanPrecise();
 
+    if (human && val === 0) {
+      return '0.00 seconds'; // Handle the case of 0 value for "Human Friendly"
+    }
+
     const prefix =
       val < 0 && human
         ? i18n.translate('fieldFormats.duration.negativeLabel', {
@@ -112,7 +116,7 @@ export class DurationFormat extends FieldFormat {
       : duration[outputFormat]();
 
     const precise = human || humanPrecise ? formatted : formatted.toFixed(outputPrecision);
-    const type = DURATION_OUTPUT_FORMATS.find(({ method }) => method === outputFormat);
+    const type = outputFormats.find(({ method }) => method === outputFormat);
 
     const unitText = useShortSuffix ? type?.shortText : type?.text.toLowerCase();
 
