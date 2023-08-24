@@ -11,6 +11,7 @@ import { services } from './services';
 
 interface CreateTestConfigOptions {
   license: string;
+  ssl?: boolean;
 }
 
 // test.not-enabled is specifically not enabled
@@ -31,14 +32,19 @@ const enabledActionTypes = [
 ];
 
 export function createTestConfig(options: CreateTestConfigOptions, testFiles?: string[]) {
-  const { license = 'trial' } = options;
+  const { license = 'trial', ssl = false } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
       require.resolve('../../api_integration/config.ts')
     );
-
-    const servers = xPackApiIntegrationTestsConfig.get('servers');
+    const servers = {
+      ...xPackApiIntegrationTestsConfig.get('servers'),
+      elasticsearch: {
+        ...xPackApiIntegrationTestsConfig.get('servers.elasticsearch'),
+        protocol: ssl ? 'https' : 'http',
+      },
+    };
 
     return {
       testFiles,
@@ -50,6 +56,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
       esTestCluster: {
         ...xPackApiIntegrationTestsConfig.get('esTestCluster'),
         license,
+        ssl,
         serverArgs: [`xpack.license.self_generated.type=${license}`],
       },
       kbnTestServer: {
@@ -73,7 +80,6 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
             'riskScoringRoutesEnabled',
             'detectionsCoverageOverview',
           ])}`,
-          '--xpack.observability.enabled=false',
           '--xpack.task_manager.poll_interval=1000',
           `--xpack.actions.preconfigured=${JSON.stringify({
             'my-test-email': {
@@ -89,8 +95,11 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
               },
             },
           })}`,
-          ...(servers.elasticsearch.protocol === 'https'
-            ? `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`
+          ...(ssl
+            ? [
+                `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
+                `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
+              ]
             : []),
         ],
       },

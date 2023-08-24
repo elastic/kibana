@@ -11,6 +11,7 @@ import { createTestConfig } from '../common/config';
 export default createTestConfig(
   {
     license: 'basic',
+    ssl: true,
   },
   [require.resolve('./tests')]
 );
