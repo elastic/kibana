@@ -1028,6 +1028,8 @@
       "@kbn/newsfeed-plugin/*": ["src/plugins/newsfeed/*"],
       "@kbn/newsfeed-test-plugin": ["test/common/plugins/newsfeed"],
       "@kbn/newsfeed-test-plugin/*": ["test/common/plugins/newsfeed/*"],
+      "@kbn/no-data-page-plugin": ["src/plugins/no_data_page"],
+      "@kbn/no-data-page-plugin/*": ["src/plugins/no_data_page/*"],
       "@kbn/notifications-plugin": ["x-pack/plugins/notifications"],
       "@kbn/notifications-plugin/*": ["x-pack/plugins/notifications/*"],
       "@kbn/object-versioning": ["packages/kbn-object-versioning"],

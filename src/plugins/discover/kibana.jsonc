@@ -27,6 +27,7 @@
       "unifiedSearch",
       "unifiedHistogram",
       "contentManagement",
+      "noDataPage"
     ],
     "optionalPlugins": [
       "home",

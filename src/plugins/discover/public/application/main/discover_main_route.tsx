@@ -261,6 +261,7 @@ export function DiscoverMainRoute({
         },
       },
       dataViewEditor,
+      noDataPage: services.noDataPage,
     };
 
     return (

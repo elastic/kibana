@@ -33,7 +33,7 @@ export interface NoDataPageProps extends CommonProps, ActionCardProps {
   /**
    * Required to set the docs link for the whole solution
    */
-  docsLink: string;
+  docsLink?: string;
   /**
    * Optionally replace the auto-generated logo
    */
