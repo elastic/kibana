@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
 import { getAdvancedButton } from '../../screens/integrations';
 import { navigateTo } from '../../tasks/navigation';
 import {

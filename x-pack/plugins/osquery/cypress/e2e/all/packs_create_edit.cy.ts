@@ -7,7 +7,6 @@
 
 import { recurse } from 'cypress-recurse';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { tag } from '../../tags';
 import { API_VERSIONS } from '../../../common/constants';
 import { navigateTo } from '../../tasks/navigation';
 import {

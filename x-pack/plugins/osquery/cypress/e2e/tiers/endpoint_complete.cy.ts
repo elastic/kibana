@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
 import { checkOsqueryResponseActionsPermissions } from '../../tasks/response_actions';
 
 describe(

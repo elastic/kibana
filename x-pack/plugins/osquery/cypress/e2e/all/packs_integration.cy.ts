@@ -7,7 +7,6 @@
 
 import { find } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { tag } from '../../tags';
 import { API_VERSIONS } from '../../../common/constants';
 import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
 import {

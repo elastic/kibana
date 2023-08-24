@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
 import { navigateTo } from '../../tasks/navigation';
 import {
   cleanupPack,
