@@ -139,36 +139,15 @@ export const useActions = ({
     ]
   );
 
-  const withExtraActions = actions.concat(extraActions ?? []);
+  const withExtraActions = actions.concat(extraActions ?? []).map((a, i, totalActions) => {
+    const order = Math.max(totalActions.length - (1 + i), 0);
+    return {
+      ...a,
+      order,
+    };
+  });
 
   return withExtraActions;
-};
-
-const getSaveToLibraryAction = ({
-  callback,
-  disabled,
-}: {
-  callback: () => void;
-  disabled?: boolean;
-}): Action => {
-  return {
-    id: 'addToExistingCase',
-    getDisplayName(context: ActionExecutionContext<object>): string {
-      return ADDED_TO_LIBRARY;
-    },
-    getIconType(context: ActionExecutionContext<object>): string | undefined {
-      return 'save';
-    },
-    type: 'actionButton',
-    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
-      return true;
-    },
-    async execute(context: ActionExecutionContext<object>): Promise<void> {
-      callback();
-    },
-    disabled,
-    order: 2,
-  };
 };
 
 const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => {
@@ -188,61 +167,34 @@ const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => 
     async execute(context: ActionExecutionContext<object>): Promise<void> {
       callback();
     },
+    order: 0,
+  };
+};
+
+const getSaveToLibraryAction = ({
+  callback,
+  disabled,
+}: {
+  callback: () => void;
+  disabled?: boolean;
+}): Action => {
+  return {
+    id: 'saveToLibrary',
+    getDisplayName(context: ActionExecutionContext<object>): string {
+      return ADDED_TO_LIBRARY;
+    },
+    getIconType(context: ActionExecutionContext<object>): string | undefined {
+      return 'save';
+    },
+    type: 'actionButton',
+    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
+      return true;
+    },
+    async execute(context: ActionExecutionContext<object>): Promise<void> {
+      callback();
+    },
+    disabled,
     order: 1,
-  };
-};
-
-const getAddToNewCaseAction = ({
-  callback,
-  disabled,
-}: {
-  callback: () => void;
-  disabled?: boolean;
-}): Action => {
-  return {
-    id: 'addToNewCase',
-    getDisplayName(context: ActionExecutionContext<object>): string {
-      return ADD_TO_NEW_CASE;
-    },
-    getIconType(context: ActionExecutionContext<object>): string | undefined {
-      return 'casesApp';
-    },
-    type: 'actionButton',
-    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
-      return true;
-    },
-    async execute(context: ActionExecutionContext<object>): Promise<void> {
-      callback();
-    },
-    disabled,
-    order: 4,
-  };
-};
-
-const getInspectAction = ({
-  callback,
-  disabled,
-}: {
-  callback: () => void;
-  disabled?: boolean;
-}): Action => {
-  return {
-    id: 'inspect',
-    getDisplayName(context: ActionExecutionContext<object>): string {
-      return INSPECT;
-    },
-    getIconType(context: ActionExecutionContext<object>): string | undefined {
-      return 'inspect';
-    },
-    type: 'actionButton',
-    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
-      return true;
-    },
-    async execute(context: ActionExecutionContext<object>): Promise<void> {
-      callback();
-    },
-    disabled,
-    order: 5,
   };
 };
 
@@ -269,6 +221,60 @@ const getAddToExistingCaseAction = ({
       callback();
     },
     disabled,
+    order: 2,
+  };
+};
+
+const getAddToNewCaseAction = ({
+  callback,
+  disabled,
+}: {
+  callback: () => void;
+  disabled?: boolean;
+}): Action => {
+  return {
+    id: 'addToNewCase',
+    getDisplayName(context: ActionExecutionContext<object>): string {
+      return ADD_TO_NEW_CASE;
+    },
+    getIconType(context: ActionExecutionContext<object>): string | undefined {
+      return 'casesApp';
+    },
+    type: 'actionButton',
+    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
+      return true;
+    },
+    async execute(context: ActionExecutionContext<object>): Promise<void> {
+      callback();
+    },
+    disabled,
     order: 3,
+  };
+};
+
+const getInspectAction = ({
+  callback,
+  disabled,
+}: {
+  callback: () => void;
+  disabled?: boolean;
+}): Action => {
+  return {
+    id: 'inspect',
+    getDisplayName(context: ActionExecutionContext<object>): string {
+      return INSPECT;
+    },
+    getIconType(context: ActionExecutionContext<object>): string | undefined {
+      return 'inspect';
+    },
+    type: 'actionButton',
+    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
+      return true;
+    },
+    async execute(context: ActionExecutionContext<object>): Promise<void> {
+      callback();
+    },
+    disabled,
+    order: 4,
   };
 };

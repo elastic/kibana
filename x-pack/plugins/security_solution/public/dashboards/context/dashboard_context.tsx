@@ -20,7 +20,6 @@ const DashboardContext = React.createContext<DashboardContextType | null>({ secu
 
 export const DashboardContextProvider: React.FC = ({ children }) => {
   const { tags, isLoading } = useFetchSecurityTags();
-
   const securityTags = isLoading || !tags ? null : tags;
 
   return <DashboardContext.Provider value={{ securityTags }}>{children}</DashboardContext.Provider>;

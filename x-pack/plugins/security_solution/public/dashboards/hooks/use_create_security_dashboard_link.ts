@@ -15,20 +15,20 @@ type UseCreateDashboard = () => { isLoading: boolean; url: string };
 export const useCreateSecurityDashboardLink: UseCreateDashboard = () => {
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const securityTags = useSecurityTags();
-
+  const url = getSecuritySolutionUrl({
+    deepLinkId: SecurityPageName.dashboards,
+    path: 'create',
+  });
   const result = useMemo(() => {
     const firstSecurityTagId = securityTags?.[0]?.id;
     if (!firstSecurityTagId) {
-      return { isLoading: true, url: '' };
+      return { isLoading: true, url };
     }
     return {
       isLoading: false,
-      url: getSecuritySolutionUrl({
-        deepLinkId: SecurityPageName.dashboards,
-        path: 'create',
-      }),
+      url,
     };
-  }, [securityTags, getSecuritySolutionUrl]);
+  }, [securityTags, url]);
 
   return result;
 };

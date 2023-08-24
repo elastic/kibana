@@ -146,6 +146,7 @@ export const useFetch = <Parameters, Response, Error extends unknown>(
       try {
         const response = await fetchFn(parameters, abortController.signal);
         endTracking('success');
+
         if (!ignore) {
           dispatch({ type: 'FETCH_SUCCESS', payload: response });
         }

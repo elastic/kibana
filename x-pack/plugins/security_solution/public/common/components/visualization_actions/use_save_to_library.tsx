@@ -6,14 +6,19 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { unmountComponentAtNode } from 'react-dom';
 import { useKibana, useToasts } from '../../lib/kibana';
 import { ADDED_TO_LIBRARY } from './translations';
+import type { LensAttributes } from './types';
 
-export const useSaveToLibrary = ({ attributes }: { attributes: LensEmbeddableInput }) => {
-  const { lens } = useKibana().services;
+export const useSaveToLibrary = ({
+  attributes,
+}: {
+  attributes: LensAttributes | undefined | null;
+}) => {
+  const { lens, theme, i18n } = useKibana().services;
   const { addSuccess } = useToasts();
 
   const { SaveModalComponent, canUseEditor } = lens;
@@ -22,7 +27,7 @@ export const useSaveToLibrary = ({ attributes }: { attributes: LensEmbeddableInp
 
     const mount = toMountPoint(
       <SaveModalComponent
-        initialInput={attributes}
+        initialInput={attributes as unknown as LensEmbeddableInput}
         onSave={() => {
           unmountComponentAtNode(targetDomElement);
           addSuccess(ADDED_TO_LIBRARY);
@@ -30,11 +35,12 @@ export const useSaveToLibrary = ({ attributes }: { attributes: LensEmbeddableInp
         onClose={() => {
           unmountComponentAtNode(targetDomElement);
         }}
-      />
+      />,
+      { theme, i18n }
     );
 
     mount(targetDomElement);
-  }, [SaveModalComponent, addSuccess, attributes]);
+  }, [SaveModalComponent, addSuccess, attributes, i18n, theme]);
 
   const disableVisualizations = useMemo(
     () => !canUseEditor() || attributes == null,

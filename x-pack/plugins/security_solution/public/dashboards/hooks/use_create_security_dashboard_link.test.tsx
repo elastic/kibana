@@ -6,23 +6,40 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { useKibana } from '../../common/lib/kibana';
 import { useCreateSecurityDashboardLink } from './use_create_security_dashboard_link';
 import { DashboardContextProvider } from '../context/dashboard_context';
 import { getTagsByName } from '../../common/containers/tags/api';
+import React from 'react';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { coreMock } from '@kbn/core/public/mocks';
+import { TestProviders } from '../../common/mock';
 
-jest.mock('../../common/lib/kibana');
+jest.mock('../../common/lib/kibana', () => ({
+  useKibana: jest.fn(),
+}));
 jest.mock('../../common/containers/tags/api');
-const URL = '/path';
+jest.mock('../../common/lib/apm/use_track_http_request');
+jest.mock('../../common/components/link_to', () => ({
+  useGetSecuritySolutionUrl: jest
+    .fn()
+    .mockReturnValue(jest.fn().mockReturnValue('/app/security/dashboards/create')),
+}));
 
 const renderUseCreateSecurityDashboardLink = () =>
   renderHook(() => useCreateSecurityDashboardLink(), {
-    wrapper: DashboardContextProvider,
+    wrapper: ({ children }) => (
+      <TestProviders>
+        <NavigationProvider core={coreMock.createStart()}>
+          <DashboardContextProvider>{children}</DashboardContextProvider>
+        </NavigationProvider>
+      </TestProviders>
+    ),
   });
 
 const asyncRenderUseCreateSecurityDashboard = async () => {
   const renderedHook = renderUseCreateSecurityDashboardLink();
+
   await act(async () => {
     await renderedHook.waitForNextUpdate();
   });
@@ -30,12 +47,15 @@ const asyncRenderUseCreateSecurityDashboard = async () => {
 };
 
 describe('useCreateSecurityDashboardLink', () => {
-  const mockGetRedirectUrl = jest.fn(() => URL);
-
   beforeAll(() => {
-    useKibana().services.dashboard = {
-      locator: { getRedirectUrl: mockGetRedirectUrl },
-    } as unknown as DashboardStart;
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        savedObjectsTagging: {
+          create: jest.fn(),
+        },
+        http: { get: jest.fn() },
+      },
+    });
   });
 
   afterEach(() => {
@@ -55,8 +75,7 @@ describe('useCreateSecurityDashboardLink', () => {
       const result1 = result.current;
       act(() => rerender());
       const result2 = result.current;
-
-      expect(result1).toBe(result2);
+      expect(result1).toEqual(result2);
     });
 
     it('should not re-request tag id when re-rendered', async () => {
@@ -71,14 +90,14 @@ describe('useCreateSecurityDashboardLink', () => {
       const { result, waitForNextUpdate } = renderUseCreateSecurityDashboardLink();
 
       expect(result.current.isLoading).toEqual(true);
-      expect(result.current.url).toEqual('');
+      expect(result.current.url).toEqual('/app/security/dashboards/create');
 
       await act(async () => {
         await waitForNextUpdate();
       });
 
       expect(result.current.isLoading).toEqual(false);
-      expect(result.current.url).toEqual(URL);
+      expect(result.current.url).toEqual('/app/security/dashboards/create');
     });
   });
 });

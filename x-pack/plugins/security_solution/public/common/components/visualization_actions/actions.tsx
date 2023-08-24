@@ -31,6 +31,7 @@ import {
 } from './translations';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from './utils';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
 const Wrapper = styled.div`
   &.viz-actions {
@@ -69,6 +70,8 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   const [isPopoverOpen, setPopover] = useState(false);
   const [isInspectModalOpen, setIsInspectModalOpen] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
+  const { addSuccess } = useAppToasts();
+  const hasPermission = canUseEditor();
 
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
@@ -121,7 +124,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   }, [attributes, navigateToPrefilledEditor, timerange]);
 
   const { openSaveVisualizationFlyout, disableVisualizations } = useSaveToLibrary({
-    attributes: attributes as LensEmbeddableInput,
+    attributes,
   });
 
   const onOpenInspectModal = useCallback(() => {
@@ -200,15 +203,19 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
             >
               {ADD_TO_EXISTING_CASE}
             </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              icon="visArea"
-              key="visualizationActionsSaveVisualization"
-              data-test-subj="viz-actions-save-visualization"
-              disabled={disableVisualizations}
-              onClick={openSaveVisualizationFlyout}
-            >
-              {ADDED_TO_LIBRARY}
-            </EuiContextMenuItem>,
+            ...(hasPermission
+              ? [
+                  <EuiContextMenuItem
+                    icon="visArea"
+                    key="visualizationActionsSaveVisualization"
+                    data-test-subj="viz-actions-save-visualization"
+                    disabled={disableVisualizations}
+                    onClick={openSaveVisualizationFlyout}
+                  >
+                    {ADDED_TO_LIBRARY}
+                  </EuiContextMenuItem>,
+                ]
+              : []),
             <EuiContextMenuItem
               icon="visArea"
               key="visualizationActionsOpenInLens"
@@ -222,6 +229,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
         : []),
     ];
   }, [
+    hasPermission,
     disableInspectButton,
     disableVisualizations,
     extraActions,
@@ -274,7 +282,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
           title={inspectTitle}
         />
       )}
-      {isSaveModalVisible && (
+      {isSaveModalVisible && hasPermission && (
         <SaveModalComponent
           initialInput={attributes as unknown as LensEmbeddableInput}
           onSave={() => {
