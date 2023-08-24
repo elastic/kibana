@@ -85,6 +85,16 @@ export const TestRunDetails = () => {
             </EuiPanel>
             <EuiSpacer size="m" />
             <TestRunSteps isLoading={stepsLoading} steps={stepsData?.steps ?? []} />
+            <>
+              <EuiSpacer size="m" />
+              <EuiPanel hasShadow={false} hasBorder>
+                <TestRunErrorInfo
+                  journeyDetails={stepsData?.details}
+                  showErrorTitle={false}
+                  showErrorLogs={true}
+                />
+              </EuiPanel>
+            </>
           </EuiFlexItem>
           <EuiFlexItem css={{ flexBasis: '36%', minWidth: 'min-content' }}>
             <StepDurationPanel legendPosition="bottom" />
