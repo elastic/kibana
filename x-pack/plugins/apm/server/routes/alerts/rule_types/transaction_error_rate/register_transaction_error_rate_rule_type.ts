@@ -66,6 +66,19 @@ import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionErrorRate];
 
+export const transactionErrorRateActionVariables = [
+  apmActionVariables.alertDetailsUrl,
+  apmActionVariables.environment,
+  apmActionVariables.interval,
+  apmActionVariables.reason,
+  apmActionVariables.serviceName,
+  apmActionVariables.threshold,
+  apmActionVariables.transactionName,
+  apmActionVariables.transactionType,
+  apmActionVariables.triggerValue,
+  apmActionVariables.viewInAppUrl,
+];
+
 export function registerTransactionErrorRateRuleType({
   alerting,
   alertsLocator,
@@ -88,19 +101,7 @@ export function registerTransactionErrorRateRuleType({
       defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
       validate: { params: transactionErrorRateParamsSchema },
       actionVariables: {
-        context: [
-          apmActionVariables.alertDetailsUrl,
-          apmActionVariables.environment,
-          apmActionVariables.interval,
-          apmActionVariables.reason,
-          apmActionVariables.serviceName,
-          apmActionVariables.transactionName,
-          apmActionVariables.threshold,
-          apmActionVariables.transactionType,
-          apmActionVariables.transactionName,
-          apmActionVariables.triggerValue,
-          apmActionVariables.viewInAppUrl,
-        ],
+        context: transactionErrorRateActionVariables,
       },
       producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
