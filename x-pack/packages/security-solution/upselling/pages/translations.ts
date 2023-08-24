@@ -17,7 +17,8 @@ export const UPGRADE_LICENSE_MESSAGE = (requiredLicense: string) =>
 
 export const UPGRADE_PRODUCT_MESSAGE = (requiredProduct: string) =>
   i18n.translate('securitySolutionPackages.entityAnalytics.paywall.upgradeProductMessage', {
-    defaultMessage: 'Entity Analytics is available with {requiredProduct} subscriptions',
+    defaultMessage:
+      'Entity risk scoring capability is available in our {requiredProduct} license tier',
     values: {
       requiredProduct,
     },
