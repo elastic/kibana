@@ -1302,7 +1302,6 @@ describe('rules schema', () => {
     });
 
     test('You cannot pass empty object for investigation_fields', () => {
-      // getCreateRulesSchemaMock doesn't include investigation_fields
       const payload: Omit<RuleCreateProps, 'investigation_fields'> & {
         investigation_fields: unknown;
       } = {
