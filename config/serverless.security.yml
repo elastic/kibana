@@ -2,6 +2,7 @@
 
 ## Disable plugins
 enterpriseSearch.enabled: false
+discover.headlessLocation: 'securitySolutionUI'
 xpack.apm.enabled: false
 xpack.infra.enabled: false
 xpack.observability.enabled: false

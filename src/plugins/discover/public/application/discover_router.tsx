@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Redirect, useParams } from 'react-router-dom';
+import { Redirect, useParams, useLocation } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import React, { useCallback, useMemo } from 'react';
 import { History } from 'history';
@@ -75,7 +75,7 @@ export const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscov
     () => profileRegistry.get(profile)?.customizationCallbacks,
     [profile, profileRegistry]
   );
-
+  console.log({props});
   if (customizationCallbacks) {
     return (
       <DiscoverRoutes
@@ -100,13 +100,25 @@ export const DiscoverRouter = ({
   services,
   history,
   profileRegistry,
+  config,
   ...routeProps
 }: DiscoverRouterProps) => {
   const customizationCallbacks = useMemo(
     () => profileRegistry.get('default')?.customizationCallbacks ?? [],
     [profileRegistry]
   );
-
+  const { application } = services;
+  const { headlessLocation } = config;
+  const location = useLocation();
+  console.log({ config });
+  if (headlessLocation) {
+    const { hash, search } = location;
+    const newUrl = application.getUrlForApp(headlessLocation, {
+      deepLinkId: 'alerts',
+      path: `${search}${hash}`,
+    });
+    console.log('newUrl', newUrl);
+  }
   return (
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
