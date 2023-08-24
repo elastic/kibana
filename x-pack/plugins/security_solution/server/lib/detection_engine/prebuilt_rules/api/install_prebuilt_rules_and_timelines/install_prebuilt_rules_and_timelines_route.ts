@@ -30,10 +30,10 @@ import { upgradePrebuiltRules } from '../../logic/rule_objects/upgrade_prebuilt_
 import { rulesToMap } from '../../logic/utils';
 
 export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
-  router.put(
-    {
+  router.versioned
+    .put({
+      access: 'public',
       path: PREBUILT_RULES_URL,
-      validate: false,
       options: {
         tags: ['access:securitySolution'],
         timeout: {
@@ -44,28 +44,33 @@ export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPl
           idleSocket: moment.duration('1', 'hour').asMilliseconds(),
         },
       },
-    },
-    async (context, _, response) => {
-      const siemResponse = buildSiemResponse(response);
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: false,
+      },
+      async (context, _, response) => {
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const rulesClient = (await context.alerting).getRulesClient();
+        try {
+          const rulesClient = (await context.alerting).getRulesClient();
 
-        const validated = await createPrepackagedRules(
-          await context.securitySolution,
-          rulesClient,
-          undefined
-        );
-        return response.ok({ body: validated ?? {} });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+          const validated = await createPrepackagedRules(
+            await context.securitySolution,
+            rulesClient,
+            undefined
+          );
+          return response.ok({ body: validated ?? {} });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };
 
 export class PrepackagedRulesError extends Error {
