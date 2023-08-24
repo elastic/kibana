@@ -27,6 +27,7 @@ import {
   CodeBox,
   LanguageClientPanel,
   InstallClientPanel,
+  getLanguageDefinitionCodeSnippet,
 } from '@kbn/search-api-panels';
 
 import React, { useMemo, useState } from 'react';
@@ -34,6 +35,8 @@ import type {
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
+import { useQuery } from '@tanstack/react-query';
+import { Connector } from '@kbn/enterprise-search-plugin/common/types/connectors';
 import { docLinks } from '../../../common/doc_links';
 import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
@@ -42,7 +45,7 @@ import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
 import './overview.scss';
 import { ApiKeyPanel } from './api_key/api_key';
-import { getCodeSnippet, showTryInConsole } from './languages/utils';
+import { showTryInConsole } from './languages/utils';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] =
@@ -59,6 +62,12 @@ export const ElasticsearchOverview = () => {
     url: elasticsearchURL,
     apiKey: clientApiKey,
   };
+
+  const { data } = useQuery({
+    queryKey: ['fetchConnectors'],
+    queryFn: () =>
+      http.fetch<{ connectors: Connector[] }>('/internal/serverless_search/connectors'),
+  });
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
@@ -85,7 +94,11 @@ export const ElasticsearchOverview = () => {
 
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
         <InstallClientPanel
-          codeSnippet={getCodeSnippet(selectedLanguage, 'installClient', codeSnippetArguments)}
+          codeSnippet={getLanguageDefinitionCodeSnippet(
+            selectedLanguage,
+            'installClient',
+            codeSnippetArguments
+          )}
           showTryInConsole={showTryInConsole('installClient')}
           languages={languageDefinitions}
           language={selectedLanguage}
@@ -124,7 +137,7 @@ export const ElasticsearchOverview = () => {
           leftPanelContent={
             <CodeBox
               languages={languageDefinitions}
-              codeSnippet={getCodeSnippet(
+              codeSnippet={getLanguageDefinitionCodeSnippet(
                 selectedLanguage,
                 'configureClient',
                 codeSnippetArguments
@@ -152,19 +165,6 @@ export const ElasticsearchOverview = () => {
                   },
                 ]
               : []),
-            ...(selectedLanguage.advancedConfig
-              ? [
-                  {
-                    href: selectedLanguage.advancedConfig,
-                    label: i18n.translate(
-                      'xpack.serverlessSearch.configureClient.advancedConfigLabel',
-                      {
-                        defaultMessage: 'Advanced configuration',
-                      }
-                    ),
-                  },
-                ]
-              : []),
           ]}
           title={i18n.translate('xpack.serverlessSearch.configureClient.title', {
             defaultMessage: 'Configure your client',
@@ -180,7 +180,11 @@ export const ElasticsearchOverview = () => {
           leftPanelContent={
             <CodeBox
               languages={languageDefinitions}
-              codeSnippet={getCodeSnippet(selectedLanguage, 'testConnection', codeSnippetArguments)}
+              codeSnippet={getLanguageDefinitionCodeSnippet(
+                selectedLanguage,
+                'testConnection',
+                codeSnippetArguments
+              )}
               showTryInConsole={showTryInConsole('testConnection')}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
@@ -198,7 +202,11 @@ export const ElasticsearchOverview = () => {
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
         <IngestData
-          codeSnippet={getCodeSnippet(selectedLanguage, 'ingestData', codeSnippetArguments)}
+          codeSnippet={getLanguageDefinitionCodeSnippet(
+            selectedLanguage,
+            'ingestData',
+            codeSnippetArguments
+          )}
           showTryInConsole={showTryInConsole('ingestData')}
           languages={languageDefinitions}
           selectedLanguage={selectedLanguage}
@@ -219,7 +227,7 @@ export const ElasticsearchOverview = () => {
           leftPanelContent={
             <CodeBox
               languages={languageDefinitions}
-              codeSnippet={getCodeSnippet(
+              codeSnippet={getLanguageDefinitionCodeSnippet(
                 selectedLanguage,
                 'buildSearchQuery',
                 codeSnippetArguments
@@ -360,26 +368,28 @@ export const ElasticsearchOverview = () => {
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section alignment="top" className="serverlessSearchFooter">
         <EuiFlexGroup gutterSize="l">
-          <EuiFlexItem>
-            <FooterIcon
-              // TODO: update with real link
-              href="https://elastic.co"
-              imgSrc={`${assetBasePath}invite_users_icon.png`}
-              title={i18n.translate('xpack.serverlessSearch.footer.inviteUsers.title', {
-                defaultMessage: 'Invite more users',
-              })}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <FooterIcon
-              // TODO: update with real link
-              href="https://elastic.co"
-              imgSrc={`${assetBasePath}billing_icon.png`}
-              title={i18n.translate('xpack.serverlessSearch.footer.billing.title', {
-                defaultMessage: 'Billing and usage',
-              })}
-            />
-          </EuiFlexItem>
+          {cloud.usersAndRolesUrl && (
+            <EuiFlexItem>
+              <FooterIcon
+                href={cloud.usersAndRolesUrl}
+                imgSrc={`${assetBasePath}invite_users_icon.png`}
+                title={i18n.translate('xpack.serverlessSearch.footer.inviteUsers.title', {
+                  defaultMessage: 'Invite more users',
+                })}
+              />
+            </EuiFlexItem>
+          )}
+          {cloud.billingUrl && (
+            <EuiFlexItem>
+              <FooterIcon
+                href={cloud.billingUrl}
+                imgSrc={`${assetBasePath}billing_icon.png`}
+                title={i18n.translate('xpack.serverlessSearch.footer.billing.title', {
+                  defaultMessage: 'Billing and usage',
+                })}
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <FooterIcon
               href="https://www.elastic.co/community/"
@@ -391,8 +401,7 @@ export const ElasticsearchOverview = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <FooterIcon
-              // TODO: update with real link
-              href="https://www.elastic.co/kibana/feedback"
+              href={docLinks.kibanaFeedback}
               imgSrc={`${assetBasePath}feedback_icon.png`}
               title={i18n.translate('xpack.serverlessSearch.footer.feedback.title', {
                 defaultMessage: 'Give feedback',

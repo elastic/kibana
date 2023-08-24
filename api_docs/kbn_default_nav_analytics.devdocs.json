@@ -145,13 +145,10 @@
           {
             "parentPluginId": "@kbn/default-nav-analytics",
             "id": "def-common.defaultNavigation.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/default-nav/analytics/default_navigation.ts",
             "deprecated": false,
             "trackAdoption": false

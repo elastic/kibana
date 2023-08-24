@@ -560,10 +560,6 @@
                 "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
-              },
-              {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
               },
@@ -3669,6 +3665,45 @@
         "children": [
           {
             "parentPluginId": "dataViews",
+            "id": "def-public.DataViewsPublicPlugin.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/data_views/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewsPublicPlugin.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initializerContext",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-plugins-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCorePluginsBrowserPluginApi",
+                    "section": "def-common.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
+                  "<object>"
+                ],
+                "path": "src/plugins/data_views/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-public.DataViewsPublicPlugin.setup",
             "type": "Function",
             "tags": [],
@@ -3913,6 +3948,17 @@
             "trackAdoption": false,
             "returnComment": [],
             "children": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewsService.scriptedFieldsEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "scriptedFieldsEnabled",
+            "description": [],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViews",
@@ -5476,6 +5522,17 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-public.DataViewsServicePublic.scriptedFieldsEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "scriptedFieldsEnabled",
+            "description": [],
+            "path": "src/plugins/data_views/public/data_views_service_public.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-public.DataViewsServicePublic.Unnamed",
             "type": "Function",
             "tags": [],
@@ -6488,6 +6545,17 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewsServicePublicDeps.scriptedFieldsEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "scriptedFieldsEnabled",
+            "description": [],
+            "path": "src/plugins/data_views/public/data_views_service_public.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -8450,10 +8518,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
               },
               {
                 "plugin": "infra",
@@ -10746,7 +10810,7 @@
                 "section": "def-common.DataViewsService",
                 "text": "DataViewsService"
               },
-              ">; }"
+              ">; getScriptedFieldsEnabled: () => boolean; }"
             ],
             "path": "src/plugins/data_views/server/plugin.ts",
             "deprecated": false,
@@ -10846,6 +10910,17 @@
             "trackAdoption": false,
             "returnComment": [],
             "children": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.DataViewsService.scriptedFieldsEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "scriptedFieldsEnabled",
+            "description": [],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViews",
@@ -14931,6 +15006,24 @@
               "trackAdoption": false
             }
           ]
+        },
+        {
+          "parentPluginId": "dataViews",
+          "id": "def-server.DataViewsServerPluginStart.getScriptedFieldsEnabled",
+          "type": "Function",
+          "tags": [],
+          "label": "getScriptedFieldsEnabled",
+          "description": [
+            "\n"
+          ],
+          "signature": [
+            "() => boolean"
+          ],
+          "path": "src/plugins/data_views/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -15495,10 +15588,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
               },
               {
                 "plugin": "infra",
@@ -18558,6 +18647,17 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-common.DataViewsService.scriptedFieldsEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "scriptedFieldsEnabled",
+            "description": [],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-common.DataViewsService.Unnamed",
             "type": "Function",
             "tags": [],
@@ -21225,6 +21325,17 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewsServiceDeps.scriptedFieldsEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "scriptedFieldsEnabled",
+            "description": [],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -24255,22 +24366,6 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "@kbn/core-saved-objects-api-browser",
-                "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
@@ -24283,8 +24378,16 @@
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+                "plugin": "@kbn/core-saved-objects-api-browser",
+                "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
                 "plugin": "home",
@@ -24321,6 +24424,14 @@
               {
                 "plugin": "home",
                 "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+              },
+              {
+                "plugin": "home",
+                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "fleet",
