@@ -143,13 +143,14 @@ describe('Service overview: Time Comparison', () => {
     cy.contains('Week before');
 
     cy.changeTimeRange('Last 7 days');
+    cy.wait('@throughputChartRequest');
+    cy.contains('Last 7 days');
     cy.getByTestSubj('comparisonSelect').should('have.value', '1w');
     cy.getByTestSubj('comparisonSelect').should('contain.text', 'Week before');
     cy.getByTestSubj('comparisonSelect').should(
       'not.contain.text',
       'Day before'
     );
-    cy.contains('Week before');
   });
 
   it('hovers over throughput chart shows previous and current period', () => {
