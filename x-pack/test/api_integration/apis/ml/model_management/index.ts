@@ -10,5 +10,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('model management', function () {
     loadTestFile(require.resolve('./memory_usage'));
+    loadTestFile(require.resolve('./nodes_overview'));
   });
 }

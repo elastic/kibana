@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
     await ml.api.startDatafeed(DATAFEED_CONFIG.datafeed_id);
   }
 
-  describe('GET model_management/memory_usage', () => {
+  describe('GET model_management/nodes_overview', () => {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.api.createTestTrainedModels('regression', 2);
@@ -65,32 +65,22 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.testResources.cleanMLSavedObjects();
     });
 
-    it('returns model memory usage', async () => {
+    it('returns nodes overview', async () => {
       const { body, status } = await supertest
-        .get(`/internal/ml/model_management/memory_usage`)
+        .get(`/internal/ml/model_management/nodes_overview`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
-      expect(body[0].id).to.eql('fq_multi_1_ae');
-      expect(body[0].type).to.eql('anomaly-detector');
-      expect(body[0].size).to.greaterThan(10000000);
-    });
-
-    it('filters out memory usage response based on the entity type', async () => {
-      const { body, status } = await supertest
-        .get(`/internal/ml/model_management/memory_usage`)
-        .query({ type: 'data-frame-analytics' })
-        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(getCommonRequestHeader('1'));
-      ml.api.assertResponseStatusCode(200, status, body);
-
-      expect(body).to.eql([]);
+      expect(body.nodes[0].roles).to.contain('ml');
+      expect(body.nodes[0].memory_overview.anomaly_detection.total).to.be.greaterThan(10000000);
+      expect(body.nodes[0].memory_overview.dfa_training.total).to.eql(0);
+      expect(body.nodes[0].memory_overview.trained_models.total).to.eql(0);
     });
 
     it('returns an error for the user with viewer persmissions', async () => {
       const { body, status } = await supertest
-        .get(`/internal/ml/model_management/memory_usage`)
+        .get(`/internal/ml/model_management/nodes_overview`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(403, status, body);
@@ -98,7 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('returns an error for unauthorized user', async () => {
       const { body, status } = await supertest
-        .get(`/internal/ml/model_management/memory_usage`)
+        .get(`/internal/ml/model_management/nodes_overview`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(403, status, body);
