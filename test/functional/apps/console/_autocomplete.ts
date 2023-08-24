@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'console']);
+  const PageObjects = getPageObjects(['common', 'console', 'header']);
   const find = getService('find');
 
   describe('console autocomplete feature', function describeIndexTests() {
@@ -42,6 +42,155 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.sleepForDebouncePeriod();
       await PageObjects.console.promptAutocomplete();
       expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+    });
+
+    describe('Autocomplete behavior', () => {
+      beforeEach(async () => {
+        await PageObjects.console.clearTextArea();
+        await PageObjects.console.pressEnter();
+      });
+
+      it('HTTP methods', async () => {
+        const suggestions = {
+          G: ['GET'],
+          P: ['PUT', 'POST'],
+          D: ['DELETE'],
+          H: ['HEAD'],
+        };
+        for (const [char, methods] of Object.entries(suggestions)) {
+          await PageObjects.console.sleepForDebouncePeriod();
+          log.debug('Key type "%s"', char);
+          await PageObjects.console.enterText(char);
+
+          await retry.waitFor('autocomplete to be visible', () =>
+            PageObjects.console.isAutocompleteVisible()
+          );
+          expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+
+          for (const [i, method] of methods.entries()) {
+            expect(await PageObjects.console.getAutocompleteSuggestion(i)).to.be.eql(method);
+          }
+
+          await PageObjects.console.pressEscape();
+          await PageObjects.console.pressEnter();
+        }
+      });
+
+      it('ES API endpoints', async () => {
+        const suggestions = {
+          'GET _': ['_alias', '_all'],
+          'PUT _': ['_all'],
+          'POST _': ['_aliases', '_all'],
+          'DELETE _': ['_all'],
+          'HEAD _': ['_alias', '_all'],
+        };
+        for (const [text, endpoints] of Object.entries(suggestions)) {
+          for (const char of text) {
+            await PageObjects.console.sleepForDebouncePeriod();
+            log.debug('Key type "%s"', char);
+            await PageObjects.console.enterText(char);
+          }
+
+          await retry.waitFor('autocomplete to be visible', () =>
+            PageObjects.console.isAutocompleteVisible()
+          );
+          expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+
+          for (const [i, endpoint] of endpoints.entries()) {
+            expect(await PageObjects.console.getAutocompleteSuggestion(i)).to.be.eql(endpoint);
+          }
+
+          await PageObjects.console.pressEscape();
+          await PageObjects.console.pressEnter();
+        }
+      });
+
+      it('JSON autocompletion with placeholder fields', async () => {
+        await PageObjects.console.enterText('GET _search\n{');
+        await PageObjects.console.pressEnter();
+
+        for (const char of '"ag') {
+          await PageObjects.console.sleepForDebouncePeriod();
+          log.debug('Key type "%s"', char);
+          await PageObjects.console.enterText(char);
+        }
+        await retry.waitFor('autocomplete to be visible', () =>
+          PageObjects.console.isAutocompleteVisible()
+        );
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+        await PageObjects.console.pressEnter();
+        await PageObjects.console.sleepForDebouncePeriod();
+
+        expect(await PageObjects.console.getAllVisibleText()).to.be.eql(
+          `
+GET _search
+{
+  "aggs": {
+    "NAME": {
+      "AGG_TYPE": {}
+    }
+  }
+}
+`.replace(/\n/g, '')
+        );
+        // cursor should be located between '"' and 'N'
+        expect(await PageObjects.console.getCurrentLineNumber()).to.be.eql(5);
+
+        await PageObjects.console.pressDown();
+        await PageObjects.console.pressRight();
+        await PageObjects.console.pressRight();
+        for (let i = 0; i < 8; i++) {
+          await PageObjects.console.pressRight(true); // select 'AGG_TYPE'
+        }
+
+        for (const char of 'ter') {
+          await PageObjects.console.sleepForDebouncePeriod();
+          log.debug('Key type "%s"', char);
+          await PageObjects.console.enterText(char);
+        }
+        await retry.waitFor('autocomplete to be visible', () =>
+          PageObjects.console.isAutocompleteVisible()
+        );
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+        await PageObjects.console.pressEnter();
+        await PageObjects.console.sleepForDebouncePeriod();
+
+        expect(await PageObjects.console.getAllVisibleText()).to.be.eql(
+          `
+GET _search
+{
+  "aggs": {
+    "NAME": {
+      "terms": {
+        "field": ""
+      }
+    }
+  }
+}
+`.replace(/\n/g, '')
+        );
+      });
+
+      it('Dynamic autocomplete', async () => {
+        await PageObjects.console.enterRequest('POST test/_doc\n{}');
+        await PageObjects.console.clickPlay();
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(await PageObjects.console.getResponseStatus()).to.be('201');
+
+        await PageObjects.console.pressEnter();
+        for (const char of 'POST t') {
+          await PageObjects.console.sleepForDebouncePeriod();
+          log.debug('Key type "%s"', char);
+          await PageObjects.console.enterText(char);
+        }
+        await retry.waitFor('autocomplete to be visible', () =>
+          PageObjects.console.isAutocompleteVisible()
+        );
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+
+        expect(await PageObjects.console.getAutocompleteSuggestion(0)).to.be.eql('test');
+      });
     });
 
     describe('anti-regression watchdogs', () => {
