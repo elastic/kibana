@@ -225,7 +225,7 @@ export function createTestEsCluster<
       } else if (esFrom === 'serverless') {
         return await firstNode.runServerless({
           basePath,
-          esArgs: ['xpack.security.http.ssl.enabled=false', ...customEsArgs],
+          esArgs: customEsArgs,
           port,
           clean: true,
           teardown: true,

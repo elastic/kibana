@@ -41,6 +41,9 @@ export default async () => {
     esTestCluster: {
       from: 'serverless',
       serverArgs: [
+        // HTTP SSL requires setup for Kibana to trust ESS, disable for now
+        'xpack.security.http.ssl.enabled=false',
+
         'xpack.security.authc.realms.file.file1.order=-100',
 
         'xpack.security.authc.realms.jwt.jwt1.order=-98',
