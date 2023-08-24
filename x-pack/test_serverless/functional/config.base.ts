@@ -58,6 +58,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         indexManagement: {
           pathname: '/app/management/data/index_management',
         },
+        discover: {
+          pathname: '/app/discover',
+        },
       },
       // choose where screenshots should be saved
       screenshots: {

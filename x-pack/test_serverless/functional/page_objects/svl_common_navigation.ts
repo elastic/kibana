@@ -142,6 +142,20 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
       async clickHome() {
         await testSubjects.click('~breadcrumb-home');
       },
+      async clickBreadcrumb(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
+        if ('deepLinkId' in by) {
+          await testSubjects.click(`~breadcrumb-deepLinkId-${by.deepLinkId}`);
+        } else {
+          (await getByVisibleText('~breadcrumb', by.text))?.click();
+        }
+      },
+      getBreadcrumb(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
+        if ('deepLinkId' in by) {
+          return testSubjects.find(`~breadcrumb-deepLinkId-${by.deepLinkId}`);
+        } else {
+          return getByVisibleText('~breadcrumb', by.text);
+        }
+      },
       async expectBreadcrumbExists(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
         if ('deepLinkId' in by) {
           await testSubjects.existOrFail(`~breadcrumb-deepLinkId-${by.deepLinkId}`);
