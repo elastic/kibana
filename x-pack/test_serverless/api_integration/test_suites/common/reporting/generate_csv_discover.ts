@@ -9,34 +9,28 @@ import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// the archived data holds a report created by test_user
-const TEST_USERNAME = 'test_user';
-const TEST_USER_PASSWORD = 'changeme';
+const ELASTIC_USERNAME = 'elastic';
+const ELASTIC_PASSWORD = 'changeme';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('svlReportingAPI');
 
-  describe('Generate CSV from SearchSource Discover', () => {
-    before(async () => {
-      await reportingAPI.createReportingRole();
-      await reportingAPI.createReportingUser();
-      await reportingAPI.createReportingUser(TEST_USERNAME, TEST_USER_PASSWORD);
-    });
+  describe('Generate CSV from SearchSource: Discover', () => {
+    const archives = {
+      data: 'x-pack/test/functional/es_archives/reporting/ecommerce',
+      savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce',
+    };
 
     beforeEach(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/es_archives/reporting/ecommerce_search'
-      );
+      await esArchiver.load(archives.data);
+      await kibanaServer.importExport.load(archives.savedObjects);
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await kibanaServer.importExport.unload(
-        'x-pack/test/functional/es_archives/reporting/ecommerce_search'
-      );
+      await esArchiver.unload(archives.data);
+      await kibanaServer.importExport.unload(archives.savedObjects);
     });
 
     it(`exported CSV file matches snapshot`, async () => {
@@ -77,33 +71,38 @@ export default ({ getService }: FtrProviderContext) => {
             },
           },
         },
-        'elastic',
-        'changeme'
+        ELASTIC_USERNAME,
+        ELASTIC_PASSWORD
       );
 
-      expect(job.created_by).to.be('test_user');
+      expect(job.created_by).to.be(ELASTIC_USERNAME);
       expect(job.jobtype).to.be('csv_searchsource');
 
       // wait for the the pending job to complete
-      await reportingAPI.waitForJobToFinish(path, 'elastic', 'changeme');
+      await reportingAPI.waitForJobToFinish(path, ELASTIC_USERNAME, ELASTIC_PASSWORD);
 
-      const csvFile = await reportingAPI.getCompletedJobOutput(path, 'elastic', 'changeme');
+      const csvFile = await reportingAPI.getCompletedJobOutput(
+        path,
+        ELASTIC_USERNAME,
+        ELASTIC_PASSWORD
+      );
       expectSnapshot(csvFile).toMatch();
     });
 
     describe('with unmapped fields', () => {
-      const dataArchive = 'x-pack/test/functional/es_archives/reporting/unmapped_fields';
-      const savedObjectsArchive =
-        'x-pack/test/functional/fixtures/kbn_archiver/reporting/unmapped_fields.json';
+      const unmappedFieldsArchives = {
+        data: 'x-pack/test/functional/es_archives/reporting/unmapped_fields',
+        savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/unmapped_fields.json',
+      };
 
       before(async () => {
-        await esArchiver.loadIfNeeded(dataArchive);
-        await kibanaServer.importExport.load(savedObjectsArchive);
+        await esArchiver.loadIfNeeded(unmappedFieldsArchives.data);
+        await kibanaServer.importExport.load(unmappedFieldsArchives.savedObjects);
       });
 
       after(async () => {
-        await esArchiver.unload(dataArchive);
-        await kibanaServer.importExport.unload(savedObjectsArchive);
+        await esArchiver.unload(unmappedFieldsArchives.data);
+        await kibanaServer.importExport.unload(unmappedFieldsArchives.savedObjects);
       });
 
       async function generateCsvReport(fields: string[]) {
@@ -123,12 +122,12 @@ export default ({ getService }: FtrProviderContext) => {
               filter: [],
             } as SerializedSearchSourceFields,
           },
-          'elastic',
-          'changeme'
+          ELASTIC_USERNAME,
+          ELASTIC_PASSWORD
         );
 
-        await reportingAPI.waitForJobToFinish(path, 'elastic', 'changeme');
-        return reportingAPI.getCompletedJobOutput(path, 'elastic', 'changeme');
+        await reportingAPI.waitForJobToFinish(path, ELASTIC_USERNAME, ELASTIC_PASSWORD);
+        return reportingAPI.getCompletedJobOutput(path, ELASTIC_USERNAME, ELASTIC_PASSWORD);
       }
 
       it('includes an unmapped field to the report', async () => {
