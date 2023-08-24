@@ -517,6 +517,7 @@ x-pack/plugins/monitoring @elastic/infra-monitoring-ui
 src/plugins/navigation @elastic/appex-sharedux
 src/plugins/newsfeed @elastic/kibana-core
 test/common/plugins/newsfeed @elastic/kibana-core
+src/plugins/no_data_page @elastic/appex-sharedux
 x-pack/plugins/notifications @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
 x-pack/plugins/observability_ai_assistant @elastic/obs-ai-assistant
