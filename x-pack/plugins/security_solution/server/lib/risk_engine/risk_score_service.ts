@@ -11,16 +11,20 @@ import type {
   CalculateAndPersistScoresResponse,
   CalculateScoresParams,
   CalculateScoresResponse,
+  RiskEngineConfiguration,
 } from './types';
 import { calculateRiskScores } from './calculate_risk_scores';
 import { calculateAndPersistRiskScores } from './calculate_and_persist_risk_scores';
 import type { RiskEngineDataClient } from './risk_engine_data_client';
+import type { RiskInputsIndexResponse } from './get_risk_inputs_index';
 
 export interface RiskScoreService {
   calculateScores: (params: CalculateScoresParams) => Promise<CalculateScoresResponse>;
   calculateAndPersistScores: (
     params: CalculateAndPersistScoresParams
   ) => Promise<CalculateAndPersistScoresResponse>;
+  getConfiguration: () => Promise<RiskEngineConfiguration | null>;
+  getRiskInputsIndex: ({ dataViewId }: { dataViewId: string }) => Promise<RiskInputsIndexResponse>;
 }
 
 export interface RiskScoreServiceFactoryParams {
@@ -39,4 +43,6 @@ export const riskScoreServiceFactory = ({
   calculateScores: (params) => calculateRiskScores({ ...params, esClient, logger }),
   calculateAndPersistScores: (params) =>
     calculateAndPersistRiskScores({ ...params, esClient, logger, riskEngineDataClient, spaceId }),
+  getConfiguration: async () => riskEngineDataClient.getConfiguration(),
+  getRiskInputsIndex: async (params) => riskEngineDataClient.getRiskInputsIndex(params),
 });
