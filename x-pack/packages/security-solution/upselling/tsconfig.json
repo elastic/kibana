@@ -18,6 +18,8 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
+    "@kbn/security-solution-navigation",
+    "@kbn/shared-ux-page-kibana-template",
   ],
   "exclude": [
     "target/**/*"
