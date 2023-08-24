@@ -1,6 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/generate-oas-cli",
-  "owner": "@elastic/kibana-core",
-  "devOnly": true
+  "owner": "@elastic/kibana-core"
 }

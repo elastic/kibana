@@ -12,7 +12,7 @@ import Path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import { set } from '@kbn/safer-lodash-set';
 import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
-import { CoreVersionedRouter } from '@kbn/core-http-router-server-internal';
+import { type CoreVersionedRouter } from '@kbn/core-http-router-server-internal';
 import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
 
 import { generateOpenApiDocument } from './generate_oas';

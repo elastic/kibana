@@ -41,7 +41,7 @@ export interface GenerateOpenApiDocumentOptions {
 }
 
 export function generateOpenApiDocument(
-  appRouters: CoreVersionedRouter[],
+  appRouters: any[],
   opts: GenerateOpenApiDocumentOptions
 ): OpenAPIV3.Document {
   const paths: OpenAPIV3.PathsObject = {};

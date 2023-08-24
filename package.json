@@ -439,6 +439,7 @@
     "@kbn/generate-console-definitions": "link:packages/kbn-generate-console-definitions",
     "@kbn/generate-csv": "link:packages/kbn-generate-csv",
     "@kbn/generate-csv-types": "link:packages/kbn-generate-csv-types",
+    "@kbn/generate-oas-cli": "link:packages/kbn-generate-oas-cli",
     "@kbn/global-search-bar-plugin": "link:x-pack/plugins/global_search_bar",
     "@kbn/global-search-plugin": "link:x-pack/plugins/global_search",
     "@kbn/global-search-providers-plugin": "link:x-pack/plugins/global_search_providers",
@@ -773,16 +774,10 @@
     "@kbn/visualization-ui-components": "link:packages/kbn-visualization-ui-components",
     "@kbn/visualizations-plugin": "link:src/plugins/visualizations",
     "@kbn/watcher-plugin": "link:x-pack/plugins/watcher",
-<<<<<<< HEAD
     "@kbn/zod": "link:packages/kbn-zod",
-    "@loaders.gl/core": "^2.3.1",
-    "@loaders.gl/json": "^2.3.1",
-    "@loaders.gl/shapefile": "^2.3.1",
-=======
     "@loaders.gl/core": "^3.4.7",
     "@loaders.gl/json": "^3.4.7",
     "@loaders.gl/shapefile": "^3.4.7",
->>>>>>> main
     "@mapbox/geojson-rewind": "^0.5.0",
     "@mapbox/mapbox-gl-draw": "1.3.0",
     "@mapbox/mapbox-gl-rtl-text": "0.2.3",
