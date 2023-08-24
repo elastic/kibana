@@ -17,11 +17,13 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
+
 import { DiscoverLink } from '../../../../lib/discover_link';
 import { useLoadIndex } from '../../../../services';
 import { Section } from '../../home';
 import { DetailsPageError } from './details_page_error';
-import { IndexActionsContextMenuWithoutRedux } from '../index_actions_context_menu/index_actions_context_menu.without_redux';
+import { ManageIndexButton } from './manage_index_button';
+
 export enum IndexDetailsSection {
   Overview = 'overview',
   Documents = 'documents',
@@ -141,10 +143,9 @@ export const DetailsPage: React.FunctionComponent<
         bottomBorder
         rightSideItems={[
           <DiscoverLink indexName={indexName} asButton={true} />,
-          <IndexActionsContextMenuWithoutRedux
-            indexNames={[indexName]}
-            indices={[data]}
-            fill={false}
+          <ManageIndexButton
+            indexName={indexName}
+            indexDetails={data}
             reloadIndexDetails={resendRequest}
             navigateToAllIndices={navigateToAllIndices}
           />,
@@ -152,6 +153,10 @@ export const DetailsPage: React.FunctionComponent<
         tabs={headerTabs}
       />
 
+      <EuiSpacer size="l" />
+      <div>
+        <pre>{JSON.stringify(data, null, 2)}</pre>
+      </div>
       <EuiSpacer size="l" />
 
       <div data-test-subj={`indexDetailsContent`}>

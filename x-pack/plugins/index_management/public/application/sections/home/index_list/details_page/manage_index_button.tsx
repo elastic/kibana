@@ -5,89 +5,34 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useState } from 'react';
-import { HttpSetup } from '@kbn/core-http-browser';
-import { EuiButtonProps } from '@elastic/eui/src/components/button/button';
-import { EuiPopoverProps } from '@elastic/eui/src/components/popover/popover';
+import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { HttpSetup } from '@kbn/core-http-browser';
+
 import { Index } from '../../../../../../common';
 import {
-  reloadIndices,
-  closeIndices as closeIndicesRequest,
-  openIndices as openIndicesRequest,
-  flushIndices as flushIndicesRequest,
-  refreshIndices as refreshIndicesRequest,
   clearCacheIndices as clearCacheIndicesRequest,
-  unfreezeIndices as unfreezeIndicesRequest,
-  forcemergeIndices as forcemergeIndicesRequest,
+  closeIndices as closeIndicesRequest,
   deleteIndices as deleteIndicesRequest,
+  flushIndices as flushIndicesRequest,
+  forcemergeIndices as forcemergeIndicesRequest,
+  openIndices as openIndicesRequest,
+  refreshIndices as refreshIndicesRequest,
+  unfreezeIndices as unfreezeIndicesRequest,
 } from '../../../../services';
 import { notificationService } from '../../../../services/notification';
-// @ts-ignore this component needs to be refactored into TS
-import { IndexActionsContextMenu } from './index_actions_context_menu';
+import { httpService } from '../../../../services/http';
 
-export interface ReduxProps {
-  closeIndices: () => Promise<void>;
-  openIndices: () => Promise<void>;
-  flushIndices: () => Promise<void>;
-  refreshIndices: () => Promise<void>;
-  clearCacheIndices: () => Promise<void>;
-  unfreezeIndices: () => Promise<void>;
-  forcemergeIndices: (maxNumSegments: string) => Promise<void>;
-  deleteIndices: ({}: { indexNames: string[] }) => Promise<void>;
-
-  // following 4 actions are only added when on the list view and only 1 index is selected
-  showSettings: ({}: { indexNames: string[] }) => void; // opens the settings tab for the 1st index
-  showMapping: ({}: { indexNames: string[] }) => void; // opens the mapping tab for the 1st index
-  showStats: ({}: { indexNames: string[] }) => void; // opens the stats tab for the 1st index
-  editIndex: ({}: { indexNames: string[] }) => void; // opens the edit settings tab for the 1st index
-
-  indexStatusByName: {
-    [indexName: string]: Index['status'] | undefined;
-  };
-  reloadIndices: typeof reloadIndices;
-
-  // this comes from the extension service
-  performExtensionAction: ({}: {
-    requestMethod: (indexNames: string[], httpClient: HttpSetup) => Promise<void>;
-    indexNames: string[];
-    successMessage: string;
-  }) => Promise<void>;
-}
-
-interface Props {
-  // either an array of indices selected in the list view or an array of 1 index name on details panel/page
-  indexNames: string[];
-
-  // indicates if the context menu is on the list view (to show additional actions)
-  isOnListView?: boolean;
-  // a callback used to reset selected indices on the list view
-  resetSelection?: () => void;
-
-  // these props are only set on the details panel to change style
-  anchorPosition?: EuiPopoverProps['anchorPosition'];
-  iconSide?: EuiButtonProps['iconSide'];
-  iconType?: EuiButtonProps['iconType'];
-  label?: React.Component;
-
-  // a new prop to make the button secondary
-  fill?: boolean;
-
-  // instead of getting indices data from the redux store, pass it as a prop
-  indices: Index[];
-
-  // a function to reload index details
-  reloadIndexDetails?: () => void;
-
-  // a function to navigate back to all indices (after index deletion)
-  navigateToAllIndices?: () => void;
-}
+import {
+  IndexActionsContextMenu,
+  IndexActionsContextMenuProps,
+} from '../index_actions_context_menu/index_actions_context_menu';
 
 const getIndexStatusByName = (
   indexNames: string[],
   indices: Index[]
-): ReduxProps['indexStatusByName'] => {
-  const indexStatusByName: ReduxProps['indexStatusByName'] = {};
+): IndexActionsContextMenuProps['indexStatusByName'] => {
+  const indexStatusByName: IndexActionsContextMenuProps['indexStatusByName'] = {};
   indexNames.forEach((indexName) => {
     const { status } = indices.find((index) => index.name === indexName) ?? {};
     indexStatusByName[indexName] = status;
@@ -95,14 +40,26 @@ const getIndexStatusByName = (
   return indexStatusByName;
 };
 
-export const IndexActionsContextMenuWithoutRedux: FunctionComponent<Props> = ({
-  indexNames,
-  indices,
+interface Props {
+  indexName: string;
+  indexDetails: Index;
+  reloadIndexDetails: () => void;
+  navigateToAllIndices: () => void;
+}
+export const ManageIndexButton: FunctionComponent<Props> = ({
+  indexName,
+  indexDetails,
   reloadIndexDetails,
   navigateToAllIndices,
-  ...rest
 }) => {
   const [isLoading, setIsLoading] = useState(false);
+
+  // the variables are created to write the index actions in a way to later re-use for indices list without redux
+  const indexNames = useMemo(() => [indexName], [indexName]);
+  const reloadIndices = reloadIndexDetails;
+  const indices = [indexDetails];
+  const indexStatusByName = getIndexStatusByName(indexNames, indices);
+
   const closeIndices = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -114,12 +71,12 @@ export const IndexActionsContextMenuWithoutRedux: FunctionComponent<Props> = ({
           values: { indexNames: indexNames.join(', ') },
         })
       );
-      reloadIndexDetails?.();
+      reloadIndices();
     } catch (error) {
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
     }
-  }, [reloadIndexDetails, indexNames]);
+  }, [reloadIndices, indexNames]);
 
   const openIndices = useCallback(async () => {
     setIsLoading(true);
@@ -132,12 +89,12 @@ export const IndexActionsContextMenuWithoutRedux: FunctionComponent<Props> = ({
           values: { indexNames: indexNames.join(', ') },
         })
       );
-      reloadIndexDetails?.();
+      reloadIndices();
     } catch (error) {
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
     }
-  }, [reloadIndexDetails, indexNames]);
+  }, [reloadIndices, indexNames]);
 
   const flushIndices = useCallback(async () => {
     setIsLoading(true);
@@ -150,12 +107,12 @@ export const IndexActionsContextMenuWithoutRedux: FunctionComponent<Props> = ({
           values: { indexNames: indexNames.join(', ') },
         })
       );
-      reloadIndexDetails?.();
+      reloadIndices();
     } catch (error) {
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
     }
-  }, [reloadIndexDetails, indexNames]);
+  }, [reloadIndices, indexNames]);
 
   const refreshIndices = useCallback(async () => {
     setIsLoading(true);
@@ -168,12 +125,12 @@ export const IndexActionsContextMenuWithoutRedux: FunctionComponent<Props> = ({
           values: { indexNames: indexNames.join(', ') },
         })
       );
-      reloadIndexDetails?.();
+      reloadIndices();
     } catch (error) {
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
     }
-  }, [reloadIndexDetails, indexNames]);
+  }, [reloadIndices, indexNames]);
 
   const clearCacheIndices = useCallback(async () => {
     setIsLoading(true);
@@ -186,12 +143,12 @@ export const IndexActionsContextMenuWithoutRedux: FunctionComponent<Props> = ({
           values: { indexNames: indexNames.join(', ') },
         })
       );
-      reloadIndexDetails?.();
+      reloadIndices();
     } catch (error) {
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
     }
-  }, [reloadIndexDetails, indexNames]);
+  }, [reloadIndices, indexNames]);
 
   const unfreezeIndices = useCallback(async () => {
     setIsLoading(true);
@@ -204,12 +161,12 @@ export const IndexActionsContextMenuWithoutRedux: FunctionComponent<Props> = ({
           values: { indexNames: indexNames.join(', ') },
         })
       );
-      reloadIndexDetails?.();
+      reloadIndices();
     } catch (error) {
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
     }
-  }, [reloadIndexDetails, indexNames]);
+  }, [reloadIndices, indexNames]);
 
   const forcemergeIndices = useCallback(
     async (maxNumSegments: string) => {
@@ -226,13 +183,13 @@ export const IndexActionsContextMenuWithoutRedux: FunctionComponent<Props> = ({
             }
           )
         );
-        reloadIndexDetails?.();
+        reloadIndices();
       } catch (error) {
         setIsLoading(false);
         notificationService.showDangerToast(error.body.message);
       }
     },
-    [reloadIndexDetails, indexNames]
+    [reloadIndices, indexNames]
   );
 
   const deleteIndices = useCallback(async () => {
@@ -246,42 +203,50 @@ export const IndexActionsContextMenuWithoutRedux: FunctionComponent<Props> = ({
           values: { indexNames: indexNames.join(', ') },
         })
       );
-      navigateToAllIndices?.();
+      navigateToAllIndices();
     } catch (error) {
       setIsLoading(false);
       notificationService.showDangerToast(error.body.message);
     }
   }, [navigateToAllIndices, indexNames]);
 
-  const props: ReduxProps = {
-    closeIndices,
-    openIndices,
-    flushIndices,
-    refreshIndices,
-    clearCacheIndices,
-    unfreezeIndices,
-    forcemergeIndices,
-    deleteIndices,
-
-    // there actions are not displayed on the index details page
-    showSettings: () => {},
-    showMapping: () => {},
-    showStats: () => {},
-    editIndex: () => {},
-
-    indexStatusByName: getIndexStatusByName(indexNames, indices),
-    reloadIndices: async () => {},
-
-    performExtensionAction: async () => {},
-  };
+  const performExtensionAction = useCallback(
+    async (
+      requestMethod: (indexNames: string[], http: HttpSetup) => Promise<void>,
+      successMessage: string
+    ) => {
+      setIsLoading(true);
+      try {
+        await requestMethod(indexNames, httpService.httpClient);
+        setIsLoading(false);
+        notificationService.showSuccessToast(successMessage);
+        reloadIndices();
+      } catch (error) {
+        setIsLoading(false);
+        notificationService.showDangerToast(error.body.message);
+      }
+    },
+    [reloadIndices, indexNames]
+  );
 
   return (
     <IndexActionsContextMenu
       indexNames={indexNames}
       indices={indices}
+      indexStatusByName={indexStatusByName}
+      fill={false}
       isLoading={isLoading}
-      {...props}
-      {...rest}
+      // index actions
+      closeIndices={closeIndices}
+      openIndices={openIndices}
+      flushIndices={flushIndices}
+      refreshIndices={refreshIndices}
+      clearCacheIndices={clearCacheIndices}
+      unfreezeIndices={unfreezeIndices}
+      forcemergeIndices={forcemergeIndices}
+      deleteIndices={deleteIndices}
+      performExtensionAction={performExtensionAction}
+      reloadIndices={reloadIndices}
     />
   );
 };
