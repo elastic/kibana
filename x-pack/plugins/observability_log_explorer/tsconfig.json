@@ -19,6 +19,8 @@
     "@kbn/observability-shared-plugin",
     "@kbn/data-plugin",
     "@kbn/kibana-react-plugin",
+    "@kbn/serverless",
+    "@kbn/core-chrome-browser",
   ],
   "exclude": [
     "target/**/*"
