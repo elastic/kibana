@@ -26,7 +26,7 @@ import apm from 'elastic-apm-node';
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
-import { isSafeMethod } from '@kbn/core-http-router-server-internal';
+import { CoreVersionedRouter, isSafeMethod } from '@kbn/core-http-router-server-internal';
 import type {
   IRouter,
   RouteConfigOptions,
@@ -583,11 +583,14 @@ export class HttpServer {
       handler: (req, h) => {
         const oasDoc = this.oasCache
           ? this.oasCache
-          : generateOpenApiDocument(this.getRegisteredRouters(), {
-              baseUrl: 'todo',
-              title: 'todo',
-              version: '0.0.0',
-            });
+          : generateOpenApiDocument(
+              this.getRegisteredRouters().map((r) => r.versioned as CoreVersionedRouter),
+              {
+                baseUrl: 'todo',
+                title: 'todo',
+                version: '0.0.0',
+              }
+            );
         return h.response(oasDoc);
       },
       options: {
