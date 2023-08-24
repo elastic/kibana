@@ -191,7 +191,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
                   &nbsp;
                   <FormattedMessage
                     id="xpack.fleet.agentList.outOfDateLabel"
-                    defaultMessage="Out-of-date"
+                    defaultMessage="Outdated policy"
                   />
                 </EuiText>
               </EuiFlexItem>
