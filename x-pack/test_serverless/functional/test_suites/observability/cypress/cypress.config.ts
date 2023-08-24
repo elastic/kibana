@@ -6,6 +6,15 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
+import { kbnTestConfig } from '@kbn/test';
+
+import Url from 'url';
+
+const kibanaUrl = Url.format({
+  protocol: kbnTestConfig.getUrlParts().protocol,
+  hostname: kbnTestConfig.getUrlParts().hostname,
+  port: kbnTestConfig.getUrlParts().port,
+});
 
 export default defineCypressConfig({
   fileServerFolder: './cypress',
@@ -29,5 +38,10 @@ export default defineCypressConfig({
     baseUrl: 'http://localhost:5620',
     supportFile: './support/e2e.ts',
     specPattern: './e2e/**/*.cy.ts',
+  },
+  env: {
+    username: kbnTestConfig.getUrlParts().username,
+    password: kbnTestConfig.getUrlParts().password,
+    kibanaUrl,
   },
 });
