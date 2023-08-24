@@ -8,11 +8,11 @@
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '@kbn/security-solution-plugin/common/endpoint/service/response_actions/constants';
 import { login } from '../../../tasks/login';
 import { getNoPrivilegesPage } from '../../../screens/endpoint_management/common';
-import { getEndpointManagementPageList } from '../../../screens/endpoint_management';
 import { ensureResponseActionAuthzAccess } from '../../../tasks/endpoint_management';
+import { getEndpointManagementPageList } from '../../../screens/endpoint_management';
 
 describe(
-  'App Features for Essential PLI',
+  'App Features for Security Essential PLI',
   {
     env: {
       ftrConfig: {
@@ -21,7 +21,13 @@ describe(
     },
   },
   () => {
-    const pages = getEndpointManagementPageList();
+    const allPages = getEndpointManagementPageList();
+    const deniedPages = allPages.filter(({ id }) => {
+      return id !== 'endpointList' && id !== 'policyList';
+    });
+    const allowedPages = allPages.filter(({ id }) => {
+      return id === 'endpointList' || id === 'policyList';
+    });
     let username: string;
     let password: string;
 
@@ -32,17 +38,31 @@ describe(
       });
     });
 
-    for (const { url, title } of pages) {
-      it(`should not allow access to ${title}`, () => {
+    for (const { url, title, pageTestSubj } of allowedPages) {
+      it(`should allow access to ${title}`, () => {
+        cy.visit(url);
+        cy.getByTestSubj(pageTestSubj).should('exist');
+      });
+    }
+
+    for (const { url, title } of deniedPages) {
+      it(`should NOT allow access to ${title}`, () => {
         cy.visit(url);
         getNoPrivilegesPage().should('exist');
       });
     }
 
-    for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES) {
+    // No access to response actions (except `unisolate`)
+    for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
+      (apiName) => apiName !== 'unisolate'
+    )) {
       it(`should not allow access to Response Action: ${actionName}`, () => {
         ensureResponseActionAuthzAccess('none', actionName, username, password);
       });
     }
+
+    it('should have access to `unisolate` api', () => {
+      ensureResponseActionAuthzAccess('all', 'unisolate', username, password);
+    });
   }
 );

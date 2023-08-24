@@ -21,6 +21,7 @@ import {
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { GetUserProfileResponse, UserProfileData } from '@kbn/security-plugin/common';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -53,6 +54,7 @@ interface KibanaLogicProps {
   setDocTitle(title: string): void;
   share: SharePluginStart;
   uiSettings: IUiSettingsClient;
+  userProfile: GetUserProfileResponse<UserProfileData>;
 }
 
 export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
@@ -93,6 +95,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     setDocTitle: [props.setDocTitle, {}],
     share: [props.share, {}],
     uiSettings: [props.uiSettings, {}],
+    userProfile: [props.userProfile, {}],
   }),
   selectors: ({ selectors }) => ({
     isCloud: [() => [selectors.cloud], (cloud?: Partial<CloudSetup>) => !!cloud?.isCloudEnabled],

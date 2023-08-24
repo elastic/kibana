@@ -697,4 +697,68 @@ describe('Error count alert', () => {
       alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
   });
+
+  it('sends alert when rule is configured with a filter query', async () => {
+    const { services, dependencies, executor, scheduleActions } =
+      createRuleTypeMocks();
+
+    registerErrorCountRuleType(dependencies);
+
+    const params = {
+      threshold: 2,
+      windowSize: 5,
+      windowUnit: 'm',
+      serviceName: undefined,
+      kqlFilter: 'service.name: foo and service.environment: env-foo',
+      groupBy: ['service.name', 'service.environment'],
+    };
+
+    services.scopedClusterClient.asCurrentUser.search.mockResponse({
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 2,
+        },
+      },
+      aggregations: {
+        error_counts: {
+          buckets: [
+            {
+              key: ['foo', 'env-foo'],
+              doc_count: 5,
+            },
+          ],
+        },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
+
+    await executor({ params });
+    ['foo_env-foo'].forEach((instanceName) =>
+      expect(services.alertFactory.create).toHaveBeenCalledWith(instanceName)
+    );
+
+    expect(scheduleActions).toHaveBeenCalledTimes(1);
+
+    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
+      serviceName: 'foo',
+      environment: 'env-foo',
+      threshold: 2,
+      triggerValue: 5,
+      reason:
+        'Error count is 5 in the last 5 mins for service: foo, env: env-foo. Alert when > 2.',
+      interval: '5 mins',
+      viewInAppUrl:
+        'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+    });
+  });
 });

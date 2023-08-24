@@ -28,7 +28,10 @@ import { isEmpty } from 'lodash';
 import { downloadJson } from '../../../../utils/download_json';
 import { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
-import { asPercent } from '../../../../../common/utils/formatters';
+import {
+  asPercent,
+  asTransactionRate,
+} from '../../../../../common/utils/formatters';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { StorageDetailsPerService } from './storage_details_per_service';
@@ -42,6 +45,7 @@ import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { SizeLabel } from './size_label';
 import { joinByKey } from '../../../../../common/utils/join_by_key';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 interface StorageExplorerItem {
   serviceName: string;
@@ -57,8 +61,15 @@ enum StorageExplorerFieldName {
   Sampling = 'sampling',
   Size = 'size',
 }
+interface Props {
+  summaryStatsData?: APIReturnType<'GET /internal/apm/storage_explorer_summary_stats'>;
+  loadingSummaryStats: boolean;
+}
 
-export function ServicesTable() {
+export function ServicesTable({
+  summaryStatsData,
+  loadingSummaryStats,
+}: Props) {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, ReactNode>
   >({});
@@ -283,6 +294,9 @@ export function ServicesTable() {
     },
   ];
 
+  const isDownloadButtonDisable =
+    isEmpty(serviceStatisticsItems) || loadingSummaryStats;
+
   return (
     <EuiPanel
       hasShadow={false}
@@ -295,7 +309,7 @@ export function ServicesTable() {
           <EuiButton
             data-test-subj="StorageExplorerDownloadReportButton"
             iconType="download"
-            isDisabled={isEmpty(serviceStatisticsItems)}
+            isDisabled={isDownloadButtonDisable}
             onClick={() =>
               downloadJson({
                 fileName: `storage-explorefpr-${moment(Date.now()).format(
@@ -308,6 +322,25 @@ export function ServicesTable() {
                     environment,
                     kuery,
                     indexLifecyclePhase,
+                  },
+                  summary: {
+                    totalSize: asDynamicBytes(summaryStatsData?.totalSize),
+                    diskSpaceUsedPct: asPercent(
+                      summaryStatsData?.diskSpaceUsedPct,
+                      1
+                    ),
+                    estimatedIncrementalSize: asDynamicBytes(
+                      summaryStatsData?.estimatedIncrementalSize
+                    ),
+                    dailyDataGeneration: asDynamicBytes(
+                      summaryStatsData?.dailyDataGeneration
+                    ),
+                    tracesPerMinute: asTransactionRate(
+                      summaryStatsData?.tracesPerMinute
+                    ),
+                    numberOfServices: (
+                      summaryStatsData?.numberOfServices ?? 0
+                    ).toString(),
                   },
                   services: serviceStatisticsItems.map((item) => ({
                     ...item,

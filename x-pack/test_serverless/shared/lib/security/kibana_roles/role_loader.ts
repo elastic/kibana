@@ -15,7 +15,9 @@ import { AxiosError } from 'axios';
 import {
   getServerlessSecurityKibanaRoleDefinitions,
   ServerlessSecurityRoles,
+  YamlRoleDefinitions,
 } from './kibana_roles';
+import { STANDARD_HTTP_HEADERS } from '../default_http_headers';
 
 const ignoreHttp409Error = (error: AxiosError) => {
   if (error?.response?.status === 409) {
@@ -24,10 +26,6 @@ const ignoreHttp409Error = (error: AxiosError) => {
 
   throw error;
 };
-
-const DEFAULT_HEADERS = Object.freeze({
-  'x-elastic-internal-product': 'security-solution',
-});
 
 export interface LoadedRoleAndUser {
   role: string;
@@ -49,7 +47,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
     };
   }
 
-  async load(name: keyof R): Promise<LoadedRoleAndUser> {
+  async load(name: keyof R, additionalRoleName?: string): Promise<LoadedRoleAndUser> {
     const role = this.roles[name];
 
     if (!role) {
@@ -59,9 +57,12 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
     }
 
     const roleName = role.name;
-
+    const roleNames = [roleName];
+    if (additionalRoleName) {
+      roleNames.push(additionalRoleName);
+    }
     await this.createRole(role);
-    await this.createUser(roleName, 'changeme', [roleName]);
+    await this.createUser(roleName, 'changeme', roleNames);
 
     return {
       role: roleName,
@@ -80,7 +81,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
         method: 'PUT',
         path: `/api/security/role/${roleName}`,
         headers: {
-          ...DEFAULT_HEADERS,
+          ...STANDARD_HTTP_HEADERS,
         },
         body: roleDefinition,
       })
@@ -112,7 +113,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
         method: 'POST',
         path: `/internal/security/users/${username}`,
         headers: {
-          ...DEFAULT_HEADERS,
+          ...STANDARD_HTTP_HEADERS,
         },
         body: user,
       })
@@ -126,7 +127,11 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
 }
 
 export class SecurityRoleAndUserLoader extends RoleAndUserLoader<ServerlessSecurityRoles> {
-  constructor(kbnClient: KbnClient, logger: ToolingLog) {
-    super(kbnClient, logger, getServerlessSecurityKibanaRoleDefinitions());
+  constructor(
+    kbnClient: KbnClient,
+    logger: ToolingLog,
+    additionalRoleDefinitions?: YamlRoleDefinitions
+  ) {
+    super(kbnClient, logger, getServerlessSecurityKibanaRoleDefinitions(additionalRoleDefinitions));
   }
 }

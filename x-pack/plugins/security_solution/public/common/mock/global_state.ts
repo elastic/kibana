@@ -421,12 +421,10 @@ export const mockGlobalState: State = {
   },
   groups: initialGroupingState,
   analyzer: {
-    analyzerById: {
-      [TableId.test]: EMPTY_RESOLVER,
-      [TimelineId.test]: EMPTY_RESOLVER,
-      [TimelineId.active]: EMPTY_RESOLVER,
-      flyout: EMPTY_RESOLVER,
-    },
+    [TableId.test]: EMPTY_RESOLVER,
+    [TimelineId.test]: EMPTY_RESOLVER,
+    [TimelineId.active]: EMPTY_RESOLVER,
+    flyout: EMPTY_RESOLVER,
   },
   sourcerer: {
     ...mockSourcererState,

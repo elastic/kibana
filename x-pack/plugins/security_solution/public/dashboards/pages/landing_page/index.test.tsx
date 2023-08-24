@@ -18,6 +18,7 @@ import { DashboardContextProvider } from '../../context/dashboard_context';
 import { act } from 'react-dom/test-utils';
 import type { NavigationLink } from '../../../common/links/types';
 import { DashboardListingTable } from '@kbn/dashboard-plugin/public';
+import { DASHBOARDS_PAGE_SECTION_CUSTOM } from './translations';
 
 jest.mock('../../../common/containers/tags/api');
 jest.mock('../../../common/lib/kibana');
@@ -94,6 +95,12 @@ describe('Dashboards landing', () => {
   });
 
   describe('Dashboards default links', () => {
+    it('should render custom dashboard listing title', async () => {
+      await renderDashboardLanding();
+
+      expect(screen.queryByText(DASHBOARDS_PAGE_SECTION_CUSTOM)).toBeInTheDocument();
+    });
+
     it('should render items', async () => {
       await renderDashboardLanding();
 
@@ -148,6 +155,16 @@ describe('Dashboards landing', () => {
       await renderDashboardLanding();
 
       expect(screen.queryByTestId('dashboardsTable')).not.toBeInTheDocument();
+    });
+
+    it('should not render loading icon if no read capability', async () => {
+      mockUseCapabilities.mockReturnValue({
+        ...DEFAULT_DASHBOARD_CAPABILITIES,
+        show: false,
+      });
+      await renderDashboardLanding();
+
+      expect(screen.queryByTestId('dashboardLoadingIcon')).not.toBeInTheDocument();
     });
 
     describe('Create Security Dashboard button', () => {

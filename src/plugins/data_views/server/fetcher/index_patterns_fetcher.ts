@@ -40,10 +40,16 @@ interface FieldSubType {
 export class IndexPatternsFetcher {
   private elasticsearchClient: ElasticsearchClient;
   private allowNoIndices: boolean;
+  private rollupsEnabled: boolean;
 
-  constructor(elasticsearchClient: ElasticsearchClient, allowNoIndices: boolean = false) {
+  constructor(
+    elasticsearchClient: ElasticsearchClient,
+    allowNoIndices: boolean = false,
+    rollupsEnabled: boolean = false
+  ) {
     this.elasticsearchClient = elasticsearchClient;
     this.allowNoIndices = allowNoIndices;
+    this.rollupsEnabled = rollupsEnabled;
   }
 
   /**
@@ -81,7 +87,7 @@ export class IndexPatternsFetcher {
       fields: options.fields || ['*'],
     });
 
-    if (type === 'rollup' && rollupIndex) {
+    if (this.rollupsEnabled && type === 'rollup' && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
       const capabilityCheck = getCapabilitiesForRollupIndices(
         await this.elasticsearchClient.rollup.getRollupIndexCaps({

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { LicenseType } from '@kbn/licensing-plugin/server';
@@ -12,7 +13,7 @@ import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { IBasePath } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import { AlertsLocatorParams, sloFeatureId } from '../../../../common';
+import { AlertsLocatorParams, observabilityPaths, sloFeatureId } from '../../../../common';
 import { SLO_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import {
@@ -76,6 +77,7 @@ export function sloBurnRateRuleType(
         { name: 'alertDetailsUrl', description: alertDetailsUrlActionVariableDescription },
         { name: 'sloId', description: sloIdActionVariableDescription },
         { name: 'sloName', description: sloNameActionVariableDescription },
+        { name: 'sloInstanceId', description: sloInstanceIdActionVariableDescription },
       ],
     },
     alerts: {
@@ -84,6 +86,8 @@ export function sloBurnRateRuleType(
       useEcs: false,
       useLegacyAlerts: true,
     },
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
   };
 }
 
@@ -140,5 +144,12 @@ export const sloNameActionVariableDescription = i18n.translate(
   'xpack.observability.slo.alerting.sloNameDescription',
   {
     defaultMessage: 'The SLO name.',
+  }
+);
+
+export const sloInstanceIdActionVariableDescription = i18n.translate(
+  'xpack.observability.slo.alerting.sloInstanceIdDescription',
+  {
+    defaultMessage: 'The SLO instance id.',
   }
 );

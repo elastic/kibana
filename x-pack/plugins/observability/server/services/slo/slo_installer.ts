@@ -37,7 +37,6 @@ export class DefaultSLOInstaller implements SLOInstaller {
       this.logger.error('Failed to install SLO common resources and summary transforms', {
         error,
       });
-      throw error;
     } finally {
       this.isInstalling = false;
       clearTimeout(installTimeout);

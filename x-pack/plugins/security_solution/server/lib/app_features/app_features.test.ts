@@ -48,6 +48,25 @@ const CASES_APP_FEATURE_CONFIG = {
   },
 };
 
+const ASSISTANT_BASE_CONFIG = {
+  bar: 'bar',
+};
+
+const ASSISTANT_APP_FEATURE_CONFIG = {
+  'test-assistant-feature': {
+    privileges: {
+      all: {
+        ui: ['test-assistant-capability'],
+        api: ['test-assistant-capability'],
+      },
+      read: {
+        ui: ['test-assistant-capability'],
+        api: ['test-assistant-capability'],
+      },
+    },
+  },
+};
+
 jest.mock('./security_kibana_features', () => {
   return {
     getSecurityBaseKibanaFeature: jest.fn(() => SECURITY_BASE_CONFIG),
@@ -72,6 +91,20 @@ jest.mock('./security_cases_kibana_features', () => {
 jest.mock('./security_cases_kibana_sub_features', () => {
   return {
     casesSubFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
+  };
+});
+
+jest.mock('./security_assistant_kibana_features', () => {
+  return {
+    getAssistantBaseKibanaFeature: jest.fn(() => ASSISTANT_BASE_CONFIG),
+    getAssistantBaseKibanaSubFeatureIds: jest.fn(() => ['subFeature1']),
+    getAssistantAppFeaturesConfig: jest.fn(() => ASSISTANT_APP_FEATURE_CONFIG),
+  };
+});
+
+jest.mock('./security_assistant_kibana_sub_features', () => {
+  return {
+    assistantSubFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
   };
 });
 
@@ -115,6 +148,27 @@ describe('AppFeatures', () => {
     expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
       ...CASES_BASE_CONFIG,
       ...CASES_APP_FEATURE_CONFIG['test-cases-feature'],
+      subFeatures: [{ baz: 'baz' }],
+    });
+  });
+
+  it('should register enabled assistant features', () => {
+    const featuresSetup = {
+      registerKibanaFeature: jest.fn(),
+    } as unknown as PluginSetupContract;
+
+    const appFeatureKeys = ['test-assistant-feature'] as unknown as AppFeatureKeys;
+
+    const appFeatures = new AppFeatures(
+      loggingSystemMock.create().get('mock'),
+      [] as unknown as ExperimentalFeatures
+    );
+    appFeatures.init(featuresSetup);
+    appFeatures.set(appFeatureKeys);
+
+    expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
+      ...ASSISTANT_BASE_CONFIG,
+      ...ASSISTANT_APP_FEATURE_CONFIG['test-assistant-feature'],
       subFeatures: [{ baz: 'baz' }],
     });
   });

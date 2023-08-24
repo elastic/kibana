@@ -23,6 +23,7 @@ import {
 import { useLoadConnectors } from '../use_load_connectors';
 import * as i18n from '../translations';
 import { useLoadActionTypes } from '../use_load_action_types';
+import { useAssistantContext } from '../../assistant_context';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 interface Props {
@@ -47,6 +48,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     selectedConnectorId,
     onConnectorSelectionChange,
   }) => {
+    const { assistantAvailability } = useAssistantContext();
     // Connector Modal State
     const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
     const { data: actionTypes } = useLoadActionTypes({ http });
@@ -68,6 +70,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       refetch: refetchConnectors,
     } = useLoadConnectors({ http });
     const isLoading = isLoadingActionTypes || isFetchingActionTypes;
+    const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
 
     const addNewConnectorOption = useMemo(() => {
       return {
@@ -76,7 +79,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
         dropdownDisplay: (
           <EuiFlexGroup gutterSize="none" key={ADD_NEW_CONNECTOR}>
             <EuiFlexItem grow={true}>
-              <EuiButtonEmpty iconType="plus" size="xs">
+              <EuiButtonEmpty href="#" iconType="plus" size="xs">
                 {i18n.ADD_NEW_CONNECTOR}
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -113,6 +116,15 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       );
     }, [connectors]);
 
+    // Only include add new connector option if user has privilege
+    const allConnectorOptions = useMemo(
+      () =>
+        assistantAvailability.hasConnectorsAllPrivilege
+          ? [...connectorOptions, addNewConnectorOption]
+          : [...connectorOptions],
+      [addNewConnectorOption, assistantAvailability.hasConnectorsAllPrivilege, connectorOptions]
+    );
+
     const cleanupAndCloseModal = useCallback(() => {
       onConnectorModalVisibilityChange?.(false);
       setIsConnectorModalVisible(false);
@@ -139,11 +151,11 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
         <EuiSuperSelect
           aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
           compressed={true}
-          disabled={isDisabled}
+          disabled={localIsDisabled}
           hasDividers={true}
           isLoading={isLoading}
           onChange={onChange}
-          options={[...connectorOptions, addNewConnectorOption]}
+          options={allConnectorOptions}
           valueOfSelected={selectedConnectorId ?? ''}
         />
         {isConnectorModalVisible && (

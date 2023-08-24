@@ -163,10 +163,13 @@
     "@kbn/cloud-chat-plugin",
     "@kbn/alerts-ui-shared",
     "@kbn/security-solution-navigation",
+    "@kbn/security-solution-upselling",
     "@kbn/discover-plugin",
     "@kbn/data-view-editor-plugin",
     "@kbn/navigation-plugin",
     "@kbn/alerts-ui-shared",
     "@kbn/core-logging-server-mocks",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/handlebars",
   ]
 }

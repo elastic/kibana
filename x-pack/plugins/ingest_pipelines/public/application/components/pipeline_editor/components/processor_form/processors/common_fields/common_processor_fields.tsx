@@ -9,6 +9,8 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { PainlessLang } from '@kbn/monaco';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCode } from '@elastic/eui';
 import {
   FieldConfig,
   UseField,
@@ -27,12 +29,8 @@ const ignoreFailureConfig: FieldConfig<any> = {
   label: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.commonFields.ignoreFailureFieldLabel',
     {
-      defaultMessage: 'Ignore failure',
+      defaultMessage: 'Ignore failures for this processor',
     }
-  ),
-  helpText: i18n.translate(
-    'xpack.ingestPipelines.pipelineEditor.commonFields.ignoreFailureHelpText',
-    { defaultMessage: 'Ignore failures for this processor.' }
   ),
   type: FIELD_TYPES.TOGGLE,
 };
@@ -42,9 +40,16 @@ const ifConfig: FieldConfig = {
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.ifFieldLabel', {
     defaultMessage: 'Condition (optional)',
   }),
-  helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.ifFieldHelpText', {
-    defaultMessage: 'Conditionally run this processor.',
-  }),
+  helpText: (
+    <FormattedMessage
+      id="xpack.ingestPipelines.pipelineEditor.commonFields.ifFieldHelpText"
+      defaultMessage="An {if} condition written as a Painless script: {exampleCondition}"
+      values={{
+        if: <EuiCode>{'if'}</EuiCode>,
+        exampleCondition: <EuiCode>{"ctx?.network?.name == 'Guest'"}</EuiCode>,
+      }}
+    />
+  ),
   type: FIELD_TYPES.TEXT,
 };
 
@@ -54,7 +59,7 @@ const tagConfig: FieldConfig = {
     defaultMessage: 'Tag (optional)',
   }),
   helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.tagFieldHelpText', {
-    defaultMessage: 'Identifier for the processor. Useful for debugging and metrics.',
+    defaultMessage: 'An identifier for the processor. Useful for debugging and metrics.',
   }),
   type: FIELD_TYPES.TEXT,
 };

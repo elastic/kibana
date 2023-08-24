@@ -8,9 +8,12 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import { DiscoverServices } from '../../build_services';
-import DiscoverContainerInternal, { DiscoverContainerInternalProps } from './discover_container';
-import { ScopedHistory } from '@kbn/core-application-browser';
+import type { DiscoverServices } from '../../build_services';
+import {
+  DiscoverContainerInternal,
+  type DiscoverContainerInternalProps,
+} from './discover_container';
+import type { ScopedHistory } from '@kbn/core-application-browser';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -45,7 +48,7 @@ const TestComponent = (props: Partial<DiscoverContainerInternalProps>) => {
 };
 
 const TEST_IDS = {
-  DISCOVER_CONTAINER_INTERNAL: 'data-container-internal-wrapper',
+  DISCOVER_CONTAINER_INTERNAL: 'discover-container-internal-wrapper',
 };
 
 describe('DiscoverContainerInternal should render properly', () => {

@@ -19,7 +19,6 @@ import {
   NamespaceType,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
-  OsTypeArray,
   createExceptionListItemSchema,
   entriesList,
   entriesNested,
@@ -302,18 +301,13 @@ export const getUpdatedEntriesOnDelete = (
  */
 export const getFilteredIndexPatterns = (
   patterns: DataViewBase,
-  item: FormattedBuilderEntry,
-  type: ExceptionListType,
-  preFilter?: (i: DataViewBase, t: ExceptionListType, o?: OsTypeArray) => DataViewBase,
-  osTypes?: OsTypeArray
+  item: FormattedBuilderEntry
 ): DataViewBase => {
-  const indexPatterns = preFilter != null ? preFilter(patterns, type, osTypes) : patterns;
-
   if (item.nested === 'child' && item.parent != null) {
     // when user has selected a nested entry, only fields with the common parent are shown
     return {
-      ...indexPatterns,
-      fields: indexPatterns.fields
+      ...patterns,
+      fields: patterns.fields
         .filter((indexField) => {
           const subTypeNested = getDataViewFieldSubtypeNested(indexField);
           const fieldHasCommonParentPath =
@@ -330,15 +324,15 @@ export const getFilteredIndexPatterns = (
     };
   } else if (item.nested === 'parent' && item.field != null) {
     // when user has selected a nested entry, right above it we show the common parent
-    return { ...indexPatterns, fields: [item.field] };
+    return { ...patterns, fields: [item.field] };
   } else if (item.nested === 'parent' && item.field == null) {
     // when user selects to add a nested entry, only nested fields are shown as options
     return {
-      ...indexPatterns,
-      fields: indexPatterns.fields.filter((field) => isDataViewFieldSubtypeNested(field)),
+      ...patterns,
+      fields: patterns.fields.filter((field) => isDataViewFieldSubtypeNested(field)),
     };
   } else {
-    return indexPatterns;
+    return patterns;
   }
 };
 

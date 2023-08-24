@@ -33,3 +33,4 @@ export * from './use_fleet_server_hosts_for_policy';
 export * from './use_fleet_server_standalone';
 export * from './use_locator';
 export * from './use_create_cloud_formation_url';
+export * from './use_create_cloud_shell_url';

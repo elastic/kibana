@@ -102,7 +102,9 @@ exports[`NavControlPopover renders without crashing 1`] = `
           "warningText": "#83650a",
         },
         "focus": Object {
+          "backgroundColor": "rgba(0,119,204,0.1)",
           "color": "currentColor",
+          "transparency": 0.1,
           "width": "2px",
         },
         "font": Object {

@@ -12,7 +12,7 @@ import { getEndpointManagementPageList } from '../../../screens/endpoint_managem
 import { ensureResponseActionAuthzAccess } from '../../../tasks/endpoint_management';
 
 describe(
-  'App Features for Complete PLI with Endpoint Complete',
+  'App Features for Security Complete PLI with Endpoint Complete Addon',
   {
     env: {
       ftrConfig: {

@@ -14,7 +14,6 @@ import {
   PREVALENCE_DETAILS_PREVALENCE_CELL_VALUE_TEST_ID,
 } from './test_ids';
 import { useFetchFieldValuePairWithAggregation } from '../../shared/hooks/use_fetch_field_value_pair_with_aggregation';
-import { TimelineId } from '../../../../common/types';
 import { useFetchUniqueByField } from '../../shared/hooks/use_fetch_unique_by_field';
 
 export interface PrevalenceDetailsPrevalenceCellProps {
@@ -22,10 +21,6 @@ export interface PrevalenceDetailsPrevalenceCellProps {
    * The highlighted field name and values
    * */
   highlightedField: { name: string; values: string[] };
-  /**
-   * The scope id
-   */
-  scopeId: string;
   /**
    * The aggregation field
    */
@@ -38,7 +33,6 @@ export interface PrevalenceDetailsPrevalenceCellProps {
  */
 export const PrevalenceDetailsPrevalenceCell: VFC<PrevalenceDetailsPrevalenceCellProps> = ({
   highlightedField,
-  scopeId,
   aggregationField,
 }) => {
   const {
@@ -47,7 +41,6 @@ export const PrevalenceDetailsPrevalenceCell: VFC<PrevalenceDetailsPrevalenceCel
     count: aggregationCount,
   } = useFetchFieldValuePairWithAggregation({
     highlightedField,
-    isActiveTimelines: scopeId === TimelineId.active,
     aggregationField,
   });
 

@@ -12,6 +12,7 @@ import {
   EuiPopover,
   EuiText,
   EuiTourStep,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -153,6 +154,9 @@ export const AgentStatusFilter: React.FC<{
 
     setIsStatusFilterOpen(isOpen);
   };
+
+  const { euiTheme } = useEuiTheme();
+
   return (
     <InactiveAgentsTourStep
       isOpen={newlyInactiveAgentsCount > 0 && !inactiveAgentsCalloutHasBeenDismissed}
@@ -177,7 +181,10 @@ export const AgentStatusFilter: React.FC<{
         closePopover={() => updateIsStatusFilterOpen(false)}
         panelPaddingSize="none"
       >
-        <div className="euiFilterSelect__items">
+        {/* EUI NOTE: Please use EuiSelectable (which already has height/scrolling built in)
+            instead of EuiFilterSelectItem (which is pending deprecation).
+            @see https://elastic.github.io/eui/#/forms/filter-group#multi-select */}
+        <div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
           {statusFilters.map(({ label, status }, idx) => (
             <EuiFilterSelectItem
               key={idx}

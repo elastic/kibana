@@ -13,10 +13,16 @@ import { HighlightedFields } from './highlighted_fields';
 import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
 import { useHighlightedFields } from '../hooks/use_highlighted_fields';
 import { TestProviders } from '../../../common/mock';
+import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
 jest.mock('../hooks/use_highlighted_fields');
+jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 
 describe('<HighlightedFields />', () => {
+  beforeEach(() => {
+    (useRuleWithFallback as jest.Mock).mockReturnValue({ investigation_fields: [] });
+  });
+
   it('should render the component', () => {
     const panelContextValue = {
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,

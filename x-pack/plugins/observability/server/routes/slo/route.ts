@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { failedDependency, forbidden } from '@hapi/boom';
 import {
   createSLOParamsSchema,
   deleteSLOParamsSchema,
   fetchHistoricalSummaryParamsSchema,
+  findSloDefinitionsParamsSchema,
   findSLOParamsSchema,
   getPreviewDataParamsSchema,
   getSLOBurnRatesParamsSchema,
   getSLODiagnosisParamsSchema,
+  getSLOInstancesParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
   updateSLOParamsSchema,
@@ -30,9 +33,11 @@ import {
   UpdateSLO,
 } from '../../services/slo';
 import { FetchHistoricalSummary } from '../../services/slo/fetch_historical_summary';
+import { FindSLODefinitions } from '../../services/slo/find_slo_definitions';
 import { getBurnRates } from '../../services/slo/get_burn_rates';
 import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diagnosis';
 import { GetPreviewData } from '../../services/slo/get_preview_data';
+import { GetSLOInstances } from '../../services/slo/get_slo_instances';
 import { DefaultHistoricalSummaryClient } from '../../services/slo/historical_summary_client';
 import { ManageSLO } from '../../services/slo/manage_slo';
 import { DefaultSummarySearchClient } from '../../services/slo/summary_search_client';
@@ -55,23 +60,23 @@ const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.histogram.custom': new HistogramTransformGenerator(),
 };
 
-const isLicenseAtLeastPlatinum = async (context: ObservabilityRequestHandlerContext) => {
+const assertPlatinumLicense = async (context: ObservabilityRequestHandlerContext) => {
   const licensing = await context.licensing;
-  return licensing.license.hasAtLeast('platinum');
+  const hasCorrectLicense = licensing.license.hasAtLeast('platinum');
+
+  if (!hasCorrectLicense) {
+    throw forbidden('Platinum license or higher is needed to make use of this feature.');
+  }
 };
 
 const createSLORoute = createObservabilityServerRoute({
   endpoint: 'POST /api/observability/slos 2023-10-31',
   options: {
-    tags: ['access:public', 'access:slo_write'],
+    tags: ['access:slo_write'],
   },
   params: createSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
@@ -88,15 +93,11 @@ const createSLORoute = createObservabilityServerRoute({
 const updateSLORoute = createObservabilityServerRoute({
   endpoint: 'PUT /api/observability/slos/{id} 2023-10-31',
   options: {
-    tags: ['access:public', 'access:slo_write'],
+    tags: ['access:slo_write'],
   },
   params: updateSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
@@ -114,7 +115,7 @@ const updateSLORoute = createObservabilityServerRoute({
 const deleteSLORoute = createObservabilityServerRoute({
   endpoint: 'DELETE /api/observability/slos/{id} 2023-10-31',
   options: {
-    tags: ['access:public', 'access:slo_write'],
+    tags: ['access:slo_write'],
   },
   params: deleteSLOParamsSchema,
   handler: async ({
@@ -124,11 +125,7 @@ const deleteSLORoute = createObservabilityServerRoute({
     logger,
     dependencies: { getRulesClientWithRequest },
   }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
@@ -146,15 +143,11 @@ const deleteSLORoute = createObservabilityServerRoute({
 const getSLORoute = createObservabilityServerRoute({
   endpoint: 'GET /api/observability/slos/{id} 2023-10-31',
   options: {
-    tags: ['access:public', 'access:slo_read'],
+    tags: ['access:slo_read'],
   },
   params: getSLOParamsSchema,
   handler: async ({ context, params }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -162,7 +155,7 @@ const getSLORoute = createObservabilityServerRoute({
     const summaryClient = new DefaultSummaryClient(esClient);
     const getSLO = new GetSLO(repository, summaryClient);
 
-    const response = await getSLO.execute(params.path.id);
+    const response = await getSLO.execute(params.path.id, params.query);
 
     return response;
   },
@@ -171,15 +164,11 @@ const getSLORoute = createObservabilityServerRoute({
 const enableSLORoute = createObservabilityServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/enable 2023-10-31',
   options: {
-    tags: ['access:public', 'access:slo_write'],
+    tags: ['access:slo_write'],
   },
   params: manageSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -197,15 +186,11 @@ const enableSLORoute = createObservabilityServerRoute({
 const disableSLORoute = createObservabilityServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/disable 2023-10-31',
   options: {
-    tags: ['access:public', 'access:slo_write'],
+    tags: ['access:slo_write'],
   },
   params: manageSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -223,15 +208,11 @@ const disableSLORoute = createObservabilityServerRoute({
 const findSLORoute = createObservabilityServerRoute({
   endpoint: 'GET /api/observability/slos 2023-10-31',
   options: {
-    tags: ['access:public', 'access:slo_read'],
+    tags: ['access:slo_read'],
   },
   params: findSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -245,6 +226,25 @@ const findSLORoute = createObservabilityServerRoute({
   },
 });
 
+const findSloDefinitionsRoute = createObservabilityServerRoute({
+  endpoint: 'GET /internal/observability/slos/_definitions',
+  options: {
+    tags: ['access:slo_read'],
+  },
+  params: findSloDefinitionsParamsSchema,
+  handler: async ({ context, params }) => {
+    await assertPlatinumLicense(context);
+
+    const soClient = (await context.core).savedObjects.client;
+    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const findSloDefinitions = new FindSLODefinitions(repository);
+
+    const response = await findSloDefinitions.execute(params.query.search);
+
+    return response;
+  },
+});
+
 const fetchHistoricalSummary = createObservabilityServerRoute({
   endpoint: 'POST /internal/observability/slos/_historical_summary',
   options: {
@@ -252,11 +252,7 @@ const fetchHistoricalSummary = createObservabilityServerRoute({
   },
   params: fetchHistoricalSummaryParamsSchema,
   handler: async ({ context, params }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -266,6 +262,27 @@ const fetchHistoricalSummary = createObservabilityServerRoute({
     const fetchSummaryData = new FetchHistoricalSummary(repository, historicalSummaryClient);
 
     const response = await fetchSummaryData.execute(params.body);
+
+    return response;
+  },
+});
+
+const getSLOInstancesRoute = createObservabilityServerRoute({
+  endpoint: 'GET /internal/observability/slos/{id}/_instances',
+  options: {
+    tags: ['access:slo_read'],
+  },
+  params: getSLOInstancesParamsSchema,
+  handler: async ({ context, params }) => {
+    await assertPlatinumLicense(context);
+
+    const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const repository = new KibanaSavedObjectsSLORepository(soClient);
+
+    const getSLOInstances = new GetSLOInstances(repository, esClient);
+
+    const response = await getSLOInstances.execute(params.path.id);
 
     return response;
   },
@@ -285,7 +302,7 @@ const getDiagnosisRoute = createObservabilityServerRoute({
       const response = await getGlobalDiagnosis(esClient, licensing);
       return response;
     } catch (error) {
-      if (error.cause.statusCode === 403) {
+      if (error instanceof errors.ResponseError && error.statusCode === 403) {
         throw forbidden('Insufficient Elasticsearch cluster permissions to access feature.');
       }
       throw failedDependency(error);
@@ -315,18 +332,19 @@ const getSloBurnRates = createObservabilityServerRoute({
   },
   params: getSLOBurnRatesParamsSchema,
   handler: async ({ context, params }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
-    const burnRates = await getBurnRates(params.path.id, params.body.windows, {
-      soClient,
-      esClient,
-    });
+    const burnRates = await getBurnRates(
+      params.path.id,
+      params.body.instanceId,
+      params.body.windows,
+      {
+        soClient,
+        esClient,
+      }
+    );
     return { burnRates };
   },
 });
@@ -338,11 +356,7 @@ const getPreviewData = createObservabilityServerRoute({
   },
   params: getPreviewDataParamsSchema,
   handler: async ({ context, params }) => {
-    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
-
-    if (!hasCorrectLicense) {
-      throw forbidden('Platinum license or higher is needed to make use of this feature.');
-    }
+    await assertPlatinumLicense(context);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const service = new GetPreviewData(esClient);
@@ -356,6 +370,7 @@ export const sloRouteRepository = {
   ...disableSLORoute,
   ...enableSLORoute,
   ...fetchHistoricalSummary,
+  ...findSloDefinitionsRoute,
   ...findSLORoute,
   ...getSLORoute,
   ...updateSLORoute,
@@ -363,4 +378,5 @@ export const sloRouteRepository = {
   ...getSloDiagnosisRoute,
   ...getSloBurnRates,
   ...getPreviewData,
+  ...getSLOInstancesRoute,
 };

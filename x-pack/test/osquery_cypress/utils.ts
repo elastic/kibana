@@ -10,6 +10,15 @@ import semver from 'semver';
 import { map } from 'lodash';
 import { PackagePolicy, CreatePackagePolicyResponse } from '@kbn/fleet-plugin/common';
 import { KbnClient } from '@kbn/test';
+import {
+  GetEnrollmentAPIKeysResponse,
+  CreateAgentPolicyResponse,
+} from '@kbn/fleet-plugin/common/types';
+import { ToolingLog } from '@kbn/tooling-log';
+
+export const DEFAULT_HEADERS = Object.freeze({
+  'x-elastic-internal-product': 'security-solution',
+});
 
 export const getInstalledIntegration = async (kbnClient: KbnClient, integrationName: string) => {
   const {
@@ -17,9 +26,46 @@ export const getInstalledIntegration = async (kbnClient: KbnClient, integrationN
   } = await kbnClient.request<{ item: PackagePolicy }>({
     method: 'GET',
     path: `/api/fleet/epm/packages/${integrationName}`,
+    headers: DEFAULT_HEADERS,
   });
 
   return item;
+};
+
+export const createAgentPolicy = async (
+  kbnClient: KbnClient,
+  log: ToolingLog,
+  agentPolicyName = 'Osquery policy'
+) => {
+  log.info(`Creating "${agentPolicyName}" agent policy`);
+
+  const {
+    data: {
+      item: { id: agentPolicyId },
+    },
+  } = await kbnClient.request<CreateAgentPolicyResponse>({
+    method: 'POST',
+    path: `/api/fleet/agent_policies?sys_monitoring=true`,
+    body: {
+      name: agentPolicyName,
+      description: '',
+      namespace: 'default',
+      monitoring_enabled: ['logs', 'metrics'],
+      inactivity_timeout: 1209600,
+    },
+  });
+
+  log.info(`Adding integration to ${agentPolicyId}`);
+
+  await addIntegrationToAgentPolicy(kbnClient, agentPolicyId, agentPolicyName);
+
+  log.info('Getting agent enrollment key');
+  const { data: apiKeys } = await kbnClient.request<GetEnrollmentAPIKeysResponse>({
+    method: 'GET',
+    path: '/api/fleet/enrollment_api_keys',
+  });
+
+  return apiKeys.items[0].api_key;
 };
 
 export const addIntegrationToAgentPolicy = async (

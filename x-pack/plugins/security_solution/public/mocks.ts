@@ -6,15 +6,17 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { BreadcrumbsNav } from './common/breadcrumbs';
 import type { NavigationLink } from './common/links/types';
-import { UpsellingService } from './common/lib/upsellings';
 import type { PluginStart, PluginSetup } from './types';
 
 const setupMock = (): PluginSetup => ({
   resolver: jest.fn(),
-  upselling: new UpsellingService(),
+  setAppLinksSwitcher: jest.fn(),
 });
+
+const upselling = new UpsellingService();
 
 const startMock = (): PluginStart => ({
   getNavLinks$: jest.fn(() => new BehaviorSubject<NavigationLink[]>([])),
@@ -23,8 +25,8 @@ const startMock = (): PluginStart => ({
   getBreadcrumbsNav$: jest.fn(
     () => new BehaviorSubject<BreadcrumbsNav>({ leading: [], trailing: [] })
   ),
-  setExtraAppLinks: jest.fn(),
   setExtraRoutes: jest.fn(),
+  getUpselling: () => upselling,
 });
 
 export const securitySolutionMock = {

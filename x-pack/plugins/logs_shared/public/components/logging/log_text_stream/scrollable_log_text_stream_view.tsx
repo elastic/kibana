@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment } from 'react';
+import React, { Fragment, GetDerivedStateFromProps } from 'react';
 import moment from 'moment';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -73,10 +73,10 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
   ScrollableLogTextStreamViewProps,
   ScrollableLogTextStreamViewState
 > {
-  public static getDerivedStateFromProps(
-    nextProps: ScrollableLogTextStreamViewProps,
-    prevState: ScrollableLogTextStreamViewState
-  ): Partial<ScrollableLogTextStreamViewState> | null {
+  public static getDerivedStateFromProps: GetDerivedStateFromProps<
+    ScrollableLogTextStreamViewProps,
+    ScrollableLogTextStreamViewState
+  > = (nextProps, prevState) => {
     const hasNewTarget = nextProps.target && nextProps.target !== prevState.target;
     const hasItems = nextProps.items.length > 0;
 
@@ -118,7 +118,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     return {
       isScrollLocked: false,
     };
-  }
+  };
 
   constructor(props: ScrollableLogTextStreamViewProps) {
     super(props);

@@ -401,10 +401,10 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-common.externals.reactbeautifuldnd",
+            "id": "def-common.externals.hellopangeadnd",
             "type": "string",
             "tags": [],
-            "label": "'react-beautiful-dnd'",
+            "label": "'@hello-pangea/dnd'",
             "description": [
               "// transient dep of eui"
             ],

@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import { EnableRiskScore } from '../../../components/risk_score/enable_risk_score';
 import type { HostsComponentsQueryProps } from './types';
@@ -22,6 +23,8 @@ import {
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScoresNoDataDetected } from '../../../components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
+import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
+import { RiskScoreUpdatePanel } from '../../../../entity_analytics/components/risk_score_update_panel';
 
 const HostRiskScoreTableManage = manageQuery(HostRiskScoreTable);
 
@@ -46,6 +49,8 @@ export const HostRiskScoreQueryTabBody = ({
     getHostRiskScoreFilterQuerySelector(state, hostsModel.HostsType.page)
   );
 
+  const { data: riskScoreEngineStatus } = useRiskEngineStatus();
+
   const pagination = useMemo(
     () => ({
       cursorStart: activePage * limit,
@@ -69,7 +74,6 @@ export const HostRiskScoreQueryTabBody = ({
     isModuleEnabled,
     loading,
     refetch,
-    isAuthorized,
     totalCount,
   } = useRiskScore({
     filterQuery,
@@ -91,18 +95,20 @@ export const HostRiskScoreQueryTabBody = ({
     isDeprecated: isDeprecated && !loading,
   };
 
-  if (!isAuthorized) {
-    return <>{'TODO: Add RiskScore Upsell'}</>;
+  if (riskScoreEngineStatus?.isUpdateAvailable) {
+    return <RiskScoreUpdatePanel />;
   }
 
   if (status.isDisabled || status.isDeprecated) {
     return (
-      <EnableRiskScore
-        {...status}
-        entityType={RiskScoreEntity.host}
-        refetch={refetch}
-        timerange={timerange}
-      />
+      <EuiPanel hasBorder>
+        <EnableRiskScore
+          {...status}
+          entityType={RiskScoreEntity.host}
+          refetch={refetch}
+          timerange={timerange}
+        />
+      </EuiPanel>
     );
   }
 

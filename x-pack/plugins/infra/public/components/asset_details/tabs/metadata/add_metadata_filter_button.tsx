@@ -75,7 +75,7 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
             color="text"
             iconType="filter"
             display="base"
-            data-test-subj="hostsView-flyout-metadata-remove-filter"
+            data-test-subj="infraAssetDetailsMetadataRemoveFilterButton"
             aria-label={i18n.translate('xpack.infra.metadataEmbeddable.filterAriaLabel', {
               defaultMessage: 'Filter',
             })}
@@ -102,7 +102,7 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
           color="primary"
           size="s"
           iconType="filter"
-          data-test-subj="hostsView-flyout-metadata-add-filter"
+          data-test-subj="infraAssetDetailsMetadataAddFilterButton"
           aria-label={i18n.translate('xpack.infra.metadataEmbeddable.AddFilterAriaLabel', {
             defaultMessage: 'Add Filter',
           })}
