@@ -11,6 +11,14 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   return {
+    async clickApmServicesLink() {
+      return testSubjects.click('infraAssetDetailsViewAPMServicesButton');
+    },
+
+    async clickOpenAsPageLink() {
+      return testSubjects.click('infraAssetDetailsOpenAsPageButton');
+    },
+
     // Overview
     async clickOverviewTab() {
       return testSubjects.click('infraAssetDetailsOverviewTab');
@@ -42,10 +50,6 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
 
     async clickShowAllMetadataOverviewTab() {
       return testSubjects.click('infraAssetDetailsMetadataShowAllButton');
-    },
-
-    async clickApmServicesLink() {
-      return testSubjects.click('infraAssetDetailsViewAPMServicesButton');
     },
 
     // Metadata

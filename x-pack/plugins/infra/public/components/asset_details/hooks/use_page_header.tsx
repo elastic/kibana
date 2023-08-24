@@ -36,7 +36,7 @@ const useRightSideItems = (links?: LinkOptions[]) => {
         <LinkToNodeDetails
           asset={asset}
           assetType={assetType}
-          currentTimestamp={getDateRangeInTimestamp().to}
+          dateRangeTimestamp={getDateRangeInTimestamp()}
         />
       ),
       alertRule: <LinkToAlertsRule onClick={overrides?.alertRule?.onCreateRuleClick} />,

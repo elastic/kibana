@@ -376,6 +376,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
             await returnTo(HOSTS_VIEW_PATH);
           });
+
+          it('should navigate to Host Details page after click', async () => {
+            await pageObjects.assetDetails.clickOpenAsPageLink();
+            const dateRange = await pageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
+            expect(dateRange.start).to.equal(START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT));
+            expect(dateRange.end).to.equal(END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT));
+
+            await returnTo(HOSTS_VIEW_PATH);
+          });
         });
       });
     });
