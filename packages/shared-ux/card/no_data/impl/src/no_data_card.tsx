@@ -36,7 +36,7 @@ export const NoDataCard = ({ href: srcHref, category, description, ...props }: P
   return (
     <RedirectAppLinksContainer>
       <Component
-        {...{ ...props, href, canAccessFleet: props.canAccessFleet || canAccessFleet, description }}
+        {...{ ...props, href, canAccessFleet: props.canAccessFleet ?? canAccessFleet, description }}
       />
     </RedirectAppLinksContainer>
   );
