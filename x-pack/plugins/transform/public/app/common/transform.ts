@@ -6,7 +6,6 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import type { TransformConfigUnion, TransformId } from '../../../common/types/transform';
@@ -27,10 +26,10 @@ export const TRANSFORM_ERROR_TYPE = {
 export const useRefreshTransformList = () => {
   const queryClient = useQueryClient();
 
-  return useCallback(() => {
+  return () => {
     queryClient.invalidateQueries([TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORMS]);
     queryClient.invalidateQueries([TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORM_AUDIT_MESSAGES]);
-  }, [queryClient]);
+  };
 };
 
 export const overrideTransformForCloning = (originalConfig: TransformConfigUnion) => {
