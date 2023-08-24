@@ -8,6 +8,7 @@
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { LogExplorerPluginStart } from '@kbn/log-explorer-plugin/public';
 import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityLogExplorerPluginSetup {}
@@ -22,4 +23,5 @@ export interface ObservabilityLogExplorerStartDeps {
   data: DataPublicPluginStart;
   logExplorer: LogExplorerPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
+  serverless?: ServerlessPluginStart;
 }

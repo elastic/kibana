@@ -13,8 +13,8 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { type ObservabilityLogExplorerConfig } from '../common/plugin_config';
+import { logExplorerAppTitle } from '../common/translations';
 import { renderObservabilityLogExplorer } from './applications/observability_log_explorer';
 import type {
   ObservabilityLogExplorerPluginSetup,
@@ -62,7 +62,3 @@ export class ObservabilityLogExplorerPlugin
     return {};
   }
 }
-
-const logExplorerAppTitle = i18n.translate('xpack.observability_log_explorer.appTitle', {
-  defaultMessage: 'Log Explorer',
-});

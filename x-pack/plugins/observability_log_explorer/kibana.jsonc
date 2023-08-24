@@ -16,7 +16,9 @@
       "logExplorer",
       "observabilityShared"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": [
+      "serverless"
+    ],
     "requiredBundles": []
   }
 }

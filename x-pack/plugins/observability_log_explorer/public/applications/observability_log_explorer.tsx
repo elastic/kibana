@@ -46,12 +46,12 @@ export interface ObservabilityLogExplorerAppProps {
 }
 
 export const ObservabilityLogExplorerApp = ({
-  core: { i18n, theme },
-  plugins: { logExplorer, observabilityShared },
+  core,
+  plugins: { logExplorer, observabilityShared, serverless },
   pluginStart,
   history,
 }: ObservabilityLogExplorerAppProps) => (
-  <KibanaRenderContextProvider i18n={i18n} theme={theme}>
+  <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
     <Router history={history}>
       <Routes>
         <Route
@@ -59,9 +59,11 @@ export const ObservabilityLogExplorerApp = ({
           exact={true}
           render={() => (
             <ObservablityLogExplorerMainRoute
+              core={core}
               history={history}
               logExplorer={logExplorer}
               observabilityShared={observabilityShared}
+              serverless={serverless}
             />
           )}
         />
