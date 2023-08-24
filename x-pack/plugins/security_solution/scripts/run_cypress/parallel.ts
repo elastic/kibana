@@ -267,8 +267,17 @@ export const cli = () => {
 
                 if (hasFleetServerArgs) {
                   vars.kbnTestServer.serverArgs.push(
+                    `--xpack.fleet.agents.fleet_server.hosts=["https://${hostRealIp}:${fleetServerPort}"]`
+                  );
+                  vars.kbnTestServer.serverArgs.push(
                     `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
                   );
+
+                  if (vars.serverless) {
+                    vars.kbnTestServer.serverArgs.push(
+                      `--xpack.fleet.internal.fleetServerStandalone=false`
+                    );
+                  }
                 }
 
                 // Serverless Specific
@@ -337,16 +346,20 @@ ${JSON.stringify(config.getAll(), null, 2)}
               { retries: 2, forever: false }
             );
 
-            await runKibanaServer({
-              procs,
-              config,
-              installDir: options?.installDir,
-              extraKbnOpts:
-                options?.installDir || options?.ci || !isOpen
-                  ? []
-                  : ['--dev', '--no-dev-config', '--no-dev-credentials'],
-              onEarlyExit,
-            });
+            await pRetry(
+              async () =>
+                runKibanaServer({
+                  procs,
+                  config,
+                  installDir: options?.installDir,
+                  extraKbnOpts:
+                    options?.installDir || options?.ci || !isOpen
+                      ? []
+                      : ['--dev', '--no-dev-config', '--no-dev-credentials'],
+                  onEarlyExit,
+                }),
+              { retries: 2, forever: false }
+            );
 
             await providers.loadAll();
 

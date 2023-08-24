@@ -20,6 +20,7 @@ import {
 import { IndexEsListSchema } from './index_es_list_schema';
 
 export const getIndexESListMock = (): IndexEsListSchema => ({
+  '@timestamp': DATE_NOW,
   created_at: DATE_NOW,
   created_by: USER,
   description: DESCRIPTION,

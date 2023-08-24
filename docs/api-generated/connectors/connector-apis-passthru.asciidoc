@@ -1459,7 +1459,7 @@ Any modifications made to this file will be overwritten.
       <div class="param">authType (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of authentication to use: basic, SSL, or none. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">webhook-authentication-basic</div><div class="param-enum">webhook-authentication-ssl</div><div class="param-enum">null</div>
-<div class="param">ca (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A base64 encoded version of the certificate authority file, which is used to sign and validate certificates. </div>
+<div class="param">ca (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A base64 encoded version of the certificate authority file that the connector can trust to sign and validate certificates. This option is available for all authentication types. </div>
 <div class="param">certType (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> If the <code>authType</code> is <code>webhook-authentication-ssl</code>, specifies whether the certificate authentication data is in a CRT and key file format or a PFX file format. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">ssl-crt-key</div><div class="param-enum">ssl-pfx</div>
@@ -1469,7 +1469,7 @@ Any modifications made to this file will be overwritten.
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">post</div><div class="param-enum">put</div>
 <div class="param">url (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The request URL. If you are using the <code>xpack.actions.allowedHosts</code> setting, add the hostname to the allowed hosts. </div>
-<div class="param">verificationMode (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Controls the verification of certificates. Use <code>full</code> to validate that the provided certificate has an issue date that is within the <code>not_before</code> and <code>not_after</code> dates, chains to a trusted certificate authority (CA), and has a hostname or IP address that matches the names within the certificate. Use <code>certificate</code> to validate the provided certificate and verifies that it is signed by a trusted authority; this option does not check the certificate hostname. Use <code>none</code> to skip certificate validation. </div>
+<div class="param">verificationMode (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Controls the verification of certificates. Use <code>full</code> to validate that the certificate has an issue date within the <code>not_before</code> and <code>not_after</code> dates, chains to a trusted certificate authority (CA), and has a hostname or IP address that matches the names within the certificate. Use <code>certificate</code> to validate the certificate and verify that it is signed by a trusted authority; this option does not check the certificate hostname. Use <code>none</code> to skip certificate validation. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">certificate</div><div class="param-enum">full</div><div class="param-enum">none</div>
     </div>  <!-- field-items -->

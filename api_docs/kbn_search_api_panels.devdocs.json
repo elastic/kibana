@@ -54,6 +54,114 @@
       },
       {
         "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.getLanguageDefinitionCodeSnippet",
+        "type": "Function",
+        "tags": [],
+        "label": "getLanguageDefinitionCodeSnippet",
+        "description": [],
+        "signature": [
+          "(language: Partial<",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "common",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-common.LanguageDefinition",
+            "text": "LanguageDefinition"
+          },
+          ">, key: keyof ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "common",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-common.LanguageDefinition",
+            "text": "LanguageDefinition"
+          },
+          ", args: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "common",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-common.LanguageDefinitionSnippetArguments",
+            "text": "LanguageDefinitionSnippetArguments"
+          },
+          ") => string"
+        ],
+        "path": "packages/kbn-search-api-panels/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.getLanguageDefinitionCodeSnippet.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "language",
+            "description": [],
+            "signature": [
+              "Partial<",
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "common",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-common.LanguageDefinition",
+                "text": "LanguageDefinition"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-search-api-panels/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.getLanguageDefinitionCodeSnippet.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "keyof ",
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "common",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-common.LanguageDefinition",
+                "text": "LanguageDefinition"
+              }
+            ],
+            "path": "packages/kbn-search-api-panels/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.getLanguageDefinitionCodeSnippet.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "common",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-common.LanguageDefinitionSnippetArguments",
+                "text": "LanguageDefinitionSnippetArguments"
+              }
+            ],
+            "path": "packages/kbn-search-api-panels/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
         "id": "def-common.GithubLink",
         "type": "Function",
         "tags": [],
@@ -570,6 +678,20 @@
             "tags": [],
             "label": "docLink",
             "description": [],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinition.github",
+            "type": "Object",
+            "tags": [],
+            "label": "github",
+            "description": [],
+            "signature": [
+              "{ link: string; label: string; } | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
