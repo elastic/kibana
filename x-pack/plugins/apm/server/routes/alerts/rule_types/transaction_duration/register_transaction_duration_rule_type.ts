@@ -69,6 +69,19 @@ import { getParsedFilterQuery } from '../utils/get_parsed_filtered_query';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 
+export const transactionDurationActionVariables = [
+  apmActionVariables.alertDetailsUrl,
+  apmActionVariables.environment,
+  apmActionVariables.interval,
+  apmActionVariables.reason,
+  apmActionVariables.serviceName,
+  apmActionVariables.threshold,
+  apmActionVariables.transactionName,
+  apmActionVariables.transactionType,
+  apmActionVariables.triggerValue,
+  apmActionVariables.viewInAppUrl,
+];
+
 export function registerTransactionDurationRuleType({
   alerting,
   ruleDataClient,
@@ -89,18 +102,7 @@ export function registerTransactionDurationRuleType({
     defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
     validate: { params: transactionDurationParamsSchema },
     actionVariables: {
-      context: [
-        apmActionVariables.alertDetailsUrl,
-        apmActionVariables.environment,
-        apmActionVariables.interval,
-        apmActionVariables.reason,
-        apmActionVariables.serviceName,
-        apmActionVariables.transactionType,
-        apmActionVariables.transactionName,
-        apmActionVariables.threshold,
-        apmActionVariables.triggerValue,
-        apmActionVariables.viewInAppUrl,
-      ],
+      context: transactionDurationActionVariables,
     },
     producer: APM_SERVER_FEATURE_ID,
     minimumLicenseRequired: 'basic',
