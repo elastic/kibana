@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ConnectorType } from './application/connector/types';
+import { ActionType } from '../common';
 import { InMemoryConnector } from './types';
 
-export const createSystemConnectors = (actionTypes: ConnectorType[]): InMemoryConnector[] => {
+export const createSystemConnectors = (actionTypes: ActionType[]): InMemoryConnector[] => {
   const systemActionTypes = actionTypes.filter((actionType) => actionType.isSystemActionType);
 
   const systemConnectors: InMemoryConnector[] = systemActionTypes.map((systemActionType) => ({

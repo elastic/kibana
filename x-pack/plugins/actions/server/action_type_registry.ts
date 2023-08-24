@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { rawConnectorSchema } from './raw_connector_schema';
-import { areValidFeatures } from '../common';
+import { ActionType as CommonActionType, areValidFeatures } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
 import { getActionTypeFeatureUsageName, TaskRunnerFactory, ILicenseState } from './lib';
 import {
@@ -20,7 +20,6 @@ import {
   ActionTypeSecrets,
   ActionTypeParams,
 } from './types';
-import { ConnectorType } from './application/connector/types';
 
 export interface ActionTypeRegistryOpts {
   licensing: LicensingPluginSetup;
@@ -223,7 +222,7 @@ export class ActionTypeRegistry {
   /**
    * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
    */
-  public list(featureId?: string): ConnectorType[] {
+  public list(featureId?: string): CommonActionType[] {
     return Array.from(this.actionTypes)
       .filter(([_, actionType]) =>
         featureId ? actionType.supportedFeatureIds.includes(featureId) : true
