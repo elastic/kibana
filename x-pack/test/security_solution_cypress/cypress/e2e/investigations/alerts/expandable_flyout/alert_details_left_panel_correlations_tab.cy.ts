@@ -33,7 +33,7 @@ import { ALERTS_URL } from '../../../../urls/navigation';
 
 describe(
   'Expandable flyout left panel correlations',
-  { tags: ['ess', 'brokenInServerless'] },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     beforeEach(() => {
       cleanKibana();

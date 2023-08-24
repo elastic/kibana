@@ -20,7 +20,7 @@ import { login, visitWithoutDateRange } from '../../../tasks/login';
 
 import { CASES_URL } from '../../../urls/navigation';
 
-describe('Cases connectors', { tags: ['ess', 'serverless'] }, () => {
+describe('Cases connectors', { tags: ['@ess', '@serverless'] }, () => {
   const configureResult = {
     connector: {
       id: 'e271c3b8-f702-4fbc-98e0-db942b573bbd',

@@ -61,7 +61,7 @@ import { login, visit } from '../../../tasks/login';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('EQL rules', { tags: ['ess', 'brokenInServerless'] }, () => {
+describe('EQL rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });

@@ -42,7 +42,7 @@ import {
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
 
-describe.skip('Create a timeline from a template', { tags: ['ess', 'serverless'] }, () => {
+describe.skip('Create a timeline from a template', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     deleteTimelines();
     login();
@@ -56,7 +56,7 @@ describe.skip('Create a timeline from a template', { tags: ['ess', 'serverless']
 
   it(
     'Should have the same query and open the timeline modal',
-    { tags: 'brokenInServerless' },
+    { tags: '@brokenInServerless' },
     () => {
       selectCustomTemplates();
       expandEventAction();
@@ -76,7 +76,7 @@ describe('Timelines', (): void => {
   });
 
   describe('Toggle create timeline from plus icon', () => {
-    context('Privileges: CRUD', { tags: 'ess' }, () => {
+    context('Privileges: CRUD', { tags: '@ess' }, () => {
       beforeEach(() => {
         login();
         visit(OVERVIEW_URL);
@@ -89,7 +89,7 @@ describe('Timelines', (): void => {
       });
     });
 
-    context('Privileges: READ', { tags: 'ess' }, () => {
+    context('Privileges: READ', { tags: '@ess' }, () => {
       beforeEach(() => {
         login(ROLES.reader);
         visit(OVERVIEW_URL, undefined, ROLES.reader);
@@ -111,7 +111,7 @@ describe('Timelines', (): void => {
 
   describe.skip(
     'Creates a timeline by clicking untitled timeline from bottom bar',
-    { tags: 'brokenInServerless' },
+    { tags: '@brokenInServerless' },
     () => {
       beforeEach(() => {
         login();

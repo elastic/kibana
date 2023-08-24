@@ -13,7 +13,7 @@ import { executeTimelineKQL, openTimelineInspectButton } from '../../../tasks/ti
 
 import { HOSTS_URL } from '../../../urls/navigation';
 
-describe('Inspect', { tags: ['ess', 'serverless'] }, () => {
+describe('Inspect', { tags: ['@ess', '@serverless'] }, () => {
   context('Timeline', () => {
     it('inspects the timeline', () => {
       const hostExistsQuery = 'host.name: *';

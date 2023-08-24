@@ -22,7 +22,7 @@ import { login, visitWithoutDateRange, visit } from '../../../tasks/login';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Open timeline', { tags: ['brokenInServerless', 'ess'] }, () => {
+describe('Open timeline', { tags: ['@brokenInServerless', '@ess'] }, () => {
   let timelineSavedObjectId: string | null = null;
   before(function () {
     cleanKibana();

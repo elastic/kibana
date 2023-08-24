@@ -15,7 +15,7 @@ import {
 import { login, visit } from '../../tasks/login';
 import { OVERVIEW_URL } from '../../urls/navigation';
 
-describe('CTI Link Panel', { tags: ['ess', 'serverless'] }, () => {
+describe('CTI Link Panel', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
   });

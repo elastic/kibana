@@ -15,7 +15,7 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login, visit } from '../../../tasks/login';
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe('Alerts Table Action column', { tags: ['ess', 'serverless'] }, () => {
+describe('Alerts Table Action column', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'process_ancestry');

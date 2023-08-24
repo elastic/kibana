@@ -68,7 +68,7 @@ import { getDetails } from '../../../tasks/rule_details';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Custom query rules', { tags: ['ess', 'brokenInServerless'] }, () => {
+describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
   describe('Custom detection rules creation with data views', () => {
     const rule = getDataViewRule();
     const expectedUrls = rule.references?.join('');

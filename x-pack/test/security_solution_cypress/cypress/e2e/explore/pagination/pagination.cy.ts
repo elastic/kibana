@@ -20,7 +20,7 @@ import { ALL_HOSTS_TABLE } from '../../../screens/hosts/all_hosts';
 import { ALL_USERS_TABLE } from '../../../screens/users/all_users';
 import { goToTablePage, sortFirstTableColumn } from '../../../tasks/table_pagination';
 
-describe('Pagination', { tags: ['ess', 'serverless'] }, () => {
+describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
   describe('Host uncommon processes table)', () => {
     before(() => {
       cy.task('esArchiverLoad', 'host_uncommon_processes');

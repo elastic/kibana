@@ -29,7 +29,7 @@ import { getTimeline } from '../../../objects/timeline';
 import { HOSTS_URL } from '../../../urls/navigation';
 import { cleanKibana, scrollToBottom } from '../../../tasks/common';
 
-describe('timeline data providers', { tags: ['ess', 'serverless'] }, () => {
+describe('timeline data providers', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -59,7 +59,7 @@ describe('timeline data providers', { tags: ['ess', 'serverless'] }, () => {
 
   it(
     'persists timeline when data provider is updated by dragging a field from data grid',
-    { tags: ['brokenInServerless'] },
+    { tags: ['@brokenInServerless'] },
     () => {
       updateDataProviderbyDraggingField('host.name', 0);
       waitForTimelineChanges();

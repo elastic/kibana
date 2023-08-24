@@ -18,7 +18,7 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
 describe(
   'Alert details expandable flyout right panel json tab',
-  { tags: ['ess', 'brokenInServerless'] },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     beforeEach(() => {
       cleanKibana();

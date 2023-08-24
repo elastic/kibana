@@ -49,7 +49,7 @@ const defaultHeaders = [
   { id: 'user.name' },
 ];
 
-describe('Fields Browser', { tags: ['ess', 'serverless'] }, () => {
+describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });

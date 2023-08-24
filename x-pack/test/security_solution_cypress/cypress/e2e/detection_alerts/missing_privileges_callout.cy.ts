@@ -42,7 +42,7 @@ const waitForPageTitleToBeShown = () => {
   cy.get(PAGE_TITLE).should('be.visible');
 };
 
-describe('Detections > Callouts', { tags: 'ess' }, () => {
+describe('Detections > Callouts', { tags: '@ess' }, () => {
   before(() => {
     // First, we have to open the app on behalf of a privileged user in order to initialize it.
     // Otherwise the app will be disabled and show a "welcome"-like page.

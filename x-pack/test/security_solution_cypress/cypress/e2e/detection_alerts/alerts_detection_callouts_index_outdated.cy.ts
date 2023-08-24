@@ -32,7 +32,7 @@ const waitForPageTitleToBeShown = () => {
 
 describe(
   'Detections > Need Admin Callouts indicating an admin is needed to migrate the alert data set',
-  { tags: 'ess' },
+  { tags: '@ess' },
   () => {
     before(() => {
       // First, we have to open the app on behalf of a privileged user in order to initialize it.

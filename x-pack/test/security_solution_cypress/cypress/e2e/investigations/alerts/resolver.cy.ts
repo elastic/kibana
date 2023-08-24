@@ -17,7 +17,7 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login, visit } from '../../../tasks/login';
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe('Analyze events view for alerts', { tags: ['ess', 'serverless'] }, () => {
+describe('Analyze events view for alerts', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule());

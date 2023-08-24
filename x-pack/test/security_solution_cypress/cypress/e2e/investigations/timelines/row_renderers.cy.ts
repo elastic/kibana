@@ -24,7 +24,7 @@ import { populateTimeline } from '../../../tasks/timeline';
 
 import { HOSTS_URL } from '../../../urls/navigation';
 
-describe('Row renderers', { tags: ['ess', 'serverless'] }, () => {
+describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });

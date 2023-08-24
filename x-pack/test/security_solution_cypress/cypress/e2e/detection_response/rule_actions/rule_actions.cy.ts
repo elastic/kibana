@@ -29,7 +29,7 @@ import { RULE_CREATION } from '../../../urls/navigation';
 
 describe(
   'Rule actions during detection rule creation',
-  { tags: ['ess', 'brokenInServerless'] },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     const indexConnector = getIndexConnector();
 

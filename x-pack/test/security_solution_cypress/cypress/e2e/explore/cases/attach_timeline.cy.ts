@@ -19,7 +19,7 @@ import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { cleanKibana, deleteTimelines } from '../../../tasks/common';
 import { createCase } from '../../../tasks/api_calls/cases';
 
-describe('attach timeline to case', { tags: ['ess', 'serverless'] }, () => {
+describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
   context('without cases created', () => {
     before(() => {
       cleanKibana();
@@ -33,7 +33,7 @@ describe('attach timeline to case', { tags: ['ess', 'serverless'] }, () => {
       });
     });
 
-    it('attach timeline to a new case', { tags: 'brokenInServerless' }, function () {
+    it('attach timeline to a new case', { tags: '@brokenInServerless' }, function () {
       visitTimeline(this.myTimeline.savedObjectId);
       attachTimelineToNewCase();
 
@@ -47,7 +47,7 @@ describe('attach timeline to case', { tags: ['ess', 'serverless'] }, () => {
 
     it(
       'attach timeline to an existing case with no case',
-      { tags: 'brokenInServerless' },
+      { tags: '@brokenInServerless' },
       function () {
         visitTimeline(this.myTimeline.savedObjectId);
         attachTimelineToExistingCase();
@@ -63,7 +63,7 @@ describe('attach timeline to case', { tags: ['ess', 'serverless'] }, () => {
     );
   });
 
-  context('with cases created', { tags: 'brokenInServerless' }, () => {
+  context('with cases created', { tags: '@brokenInServerless' }, () => {
     before(() => {
       login();
       deleteTimelines();

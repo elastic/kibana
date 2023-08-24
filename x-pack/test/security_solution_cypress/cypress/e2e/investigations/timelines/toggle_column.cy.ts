@@ -19,7 +19,7 @@ import {
 
 import { HOSTS_URL } from '../../../urls/navigation';
 
-describe('toggle column in timeline', { tags: ['ess', 'serverless'] }, () => {
+describe('toggle column in timeline', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.intercept('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');

@@ -31,7 +31,7 @@ const RULE_1 = createRuleAssetSavedObject({
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update Notifications',
-  { tags: ['ess', 'brokenInServerless'] },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     beforeEach(() => {
       login();

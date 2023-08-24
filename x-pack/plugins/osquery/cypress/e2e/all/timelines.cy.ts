@@ -9,7 +9,7 @@ import { tag } from '../../tags';
 import { takeOsqueryActionWithParams } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Timelines', { tags: [tag.ESS] }, () => {
+describe('ALL - Timelines', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
   });

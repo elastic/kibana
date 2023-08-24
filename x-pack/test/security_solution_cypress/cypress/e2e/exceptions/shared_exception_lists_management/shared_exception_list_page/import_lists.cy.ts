@@ -20,7 +20,7 @@ import {
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 
-describe('Import Lists', { tags: ['ess', 'serverless'] }, () => {
+describe('Import Lists', { tags: ['@ess', '@serverless'] }, () => {
   const LIST_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_exception_list.ndjson';
   before(() => {
     cy.task('esArchiverResetKibana');

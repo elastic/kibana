@@ -59,7 +59,7 @@ import { login, visitWithoutDateRange } from '../../../tasks/login';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Detection rules, threshold', { tags: ['ess', 'brokenInServerless'] }, () => {
+describe('Detection rules, threshold', { tags: ['@ess', '@brokenInServerless'] }, () => {
   const rule = getNewThresholdRule();
   const expectedUrls = rule.references?.join('');
   const expectedFalsePositives = rule.false_positives?.join('');

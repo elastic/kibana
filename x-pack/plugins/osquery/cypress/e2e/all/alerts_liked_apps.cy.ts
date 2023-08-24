@@ -21,7 +21,7 @@ import { ServerlessRoleName } from '../../support/roles';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
-describe('Alert Event Details', { browser: 'electron', tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Alert Event Details', { browser: 'electron', tags: ['@ess', '@serverless'] }, () => {
   let ruleId: string;
   let ruleName: string;
 
@@ -100,7 +100,7 @@ describe('Alert Event Details', { browser: 'electron', tags: [tag.ESS, tag.SERVE
     closeModalIfVisible();
   });
 
-  it('can visit discover from response action results', { tags: [tag.ESS] }, () => {
+  it('can visit discover from response action results', { tags: ['@ess'] }, () => {
     const discoverRegex = new RegExp(`action_id: ${UUID_REGEX}`);
     cy.getBySel('expand-event').first().click();
     cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
@@ -126,7 +126,7 @@ describe('Alert Event Details', { browser: 'electron', tags: [tag.ESS, tag.SERVE
       });
   });
 
-  it('can visit lens from response action results', { tags: [tag.ESS] }, () => {
+  it('can visit lens from response action results', { tags: ['@ess'] }, () => {
     const lensRegex = new RegExp(`Action ${UUID_REGEX} results`);
     cy.getBySel('expand-event').first().click();
     cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
@@ -160,7 +160,7 @@ describe('Alert Event Details', { browser: 'electron', tags: [tag.ESS, tag.SERVE
     cy.getBySel('breadcrumbs').contains(lensRegex);
   });
 
-  it('can add to timeline from response action results', { tags: [tag.ESS] }, () => {
+  it('can add to timeline from response action results', { tags: ['@ess'] }, () => {
     const timelineRegex = new RegExp(`Added ${UUID_REGEX} to timeline`);
     const filterRegex = new RegExp(`action_id: "${UUID_REGEX}"`);
     cy.getBySel('expand-event').first().click();

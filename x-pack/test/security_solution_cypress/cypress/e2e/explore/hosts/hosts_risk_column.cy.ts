@@ -12,7 +12,7 @@ import { cleanKibana } from '../../../tasks/common';
 import { TABLE_CELL } from '../../../screens/alerts_details';
 import { kqlSearch } from '../../../tasks/security_header';
 
-describe('All hosts table', { tags: ['ess', 'serverless'] }, () => {
+describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'risk_hosts');

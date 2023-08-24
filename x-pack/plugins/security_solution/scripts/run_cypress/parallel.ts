@@ -110,7 +110,7 @@ export const cli = () => {
 
         // to avoid running too many tests, we limit the number of files to 3
         // we may extend this in the future
-        files = files.slice(0, 3);
+        files = files.slice(0, 5);
       }
 
       if (!files?.length) {
@@ -453,7 +453,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
               try {
                 result = await cypress.run({
                   browser: 'chrome',
-                  spec: `cypress/${filePath.split('/cypress')[1]}`,
+                  spec: filePath,
                   configFile: cypressConfigFilePath,
                   reporter: argv.reporter as string,
                   reporterOptions: argv.reporterOptions,

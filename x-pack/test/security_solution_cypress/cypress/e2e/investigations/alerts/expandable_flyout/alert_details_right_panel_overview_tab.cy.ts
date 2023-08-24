@@ -69,7 +69,7 @@ import {
 
 describe(
   'Alert details expandable flyout right panel overview tab',
-  { tags: ['ess', 'brokenInServerless'] },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     const rule = getNewRule();
 

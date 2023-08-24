@@ -25,7 +25,7 @@ import { openTimelineUsingToggle } from '../../../tasks/security_main';
 const testDomain = 'myTest';
 
 // tracked by https://github.com/elastic/kibana/issues/161874
-describe.skip('Hover actions', { tags: ['ess', 'serverless'] }, () => {
+describe.skip('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
   const onBeforeLoadCallback = (win: Cypress.AUTWindow) => {
     // avoid cypress being held by windows prompt and timeout
     cy.stub(win, 'prompt').returns(true);

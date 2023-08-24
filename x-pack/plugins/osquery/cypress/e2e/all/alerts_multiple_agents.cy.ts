@@ -16,7 +16,7 @@ import {
 } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('Alert Event Details - dynamic params', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Alert Event Details - dynamic params', { tags: ['@ess', '@serverless'] }, () => {
   let ruleId: string;
   let ruleName: string;
 

@@ -9,7 +9,7 @@ import { LEFT_NAVIGATION } from '../screens/landing_page';
 import { login } from '../tasks/login';
 import { navigatesToLandingPage } from '../tasks/navigation';
 
-describe('Serverless', () => {
+describe('@serverless', () => {
   it('Should navigate to the landing page', () => {
     login();
     navigatesToLandingPage();

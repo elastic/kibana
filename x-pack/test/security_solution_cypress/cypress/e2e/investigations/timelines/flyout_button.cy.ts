@@ -23,7 +23,7 @@ import {
 
 import { HOSTS_URL } from '../../../urls/navigation';
 
-describe('timeline flyout button', { tags: ['ess', 'brokenInServerless'] }, () => {
+describe('timeline flyout button', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -49,7 +49,7 @@ describe('timeline flyout button', { tags: ['ess', 'brokenInServerless'] }, () =
 
   it(
     're-focuses the toggle button when timeline is closed by clicking the [X] close button',
-    { tags: 'brokenInServerless' },
+    { tags: '@brokenInServerless' },
     () => {
       openTimelineUsingToggle();
       closeTimelineUsingCloseButton();

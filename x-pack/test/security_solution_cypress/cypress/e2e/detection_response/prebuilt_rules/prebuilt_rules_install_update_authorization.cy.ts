@@ -57,7 +57,7 @@ const loadPageAsReadOnlyUser = (url: string) => {
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update - Authorization/RBAC',
-  { tags: 'ess' },
+  { tags: '@ess' },
   () => {
     beforeEach(() => {
       login();

@@ -45,7 +45,7 @@ const defaultHeadersInDefaultEcsCategory = [
   { id: 'destination.ip' },
 ];
 
-describe('Events Viewer', { tags: ['ess', 'brokenInServerless'] }, () => {
+describe('Events Viewer', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', 'auditbeat_big');
   });

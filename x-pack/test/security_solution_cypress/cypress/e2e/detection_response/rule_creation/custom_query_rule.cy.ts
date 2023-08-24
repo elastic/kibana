@@ -114,7 +114,7 @@ import { enablesRule, getDetails } from '../../../tasks/rule_details';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Custom query rules', { tags: ['ess', 'brokenInServerless'] }, () => {
+describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });

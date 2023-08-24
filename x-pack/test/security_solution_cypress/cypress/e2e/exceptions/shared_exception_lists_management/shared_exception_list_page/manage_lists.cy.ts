@@ -44,7 +44,7 @@ const getExceptionList2 = () => ({
   list_id: 'exception_list_2',
 });
 
-describe('Manage lists from "Shared Exception Lists" page', { tags: ['ess', 'serverless'] }, () => {
+describe('Manage lists from "Shared Exception Lists" page', { tags: ['@ess', '@serverless'] }, () => {
   describe('Create/Export/Delete List', () => {
     before(() => {
       createRule(getNewRule({ name: 'Another rule' }));

@@ -52,7 +52,7 @@ const EXPIRED_EXCEPTION_ITEM_NAME = 'Sample exception item';
 
 const NON_EXPIRED_EXCEPTION_ITEM_NAME = 'Sample exception item with future expiration';
 
-describe('Detection rules, bulk duplicate', { tags: ['ess', 'serverless'] }, () => {
+describe('Detection rules, bulk duplicate', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });

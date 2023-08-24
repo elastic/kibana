@@ -29,7 +29,7 @@ describe('Add to Cases', () => {
     });
   });
 
-  describe('observability', { tags: [tag.ESS] }, () => {
+  describe('observability', { tags: ['@ess'] }, () => {
     let caseId: string;
     let caseTitle: string;
     before(() => {
@@ -60,7 +60,7 @@ describe('Add to Cases', () => {
     });
   });
 
-  describe('security', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  describe('security', { tags: ['@ess', '@serverless'] }, () => {
     let caseId: string;
     let caseTitle: string;
 

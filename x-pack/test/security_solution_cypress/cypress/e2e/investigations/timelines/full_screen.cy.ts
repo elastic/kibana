@@ -18,7 +18,7 @@ import { populateTimeline } from '../../../tasks/timeline';
 
 import { HOSTS_URL } from '../../../urls/navigation';
 
-describe('Toggle full screen', { tags: ['ess', 'serverless'] }, () => {
+describe('Toggle full screen', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });

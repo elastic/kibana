@@ -50,7 +50,7 @@ describe('Alert details expandable flyout rule preview panel', () => {
   describe('rule preview', () => {
     it(
       'should display rule preview and its sub sections',
-      { tags: ['ess', 'brokenInServerless'] },
+      { tags: ['@ess', '@brokenInServerless'] },
       () => {
         cy.log('rule preview panel');
 

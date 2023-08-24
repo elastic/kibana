@@ -22,7 +22,7 @@ import { openEvents, openSessions } from '../../../tasks/hosts/main';
 import { login, visit } from '../../../tasks/login';
 import { ALERTS_URL, HOSTS_URL } from '../../../urls/navigation';
 
-describe('Bulk Investigate in Timeline', { tags: ['ess', 'serverless'] }, () => {
+describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'bulk_process');

@@ -32,7 +32,7 @@ import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
 const spaceId = 'default';
 
-describe('Enable risk scores', { tags: ['ess', 'serverless'] }, () => {
+describe('Enable risk scores', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();

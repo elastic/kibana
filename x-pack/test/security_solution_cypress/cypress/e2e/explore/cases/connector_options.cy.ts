@@ -28,7 +28,7 @@ import { CASES_URL } from '../../../urls/navigation';
 import { CONNECTOR_CARD_DETAILS, CONNECTOR_TITLE } from '../../../screens/case_details';
 import { cleanKibana } from '../../../tasks/common';
 
-describe('Cases connector incident fields', { tags: ['ess', 'serverless'] }, () => {
+describe('Cases connector incident fields', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();

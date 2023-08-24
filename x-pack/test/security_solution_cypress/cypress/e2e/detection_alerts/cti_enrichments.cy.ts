@@ -28,7 +28,7 @@ import { openJsonView, openThreatIndicatorDetails } from '../../tasks/alerts_det
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 import { addsFieldsToTimeline } from '../../tasks/rule_details';
 
-describe('CTI Enrichment', { tags: ['ess', 'serverless'] }, () => {
+describe('CTI Enrichment', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'threat_indicator');

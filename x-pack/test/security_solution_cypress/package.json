@@ -20,7 +20,7 @@
       "cypress:open:serverless": "yarn cypress:serverless open --config-file ../../test/security_solution_cypress/cypress/cypress_serverless.config.ts --spec './cypress/e2e/**/*.cy.ts'",
       "cypress:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/{,!(investigations,explore)/**/}*.cy.ts'; status=$?; yarn junit:merge && exit $status",
       "cypress:investigations:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/investigations/**/*.cy.ts'; status=$?; yarn junit:merge && exit $status",
-      "cypress:explore:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/explore/**/*.cy.ts'; status=$?; yarn junit:merge && exit $status",
+      "cypress:explore:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/explore/**/*.cy.ts'",
       "cypress:changed-specs-only:serverless": "yarn cypress:serverless --changed-specs-only --env burn=2"
     }
   }

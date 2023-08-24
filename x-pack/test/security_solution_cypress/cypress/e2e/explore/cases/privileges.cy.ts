@@ -48,7 +48,7 @@ const testCase: TestCaseWithoutTimeline = {
   owner: 'securitySolution',
 };
 
-describe('Cases privileges', { tags: 'ess' }, () => {
+describe('Cases privileges', { tags: '@ess' }, () => {
   before(() => {
     cleanKibana();
     createUsersAndRoles(usersToCreate, rolesToCreate);

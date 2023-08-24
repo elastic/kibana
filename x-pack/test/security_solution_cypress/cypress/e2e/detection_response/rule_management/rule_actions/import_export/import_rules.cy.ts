@@ -17,7 +17,7 @@ import { login, visitWithoutDateRange } from '../../../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../../urls/navigation';
 const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 
-describe('Import rules', { tags: ['ess', 'brokenInServerless'] }, () => {
+describe('Import rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });

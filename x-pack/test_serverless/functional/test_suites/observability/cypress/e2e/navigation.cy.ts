@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-describe('Serverless', () => {
+describe('@serverless', () => {
   it('Should login', () => {
     cy.loginAsElasticUser();
   });

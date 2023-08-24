@@ -24,7 +24,7 @@ import { createTimeline, favoriteTimeline } from '../../../tasks/api_calls/timel
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe('timeline overview search', { tags: ['ess', 'serverless'] }, () => {
+describe('timeline overview search', { tags: ['@ess', 'serverless'] }, () => {
   before(() => {
     cleanKibana();
 

@@ -16,7 +16,7 @@ import { cleanKibana } from '../../../tasks/common';
 import { createTimeline, favoriteTimeline } from '../../../tasks/api_calls/timelines';
 import { getTimeline } from '../../../objects/timeline';
 
-describe('Overview Page', { tags: ['ess', 'serverless'] }, () => {
+describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'overview');
@@ -64,7 +64,7 @@ describe('Overview Page', { tags: ['ess', 'serverless'] }, () => {
   });
 });
 
-describe('Overview page with no data', { tags: 'brokenInServerless' }, () => {
+describe('Overview page with no data', { tags: '@brokenInServerless' }, () => {
   before(() => {
     cy.task('esArchiverUnload', 'auditbeat');
   });

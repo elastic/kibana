@@ -44,7 +44,7 @@ import {
 } from '../../../screens/exceptions';
 import { createEndpointExceptionList } from '../../../tasks/api_calls/exceptions';
 
-describe('Add endpoint exception from rule details', { tags: ['ess', 'serverless'] }, () => {
+describe('Add endpoint exception from rule details', { tags: ['@ess', '@serverless'] }, () => {
   const ITEM_NAME = 'Sample Exception List Item';
 
   before(() => {

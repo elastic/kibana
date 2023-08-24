@@ -10,7 +10,7 @@ import { navigateTo } from '../../tasks/navigation';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Edit saved query', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('ALL - Edit saved query', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
 

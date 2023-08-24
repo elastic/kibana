@@ -13,7 +13,7 @@ import { DATAGRID_HEADERS, DATAGRID_HEADER } from '../../../screens/timeline';
 import { waitsForEventsToBeLoaded } from '../../../tasks/hosts/events';
 import { removeColumn } from '../../../tasks/timeline';
 
-describe('persistent timeline', { tags: ['ess', 'serverless'] }, () => {
+describe('persistent timeline', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     login();
     visit(HOSTS_URL);
@@ -27,7 +27,7 @@ describe('persistent timeline', { tags: ['ess', 'serverless'] }, () => {
     );
   });
 
-  it('persist the deletion of a column', { tags: 'brokenInServerless' }, function () {
+  it('persist the deletion of a column', { tags: '@brokenInServerless' }, function () {
     /* For testing purposes we are going to use the message column */
     const COLUMN = 'message';
 

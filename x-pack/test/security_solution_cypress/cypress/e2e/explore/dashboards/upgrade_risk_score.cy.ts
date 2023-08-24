@@ -38,7 +38,7 @@ import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
 const spaceId = 'default';
 
-describe('Upgrade risk scores', { tags: ['ess', 'serverless'] }, () => {
+describe('Upgrade risk scores', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();

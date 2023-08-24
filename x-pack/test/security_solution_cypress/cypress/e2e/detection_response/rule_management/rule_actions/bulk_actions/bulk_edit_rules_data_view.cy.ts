@@ -57,7 +57,7 @@ const expectedIndexPatterns = ['index-1-*', 'index-2-*'];
 
 describe(
   'Bulk editing index patterns of rules with a data view only',
-  { tags: ['ess', 'brokenInServerless'] },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     before(() => {
       cleanKibana();
@@ -250,7 +250,7 @@ describe(
 
 describe(
   'Bulk editing index patterns of rules with index patterns and rules with a data view',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     before(() => {
       cleanKibana();

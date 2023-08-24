@@ -48,7 +48,7 @@ import { openTimeline, waitForTimelinesPanelToBeLoaded } from '../../../tasks/ti
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Timeline Templates', { tags: ['ess', 'serverless'] }, () => {
+describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });

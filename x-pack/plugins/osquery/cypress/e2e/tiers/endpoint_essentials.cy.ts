@@ -11,7 +11,7 @@ import { checkOsqueryResponseActionsPermissions } from '../../tasks/response_act
 describe(
   'App Features for Endpoint Essentials PLI',
   {
-    tags: [tag.SERVERLESS],
+    tags: ['@serverless'],
     env: {
       ftrConfig: {
         productTypes: [

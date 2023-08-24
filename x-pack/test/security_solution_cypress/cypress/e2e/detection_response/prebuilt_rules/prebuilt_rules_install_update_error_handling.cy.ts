@@ -24,7 +24,7 @@ import {
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update - Error handling',
-  { tags: 'ess' },
+  { tags: '@ess' },
   () => {
     beforeEach(() => {
       login();

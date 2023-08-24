@@ -38,7 +38,7 @@ import {
   waitForExceptionsTableToBeLoaded,
 } from '../../../tasks/exceptions_table';
 
-describe('Add, edit and delete exception', { tags: ['ess', 'serverless'] }, () => {
+describe('Add, edit and delete exception', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverResetKibana');
     cy.task('esArchiverLoad', 'exceptions');

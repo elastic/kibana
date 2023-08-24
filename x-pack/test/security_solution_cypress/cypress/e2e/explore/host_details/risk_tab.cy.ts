@@ -10,7 +10,7 @@ import { login, visitHostDetailsPage } from '../../../tasks/login';
 import { cleanKibana, waitForTableToLoad } from '../../../tasks/common';
 import { TABLE_CELL, TABLE_ROWS } from '../../../screens/alerts_details';
 
-describe('risk tab', { tags: ['ess', 'serverless'] }, () => {
+describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'risk_hosts');

@@ -50,7 +50,7 @@ describe('Sourcerer', () => {
     cy.task('esArchiverResetKibana');
     dataViews.forEach((dataView: string) => postDataView(dataView));
   });
-  describe('permissions', { tags: 'ess' }, () => {
+  describe('permissions', { tags: '@ess' }, () => {
     before(() => {
       createUsersAndRoles(usersToCreate, rolesToCreate);
     });
@@ -61,7 +61,7 @@ describe('Sourcerer', () => {
     });
   });
 
-  describe('Default scope', { tags: ['ess', 'serverless'] }, () => {
+  describe('Default scope', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       cy.clearLocalStorage();
       login();
@@ -123,7 +123,7 @@ describe('Sourcerer', () => {
 
     it(
       'adds a pattern to the default index and correctly filters out auditbeat-*',
-      { tags: 'brokenInServerless' },
+      { tags: '@brokenInServerless' },
       () => {
         openSourcerer();
         isSourcererSelection(`auditbeat-*`);
@@ -138,7 +138,7 @@ describe('Sourcerer', () => {
     );
   });
 });
-describe('Timeline scope', { tags: 'brokenInServerless' }, () => {
+describe('Timeline scope', { tags: '@brokenInServerless' }, () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     login();

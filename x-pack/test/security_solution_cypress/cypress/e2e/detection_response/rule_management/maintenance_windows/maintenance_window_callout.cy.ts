@@ -12,7 +12,7 @@ import { cleanKibana } from '../../../../tasks/common';
 import { login, visit } from '../../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
 
-describe('Maintenance window callout on Rule Management page', { tags: ['ess'] }, () => {
+describe('Maintenance window callout on Rule Management page', { tags: ['@ess'] }, () => {
   let maintenanceWindowId = '';
 
   before(() => {

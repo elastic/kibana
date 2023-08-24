@@ -29,7 +29,7 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login, visit } from '../../../tasks/login';
 import { startAlertsCasesTour } from '../../../tasks/api_calls/tour';
 
-describe('Guided onboarding tour', { tags: ['ess', 'brokenInServerless'] }, () => {
+describe('Guided onboarding tour', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     login();
@@ -71,7 +71,7 @@ describe('Guided onboarding tour', { tags: ['ess', 'brokenInServerless'] }, () =
 
   describe.skip(
     'persists tour steps in flyout on flyout toggle',
-    { tags: ['ess', 'brokenInServerless'] },
+    { tags: ['@ess', '@brokenInServerless'] },
     () => {
       const stepsInAlertsFlyout = [
         AlertsCasesTourSteps.reviewAlertDetailsFlyout,
@@ -82,7 +82,7 @@ describe('Guided onboarding tour', { tags: ['ess', 'brokenInServerless'] }, () =
       const stepsInCasesFlyout = [AlertsCasesTourSteps.createCase, AlertsCasesTourSteps.submitCase];
 
       stepsInAlertsFlyout.forEach((step) => {
-        it(`step: ${step}, resets to ${step}`, { tags: ['ess', 'brokenInServerless'] }, () => {
+        it(`step: ${step}, resets to ${step}`, { tags: ['@ess', '@brokenInServerless'] }, () => {
           startTour();
           goToStep(step);
           assertTourStepExist(step);
@@ -96,7 +96,7 @@ describe('Guided onboarding tour', { tags: ['ess', 'brokenInServerless'] }, () =
       stepsInCasesFlyout.forEach((step) => {
         it(
           `step: ${step}, resets to ${AlertsCasesTourSteps.createCase}`,
-          { tags: ['ess', 'brokenInServerless'] },
+          { tags: ['@ess', '@brokenInServerless'] },
           () => {
             startTour();
             goToStep(step);

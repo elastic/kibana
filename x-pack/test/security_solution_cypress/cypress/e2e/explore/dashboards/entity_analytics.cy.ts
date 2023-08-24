@@ -55,7 +55,7 @@ const SIEM_KIBANA_HOST_ALERTS = 2;
 const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 const END_DATE = 'Jan 19, 2019 @ 20:33:29.186';
 
-describe('Entity Analytics Dashboard', { tags: ['ess', 'brokenInServerless'] }, () => {
+describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });
