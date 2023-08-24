@@ -48,5 +48,6 @@ export function validateParamsForWarnings(
        */
     }
   }
-  return null;
+  // Better to set the warning msg if you do not know if the mustache template is invalid
+  return publicUrlWarning;
 }

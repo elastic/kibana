@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import getCaretCoordinates from 'textarea-caret';
 import { Properties } from 'csstype';
 import {
@@ -55,6 +55,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
   const [matches, setMatches] = useState<string[]>([]);
   const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0, height: 0, width: 0 });
   const [isListOpen, setListOpen] = useState(false);
+  const [autoCompleteIndex, setAutoCompleteIndex] = useState(-1);
   const [selectableHasFocus, setSelectableHasFocus] = useState(false);
   const [searchWord, setSearchWord] = useState<string>('');
 
@@ -67,6 +68,14 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
       'data-test-subj': `${variable}-selectableOption`,
     }));
   }, [matches]);
+
+  const closeList = useCallback((doNoResetAutoCompleteIndex = false) => {
+    if (!doNoResetAutoCompleteIndex) {
+      setAutoCompleteIndex(-1)
+    }
+    setListOpen(false);
+    setSelectableHasFocus(false);
+  }, [])
 
   const onOptionPick = useCallback(
     (newOptions: EuiSelectableOption[]) => {
@@ -87,6 +96,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
 
         editAction(paramsProperty, newInputText.trim(), index);
         setMatches([]);
+        closeList();
         textAreaRef.current.focus();
         // We use setTimeout here, because editAction is async function and we need to wait before it executes
         setTimeout(() => {
@@ -99,7 +109,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
         }, 0);
       }
     },
-    [editAction, index, paramsProperty]
+    [editAction, index, paramsProperty, closeList]
   );
 
   const recalcMenuPosition = useCallback(() => {
@@ -115,35 +125,24 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
     const left = textAreaClientRect.left + window.pageXOffset;
     const height = newPosition.height;
     const width = textAreaClientRect.width;
-    setPopupPosition((old) =>
-      old.top !== top || old.left !== left || old.width !== width || old.height !== height
+    setPopupPosition((old) => old.top !== top || old.left !== left || old.width !== width || old.height !== height
         ? { top, left, width, height }
         : old
     );
-  }, [setPopupPosition, textAreaRef]);
-
-  useEffect(() => {
-    if (!isListOpen) return;
-    // E.g. we have a case, that warning appeared and disappeared from time to time, but without recalculation of
-    // a menu position, a menu will be in a wrong place. To prevent such cases I recalculate a menu position every 300 ms.
-    const interval = setInterval(recalcMenuPosition, 300);
-    return () => clearInterval(interval);
-  }, [isListOpen, recalcMenuPosition]);
+  }, []);
 
   const onChangeWithMessageVariable = useCallback(() => {
     if (!textAreaRef.current) return;
     const { value, selectionStart } = textAreaRef.current;
+    const lastTwoLetter = value.slice(selectionStart - 2, selectionStart);
 
-    recalcMenuPosition();
-    const lastSpaceIndex = value.slice(0, selectionStart).lastIndexOf(' ');
-    const lastOpenDoubleCurlyBracketsIndex = value.slice(0, selectionStart).lastIndexOf('{{');
-    const currentWordStartIndex = Math.max(lastSpaceIndex, lastOpenDoubleCurlyBracketsIndex);
+    const currentWord = autoCompleteIndex !== -1 ? value.slice(autoCompleteIndex, selectionStart) : '';
 
-    const currentWord = value
-      .slice(currentWordStartIndex === -1 ? 0 : currentWordStartIndex, selectionStart)
-      .trim();
-
-    if (currentWord.startsWith('{{')) {
+    console.log('currentWord', currentWord, 'lastTwoLetter', lastTwoLetter)
+    if (lastTwoLetter === '{{' || currentWord.startsWith('{{')) {
+      if (lastTwoLetter === '{{') {
+        setAutoCompleteIndex(selectionStart - 2)
+      }
       const filteredMatches = filterSuggestions({
         actionVariablesList: messageVariables
           ?.filter(({ deprecated }) => !deprecated)
@@ -152,18 +151,17 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
       });
       setSearchWord(currentWord.slice(2));
       setMatches(filteredMatches);
-      setListOpen((prevVal) => {
-        if (!prevVal) {
-          return true;
-        }
-        return prevVal;
+      setListOpen(() => {
+        setTimeout(() => recalcMenuPosition(), 0);
+        return true;
       });
+    } else if (lastTwoLetter === '}}') {
+      closeList()
     } else {
       setMatches([]);
     }
-
     editAction(paramsProperty, value, index);
-  }, [editAction, index, messageVariables, paramsProperty, recalcMenuPosition]);
+  }, [autoCompleteIndex, editAction, index, isListOpen, messageVariables, paramsProperty, recalcMenuPosition]);
 
   const textareaOnKeyPress = useCallback(
     (event) => {
@@ -184,8 +182,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
         } else if (event.code === 'Escape') {
           event.preventDefault();
           event.stopPropagation();
-          setListOpen(false);
-          setSelectableHasFocus(false);
+          closeList()
         } else if (event.code === 'Enter' || event.code === 'Space') {
           const optionIndex = selectableRef.current.state.activeOptionIndex;
           onOptionPick(
@@ -199,8 +196,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
               return ots;
             })
           );
-          setListOpen(false);
-          setSelectableHasFocus(false);
+          closeList()
         }
       } else {
         setSelectableHasFocus((prevValue) => {
@@ -211,7 +207,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
         });
       }
     },
-    [isListOpen, onOptionPick, optionsToShow, selectableHasFocus]
+    [closeList, isListOpen, onOptionPick, optionsToShow, selectableHasFocus]
   );
 
   const clickOutSideTextArea = useCallback((event) => {
@@ -231,7 +227,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
     ) {
       return;
     }
-    setListOpen(false);
+    closeList()
   }, []);
 
   const onSelectMessageVariable = useCallback(
@@ -300,14 +296,9 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
                 editAction(paramsProperty, '', index);
               }
             }, [editAction, index, inputTargetValue, isListOpen, paramsProperty])}
-            onClick={useCallback(() => setListOpen(false), [])}
+            onClick={useCallback(() => closeList(), [])}
             onScroll={useCallback(() => {
-              if (
-                textAreaRef.current?.getBoundingClientRect() &&
-                textAreaRef.current.getBoundingClientRect().top > popupPosition.top
-              ) {
-                setListOpen(false);
-              }
+                closeList(true);
             }, [popupPosition.top])}
           />
         </EuiOutsideClickDetector>
