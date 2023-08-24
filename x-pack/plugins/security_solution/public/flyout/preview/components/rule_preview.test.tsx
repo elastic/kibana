@@ -22,6 +22,7 @@ import {
   mockDefineStepRule,
   mockScheduleStepRule,
 } from '../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
+import { useGetSavedQuery } from '../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import {
   RULE_PREVIEW_BODY_TEST_ID,
   RULE_PREVIEW_ABOUT_HEADER_TEST_ID,
@@ -42,6 +43,9 @@ jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallbac
 
 const mockGetStepsData = getStepsData as jest.Mock;
 jest.mock('../../../detections/pages/detection_engine/rules/helpers');
+
+const mockUseGetSavedQuery = useGetSavedQuery as jest.Mock;
+jest.mock('../../../detections/pages/detection_engine/rules/use_get_saved_query');
 
 const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 
@@ -69,6 +73,7 @@ describe('<RulePreview />', () => {
       scheduleRuleData: mockScheduleStepRule(),
       ruleActionsData: { actions: ['action'] },
     });
+    mockUseGetSavedQuery.mockReturnValue({ isSavedQueryLoading: false, savedQueryBar: null });
     const { getByTestId } = render(
       <TestProviders>
         <ThemeProvider theme={mockTheme}>

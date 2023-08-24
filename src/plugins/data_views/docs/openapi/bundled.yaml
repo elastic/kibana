@@ -280,6 +280,62 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+    delete:
+      summary: Delete a runtime field from a data view.
+      operationId: deleteRuntimeField
+      description: |
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/field_name'
+        - $ref: '#/components/parameters/view_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+        '404':
+          description: Object is not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
+    post:
+      summary: Update an existing runtime field.
+      operationId: updateRuntimeField
+      description: |
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/field_name'
+        - $ref: '#/components/parameters/view_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data_view:
+                  type: object
+                fields:
+                  type: array
+                  items:
+                    type: object
+            examples:
+              updateRuntimeFieldRequest:
+                $ref: '#/components/examples/update_runtime_field_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+      servers:
+        - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
   /api/data_views/default:
@@ -1832,6 +1888,12 @@ components:
           fieldAttrs: {}
           allowNoIndex: false
           name: Kibana Sample Data Flights
+    update_runtime_field_request:
+      summary: Update an existing runtime field on a data view.
+      value:
+        runtimeField:
+          script:
+            source: emit(doc["bar"].value)
     get_default_data_view_response:
       summary: The get default data view API returns the default data view identifier.
       value:

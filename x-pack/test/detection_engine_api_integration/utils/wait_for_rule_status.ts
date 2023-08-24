@@ -46,6 +46,7 @@ export const waitForRuleStatus = async (
       const response = await supertest
         .get(DETECTION_ENGINE_RULES_URL)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .query(query)
         .expect(200);
 
