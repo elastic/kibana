@@ -8,6 +8,7 @@
 import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
 import _ from 'lodash';
+import globby from 'globby';
 import pMap from 'p-map';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
@@ -85,12 +86,16 @@ export const cli = () => {
       ) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
       const spec: string | undefined = argv?.spec as string;
+      const grepSpecPattern = grep({
+        ...cypressConfigFile,
+        specPattern: spec ?? cypressConfigFile.e2e.specPattern,
+        excludeSpecPattern: [],
+      }).specPattern;
+
       let files = retrieveIntegrations(
-        grep({
-          ...cypressConfigFile,
-          specPattern: spec ? [spec] : cypressConfigFile.e2e.specPattern,
-          excludeSpecPattern: [],
-        }).specPattern
+        _.isArray(grepSpecPattern)
+          ? grepSpecPattern
+          : globby.sync(spec ? [spec] : cypressConfigFile.e2e.specPattern)
       );
 
       if (argv.changedSpecsOnly) {
@@ -480,11 +485,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
           return result;
         },
         {
-          concurrency: (argv.concurrency as number | undefined)
-            ? (argv.concurrency as number)
-            : !isOpen
-            ? 2
-            : 1,
+          concurrency: 1,
         }
       ).then((results) => {
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
