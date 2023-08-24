@@ -28,7 +28,7 @@ export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
     <AssetDetails
       asset={{ id: name, name }}
       assetType="host"
-      dateRange={parsedDateRange}
+      dateRange={hostFlyoutState?.dateRange ?? parsedDateRange}
       activeTabId={hostFlyoutState?.tabId}
       overrides={{
         metadata: {
@@ -44,6 +44,7 @@ export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
       }}
       onTabsStateChange={(state) =>
         setHostFlyoutState({
+          dateRange: state.dateRange,
           metadataSearch: state.metadata?.query,
           processSearch: state.processes?.query,
           logsSearch: state.logs?.query,

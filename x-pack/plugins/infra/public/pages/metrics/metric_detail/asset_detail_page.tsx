@@ -6,7 +6,7 @@
  */
 
 import type { TimeRange } from '@kbn/es-query';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { NoRemoteCluster } from '../../../components/empty_states';
@@ -70,26 +70,35 @@ export const AssetDetailPage = () => {
     return queryParams.get('assetName') ?? undefined;
   }, [search]);
 
-  const { parsedTimeRange, setTimeRange } = useMetricsTimeContext();
+  const { timeRange, setTimeRange } = useMetricsTimeContext();
 
   const dateRange: TimeRange = useMemo(
     () => ({
-      from: new Date(parsedTimeRange.from).toISOString(),
-      to: new Date(parsedTimeRange.to).toISOString(),
+      from:
+        typeof timeRange.from === 'number'
+          ? new Date(timeRange.from).toISOString()
+          : timeRange.from,
+      to: typeof timeRange.to === 'number' ? new Date(timeRange.to).toISOString() : timeRange.to,
     }),
-    [parsedTimeRange.from, parsedTimeRange.to]
+    [timeRange.from, timeRange.to]
   );
 
   // Retrocompatibility
-  const handleTabStateChange = ({ dateRange: newDateRange }: TabState) => {
-    if (newDateRange) {
-      setTimeRange({
-        from: newDateRange.from,
-        to: newDateRange.to,
-        interval: parsedTimeRange.interval,
-      });
-    }
-  };
+  const handleTabStateChange = useCallback(
+    ({ dateRange: newDateRange }: TabState) => {
+      if (newDateRange) {
+        setTimeRange(
+          {
+            from: newDateRange.from,
+            to: newDateRange.to,
+            interval: timeRange.interval,
+          },
+          false
+        );
+      }
+    },
+    [setTimeRange, timeRange.interval]
+  );
 
   const { metricIndicesExist, remoteClustersExist } = source?.status ?? {};
 

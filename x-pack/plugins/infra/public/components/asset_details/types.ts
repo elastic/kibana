@@ -26,8 +26,7 @@ export enum FlyoutTabIds {
 
 export type TabIds = `${FlyoutTabIds}`;
 
-export interface TabState {
-  dateRange?: TimeRange;
+export interface OverridableTabState {
   metadata?: {
     query?: string;
     showActionsColumn?: boolean;
@@ -46,6 +45,10 @@ export interface TabState {
   };
 }
 
+export interface TabState extends OverridableTabState {
+  activeTabId?: TabIds;
+  dateRange: TimeRange;
+}
 export interface FlyoutProps {
   closeFlyout: () => void;
   mode: 'flyout';
@@ -70,7 +73,7 @@ export interface AssetDetailsProps {
   dateRange: TimeRange;
   tabs: Tab[];
   activeTabId?: TabIds;
-  overrides?: TabState;
+  overrides?: OverridableTabState;
   renderMode: RenderMode;
   onTabsStateChange?: TabsStateChangeFn;
   links?: LinkOptions[];
@@ -79,7 +82,9 @@ export interface AssetDetailsProps {
   metricAlias: string;
 }
 
-export type TabsStateChangeFn = (state: TabState & { activeTabId?: TabIds }) => void;
+export type TabsStateChangeFn = (
+  state: OverridableTabState & { activeTabId?: TabIds; dateRange: TimeRange }
+) => void;
 
 export interface ContentTemplateProps {
   header: Pick<AssetDetailsProps, 'tabs' | 'links'>;

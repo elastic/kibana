@@ -22,6 +22,7 @@ import { Popover } from '../../common/popover';
 import { useDateRangeProviderContext } from '../../../hooks/use_date_range';
 
 type DataViewOrigin = 'logs' | 'metrics';
+type BrushEndArgs = Parameters<NonNullable<LensEmbeddableInput['onBrushEnd']>>[0];
 
 interface Props {
   nodeName: string;
@@ -54,10 +55,7 @@ export const MetricsGrid = React.memo(
     );
 
     const handleBrushEnd = useCallback(
-      ({
-        range,
-        preventDefault,
-      }: Parameters<NonNullable<LensEmbeddableInput['onBrushEnd']>>[0]) => {
+      ({ range, preventDefault }: BrushEndArgs) => {
         setDateRange({
           from: new Date(range[0]).toISOString(),
           to: new Date(range[1]).toISOString(),
