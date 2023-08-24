@@ -15,6 +15,10 @@ describe('Duration Format', () => {
     outputPrecision: undefined,
     showSuffix: undefined,
     fixtures: [
+     {
+        input: 0,
+        output: '0.00 seconds',
+      },
       {
         input: -60,
         output: 'minus a minute',
