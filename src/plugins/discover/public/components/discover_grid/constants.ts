@@ -11,10 +11,11 @@ import { EuiDataGridStyle } from '@elastic/eui';
 // data types
 export const kibanaJSON = 'kibana-json';
 export const GRID_STYLE = {
-  border: 'all',
+  border: 'horizontal',
   fontSize: 's',
-  cellPadding: 's',
-  rowHover: 'none',
+  cellPadding: 'm',
+  rowHover: 'highlight',
+  header: 'underline',
 } as EuiDataGridStyle;
 
 export const defaultTimeColumnWidth = 210;
