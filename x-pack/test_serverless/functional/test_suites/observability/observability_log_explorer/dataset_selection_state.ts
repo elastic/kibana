@@ -10,14 +10,14 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'discoverLogExplorer']);
+  const PageObjects = getPageObjects(['common', 'observabilityLogExplorer']);
 
   describe('DatasetSelection initialization and update', () => {
     describe('when the "index" query param does not exist', () => {
       it('should initialize the "All log datasets" selection', async () => {
         await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
         const datasetSelectionTitle =
-          await PageObjects.discoverLogExplorer.getDatasetSelectorButtonText();
+          await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
 
         expect(datasetSelectionTitle).to.be('All log datasets');
       });
@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         const datasetSelectionTitle =
-          await PageObjects.discoverLogExplorer.getDatasetSelectorButtonText();
+          await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
 
         expect(datasetSelectionTitle).to.be('[Azure Logs] activitylogs');
       });
@@ -44,9 +44,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         const datasetSelectionTitle =
-          await PageObjects.discoverLogExplorer.getDatasetSelectorButtonText();
+          await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
 
-        await PageObjects.discoverLogExplorer.assertRestoreFailureToastExist();
+        await PageObjects.observabilityLogExplorer.assertRestoreFailureToastExist();
         expect(datasetSelectionTitle).to.be('All log datasets');
       });
     });
@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should decode and restore the selection for the current index', async () => {
         await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
         const allDatasetSelectionTitle =
-          await PageObjects.discoverLogExplorer.getDatasetSelectorButtonText();
+          await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
         expect(allDatasetSelectionTitle).to.be('All log datasets');
 
         const azureActivitylogsIndex =
@@ -66,14 +66,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           )})&controlPanels=()`,
         });
         const azureDatasetSelectionTitle =
-          await PageObjects.discoverLogExplorer.getDatasetSelectorButtonText();
+          await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
         expect(azureDatasetSelectionTitle).to.be('[Azure Logs] activitylogs');
 
         // Go back to previous page selection
         await retry.try(async () => {
           await browser.goBack();
           const backNavigationDatasetSelectionTitle =
-            await PageObjects.discoverLogExplorer.getDatasetSelectorButtonText();
+            await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
           expect(backNavigationDatasetSelectionTitle).to.be('All log datasets');
         });
 
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           await browser.goForward();
           const forwardNavigationDatasetSelectionTitle =
-            await PageObjects.discoverLogExplorer.getDatasetSelectorButtonText();
+            await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
           expect(forwardNavigationDatasetSelectionTitle).to.be('[Azure Logs] activitylogs');
         });
       });

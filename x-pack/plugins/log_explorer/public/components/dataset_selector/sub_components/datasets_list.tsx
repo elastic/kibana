@@ -52,7 +52,7 @@ export const DatasetsList = ({
         titleSize="s"
         body={
           <FormattedMessage
-            id="xpack.discoverLogExplorer.datasetSelector.noDatasetsError"
+            id="xpack.logExplorer.datasetSelector.noDatasetsError"
             defaultMessage="An {error} occurred while getting your data streams. Please retry."
             values={{
               error: (

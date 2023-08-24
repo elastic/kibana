@@ -17,19 +17,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Columns selection initialization and update', () => {
     before(async () => {
       await esArchiver.load(
-        'x-pack/test/functional/es_archives/discover_log_explorer/data_streams'
+        'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
       );
     });
 
     after(async () => {
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/discover_log_explorer/data_streams'
+        'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
       );
     });
 
-    describe('when the log explorer profile loads', () => {
+    describe('when the log explorer loads', () => {
       it("should initialize the table columns to logs' default selection", async () => {
-        await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
+        await PageObjects.common.navigateToApp('observabilityLogExplorer');
 
         await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
 
@@ -39,8 +39,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should restore the table columns from the URL state if exists', async () => {
-        await PageObjects.common.navigateToApp('discover', {
-          hash: '/p/log-explorer?_a=(columns:!(message,data_stream.namespace))',
+        await PageObjects.common.navigateToApp('observabilityLogExplorer', {
+          hash: '?_a=(columns:!(message,data_stream.namespace))',
         });
 
         await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();

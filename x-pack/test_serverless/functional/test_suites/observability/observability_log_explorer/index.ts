@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function (loadTestFile: FtrProviderContext['loadTestFile']) {
-  describe('Discover Log-Explorer profile', function () {
+  describe('Observability Log Explorer', function () {
     loadTestFile(require.resolve('./columns_selection'));
     loadTestFile(require.resolve('./customization'));
     loadTestFile(require.resolve('./dataset_selection_state'));

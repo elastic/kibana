@@ -36,7 +36,6 @@ pageLoadAssetSize:
   devTools: 38637
   discover: 99999
   discoverEnhanced: 42730
-  discoverLogExplorer: 39045
   embeddable: 87309
   embeddableEnhanced: 22107
   enterpriseSearch: 50858
@@ -87,6 +86,7 @@ pageLoadAssetSize:
   licenseManagement: 41817
   licensing: 29004
   lists: 22900
+  logExplorer: 39045
   logsShared: 281060
   logstash: 53548
   management: 46112

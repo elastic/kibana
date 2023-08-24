@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DiscoverLogExplorerServerPlugin } from './plugin';
+import { LogExplorerServerPlugin } from './plugin';
 
 export { config } from './config';
 
-export const plugin = () => new DiscoverLogExplorerServerPlugin();
+export const plugin = () => new LogExplorerServerPlugin();

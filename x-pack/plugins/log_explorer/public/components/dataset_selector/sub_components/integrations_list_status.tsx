@@ -42,7 +42,7 @@ export const IntegrationsListStatus = ({
         titleSize="s"
         body={
           <FormattedMessage
-            id="xpack.discoverLogExplorer.datasetSelector.noIntegrationsError"
+            id="xpack.logExplorer.datasetSelector.noIntegrationsError"
             defaultMessage="An {error} occurred while getting your integrations. Please retry."
             values={{
               error: (

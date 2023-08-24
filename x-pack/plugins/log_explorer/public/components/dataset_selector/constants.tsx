@@ -16,59 +16,53 @@ export const DATA_VIEW_POPOVER_CONTENT_WIDTH = 300;
 export const contextMenuStyles = { maxHeight: 440 };
 
 export const selectDatasetLabel = i18n.translate(
-  'xpack.discoverLogExplorer.datasetSelector.selectDataset',
+  'xpack.logExplorer.datasetSelector.selectDataset',
   { defaultMessage: 'Select dataset' }
 );
 
-export const integrationsLabel = i18n.translate(
-  'xpack.discoverLogExplorer.datasetSelector.integrations',
-  { defaultMessage: 'Integrations' }
-);
+export const integrationsLabel = i18n.translate('xpack.logExplorer.datasetSelector.integrations', {
+  defaultMessage: 'Integrations',
+});
 
 export const uncategorizedLabel = i18n.translate(
-  'xpack.discoverLogExplorer.datasetSelector.uncategorized',
+  'xpack.logExplorer.datasetSelector.uncategorized',
   { defaultMessage: 'Uncategorized' }
 );
 
-export const sortOrdersLabel = i18n.translate(
-  'xpack.discoverLogExplorer.datasetSelector.sortOrders',
-  { defaultMessage: 'Sort directions' }
-);
+export const sortOrdersLabel = i18n.translate('xpack.logExplorer.datasetSelector.sortOrders', {
+  defaultMessage: 'Sort directions',
+});
 
-export const noDatasetsLabel = i18n.translate(
-  'xpack.discoverLogExplorer.datasetSelector.noDatasets',
-  { defaultMessage: 'No data streams found' }
-);
+export const noDatasetsLabel = i18n.translate('xpack.logExplorer.datasetSelector.noDatasets', {
+  defaultMessage: 'No data streams found',
+});
 
 export const noDatasetsDescriptionLabel = i18n.translate(
-  'xpack.discoverLogExplorer.datasetSelector.noDatasetsDescription',
+  'xpack.logExplorer.datasetSelector.noDatasetsDescription',
   {
     defaultMessage: 'No datasets or search results found.',
   }
 );
 
 export const noIntegrationsLabel = i18n.translate(
-  'xpack.discoverLogExplorer.datasetSelector.noIntegrations',
+  'xpack.logExplorer.datasetSelector.noIntegrations',
   { defaultMessage: 'No integrations found' }
 );
 
 export const noIntegrationsDescriptionLabel = i18n.translate(
-  'xpack.discoverLogExplorer.datasetSelector.noIntegrationsDescription',
+  'xpack.logExplorer.datasetSelector.noIntegrationsDescription',
   {
     defaultMessage: 'No integrations or search results found.',
   }
 );
 
-export const errorLabel = i18n.translate('xpack.discoverLogExplorer.datasetSelector.error', {
+export const errorLabel = i18n.translate('xpack.logExplorer.datasetSelector.error', {
   defaultMessage: 'error',
 });
 
-export const noDataRetryLabel = i18n.translate(
-  'xpack.discoverLogExplorer.datasetSelector.noDataRetry',
-  {
-    defaultMessage: 'Retry',
-  }
-);
+export const noDataRetryLabel = i18n.translate('xpack.logExplorer.datasetSelector.noDataRetry', {
+  defaultMessage: 'Retry',
+});
 
 export const sortOptions = [
   {

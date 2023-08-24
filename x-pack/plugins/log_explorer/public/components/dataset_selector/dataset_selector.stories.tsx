@@ -22,7 +22,7 @@ import {
 
 const meta: Meta<typeof DatasetSelector> = {
   component: DatasetSelector,
-  title: 'discover_log_explorer/DatasetSelector',
+  title: 'log_explorer/DatasetSelector',
   decorators: [(wrappedStory) => <I18nProvider>{wrappedStory()}</I18nProvider>],
   argTypes: {
     datasetsError: {

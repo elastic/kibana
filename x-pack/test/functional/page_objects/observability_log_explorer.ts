@@ -98,7 +98,7 @@ const packages: IntegrationPackage[] = [
 const initialPackages = packages.slice(0, 3);
 const additionalPackages = packages.slice(3);
 
-export function DiscoverLogExplorerPageObject({ getService }: FtrProviderContext) {
+export function ObservabilityLogExplorerPageObject({ getService }: FtrProviderContext) {
   const log = getService('log');
   const supertest = getService('supertest');
   const testSubjects = getService('testSubjects');

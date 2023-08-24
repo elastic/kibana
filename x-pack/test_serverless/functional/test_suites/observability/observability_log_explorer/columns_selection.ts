@@ -17,13 +17,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Columns selection initialization and update', () => {
     before(async () => {
       await esArchiver.load(
-        'x-pack/test/functional/es_archives/discover_log_explorer/data_streams'
+        'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
       );
     });
 
     after(async () => {
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/discover_log_explorer/data_streams'
+        'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
       );
     });
 

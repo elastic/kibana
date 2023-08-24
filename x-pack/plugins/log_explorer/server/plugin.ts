@@ -7,7 +7,7 @@
 
 import { Plugin } from '@kbn/core/server';
 
-export class DiscoverLogExplorerServerPlugin implements Plugin {
+export class LogExplorerServerPlugin implements Plugin {
   setup() {}
 
   start() {}
