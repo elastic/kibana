@@ -190,7 +190,7 @@ export const getSyntheticsMonitorSavedObjectType = (
       getTitle: (savedObject) =>
         savedObject.attributes.name +
         ' - ' +
-        i18n.translate('xpack.synthetics.syntheticsMonitors', {
+        i18n.translate('xpack.synthetics.syntheticsMonitors.label', {
           defaultMessage: 'Synthetics - Monitor',
         }),
     },
