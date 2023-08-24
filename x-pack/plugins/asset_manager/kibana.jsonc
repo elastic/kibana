@@ -12,6 +12,7 @@
     "optionalPlugins": [
     ],
     "requiredPlugins": [
+      "apmDataAccess"
     ],
     "browser": false,
     "server": true,
