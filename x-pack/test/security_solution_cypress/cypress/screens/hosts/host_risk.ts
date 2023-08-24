@@ -14,11 +14,15 @@ export const HOST_BY_RISK_TABLE_CELL =
 
 export const HOST_BY_RISK_TABLE = '[data-test-subj="table-hostRisk-loading-false"]';
 
-export const HOST_BY_RISK_TABLE_FILTER =
-  '[data-test-subj="host-risk-score-header-content"] [data-test-subj="risk-filter-button"]';
+// export const HOST_BY_RISK_TABLE_FILTER =
+//   '[data-test-subj="host-risk-score-header-content"] [data-test-subj="risk-filter-button"]';
 
-export const USER_BY_RISK_TABLE_FILTER =
-  '[data-test-subj="user-risk-score-header-content"] [data-test-subj="risk-filter-button"]';
+// export const USER_BY_RISK_TABLE_FILTER =
+//   '[data-test-subj="user-risk-score-header-content"] [data-test-subj="risk-filter-button"]';
+
+export const HOST_BY_RISK_TABLE_FILTER = '[data-test-subj="risk-filter-button"]';
+
+export const USER_BY_RISK_TABLE_FILTER = '[data-test-subj="risk-filter-button"]';
 
 export const HOST_BY_RISK_TABLE_FILTER_CRITICAL = '[data-test-subj="risk-filter-item-Critical"]';
 

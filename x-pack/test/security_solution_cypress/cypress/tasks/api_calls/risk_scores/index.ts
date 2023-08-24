@@ -287,10 +287,6 @@ export const interceptInstallRiskScoreModule = () => {
   cy.intercept(`POST`, RISK_SCORE_URL).as('install');
 };
 
-export const waitForInstallRiskScoreModule = () => {
-  cy.wait(['@install'], { requestTimeout: 50000 });
-};
-
 export const installRiskScoreModule = () => {
   cy.request({
     url: RISK_SCORE_URL,

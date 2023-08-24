@@ -21,6 +21,7 @@ export const RiskScoreUpdatePanel = () => {
           color="primary"
           fill
           deepLinkId={SecurityPageName.entityAnalyticsManagement}
+          data-test-subj="update-risk-score-button"
         >
           {i18n.UPDATE_PANEL_GO_TO_MANAGE}
         </SecuritySolutionLinkButton>

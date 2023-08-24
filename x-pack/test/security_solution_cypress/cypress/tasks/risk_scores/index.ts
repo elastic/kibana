@@ -10,8 +10,7 @@ import {
   ENABLE_USER_RISK_SCORE_BUTTON,
   HOSTS_TABLE_ALERT_CELL,
   UPGRADE_CONFIRMATION_BUTTON,
-  UPGRADE_HOST_RISK_SCORE_BUTTON,
-  UPGRADE_USER_RISK_SCORE_BUTTON,
+  UPGRADE_RISK_SCORE_BUTTON,
   USERS_TABLE_ALERT_CELL,
 } from '../../screens/entity_analytics';
 import {
@@ -68,17 +67,8 @@ export const clickEnableRiskScore = (riskScoreEntity: RiskScoreEntity) => {
   cy.get(button).click();
 };
 
-export const clickUpgradeRiskScore = (riskScoreEntity: RiskScoreEntity) => {
-  const button =
-    riskScoreEntity === RiskScoreEntity.user
-      ? UPGRADE_USER_RISK_SCORE_BUTTON
-      : UPGRADE_HOST_RISK_SCORE_BUTTON;
-
-  cy.get(button).click();
-};
-
-export const clickUpgradeRiskScoreConfirmed = () => {
-  cy.get(UPGRADE_CONFIRMATION_BUTTON).click();
+export const clickUpgradeRiskScore = () => {
+  cy.get(UPGRADE_RISK_SCORE_BUTTON).click();
 };
 
 export const clickOnFirstUsersAlerts = () => {
