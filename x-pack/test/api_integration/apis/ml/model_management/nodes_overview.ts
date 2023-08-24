@@ -78,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.nodes[0].memory_overview.trained_models.total).to.eql(0);
     });
 
-    it('returns an error for the user with viewer persmissions', async () => {
+    it('returns an error for the user with viewer permissions', async () => {
       const { body, status } = await supertest
         .get(`/internal/ml/model_management/nodes_overview`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
