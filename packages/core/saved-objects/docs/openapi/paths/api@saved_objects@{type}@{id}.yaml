@@ -14,6 +14,12 @@ get:
          application/json:
           schema:
             type: object
+    '400':
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
   servers:
      - url: https://localhost:5601
 

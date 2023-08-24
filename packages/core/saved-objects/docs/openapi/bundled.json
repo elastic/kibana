@@ -93,12 +93,11 @@
             }
           },
           "400": {
-            "description": "Bad request.",
+            "description": "Bad request",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/400_response"
                 }
               }
             }
@@ -170,6 +169,16 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
           }
         },
         "servers": [
@@ -229,6 +238,16 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
           }
         },
         "servers": [
@@ -276,6 +295,16 @@
               "application/json": {
                 "schema": {
                   "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
                 }
               }
             }
@@ -330,6 +359,16 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
           }
         },
         "servers": [
@@ -377,6 +416,16 @@
               "application/json": {
                 "schema": {
                   "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
                 }
               }
             }
@@ -476,8 +525,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/400_response"
                 }
               }
             }
@@ -649,6 +697,16 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
           }
         },
         "servers": [
@@ -768,8 +826,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/400_response"
                 }
               }
             }
@@ -939,8 +996,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/400_response"
                 }
               }
             }
@@ -1058,6 +1114,16 @@
               "application/json": {
                 "schema": {
                   "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
                 }
               }
             }
@@ -1236,6 +1302,16 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
           }
         },
         "servers": [
@@ -1408,6 +1484,46 @@
         }
       }
     },
+    "schemas": {
+      "400_response": {
+        "title": "Bad request",
+        "type": "object",
+        "required": [
+          "error",
+          "message",
+          "statusCode"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": [
+              "Bad Request"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "statusCode": {
+            "type": "integer",
+            "enum": [
+              400
+            ]
+          }
+        }
+      },
+      "attributes": {
+        "type": "object",
+        "description": "The data that you want to create. WARNING: When you create saved objects, attributes are not validated, which allows you to pass arbitrary and ill-formed data into the API that can break Kibana. Make sure any data that you send to the API is properly formed.\n"
+      },
+      "initial_namespaces": {
+        "type": "array",
+        "description": "Identifiers for the spaces in which this object is created. If this is provided, the object is created only in the explicitly defined spaces. If this is not provided, the object is created in the current space (default behavior). For shareable object types (registered with `namespaceType: 'multiple'`), this option can be used to specify one or more spaces, including the \"All spaces\" identifier ('*'). For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`), this option can only be used to specify a single space, and the \"All spaces\" identifier ('*') is not allowed. For global object types (`registered with `namespaceType: agnostic`), this option cannot be used.\n"
+      },
+      "references": {
+        "type": "array",
+        "description": "Objects with `name`, `id`, and `type` properties that describe the other saved objects that this object references. Use `name` in attributes to refer to the other saved object, but never the `id`, which can update automatically during migrations or import and export.\n"
+      }
+    },
     "parameters": {
       "kbn_xsrf": {
         "schema": {
@@ -1435,20 +1551,6 @@
         "schema": {
           "type": "string"
         }
-      }
-    },
-    "schemas": {
-      "attributes": {
-        "type": "object",
-        "description": "The data that you want to create. WARNING: When you create saved objects, attributes are not validated, which allows you to pass arbitrary and ill-formed data into the API that can break Kibana. Make sure any data that you send to the API is properly formed.\n"
-      },
-      "initial_namespaces": {
-        "type": "array",
-        "description": "Identifiers for the spaces in which this object is created. If this is provided, the object is created only in the explicitly defined spaces. If this is not provided, the object is created in the current space (default behavior). For shareable object types (registered with `namespaceType: 'multiple'`), this option can be used to specify one or more spaces, including the \"All spaces\" identifier ('*'). For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`), this option can only be used to specify a single space, and the \"All spaces\" identifier ('*') is not allowed. For global object types (`registered with `namespaceType: agnostic`), this option cannot be used.\n"
-      },
-      "references": {
-        "type": "array",
-        "description": "Objects with `name`, `id`, and `type` properties that describe the other saved objects that this object references. Use `name` in attributes to refer to the other saved object, but never the `id`, which can update automatically during migrations or import and export.\n"
       }
     }
   }
