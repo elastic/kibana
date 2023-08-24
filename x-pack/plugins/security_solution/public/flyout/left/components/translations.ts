@@ -21,6 +21,13 @@ export const SESSION_VIEW_ERROR_MESSAGE = i18n.translate(
   }
 );
 
+export const CORRELATIONS_ERROR_MESSAGE = i18n.translate(
+  'xpack.securitySolution.flyout.correlationsErrorMessage',
+  {
+    defaultMessage: 'No correlations data available',
+  }
+);
+
 export const USER_TITLE = i18n.translate('xpack.securitySolution.flyout.entities.userTitle', {
   defaultMessage: 'User',
 });
