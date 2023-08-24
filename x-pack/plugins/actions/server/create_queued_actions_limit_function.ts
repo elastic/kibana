@@ -20,7 +20,7 @@ export function createQueuedActionsLimitFunction({
   configurationUtilities,
 }: CreateQueuedActionsLimitFunctionOptions): ReachedQueuedActionsLimit {
   return async function execute() {
-    const limit = configurationUtilities.getQueuedMax();
+    const limit = configurationUtilities.getMaxQueued();
     const { docs: tasks } = await taskManager.fetch({
       query: {
         bool: {

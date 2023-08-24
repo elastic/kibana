@@ -55,7 +55,7 @@ export interface ActionsConfigurationUtilities {
     options?: ValidateEmailAddressesOptions
   ): string | undefined;
   enableFooterInEmail: () => boolean;
-  getQueuedMax: () => number;
+  getMaxQueued: () => number;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -219,6 +219,6 @@ export function getActionsConfigurationUtilities(
       );
     },
     enableFooterInEmail: () => config.enableFooterInEmail,
-    getQueuedMax: () => config.queued?.max || DEFAULT_QUEUED_MAX,
+    getMaxQueued: () => config.queued?.max || DEFAULT_QUEUED_MAX,
   };
 }

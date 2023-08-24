@@ -19,7 +19,7 @@ beforeEach(() => jest.resetAllMocks());
 describe('createQueuedActionsLimitFunction()', () => {
   test('returns true if the number of queued actions is greater than the config limit', async () => {
     mockTaskManager.fetch.mockResolvedValueOnce({ docs: [doc, doc, doc] });
-    mockActionsConfig.getQueuedMax.mockReturnValueOnce(2);
+    mockActionsConfig.getMaxQueued.mockReturnValueOnce(2);
 
     const executeFn = createQueuedActionsLimitFunction({
       taskManager: mockTaskManager,
@@ -30,7 +30,7 @@ describe('createQueuedActionsLimitFunction()', () => {
 
   test('returns true if the number of queued actions is equal the config limit', async () => {
     mockTaskManager.fetch.mockResolvedValueOnce({ docs: [doc, doc] });
-    mockActionsConfig.getQueuedMax.mockReturnValueOnce(3);
+    mockActionsConfig.getMaxQueued.mockReturnValueOnce(3);
 
     const executeFn = createQueuedActionsLimitFunction({
       taskManager: mockTaskManager,
@@ -41,7 +41,7 @@ describe('createQueuedActionsLimitFunction()', () => {
 
   test('returns false if the number of queued actions is less than the config limit', async () => {
     mockTaskManager.fetch.mockResolvedValueOnce({ docs: [doc] });
-    mockActionsConfig.getQueuedMax.mockReturnValueOnce(3);
+    mockActionsConfig.getMaxQueued.mockReturnValueOnce(3);
 
     const executeFn = createQueuedActionsLimitFunction({
       taskManager: mockTaskManager,
