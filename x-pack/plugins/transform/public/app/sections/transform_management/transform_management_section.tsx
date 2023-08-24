@@ -50,12 +50,8 @@ export const TransformManagement: FC = () => {
     isInitialLoading,
     isLoading: transformsLoading,
     error: errorMessage,
-    data,
+    data: { transforms, transformNodes, transformIdsWithoutConfig },
   } = useGetTransforms();
-  const isInitialized = !isInitialLoading;
-  const transforms = useMemo(() => data?.tableRows ?? [], [data]);
-  const transformNodes = data?.transformNodes ?? 0;
-  const transformIdsWithoutConfig = data?.transformIdsWithoutConfig;
 
   const { canStartStopTransform } = useAuthorization().capabilities;
 
@@ -151,8 +147,8 @@ export const TransformManagement: FC = () => {
       <EuiSpacer size="l" />
 
       <EuiPageContentBody data-test-subj="transformPageTransformList">
-        {!isInitialized && <EuiSkeletonText lines={2} />}
-        {isInitialized && (
+        {isInitialLoading && <EuiSkeletonText lines={2} />}
+        {!isInitialLoading && (
           <>
             {unauthorizedTransformsWarning}
 

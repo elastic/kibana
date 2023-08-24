@@ -28,10 +28,17 @@ import { useAppDependencies } from '../app_dependencies';
 import { TRANSFORM_ERROR_TYPE } from '../common/transform';
 
 interface UseGetTransformsResponse {
-  tableRows: TransformListRow[];
+  transforms: TransformListRow[];
+  transformIds: string[];
   transformIdsWithoutConfig?: string[];
   transformNodes: number;
 }
+
+const getInitialData = (): UseGetTransformsResponse => ({
+  transforms: [],
+  transformIds: [],
+  transformNodes: 0,
+});
 
 export const useGetTransforms = () => {
   const { http } = useAppDependencies();
@@ -39,10 +46,7 @@ export const useGetTransforms = () => {
   return useQuery<UseGetTransformsResponse, IHttpFetchError>(
     [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORMS],
     async ({ signal }) => {
-      const update: UseGetTransformsResponse = {
-        tableRows: [],
-        transformNodes: 0,
-      };
+      const update = getInitialData();
 
       const transformNodes = await http.get<GetTransformNodesResponseSchema>(
         addInternalBasePath('transforms/_nodes'),
@@ -87,7 +91,7 @@ export const useGetTransforms = () => {
           danglingTaskIdMatches.length > 0 ? danglingTaskIdMatches : undefined;
       }
 
-      update.tableRows = transformConfigs.transforms.reduce((reducedtableRows, config) => {
+      update.transforms = transformConfigs.transforms.reduce((reducedtableRows, config) => {
         const stats = transformStats.transforms.find((d) => config.id === d.id);
 
         // A newly created transform might not have corresponding stats yet.
@@ -107,10 +111,12 @@ export const useGetTransforms = () => {
         });
         return reducedtableRows;
       }, [] as TransformListRow[]);
+      update.transformIds = update.transforms.map(({ id }) => id);
 
       return update;
     },
     {
+      initialData: getInitialData(),
       refetchInterval: DEFAULT_REFRESH_INTERVAL_MS,
     }
   );

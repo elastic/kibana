@@ -123,8 +123,10 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
 
     const { overlays, theme } = useAppDependencies();
 
-    const { error: transformsError, data: transforms } = useGetTransforms();
-    const transformIds = transforms?.tableRows.map((d) => d.id) ?? [];
+    const {
+      error: transformsError,
+      data: { transformIds },
+    } = useGetTransforms();
 
     useEffect(() => {
       if (transformsError !== null) {

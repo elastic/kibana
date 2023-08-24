@@ -31,7 +31,7 @@ const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
   const toast = useToastNotifications();
   const { error, data } = useGetTransforms();
   const transformOptions = useMemo(
-    () => data?.tableRows.filter((v) => v.config.sync).map((v) => v.id) ?? [],
+    () => data?.transforms.filter((v) => v.config.sync).map((v) => v.id) ?? [],
     [data]
   );
 
