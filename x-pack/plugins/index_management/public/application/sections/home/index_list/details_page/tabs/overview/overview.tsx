@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiSpacer,
@@ -17,8 +17,29 @@ import {
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
-import type { Index } from '../../../../../../../common';
-import { useAppContext } from '../../../../../app_context';
+import {
+  CodeBox,
+  LanguageDefinition,
+  LanguageDefinitionSnippetArguments,
+} from '@kbn/search-api-panels';
+import type { Index } from '../../../../../../../../common';
+import { useAppContext } from '../../../../../../app_context';
+import { languageDefinitions, curlDefinition } from './languages';
+
+const getCodeSnippet = (
+  language: LanguageDefinition,
+  key: keyof LanguageDefinition,
+  args: LanguageDefinitionSnippetArguments
+): string => {
+  const snippetVal = language[key];
+  if (snippetVal === undefined) return '';
+  if (typeof snippetVal === 'string') return snippetVal;
+  return snippetVal(args);
+};
+
+const unknownLabel = i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.unknownLabel', {
+  defaultMessage: 'Unknown',
+});
 
 interface Props {
   indexDetails: Index;
@@ -26,6 +47,7 @@ interface Props {
 
 export const OverviewTab: React.FunctionComponent<Props> = ({ indexDetails }) => {
   const {
+    name,
     status,
     documents,
     documents_deleted: documentsDeleted,
@@ -33,7 +55,21 @@ export const OverviewTab: React.FunctionComponent<Props> = ({ indexDetails }) =>
     replica,
     aliases,
   } = indexDetails;
-  const { config } = useAppContext();
+  const { config, core, plugins } = useAppContext();
+
+  const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(curlDefinition);
+
+  // const elasticsearchURL = useMemo(() => {
+  //   return cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER;
+  // }, [cloud]);
+
+  // TODO do no hardcode
+  const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
+    url: 'https://your_deployment_url',
+    apiKey: 'yourApiKey',
+    indexName: name,
+  };
+
   return (
     <>
       <EuiFlexGroup>
@@ -86,7 +122,7 @@ export const OverviewTab: React.FunctionComponent<Props> = ({ indexDetails }) =>
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiStat
-                  title={primary}
+                  title={primary ? primary : unknownLabel}
                   description={i18n.translate(
                     'xpack.idxMgmt.indexDetails.overviewTab.primaryLabel',
                     {
@@ -97,7 +133,7 @@ export const OverviewTab: React.FunctionComponent<Props> = ({ indexDetails }) =>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiStat
-                  title={replica}
+                  title={replica ? replica : unknownLabel}
                   description={i18n.translate(
                     'xpack.idxMgmt.indexDetails.overviewTab.replicaLabel',
                     {
@@ -124,7 +160,7 @@ export const OverviewTab: React.FunctionComponent<Props> = ({ indexDetails }) =>
 
       <EuiSpacer />
 
-      <EuiFlexGroup>
+      <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiTitle size="s">
             <h2>
@@ -148,9 +184,23 @@ export const OverviewTab: React.FunctionComponent<Props> = ({ indexDetails }) =>
           </EuiTextColor>
         </EuiFlexItem>
 
-        <EuiSpacer />
-
-        <EuiFlexItem>{/* TODO implement code snippet */}</EuiFlexItem>
+        <EuiFlexItem>
+          <CodeBox
+            languages={languageDefinitions}
+            // TODO update
+            codeSnippet={getCodeSnippet(selectedLanguage, 'ingestDataIndex', codeSnippetArguments)}
+            selectedLanguage={selectedLanguage}
+            setSelectedLanguage={setSelectedLanguage}
+            http={core.http}
+            // TODO fix
+            pluginId={'serverlessSearch'}
+            sharePlugin={plugins.share}
+            application={core.application}
+            // This feature does not appear to work as expected
+            // Fix in progress: https://github.com/elastic/kibana/pull/164766
+            showTryInConsole
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );

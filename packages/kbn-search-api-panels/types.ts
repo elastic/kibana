@@ -27,18 +27,18 @@ export interface LanguageDefinitionSnippetArguments {
 
 type CodeSnippet = string | ((args: LanguageDefinitionSnippetArguments) => string);
 export interface LanguageDefinition {
+  name: string;
+  id: Languages;
+  iconType: string;
+  docLink: string;
+  configureClient?: CodeSnippet;
+  ingestData?: CodeSnippet;
+  ingestDataIndex?: CodeSnippet;
+  installClient?: string;
+  buildSearchQuery?: CodeSnippet;
+  testConnection?: CodeSnippet;
   advancedConfig?: string;
   apiReference?: string;
   basicConfig?: string;
-  configureClient: CodeSnippet;
-  docLink: string;
-  iconType: string;
-  id: Languages;
-  ingestData: CodeSnippet;
-  ingestDataIndex: CodeSnippet;
-  installClient: string;
   languageStyling?: string;
-  name: string;
-  buildSearchQuery: CodeSnippet;
-  testConnection: CodeSnippet;
 }

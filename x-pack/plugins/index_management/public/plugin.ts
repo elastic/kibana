@@ -45,7 +45,7 @@ export class IndexMgmtUIPlugin {
     } = this.ctx.config.get<ClientConfigType>();
 
     if (isIndexManagementUiEnabled) {
-      const { fleet, usageCollection, management } = plugins;
+      const { fleet, usageCollection, management, share } = plugins;
       const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
       management.sections.section.data.registerApp({
         id: PLUGIN.id,
@@ -64,6 +64,7 @@ export class IndexMgmtUIPlugin {
             enableLegacyTemplates,
             enableIndexDetailsPage,
             enableIndexStats,
+            share,
           });
         },
       });

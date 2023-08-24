@@ -18,6 +18,7 @@ import {
   DocLinksStart,
   IUiSettingsClient,
   ExecutionContextStart,
+  HttpSetup,
 } from '@kbn/core/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -33,10 +34,12 @@ export interface AppDependencies {
     getUrlForApp: ApplicationStart['getUrlForApp'];
     executionContext: ExecutionContextStart;
     application: ApplicationStart;
+    http: HttpSetup;
   };
   plugins: {
     usageCollection: UsageCollectionSetup;
     isFleetEnabled: boolean;
+    share: SharePluginStart;
   };
   services: {
     uiMetricService: UiMetricService;
