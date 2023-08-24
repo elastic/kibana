@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import {
   PluginConfigDescriptor,
   PluginInitializerContext,
@@ -14,14 +14,12 @@ import { maxSuggestions } from '@kbn/observability-plugin/common';
 import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
 import { APMPlugin } from './plugin';
 
-const disabledOnServerless = schema.conditional(
-  schema.contextRef('serverless'),
-  true,
-  schema.boolean({
+const disabledOnServerless = offeringBasedSchema({
+  serverless: schema.boolean({
     defaultValue: false,
   }),
-  schema.oneOf([schema.literal(true)], { defaultValue: true })
-);
+  traditional: schema.oneOf([schema.literal(true)], { defaultValue: true }),
+});
 
 // All options should be documented in the APM configuration settings: https://github.com/elastic/kibana/blob/main/docs/settings/apm-settings.asciidoc
 // and be included on cloud allow list unless there are specific reasons not to
@@ -61,18 +59,12 @@ const configSchema = schema.object({
     defaultValue: 'https://apm-agent-versions.elastic.co/versions.json',
   }),
   enabled: schema.boolean({ defaultValue: true }),
-  serverlessOnboarding: schema.conditional(
-    schema.contextRef('serverless'),
-    true,
-    schema.boolean({ defaultValue: false }),
-    schema.never()
-  ),
-  managedServiceUrl: schema.conditional(
-    schema.contextRef('serverless'),
-    true,
-    schema.string({ defaultValue: '' }),
-    schema.never()
-  ),
+  serverlessOnboarding: offeringBasedSchema({
+    serverless: schema.boolean({ defaultValue: false }),
+  }),
+  managedServiceUrl: offeringBasedSchema({
+    serverless: schema.string({ defaultValue: '' }),
+  }),
   featureFlags: schema.object({
     agentConfigurationAvailable: disabledOnServerless,
     configurableIndicesAvailable: disabledOnServerless,
@@ -83,13 +75,10 @@ const configSchema = schema.object({
     storageExplorerAvailable: disabledOnServerless,
   }),
   serverless: schema.object({
-    enabled: schema.conditional(
-      schema.contextRef('serverless'),
-      true,
-      schema.literal(true),
-      schema.never(),
-      { defaultValue: schema.contextRef('serverless') }
-    ),
+    enabled: offeringBasedSchema({
+      serverless: schema.literal(true),
+      options: { defaultValue: schema.contextRef('serverless') },
+    }),
   }),
 });
 
