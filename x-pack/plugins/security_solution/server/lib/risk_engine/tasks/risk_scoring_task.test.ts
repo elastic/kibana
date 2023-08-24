@@ -211,8 +211,6 @@ describe('Risk Scoring Task', () => {
         });
         expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(1);
       });
-
-      it.todo('schedules the next run');
     });
 
     describe('when there are scores to calculate', () => {
@@ -328,7 +326,22 @@ describe('Risk Scoring Task', () => {
         });
       });
 
-      it.todo('updates the task state');
+      it('updates the task state', async () => {
+        const { state: initialState } = riskScoringTaskInstanceMock;
+        const { state: nextState } = await runTask({
+          getRiskScoreService,
+          logger: mockLogger,
+          taskInstance: riskScoringTaskInstanceMock,
+        });
+
+        expect(initialState).not.toEqual(nextState);
+        expect(nextState).toEqual(
+          expect.objectContaining({
+            runs: 1,
+            scoresWritten: 10,
+          })
+        );
+      });
 
       describe('short-circuiting', () => {
         it('does not execute if the risk engine is not enabled', async () => {
@@ -379,11 +392,6 @@ describe('Risk Scoring Task', () => {
             expect.stringContaining('service is not available')
           );
         });
-      });
-
-      describe('failure conditions', () => {
-        it.todo('logs an error and does not execute if the configured range is invalid');
-        it.todo('logs an error if the configured filter is invalid');
       });
     });
   });
