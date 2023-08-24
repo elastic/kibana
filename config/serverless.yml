@@ -37,6 +37,8 @@ xpack.license_management.enabled: false
 xpack.index_management.enableIndexActions: false
 # Disable legacy index templates from Index Management UI
 xpack.index_management.enableLegacyTemplates: false
+# Disable index stats information from Index Management UI
+xpack.index_management.enableIndexStats: false
 
 # Keep deeplinks visible so that they are shown in the sidenav
 dev_tools.deeplinks.navLinkStatus: visible
@@ -47,6 +49,9 @@ xpack.canvas.enabled: false
 xpack.cloud_integrations.data_migration.enabled: false
 data.search.sessions.enabled: false
 advanced_settings.enabled: false
+
+# Disable the browser-side functionality that depends on SecurityCheckupGetStateRoutes
+xpack.security.showInsecureClusterWarning: false
 
 # Disable UI of security management plugins
 xpack.security.ui.userManagementEnabled: false
@@ -106,3 +111,9 @@ xpack.alerting.rules.run.ruleTypeOverrides:
     timeout: 1m
 xpack.alerting.rules.minimumScheduleInterval.enforce: true
 xpack.actions.run.maxAttempts: 10
+
+# Task Manager
+xpack.task_manager.allow_reading_invalid_state: false
+
+## TaskManager requeue invalid tasks, supports ZDT
+xpack.task_manager.requeue_invalid_tasks.enabled: true

@@ -70,6 +70,7 @@ const appDependencies = {
   config: {
     enableLegacyTemplates: true,
     enableIndexActions: true,
+    enableIndexStats: true,
   },
 } as any;
 

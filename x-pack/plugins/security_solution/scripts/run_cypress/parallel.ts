@@ -105,6 +105,10 @@ export const cli = () => {
           // eslint-disable-next-line no-process-exit
           return process.exit(0);
         }
+
+        // to avoid running too many tests, we limit the number of files to 3
+        // we may extend this in the future
+        files = files.slice(0, 3);
       }
 
       if (!files?.length) {
@@ -263,8 +267,17 @@ export const cli = () => {
 
                 if (hasFleetServerArgs) {
                   vars.kbnTestServer.serverArgs.push(
+                    `--xpack.fleet.agents.fleet_server.hosts=["https://${hostRealIp}:${fleetServerPort}"]`
+                  );
+                  vars.kbnTestServer.serverArgs.push(
                     `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
                   );
+
+                  if (vars.serverless) {
+                    vars.kbnTestServer.serverArgs.push(
+                      `--xpack.fleet.internal.fleetServerStandalone=false`
+                    );
+                  }
                 }
 
                 // Serverless Specific
