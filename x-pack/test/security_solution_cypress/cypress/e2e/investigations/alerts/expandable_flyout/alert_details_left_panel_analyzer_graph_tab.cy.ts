@@ -26,7 +26,8 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-describe(
+// TODO enable once the visualize tabs are back
+describe.skip(
   'Alert details expandable flyout left panel analyzer graph',
   { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
   () => {

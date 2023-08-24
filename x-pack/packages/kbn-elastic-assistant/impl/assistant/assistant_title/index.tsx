@@ -29,11 +29,12 @@ import { ConnectorSelectorInline } from '../../connectorland/connector_selector_
  * information about the assistant feature and access to documentation.
  */
 export const AssistantTitle: React.FC<{
+  isDisabled?: boolean;
   title: string | JSX.Element;
   titleIcon: string;
   docLinks: Omit<DocLinksStart, 'links'>;
   selectedConversation: Conversation | undefined;
-}> = ({ title, titleIcon, docLinks, selectedConversation }) => {
+}> = ({ isDisabled = false, title, titleIcon, docLinks, selectedConversation }) => {
   const selectedConnectorId = selectedConversation?.apiConfig?.connectorId;
 
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
@@ -116,7 +117,7 @@ export const AssistantTitle: React.FC<{
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ConnectorSelectorInline
-              isDisabled={selectedConversation === undefined}
+              isDisabled={isDisabled || selectedConversation === undefined}
               onConnectorModalVisibilityChange={() => {}}
               onConnectorSelectionChange={() => {}}
               selectedConnectorId={selectedConnectorId}

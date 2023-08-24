@@ -1171,12 +1171,12 @@
                 "path": "packages/core/application/core-application-browser-internal/src/ui/app_container.tsx"
               },
               {
-                "plugin": "@kbn/core-application-browser-mocks",
-                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts"
-              },
-              {
                 "plugin": "management",
                 "path": "src/plugins/management/public/application.tsx"
+              },
+              {
+                "plugin": "@kbn/core-application-browser-mocks",
+                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts"
               },
               {
                 "plugin": "fleet",
