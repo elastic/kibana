@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import type { SecurityPageName } from '../../../../common';
+import type { SecurityPageName } from '@kbn/security-solution-navigation';
 import type {
   SectionUpsellings,
   PageUpsellings,
