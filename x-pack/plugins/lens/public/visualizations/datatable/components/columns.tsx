@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
+  copyToClipboard,
   EuiDataGridColumn,
   EuiDataGridColumnCellActionProps,
   EuiListGroupItemProps,
@@ -165,6 +166,41 @@ export const createGridColumns = (
         }
       );
     }
+
+    cellActions.push(({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
+      const { contentsIsDefined, cellContent } = getContentData({
+        rowIndex,
+        columnId,
+      });
+
+      const copyActionText = i18n.translate('xpack.lens.table.triggerAction.copyToClipboard', {
+        defaultMessage: 'Copy to clipboard',
+      });
+      const copyForAriaLabel = i18n.translate('xpack.lens.table.triggerAction.copyToClipboard', {
+        defaultMessage: 'Copy to clipboard',
+        values: {
+          cellContent,
+        },
+      });
+
+      if (!contentsIsDefined) {
+        return null;
+      }
+
+      return (
+        <Component
+          aria-label={copyForAriaLabel}
+          data-test-subj="lensDatatableCopyToClipboard"
+          onClick={() => {
+            copyToClipboard(cellContent);
+            closeCellPopover?.();
+          }}
+          iconType="copyClipboard"
+        >
+          {copyActionText}
+        </Component>
+      );
+    });
 
     // Add all the column compatible cell actions
     const compatibleCellActions = columnCellValueActions?.[colIndex] ?? [];
