@@ -25,6 +25,12 @@ print_r($response->asArray());`,
   ->setApiKey('${apiKey}')
   ->build();`,
   docLink: docLinks.clientsPhpOverview,
+  github: {
+    label: i18n.translate('xpack.enterpriseSearch.languages.php.githubLink', {
+      defaultMessage: 'elasticsearch-php',
+    }),
+    link: 'https://github.com/elastic/elasticsearch-php',
+  },
   iconType: 'php.svg',
   id: Languages.PHP,
   ingestData: `$params = [
