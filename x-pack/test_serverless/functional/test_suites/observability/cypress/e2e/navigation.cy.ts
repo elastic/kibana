@@ -79,7 +79,10 @@ describe('Serverless', () => {
     cy.contains('Log rate analysis').click();
     cy.url().should('include', '/app/ml/aiops/log_rate_analysis_index_select');
 
-    cy.contains('Change Point Detection').click();
+    cy.contains('Log pattern analysis').click();
+    cy.url().should('include', '/app/ml/aiops/log_categorization_index_select');
+
+    cy.contains('Change point detection').click();
     cy.url().should('include', '/app/ml/aiops/change_point_detection_index_select');
 
     cy.contains('Job notifications').click();
