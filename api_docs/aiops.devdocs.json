@@ -552,6 +552,28 @@
           },
           {
             "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.i18n",
+            "type": "Object",
+            "tags": [],
+            "label": "i18n",
+            "description": [
+              "\nInternationalisation service"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-i18n-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreI18nBrowserPluginApi",
+                "section": "def-common.I18nStart",
+                "text": "I18nStart"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
             "id": "def-public.AiopsAppDependencies.fieldStats",
             "type": "Object",
             "tags": [],

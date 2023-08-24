@@ -46,7 +46,12 @@ export const waitForRuleStatus = async (
     async () => {
       const query = 'id' in idOrRuleId ? { id: idOrRuleId.id } : { rule_id: idOrRuleId.ruleId };
       const route = routeWithNamespace(DETECTION_ENGINE_RULES_URL, namespace);
-      const response = await supertest.get(route).set('kbn-xsrf', 'true').query(query).expect(200);
+      const response = await supertest
+        .get(route)
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
+        .query(query)
+        .expect(200);
 
       // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
       const rule = response.body;

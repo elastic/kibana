@@ -32,7 +32,11 @@ export const createRule = async (
   namespace?: string
 ): Promise<RuleResponse> => {
   const route = routeWithNamespace(DETECTION_ENGINE_RULES_URL, namespace);
-  const response = await supertest.post(route).set('kbn-xsrf', 'true').send(rule);
+  const response = await supertest
+    .post(route)
+    .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31')
+    .send(rule);
   if (response.status === 409) {
     if (rule.rule_id != null) {
       log.debug(
@@ -44,6 +48,7 @@ export const createRule = async (
       const secondResponseTry = await supertest
         .post(DETECTION_ENGINE_RULES_URL)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send(rule);
       if (secondResponseTry.status !== 200) {
         throw new Error(
