@@ -40,11 +40,11 @@ a1.TableInfo$ForeignKey$$ExternalSyntheticOutline0 -> a1.e:
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const esClient = getService('es');
+  const es = getService('es');
 
   function waitForSourceMapCount(expectedCount: number) {
     const getSourceMapCount = async () => {
-      const res = await esClient.search({
+      const res = await es.search({
         index: '.apm-source-map',
         size: 0,
         track_total_hits: true,
@@ -64,7 +64,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   async function deleteAllApmSourceMaps() {
-    await esClient.deleteByQuery({
+    await es.deleteByQuery({
       index: '.apm-source-map*',
       refresh: true,
       query: { match_all: {} },
@@ -72,7 +72,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   async function deleteAllFleetSourceMaps() {
-    return esClient.deleteByQuery({
+    return es.deleteByQuery({
       index: '.fleet-artifacts*',
       refresh: true,
       query: {
@@ -195,7 +195,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('is uploaded as a fleet artifact', async () => {
-        const res = await esClient.search({
+        const res = await es.search({
           index: '.fleet-artifacts',
           size: 1,
           query: {
@@ -210,7 +210,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('is added to .apm-source-map index', async () => {
-        const res = await esClient.search<ApmSourceMap>({
+        const res = await es.search<ApmSourceMap>({
           index: '.apm-source-map',
         });
 
@@ -231,8 +231,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           async function getSourceMapDocFromApmIndex() {
-            await esClient.indices.refresh({ index: '.apm-source-map' });
-            return await esClient.get<ApmSourceMap>({
+            await es.indices.refresh({ index: '.apm-source-map' });
+            return await es.get<ApmSourceMap>({
               index: '.apm-source-map',
               id: 'uploading-test-1.0.0-bar',
             });
@@ -256,7 +256,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('creates one document in the .apm-source-map index', async () => {
-          const res = await esClient.search<ApmSourceMap>({ index: '.apm-source-map', size: 0 });
+          const res = await es.search<ApmSourceMap>({ index: '.apm-source-map', size: 0 });
 
           // @ts-expect-error
           expect(res.hits.total.value).to.be(1);
@@ -301,7 +301,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('is uploaded as a fleet artifact', async () => {
-        const res = await esClient.search({
+        const res = await es.search({
           index: '.fleet-artifacts',
           size: 1,
           query: {
@@ -316,7 +316,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('is added to .apm-source-map index', async () => {
-        const res = await esClient.search<ApmSourceMap>({
+        const res = await es.search<ApmSourceMap>({
           index: '.apm-source-map',
         });
 
@@ -337,8 +337,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           async function getSourceMapDocFromApmIndex() {
-            await esClient.indices.refresh({ index: '.apm-source-map' });
-            return await esClient.get<ApmSourceMap>({
+            await es.indices.refresh({ index: '.apm-source-map' });
+            return await es.get<ApmSourceMap>({
               index: '.apm-source-map',
               id: 'uploading-test-1.0.0-android',
             });
@@ -361,7 +361,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('creates one document in the .apm-source-map index', async () => {
-          const res = await esClient.search<ApmSourceMap>({ index: '.apm-source-map', size: 0 });
+          const res = await es.search<ApmSourceMap>({ index: '.apm-source-map', size: 0 });
 
           // @ts-expect-error
           expect(res.hits.total.value).to.be(1);
@@ -475,7 +475,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('can delete an apm source map', async () => {
         // check that the sourcemap is deleted from .apm-source-map index
-        const res = await esClient.search({ index: '.apm-source-map' });
+        const res = await es.search({ index: '.apm-source-map' });
         // @ts-expect-error
         expect(res.hits.total.value).to.be(0);
       });

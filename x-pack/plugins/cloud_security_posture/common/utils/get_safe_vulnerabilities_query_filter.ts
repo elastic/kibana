@@ -10,11 +10,6 @@ export const getSafeVulnerabilitiesQueryFilter = (query?: QueryDslQueryContainer
   ...query,
   bool: {
     ...query?.bool,
-    filter: [
-      ...((query?.bool?.filter as []) || []),
-      { exists: { field: 'vulnerability.score.base' } },
-      { exists: { field: 'vulnerability.score.version' } },
-      { exists: { field: 'resource.id' } },
-    ],
+    filter: [...((query?.bool?.filter as []) || []), { exists: { field: 'resource.id' } }],
   },
 });

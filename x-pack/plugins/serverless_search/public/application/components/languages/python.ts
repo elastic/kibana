@@ -11,7 +11,7 @@ import { docLinks } from '../../../../common/doc_links';
 import { INDEX_NAME_PLACEHOLDER } from '../../constants';
 
 export const pythonDefinition: LanguageDefinition = {
-  advancedConfig: docLinks.pythonAdvancedConfig,
+  apiReference: docLinks.pythonApiReference,
   basicConfig: docLinks.pythonBasicConfig,
   buildSearchQuery: `client.search(index="books", q="snow")`,
   configureClient: ({ url, apiKey }) => `from elasticsearch import Elasticsearch
@@ -21,6 +21,12 @@ client = Elasticsearch(
   api_key="${apiKey}"
 )`,
   docLink: docLinks.pythonClient,
+  github: {
+    link: 'https://github.com/elastic/elasticsearch-serverless-python',
+    label: i18n.translate('xpack.serverlessSearch.languages.python.githubLabel', {
+      defaultMessage: 'elasticsearch-serverless-python',
+    }),
+  },
   iconType: 'python.svg',
   id: Languages.PYTHON,
   ingestData: `documents = [

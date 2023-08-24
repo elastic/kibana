@@ -71,7 +71,6 @@ const AssistantComponent: React.FC<Props> = ({
   setConversationId,
 }) => {
   const {
-    actionTypeRegistry,
     assistantTelemetry,
     augmentMessageCodeBlocks,
     conversations,
@@ -98,11 +97,7 @@ const AssistantComponent: React.FC<Props> = ({
   const { createConversation } = useConversation();
 
   // Connector details
-  const {
-    data: connectors,
-    isSuccess: areConnectorsFetched,
-    refetch: refetchConnectors,
-  } = useLoadConnectors({ http });
+  const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({ http });
   const defaultConnectorId = useMemo(() => getDefaultConnector(connectors)?.id, [connectors]);
   const defaultProvider = useMemo(
     () =>
@@ -171,14 +166,10 @@ const AssistantComponent: React.FC<Props> = ({
   }, [areConnectorsFetched, connectors?.length, currentConversation, setLastConversationId]);
 
   const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
-    actionTypeRegistry,
-    http,
-    refetchConnectors,
+    conversation: blockBotConversation,
     onSetupComplete: () => {
       bottomRef.current?.scrollIntoView({ behavior: 'auto' });
     },
-    conversation: blockBotConversation,
-    isConnectorConfigured: !!connectors?.length,
   });
 
   const currentTitle: { title: string | JSX.Element; titleIcon: string } =
@@ -475,6 +466,7 @@ const AssistantComponent: React.FC<Props> = ({
             <EuiFlexGroup justifyContent="spaceAround">
               <EuiFlexItem grow={false}>
                 <ConnectorMissingCallout
+                  isConnectorConfigured={connectors?.length > 0}
                   isSettingsModalVisible={isSettingsModalVisible}
                   setIsSettingsModalVisible={setIsSettingsModalVisible}
                 />
