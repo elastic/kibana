@@ -121,7 +121,8 @@ export const cli = () => {
       }
 
       if (!files?.length) {
-        throw new Error('No files found');
+        // eslint-disable-next-line no-process-exit
+        return process.exit(0);
       }
 
       const esPorts: number[] = [9200, 9220];

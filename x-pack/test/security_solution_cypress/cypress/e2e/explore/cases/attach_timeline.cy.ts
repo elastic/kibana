@@ -19,36 +19,36 @@ import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { cleanKibana, deleteTimelines } from '../../../tasks/common';
 import { createCase } from '../../../tasks/api_calls/cases';
 
-describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
-  context('without cases created', () => {
-    before(() => {
-      cleanKibana();
-    });
-
-    beforeEach(() => {
-      login();
-      deleteTimelines();
-      createTimeline(getTimeline()).then((response) => {
-        cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline');
+describe(
+  'attach timeline to case',
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  () => {
+    context('without cases created', () => {
+      before(() => {
+        cleanKibana();
       });
-    });
 
-    it('attach timeline to a new case', { tags: '@brokenInServerless' }, function () {
-      visitTimeline(this.myTimeline.savedObjectId);
-      attachTimelineToNewCase();
-
-      cy.location('origin').then((origin) => {
-        cy.get(DESCRIPTION_INPUT).should(
-          'have.text',
-          `[${this.myTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${this.myTimeline.savedObjectId}%27,isOpen:!t))`
-        );
+      beforeEach(() => {
+        login();
+        deleteTimelines();
+        createTimeline(getTimeline()).then((response) => {
+          cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline');
+        });
       });
-    });
 
-    it(
-      'attach timeline to an existing case with no case',
-      { tags: '@brokenInServerless' },
-      function () {
+      it('attach timeline to a new case', function () {
+        visitTimeline(this.myTimeline.savedObjectId);
+        attachTimelineToNewCase();
+
+        cy.location('origin').then((origin) => {
+          cy.get(DESCRIPTION_INPUT).should(
+            'have.text',
+            `[${this.myTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${this.myTimeline.savedObjectId}%27,isOpen:!t))`
+          );
+        });
+      });
+
+      it('attach timeline to an existing case with no case', function () {
         visitTimeline(this.myTimeline.savedObjectId);
         attachTimelineToExistingCase();
         addNewCase();
@@ -59,47 +59,47 @@ describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
             `[${this.myTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${this.myTimeline.savedObjectId}%27,isOpen:!t))`
           );
         });
-      }
-    );
-  });
-
-  context('with cases created', { tags: '@brokenInServerless' }, () => {
-    before(() => {
-      login();
-      deleteTimelines();
-      createTimeline(getTimeline()).then((response) =>
-        cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
-      );
-      createCase(getCase1()).then((response) => cy.wrap(response.body.id).as('caseId'));
-    });
-
-    beforeEach(() => {
-      login();
-    });
-
-    it('attach timeline to an existing case', function () {
-      visitTimeline(this.timelineId);
-      attachTimelineToExistingCase();
-      selectCase(this.caseId);
-
-      cy.location('origin').then((origin) => {
-        cy.get(ADD_COMMENT_INPUT).should(
-          'have.text',
-          `[${getTimeline().title}](${origin}/app/security/timelines?timeline=(id:%27${
-            this.timelineId
-          }%27,isOpen:!t))`
-        );
       });
     });
 
-    it('modal can be re-opened once closed', function () {
-      visitTimeline(this.timelineId);
-      attachTimelineToExistingCase();
-      cy.get('[data-test-subj="all-cases-modal-cancel-button"]').click({ force: true });
+    context('with cases created', () => {
+      before(() => {
+        login();
+        deleteTimelines();
+        createTimeline(getTimeline()).then((response) =>
+          cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
+        );
+        createCase(getCase1()).then((response) => cy.wrap(response.body.id).as('caseId'));
+      });
 
-      cy.get('[data-test-subj="all-cases-modal"]').should('not.exist');
-      attachTimelineToExistingCase();
-      cy.get('[data-test-subj="all-cases-modal"]').should('be.visible');
+      beforeEach(() => {
+        login();
+      });
+
+      it('attach timeline to an existing case', function () {
+        visitTimeline(this.timelineId);
+        attachTimelineToExistingCase();
+        selectCase(this.caseId);
+
+        cy.location('origin').then((origin) => {
+          cy.get(ADD_COMMENT_INPUT).should(
+            'have.text',
+            `[${getTimeline().title}](${origin}/app/security/timelines?timeline=(id:%27${
+              this.timelineId
+            }%27,isOpen:!t))`
+          );
+        });
+      });
+
+      it('modal can be re-opened once closed', function () {
+        visitTimeline(this.timelineId);
+        attachTimelineToExistingCase();
+        cy.get('[data-test-subj="all-cases-modal-cancel-button"]').click({ force: true });
+
+        cy.get('[data-test-subj="all-cases-modal"]').should('not.exist');
+        attachTimelineToExistingCase();
+        cy.get('[data-test-subj="all-cases-modal"]').should('be.visible');
+      });
     });
-  });
-});
+  }
+);
