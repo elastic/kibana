@@ -7,7 +7,6 @@
  */
 
 import {
-  ACTION_ADD_PANEL,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddablePackageState,
@@ -42,7 +41,7 @@ const getDefaultNavigationEmbeddableInput = (): Omit<NavigationEmbeddableByValue
     title: '',
     layout: NAV_VERTICAL_LAYOUT,
   },
-  disabledActions: [ACTION_ADD_PANEL, 'OPEN_FLYOUT_ADD_DRILLDOWN'],
+  disabledActions: ['OPEN_FLYOUT_ADD_DRILLDOWN'],
 });
 
 export class NavigationEmbeddableFactoryDefinition

@@ -6,19 +6,25 @@
  * Side Public License, v 1.
  */
 
-import useMount from 'react-use/lib/useMount';
 import React, { useState } from 'react';
+import useMount from 'react-use/lib/useMount';
 
 import { EuiFieldText } from '@elastic/eui';
+import { urlDrilldownValidateUrl } from '@kbn/ui-actions-enhanced-plugin/public';
+
 import { ExternalLinkStrings } from './external_link_strings';
 import { coreServices } from '../../services/kibana_services';
 
+class DisallowedUrlError extends Error {}
+
 export const ExternalLinkDestinationPicker = ({
   onDestinationPicked,
+  setDestinationError,
   initialSelection,
   ...other
 }: {
   onDestinationPicked: (destination?: string) => void;
+  setDestinationError: (error: string | undefined) => void;
   initialSelection?: string;
 }) => {
   const [validUrl, setValidUrl] = useState<boolean>(true);
@@ -29,6 +35,8 @@ export const ExternalLinkDestinationPicker = ({
       const url = coreServices.http.externalUrl.validateUrl(initialSelection);
       if (url === null) {
         setValidUrl(false);
+        onDestinationPicked(undefined);
+        setDestinationError(ExternalLinkStrings.getDisallowedUrlError());
       } else {
         onDestinationPicked(initialSelection);
       }
@@ -42,21 +50,38 @@ export const ExternalLinkDestinationPicker = ({
         value={currentUrl}
         placeholder={ExternalLinkStrings.getPlaceholder()}
         isInvalid={!validUrl}
-        onChange={(e) => {
-          setCurrentUrl(e.target.value);
+        onChange={(event) => {
+          const url = event.target.value;
+          setCurrentUrl(url);
+
+          if (url === '') {
+            setValidUrl(true);
+            onDestinationPicked(undefined);
+            setDestinationError(undefined);
+            return;
+          }
+
           try {
-            const url = coreServices.http.externalUrl.validateUrl(e.target.value);
-            if (url === null) {
-              /* This error doesn't need to be translated because it will never be exposed to
-               * the user - it will always be caught and handled in the `catch` below */
-              throw new Error('Invalid URL');
-            } else {
-              setValidUrl(true);
-              onDestinationPicked(e.target.value);
+            const allowedUrl = coreServices.http.externalUrl.validateUrl(url); // TODO: rename this
+            if (allowedUrl === null) {
+              throw new DisallowedUrlError();
             }
-          } catch {
+            const validatedUrl = urlDrilldownValidateUrl(url);
+            if (validatedUrl.isValid) {
+              setValidUrl(true);
+              onDestinationPicked(url);
+              setDestinationError(undefined);
+            } else {
+              throw new Error();
+            }
+          } catch (error) {
             setValidUrl(false);
             onDestinationPicked(undefined);
+            setDestinationError(
+              error instanceof DisallowedUrlError
+                ? ExternalLinkStrings.getDisallowedUrlError()
+                : ExternalLinkStrings.getUrlFormatError()
+            );
           }
         }}
       />

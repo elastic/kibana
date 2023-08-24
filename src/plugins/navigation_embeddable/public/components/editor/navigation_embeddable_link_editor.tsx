@@ -73,6 +73,7 @@ export const NavigationEmbeddableLinkEditor = ({
   );
   const [defaultLinkLabel, setDefaultLinkLabel] = useState<string | undefined>();
   const [currentLinkLabel, setCurrentLinkLabel] = useState<string>(link?.label ?? '');
+  const [destinationError, setDestinationError] = useState<string | undefined>();
   const [linkDestination, setLinkDestination] = useState<string | undefined>(link?.destination);
   const [linkOptions, setLinkOptions] = useState<NavigationLinkOptions | undefined>({
     ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
@@ -174,7 +175,11 @@ export const NavigationEmbeddableLinkEditor = ({
             />
           </EuiFormRow>
 
-          <EuiFormRow label={NavEmbeddableStrings.editor.linkEditor.getLinkDestinationLabel()}>
+          <EuiFormRow
+            label={NavEmbeddableStrings.editor.linkEditor.getLinkDestinationLabel()}
+            isInvalid={Boolean(destinationError)}
+            error={destinationError}
+          >
             {selectedLinkType === DASHBOARD_LINK_TYPE ? (
               <DashboardLinkDestinationPicker
                 parentDashboard={parentDashboard}
@@ -185,6 +190,7 @@ export const NavigationEmbeddableLinkEditor = ({
               <ExternalLinkDestinationPicker
                 initialSelection={linkDestination}
                 onDestinationPicked={onUrlSelected}
+                setDestinationError={setDestinationError}
               />
             )}
           </EuiFormRow>
