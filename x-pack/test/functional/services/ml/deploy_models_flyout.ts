@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { IngestInferenceProcessor } from '@elastic/elasticsearch/lib/api/types';
+import { IngestInferenceProcessor, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { ProvidedType } from '@kbn/test';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -18,9 +18,9 @@ export interface TrainedModelRowData {
   modelTypes: string[];
 }
 
-export type MlDeployTrainedModelsFlyout = ProvidedType<typeof DeployTrainedModelsFlyoutProvider>;
+export type MlDeployTrainedModelsFlyout = ProvidedType<typeof DeployDFAModelFlyoutProvider>;
 
-export function DeployTrainedModelsFlyoutProvider(
+export function DeployDFAModelFlyoutProvider(
   { getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI
 ) {
@@ -200,10 +200,10 @@ export function DeployTrainedModelsFlyoutProvider(
 
     public async completeTrainedModelsInferenceFlyoutPipelineConfig(
       expectedValues: {
-        inferenceConfig: any;
-        editedInferenceConfig?: any;
-        fieldMap: any;
-        editedFieldMap?: any;
+        inferenceConfig: IngestInferenceProcessor['inference_config'];
+        editedInferenceConfig?: IngestInferenceProcessor['inference_config'];
+        fieldMap: IngestInferenceProcessor['field_map'];
+        editedFieldMap?: IngestInferenceProcessor['field_map'];
       },
       editDefaults: boolean = false
     ) {
@@ -267,7 +267,7 @@ export function DeployTrainedModelsFlyoutProvider(
       await this.deployModelsContinue('mlTrainedModelsInferenceReviewAndCreateStep');
     }
 
-    public async completeTrainedModelsInferenceFlyoutCreateStep(expectedConfig: any) {
+    public async completeTrainedModelsInferenceFlyoutCreateStep(expectedConfig: IngestPipeline) {
       const pipelineConfig = await testSubjects.getVisibleText(
         'mlTrainedModelsInferenceReviewAndCreateStepConfigBlock'
       );

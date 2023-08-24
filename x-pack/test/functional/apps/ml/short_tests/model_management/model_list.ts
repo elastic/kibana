@@ -173,27 +173,27 @@ export default function ({ getService }: FtrProviderContext) {
           modelWithoutPipelineData.modelId
         );
         await ml.testExecution.logTestStep('should complete the deploy model Details step');
-        await ml.trainedModelsFlyout.completeTrainedModelsInferenceFlyoutDetails({
+        await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutDetails({
           name: modelWithoutPipelineDataExpectedValues.name,
           description: modelWithoutPipelineDataExpectedValues.description,
           // If no metadata is provided, the target field will default to empty string
           targetField: '',
         });
         await ml.testExecution.logTestStep('should complete the deploy model Pipeline Config step');
-        await ml.trainedModelsFlyout.completeTrainedModelsInferenceFlyoutPipelineConfig({
+        await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutPipelineConfig({
           inferenceConfig: modelWithoutPipelineDataExpectedValues.inferenceConfig,
           fieldMap: modelWithoutPipelineDataExpectedValues.fieldMap,
         });
         await ml.testExecution.logTestStep(
           'should complete the deploy model pipeline On Failure step'
         );
-        await ml.trainedModelsFlyout.completeTrainedModelsInferenceFlyoutOnFailure(
+        await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutOnFailure(
           getDefaultOnFailureConfiguration()
         );
         await ml.testExecution.logTestStep(
           'should complete the deploy model pipeline Create pipeline step'
         );
-        await ml.trainedModelsFlyout.completeTrainedModelsInferenceFlyoutCreateStep({
+        await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutCreateStep({
           description: modelWithoutPipelineDataExpectedValues.description,
           processors: [
             {
@@ -228,7 +228,7 @@ export default function ({ getService }: FtrProviderContext) {
           modelWithoutPipelineData.modelId
         );
         await ml.testExecution.logTestStep('should complete the deploy model Details step');
-        await ml.trainedModelsFlyout.completeTrainedModelsInferenceFlyoutDetails(
+        await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutDetails(
           {
             name: modelWithoutPipelineDataExpectedValues.duplicateName,
             description: modelWithoutPipelineDataExpectedValues.duplicateDescription,
@@ -237,7 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
           true
         );
         await ml.testExecution.logTestStep('should complete the deploy model Pipeline Config step');
-        await ml.trainedModelsFlyout.completeTrainedModelsInferenceFlyoutPipelineConfig(
+        await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutPipelineConfig(
           {
             inferenceConfig: modelWithoutPipelineDataExpectedValues.inferenceConfig,
             editedInferenceConfig: modelWithoutPipelineDataExpectedValues.editedInferenceConfig,
@@ -249,14 +249,14 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep(
           'should complete the deploy model pipeline On Failure step'
         );
-        await ml.trainedModelsFlyout.completeTrainedModelsInferenceFlyoutOnFailure(
+        await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutOnFailure(
           getDefaultOnFailureConfiguration(),
           true
         );
         await ml.testExecution.logTestStep(
           'should complete the deploy model pipeline Create pipeline step'
         );
-        await ml.trainedModelsFlyout.completeTrainedModelsInferenceFlyoutCreateStep({
+        await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutCreateStep({
           description: modelWithoutPipelineDataExpectedValues.duplicateDescription,
           processors: [
             {
