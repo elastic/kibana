@@ -83,7 +83,7 @@ import {
 import { deleteSelectedRules } from '../../../tasks/rules_bulk_actions';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { deleteConnectors } from '../../../tasks/common';
+import { deleteAlertsAndRules, deleteConnectors } from '../../../tasks/common';
 import { addEmailConnectorAndRuleAction } from '../../../tasks/common/rule_actions';
 import {
   createAndEnableRule,
@@ -115,8 +115,8 @@ import { enablesRule, getDetails } from '../../../tasks/rule_details';
 import { RULE_CREATION } from '../../../urls/navigation';
 
 describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
-  before(() => {
-    cleanKibana();
+  beforeEach(() => {
+    deleteAlertsAndRules();
   });
 
   describe('Custom detection rules creation', () => {
