@@ -82,7 +82,14 @@ function createServerlessES() {
 
 const defaults = {
   server: {
-    port: 5620,
+    restrictInternalApis: true,
+    versioned: {
+      versionResolution: 'newest',
+      strictClientVersionCheck: false,
+    },
+  },
+  migrations: {
+    algorithm: 'zdt',
   },
   elasticsearch: {
     serviceAccountToken: 'BEEF',
