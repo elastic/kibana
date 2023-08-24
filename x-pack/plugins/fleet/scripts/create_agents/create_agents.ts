@@ -141,6 +141,7 @@ function createAgentWithStatus({
   policyId: string;
   status: AgentStatus;
   version: string;
+  hostname: string;
 }) {
   const baseAgent = {
     access_api_key_id: 'api-key-1',
