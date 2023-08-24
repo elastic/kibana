@@ -103,6 +103,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Page level controls',
       description: 'Screen reader announcement about heading controls',
     }),
+    'euiBreadcrumb.popoverAriaLabel': i18n.translate('core.euiBreadcrumb.popoverAriaLabel', {
+      defaultMessage: 'Clicking this button will toggle a popover dialog.',
+    }),
     'euiBreadcrumb.collapsedBadge.ariaLabel': i18n.translate(
       'core.euiBreadcrumb.collapsedBadge.ariaLabel',
       {
@@ -157,6 +160,17 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description:
           'ARIA label and tooltip content describing a button that expands an actions menu',
       }
+    ),
+    'euiCollapsibleNavBeta.ariaLabel': i18n.translate('core.euiCollapsibleNavBeta.ariaLabel', {
+      defaultMessage: 'Site menu',
+    }),
+    'euiCollapsibleNavButton.ariaLabelClose': i18n.translate(
+      'core.euiCollapsibleNavButton.ariaLabelClose',
+      { defaultMessage: 'Toggle navigation closed' }
+    ),
+    'euiCollapsibleNavButton.ariaLabelOpen': i18n.translate(
+      'core.euiCollapsibleNavButton.ariaLabelOpen',
+      { defaultMessage: 'Toggle navigation open' }
     ),
     'euiColorPicker.alphaLabel': i18n.translate('core.euiColorPicker.alphaLabel', {
       defaultMessage: 'Alpha channel (opacity) value',
@@ -1455,13 +1469,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiResizableButton.horizontalResizerAriaLabel': i18n.translate(
       'core.euiResizableButton.horizontalResizerAriaLabel',
       {
-        defaultMessage: 'Press left or right to adjust panels size',
+        defaultMessage: 'Press the left or right arrow keys to adjust panels size',
       }
     ),
     'euiResizableButton.verticalResizerAriaLabel': i18n.translate(
       'core.euiResizableButton.verticalResizerAriaLabel',
       {
-        defaultMessage: 'Press up or down to adjust panels size',
+        defaultMessage: 'Press the up or down arrow keys to adjust panels size',
       }
     ),
     'euiResizablePanel.toggleButtonAriaLabel': i18n.translate(

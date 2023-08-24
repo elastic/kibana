@@ -139,6 +139,7 @@ export class DataPublicPlugin
       fieldFormats,
       indexPatterns: dataViews,
       screenshotMode,
+      scriptedFieldsEnabled: dataViews.scriptedFieldsEnabled,
     });
     setSearchService(search);
 

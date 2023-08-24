@@ -7,19 +7,21 @@
 
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { RESPONSE_ACTIONS_ITEM_0, RESPONSE_ACTIONS_ITEM_1 } from '../../tasks/response_actions';
-import { ROLE, login } from '../../tasks/login';
 import {
   checkActionItemsInResults,
+  clickRuleName,
   inputQuery,
   loadRuleAlerts,
   submitQuery,
 } from '../../tasks/live_query';
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
+import { tag } from '../../tags';
+import { ServerlessRoleName } from '../../support/roles';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
-describe('Alert Event Details', { browser: 'electron' }, () => {
+describe('Alert Event Details', { browser: 'electron', tags: [tag.ESS, tag.SERVERLESS] }, () => {
   let ruleId: string;
   let ruleName: string;
 
@@ -36,9 +38,9 @@ describe('Alert Event Details', { browser: 'electron' }, () => {
   });
 
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    cy.login(ServerlessRoleName.SOC_MANAGER);
     cy.visit('/app/security/rules');
-    cy.contains(ruleName).click();
+    clickRuleName(ruleName);
   });
 
   it('should be able to add investigation guides to response actions', () => {
@@ -98,7 +100,7 @@ describe('Alert Event Details', { browser: 'electron' }, () => {
     closeModalIfVisible();
   });
 
-  it('can visit discover from response action results', () => {
+  it('can visit discover from response action results', { tags: [tag.ESS] }, () => {
     const discoverRegex = new RegExp(`action_id: ${UUID_REGEX}`);
     cy.getBySel('expand-event').first().click();
     cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
@@ -124,7 +126,7 @@ describe('Alert Event Details', { browser: 'electron' }, () => {
       });
   });
 
-  it('can visit lens from response action results', () => {
+  it('can visit lens from response action results', { tags: [tag.ESS] }, () => {
     const lensRegex = new RegExp(`Action ${UUID_REGEX} results`);
     cy.getBySel('expand-event').first().click();
     cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
@@ -158,7 +160,7 @@ describe('Alert Event Details', { browser: 'electron' }, () => {
     cy.getBySel('breadcrumbs').contains(lensRegex);
   });
 
-  it('can add to timeline from response action results', () => {
+  it('can add to timeline from response action results', { tags: [tag.ESS] }, () => {
     const timelineRegex = new RegExp(`Added ${UUID_REGEX} to timeline`);
     const filterRegex = new RegExp(`action_id: "${UUID_REGEX}"`);
     cy.getBySel('expand-event').first().click();
