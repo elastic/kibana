@@ -4,22 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Client } from '@elastic/elasticsearch';
 import pRetry from 'p-retry';
 import { ToolingLog } from '@kbn/tooling-log';
-import { Client } from '@elastic/elasticsearch';
+import { APM_ALERTS_INDEX } from './alerting_api_helper';
 
-async function getActiveAlert({
+export async function getActiveApmAlerts({
   ruleId,
   esClient,
-  log,
 }: {
   ruleId: string;
   waitMillis?: number;
   esClient: Client;
-  log: ToolingLog;
 }): Promise<Record<string, any>> {
   const searchParams = {
-    index: '.alerts-observability.apm.alerts-*',
+    index: APM_ALERTS_INDEX,
     size: 1,
     query: {
       bool: {
@@ -44,16 +43,10 @@ async function getActiveAlert({
     },
   };
   const response = await esClient.search(searchParams);
-  const firstHit = response.hits.hits[0];
-  if (!firstHit) {
-    log.debug(`No active alert found for rule ${ruleId}`);
-    throw new Error(`No active alert found for rule ${ruleId}`);
-  }
-  log.debug(`Get active alert for the rule ${ruleId}`);
-  return firstHit;
+  return response.hits.hits.map((hit) => hit._source);
 }
 
-export function waitForActiveAlert({
+export function waitForActiveApmAlert({
   ruleId,
   esClient,
   log,
@@ -64,8 +57,21 @@ export function waitForActiveAlert({
   log: ToolingLog;
 }): Promise<Record<string, any>> {
   log.debug(`Wait for the rule ${ruleId} to be active`);
-  return pRetry(() => getActiveAlert({ ruleId, esClient, log }), {
-    retries: 10,
-    factor: 1.5,
-  });
+  return pRetry(
+    async () => {
+      const activeApmAlerts = await getActiveApmAlerts({ ruleId, esClient });
+
+      if (activeApmAlerts.length === 0) {
+        log.debug(`No active alert found for rule ${ruleId}`);
+        throw new Error(`No active alert found for rule ${ruleId}`);
+      }
+      log.debug(`Get active alert for the rule ${ruleId}`);
+
+      return activeApmAlerts[0];
+    },
+    {
+      retries: 10,
+      factor: 1.5,
+    }
+  );
 }
