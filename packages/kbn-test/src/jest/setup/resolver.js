@@ -14,7 +14,15 @@
 const resolve = require('resolve');
 
 module.exports = (request, options) => {
+  if (request === 'axios') {
+    return resolve.sync('axios/dist/node/axios.cjs', {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  }
+
   try {
+    // Preserve symlinks
     return resolve.sync(request, {
       basedir: options.basedir,
       extensions: options.extensions,

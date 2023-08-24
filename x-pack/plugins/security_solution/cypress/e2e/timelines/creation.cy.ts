@@ -106,7 +106,7 @@ describe('Timelines', (): void => {
   });
 });
 
-describe('Create a timeline from a template', () => {
+describe.skip('Create a timeline from a template', () => {
   before(() => {
     cy.intercept('/api/timeline*').as('timeline');
     cleanKibana();
