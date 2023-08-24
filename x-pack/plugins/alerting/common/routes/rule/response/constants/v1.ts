@@ -40,6 +40,7 @@ export const ruleExecutionStatusErrorReason = {
 export const ruleExecutionStatusWarningReason = {
   MAX_EXECUTABLE_ACTIONS: 'maxExecutableActions',
   MAX_ALERTS: 'maxAlerts',
+  MAX_QUEUED_ACTIONS: 'maxQueuedActions',
 } as const;
 
 export type RuleNotifyWhen = typeof ruleNotifyWhen[keyof typeof ruleNotifyWhen];
