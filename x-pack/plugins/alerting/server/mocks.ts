@@ -60,6 +60,7 @@ const createStartMock = () => {
     listTypes: jest.fn(),
     getType: jest.fn(),
     getAllTypes: jest.fn(),
+    getAlertIndicesAlias: jest.fn(),
     getAlertingAuthorizationWithRequest: jest.fn(),
     getRulesClientWithRequest: jest.fn().mockResolvedValue(rulesClientMock.create()),
     getFrameworkHealth: jest.fn(),

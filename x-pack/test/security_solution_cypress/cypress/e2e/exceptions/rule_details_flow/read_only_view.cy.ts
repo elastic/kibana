@@ -10,15 +10,10 @@ import { tag } from '../../../tags';
 import { getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visitSecurityDetectionRulesPage } from '../../../tasks/login';
 import { goToExceptionsTab, goToAlertsTab } from '../../../tasks/rule_details';
-import {
-  disableAutoRefresh,
-  goToRuleDetails,
-  waitForRulesTableToBeLoaded,
-} from '../../../tasks/alerts_detection_rules';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { goToTheRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
+import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -35,12 +30,15 @@ import {
 describe('Exceptions viewer read only', { tags: tag.ESS }, () => {
   const exceptionList = getExceptionList();
 
-  before(() => {
-    cleanKibana();
+  beforeEach(() => {
+    deleteAlertsAndRules();
+    deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
+
     // create rule with exceptions
     createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
       createRule(
         getNewRule({
+          name: 'Test exceptions rule',
           query: 'agent.name:*',
           index: ['exceptions*'],
           exceptions_list: [
@@ -55,20 +53,11 @@ describe('Exceptions viewer read only', { tags: tag.ESS }, () => {
         })
       );
     });
-  });
 
-  beforeEach(() => {
     login(ROLES.reader);
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL, ROLES.reader);
-    waitForRulesTableToBeLoaded();
-    disableAutoRefresh();
-    goToRuleDetails();
+    visitSecurityDetectionRulesPage(ROLES.reader);
+    goToTheRuleDetailsOf('Test exceptions rule');
     goToExceptionsTab();
-  });
-
-  after(() => {
-    deleteAlertsAndRules();
-    deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
   });
 
   it('Cannot add an exception from empty viewer screen', () => {
