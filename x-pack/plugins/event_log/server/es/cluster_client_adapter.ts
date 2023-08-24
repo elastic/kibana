@@ -178,6 +178,36 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     }
   }
 
+  public async doesIlmPolicyExist(policyName: string): Promise<boolean> {
+    const request = {
+      method: 'GET',
+      path: `/_ilm/policy/${policyName}`,
+    };
+    try {
+      const esClient = await this.elasticsearchClientPromise;
+      await esClient.transport.request(request);
+    } catch (err) {
+      if (err.statusCode === 404) return false;
+      throw new Error(`error checking existance of ilm policy: ${err.message}`);
+    }
+    return true;
+  }
+
+  public async createIlmPolicy(policyName: string, policy: Record<string, unknown>): Promise<void> {
+    this.logger.info(`Installing ILM policy ${policyName}`);
+    const request = {
+      method: 'PUT',
+      path: `/_ilm/policy/${policyName}`,
+      body: policy,
+    };
+    try {
+      const esClient = await this.elasticsearchClientPromise;
+      await esClient.transport.request(request);
+    } catch (err) {
+      throw new Error(`error creating ilm policy: ${err.message}`);
+    }
+  }
+
   public async doesIndexTemplateExist(name: string): Promise<boolean> {
     try {
       const esClient = await this.elasticsearchClientPromise;
