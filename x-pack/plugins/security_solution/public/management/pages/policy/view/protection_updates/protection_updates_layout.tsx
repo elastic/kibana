@@ -167,7 +167,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
           {canWritePolicyManagement ? (
             <div data-test-subj={'protection-updates-version-to-deploy-picker'}>
               <EuiDatePicker
-                popoverPlacement={'upCenter'}
+                popoverPlacement={'downCenter'}
                 dateFormat={displayDateFormat}
                 selected={selectedDate}
                 maxDate={today}
