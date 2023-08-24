@@ -6,8 +6,12 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
-import { UpsertMonitorError, UpsertMonitorRequest, UpsertMonitorResponse } from '..';
-import { MonitorManagementListResult } from '../../../../../common/runtime_types';
+import { UpsertMonitorError, UpsertMonitorRequest } from '..';
+import {
+  MonitorManagementListResult,
+  MonitorFiltersResult,
+  EncryptedSyntheticsSavedMonitor,
+} from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
 
 import { MonitorListPageState } from './models';
@@ -21,17 +25,16 @@ export const quietFetchMonitorListAction = createAction<MonitorListPageState>(
 );
 
 export const fetchUpsertMonitorAction = createAction<UpsertMonitorRequest>('fetchUpsertMonitor');
-export const fetchUpsertSuccessAction = createAction<{
-  id: string;
-  attributes: { enabled: boolean };
-}>('fetchUpsertMonitorSuccess');
+export const fetchUpsertSuccessAction = createAction<EncryptedSyntheticsSavedMonitor>(
+  'fetchUpsertMonitorSuccess'
+);
 export const fetchUpsertFailureAction = createAction<UpsertMonitorError>(
   'fetchUpsertMonitorFailure'
 );
 
 export const enableMonitorAlertAction = createAsyncAction<
   UpsertMonitorRequest,
-  UpsertMonitorResponse,
+  EncryptedSyntheticsSavedMonitor,
   UpsertMonitorError
 >('enableMonitorAlertAction');
 
@@ -42,3 +45,7 @@ export const updateManagementPageStateAction = createAction<Partial<MonitorListP
 );
 
 export const cleanMonitorListState = createAction('cleanMonitorListState');
+
+export const fetchMonitorFiltersAction = createAsyncAction<void, MonitorFiltersResult>(
+  'fetchMonitorFiltersAction'
+);

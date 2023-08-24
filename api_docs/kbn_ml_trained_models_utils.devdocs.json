@@ -40,13 +40,10 @@
       {
         "parentPluginId": "@kbn/ml-trained-models-utils",
         "id": "def-common.BUILT_IN_MODEL_TYPE",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "BUILT_IN_MODEL_TYPE",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -75,7 +72,7 @@
         "label": "SupportedPytorchTasksType",
         "description": [],
         "signature": [
-          "\"ner\" | \"question_answering\" | \"zero_shot_classification\" | \"text_classification\" | \"text_embedding\" | \"fill_mask\" | \"text_expansion\""
+          "\"text_expansion\" | \"ner\" | \"question_answering\" | \"zero_shot_classification\" | \"text_classification\" | \"text_embedding\" | \"fill_mask\""
         ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,

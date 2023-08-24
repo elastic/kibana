@@ -78,6 +78,7 @@ const isSearchSourceParam = (action: LocalStateAction): action is SearchSourcePa
 export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProps) => {
   const services = useTriggerUiActionServices();
   const unifiedSearch = services.unifiedSearch;
+  const { dataViews, dataViewEditor } = useTriggerUiActionServices();
   const { searchSource, errors, initialSavedQuery, setParam, ruleParams } = props;
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
 
@@ -117,7 +118,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   );
 
   const { index: dataView, query, filter: filters } = ruleConfiguration;
-  const dataViews = useMemo(() => (dataView ? [dataView] : []), [dataView]);
+  const indexPatterns = useMemo(() => (dataView ? [dataView] : []), [dataView]);
 
   const [esFields, setEsFields] = useState<FieldOption[]>(
     dataView ? convertFieldSpecToFieldOption(dataView.fields.map((field) => field.toSpec())) : []
@@ -296,6 +297,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       </EuiTitle>
       <EuiSpacer size="s" />
       <DataViewSelectPopover
+        dependencies={{ dataViews, dataViewEditor }}
         dataView={dataView}
         metadata={props.metadata}
         onSelectDataView={onSelectDataView}
@@ -320,7 +322,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
             suggestionsSize="s"
             displayStyle="inPage"
             query={query}
-            indexPatterns={dataViews}
+            indexPatterns={indexPatterns}
             savedQuery={savedQuery}
             filters={filters}
             onFiltersUpdated={onUpdateFilters}

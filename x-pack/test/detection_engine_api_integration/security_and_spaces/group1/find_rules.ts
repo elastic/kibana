@@ -11,9 +11,7 @@ import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
-  createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
   getComplexRule,
   getComplexRuleOutput,
   getSimpleRule,
@@ -29,11 +27,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('find_rules', () => {
     beforeEach(async () => {
-      await createSignalsIndex(supertest, log);
-    });
-
-    afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
       await deleteAllRules(supertest, log);
     });
 

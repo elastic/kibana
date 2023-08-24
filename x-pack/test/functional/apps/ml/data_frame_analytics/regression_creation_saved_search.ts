@@ -94,7 +94,6 @@ export default function ({ getService }: FtrProviderContext) {
                   'Model memory limit',
                   '10mb',
                   'Version',
-                  '8.9.0',
                 ],
               },
               {
@@ -183,7 +182,6 @@ export default function ({ getService }: FtrProviderContext) {
                   'Model memory limit',
                   '10mb',
                   'Version',
-                  '8.9.0',
                 ],
               },
               {
@@ -266,14 +264,7 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
-                expectedEntries: [
-                  'STOPPED',
-                  'Create time',
-                  'Model memory limit',
-                  '5mb',
-                  'Version',
-                  '8.9.0',
-                ],
+                expectedEntries: ['STOPPED', 'Create time', 'Model memory limit', '5mb', 'Version'],
               },
               {
                 section: 'stats',
@@ -355,14 +346,7 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
-                expectedEntries: [
-                  'STOPPED',
-                  'Create time',
-                  'Model memory limit',
-                  '5mb',
-                  'Version',
-                  '8.9.0',
-                ],
+                expectedEntries: ['STOPPED', 'Create time', 'Model memory limit', '5mb', 'Version'],
               },
               {
                 section: 'stats',

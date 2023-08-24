@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 
 export const fullHeight = css`
   height: 100%;

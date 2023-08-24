@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { LoadWhenInView } from '@kbn/observability-plugin/public';
+import { LoadWhenInView } from '@kbn/observability-shared-plugin/public';
 import { I18LABELS } from './translations';
 import { UXMetrics } from './ux_metrics';
 import { ImpactfulMetrics } from './impactful_metrics';

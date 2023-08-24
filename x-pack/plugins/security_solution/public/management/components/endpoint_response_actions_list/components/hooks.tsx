@@ -17,17 +17,18 @@ import type {
   ResponseActionStatus,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
-  RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
+  RESPONSE_ACTION_API_COMMANDS_NAMES,
+  RESPONSE_ACTION_TYPE,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { DateRangePickerValues } from './actions_log_date_range_picker';
 import type { FILTER_NAMES } from '../translations';
-import { UX_MESSAGES } from '../translations';
+import { FILTER_TYPE_OPTIONS, UX_MESSAGES } from '../translations';
 import { StatusBadge } from './status_badge';
 import { useActionHistoryUrlParams } from './use_action_history_url_params';
 import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
 
-const defaultDateRangeOptions = Object.freeze({
+export const DEFAULT_DATE_RANGE_OPTIONS = Object.freeze({
   autoRefreshOptions: {
     enabled: false,
     duration: 10000,
@@ -38,9 +39,20 @@ const defaultDateRangeOptions = Object.freeze({
 });
 
 export const useDateRangePicker = (isFlyout: boolean) => {
-  const { setUrlDateRangeFilters } = useActionHistoryUrlParams();
-  const [dateRangePickerState, setDateRangePickerState] =
-    useState<DateRangePickerValues>(defaultDateRangeOptions);
+  const {
+    setUrlDateRangeFilters,
+    startDate: startDateFromUrl,
+    endDate: endDateFromUrl,
+  } = useActionHistoryUrlParams();
+  const [dateRangePickerState, setDateRangePickerState] = useState<DateRangePickerValues>({
+    ...DEFAULT_DATE_RANGE_OPTIONS,
+    startDate: isFlyout
+      ? DEFAULT_DATE_RANGE_OPTIONS.startDate
+      : startDateFromUrl ?? DEFAULT_DATE_RANGE_OPTIONS.startDate,
+    endDate: isFlyout
+      ? DEFAULT_DATE_RANGE_OPTIONS.endDate
+      : endDateFromUrl ?? DEFAULT_DATE_RANGE_OPTIONS.endDate,
+  });
 
   const updateActionListDateRanges = useCallback(
     ({ start, end }) => {
@@ -184,17 +196,21 @@ export const useActionsLogFilter = ({
   setUrlActionsFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlActionsFilters'];
   setUrlHostsFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlHostsFilters'];
   setUrlStatusesFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlStatusesFilters'];
+  setUrlTypeFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlTypeFilters'];
 } => {
   const {
     commands,
     statuses,
     hosts: selectedAgentIdsFromUrl,
+    types = [],
     setUrlActionsFilters,
     setUrlHostsFilters,
     setUrlStatusesFilters,
+    setUrlTypeFilters,
   } = useActionHistoryUrlParams();
   const isStatusesFilter = filterName === 'statuses';
   const isHostsFilter = filterName === 'hosts';
+  const isTypeFilter = filterName === 'type';
   const { data: endpointsList, isFetching } = useGetEndpointsList({
     searchString,
     selectedAgentIds: selectedAgentIdsFromUrl,
@@ -213,7 +229,14 @@ export const useActionsLogFilter = ({
 
   // filter options
   const [items, setItems] = useState<FilterItems>(
-    isStatusesFilter
+    isTypeFilter
+      ? RESPONSE_ACTION_TYPE.map((type) => ({
+          key: type,
+          label: getTypeDisplayName(type),
+          checked: !isFlyout && types?.includes(type) ? 'on' : undefined,
+          'data-test-subj': `${filterName}-filter-option`,
+        }))
+      : isStatusesFilter
       ? RESPONSE_ACTION_STATUS.map((statusName) => ({
           key: statusName,
           label: (
@@ -234,20 +257,10 @@ export const useActionsLogFilter = ({
       : isHostsFilter
       ? []
       : RESPONSE_ACTION_API_COMMANDS_NAMES.filter((commandName) => {
-          // `get-file` is currently behind FF
-          if (
-            commandName === 'get-file' &&
-            !ExperimentalFeaturesService.get().responseActionGetFileEnabled
-          ) {
-            return false;
-          }
+          const featureFlags = ExperimentalFeaturesService.get();
 
-          // TODO: remove this when `execute` is no longer behind FF
-          // planned for 8.8
-          if (
-            commandName === 'execute' &&
-            !ExperimentalFeaturesService.get().responseActionExecuteEnabled
-          ) {
+          // upload - v8.9
+          if (commandName === 'upload' && !featureFlags.responseActionUploadEnabled) {
             return false;
           }
 
@@ -295,5 +308,13 @@ export const useActionsLogFilter = ({
     setUrlActionsFilters,
     setUrlHostsFilters,
     setUrlStatusesFilters,
+    setUrlTypeFilters,
   };
+};
+
+const getTypeDisplayName = (type: 'manual' | 'automated') => {
+  if (type === 'automated') {
+    return FILTER_TYPE_OPTIONS.automated;
+  }
+  return FILTER_TYPE_OPTIONS.manual;
 };

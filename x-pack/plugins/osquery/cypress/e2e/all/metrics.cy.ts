@@ -5,25 +5,26 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import { navigateTo } from '../../tasks/navigation';
-import { ROLE, login } from '../../tasks/login';
 import { checkResults, inputQuery, submitQuery } from '../../tasks/live_query';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 import { triggerLoadData } from '../../tasks/inventory';
+import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Inventory', () => {
+describe('ALL - Inventory', { tags: [tag.ESS] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
 
   before(() => {
     loadSavedQuery().then((data) => {
-      savedQueryId = data.id;
-      savedQueryName = data.attributes.id;
+      savedQueryId = data.saved_object_id;
+      savedQueryName = data.id;
     });
   });
 
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    cy.login(ServerlessRoleName.SOC_MANAGER);
     navigateTo('/app/osquery');
   });
 

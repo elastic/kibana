@@ -22,7 +22,14 @@ import {
   FLEET_PROXY_SAVED_OBJECT_TYPE,
   MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   INGEST_SAVED_OBJECT_INDEX,
+  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../constants';
+
+import { migrateOutputEvictionsFromV8100, migrateOutputToV8100 } from './migrations/to_v8_10_0';
+
+import { migrateSyntheticsPackagePolicyToV8100 } from './migrations/synthetics/to_v8_10_0';
+
+import { migratePackagePolicyEvictionsFromV8100 } from './migrations/security_solution/to_v8_10_0';
 
 import {
   migrateAgentPolicyToV7100,
@@ -55,8 +62,12 @@ import {
   migrateInstallationToV860,
   migratePackagePolicyToV860,
 } from './migrations/to_v8_6_0';
-import { migratePackagePolicyToV870 } from './migrations/security_solution';
+import {
+  migratePackagePolicyToV8100,
+  migratePackagePolicyToV870,
+} from './migrations/security_solution';
 import { migratePackagePolicyToV880 } from './migrations/to_v8_8_0';
+import { migrateAgentPolicyToV890 } from './migrations/to_v8_9_0';
 
 /*
  * Saved object types and mappings
@@ -79,6 +90,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         fleet_server_hosts: { type: 'keyword' },
         has_seen_add_data_notice: { type: 'boolean', index: false },
         prerelease_integrations_enabled: { type: 'boolean' },
+        secret_storage_requirements_met: { type: 'boolean' },
       },
     },
     migrations: {
@@ -122,6 +134,8 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             enabled: { type: 'boolean' },
           },
         },
+        is_protected: { type: 'boolean' },
+        overrides: { type: 'flattened', index: false },
       },
     },
     migrations: {
@@ -129,6 +143,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
       '7.12.0': migrateAgentPolicyToV7120,
       '8.4.0': migrateAgentPolicyToV840,
       '8.5.0': migrateAgentPolicyToV850,
+      '8.9.0': migrateAgentPolicyToV890,
     },
   },
   [OUTPUT_SAVED_OBJECT_TYPE]: {
@@ -157,6 +172,89 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         shipper: {
           dynamic: false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
           properties: {},
+        },
+        allow_edit: { enabled: false },
+        version: { type: 'keyword' },
+        key: { type: 'keyword' },
+        compression: { type: 'keyword' },
+        compression_level: { type: 'integer' },
+        client_id: { type: 'keyword' },
+        auth_type: { type: 'keyword' },
+        connection_type: { type: 'keyword' },
+        username: { type: 'keyword' },
+        password: { type: 'text', index: false },
+        sasl: {
+          dynamic: false,
+          properties: {
+            mechanism: { type: 'text' },
+          },
+        },
+        partition: { type: 'keyword' },
+        random: {
+          dynamic: false,
+          properties: {
+            group_events: { type: 'integer' },
+          },
+        },
+        round_robin: {
+          dynamic: false,
+          properties: {
+            group_events: { type: 'integer' },
+          },
+        },
+        hash: {
+          dynamic: false,
+          properties: {
+            hash: { type: 'text' },
+            random: { type: 'boolean' },
+          },
+        },
+        topics: {
+          dynamic: false,
+          properties: {
+            topic: { type: 'keyword' },
+            when: {
+              dynamic: false,
+              properties: {
+                type: { type: 'text' },
+                condition: { type: 'text' },
+              },
+            },
+          },
+        },
+        headers: {
+          dynamic: false,
+          properties: {
+            key: { type: 'text' },
+            value: { type: 'text' },
+          },
+        },
+        timeout: { type: 'integer' },
+        broker_timeout: { type: 'integer' },
+        broker_ack_reliability: { type: 'text' },
+        broker_buffer_size: { type: 'integer' },
+        required_acks: { type: 'integer' },
+        channel_buffer_size: { type: 'integer' },
+      },
+    },
+    modelVersions: {
+      '1': {
+        changes: [
+          {
+            type: 'mappings_deprecation',
+            deprecatedMappings: [
+              'broker_ack_reliability',
+              'broker_buffer_size',
+              'channel_buffer_size',
+            ],
+          },
+          {
+            type: 'data_backfill',
+            backfillFn: migrateOutputToV8100,
+          },
+        ],
+        schemas: {
+          forwardCompatibility: migrateOutputEvictionsFromV8100,
         },
       },
     },
@@ -197,11 +295,29 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           dynamic: false,
           properties: {},
         },
+        secret_references: { properties: { id: { type: 'keyword' } } },
         revision: { type: 'integer' },
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
         created_at: { type: 'date' },
         created_by: { type: 'keyword' },
+      },
+    },
+    modelVersions: {
+      '1': {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: migratePackagePolicyToV8100,
+          },
+          {
+            type: 'data_backfill',
+            backfillFn: migrateSyntheticsPackagePolicyToV8100,
+          },
+        ],
+        schemas: {
+          forwardCompatibility: migratePackagePolicyEvictionsFromV8100,
+        },
       },
     },
     migrations: {
@@ -338,6 +454,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         name: { type: 'keyword' },
         is_default: { type: 'boolean' },
         host: { type: 'keyword' },
+        proxy_id: { type: 'keyword' },
       },
     },
   },
@@ -392,6 +509,22 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
       properties: {},
     },
   },
+  [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE]: {
+    name: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      dynamic: false,
+      properties: {
+        policy_id: { type: 'keyword' },
+        token_plain: { type: 'keyword' },
+      },
+    },
+  },
 });
 
 export function registerSavedObjects(savedObjects: SavedObjectsServiceSetup) {
@@ -406,7 +539,10 @@ export function registerEncryptedSavedObjects(
 ) {
   encryptedSavedObjects.registerType({
     type: OUTPUT_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set([{ key: 'ssl', dangerouslyExposeValue: true }]),
+    attributesToEncrypt: new Set([
+      { key: 'ssl', dangerouslyExposeValue: true },
+      { key: 'password', dangerouslyExposeValue: true },
+    ]),
     attributesToExcludeFromAAD: new Set([
       'output_id',
       'name',
@@ -420,11 +556,33 @@ export function registerEncryptedSavedObjects(
       'config_yaml',
       'is_preconfigured',
       'proxy_id',
+      'version',
+      'key',
+      'compression',
+      'compression_level',
+      'client_id',
+      'auth_type',
+      'connection_type',
+      'username',
+      'sasl',
+      'partition',
+      'random',
+      'round_robin',
+      'hash',
+      'topics',
+      'headers',
+      'timeout',
+      'broker_timeout',
+      'required_acks',
     ]),
   });
   // Encrypted saved objects
   encryptedSavedObjects.registerType({
     type: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['passphrase']),
+  });
+  encryptedSavedObjects.registerType({
+    type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['token']),
   });
 }

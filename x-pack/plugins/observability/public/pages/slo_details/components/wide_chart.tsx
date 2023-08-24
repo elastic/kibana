@@ -14,6 +14,8 @@ import {
   Position,
   ScaleType,
   Settings,
+  Tooltip,
+  TooltipType,
 } from '@elastic/charts';
 import React, { useRef } from 'react';
 import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
@@ -57,11 +59,11 @@ export function WideChart({ chart, data, id, isLoading, state }: Props) {
 
   return (
     <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>
+      <Tooltip type={TooltipType.VerticalCursor} />
       <Settings
         baseTheme={baseTheme}
         showLegend={false}
         theme={[theme]}
-        tooltip="vertical"
         noResults={<EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />}
         onPointerUpdate={handleCursorUpdate}
         externalPointerEvents={{

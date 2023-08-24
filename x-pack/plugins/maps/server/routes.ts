@@ -21,79 +21,93 @@ export async function initRoutes(coreSetup: CoreSetup, logger: Logger): Promise<
   const [coreStart, { data: dataPlugin }]: [CoreStart, StartDeps] =
     (await coreSetup.getStartServices()) as unknown as [CoreStart, StartDeps];
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: `/${FONTS_API_PATH}/{fontstack}/{range}`,
-      validate: {
-        params: schema.object({
-          fontstack: schema.string(),
-          range: schema.string(),
-        }),
+      access: 'internal',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: schema.object({
+              fontstack: schema.string(),
+              range: schema.string(),
+            }),
+          },
+        },
       },
-    },
-    (context, request, response) => {
-      const range = path.normalize(request.params.range);
-      const rootPath = path.resolve(__dirname, 'fonts', 'open_sans');
-      const fontPath = path.resolve(rootPath, `${range}.pbf`);
-      return !fontPath.startsWith(rootPath)
-        ? response.notFound()
-        : new Promise((resolve) => {
-            fs.readFile(fontPath, (error, data) => {
-              if (error) {
-                resolve(response.notFound());
-              } else {
-                resolve(
-                  response.ok({
-                    body: data,
-                  })
-                );
-              }
+      (context, request, response) => {
+        const range = path.normalize(request.params.range);
+        const rootPath = path.resolve(__dirname, 'fonts', 'open_sans');
+        const fontPath = path.resolve(rootPath, `${range}.pbf`);
+        return !fontPath.startsWith(rootPath)
+          ? response.notFound()
+          : new Promise((resolve) => {
+              fs.readFile(fontPath, (error, data) => {
+                if (error) {
+                  resolve(response.notFound());
+                } else {
+                  resolve(
+                    response.ok({
+                      body: data,
+                    })
+                  );
+                }
+              });
             });
-          });
-    }
-  );
+      }
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: `/${INDEX_SETTINGS_API_PATH}`,
-      validate: {
-        query: schema.object({
-          indexPatternTitle: schema.string(),
-        }),
+      access: 'internal',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: schema.object({
+              indexPatternTitle: schema.string(),
+            }),
+          },
+        },
       },
-    },
-    async (context, request, response) => {
-      const { query } = request;
-      if (!query.indexPatternTitle) {
-        logger.warn(`Required query parameter 'indexPatternTitle' not provided.`);
-        return response.custom({
-          body: `Required query parameter 'indexPatternTitle' not provided.`,
-          statusCode: 400,
-        });
-      }
+      async (context, request, response) => {
+        const { query } = request;
+        if (!query.indexPatternTitle) {
+          logger.warn(`Required query parameter 'indexPatternTitle' not provided.`);
+          return response.custom({
+            body: `Required query parameter 'indexPatternTitle' not provided.`,
+            statusCode: 400,
+          });
+        }
 
-      try {
-        const coreContext = await context.core;
-        const resp = await coreContext.elasticsearch.client.asCurrentUser.indices.getSettings({
-          index: query.indexPatternTitle,
-        });
-        const indexPatternSettings = getIndexPatternSettings(
-          resp as unknown as Record<string, string | number | boolean>
-        );
-        return response.ok({
-          body: indexPatternSettings,
-        });
-      } catch (error) {
-        logger.warn(
-          `Cannot load index settings for data view '${query.indexPatternTitle}', error: ${error.message}.`
-        );
-        return response.custom({
-          body: 'Error loading index settings',
-          statusCode: 400,
-        });
+        try {
+          const coreContext = await context.core;
+          const resp = await coreContext.elasticsearch.client.asCurrentUser.indices.getSettings({
+            index: query.indexPatternTitle,
+          });
+          const indexPatternSettings = getIndexPatternSettings(
+            resp as unknown as Record<string, string | number | boolean>
+          );
+          return response.ok({
+            body: indexPatternSettings,
+          });
+        } catch (error) {
+          logger.warn(
+            `Cannot load index settings for data view '${query.indexPatternTitle}', error: ${error.message}.`
+          );
+          return response.custom({
+            body: 'Error loading index settings',
+            statusCode: 400,
+          });
+        }
       }
-    }
-  );
+    );
 
   initMVTRoutes({ router, logger, core: coreStart });
   initIndexingRoutes({ router, logger, dataPlugin });

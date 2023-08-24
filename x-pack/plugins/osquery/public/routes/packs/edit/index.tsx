@@ -12,7 +12,7 @@ import {
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -126,7 +126,7 @@ const EditPackPageComponent = () => {
       headerChildren={HeaderContent}
     >
       {!data ? (
-        <EuiLoadingContent lines={10} />
+        <EuiSkeletonText lines={10} />
       ) : (
         <PackForm editMode={true} defaultValue={data} isReadOnly={isReadOnly} />
       )}

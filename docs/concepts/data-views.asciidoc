@@ -40,7 +40,8 @@ image::images/discover-data-view.png[How to set the {data-source} in Discover, w
 . Give your {data-source} a name.
 
 . Start typing in the *Index pattern* field, and {kib} looks for the names of
-indices, data streams, and aliases that match your input.
+indices, data streams, and aliases that match your input. You can
+view all available sources or only the sources that the data view targets.
 +
 [role="screenshot"]
 image:management/index-patterns/images/create-data-view.png["Create data view"]

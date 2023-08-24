@@ -20,6 +20,7 @@ import { RuleType } from './types';
 import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { dataPluginMock as autocompletePluginMock } from '@kbn/unified-search-plugin/server/mocks';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
 import {
   DataViewsServerPluginStart,
@@ -60,7 +61,7 @@ const generateAlertingConfig = (): AlertingConfig => ({
   },
 });
 
-const sampleRuleType: RuleType<never, never, {}, never, never, 'default'> = {
+const sampleRuleType: RuleType<never, never, {}, never, never, 'default', 'recovered', {}> = {
   id: 'test',
   name: 'test',
   minimumLicenseRequired: 'basic',
@@ -90,6 +91,7 @@ describe('Alerting Plugin', () => {
       monitoringCollection: monitoringCollectionMock.createSetup(),
       data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
       features: featuresPluginMock.createSetup(),
+      unifiedSearch: autocompletePluginMock.createSetupContract(),
     };
 
     let plugin: AlertingPlugin;
@@ -196,7 +198,7 @@ describe('Alerting Plugin', () => {
         const ruleType = {
           ...sampleRuleType,
           minimumLicenseRequired: 'basic',
-        } as RuleType<never, never, {}, never, never, 'default', never>;
+        } as RuleType<never, never, {}, never, never, 'default', never, {}>;
         await setup.registerType(ruleType);
         expect(ruleType.ruleTaskTimeout).toBe('5m');
       });
@@ -206,7 +208,7 @@ describe('Alerting Plugin', () => {
           ...sampleRuleType,
           minimumLicenseRequired: 'basic',
           ruleTaskTimeout: '20h',
-        } as RuleType<never, never, {}, never, never, 'default', never>;
+        } as RuleType<never, never, {}, never, never, 'default', never, {}>;
         await setup.registerType(ruleType);
         expect(ruleType.ruleTaskTimeout).toBe('20h');
       });
@@ -215,7 +217,7 @@ describe('Alerting Plugin', () => {
         const ruleType = {
           ...sampleRuleType,
           minimumLicenseRequired: 'basic',
-        } as RuleType<never, never, {}, never, never, 'default', never>;
+        } as RuleType<never, never, {}, never, never, 'default', never, {}>;
         await setup.registerType(ruleType);
         expect(ruleType.cancelAlertsOnRuleTimeout).toBe(true);
       });
@@ -225,7 +227,7 @@ describe('Alerting Plugin', () => {
           ...sampleRuleType,
           minimumLicenseRequired: 'basic',
           cancelAlertsOnRuleTimeout: false,
-        } as RuleType<never, never, {}, never, never, 'default', never>;
+        } as RuleType<never, never, {}, never, never, 'default', never, {}>;
         await setup.registerType(ruleType);
         expect(ruleType.cancelAlertsOnRuleTimeout).toBe(false);
       });
@@ -251,6 +253,7 @@ describe('Alerting Plugin', () => {
           monitoringCollection: monitoringCollectionMock.createSetup(),
           data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
           features: featuresPluginMock.createSetup(),
+          unifiedSearch: autocompletePluginMock.createSetupContract(),
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
@@ -267,6 +270,7 @@ describe('Alerting Plugin', () => {
             dataViewsServiceFactory: jest
               .fn()
               .mockResolvedValue(dataViewPluginMocks.createStartContract()),
+            getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
           } as DataViewsServerPluginStart,
         });
 
@@ -298,6 +302,7 @@ describe('Alerting Plugin', () => {
           monitoringCollection: monitoringCollectionMock.createSetup(),
           data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
           features: featuresPluginMock.createSetup(),
+          unifiedSearch: autocompletePluginMock.createSetupContract(),
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
@@ -314,6 +319,7 @@ describe('Alerting Plugin', () => {
             dataViewsServiceFactory: jest
               .fn()
               .mockResolvedValue(dataViewPluginMocks.createStartContract()),
+            getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
           } as DataViewsServerPluginStart,
         });
 
@@ -356,6 +362,7 @@ describe('Alerting Plugin', () => {
         monitoringCollection: monitoringCollectionMock.createSetup(),
         data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
         features: featuresPluginMock.createSetup(),
+        unifiedSearch: autocompletePluginMock.createSetupContract(),
       });
 
       const startContract = plugin.start(coreMock.createStart(), {
@@ -372,6 +379,7 @@ describe('Alerting Plugin', () => {
           dataViewsServiceFactory: jest
             .fn()
             .mockResolvedValue(dataViewPluginMocks.createStartContract()),
+          getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
         } as DataViewsServerPluginStart,
       });
 

@@ -10,7 +10,10 @@ import { chain } from 'lodash';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  DEFAULT_INDEX_TYPES_MAP,
+  type IndexMapping,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type {
   BaseState,
   CalculateExcludeFiltersState,
@@ -60,7 +63,6 @@ import type { ResponseType } from '../next';
 import { createInitialProgress } from './progress';
 import { model } from './model';
 import type { BulkIndexOperationTuple, BulkOperation } from './create_batches';
-import { DEFAULT_INDEX_TYPES_MAP } from '../kibana_migrator_constants';
 
 describe('migrations v2 model', () => {
   const indexMapping: IndexMapping = {
@@ -86,7 +88,9 @@ describe('migrations v2 model', () => {
     retryDelay: 0,
     retryAttempts: 15,
     batchSize: 1000,
+    maxBatchSize: 1000,
     maxBatchSizeBytes: 1e8,
+    maxReadBatchSizeBytes: 1234,
     discardUnknownObjects: false,
     discardCorruptObjects: false,
     indexPrefix: '.kibana',
@@ -98,6 +102,7 @@ describe('migrations v2 model', () => {
     versionAlias: '.kibana_7.11.0',
     versionIndex: '.kibana_7.11.0_001',
     tempIndex: '.kibana_7.11.0_reindex_temp',
+    tempIndexAlias: '.kibana_7.11.0_reindex_temp_alias',
     excludeOnUpgradeQuery: {
       bool: {
         must_not: [
@@ -328,6 +333,21 @@ describe('migrations v2 model', () => {
             `"The .kibana alias is pointing to a newer version of Kibana: v7.12.0"`
           );
         });
+        test('INIT -> FATAL when later version alias exists', () => {
+          const res: ResponseType<'INIT'> = Either.right({
+            '.kibana_7.11.0_001': {
+              aliases: { '.kibana_7.12.0': {}, '.kibana': {} },
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+              settings: {},
+            },
+          });
+          const newState = model(initState, res) as FatalState;
+
+          expect(newState.controlState).toEqual('FATAL');
+          expect(newState.reason).toMatchInlineSnapshot(
+            `"The .kibana_7.12.0 alias refers to a newer version of Kibana: v7.12.0"`
+          );
+        });
         test('INIT -> FATAL when .kibana points to multiple indices', () => {
           const res: ResponseType<'INIT'> = Either.right({
             '.kibana_7.12.0_001': {
@@ -363,13 +383,13 @@ describe('migrations v2 model', () => {
             '.kibana_7.invalid.0_001': {
               aliases: {
                 '.kibana': {},
-                '.kibana_7.12.0': {},
+                '.kibana_7.11.0': {},
               },
               mappings: mappingsWithUnknownType,
               settings: {},
             },
-            '.kibana_7.11.0_001': {
-              aliases: { '.kibana_7.11.0': {} },
+            '.kibana_7.10.0_001': {
+              aliases: { '.kibana_7.10.0': {} },
               mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
               settings: {},
             },
@@ -569,13 +589,13 @@ describe('migrations v2 model', () => {
             '.kibana_7.invalid.0_001': {
               aliases: {
                 '.kibana': {},
-                '.kibana_7.12.0': {},
+                '.kibana_7.11.0': {},
               },
               mappings: mappingsWithUnknownType,
               settings: {},
             },
-            '.kibana_7.11.0_001': {
-              aliases: { '.kibana_7.11.0': {} },
+            '.kibana_7.10.0_001': {
+              aliases: { '.kibana_7.10.0': {} },
               mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
               settings: {},
             },
@@ -586,8 +606,8 @@ describe('migrations v2 model', () => {
           expect(newState.sourceIndex.value).toBe('.kibana_7.invalid.0_001');
           expect(newState.aliases).toEqual({
             '.kibana': '.kibana_7.invalid.0_001',
-            '.kibana_7.11.0': '.kibana_7.11.0_001',
-            '.kibana_7.12.0': '.kibana_7.invalid.0_001',
+            '.kibana_7.10.0': '.kibana_7.10.0_001',
+            '.kibana_7.11.0': '.kibana_7.invalid.0_001',
           });
         });
 
@@ -1744,9 +1764,10 @@ describe('migrations v2 model', () => {
 
       describe('if the migrator source index did NOT exist', () => {
         test('READY_TO_REINDEX_SYNC -> DONE_REINDEXING_SYNC', () => {
-          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right(
-            'synchronized_successfully' as const
-          );
+          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
+            type: 'synchronization_successful' as const,
+            data: [],
+          });
           const newState = model(state, res);
           expect(newState.controlState).toEqual('DONE_REINDEXING_SYNC');
         });
@@ -1754,9 +1775,10 @@ describe('migrations v2 model', () => {
 
       describe('if the migrator source index did exist', () => {
         test('READY_TO_REINDEX_SYNC -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT', () => {
-          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right(
-            'synchronized_successfully' as const
-          );
+          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
+            type: 'synchronization_successful' as const,
+            data: [],
+          });
           const newState = model(
             {
               ...state,
@@ -1771,7 +1793,7 @@ describe('migrations v2 model', () => {
 
       test('READY_TO_REINDEX_SYNC -> FATAL if the synchronization between migrators fails', () => {
         const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.left({
-          type: 'sync_failed',
+          type: 'synchronization_failed',
           error: new Error('Other migrators failed to reach the synchronization point'),
         });
         const newState = model(state, res);
@@ -1832,6 +1854,8 @@ describe('migrations v2 model', () => {
         expect(newState.lastHitSortValue).toBe(lastHitSortValue);
         expect(newState.progress.processed).toBe(undefined);
         expect(newState.progress.total).toBe(1);
+        expect(newState.maxBatchSize).toBe(1000);
+        expect(newState.batchSize).toBe(1000); // don't increase batchsize above default
         expect(newState.logs).toMatchInlineSnapshot(`
           Array [
             Object {
@@ -1840,6 +1864,83 @@ describe('migrations v2 model', () => {
             },
           ]
         `);
+      });
+
+      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_TRANSFORM increases batchSize if < maxBatchSize', () => {
+        const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
+        const lastHitSortValue = [123456];
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
+          outdatedDocuments,
+          lastHitSortValue,
+          totalHits: 1,
+          processedDocs: 1,
+        });
+        let newState = model({ ...state, batchSize: 500 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(600);
+        newState = model({ ...state, batchSize: 600 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(720);
+        newState = model({ ...state, batchSize: 720 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(864);
+        newState = model({ ...state, batchSize: 864 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(1000); // + 20% would have been 1036
+        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_TRANSFORM');
+        expect(newState.maxBatchSize).toBe(1000);
+      });
+
+      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_READ if left es_response_too_large', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 4567,
+        });
+        const newState = model(state, res) as ReindexSourceToTempRead;
+        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_READ');
+        expect(newState.lastHitSortValue).toBe(undefined); // lastHitSortValue should not be set
+        expect(newState.progress.processed).toBe(undefined); // don't increment progress
+        expect(newState.batchSize).toBe(500); // halves the batch size
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.logs).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": "warning",
+              "message": "Read a batch with a response content length of 4567 bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 500.",
+            },
+          ]
+        `);
+      });
+
+      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_READ if left es_response_too_large will not reduce batch size below 1', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 2345,
+        });
+        const newState = model({ ...state, batchSize: 1.5 }, res) as ReindexSourceToTempRead;
+        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_READ');
+        expect(newState.lastHitSortValue).toBe(undefined); // lastHitSortValue should not be set
+        expect(newState.progress.processed).toBe(undefined); // don't increment progress
+        expect(newState.batchSize).toBe(1); // don't halve the batch size or go below 1
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.logs).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": "warning",
+              "message": "Read a batch with a response content length of 2345 bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 1.",
+            },
+          ]
+        `);
+      });
+
+      it('REINDEX_SOURCE_TO_TEMP_READ -> FATAL if left es_response_too_large and batchSize already 1', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 2345,
+        });
+        const newState = model({ ...state, batchSize: 1 }, res) as FatalState;
+        expect(newState.controlState).toBe('FATAL');
+        expect(newState.batchSize).toBe(1); // don't halve the batch size or go below 1
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"After reducing the read batch size to a single document, the Elasticsearch response content length was 2345bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again."`
+        );
       });
 
       it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_CLOSE_PIT if no outdated documents to reindex', () => {
@@ -1945,15 +2046,16 @@ describe('migrations v2 model', () => {
       };
 
       test('DONE_REINDEXING_SYNC -> SET_TEMP_WRITE_BLOCK if synchronization succeeds', () => {
-        const res: ResponseType<'DONE_REINDEXING_SYNC'> = Either.right(
-          'synchronized_successfully' as const
-        );
+        const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
+          type: 'synchronization_successful' as const,
+          data: [],
+        });
         const newState = model(state, res);
         expect(newState.controlState).toEqual('SET_TEMP_WRITE_BLOCK');
       });
       test('DONE_REINDEXING_SYNC -> FATAL if the synchronization between migrators fails', () => {
         const res: ResponseType<'DONE_REINDEXING_SYNC'> = Either.left({
-          type: 'sync_failed',
+          type: 'synchronization_failed',
           error: new Error('Other migrators failed to reach the synchronization point'),
         });
         const newState = model(state, res);
@@ -2304,6 +2406,8 @@ describe('migrations v2 model', () => {
         expect(newState.lastHitSortValue).toBe(lastHitSortValue);
         expect(newState.progress.processed).toBe(undefined);
         expect(newState.progress.total).toBe(10);
+        expect(newState.maxBatchSize).toBe(1000);
+        expect(newState.batchSize).toBe(1000); // don't increase batchsize above default
         expect(newState.logs).toMatchInlineSnapshot(`
           Array [
             Object {
@@ -2343,6 +2447,83 @@ describe('migrations v2 model', () => {
             },
           ]
         `);
+      });
+
+      it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_TRANSFORM increases batchSize up to maxBatchSize', () => {
+        const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
+        const lastHitSortValue = [123456];
+        const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.right({
+          outdatedDocuments,
+          lastHitSortValue,
+          totalHits: 1,
+          processedDocs: [],
+        });
+        let newState = model({ ...state, batchSize: 500 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(600);
+        newState = model({ ...state, batchSize: 600 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(720);
+        newState = model({ ...state, batchSize: 720 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(864);
+        newState = model({ ...state, batchSize: 864 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(1000); // + 20% would have been 1036
+        expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_TRANSFORM');
+        expect(newState.maxBatchSize).toBe(1000);
+      });
+
+      it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_READ if left es_response_too_large', () => {
+        const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 3456,
+        });
+        const newState = model(state, res) as ReindexSourceToTempRead;
+        expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_SEARCH_READ');
+        expect(newState.lastHitSortValue).toBe(undefined); // lastHitSortValue should not be set
+        expect(newState.progress.processed).toBe(undefined); // don't increment progress
+        expect(newState.batchSize).toBe(500); // halves the batch size
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.logs).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": "warning",
+              "message": "Read a batch with a response content length of 3456 bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 500.",
+            },
+          ]
+        `);
+      });
+
+      it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_READ if left es_response_too_large will not reduce batch size below 1', () => {
+        const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 2345,
+        });
+        const newState = model({ ...state, batchSize: 1.5 }, res) as ReindexSourceToTempRead;
+        expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_SEARCH_READ');
+        expect(newState.lastHitSortValue).toBe(undefined); // lastHitSortValue should not be set
+        expect(newState.progress.processed).toBe(undefined); // don't increment progress
+        expect(newState.batchSize).toBe(1); // don't halve the batch size or go below 1
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.logs).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": "warning",
+              "message": "Read a batch with a response content length of 2345 bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 1.",
+            },
+          ]
+        `);
+      });
+
+      it('OUTDATED_DOCUMENTS_SEARCH_READ -> FATAL if left es_response_too_large and batchSize already 1', () => {
+        const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 2345,
+        });
+        const newState = model({ ...state, batchSize: 1 }, res) as FatalState;
+        expect(newState.controlState).toBe('FATAL');
+        expect(newState.batchSize).toBe(1); // don't halve the batch size or go below 1
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"After reducing the read batch size to a single document, the response content length was 2345 bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again."`
+        );
       });
 
       it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT if no outdated documents to transform', () => {
@@ -2416,19 +2597,73 @@ describe('migrations v2 model', () => {
         targetIndex: '.kibana_7.11.0_001',
       };
 
-      it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if mappings do not match', () => {
-        const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.right({ match: false });
-        const newState = model(
-          checkTargetMappingsState,
-          res
-        ) as UpdateTargetMappingsPropertiesState;
-        expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS_PROPERTIES');
+      describe('reindex migration', () => {
+        it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if origin mappings did not exist', () => {
+          const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
+            type: 'actual_mappings_incomplete' as const,
+          });
+          const newState = model(
+            checkTargetMappingsState,
+            res
+          ) as UpdateTargetMappingsPropertiesState;
+          expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS_PROPERTIES');
+          expect(Option.isNone(newState.updatedTypesQuery)).toEqual(true);
+        });
       });
 
-      it('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS if mappings match', () => {
-        const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.right({ match: true });
-        const newState = model(checkTargetMappingsState, res) as CheckVersionIndexReadyActions;
-        expect(newState.controlState).toBe('CHECK_VERSION_INDEX_READY_ACTIONS');
+      describe('compatible migration', () => {
+        it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if core fields have been updated', () => {
+          const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
+            type: 'compared_mappings_changed' as const,
+            updatedHashes: ['dashboard', 'lens', 'namespaces'],
+          });
+          const newState = model(
+            checkTargetMappingsState,
+            res
+          ) as UpdateTargetMappingsPropertiesState;
+          expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS_PROPERTIES');
+          // since a core field has been updated, we must pickup ALL SOs.
+          // Thus, we must NOT define a filter query.
+          expect(Option.isNone(newState.updatedTypesQuery)).toEqual(true);
+        });
+
+        it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if only SO types have changed', () => {
+          const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
+            type: 'compared_mappings_changed' as const,
+            updatedHashes: ['dashboard', 'lens'],
+          });
+          const newState = model(
+            checkTargetMappingsState,
+            res
+          ) as UpdateTargetMappingsPropertiesState;
+          expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS_PROPERTIES');
+          expect(
+            Option.isSome(newState.updatedTypesQuery) && newState.updatedTypesQuery.value
+          ).toEqual({
+            bool: {
+              should: [
+                {
+                  term: {
+                    type: 'dashboard',
+                  },
+                },
+                {
+                  term: {
+                    type: 'lens',
+                  },
+                },
+              ],
+            },
+          });
+        });
+
+        it('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS if mappings match', () => {
+          const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.right({
+            type: 'compared_mappings_match' as const,
+          });
+          const newState = model(checkTargetMappingsState, res) as CheckVersionIndexReadyActions;
+          expect(newState.controlState).toBe('CHECK_VERSION_INDEX_READY_ACTIONS');
+        });
       });
     });
 
@@ -2661,6 +2896,17 @@ describe('migrations v2 model', () => {
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
+        updatedTypesQuery: Option.fromNullable({
+          bool: {
+            should: [
+              {
+                term: {
+                  type: 'type1',
+                },
+              },
+            ],
+          },
+        }),
       };
       test('UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK', () => {
         const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES'> = Either.right({
@@ -2774,6 +3020,24 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toEqual(0);
       });
 
+      test('CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY_SYNC if mustRelocateDocuments === true', () => {
+        const versionIndexReadyActions = Option.some([
+          { add: { index: 'kibana-index', alias: 'my-alias' } },
+        ]);
+
+        const newState = model(
+          {
+            ...сheckVersionIndexReadyActionsState,
+            mustRelocateDocuments: true,
+            versionIndexReadyActions,
+          },
+          res
+        ) as PostInitState;
+        expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY_SYNC');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+
       test('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE if none versionIndexReadyActions', () => {
         const newState = model(сheckVersionIndexReadyActionsState, res) as PostInitState;
         expect(newState.controlState).toEqual('DONE');
@@ -2793,10 +3057,10 @@ describe('migrations v2 model', () => {
         sourceIndex: Option.none as Option.None,
         targetIndex: '.kibana_7.11.0_001',
       };
-      test('CREATE_NEW_TARGET -> MARK_VERSION_INDEX_READY', () => {
+      test('CREATE_NEW_TARGET -> CHECK_VERSION_INDEX_READY_ACTIONS', () => {
         const res: ResponseType<'CREATE_NEW_TARGET'> = Either.right('create_index_succeeded');
         const newState = model(createNewTargetState, res);
-        expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
+        expect(newState.controlState).toEqual('CHECK_VERSION_INDEX_READY_ACTIONS');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
@@ -2810,7 +3074,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
       });
-      test('CREATE_NEW_TARGET -> MARK_VERSION_INDEX_READY resets the retry count and delay', () => {
+      test('CREATE_NEW_TARGET -> CHECK_VERSION_INDEX_READY_ACTIONS resets the retry count and delay', () => {
         const res: ResponseType<'CREATE_NEW_TARGET'> = Either.right('create_index_succeeded');
         const testState = {
           ...createNewTargetState,
@@ -2819,7 +3083,7 @@ describe('migrations v2 model', () => {
         };
 
         const newState = model(testState, res);
-        expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
+        expect(newState.controlState).toEqual('CHECK_VERSION_INDEX_READY_ACTIONS');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });

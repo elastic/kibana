@@ -8,8 +8,8 @@
 import React from 'react';
 import { FieldValueSuggestions } from '.';
 import { render, screen, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
-import * as searchHook from '../../../hooks/use_es_search';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import * as obsHooks from '@kbn/observability-shared-plugin/public/hooks/use_es_search';
 
 jest.setTimeout(30000);
 
@@ -19,7 +19,7 @@ describe('FieldValueSuggestions', () => {
 
   function setupSearch(data: any) {
     // @ts-ignore
-    jest.spyOn(searchHook, 'useEsSearch').mockReturnValue({
+    jest.spyOn(obsHooks, 'useEsSearch').mockReturnValue({
       data: {
         took: 17,
         timed_out: false,

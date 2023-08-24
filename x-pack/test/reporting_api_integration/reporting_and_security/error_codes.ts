@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants/routes';
 import { ReportApiJSON } from '@kbn/reporting-plugin/common/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -15,8 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/156902
-  describe.skip('Reporting error codes', () => {
+  describe('Reporting error codes', () => {
     it('places error_code in report output', async () => {
       await reportingAPI.initEcommerce();
 
@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
 
       const jobInfo = await supertest
-        .get('/api/reporting/jobs/info/kraz4j94154g0763b583rc37')
+        .get(INTERNAL_ROUTES.JOBS.INFO_PREFIX + '/kraz4j94154g0763b583rc37')
         .auth('test_user', 'changeme');
 
       expect(jobInfo.body.output.warnings).to.eql([

@@ -16,17 +16,20 @@ import {
   FilteringValidationState,
   IngestPipelineParams,
 } from '../../common/types/connectors';
+import { stripSearchPrefix } from '../../common/utils/strip_search_prefix';
 
 export function createConnectorDocument({
   indexName,
   isNative,
+  name,
   pipeline,
   serviceType,
   language,
 }: {
-  indexName: string;
+  indexName: string | null;
   isNative: boolean;
   language: string | null;
+  name?: string;
   pipeline?: IngestPipelineParams | null;
   serviceType: string | null;
 }): ConnectorDocument {
@@ -114,14 +117,22 @@ export function createConnectorDocument({
     index_name: indexName,
     is_native: isNative,
     language,
+    last_access_control_sync_error: null,
+    last_access_control_sync_scheduled_at: null,
+    last_access_control_sync_status: null,
+    last_incremental_sync_scheduled_at: null,
     last_seen: null,
     last_sync_error: null,
     last_sync_scheduled_at: null,
     last_sync_status: null,
     last_synced: null,
-    name: indexName.startsWith('search-') ? indexName.substring(7) : indexName,
+    name: name || stripSearchPrefix(indexName ?? ''),
     pipeline,
-    scheduling: { enabled: false, interval: '0 0 0 * * ?' },
+    scheduling: {
+      access_control: { enabled: false, interval: '0 0 0 * * ?' },
+      full: { enabled: false, interval: '0 0 0 * * ?' },
+      incremental: { enabled: false, interval: '0 0 0 * * ?' },
+    },
     service_type: serviceType || null,
     status: ConnectorStatus.CREATED,
     sync_now: false,

@@ -81,7 +81,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   let throughputMetricValues: Awaited<ReturnType<typeof getThroughputValues>>;
   let throughputTransactionValues: Awaited<ReturnType<typeof getThroughputValues>>;
 
-  registry.when('Service maps APIs', { config: 'trial', archives: [] }, () => {
+  registry.when('Service Maps APIs', { config: 'trial', archives: [] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_RATE = 80;
       const GO_DEV_RATE = 20;

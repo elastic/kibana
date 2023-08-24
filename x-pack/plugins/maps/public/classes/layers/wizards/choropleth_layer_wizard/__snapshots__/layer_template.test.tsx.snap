@@ -94,8 +94,8 @@ exports[`should render elasticsearch UI when left source is BOUNDARIES_SOURCE.EL
       />
     </EuiFormRow>
     <GeoIndexPatternSelect
+      dataView={null}
       onChange={[Function]}
-      value=""
     />
   </EuiPanel>
   <EuiSpacer

@@ -11,6 +11,7 @@ import { Filter, buildPhrasesFilter, buildPhraseFilter } from '@kbn/es-query';
 import { FilterItem } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ObservabilityAppServices } from '../../../application/types';
 
 export function buildFilterLabel({
   field,
@@ -76,8 +77,8 @@ export function FilterValueLabel({
   const filter = buildFilterLabel({ field, value, label, dataView, negate });
 
   const {
-    services: { uiSettings },
-  } = useKibana();
+    services: { uiSettings, docLinks },
+  } = useKibana<ObservabilityAppServices>();
 
   return dataView ? (
     <FilterItemI18n
@@ -92,7 +93,8 @@ export function FilterValueLabel({
           invertFilter({ field, value, negate });
         }
       }}
-      uiSettings={uiSettings!}
+      uiSettings={uiSettings}
+      docLinks={docLinks}
       hiddenPanelOptions={[
         ...(allowExclusion ? [] : ['negateFilter' as const]),
         'pinFilter',

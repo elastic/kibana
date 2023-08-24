@@ -15,7 +15,7 @@ export type PLATFORM_TYPE =
   | 'rpm'
   | 'deb'
   | 'kubernetes'
-  | 'cloudFormation';
+  | 'googleCloudShell';
 
 export const REDUCED_PLATFORM_OPTIONS: Array<{
   label: string;
@@ -59,14 +59,6 @@ export const REDUCED_PLATFORM_OPTIONS: Array<{
   },
 ];
 
-export const CLOUD_FORMATION_PLATFORM_OPTION = {
-  id: 'cloudFormation',
-  label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.cloudFormation', {
-    defaultMessage: 'CloudFormation',
-  }),
-  'data-test-subj': 'platformTypeCloudFormation',
-};
-
 export const PLATFORM_OPTIONS = [
   ...REDUCED_PLATFORM_OPTIONS,
   {
@@ -75,6 +67,17 @@ export const PLATFORM_OPTIONS = [
       defaultMessage: 'Kubernetes',
     }),
     'data-test-subj': 'platformTypeKubernetes',
+  },
+];
+
+export const PLATFORM_OPTIONS_CLOUD_SHELL = [
+  ...PLATFORM_OPTIONS,
+  {
+    id: 'googleCloudShell',
+    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.googleCloudShell', {
+      defaultMessage: 'Google Cloud Shell Script',
+    }),
+    'data-test-subj': 'platformTypeGoogleCloudShellScript',
   },
 ];
 

@@ -7,6 +7,7 @@
 
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   GroupByEntry,
@@ -225,6 +226,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function () {
+        before(async () => {
+          // Add explicit mapping for destination index https://github.com/elastic/elasticsearch/issues/67148
+          if (testData.type === 'latest') {
+            const destIndexMappings: MappingTypeMapping = {
+              properties: {
+                products: {
+                  properties: {
+                    base_price: {
+                      type: 'float',
+                    },
+                  },
+                },
+              },
+            };
+
+            await transform.api.createIndices(testData.destinationIndex, {
+              mappings: destIndexMappings,
+            });
+          }
+        });
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
           await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);

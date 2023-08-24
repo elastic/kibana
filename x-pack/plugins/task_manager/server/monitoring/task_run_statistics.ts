@@ -10,7 +10,7 @@ import { filter, startWith, map } from 'rxjs/operators';
 import { JsonObject, JsonValue } from '@kbn/utility-types';
 import { isNumber, mapValues } from 'lodash';
 import { Logger } from '@kbn/core/server';
-import { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
+import { AggregatedStatProvider, AggregatedStat } from '../lib/runtime_statistics_aggregator';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import {
   isTaskRunEvent,
@@ -433,11 +433,11 @@ function getHealthStatus(
 ): HealthStatus {
   if (resultFrequencySummary.Failed > executionErrorThreshold.warn_threshold) {
     if (resultFrequencySummary.Failed > executionErrorThreshold.error_threshold) {
-      logger.warn(
+      logger.debug(
         `Health Status error threshold has been exceeded, resultFrequencySummary.Failed (${resultFrequencySummary.Failed}) is greater than error_threshold (${executionErrorThreshold.error_threshold})`
       );
     } else {
-      logger.warn(
+      logger.debug(
         `Health Status warn threshold has been exceeded, resultFrequencySummary.Failed (${resultFrequencySummary.Failed}) is greater than warn_threshold (${executionErrorThreshold.warn_threshold})`
       );
     }

@@ -18,7 +18,7 @@ import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useCapabilities } from '../../../common/lib/kibana';
 import { DashboardViewPromptState } from '../../hooks/use_dashboard_view_prompt_state';
-import { DashboardRenderer } from '../../../common/components/dashboards/dashboard_renderer';
+import { DashboardRenderer } from '../../components/dashboard_renderer';
 import { StatusPrompt } from '../../components/status_prompt';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';

@@ -38,12 +38,14 @@ import { urlForwardingServiceFactory } from './url_forwarding/url_forwarding_ser
 import { visualizationsServiceFactory } from './visualizations/visualizations_service';
 import { usageCollectionServiceFactory } from './usage_collection/usage_collection_service';
 import { analyticsServiceFactory } from './analytics/analytics_service';
-import { dashboardSavedObjectServiceFactory } from './dashboard_saved_object/dashboard_saved_object_service';
 import { customBrandingServiceFactory } from './custom_branding/custom_branding_service';
 import { savedObjectsManagementServiceFactory } from './saved_objects_management/saved_objects_management_service';
+import { dashboardContentManagementServiceFactory } from './dashboard_content_management/dashboard_content_management_service';
+import { contentManagementServiceFactory } from './content_management/content_management_service';
+import { serverlessServiceFactory } from './serverless/serverless_service';
 
 const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
-  dashboardSavedObject: new PluginServiceProvider(dashboardSavedObjectServiceFactory, [
+  dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory, [
     'dashboardSessionStorage',
     'savedObjectsTagging',
     'initializerContext',
@@ -82,6 +84,8 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   visualizations: new PluginServiceProvider(visualizationsServiceFactory),
   customBranding: new PluginServiceProvider(customBrandingServiceFactory),
   savedObjectsManagement: new PluginServiceProvider(savedObjectsManagementServiceFactory),
+  contentManagement: new PluginServiceProvider(contentManagementServiceFactory),
+  serverless: new PluginServiceProvider(serverlessServiceFactory),
 };
 
 export const pluginServices = new PluginServices<DashboardServices>();

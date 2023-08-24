@@ -12,16 +12,19 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { formatFieldValue } from '../../../utils/format_value';
+import type {
+  DataTableRecord,
+  EsHitRecord,
+  ShouldShowFieldInTableHandler,
+} from '@kbn/discover-utils/types';
+import { formatFieldValue } from '@kbn/discover-utils';
+import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '@kbn/discover-utils';
 import { DocViewRenderProps } from '../../../services/doc_views/doc_views_types';
 import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../utils/row_formatter';
 import { DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
-import { DataTableRecord, EsHitRecord } from '../../../types';
 import { TableRowDetails } from './table_row_details';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
-import { type ShouldShowFieldInTableHandler } from '../../../utils/get_should_show_field_handler';
 
 export type DocTableRow = EsHitRecord & {
   isAnchor?: boolean;
@@ -31,8 +34,10 @@ export interface TableRowProps {
   columns: string[];
   filter: DocViewFilterFn;
   filters?: Filter[];
+  isPlainRecord?: boolean;
   savedSearchId?: string;
   row: DataTableRecord;
+  rows: DataTableRecord[];
   dataView: DataView;
   useNewFieldsApi: boolean;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
@@ -43,10 +48,12 @@ export interface TableRowProps {
 
 export const TableRow = ({
   filters,
+  isPlainRecord,
   columns,
   filter,
   savedSearchId,
   row,
+  rows,
   dataView,
   useNewFieldsApi,
   shouldShowFieldHandler,
@@ -212,6 +219,7 @@ export const TableRow = ({
             columns={columns}
             filters={filters}
             savedSearchId={savedSearchId}
+            isPlainRecord={isPlainRecord}
           >
             <DocViewer
               columns={columns}
@@ -220,6 +228,7 @@ export const TableRow = ({
               dataView={dataView}
               onAddColumn={onAddColumn}
               onRemoveColumn={onRemoveColumn}
+              textBasedHits={isPlainRecord ? rows : undefined}
             />
           </TableRowDetails>
         )}

@@ -6,7 +6,7 @@
  */
 
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { useEsSearch } from '@kbn/observability-plugin/public';
+import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
 import { Ping } from '../../../../common/runtime_types';
 

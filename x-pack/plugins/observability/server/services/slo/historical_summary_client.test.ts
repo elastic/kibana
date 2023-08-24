@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import moment from 'moment';
 import { oneMinute, oneMonth, thirtyDays } from './fixtures/duration';
 import { createSLO } from './fixtures/slo';
@@ -138,37 +139,40 @@ describe('FetchHistoricalSummary', () => {
   describe('Rolling and Occurrences SLOs', () => {
     it('returns the summary', async () => {
       const slo = createSLO({
-        timeWindow: { isRolling: true, duration: thirtyDays() },
+        timeWindow: { type: 'rolling', duration: thirtyDays() },
         objective: { target: 0.95 },
+        groupBy: ALL_VALUE,
       });
       esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(30));
       const client = new DefaultHistoricalSummaryClient(esClientMock);
 
-      const results = await client.fetch([slo]);
-      results[slo.id].forEach((dailyResult) =>
+      const results = await client.fetch([{ slo, sloId: slo.id, instanceId: ALL_VALUE }]);
+
+      results[0].data.forEach((dailyResult) =>
         expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
       );
 
-      expect(results[slo.id]).toHaveLength(180);
+      expect(results[0].data).toHaveLength(180);
     });
   });
 
   describe('Rolling and Timeslices SLOs', () => {
     it('returns the summary', async () => {
       const slo = createSLO({
-        timeWindow: { isRolling: true, duration: thirtyDays() },
+        timeWindow: { type: 'rolling', duration: thirtyDays() },
         budgetingMethod: 'timeslices',
         objective: { target: 0.95, timesliceTarget: 0.9, timesliceWindow: oneMinute() },
+        groupBy: ALL_VALUE,
       });
       esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(30));
       const client = new DefaultHistoricalSummaryClient(esClientMock);
 
-      const results = await client.fetch([slo]);
+      const results = await client.fetch([{ slo, sloId: slo.id, instanceId: ALL_VALUE }]);
 
-      results[slo.id].forEach((dailyResult) =>
+      results[0].data.forEach((dailyResult) =>
         expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
       );
-      expect(results[slo.id]).toHaveLength(180);
+      expect(results[0].data).toHaveLength(180);
     });
   });
 
@@ -177,7 +181,7 @@ describe('FetchHistoricalSummary', () => {
       const slo = createSLO({
         timeWindow: {
           duration: oneMonth(),
-          calendar: { startTime: new Date('2023-01-01T00:00:00.000Z') },
+          type: 'calendarAligned',
         },
         budgetingMethod: 'timeslices',
         objective: { target: 0.95, timesliceTarget: 0.9, timesliceWindow: oneMinute() },
@@ -185,13 +189,12 @@ describe('FetchHistoricalSummary', () => {
       esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForMonthlyCalendarAlignedSLO());
       const client = new DefaultHistoricalSummaryClient(esClientMock);
 
-      const results = await client.fetch([slo]);
+      const results = await client.fetch([{ slo, sloId: slo.id, instanceId: ALL_VALUE }]);
 
-      results[slo.id].forEach((dailyResult) =>
+      results[0].data.forEach((dailyResult) =>
         expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
       );
-
-      expect(results[slo.id]).toHaveLength(108);
+      expect(results[0].data).toHaveLength(108);
     });
   });
 
@@ -200,7 +203,7 @@ describe('FetchHistoricalSummary', () => {
       const slo = createSLO({
         timeWindow: {
           duration: oneMonth(),
-          calendar: { startTime: new Date('2023-01-01T00:00:00.000Z') },
+          type: 'calendarAligned',
         },
         budgetingMethod: 'occurrences',
         objective: { target: 0.95 },
@@ -208,13 +211,35 @@ describe('FetchHistoricalSummary', () => {
       esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForMonthlyCalendarAlignedSLO());
       const client = new DefaultHistoricalSummaryClient(esClientMock);
 
-      const results = await client.fetch([slo]);
+      const results = await client.fetch([{ slo, sloId: slo.id, instanceId: ALL_VALUE }]);
 
-      results[slo.id].forEach((dailyResult) =>
+      results[0].data.forEach((dailyResult) =>
         expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
       );
 
-      expect(results[slo.id]).toHaveLength(108);
+      expect(results[0].data).toHaveLength(108);
     });
+  });
+
+  it("filters with the 'instanceId' when provided", async () => {
+    const slo = createSLO({
+      timeWindow: { type: 'rolling', duration: thirtyDays() },
+      objective: { target: 0.95 },
+      groupBy: 'host',
+    });
+    esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(30));
+    const client = new DefaultHistoricalSummaryClient(esClientMock);
+
+    const results = await client.fetch([{ slo, sloId: slo.id, instanceId: 'host-abc' }]);
+
+    expect(
+      // @ts-ignore
+      esClientMock.msearch.mock.calls[0][0].searches[1].query.bool.filter[3]
+    ).toEqual({ term: { 'slo.instanceId': 'host-abc' } });
+
+    results[0].data.forEach((dailyResult) =>
+      expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
+    );
+    expect(results[0].data).toHaveLength(180);
   });
 });

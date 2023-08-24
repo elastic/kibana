@@ -22,7 +22,7 @@ import type { GetTimeFieldRangeResponse } from './types';
  */
 export type SetFullTimeRangeApiPath =
   | '/internal/file_upload/time_field_range'
-  | '/api/ml/fields_service/time_field_range';
+  | '/internal/ml/fields_service/time_field_range';
 
 /**
  * Determines the full available time range of the given Data View and updates

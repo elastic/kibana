@@ -8,14 +8,14 @@
 import expect from 'expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
   createRule,
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleOutput,
   getWebHookAction,
@@ -27,6 +27,7 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('export_rules', () => {
     describe('exporting rules', () => {
@@ -35,7 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -741,5 +742,6 @@ function expectToMatchRuleSchema(obj: RuleResponse): void {
     index: expect.arrayContaining([]),
     query: expect.any(String),
     actions: expect.arrayContaining([]),
+    investigation_fields: expect.arrayContaining([]),
   });
 }

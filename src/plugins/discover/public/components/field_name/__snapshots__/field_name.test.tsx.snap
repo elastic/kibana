@@ -197,7 +197,7 @@ Array [
       >
         <span>
           <mark
-            class="euiMark emotion-euiMarkStyles-EuiMark"
+            class="euiMark emotion-euiMark-hasScreenReaderHelpText"
           >
             te
           </mark>

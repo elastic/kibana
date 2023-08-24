@@ -13,9 +13,10 @@ import { monaco } from '@kbn/monaco';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { JSONCodeEditorCommonMemoized } from '../../../../components/json_code_editor/json_code_editor_common';
-import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
 import { useEsDocSearch } from '../../../../hooks/use_es_doc_search';
 import { ElasticRequestState } from '../../../../application/doc/types';
 import { getHeight } from './get_height';
@@ -24,6 +25,7 @@ interface SourceViewerProps {
   id: string;
   index: string;
   dataView: DataView;
+  textBasedHits?: DataTableRecord[];
   hasLineNumbers: boolean;
   width?: number;
 }
@@ -40,6 +42,7 @@ export const DocViewerSource = ({
   dataView,
   width,
   hasLineNumbers,
+  textBasedHits,
 }: SourceViewerProps) => {
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
   const [editorHeight, setEditorHeight] = useState<number>();
@@ -52,6 +55,7 @@ export const DocViewerSource = ({
     index,
     dataView,
     requestSource: useNewFieldsApi,
+    textBasedHits,
   });
 
   useEffect(() => {

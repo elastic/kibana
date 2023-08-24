@@ -5,94 +5,112 @@
  * 2.0.
  */
 
-import { MsearchMultisearchBody } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { occurrencesBudgetingMethodSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
+import {
+  ALL_VALUE,
+  calendarAlignedTimeWindowSchema,
+  Duration,
+  occurrencesBudgetingMethodSchema,
+  timeslicesBudgetingMethodSchema,
+  toMomentUnitOfTime,
+} from '@kbn/slo-schema';
+import moment from 'moment';
+import { SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
+import { DateRange, SLO, Summary } from '../../domain/models';
+import { computeSLI, computeSummaryStatus, toErrorBudget } from '../../domain/services';
 import { toDateRange } from '../../domain/services/date_range';
-import { DateRange, SLO, SLOId, Summary } from '../../domain/models';
-import { computeErrorBudget, computeSLI, computeSummaryStatus } from '../../domain/services';
 
 export interface SummaryClient {
-  fetchSummary(sloList: SLO[]): Promise<Record<SLOId, Summary>>;
+  computeSummary(slo: SLO, instanceId?: string): Promise<Summary>;
 }
 
 export class DefaultSummaryClient implements SummaryClient {
   constructor(private esClient: ElasticsearchClient) {}
 
-  async fetchSummary(sloList: SLO[]): Promise<Record<SLOId, Summary>> {
-    const dateRangeBySlo: Record<SLOId, DateRange> = sloList.reduce(
-      (acc, slo) => ({ [slo.id]: toDateRange(slo.timeWindow), ...acc }),
-      {}
-    );
-    const searches = sloList.flatMap((slo) => [
-      { index: `${SLO_DESTINATION_INDEX_NAME}*` },
-      generateSearchQuery(slo, dateRangeBySlo[slo.id]),
-    ]);
+  async computeSummary(slo: SLO, instanceId: string = ALL_VALUE): Promise<Summary> {
+    const dateRange = toDateRange(slo.timeWindow);
+    const isDefinedWithGroupBy = slo.groupBy !== ALL_VALUE;
+    const hasInstanceId = instanceId !== ALL_VALUE;
+    const extraInstanceIdFilter =
+      isDefinedWithGroupBy && hasInstanceId ? [{ term: { 'slo.instanceId': instanceId } }] : [];
 
-    const summaryBySlo: Record<SLOId, Summary> = {};
-    if (searches.length === 0) {
-      return summaryBySlo;
+    const result = await this.esClient.search({
+      index: SLO_DESTINATION_INDEX_PATTERN,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { term: { 'slo.id': slo.id } },
+            { term: { 'slo.revision': slo.revision } },
+            {
+              range: {
+                '@timestamp': { gte: dateRange.from.toISOString(), lt: dateRange.to.toISOString() },
+              },
+            },
+            ...extraInstanceIdFilter,
+          ],
+        },
+      },
+      ...(occurrencesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+        aggs: {
+          good: { sum: { field: 'slo.numerator' } },
+          total: { sum: { field: 'slo.denominator' } },
+        },
+      }),
+      ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+        aggs: {
+          good: {
+            sum: { field: 'slo.isGoodSlice' },
+          },
+          total: {
+            value_count: { field: 'slo.isGoodSlice' },
+          },
+        },
+      }),
+    });
+
+    // @ts-ignore value is not type correctly
+    const good = result.aggregations?.good?.value ?? 0;
+    // @ts-ignore value is not type correctly
+    const total = result.aggregations?.total?.value ?? 0;
+
+    const sliValue = computeSLI(good, total);
+    const initialErrorBudget = 1 - slo.objective.target;
+    let errorBudget;
+
+    if (
+      calendarAlignedTimeWindowSchema.is(slo.timeWindow) &&
+      timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
+    ) {
+      const totalSlices = computeTotalSlicesFromDateRange(
+        dateRange,
+        slo.objective.timesliceWindow!
+      );
+      const consumedErrorBudget =
+        sliValue < 0 ? 0 : (total - good) / (totalSlices * initialErrorBudget);
+
+      errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget);
+    } else {
+      const consumedErrorBudget = sliValue < 0 ? 0 : (1 - sliValue) / initialErrorBudget;
+      errorBudget = toErrorBudget(
+        initialErrorBudget,
+        consumedErrorBudget,
+        calendarAlignedTimeWindowSchema.is(slo.timeWindow)
+      );
     }
 
-    const result = await this.esClient.msearch({ searches });
-
-    for (let i = 0; i < result.responses.length; i++) {
-      const slo = sloList[i];
-
-      // @ts-ignore
-      const { aggregations = {} } = result.responses[i];
-      const good = aggregations?.good?.value ?? 0;
-      const total = aggregations?.total?.value ?? 0;
-
-      const sliValue = computeSLI({ good, total });
-      const errorBudget = computeErrorBudget(slo, {
-        dateRange: dateRangeBySlo[slo.id],
-        good,
-        total,
-      });
-      summaryBySlo[slo.id] = {
-        sliValue,
-        errorBudget,
-        status: computeSummaryStatus(slo, sliValue, errorBudget),
-      };
-    }
-
-    return summaryBySlo;
+    return {
+      sliValue,
+      errorBudget,
+      status: computeSummaryStatus(slo, sliValue, errorBudget),
+    };
   }
 }
 
-function generateSearchQuery(slo: SLO, dateRange: DateRange): MsearchMultisearchBody {
-  return {
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          { term: { 'slo.id': slo.id } },
-          { term: { 'slo.revision': slo.revision } },
-          {
-            range: {
-              '@timestamp': { gte: dateRange.from.toISOString(), lt: dateRange.to.toISOString() },
-            },
-          },
-        ],
-      },
-    },
-    ...(occurrencesBudgetingMethodSchema.is(slo.budgetingMethod) && {
-      aggs: {
-        good: { sum: { field: 'slo.numerator' } },
-        total: { sum: { field: 'slo.denominator' } },
-      },
-    }),
-    ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
-      aggs: {
-        good: {
-          sum: { field: 'slo.isGoodSlice' },
-        },
-        total: {
-          value_count: { field: 'slo.isGoodSlice' },
-        },
-      },
-    }),
-  };
+function computeTotalSlicesFromDateRange(dateRange: DateRange, timesliceWindow: Duration) {
+  const dateRangeDurationInUnit = moment(dateRange.to).diff(
+    dateRange.from,
+    toMomentUnitOfTime(timesliceWindow.unit)
+  );
+  return Math.ceil(dateRangeDurationInUnit / timesliceWindow!.value);
 }

@@ -11,6 +11,15 @@ jest.mock('../../components/vector_style_editor', () => ({
   },
 }));
 
+jest.mock('../../components/legend/size', () => ({
+  MarkerSizeLegend: () => {
+    return <div>mockMarkerSizeLegend</div>;
+  },
+  OrdinalLegend: () => {
+    return <div>mockMarkerSizeLegend</div>;
+  },
+}));
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
@@ -20,95 +29,37 @@ import { IField } from '../../../../fields/field';
 import { IVectorLayer } from '../../../../layers/vector_layer';
 
 describe('renderLegendDetailRow', () => {
-  test('Should render line width simple range', async () => {
-    const field = {
-      getLabel: async () => {
-        return 'foobar_label';
-      },
-      getName: () => {
-        return 'foodbar';
-      },
-      getOrigin: () => {
-        return FIELD_ORIGIN.SOURCE;
-      },
-      supportsFieldMetaFromEs: () => {
-        return true;
-      },
-      supportsFieldMetaFromLocalData: () => {
-        return true;
-      },
-    } as unknown as IField;
+  test('Should render ordinal legend for line width style property', () => {
     const sizeProp = new DynamicSizeProperty(
       { minSize: 0, maxSize: 10, fieldMetaOptions: { isEnabled: true } },
       VECTOR_STYLES.LINE_WIDTH,
-      field,
+      {} as unknown as IField,
       {} as unknown as IVectorLayer,
       () => {
         return (value: RawValue) => value + '_format';
       },
       false
     );
-    sizeProp.getRangeFieldMeta = () => {
-      return {
-        min: 0,
-        max: 100,
-        delta: 100,
-      };
-    };
 
     const legendRow = sizeProp.renderLegendDetailRow();
     const component = shallow(legendRow);
-
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
     expect(component).toMatchSnapshot();
   });
 
-  test('Should render icon size scale', async () => {
-    const field = {
-      getLabel: async () => {
-        return 'foobar_label';
-      },
-      getName: () => {
-        return 'foodbar';
-      },
-      getOrigin: () => {
-        return FIELD_ORIGIN.SOURCE;
-      },
-      supportsFieldMetaFromEs: () => {
-        return true;
-      },
-      supportsFieldMetaFromLocalData: () => {
-        return true;
-      },
-    } as unknown as IField;
+  test('Should render marker size legend for icon size property', () => {
     const sizeProp = new DynamicSizeProperty(
       { minSize: 0, maxSize: 10, fieldMetaOptions: { isEnabled: true } },
       VECTOR_STYLES.ICON_SIZE,
-      field,
+      {} as unknown as IField,
       {} as unknown as IVectorLayer,
       () => {
         return (value: RawValue) => value + '_format';
       },
       false
     );
-    sizeProp.getRangeFieldMeta = () => {
-      return {
-        min: 0,
-        max: 100,
-        delta: 100,
-      };
-    };
 
     const legendRow = sizeProp.renderLegendDetailRow();
     const component = shallow(legendRow);
-
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
     expect(component).toMatchSnapshot();
   });
 });

@@ -136,6 +136,7 @@ export default function (providerContext: FtrProviderContext) {
         resPackage.body.component_templates[0].component_template.template.mappings.properties
       ).eql({
         '@timestamp': {
+          ignore_malformed: false,
           type: 'date',
         },
         test_logs2: {
@@ -222,6 +223,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'reference2',
           },
           mapping: {
+            ignore_malformed: `true`,
             total_fields: {
               limit: '10000',
             },
@@ -235,6 +237,7 @@ export default function (providerContext: FtrProviderContext) {
         dynamic: true,
         properties: {
           '@timestamp': {
+            ignore_malformed: false,
             type: 'date',
           },
           data_stream: {
@@ -301,6 +304,7 @@ export default function (providerContext: FtrProviderContext) {
         resPackage.body.component_templates[0].component_template.template.mappings.properties
       ).eql({
         '@timestamp': {
+          ignore_malformed: false,
           type: 'date',
         },
         metrics_test_name2: {

@@ -6,26 +6,39 @@
  */
 
 import {
+  EuiBadge,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
+  EuiPagination,
   EuiPanel,
+  EuiSkeletonText,
   EuiSpacer,
   EuiTab,
   EuiTabs,
   EuiTitle,
   EuiToolTip,
-  EuiEmptyPrompt,
-  EuiPagination,
-  EuiLoadingContent,
-  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
+import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin/public';
 import { first } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import useAsync from 'react-use/lib/useAsync';
+import { ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
+import { TraceSearchType } from '../../../../../common/trace_explorer';
+import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
+import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
 import { DiscoverErrorLink } from '../../../shared/links/discover_links/discover_error_link';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
@@ -35,24 +48,13 @@ import { Summary } from '../../../shared/summary';
 import { HttpInfoSummaryItem } from '../../../shared/summary/http_info_summary_item';
 import { UserAgentSummaryItem } from '../../../shared/summary/user_agent_summary_item';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
-import {
-  ErrorTab,
-  exceptionStacktraceTab,
-  getTabs,
-  logStacktraceTab,
-} from './error_tabs';
-import { ExceptionStacktrace } from './exception_stacktrace';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
-import { TraceSearchType } from '../../../../../common/trace_explorer';
+import { PlaintextStacktrace } from './plaintext_stacktrace';
 import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
-import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';
-import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
-import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { ErrorTab, ErrorTabKey, getTabs } from './error_tabs';
+import { ErrorUiActionsContextMenu } from './error_ui_actions_context_menu';
+import { ExceptionStacktrace } from './exception_stacktrace';
 import { SampleSummary } from './sample_summary';
+import { ErrorSampleContextualInsight } from './error_sample_contextual_insight';
 
 const TransactionLinkName = euiStyled.div`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
@@ -91,6 +93,8 @@ export function ErrorSampleDetails({
     urlParams: { detailTab, offset, comparisonEnabled },
   } = useLegacyUrlParams();
 
+  const { uiActions } = useApmPluginContext();
+
   const router = useApmRouter();
 
   const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
@@ -121,6 +125,17 @@ export function ErrorSampleDetails({
   };
 
   const { error, transaction } = errorData;
+
+  const externalContextMenuItems = useAsync(() => {
+    return getContextMenuItemsFromActions({
+      uiActions,
+      triggerId: ObservabilityTriggerId.ApmErrorContextMenu,
+      context: {
+        error,
+        transaction,
+      },
+    });
+  }, [error, transaction, uiActions]);
 
   if (!error && errorSampleIds?.length === 0 && isSucceded) {
     return (
@@ -207,6 +222,9 @@ export function ErrorSampleDetails({
             </EuiLink>
           </EuiFlexItem>
         )}
+        {externalContextMenuItems.value?.length ? (
+          <ErrorUiActionsContextMenu items={externalContextMenuItems.value} />
+        ) : undefined}
         <EuiFlexItem grow={false}>
           <DiscoverErrorLink error={error} kuery={kuery}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -231,7 +249,7 @@ export function ErrorSampleDetails({
       {isLoading ? (
         <EuiFlexItem grow={false}>
           <EuiSpacer size="s" />
-          <EuiLoadingContent lines={2} data-test-sub="loading-content" />
+          <EuiSkeletonText lines={2} data-test-sub="loading-content" />
         </EuiFlexItem>
       ) : (
         <Summary
@@ -313,11 +331,13 @@ export function ErrorSampleDetails({
       {isLoading ? (
         <EuiFlexItem grow={false}>
           <EuiSpacer size="s" />
-          <EuiLoadingContent lines={3} data-test-sub="loading-content" />
+          <EuiSkeletonText lines={3} data-test-sub="loading-content" />
         </EuiFlexItem>
       ) : (
         <SampleSummary error={error} />
       )}
+
+      <ErrorSampleContextualInsight error={error} transaction={transaction} />
 
       <EuiTabs>
         {tabs.map(({ key, label }) => {
@@ -342,15 +362,15 @@ export function ErrorSampleDetails({
       </EuiTabs>
       <EuiSpacer />
       {isLoading || !error ? (
-        <EuiLoadingContent lines={3} data-test-sub="loading-content" />
+        <EuiSkeletonText lines={3} data-test-sub="loading-content" />
       ) : (
-        <TabContent error={error} currentTab={currentTab} />
+        <ErrorSampleDetailTabContent error={error} currentTab={currentTab} />
       )}
     </EuiPanel>
   );
 }
 
-function TabContent({
+export function ErrorSampleDetailTabContent({
   error,
   currentTab,
 }: {
@@ -360,14 +380,24 @@ function TabContent({
   const codeLanguage = error?.service.language?.name;
   const exceptions = error?.error.exception || [];
   const logStackframes = error?.error.log?.stacktrace;
-
+  const isPlaintextException =
+    !!error?.error.stack_trace &&
+    exceptions.length === 1 &&
+    !exceptions[0].stacktrace;
   switch (currentTab.key) {
-    case logStacktraceTab.key:
+    case ErrorTabKey.LogStackTrace:
       return (
         <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />
       );
-    case exceptionStacktraceTab.key:
-      return (
+    case ErrorTabKey.ExceptionStacktrace:
+      return isPlaintextException ? (
+        <PlaintextStacktrace
+          message={exceptions[0].message}
+          type={exceptions[0].type}
+          stacktrace={error?.error.stack_trace}
+          codeLanguage={codeLanguage}
+        />
+      ) : (
         <ExceptionStacktrace
           codeLanguage={codeLanguage}
           exceptions={exceptions}

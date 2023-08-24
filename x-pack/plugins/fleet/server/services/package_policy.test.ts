@@ -172,6 +172,7 @@ jest.mock('./epm/packages', () => {
   return {
     getPackageInfo: jest.fn().mockImplementation(mockedGetPackageInfo),
     getInstallation: mockedGetInstallation,
+    ensureInstalledPackage: jest.fn(),
   };
 });
 
@@ -214,6 +215,7 @@ const mockAgentPolicyGet = () => {
         updated_at: new Date().toISOString(),
         updated_by: 'test',
         revision: 1,
+        is_protected: false,
       });
     }
   );
@@ -255,6 +257,11 @@ describe('Package policy service', () => {
           enabled: true,
           policy_id: 'test',
           inputs: [],
+          package: {
+            name: 'test',
+            title: 'Test',
+            version: '0.0.1',
+          },
         },
         // Skipping unique name verification just means we have to less mocking/setup
         { id: 'test-package-policy', skipUniqueNameVerification: true }
@@ -264,6 +271,54 @@ describe('Package policy service', () => {
         action: 'create',
         id: 'test-package-policy',
         savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    });
+  });
+
+  describe('inspect', () => {
+    it('should return compiled inputs', async () => {
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'test-package-policy',
+        attributes: {},
+        references: [],
+        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      mockAgentPolicyGet();
+
+      const policyResult = await packagePolicyService.inspect(
+        soClient,
+        {
+          id: 'b684f590-feeb-11ed-b202-b7f403f1dee9',
+          name: 'Test Package Policy',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test',
+          inputs: [],
+          package: {
+            name: 'test',
+            title: 'Test',
+            version: '0.0.1',
+          },
+        }
+        // Skipping unique name verification just means we have to less mocking/setup
+      );
+
+      expect(policyResult).toEqual({
+        elasticsearch: undefined,
+        enabled: true,
+        inputs: [],
+        name: 'Test Package Policy',
+        namespace: 'test',
+        package: {
+          name: 'test',
+          title: 'Test',
+          version: '0.0.1',
+        },
+        policy_id: 'test',
+        id: 'b684f590-feeb-11ed-b202-b7f403f1dee9',
       });
     });
   });

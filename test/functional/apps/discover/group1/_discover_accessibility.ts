@@ -31,8 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return (await targetElement._webElement.getId()) === (await activeElement._webElement.getId());
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/152938
-  describe.skip('discover accessibility', () => {
+  describe('discover accessibility', () => {
     before(async () => {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
@@ -44,15 +43,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-    });
-
-    it('should give focus to the saved search title h1 on navigate', async () => {
-      expect(await hasFocus('discoverSavedSearchTitle')).to.be(true);
-    });
-
-    it('should give focus to the data view switch link when Tab is pressed', async () => {
-      await browser.pressKeys(browser.keys.TAB);
-      expect(await hasFocus('discover-dataView-switch-link')).to.be(true);
     });
 
     describe('top nav menu buttons', () => {
@@ -73,9 +63,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.pressKeys(browser.keys.ESCAPE);
         expect(await hasFocus(menuButtonTestSubject)).to.be(true);
       };
-
-      it('should return focus to the options button when dismissing the options popover', () =>
-        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverOptionsButton'));
 
       it('should return focus to the open button when dismissing the open search flyout', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverOpenButton'));

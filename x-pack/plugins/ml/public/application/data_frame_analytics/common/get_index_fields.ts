@@ -7,9 +7,8 @@
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
+import { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-
-import { getDefaultFieldsFromJobCaps, DataFrameAnalyticsConfig } from '.';
 
 export interface FieldTypes {
   [key: string]: ES_FIELD_TYPES;
@@ -19,13 +18,9 @@ export const getIndexFields = (
   jobConfig: DataFrameAnalyticsConfig | undefined,
   needsDestIndexFields: boolean
 ) => {
-  const { fields } = newJobCapsServiceAnalytics;
   if (jobConfig !== undefined) {
-    const { selectedFields: defaultSelected, docFields } = getDefaultFieldsFromJobCaps(
-      fields,
-      jobConfig,
-      needsDestIndexFields
-    );
+    const { selectedFields: defaultSelected, docFields } =
+      newJobCapsServiceAnalytics.getDefaultFields(jobConfig, needsDestIndexFields);
 
     const types: FieldTypes = {};
     const allFields: string[] = [];

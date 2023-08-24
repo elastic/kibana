@@ -9,7 +9,7 @@ import { InfraTelemetryEventTypes, InfraTelemetryEvent } from './types';
 const hostsViewQuerySubmittedEvent: InfraTelemetryEvent = {
   eventType: InfraTelemetryEventTypes.HOSTS_VIEW_QUERY_SUBMITTED,
   schema: {
-    control_filters: {
+    control_filter_fields: {
       type: 'array',
       items: {
         type: 'text',
@@ -19,7 +19,7 @@ const hostsViewQuerySubmittedEvent: InfraTelemetryEvent = {
         },
       },
     },
-    filters: {
+    filter_fields: {
       type: 'array',
       items: {
         type: 'text',
@@ -36,10 +36,17 @@ const hostsViewQuerySubmittedEvent: InfraTelemetryEvent = {
         optional: false,
       },
     },
-    query: {
-      type: 'text',
+    with_query: {
+      type: 'boolean',
       _meta: {
         description: 'KQL query search for hosts',
+        optional: false,
+      },
+    },
+    limit: {
+      type: 'integer',
+      _meta: {
+        description: 'Selected host limit',
         optional: false,
       },
     },
@@ -78,6 +85,7 @@ const hostFlyoutRemoveFilter: InfraTelemetryEvent = {
     },
   },
 };
+
 const hostFlyoutAddFilter: InfraTelemetryEvent = {
   eventType: InfraTelemetryEventTypes.HOST_FLYOUT_FILTER_ADDED,
   schema: {
@@ -91,9 +99,51 @@ const hostFlyoutAddFilter: InfraTelemetryEvent = {
   },
 };
 
+const hostViewTotalHostCountRetrieved: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.HOST_VIEW_TOTAL_HOST_COUNT_RETRIEVED,
+  schema: {
+    total: {
+      type: 'integer',
+      _meta: {
+        description: 'Total number of hosts retrieved.',
+        optional: false,
+      },
+    },
+  },
+};
+
+const assetDetailsFlyoutViewed: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.ASSET_DETAILS_FLYOUT_VIEWED,
+  schema: {
+    componentName: {
+      type: 'keyword',
+      _meta: {
+        description: 'Hostname for the clicked host.',
+        optional: false,
+      },
+    },
+    assetType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Cloud provider for the clicked host.',
+        optional: false,
+      },
+    },
+    tabId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Cloud provider for the clicked host.',
+        optional: true,
+      },
+    },
+  },
+};
+
 export const infraTelemetryEvents = [
+  assetDetailsFlyoutViewed,
   hostsViewQuerySubmittedEvent,
   hostsEntryClickedEvent,
   hostFlyoutRemoveFilter,
   hostFlyoutAddFilter,
+  hostViewTotalHostCountRetrieved,
 ];

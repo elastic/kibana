@@ -75,6 +75,7 @@ const ObservabilityApmAlertOptional = rt.partial({
   }),
   error: rt.partial({
     grouping_key: schemaString,
+    grouping_name: schemaString,
   }),
   kibana: rt.partial({
     alert: rt.partial({

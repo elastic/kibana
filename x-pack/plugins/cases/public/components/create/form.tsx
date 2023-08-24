@@ -17,13 +17,14 @@ import styled, { css } from 'styled-components';
 
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
+import type { ActionConnector } from '../../../common/types/domain';
+import type { CasePostRequest } from '../../../common/types/api';
 import { Title } from './title';
 import { Description, fieldName as descriptionFieldName } from './description';
 import { Tags } from './tags';
 import { Connector } from './connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
-import type { ActionConnector, CasePostRequest } from '../../../common/api';
 import type { CaseUI } from '../../containers/types';
 import type { CasesTimelineIntegration } from '../timeline_context';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
@@ -42,6 +43,7 @@ import { Severity } from './severity';
 import { Assignees } from './assignees';
 import { useCancelCreationAction } from './use_cancel_creation_action';
 import { CancelCreationConfirmationModal } from './cancel_creation_confirmation_modal';
+import { Category } from './category';
 
 interface ContainerProps {
   big?: boolean;
@@ -72,7 +74,7 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
   onSuccess: (theCase: CaseUI) => void;
   afterCaseCreated?: (
     theCase: CaseUI,
-    createAttachments: UseCreateAttachments['createAttachments']
+    createAttachments: UseCreateAttachments['mutate']
   ) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
   attachments?: CaseAttachmentsWithoutOwner;
@@ -84,9 +86,8 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
   ({ connectors, isLoadingConnectors, withSteps, owner, draftStorageKey }) => {
     const { isSubmitting } = useFormContext();
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
-
     const availableOwners = useAvailableCasesOwners();
-    const canShowCaseSolutionSelection = !owner.length && availableOwners.length;
+    const canShowCaseSolutionSelection = !owner.length && availableOwners.length > 1;
 
     const firstStep = useMemo(
       () => ({
@@ -101,6 +102,9 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
             ) : null}
             <Container>
               <Tags isLoading={isSubmitting} />
+            </Container>
+            <Container>
+              <Category isLoading={isSubmitting} />
             </Container>
             <Container>
               <Severity isLoading={isSubmitting} />

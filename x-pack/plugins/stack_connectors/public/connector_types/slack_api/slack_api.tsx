@@ -20,13 +20,14 @@ import type {
   SlackApiActionParams,
   SlackApiSecrets,
   PostMessageParams,
+  SlackApiConfig,
 } from '../../../common/slack_api/types';
 import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
 import { SlackActionParams } from '../types';
 import { subtype } from '../slack/slack';
 
 export const getConnectorType = (): ConnectorTypeModel<
-  unknown,
+  SlackApiConfig,
   SlackApiSecrets,
   PostMessageParams
 > => ({

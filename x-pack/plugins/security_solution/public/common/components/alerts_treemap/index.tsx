@@ -12,7 +12,7 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { useTheme } from '../charts/common';
+import { useThemes } from '../charts/common';
 import { DraggableLegend } from '../charts/draggable_legend';
 import type { LegendItem } from '../charts/draggable_legend_item';
 import type { AlertSearchResponse } from '../../../detections/containers/detection_engine/alerts/types';
@@ -59,22 +59,23 @@ const AlertsTreemapComponent: React.FC<Props> = ({
   stackByField0,
   stackByField1,
 }: Props) => {
-  const theme = useTheme();
-  const fillColor = useMemo(() => theme.background.color, [theme.background.color]);
+  const { theme, baseTheme } = useThemes();
+  const fillColor = useMemo(
+    () => theme?.background?.color ?? baseTheme.background.color,
+    [theme?.background?.color, baseTheme.background.color]
+  );
 
-  const treemapTheme: PartialTheme[] = useMemo(
-    () => [
-      {
-        partition: {
-          fillLabel: { valueFont: { fontWeight: 700 } },
-          idealFontSizeJump: 1.15,
-          maxFontSize: 16,
-          minFontSize: 4,
-          sectorLineStroke: fillColor, // draws the light or dark "lines" between partitions
-          sectorLineWidth: 1.5,
-        },
+  const treemapTheme: PartialTheme = useMemo(
+    () => ({
+      partition: {
+        fillLabel: { valueFont: { fontWeight: 700 } },
+        idealFontSizeJump: 1.15,
+        maxFontSize: 16,
+        minFontSize: 4,
+        sectorLineStroke: fillColor, // draws the light or dark "lines" between partitions
+        sectorLineWidth: 1.5,
       },
-    ],
+    }),
     [fillColor]
   );
 
@@ -173,9 +174,9 @@ const AlertsTreemapComponent: React.FC<Props> = ({
           ) : (
             <Chart>
               <Settings
-                baseTheme={theme}
+                baseTheme={baseTheme}
                 showLegend={false}
-                theme={treemapTheme}
+                theme={[treemapTheme, theme]}
                 onElementClick={onElementClick}
               />
               <Partition

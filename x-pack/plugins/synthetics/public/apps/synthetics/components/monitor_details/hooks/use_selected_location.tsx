@@ -7,12 +7,14 @@
 
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useSelectedMonitor } from './use_selected_monitor';
 import { selectSelectedLocationId, setMonitorDetailsLocationAction } from '../../../state';
 import { useUrlParams, useLocations } from '../../../hooks';
 
 export const useSelectedLocation = (updateUrl = true) => {
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { locations } = useLocations();
+  const { monitor } = useSelectedMonitor();
   const selectedLocationId = useSelector(selectSelectedLocationId);
   const dispatch = useDispatch();
 
@@ -20,16 +22,24 @@ export const useSelectedLocation = (updateUrl = true) => {
 
   useEffect(() => {
     if (!urlLocationId) {
-      const firstLocationId = locations?.[0]?.id;
-      if (firstLocationId && updateUrl) {
-        updateUrlParams({ locationId: firstLocationId }, true);
+      const monitorLocationId = monitor?.locations?.[0]?.id;
+      if (monitorLocationId && updateUrl) {
+        updateUrlParams({ locationId: monitorLocationId }, true);
       }
     }
 
     if (urlLocationId && selectedLocationId !== urlLocationId) {
       dispatch(setMonitorDetailsLocationAction(urlLocationId));
     }
-  }, [dispatch, updateUrlParams, locations, urlLocationId, selectedLocationId, updateUrl]);
+  }, [
+    dispatch,
+    updateUrlParams,
+    locations,
+    urlLocationId,
+    selectedLocationId,
+    updateUrl,
+    monitor?.locations,
+  ]);
 
   return useMemo(
     () => locations.find((loc) => loc.id === urlLocationId) ?? null,

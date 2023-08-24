@@ -12,6 +12,7 @@ import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, pagePathGetters } from '../../../../
 const EXCLUDED_PACKAGES = [
   'apm',
   'cloud_security_posture',
+  'cloud_defend',
   'dga',
   'fleet_server',
   'osquery_manager',

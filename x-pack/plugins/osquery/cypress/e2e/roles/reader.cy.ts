@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ROLE, login } from '../../tasks/login';
+import { tag } from '../../tags';
 import { navigateTo } from '../../tasks/navigation';
 import {
   cleanupPack,
@@ -14,8 +14,9 @@ import {
   loadPack,
   loadSavedQuery,
 } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../support/roles';
 
-describe('Reader - only READ', () => {
+describe('Reader - only READ', { tags: [tag.ESS] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
   let packName: string;
@@ -24,12 +25,12 @@ describe('Reader - only READ', () => {
 
   before(() => {
     loadPack().then((data) => {
-      packId = data.id;
-      packName = data.attributes.name;
+      packId = data.saved_object_id;
+      packName = data.name;
     });
     loadSavedQuery().then((data) => {
-      savedQueryId = data.id;
-      savedQueryName = data.attributes.id;
+      savedQueryId = data.saved_object_id;
+      savedQueryName = data.id;
     });
     loadLiveQuery().then((data) => {
       liveQueryQuery = data.queries?.[0].query;
@@ -37,7 +38,7 @@ describe('Reader - only READ', () => {
   });
 
   beforeEach(() => {
-    login(ROLE.reader);
+    cy.login(ServerlessRoleName.READER);
   });
 
   after(() => {
@@ -51,11 +52,11 @@ describe('Reader - only READ', () => {
     cy.contains(savedQueryName);
     cy.contains('Add saved query').should('be.disabled');
     cy.react('PlayButtonComponent', {
-      props: { savedQuery: { attributes: { id: savedQueryName } } },
+      props: { savedQuery: { id: savedQueryName } },
       options: { timeout: 3000 },
     }).should('not.exist');
     cy.react('CustomItemAction', {
-      props: { index: 1, item: { attributes: { id: savedQueryName } } },
+      props: { index: 1, item: { id: savedQueryName } },
     }).click();
     cy.react('EuiFormRow', { props: { label: 'ID' } })
       .getBySel('input')
@@ -90,7 +91,7 @@ describe('Reader - only READ', () => {
     cy.getBySel('tablePaginationPopoverButton').click();
     cy.getBySel('tablePagination-50-rows').click();
     cy.react('ActiveStateSwitchComponent', {
-      props: { item: { attributes: { name: packName } } },
+      props: { item: { name: packName } },
     })
       .find('button')
       .should('be.disabled');

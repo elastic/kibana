@@ -294,10 +294,21 @@
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-public.BaseVisType.hidden",
+            "id": "def-public.BaseVisType.disableCreate",
             "type": "boolean",
             "tags": [],
-            "label": "hidden",
+            "label": "disableCreate",
+            "description": [],
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.BaseVisType.disableEdit",
+            "type": "boolean",
+            "tags": [],
+            "label": "disableEdit",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false,
@@ -4508,6 +4519,34 @@
           },
           {
             "parentPluginId": "visualizations",
+            "id": "def-public.VisTypeAlias.disableCreate",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableCreate",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisTypeAlias.disableEdit",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableEdit",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
             "id": "def-public.VisTypeAlias.isDeprecated",
             "type": "CompoundType",
             "tags": [],
@@ -5402,10 +5441,24 @@
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-public.VisTypeDefinition.hidden",
+            "id": "def-public.VisTypeDefinition.disableCreate",
             "type": "CompoundType",
             "tags": [],
-            "label": "hidden",
+            "label": "disableCreate",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisTypeDefinition.disableEdit",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableEdit",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -6275,21 +6328,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-public.VISUALIZE_ENABLE_LABS_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "VISUALIZE_ENABLE_LABS_SETTING",
-        "description": [],
-        "signature": [
-          "\"visualize:enableLabs\""
-        ],
-        "path": "src/plugins/visualizations/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-public.VisualizeEmbeddableContract",
         "type": "Type",
         "tags": [],
@@ -6352,7 +6390,15 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          ">) => void; render: (domNode: HTMLElement) => Promise<void>; getFilters: () => Promise<",
+          ">) => void; openInspector: () => ",
+          {
+            "pluginId": "@kbn/core-mount-utils-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+            "section": "def-common.OverlayRef",
+            "text": "OverlayRef"
+          },
+          " | undefined; render: (domNode: HTMLElement) => Promise<void>; getFilters: () => Promise<",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -6383,14 +6429,6 @@
             "docId": "kibInspectorPluginApi",
             "section": "def-common.Adapters",
             "text": "Adapters"
-          },
-          " | undefined; openInspector: () => ",
-          {
-            "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-common.OverlayRef",
-            "text": "OverlayRef"
           },
           " | undefined; transferCustomizationsToUiState: () => void; hasInspector: () => boolean; onContainerLoading: () => void; onContainerData: () => void; onContainerRender: () => void; onContainerError: (error: ",
           {
@@ -6629,8 +6667,6 @@
             "section": "def-public.VisualizeEmbeddable",
             "text": "VisualizeEmbeddable"
           },
-          " | ",
-          "DisabledLabEmbeddable",
           " | undefined>; readonly type: \"visualization\"; inject: (_state: ",
           {
             "pluginId": "embeddable",
@@ -6679,7 +6715,7 @@
             "section": "def-common.SavedObjectReference",
             "text": "SavedObjectReference"
           },
-          "[]; }; isEditable: () => Promise<boolean>; getDisplayName: () => any; createFromSavedObject: (savedObjectId: string, input: Partial<",
+          "[]; }; isEditable: () => Promise<boolean>; getDisplayName: () => string; createFromSavedObject: (savedObjectId: string, input: Partial<",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -6727,8 +6763,6 @@
             "section": "def-public.VisualizeEmbeddable",
             "text": "VisualizeEmbeddable"
           },
-          " | ",
-          "DisabledLabEmbeddable",
           ">; readonly savedObjectMetaData: ",
           {
             "pluginId": "savedObjectsFinder",
@@ -6869,6 +6903,21 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.XYCurveTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "XYCurveTypes",
+        "description": [],
+        "signature": [
+          "{ readonly LINEAR: \"LINEAR\"; readonly CURVE_MONOTONE_X: \"CURVE_MONOTONE_X\"; readonly CURVE_STEP_AFTER: \"CURVE_STEP_AFTER\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "setup": {
@@ -6897,7 +6946,7 @@
           "section": "def-public.VisTypeAlias",
           "text": "VisTypeAlias"
         },
-        ") => void; hideTypes: (typeNames: string[]) => void; } & { visEditorsRegistry: { registerDefault: (editor: ",
+        ") => void; } & { visEditorsRegistry: { registerDefault: (editor: ",
         "VisEditorConstructor",
         "<",
         {
@@ -6911,7 +6960,9 @@
         "VisEditorConstructor",
         "<TVisParams>) => void; get: (name: string) => ",
         "VisEditorConstructor",
-        "<any> | undefined; }; }"
+        "<any> | undefined; }; listingViewRegistry: ",
+        "ListingViewRegistry",
+        "; }"
       ],
       "path": "src/plugins/visualizations/public/plugin.ts",
       "deprecated": false,
@@ -7031,44 +7082,61 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-server.VISUALIZE_ENABLE_LABS_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "VISUALIZE_ENABLE_LABS_SETTING",
-        "description": [],
-        "signature": [
-          "\"visualize:enableLabs\""
-        ],
-        "path": "src/plugins/visualizations/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [],
     "setup": {
       "parentPluginId": "visualizations",
-      "id": "def-server.VisualizationsPluginSetup",
+      "id": "def-server.VisualizationsServerSetup",
       "type": "Interface",
       "tags": [],
-      "label": "VisualizationsPluginSetup",
+      "label": "VisualizationsServerSetup",
       "description": [],
       "path": "src/plugins/visualizations/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "visualizations",
+          "id": "def-server.VisualizationsServerSetup.registerReadOnlyVisType",
+          "type": "Function",
+          "tags": [],
+          "label": "registerReadOnlyVisType",
+          "description": [],
+          "signature": [
+            "(visType: string) => void"
+          ],
+          "path": "src/plugins/visualizations/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "visualizations",
+              "id": "def-server.VisualizationsServerSetup.registerReadOnlyVisType.$1",
+              "type": "string",
+              "tags": [],
+              "label": "visType",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "src/plugins/visualizations/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
       "parentPluginId": "visualizations",
-      "id": "def-server.VisualizationsPluginStart",
+      "id": "def-server.VisualizationsServerStart",
       "type": "Interface",
       "tags": [],
-      "label": "VisualizationsPluginStart",
+      "label": "VisualizationsServerStart",
       "description": [],
       "path": "src/plugins/visualizations/server/types.ts",
       "deprecated": false,
@@ -7136,6 +7204,60 @@
               }
             ],
             "path": "src/plugins/visualizations/common/vis_schemas.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.excludeMetaFromColumn",
+        "type": "Function",
+        "tags": [],
+        "label": "excludeMetaFromColumn",
+        "description": [],
+        "signature": [
+          "(column: ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.Column",
+            "text": "Column"
+          },
+          ") => ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.Column",
+            "text": "Column"
+          }
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.excludeMetaFromColumn.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "column",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.Column",
+                "text": "Column"
+              }
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -10100,6 +10222,17 @@
             "path": "src/plugins/visualizations/common/convert_to_lens/types/context.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.Layer.ignoreGlobalFilters",
+            "type": "boolean",
+            "tags": [],
+            "label": "ignoreGlobalFilters",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/context.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10660,7 +10793,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ decimals: number; suffix?: string | undefined; } | undefined"
+              "{ decimals: number; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
             "deprecated": false,
@@ -11837,6 +11970,132 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-common.TagcloudVisConfiguration",
+        "type": "Interface",
+        "tags": [],
+        "label": "TagcloudVisConfiguration",
+        "description": [],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.TagcloudVisConfiguration.layerId",
+            "type": "string",
+            "tags": [],
+            "label": "layerId",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.TagcloudVisConfiguration.layerType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "layerType",
+            "description": [],
+            "signature": [
+              "\"data\" | \"annotations\" | \"referenceLine\""
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.TagcloudVisConfiguration.valueAccessor",
+            "type": "string",
+            "tags": [],
+            "label": "valueAccessor",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.TagcloudVisConfiguration.tagAccessor",
+            "type": "string",
+            "tags": [],
+            "label": "tagAccessor",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.TagcloudVisConfiguration.maxFontSize",
+            "type": "number",
+            "tags": [],
+            "label": "maxFontSize",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.TagcloudVisConfiguration.minFontSize",
+            "type": "number",
+            "tags": [],
+            "label": "minFontSize",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.TagcloudVisConfiguration.orientation",
+            "type": "string",
+            "tags": [],
+            "label": "orientation",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.TagcloudVisConfiguration.palette",
+            "type": "Object",
+            "tags": [],
+            "label": "palette",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
+              "<{ [key: string]: unknown; }>"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.TagcloudVisConfiguration.showLabel",
+            "type": "boolean",
+            "tags": [],
+            "label": "showLabel",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-common.TermsParams",
         "type": "Interface",
         "tags": [],
@@ -11938,7 +12197,7 @@
             "label": "orderBy",
             "description": [],
             "signature": [
-              "{ type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"column\"; columnId: string; } | { type: \"custom\"; }"
+              "{ type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"significant\"; } | { type: \"column\"; columnId: string; } | { type: \"custom\"; }"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
@@ -12810,7 +13069,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"bar\" | \"line\" | \"area\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -13679,6 +13938,14 @@
             "docId": "kibVisualizationsPluginApi",
             "section": "def-common.HeatmapConfiguration",
             "text": "HeatmapConfiguration"
+          },
+          " | ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.TagcloudVisConfiguration",
+            "text": "TagcloudVisConfiguration"
           }
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
@@ -14893,7 +15160,7 @@
         "label": "SeriesType",
         "description": [],
         "signature": [
-          "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+          "\"bar\" | \"line\" | \"area\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
@@ -15114,7 +15381,7 @@
         "label": "TimeScaleUnit",
         "description": [],
         "signature": [
-          "\"m\" | \"s\" | \"d\" | \"h\""
+          "\"m\" | \"d\" | \"h\" | \"s\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
         "deprecated": false,

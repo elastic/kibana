@@ -39,7 +39,6 @@ import {
   THREAT_MATCH_INDEX_HELPER_TEXT,
   THREAT_MATCH_REQUIRED,
   THREAT_MATCH_EMPTIES,
-  SAVED_QUERY_REQUIRED,
 } from './translations';
 
 export const schema: FormSchema<DefineStepRule> = {
@@ -88,7 +87,14 @@ export const schema: FormSchema<DefineStepRule> = {
     ),
     validations: [],
   },
+  // TODO: populate the dataViewTitle in a better way
   dataViewId: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewSelector',
+      {
+        defaultMessage: 'Data View',
+      }
+    ),
     fieldsToValidateOnChange: ['dataViewId'],
     validations: [
       {
@@ -140,7 +146,10 @@ export const schema: FormSchema<DefineStepRule> = {
             return undefined;
           }
           if (savedId) {
-            return { code: 'ERR_FIELD_MISSING', path, message: SAVED_QUERY_REQUIRED };
+            // Ignore field validation error in this case.
+            // Instead, we show the error toast when saved query object does not exist.
+            // https://github.com/elastic/kibana/issues/159060
+            return undefined;
           }
           const message = isEqlRule(formData.ruleType) ? EQL_QUERY_REQUIRED : CUSTOM_QUERY_REQUIRED;
           return { code: 'ERR_FIELD_MISSING', path, message };
@@ -626,7 +635,7 @@ export const schema: FormSchema<DefineStepRule> = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.suppressionMissingFieldsLabel',
       {
-        defaultMessage: 'If “Suppress by” field does not exist',
+        defaultMessage: 'If a suppression field is missing',
       }
     ),
   },

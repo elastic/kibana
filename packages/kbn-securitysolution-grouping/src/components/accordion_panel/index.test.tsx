@@ -8,8 +8,9 @@
 
 import { fireEvent, render } from '@testing-library/react';
 import { GroupPanel } from '.';
-import { createGroupFilter, getNullGroupFilter } from './helpers';
+import { createGroupFilter, getNullGroupFilter } from '../../containers/query/helpers';
 import React from 'react';
+import { groupingBucket } from '../../mocks';
 
 const onToggleGroup = jest.fn();
 const renderChildComponent = jest.fn();
@@ -20,40 +21,10 @@ const testProps = {
   isLoading: false,
   isNullGroup: false,
   groupBucket: {
+    ...groupingBucket,
     selectedGroup,
-    key: [ruleName, ruleName],
-    key_as_string: `${ruleName}|${ruleName}`,
-    doc_count: 98,
-    hostsCountAggregation: {
-      value: 5,
-    },
-    ruleTags: {
-      doc_count_error_upper_bound: 0,
-      sum_other_doc_count: 0,
-      buckets: [],
-    },
-    alertsCount: {
-      value: 98,
-    },
-    rulesCountAggregation: {
-      value: 1,
-    },
-    severitiesSubAggregation: {
-      doc_count_error_upper_bound: 0,
-      sum_other_doc_count: 0,
-      buckets: [
-        {
-          key: 'low',
-          doc_count: 98,
-        },
-      ],
-    },
-    countSeveritySubAggregation: {
-      value: 1,
-    },
-    usersCountAggregation: {
-      value: 98,
-    },
+    key: [ruleName],
+    key_as_string: `${ruleName}`,
   },
   renderChildComponent,
   selectedGroup,
@@ -68,7 +39,7 @@ describe('grouping accordion panel', () => {
     const { getByTestId } = render(<GroupPanel {...testProps} />);
     expect(getByTestId('grouping-accordion')).toBeInTheDocument();
     expect(renderChildComponent).toHaveBeenCalledWith(
-      createGroupFilter(testProps.selectedGroup, ruleName)
+      createGroupFilter(testProps.selectedGroup, [ruleName])
     );
   });
   it('creates the query for the selectedGroup attribute when the group is null', () => {
@@ -82,8 +53,7 @@ describe('grouping accordion panel', () => {
         {...testProps}
         groupBucket={{
           ...testProps.groupBucket,
-          // @ts-expect-error
-          key: null,
+          selectedGroup: 'wrong-group',
         }}
       />
     );

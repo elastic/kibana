@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SelectorCondition, SelectorType } from '../../types';
+import { SelectorCondition, SelectorType } from '../../../common';
 
 export const fileSelector = i18n.translate('xpack.cloudDefend.fileSelector', {
   defaultMessage: 'File selector',
@@ -123,6 +123,22 @@ export const unusedSelector = i18n.translate('xpack.cloudDefend.unusedSelector',
 export const unusedSelectorHelp = i18n.translate('xpack.cloudDefend.unusedSelectorHelp', {
   defaultMessage: 'This selector is not in use by any response.',
 });
+
+export const errorInvalidTargetFilePath = i18n.translate(
+  'xpack.cloudDefend.errorInvalidTargetFilePath',
+  {
+    defaultMessage:
+      '"Target file path" values must use absolute paths. A trailing * wildcard may be used to match all files in the target directory. Use double ** to match all files recursively. e.g /etc/**',
+  }
+);
+
+export const errorInvalidProcessExecutable = i18n.translate(
+  'xpack.cloudDefend.errorInvalidProcessExecutable',
+  {
+    defaultMessage:
+      '"Process executable" values must use absolute paths. A trailing * wildcard may be used to match all files in the target directory. Use double ** to match all files recursively. e.g /usr/bin/**',
+  }
+);
 
 export const errorInvalidPodLabel = i18n.translate('xpack.cloudDefend.errorInvalidPodLabel', {
   defaultMessage:

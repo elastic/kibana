@@ -8,7 +8,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDataGridColumn, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
+import {
+  type EuiDataGridColumn,
+  type EuiDataGridColumnCellAction,
+  EuiIcon,
+  EuiScreenReaderOnly,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
@@ -65,24 +71,28 @@ function buildEuiGridColumn({
   dataView,
   defaultColumns,
   isSortEnabled,
+  isPlainRecord,
   toastNotifications,
   hasEditDataViewPermission,
   valueToStringConverter,
   rowsCount,
   onFilter,
   editField,
+  columnCellActions,
 }: {
   columnName: string;
   columnWidth: number | undefined;
   dataView: DataView;
   defaultColumns: boolean;
   isSortEnabled: boolean;
+  isPlainRecord?: boolean;
   toastNotifications: ToastsStart;
   hasEditDataViewPermission: () => boolean;
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
   onFilter?: DocViewFilterFn;
   editField?: (fieldName: string) => void;
+  columnCellActions?: EuiDataGridColumnCellAction[];
 }) {
   const dataViewField = dataView.getFieldByName(columnName);
   const editFieldButton =
@@ -96,10 +106,17 @@ function buildEuiGridColumn({
         })
       : dataViewField?.displayName || columnName;
 
+  let cellActions: EuiDataGridColumnCellAction[];
+  if (columnCellActions?.length) {
+    cellActions = columnCellActions;
+  } else {
+    cellActions = dataViewField ? buildCellActions(dataViewField, onFilter) : [];
+  }
+
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(dataViewField?.type),
-    isSortable: isSortEnabled && dataViewField?.sortable === true,
+    isSortable: isSortEnabled && (isPlainRecord || dataViewField?.sortable === true),
     displayAsText: columnDisplayName,
     actions: {
       showHide:
@@ -132,7 +149,7 @@ function buildEuiGridColumn({
         ...(editFieldButton ? [editFieldButton] : []),
       ],
     },
-    cellActions: dataViewField ? buildCellActions(dataViewField, onFilter) : [],
+    cellActions,
   };
 
   if (column.id === dataView.timeFieldName) {
@@ -170,12 +187,13 @@ function buildEuiGridColumn({
 
 export function getEuiGridColumns({
   columns,
+  columnsCellActions,
   rowsCount,
   settings,
   dataView,
-  showTimeCol,
   defaultColumns,
   isSortEnabled,
+  isPlainRecord,
   services,
   hasEditDataViewPermission,
   valueToStringConverter,
@@ -183,12 +201,13 @@ export function getEuiGridColumns({
   editField,
 }: {
   columns: string[];
+  columnsCellActions?: EuiDataGridColumnCellAction[][];
   rowsCount: number;
   settings: DiscoverGridSettings | undefined;
   dataView: DataView;
-  showTimeCol: boolean;
   defaultColumns: boolean;
   isSortEnabled: boolean;
+  isPlainRecord?: boolean;
   services: {
     uiSettings: IUiSettingsClient;
     toastNotifications: ToastsStart;
@@ -198,21 +217,17 @@ export function getEuiGridColumns({
   onFilter: DocViewFilterFn;
   editField?: (fieldName: string) => void;
 }) {
-  const timeFieldName = dataView.timeFieldName;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
 
-  let visibleColumns = columns;
-  if (showTimeCol && dataView.timeFieldName && !columns.find((col) => col === timeFieldName)) {
-    visibleColumns = [dataView.timeFieldName, ...columns];
-  }
-
-  return visibleColumns.map((column) =>
+  return columns.map((column, columnIndex) =>
     buildEuiGridColumn({
       columnName: column,
+      columnCellActions: columnsCellActions?.[columnIndex],
       columnWidth: getColWidth(column),
       dataView,
       defaultColumns,
       isSortEnabled,
+      isPlainRecord,
       toastNotifications: services.toastNotifications,
       hasEditDataViewPermission,
       valueToStringConverter,
@@ -226,7 +241,7 @@ export function getEuiGridColumns({
 export function getVisibleColumns(columns: string[], dataView: DataView, showTimeCol: boolean) {
   const timeFieldName = dataView.timeFieldName;
 
-  if (showTimeCol && !columns.find((col) => col === timeFieldName)) {
+  if (showTimeCol && timeFieldName && !columns.find((col) => col === timeFieldName)) {
     return [timeFieldName, ...columns];
   }
 

@@ -13,11 +13,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { RuleStatus, useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 export function RulesPage() {
   const {
@@ -142,6 +143,7 @@ export function RulesPage() {
       }}
       data-test-subj="rulesPage"
     >
+      <HeaderMenu />
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <RuleList

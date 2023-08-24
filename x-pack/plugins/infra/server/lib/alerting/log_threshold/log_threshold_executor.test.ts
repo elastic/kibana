@@ -6,16 +6,12 @@
  */
 
 import {
-  positiveComparators,
-  negativeComparators,
-  queryMappings,
-  buildFiltersFromCriteria,
-  getUngroupedESQuery,
   getGroupedESQuery,
   processUngroupedResults,
   processGroupByResults,
   LogThresholdAlertFactory,
   LogThresholdAlertLimit,
+  getUngroupedESQuery,
 } from './log_threshold_executor';
 import {
   Comparator,
@@ -25,6 +21,12 @@ import {
   GroupedSearchQueryResponse,
 } from '../../../../common/alerting/logs/log_threshold';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  positiveComparators,
+  negativeComparators,
+  buildFiltersFromCriteria,
+  queryMappings,
+} from '../../../../common/alerting/logs/log_threshold/query_helpers';
 
 // Mocks //
 const numericField = {

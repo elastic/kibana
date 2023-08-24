@@ -26,6 +26,7 @@ import { SharePluginStart } from '@kbn/share-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 
 export interface ObservabilityAppServices {
   application: ApplicationStart;
@@ -34,6 +35,7 @@ export interface ObservabilityAppServices {
   chrome: ChromeStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  discover: DiscoverStart;
   docLinks: DocLinksStart;
   http: HttpStart;
   lens: LensPublicStart;

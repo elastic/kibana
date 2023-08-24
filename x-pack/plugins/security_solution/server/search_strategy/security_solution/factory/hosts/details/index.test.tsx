@@ -17,25 +17,12 @@ import type {
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { EndpointAppContext } from '../../../../../endpoint/types';
-import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
-import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
+import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
 
 const mockDeps = {
   esClient: {} as IScopedClusterClient,
   savedObjectsClient: {} as SavedObjectsClientContract,
-  endpointContext: {
-    logFactory: {
-      get: jest.fn().mockReturnValue({
-        warn: jest.fn(),
-      }),
-    },
-    config: jest.fn().mockResolvedValue({}),
-    experimentalFeatures: {
-      ...allowedExperimentalValues,
-    },
-    service: {} as EndpointAppContextService,
-  } as EndpointAppContext,
+  endpointContext: createMockEndpointAppContext(),
   request: {} as KibanaRequest,
 };
 

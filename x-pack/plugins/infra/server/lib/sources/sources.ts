@@ -22,8 +22,8 @@ import {
   InfraStaticSourceConfiguration,
   SourceConfigurationConfigFileProperties,
   sourceConfigurationConfigFilePropertiesRT,
-  SourceConfigurationSavedObjectRuntimeType,
 } from '../../../common/source_configuration/source_configuration';
+import { SourceConfigurationSavedObjectRT } from '.';
 import { InfraConfig } from '../..';
 import { defaultSourceConfiguration } from './defaults';
 import { AnomalyThresholdRangeError, NotFoundError } from './errors';
@@ -258,7 +258,7 @@ export const mergeSourceConfiguration = (
 
 export const convertSavedObjectToSavedSourceConfiguration = (savedObject: SavedObject<unknown>) =>
   pipe(
-    SourceConfigurationSavedObjectRuntimeType.decode(savedObject),
+    SourceConfigurationSavedObjectRT.decode(savedObject),
     map((savedSourceConfiguration) => ({
       id: savedSourceConfiguration.id,
       version: savedSourceConfiguration.version,

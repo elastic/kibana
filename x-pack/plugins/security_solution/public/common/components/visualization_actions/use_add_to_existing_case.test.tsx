@@ -14,6 +14,7 @@ import {
   readCasesPermissions,
   writeCasesPermissions,
 } from '../../../cases_test_utils';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 
 const mockedUseKibana = mockUseKibana();
 const mockGetUseCasesAddToExistingCaseModal = jest.fn();
@@ -112,5 +113,35 @@ describe('useAddToExistingCase', () => {
       })
     );
     expect(result.current.disabled).toEqual(true);
+  });
+
+  it('should open add to existing case modal', () => {
+    const mockOpenCaseModal = jest.fn();
+    const mockClick = jest.fn();
+
+    mockGetUseCasesAddToExistingCaseModal.mockReturnValue({ open: mockOpenCaseModal });
+
+    const { result } = renderHook(() =>
+      useAddToExistingCase({
+        lensAttributes: kpiHostMetricLensAttributes,
+        timeRange,
+        onAddToCaseClicked: mockClick,
+      })
+    );
+
+    result.current.onAddToExistingCaseClicked();
+    const attachments = mockOpenCaseModal.mock.calls[0][0].getAttachments();
+
+    expect(attachments).toEqual([
+      {
+        persistableStateAttachmentState: {
+          attributes: kpiHostMetricLensAttributes,
+          timeRange,
+        },
+        persistableStateAttachmentTypeId: '.lens',
+        type: AttachmentType.persistableState as const,
+      },
+    ]);
+    expect(mockClick).toHaveBeenCalled();
   });
 });

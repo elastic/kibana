@@ -39,7 +39,8 @@ import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type {
   Vis,
   VisualizeEmbeddableContract,
@@ -48,7 +49,7 @@ import type {
   VisParams,
 } from '..';
 
-import type { SavedVisState } from '../types';
+import type { ListingViewRegistry, SavedVisState } from '../types';
 import type { createVisEmbeddableFromObject } from '../embeddable';
 import type { VisEditorsRegistry } from '../vis_editors_registry';
 
@@ -107,12 +108,15 @@ export interface VisualizeServices extends CoreStart {
   scopedHistory: ScopedHistory;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
+  savedSearch: SavedSearchPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   getKibanaVersion: () => string;
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;
   visEditorsRegistry: VisEditorsRegistry;
+  listingViewRegistry: ListingViewRegistry;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  serverless?: ServerlessPluginStart;
 }
 
 export interface VisInstance {

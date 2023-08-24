@@ -191,6 +191,39 @@ paths:
           $ref: '#/components/responses/error'
       operationId: packages-get-verification-key-id
     parameters: []
+  /epm/bulk_assets:
+    post:
+      summary: Bulk get assets
+      tags:
+        - Elastic Package Manager (EPM)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_bulk_assets_response'
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: bulk-get-assets
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assetIds:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      id:
+                        type: string
+                  description: list of items necessary to fetch assets
+              required:
+                - assetIds
   /epm/categories:
     get:
       summary: List package categories
@@ -565,6 +598,7 @@ paths:
                           - not_installed
                       savedObject:
                         type: object
+                        deprecated: true
                       latestVersion:
                         type: string
                       keepPoliciesUpToDate:
@@ -967,6 +1001,7 @@ paths:
           name: kuery
           in: query
           required: false
+          deprecated: true
   /agent_status/data:
     get:
       summary: Get incoming agent data
@@ -2395,7 +2430,11 @@ paths:
           $ref: '#/components/responses/error'
       operationId: get-package-policies
       security: []
-      parameters: []
+      parameters:
+        - $ref: '#/components/parameters/page_size'
+        - $ref: '#/components/parameters/page_index'
+        - $ref: '#/components/parameters/kuery'
+        - $ref: '#/components/parameters/format'
     parameters: []
     post:
       summary: Create package policy
@@ -2428,6 +2467,7 @@ paths:
               $ref: '#/components/schemas/package_policy_request'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/format'
   /package_policies/_bulk_get:
     post:
       summary: Bulk get package policies
@@ -2466,7 +2506,8 @@ paths:
           $ref: '#/components/responses/error'
       operationId: bulk-get-package-policies
       security: []
-      parameters: []
+      parameters:
+        - $ref: '#/components/parameters/format'
   /package_policies/delete:
     post:
       summary: Delete package policy
@@ -2592,6 +2633,12 @@ paths:
         '400':
           $ref: '#/components/responses/error'
   /package_policies/{packagePolicyId}:
+    parameters:
+      - schema:
+          type: string
+        name: packagePolicyId
+        in: path
+        required: true
     get:
       summary: Get package policy by ID
       tags:
@@ -2611,12 +2658,8 @@ paths:
         '400':
           $ref: '#/components/responses/error'
       operationId: get-package-policy
-    parameters:
-      - schema:
-          type: string
-        name: packagePolicyId
-        in: path
-        required: true
+      parameters:
+        - $ref: '#/components/parameters/format'
     put:
       summary: Update package policy by ID
       tags:
@@ -2646,6 +2689,7 @@ paths:
           $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/format'
     delete:
       summary: Delete package policy by ID
       tags:
@@ -2686,7 +2730,7 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/output'
+                      $ref: '#/components/schemas/output_create_request'
                   total:
                     type: integer
                   page:
@@ -2709,38 +2753,15 @@ paths:
                 type: object
                 properties:
                   item:
-                    $ref: '#/components/schemas/output'
+                    $ref: '#/components/schemas/output_create_request'
         '400':
           $ref: '#/components/responses/error'
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                id:
-                  type: string
-                name:
-                  type: string
-                type:
-                  type: string
-                  enum:
-                    - elasticsearch
-                is_default:
-                  type: boolean
-                is_default_monitoring:
-                  type: boolean
-                hosts:
-                  type: array
-                  items:
-                    type: string
-                ca_sha256:
-                  type: string
-                config_yaml:
-                  type: string
-              required:
-                - name
-                - type
+              $ref: '#/components/schemas/output_create_request'
       operationId: post-outputs
   /outputs/{outputId}:
     get:
@@ -2753,12 +2774,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  item:
-                    $ref: '#/components/schemas/output'
-                required:
-                  - item
+                $ref: '#/components/schemas/output_create_request'
         '400':
           $ref: '#/components/responses/error'
       operationId: get-output
@@ -2798,43 +2814,14 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                type:
-                  type: string
-                  enum:
-                    - elasticsearch
-                is_default:
-                  type: boolean
-                is_default_monitoring:
-                  type: boolean
-                hosts:
-                  type: array
-                  items:
-                    type: string
-                ca_sha256:
-                  type: string
-                ca_trusted_fingerprint:
-                  type: string
-                config_yaml:
-                  type: string
-              required:
-                - name
-                - type
+              $ref: '#/components/schemas/output_update_request'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  item:
-                    $ref: '#/components/schemas/output'
-                required:
-                  - item
+                $ref: '#/components/schemas/output_update_request'
         '400':
           $ref: '#/components/responses/error'
       parameters:
@@ -3396,6 +3383,7 @@ components:
       required: false
       schema:
         type: string
+        deprecated: true
     sort_order:
       name: sortOrder
       in: query
@@ -3412,6 +3400,16 @@ components:
       required: false
       schema:
         type: boolean
+    format:
+      name: format
+      in: query
+      description: Simplified or legacy format for package inputs
+      required: false
+      schema:
+        type: string
+        enum:
+          - simplified
+          - legacy
   responses:
     error:
       description: Generic Error
@@ -3474,6 +3472,60 @@ components:
           $ref: '#/components/schemas/settings'
       required:
         - item
+    saved_object_type:
+      title: Saved Object type
+      oneOf:
+        - type: string
+          enum:
+            - dashboard
+            - visualization
+            - search
+            - index_pattern
+            - map
+            - lens
+            - security_rule
+            - csp_rule_template
+            - ml_module
+            - tag
+            - osquery_pack_asset
+            - osquery_saved_query
+        - type: string
+          enum:
+            - index
+            - component_template
+            - ingest_pipeline
+            - index_template
+            - ilm_policy
+            - transform
+            - data_stream_ilm_policy
+            - ml_model
+    get_bulk_assets_response:
+      title: Bulk get assets response
+      type: object
+      deprecated: true
+      properties:
+        response:
+          type: array
+          items:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                type:
+                  $ref: '#/components/schemas/saved_object_type'
+                updatedAt:
+                  type: string
+                attributes:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    description:
+                      type: string
+      required:
+        - items
     get_categories_response:
       title: Get categories response
       type: object
@@ -3511,6 +3563,118 @@ components:
               - count
       required:
         - items
+    kibana_saved_object_type:
+      title: Kibana saved object asset type
+      type: string
+      enum:
+        - dashboard
+        - visualization
+        - search
+        - index-pattern
+        - map
+        - lens
+        - ml-module
+        - security-rule
+        - csp_rule_template
+    elasticsearch_asset_type:
+      title: Elasticsearch asset type
+      type: string
+      enum:
+        - component_template
+        - ingest_pipeline
+        - index_template
+        - ilm_policy
+        - transform
+        - data_stream_ilm_policy
+    installation_info:
+      title: Installation info object
+      type: object
+      properties:
+        type:
+          type: string
+        created_at:
+          type: string
+        updated_at:
+          type: string
+        namespaces:
+          type: array
+          items:
+            type: string
+        installed_kibana:
+          type: object
+          properties:
+            id:
+              type: string
+            type:
+              $ref: '#/components/schemas/kibana_saved_object_type'
+        installed_es:
+          type: object
+          properties:
+            id:
+              type: string
+            deferred:
+              type: boolean
+            type:
+              $ref: '#/components/schemas/elasticsearch_asset_type'
+        name:
+          type: string
+        version:
+          type: string
+        install_status:
+          type: string
+          enum:
+            - installed
+            - installing
+            - install_failed
+        install_source:
+          type: string
+          enum:
+            - registry
+            - upload
+            - bundled
+        install_kibana_space_id:
+          type: string
+        install_format_schema_version:
+          type: string
+        verification_status:
+          type: string
+          enum:
+            - verified
+            - unverified
+            - unknown
+        verification_key_id:
+          type: string
+          nullable: true
+        experimental_data_stream_features:
+          type: array
+          properties:
+            data_stream:
+              type: string
+            features:
+              type: object
+              properties:
+                synthetic_source:
+                  type: boolean
+                  nullable: true
+                tsdb:
+                  type: boolean
+                  nullable: true
+                doc_value_only_numeric:
+                  type: boolean
+                  nullable: true
+                doc_value_only_other:
+                  type: boolean
+                  nullable: true
+      required:
+        - installed_kibana
+        - installed_es
+        - name
+        - version
+        - install_status
+        - install_version
+        - install_started_at
+        - install_source
+        - verification_status
     search_result:
       title: Search result
       type: object
@@ -3533,8 +3697,11 @@ components:
           type: string
         status:
           type: string
+        installationInfo:
+          $ref: '#/components/schemas/installation_info'
         savedObject:
           type: object
+          deprecated: true
       required:
         - description
         - download
@@ -3560,29 +3727,6 @@ components:
             $ref: '#/components/schemas/search_result'
       required:
         - items
-    kibana_saved_object_type:
-      title: Kibana saved object asset type
-      type: string
-      enum:
-        - dashboard
-        - visualization
-        - search
-        - index-pattern
-        - map
-        - lens
-        - ml-module
-        - security-rule
-        - csp_rule_template
-    elasticsearch_asset_type:
-      title: Elasticsearch asset type
-      type: string
-      enum:
-        - component_template
-        - ingest_pipeline
-        - index_template
-        - ilm_policy
-        - transform
-        - data_stream_ilm_policy
     bulk_install_packages_response:
       title: Bulk install packages response
       type: object
@@ -4137,8 +4281,10 @@ components:
             revision:
               type: number
             inputs:
-              type: array
-              items: {}
+              oneOf:
+                - type: array
+                  items: {}
+                - type: object
           required:
             - id
             - revision
@@ -4181,7 +4327,8 @@ components:
         package_policies:
           description: >-
             This field is present only when retrieving a single agent policy, or
-            when retrieving a list of agent policy with the ?full=true parameter
+            when retrieving a list of agent policies with the ?full=true
+            parameter
           type: array
           items:
             $ref: '#/components/schemas/package_policy'
@@ -4206,6 +4353,18 @@ components:
             required:
               - name
               - enabled
+        is_protected:
+          description: >-
+            Indicates whether the agent policy has tamper protection enabled.
+            Default false.
+          type: boolean
+        overrides:
+          type: object
+          description: >-
+            Override settings that are defined in the agent policy. Input
+            settings cannot be overridden. The override option should be used
+            only in unusual circumstances and not as a routine procedure.
+          nullable: true
       required:
         - id
         - status
@@ -4258,6 +4417,8 @@ components:
             required:
               - name
               - enabled
+        is_protected:
+          type: boolean
       required:
         - name
         - namespace
@@ -4306,6 +4467,8 @@ components:
             required:
               - name
               - enabled
+        is_protected:
+          type: boolean
       required:
         - name
         - namespace
@@ -4424,9 +4587,13 @@ components:
         agent:
           type: string
           nullable: true
-        download_source_id:
-          type: string
-          nullable: true
+        secret_references:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
       required:
         - id
         - outputs
@@ -4692,8 +4859,8 @@ components:
         type: array
         items:
           $ref: '#/components/schemas/full_agent_policy_input'
-    output:
-      title: Output
+    output_create_request_elasticsearch:
+      title: elasticsearch
       type: object
       properties:
         id:
@@ -4708,6 +4875,203 @@ components:
           type: string
           enum:
             - elasticsearch
+        hosts:
+          type: array
+          items:
+            type: string
+        ca_sha256:
+          type: string
+        ca_trusted_fingerprint:
+          type: string
+        config:
+          type: object
+        config_yaml:
+          type: string
+        ssl:
+          type: object
+          properties:
+            certificate_authorities:
+              type: array
+              items:
+                type: string
+            certificate:
+              type: string
+            key:
+              type: string
+        proxy_id:
+          type: string
+        shipper:
+          type: object
+          properties:
+            disk_queue_enabled:
+              type: boolean
+            disk_queue_path:
+              type: string
+            disk_queue_max_size:
+              type: number
+            disk_queue_encryption_enabled:
+              type: boolean
+            disk_queue_compression_enabled:
+              type: boolean
+            compression_level:
+              type: number
+            loadbalance:
+              type: boolean
+      required:
+        - name
+    output_create_request_kafka:
+      title: kafka
+      type: object
+      properties:
+        id:
+          type: string
+        is_default:
+          type: boolean
+        is_default_monitoring:
+          type: boolean
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - kafka
+        hosts:
+          type: array
+          items:
+            type: string
+        ca_sha256:
+          type: string
+        ca_trusted_fingerprint:
+          type: string
+        config:
+          type: object
+        config_yaml:
+          type: string
+        ssl:
+          type: object
+          properties:
+            certificate_authorities:
+              type: array
+              items:
+                type: string
+            certificate:
+              type: string
+            key:
+              type: string
+            verification_mode:
+              type: string
+              enum:
+                - none
+                - full
+                - certificate
+                - strict
+        proxy_id:
+          type: string
+        shipper:
+          type: object
+          properties:
+            disk_queue_enabled:
+              type: boolean
+            disk_queue_path:
+              type: string
+            disk_queue_max_size:
+              type: number
+            disk_queue_encryption_enabled:
+              type: boolean
+            disk_queue_compression_enabled:
+              type: boolean
+            compression_level:
+              type: number
+            loadbalance:
+              type: boolean
+        version:
+          type: string
+        key:
+          type: string
+        compression:
+          type: string
+        compression_level:
+          type: number
+        client_id:
+          type: string
+        auth_type:
+          type: string
+        connection_type:
+          type: string
+          enum:
+            - plaintext
+            - encryption
+        username:
+          type: string
+        password:
+          type: string
+        sasl:
+          type: object
+          properties:
+            mechanism:
+              type: string
+        partition:
+          type: string
+        random:
+          type: object
+          properties:
+            group_events:
+              type: number
+        round_robin:
+          type: object
+          properties:
+            group_events:
+              type: number
+        topics:
+          type: array
+          items:
+            type: object
+            properties:
+              topic:
+                type: string
+              when:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  condition:
+                    type: string
+        headers:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+        timeout:
+          type: number
+        broker_timeout:
+          type: number
+        required_acks:
+          type: number
+      required:
+        - name
+        - type
+        - topics
+        - auth_type
+        - hosts
+    output_create_request_logstash:
+      title: logstash
+      type: object
+      properties:
+        id:
+          type: string
+        is_default:
+          type: boolean
+        is_default_monitoring:
+          type: boolean
+        name:
+          type: string
+        type:
+          type: string
+          enum:
             - logstash
         hosts:
           type: array
@@ -4752,10 +5116,289 @@ components:
             loadbalance:
               type: boolean
       required:
-        - id
-        - is_default
         - name
+        - hosts
         - type
+    output_create_request:
+      title: Output
+      oneOf:
+        - $ref: '#/components/schemas/output_create_request_elasticsearch'
+        - $ref: '#/components/schemas/output_create_request_kafka'
+        - $ref: '#/components/schemas/output_create_request_logstash'
+      discriminator:
+        propertyName: type
+        mapping:
+          elasticsearch: '#/components/schemas/output_create_request_elasticsearch'
+          kafka: '#/components/schemas/output_create_request_kafka'
+          logstash: '#/components/schemas/output_create_request_logstash'
+    output_update_request_elasticsearch:
+      title: elasticsearch
+      type: object
+      properties:
+        id:
+          type: string
+        is_default:
+          type: boolean
+        is_default_monitoring:
+          type: boolean
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - elasticsearch
+        hosts:
+          type: array
+          items:
+            type: string
+        ca_sha256:
+          type: string
+        ca_trusted_fingerprint:
+          type: string
+        config:
+          type: object
+        config_yaml:
+          type: string
+        ssl:
+          type: object
+          properties:
+            certificate_authorities:
+              type: array
+              items:
+                type: string
+            certificate:
+              type: string
+            key:
+              type: string
+        proxy_id:
+          type: string
+        shipper:
+          type: object
+          properties:
+            disk_queue_enabled:
+              type: boolean
+            disk_queue_path:
+              type: string
+            disk_queue_max_size:
+              type: number
+            disk_queue_encryption_enabled:
+              type: boolean
+            disk_queue_compression_enabled:
+              type: boolean
+            compression_level:
+              type: number
+            loadbalance:
+              type: boolean
+      required:
+        - name
+        - hosts
+        - type
+    output_update_request_kafka:
+      title: kafka
+      type: object
+      properties:
+        id:
+          type: string
+        is_default:
+          type: boolean
+        is_default_monitoring:
+          type: boolean
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - kafka
+        hosts:
+          type: array
+          items:
+            type: string
+        ca_sha256:
+          type: string
+        ca_trusted_fingerprint:
+          type: string
+        config:
+          type: object
+        config_yaml:
+          type: string
+        ssl:
+          type: object
+          properties:
+            certificate_authorities:
+              type: array
+              items:
+                type: string
+            certificate:
+              type: string
+            key:
+              type: string
+            verification_mode:
+              type: string
+              enum:
+                - none
+                - full
+                - certificate
+                - strict
+        proxy_id:
+          type: string
+        shipper:
+          type: object
+          properties:
+            disk_queue_enabled:
+              type: boolean
+            disk_queue_path:
+              type: string
+            disk_queue_max_size:
+              type: number
+            disk_queue_encryption_enabled:
+              type: boolean
+            disk_queue_compression_enabled:
+              type: boolean
+            compression_level:
+              type: number
+            loadbalance:
+              type: boolean
+        version:
+          type: string
+        key:
+          type: string
+        compression:
+          type: string
+        compression_level:
+          type: number
+        client_id:
+          type: string
+        auth_type:
+          type: string
+        connection_type:
+          type: string
+          enum:
+            - plaintext
+            - encryption
+        username:
+          type: string
+        password:
+          type: string
+        sasl:
+          type: object
+          properties:
+            mechanism:
+              type: string
+        partition:
+          type: string
+        random:
+          type: object
+          properties:
+            group_events:
+              type: number
+        round_robin:
+          type: object
+          properties:
+            group_events:
+              type: number
+        topics:
+          type: array
+          items:
+            type: object
+            properties:
+              topic:
+                type: string
+              when:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  condition:
+                    type: string
+        headers:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+        timeout:
+          type: number
+        broker_timeout:
+          type: number
+        required_acks:
+          type: number
+      required:
+        - name
+    output_update_request_logstash:
+      title: logstash
+      type: object
+      properties:
+        id:
+          type: string
+        is_default:
+          type: boolean
+        is_default_monitoring:
+          type: boolean
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - logstash
+        hosts:
+          type: array
+          items:
+            type: string
+        ca_sha256:
+          type: string
+        ca_trusted_fingerprint:
+          type: string
+        config:
+          type: object
+        config_yaml:
+          type: string
+        ssl:
+          type: object
+          properties:
+            certificate_authorities:
+              type: array
+              items:
+                type: string
+            certificate:
+              type: string
+            key:
+              type: string
+        proxy_id:
+          type: string
+        shipper:
+          type: object
+          properties:
+            disk_queue_enabled:
+              type: boolean
+            disk_queue_path:
+              type: string
+            disk_queue_max_size:
+              type: number
+            disk_queue_encryption_enabled:
+              type: boolean
+            disk_queue_compression_enabled:
+              type: boolean
+            compression_level:
+              type: number
+            loadbalance:
+              type: boolean
+      required:
+        - name
+    output_update_request:
+      title: Output
+      oneOf:
+        - $ref: '#/components/schemas/output_update_request_elasticsearch'
+        - $ref: '#/components/schemas/output_update_request_kafka'
+        - $ref: '#/components/schemas/output_update_request_logstash'
+      discriminator:
+        propertyName: type
+        mapping:
+          elasticsearch: '#/components/schemas/output_update_request_elasticsearch'
+          kafka: '#/components/schemas/output_update_request_kafka'
+          logstash: '#/components/schemas/output_update_request_logstash'
     download_sources:
       title: Download Source
       type: object
@@ -4768,6 +5411,12 @@ components:
           type: string
         host:
           type: string
+        proxy_id:
+          description: >-
+            The ID of the proxy to use for this download source. See the proxies
+            API for more information.
+          type: string
+          nullable: true
       required:
         - is_default
         - name

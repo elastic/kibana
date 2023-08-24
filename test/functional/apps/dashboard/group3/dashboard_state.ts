@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visChart',
     'share',
     'timePicker',
+    'unifiedFieldList',
   ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -121,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.header.clickDiscover();
       await PageObjects.timePicker.setHistoricalDataRange();
-      await PageObjects.discover.clickFieldListItemAdd('bytes');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -135,7 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(inViewMode).to.be(true);
 
       await PageObjects.header.clickDiscover();
-      await PageObjects.discover.clickFieldListItemAdd('agent');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('agent');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -154,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.saveDashboard('Has local edits');
 
       await PageObjects.header.clickDiscover();
-      await PageObjects.discover.clickFieldListItemAdd('clientip');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('clientip');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
 

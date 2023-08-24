@@ -7,6 +7,7 @@
  */
 
 import type { Request, ResponseToolkit } from '@hapi/hapi';
+import apm from 'elastic-apm-node';
 import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import {
@@ -119,11 +120,14 @@ function validOptions(
 }
 
 /** @internal */
-interface RouterOptions {
+export interface RouterOptions {
   /** Whether we are running in development */
   isDev?: boolean;
-  /** Whether we are running in a serverless */
-  isServerless?: boolean;
+  /**
+   * Which route resolution algo to use.
+   * @note default to "oldest", but when running in dev default to "none"
+   */
+  versionedRouteResolution?: 'newest' | 'oldest' | 'none';
 }
 
 /**
@@ -143,7 +147,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     public readonly routerPath: string,
     private readonly log: Logger,
     private readonly enhanceWithContext: ContextEnhancer<any, any, any, any, any>,
-    private readonly options: RouterOptions = { isDev: false, isServerless: false }
+    private readonly options: RouterOptions
   ) {
     const buildMethod =
       <Method extends RouteMethod>(method: Method) =>
@@ -203,24 +207,30 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
       return hapiResponseAdapter.handle(kibanaResponse);
     } catch (e) {
+      // log and capture error
       this.log.error(e);
+      apm.captureError(e);
+
       // forward 401 errors from ES client
       if (isElasticsearchUnauthorizedError(e)) {
         return hapiResponseAdapter.handle(
           kibanaResponseFactory.unauthorized(convertEsUnauthorized(e))
         );
       }
+
+      // return a generic 500 to avoid error info / stack trace surfacing
       return hapiResponseAdapter.toInternalError();
     }
   }
 
   private versionedRouter: undefined | VersionedRouter<Context> = undefined;
+
   public get versioned(): VersionedRouter<Context> {
     if (this.versionedRouter === undefined) {
       this.versionedRouter = CoreVersionedRouter.from({
         router: this,
         isDev: this.options.isDev,
-        defaultHandlerResolutionStrategy: this.options.isServerless ? 'newest' : 'oldest',
+        defaultHandlerResolutionStrategy: this.options.versionedRouteResolution,
       });
     }
     return this.versionedRouter;

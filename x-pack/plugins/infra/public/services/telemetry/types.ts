@@ -17,13 +17,16 @@ export enum InfraTelemetryEventTypes {
   HOSTS_ENTRY_CLICKED = 'Host Entry Clicked',
   HOST_FLYOUT_FILTER_REMOVED = 'Host Flyout Filter Removed',
   HOST_FLYOUT_FILTER_ADDED = 'Host Flyout Filter Added',
+  HOST_VIEW_TOTAL_HOST_COUNT_RETRIEVED = 'Host View Total Host Count Retrieved',
+  ASSET_DETAILS_FLYOUT_VIEWED = 'Asset Details Flyout Viewed',
 }
 
 export interface HostsViewQuerySubmittedParams {
-  control_filters: string[];
-  filters: string[];
+  control_filter_fields: string[];
+  filter_fields: string[];
   interval: string;
-  query: string | { [key: string]: any };
+  with_query: boolean;
+  limit: number;
 }
 
 export interface HostEntryClickedParams {
@@ -35,16 +38,30 @@ export interface HostFlyoutFilterActionParams {
   field_name: string;
 }
 
+export interface HostsViewQueryHostsCountRetrievedParams {
+  total: number;
+}
+
+export interface AssetDetailsFlyoutViewedParams {
+  assetType: string;
+  componentName: string;
+  tabId?: string;
+}
+
 export type InfraTelemetryEventParams =
   | HostsViewQuerySubmittedParams
   | HostEntryClickedParams
-  | HostFlyoutFilterActionParams;
+  | HostFlyoutFilterActionParams
+  | HostsViewQueryHostsCountRetrievedParams
+  | AssetDetailsFlyoutViewedParams;
 
 export interface ITelemetryClient {
   reportHostEntryClicked(params: HostEntryClickedParams): void;
   reportHostFlyoutFilterRemoved(params: HostFlyoutFilterActionParams): void;
   reportHostFlyoutFilterAdded(params: HostFlyoutFilterActionParams): void;
+  reportHostsViewTotalHostCountRetrieved(params: HostsViewQueryHostsCountRetrievedParams): void;
   reportHostsViewQuerySubmitted(params: HostsViewQuerySubmittedParams): void;
+  reportAssetDetailsFlyoutViewed(params: AssetDetailsFlyoutViewedParams): void;
 }
 
 export type InfraTelemetryEvent =
@@ -63,4 +80,12 @@ export type InfraTelemetryEvent =
   | {
       eventType: InfraTelemetryEventTypes.HOSTS_ENTRY_CLICKED;
       schema: RootSchema<HostEntryClickedParams>;
+    }
+  | {
+      eventType: InfraTelemetryEventTypes.HOST_VIEW_TOTAL_HOST_COUNT_RETRIEVED;
+      schema: RootSchema<HostsViewQueryHostsCountRetrievedParams>;
+    }
+  | {
+      eventType: InfraTelemetryEventTypes.ASSET_DETAILS_FLYOUT_VIEWED;
+      schema: RootSchema<AssetDetailsFlyoutViewedParams>;
     };

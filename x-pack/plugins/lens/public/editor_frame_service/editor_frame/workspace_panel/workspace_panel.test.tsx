@@ -15,6 +15,7 @@ import {
   createExpressionRendererMock,
   DatasourceMock,
   createMockFramePublicAPI,
+  createMockedDragDropContext,
 } from '../../../mocks';
 import { mockDataPlugin, mountWithProvider } from '../../../mocks';
 jest.mock('../../../debounced_component', () => {
@@ -529,7 +530,9 @@ describe('workspace_panel', () => {
 
     const onEvent = expressionRendererMock.mock.calls[0][0].onEvent!;
 
-    const eventData = { myData: true, table: { rows: [], columns: [] }, column: 0 };
+    const eventData = {
+      data: [{ table: { rows: [], columns: [] }, cells: [{ column: 0, row: 0 }] }],
+    };
     onEvent({ name: 'multiFilter', data: eventData });
 
     expect(uiActionsMock.getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.multiFilter);
@@ -797,7 +800,7 @@ describe('workspace_panel', () => {
       lensStore.dispatch(
         updateDatasourceState({
           datasourceId: 'testDatasource',
-          updater: {},
+          newDatasourceState: 'newState',
         })
       );
     });
@@ -934,18 +937,7 @@ describe('workspace_panel', () => {
 
     async function initComponent(draggingContext = draggedField) {
       const mounted = await mountWithProvider(
-        <ChildDragDropProvider
-          dataTestSubjPrefix="lnsDragDrop"
-          dragging={draggingContext}
-          setDragging={() => {}}
-          setActiveDropTarget={() => {}}
-          activeDropTarget={undefined}
-          keyboardMode={false}
-          setKeyboardMode={() => {}}
-          setA11yMessage={() => {}}
-          registerDropTarget={jest.fn()}
-          dropTargetsByOrder={undefined}
-        >
+        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingContext })}>
           <WorkspacePanel
             {...defaultProps}
             datasourceMap={{

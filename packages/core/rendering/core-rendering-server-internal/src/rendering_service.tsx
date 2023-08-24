@@ -167,7 +167,9 @@ export class RenderingService {
 
     let darkMode: boolean;
 
-    if (userSettingDarkMode) {
+    const isThemeOverridden = settings.user['theme:darkMode']?.isOverridden ?? false;
+
+    if (userSettingDarkMode !== undefined && !isThemeOverridden) {
       darkMode = userSettingDarkMode;
     } else {
       darkMode = getSettingValue('theme:darkMode', settings, Boolean);

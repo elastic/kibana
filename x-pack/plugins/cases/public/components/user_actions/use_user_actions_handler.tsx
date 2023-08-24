@@ -49,9 +49,10 @@ export const useUserActionsHandler = (): UseUserActionsHandler => {
   const { clearDraftComment, draftComment, hasIncomingLensState, openLensModal } =
     useLensDraftComment();
   const handlerTimeoutId = useRef(0);
-  const { isLoadingIds, patchComment } = useUpdateComment();
+  const { mutate: patchComment } = useUpdateComment();
   const { mutate: deleteComment } = useDeleteComment();
   const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
+  const [loadingCommentIds, setLoadingCommentIds] = useState<string[]>([]);
   const [manageMarkdownEditIds, setManageMarkdownEditIds] = useState<string[]>([]);
   const refreshCaseViewPage = useRefreshCaseViewPage();
   const commentRefs = useRef<
@@ -70,14 +71,33 @@ export const useUserActionsHandler = (): UseUserActionsHandler => {
     [clearDraftComment]
   );
 
+  const removeCommentIdFromLoadingIds = (commentId: string) => {
+    setLoadingCommentIds((ids) => ids.filter((loadingId) => loadingId !== commentId));
+  };
+
+  const addCommentIdToLoadingIds = (commentId: string) => {
+    setLoadingCommentIds((ids) => [...ids, commentId]);
+  };
+
   const handleSaveComment = useCallback(
     ({ id, version }: { id: string; version: string }, content: string) => {
-      patchComment({
-        caseId,
-        commentId: id,
-        commentUpdate: content,
-        version,
-      });
+      addCommentIdToLoadingIds(id);
+      patchComment(
+        {
+          caseId,
+          commentId: id,
+          commentUpdate: content,
+          version,
+        },
+        {
+          onSuccess: () => {
+            removeCommentIdFromLoadingIds(id);
+          },
+          onError: () => {
+            removeCommentIdFromLoadingIds(id);
+          },
+        }
+      );
     },
     [caseId, patchComment]
   );
@@ -154,7 +174,7 @@ export const useUserActionsHandler = (): UseUserActionsHandler => {
   }, [clearDraftComment, draftComment, hasIncomingLensState, openLensModal]);
 
   return {
-    loadingCommentIds: isLoadingIds,
+    loadingCommentIds,
     selectedOutlineCommentId,
     manageMarkdownEditIds,
     commentRefs,

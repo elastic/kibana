@@ -11,15 +11,18 @@ import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import type {
   RuleExecutionMetrics,
   RuleExecutionStatus,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   LogLevel,
   logLevelFromExecutionStatus,
   logLevelToNumber,
   RuleExecutionEventType,
   ruleExecutionStatusToNumber,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
-import { RULE_SAVED_OBJECT_TYPE, RULE_EXECUTION_LOG_PROVIDER } from './constants';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import {
+  RULE_SAVED_OBJECT_TYPE,
+  RULE_EXECUTION_LOG_PROVIDER,
+} from '../../event_log/event_log_constants';
 
 export interface IEventLogWriter {
   logMessage(args: MessageArgs): void;

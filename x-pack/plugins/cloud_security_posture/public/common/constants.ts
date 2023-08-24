@@ -27,9 +27,10 @@ import {
 import eksLogo from '../assets/icons/cis_eks_logo.svg';
 import aksLogo from '../assets/icons/cis_aks_logo.svg';
 import gkeLogo from '../assets/icons/cis_gke_logo.svg';
+import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
 
 export const statusColors = {
-  passed: euiThemeVars.euiColorVis0,
+  passed: euiThemeVars.euiColorSuccess,
   failed: euiThemeVars.euiColorVis9,
 };
 
@@ -42,6 +43,7 @@ export const LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY = 'cloudPosture:benchmark:pag
 export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
 export const LOCAL_STORAGE_DASHBOARD_CLUSTER_SORT_KEY =
   'cloudPosture:complianceDashboard:clusterSort';
+export const LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY = 'cloudPosture:findings:lastSelectedTab';
 
 export type CloudPostureIntegrations = Record<
   CloudSecurityPolicyTemplate,
@@ -58,6 +60,7 @@ export interface CloudPostureIntegrationProps {
     disabled?: boolean;
     icon?: string;
     tooltip?: string;
+    isBeta?: boolean;
   }>;
 }
 
@@ -74,7 +77,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
       {
         type: CLOUDBEAT_AWS,
         name: i18n.translate('xpack.csp.cspmIntegration.awsOption.nameTitle', {
-          defaultMessage: 'Amazon Web Services',
+          defaultMessage: 'AWS',
         }),
         benchmark: i18n.translate('xpack.csp.cspmIntegration.awsOption.benchmarkTitle', {
           defaultMessage: 'CIS AWS',
@@ -89,11 +92,8 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.cspmIntegration.gcpOption.benchmarkTitle', {
           defaultMessage: 'CIS GCP',
         }),
-        disabled: true,
-        icon: 'logoGCP',
-        tooltip: i18n.translate('xpack.csp.cspmIntegration.gcpOption.tooltipContent', {
-          defaultMessage: 'Coming soon',
-        }),
+        icon: googleCloudLogo,
+        isBeta: true,
       },
       {
         type: CLOUDBEAT_AZURE,
@@ -192,7 +192,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'GCP',
         }),
         disabled: true,
-        icon: 'logoGCP',
+        icon: googleCloudLogo,
         tooltip: i18n.translate('xpack.csp.vulnMgmtIntegration.gcpOption.tooltipContent', {
           defaultMessage: 'Coming soon',
         }),
@@ -214,3 +214,9 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
   },
 };
 export const FINDINGS_DOCS_URL = 'https://ela.st/findings';
+export const MIN_VERSION_GCP_CIS = '1.5.0';
+
+export const NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS = 10000;
+
+export const DETECTION_ENGINE_RULES_KEY = 'detection_engine_rules';
+export const DETECTION_ENGINE_ALERTS_KEY = 'detection_engine_alerts';

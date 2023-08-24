@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '../../../hooks';
+import { useKibana } from '../../../hooks/use_kibana';
 
 const POLICIES_URL = '/api/fleet/package_policies';
 const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';

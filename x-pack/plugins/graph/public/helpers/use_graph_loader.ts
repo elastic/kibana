@@ -101,7 +101,7 @@ export const useGraphLoader = ({ toastNotifications, coreStart }: UseGraphLoader
       inspectRequest.json(dsl);
 
       return coreStart.http
-        .post<{ resp: estypes.GraphExploreResponse }>('../api/graph/graphExplore', request)
+        .post<{ resp: estypes.GraphExploreResponse }>('../internal/graph/graphExplore', request)
         .then(function (data) {
           const response = data.resp;
 
@@ -136,7 +136,7 @@ export const useGraphLoader = ({ toastNotifications, coreStart }: UseGraphLoader
       inspectRequest.json(dsl);
 
       coreStart.http
-        .post<{ resp: estypes.GraphExploreResponse }>('../api/graph/searchProxy', request)
+        .post<{ resp: estypes.GraphExploreResponse }>('../internal/graph/searchProxy', request)
         .then(function (data) {
           const response = data.resp;
           inspectRequest.stats({}).ok({ json: response });

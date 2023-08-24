@@ -24,7 +24,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { useTheme } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { formatMillisecond } from '../common/network_data/data_formatting';
 
 import { useNetworkTimings } from '../hooks/use_network_timings';

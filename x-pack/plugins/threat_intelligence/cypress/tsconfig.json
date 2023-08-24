@@ -4,6 +4,6 @@
   "exclude": ["target/**/*"],
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["cypress", "cypress-file-upload", "cypress-pipe", "node"]
+    "types": ["cypress", "cypress-file-upload", "node"]
   },
 }

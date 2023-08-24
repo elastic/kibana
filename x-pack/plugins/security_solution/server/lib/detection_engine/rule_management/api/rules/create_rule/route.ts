@@ -5,24 +5,25 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
+import type { CreateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
+import {
+  CreateRuleRequestBody,
+  validateCreateRuleProps,
+} from '../../../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { validateCreateRuleProps } from '../../../../../../../common/detection_engine/rule_management';
-import { RuleCreateProps } from '../../../../../../../common/detection_engine/rule_schema';
-
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../../machine_learning/validation';
-import { readRules } from '../../../logic/crud/read_rules';
 import { buildSiemResponse } from '../../../../routes/utils';
-
 import { createRules } from '../../../logic/crud/create_rules';
+import { readRules } from '../../../logic/crud/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
-import { transformValidate } from '../../../utils/validate';
+import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
 
 export const createRuleRoute = (
   router: SecuritySolutionPluginRouter,
@@ -32,13 +33,13 @@ export const createRuleRoute = (
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        body: buildRouteValidation(RuleCreateProps),
+        body: buildRouteValidation(CreateRuleRequestBody),
       },
       options: {
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<CreateRuleResponse>> => {
       const siemResponse = buildSiemResponse(response);
       const validationErrors = validateCreateRuleProps(request.body);
       if (validationErrors.length) {
@@ -93,6 +94,8 @@ export const createRuleRoute = (
           ruleId: undefined,
         });
 
+        await validateResponseActionsPermissions(ctx.securitySolution, request.body);
+
         const createdRule = await createRules({
           rulesClient,
           params: request.body,
@@ -102,7 +105,7 @@ export const createRuleRoute = (
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {
-          return response.ok({ body: validated ?? {} });
+          return response.ok({ body: validated });
         }
       } catch (err) {
         const error = transformError(err as Error);

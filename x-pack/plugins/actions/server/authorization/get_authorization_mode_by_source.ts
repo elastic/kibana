@@ -53,13 +53,10 @@ export async function getBulkAuthorizationModeBySource(
       id: get(es, 'source.id'),
     }))
   );
-  const legacyVersions: Record<string, boolean> = alerts.saved_objects.reduce(
-    (acc, so) => ({
-      ...acc,
-      [so.id]: so.attributes.meta?.versionApiKeyLastmodified === LEGACY_VERSION,
-    }),
-    {}
-  );
+  const legacyVersions = alerts.saved_objects.reduce<Record<string, boolean>>((acc, so) => {
+    acc[so.id] = so.attributes.meta?.versionApiKeyLastmodified === LEGACY_VERSION;
+    return acc;
+  }, {});
   return executionSources.reduce((acc, es) => {
     const isAlertSavedObject =
       isSavedObjectExecutionSource(es) && es.source?.type === ALERT_SAVED_OBJECT_TYPE;

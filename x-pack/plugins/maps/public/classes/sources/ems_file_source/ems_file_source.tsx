@@ -16,7 +16,6 @@ import { getEmsFileLayers } from '../../../util';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { UpdateSourceEditor } from './update_source_editor';
 import { EMSFileField } from '../../fields/ems_file_field';
-import { registerSource } from '../source_registry';
 import { IField } from '../../fields/field';
 import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
@@ -218,8 +217,3 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     return emsSettings.isEMSUrlSet() ? [LICENSED_FEATURES.ON_PREM_EMS] : [];
   }
 }
-
-registerSource({
-  ConstructorFunction: EMSFileSource,
-  type: SOURCE_TYPES.EMS_FILE,
-});

@@ -7,16 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n-react';
-import { render } from 'react-dom';
 import { PaletteOutput, PaletteRegistry, CustomPaletteParams } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayoutDirection } from '@elastic/charts';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
-import { AccessorConfig } from '@kbn/visualization-ui-components/public';
+import { AccessorConfig } from '@kbn/visualization-ui-components';
 import { CollapseFunction } from '../../../common/expressions';
 import type { LayerType } from '../../../common/types';
 import { layerTypes } from '../../../common/layer_types';
@@ -33,7 +30,6 @@ import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import { DimensionEditor, DimensionEditorAdditionalSection } from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
-import { FormatSelectorOptions } from '../../datasources/form_based/dimension_panel/format_selector';
 import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
 
@@ -116,10 +112,6 @@ const getMetricLayerConfiguration = (
 
   const isBucketed = (op: OperationMetadata) => op.isBucketed;
 
-  const formatterOptions: FormatSelectorOptions = {
-    disableExtraOptions: true,
-  };
-
   return {
     groups: [
       {
@@ -146,7 +138,6 @@ const getMetricLayerConfiguration = (
         isMetricDimension: true,
         enableDimensionEditor: true,
         enableFormatSelector: true,
-        formatSelectorOptions: formatterOptions,
         requiredMinDimensionCount: 1,
       },
       {
@@ -172,7 +163,6 @@ const getMetricLayerConfiguration = (
         isMetricDimension: true,
         enableDimensionEditor: true,
         enableFormatSelector: true,
-        formatSelectorOptions: formatterOptions,
       },
       {
         groupId: GROUP_ID.MAX,
@@ -194,7 +184,6 @@ const getMetricLayerConfiguration = (
         filterOperations: isSupportedMetric,
         enableDimensionEditor: true,
         enableFormatSelector: false,
-        formatSelectorOptions: formatterOptions,
         supportStaticValue: true,
         prioritizedOperation: 'max',
         groupTooltip: i18n.translate('xpack.lens.metric.maxTooltip', {
@@ -219,7 +208,6 @@ const getMetricLayerConfiguration = (
         filterOperations: isBucketed,
         enableDimensionEditor: true,
         enableFormatSelector: true,
-        formatSelectorOptions: formatterOptions,
       },
     ],
   };
@@ -420,7 +408,6 @@ export const getMetricVisualization = ({
             ]
           : undefined,
         disabled: true,
-        canAddViaMenu: true,
       },
       {
         type: layerTypes.METRIC_TRENDLINE,
@@ -431,7 +418,6 @@ export const getMetricVisualization = ({
           { groupId: GROUP_ID.TREND_TIME, columnId: generateId(), autoTimeField: true },
         ],
         disabled: Boolean(state?.trendlineLayerId),
-        canAddViaMenu: true,
       },
     ];
   },
@@ -603,37 +589,16 @@ export const getMetricVisualization = ({
     return updated;
   },
 
-  renderToolbar(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <Toolbar {...props} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  ToolbarComponent(props) {
+    return <Toolbar {...props} />;
   },
 
-  renderDimensionEditor(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <DimensionEditor {...props} paletteService={paletteService} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  DimensionEditorComponent(props) {
+    return <DimensionEditor {...props} paletteService={paletteService} />;
   },
 
-  renderDimensionEditorAdditionalSection(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <DimensionEditorAdditionalSection {...props} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  DimensionEditorAdditionalSectionComponent(props) {
+    return <DimensionEditorAdditionalSection {...props} />;
   },
 
   getDisplayOptions() {

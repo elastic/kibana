@@ -43,20 +43,17 @@ export const getMlInferencePipelines = async (
 
   // Process pipelines: check if the model_id is one of the redacted ones, if so, redact it in the
   // result as well
-  const inferencePipelinesResult: Record<string, IngestPipeline> = Object.entries(
-    fetchedInferencePipelines
-  ).reduce(
-    (currentPipelines, [name, inferencePipeline]) => ({
-      ...currentPipelines,
-      [name]: {
-        ...inferencePipeline,
-        processors: inferencePipeline.processors?.map((processor) =>
-          redactModelIdIfInaccessible(processor, accessibleModelIds)
-        ),
-      },
-    }),
-    {}
-  );
+  const inferencePipelinesResult = Object.entries(fetchedInferencePipelines).reduce<
+    Record<string, IngestPipeline>
+  >((currentPipelines, [name, inferencePipeline]) => {
+    currentPipelines[name] = {
+      ...inferencePipeline,
+      processors: inferencePipeline.processors?.map((processor) =>
+        redactModelIdIfInaccessible(processor, accessibleModelIds)
+      ),
+    };
+    return currentPipelines;
+  }, {});
 
   return inferencePipelinesResult;
 };

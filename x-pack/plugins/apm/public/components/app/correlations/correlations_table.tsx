@@ -11,7 +11,7 @@ import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
-import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
 import type { FieldValuePair } from '../../../../common/correlations/types';

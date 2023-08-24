@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { FAILED_TO_SCHEDULE } from '../manual_test_run_mode/browser_test_results';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
 import {
   CheckGroupResult,
@@ -34,17 +35,26 @@ interface Props {
 }
 export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const { summariesLoading, expectedSummariesLoaded, stepLoadingInProgress, checkGroupResults } =
-    useBrowserRunOnceMonitors({
-      testRunId,
-      expectSummaryDocs: expectPings,
-    });
+  const {
+    retriesExceeded,
+    summariesLoading,
+    expectedSummariesLoaded,
+    stepLoadingInProgress,
+    checkGroupResults,
+  } = useBrowserRunOnceMonitors({
+    testRunId,
+    expectSummaryDocs: expectPings,
+  });
 
   useEffect(() => {
     if (expectedSummariesLoaded) {
       onDone(testRunId);
     }
   }, [onDone, expectedSummariesLoaded, testRunId]);
+
+  if (retriesExceeded) {
+    return <EuiCallOut title={FAILED_TO_SCHEDULE} color="danger" iconType="alert" />;
+  }
 
   return (
     <>

@@ -37,7 +37,7 @@ import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
 import type {
   ExceptionListRuleReferencesInfoSchema,
   ExceptionListRuleReferencesSchema,
-} from '../../../../../common/detection_engine/rule_exceptions';
+} from '../../../../../common/api/detection_engine/rule_exceptions';
 import type { Rule } from '../../../rule_management/logic/types';
 import * as i18n from './translations';
 

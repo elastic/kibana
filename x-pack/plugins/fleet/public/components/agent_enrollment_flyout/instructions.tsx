@@ -78,13 +78,20 @@ export const Instructions = (props: InstructionProps) => {
     (fleetServers.length === 0 ||
       isFleetServerUnhealthy ||
       (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
+
   useEffect(() => {
-    if (!isIntegrationFlow && showAgentEnrollment) {
+    // If we detect a CloudFormation integration, we want to hide the selection type
+    if (
+      props.cloudSecurityIntegration?.isCloudFormation ||
+      props.cloudSecurityIntegration?.cloudShellUrl
+    ) {
+      setSelectionType(undefined);
+    } else if (!isIntegrationFlow && showAgentEnrollment) {
       setSelectionType('radio');
     } else {
       setSelectionType('tabs');
     }
-  }, [isIntegrationFlow, showAgentEnrollment, setSelectionType]);
+  }, [isIntegrationFlow, showAgentEnrollment, setSelectionType, props.cloudSecurityIntegration]);
 
   if (isLoadingAgents || isLoadingAgentPolicies || isLoadingFleetServerHealth)
     return <Loading size="l" />;
@@ -99,7 +106,7 @@ export const Instructions = (props: InstructionProps) => {
     } else if (showAgentEnrollment) {
       return (
         <>
-          {selectionType === 'tabs' && (
+          {selectionType === 'tabs' && !props.cloudSecurityIntegration?.cloudShellUrl && (
             <>
               <EuiText>
                 <FormattedMessage

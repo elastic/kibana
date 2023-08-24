@@ -13,6 +13,7 @@ import {
   SavedObjectMigrationFn,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
   LensDocShape715,
   LensDocShape810,
@@ -132,12 +133,12 @@ describe('Lens migrations', () => {
           visualizationType: 'lnsMetric',
         },
       };
-      const result = migrations['7.7.0'](target, context);
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.7.0'])(target, context);
       expect(result).toEqual(target);
     });
 
     it('should handle missing layers', () => {
-      const result = migrations['7.7.0'](
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.7.0'])(
         {
           ...example,
           attributes: {
@@ -169,7 +170,7 @@ describe('Lens migrations', () => {
     });
 
     it('should remove only missing accessors', () => {
-      const result = migrations['7.7.0'](example, context);
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.7.0'])(example, context);
 
       expect(result.attributes.state.visualization.layers).toEqual([
         {
@@ -285,7 +286,7 @@ describe('Lens migrations', () => {
     };
 
     it('should remove the lens_auto_date expression', () => {
-      const result = migrations['7.8.0'](example, context);
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.8.0'])(example, context);
       expect(result.attributes.expression).toContain(`timeFields=\"products.created_on\"`);
     });
 
@@ -302,7 +303,7 @@ describe('Lens migrations', () => {
 | xyVis xTitle="products.created_on" yTitle="Count of records" legend={legendConfig isVisible=true position="right"} layers={}`,
         },
       };
-      const result = migrations['7.8.0'](input, context);
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.8.0'])(input, context);
       expect(result).toEqual(input);
     });
   });
@@ -454,12 +455,12 @@ describe('Lens migrations', () => {
     };
 
     it('should remove expression', () => {
-      const result = migrations['7.10.0'](example, context);
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.10.0'])(example, context);
       expect(result.attributes.expression).toBeUndefined();
     });
 
     it('should list references for layers', () => {
-      const result = migrations['7.10.0'](example, context);
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.10.0'])(example, context);
       expect(
         result.references?.find(
           (ref) => ref.name === 'indexpattern-datasource-layer-3b7791e9-326e-40d5-a787-b7594e48d906'
@@ -473,7 +474,7 @@ describe('Lens migrations', () => {
     });
 
     it('should remove index pattern ids from layers', () => {
-      const result = migrations['7.10.0'](example, context);
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.10.0'])(example, context);
       expect(
         result.attributes.state.datasourceStates.indexpattern.layers[
           '3b7791e9-326e-40d5-a787-b7594e48d906'
@@ -487,12 +488,12 @@ describe('Lens migrations', () => {
     });
 
     it('should remove datsource meta data', () => {
-      const result = migrations['7.10.0'](example, context);
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.10.0'])(example, context);
       expect(result.attributes.state.datasourceMetaData).toBeUndefined();
     });
 
     it('should list references for filters', () => {
-      const result = migrations['7.10.0'](example, context);
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.10.0'])(example, context);
       expect(result.references?.find((ref) => ref.name === 'filter-index-pattern-0')?.id).toEqual(
         '90943e30-9a47-11e8-b64d-95841ca0b247'
       );
@@ -502,7 +503,7 @@ describe('Lens migrations', () => {
     });
 
     it('should remove index pattern ids from filters', () => {
-      const result = migrations['7.10.0'](example, context);
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.10.0'])(example, context);
       expect(result.attributes.state.filters[0].meta.index).toBeUndefined();
       expect(result.attributes.state.filters[0].meta.indexRefName).toEqual(
         'filter-index-pattern-0'
@@ -514,7 +515,7 @@ describe('Lens migrations', () => {
     });
 
     it('should list reference for current index pattern', () => {
-      const result = migrations['7.10.0'](example, context);
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.10.0'])(example, context);
       expect(
         result.references?.find(
           (ref) => ref.name === 'indexpattern-datasource-current-indexpattern'
@@ -523,14 +524,14 @@ describe('Lens migrations', () => {
     });
 
     it('should remove current index pattern id from datasource state', () => {
-      const result = migrations['7.10.0'](example, context);
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.10.0'])(example, context);
       expect(
         result.attributes.state.datasourceStates.indexpattern.currentIndexPatternId
       ).toBeUndefined();
     });
 
     it('should produce a valid document', () => {
-      const result = migrations['7.10.0'](example, context);
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.10.0'])(example, context);
       // changes to the outcome of this are critical - this test is a safe guard to not introduce changes accidentally
       // if this test fails, make extra sure it's expected
       expect(result).toMatchSnapshot();
@@ -608,9 +609,10 @@ describe('Lens migrations', () => {
     };
 
     it('should remove the suggested priority from all columns', () => {
-      const result = migrations['7.11.0'](example, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.11.0'])(
+        example,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       const resultLayers = result.attributes.state.datasourceStates.indexpattern.layers;
       const layersWithSuggestedPriority = Object.values(resultLayers).reduce(
         (count, layer) =>
@@ -657,16 +659,18 @@ describe('Lens migrations', () => {
         ...example,
         attributes: { ...example.attributes, visualizationType: 'xy' },
       };
-      const result = migrations['7.12.0'](xyChart, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.12.0'])(
+        xyChart,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       expect(result).toBe(xyChart);
     });
 
     it('should remove layer array and reshape state', () => {
-      const result = migrations['7.12.0'](example, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.12.0'])(
+        example,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       expect(result.attributes.state.visualization).toEqual({
         layerId: 'first',
         columns: [
@@ -856,19 +860,22 @@ describe('Lens migrations', () => {
     };
 
     it('should rename only specific operation types', () => {
-      const result = migrations['7.13.0'](example, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.13.0'])(
+        example,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       validate(result);
     });
 
     it('can be applied multiple times', () => {
-      const result1 = migrations['7.13.0'](example, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
-      const result2 = migrations['7.13.1'](result1, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result1 = SavedObjectsUtils.getMigrationFunction(migrations['7.13.0'])(
+        example,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
+      const result2 = SavedObjectsUtils.getMigrationFunction(migrations['7.13.1'])(
+        result1,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       validate(result2);
     });
   });
@@ -949,9 +956,10 @@ describe('Lens migrations', () => {
     };
 
     it('should remove time zone param from date histogram', () => {
-      const result = migrations['7.14.0'](example, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.14.0'])(
+        example,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       const layers = Object.values(result.attributes.state.datasourceStates.indexpattern.layers);
       expect(layers.length).toBe(1);
       const columns = Object.values(layers[0].columns);
@@ -1059,9 +1067,10 @@ describe('Lens migrations', () => {
           },
         ],
       } as unknown as VisStatePre715;
-      const result = migrations['7.15.0'](xyExample, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.15.0'])(
+        xyExample,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
       if ('layers' in state) {
         for (const layer of state.layers) {
@@ -1087,9 +1096,10 @@ describe('Lens migrations', () => {
           },
         ],
       } as unknown as VisStatePre715;
-      const result = migrations['7.15.0'](pieExample, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.15.0'])(
+        pieExample,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
       if ('layers' in state) {
         for (const layer of state.layers) {
@@ -1104,9 +1114,10 @@ describe('Lens migrations', () => {
         layerId: '1',
         accessor: undefined,
       } as unknown as VisStatePre715;
-      const result = migrations['7.15.0'](metricExample, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.15.0'])(
+        metricExample,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
       expect('layerType' in state).toEqual(true);
       if ('layerType' in state) {
@@ -1120,9 +1131,10 @@ describe('Lens migrations', () => {
         layerId: '1',
         accessor: undefined,
       } as unknown as VisStatePre715;
-      const result = migrations['7.15.0'](datatableExample, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.15.0'])(
+        datatableExample,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
       expect('layerType' in state).toEqual(true);
       if ('layerType' in state) {
@@ -1136,9 +1148,10 @@ describe('Lens migrations', () => {
         layerId: '1',
         accessor: undefined,
       } as unknown as VisStatePre715;
-      const result = migrations['7.15.0'](heatmapExample, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.15.0'])(
+        heatmapExample,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
       expect('layerType' in state).toEqual(true);
       if ('layerType' in state) {
@@ -1221,9 +1234,10 @@ describe('Lens migrations', () => {
             },
           ],
         } as unknown as VisState716;
-        const result = migrations['7.16.0'](exampleCopy, context) as ReturnType<
-          SavedObjectMigrationFn<LensDocShape, LensDocShape>
-        >;
+        const result = SavedObjectsUtils.getMigrationFunction(migrations['7.16.0'])(
+          exampleCopy,
+          context
+        ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
         expect(result).toEqual(exampleCopy);
       }
     });
@@ -1241,9 +1255,10 @@ describe('Lens migrations', () => {
           },
         ],
       } as unknown as VisState716;
-      const result = migrations['7.16.0'](datatableExample, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.16.0'])(
+        datatableExample,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       expect(result).toEqual(datatableExample);
     });
 
@@ -1260,9 +1275,10 @@ describe('Lens migrations', () => {
           },
         ],
       } as unknown as VisState716;
-      const result = migrations['7.16.0'](datatableExample, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.16.0'])(
+        datatableExample,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       expect(result).toEqual(datatableExample);
     });
 
@@ -1272,9 +1288,10 @@ describe('Lens migrations', () => {
       (datatableExample.attributes as LensDocShape715<VisState716>).state.visualization = {
         columns: [{ colorMode: 'none' }, {}],
       } as unknown as VisState716;
-      const result = migrations['7.16.0'](datatableExample, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.16.0'])(
+        datatableExample,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       expect(result).toEqual(datatableExample);
     });
 
@@ -1291,9 +1308,10 @@ describe('Lens migrations', () => {
           },
         ],
       } as unknown as VisState716;
-      const result = migrations['7.16.0'](datatableExample, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.16.0'])(
+        datatableExample,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       expect(result).toEqual(datatableExample);
     });
 
@@ -1340,9 +1358,10 @@ describe('Lens migrations', () => {
           },
         ],
       } as unknown as VisState716;
-      const result = migrations['7.16.0'](datatableExample, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.16.0'])(
+        datatableExample,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       const state = (
         result.attributes as LensDocShape715<Extract<VisState716, { columns: unknown[] }>>
       ).state.visualization;
@@ -1390,9 +1409,10 @@ describe('Lens migrations', () => {
           },
         },
       } as unknown as VisState716;
-      const result = migrations['7.16.0'](datatableExample, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['7.16.0'])(
+        datatableExample,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       const state = (
         result.attributes as LensDocShape715<
           Extract<VisState716, { palette?: PaletteOutput<CustomPaletteParams> }>
@@ -1519,9 +1539,10 @@ describe('Lens migrations', () => {
         };
       });
 
-      const result = migrations['8.1.0'](example, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['8.1.0'])(
+        example,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
 
       expect(result.attributes.state.filters).toEqual(expectedFilters);
     });
@@ -1586,9 +1607,10 @@ describe('Lens migrations', () => {
     } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
 
     it('should change field for count operations but not for others, not changing the vis', () => {
-      const result = migrations['8.1.0'](example, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['8.1.0'])(
+        example,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
 
       expect(
         Object.values(
@@ -1632,10 +1654,9 @@ describe('Lens migrations', () => {
       {}
     );
 
-    const migratedLensDoc = migrationFunctionsObject[migrationVersion](
-      lensVisualizationDoc as SavedObjectUnsanitizedDoc,
-      {} as SavedObjectMigrationContext
-    );
+    const migratedLensDoc = SavedObjectsUtils.getMigrationFunction(
+      migrationFunctionsObject[migrationVersion]
+    )(lensVisualizationDoc as SavedObjectUnsanitizedDoc, {} as SavedObjectMigrationContext);
 
     expect(migratedLensDoc).toEqual({
       attributes: {
@@ -1687,10 +1708,9 @@ describe('Lens migrations', () => {
       {}
     );
 
-    const migratedLensDoc = migrationFunctionsObject[migrationVersion](
-      lensVisualizationDoc as SavedObjectUnsanitizedDoc,
-      {} as SavedObjectMigrationContext
-    );
+    const migratedLensDoc = SavedObjectsUtils.getMigrationFunction(
+      migrationFunctionsObject[migrationVersion]
+    )(lensVisualizationDoc as SavedObjectUnsanitizedDoc, {} as SavedObjectMigrationContext);
 
     expect(migratedLensDoc).toEqual({
       attributes: {
@@ -1735,11 +1755,12 @@ describe('Lens migrations', () => {
         }),
       }
     );
-    const migratedLensDoc = migrationFunctionsObject[migrationVersion](
-      lensVisualizationDoc as SavedObjectUnsanitizedDoc,
-      {} as SavedObjectMigrationContext
-    );
-    const otherLensDoc = migrationFunctionsObject[migrationVersion](
+    const migratedLensDoc = SavedObjectsUtils.getMigrationFunction(
+      migrationFunctionsObject[migrationVersion]
+    )(lensVisualizationDoc as SavedObjectUnsanitizedDoc, {} as SavedObjectMigrationContext);
+    const otherLensDoc = SavedObjectsUtils.getMigrationFunction(
+      migrationFunctionsObject[migrationVersion]
+    )(
       {
         ...lensVisualizationDoc,
         attributes: {
@@ -1829,9 +1850,10 @@ describe('Lens migrations', () => {
     } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
 
     it('should change field for count operations but not for others, not changing the vis', () => {
-      const result = migrations['8.1.0'](example, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['8.1.0'])(
+        example,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
 
       expect(
         Object.values(
@@ -1924,9 +1946,10 @@ describe('Lens migrations', () => {
       } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
 
       it('should set showArrayValues for last-value columns', () => {
-        const result = migrations['8.2.0'](example, context) as ReturnType<
-          SavedObjectMigrationFn<LensDocShape, LensDocShape>
-        >;
+        const result = SavedObjectsUtils.getMigrationFunction(migrations['8.2.0'])(
+          example,
+          context
+        ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
 
         const layer2Columns =
           result.attributes.state.datasourceStates.indexpattern.layers['2'].columns;
@@ -2031,7 +2054,10 @@ describe('Lens migrations', () => {
       }
 
       it('should migrate enabled fitRowToContent to new rowHeight: "auto"', () => {
-        const result = migrations['8.2.0'](getExample(true), context) as ReturnType<
+        const result = SavedObjectsUtils.getMigrationFunction(migrations['8.2.0'])(
+          getExample(true),
+          context
+        ) as ReturnType<
           SavedObjectMigrationFn<LensDocShape810<VisState810>, LensDocShape810<VisState820>>
         >;
 
@@ -2043,7 +2069,10 @@ describe('Lens migrations', () => {
       });
 
       it('should migrate disabled fitRowToContent to new rowHeight: "single"', () => {
-        const result = migrations['8.2.0'](getExample(false), context) as ReturnType<
+        const result = SavedObjectsUtils.getMigrationFunction(migrations['8.2.0'])(
+          getExample(false),
+          context
+        ) as ReturnType<
           SavedObjectMigrationFn<LensDocShape810<VisState810>, LensDocShape810<VisState820>>
         >;
 
@@ -2117,9 +2146,10 @@ describe('Lens migrations', () => {
     } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
 
     it('should set include empty rows for all date histogram columns', () => {
-      const result = migrations['8.2.0'](example, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['8.2.0'])(
+        example,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
 
       const layer2Columns =
         result.attributes.state.datasourceStates.indexpattern.layers['2'].columns;
@@ -2145,9 +2175,10 @@ describe('Lens migrations', () => {
     } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
 
     it('preserves current config for existing visualizations that are using the DEFAULTS', () => {
-      const result = migrations['8.3.0'](example, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['8.3.0'])(
+        example,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       const visState = result.attributes.state.visualization as LegacyMetricState;
       expect(visState.textAlign).toBe('center');
       expect(visState.titlePosition).toBe('bottom');
@@ -2155,7 +2186,7 @@ describe('Lens migrations', () => {
     });
 
     it('preserves current config for existing visualizations that are using CUSTOM settings', () => {
-      const result = migrations['8.3.0'](
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['8.3.0'])(
         {
           ...example,
           attributes: {
@@ -2180,7 +2211,7 @@ describe('Lens migrations', () => {
 
   describe('8.3.0 - convert legend sizes to strings', () => {
     const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
-    const migrate = migrations['8.3.0'];
+    const migrate = SavedObjectsUtils.getMigrationFunction(migrations['8.3.0']);
 
     const autoLegendSize = 'auto';
     const largeLegendSize = 'large';
@@ -2266,15 +2297,16 @@ describe('Lens migrations', () => {
     } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
 
     it('migrates valueLabels from `inside` to `show`', () => {
-      const result = migrations['8.3.0'](example, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['8.3.0'])(
+        example,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       const visState = result.attributes.state.visualization as VisState830;
       expect(visState.valueLabels).toBe('show');
     });
 
     it("doesn't migrate valueLabels with `hide` value", () => {
-      const result = migrations['8.3.0'](
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['8.3.0'])(
         {
           ...example,
           attributes: {
@@ -2320,9 +2352,10 @@ describe('Lens migrations', () => {
     } as unknown as SavedObjectUnsanitizedDoc<LensDocShape850<XYVisStatePre850>>;
 
     it('migrates existing annotation events as manual type', () => {
-      const result = migrations['8.5.0'](example, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['8.5.0'])(
+        example,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       const visState = result.attributes.state.visualization as VisState850;
       const [dataLayer, annotationLayer] = visState.layers;
       expect(dataLayer).toEqual({ layerType: 'data' });
@@ -2349,14 +2382,15 @@ describe('Lens migrations', () => {
     } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
 
     it('lnsMetric => lnsLegacyMetric', () => {
-      const result = migrations['8.5.0'](example, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['8.5.0'])(
+        example,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       expect(result.attributes.visualizationType).toBe('lnsLegacyMetric');
     });
 
     it('lnsMetricNew => lnsMetric', () => {
-      const result = migrations['8.5.0'](
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['8.5.0'])(
         { ...example, attributes: { ...example.attributes, visualizationType: 'lnsMetricNew' } },
         context
       ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
@@ -2390,9 +2424,10 @@ describe('Lens migrations', () => {
     } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
 
     it('make metric an array', () => {
-      const result = migrations['8.6.0'](example, context) as ReturnType<
-        SavedObjectMigrationFn<LensDocShape, LensDocShape>
-      >;
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['8.6.0'])(
+        example,
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       expect(
         (result.attributes.state.visualization as { layers: Array<{ metrics: string[] }> })
           .layers[0]
@@ -2496,10 +2531,11 @@ describe('Lens migrations', () => {
     };
 
     it('migrates the indexpattern datasource to formBased', () => {
-      const result = migrations['8.6.0'](example, context);
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['8.6.0'])(example, context);
       expect(result.attributes.state.datasourceStates.formBased).toBe(
         example.attributes.state.datasourceStates.indexpattern
       );
     });
   });
+  // For 8.8.0 tests are already executed at unit level in common_migrations
 });

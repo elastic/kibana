@@ -4,14 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import semverCompare from 'semver/functions/compare';
+import semverValid from 'semver/functions/valid';
 import {
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
@@ -20,8 +24,11 @@ import type {
   NewPackagePolicyInput,
   PackagePolicyReplaceDefineStepExtensionComponentProps,
 } from '@kbn/fleet-plugin/public/types';
-import type { PackageInfo } from '@kbn/fleet-plugin/common';
+import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useParams } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
+import { assert } from '../../../common/utils/helpers';
 import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
 import {
   CLOUDBEAT_AWS,
@@ -37,6 +44,7 @@ import {
   POSTURE_NAMESPACE,
   type NewPackagePolicyPostureInput,
   isPostureInput,
+  getMaxPackageName,
 } from './utils';
 import {
   PolicyTemplateInfo,
@@ -44,8 +52,7 @@ import {
   PolicyTemplateSelector,
   PolicyTemplateVarsForm,
 } from './policy_template_selectors';
-import { assert } from '../../../common/utils/helpers';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -72,6 +79,206 @@ interface IntegrationInfoFieldsProps {
   onChange(field: string, value: string): void;
 }
 
+export const AWS_SINGLE_ACCOUNT = 'single-account';
+export const AWS_ORGANIZATION_ACCOUNT = 'organization-account';
+export const GCP_SINGLE_ACCOUNT = 'single-account-gcp';
+export const GCP_ORGANIZATION_ACCOUNT = 'organization-account-gcp';
+type AwsAccountType = typeof AWS_SINGLE_ACCOUNT | typeof AWS_ORGANIZATION_ACCOUNT;
+
+const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps['options'] => [
+  {
+    id: AWS_ORGANIZATION_ACCOUNT,
+    label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.awsOrganizationLabel', {
+      defaultMessage: 'AWS Organization',
+    }),
+    disabled: isAwsOrgDisabled,
+    tooltip: isAwsOrgDisabled
+      ? i18n.translate('xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDisabledTooltip', {
+          defaultMessage: 'Supported from integration version 1.5.0 and above',
+        })
+      : undefined,
+  },
+  {
+    id: AWS_SINGLE_ACCOUNT,
+    label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.singleAccountLabel', {
+      defaultMessage: 'Single Account',
+    }),
+  },
+];
+
+const getGcpAccountTypeOptions = (): CspRadioGroupProps['options'] => [
+  {
+    id: GCP_ORGANIZATION_ACCOUNT,
+    label: i18n.translate('xpack.csp.fleetIntegration.gcpAccountType.gcpOrganizationLabel', {
+      defaultMessage: 'GCP Organization',
+    }),
+    disabled: true,
+    tooltip: i18n.translate(
+      'xpack.csp.fleetIntegration.gcpAccountType.gcpOrganizationDisabledTooltip',
+      {
+        defaultMessage: 'Coming Soon',
+      }
+    ),
+  },
+  {
+    id: GCP_SINGLE_ACCOUNT,
+    label: i18n.translate('xpack.csp.fleetIntegration.gcpAccountType.gcpSingleAccountLabel', {
+      defaultMessage: 'Single Account',
+    }),
+  },
+];
+
+const getAwsAccountType = (
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>
+): AwsAccountType | undefined => input.streams[0].vars?.['aws.account_type']?.value;
+
+const AWS_ORG_MINIMUM_PACKAGE_VERSION = '1.5.0-preview20';
+
+const AwsAccountTypeSelect = ({
+  input,
+  newPolicy,
+  updatePolicy,
+  packageInfo,
+}: {
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
+  newPolicy: NewPackagePolicy;
+  updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
+  packageInfo: PackageInfo;
+}) => {
+  // This will disable the aws org option for any version below 1.5.0-preview20 which introduced support for account_type. https://github.com/elastic/integrations/pull/6682
+  const isValidSemantic = semverValid(packageInfo.version);
+  const isAwsOrgDisabled = isValidSemantic
+    ? semverCompare(packageInfo.version, AWS_ORG_MINIMUM_PACKAGE_VERSION) < 0
+    : true;
+
+  const awsAccountTypeOptions = useMemo(
+    () => getAwsAccountTypeOptions(isAwsOrgDisabled),
+    [isAwsOrgDisabled]
+  );
+
+  useEffect(() => {
+    if (!getAwsAccountType(input)) {
+      updatePolicy(
+        getPosturePolicy(newPolicy, input.type, {
+          'aws.account_type': {
+            value: isAwsOrgDisabled ? AWS_SINGLE_ACCOUNT : AWS_ORGANIZATION_ACCOUNT,
+            type: 'text',
+          },
+        })
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input]);
+
+  return (
+    <>
+      <EuiText color="subdued" size="s">
+        <FormattedMessage
+          id="xpack.csp.fleetIntegration.awsAccountTypeDescriptionLabel"
+          defaultMessage="Select between single account or organization, and then fill in the name and description to help identify this integration."
+        />
+      </EuiText>
+      <EuiSpacer size="l" />
+      {isAwsOrgDisabled && (
+        <>
+          <EuiCallOut color="warning">
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationNotSupportedMessage"
+              defaultMessage="AWS Organization not supported in current integration version. Please upgrade to the latest version to enable AWS Organizations integration."
+            />
+          </EuiCallOut>
+          <EuiSpacer size="l" />
+        </>
+      )}
+      <RadioGroup
+        idSelected={getAwsAccountType(input) || ''}
+        options={awsAccountTypeOptions}
+        onChange={(accountType) => {
+          updatePolicy(
+            getPosturePolicy(newPolicy, input.type, {
+              'aws.account_type': {
+                value: accountType,
+                type: 'text',
+              },
+            })
+          );
+        }}
+        size="m"
+      />
+      {getAwsAccountType(input) === AWS_ORGANIZATION_ACCOUNT && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiText color="subdued" size="s">
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
+              defaultMessage="Connect Elastic to every AWS Account (current and future) in your environment by providing Elastic with read-only (configuration) access to your AWS organization."
+            />
+          </EuiText>
+        </>
+      )}
+      {getAwsAccountType(input) === AWS_SINGLE_ACCOUNT && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiText color="subdued" size="s">
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.awsAccountType.singleAccountDescription"
+              defaultMessage="Deploying to a single account is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy CSPM at the organization-level, which automatically connects all accounts (both current and future)."
+            />
+          </EuiText>
+        </>
+      )}
+      <EuiSpacer size="l" />
+    </>
+  );
+};
+
+const GcpAccountTypeSelect = ({
+  input,
+  newPolicy,
+  updatePolicy,
+  packageInfo,
+}: {
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>;
+  newPolicy: NewPackagePolicy;
+  updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
+  packageInfo: PackageInfo;
+}) => {
+  return (
+    <>
+      <EuiText color="subdued" size="s">
+        <FormattedMessage
+          id="xpack.csp.fleetIntegration.gcpAccountTypeDescriptionLabel"
+          defaultMessage="Select between single account or organization, and then fill in the name and description to help identify this integration."
+        />
+      </EuiText>
+      <EuiSpacer size="l" />
+      <RadioGroup
+        idSelected={GCP_SINGLE_ACCOUNT}
+        options={getGcpAccountTypeOptions()}
+        onChange={(accountType) => {
+          updatePolicy(
+            getPosturePolicy(newPolicy, input.type, {
+              gcp_account_type: {
+                value: accountType,
+                type: 'text',
+              },
+            })
+          );
+        }}
+        size="m"
+      />
+      <EuiSpacer size="l" />
+      <EuiText color="subdued" size="s">
+        <FormattedMessage
+          id="xpack.csp.fleetIntegration.gcpAccountType.singleAccountDescription"
+          defaultMessage="Deploying to a single account is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy CSPM at the organization-level, which automatically connects all accounts (both current and future)."
+        />
+      </EuiText>
+      <EuiSpacer size="l" />
+    </>
+  );
+};
+
 const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) => (
   <div>
     {fields.map(({ value, id, label, error }) => (
@@ -93,12 +300,13 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
       ? integrationParam
       : undefined;
-
+    // Handling validation state
+    const [isValid, setIsValid] = useState(true);
     const input = getSelectedOption(newPolicy.inputs, integration);
 
     const updatePolicy = useCallback(
-      (updatedPolicy: NewPackagePolicy) => onChange({ isValid: true, updatedPolicy }),
-      [onChange]
+      (updatedPolicy: NewPackagePolicy) => onChange({ isValid, updatedPolicy }),
+      [onChange, isValid]
     );
     /**
      * - Updates policy inputs by user selection
@@ -106,11 +314,11 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
      */
     const setEnabledPolicyInput = useCallback(
       (inputType: PostureInput) => {
-        const inputVars = getPostureInputHiddenVars(inputType);
+        const inputVars = getPostureInputHiddenVars(inputType, packageInfo);
         const policy = getPosturePolicy(newPolicy, inputType, inputVars);
         updatePolicy(policy);
       },
-      [newPolicy, updatePolicy]
+      [newPolicy, updatePolicy, packageInfo]
     );
 
     // search for non null fields of the validation?.vars object
@@ -119,6 +327,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     );
 
     const [isLoading, setIsLoading] = useState(validationResultsNonNullFields.length > 0);
+    const [canFetchIntegration, setCanFetchIntegration] = useState(true);
 
     // delaying component rendering due to a race condition issue from Fleet
     // TODO: remove this workaround when the following issue is resolved:
@@ -132,6 +341,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       setTimeout(() => setIsLoading(false), 200);
     }, [validationResultsNonNullFields]);
 
+    const { data: packagePolicyList, refetch } = usePackagePolicyList(packageInfo.name, {
+      enabled: canFetchIntegration,
+    });
+
     useEffect(() => {
       if (isEditPage) return;
       if (isLoading) return;
@@ -140,16 +353,9 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // Required for mount only to ensure a single input type is selected
       // This will remove errors in validationResults.vars
       setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
+      refetch();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoading, input.policy_template, isEditPage]);
-
-    usePolicyTemplateInitialName({
-      isEditPage,
-      isLoading,
-      integration,
-      newPolicy,
-      updatePolicy,
-    });
 
     useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
 
@@ -157,6 +363,16 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       packageInfo,
       updatePolicy,
       newPolicy,
+    });
+
+    usePolicyTemplateInitialName({
+      packagePolicyList: packagePolicyList?.items,
+      isEditPage,
+      isLoading,
+      integration,
+      newPolicy,
+      updatePolicy,
+      setCanFetchIntegration,
     });
 
     if (isLoading) {
@@ -195,7 +411,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     ];
 
     return (
-      <div data-test-subj={'test'}>
+      <>
         {isEditPage && <EditScreenStepTitle />}
         {/* Defines the enabled policy template */}
         {!integration && (
@@ -219,15 +435,42 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           disabled={isEditPage}
         />
         <EuiSpacer size="l" />
+
+        {/* AWS account type selection box */}
+        {input.type === 'cloudbeat/cis_aws' && (
+          <AwsAccountTypeSelect
+            input={input}
+            newPolicy={newPolicy}
+            updatePolicy={updatePolicy}
+            packageInfo={packageInfo}
+          />
+        )}
+
+        {input.type === 'cloudbeat/cis_gcp' && (
+          <GcpAccountTypeSelect
+            input={input}
+            newPolicy={newPolicy}
+            updatePolicy={updatePolicy}
+            packageInfo={packageInfo}
+          />
+        )}
+
         {/* Defines the name/description */}
         <IntegrationSettings
           fields={integrationFields}
           onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
         />
         {/* Defines the vars of the enabled input of the active policy template */}
-        <PolicyTemplateVarsForm input={input} newPolicy={newPolicy} updatePolicy={updatePolicy} />
+        <PolicyTemplateVarsForm
+          input={input}
+          newPolicy={newPolicy}
+          updatePolicy={updatePolicy}
+          packageInfo={packageInfo}
+          onChange={onChange}
+          setIsValid={setIsValid}
+        />
         <EuiSpacer />
-      </div>
+      </>
     );
   }
 );
@@ -236,45 +479,6 @@ CspPolicyTemplateForm.displayName = 'CspPolicyTemplateForm';
 
 // eslint-disable-next-line import/no-default-export
 export { CspPolicyTemplateForm as default };
-
-const usePolicyTemplateInitialName = ({
-  isEditPage,
-  isLoading,
-  integration,
-  newPolicy,
-  updatePolicy,
-}: {
-  isEditPage: boolean;
-  isLoading: boolean;
-  integration: CloudSecurityPolicyTemplate | undefined;
-  newPolicy: NewPackagePolicy;
-  updatePolicy: (policy: NewPackagePolicy) => void;
-}) => {
-  const getSetupStatus = useCspSetupStatusApi();
-  const installedPackagePolicyCount = Object.entries(getSetupStatus?.data ?? {})?.find(
-    ([key, _value]) => key === integration
-  )?.[1]?.installedPackagePolicies;
-
-  const currentPackagePolicyCount =
-    typeof installedPackagePolicyCount === 'number' ? installedPackagePolicyCount + 1 : undefined;
-
-  useEffect(() => {
-    if (!integration) return;
-    if (isEditPage) return;
-    if (isLoading) return;
-
-    const sequenceSuffix = currentPackagePolicyCount ? `-${currentPackagePolicyCount}` : '';
-    const currentIntegrationName = `${integration}${sequenceSuffix}`;
-    if (newPolicy.name === currentIntegrationName) {
-      return;
-    }
-    updatePolicy({
-      ...newPolicy,
-      name: currentIntegrationName,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, integration, isEditPage]);
-};
 
 const useEnsureDefaultNamespace = ({
   newPolicy,
@@ -291,6 +495,48 @@ const useEnsureDefaultNamespace = ({
     const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: POSTURE_NAMESPACE };
     updatePolicy(policy);
   }, [newPolicy, input, updatePolicy]);
+};
+
+const usePolicyTemplateInitialName = ({
+  isEditPage,
+  isLoading,
+  integration,
+  newPolicy,
+  packagePolicyList,
+  updatePolicy,
+  setCanFetchIntegration,
+}: {
+  isEditPage: boolean;
+  isLoading: boolean;
+  integration: CloudSecurityPolicyTemplate | undefined;
+  newPolicy: NewPackagePolicy;
+  packagePolicyList: PackagePolicy[] | undefined;
+  updatePolicy: (policy: NewPackagePolicy) => void;
+  setCanFetchIntegration: (canFetch: boolean) => void;
+}) => {
+  useEffect(() => {
+    if (!integration) return;
+    if (isEditPage) return;
+    if (isLoading) return;
+
+    const packagePolicyListByIntegration = packagePolicyList?.filter(
+      (policy) => policy?.vars?.posture?.value === integration
+    );
+
+    const currentIntegrationName = getMaxPackageName(integration, packagePolicyListByIntegration);
+
+    if (newPolicy.name === currentIntegrationName) {
+      return;
+    }
+
+    updatePolicy({
+      ...newPolicy,
+      name: currentIntegrationName,
+    });
+    setCanFetchIntegration(false);
+    // since this useEffect should only run on initial mount updatePolicy and newPolicy shouldn't re-trigger it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, integration, isEditPage, packagePolicyList]);
 };
 
 const getSelectedOption = (

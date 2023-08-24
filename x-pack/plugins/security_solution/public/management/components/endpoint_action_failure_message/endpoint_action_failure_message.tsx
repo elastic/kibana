@@ -14,10 +14,11 @@ import type { ActionDetails, MaybeImmutable } from '../../../../common/endpoint/
 
 interface EndpointActionFailureMessageProps {
   action: MaybeImmutable<ActionDetails<{ code?: string }>>;
+  'data-test-subj'?: string;
 }
 
 export const EndpointActionFailureMessage = memo<EndpointActionFailureMessageProps>(
-  ({ action }) => {
+  ({ action, 'data-test-subj': dataTestSubj }) => {
     return useMemo(() => {
       if (!action.isCompleted || action.wasSuccessful) {
         return null;
@@ -55,7 +56,7 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
       }
 
       return (
-        <>
+        <div data-test-subj={dataTestSubj}>
           <FormattedMessage
             id="xpack.securitySolution.endpointResponseActions.actionError.errorMessage"
             defaultMessage="The following { errorCount, plural, =1 {error was} other {errors were}} encountered:"
@@ -63,9 +64,16 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
           />
           <EuiSpacer size="s" />
           <div>{errors.join(' | ')}</div>
-        </>
+        </div>
       );
-    }, [action]);
+    }, [
+      action.agents,
+      action.errors,
+      action.isCompleted,
+      action.outputs,
+      action.wasSuccessful,
+      dataTestSubj,
+    ]);
   }
 );
 EndpointActionFailureMessage.displayName = 'EndpointActionFailureMessage';

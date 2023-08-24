@@ -9,13 +9,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { EuiPageBody } from '@elastic/eui';
-import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
-import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
-import { Switch, Redirect, Router, useLocation } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { EuiPageBody, EuiPageTemplate, EuiPageSection, EuiText } from '@elastic/eui';
+import { Redirect, useLocation } from 'react-router-dom';
+import { Router, Routes as RouterRoutes, Route } from '@kbn/shared-ux-router';
 import { createBrowserHistory } from 'history';
-import { EuiText } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
 
 function useQuery() {
@@ -38,9 +35,9 @@ export const Routes: React.FC<{}> = () => {
 
   return (
     <EuiPageBody>
-      <EuiPageContent>
-        <EuiPageContentBody>
-          <Switch>
+      <EuiPageTemplate.Section>
+        <EuiPageSection>
+          <RouterRoutes>
             <Route path="/hello">
               <HelloPage
                 firstName={query.get('firstName') || ''}
@@ -48,9 +45,9 @@ export const Routes: React.FC<{}> = () => {
               />
             </Route>
             <Redirect from="/" to="/hello" />
-          </Switch>
-        </EuiPageContentBody>
-      </EuiPageContent>
+          </RouterRoutes>
+        </EuiPageSection>
+      </EuiPageTemplate.Section>
     </EuiPageBody>
   );
 };

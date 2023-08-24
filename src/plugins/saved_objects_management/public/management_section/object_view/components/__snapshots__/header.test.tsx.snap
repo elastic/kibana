@@ -23,13 +23,32 @@ exports[`Intro component renders correctly 1`] = `
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+          class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
+            <button
+              class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-danger"
+              data-test-subj="savedObjectEditDelete"
+              type="button"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                <span
+                  color="inherit"
+                  data-euiicon-type="trash"
+                />
+                Delete
+              </span>
+            </button>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
             <a
-              class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-s-base-primary"
+              class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
               data-test-subj="savedObjectEditViewInApp"
               href="/some-url"
               rel="noreferrer"
@@ -44,25 +63,6 @@ exports[`Intro component renders correctly 1`] = `
                 View saved object
               </span>
             </a>
-          </div>
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
-          >
-            <button
-              class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-s-base-danger"
-              data-test-subj="savedObjectEditDelete"
-              type="button"
-            >
-              <span
-                class="emotion-euiButtonDisplayContent"
-              >
-                <span
-                  color="inherit"
-                  data-euiicon-type="trash"
-                />
-                Delete
-              </span>
-            </button>
           </div>
         </div>
       </div>

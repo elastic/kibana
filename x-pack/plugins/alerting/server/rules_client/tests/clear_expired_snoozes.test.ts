@@ -83,7 +83,7 @@ describe('clearExpiredSnoozes()', () => {
   });
 
   test('clears expired unscheduled snoozes and leaves unexpired scheduled snoozes', async () => {
-    setupTestWithSnoozeSchedule([
+    const { attributes, id } = setupTestWithSnoozeSchedule([
       {
         duration: 1000,
         rRule: {
@@ -102,7 +102,7 @@ describe('clearExpiredSnoozes()', () => {
         },
       },
     ]);
-    await rulesClient.clearExpiredSnoozes({ id: '1' });
+    await rulesClient.clearExpiredSnoozes({ rule: { ...attributes, id } });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
@@ -122,12 +122,12 @@ describe('clearExpiredSnoozes()', () => {
         ],
       },
       {
-        version: '123',
+        refresh: false,
       }
     );
   });
   test('clears expired scheduled snoozes and leaves unexpired ones', async () => {
-    setupTestWithSnoozeSchedule([
+    const { attributes, id } = setupTestWithSnoozeSchedule([
       {
         id: '1',
         duration: 1000,
@@ -147,7 +147,7 @@ describe('clearExpiredSnoozes()', () => {
         },
       },
     ]);
-    await rulesClient.clearExpiredSnoozes({ id: '1' });
+    await rulesClient.clearExpiredSnoozes({ rule: { ...attributes, id } });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
@@ -167,12 +167,12 @@ describe('clearExpiredSnoozes()', () => {
         ],
       },
       {
-        version: '123',
+        refresh: false,
       }
     );
   });
   test('does nothing when no snoozes are expired', async () => {
-    setupTestWithSnoozeSchedule([
+    const { attributes, id } = setupTestWithSnoozeSchedule([
       {
         duration: 1000 * 24 * 60 * 60 * 3, // 3 days
         rRule: {
@@ -191,7 +191,7 @@ describe('clearExpiredSnoozes()', () => {
         },
       },
     ]);
-    await rulesClient.clearExpiredSnoozes({ id: '1' });
+    await rulesClient.clearExpiredSnoozes({ rule: { ...attributes, id } });
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
   });
 });
@@ -240,4 +240,5 @@ function setupTestWithSnoozeSchedule(snoozeSchedule: RuleSnooze) {
     retryAt: null,
     ownerId: null,
   });
+  return rule;
 }

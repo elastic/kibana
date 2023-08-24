@@ -6,26 +6,26 @@
  */
 
 import { IToasts } from '@kbn/core-notifications-browser';
-import { Query } from '@kbn/es-query';
 import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import * as Array from 'fp-ts/lib/Array';
 import * as Either from 'fp-ts/lib/Either';
 import { identity, pipe } from 'fp-ts/lib/function';
 import * as rt from 'io-ts';
 import { InvokeCreator } from 'xstate';
-import { DurationInputObject } from 'moment';
-import moment from 'moment';
+import {
+  defaultFilterStateKey,
+  defaultPositionStateKey,
+  DEFAULT_REFRESH_INTERVAL,
+} from '@kbn/logs-shared-plugin/common';
+import {
+  getTimeRangeEndFromTime,
+  getTimeRangeStartFromTime,
+} from '../../../../common/url_state_storage_service';
 import { minimalTimeKeyRT } from '../../../../common/time';
 import { datemathStringRT } from '../../../utils/datemath';
 import { createPlainError, formatErrors } from '../../../../common/runtime_types';
-import { replaceStateKeyInQueryString } from '../../../utils/url_state';
 import type { LogStreamQueryContext, LogStreamQueryEvent, ParsedQuery } from './types';
-import {
-  DEFAULT_FILTERS,
-  DEFAULT_QUERY,
-  DEFAULT_REFRESH_INTERVAL,
-  DEFAULT_TIMERANGE,
-} from './defaults';
+import { DEFAULT_FILTERS, DEFAULT_QUERY, DEFAULT_TIMERANGE } from './defaults';
 
 interface LogStreamQueryUrlStateDependencies {
   filterStateKey?: string;
@@ -34,9 +34,6 @@ interface LogStreamQueryUrlStateDependencies {
   toastsService: IToasts;
   urlStateStorage: IKbnUrlStateStorage;
 }
-
-const defaultFilterStateKey = 'logFilter';
-const defaultPositionStateKey = 'logPosition'; // NOTE: Provides backwards compatibility for start / end / streamLive previously stored under the logPosition key.
 
 type RequiredDefaults = Required<Omit<FilterStateInUrl, 'timeRange' | 'refreshInterval'>>;
 type OptionalDefaults = Pick<FilterStateInUrl, 'timeRange' | 'refreshInterval'>;
@@ -195,68 +192,6 @@ export const initializeFromUrl =
     }
   };
 
-const filterMeta = rt.partial({
-  alias: rt.union([rt.string, rt.null]),
-  disabled: rt.boolean,
-  negate: rt.boolean,
-  controlledBy: rt.string,
-  group: rt.string,
-  index: rt.string,
-  isMultiIndex: rt.boolean,
-  type: rt.string,
-  key: rt.string,
-  params: rt.any,
-  value: rt.any,
-});
-
-const filter = rt.intersection([
-  rt.type({
-    meta: filterMeta,
-  }),
-  rt.partial({
-    query: rt.UnknownRecord,
-  }),
-]);
-
-const filterStateInUrlRT = rt.partial({
-  query: rt.union([
-    rt.strict({
-      language: rt.string,
-      query: rt.union([rt.string, rt.record(rt.string, rt.unknown)]),
-    }),
-    rt.strict({
-      sql: rt.string,
-    }),
-    rt.strict({
-      esql: rt.string,
-    }),
-  ]),
-  filters: rt.array(filter),
-  timeRange: rt.strict({
-    from: rt.string,
-    to: rt.string,
-  }),
-  refreshInterval: rt.strict({
-    pause: rt.boolean,
-    value: rt.number,
-  }),
-});
-
-export type FilterStateInUrl = rt.TypeOf<typeof filterStateInUrlRT>;
-
-const legacyFilterStateInUrlRT = rt.union([
-  rt.strict({
-    language: rt.string,
-    query: rt.union([rt.string, rt.record(rt.string, rt.unknown)]),
-  }),
-  rt.strict({
-    sql: rt.string,
-  }),
-  rt.strict({
-    esql: rt.string,
-  }),
-]);
-
 const legacyLegacyFilterStateWithExpressionInUrlRT = rt.type({
   kind: rt.literal('kuery'),
   expression: rt.string,
@@ -290,25 +225,64 @@ const decodePositionQueryValueFromUrl = (queryValueFromUrl: unknown) => {
   return legacyPositionStateInUrlRT.decode(queryValueFromUrl);
 };
 
-const ONE_HOUR = 3600000;
-export const replaceLogFilterInQueryString = (query: Query, time?: number) =>
-  replaceStateKeyInQueryString<FilterStateInUrl>(defaultFilterStateKey, {
-    query,
-    ...(time && !Number.isNaN(time)
-      ? {
-          timeRange: {
-            from: new Date(time - ONE_HOUR).toISOString(),
-            to: new Date(time + ONE_HOUR).toISOString(),
-          },
-        }
-      : {}),
-    refreshInterval: DEFAULT_REFRESH_INTERVAL,
-  });
+export type FilterStateInUrl = rt.TypeOf<typeof filterStateInUrlRT>;
 
-const defaultTimeRangeFromPositionOffset: DurationInputObject = { hours: 1 };
+export const filterMeta = rt.partial({
+  alias: rt.union([rt.string, rt.null]),
+  disabled: rt.boolean,
+  negate: rt.boolean,
+  controlledBy: rt.string,
+  group: rt.string,
+  index: rt.string,
+  isMultiIndex: rt.boolean,
+  type: rt.string,
+  key: rt.string,
+  params: rt.any,
+  value: rt.any,
+});
 
-const getTimeRangeStartFromTime = (time: number): string =>
-  moment(time).subtract(defaultTimeRangeFromPositionOffset).toISOString();
+export const filter = rt.intersection([
+  rt.type({
+    meta: filterMeta,
+  }),
+  rt.partial({
+    query: rt.UnknownRecord,
+  }),
+]);
 
-const getTimeRangeEndFromTime = (time: number): string =>
-  moment(time).add(defaultTimeRangeFromPositionOffset).toISOString();
+export const filterStateInUrlRT = rt.partial({
+  query: rt.union([
+    rt.strict({
+      language: rt.string,
+      query: rt.union([rt.string, rt.record(rt.string, rt.unknown)]),
+    }),
+    rt.strict({
+      sql: rt.string,
+    }),
+    rt.strict({
+      esql: rt.string,
+    }),
+  ]),
+  filters: rt.array(filter),
+  timeRange: rt.strict({
+    from: rt.string,
+    to: rt.string,
+  }),
+  refreshInterval: rt.strict({
+    pause: rt.boolean,
+    value: rt.number,
+  }),
+});
+
+export const legacyFilterStateInUrlRT = rt.union([
+  rt.strict({
+    language: rt.string,
+    query: rt.union([rt.string, rt.record(rt.string, rt.unknown)]),
+  }),
+  rt.strict({
+    sql: rt.string,
+  }),
+  rt.strict({
+    esql: rt.string,
+  }),
+]);

@@ -10,6 +10,3 @@ import { SyntheticsAppState } from '../root_reducer';
 export const selectOverviewStatus = ({
   overviewStatus: { status, error, loaded },
 }: SyntheticsAppState) => ({ status, error, loaded });
-
-export const selectFiltersData = ({ overviewStatus: { filtersData } }: SyntheticsAppState) =>
-  filtersData;

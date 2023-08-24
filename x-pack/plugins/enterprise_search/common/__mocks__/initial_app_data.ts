@@ -34,6 +34,8 @@ export const DEFAULT_INITIAL_APP_DATA = {
   features: {
     hasConnectors: true,
     hasDefaultIngestPipeline: true,
+    hasDocumentLevelSecurityEnabled: true,
+    hasIncrementalSyncEnabled: true,
     hasNativeConnectors: true,
     hasWebCrawler: true,
   },

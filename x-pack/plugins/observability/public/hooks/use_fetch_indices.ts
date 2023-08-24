@@ -5,41 +5,46 @@
  * 2.0.
  */
 
-import {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-  useQuery,
-} from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../utils/kibana_react';
+
+export type Index = string;
 
 export interface UseFetchIndicesResponse {
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
-  indices: Index[] | undefined;
-  refetch: <TPageData>(
-    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
-  ) => Promise<QueryObserverResult<Index[], unknown>>;
-}
-export interface Index {
-  name: string;
+  data: Index[] | undefined;
 }
 
-export function useFetchIndices(): UseFetchIndicesResponse {
+interface Params {
+  search?: string;
+}
+
+interface ResolveIndexReponse {
+  indices: Array<{ name: string }>;
+}
+
+export function useFetchIndices({ search }: Params): UseFetchIndicesResponse {
   const { http } = useKibana().services;
 
-  const { isLoading, isError, isSuccess, data, refetch } = useQuery({
-    queryKey: ['fetchIndices'],
-    queryFn: async ({ signal }) => {
+  const { isLoading, isError, isSuccess, data } = useQuery({
+    queryKey: ['fetchIndices', search],
+    queryFn: async () => {
+      const searchPattern = search?.endsWith('*') ? search : `${search}*`;
       try {
-        const response = await http.get<Index[]>(`/api/index_management/indices`, { signal });
-        return response;
+        const response = await http.get<ResolveIndexReponse>(
+          `/internal/index-pattern-management/resolve_index/${searchPattern}`
+        );
+        return response.indices.map((index) => index.name);
       } catch (error) {
         throw new Error(`Something went wrong. Error: ${error}`);
       }
     },
+    retry: false,
+    enabled: Boolean(search),
+    refetchOnWindowFocus: false,
   });
 
-  return { isLoading, isError, isSuccess, indices: data, refetch };
+  return { isLoading, isError, isSuccess, data };
 }

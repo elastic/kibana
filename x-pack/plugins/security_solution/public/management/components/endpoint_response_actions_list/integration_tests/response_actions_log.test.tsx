@@ -16,8 +16,11 @@ import {
 } from '../../../../common/mock/endpoint';
 import { ResponseActionsLog } from '../response_actions_log';
 import type {
+  ActionDetails,
   ActionDetailsApiResponse,
   ActionFileInfoApiResponse,
+  ResponseActionUploadOutputContent,
+  ResponseActionUploadParameters,
 } from '../../../../../common/endpoint/types';
 import { MANAGEMENT_PATH } from '../../../../../common/constants';
 import { getActionListMock } from '../mocks';
@@ -29,6 +32,8 @@ import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_m
 import { waitFor } from '@testing-library/react';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import { useGetEndpointActionList as _useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
+import { OUTPUT_MESSAGES } from '../translations';
+import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 const useGetEndpointActionListMock = _useGetEndpointActionList as jest.Mock;
 
@@ -118,8 +123,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 
 jest.mock('../../../hooks/endpoint/use_get_endpoints_list');
 
-jest.mock('../../../../common/experimental_features_service');
-
 jest.mock('../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
@@ -195,9 +198,6 @@ describe('Response actions history', () => {
       (renderResult = mockedContext.render(
         <ResponseActionsLog data-test-subj={testPrefix} {...(props ?? {})} />
       ));
-    reactTestingLibrary.act(() => {
-      history.push(`${MANAGEMENT_PATH}/response_actions`);
-    });
 
     useGetEndpointActionListMock.mockReturnValue({
       ...getBaseMockedActionList(),
@@ -224,6 +224,29 @@ describe('Response actions history', () => {
   afterEach(() => {
     useGetEndpointActionListMock.mockReturnValue(getBaseMockedActionList());
     useUserPrivilegesMock.mockReset();
+  });
+
+  it('should call API with default date range', () => {
+    reactTestingLibrary.act(() => {
+      history.push(`${MANAGEMENT_PATH}/response_actions_history`);
+    });
+
+    render();
+    expect(useGetEndpointActionListMock).toHaveBeenCalledWith(
+      {
+        page: 1,
+        pageSize: 10,
+        agentIds: undefined,
+        commands: [],
+        statuses: [],
+        types: [],
+        userIds: [],
+        withOutputs: [],
+        startDate: 'now-24h/h',
+        endDate: 'now',
+      },
+      { retry: false }
+    );
   });
 
   describe('When index does not exist yet', () => {
@@ -289,9 +312,9 @@ describe('Response actions history', () => {
           pageSize: 10,
           startDate: 'now-24h/h',
           statuses: [],
+          types: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: true,
         },
         expect.anything()
       );
@@ -462,6 +485,65 @@ describe('Response actions history', () => {
       expect(noTrays).toEqual([]);
     });
 
+    it('should show already expanded trays on page navigation', async () => {
+      // start with two pages worth of response actions
+      // 10 on page 1, 3 on page 2
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({ actionCount: 13 }),
+      });
+      render();
+      const { getByTestId, getAllByTestId } = renderResult;
+
+      // on page 1
+      expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
+        'Showing 1-10 of 13 response actions'
+      );
+      const expandButtonsOnPage1 = getAllByTestId(`${testPrefix}-expand-button`);
+      // expand 2nd, 4th, 6th rows
+      expandButtonsOnPage1.forEach((button, i) => {
+        if ([1, 3, 5].includes(i)) {
+          userEvent.click(button);
+        }
+      });
+      // verify 3 rows are expanded
+      const traysOnPage1 = getAllByTestId(`${testPrefix}-details-tray`);
+      expect(traysOnPage1).toBeTruthy();
+      expect(traysOnPage1.length).toEqual(3);
+
+      // go to 2nd page
+      const page2 = getByTestId('pagination-button-1');
+      userEvent.click(page2);
+
+      // verify on page 2
+      expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
+        'Showing 11-13 of 13 response actions'
+      );
+
+      // go back to 1st page
+      userEvent.click(getByTestId('pagination-button-0'));
+      // verify on page 1
+      expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
+        'Showing 1-10 of 13 response actions'
+      );
+
+      const traysOnPage1back = getAllByTestId(`${testPrefix}-details-tray`);
+      const expandButtonsOnPage1back = getAllByTestId(`${testPrefix}-expand-button`);
+      const expandedButtons = expandButtonsOnPage1back.reduce<number[]>((acc, button, i) => {
+        // find expanded rows
+        if (button.getAttribute('aria-label') === 'Collapse') {
+          acc.push(i);
+        }
+        return acc;
+      }, []);
+
+      // verify 3 rows are expanded
+      expect(traysOnPage1back).toBeTruthy();
+      expect(traysOnPage1back.length).toEqual(3);
+      // verify 3 rows that are expanded are the ones from before
+      expect(expandedButtons).toEqual([1, 3, 5]);
+    });
+
     it('should contain relevant details in each expanded row', async () => {
       render();
       const { getAllByTestId } = renderResult;
@@ -478,6 +560,7 @@ describe('Response actions history', () => {
           'Input',
           'Parameters',
           'Comment',
+          'Hostname',
           'Output:',
         ]
       );
@@ -788,6 +871,84 @@ describe('Response actions history', () => {
         }
       );
     });
+
+    describe('`upload` action', () => {
+      let action: ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>;
+
+      beforeEach(async () => {
+        action = new EndpointActionGenerator().generateActionDetails<
+          ResponseActionUploadOutputContent,
+          ResponseActionUploadParameters
+        >({ command: 'upload' });
+
+        const actionListApiResponse = await getActionListMock({
+          actionCount: 1,
+          commands: ['upload'],
+        });
+
+        actionListApiResponse.data = [action];
+
+        useGetEndpointActionListMock.mockReturnValue({
+          ...getBaseMockedActionList(),
+          data: actionListApiResponse,
+        });
+      });
+
+      it('should display pending output if action is not complete yet', () => {
+        action.isCompleted = false;
+        const { getByTestId } = render();
+        getByTestId(`${testPrefix}-expand-button`).click();
+
+        expect(getByTestId(`${testPrefix}-details-tray-output`)).toHaveTextContent(
+          OUTPUT_MESSAGES.isPending('upload')
+        );
+      });
+
+      it('should display output for single agent', () => {
+        const { getByTestId } = render();
+        getByTestId(`${testPrefix}-expand-button`).click();
+
+        expect(getByTestId(`${testPrefix}-uploadDetails`)).toHaveTextContent(
+          'upload completed successfully' +
+            'File saved to: /path/to/uploaded/file' +
+            'Free disk space on drive: 1.18MB'
+        );
+      });
+
+      it('should display output for multiple agents', () => {
+        action.agents.push('agent-b');
+        action.hosts['agent-b'] = {
+          name: 'host b',
+        };
+        action.agentState['agent-b'] = {
+          errors: undefined,
+          wasSuccessful: true,
+          isCompleted: true,
+          completedAt: '2023-05-10T20:09:25.824Z',
+        };
+        (action.outputs = action.outputs ?? {})['agent-b'] = {
+          type: 'json',
+          content: {
+            code: 'ra_upload_file-success',
+            path: 'some/path/to/file',
+            disk_free_space: 123445,
+          },
+        };
+
+        const { getByTestId } = render();
+        getByTestId(`${testPrefix}-expand-button`).click();
+
+        expect(getByTestId(`${testPrefix}-uploadDetails`)).toHaveTextContent(
+          'upload completed successfully' +
+            'Host: Host-agent-a' +
+            'File saved to: /path/to/uploaded/file' +
+            'Free disk space on drive: 1.18MB' +
+            'Host: host b' +
+            'File saved to: some/path/to/file' +
+            'Free disk space on drive: 120.55KB'
+        );
+      });
+    });
   });
 
   describe('Action status ', () => {
@@ -917,6 +1078,7 @@ describe('Response actions history', () => {
     });
 
     it('should show a list of actions when opened', () => {
+      mockedContext.setExperimentalFlag({ responseActionUploadEnabled: true });
       render();
       const { getByTestId, getAllByTestId } = renderResult;
 
@@ -927,13 +1089,14 @@ describe('Response actions history', () => {
         RESPONSE_ACTION_API_COMMANDS_NAMES.length
       );
       expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
-        'isolate',
-        'release',
-        'kill-process',
-        'suspend-process',
-        'processes',
-        'get-file',
-        'execute',
+        'isolate. To check this option, press Enter.',
+        'release. To check this option, press Enter.',
+        'kill-process. To check this option, press Enter.',
+        'suspend-process. To check this option, press Enter.',
+        'processes. To check this option, press Enter.',
+        'get-file. To check this option, press Enter.',
+        'execute. To check this option, press Enter.',
+        'upload. To check this option, press Enter.',
       ]);
     });
 
@@ -997,9 +1160,9 @@ describe('Response actions history', () => {
           pageSize: 10,
           startDate: 'now-24h/h',
           statuses: ['failed', 'pending'],
+          types: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: true,
         },
         expect.anything()
       );
@@ -1199,9 +1362,9 @@ describe('Response actions history', () => {
           pageSize: 10,
           startDate: 'now-24h/h',
           statuses: [],
+          types: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: true,
         },
         expect.anything()
       );

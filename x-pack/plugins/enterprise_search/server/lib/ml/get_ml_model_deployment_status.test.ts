@@ -198,6 +198,7 @@ describe('getMlModelDeploymentStatus', () => {
               target_allocation_count: 3,
             },
             start_time: 123456,
+            threads_per_allocation: 1,
           },
           model_id: 'mockModelName',
         },
@@ -221,6 +222,7 @@ describe('getMlModelDeploymentStatus', () => {
     expect(deployedStatus.nodeAllocationCount).toEqual(1);
     expect(deployedStatus.startTime).toEqual(123456);
     expect(deployedStatus.targetAllocationCount).toEqual(3);
+    expect(deployedStatus.threadsPerAllocation).toEqual(1);
   });
 
   it('should return fully allocated if the model is fully allocated', async () => {

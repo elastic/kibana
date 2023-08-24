@@ -9,8 +9,8 @@ import { Readable } from 'stream';
 
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
-import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
-import type { HapiReadableStream } from '../../rule_management/logic/import/hapi_readable_stream';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { HapiReadableStream } from '../../../../types';
 
 /**
  * Given a string, builds a hapi stream as our
@@ -19,11 +19,11 @@ import type { HapiReadableStream } from '../../rule_management/logic/import/hapi
  * @param filename String to declare file extension
  */
 export const buildHapiStream = (string: string, filename = 'file.ndjson'): HapiReadableStream => {
-  const HapiStream = class extends Readable {
-    public readonly hapi: { filename: string };
+  const HapiStream = class extends Readable implements HapiReadableStream {
+    public readonly hapi;
     constructor(fileName: string) {
       super();
-      this.hapi = { filename: fileName };
+      this.hapi = { filename: fileName, headers: {} };
     }
   };
 
@@ -100,4 +100,5 @@ export const getOutputRuleAlertForRest = (): RuleResponse => ({
   namespace: undefined,
   data_view_id: undefined,
   alert_suppression: undefined,
+  investigation_fields: [],
 });

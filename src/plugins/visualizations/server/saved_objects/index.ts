@@ -7,3 +7,4 @@
  */
 
 export { getVisualizationSavedObjectType } from './visualization';
+export { registerReadOnlyVisType } from './read_only_vis_type_registry';

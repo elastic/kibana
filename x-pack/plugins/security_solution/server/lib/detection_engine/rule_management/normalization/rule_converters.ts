@@ -18,7 +18,7 @@ import {
   SERVER_APP_ID,
 } from '../../../../../common/constants';
 
-import type { PatchRuleRequestBody } from '../../../../../common/detection_engine/rule_management';
+import type { PatchRuleRequestBody } from '../../../../../common/api/detection_engine/rule_management';
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
@@ -27,7 +27,7 @@ import type {
   RuleResponse,
   TypeSpecificCreateProps,
   TypeSpecificResponse,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import {
   EqlPatchParams,
   MachineLearningPatchParams,
@@ -36,7 +36,7 @@ import {
   SavedQueryPatchParams,
   ThreatMatchPatchParams,
   ThresholdPatchParams,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import {
   transformAlertToRuleAction,
@@ -409,6 +409,7 @@ export const convertPatchAPIToInternalSchema = (
       description: nextParams.description ?? existingParams.description,
       ruleId: existingParams.ruleId,
       falsePositives: nextParams.false_positives ?? existingParams.falsePositives,
+      investigationFields: nextParams.investigation_fields ?? existingParams.investigationFields,
       from: nextParams.from ?? existingParams.from,
       immutable: existingParams.immutable,
       license: nextParams.license ?? existingParams.license,
@@ -470,6 +471,7 @@ export const convertCreateAPIToInternalSchema = (
       description: input.description,
       ruleId: newRuleId,
       falsePositives: input.false_positives ?? [],
+      investigationFields: input.investigation_fields ?? [],
       from: input.from ?? 'now-6m',
       immutable,
       license: input.license,
@@ -619,6 +621,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     rule_name_override: params.ruleNameOverride,
     timestamp_override: params.timestampOverride,
     timestamp_override_fallback_disabled: params.timestampOverrideFallbackDisabled,
+    investigation_fields: params.investigationFields,
     author: params.author,
     false_positives: params.falsePositives,
     from: params.from,

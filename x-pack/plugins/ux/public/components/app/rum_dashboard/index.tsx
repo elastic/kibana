@@ -7,7 +7,7 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { LocalUIFilters } from './local_uifilters';
 import { RumDashboard } from './rum_dashboard';
 

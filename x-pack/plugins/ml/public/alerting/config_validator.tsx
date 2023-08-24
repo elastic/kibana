@@ -50,7 +50,7 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
       lookbackIntervalInSeconds &&
       alertIntervalInSeconds < lookbackIntervalInSeconds;
 
-    const bucketSpanDuration = parseInterval(jobConfigs[0].analysis_config.bucket_span);
+    const bucketSpanDuration = parseInterval(jobConfigs[0].analysis_config.bucket_span!);
     const notificationDuration = bucketSpanDuration
       ? Math.ceil(bucketSpanDuration.asMinutes()) *
         Math.min(

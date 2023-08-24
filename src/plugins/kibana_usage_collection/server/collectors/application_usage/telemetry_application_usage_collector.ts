@@ -90,21 +90,19 @@ export function registerApplicationUsageCollector(
             }
           ) => {
             const existing = acc[appId] || { clicks_total: 0, minutes_on_screen_total: 0 };
-            return {
-              ...acc,
-              [serializeKey(appId, viewId)]: {
-                appId,
-                viewId,
-                clicks_total: numberOfClicks + existing.clicks_total,
-                clicks_7_days: 0,
-                clicks_30_days: 0,
-                clicks_90_days: 0,
-                minutes_on_screen_total: minutesOnScreen + existing.minutes_on_screen_total,
-                minutes_on_screen_7_days: 0,
-                minutes_on_screen_30_days: 0,
-                minutes_on_screen_90_days: 0,
-              },
+            acc[serializeKey(appId, viewId)] = {
+              appId,
+              viewId,
+              clicks_total: numberOfClicks + existing.clicks_total,
+              clicks_7_days: 0,
+              clicks_30_days: 0,
+              clicks_90_days: 0,
+              minutes_on_screen_total: minutesOnScreen + existing.minutes_on_screen_total,
+              minutes_on_screen_7_days: 0,
+              minutes_on_screen_30_days: 0,
+              minutes_on_screen_90_days: 0,
             };
+            return acc;
           },
           {} as ApplicationUsageTelemetryReport
         );
@@ -156,17 +154,15 @@ export function registerApplicationUsageCollector(
               minutes_on_screen_90_days: existing.minutes_on_screen_90_days + minutesOnScreen,
             };
 
-            return {
-              ...acc,
-              [serializeKey(appId, viewId)]: {
-                ...existing,
-                clicks_total: existing.clicks_total + numberOfClicks,
-                minutes_on_screen_total: existing.minutes_on_screen_total + minutesOnScreen,
-                ...(isInLast7Days ? last7Days : {}),
-                ...(isInLast30Days ? last30Days : {}),
-                ...(isInLast90Days ? last90Days : {}),
-              },
+            acc[serializeKey(appId, viewId)] = {
+              ...existing,
+              clicks_total: existing.clicks_total + numberOfClicks,
+              minutes_on_screen_total: existing.minutes_on_screen_total + minutesOnScreen,
+              ...(isInLast7Days ? last7Days : {}),
+              ...(isInLast30Days ? last30Days : {}),
+              ...(isInLast90Days ? last90Days : {}),
             };
+            return acc;
           },
           applicationUsageFromTotals
         );

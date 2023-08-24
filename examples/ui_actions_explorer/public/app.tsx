@@ -9,18 +9,19 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 
-import { EuiPage } from '@elastic/eui';
-
-import { EuiButton } from '@elastic/eui';
-import { EuiPageBody } from '@elastic/eui';
-import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
-import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
-import { EuiFieldText } from '@elastic/eui';
-import { EuiCallOut } from '@elastic/eui';
-import { EuiPageHeader } from '@elastic/eui';
-import { EuiModalBody } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiButton,
+  EuiPageBody,
+  EuiPageTemplate,
+  EuiPageSection,
+  EuiSpacer,
+  EuiText,
+  EuiFieldText,
+  EuiCallOut,
+  EuiPageHeader,
+  EuiModalBody,
+} from '@elastic/eui';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { UiActionsStart, createAction } from '@kbn/ui-actions-plugin/public';
 import { AppMountParameters, OverlayStart } from '@kbn/core/public';
@@ -39,9 +40,11 @@ const ActionsExplorer = ({ uiActionsApi, openModal }: Props) => {
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPageHeader>Ui Actions Explorer</EuiPageHeader>
-        <EuiPageContent>
-          <EuiPageContentBody>
+        <EuiPageSection>
+          <EuiPageHeader pageTitle={'Ui Actions Explorer'} />
+        </EuiPageSection>
+        <EuiPageTemplate.Section>
+          <EuiPageSection>
             <EuiText>
               <p>
                 By default there is a single action attached to the `HELLO_WORLD_TRIGGER`. Clicking
@@ -105,8 +108,8 @@ const ActionsExplorer = ({ uiActionsApi, openModal }: Props) => {
             <EuiSpacer />
 
             <ContextMenuExamples />
-          </EuiPageContentBody>
-        </EuiPageContent>
+          </EuiPageSection>
+        </EuiPageTemplate.Section>
       </EuiPageBody>
     </EuiPage>
   );

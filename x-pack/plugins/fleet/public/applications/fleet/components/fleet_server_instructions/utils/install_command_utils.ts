@@ -52,7 +52,7 @@ function getArtifact(platform: PLATFORM_TYPE, kibanaVersion: string) {
     kubernetes: {
       downloadCommand: '',
     },
-    cloudFormation: {
+    googleCloudShell: {
       downloadCommand: '',
     },
   };
@@ -119,6 +119,7 @@ export function getInstallCommandForPlatform(
     rpm: `${artifact.downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent`,
     kubernetes: '',
     cloudFormation: '',
+    googleCloudShell: '',
   };
 
   return commands[platform];

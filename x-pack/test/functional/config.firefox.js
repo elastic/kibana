@@ -16,7 +16,6 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/infra'),
       require.resolve('./apps/security'),
       require.resolve('./apps/spaces'),
-      require.resolve('./apps/status_page'),
       require.resolve('./apps/watcher'),
     ],
 

@@ -5,23 +5,24 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import { navigateTo } from '../../tasks/navigation';
-import { ROLE, login } from '../../tasks/login';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Edit saved query', () => {
+describe('ALL - Edit saved query', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
 
   before(() => {
     loadSavedQuery().then((data) => {
-      savedQueryId = data.id;
-      savedQueryName = data.attributes.id;
+      savedQueryId = data.saved_object_id;
+      savedQueryName = data.id;
     });
   });
 
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    cy.login(ServerlessRoleName.SOC_MANAGER);
     navigateTo('/app/osquery/saved_queries');
   });
 
@@ -31,7 +32,7 @@ describe('ALL - Edit saved query', () => {
 
   it('by changing ecs mappings and platforms', () => {
     cy.react('CustomItemAction', {
-      props: { index: 1, item: { attributes: { id: savedQueryName } } },
+      props: { index: 1, item: { id: savedQueryName } },
     }).click();
     cy.contains('Custom key/value pairs.').should('exist');
     cy.contains('Hours of uptime').should('exist');
@@ -72,7 +73,7 @@ describe('ALL - Edit saved query', () => {
     cy.wait(5000);
 
     cy.react('CustomItemAction', {
-      props: { index: 1, item: { attributes: { id: savedQueryName } } },
+      props: { index: 1, item: { id: savedQueryName } },
     }).click();
     cy.contains('Custom key/value pairs').should('not.exist');
     cy.contains('Hours of uptime').should('not.exist');

@@ -24,6 +24,7 @@ import {
   InfraRouteConfig,
   InfraServerPluginSetupDeps,
   InfraServerPluginStartDeps,
+  InfraVersionedRouteConfig,
 } from './adapter_types';
 
 interface FrozenIndexParams {
@@ -75,6 +76,37 @@ export class KibanaFramework {
       case 'patch':
         this.router.patch(routeConfig, handler);
         break;
+    }
+  }
+
+  public registerVersionedRoute<Method extends RouteMethod = any>(
+    config: InfraVersionedRouteConfig<Method>
+  ) {
+    const defaultOptions = {
+      tags: ['access:infra'],
+    };
+    const routeConfig = {
+      access: config.access,
+      path: config.path,
+      // Currently we have no use of custom options beyond tags, this can be extended
+      // beyond defaultOptions if it's needed.
+      options: defaultOptions,
+    };
+    switch (config.method) {
+      case 'get':
+        return this.router.versioned.get(routeConfig);
+      case 'post':
+        return this.router.versioned.post(routeConfig);
+      case 'delete':
+        return this.router.versioned.delete(routeConfig);
+      case 'put':
+        return this.router.versioned.put(routeConfig);
+      case 'patch':
+        return this.router.versioned.patch(routeConfig);
+      default:
+        throw new RangeError(
+          `#registerVersionedRoute: "${config.method}" is not an accepted method`
+        );
     }
   }
 

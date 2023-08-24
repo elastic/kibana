@@ -31,31 +31,40 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
-// import type { OsqueryPluginStart } from '../../osquery/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import {
+  LogsSharedClientSetupExports,
+  LogsSharedClientStartExports,
+} from '@kbn/logs-shared-plugin/public';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
   UseNodeMetricsTableOptions,
 } from './components/infrastructure_node_metrics_tables/shared';
 import { InventoryViewsServiceStart } from './services/inventory_views';
-import { LogViewsServiceStart } from './services/log_views';
 import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
 import { ITelemetryClient } from './services/telemetry';
+import type { InfraLocators } from '../common/locators';
 
 // Our own setup and start contract values
-export type InfraClientSetupExports = void;
+export interface InfraClientSetupExports {
+  locators: InfraLocators;
+}
 
 export interface InfraClientStartExports {
   inventoryViews: InventoryViewsServiceStart;
-  logViews: LogViewsServiceStart;
   metricsExplorerViews: MetricsExplorerViewsServiceStart;
   telemetry: ITelemetryClient;
+  locators: InfraLocators;
   ContainerMetricsTable: (
     props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
   ) => JSX.Element;
@@ -68,15 +77,19 @@ export interface InfraClientStartExports {
 }
 
 export interface InfraClientSetupDeps {
+  logsShared: LogsSharedClientSetupExports;
   home?: HomePublicPluginSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  uiActions: UiActionsSetup;
   usageCollection: UsageCollectionSetup;
   ml: MlPluginSetup;
   embeddable: EmbeddableSetup;
   share: SharePluginSetup;
   lens: LensPublicStart;
+  fieldFormats: FieldFormatsSetup;
+  licensing: LicensingPluginSetup;
 }
 
 export interface InfraClientStartDeps {
@@ -86,18 +99,24 @@ export interface InfraClientStartDeps {
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
   embeddable?: EmbeddableStart;
+  kibanaVersion?: string;
   lens: LensPublicStart;
+  logsShared: LogsSharedClientStartExports;
   ml: MlPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  osquery?: unknown; // OsqueryPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  osquery?: unknown; // OsqueryPluginStart - can't be imported due to cyclic dependency;
   share: SharePluginStart;
   spaces: SpacesPluginStart;
   storage: IStorageWrapper;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
   telemetry: ITelemetryClient;
+  fieldFormats: FieldFormatsStart;
+  licensing: LicensingPluginStart;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;

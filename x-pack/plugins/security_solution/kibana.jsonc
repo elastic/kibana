@@ -19,17 +19,20 @@
       "cloudSecurityPosture",
       "dashboard",
       "data",
-      "ecsDataQualityDashboard",
       "dataViews",
+      "discover",
+      "ecsDataQualityDashboard",
       "embeddable",
       "eventLog",
       "features",
+      "fieldFormats",
       "guidedOnboarding",
       "inspector",
       "kubernetesSecurity",
       "lens",
       "licensing",
       "maps",
+      "navigation",
       "ruleRegistry",
       "sessionView",
       "spaces",
@@ -41,8 +44,11 @@
       "unifiedSearch",
       "files",
       "controls",
-      "dataViews",
+      "dataViewEditor",
       "savedObjectsManagement",
+      "stackConnectors",
+      "discover",
+      "notifications"
     ],
     "optionalPlugins": [
       "cloudExperiments",
@@ -67,7 +73,8 @@
       "usageCollection",
       "lists",
       "ml",
-      "unifiedSearch"
+      "unifiedSearch",
+      "cloudChat"
     ],
     "extraPublicDirs": [
       "common"

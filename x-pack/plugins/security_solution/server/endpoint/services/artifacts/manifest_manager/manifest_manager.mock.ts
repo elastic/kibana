@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import LRU from 'lru-cache';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  elasticsearchServiceMock,
+} from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
@@ -24,6 +27,9 @@ import { createEndpointArtifactClientMock, getManifestClientMock } from '../mock
 import type { ManifestManagerContext } from './manifest_manager';
 import { ManifestManager } from './manifest_manager';
 import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
+import { createAppFeaturesMock } from '../../../../lib/app_features/mocks';
+import type { AppFeatureKeys } from '../../../../../common/types/app_features';
+import type { AppFeatures } from '../../../../lib/app_features/app_features';
 
 export const createExceptionListResponse = (data: ExceptionListItemSchema[], total?: number) => ({
   data,
@@ -62,35 +68,39 @@ export enum ManifestManagerMockType {
 }
 
 export interface ManifestManagerMockOptions {
-  cache: LRU<string, Buffer>;
   exceptionListClient: ExceptionListClient;
   packagePolicyService: jest.Mocked<PackagePolicyClient>;
   savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+  appFeatures: AppFeatures;
 }
 
 export const buildManifestManagerMockOptions = (
-  opts: Partial<ManifestManagerMockOptions>
+  opts: Partial<ManifestManagerMockOptions>,
+  customAppFeatures?: AppFeatureKeys
 ): ManifestManagerMockOptions => {
   const savedObjectMock = savedObjectsClientMock.create();
   return {
-    cache: new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 }),
     exceptionListClient: listMock.getExceptionListClient(savedObjectMock),
     packagePolicyService: createPackagePolicyServiceMock(),
     savedObjectsClient: savedObjectMock,
+    appFeatures: createAppFeaturesMock(customAppFeatures),
     ...opts,
   };
 };
 
 export const buildManifestManagerContextMock = (
-  opts: Partial<ManifestManagerMockOptions>
+  opts: Partial<ManifestManagerMockOptions>,
+  customAppFeatures?: AppFeatureKeys
 ): ManifestManagerContext => {
-  const fullOpts = buildManifestManagerMockOptions(opts);
+  const fullOpts = buildManifestManagerMockOptions(opts, customAppFeatures);
 
   return {
     ...fullOpts,
     artifactClient: createEndpointArtifactClientMock(),
     logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
-    experimentalFeatures: parseExperimentalConfigValue([]),
+    experimentalFeatures: parseExperimentalConfigValue([]).features,
+    packagerTaskPackagePolicyUpdateBatchSize: 10,
+    esClient: elasticsearchServiceMock.createElasticsearchClient(),
   };
 };
 
@@ -130,7 +140,7 @@ export const getManifestManagerMock = (
           context.exceptionListClient.findExceptionListItem = jest
             .fn()
             .mockRejectedValue(new Error('unexpected thing happened'));
-          return super.buildExceptionListArtifacts();
+          return super.buildExceptionListArtifacts([]);
         case ManifestManagerMockType.NormalFlow:
           return getMockArtifactsWithDiff();
       }

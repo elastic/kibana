@@ -34,7 +34,7 @@ describe('ZDT upgrades - running on a fresh cluster', () => {
     const barType = getBarType();
 
     const { runMigrations, client } = await getKibanaMigratorTestKit({
-      ...getBaseMigratorParams(),
+      ...getBaseMigratorParams({ kibanaVersion: '8.8.0' }),
       logFilePath,
       types: [fooType, barType],
     });

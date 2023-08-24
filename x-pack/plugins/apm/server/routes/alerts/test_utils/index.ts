@@ -6,8 +6,9 @@
  */
 
 import { IBasePath, Logger } from '@kbn/core/server';
-import { of } from 'rxjs';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
@@ -17,13 +18,6 @@ import { APMConfig, APM_SERVER_FEATURE_ID } from '../../..';
 
 export const createRuleTypeMocks = () => {
   let alertExecutor: (...args: any[]) => Promise<any>;
-
-  const mockedConfig$ = of({
-    indices: {
-      error: 'apm-*',
-      transaction: 'apm-*',
-    },
-  } as APMConfig);
 
   const loggerMock = {
     debug: jest.fn(),
@@ -62,7 +56,14 @@ export const createRuleTypeMocks = () => {
         publicBaseUrl: 'http://localhost:5601/eyr',
         serverBasePath: '/eyr',
       } as IBasePath,
-      config$: mockedConfig$,
+      apmConfig: { searchAggregatedTransactions: true } as any as APMConfig,
+      getApmIndices: async () => ({
+        error: 'apm-*',
+        transaction: 'apm-*',
+        span: 'apm-*',
+        metric: 'apm-*',
+        onboarding: 'apm-*',
+      }),
       observability: {
         getAlertDetailsConfig: jest.fn().mockReturnValue({ apm: true }),
       } as unknown as ObservabilityPluginSetup,
@@ -70,6 +71,11 @@ export const createRuleTypeMocks = () => {
       ruleDataClient: ruleRegistryMocks.createRuleDataClient(
         '.alerts-observability.apm.alerts'
       ) as IRuleDataClient,
+      alertsLocator: {
+        getLocation: jest.fn().mockImplementation(() => ({
+          path: 'mockedAlertsLocator > getLocation',
+        })),
+      } as any as LocatorPublic<AlertsLocatorParams>,
     },
     services,
     scheduleActions,

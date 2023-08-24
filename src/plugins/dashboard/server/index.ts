@@ -25,4 +25,3 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { DashboardPluginSetup, DashboardPluginStart } from './types';
-export { findByValueEmbeddables } from './usage/find_by_value_embeddables';

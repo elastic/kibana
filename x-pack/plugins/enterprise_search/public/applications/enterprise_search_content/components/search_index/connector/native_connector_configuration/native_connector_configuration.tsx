@@ -23,13 +23,15 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { BetaConnectorCallout } from '../../../../../shared/beta/beta_connector_callout';
 import { docLinks } from '../../../../../shared/doc_links';
+import { CONNECTOR_ICONS } from '../../../../../shared/icons/connector_icons';
 
 import { hasConfiguredConfiguration } from '../../../../utils/has_configured_configuration';
 import { isConnectorIndex } from '../../../../utils/indices';
 import { IndexViewLogic } from '../../index_view_logic';
 import { ConnectorNameAndDescription } from '../connector_name_and_description/connector_name_and_description';
-import { NATIVE_CONNECTORS } from '../constants';
+import { BETA_CONNECTORS, NATIVE_CONNECTORS } from '../constants';
 
 import { ConvertConnector } from './convert_connector';
 import { NativeConnectorAdvancedConfiguration } from './native_connector_advanced_configuration';
@@ -45,17 +47,34 @@ export const NativeConnectorConfiguration: React.FC = () => {
 
   const nativeConnector = NATIVE_CONNECTORS.find(
     (connector) => connector.serviceType === index.connector.service_type
-  );
-
-  if (!nativeConnector) {
-    return <></>;
-  }
+  ) || {
+    docsUrl: '',
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.custom,
+    iconPath: 'custom.svg',
+    isBeta: true,
+    isNative: true,
+    keywords: [],
+    name: index.connector.name,
+    serviceType: index.connector.service_type ?? '',
+  };
 
   const hasDescription = !!index.connector.description;
   const hasConfigured = hasConfiguredConfiguration(index.connector.configuration);
-  const hasConfiguredAdvanced = index.connector.last_synced || index.connector.scheduling.enabled;
+  const hasConfiguredAdvanced =
+    index.connector.last_synced ||
+    index.connector.scheduling.full.enabled ||
+    index.connector.scheduling.incremental.enabled;
   const hasResearched = hasDescription || hasConfigured || hasConfiguredAdvanced;
   const icon = nativeConnector.icon;
+
+  // TODO service_type === "" is considered unknown/custom connector multipleplaces replace all of them with a better solution
+  const isBeta =
+    !index.connector.service_type ||
+    Boolean(
+      BETA_CONNECTORS.find(({ serviceType }) => serviceType === index.connector.service_type)
+    );
 
   return (
     <>
@@ -71,7 +90,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
               )}
               <EuiFlexItem grow={false}>
                 <EuiTitle size="m">
-                  <h3>{nativeConnector.name}</h3>
+                  <h3>{nativeConnector?.name ?? index.connector.name}</h3>
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -209,6 +228,13 @@ export const NativeConnectorConfiguration: React.FC = () => {
                 <ConvertConnector />
               </EuiPanel>
             </EuiFlexItem>
+            {isBeta ? (
+              <EuiFlexItem grow={false}>
+                <EuiPanel hasBorder hasShadow={false}>
+                  <BetaConnectorCallout />
+                </EuiPanel>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

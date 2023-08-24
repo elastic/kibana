@@ -10,7 +10,8 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { normalizeHostsForAgents } from '../../common/services';
 import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, GLOBAL_SETTINGS_ID } from '../../common/constants';
-import type { SettingsSOAttributes, Settings, BaseSettings } from '../../common/types';
+import type { Settings, BaseSettings } from '../../common/types';
+import type { SettingsSOAttributes } from '../types';
 
 import { appContextService } from './app_context';
 import { listFleetServerHosts } from './fleet_server_host';

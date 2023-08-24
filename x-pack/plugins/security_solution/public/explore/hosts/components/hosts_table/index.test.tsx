@@ -50,6 +50,11 @@ jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities', () => ({
   useMlCapabilities: () => mockUseMlCapabilities(),
 }));
 
+const mockUseHasSecurityCapability = jest.fn().mockReturnValue(false);
+jest.mock('../../../../helper_hooks', () => ({
+  useHasSecurityCapability: () => mockUseHasSecurityCapability(),
+}));
+
 describe('Hosts Table', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
@@ -84,8 +89,9 @@ describe('Hosts Table', () => {
       expect(wrapper.find('HostsTable')).toMatchSnapshot();
     });
 
-    test('it renders "Host Risk classfication" column when "isPlatinumOrTrialLicense" is truthy', () => {
+    test('it renders "Host Risk classification" column when "isPlatinumOrTrialLicense" is truthy and user has risk-entity capability', () => {
       mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
+      mockUseHasSecurityCapability.mockReturnValue(true);
 
       const { queryByTestId } = render(
         <TestProviders store={store}>
@@ -107,8 +113,33 @@ describe('Hosts Table', () => {
       expect(queryByTestId('tableHeaderCell_node.risk_4')).toBeInTheDocument();
     });
 
-    test("it doesn't renders 'Host Risk classfication' column when 'isPlatinumOrTrialLicense' is falsy", () => {
+    test("it doesn't renders 'Host Risk classification' column when 'isPlatinumOrTrialLicense' is falsy", () => {
       mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: false });
+      mockUseHasSecurityCapability.mockReturnValue(true);
+
+      const { queryByTestId } = render(
+        <TestProviders store={store}>
+          <HostsTable
+            id="hostsQuery"
+            isInspect={false}
+            loading={false}
+            data={mockData}
+            totalCount={0}
+            fakeTotalCount={-1}
+            setQuerySkip={jest.fn()}
+            showMorePagesIndicator={false}
+            loadPage={loadPage}
+            type={hostsModel.HostsType.page}
+          />
+        </TestProviders>
+      );
+
+      expect(queryByTestId('tableHeaderCell_node.riskScore_4')).not.toBeInTheDocument();
+    });
+
+    test("it doesn't renders 'Host Risk classification' column when user doesn't has entity-analytics capabilities", () => {
+      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
+      mockUseHasSecurityCapability.mockReturnValue(false);
 
       const { queryByTestId } = render(
         <TestProviders store={store}>

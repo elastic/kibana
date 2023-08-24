@@ -145,11 +145,15 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
           },
           {
             "plugin": "securitySolution",
@@ -393,19 +397,23 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.test.ts"
           },
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
           },
           {
             "plugin": "securitySolution",
@@ -541,7 +549,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/host_isolation_exceptions_validator.ts"
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
           },
           {
             "plugin": "securitySolution",
@@ -549,11 +561,7 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/endpoint_app_context_services.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/endpoint_app_context_services.ts"
+            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/host_isolation_exceptions_validator.ts"
           },
           {
             "plugin": "lists",
@@ -601,11 +609,15 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
           },
           {
             "plugin": "securitySolution",
@@ -1030,11 +1042,15 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
           },
           {
             "plugin": "securitySolution",
@@ -1121,21 +1137,6 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-constants",
-        "id": "def-common.EXCEPTION_FILTER",
-        "type": "string",
-        "tags": [],
-        "label": "EXCEPTION_FILTER",
-        "description": [],
-        "signature": [
-          "\"/internal/lists/_create_filter\""
-        ],
-        "path": "packages/kbn-securitysolution-list-constants/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.EXCEPTION_LIST_ITEM_URL",
         "type": "string",
         "tags": [],
@@ -1200,13 +1201,13 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-constants",
-        "id": "def-common.FIND_LISTS_BY_SIZE",
+        "id": "def-common.INTERNAL_EXCEPTION_FILTER",
         "type": "string",
         "tags": [],
-        "label": "FIND_LISTS_BY_SIZE",
+        "label": "INTERNAL_EXCEPTION_FILTER",
         "description": [],
         "signature": [
-          "\"/internal/lists/_find_lists_by_size\""
+          "\"/internal/lists/_create_filter\""
         ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
@@ -1234,6 +1235,21 @@
         "tags": [],
         "label": "INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL",
         "description": [],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.INTERNAL_FIND_LISTS_BY_SIZE",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_FIND_LISTS_BY_SIZE",
+        "description": [],
+        "signature": [
+          "\"/internal/lists/_find_lists_by_size\""
+        ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,

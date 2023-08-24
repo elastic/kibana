@@ -6,9 +6,10 @@
  */
 
 import moment from 'moment';
+import { Frequency } from '@kbn/rrule';
 import { has } from 'lodash';
 import { MaintenanceWindow } from '../types';
-import { EndsOptions, Frequency } from '../constants';
+import { EndsOptions, MaintenanceWindowFrequency } from '../constants';
 import { FormProps, RecurringScheduleFormProps } from '../components/schema';
 import { getInitialByWeekday } from './get_initial_by_weekday';
 import { RRuleParams } from '../../../../common';
@@ -31,7 +32,7 @@ export const convertFromMaintenanceWindowToForm = (
 
   const rRule = maintenanceWindow.rRule;
   const isCustomFrequency = isCustom(rRule);
-  const frequency = rRule.freq?.toString() as Frequency;
+  const frequency = rRule.freq as MaintenanceWindowFrequency;
   const ends = rRule.until
     ? EndsOptions.ON_DATE
     : rRule.count
@@ -74,7 +75,7 @@ export const convertFromMaintenanceWindowToForm = (
 };
 
 const isCustom = (rRule: RRuleParams) => {
-  const freq = rRule.freq?.toString() as Frequency;
+  const freq = rRule.freq;
   // interval is greater than 1
   if (rRule.interval && rRule.interval > 1) {
     return true;

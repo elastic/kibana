@@ -35,6 +35,7 @@ import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use
 import { getRiskEntityTranslation } from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
+import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 
 const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
@@ -111,7 +112,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     inspect,
     refetch,
     isDeprecated,
-    isLicenseValid,
+    isAuthorized,
     isModuleEnabled,
   } = useRiskScore({
     filterQuery,
@@ -124,6 +125,8 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     riskEntity,
     includeAlertsCount: true,
   });
+
+  const { data: riskScoreEngineStatus } = useRiskEngineStatus();
 
   useQueryInspector({
     queryId: entity.tableQueryId,
@@ -140,7 +143,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
 
   const refreshPage = useRefetchQueries();
 
-  if (!isLicenseValid) {
+  if (!isAuthorized) {
     return null;
   }
 
@@ -148,6 +151,10 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     isDisabled: !isModuleEnabled && !isTableLoading,
     isDeprecated: isDeprecated && !isTableLoading,
   };
+
+  if (riskScoreEngineStatus?.isUpdateAvailable) {
+    return null;
+  }
 
   if (status.isDisabled || status.isDeprecated) {
     return (

@@ -56,6 +56,104 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: SERVERLESS_ENVIRONMENT=observability .buildkite/scripts/steps/functional/serverless_ftr.sh
+    label: 'Serverless Observability Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 40
+    soft_fail:
+      - exit_status: 10
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: SERVERLESS_ENVIRONMENT=search .buildkite/scripts/steps/functional/serverless_ftr.sh
+    label: 'Serverless Search Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 40
+    soft_fail:
+      - exit_status: 10
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: SERVERLESS_ENVIRONMENT=security .buildkite/scripts/steps/functional/serverless_ftr.sh
+    label: 'Serverless Security Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 40
+    soft_fail:
+      - exit_status: 10
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/functional/security_serverless.sh
+    label: 'Serverless Security Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 40
+    parallelism: 10
+    soft_fail: true
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+    artifact_paths:
+      - "target/kibana-security-solution/**/*"
+
+  - command: .buildkite/scripts/steps/functional/security_serverless_defend_workflows.sh
+    label: 'Serverless Security Defend Workflows Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 40
+    soft_fail: true
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+    artifact_paths:
+      - "target/kibana-security-solution/**/*"
+
+  - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
+    label: 'Serverless Security Investigations Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 40
+    parallelism: 4
+    soft_fail: true
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+    artifact_paths:
+      - "target/kibana-security-solution/**/*"
+
+  - command: .buildkite/scripts/steps/functional/security_serverless_explore.sh
+    label: 'Serverless Security Explore Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 40
+    parallelism: 2
+    soft_fail: true
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+    artifact_paths:
+      - "target/kibana-security-solution/**/*"
+
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:

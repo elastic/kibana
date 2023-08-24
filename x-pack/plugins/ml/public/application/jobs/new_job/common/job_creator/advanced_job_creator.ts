@@ -7,10 +7,10 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
+import type { Field, Aggregation, SplitField } from '@kbn/ml-anomaly-utils';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 import { JobCreator } from './job_creator';
-import { Field, Aggregation, SplitField } from '../../../../../../common/types/fields';
 import {
   Job,
   Datafeed,
@@ -39,7 +39,7 @@ export class AdvancedJobCreator extends JobCreator {
   private _richDetectors: RichDetector[] = [];
   private _queryString: string;
 
-  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearch | null, query: object) {
     super(indexPattern, savedSearch, query);
 
     this._queryString = JSON.stringify(this._datafeed_config.query);

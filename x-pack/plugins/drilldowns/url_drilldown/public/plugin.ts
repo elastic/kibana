@@ -48,7 +48,8 @@ export class UrlDrilldownPlugin
           startServices().core.docLinks.links.dashboard.urlDrilldownTemplateSyntax,
         getVariablesHelpDocsLink: () =>
           startServices().core.docLinks.links.dashboard.urlDrilldownVariables,
-        uiSettings: core.uiSettings,
+        settings: core.settings,
+        theme: () => startServices().core.theme,
       })
     );
 

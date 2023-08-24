@@ -474,7 +474,7 @@ export type PolicyInfo = Immutable<{
 }>;
 
 // Host Information as returned by the Host Details API.
-// NOTE:  `HostInfo` type is the original and defined as Immutable.
+// NOTE:The `HostInfo` type is the original and defined as Immutable.
 export interface HostInfoInterface {
   metadata: HostMetadataInterface;
   host_status: HostStatus;
@@ -485,7 +485,7 @@ export interface HostInfoInterface {
        */
       configured: PolicyInfo;
       /**
-       * Last reported running in agent (may lag behind configured)
+       * Last reported running in agent (might lag behind configured)
        */
       applied: PolicyInfo;
     };
@@ -494,14 +494,22 @@ export interface HostInfoInterface {
      */
     endpoint: PolicyInfo;
   };
+  /**
+   * The time when the Elastic Agent associated with this Endpoint host checked in with fleet
+   * Conceptually the value is the same as Agent['last_checkin'] if present, but we fall back to
+   * UnitedAgentMetadataPersistedData['united']['endpoint']['metadata']['@timestamp']
+   * if `Agent.last_checkin` value is `undefined`
+   */
+  last_checkin: string;
 }
 
 export type HostInfo = Immutable<HostInfoInterface>;
 
 // Host metadata document streamed up to ES by the Endpoint running on host machines.
-// NOTE:  `HostMetadata` type is the original and defined as Immutable. If needing to
+// NOTE: The `HostMetadata` type is the original and defined as Immutable. If you need to
 //        work with metadata that is not mutable, use `HostMetadataInterface`
 export type HostMetadata = Immutable<HostMetadataInterface>;
+
 export interface HostMetadataInterface {
   '@timestamp': number;
   event: {
@@ -556,7 +564,10 @@ export interface HostMetadataInterface {
   data_stream: DataStream;
 }
 
-export type UnitedAgentMetadata = Immutable<{
+/**
+ * The persisted data (to the index) for both endpoint and agent data.
+ * */
+export type UnitedAgentMetadataPersistedData = Immutable<{
   agent: {
     id: string;
   };
@@ -931,6 +942,11 @@ export interface PolicyConfig {
   meta: {
     license: string;
     cloud: boolean;
+    license_uid: string;
+    cluster_uuid: string;
+    cluster_name: string;
+    serverless: boolean;
+    heartbeatinterval?: number;
   };
   windows: {
     advanced?: {
@@ -956,7 +972,7 @@ export interface PolicyConfig {
     };
     malware: ProtectionFields & BlocklistFields;
     memory_protection: ProtectionFields & SupportedFields;
-    behavior_protection: ProtectionFields & SupportedFields;
+    behavior_protection: BehaviorProtectionFields & SupportedFields;
     ransomware: ProtectionFields & SupportedFields;
     logging: {
       file: string;
@@ -996,7 +1012,7 @@ export interface PolicyConfig {
       network: boolean;
     };
     malware: ProtectionFields & BlocklistFields;
-    behavior_protection: ProtectionFields & SupportedFields;
+    behavior_protection: BehaviorProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
@@ -1026,7 +1042,7 @@ export interface PolicyConfig {
       tty_io: boolean;
     };
     malware: ProtectionFields & BlocklistFields;
-    behavior_protection: ProtectionFields & SupportedFields;
+    behavior_protection: BehaviorProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
@@ -1086,6 +1102,10 @@ export interface UIPolicyConfig {
 /** Policy:  Protection fields */
 export interface ProtectionFields {
   mode: ProtectionModes;
+}
+
+export interface BehaviorProtectionFields extends ProtectionFields {
+  reputation_service: boolean;
 }
 
 /** Policy:  Supported fields */
@@ -1307,25 +1327,40 @@ export interface ListPageRouteState {
   backButtonLabel?: string;
 }
 
-/**
- * REST API standard base response for list types
- */
-interface BaseListResponse<D = unknown> {
-  data: D[];
-  page: number;
-  pageSize: number;
-  total: number;
-}
-
 export interface AdditionalOnSwitchChangeParams {
   value: boolean;
   policyConfigData: UIPolicyConfig;
   protectionOsList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
 }
 
+/** Allowed fields for sorting in the EndpointList table.
+ * These are the column fields in the EndpointList table, based on the
+ * returned `HostInfoInterface` data type (and not on the internal data structure).
+ */
+export enum EndpointSortableField {
+  ENROLLED_AT = 'enrolled_at',
+  HOSTNAME = 'metadata.host.hostname',
+  HOST_STATUS = 'host_status',
+  POLICY_NAME = 'metadata.Endpoint.policy.applied.name',
+  POLICY_STATUS = 'metadata.Endpoint.policy.applied.status',
+  HOST_OS_NAME = 'metadata.host.os.name',
+  HOST_IP = 'metadata.host.ip',
+  AGENT_VERSION = 'metadata.agent.version',
+  LAST_SEEN = 'last_checkin',
+}
+
 /**
  * Returned by the server via GET /api/endpoint/metadata
  */
-export type MetadataListResponse = BaseListResponse<HostInfo>;
+export interface MetadataListResponse {
+  data: HostInfo[];
+  page: number;
+  pageSize: number;
+  total: number;
+  sortField: EndpointSortableField;
+  sortDirection: 'asc' | 'desc';
+}
 
 export type { EndpointPrivileges } from './authz';
+
+export type { EndpointHeartbeat } from './heartbeat';

@@ -602,14 +602,9 @@ export class GisPageObject extends FtrService {
     await this.inspector.openInspectorView('Map details');
   }
 
-  // Method should only be used when multiple requests are expected
-  // RequestSelector will only display inspectorRequestChooser when there is more than one request
   async openInspectorRequest(requestName: string) {
     await this.inspector.open();
-    await this.inspector.openInspectorRequestsView();
-    this.log.debug(`Open Inspector request ${requestName}`);
-    await this.testSubjects.click('inspectorRequestChooser');
-    await this.testSubjects.click(`inspectorRequestChooser${requestName}`);
+    await this.inspector.openRequestByName(requestName);
   }
 
   async doesInspectorHaveRequests() {
@@ -642,20 +637,19 @@ export class GisPageObject extends FtrService {
     return response;
   }
 
-  async _getResponse(requestName: string) {
-    await this.inspector.openInspectorRequestsView();
-    if (requestName) {
-      await this.testSubjects.click('inspectorRequestChooser');
-      await this.testSubjects.click(`inspectorRequestChooser${requestName}`);
+  async _getResponse(requestName?: string) {
+    if (!requestName) {
+      await this.inspector.openInspectorRequestsView();
+    } else {
+      await this.inspector.openRequestByName(requestName);
     }
-    await this.inspector.openInspectorRequestsView();
     await this.testSubjects.click('inspectorRequestDetailResponse');
     await this.find.byCssSelector('.react-monaco-editor-container');
     const responseBody = await this.monacoEditor.getCodeEditorValue();
     return JSON.parse(responseBody);
   }
 
-  async getResponseFromDashboardPanel(panelTitle: string, requestName: string) {
+  async getResponseFromDashboardPanel(panelTitle: string, requestName?: string) {
     await this.dashboardPanelActions.openInspectorByTitle(panelTitle);
     const response = await this._getResponse(requestName);
     await this.inspector.close();

@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiFieldSearch,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -18,25 +17,18 @@ import {
 } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
-import {
-  INDICATOR_APM_AVAILABILITY,
-  INDICATOR_APM_LATENCY,
-  INDICATOR_CUSTOM_KQL,
-} from '../../../utils/slo/labels';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import React, { useState } from 'react';
+import { useCreateDataView } from '../../../hooks/use_create_data_view';
+import { useKibana } from '../../../utils/kibana_react';
 
 export interface SloListSearchFilterSortBarProps {
   loading: boolean;
-  onChangeQuery: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onChangeSort: (sort: SortType) => void;
-  onChangeIndicatorTypeFilter: (filter: FilterType[]) => void;
+  onChangeQuery: (query: string) => void;
+  onChangeSort: (sort: SortField | undefined) => void;
 }
 
-export type SortType = 'creationTime' | 'indicatorType';
-export type FilterType =
-  | 'sli.apm.transactionDuration'
-  | 'sli.apm.transactionErrorRate'
-  | 'sli.kql.custom';
+export type SortField = 'sli_value' | 'error_budget_consumed' | 'error_budget_remaining' | 'status';
 
 export type Item<T> = EuiSelectableOption & {
   label: string;
@@ -44,34 +36,31 @@ export type Item<T> = EuiSelectableOption & {
   checked?: EuiSelectableOptionCheckedType;
 };
 
-const SORT_OPTIONS: Array<Item<SortType>> = [
+const SORT_OPTIONS: Array<Item<SortField>> = [
   {
-    label: i18n.translate('xpack.observability.slo.list.sortBy.creationTime', {
-      defaultMessage: 'Creation time',
+    label: i18n.translate('xpack.observability.slo.list.sortBy.sliValue', {
+      defaultMessage: 'SLI value',
     }),
-    type: 'creationTime',
+    type: 'sli_value',
+  },
+  {
+    label: i18n.translate('xpack.observability.slo.list.sortBy.sloStatus', {
+      defaultMessage: 'SLO status',
+    }),
+    type: 'status',
     checked: 'on',
   },
   {
-    label: i18n.translate('xpack.observability.slo.list.sortBy.indicatorType', {
-      defaultMessage: 'Indicator type',
+    label: i18n.translate('xpack.observability.slo.list.sortBy.errorBudgetConsumed', {
+      defaultMessage: 'Error budget consumed',
     }),
-    type: 'indicatorType',
-  },
-];
-
-const INDICATOR_TYPE_OPTIONS: Array<Item<FilterType>> = [
-  {
-    label: INDICATOR_APM_LATENCY,
-    type: 'sli.apm.transactionDuration',
+    type: 'error_budget_consumed',
   },
   {
-    label: INDICATOR_APM_AVAILABILITY,
-    type: 'sli.apm.transactionErrorRate',
-  },
-  {
-    label: INDICATOR_CUSTOM_KQL,
-    type: 'sli.kql.custom',
+    label: i18n.translate('xpack.observability.slo.list.sortBy.errorBudgetRemaining', {
+      defaultMessage: 'Error budget remaining',
+    }),
+    type: 'error_budget_remaining',
   },
 ];
 
@@ -79,96 +68,60 @@ export function SloListSearchFilterSortBar({
   loading,
   onChangeQuery,
   onChangeSort,
-  onChangeIndicatorTypeFilter,
 }: SloListSearchFilterSortBarProps) {
-  const [isFilterPopoverOpen, setFilterPopoverOpen] = useState(false);
-  const [isSortPopoverOpen, setSortPopoverOpen] = useState(false);
+  const { data, dataViews, docLinks, http, notifications, storage, uiSettings, unifiedSearch } =
+    useKibana().services;
+  const { dataView } = useCreateDataView({ indexPatternString: '.slo-observability.summary-*' });
 
+  const [isSortPopoverOpen, setSortPopoverOpen] = useState(false);
   const [sortOptions, setSortOptions] = useState(SORT_OPTIONS);
-  const [indicatorTypeOptions, setIndicatorTypeOptions] = useState(INDICATOR_TYPE_OPTIONS);
+  const [query, setQuery] = useState('');
 
   const selectedSort = sortOptions.find((option) => option.checked === 'on');
-  const selectedIndicatorTypeFilter = indicatorTypeOptions.filter(
-    (option) => option.checked === 'on'
-  );
-
-  const handleToggleFilterButton = () => setFilterPopoverOpen(!isFilterPopoverOpen);
   const handleToggleSortButton = () => setSortPopoverOpen(!isSortPopoverOpen);
 
-  const handleChangeSort = (newOptions: Array<Item<SortType>>) => {
+  const handleChangeSort = (newOptions: Array<Item<SortField>>) => {
     setSortOptions(newOptions);
     setSortPopoverOpen(false);
+    onChangeSort(newOptions.find((o) => o.checked)?.type);
   };
-
-  const handleChangeIndicatorTypeOptions = (newOptions: Array<Item<FilterType>>) => {
-    setIndicatorTypeOptions(newOptions);
-    onChangeIndicatorTypeFilter(
-      newOptions.filter((option) => option.checked === 'on').map((option) => option.type)
-    );
-  };
-
-  useEffect(() => {
-    if (selectedSort?.type === 'creationTime' || selectedSort?.type === 'indicatorType') {
-      onChangeSort(selectedSort.type);
-    }
-  }, [onChangeSort, selectedSort]);
 
   return (
     <EuiFlexGroup direction="row" gutterSize="s">
       <EuiFlexItem grow>
-        <EuiFieldSearch
-          data-test-subj="o11ySloListSearchFilterSortBarFieldSearch"
-          fullWidth
-          isLoading={loading}
-          onChange={onChangeQuery}
+        <QueryStringInput
+          appName="Observability"
+          bubbleSubmitEvent={false}
+          deps={{
+            data,
+            dataViews,
+            docLinks,
+            http,
+            notifications,
+            storage,
+            uiSettings,
+            unifiedSearch,
+          }}
+          disableAutoFocus
+          onSubmit={() => onChangeQuery(query)}
+          disableLanguageSwitcher
+          isDisabled={loading}
+          indexPatterns={dataView ? [dataView] : []}
           placeholder={i18n.translate('xpack.observability.slo.list.search', {
-            defaultMessage: 'Search',
+            defaultMessage: 'Search your SLOs...',
           })}
+          query={{ query: String(query), language: 'kuery' }}
+          size="s"
+          onChange={(value) => setQuery(String(value.query))}
         />
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false} style={{ width: 200 }}>
+      <EuiFlexItem grow={true} style={{ maxWidth: 280 }}>
         <EuiFilterGroup>
           <EuiPopover
             button={
               <EuiFilterButton
-                iconType="arrowDown"
-                onClick={handleToggleFilterButton}
-                isSelected={isFilterPopoverOpen}
-                numFilters={selectedIndicatorTypeFilter.length}
-              >
-                {i18n.translate('xpack.observability.slo.list.indicatorTypeFilter', {
-                  defaultMessage: 'Indicator type',
-                })}
-              </EuiFilterButton>
-            }
-            isOpen={isFilterPopoverOpen}
-            closePopover={handleToggleFilterButton}
-            panelPaddingSize="none"
-            anchorPosition="downCenter"
-          >
-            <div style={{ width: 300 }}>
-              <EuiPopoverTitle paddingSize="s">
-                {i18n.translate('xpack.observability.slo.list.indicatorTypeFilter', {
-                  defaultMessage: 'Indicator type',
-                })}
-              </EuiPopoverTitle>
-              <EuiSelectable<Item<FilterType>>
-                options={indicatorTypeOptions}
-                onChange={handleChangeIndicatorTypeOptions}
-              >
-                {(list) => list}
-              </EuiSelectable>
-            </div>
-          </EuiPopover>
-        </EuiFilterGroup>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false} style={{ width: 200 }}>
-        <EuiFilterGroup>
-          <EuiPopover
-            button={
-              <EuiFilterButton
+                disabled={loading}
                 iconType="arrowDown"
                 onClick={handleToggleSortButton}
                 isSelected={isSortPopoverOpen}
@@ -190,10 +143,11 @@ export function SloListSearchFilterSortBar({
                   defaultMessage: 'Sort by',
                 })}
               </EuiPopoverTitle>
-              <EuiSelectable<Item<SortType>>
+              <EuiSelectable<Item<SortField>>
                 singleSelection
                 options={sortOptions}
                 onChange={handleChangeSort}
+                isLoading={loading}
               >
                 {(list) => list}
               </EuiSelectable>

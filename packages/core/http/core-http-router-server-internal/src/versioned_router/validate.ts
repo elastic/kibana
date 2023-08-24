@@ -51,8 +51,8 @@ export function validate(
     query: getValidator(runtimeSchema.query),
   });
   return {
-    body: validator.getBody(data.body, `get ${version} body`),
-    params: validator.getParams(data.params, `get ${version} params`),
-    query: validator.getQuery(data.query, `get ${version} query`),
+    params: validator.getParams(data.params, 'request params'),
+    query: validator.getQuery(data.query, 'request query'),
+    body: validator.getBody(data.body, 'request body'),
   };
 }

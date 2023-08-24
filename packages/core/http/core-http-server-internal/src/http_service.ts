@@ -36,7 +36,7 @@ import {
   InternalHttpServiceSetup,
   InternalHttpServiceStart,
 } from './types';
-import { registerCoreHandlers } from './lifecycle_handlers';
+import { registerCoreHandlers } from './register_lifecycle_handlers';
 import { ExternalUrlConfigType, externalUrlConfig, ExternalUrlConfig } from './external_url';
 
 export interface PrebootDeps {
@@ -133,7 +133,7 @@ export class HttpService
           path,
           this.log,
           prebootServerRequestHandlerContext.createHandler.bind(null, this.coreContext.coreId),
-          { isDev: this.env.mode.dev, isServerless: this.env.cliArgs.serverless }
+          { isDev: this.env.mode.dev, versionedRouteResolution: config.versioned.versionResolution }
         );
 
         registerCallback(router);
@@ -179,7 +179,7 @@ export class HttpService
         const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, pluginId);
         const router = new Router<Context>(path, this.log, enhanceHandler, {
           isDev: this.env.mode.dev,
-          isServerless: this.env.cliArgs.serverless,
+          versionedRouteResolution: config.versioned.versionResolution,
         });
         registerRouter(router);
         return router;

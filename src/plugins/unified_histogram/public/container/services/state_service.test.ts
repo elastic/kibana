@@ -9,6 +9,7 @@
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { UnifiedHistogramFetchStatus } from '../..';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
+import { lensTablesAdapterMock } from '../../__mocks__/lens_table_adapter';
 import {
   getChartHidden,
   getTopPanelHeight,
@@ -46,6 +47,7 @@ describe('UnifiedHistogramStateService', () => {
     breakdownField: 'bytes',
     chartHidden: false,
     lensRequestAdapter: new RequestAdapter(),
+    lensTablesAdapter: lensTablesAdapterMock,
     timeInterval: 'auto',
     topPanelHeight: 100,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
@@ -134,6 +136,8 @@ describe('UnifiedHistogramStateService', () => {
     expect(state).toEqual(newState);
     stateService.setLensRequestAdapter(undefined);
     newState = { ...newState, lensRequestAdapter: undefined };
+    stateService.setLensTablesAdapter(undefined);
+    newState = { ...newState, lensTablesAdapter: undefined };
     expect(state).toEqual(newState);
     stateService.setTotalHits({
       totalHitsStatus: UnifiedHistogramFetchStatus.complete,

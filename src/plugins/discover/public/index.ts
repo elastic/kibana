@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { DiscoverPlugin } from './plugin';
 
 export type { DiscoverSetup, DiscoverStart } from './plugin';
@@ -15,15 +15,13 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { ISearchEmbeddable, SearchInput } from './embeddable';
-export { SEARCH_EMBEDDABLE_TYPE } from './embeddable';
+export type { DiscoverStateContainer } from './application/main/services/discover_state';
+export type { DiscoverContainerProps } from './components/discover_container';
+export type {
+  CustomizationCallback,
+  DiscoverProfileId,
+  DiscoverProfileOptions,
+  RegisterCustomizationProfile,
+} from './customizations';
+export { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './embeddable';
 export { loadSharingDataHelpers } from './utils';
-
-// re-export types and static functions to give other plugins time to migrate away
-export {
-  type SavedSearch,
-  getSavedSearch,
-  getSavedSearchFullPathUrl,
-  getSavedSearchUrl,
-  getSavedSearchUrlConflictMessage,
-  throwErrorOnSavedSearchUrlConflict,
-} from '@kbn/saved-search-plugin/public';

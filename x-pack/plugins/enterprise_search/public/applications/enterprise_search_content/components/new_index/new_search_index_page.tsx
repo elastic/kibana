@@ -46,7 +46,7 @@ function getTitle(method: string, serviceType: string): string {
     }
     case INGESTION_METHOD_IDS.CRAWLER:
       return i18n.translate('xpack.enterpriseSearch.content.new_index.crawlerTitle', {
-        defaultMessage: 'New web crawler search index',
+        defaultMessage: 'Web crawler search index',
       });
     default:
       return i18n.translate('xpack.enterpriseSearch.content.new_index.genericTitle', {
@@ -55,32 +55,26 @@ function getTitle(method: string, serviceType: string): string {
   }
 }
 
-function getDescription(method: string, serviceType: string): string {
+function getDescription(method: string): string {
   switch (method) {
     case INGESTION_METHOD_IDS.API:
       return i18n.translate('xpack.enterpriseSearch.content.new_index.apiDescription', {
-        defaultMessage: 'A search index stores your data.',
+        defaultMessage:
+          'Use the API to programatically add documents to an Elasticsearch index. Start by creating your index.',
       });
     case INGESTION_METHOD_IDS.CONNECTOR: {
-      const connector =
-        Boolean(serviceType) && CONNECTORS.find((item) => item.serviceType === serviceType);
-      return connector
-        ? i18n.translate(
-            'xpack.enterpriseSearch.content.new_index.connectorDescriptionWithServiceType',
-            {
-              defaultMessage: 'A search index stores the data for your {name} connector.',
-              values: {
-                name: connector.name,
-              },
-            }
-          )
-        : i18n.translate('xpack.enterpriseSearch.content.new_index.connectorDescription', {
-            defaultMessage: 'A search index stores the data for your connector.',
-          });
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.new_index.connectorDescriptionWithServiceType',
+        {
+          defaultMessage:
+            'Use a connector to sync, extract, transform and index data from your data source. Connectors are Elastic integrations that write directly to Elasticsearch indices.',
+        }
+      );
     }
     case INGESTION_METHOD_IDS.CRAWLER:
       return i18n.translate('xpack.enterpriseSearch.content.new_index.crawlerDescription', {
-        defaultMessage: 'A search index stores the data for your web crawler.',
+        defaultMessage:
+          'Use the web crawler to programmatically discover, extract, and index searchable content from websites and knowledge bases.',
       });
     default:
       return i18n.translate('xpack.enterpriseSearch.content.new_index.defaultDescription', {
@@ -103,7 +97,7 @@ export const NewSearchIndexPage: React.FC = () => {
       pageViewTelemetry="New Index"
       isLoading={false}
       pageHeader={{
-        description: getDescription(type, serviceType),
+        description: getDescription(type),
         pageTitle: (
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>

@@ -8,7 +8,9 @@
 import React from 'react';
 import { EuiSteps, EuiPanel, EuiText, EuiSpacer } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
+import { InspectMonitorPortal } from './inspect_monitor_portal';
 import { ConfigKey, FormMonitorType, StepMap } from '../types';
+import { serializeNestedFormField } from '../form/formatter';
 import { AdvancedConfig } from '../advanced';
 import { MonitorTypePortal } from './monitor_type_portal';
 import { ReadOnlyCallout } from './read_only_callout';
@@ -24,7 +26,7 @@ export const MonitorSteps = ({
   isEditFlow?: boolean;
   projectId?: string;
 }) => {
-  const { watch } = useFormContext();
+  const { watch, formState } = useFormContext();
   const [type]: [FormMonitorType] = watch([ConfigKey.FORM_MONITOR_TYPE]);
   const steps = stepMap[type];
 
@@ -54,6 +56,10 @@ export const MonitorSteps = ({
       )}
       <AdvancedConfig readOnly={readOnly} />
       <MonitorTypePortal monitorType={type} />
+      <InspectMonitorPortal
+        isValid={formState.isValid}
+        monitorFields={serializeNestedFormField(watch())}
+      />
     </>
   );
 };

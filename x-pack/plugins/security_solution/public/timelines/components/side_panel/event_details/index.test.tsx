@@ -21,7 +21,11 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { allCasesPermissions } from '../../../../cases_test_utils';
-import { DEFAULT_ALERTS_INDEX, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
+import {
+  DEFAULT_ALERTS_INDEX,
+  DEFAULT_PREVIEW_INDEX,
+  ASSISTANT_FEATURE_ID,
+} from '../../../../../common/constants';
 
 const ecsData: Ecs = {
   _id: '1',
@@ -138,6 +142,13 @@ describe('event details panel component', () => {
     (KibanaServices.get as jest.Mock).mockReturnValue(coreStartMock);
     (useKibana as jest.Mock).mockReturnValue({
       services: {
+        application: {
+          capabilities: {
+            [ASSISTANT_FEATURE_ID]: {
+              'ai-assistant': true,
+            },
+          },
+        },
         uiSettings: {
           get: jest.fn().mockReturnValue([]),
         },
@@ -152,7 +163,7 @@ describe('event details panel component', () => {
           }),
         },
         osquery: {
-          OsqueryResults: jest.fn().mockReturnValue(null),
+          OsqueryResult: jest.fn().mockReturnValue(null),
           fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
         },
       },

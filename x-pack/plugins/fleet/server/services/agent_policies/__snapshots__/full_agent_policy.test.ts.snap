@@ -68,6 +68,7 @@ Object {
     },
   },
   "revision": 1,
+  "secret_references": Array [],
   "signed": Object {
     "data": "",
     "signature": "",
@@ -143,6 +144,7 @@ Object {
     },
   },
   "revision": 1,
+  "secret_references": Array [],
   "signed": Object {
     "data": "",
     "signature": "",
@@ -218,6 +220,7 @@ Object {
     },
   },
   "revision": 1,
+  "secret_references": Array [],
   "signed": Object {
     "data": "",
     "signature": "",

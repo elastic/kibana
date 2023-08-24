@@ -33,7 +33,7 @@ describe('fetch_top_nodes', () => {
         aggregatable: true,
       },
     ]);
-    expect(postMock).toHaveBeenCalledWith('../api/graph/searchProxy', {
+    expect(postMock).toHaveBeenCalledWith('../internal/graph/searchProxy', {
       body: JSON.stringify({
         index: 'test',
         body: {

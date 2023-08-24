@@ -24,6 +24,7 @@
       "kibanaReact",
       "management",
       "esUiShared",
+      "unifiedSearch",
     ],
     "optionalPlugins": [
       "usageCollection",

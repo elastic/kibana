@@ -14,6 +14,7 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   Rule,
+  RuleAlertData,
 } from '../types';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -48,6 +49,7 @@ import {
   generateAlertOpts,
   DATE_1970,
   generateActionOpts,
+  mockedRawRuleSO,
 } from './fixtures';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { SharePluginStart } from '@kbn/share-plugin/server';
@@ -74,6 +76,7 @@ const alertingEventLogger = alertingEventLoggerMock.create();
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const dataViewsMock = {
   dataViewsServiceFactory: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
+  getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
 } as DataViewsServerPluginStart;
 const alertsService = alertsServiceMock.create();
 
@@ -182,16 +185,7 @@ describe('Task Runner Cancel', () => {
     );
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
 
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        apiKey: Buffer.from('123:abc').toString('base64'),
-        enabled: true,
-        consumer: 'bar',
-      },
-      references: [],
-    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     alertingEventLogger.getStartAndDuration.mockImplementation(() => ({ start: new Date() }));
@@ -200,12 +194,12 @@ describe('Task Runner Cancel', () => {
   });
 
   test('updates rule saved object execution status and writes to event log entry when task is cancelled mid-execution', async () => {
-    const taskRunner = new TaskRunner(
+    const taskRunner = new TaskRunner({
       ruleType,
-      mockedTaskInstance,
-      taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
-    );
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
     const promise = taskRunner.run();
@@ -288,22 +282,23 @@ describe('Task Runner Cancel', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         return { state: {} };
       }
     );
     // setting cancelAlertsOnRuleTimeout to false here
-    const taskRunner = new TaskRunner(
+    const taskRunner = new TaskRunner({
       ruleType,
-      mockedTaskInstance,
-      {
+      taskInstance: mockedTaskInstance,
+      context: {
         ...taskRunnerFactoryInitializerParams,
         cancelAlertsOnRuleTimeout: false,
       },
-      inMemoryMetrics
-    );
+      inMemoryMetrics,
+    });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
     const promise = taskRunner.run();
@@ -356,19 +351,20 @@ describe('Task Runner Cancel', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         return { state: {} };
       }
     );
     // setting cancelAlertsOnRuleTimeout for ruleType to false here
-    const taskRunner = new TaskRunner(
-      updatedRuleType,
-      mockedTaskInstance,
-      taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
-    );
+    const taskRunner = new TaskRunner({
+      ruleType: updatedRuleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
     const promise = taskRunner.run();
@@ -418,18 +414,19 @@ describe('Task Runner Cancel', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         return { state: {} };
       }
     );
-    const taskRunner = new TaskRunner(
+    const taskRunner = new TaskRunner({
       ruleType,
-      mockedTaskInstance,
-      taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
-    );
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
     const promise = taskRunner.run();
@@ -525,6 +522,7 @@ describe('Task Runner Cancel', () => {
       },
       timings: {
         claim_to_start_duration_ms: 0,
+        persist_alerts_duration_ms: 0,
         prepare_rule_duration_ms: 0,
         process_alerts_duration_ms: 0,
         process_rule_duration_ms: 0,

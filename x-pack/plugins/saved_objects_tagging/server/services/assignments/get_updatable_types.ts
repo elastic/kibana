@@ -25,10 +25,8 @@ export const getUpdatableSavedObjectTypes = async ({
 
   // Each Saved Object type has a distinct privilege/action that we need to check
   const typeActionMap = types.reduce((acc, type) => {
-    return {
-      ...acc,
-      [type]: authorization!.actions.savedObject.get(type, 'update'),
-    };
+    acc[type] = authorization!.actions.savedObject.get(type, 'update');
+    return acc;
   }, {} as Record<string, string>);
 
   // Perform the privilege check

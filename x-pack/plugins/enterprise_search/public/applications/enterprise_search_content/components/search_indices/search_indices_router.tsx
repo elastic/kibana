@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { Switch } from 'react-router-dom';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { SEARCH_INDICES_PATH, SEARCH_INDEX_PATH, NEW_INDEX_PATH } from '../../routes';
 
@@ -19,7 +18,7 @@ import { SearchIndices } from './search_indices';
 
 export const SearchIndicesRouter: React.FC = () => {
   return (
-    <Switch>
+    <Routes>
       <Route path={NEW_INDEX_PATH}>
         <NewIndexRouter />
       </Route>
@@ -29,6 +28,6 @@ export const SearchIndicesRouter: React.FC = () => {
       <Route path={SEARCH_INDEX_PATH}>
         <SearchIndexRouter />
       </Route>
-    </Switch>
+    </Routes>
   );
 };

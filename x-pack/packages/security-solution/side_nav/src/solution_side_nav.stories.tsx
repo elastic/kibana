@@ -7,11 +7,13 @@
 
 import React from 'react';
 import { SolutionNav } from '@kbn/shared-ux-page-solution-nav';
+import { LinkCategoryType } from '@kbn/security-solution-navigation';
 import readme from '../../README.mdx';
 import {
   SolutionSideNav as SolutionSideNavComponent,
   type SolutionSideNavProps,
   type SolutionSideNavItem,
+  SolutionSideNavItemPosition,
 } from '..';
 
 const items: SolutionSideNavItem[] = [
@@ -34,7 +36,15 @@ const items: SolutionSideNavItem[] = [
       },
       {
         id: 'panelLink2',
-        label: 'I am the second nested',
+        label: 'I am an external link that opens in a new tab',
+        href: '#',
+        openInNewTab: true,
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      },
+      {
+        id: 'panelLink3',
+        label: 'I have an icon',
+        iconType: 'logoVulnerabilityManagement',
         href: '#',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
@@ -55,6 +65,15 @@ const items: SolutionSideNavItem[] = [
           text: 'Technical Preview',
         },
       },
+      {
+        id: 'panelLinkAll',
+        label: 'I have all things',
+        href: '#',
+        iconType: 'logoSiteSearch',
+        openInNewTab: true,
+        isBeta: true,
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      },
     ],
   },
   {
@@ -62,56 +81,95 @@ const items: SolutionSideNavItem[] = [
     label: 'I have categories',
     href: '#',
     categories: [
-      { label: 'First Category', linkIds: ['panelCatLink1', 'panelCatLink2'] },
-      { label: 'Second Category', linkIds: ['panelCatLink3', 'panelCatLink4'] },
+      { type: LinkCategoryType.separator, linkIds: ['panelCatLink1'] },
+      {
+        type: LinkCategoryType.title,
+        label: 'Title Category',
+        linkIds: ['panelCatLink2', 'panelCatLink3'],
+      },
+      {
+        type: LinkCategoryType.accordion,
+        label: 'ACCORDION CATEGORY',
+        categories: [
+          { label: 'Nested Category', linkIds: ['panelCatLink4', 'panelCatLink5'] },
+          { label: 'Second Nested', linkIds: ['panelCatLink6'] },
+        ],
+      },
     ],
     items: [
       {
         id: 'panelCatLink1',
-        label: 'I am the first nested',
+        label: 'I am in a separator category',
         href: '#',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
       {
         id: 'panelCatLink2',
-        label: 'I am the second nested',
+        label: 'I am in a title category',
         href: '#',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
       {
         id: 'panelCatLink3',
-        label: 'I am the third nested',
+        label: 'Me too',
         href: '#',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
       {
         id: 'panelCatLink4',
-        label: 'I am the fourth nested',
+        label: 'I am in an accordion category',
+        href: '#',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      },
+      {
+        id: 'panelCatLink5',
+        label: 'Me too',
+        href: '#',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      },
+      {
+        id: 'panelCatLink6',
+        label: 'I am another nested sub-category',
         href: '#',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
     ],
   },
-  { id: 'linkTruncated', href: '#', label: 'I have truncated text because I am too long' },
-  { id: 'linkSmall', href: '#', label: 'I am smaller', labelSize: 'xs' },
-];
-const footerItems: SolutionSideNavItem[] = [
-  { id: 'footerLink', href: '#', label: 'I am a footer link' },
+  { id: 'linkWrapped', href: '#', label: 'I have wrapped text because I am too long' },
   {
-    id: 'footerLinkPanel',
+    id: 'bottomLink',
+    href: '#',
+    label: 'I am a bottom link',
+    position: SolutionSideNavItemPosition.bottom,
+  },
+  {
+    id: 'bottomLinkPanel',
     href: '#',
     label: 'I also have panel',
+    position: SolutionSideNavItemPosition.bottom,
     items: [
       {
-        id: 'footerLinkPanel1',
-        label: 'I am a footer nested link',
+        id: 'bottomLinkPanel1',
+        label: 'I am a bottom nested link',
         href: '#',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
     ],
   },
-  { id: 'footerLinkSeparator', href: '#', label: 'I have a separator', appendSeparator: true },
-  { id: 'footerLinkIcon', href: '#', label: 'I have an icon', iconType: 'heart' },
+  {
+    id: 'bottomLinkSeparator',
+    href: '#',
+    label: 'I have a separator',
+    appendSeparator: true,
+    position: SolutionSideNavItemPosition.bottom,
+  },
+  {
+    id: 'bottomLinkIcon',
+    href: '#',
+    label: 'I have an icon',
+    iconType: 'heart',
+    position: SolutionSideNavItemPosition.bottom,
+  },
 ];
 
 export default {
@@ -136,9 +194,7 @@ export default {
   ],
 };
 
-type Params = Pick<SolutionSideNavProps, 'selectedId' | 'panelTopOffset' | 'panelBottomOffset'>;
-
-export const SolutionSideNav = (params: Params) => (
+export const SolutionSideNav = (params: SolutionSideNavProps) => (
   <>
     <SolutionNav
       name={'Security'}
@@ -148,9 +204,9 @@ export const SolutionSideNav = (params: Params) => (
       // eslint-disable-next-line react/no-children-prop
       children={
         <SolutionSideNavComponent
-          items={items}
-          footerItems={footerItems}
+          items={params.items}
           selectedId={params.selectedId}
+          categories={params.categories}
           panelBottomOffset={params.panelBottomOffset || undefined}
           panelTopOffset={params.panelTopOffset || undefined}
         />
@@ -168,8 +224,29 @@ export const SolutionSideNav = (params: Params) => (
 SolutionSideNav.argTypes = {
   selectedId: {
     control: { type: 'radio' },
-    options: [...items, ...footerItems].map(({ id }) => id),
+    options: items.map(({ id }) => id),
     defaultValue: 'simpleLink',
+  },
+  items: {
+    control: 'object',
+    defaultValue: items,
+  },
+  categories: {
+    control: 'object',
+    defaultValue: [
+      {
+        type: 'separator',
+        linkIds: ['simpleLink', 'panelLink', 'categoriesPanelLink'],
+      },
+      {
+        type: 'separator',
+        linkIds: ['linkWrapped'],
+      },
+      {
+        type: 'separator',
+        linkIds: ['bottomLink', 'bottomLinkPanel', 'bottomLinkSeparator', 'bottomLinkIcon'],
+      },
+    ],
   },
   panelTopOffset: {
     control: 'text',

@@ -11,11 +11,10 @@ import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 import { groups } from '../../__mocks__/groups.mock';
 
 import React from 'react';
-import { Switch } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { GroupOverview } from './components/group_overview';
 import { GroupSourcePrioritization } from './components/group_source_prioritization';
@@ -41,7 +40,7 @@ describe('GroupRouter', () => {
   it('renders', () => {
     const wrapper = shallow(<GroupRouter />);
 
-    expect(wrapper.find(Switch)).toHaveLength(1);
+    expect(wrapper.find(Routes)).toHaveLength(1);
     expect(wrapper.find(Route)).toHaveLength(2);
     expect(wrapper.find(GroupOverview)).toHaveLength(1);
     expect(wrapper.find(GroupSourcePrioritization)).toHaveLength(1);

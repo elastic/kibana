@@ -12,7 +12,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiCopy, EuiLoadingContent } from '@elastic/eui';
+import { EuiSkeletonText, EuiCopy } from '@elastic/eui';
 
 import { DEFAULT_META } from '../../../shared/constants';
 import { externalUrl } from '../../../shared/enterprise_search_url';
@@ -62,7 +62,7 @@ describe('Credentials', () => {
     setMockValues({ ...values, dataLoading: true });
     const wrapper = shallow(<Credentials />);
     expect(wrapper.find('[data-test-subj="CreateAPIKeyButton"]')).toHaveLength(0);
-    expect(wrapper.find(EuiLoadingContent)).toHaveLength(1);
+    expect(wrapper.find(EuiSkeletonText).prop('isLoading')).toEqual(true);
   });
 
   it('renders the API endpoint and a button to copy it', () => {

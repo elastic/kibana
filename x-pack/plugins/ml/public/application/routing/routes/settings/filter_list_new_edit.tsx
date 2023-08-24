@@ -7,22 +7,14 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-
 import { useTimefilter } from '@kbn/ml-date-picker';
-
 import { ML_PAGES } from '../../../../../common/constants/locator';
-
-import { checkFullLicense } from '../../../license';
-import {
-  checkGetJobsCapabilitiesResolver,
-  checkPermission,
-} from '../../../capabilities/check_capabilities';
+import { usePermissionCheck } from '../../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { EditFilterList } from '../../../settings/filter_lists';
 import { NavigateToPath } from '../../../contexts/kibana';
-
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
+import { useRouteResolver } from '../../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
 enum MODE {
@@ -77,32 +69,23 @@ export const editFilterListRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<NewFilterPageProps> = ({ location, mode, deps }) => {
+const PageWrapper: FC<NewFilterPageProps> = ({ location, mode }) => {
   let filterId: string | undefined;
   if (mode === MODE.EDIT) {
     const pathMatch: string[] | null = location.pathname.match(/.+\/(.+)$/);
     filterId = pathMatch && pathMatch.length > 1 ? pathMatch[1] : undefined;
   }
-  const { redirectToMlAccessDeniedPage } = deps;
 
-  const { context } = useResolver(
-    undefined,
-    undefined,
-    deps.config,
-    deps.dataViewsContract,
-    deps.getSavedSearchDeps,
-    {
-      checkFullLicense,
-      checkGetJobsCapabilities: () =>
-        checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-      getMlNodeCount,
-    }
-  );
+  const { context } = useRouteResolver('full', ['canGetFilters', 'canCreateFilter'], {
+    getMlNodeCount,
+  });
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
-  const canCreateFilter = checkPermission('canCreateFilter');
-  const canDeleteFilter = checkPermission('canDeleteFilter');
+  const [canCreateFilter, canDeleteFilter] = usePermissionCheck([
+    'canCreateFilter',
+    'canDeleteFilter',
+  ]);
 
   return (
     <PageLoader context={context}>

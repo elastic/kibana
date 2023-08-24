@@ -38,7 +38,6 @@ import {
   ipRangeFunction,
   ISearchGeneric,
   kibana,
-  kibanaContext,
   kibanaFilterFunction,
   kibanaTimerangeFunction,
   kqlFunction,
@@ -65,7 +64,7 @@ import { DataPublicPluginStart, DataStartDependencies } from '../types';
 import { AggsService } from './aggs';
 import { createUsageCollector, SearchUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql } from './expressions';
-import { getKibanaContext } from './expressions/kibana_context';
+
 import { handleWarnings } from './fetch/handle_warnings';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
@@ -87,6 +86,7 @@ export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
   indexPatterns: DataViewsContract;
   screenshotMode: ScreenshotModePluginStart;
+  scriptedFieldsEnabled: boolean;
 }
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
@@ -143,11 +143,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       })
     );
     expressions.registerFunction(kibana);
-    expressions.registerFunction(
-      getKibanaContext({ getStartServices } as {
-        getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
-      })
-    );
     expressions.registerFunction(cidrFunction);
     expressions.registerFunction(dateRangeFunction);
     expressions.registerFunction(extendedBoundsFunction);
@@ -167,7 +162,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(removeFilterFunction);
     expressions.registerFunction(selectFilterFunction);
     expressions.registerFunction(phraseFilterFunction);
-    expressions.registerType(kibanaContext);
 
     expressions.registerFunction(
       getEsdsl({ getStartServices } as {
@@ -223,7 +217,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public start(
     { http, theme, uiSettings, chrome, application }: CoreStart,
-    { fieldFormats, indexPatterns, screenshotMode }: SearchServiceStartDependencies
+    {
+      fieldFormats,
+      indexPatterns,
+      screenshotMode,
+      scriptedFieldsEnabled,
+    }: SearchServiceStartDependencies
   ): ISearchStart {
     const search = ((request, options = {}) => {
       return this.searchInterceptor.search(request, options);
@@ -252,6 +251,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         }
         return response;
       },
+      scriptedFieldsEnabled,
     };
 
     const config = this.initializerContext.config.get();

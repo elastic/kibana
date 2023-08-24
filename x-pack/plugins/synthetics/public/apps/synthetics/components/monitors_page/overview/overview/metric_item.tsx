@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
 import { EuiPanel, EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DARK_THEME } from '@elastic/charts';
-import { useTheme } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
 import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';
@@ -139,13 +139,14 @@ export const MetricItem = ({
                       justifyContent="flexEnd"
                       // empty title to prevent default title from showing
                       title=""
+                      component="span"
                     >
-                      <EuiFlexItem grow={false}>
+                      <EuiFlexItem grow={false} component="span">
                         {i18n.translate('xpack.synthetics.overview.duration.label', {
                           defaultMessage: 'Duration',
                         })}
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
+                      <EuiFlexItem grow={false} component="span">
                         <EuiIconTip
                           title={i18n.translate('xpack.synthetics.overview.duration.description', {
                             defaultMessage: 'Median duration of last 24 checks',

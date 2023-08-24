@@ -15,16 +15,12 @@
     padding: 0;
   }
 
-  .dscDiscoverGrid__textLanguageMode .euiDataGridRowCell.euiDataGridRowCell--firstColumn {
-    padding: $euiSizeXS;
-  }
-
   .euiDataGridRowCell.euiDataGridRowCell--lastColumn {
     border-right: none;
   }
 
-  .dscDiscoverGrid__documentsMode .euiDataGridRowCell:first-of-type,
-  .dscDiscoverGrid__documentsMode .euiDataGrid--headerShade.euiDataGrid--bordersAll .euiDataGridHeaderCell:first-of-type {
+  .dscDiscoverGrid__table .euiDataGridRowCell:first-of-type,
+  .dscDiscoverGrid__table .euiDataGrid--headerShade.euiDataGrid--bordersAll .euiDataGridHeaderCell:first-of-type {
     border-left: none;
     border-right: none;
   }
@@ -67,14 +63,6 @@
   flex-grow: 1;
   flex-shrink: 1;
   min-height: 0;
-}
-
-.dscDiscoverGrid__footer {
-  flex-shrink: 0;
-  background-color: $euiColorLightShade;
-  padding: $euiSize / 2 $euiSize;
-  margin-top: $euiSize / 4;
-  text-align: center;
 }
 
 .dscTable__flyoutHeader {
@@ -123,8 +111,8 @@
 }
 
 .dscDiscoverGrid__descriptionListDescription {
-  word-break: normal !important;
-  white-space: nowrap;
+  word-break: break-all;
+  white-space: normal;
 
   // Special handling for images coming from the image field formatter
   img {

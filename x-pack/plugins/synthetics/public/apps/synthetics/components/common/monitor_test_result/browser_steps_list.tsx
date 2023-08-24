@@ -13,6 +13,7 @@ import React, {
   useCallback,
   useEffect,
   useState,
+  useMemo,
 } from 'react';
 import {
   EuiBasicTable,
@@ -59,6 +60,23 @@ export function isStepEnd(step: JourneyStep) {
   return step.synthetics?.type === 'step/end';
 }
 
+function toExpandedMapItem(step: JourneyStep, stepsList: JourneyStep[], testNowMode: boolean) {
+  if (testNowMode) {
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <StepTabs step={step} loading={false} stepsList={stepsList} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+  return <></>;
+}
+
+function mapStepIds(steps: JourneyStep[]) {
+  return steps.map(({ _id }) => _id).toString();
+}
+
 export const BrowserStepsList = ({
   steps,
   error,
@@ -70,45 +88,56 @@ export const BrowserStepsList = ({
   showExpand = true,
   testNowMode = false,
 }: Props) => {
-  const { euiTheme } = useEuiTheme();
   const stepEnds: JourneyStep[] = steps.filter(isStepEnd);
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
-    Record<string, ReactElement>
-  >({});
+  const failedStep = stepEnds.find((step) => step.synthetics.step?.status === 'failed');
+  /**
+   * This component is used in cases where the steps list is not pre-fetched at render time. In that case, we handle the auto-expand
+   * in the `useEffect` call below, which will update the expanded map after the data loads. At times, the component is also rendered
+   * with the complete list of steps pre-loaded. In that case, we must set the default state value to pre-expand for the error step.
+   */
+  const defaultExpanded = useMemo(
+    () =>
+      !!failedStep && showExpand
+        ? { [failedStep._id]: toExpandedMapItem(failedStep, steps, testNowMode) }
+        : {},
+    [failedStep, showExpand, steps, testNowMode]
+  );
+  const { euiTheme } = useEuiTheme();
+  const [expandedMap, setExpandedMap] = useState<Record<string, ReactElement>>(defaultExpanded);
+  const [stepIds, setStepIds] = useState<string>(mapStepIds(stepEnds));
   const isTabletOrGreater = useIsWithinMinBreakpoint('s');
+
+  useEffect(() => {
+    /**
+     * This effect will only take action when the set of steps changes.
+     */
+    const latestIds = mapStepIds(stepEnds);
+    if (latestIds !== stepIds) {
+      setStepIds(latestIds);
+      if (failedStep && showExpand && !expandedMap[failedStep._id]) {
+        setExpandedMap(
+          Object.assign(expandedMap, {
+            [failedStep._id]: toExpandedMapItem(failedStep, steps, testNowMode),
+          })
+        );
+      }
+    }
+  }, [expandedMap, failedStep, showExpand, stepEnds, stepIds, steps, testNowMode]);
 
   const toggleDetails = useCallback(
     (item: JourneyStep) => {
-      setItemIdToExpandedRowMap((prevState) => {
-        const itemIdToExpandedRowMapValues = { ...prevState };
-        if (itemIdToExpandedRowMapValues[item._id]) {
-          delete itemIdToExpandedRowMapValues[item._id];
+      setExpandedMap((prevState) => {
+        const expandedMapValues = { ...prevState };
+        if (expandedMapValues[item._id]) {
+          delete expandedMapValues[item._id];
         } else {
-          if (testNowMode) {
-            itemIdToExpandedRowMapValues[item._id] = (
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <StepTabs step={item} loading={false} stepsList={steps} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            );
-          } else {
-            itemIdToExpandedRowMapValues[item._id] = <></>;
-          }
+          expandedMapValues[item._id] = toExpandedMapItem(item, steps, testNowMode);
         }
-        return itemIdToExpandedRowMapValues;
+        return expandedMapValues;
       });
     },
     [steps, testNowMode]
   );
-
-  const failedStep = stepEnds?.find((step) => step.synthetics.step?.status === 'failed');
-
-  useEffect(() => {
-    if (failedStep && showExpand) {
-      toggleDetails(failedStep);
-    }
-  }, [failedStep, showExpand, toggleDetails]);
 
   const columns: Array<EuiBasicTableColumn<JourneyStep>> = [
     ...(showExpand
@@ -120,8 +149,8 @@ export const BrowserStepsList = ({
             render: (item: JourneyStep) => (
               <EuiButtonIcon
                 onClick={() => toggleDetails(item)}
-                aria-label={itemIdToExpandedRowMap[item._id] ? 'Collapse' : 'Expand'}
-                iconType={itemIdToExpandedRowMap[item._id] ? 'arrowDown' : 'arrowRight'}
+                aria-label={expandedMap[item._id] ? 'Collapse' : 'Expand'}
+                iconType={expandedMap[item._id] ? 'arrowDown' : 'arrowRight'}
               />
             ),
           },
@@ -166,7 +195,7 @@ export const BrowserStepsList = ({
             stepsLoading={loading}
             showStepNumber={showStepNumber}
             showLastSuccessful={showLastSuccessful}
-            isExpanded={Boolean(itemIdToExpandedRowMap[step._id])}
+            isExpanded={Boolean(expandedMap[step._id])}
             isTestNowMode={testNowMode}
             euiTheme={euiTheme}
           />
@@ -201,9 +230,10 @@ export const BrowserStepsList = ({
       name: RESULT_LABEL,
       render: (pingStatus: string, item: JourneyStep) => (
         <ResultDetails
+          testNowMode={testNowMode}
           step={item}
           pingStatus={pingStatus}
-          isExpanded={Boolean(itemIdToExpandedRowMap[item._id]) && !testNowMode}
+          isExpanded={Boolean(expandedMap[item._id]) && !testNowMode}
         />
       ),
       mobileOptions: {
@@ -216,10 +246,7 @@ export const BrowserStepsList = ({
             field: 'synthetics.step.status',
             name: LAST_SUCCESSFUL,
             render: (pingStatus: string, item: JourneyStep) => (
-              <ResultDetailsSuccessful
-                step={item}
-                isExpanded={Boolean(itemIdToExpandedRowMap[item._id])}
-              />
+              <ResultDetailsSuccessful step={item} isExpanded={Boolean(expandedMap[item._id])} />
             ),
             mobileOptions: {
               show: false,
@@ -260,7 +287,7 @@ export const BrowserStepsList = ({
       <EuiBasicTable
         css={{ overflowX: isTabletOrGreater ? 'auto' : undefined }}
         cellProps={(row) => {
-          if (itemIdToExpandedRowMap[row._id]) {
+          if (expandedMap[row._id]) {
             return {
               style: { verticalAlign: 'top' },
             };
@@ -284,7 +311,7 @@ export const BrowserStepsList = ({
         }
         tableLayout={'auto'}
         itemId="_id"
-        itemIdToExpandedRowMap={testNowMode ? itemIdToExpandedRowMap : undefined}
+        itemIdToExpandedRowMap={testNowMode ? expandedMap : undefined}
       />
     </>
   );
@@ -362,6 +389,7 @@ const MobileRowDetails = ({
                 title: RESULT_LABEL,
                 description: (
                   <ResultDetails
+                    testNowMode={isTestNowMode}
                     step={journeyStep}
                     pingStatus={journeyStep?.synthetics?.step?.status ?? 'skipped'}
                     isExpanded={isExpanded && !isTestNowMode}

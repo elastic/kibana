@@ -19,6 +19,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/i18n-react",
-    "@kbn/ui-actions-plugin"
+    "@kbn/ui-actions-plugin",
+    "@kbn/data-views-plugin"
   ]
 }

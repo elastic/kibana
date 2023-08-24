@@ -29,10 +29,9 @@ import { useStyles } from './styles';
 import {
   ControlGeneralViewSelectorDeps,
   ControlFormErrorMap,
-  Selector,
-  SelectorCondition,
   SelectorConditionsMap,
 } from '../../types';
+import { Selector, SelectorCondition } from '../../../common';
 import {
   getSelectorConditions,
   camelToSentenceCase,
@@ -400,7 +399,11 @@ export const ControlGeneralViewSelector = ({
                 <EuiText css={styles.conditionsBadge} size="xs">
                   <b>{i18n.conditions}</b>
                 </EuiText>
-                <EuiBadge title={conditionsAdded.join(',')} color="hollow">
+                <EuiBadge
+                  title={conditionsAdded.join(',')}
+                  color="hollow"
+                  data-test-subj="cloud-defend-conditions-count"
+                >
                   {conditionsAdded.length}
                 </EuiBadge>
               </>

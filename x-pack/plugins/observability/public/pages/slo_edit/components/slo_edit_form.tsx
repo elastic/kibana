@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
-import { useLocation, useHistory } from 'react-router-dom';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCheckbox,
   EuiFlexGroup,
   EuiIconTip,
@@ -17,35 +15,40 @@ import {
   EuiSteps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { CreateSLOInput, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-
-import { useKibana } from '../../../utils/kibana_react';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import React, { useCallback, useEffect, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { sloFeatureId } from '../../../../common';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
+import { paths } from '../../../../common/locators/paths';
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
-import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';
-import { useShowSections } from '../hooks/use_show_sections';
 import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
-import { useSectionFormValidation } from '../helpers/use_section_form_validation';
-import { SloEditFormDescriptionSection } from './slo_edit_form_description_section';
-import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
-import { SloEditFormIndicatorSection } from './slo_edit_form_indicator_section';
+import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';
+import { useKibana } from '../../../utils/kibana_react';
+import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 import {
-  transformValuesToCreateSLOInput,
-  transformSloResponseToCreateSloInput,
+  transformCreateSLOFormToCreateSLOInput,
+  transformSloResponseToCreateSloForm,
   transformValuesToUpdateSLOInput,
 } from '../helpers/process_slo_form_values';
-import { paths } from '../../../config/paths';
-import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
-import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
-import { sloFeatureId } from '../../../../common';
+import {
+  CREATE_RULE_SEARCH_PARAM,
+  useAddRuleFlyoutState,
+} from '../hooks/use_add_rule_flyout_state';
+import { useCopyToJson } from '../hooks/use_copy_to_json';
+import { useParseUrlState } from '../hooks/use_parse_url_state';
+import { useSectionFormValidation } from '../hooks/use_section_form_validation';
+import { useShowSections } from '../hooks/use_show_sections';
+import { CreateSLOForm } from '../types';
+import { SloEditFormDescriptionSection } from './slo_edit_form_description_section';
+import { SloEditFormIndicatorSection } from './slo_edit_form_indicator_section';
+import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
 
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;
 }
 
 export const maxWidth = 775;
-
-const CREATE_RULE_SEARCH_PARAM = 'create-rule';
 
 export function SloEditForm({ slo }: Props) {
   const {
@@ -54,44 +57,28 @@ export function SloEditForm({ slo }: Props) {
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
 
-  const history = useHistory();
-  const { search } = useLocation();
-
+  const isEditMode = slo !== undefined;
   const { data: rules, isInitialLoading } = useFetchRulesForSlo({
     sloIds: slo?.id ? [slo.id] : undefined,
   });
 
-  const urlStateStorage = createKbnUrlStateStorage({
-    history,
-    useHash: false,
-    useHashQuery: false,
-  });
-
-  const urlParams = urlStateStorage.get<CreateSLOInput>('_a');
-
-  const searchParams = new URLSearchParams(search);
-
-  const isEditMode = slo !== undefined;
-
-  const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
+  const sloFormValuesUrlState = useParseUrlState();
+  const isAddRuleFlyoutOpen = useAddRuleFlyoutState(isEditMode);
   const [isCreateRuleCheckboxChecked, setIsCreateRuleCheckboxChecked] = useState(true);
 
-  if (searchParams.has(CREATE_RULE_SEARCH_PARAM) && isEditMode && !isAddRuleFlyoutOpen) {
-    setIsAddRuleFlyoutOpen(true);
-  }
-
   useEffect(() => {
-    if (isEditMode && rules && rules[slo.id].length && isCreateRuleCheckboxChecked) {
+    if (isEditMode && rules && rules[slo.id].length) {
       setIsCreateRuleCheckboxChecked(false);
     }
-  }, [isCreateRuleCheckboxChecked, isEditMode, rules, slo]);
+  }, [isEditMode, rules, slo]);
 
-  const methods = useForm({
-    defaultValues: { ...SLO_EDIT_FORM_DEFAULT_VALUES, ...urlParams },
-    values: transformSloResponseToCreateSloInput(slo),
+  const methods = useForm<CreateSLOForm>({
+    defaultValues: Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, sloFormValuesUrlState),
+    values: transformSloResponseToCreateSloForm(slo),
     mode: 'all',
   });
   const { watch, getFieldState, getValues, formState, trigger } = methods;
+  const handleCopyToJson = useCopyToJson({ trigger, getValues });
 
   const { isIndicatorSectionValid, isObjectiveSectionValid, isDescriptionSectionValid } =
     useSectionFormValidation({
@@ -134,7 +121,7 @@ export function SloEditForm({ slo }: Props) {
         navigate(basePath.prepend(paths.observability.slos));
       }
     } else {
-      const processedValues = transformValuesToCreateSLOInput(values);
+      const processedValues = transformCreateSLOFormToCreateSLOInput(values);
 
       if (isCreateRuleCheckboxChecked) {
         const { id } = await createSlo({ slo: processedValues });
@@ -171,7 +158,7 @@ export function SloEditForm({ slo }: Props) {
                 title: i18n.translate('xpack.observability.slo.sloEdit.definition.title', {
                   defaultMessage: 'Define SLI',
                 }),
-                children: <SloEditFormIndicatorSection />,
+                children: <SloEditFormIndicatorSection isEditMode={isEditMode} />,
                 status: isIndicatorSectionValid ? 'complete' : 'incomplete',
               },
               {
@@ -241,17 +228,28 @@ export function SloEditForm({ slo }: Props) {
                   })}
             </EuiButton>
 
-            <EuiButton
-              color="ghost"
+            <EuiButtonEmpty
+              color="primary"
               data-test-subj="sloFormCancelButton"
-              fill
               disabled={isCreateSloLoading || isUpdateSloLoading}
               onClick={() => navigateToUrl(basePath.prepend(paths.observability.slos))}
             >
               {i18n.translate('xpack.observability.slo.sloEdit.cancelButton', {
                 defaultMessage: 'Cancel',
               })}
-            </EuiButton>
+            </EuiButtonEmpty>
+
+            <EuiButtonEmpty
+              color="primary"
+              iconType="copyClipboard"
+              data-test-subj="sloFormCopyJsonButton"
+              disabled={isCreateSloLoading || isUpdateSloLoading}
+              onClick={handleCopyToJson}
+            >
+              {i18n.translate('xpack.observability.slo.sloEdit.copyJsonButton', {
+                defaultMessage: 'Copy JSON',
+              })}
+            </EuiButtonEmpty>
           </EuiFlexGroup>
         </EuiFlexGroup>
       </FormProvider>
@@ -260,8 +258,8 @@ export function SloEditForm({ slo }: Props) {
         <AddRuleFlyout
           canChangeTrigger={false}
           consumer={sloFeatureId}
-          initialValues={{ name: `${slo.name} Burn Rate rule`, params: { sloId: slo.id } }}
-          ruleTypeId={SLO_BURN_RATE_RULE_ID}
+          initialValues={{ name: `${slo.name} burn rate rule`, params: { sloId: slo.id } }}
+          ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
           onClose={handleCloseRuleFlyout}
           onSave={handleCloseRuleFlyout}
         />

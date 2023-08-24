@@ -12,12 +12,10 @@ import { AddToCaseAction } from './add_to_case_action';
 import * as useCaseHook from '../hooks/use_add_to_case';
 import * as datePicker from '../components/date_range_picker';
 import moment from 'moment';
-import { noCasesPermissions as mockUseGetCasesPermissions } from '../../../../utils/cases_permissions';
+import { noCasesPermissions as mockUseGetCasesPermissions } from '@kbn/observability-shared-plugin/public';
+import * as obsHooks from '@kbn/observability-shared-plugin/public/hooks/use_get_user_cases_permissions';
 
-jest.mock('../../../../hooks/use_get_user_cases_permissions', () => ({
-  useGetUserCasesPermissions: jest.fn(() => mockUseGetCasesPermissions()),
-}));
-
+jest.spyOn(obsHooks, 'useGetUserCasesPermissions').mockReturnValue(mockUseGetCasesPermissions());
 describe('AddToCaseAction', function () {
   beforeEach(() => {
     jest.spyOn(datePicker, 'parseRelativeDate').mockRestore();
@@ -62,12 +60,7 @@ describe('AddToCaseAction', function () {
     const useAddToCaseHook = jest.spyOn(useCaseHook, 'useAddToCase');
 
     const { getByText } = render(
-      <AddToCaseAction
-        lensAttributes={null}
-        timeRange={{ to: '', from: '' }}
-        appId="securitySolutionUI"
-        owner="security"
-      />
+      <AddToCaseAction lensAttributes={null} timeRange={{ to: '', from: '' }} owner="security" />
     );
 
     expect(await forNearestButton(getByText)('Add to case')).toBeDisabled();
@@ -79,7 +72,6 @@ describe('AddToCaseAction', function () {
           from: '',
           to: '',
         },
-        appId: 'securitySolutionUI',
         owner: 'security',
       })
     );
@@ -118,6 +110,7 @@ describe('AddToCaseAction', function () {
           update: false,
           delete: false,
           push: false,
+          connectors: false,
         },
       })
     );

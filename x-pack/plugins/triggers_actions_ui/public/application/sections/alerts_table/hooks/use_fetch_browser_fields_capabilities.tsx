@@ -6,15 +6,12 @@
  */
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
-import type { DataViewFieldBase } from '@kbn/es-query';
-import { useQuery } from '@tanstack/react-query';
-import { useMemo, useRef } from 'react';
-import { loadAlertDataView } from '../../../hooks/use_alert_data_view';
+import { BASE_RAC_ALERTS_API_PATH, BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { useCallback, useEffect, useState } from 'react';
+import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
 import type { Alerts } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ERROR_FETCH_BROWSER_FIELDS } from './translations';
-import { getCategory } from '../../field_browser/helpers';
 
 export interface FetchAlertsArgs {
   featureIds: ValidFeatureId[];
@@ -29,75 +26,63 @@ export type UseFetchAlerts = ({ featureIds }: FetchAlertsArgs) => [boolean, Fetc
 
 const INVALID_FEATURE_ID = 'siem';
 
-/**
- * HOT Code path where the fields can be 16087 in length or larger. This is
- * VERY mutatious on purpose to improve the performance of the transform.
- */
-const getDataViewStateFromIndexFields = (
-  _title: string,
-  fields: DataViewFieldBase[],
-  _includeUnmapped: boolean = false
-): BrowserFields => {
-  // Adds two dangerous casts to allow for mutations within this function
-  type DangerCastForMutation = Record<string, {}>;
-
-  return fields.reduce<BrowserFields>((browserFields, field) => {
-    // mutate browserFields
-    const category = getCategory(field.name);
-    if (browserFields[category] == null) {
-      (browserFields as DangerCastForMutation)[category] = {};
-    }
-    if (browserFields[category].fields == null) {
-      browserFields[category].fields = {};
-    }
-    (browserFields[category].fields as Record<string, BrowserField>)[field.name] =
-      field as unknown as BrowserField;
-
-    return browserFields;
-  }, {});
-};
-
 export const useFetchBrowserFieldCapabilities = ({
   featureIds,
   initialBrowserFields,
-}: FetchAlertsArgs): [boolean | undefined, BrowserFields] => {
+}: FetchAlertsArgs): [boolean | undefined, BrowserFields, unknown[]] => {
   const {
     http,
-    data: dataService,
     notifications: { toasts },
   } = useKibana().services;
 
-  const enabled = !initialBrowserFields && !featureIds.includes(INVALID_FEATURE_ID);
+  const [isLoading, setIsLoading] = useState<boolean | undefined>(undefined);
+  const [browserFields, setBrowserFields] = useState<BrowserFields>(
+    () => initialBrowserFields ?? {}
+  );
+  const [fields, setFields] = useState<FieldDescriptor[]>([]);
 
-  const { data: dataView, isFetching } = useQuery({
-    queryKey: ['fetchBrowserFields', featureIds],
-    queryFn: () => {
-      return loadAlertDataView({ http, dataService, featureIds });
-    },
-    onError: () => {
+  const getBrowserFieldInfo = useCallback(async (): Promise<{
+    browserFields: BrowserFields;
+    fields: FieldDescriptor[];
+  }> => {
+    if (!http) return Promise.resolve({ browserFields: {}, fields: [] });
+
+    try {
+      return await http.get<{ browserFields: BrowserFields; fields: FieldDescriptor[] }>(
+        `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
+        {
+          query: { featureIds },
+        }
+      );
+    } catch (e) {
       toasts.addDanger(ERROR_FETCH_BROWSER_FIELDS);
-    },
-    enabled,
-    keepPreviousData: true,
-    cacheTime: 0,
-    refetchOnWindowFocus: false,
-  });
-  const loading = useRef<boolean | undefined>(isFetching);
-  const browserFields = useMemo(() => {
-    if (!enabled && initialBrowserFields) {
-      loading.current = undefined;
-      return initialBrowserFields;
+      return Promise.resolve({ browserFields: {}, fields: [] });
     }
-    if (!dataView) {
-      loading.current = undefined;
-      return {};
-    }
-    loading.current = isFetching;
-    return getDataViewStateFromIndexFields(
-      dataView.id ?? '',
-      dataView.fields != null ? dataView.fields : []
-    );
-  }, [enabled, initialBrowserFields, dataView, isFetching]);
+  }, [featureIds, http, toasts]);
 
-  return [loading.current, browserFields];
+  useEffect(() => {
+    if (initialBrowserFields) {
+      // Event if initial browser fields is empty, assign it
+      // because client may be doing it to hide Fields Browser
+      setBrowserFields(initialBrowserFields);
+      return;
+    }
+
+    if (isLoading !== undefined || featureIds.includes(INVALID_FEATURE_ID)) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    const callApi = async () => {
+      const { browserFields: browserFieldsInfo, fields: newFields } = await getBrowserFieldInfo();
+      setFields(newFields);
+      setBrowserFields(browserFieldsInfo);
+      setIsLoading(false);
+    };
+
+    callApi();
+  }, [getBrowserFieldInfo, isLoading, featureIds, initialBrowserFields]);
+
+  return [isLoading, browserFields, fields];
 };

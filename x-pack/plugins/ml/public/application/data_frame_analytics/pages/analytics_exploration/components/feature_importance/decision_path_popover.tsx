@@ -8,19 +8,19 @@
 import React, { FC, useState } from 'react';
 import { EuiLink, EuiTab, EuiTabs, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RegressionDecisionPath } from './decision_path_regression';
-import { DecisionPathJSONViewer } from './decision_path_json_viewer';
 import {
-  FeatureImportance,
-  FeatureImportanceBaseline,
+  ANALYSIS_CONFIG_TYPE,
+  type DataFrameAnalysisConfigType,
+  type FeatureImportance,
+  type FeatureImportanceBaseline,
+  type TopClasses,
   isClassificationFeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
-  TopClasses,
-} from '../../../../../../../common/types/feature_importance';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../common';
+} from '@kbn/ml-data-frame-analytics-utils';
+import { RegressionDecisionPath } from './decision_path_regression';
+import { DecisionPathJSONViewer } from './decision_path_json_viewer';
 import { ClassificationDecisionPath } from './decision_path_classification';
 import { useMlKibana } from '../../../../../contexts/kibana';
-import type { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 import { getStringBasedClassName } from './use_classification_path_data';
 
 interface DecisionPathPopoverProps {

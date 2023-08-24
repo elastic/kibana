@@ -41,6 +41,7 @@ export const createContext = ({
     maxRetryAttempts: migrationConfig.retryAttempts,
     migrationDocLinks: docLinks.links.kibanaUpgradeSavedObjects,
     deletedTypes: REMOVED_TYPES,
+    batchSize: migrationConfig.batchSize,
     discardCorruptObjects: Boolean(migrationConfig.discardCorruptObjects),
     nodeRoles,
   };

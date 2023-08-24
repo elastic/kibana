@@ -46,12 +46,7 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
 
     if (fieldRequested.includes('*') && hits.length > 0) {
       const fieldsReturned = hits.flatMap((hit) => Object.keys(hit.fields ?? {}));
-      fieldRequested = fieldsReturned.reduce((acc, f) => {
-        if (!acc.includes(f)) {
-          return [...acc, f];
-        }
-        return acc;
-      }, fieldRequested);
+      fieldRequested = [...new Set(fieldsReturned)];
     }
 
     const edges: TimelineEdges[] = await Promise.all(
@@ -64,11 +59,11 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
       )
     );
 
-    const consumers: Record<string, number> = producerBuckets.reduce(
-      (acc: Record<string, number>, b: { key: string; doc_count: number }) => ({
-        ...acc,
-        [b.key]: b.doc_count,
-      }),
+    const consumers = producerBuckets.reduce(
+      (acc: Record<string, number>, b: { key: string; doc_count: number }) => {
+        acc[b.key] = b.doc_count;
+        return acc;
+      },
       {}
     );
 

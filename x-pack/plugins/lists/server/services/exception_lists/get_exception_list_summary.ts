@@ -29,6 +29,7 @@ interface ByOsAggBucketType {
   key: string;
   doc_count: number;
 }
+
 interface ByOsAggType {
   by_os: {
     buckets: ByOsAggBucketType[];
@@ -84,12 +85,14 @@ export const getExceptionListSummary = async ({
     return null;
   }
 
-  const summary: ExceptionListSummarySchema = savedObject.aggregations.by_os.buckets.reduce(
-    (acc, item: ByOsAggBucketType) => ({
-      ...acc,
-      [item.key]: item.doc_count,
-      total: savedObject.total,
-    }),
+  const summary = savedObject.aggregations.by_os.buckets.reduce<ExceptionListSummarySchema>(
+    (acc, item: ByOsAggBucketType) => {
+      Object.assign(acc, {
+        [item.key]: item.doc_count,
+        total: savedObject.total,
+      });
+      return acc;
+    },
     { linux: 0, macos: 0, total: 0, windows: 0 }
   );
 

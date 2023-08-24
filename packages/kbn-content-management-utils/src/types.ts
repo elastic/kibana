@@ -20,6 +20,15 @@ import type {
 } from '@kbn/content-management-plugin/common';
 
 import type {
+  ContentManagementServicesDefinition as ServicesDefinition,
+  Version,
+} from '@kbn/object-versioning';
+
+export interface ServicesDefinitionSet {
+  [version: Version]: ServicesDefinition;
+}
+
+import {
   SortOrder,
   AggregationsAggregationContainer,
   SortResults,
@@ -167,7 +176,7 @@ export interface SavedObjectUpdateOptions<Attributes = unknown> {
 }
 
 /** Return value for Saved Object get, T is item returned */
-export type GetResultSO<T extends object> = GetResult<
+export type GetResultSO<T extends object = object> = GetResult<
   T,
   {
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
@@ -179,7 +188,7 @@ export type GetResultSO<T extends object> = GetResult<
 /**
  * Saved object with metadata
  */
-export interface SOWithMetadata<Attributes extends object> {
+export interface SOWithMetadata<Attributes extends object = object> {
   id: string;
   type: string;
   version?: string;
@@ -197,13 +206,84 @@ export interface SOWithMetadata<Attributes extends object> {
   originId?: string;
 }
 
-type PartialItem<Attributes extends object> = Omit<
+export type SOWithMetadataPartial<Attributes extends object = object> = Omit<
   SOWithMetadata<Attributes>,
   'attributes' | 'references'
 > & {
   attributes: Partial<Attributes>;
   references: Reference[] | undefined;
 };
+
+export interface CMCrudTypes {
+  /**
+   * Saved object attributes
+   */
+  Attributes: object;
+  /**
+   * Complete saved object
+   */
+  Item: SOWithMetadata;
+  /**
+   * Partial saved object, used as output for update
+   */
+  PartialItem: SOWithMetadataPartial;
+
+  /**
+   * Get item params
+   */
+  GetIn: GetIn;
+  /**
+   * Get item result
+   */
+  GetOut: GetResultSO<SOWithMetadata>;
+  /**
+   * Create item params
+   */
+  CreateIn: CreateIn;
+  /**
+   * Create item result
+   */
+  CreateOut: CreateResult<SOWithMetadata>;
+  /**
+   *
+   */
+  CreateOptions: object;
+
+  /**
+   * Search item params
+   */
+  SearchIn: SearchIn;
+  /**
+   * Search item result
+   */
+  SearchOut: SearchResult<SOWithMetadata>;
+  /**
+   *
+   */
+  SearchOptions: object;
+
+  /**
+   * Update item params
+   */
+  UpdateIn: UpdateIn;
+  /**
+   * Update item result
+   */
+  UpdateOut: UpdateResult<SOWithMetadataPartial>;
+  /**
+   *
+   */
+  UpdateOptions: object;
+
+  /**
+   * Delete item params
+   */
+  DeleteIn: DeleteIn;
+  /**
+   * Delete item result
+   */
+  DeleteOut: DeleteResult;
+}
 
 /**
  * Types used by content management storage
@@ -217,6 +297,7 @@ export interface ContentManagementCrudTypes<
   UpdateOptions extends object,
   SearchOptions extends object
 > {
+  Attributes: Attributes;
   /**
    * Complete saved object
    */
@@ -224,7 +305,7 @@ export interface ContentManagementCrudTypes<
   /**
    * Partial saved object, used as output for update
    */
-  PartialItem: PartialItem<Attributes>;
+  PartialItem: SOWithMetadataPartial<Attributes>;
   /**
    * Create options
    */
@@ -266,11 +347,11 @@ export interface ContentManagementCrudTypes<
   /**
    * Update item params
    */
-  UpdateIn: UpdateIn<ContentType, Attributes, UpdateOptions>;
+  UpdateIn: UpdateIn<ContentType, Partial<Attributes>, UpdateOptions>;
   /**
    * Update item result
    */
-  UpdateOut: UpdateResult<PartialItem<Attributes>>;
+  UpdateOut: UpdateResult<SOWithMetadataPartial<Attributes>>;
 
   /**
    * Delete item params

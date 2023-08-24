@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useGetUrlParams, useUrlParams } from '../../hooks';
 import { deletePackagePolicy } from '../../state/monitor_management/api';

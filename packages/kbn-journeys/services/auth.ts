@@ -57,6 +57,7 @@ export class Auth {
         'kbn-version': version,
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'same-origin',
+        'x-elastic-internal-origin': 'Kibana',
       },
       validateStatus: () => true,
       maxRedirects: 0,
@@ -100,5 +101,9 @@ export class Auth {
 
   public isCloud() {
     return this.config.get('servers.kibana.hostname') !== 'localhost';
+  }
+
+  public isServerless() {
+    return !!this.config.get('serverless');
   }
 }

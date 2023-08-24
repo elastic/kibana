@@ -26,7 +26,7 @@ export interface UseThreatIntelligenceParams {
   dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
 }
 
-export interface UseThreatIntelligenceValue {
+export interface UseThreatIntelligenceResult {
   /**
    * Returns true while the threat intelligence data is being queried
    */
@@ -58,7 +58,7 @@ export interface UseThreatIntelligenceValue {
  */
 export const useFetchThreatIntelligence = ({
   dataFormattedForFieldBrowser,
-}: UseThreatIntelligenceParams): UseThreatIntelligenceValue => {
+}: UseThreatIntelligenceParams): UseThreatIntelligenceResult => {
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
   // retrieve the threat enrichment fields with value for the current document

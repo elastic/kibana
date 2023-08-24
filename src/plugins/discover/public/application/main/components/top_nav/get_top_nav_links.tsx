@@ -8,56 +8,37 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import { openOptionsPopover } from './open_options_popover';
 import { openAlertsPopover } from './open_alerts_popover';
+import type { TopNavCustomization } from '../../../../customizations';
 
 /**
  * Helper function to build the top nav links
  */
 export const getTopNavLinks = ({
   dataView,
-  navigateTo,
   services,
   state,
   onOpenInspector,
   isPlainRecord,
-  persistDataView,
   adHocDataViews,
+  topNavCustomization,
 }: {
   dataView: DataView;
-  navigateTo: (url: string) => void;
   services: DiscoverServices;
   state: DiscoverStateContainer;
   onOpenInspector: () => void;
   isPlainRecord: boolean;
   adHocDataViews: DataView[];
-  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
+  topNavCustomization: TopNavCustomization | undefined;
 }): TopNavMenuData[] => {
-  const options = {
-    id: 'options',
-    label: i18n.translate('discover.localMenu.localMenu.optionsTitle', {
-      defaultMessage: 'Options',
-    }),
-    description: i18n.translate('discover.localMenu.optionsDescription', {
-      defaultMessage: 'Options',
-    }),
-    run: (anchorElement: HTMLElement) =>
-      openOptionsPopover({
-        I18nContext: services.core.i18n.Context,
-        anchorElement,
-        theme$: services.core.theme.theme$,
-        services,
-      }),
-    testId: 'discoverOptionsButton',
-  };
-
   const alerts = {
     id: 'alerts',
     label: i18n.translate('discover.localMenu.localMenu.alertsTitle', {
@@ -68,8 +49,6 @@ export const getTopNavLinks = ({
     }),
     run: async (anchorElement: HTMLElement) => {
       openAlertsPopover({
-        I18nContext: services.core.i18n.Context,
-        theme$: services.core.theme.theme$,
         anchorElement,
         services,
         stateContainer: state,
@@ -87,7 +66,7 @@ export const getTopNavLinks = ({
     description: i18n.translate('discover.localMenu.newSearchDescription', {
       defaultMessage: 'New Search',
     }),
-    run: () => navigateTo('/'),
+    run: () => services.locator.navigate({}),
     testId: 'discoverNewButton',
   };
 
@@ -106,7 +85,6 @@ export const getTopNavLinks = ({
       onSaveSearch({
         savedSearch: state.savedSearchState.getState(),
         services,
-        navigateTo,
         state,
         onClose: () => {
           anchorElement?.focus();
@@ -127,8 +105,6 @@ export const getTopNavLinks = ({
     run: () =>
       showOpenSearchPanel({
         onOpenSavedSearch: state.actions.onOpenSavedSearch,
-        I18nContext: services.core.i18n.Context,
-        theme$: services.core.theme.theme$,
         services,
       }),
   };
@@ -143,29 +119,67 @@ export const getTopNavLinks = ({
     }),
     testId: 'shareTopNavButton',
     run: async (anchorElement: HTMLElement) => {
-      if (!services.share) {
-        return;
-      }
-      // this prompts the user to save the dataview if adhoc dataview is detected
-      // for text based languages we don't want this check
-      if (!isPlainRecord) {
-        const updatedDataView = await persistDataView(dataView);
-        if (!updatedDataView) {
-          return;
-        }
-      }
+      if (!services.share) return;
       const savedSearch = state.savedSearchState.getState();
       const sharingData = await getSharingData(
         savedSearch.searchSource,
         state.appState.getState(),
-        services
+        services,
+        isPlainRecord
+      );
+
+      const { locator } = services;
+      const appState = state.appState.getState();
+      const { timefilter } = services.data.query.timefilter;
+      const timeRange = timefilter.getTime();
+      const refreshInterval = timefilter.getRefreshInterval();
+      const { grid, ...otherState } = appState;
+      const filters = services.filterManager.getFilters();
+
+      // Share -> Get links -> Snapshot
+      const params: DiscoverAppLocatorParams = {
+        ...otherState,
+        ...(savedSearch.id ? { savedSearchId: savedSearch.id } : {}),
+        ...(dataView?.isPersisted()
+          ? { dataViewId: dataView?.id }
+          : { dataViewSpec: dataView?.toMinimalSpec() }),
+        filters,
+        timeRange,
+        refreshInterval,
+      };
+      const relativeUrl = locator.getRedirectUrl(params);
+
+      // This logic is duplicated from `relativeToAbsolute` (for bundle size reasons). Ultimately, this should be
+      // replaced when https://github.com/elastic/kibana/issues/153323 is implemented.
+      const link = document.createElement('a');
+      link.setAttribute('href', relativeUrl);
+      const shareableUrl = link.href;
+
+      // Share -> Get links -> Saved object
+      let shareableUrlForSavedObject = await locator.getUrl(
+        { savedSearchId: savedSearch.id },
+        { absolute: true }
+      );
+
+      // UrlPanelContent forces a '_g' parameter in the saved object URL:
+      // https://github.com/elastic/kibana/blob/a30508153c1467b1968fb94faf1debc5407f61ea/src/plugins/share/public/components/url_panel_content.tsx#L230
+      // Since our locator doesn't add the '_g' parameter if it's not needed, UrlPanelContent
+      // will interpret it as undefined and add '?_g=' to the URL, which is invalid in Discover,
+      // so instead we add an empty object for the '_g' parameter to the URL.
+      shareableUrlForSavedObject = setStateToKbnUrl(
+        '_g',
+        {},
+        undefined,
+        shareableUrlForSavedObject
       );
 
       services.share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: false,
         allowShortUrl: !!services.capabilities.discover.createShortUrl,
-        shareableUrl: unhashUrl(window.location.href),
+        shareableUrl,
+        shareableUrlForSavedObject,
+        shareableUrlLocatorParams: { locator, params },
         objectId: savedSearch.id,
         objectType: 'search',
         sharingData: {
@@ -200,17 +214,37 @@ export const getTopNavLinks = ({
     },
   };
 
-  return [
-    ...(services.capabilities.advancedSettings.save ? [options] : []),
-    newSearch,
-    openSearch,
-    shareSearch,
-    ...(services.triggersActionsUi &&
+  const defaultMenu = topNavCustomization?.defaultMenu;
+  const entries = [...(topNavCustomization?.getMenuItems?.() ?? [])];
+
+  if (!defaultMenu?.newItem?.disabled) {
+    entries.push({ data: newSearch, order: defaultMenu?.newItem?.order ?? 100 });
+  }
+
+  if (!defaultMenu?.openItem?.disabled) {
+    entries.push({ data: openSearch, order: defaultMenu?.openItem?.order ?? 200 });
+  }
+
+  if (!defaultMenu?.shareItem?.disabled) {
+    entries.push({ data: shareSearch, order: defaultMenu?.shareItem?.order ?? 300 });
+  }
+
+  if (
+    services.triggersActionsUi &&
     services.capabilities.management?.insightsAndAlerting?.triggersActions &&
-    !isPlainRecord
-      ? [alerts]
-      : []),
-    inspectSearch,
-    ...(services.capabilities.discover.save ? [saveSearch] : []),
-  ];
+    !isPlainRecord &&
+    !defaultMenu?.alertsItem?.disabled
+  ) {
+    entries.push({ data: alerts, order: defaultMenu?.alertsItem?.order ?? 400 });
+  }
+
+  if (!defaultMenu?.inspectItem?.disabled) {
+    entries.push({ data: inspectSearch, order: defaultMenu?.inspectItem?.order ?? 500 });
+  }
+
+  if (services.capabilities.discover.save && !defaultMenu?.saveItem?.disabled) {
+    entries.push({ data: saveSearch, order: defaultMenu?.saveItem?.order ?? 600 });
+  }
+
+  return entries.sort((a, b) => a.order - b.order).map((entry) => entry.data);
 };

@@ -94,10 +94,10 @@ describe('CaseUI View Page activity tab', () => {
     const getFeatureIdsMock = jest.spyOn(api, 'getFeatureIds');
     appMockRender.render(<CaseViewAlerts caseData={caseData} />);
     await waitFor(async () => {
-      expect(getFeatureIdsMock).toHaveBeenCalledWith(
-        { registrationContext: ['matchme'] },
-        expect.anything()
-      );
+      expect(getFeatureIdsMock).toHaveBeenCalledWith({
+        query: { registrationContext: ['matchme'] },
+        signal: expect.anything(),
+      });
     });
   });
 

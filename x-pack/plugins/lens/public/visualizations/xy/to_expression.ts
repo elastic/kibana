@@ -13,11 +13,11 @@ import {
   buildExpressionFunction,
   ExpressionFunctionTheme,
 } from '@kbn/expressions-plugin/common';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import {
-  EventAnnotationServiceType,
   isManualPointAnnotationConfig,
   isRangeAnnotationConfig,
-} from '@kbn/event-annotation-plugin/public';
+} from '@kbn/event-annotation-common';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
   AvailableReferenceLineIcon,
@@ -35,17 +35,18 @@ import {
   XYCurveType,
   YAxisConfigFn,
 } from '@kbn/expression-xy-plugin/common';
-import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import type {
-  State,
+  State as XYState,
   YConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   XYAnnotationLayerConfig,
   AxisConfig,
   ValidXYDataLayerConfig,
+  XYLayerConfig,
 } from './types';
 import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '../../types';
 import { getColumnToLabelMap } from './state_helpers';
@@ -65,6 +66,10 @@ import {
 import type { CollapseExpressionFunction } from '../../../common/expressions';
 import { hasIcon } from './xy_config_panel/shared/marker_decoration_settings';
 
+type XYLayerConfigWithSimpleView = XYLayerConfig & { simpleView?: boolean };
+type XYAnnotationLayerConfigWithSimpleView = XYAnnotationLayerConfig & { simpleView?: boolean };
+type State = Omit<XYState, 'layers'> & { layers: XYLayerConfigWithSimpleView[] };
+
 export const getSortedAccessors = (
   datasource: DatasourcePublicAPI | undefined,
   layer: XYDataLayerConfig | XYReferenceLineLayerConfig
@@ -83,7 +88,6 @@ export const toExpression = (
   state: State,
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
-  attributes: Partial<{ title: string; description: string }> = {},
   datasourceExpressionsByLayers: Record<string, Ast>,
   eventAnnotationService: EventAnnotationServiceType
 ): Ast | null => {
@@ -152,7 +156,6 @@ export function toPreviewExpression(
     },
     datasourceLayers,
     paletteService,
-    {},
     datasourceExpressionsByLayers,
     eventAnnotationService
   );
@@ -429,7 +432,7 @@ const referenceLineLayerToExpression = (
 };
 
 const annotationLayerToExpression = (
-  layer: XYAnnotationLayerConfig,
+  layer: XYAnnotationLayerConfigWithSimpleView,
   eventAnnotationService: EventAnnotationServiceType
 ): Ast => {
   const extendedAnnotationLayerFn = buildExpressionFunction<ExtendedAnnotationLayerFn>(

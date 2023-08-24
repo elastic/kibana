@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ExperimentalFeaturesService } from '../applications/fleet/services';
+import { useConfig } from './use_config';
 
 export function useFleetServerStandalone() {
-  const isFleetServerStandalone = ExperimentalFeaturesService.get().fleetServerStandalone;
+  const config = useConfig();
+  const isFleetServerStandalone = config.internal?.fleetServerStandalone ?? false;
 
   return { isFleetServerStandalone };
 }

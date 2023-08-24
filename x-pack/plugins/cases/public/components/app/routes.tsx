@@ -6,10 +6,9 @@
  */
 
 import React, { lazy, Suspense, useCallback } from 'react';
-import { Redirect, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AllCases } from '../all_cases';
@@ -28,7 +27,6 @@ import {
 import { NoPrivilegesPage } from '../no_privileges';
 import * as i18n from './translations';
 import { useReadonlyHeader } from './use_readonly_header';
-import { casesQueryClient } from '../cases_context/query_client';
 import type { CaseViewProps } from '../case_view/types';
 
 const CaseViewLazy: React.FC<CaseViewProps> = lazy(() => import('../case_view'));
@@ -53,9 +51,9 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   );
 
   return (
-    <QueryClientProvider client={casesQueryClient}>
+    <>
       <ReactQueryDevtools initialIsOpen={false} />
-      <Switch>
+      <Routes>
         <Route strict exact path={basePath}>
           <AllCases />
         </Route>
@@ -97,8 +95,8 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
         <Route path={basePath}>
           <Redirect to={basePath} />
         </Route>
-      </Switch>
-    </QueryClientProvider>
+      </Routes>
+    </>
   );
 };
 CasesRoutesComponent.displayName = 'CasesRoutes';

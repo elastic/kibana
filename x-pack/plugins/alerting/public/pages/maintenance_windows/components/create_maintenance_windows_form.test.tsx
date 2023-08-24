@@ -94,8 +94,8 @@ describe('CreateMaintenanceWindowForm', () => {
     const timezoneInput = within(result.getByTestId('timezone-field')).getByTestId('input');
 
     expect(titleInput).toHaveValue('test');
-    expect(dateInputs[0]).toHaveValue('03/24/2023 12:00 AM');
-    expect(dateInputs[1]).toHaveValue('03/26/2023 12:00 AM');
+    expect(dateInputs[0]).toHaveValue('03/23/2023 09:00 PM');
+    expect(dateInputs[1]).toHaveValue('03/25/2023 09:00 PM');
     expect(recurringInput).toBeChecked();
     expect(timezoneInput).toHaveTextContent('America/Los_Angeles');
   });

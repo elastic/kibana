@@ -150,6 +150,7 @@ export const PingType = t.intersection([
     docId: t.string,
   }),
   t.partial({
+    '@timestamp': t.string,
     agent: AgentType,
     container: t.partial({
       id: t.string,

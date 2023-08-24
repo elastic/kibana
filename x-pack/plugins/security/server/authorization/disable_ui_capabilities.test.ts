@@ -8,11 +8,11 @@
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ElasticsearchFeature, KibanaFeature } from '@kbn/features-plugin/server';
 
-import type { AuthenticatedUser } from '../../common/model';
 import { Actions } from './actions';
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 import { authorizationMock } from './index.mock';
 import type { CheckPrivilegesResponse } from './types';
+import type { AuthenticatedUser } from '../../common/model';
 
 type MockAuthzOptions =
   | { rejectCheckPrivileges: any }
@@ -22,11 +22,11 @@ type MockAuthzOptions =
       };
     };
 
-const actions = new Actions('1.0.0-zeta1');
+const actions = new Actions();
 const mockRequest = httpServerMock.createKibanaRequest();
 
 const createMockAuthz = (options: MockAuthzOptions) => {
-  const mock = authorizationMock.create({ version: '1.0.0-zeta1' });
+  const mock = authorizationMock.create();
   // plug actual ui actions into mock Actions with
   mock.actions = actions;
 

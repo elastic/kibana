@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { useMemo, useRef } from 'react';
-import { createEsParams, useEsSearch } from '@kbn/observability-plugin/public';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { SUMMARY_FILTER } from '../../../../../../common/constants/client_defaults';
 import { Ping } from '../../../../../../common/runtime_types';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useTickTick } from './use_tick_tick';
+
+const MAX_RETRIES = 50;
 
 export const useSimpleRunOnceMonitors = ({
   expectSummaryDocs,
@@ -20,6 +22,7 @@ export const useSimpleRunOnceMonitors = ({
   testRunId: string;
 }) => {
   const { refreshTimer, lastRefresh } = useTickTick(2 * 1000);
+  const [numberOfRetries, setNumberOfRetries] = useState(0);
 
   const { data, loading } = useEsSearch(
     createEsParams({
@@ -54,6 +57,14 @@ export const useSimpleRunOnceMonitors = ({
     time: Date.now(),
   });
 
+  useEffect(() => {
+    const docs = data?.hits.hits ?? [];
+
+    if (docs.length === 0) {
+      setNumberOfRetries((prevState) => prevState + 1);
+    }
+  }, [data]);
+
   return useMemo(() => {
     const docs = data?.hits.hits ?? [];
 
@@ -85,10 +96,11 @@ export const useSimpleRunOnceMonitors = ({
     }
 
     return {
+      retriesExceeded: numberOfRetries > MAX_RETRIES,
       data,
       loading,
       summaryDocs: null,
       lastUpdated: lastUpdated.current.time,
     };
-  }, [expectSummaryDocs, data, loading, refreshTimer]);
+  }, [data, numberOfRetries, loading, expectSummaryDocs, refreshTimer]);
 };

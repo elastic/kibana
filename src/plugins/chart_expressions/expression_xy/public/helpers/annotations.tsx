@@ -8,7 +8,6 @@
 import React from 'react';
 import { Position } from '@elastic/charts';
 import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
-import classnames from 'classnames';
 import type {
   IconPosition,
   ReferenceLineDecorationConfig,
@@ -180,12 +179,7 @@ export const AnnotationIcon = ({
       {...rest}
       data-test-subj="xyVisAnnotationIcon"
       type={iconConfig.icon || type}
-      className={classnames(
-        { [rotateClassName]: iconConfig.shouldRotate },
-        {
-          lensAnnotationIconFill: renderedInChart && iconConfig.canFill,
-        }
-      )}
+      className={iconConfig.shouldRotate ? rotateClassName : undefined}
     />
   );
 };

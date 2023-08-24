@@ -5,26 +5,39 @@
  * 2.0.
  */
 
-import { Chart, Datum, Flame, FlameLayerValue, PartialTheme, Settings } from '@elastic/charts';
+import {
+  Chart,
+  Datum,
+  Flame,
+  FlameLayerValue,
+  PartialTheme,
+  Settings,
+  Tooltip,
+  FlameSpec,
+} from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { Maybe } from '@kbn/observability-plugin/common/typings';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../../common/flamegraph';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { ElasticFlameGraph } from '../../../common/flamegraph';
 import { getFlamegraphModel } from '../../utils/get_flamegraph_model';
-import { FlameGraphLegend } from '../flame_graphs_view/flame_graph_legend';
+import { FlameGraphLegend } from './flame_graph_legend';
 import { FrameInformationWindow } from '../frame_information_window';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { FlameGraphTooltip } from './flamegraph_tooltip';
+import { ComparisonMode } from '../normalization_menu';
 
 interface Props {
   id: string;
-  comparisonMode: FlameGraphComparisonMode;
+  comparisonMode?: ComparisonMode;
   primaryFlamegraph?: ElasticFlameGraph;
   comparisonFlamegraph?: ElasticFlameGraph;
   baseline?: number;
   comparison?: number;
   showInformationWindow: boolean;
   toggleShowInformationWindow: () => void;
+  searchText?: string;
+  onChangeSearchText?: FlameSpec['onSearchTextChange'];
 }
 
 export function FlameGraph({
@@ -36,8 +49,11 @@ export function FlameGraph({
   comparison,
   showInformationWindow,
   toggleShowInformationWindow,
+  searchText,
+  onChangeSearchText,
 }: Props) {
   const theme = useEuiTheme();
+  const trackProfilingEvent = useUiTracker({ app: 'profiling' });
 
   const columnarData = useMemo(() => {
     return getFlamegraphModel({
@@ -108,45 +124,46 @@ export function FlameGraph({
                         setHighlightedVmIndex(selectedElement!.vmIndex);
                       }
                     }}
-                    tooltip={{
-                      actions: [{ label: '', onSelect: () => {} }],
-                      customTooltip: (props) => {
-                        if (!primaryFlamegraph) {
-                          return <></>;
-                        }
+                  />
+                  <Tooltip
+                    actions={[{ label: '', onSelect: () => {} }]}
+                    customTooltip={(props) => {
+                      if (!primaryFlamegraph) {
+                        return <></>;
+                      }
 
-                        const valueIndex = props.values[0].valueAccessor as number;
-                        const label = primaryFlamegraph.Label[valueIndex];
-                        const countInclusive = primaryFlamegraph.CountInclusive[valueIndex];
-                        const countExclusive = primaryFlamegraph.CountExclusive[valueIndex];
-                        const totalSeconds = primaryFlamegraph.TotalSeconds;
-                        const nodeID = primaryFlamegraph.ID[valueIndex];
+                      const valueIndex = props.values[0].valueAccessor as number;
+                      const label = primaryFlamegraph.Label[valueIndex];
+                      const countInclusive = primaryFlamegraph.CountInclusive[valueIndex];
+                      const countExclusive = primaryFlamegraph.CountExclusive[valueIndex];
+                      const totalSeconds = primaryFlamegraph.TotalSeconds;
+                      const nodeID = primaryFlamegraph.ID[valueIndex];
 
-                        const comparisonNode = columnarData.comparisonNodesById[nodeID];
+                      const comparisonNode = columnarData.comparisonNodesById[nodeID];
 
-                        return (
-                          <FlameGraphTooltip
-                            isRoot={valueIndex === 0}
-                            label={label}
-                            countInclusive={countInclusive}
-                            countExclusive={countExclusive}
-                            totalSamples={totalSamples}
-                            totalSeconds={totalSeconds}
-                            comparisonCountInclusive={comparisonNode?.CountInclusive}
-                            comparisonCountExclusive={comparisonNode?.CountExclusive}
-                            comparisonTotalSamples={comparisonFlamegraph?.CountInclusive[0]}
-                            comparisonTotalSeconds={comparisonFlamegraph?.TotalSeconds}
-                            baselineScaleFactor={baseline}
-                            comparisonScaleFactor={comparison}
-                            onShowMoreClick={() => {
-                              if (!showInformationWindow) {
-                                toggleShowInformationWindow();
-                              }
-                              setHighlightedVmIndex(valueIndex);
-                            }}
-                          />
-                        );
-                      },
+                      return (
+                        <FlameGraphTooltip
+                          isRoot={valueIndex === 0}
+                          label={label}
+                          countInclusive={countInclusive}
+                          countExclusive={countExclusive}
+                          totalSamples={totalSamples}
+                          totalSeconds={totalSeconds}
+                          comparisonCountInclusive={comparisonNode?.CountInclusive}
+                          comparisonCountExclusive={comparisonNode?.CountExclusive}
+                          comparisonTotalSamples={comparisonFlamegraph?.CountInclusive[0]}
+                          comparisonTotalSeconds={comparisonFlamegraph?.TotalSeconds}
+                          baselineScaleFactor={baseline}
+                          comparisonScaleFactor={comparison}
+                          onShowMoreClick={() => {
+                            trackProfilingEvent({ metric: 'flamegraph_node_details_click' });
+                            if (!showInformationWindow) {
+                              toggleShowInformationWindow();
+                            }
+                            setHighlightedVmIndex(valueIndex);
+                          }}
+                        />
+                      );
                     }}
                   />
                   <Flame
@@ -156,6 +173,8 @@ export function FlameGraph({
                     valueFormatter={(value) => `${value}`}
                     animation={{ duration: 100 }}
                     controlProviderCallback={{}}
+                    search={searchText ? { text: searchText } : undefined}
+                    onSearchTextChange={onChangeSearchText}
                   />
                 </Chart>
               </EuiFlexItem>

@@ -17,7 +17,7 @@ import type { ConfigType } from '../../../..';
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../utils/common';
-import { deleteNoteSchema } from '../../schemas/notes';
+import { deleteNoteSchema } from '../../../../../common/api/timeline';
 import { deleteNote } from '../../saved_object/notes';
 
 export const deleteNoteRoute = (

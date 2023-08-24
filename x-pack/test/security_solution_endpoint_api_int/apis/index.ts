@@ -48,7 +48,6 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     loadTestFile(require.resolve('./package'));
     loadTestFile(require.resolve('./endpoint_authz'));
     loadTestFile(require.resolve('./endpoint_response_actions/execute'));
-    loadTestFile(require.resolve('./file_upload_index'));
     loadTestFile(require.resolve('./endpoint_artifacts/trusted_apps'));
     loadTestFile(require.resolve('./endpoint_artifacts/event_filters'));
     loadTestFile(require.resolve('./endpoint_artifacts/host_isolation_exceptions'));

@@ -26,10 +26,17 @@ export class RenderableService extends FtrService {
    */
   public async waitForRender(count: number = 1): Promise<void> {
     this.log.debug(`Renderable.waitForRender for ${count} elements`);
+    // exit if there are no objects expected
+    if (count === 0) {
+      return;
+    }
     await this.retry.try(async () => {
       const completedElements = await this.find.allByCssSelector(RENDER_COMPLETE_SELECTOR);
       if (completedElements.length < count) {
-        const pendingElements = await this.find.allByCssSelector(RENDER_COMPLETE_PENDING_SELECTOR);
+        const pendingElements = await this.find.allByCssSelector(
+          RENDER_COMPLETE_PENDING_SELECTOR,
+          2500
+        );
         const pendingElementNames = [];
         for (const pendingElement of pendingElements) {
           const title = await pendingElement.getAttribute('data-title');

@@ -6,11 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-// Follow pattern from https://github.com/elastic/kibana/pull/52447
-// TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
-import type { SavedObject, SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
-
-import type { CustomIntegrationIcon } from '@kbn/custom-integrations-plugin/common';
 
 import type {
   ASSETS_SAVED_OBJECT_TYPE,
@@ -21,12 +16,7 @@ import type {
 } from '../../constants';
 import type { ValueOf } from '..';
 
-import type {
-  PackageSpecManifest,
-  PackageSpecIcon,
-  PackageSpecScreenshot,
-  PackageSpecCategory,
-} from './package_spec';
+import type { PackageSpecManifest, PackageSpecIcon, PackageSpecCategory } from './package_spec';
 
 export type InstallationStatus = typeof installationStatuses;
 
@@ -44,17 +34,10 @@ export interface DefaultPackagesInstallationError {
 }
 
 export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install' | 'unknown';
-export type InstallSource = 'registry' | 'upload' | 'bundled';
+export type InstallSource = 'registry' | 'upload' | 'bundled' | 'custom';
 
 export type EpmPackageInstallStatus = 'installed' | 'installing' | 'install_failed';
 
-export type DetailViewPanelName =
-  | 'overview'
-  | 'policies'
-  | 'assets'
-  | 'settings'
-  | 'custom'
-  | 'api-reference';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AgentAssetType = typeof agentAssetTypes;
 export type DocAssetType = 'doc' | 'notice' | 'license';
@@ -114,6 +97,29 @@ export type FleetElasticsearchAssetType = Exclude<
   ElasticsearchAssetType,
   ElasticsearchAssetType.index
 >;
+
+export type AllowedAssetTypes = [
+  KibanaAssetType.dashboard,
+  KibanaAssetType.search,
+  KibanaAssetType.visualization,
+  ElasticsearchAssetType.transform
+];
+
+// Defined as part of the removing public references to saved object schemas
+export interface SimpleSOAssetType {
+  id: string;
+  type: ElasticsearchAssetType | KibanaSavedObjectType;
+  updatedAt?: string;
+  attributes: {
+    title?: string;
+    description?: string;
+  };
+}
+
+export interface AssetSOObject {
+  id: string;
+  type: ElasticsearchAssetType | KibanaSavedObjectType;
+}
 
 export type DataType = typeof dataTypes;
 export type MonitoringType = typeof monitoringTypes;
@@ -251,12 +257,6 @@ export interface RegistryStream {
 
 export type RegistryStreamWithDataStream = RegistryStream & { data_stream: RegistryDataStream };
 
-export type RequirementVersion = string;
-export type RequirementVersionRange = string;
-export interface ServiceRequirements {
-  versions: RequirementVersionRange;
-}
-
 // Registry's response types
 // from /search
 // https://github.com/elastic/package-registry/blob/master/docs/api/search.json
@@ -278,8 +278,6 @@ export type RegistrySearchResult = Pick<
   | 'policy_templates'
   | 'categories'
 >;
-
-export type ScreenshotItem = RegistryImage | PackageSpecScreenshot;
 
 // from /categories
 // https://github.com/elastic/package-registry/blob/master/docs/api/categories.json
@@ -337,6 +335,8 @@ export enum RegistryDataStreamKeys {
   ingest_pipeline = 'ingest_pipeline',
   elasticsearch = 'elasticsearch',
   dataset_is_prefix = 'dataset_is_prefix',
+  routing_rules = 'routing_rules',
+  lifecycle = 'lifecycle',
 }
 
 export interface RegistryDataStream {
@@ -353,6 +353,8 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.ingest_pipeline]?: string;
   [RegistryDataStreamKeys.elasticsearch]?: RegistryElasticsearch;
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
+  [RegistryDataStreamKeys.routing_rules]?: RegistryDataStreamRoutingRules[];
+  [RegistryDataStreamKeys.lifecycle]?: RegistryDataStreamLifecycle;
 }
 
 export interface RegistryElasticsearch {
@@ -376,6 +378,19 @@ export interface RegistryDataStreamPrivileges {
   indices?: string[];
 }
 
+export interface RegistryDataStreamRoutingRules {
+  source_dataset: string;
+  rules: Array<{
+    target_dataset: string;
+    if: string;
+    namespace: string;
+  }>;
+}
+
+export interface RegistryDataStreamLifecycle {
+  data_retention: string;
+}
+
 export type RegistryVarType =
   | 'integer'
   | 'bool'
@@ -396,6 +411,7 @@ export enum RegistryVarsEntryKeys {
   options = 'options',
   default = 'default',
   os = 'os',
+  secret = 'secret',
 }
 
 // EPR types this as `[]map[string]interface{}`
@@ -407,6 +423,7 @@ export interface RegistryVarsEntry {
   [RegistryVarsEntryKeys.description]?: string;
   [RegistryVarsEntryKeys.type]: RegistryVarType;
   [RegistryVarsEntryKeys.required]?: boolean;
+  [RegistryVarsEntryKeys.secret]?: boolean;
   [RegistryVarsEntryKeys.show_user]?: boolean;
   [RegistryVarsEntryKeys.multi]?: boolean;
   [RegistryVarsEntryKeys.options]?: Array<{ value: string; text: string }>;
@@ -416,6 +433,49 @@ export interface RegistryVarsEntry {
       default: string | string[];
     };
   };
+}
+
+// Deprecated as part of the removing public references to saved object schemas
+// See https://github.com/elastic/kibana/issues/149098
+/**
+ * @deprecated replaced with installationInfo
+ */
+export interface InstallableSavedObject {
+  type: string;
+  id: string;
+  attributes: Installation;
+  references?: SOReference[];
+  created_at?: string;
+  updated_at?: string;
+  version?: string;
+  coreMigrationVersion?: string;
+  namespaces?: string[];
+}
+export type InstallationInfo = {
+  type: string;
+  created_at?: string;
+  updated_at?: string;
+  namespaces?: string[];
+} & Omit<
+  Installation,
+  | 'package_assets'
+  | 'es_index_patterns'
+  | 'install_version'
+  | 'install_started_at'
+  | 'keep_policies_up_to_date'
+  | 'internal'
+  | 'removable'
+>;
+
+// Deprecated as part of the removing public references to saved object schemas
+// See https://github.com/elastic/kibana/issues/149098
+/**
+ * @deprecated
+ */
+interface SOReference {
+  name: string;
+  type: string;
+  id: string;
 }
 
 // some properties are optional in Registry responses but required in EPM
@@ -434,36 +494,22 @@ type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, key
 
 // Managers public HTTP response types
 export type PackageList = PackageListItem[];
+
+// Remove savedObject when addressing the deprecation
 export type PackageListItem = Installable<RegistrySearchResult> & {
+  id: string;
   integration?: string;
-  id: string;
+  installationInfo?: InstallationInfo;
+  savedObject?: InstallableSavedObject;
 };
-
-export type IntegrationCardReleaseLabel = 'beta' | 'preview' | 'ga' | 'rc';
-
-export interface IntegrationCardItem {
-  url: string;
-  release?: IntegrationCardReleaseLabel;
-  description: string;
-  name: string;
-  title: string;
-  version: string;
-  icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
-  integration: string;
-  id: string;
-  categories: string[];
-  fromIntegrations?: string;
-  isReauthorizationRequired?: boolean;
-  isUnverified?: boolean;
-  isUpdateAvailable?: boolean;
-  showLabels?: boolean;
-}
-
-export type PackageVerificationStatus = 'verified' | 'unverified' | 'unknown';
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
   | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
+
+export type IntegrationCardReleaseLabel = 'beta' | 'preview' | 'ga' | 'rc';
+
+export type PackageVerificationStatus = 'verified' | 'unverified' | 'unknown';
 
 // TODO - Expand this with other experimental indexing types
 export type ExperimentalIndexingFeature =
@@ -477,7 +523,7 @@ export interface ExperimentalDataStreamFeature {
   features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
 }
 
-export interface Installation extends SavedObjectAttributes {
+export interface Installation {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
   package_assets?: PackageAssetReference[];
@@ -493,11 +539,9 @@ export interface Installation extends SavedObjectAttributes {
   install_format_schema_version?: string;
   verification_status: PackageVerificationStatus;
   verification_key_id?: string | null;
-  // TypeScript doesn't like using the `ExperimentalDataStreamFeature` type defined above here
-  experimental_data_stream_features?: Array<{
-    data_stream: string;
-    features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
-  }>;
+  experimental_data_stream_features?: ExperimentalDataStreamFeature[];
+  internal?: boolean;
+  removable?: boolean;
 }
 
 export interface PackageUsageStats {
@@ -517,12 +561,14 @@ export type InstallStatusExcluded<T = {}> = T & {
 
 export type InstalledRegistry<T = {}> = T & {
   status: InstallationStatus['Installed'];
-  savedObject: SavedObject<Installation>;
+  savedObject?: InstallableSavedObject;
+  installationInfo?: InstallationInfo;
 };
 
 export type Installing<T = {}> = T & {
   status: InstallationStatus['Installing'];
-  savedObject: SavedObject<Installation>;
+  savedObject?: InstallableSavedObject;
+  installationInfo?: InstallationInfo;
 };
 
 export type NotInstalled<T = {}> = T & {
@@ -535,21 +581,25 @@ export type InstallFailed<T = {}> = T & {
 
 export type AssetReference = KibanaAssetReference | EsAssetReference;
 
-export type KibanaAssetReference = Pick<SavedObjectReference, 'id'> & {
+export interface KibanaAssetReference {
+  id: string;
   type: KibanaSavedObjectType;
-};
-export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
+}
+export interface EsAssetReference {
+  id: string;
   type: ElasticsearchAssetType;
   deferred?: boolean;
-};
+}
 
-export type PackageAssetReference = Pick<SavedObjectReference, 'id'> & {
+export interface PackageAssetReference {
+  id: string;
   type: typeof ASSETS_SAVED_OBJECT_TYPE;
-};
+}
 
 export interface IndexTemplateMappings {
   properties: any;
   dynamic_templates?: any;
+  runtime?: any;
 }
 
 // This is an index template v2, see https://github.com/elastic/elasticsearch/issues/53101
@@ -561,6 +611,7 @@ export interface IndexTemplate {
   template: {
     settings: any;
     mappings: any;
+    lifecycle?: any;
   };
   data_stream: { hidden?: boolean };
   composed_of: string[];
@@ -581,7 +632,10 @@ export interface TemplateMapEntry {
         mappings: NonNullable<RegistryElasticsearch['index_template.mappings']>;
       }
     | {
-        settings: NonNullable<RegistryElasticsearch['index_template.settings']> | object;
+        settings: NonNullable<RegistryElasticsearch['index_template.settings']>;
+      }
+    | {
+        lifecycle?: any;
       };
 }
 

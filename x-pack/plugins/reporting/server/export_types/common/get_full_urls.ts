@@ -11,41 +11,36 @@ import {
   UrlWithParsedQuery,
   UrlWithStringQuery,
 } from 'url';
-import { ReportingConfig } from '../..';
-import { TaskPayloadPNG } from '../png/types';
+import { ReportingConfigType } from '../../config';
+import { ReportingServerInfo } from '../../core';
 import { TaskPayloadPDF } from '../printable_pdf/types';
 import { getAbsoluteUrlFactory } from './get_absolute_url';
 import { validateUrls } from './validate_urls';
 
-function isPngJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPNG {
-  return (job as TaskPayloadPNG).relativeUrl !== undefined;
-}
-function isPdfJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPDF {
-  return (job as TaskPayloadPDF).objects !== undefined;
-}
+export function getFullUrls(
+  serverInfo: ReportingServerInfo,
+  config: ReportingConfigType,
+  job: TaskPayloadPDF
+) {
+  const {
+    kibanaServer: { protocol, hostname, port },
+  } = config;
+  const getAbsoluteUrl = getAbsoluteUrlFactory({
+    basePath: serverInfo.basePath,
+    protocol: protocol ?? serverInfo.protocol,
+    hostname: hostname ?? serverInfo.hostname,
+    port: port ?? serverInfo.port,
+  });
 
-export function getFullUrls(config: ReportingConfig, job: TaskPayloadPDF | TaskPayloadPNG) {
-  const [basePath, protocol, hostname, port] = [
-    config.kbnConfig.get('server', 'basePath'),
-    config.get('kibanaServer', 'protocol'),
-    config.get('kibanaServer', 'hostname'),
-    config.get('kibanaServer', 'port'),
-  ] as string[];
-  const getAbsoluteUrl = getAbsoluteUrlFactory({ basePath, protocol, hostname, port });
-
-  // PDF and PNG job params put in the url differently
   let relativeUrls: string[] = [];
 
-  if (isPngJob(job)) {
-    relativeUrls = [job.relativeUrl];
-  } else if (isPdfJob(job)) {
+  try {
     relativeUrls = job.objects.map((obj) => obj.relativeUrl);
-  } else {
+  } catch (error) {
     throw new Error(
       `No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\``
     );
   }
-
   validateUrls(relativeUrls);
 
   const urls = relativeUrls.map((relativeUrl) => {

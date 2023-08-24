@@ -156,7 +156,7 @@
             "label": "namespaceType",
             "description": [],
             "signature": [
-              "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
+              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.ts",
             "deprecated": false,

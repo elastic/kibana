@@ -6,21 +6,10 @@
  */
 
 import type { Observable } from 'rxjs';
-import LRU from 'lru-cache';
-import {
-  QUERY_RULE_TYPE_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  EQL_RULE_TYPE_ID,
-  SAVED_QUERY_RULE_TYPE_ID,
-  THRESHOLD_RULE_TYPE_ID,
-  NEW_TERMS_RULE_TYPE_ID,
-} from '@kbn/securitysolution-rules';
-
+import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
@@ -28,6 +17,8 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
+import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
+import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
 import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
 import { siemGuideId, siemGuideConfig } from '../common/guided_onboarding/siem_guide_config';
 import {
@@ -47,12 +38,7 @@ import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
 import { createConfig } from './config';
 import { initUiSettings } from './ui_settings';
-import {
-  APP_ID,
-  SERVER_APP_ID,
-  LEGACY_NOTIFICATIONS_ID,
-  DEFAULT_ALERTS_INDEX,
-} from '../common/constants';
+import { APP_ID, SERVER_APP_ID, DEFAULT_ALERTS_INDEX } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
@@ -70,8 +56,8 @@ import { TelemetryReceiver } from './lib/telemetry/receiver';
 import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
-import { createRuleExecutionLogService } from './lib/detection_engine/rule_monitoring';
-import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
+import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
+import { createRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import type {
   CreateRuleOptions,
@@ -105,7 +91,12 @@ import { actionCreateService } from './endpoint/services/actions';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService } from './lib/telemetry/artifact';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
-import { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../common/endpoint/constants';
+import {
+  ENDPOINT_FIELDS_SEARCH_STRATEGY,
+  ENDPOINT_SEARCH_STRATEGY,
+} from '../common/endpoint/constants';
+
+import { AppFeatures } from './lib/app_features';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -114,7 +105,9 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly config: ConfigType;
   private readonly logger: Logger;
   private readonly appClientFactory: AppClientFactory;
+  private readonly appFeatures: AppFeatures;
 
+  private readonly ruleMonitoringService: IRuleMonitoringService;
   private readonly endpointAppContextService = new EndpointAppContextService();
   private readonly telemetryReceiver: ITelemetryReceiver;
   private readonly telemetryEventsSender: ITelemetryEventsSender;
@@ -125,18 +118,19 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   private manifestTask: ManifestTask | undefined;
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
-  private artifactsCache: LRU<string, Buffer>;
   private telemetryUsageCounter?: UsageCounter;
   private endpointContext: EndpointAppContext;
 
   constructor(context: PluginInitializerContext) {
+    const serverConfig = createConfig(context);
+
     this.pluginContext = context;
-    this.config = createConfig(context);
+    this.config = serverConfig;
     this.logger = context.logger.get();
     this.appClientFactory = new AppClientFactory();
+    this.appFeatures = new AppFeatures(this.logger, this.config.experimentalFeatures);
 
-    // Cache up to three artifacts with a max retention of 5 mins each
-    this.artifactsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
+    this.ruleMonitoringService = createRuleMonitoringService(this.config, this.logger);
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
 
@@ -145,6 +139,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       logFactory: this.pluginContext.logger,
       service: this.endpointAppContextService,
       config: (): Promise<ConfigType> => Promise.resolve(this.config),
+      get serverConfig() {
+        return serverConfig;
+      },
       experimentalFeatures: this.config.experimentalFeatures,
     };
   }
@@ -155,14 +152,14 @@ export class Plugin implements ISecuritySolutionPlugin {
   ): SecuritySolutionPluginSetup {
     this.logger.debug('plugin setup');
 
-    const { appClientFactory, pluginContext, config, logger } = this;
+    const { appClientFactory, appFeatures, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings, experimentalFeatures);
+    appFeatures.init(plugins.features);
 
-    const ruleExecutionLogService = createRuleExecutionLogService(config, logger, core, plugins);
-    ruleExecutionLogService.registerEventLogProvider();
+    this.ruleMonitoringService.setup(core, plugins);
 
     const requestContextFactory = new RequestContextFactory({
       config,
@@ -170,7 +167,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       core,
       plugins,
       endpointAppContextService: this.endpointAppContextService,
-      ruleExecutionLogService,
+      ruleMonitoringService: this.ruleMonitoringService,
       kibanaVersion: pluginContext.env.packageInfo.version,
       kibanaBranch: pluginContext.env.packageInfo.branch,
     });
@@ -240,8 +237,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       config: this.config,
       publicBaseUrl: core.http.basePath.publicBaseUrl,
       ruleDataClient,
-      ruleExecutionLoggerFactory: ruleExecutionLogService.createClientForExecutors,
+      ruleExecutionLoggerFactory:
+        this.ruleMonitoringService.createRuleExecutionLogClientForExecutors,
       version: pluginContext.env.packageInfo.version,
+      experimentalFeatures: config.experimentalFeatures,
     };
 
     const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
@@ -313,22 +312,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.encryptedSavedObjects?.canEncrypt === true
     );
 
-    const ruleTypes = [
-      LEGACY_NOTIFICATIONS_ID,
-      EQL_RULE_TYPE_ID,
-      INDICATOR_RULE_TYPE_ID,
-      ML_RULE_TYPE_ID,
-      QUERY_RULE_TYPE_ID,
-      SAVED_QUERY_RULE_TYPE_ID,
-      THRESHOLD_RULE_TYPE_ID,
-      NEW_TERMS_RULE_TYPE_ID,
-    ];
-
-    plugins.features.registerKibanaFeature(
-      getKibanaPrivilegesFeaturePrivileges(ruleTypes, experimentalFeatures)
-    );
-    plugins.features.registerKibanaFeature(getCasesKibanaFeature());
-
     if (plugins.alerting != null) {
       const ruleNotificationType = legacyRulesNotificationAlertType({ logger });
 
@@ -378,6 +361,12 @@ export class Plugin implements ISecuritySolutionPlugin {
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy
       );
+      const endpointSearchStrategy = endpointSearchStrategyProvider(
+        depsStart.data,
+        this.endpointContext
+      );
+
+      plugins.data.search.registerSearchStrategy(ENDPOINT_SEARCH_STRATEGY, endpointSearchStrategy);
     });
 
     setIsElasticCloudDeployment(plugins.cloud.isCloudEnabled ?? false);
@@ -403,7 +392,9 @@ export class Plugin implements ISecuritySolutionPlugin {
      */
     plugins.guidedOnboarding.registerGuideConfig(siemGuideId, siemGuideConfig);
 
-    return {};
+    return {
+      setAppFeatures: this.appFeatures.set.bind(this.appFeatures),
+    };
   }
 
   public start(
@@ -411,6 +402,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
     const { config, logger } = this;
+
+    this.ruleMonitoringService.start(core, plugins);
 
     const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
@@ -424,10 +417,27 @@ export class Plugin implements ISecuritySolutionPlugin {
       // from where authz can be derived)
       false
     );
-    const { authz, agentService, packageService, packagePolicyService, agentPolicyService } =
+    const {
+      authz,
+      agentService,
+      packageService,
+      packagePolicyService,
+      agentPolicyService,
+      createFilesClient,
+      createFleetActionsClient,
+    } =
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       plugins.fleet!;
     let manifestManager: ManifestManager | undefined;
+    const endpointFleetServicesFactory = new EndpointFleetServicesFactory(
+      {
+        agentService,
+        packageService,
+        packagePolicyService,
+        agentPolicyService,
+      },
+      core.savedObjects
+    );
 
     this.licensing$ = plugins.licensing.license$;
 
@@ -444,21 +454,29 @@ export class Plugin implements ISecuritySolutionPlugin {
         exceptionListClient,
         packagePolicyService: plugins.fleet.packagePolicyService,
         logger,
-        cache: this.artifactsCache,
         experimentalFeatures: config.experimentalFeatures,
+        packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
+        esClient: core.elasticsearch.client.asInternalUser,
+        appFeatures: this.appFeatures,
       });
 
-      // Migrate artifacts to fleet and then start the minifest task after that is done
+      // Migrate artifacts to fleet and then start the manifest task after that is done
       plugins.fleet.fleetSetupCompleted().then(() => {
-        logger.info('Dependent plugin setup complete - Starting ManifestTask');
-
         if (this.manifestTask) {
+          logger.info('Dependent plugin setup complete - Starting ManifestTask');
           this.manifestTask.start({
             taskManager,
           });
         } else {
           logger.error(new Error('User artifacts task not available.'));
         }
+
+        turnOffPolicyProtectionsIfNotSupported(
+          core.elasticsearch.client.asInternalUser,
+          endpointFleetServicesFactory.asInternalUser(),
+          this.appFeatures,
+          logger
+        );
       });
 
       // License related start
@@ -475,21 +493,14 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.endpointAppContextService.start({
       fleetAuthzService: authz,
+      createFleetFilesClient: createFilesClient,
       endpointMetadataService: new EndpointMetadataService(
         core.savedObjects,
         agentPolicyService,
         packagePolicyService,
         logger
       ),
-      endpointFleetServicesFactory: new EndpointFleetServicesFactory(
-        {
-          agentService,
-          packageService,
-          packagePolicyService,
-          agentPolicyService,
-        },
-        core.savedObjects
-      ),
+      endpointFleetServicesFactory,
       security: plugins.security,
       alerting: plugins.alerting,
       config: this.config,
@@ -508,6 +519,9 @@ export class Plugin implements ISecuritySolutionPlugin {
         core.elasticsearch.client.asInternalUser,
         this.endpointContext
       ),
+      createFleetActionsClient,
+      esClient: core.elasticsearch.client.asInternalUser,
+      appFeatures: this.appFeatures,
     });
 
     this.telemetryReceiver.start(

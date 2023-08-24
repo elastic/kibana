@@ -8,4 +8,4 @@
 
 export * from '@kbn/data-views-plugin/common/field.stub';
 export * from '@kbn/data-views-plugin/common/data_view.stub';
-export * from './es_query/stubs';
+export * from '@kbn/data-service/src/es_query/stubs';

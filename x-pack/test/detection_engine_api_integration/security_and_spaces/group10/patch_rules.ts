@@ -19,7 +19,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -424,6 +424,28 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body).to.eql({
           status_code: 404,
           message: 'rule_id: "fake_id" not found',
+        });
+      });
+
+      describe('investigation_fields', () => {
+        it('should overwrite investigation_fields value on update - non additive', async () => {
+          await createRule(supertest, log, {
+            ...getSimpleRule('rule-1'),
+            investigation_fields: ['blob', 'boop'],
+          });
+
+          const rulePatch = {
+            rule_id: 'rule-1',
+            investigation_fields: ['foo', 'bar'],
+          };
+
+          const { body } = await supertest
+            .patch(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(rulePatch)
+            .expect(200);
+
+          expect(body.investigation_fields).to.eql(['foo', 'bar']);
         });
       });
     });

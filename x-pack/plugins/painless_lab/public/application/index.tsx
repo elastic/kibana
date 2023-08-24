@@ -20,6 +20,7 @@ interface AppDependencies {
   http: HttpSetup;
   I18nContext: CoreStart['i18n']['Context'];
   uiSettings: CoreSetup['uiSettings'];
+  settings: CoreStart['settings'];
   links: Links;
   chrome: ChromeStart;
   theme$: Observable<CoreTheme>;
@@ -27,13 +28,15 @@ interface AppDependencies {
 
 export function renderApp(
   element: HTMLElement | null,
-  { http, I18nContext, uiSettings, links, chrome, theme$ }: AppDependencies
+  { http, I18nContext, uiSettings, links, chrome, theme$, settings }: AppDependencies
 ) {
   if (!element) {
     return () => undefined;
   }
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
     uiSettings,
+    settings,
+    theme: { theme$ },
   });
   render(
     <I18nContext>

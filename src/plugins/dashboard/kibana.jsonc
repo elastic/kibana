@@ -18,6 +18,7 @@
       "savedObjects",
       "savedObjectsFinder",
       "savedObjectsManagement",
+      "contentManagement",
       "share",
       "screenshotMode",
       "uiActions",
@@ -32,12 +33,9 @@
       "savedObjectsTaggingOss",
       "screenshotMode",
       "usageCollection",
-      "taskManager"
+      "taskManager",
+      "serverless"
     ],
-    "requiredBundles": [
-      "kibanaReact",
-      "kibanaUtils",
-      "presentationUtil"
-    ]
+    "requiredBundles": ["kibanaReact", "kibanaUtils", "presentationUtil"]
   }
 }

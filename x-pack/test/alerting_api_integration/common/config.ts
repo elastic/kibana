@@ -44,6 +44,8 @@ const enabledActionTypes = [
   '.servicenow-itom',
   '.jira',
   '.resilient',
+  '.gen-ai',
+  '.d3security',
   '.slack',
   '.slack_api',
   '.tines',
@@ -62,6 +64,8 @@ const enabledActionTypes = [
   'test.throw',
   'test.excluded',
   'test.capped',
+  'test.system-action',
+  'test.system-action-kibana-privileges',
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
@@ -183,6 +187,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.alerting.healthCheck.interval="1s"',
           '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
           '--xpack.alerting.rules.run.alerts.max=20',
+          '--xpack.observability.unsafe.thresholdRule.enabled=true',
           `--xpack.alerting.rules.run.actions.connectorTypeOverrides=${JSON.stringify([
             { id: 'test.capped', max: '1' },
           ])}`,
@@ -204,6 +209,18 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             'my-test-email': {
               actionTypeId: '.email',
               name: 'TestEmail#xyz',
+              config: {
+                from: 'me@test.com',
+                service: '__json',
+              },
+              secrets: {
+                user: 'user',
+                password: 'password',
+              },
+            },
+            'notification-email': {
+              actionTypeId: '.email',
+              name: 'Notification Email Connector',
               config: {
                 from: 'me@test.com',
                 service: '__json',
@@ -315,6 +332,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
               ]
             : []),
+          '--notifications.connectors.default.email=notification-email',
+          '--xpack.task_manager.allow_reading_invalid_state=false',
+          '--xpack.task_manager.requeue_invalid_tasks.enabled=true',
         ],
       },
     };

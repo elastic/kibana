@@ -7,43 +7,106 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import {
-  ANALYZER_TREE_TEST_ID,
-  ANALYZER_TREE_LOADING_TEST_ID,
-  ANALYZER_TREE_ERROR_TEST_ID,
-} from './test_ids';
+import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
+import { ANALYZE_GRAPH_ID } from '../../left/components/analyze_graph';
 import { ANALYZER_PREVIEW_TITLE } from './translations';
 import * as mock from '../mocks/mock_analyzer_data';
+import type { AnalyzerTreeProps } from './analyzer_tree';
 import { AnalyzerTree } from './analyzer_tree';
+import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import { TestProviders } from '@kbn/timelines-plugin/public/mock';
+import { RightPanelContext } from '../context';
+import { LeftPanelKey, LeftPanelVisualizeTab } from '../../left';
 
-const defaultProps = {
+import {
+  EXPANDABLE_PANEL_CONTENT_TEST_ID,
+  EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
+  EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
+  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
+  EXPANDABLE_PANEL_LOADING_TEST_ID,
+  EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
+} from '../../shared/components/test_ids';
+const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(ANALYZER_PREVIEW_TEST_ID);
+const TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID);
+const TITLE_ICON_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(ANALYZER_PREVIEW_TEST_ID);
+const TITLE_TEXT_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(ANALYZER_PREVIEW_TEST_ID);
+const CONTENT_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(ANALYZER_PREVIEW_TEST_ID);
+const LOADING_TEST_ID = EXPANDABLE_PANEL_LOADING_TEST_ID(ANALYZER_PREVIEW_TEST_ID);
+
+const defaultProps: AnalyzerTreeProps = {
   statsNodes: mock.mockStatsNodes,
   loading: false,
   error: false,
 };
+
+const flyoutContextValue = {
+  openLeftPanel: jest.fn(),
+} as unknown as ExpandableFlyoutContext;
+
+const panelContextValue = {
+  eventId: 'event id',
+  indexName: 'indexName',
+  browserFields: {},
+  dataFormattedForFieldBrowser: [],
+} as unknown as RightPanelContext;
+
+const renderAnalyzerTree = (children: React.ReactNode) =>
+  render(
+    <TestProviders>
+      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+        <RightPanelContext.Provider value={panelContextValue}>
+          {children}
+        </RightPanelContext.Provider>
+      </ExpandableFlyoutContext.Provider>
+    </TestProviders>
+  );
+
 describe('<AnalyzerTree />', () => {
+  it('should render wrapper component', () => {
+    const { getByTestId, queryByTestId } = renderAnalyzerTree(<AnalyzerTree {...defaultProps} />);
+    expect(queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(TITLE_ICON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
+  });
+
   it('should render the component when data is passed', () => {
-    const { getByTestId, getByText } = render(<AnalyzerTree {...defaultProps} />);
+    const { getByTestId, getByText } = renderAnalyzerTree(<AnalyzerTree {...defaultProps} />);
     expect(getByText(ANALYZER_PREVIEW_TITLE)).toBeInTheDocument();
-    expect(getByTestId(ANALYZER_TREE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render blank when data is not passed', () => {
-    const { queryByTestId, queryByText } = render(
+    const { queryByTestId, queryByText } = renderAnalyzerTree(
       <AnalyzerTree {...defaultProps} statsNodes={undefined} />
     );
     expect(queryByText(ANALYZER_PREVIEW_TITLE)).not.toBeInTheDocument();
-    expect(queryByTestId(ANALYZER_TREE_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(CONTENT_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render loading spinner when loading is true', () => {
-    const { getByTestId } = render(<AnalyzerTree {...defaultProps} loading={true} />);
-    expect(getByTestId(ANALYZER_TREE_LOADING_TEST_ID)).toBeInTheDocument();
+    const { getByTestId } = renderAnalyzerTree(<AnalyzerTree {...defaultProps} loading={true} />);
+    expect(getByTestId(LOADING_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should display error message when error is true', () => {
-    const { getByTestId, getByText } = render(<AnalyzerTree {...defaultProps} error={true} />);
-    expect(getByText('Unable to display analyzer preview.')).toBeInTheDocument();
-    expect(getByTestId(ANALYZER_TREE_ERROR_TEST_ID)).toBeInTheDocument();
+  it('should not render when error is true', () => {
+    const { getByTestId } = renderAnalyzerTree(<AnalyzerTree {...defaultProps} error={true} />);
+    expect(getByTestId(CONTENT_TEST_ID)).toBeEmptyDOMElement();
+  });
+
+  it('should navigate to left section Visualize tab when clicking on title', () => {
+    const { getByTestId } = renderAnalyzerTree(<AnalyzerTree {...defaultProps} />);
+
+    getByTestId(TITLE_LINK_TEST_ID).click();
+    expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
+      id: LeftPanelKey,
+      path: { tab: LeftPanelVisualizeTab, subTab: ANALYZE_GRAPH_ID },
+      params: {
+        id: panelContextValue.eventId,
+        indexName: panelContextValue.indexName,
+        scopeId: panelContextValue.scopeId,
+      },
+    });
   });
 });

@@ -42,9 +42,9 @@ describe('formatNavigationLinks', () => {
             Object {
               "description": "description 2",
               "disabled": true,
-              "icon": "someicon",
               "id": "endpoints",
-              "image": "someimage",
+              "landingIcon": "someicon",
+              "landingImage": "someimage",
               "skipUrlState": true,
               "title": "title 2",
             },

@@ -33,6 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('area charts', function indexPatternCreation() {
     before(async () => {
       await PageObjects.visualize.initTests();
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
     const initAreaChart = async () => {
       log.debug('navigateToApp visualize');
@@ -41,7 +42,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.clickAreaChart();
       log.debug('clickNewSearch');
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('Click X-axis');
       await PageObjects.visEditor.clickBucket('X-axis');
       log.debug('Click Date Histogram');
@@ -67,6 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async function () {
       await security.testUser.restoreDefaults();
+      await PageObjects.common.unsetTime();
     });
 
     it('should save and load with special characters', async function () {
@@ -433,8 +434,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(isFieldErrorMessageExists).to.be(false);
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/156821
-      describe.skip('interval errors', () => {
+      describe('interval errors', () => {
         before(async () => {
           // to trigger displaying of error messages
           await testSubjects.clickWhenNotDisabledWithoutRetry('visualizeEditorRenderButton');

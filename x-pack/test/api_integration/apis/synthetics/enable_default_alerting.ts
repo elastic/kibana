@@ -7,13 +7,11 @@
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import { ConfigKey, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
-import { API_URLS, SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
-import { Spaces } from '../../../alerting_api_integration/spaces_only/scenarios';
-import { ObjectRemover } from '../../../alerting_api_integration/common/lib';
+import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('EnableDefaultAlerting', function () {
@@ -26,24 +24,19 @@ export default function ({ getService }: FtrProviderContext) {
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
 
-    const objectRemover = new ObjectRemover(supertest);
-
     after(async () => {
-      await objectRemover.removeAll();
-      await kibanaServer.savedObjects.clean({ types: ['synthetics-monitor', 'synthetic-monitor'] });
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    before(() => {
+    before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+
       _httpMonitorJson = getFixtureJson('http_monitor');
     });
 
     beforeEach(async () => {
       httpMonitorJson = _httpMonitorJson;
-      await kibanaServer.savedObjects.clean({ types: ['synthetics-monitor', 'synthetic-monitor'] });
-    });
-
-    afterEach(async () => {
-      await objectRemover.removeAll();
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('returns the created alerted when called', async () => {
@@ -52,75 +45,122 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send({});
 
-      const omitFields = ['id', 'updatedAt', 'createdAt', 'scheduledTaskId', 'executionStatus'];
+      const omitFields = [
+        'id',
+        'updatedAt',
+        'createdAt',
+        'scheduledTaskId',
+        'executionStatus',
+        'monitoring',
+        'nextRun',
+        'lastRun',
+        'snoozeSchedule',
+        'viewInAppRelativeUrl',
+      ];
 
-      objectRemover.add(Spaces.default.id, apiResponse.body.id, 'rule', 'alerting');
+      const statusRule = apiResponse.body.statusRule;
+      const tlsRule = apiResponse.body.tlsRule;
 
-      expect(omit(apiResponse.body, omitFields)).eql(
-        omit(
-          {
-            id: '1d72eb10-8046-11ed-9c27-7d79cab2e477',
-            notifyWhen: 'onActionGroupChange',
-            consumer: 'uptime',
-            alertTypeId: 'xpack.synthetics.alerts.monitorStatus',
-            apiKeyCreatedByUser: false,
-            tags: ['SYNTHETICS_DEFAULT_ALERT'],
-            name: 'Synthetics internal alert',
-            enabled: true,
-            throttle: null,
-            apiKeyOwner: 'elastic',
-            createdBy: 'elastic',
-            updatedBy: 'elastic',
-            muteAll: false,
-            mutedInstanceIds: [],
-            schedule: { interval: '1m' },
-            actions: [],
-            params: {},
-            updatedAt: '2022-12-20T09:10:15.500Z',
-            createdAt: '2022-12-20T09:10:15.500Z',
-            scheduledTaskId: '1d72eb10-8046-11ed-9c27-7d79cab2e477',
-            executionStatus: { status: 'pending', lastExecutionDate: '2022-12-20T09:10:15.500Z' },
-            ruleTypeId: 'xpack.synthetics.alerts.monitorStatus',
-            running: false,
-            revision: 0,
-          },
-          omitFields
-        )
-      );
+      expect(omit(statusRule, omitFields)).eql(omit(defaultAlertRules.statusRule, omitFields));
+      expect(omit(tlsRule, omitFields)).eql(omit(defaultAlertRules.tlsRule, omitFields));
     });
 
     it('enables alert when new monitor is added', async () => {
       const newMonitor = httpMonitorJson;
 
       const apiResponse = await supertest
-        .post(API_URLS.SYNTHETICS_MONITORS)
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
         .send(newMonitor);
 
-      expect(apiResponse.body.attributes).eql(
+      expect(apiResponse.body).eql(
         omit(
           {
             ...newMonitor,
             [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+            created_at: apiResponse.body.created_at,
+            updated_at: apiResponse.body.updated_at,
           },
           secretKeys
         )
       );
-
-      let foundAlert: any;
 
       await retry.tryForTime(30 * 1000, async () => {
         const res = await supertest
           .get(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
           .set('kbn-xsrf', 'true');
 
-        expect(res.body.ruleTypeId).eql('xpack.synthetics.alerts.monitorStatus');
-        foundAlert = res.body;
+        expect(res.body.statusRule.ruleTypeId).eql('xpack.synthetics.alerts.monitorStatus');
+        expect(res.body.tlsRule.ruleTypeId).eql('xpack.synthetics.alerts.tls');
       });
-      if (foundAlert) {
-        objectRemover.add(Spaces.default.id, foundAlert.id, 'rule', 'alerting');
-      }
     });
   });
 }
+
+const defaultAlertRules = {
+  statusRule: {
+    id: '574e82f0-1672-11ee-8e7d-c985c0ef6c2e',
+    notifyWhen: null,
+    consumer: 'uptime',
+    alertTypeId: 'xpack.synthetics.alerts.monitorStatus',
+    tags: ['SYNTHETICS_DEFAULT_ALERT'],
+    name: 'Synthetics status internal alert',
+    enabled: true,
+    throttle: null,
+    apiKeyOwner: 'elastic',
+    apiKeyCreatedByUser: false,
+    createdBy: 'elastic',
+    updatedBy: 'elastic',
+    muteAll: false,
+    mutedInstanceIds: [],
+    revision: 0,
+    running: false,
+    schedule: { interval: '1m' },
+    actions: [],
+    params: {},
+    snoozeSchedule: [],
+    updatedAt: '2023-06-29T11:44:44.488Z',
+    createdAt: '2023-06-29T11:44:44.488Z',
+    scheduledTaskId: '574e82f0-1672-11ee-8e7d-c985c0ef6c2e',
+    executionStatus: {
+      status: 'ok',
+      lastExecutionDate: '2023-06-29T11:47:55.331Z',
+      lastDuration: 64,
+    },
+    ruleTypeId: 'xpack.synthetics.alerts.monitorStatus',
+    viewInAppRelativeUrl: '/app/observability/alerts/rules/574e82f0-1672-11ee-8e7d-c985c0ef6c2e',
+  },
+  tlsRule: {
+    id: '574eaa00-1672-11ee-8e7d-c985c0ef6c2e',
+    notifyWhen: null,
+    consumer: 'uptime',
+    alertTypeId: 'xpack.synthetics.alerts.tls',
+    tags: ['SYNTHETICS_DEFAULT_ALERT'],
+    name: 'Synthetics internal TLS alert',
+    enabled: true,
+    throttle: null,
+    apiKeyOwner: 'elastic',
+    apiKeyCreatedByUser: false,
+    createdBy: 'elastic',
+    updatedBy: 'elastic',
+    muteAll: false,
+    mutedInstanceIds: [],
+    revision: 0,
+    running: false,
+    schedule: { interval: '1m' },
+    actions: [],
+    params: {},
+    snoozeSchedule: [],
+    updatedAt: '2023-06-29T11:44:44.489Z',
+    createdAt: '2023-06-29T11:44:44.489Z',
+    scheduledTaskId: '574eaa00-1672-11ee-8e7d-c985c0ef6c2e',
+    executionStatus: {
+      status: 'ok',
+      lastExecutionDate: '2023-06-29T11:44:46.214Z',
+      lastDuration: 193,
+    },
+    ruleTypeId: 'xpack.synthetics.alerts.tls',
+    viewInAppRelativeUrl: '/app/observability/alerts/rules/574e82f0-1672-11ee-8e7d-c985c0ef6c2e',
+  },
+};

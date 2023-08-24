@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import { preparePack } from '../../tasks/packs';
 import {
   addToCase,
@@ -18,11 +19,11 @@ import {
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
-import { ROLE, login } from '../../tasks/login';
 import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 import { loadCase, cleanupCase, loadPack, cleanupPack } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Saved queries', () => {
+describe('ALL - Saved queries', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   let caseId: string;
 
   before(() => {
@@ -32,7 +33,7 @@ describe('ALL - Saved queries', () => {
   });
 
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    cy.login(ServerlessRoleName.SOC_MANAGER);
     navigateTo('/app/osquery');
   });
 
@@ -76,8 +77,8 @@ describe('ALL - Saved queries', () => {
           },
         },
       }).then((data) => {
-        packId = data.id;
-        packName = data.attributes.name;
+        packId = data.saved_object_id;
+        packName = data.name;
       });
     });
 
@@ -93,7 +94,7 @@ describe('ALL - Saved queries', () => {
 
     it('checks result type on prebuilt saved query', () => {
       cy.react('CustomItemAction', {
-        props: { index: 1, item: { attributes: { id: 'users_elastic' } } },
+        props: { index: 1, item: { id: 'users_elastic' } },
       }).click();
       cy.getBySel('resultsTypeField').within(() => {
         cy.contains('Snapshot');
@@ -102,7 +103,7 @@ describe('ALL - Saved queries', () => {
 
     it('user can run prebuilt saved query and add to case', () => {
       cy.react('PlayButtonComponent', {
-        props: { savedQuery: { attributes: { id: 'users_elastic' } } },
+        props: { savedQuery: { id: 'users_elastic' } },
       }).click();
 
       selectAllAgents();
@@ -114,7 +115,7 @@ describe('ALL - Saved queries', () => {
 
     it('user cant delete prebuilt saved query', () => {
       cy.react('CustomItemAction', {
-        props: { index: 1, item: { attributes: { id: 'users_elastic' } } },
+        props: { index: 1, item: { id: 'users_elastic' } },
       }).click();
       cy.contains('Delete query').should('not.exist');
       navigateTo('/app/osquery/saved_queries');
@@ -124,7 +125,7 @@ describe('ALL - Saved queries', () => {
       findFormFieldByRowsLabelAndType('ID', 'query-to-delete');
       cy.contains('Save query').click();
       cy.react('CustomItemAction', {
-        props: { index: 1, item: { attributes: { id: 'query-to-delete' } } },
+        props: { index: 1, item: { id: 'query-to-delete' } },
       }).click();
       deleteAndConfirm('query');
     });

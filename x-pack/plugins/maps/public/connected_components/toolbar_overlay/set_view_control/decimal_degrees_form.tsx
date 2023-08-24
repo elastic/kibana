@@ -90,7 +90,6 @@ export class DecimalDegreesForm extends Component<Props, State> {
             onChange={this._onLatChange}
             isInvalid={isLatInvalid}
             data-test-subj="latitudeInput"
-            step="any" // Browsers will validate decimals as invalid otherwise
           />
         </EuiFormRow>
 
@@ -108,7 +107,6 @@ export class DecimalDegreesForm extends Component<Props, State> {
             onChange={this._onLonChange}
             isInvalid={isLonInvalid}
             data-test-subj="longitudeInput"
-            step="any" // Browsers will validate decimals as invalid otherwise
           />
         </EuiFormRow>
 
@@ -126,7 +124,6 @@ export class DecimalDegreesForm extends Component<Props, State> {
             onChange={this._onZoomChange}
             isInvalid={isZoomInvalid}
             data-test-subj="zoomInput"
-            step="any" // Browsers will validate decimals as invalid otherwise
           />
         </EuiFormRow>
 

@@ -14,10 +14,11 @@ import {
   ALERT_STATUS,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   SPACE_IDS,
   VERSION,
 } from '@kbn/rule-data-utils';
-import { MachineLearningRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { MachineLearningRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -35,7 +36,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   executeSetupModuleRequest,
   forceStartDatafeeds,
   getOpenSignals,
@@ -65,8 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
     rule_id: 'ml-rule-id',
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/145776
-  describe.skip('Machine learning type rules', () => {
+  describe('Machine learning type rules', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
@@ -78,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/anomalies');
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 
@@ -118,6 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
           'event.kind': 'signal',
           [ALERT_ANCESTORS]: expect.any(Array),
           [ALERT_WORKFLOW_STATUS]: 'open',
+          [ALERT_WORKFLOW_TAGS]: [],
           [ALERT_STATUS]: 'active',
           [SPACE_IDS]: ['default'],
           [ALERT_SEVERITY]: 'critical',
@@ -145,6 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
             to: 'now',
             type: 'machine_learning',
             version: 1,
+            investigation_fields: [],
           },
           [ALERT_DEPTH]: 1,
           [ALERT_REASON]: `event with process store, by root on mothra created critical alert Test ML rule.`,
@@ -247,11 +249,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('alerts should be be enriched', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
       });
 
       it('should be enriched with host risk score', async () => {

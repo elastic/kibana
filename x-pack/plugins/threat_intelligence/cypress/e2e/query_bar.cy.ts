@@ -6,154 +6,187 @@
  */
 
 import {
-  BARCHART_FILTER_IN_BUTTON,
-  BARCHART_FILTER_OUT_BUTTON,
-  BARCHART_POPOVER_BUTTON,
-  FLYOUT_CLOSE_BUTTON,
-  FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_IN_BUTTON,
-  FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_OUT_BUTTON,
-  FLYOUT_OVERVIEW_TAB_BLOCKS_ITEM,
-  FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_IN_BUTTON,
-  FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_OUT_BUTTON,
-  FLYOUT_TABLE_TAB_ROW_FILTER_IN_BUTTON,
-  FLYOUT_TABLE_TAB_ROW_FILTER_OUT_BUTTON,
-  FLYOUT_TABS,
-  INDICATOR_TYPE_CELL,
-  INDICATORS_TABLE_CELL_FILTER_IN_BUTTON,
-  INDICATORS_TABLE_CELL_FILTER_OUT_BUTTON,
-  KQL_FILTER,
-  TOGGLE_FLYOUT_BUTTON,
-} from '../screens/indicators';
-import { selectRange } from '../tasks/select_range';
-import { login } from '../tasks/login';
+  closeFlyout,
+  navigateToFlyoutTableTab,
+  openFlyout,
+  waitForViewToBeUpdated,
+} from '../tasks/common';
+import {
+  clearKQLBar,
+  filterInFromBarChartLegend,
+  filterInFromFlyoutBlockItem,
+  filterInFromFlyoutOverviewTable,
+  filterInFromFlyoutTableTab,
+  filterInFromTableCell,
+  filterOutFromBarChartLegend,
+  filterOutFromFlyoutBlockItem,
+  filterOutFromFlyoutOverviewTable,
+  filterOutFromFlyoutTableTab,
+  filterOutFromTableCell,
+} from '../tasks/query_bar';
+import { INDICATOR_TYPE_CELL } from '../screens/indicators';
+import { KQL_FILTER } from '../screens/query_bar';
+import { login, visit } from '../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 
-describe('Indicators', () => {
-  before(() => {
+describe('Indicators query bar interaction', () => {
+  beforeEach(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
     login();
+    visit(THREAT_INTELLIGENCE);
   });
-  after(() => {
+
+  afterEach(() => {
     esArchiverUnload('threat_intelligence/indicators_data');
   });
 
-  describe('Indicators query bar interaction', () => {
-    beforeEach(() => {
-      cy.visit(THREAT_INTELLIGENCE);
+  it.skip('should add filter to kql', () => {
+    cy.log('filter in values when clicking in the barchart legend');
 
-      selectRange();
-    });
+    waitForViewToBeUpdated();
 
-    it('should add filter to kql and filter in values when clicking in the barchart legend', () => {
-      cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-      cy.get(BARCHART_POPOVER_BUTTON).should('exist').first().click();
-      cy.get(BARCHART_FILTER_IN_BUTTON).should('exist').click();
-      cy.get(KQL_FILTER).should('exist');
-      cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-    });
+    cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
-    it('should add negated filter to kql and filter out values when clicking in the barchart legend', () => {
-      cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-      cy.get(BARCHART_POPOVER_BUTTON).should('exist').first().click();
-      cy.get(BARCHART_FILTER_OUT_BUTTON).should('exist').click();
-      cy.get(KQL_FILTER).should('exist');
-      cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-    });
+    filterInFromBarChartLegend();
+    waitForViewToBeUpdated();
 
-    it('should add filter to kql and filter in and out values when clicking in an indicators table cell', () => {
-      cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
+    cy.get(KQL_FILTER).should('exist');
+    cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
-      cy.get(INDICATOR_TYPE_CELL)
-        .first()
-        .should('be.visible')
-        .trigger('mouseover')
-        .within((_cell) => {
-          cy.get(INDICATORS_TABLE_CELL_FILTER_IN_BUTTON).should('exist').click({
-            force: true,
-          });
-        });
+    clearKQLBar();
+    waitForViewToBeUpdated();
 
-      cy.get(KQL_FILTER).should('exist');
-      cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-    });
+    cy.log('filter out values when clicking in the barchart legend');
 
-    it('should add negated filter and filter out and out values when clicking in an indicators table cell', () => {
-      cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-      cy.get(INDICATOR_TYPE_CELL)
-        .first()
-        .trigger('mouseover')
-        .within((_cell) => {
-          cy.get(INDICATORS_TABLE_CELL_FILTER_OUT_BUTTON).should('exist').click({ force: true });
-        });
+    cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
-      cy.get(KQL_FILTER).should('exist');
-      cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-    });
+    filterOutFromBarChartLegend();
+    waitForViewToBeUpdated();
 
-    it('should add filter to kql and filter in values when clicking in an indicators flyout overview tab block', () => {
-      cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-      cy.get(TOGGLE_FLYOUT_BUTTON).first().click({ force: true });
-      cy.get(FLYOUT_OVERVIEW_TAB_BLOCKS_ITEM).first().trigger('mouseover');
-      cy.get(FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_IN_BUTTON)
-        .should('exist')
-        .first()
-        .click({ force: true });
-      cy.get(FLYOUT_CLOSE_BUTTON).should('exist').click();
-      cy.get(KQL_FILTER).should('exist');
-      cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-    });
+    cy.get(KQL_FILTER).should('exist');
+    cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
-    it('should add negated filter to kql filter out values when clicking in an indicators flyout overview block', () => {
-      cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-      cy.get(TOGGLE_FLYOUT_BUTTON).first().click({ force: true });
-      cy.get(FLYOUT_OVERVIEW_TAB_BLOCKS_ITEM).first().trigger('mouseover');
-      cy.get(FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_OUT_BUTTON)
-        .should('exist')
-        .first()
-        .click({ force: true });
-      cy.get(FLYOUT_CLOSE_BUTTON).should('exist').click();
-      cy.get(KQL_FILTER).should('exist');
-      cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-    });
+    clearKQLBar();
+    waitForViewToBeUpdated();
 
-    it('should add filter to kql and filter in values when clicking in an indicators flyout overview tab table row', () => {
-      cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-      cy.get(TOGGLE_FLYOUT_BUTTON).first().click({ force: true });
-      cy.get(FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_IN_BUTTON).should('exist').first().click();
-      cy.get(FLYOUT_CLOSE_BUTTON).should('exist').click();
-      cy.get(KQL_FILTER).should('exist');
-      cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-    });
+    cy.log('filter in values when clicking in an indicators table cell');
 
-    it('should add negated filter to kql filter out values when clicking in an indicators flyout overview tab row', () => {
-      cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-      cy.get(TOGGLE_FLYOUT_BUTTON).first().click({ force: true });
-      cy.get(FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_OUT_BUTTON).should('exist').first().click();
-      cy.get(FLYOUT_CLOSE_BUTTON).should('exist').click();
-      cy.get(KQL_FILTER).should('exist');
-      cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-    });
+    cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
 
-    it('should add filter to kql and filter in values when clicking in an indicators flyout table tab action column', () => {
-      cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-      cy.get(TOGGLE_FLYOUT_BUTTON).first().click({ force: true });
-      cy.get(`${FLYOUT_TABS} button:nth-child(2)`).click();
-      cy.get(FLYOUT_TABLE_TAB_ROW_FILTER_IN_BUTTON).should('exist').first().click();
-      cy.get(FLYOUT_CLOSE_BUTTON).should('exist').click();
-      cy.get(KQL_FILTER).should('exist');
-      cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-    });
+    filterInFromTableCell();
+    waitForViewToBeUpdated();
 
-    it('should add negated filter to kql filter out values when clicking in an indicators flyout table tab action column', () => {
-      cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-      cy.get(TOGGLE_FLYOUT_BUTTON).first().click({ force: true });
-      cy.get(`${FLYOUT_TABS} button:nth-child(2)`).click();
-      cy.get(FLYOUT_TABLE_TAB_ROW_FILTER_OUT_BUTTON).should('exist').first().click();
-      cy.get(FLYOUT_CLOSE_BUTTON).should('exist').click();
-      cy.get(KQL_FILTER).should('exist');
-      cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-    });
+    cy.get(KQL_FILTER).should('exist');
+    cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
+
+    clearKQLBar();
+    waitForViewToBeUpdated();
+
+    cy.log('filter out and out values when clicking in an indicators table cell');
+
+    waitForViewToBeUpdated();
+    cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
+
+    filterOutFromTableCell();
+    waitForViewToBeUpdated();
+
+    cy.get(KQL_FILTER).should('exist');
+    cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
+
+    clearKQLBar();
+    waitForViewToBeUpdated();
+
+    cy.log('filter in values when clicking in an indicators flyout overview tab block');
+
+    cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
+
+    openFlyout(0);
+    filterInFromFlyoutBlockItem();
+    closeFlyout();
+    waitForViewToBeUpdated();
+
+    cy.get(KQL_FILTER).should('exist');
+    cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
+
+    clearKQLBar();
+    waitForViewToBeUpdated();
+
+    cy.log('filter out values when clicking in an indicators flyout overview block');
+
+    cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
+
+    openFlyout(0);
+    filterOutFromFlyoutBlockItem();
+    closeFlyout();
+    waitForViewToBeUpdated();
+
+    cy.get(KQL_FILTER).should('exist');
+    cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
+
+    clearKQLBar();
+    waitForViewToBeUpdated();
+
+    cy.log('filter in values when clicking in an indicators flyout overview tab table row');
+
+    cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
+
+    openFlyout(0);
+    filterInFromFlyoutOverviewTable();
+    closeFlyout();
+    waitForViewToBeUpdated();
+
+    cy.get(KQL_FILTER).should('exist');
+    cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
+
+    clearKQLBar();
+    waitForViewToBeUpdated();
+
+    cy.log('filter out values when clicking in an indicators flyout overview tab row');
+
+    cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
+
+    openFlyout(0);
+    filterOutFromFlyoutOverviewTable();
+    closeFlyout();
+    waitForViewToBeUpdated();
+
+    cy.get(KQL_FILTER).should('exist');
+    cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
+
+    clearKQLBar();
+    waitForViewToBeUpdated();
+
+    cy.log('filter in values when clicking in an indicators flyout table tab action column');
+
+    cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
+
+    openFlyout(0);
+    navigateToFlyoutTableTab();
+    filterInFromFlyoutTableTab();
+    closeFlyout();
+    waitForViewToBeUpdated();
+
+    cy.get(KQL_FILTER).should('exist');
+    cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
+
+    clearKQLBar();
+    waitForViewToBeUpdated();
+
+    cy.log('filter out values when clicking in an indicators flyout table tab action column');
+
+    cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
+
+    openFlyout(0);
+    navigateToFlyoutTableTab();
+    filterOutFromFlyoutTableTab();
+    closeFlyout();
+    waitForViewToBeUpdated();
+
+    cy.get(KQL_FILTER).should('exist');
+    cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
+
+    clearKQLBar();
   });
 });

@@ -9,7 +9,7 @@ import {
   EuiPageHeaderProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonTitle,
   EuiIcon,
 } from '@elastic/eui';
 import React from 'react';
@@ -68,14 +68,16 @@ export function ServiceGroupTemplate({
       responsive={false}
     >
       <EuiFlexItem grow={false}>
-        {loadingServiceGroupName ? (
-          <EuiLoadingContent lines={2} style={{ width: 180, height: 40 }} />
-        ) : (
-          serviceGroupName ||
-          i18n.translate('xpack.apm.serviceGroup.allServices.title', {
-            defaultMessage: 'Services',
-          })
-        )}
+        <EuiSkeletonTitle
+          size="l"
+          style={{ width: 180 }}
+          isLoading={loadingServiceGroupName}
+        >
+          {serviceGroupName ||
+            i18n.translate('xpack.apm.serviceGroup.allServices.title', {
+              defaultMessage: 'Services',
+            })}
+        </EuiSkeletonTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -164,7 +166,7 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
     {
       key: 'service-map',
       label: i18n.translate('xpack.apm.serviceGroup.serviceMap', {
-        defaultMessage: 'Service map',
+        defaultMessage: 'Service Map',
       }),
       href: router.link('/service-map', { query }),
     },

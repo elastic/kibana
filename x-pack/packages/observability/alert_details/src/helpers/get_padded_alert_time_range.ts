@@ -8,9 +8,8 @@
 import moment from 'moment';
 
 export interface TimeRange {
-  from?: string;
-  to?: string;
-  interval?: string;
+  from: string;
+  to: string;
 }
 
 export const getPaddedAlertTimeRange = (alertStart: string, alertEnd?: string): TimeRange => {

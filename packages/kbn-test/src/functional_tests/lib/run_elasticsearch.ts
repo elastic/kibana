@@ -19,6 +19,7 @@ interface RunElasticsearchOptions {
   config: Config;
   onEarlyExit?: (msg: string) => void;
   logsDir?: string;
+  name?: string;
 }
 
 interface CcsConfig {
@@ -33,7 +34,7 @@ function getEsConfig({
 }: RunElasticsearchOptions) {
   const ssl = !!config.get('esTestCluster.ssl');
   const license: 'basic' | 'trial' | 'gold' = config.get('esTestCluster.license');
-  const esArgs: string[] = config.get('esTestCluster.serverArgs') ?? [];
+  const esArgs: string[] = config.get('esTestCluster.serverArgs');
   const esJavaOpts: string | undefined = config.get('esTestCluster.esJavaOpts');
   const isSecurityEnabled = esArgs.includes('xpack.security.enabled=true');
 
@@ -63,13 +64,13 @@ function getEsConfig({
 export async function runElasticsearch(
   options: RunElasticsearchOptions
 ): Promise<() => Promise<void>> {
-  const { log, logsDir } = options;
+  const { log, logsDir, name } = options;
   const config = getEsConfig(options);
 
   if (!config.ccsConfig) {
     const node = await startEsNode({
       log,
-      name: 'ftr',
+      name: name ?? 'ftr',
       logsDir,
       config,
     });
@@ -81,7 +82,7 @@ export async function runElasticsearch(
   const remotePort = await getPort();
   const remoteNode = await startEsNode({
     log,
-    name: 'ftr-remote',
+    name: name ?? 'ftr-remote',
     logsDir,
     config: {
       ...config,
@@ -92,7 +93,7 @@ export async function runElasticsearch(
 
   const localNode = await startEsNode({
     log,
-    name: 'ftr-local',
+    name: name ?? 'ftr-local',
     logsDir,
     config: {
       ...config,

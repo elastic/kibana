@@ -5,12 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
+import { EuiPanel, EuiSkeletonText } from '@elastic/eui';
 
 export const OverviewGridItemLoader = () => {
   return (
     <EuiPanel style={{ height: '160px' }} hasBorder={true}>
-      <EuiLoadingContent lines={2} />
+      <EuiSkeletonText lines={2} />
     </EuiPanel>
   );
 };

@@ -10,7 +10,7 @@ Object {
     "enablePanelActionDownload": true,
     "escapeFormulaValues": false,
     "maxSizeBytes": ByteSizeValue {
-      "valueInBytes": 10485760,
+      "valueInBytes": 262144000,
     },
     "scroll": Object {
       "duration": "30s",
@@ -20,6 +20,17 @@ Object {
   },
   "enabled": true,
   "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "export_types": Object {
+    "csv": Object {
+      "enabled": true,
+    },
+    "pdf": Object {
+      "enabled": true,
+    },
+    "png": Object {
+      "enabled": true,
+    },
+  },
   "kibanaServer": Object {},
   "poll": Object {
     "jobCompletionNotifier": Object {
@@ -57,7 +68,7 @@ Object {
     "enablePanelActionDownload": true,
     "escapeFormulaValues": false,
     "maxSizeBytes": ByteSizeValue {
-      "valueInBytes": 10485760,
+      "valueInBytes": 262144000,
     },
     "scroll": Object {
       "duration": "30s",
@@ -66,6 +77,17 @@ Object {
     "useByteOrderMarkEncoding": false,
   },
   "enabled": true,
+  "export_types": Object {
+    "csv": Object {
+      "enabled": true,
+    },
+    "pdf": Object {
+      "enabled": true,
+    },
+    "png": Object {
+      "enabled": true,
+    },
+  },
   "kibanaServer": Object {},
   "poll": Object {
     "jobCompletionNotifier": Object {

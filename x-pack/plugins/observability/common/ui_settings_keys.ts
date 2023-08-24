@@ -24,5 +24,6 @@ export const apmAWSLambdaRequestCostPerMillion = 'observability:apmAWSLambdaRequ
 export const enableCriticalPath = 'observability:apmEnableCriticalPath';
 export const apmEnableServiceMetrics = 'observability:apmEnableServiceMetrics';
 export const apmEnableContinuousRollups = 'observability:apmEnableContinuousRollups';
-export const profilingElasticsearchPlugin = 'observability:profilingElasticsearchPlugin';
 export const syntheticsThrottlingEnabled = 'observability:syntheticsThrottlingEnabled';
+export const enableLegacyUptimeApp = 'observability:enableLegacyUptimeApp';
+export const apmEnableProfilingIntegration = 'observability:apmEnableProfilingIntegration';

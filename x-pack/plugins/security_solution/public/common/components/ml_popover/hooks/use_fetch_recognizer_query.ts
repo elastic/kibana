@@ -12,7 +12,7 @@ import { checkRecognizer } from '../api';
 import type { CheckRecognizerProps, RecognizerModule } from '../types';
 
 const ONE_MINUTE = 60000;
-export const GET_RECOGNIZER_QUERY_KEY = ['GET', '/api/ml/modules/recognize/:indexPatterns'];
+export const GET_RECOGNIZER_QUERY_KEY = ['GET', '/internal/ml/modules/recognize/:indexPatterns'];
 
 export const useFetchRecognizerQuery = (
   queryArgs: Omit<CheckRecognizerProps, 'signal'>,

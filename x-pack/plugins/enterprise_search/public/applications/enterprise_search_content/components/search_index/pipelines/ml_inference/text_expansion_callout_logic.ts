@@ -48,6 +48,11 @@ interface TextExpansionCalloutActions {
   textExpansionModel: FetchTextExpansionModelApiLogicActions['apiSuccess'];
 }
 
+export interface TextExpansionCalloutError {
+  title: string;
+  message: string;
+}
+
 export interface TextExpansionCalloutValues {
   createTextExpansionModelError: HttpError | undefined;
   createTextExpansionModelStatus: Status;
@@ -56,6 +61,7 @@ export interface TextExpansionCalloutValues {
   isCreateButtonDisabled: boolean;
   isModelDownloadInProgress: boolean;
   isModelDownloaded: boolean;
+  isModelRunningSingleThreaded: boolean;
   isModelStarted: boolean;
   isPollingTextExpansionModelActive: boolean;
   isStartButtonDisabled: boolean;
@@ -63,6 +69,7 @@ export interface TextExpansionCalloutValues {
   startTextExpansionModelStatus: Status;
   textExpansionModel: FetchTextExpansionModelResponse | undefined;
   textExpansionModelPollTimeoutId: null | ReturnType<typeof setTimeout>;
+  textExpansionError: TextExpansionCalloutError | null;
 }
 
 /**
@@ -256,9 +263,32 @@ export const TextExpansionCalloutLogic = kea<
       (pollingTimeoutId: TextExpansionCalloutValues['textExpansionModelPollTimeoutId']) =>
         pollingTimeoutId !== null,
     ],
+    textExpansionError: [
+      () => [
+        selectors.createTextExpansionModelError,
+        selectors.fetchTextExpansionModelError,
+        selectors.startTextExpansionModelError,
+      ],
+      (
+        createTextExpansionError: TextExpansionCalloutValues['createTextExpansionModelError'],
+        fetchTextExpansionError: TextExpansionCalloutValues['fetchTextExpansionModelError'],
+        startTextExpansionError: TextExpansionCalloutValues['startTextExpansionModelError']
+      ) =>
+        getTextExpansionError(
+          createTextExpansionError,
+          fetchTextExpansionError,
+          startTextExpansionError
+        ),
+    ],
     isStartButtonDisabled: [
       () => [selectors.startTextExpansionModelStatus],
       (status: Status) => status !== Status.IDLE && status !== Status.ERROR,
+    ],
+    isModelRunningSingleThreaded: [
+      () => [selectors.textExpansionModel],
+      (data: FetchTextExpansionModelResponse) =>
+        // Running single threaded if model has max 1 deployment on 1 node with 1 thread
+        data?.targetAllocationCount * data?.threadsPerAllocation <= 1,
     ],
   }),
 });

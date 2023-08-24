@@ -20,7 +20,7 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiFlexGroup,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiCallOut,
   EuiText,
 } from '@elastic/eui';
@@ -34,13 +34,13 @@ import type {
 } from '@kbn/securitysolution-list-utils';
 
 import type { Moment } from 'moment';
-import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 import { ExceptionItemComments } from '../item_comments';
 import {
   defaultEndpointExceptionItems,
   retrieveAlertOsTypes,
-  filterIndexPatterns,
+  getPrepopulatedRuleExceptionWithHighlightFields,
 } from '../../utils/helpers';
 import type { AlertData } from '../../utils/types';
 import { initialState, createExceptionItemsReducer } from './reducer';
@@ -114,7 +114,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   onCancel,
   onConfirm,
 }: AddExceptionFlyoutProps) {
-  const { isLoading, indexPatterns } = useFetchIndexPatterns(rules);
+  const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
   const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
@@ -335,12 +335,29 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   );
 
   useEffect((): void => {
-    if (listType === ExceptionListTypeEnum.ENDPOINT && alertData != null) {
-      setInitialExceptionItems(
-        defaultEndpointExceptionItems(ENDPOINT_LIST_ID, exceptionItemName, alertData)
-      );
+    if (alertData) {
+      switch (listType) {
+        case ExceptionListTypeEnum.ENDPOINT: {
+          return setInitialExceptionItems(
+            defaultEndpointExceptionItems(ENDPOINT_LIST_ID, exceptionItemName, alertData)
+          );
+        }
+        case ExceptionListTypeEnum.RULE_DEFAULT: {
+          const populatedException = getPrepopulatedRuleExceptionWithHighlightFields({
+            alertData,
+            exceptionItemName,
+            // With "rule_default" type, there is only ever one rule associated.
+            // That is why it's ok to pull just the first item from rules array here.
+            ruleCustomHighlightedFields: rules?.[0]?.investigation_fields ?? [],
+          });
+          if (populatedException) {
+            setComment(i18n.ADD_RULE_EXCEPTION_FROM_ALERT_COMMENT(alertData._id));
+            return setInitialExceptionItems([populatedException]);
+          }
+        }
+      }
     }
-  }, [listType, exceptionItemName, alertData, setInitialExceptionItems]);
+  }, [listType, exceptionItemName, alertData, rules, setInitialExceptionItems, setComment]);
 
   const osTypesSelection = useMemo((): OsTypeArray => {
     return hasAlertData ? retrieveAlertOsTypes(alertData) : selectedOs ? [...selectedOs] : [];
@@ -468,9 +485,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         <EuiSpacer size="m" />
       </FlyoutHeader>
 
-      {isLoading && <EuiLoadingContent data-test-subj="loadingAddExceptionFlyout" lines={4} />}
-      {!isLoading && (
-        <FlyoutBodySection className="builder-section">
+      <FlyoutBodySection className="builder-section">
+        <EuiSkeletonText data-test-subj="loadingAddExceptionFlyout" lines={4} isLoading={isLoading}>
           {errorSubmitting != null && (
             <>
               <EuiCallOut title={i18n.SUBMIT_ERROR_TITLE} color="danger" iconType="warning">
@@ -501,7 +517,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
             onOsChange={setSelectedOs}
             onExceptionItemAdd={setExceptionItemsToAdd}
             onSetErrorExists={setConditionsValidationError}
-            onFilterIndexPatterns={filterIndexPatterns}
+            getExtendedFields={getExtendedFields}
           />
 
           {listType !== ExceptionListTypeEnum.ENDPOINT && !sharedListToAddTo?.length && (
@@ -521,9 +537,10 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           <ExceptionItemComments
             accordionTitle={
               <SectionHeader size="xs">
-                <h3>{i18n.COMMENTS_SECTION_TITLE(0)}</h3>
+                <h3>{i18n.COMMENTS_SECTION_TITLE(newComment ? 1 : 0)}</h3>
               </SectionHeader>
             }
+            initialIsOpen={!!newComment}
             newCommentValue={newComment}
             newCommentOnChange={setComment}
           />
@@ -556,8 +573,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
               />
             </>
           )}
-        </FlyoutBodySection>
-      )}
+        </EuiSkeletonText>
+      </FlyoutBodySection>
       <EuiFlyoutFooter>
         <FlyoutFooterGroup justifyContent="spaceBetween">
           <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleCloseFlyout}>

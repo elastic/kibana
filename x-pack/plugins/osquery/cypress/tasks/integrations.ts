@@ -75,7 +75,7 @@ export const interceptPackId = (cb: (packId: string) => void) => {
   cy.intercept('POST', '**/api/osquery/packs', (req) => {
     req.continue((res) => {
       if (res.body.data) {
-        cb(res.body.data.id);
+        cb(res.body.data.saved_object_id);
       }
 
       return res.send(res.body);

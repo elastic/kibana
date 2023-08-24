@@ -26,7 +26,8 @@
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
-      "data"
+      "data",
+      "textBasedLanguages"
     ]
   }
 }

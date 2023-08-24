@@ -7,11 +7,12 @@
 
 import type { VFC } from 'react';
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { ExpandableSection } from './expandable_section';
 import { HighlightedFields } from './highlighted_fields';
 import { INVESTIGATION_SECTION_TEST_ID } from './test_ids';
 import { INVESTIGATION_TITLE } from './translations';
-
+import { InvestigationGuideButton } from './investigation_guide_button';
 export interface DescriptionSectionProps {
   /**
    * Boolean to allow the component to be expanded or collapsed on first render
@@ -22,13 +23,15 @@ export interface DescriptionSectionProps {
 /**
  * Most top section of the overview tab. It contains the description, reason and mitre attack information (for a document of type alert).
  */
-export const InvestigationSection: VFC<DescriptionSectionProps> = ({ expanded = false }) => {
+export const InvestigationSection: VFC<DescriptionSectionProps> = ({ expanded = true }) => {
   return (
     <ExpandableSection
       expanded={expanded}
       title={INVESTIGATION_TITLE}
       data-test-subj={INVESTIGATION_SECTION_TEST_ID}
     >
+      <InvestigationGuideButton />
+      <EuiSpacer size="m" />
       <HighlightedFields />
     </ExpandableSection>
   );

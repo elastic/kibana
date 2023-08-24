@@ -13,12 +13,7 @@ import { isEqual } from 'lodash';
 import { encode } from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  toMountPoint,
-  wrapWithTheme,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { getNestedProperty } from '@kbn/ml-nested-property';
@@ -32,7 +27,7 @@ import {
   type Dictionary,
   type SetUrlState,
 } from '@kbn/ml-url-state';
-import { getSavedSearch, type SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   type IndexDataVisualizerViewProps,
@@ -94,6 +89,7 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
     data: { dataViews, search },
     savedObjects: { client: savedObjectsClient },
     notifications: { toasts },
+    savedSearch: savedSearchService,
   } = services;
 
   const history = useHistory();
@@ -159,10 +155,7 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
       if (typeof parsedQueryString?.savedSearchId === 'string') {
         const savedSearchId = parsedQueryString.savedSearchId;
         try {
-          const savedSearch = await getSavedSearch(savedSearchId, {
-            search,
-            savedObjectsClient,
-          });
+          const savedSearch = await savedSearchService.get(savedSearchId);
           const dataView = savedSearch.searchSource.getField('index');
 
           if (!dataView) {
@@ -190,7 +183,7 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
       }
     };
     getDataView();
-  }, [savedObjectsClient, toasts, dataViews, urlSearchString, search]);
+  }, [savedObjectsClient, toasts, dataViews, urlSearchString, search, savedSearchService]);
 
   const setUrlState: SetUrlState = useCallback(
     (
@@ -304,9 +297,7 @@ export const IndexDataVisualizer: FC<{
     ...coreStart,
   };
   const datePickerDeps = {
-    ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
-    toMountPoint,
-    wrapWithTheme,
+    ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
   };
 

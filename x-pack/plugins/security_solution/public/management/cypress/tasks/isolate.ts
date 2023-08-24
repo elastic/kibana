@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import type { ActionDetails } from '../../../../common/endpoint/types';
+import { loadPage } from './common';
 
 const API_ENDPOINT_ACTION_PATH = '/api/endpoint/action/*';
 export const interceptActionRequests = (
@@ -71,9 +71,10 @@ export const waitForReleaseOption = (alertId: string): void => {
 };
 
 export const visitRuleAlerts = (ruleName: string) => {
-  cy.visit('/app/security/rules');
+  loadPage('/app/security/rules');
   cy.contains(ruleName).click();
 };
+
 export const checkFlyoutEndpointIsolation = (): void => {
   cy.getByTestSubj('event-field-agent.status').then(($status) => {
     if ($status.find('[title="Isolated"]').length > 0) {
@@ -91,7 +92,7 @@ export const checkFlyoutEndpointIsolation = (): void => {
 };
 
 export const toggleRuleOffAndOn = (ruleName: string): void => {
-  cy.visit('/app/security/rules');
+  loadPage('/app/security/rules');
   cy.wait(2000);
   cy.contains(ruleName)
     .parents('tr')
@@ -106,20 +107,9 @@ export const toggleRuleOffAndOn = (ruleName: string): void => {
 
 export const filterOutEndpoints = (endpointHostname: string): void => {
   cy.getByTestSubj('filters-global-container').within(() => {
-    cy.getByTestSubj('queryInput').click().type(`host.hostname : "${endpointHostname}"`);
+    cy.getByTestSubj('queryInput').click();
+    cy.getByTestSubj('queryInput').type(`host.name: ${endpointHostname}`);
     cy.getByTestSubj('querySubmitButton').click();
-  });
-};
-
-export const createAgentPolicyTask = (
-  version: string
-): Cypress.Chainable<IndexedFleetEndpointPolicyResponse> => {
-  const policyName = `Reassign ${Math.random().toString(36).substring(2, 7)}`;
-
-  return cy.task<IndexedFleetEndpointPolicyResponse>('indexFleetEndpointPolicy', {
-    policyName,
-    endpointPackageVersion: version,
-    agentPolicyName: policyName,
   });
 };
 

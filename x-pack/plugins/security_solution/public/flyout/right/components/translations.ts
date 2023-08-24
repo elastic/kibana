@@ -11,17 +11,17 @@ import { i18n } from '@kbn/i18n';
 
 export const EXPAND_DETAILS_BUTTON = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.expandDetailButton',
-  { defaultMessage: 'Expand alert details' }
+  { defaultMessage: 'Expand details' }
 );
 
 export const COLLAPSE_DETAILS_BUTTON = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.collapseDetailButton',
-  { defaultMessage: 'Collapse alert details' }
+  { defaultMessage: 'Collapse details' }
 );
 
-export const DOCUMENT_DETAILS = i18n.translate(
+export const EVENT_DETAILS = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.headerTitle',
-  { defaultMessage: 'Document details' }
+  { defaultMessage: 'Event details' }
 );
 
 export const SEVERITY_TITLE = i18n.translate(
@@ -38,12 +38,26 @@ export const RISK_SCORE_TITLE = i18n.translate(
   }
 );
 
-/* Description section */
-
-export const DESCRIPTION_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.descriptionTitle',
+export const RULE_SUMMARY_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.ruleSummaryText',
   {
-    defaultMessage: 'Description',
+    defaultMessage: 'Rule summary',
+  }
+);
+
+export const ALERT_REASON_DETAILS_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.alertReasonDetailsText',
+  {
+    defaultMessage: 'Show full reason',
+  }
+);
+
+/* About section */
+
+export const ABOUT_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.aboutTitle',
+  {
+    defaultMessage: 'About',
   }
 );
 
@@ -54,22 +68,20 @@ export const RULE_DESCRIPTION_TITLE = i18n.translate(
   }
 );
 
+export const PREVIEW_RULE_DETAILS = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.previewRuleDetailsText',
+  { defaultMessage: 'Preview rule details' }
+);
+
+export const PREVIEW_ALERT_REASON_DETAILS = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.previewAlertReasonDetailsText',
+  { defaultMessage: 'Preview alert reason' }
+);
+
 export const DOCUMENT_DESCRIPTION_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.documentDescriptionTitle',
   {
     defaultMessage: 'Document description',
-  }
-);
-export const DOCUMENT_DESCRIPTION_EXPAND_BUTTON = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.documentDescriptionExpandButton',
-  {
-    defaultMessage: 'Expand',
-  }
-);
-export const DOCUMENT_DESCRIPTION_COLLAPSE_BUTTON = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.documentDescriptionCollapseButton',
-  {
-    defaultMessage: 'Collapse',
   }
 );
 
@@ -101,6 +113,16 @@ export const HIGHLIGHTED_FIELDS_TITLE = i18n.translate(
   { defaultMessage: 'Highlighted fields' }
 );
 
+export const HIGHLIGHTED_FIELDS_FIELD_COLUMN = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.highlightedFields.fieldColumn',
+  { defaultMessage: 'Field' }
+);
+
+export const HIGHLIGHTED_FIELDS_VALUE_COLUMN = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.highlightedFields.valueColumn',
+  { defaultMessage: 'Value' }
+);
+
 /* Insights section */
 
 export const ENTITIES_TITLE = i18n.translate(
@@ -118,31 +140,14 @@ export const INSIGHTS_TITLE = i18n.translate(
   { defaultMessage: 'Insights' }
 );
 
-export const TECHNICAL_PREVIEW_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.technicalPreviewTitle',
-  { defaultMessage: 'Technical Preview' }
+export const CORRELATIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.correlationsTitle',
+  { defaultMessage: 'Correlations' }
 );
 
-export const TECHNICAL_PREVIEW_MESSAGE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.technicalPreviewMessage',
-  {
-    defaultMessage:
-      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-  }
-);
-
-export const ENTITIES_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.entitiesText',
-  {
-    defaultMessage: 'entities',
-  }
-);
-
-export const THREAT_INTELLIGENCE_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligenceText',
-  {
-    defaultMessage: 'fields of threat intelligence',
-  }
+export const PREVALENCE_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.prevalenceTitle',
+  { defaultMessage: 'Prevalence' }
 );
 
 export const THREAT_MATCH_DETECTED = i18n.translate(
@@ -173,11 +178,13 @@ export const THREAT_ENRICHMENTS = i18n.translate(
   }
 );
 
-export const VIEW_ALL = (text: string) =>
-  i18n.translate('xpack.securitySolution.flyout.documentDetails.overviewTab.viewAllButton', {
-    values: { text },
-    defaultMessage: 'View all {text}',
-  });
+export const PREVALENCE_ROW_UNCOMMON = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.prevalenceRowText',
+  {
+    defaultMessage: 'is uncommon',
+  }
+);
+
 export const VISUALIZATIONS_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.visualizationsTitle',
   { defaultMessage: 'Visualizations' }
@@ -188,9 +195,59 @@ export const ANALYZER_PREVIEW_TITLE = i18n.translate(
   { defaultMessage: 'Analyzer preview' }
 );
 
-export const ANALYZER_PREVIEW_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.analyzerPreviewText',
+export const SHARE = i18n.translate('xpack.securitySolution.flyout.documentDetails.share', {
+  defaultMessage: 'Share Alert',
+});
+
+export const INVESTIGATION_GUIDE_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.investigationGuideText',
   {
-    defaultMessage: 'analyzer preview.',
+    defaultMessage: 'Investigation guide',
   }
 );
+
+export const SESSION_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.title',
+  {
+    defaultMessage: 'Session viewer preview',
+  }
+);
+
+export const SESSION_PREVIEW_PROCESS_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.processText',
+  {
+    defaultMessage: 'started',
+  }
+);
+
+export const SESSION_PREVIEW_TIME_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.timeText',
+  {
+    defaultMessage: 'at',
+  }
+);
+
+export const SESSION_PREVIEW_RULE_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.ruleText',
+  {
+    defaultMessage: 'with rule',
+  }
+);
+
+export const SESSION_PREVIEW_COMMAND_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.commandText',
+  {
+    defaultMessage: 'by',
+  }
+);
+
+export const RESPONSE_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.responseSectionTitle',
+  {
+    defaultMessage: 'Response',
+  }
+);
+
+export const RESPONSE_EMPTY = i18n.translate('xpack.securitySolution.flyout.response.empty', {
+  defaultMessage: 'There are no response actions defined for this event.',
+});

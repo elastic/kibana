@@ -39,6 +39,7 @@ describe('updateActionRoute', () => {
       config: { foo: true },
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -67,6 +68,7 @@ describe('updateActionRoute', () => {
         config: { foo: true },
         is_preconfigured: false,
         is_deprecated: false,
+        is_system_action: false,
       },
     });
 
@@ -106,6 +108,7 @@ describe('updateActionRoute', () => {
       config: { foo: true },
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -150,6 +153,7 @@ describe('updateActionRoute', () => {
       config: { foo: true },
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false,
     };
 
     const actionsClient = actionsClientMock.create();

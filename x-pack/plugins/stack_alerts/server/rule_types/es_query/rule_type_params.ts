@@ -41,11 +41,11 @@ const EsQueryRuleParamsSchemaProperties = {
   threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
   thresholdComparator: getComparatorSchemaType(validateComparator),
   // aggregation type
-  aggType: schema.string({ validate: validateAggType }),
+  aggType: schema.string({ validate: validateAggType, defaultValue: 'count' }),
   // aggregation field
   aggField: schema.maybe(schema.string({ minLength: 1 })),
   // how to group
-  groupBy: schema.string({ validate: validateGroupBy }),
+  groupBy: schema.string({ validate: validateGroupBy, defaultValue: 'all' }),
   // field to group on (for groupBy: top)
   termField: schema.maybe(schema.string({ minLength: 1 })),
   // limit on number of groups returned

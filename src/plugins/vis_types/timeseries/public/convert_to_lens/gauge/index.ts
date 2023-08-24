@@ -101,6 +101,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
 
     const extendedLayer: ExtendedLayer = {
       indexPatternId,
+      ignoreGlobalFilters: Boolean(model.ignore_global_filter || series.ignore_global_filter),
       layerId: uuidv4(),
       columns: [...metricsColumns, ...(bucket ? [bucket] : [])],
       columnOrder: [],

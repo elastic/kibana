@@ -71,7 +71,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   let latencyMetricValues: Awaited<ReturnType<typeof getLatencyValues>>;
   let latencyTransactionValues: Awaited<ReturnType<typeof getLatencyValues>>;
-  registry.when('Service maps APIs', { config: 'trial', archives: [] }, () => {
+  registry.when('Service Maps APIs', { config: 'trial', archives: [] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_RATE = 80;
       const GO_DEV_RATE = 20;

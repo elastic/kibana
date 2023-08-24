@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { useExpandedPingList } from './use_ping_expanded';
 import { formatDuration } from '../../../../utils/formatting';
 import { Ping } from '../../../../../../../common/runtime_types';
 import * as I18LABELS from './translations';
@@ -26,21 +27,7 @@ interface Props {
 }
 
 export function PingListTable({ loading, error, pings, onChange }: Props) {
-  const [expandedRows, setExpandedRows] = useState<Record<string, JSX.Element>>({});
-
-  const expandedIdsToRemove = JSON.stringify(
-    Object.keys(expandedRows).filter((e) => !pings.some(({ docId }) => docId === e))
-  );
-
-  useEffect(() => {
-    const parsed = JSON.parse(expandedIdsToRemove);
-    if (parsed.length) {
-      parsed.forEach((docId: string) => {
-        delete expandedRows[docId];
-      });
-      setExpandedRows(expandedRows);
-    }
-  }, [expandedIdsToRemove, expandedRows]);
+  const { expandedRows, setExpandedRows } = useExpandedPingList(pings);
 
   const hasStatus = pings.reduce(
     (hasHttpStatus: boolean, currentPing) =>

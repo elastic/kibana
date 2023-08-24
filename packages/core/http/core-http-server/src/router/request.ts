@@ -30,6 +30,7 @@ export interface KibanaRequestState extends RequestApplicationState {
   requestUuid: string;
   rewrittenUrl?: URL;
   traceId?: string;
+  measureElu?: () => void;
 }
 
 /**
@@ -133,6 +134,12 @@ export interface KibanaRequest<
    * Even if the API facade is the same, fake requests have some stubbed functionalities.
    */
   readonly isFakeRequest: boolean;
+
+  /**
+   * An internal request has access to internal routes.
+   * @note See the {@link KibanaRequestRouteOptions#access} route option.
+   */
+  readonly isInternalApiRequest: boolean;
 
   /**
    * The socket associated with this request.

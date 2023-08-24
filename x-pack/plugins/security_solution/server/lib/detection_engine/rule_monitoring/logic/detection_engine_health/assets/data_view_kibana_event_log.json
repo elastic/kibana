@@ -1,0 +1,14 @@
+{
+  "type": "index-pattern",
+  "id": "kibana-event-log-data-view",
+  "managed": true,
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.0.0",
+  "attributes": {
+    "name": ".kibana-event-log-*",
+    "title": ".kibana-event-log-*",
+    "timeFieldName": "@timestamp",
+    "allowNoIndex": true
+  },
+  "references": []
+}

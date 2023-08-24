@@ -16,6 +16,7 @@ import {
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/public';
 
+import type { TableListTab } from '@kbn/content-management-tabbed-table-list-view';
 import type { Vis } from './vis';
 import type { PersistedState } from './persisted_state';
 import type { VisParams, SerializedVis } from '../common';
@@ -94,3 +95,5 @@ export interface VisEditorOptionsProps<VisParamType = unknown> {
   setValidity(isValid: boolean): void;
   setTouched(isTouched: boolean): void;
 }
+
+export type ListingViewRegistry = Pick<Set<TableListTab>, 'add'>;

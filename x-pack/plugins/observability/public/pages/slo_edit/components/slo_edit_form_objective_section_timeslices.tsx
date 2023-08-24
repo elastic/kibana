@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFieldNumber, EuiFlexGrid, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import { EuiFieldNumber, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import type { CreateSLOInput } from '@kbn/slo-schema';
+import { CreateSLOForm } from '../types';
 
 export function SloEditFormObjectiveSectionTimeslices() {
-  const { control, getFieldState } = useFormContext<CreateSLOInput>();
+  const { control, getFieldState } = useFormContext<CreateSLOForm>();
+
   return (
-    <EuiFlexGrid columns={3}>
+    <>
       <EuiFlexItem>
         <EuiFormRow
           isInvalid={getFieldState('objective.timesliceTarget').invalid}
@@ -34,7 +35,6 @@ export function SloEditFormObjectiveSectionTimeslices() {
           }
         >
           <Controller
-            shouldUnregister
             name="objective.timesliceTarget"
             control={control}
             defaultValue={95}
@@ -43,17 +43,17 @@ export function SloEditFormObjectiveSectionTimeslices() {
               min: 0.001,
               max: 99.999,
             }}
-            render={({ field: { ref, ...field }, fieldState }) => (
+            render={({ field: { ref, onChange, ...field }, fieldState }) => (
               <EuiFieldNumber
                 {...field}
                 required
                 isInvalid={fieldState.invalid}
-                value={String(field.value)}
+                value={field.value}
                 data-test-subj="sloFormObjectiveTimesliceTargetInput"
                 min={0.001}
                 max={99.999}
                 step={0.001}
-                onChange={(event) => field.onChange(Number(event.target.value))}
+                onChange={(event) => onChange(event.target.value)}
               />
             )}
           />
@@ -78,27 +78,26 @@ export function SloEditFormObjectiveSectionTimeslices() {
           }
         >
           <Controller
-            shouldUnregister
             name="objective.timesliceWindow"
             defaultValue="1"
             control={control}
             rules={{ required: true, min: 1, max: 120 }}
-            render={({ field: { ref, ...field }, fieldState }) => (
+            render={({ field: { ref, onChange, ...field }, fieldState }) => (
               <EuiFieldNumber
                 {...field}
                 isInvalid={fieldState.invalid}
                 required
                 data-test-subj="sloFormObjectiveTimesliceWindowInput"
-                value={String(field.value)}
+                value={field.value}
                 min={1}
                 max={120}
                 step={1}
-                onChange={(event) => field.onChange(String(Number(event.target.value)))}
+                onChange={(event) => onChange(String(parseInt(event.target.value, 10)))}
               />
             )}
           />
         </EuiFormRow>
       </EuiFlexItem>
-    </EuiFlexGrid>
+    </>
   );
 }

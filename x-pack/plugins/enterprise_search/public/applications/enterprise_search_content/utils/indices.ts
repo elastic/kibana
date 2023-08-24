@@ -108,6 +108,17 @@ export function getLastUpdated(index?: ElasticsearchIndexWithIngestion): string 
   return isConnectorIndex(index) ? index.connector.last_synced ?? 'never' : null;
 }
 
+export function getContentExtractionDisabled(index?: ElasticsearchIndexWithIngestion): boolean {
+  if (!index) return false;
+  if (isConnectorIndex(index)) {
+    const contentExtractionDisabled =
+      index.connector.configuration?.use_text_extraction_service?.value;
+    return !!contentExtractionDisabled;
+  }
+
+  return false;
+}
+
 export function indexToViewIndex(index: ElasticsearchIndex): ConnectorViewIndex;
 export function indexToViewIndex(index: ElasticsearchIndex): CrawlerViewIndex;
 export function indexToViewIndex(index: ElasticsearchIndex): ApiViewIndex {

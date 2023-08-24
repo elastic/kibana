@@ -131,6 +131,42 @@ describe('Stack Connectors Plugin', () => {
           name: 'Microsoft Teams',
         })
       );
+      expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
+        17,
+        expect.objectContaining({
+          id: '.torq',
+          name: 'Torq',
+        })
+      );
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(4);
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          id: '.opsgenie',
+          name: 'Opsgenie',
+        })
+      );
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          id: '.tines',
+          name: 'Tines',
+        })
+      );
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({
+          id: '.gen-ai',
+          name: 'Generative AI',
+        })
+      );
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        4,
+        expect.objectContaining({
+          id: '.d3security',
+          name: 'D3 Security',
+        })
+      );
     });
   });
 });

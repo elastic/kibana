@@ -54,6 +54,7 @@ describe('startMlModelDeployment', () => {
         nodeAllocationCount: 0,
         startTime: 123456,
         targetAllocationCount: 3,
+        threadsPerAllocation: 1,
       })
     );
 
@@ -73,6 +74,7 @@ describe('startMlModelDeployment', () => {
         nodeAllocationCount: 0,
         startTime: 123456,
         targetAllocationCount: 3,
+        threadsPerAllocation: 1,
       })
     );
 
@@ -94,6 +96,7 @@ describe('startMlModelDeployment', () => {
           nodeAllocationCount: 0,
           startTime: 123456,
           targetAllocationCount: 3,
+          threadsPerAllocation: 1,
         })
       )
       .mockReturnValueOnce(
@@ -103,6 +106,7 @@ describe('startMlModelDeployment', () => {
           nodeAllocationCount: 0,
           startTime: 123456,
           targetAllocationCount: 3,
+          threadsPerAllocation: 1,
         })
       );
     mockTrainedModelsProvider.startTrainedModelDeployment.mockImplementation(async () => {});

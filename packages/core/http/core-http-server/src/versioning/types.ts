@@ -37,6 +37,24 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   access: Exclude<RouteConfigOptions<Method>['access'], undefined>;
   /** A human-readable description of this route */
   description?: string;
+  /**
+   * When enabled, the router will also check for the presence of an `apiVersion`
+   * query parameter to determine the route version to resolve to:
+   *
+   * `/api/my-app/foo?apiVersion=1`
+   *
+   * This enables use cases like a versioned Kibana endpoint
+   * inside an <img /> tag's href. Otherwise it should _not_ be enabled.
+   *
+   * @note When enabled and both query parameter and header are present, header
+   *       will take precedence.
+   * @note When enabled `apiVersion` is a reserved query parameter and will not
+   *       be passed to the route handler or handler validation.
+   * @note `apiVersion` is a reserved query parameter, avoid using it
+   * @experimental
+   * @default false
+   */
+  enableQueryVersion?: boolean;
 };
 
 /**
@@ -142,15 +160,30 @@ export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCt
  * @experimental
  */
 export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
-  /** @experimental */
+  /**
+   * @experimental
+   * @track-adoption
+   */
   get: VersionedRouteRegistrar<'get', Ctx>;
-  /** @experimental */
+  /**
+   * @experimental
+   * @track-adoption
+   */
   put: VersionedRouteRegistrar<'put', Ctx>;
-  /** @experimental */
+  /**
+   * @experimental
+   * @track-adoption
+   */
   post: VersionedRouteRegistrar<'post', Ctx>;
-  /** @experimental */
+  /**
+   * @experimental
+   * @track-adoption
+   */
   patch: VersionedRouteRegistrar<'patch', Ctx>;
-  /** @experimental */
+  /**
+   * @experimental
+   * @track-adoption
+   */
   delete: VersionedRouteRegistrar<'delete', Ctx>;
 }
 
@@ -188,7 +221,7 @@ export interface VersionedRouteResponseValidation {
  * Versioned route validation
  * @experimental
  */
-interface FullValidationConfig<P, Q, B> {
+export interface FullValidationConfig<P, Q, B> {
   /**
    * Validation to run against route inputs: params, query and body
    * @experimental

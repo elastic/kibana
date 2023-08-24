@@ -31,7 +31,7 @@ import {
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
   ENABLE_SQL,
-} from '../common';
+} from '@kbn/discover-utils';
 import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
 
 const technicalPreviewLabel = i18n.translate('discover.advancedSettings.technicalPreviewLabel', {
@@ -199,6 +199,7 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
           '</a>',
       },
     }),
+    requiresPageReload: true,
     category: ['discover'],
     schema: schema.boolean(),
     metric: {
@@ -206,7 +207,6 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
       name: 'discover:useLegacyDataGrid',
     },
   },
-
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
       defaultMessage: 'Modify columns when changing data views',

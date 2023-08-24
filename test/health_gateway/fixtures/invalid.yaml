@@ -4,7 +4,7 @@ server:
 
 kibana:
   hosts:
-    - http://localhost:65537/api/status/ok
+    - http://localhost:65537/health/ok
   requestTimeout: 2s
 
 logging:

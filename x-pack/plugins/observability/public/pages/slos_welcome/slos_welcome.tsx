@@ -21,10 +21,12 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../utils/kibana_react';
 import { useLicense } from '../../hooks/use_license';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
-import { paths } from '../../config/paths';
-import illustration from './assets/illustration.svg';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
+import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
+import { paths } from '../../../common/locators/paths';
+import illustration from './assets/illustration.svg';
+import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 export function SlosWelcomePage() {
   const {
@@ -32,6 +34,7 @@ export function SlosWelcomePage() {
     http: { basePath },
   } = useKibana().services;
   const { hasWriteCapabilities } = useCapabilities();
+  const { isError: hasErrorInGlobalDiagnosis } = useFetchSloGlobalDiagnosis();
   const { ObservabilityPageTemplate } = usePluginContext();
 
   const { hasAtLeast } = useLicense();
@@ -44,7 +47,8 @@ export function SlosWelcomePage() {
     navigateToUrl(basePath.prepend(paths.observability.sloCreate));
   };
 
-  const hasSlosAndHasPermissions = total > 0 && hasAtLeast('platinum') === true;
+  const hasSlosAndHasPermissions =
+    total > 0 && hasAtLeast('platinum') === true && !hasErrorInGlobalDiagnosis;
 
   useEffect(() => {
     if (hasSlosAndHasPermissions) {
@@ -54,6 +58,7 @@ export function SlosWelcomePage() {
 
   return hasSlosAndHasPermissions || isLoading ? null : (
     <ObservabilityPageTemplate data-test-subj="slosPageWelcomePrompt">
+      <HeaderMenu />
       <EuiPageTemplate.EmptyPrompt
         title={
           <EuiTitle size="l">
@@ -110,7 +115,7 @@ export function SlosWelcomePage() {
                       fill
                       color="primary"
                       onClick={handleClickCreateSlo}
-                      disabled={!hasWriteCapabilities}
+                      disabled={!hasWriteCapabilities || hasErrorInGlobalDiagnosis}
                     >
                       {i18n.translate('xpack.observability.slo.sloList.welcomePrompt.buttonLabel', {
                         defaultMessage: 'Create SLO',

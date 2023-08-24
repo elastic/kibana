@@ -24,6 +24,7 @@ import {
   PreconfiguredFleetServerHostsSchema,
   PreconfiguredFleetProxiesSchema,
 } from './types';
+import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts';
 
 const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
@@ -37,6 +38,11 @@ export const config: PluginConfigDescriptor = {
     enableExperimental: true,
     developer: {
       maxAgentPoliciesWithInactivityTimeout: true,
+    },
+    internal: {
+      fleetServerStandalone: true,
+      disableProxies: true,
+      activeAgentsSoftLimit: true,
     },
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
@@ -164,9 +170,51 @@ export const config: PluginConfigDescriptor = {
         disableILMPolicies: schema.boolean({
           defaultValue: false,
         }),
+        disableProxies: schema.boolean({
+          defaultValue: false,
+        }),
+        fleetServerStandalone: schema.boolean({
+          defaultValue: false,
+        }),
+        activeAgentsSoftLimit: schema.maybe(
+          schema.number({
+            min: 0,
+          })
+        ),
+        capabilities: schema.arrayOf(
+          schema.oneOf([
+            // See package-spec for the list of available capiblities https://github.com/elastic/package-spec/blob/dcc37b652690f8a2bca9cf8a12fc28fd015730a0/spec/integration/manifest.spec.yml#L113
+            schema.literal('apm'),
+            schema.literal('enterprise_search'),
+            schema.literal('observability'),
+            schema.literal('security'),
+            schema.literal('serverless_search'),
+            schema.literal('uptime'),
+          ]),
+          { defaultValue: [] }
+        ),
       })
     ),
     enabled: schema.boolean({ defaultValue: true }),
+    /**
+     * The max size of the artifacts encoded_size sum in a batch when more than one (there is at least one artifact in a batch).
+     * @example
+     * artifact1.encoded_size = 400
+     * artifact2.encoded_size = 600
+     * artifact3.encoded_size = 1_200
+     * and
+     * createArtifactsBulkBatchSize: 1_000
+     * then
+     * batch1 = [artifact1, artifact2]
+     * batch2 = [artifact3]
+     */
+    createArtifactsBulkBatchSize: schema.maybe(
+      schema.number({
+        defaultValue: BULK_CREATE_MAX_ARTIFACTS_BYTES,
+        max: 4_000_000,
+        min: 400,
+      })
+    ),
   }),
 };
 

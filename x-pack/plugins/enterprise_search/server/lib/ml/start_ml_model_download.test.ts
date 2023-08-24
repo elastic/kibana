@@ -53,6 +53,7 @@ describe('startMlModelDownload', () => {
         nodeAllocationCount: 0,
         startTime: 123456,
         targetAllocationCount: 3,
+        threadsPerAllocation: 1,
       })
     );
 
@@ -74,6 +75,7 @@ describe('startMlModelDownload', () => {
           nodeAllocationCount: 0,
           startTime: 123456,
           targetAllocationCount: 3,
+          threadsPerAllocation: 1,
         })
       )
       .mockReturnValueOnce(
@@ -83,6 +85,7 @@ describe('startMlModelDownload', () => {
           nodeAllocationCount: 0,
           startTime: 123456,
           targetAllocationCount: 3,
+          threadsPerAllocation: 1,
         })
       );
 

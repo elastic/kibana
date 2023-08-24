@@ -6,10 +6,8 @@
  */
 
 import { EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
-import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import React, { createContext, useMemo } from 'react';
+import React, { createContext } from 'react';
 import styled from 'styled-components';
-
 import type { GetBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import * as i18n from './translations';
@@ -25,35 +23,60 @@ export const Indent = styled.div`
 
 export const BasicAlertDataContext = createContext<Partial<GetBasicDataFromDetailsData>>({});
 
-const InvestigationGuideViewComponent: React.FC<{
+interface InvestigationGuideViewProps {
+  /**
+   * An array of events data
+   */
   data: TimelineEventsDetailsItem[];
-}> = ({ data }) => {
-  const ruleId = useMemo(() => {
-    const item = data.find((d) => d.field === 'signal.rule.id' || d.field === ALERT_RULE_UUID);
-    return Array.isArray(item?.originalValue)
-      ? item?.originalValue[0]
-      : item?.originalValue ?? null;
-  }, [data]);
-  const { rule: maybeRule } = useRuleWithFallback(ruleId);
-  const basicAlertData = useBasicDataFromDetailsData(data);
+  /**
+   * Boolean value indicating whether to show the full view of investigation guide, defaults to false and shows partial text
+   * with Read more button
+   */
+  showFullView?: boolean;
+  /**
+   * Boolean value indicating whether to show investigation guide text title, defaults to true and shows title
+   */
+  showTitle?: boolean;
+}
 
-  if (!maybeRule?.note) {
+/**
+ * Investigation guide that shows the markdown text of rule.note
+ */
+const InvestigationGuideViewComponent: React.FC<InvestigationGuideViewProps> = ({
+  data,
+  showFullView = false,
+  showTitle = true,
+}) => {
+  const basicAlertData = useBasicDataFromDetailsData(data);
+  const { rule: maybeRule } = useRuleWithFallback(basicAlertData.ruleId);
+
+  if (!basicAlertData.ruleId || !maybeRule?.note) {
     return null;
   }
 
   return (
     <BasicAlertDataContext.Provider value={basicAlertData}>
-      <EuiSpacer size="l" />
-      <EuiTitle size="xxxs" data-test-subj="summary-view-guide">
-        <h5>{i18n.INVESTIGATION_GUIDE}</h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
+      {showTitle && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiTitle size="xxxs" data-test-subj="summary-view-guide">
+            <h5>{i18n.INVESTIGATION_GUIDE}</h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+        </>
+      )}
       <Indent>
-        <EuiText size="xs">
-          <LineClamp lineClampHeight={4.5}>
+        {showFullView ? (
+          <EuiText size="xs" data-test-subj="investigation-guide-full-view">
             <MarkdownRenderer>{maybeRule.note}</MarkdownRenderer>
-          </LineClamp>
-        </EuiText>
+          </EuiText>
+        ) : (
+          <EuiText size="xs" data-test-subj="investigation-guide-clamped">
+            <LineClamp lineClampHeight={4.5}>
+              <MarkdownRenderer>{maybeRule.note}</MarkdownRenderer>
+            </LineClamp>
+          </EuiText>
+        )}
       </Indent>
     </BasicAlertDataContext.Provider>
   );

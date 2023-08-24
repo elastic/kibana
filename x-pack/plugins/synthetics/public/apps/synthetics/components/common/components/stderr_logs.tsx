@@ -23,14 +23,13 @@ import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable } from '@elastic/eui';
 import moment from 'moment';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useStdErrorLogs } from './use_std_error_logs';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { Ping } from '../../../../../../common/runtime_types';
 import { ClientPluginsStart } from '../../../../../plugin';
 
 export const StdErrorLogs = ({
-  monitorId,
   checkGroup,
   timestamp,
   title,
@@ -38,7 +37,6 @@ export const StdErrorLogs = ({
   hideTitle = false,
   pageSize = 5,
 }: {
-  monitorId?: string;
   checkGroup?: string;
   timestamp?: string;
   title?: string;
@@ -71,7 +69,7 @@ export const StdErrorLogs = ({
     },
   ] as Array<EuiBasicTableColumn<Ping>>;
 
-  const { items, loading } = useStdErrorLogs({ monitorId, checkGroup });
+  const { items, loading } = useStdErrorLogs({ checkGroup });
 
   const { discover, exploratoryView } = useKibana<ClientPluginsStart>().services;
 

@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type {
-  SavedObject,
-  SavedObjectsCreateOptions,
-  SavedObjectsUpdateOptions,
-} from '@kbn/core/public';
+import type { SavedObject } from '@kbn/core/server';
 import type { ErrorToastOptions, ToastInputFields } from '@kbn/core-notifications-browser';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
@@ -119,7 +116,7 @@ export interface DataViewAttributes {
   /**
    * Fields as a serialized array of field specs
    */
-  fields: string;
+  fields?: string;
   /**
    * Data view title
    */
@@ -237,10 +234,6 @@ export interface UiSettingsCommon {
  */
 export interface SavedObjectsClientCommonFindArgs {
   /**
-   * Saved object type
-   */
-  type: string | string[];
-  /**
    * Saved object fields
    */
   fields?: string[];
@@ -259,21 +252,23 @@ export interface SavedObjectsClientCommonFindArgs {
 }
 
 /**
- * Common interface for the saved objects client
+ * Common interface for the saved objects client on server and content management in browser
  * @public
  */
-export interface SavedObjectsClientCommon {
+export interface PersistenceAPI {
   /**
    * Search for saved objects
    * @param options - options for search
    */
-  find: <T = unknown>(options: SavedObjectsClientCommonFindArgs) => Promise<Array<SavedObject<T>>>;
+  find: (
+    options: SavedObjectsClientCommonFindArgs
+  ) => Promise<Array<SavedObject<DataViewAttributes>>>;
   /**
    * Get a single saved object by id
    * @param type - type of saved object
    * @param id - id of saved object
    */
-  get: <T = unknown>(type: string, id: string) => Promise<SavedObject<T>>;
+  get: (id: string) => Promise<SavedObject<DataViewAttributes>>;
   /**
    * Update a saved object by id
    * @param type - type of saved object
@@ -282,28 +277,26 @@ export interface SavedObjectsClientCommon {
    * @param options - client options
    */
   update: (
-    type: string,
     id: string,
     attributes: DataViewAttributes,
-    options: SavedObjectsUpdateOptions
+    options: { version?: string }
   ) => Promise<SavedObject>;
   /**
    * Create a saved object
-   * @param type - type of saved object
    * @param attributes - attributes to set
    * @param options - client options
    */
   create: (
-    type: string,
     attributes: DataViewAttributes,
-    options: SavedObjectsCreateOptions & { initialNamespaces?: string[] }
+    // SavedObjectsCreateOptions
+    options: { id?: string; initialNamespaces?: string[]; overwrite?: boolean }
   ) => Promise<SavedObject>;
   /**
    * Delete a saved object by id
    * @param type - type of saved object
    * @param id - id of saved object
    */
-  delete: (type: string, id: string) => Promise<{}>;
+  delete: (id: string) => Promise<void>;
 }
 
 export interface GetFieldsOptions {
@@ -437,7 +430,7 @@ export type FieldSpec = DataViewFieldBase & {
   /**
    * set if field is a TSDB metric field
    */
-  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter';
+  timeSeriesMetric?: estypes.MappingTimeSeriesMetricType;
 
   // not persisted
 
@@ -524,10 +517,15 @@ export type DataViewSpec = {
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SourceFilter = {
   value: string;
+  clientId?: string | number;
 };
 
 export interface HasDataService {
   hasESData: () => Promise<boolean>;
   hasUserDataView: () => Promise<boolean>;
   hasDataView: () => Promise<boolean>;
+}
+
+export interface ClientConfigType {
+  scriptedFieldsEnabled?: boolean;
 }

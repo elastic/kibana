@@ -21,6 +21,64 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('fleet_agent_policies', () => {
     skipIfNoDockerRegistry(providerContext);
+
+    describe('GET /api/fleet/agent_policies', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await kibanaServer.savedObjects.cleanStandardList();
+      });
+      setupFleetAndAgents(providerContext);
+
+      it('should get list agent policies', async () => {
+        await supertest.get(`/api/fleet/agent_policies`).expect(200);
+      });
+
+      it('should get a list of agent policies by kuery', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST',
+            namespace: 'default',
+          })
+          .expect(200);
+        const { body: responseBody } = await supertest
+          .get(`/api/fleet/agent_policies?kuery=ingest-agent-policies.name:TEST`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        expect(responseBody.items.length).to.eql(1);
+      });
+
+      it('should return 200 even if the passed kuery does not have prefix ingest-agent-policies', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST-1',
+            namespace: 'default',
+          })
+          .expect(200);
+        await supertest
+          .get(`/api/fleet/agent_policies?kuery=name:TEST-1`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      });
+
+      it('should return 400 if passed kuery is not correct', async () => {
+        await supertest
+          .get(`/api/fleet/agent_policies?kuery=ingest-agent-policies.non_existent_parameter:test`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+
+      it('should return 400 if passed kuery is invalid', async () => {
+        await supertest
+          .get(`/api/fleet/agent_policies?kuery='test%3A'`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+    });
+
     describe('POST /api/fleet/agent_policies', () => {
       let systemPkgVersion: string;
       before(async () => {
@@ -392,7 +450,36 @@ export default function (providerContext: FtrProviderContext) {
           schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           updated_by: 'elastic',
           package_policies: [],
+          is_protected: false,
         });
+      });
+
+      it('should copy inactivity timeout', async () => {
+        const {
+          body: { item: policyWithTimeout },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Inactivity test',
+            namespace: 'default',
+            is_managed: true,
+            inactivity_timeout: 123,
+          })
+          .expect(200);
+
+        const {
+          body: { item: newPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies/${policyWithTimeout.id}/copy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Inactivity test copy',
+            description: 'Test',
+          })
+          .expect(200);
+
+        expect(newPolicy.inactivity_timeout).to.eql(123);
       });
 
       it('should increment package policy copy names', async () => {
@@ -672,6 +759,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'Updated name',
             description: 'Updated description',
             namespace: 'default',
+            is_protected: false,
           })
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
@@ -689,6 +777,7 @@ export default function (providerContext: FtrProviderContext) {
           updated_by: 'elastic',
           inactivity_timeout: 1209600,
           package_policies: [],
+          is_protected: false,
         });
       });
 
@@ -860,6 +949,92 @@ export default function (providerContext: FtrProviderContext) {
           .filter((item: any) => item.status === 'installed')
           .map((item: any) => item.name);
         expect(installedPackagesAfterUpdate).to.contain('elastic_agent');
+      });
+
+      it('should allow to set overrides', async () => {
+        const {
+          body: { item: originalPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Override Test ${Date.now()}`,
+            description: 'Initial description',
+            namespace: 'default',
+          })
+          .expect(200);
+        agentPolicyId = originalPolicy.id;
+        createdPolicyIds.push(agentPolicyId as string);
+        const {
+          body: { item: updatedPolicy },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: originalPolicy.name,
+            description: originalPolicy.description,
+            namespace: 'default',
+            overrides: {
+              agent: {
+                logging: {
+                  level: 'debug',
+                },
+              },
+            },
+          })
+          .expect(200);
+
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { id, updated_at, ...newPolicy } = updatedPolicy;
+
+        expect(newPolicy).to.eql({
+          status: 'active',
+          name: originalPolicy.name,
+          description: originalPolicy.description,
+          namespace: 'default',
+          is_managed: false,
+          revision: 2,
+          schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
+          updated_by: 'elastic',
+          inactivity_timeout: 1209600,
+          package_policies: [],
+          is_protected: false,
+          overrides: {
+            agent: {
+              logging: {
+                level: 'debug',
+              },
+            },
+          },
+        });
+      });
+
+      it('should not allow to set inputs inside overrides', async () => {
+        const {
+          body: { item: originalPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Override Test ${Date.now()}`,
+            description: 'Initial description',
+            namespace: 'default',
+          })
+          .expect(200);
+        agentPolicyId = originalPolicy.id;
+        createdPolicyIds.push(agentPolicyId as string);
+        await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Override Test ${Date.now()}`,
+            description: 'Updated description',
+            namespace: 'default',
+            overrides: {
+              inputs: [],
+            },
+          })
+          .expect(400);
       });
     });
 

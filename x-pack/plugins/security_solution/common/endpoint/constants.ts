@@ -7,6 +7,7 @@
 
 /** endpoint data streams that are used for host isolation  */
 import { getFileDataIndexName, getFileMetadataIndexName } from '@kbn/fleet-plugin/common';
+import { EndpointSortableField } from './types';
 
 /** for index patterns `.logs-endpoint.actions-* and .logs-endpoint.action.responses-*`*/
 export const ENDPOINT_ACTIONS_DS = '.logs-endpoint.actions';
@@ -45,12 +46,16 @@ export const policyIndexPattern = 'metrics-endpoint.policy-*';
 
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 
+export const ENDPOINT_HEARTBEAT_INDEX = '.logs-endpoint.heartbeat-default';
+
 // File storage indexes supporting endpoint Upload/download
 export const FILE_STORAGE_METADATA_INDEX = getFileMetadataIndexName('endpoint');
 export const FILE_STORAGE_DATA_INDEX = getFileDataIndexName('endpoint');
 
-// Endpoint API routes
+// Location from where all Endpoint related APIs are mounted
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
+
+// Endpoint API routes
 export const HOST_METADATA_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata`;
 export const HOST_METADATA_GET_ROUTE = `${HOST_METADATA_LIST_ROUTE}/{id}`;
 export const METADATA_TRANSFORMS_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata/transforms`;
@@ -73,7 +78,6 @@ export const UNISOLATE_HOST_ROUTE = `${BASE_ENDPOINT_ROUTE}/unisolate`;
 
 /** Base Actions route. Used to get a list of all actions and is root to other action related routes */
 export const BASE_ENDPOINT_ACTION_ROUTE = `${BASE_ENDPOINT_ROUTE}/action`;
-export const BASE_ENDPOINT_ACTION_ALERTS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/alerts`;
 
 export const ISOLATE_HOST_ROUTE_V2 = `${BASE_ENDPOINT_ACTION_ROUTE}/isolate`;
 export const UNISOLATE_HOST_ROUTE_V2 = `${BASE_ENDPOINT_ACTION_ROUTE}/unisolate`;
@@ -82,6 +86,7 @@ export const KILL_PROCESS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/kill_process`;
 export const SUSPEND_PROCESS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/suspend_process`;
 export const GET_FILE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/get_file`;
 export const EXECUTE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/execute`;
+export const UPLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/upload`;
 
 /** Endpoint Actions Routes */
 export const ENDPOINT_ACTION_LOG_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_log/{agent_id}`;
@@ -95,6 +100,8 @@ export const failedFleetActionErrorCode = '424';
 
 export const ENDPOINT_DEFAULT_PAGE = 0;
 export const ENDPOINT_DEFAULT_PAGE_SIZE = 10;
+export const ENDPOINT_DEFAULT_SORT_FIELD = EndpointSortableField.ENROLLED_AT;
+export const ENDPOINT_DEFAULT_SORT_DIRECTION = 'desc';
 
 export const ENDPOINT_ERROR_CODES: Record<string, number> = {
   ES_CONNECTION_ERROR: -272,
@@ -102,3 +109,4 @@ export const ENDPOINT_ERROR_CODES: Record<string, number> = {
 };
 
 export const ENDPOINT_FIELDS_SEARCH_STRATEGY = 'endpointFields';
+export const ENDPOINT_SEARCH_STRATEGY = 'endpointSearchStrategy';

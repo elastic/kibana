@@ -24,11 +24,13 @@ import { FlowTargetSourceDest } from '../../../../common/search_strategy/securit
 import { EventDetailsPanel } from './event_details';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 import type { ExpandedDetailTimeline } from '../../../../common/types';
+import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 
 jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
 }));
 
+jest.mock('../../../assistant/use_assistant_availability');
 const mockUseLocation = jest.fn().mockReturnValue({ pathname: '/test', search: '?' });
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -37,7 +39,6 @@ jest.mock('react-router-dom', () => {
     useLocation: () => mockUseLocation(),
   };
 });
-
 describe('Details Panel Component', () => {
   const state: State = {
     ...mockGlobalState,
@@ -112,6 +113,12 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel: rendering', () => {
     beforeEach(() => {
+      (useAssistantAvailability as jest.Mock).mockReturnValue({
+        hasConnectorsAllPrivilege: true,
+        hasConnectorsReadPrivilege: true,
+        hasAssistantPrivilege: false,
+        isAssistantEnabled: true,
+      });
       store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 

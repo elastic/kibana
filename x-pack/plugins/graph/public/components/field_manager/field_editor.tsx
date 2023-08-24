@@ -29,10 +29,10 @@ import { FieldIcon } from '@kbn/react-field';
 import classNames from 'classnames';
 import { WorkspaceField } from '../../types';
 import { iconChoices } from '../../helpers/style_choices';
-import { LegacyIcon } from '../legacy_icon';
 import { UpdateableFieldProperties } from './field_manager';
 
 import { isEqual } from '../helpers';
+import { IconRenderer } from '../icon_renderer';
 
 export interface FieldPickerProps {
   field: WorkspaceField;
@@ -145,7 +145,11 @@ export function FieldEditor({
             }
           }}
         >
-          <LegacyIcon className={'gphFieldEditor__badgeIcon'} icon={initialField.icon} />
+          <IconRenderer
+            className="gphFieldEditor__badgeIcon"
+            icon={initialField.icon}
+            color={color}
+          />
           {initialField.name}
         </EuiBadge>
       }
@@ -286,7 +290,7 @@ export function FieldEditor({
                       const { label, value } = option;
                       return (
                         <span className={contentClassName}>
-                          <LegacyIcon icon={value!} />{' '}
+                          <IconRenderer icon={value!} />{' '}
                           <EuiHighlight search={searchValue}>{label}</EuiHighlight>
                         </span>
                       );

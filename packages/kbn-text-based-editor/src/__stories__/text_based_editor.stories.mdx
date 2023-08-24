@@ -1,0 +1,117 @@
+import { Canvas, Meta, Story, ArgsTable } from '@storybook/addon-docs/blocks';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { TextBasedLanguagesEditor } from '../text_based_languages_editor';
+
+
+export const Template = (args) => 
+<I18nProvider> 
+    <KibanaContextProvider
+        services={{
+          settings: { client: { get: () => {} } },
+          uiSettings: { get: () => {} },
+        }}
+    >
+        <TextBasedLanguagesEditor {...args} />
+    </KibanaContextProvider>
+</I18nProvider>;
+
+<Meta 
+    title="Text based languages editor"
+    component={TextBasedLanguagesEditor}
+/>
+
+
+# Overview
+
+The TextBasedLanguagesEditor component is a reusable component and can be used to support text based languages in your application (SQL, ESQL):
+
+<Canvas>
+    <Story 
+        name='compact mode'
+        args={
+            {
+                query: { sql: 'SELECT field1, field2 FROM DATAVIEW' },
+                isCodeEditorExpanded:false,
+                'data-test-subj':'test-id'
+            }
+        }
+        argTypes={
+            { onTextLangQueryChange: { action: 'changed' }, onTextLangQuerySubmit:  { action: 'submitted' }, expandCodeEditor:  { action: 'expanded' }}
+        }
+        >
+    {Template.bind({})}
+    </Story>
+</Canvas>
+
+When there are errors to the query the UI displays the errors to the editor:
+
+<Canvas>
+    <Story 
+        name='with errors'
+        args={
+            {
+                query: { sql: 'SELECT field1, field2 FROM DATAVIEW' },
+                isCodeEditorExpanded:false,
+                'data-test-subj':'test-id',
+                errors: [
+        new Error(
+          '[essql] > Unexpected error from Elasticsearch: verification_exception - Found 1 problem line 1:16: Unknown column [field10]'
+        ),
+      ]
+            }
+        }
+        argTypes={
+            { onTextLangQueryChange: { action: 'changed' }, onTextLangQuerySubmit:  { action: 'submitted' }, expandCodeEditor:  { action: 'expanded' }}
+        }
+        >
+    {Template.bind({})}
+    </Story>
+</Canvas>
+
+When there the query is long and the editor is on the compact view:
+
+<Canvas>
+    <Story 
+        name='with long query'
+        args={
+            {
+                query: { sql: 'SELECT field1, field2, field 3, field 4, field 5 FROM DATAVIEW WHERE field5 IS NOT NULL AND field4 IS NULL' },
+                isCodeEditorExpanded:false,
+                'data-test-subj':'test-id',
+            }
+        }
+        argTypes={
+            { onTextLangQueryChange: { action: 'changed' }, onTextLangQuerySubmit:  { action: 'submitted' }, expandCodeEditor:  { action: 'expanded' }}
+        }
+        >
+    {Template.bind({})}
+    </Story>
+</Canvas>
+
+
+The editor also works on the expanded mode:
+
+<Canvas>
+    <Story 
+        name='on expanded mode'
+        args={
+            {
+                query: { sql: 'SELECT field1, field2 FROM DATAVIEW' },
+                isCodeEditorExpanded:true,
+                'data-test-subj':'test-id',
+            }
+        }
+        argTypes={
+            { onTextLangQueryChange: { action: 'changed' }, onTextLangQuerySubmit:  { action: 'submitted' }, expandCodeEditor:  { action: 'expanded' }}
+        }
+        >
+    {Template.bind({})}
+    </Story>
+</Canvas>
+
+## Component props
+
+The component exposes the following properties:
+
+<ArgsTable story="compact mode"/>

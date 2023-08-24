@@ -147,6 +147,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
@@ -158,6 +159,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
@@ -169,6 +171,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
   });
 
@@ -246,6 +249,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
       transactionName: 'tx-name-foo',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
@@ -258,6 +262,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
       transactionName: 'tx-name-foo-2',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
@@ -270,6 +275,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
       transactionName: 'tx-name-bar',
     });
   });
@@ -348,6 +354,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
       errorGroupingKey: 'error-key-foo',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
@@ -360,6 +367,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
       errorGroupingKey: 'error-key-foo-2',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
@@ -372,6 +380,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
       errorGroupingKey: 'error-key-bar',
     });
   });
@@ -446,6 +455,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
@@ -457,6 +467,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
@@ -468,6 +479,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
   });
 
@@ -545,6 +557,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=ENVIRONMENT_ALL',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
@@ -556,6 +569,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=ENVIRONMENT_ALL',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
@@ -567,6 +581,184 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+    });
+  });
+
+  it('sends alert when rule is configured with group by on error.grouping_key and error.grouping_name', async () => {
+    const { services, dependencies, executor, scheduleActions } =
+      createRuleTypeMocks();
+
+    registerErrorCountRuleType(dependencies);
+
+    const params = {
+      threshold: 2,
+      windowSize: 5,
+      windowUnit: 'm',
+      groupBy: [
+        'service.name',
+        'service.environment',
+        'error.grouping_key',
+        'error.grouping_name',
+      ],
+    };
+
+    services.scopedClusterClient.asCurrentUser.search.mockResponse({
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 2,
+        },
+      },
+      aggregations: {
+        error_counts: {
+          buckets: [
+            {
+              key: ['foo', 'env-foo', 'error-key-foo', 'error-name-foo'],
+              doc_count: 5,
+            },
+            {
+              key: ['foo', 'env-foo-2', 'error-key-foo-2', 'error-name-foo2'],
+              doc_count: 4,
+            },
+            {
+              key: ['bar', 'env-bar', 'error-key-bar', 'error-name-bar'],
+              doc_count: 3,
+            },
+            {
+              key: ['bar', 'env-bar-2', 'error-key-bar-2', 'error-name-bar2'],
+              doc_count: 1,
+            },
+          ],
+        },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
+
+    await executor({ params });
+    [
+      'foo_env-foo_error-key-foo_error-name-foo',
+      'foo_env-foo-2_error-key-foo-2_error-name-foo2',
+      'bar_env-bar_error-key-bar_error-name-bar',
+    ].forEach((instanceName) =>
+      expect(services.alertFactory.create).toHaveBeenCalledWith(instanceName)
+    );
+
+    expect(scheduleActions).toHaveBeenCalledTimes(3);
+
+    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
+      serviceName: 'foo',
+      environment: 'env-foo',
+      threshold: 2,
+      triggerValue: 5,
+      reason:
+        'Error count is 5 in the last 5 mins for service: foo, env: env-foo, error key: error-key-foo, error name: error-name-foo. Alert when > 2.',
+      interval: '5 mins',
+      viewInAppUrl:
+        'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
+      errorGroupingKey: 'error-key-foo',
+      errorGroupingName: 'error-name-foo',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+    });
+    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
+      serviceName: 'foo',
+      environment: 'env-foo-2',
+      threshold: 2,
+      triggerValue: 4,
+      reason:
+        'Error count is 4 in the last 5 mins for service: foo, env: env-foo-2, error key: error-key-foo-2, error name: error-name-foo2. Alert when > 2.',
+      interval: '5 mins',
+      viewInAppUrl:
+        'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
+      errorGroupingKey: 'error-key-foo-2',
+      errorGroupingName: 'error-name-foo2',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+    });
+    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
+      serviceName: 'bar',
+      environment: 'env-bar',
+      reason:
+        'Error count is 3 in the last 5 mins for service: bar, env: env-bar, error key: error-key-bar, error name: error-name-bar. Alert when > 2.',
+      threshold: 2,
+      triggerValue: 3,
+      interval: '5 mins',
+      viewInAppUrl:
+        'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
+      errorGroupingKey: 'error-key-bar',
+      errorGroupingName: 'error-name-bar',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+    });
+  });
+
+  it('sends alert when rule is configured with a filter query', async () => {
+    const { services, dependencies, executor, scheduleActions } =
+      createRuleTypeMocks();
+
+    registerErrorCountRuleType(dependencies);
+
+    const params = {
+      threshold: 2,
+      windowSize: 5,
+      windowUnit: 'm',
+      serviceName: undefined,
+      kqlFilter: 'service.name: foo and service.environment: env-foo',
+      groupBy: ['service.name', 'service.environment'],
+    };
+
+    services.scopedClusterClient.asCurrentUser.search.mockResponse({
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 2,
+        },
+      },
+      aggregations: {
+        error_counts: {
+          buckets: [
+            {
+              key: ['foo', 'env-foo'],
+              doc_count: 5,
+            },
+          ],
+        },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
+
+    await executor({ params });
+    ['foo_env-foo'].forEach((instanceName) =>
+      expect(services.alertFactory.create).toHaveBeenCalledWith(instanceName)
+    );
+
+    expect(scheduleActions).toHaveBeenCalledTimes(1);
+
+    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
+      serviceName: 'foo',
+      environment: 'env-foo',
+      threshold: 2,
+      triggerValue: 5,
+      reason:
+        'Error count is 5 in the last 5 mins for service: foo, env: env-foo. Alert when > 2.',
+      interval: '5 mins',
+      viewInAppUrl:
+        'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
   });
 });

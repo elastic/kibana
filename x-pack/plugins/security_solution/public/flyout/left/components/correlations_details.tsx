@@ -6,8 +6,17 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
-import { CORRELATIONS_DETAILS_TEST_ID } from './test_ids';
+import { EuiSpacer } from '@elastic/eui';
+import { RelatedAlertsBySession } from './related_alerts_by_session';
+import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_event';
+import { RelatedCases } from './related_cases';
+import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
+import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
+
+import { useLeftPanelContext } from '../context';
+import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
+import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
+import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
 
 export const CORRELATIONS_TAB_ID = 'correlations-details';
 
@@ -15,7 +24,47 @@ export const CORRELATIONS_TAB_ID = 'correlations-details';
  * Correlations displayed in the document details expandable flyout left section under the Insights tab
  */
 export const CorrelationsDetails: React.FC = () => {
-  return <EuiText data-test-subj={CORRELATIONS_DETAILS_TEST_ID}>{'Correlations'}</EuiText>;
+  const { dataAsNestedObject, dataFormattedForFieldBrowser, eventId, getFieldsData, scopeId } =
+    useLeftPanelContext();
+
+  const {
+    show: showAlertsByAncestry,
+    documentId,
+    indices,
+  } = useShowRelatedAlertsByAncestry({
+    getFieldsData,
+    dataAsNestedObject,
+    dataFormattedForFieldBrowser,
+  });
+  const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
+    getFieldsData,
+  });
+  const { show: showAlertsBySession, entityId } = useShowRelatedAlertsBySession({ getFieldsData });
+  const showCases = useShowRelatedCases();
+
+  return (
+    <>
+      {showAlertsByAncestry && documentId && indices && (
+        <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
+      )}
+
+      <EuiSpacer />
+
+      {showSameSourceAlerts && originalEventId && (
+        <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
+      )}
+
+      <EuiSpacer />
+
+      {showAlertsBySession && entityId && (
+        <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
+      )}
+
+      <EuiSpacer />
+
+      {showCases && <RelatedCases eventId={eventId} />}
+    </>
+  );
 };
 
 CorrelationsDetails.displayName = 'CorrelationsDetails';

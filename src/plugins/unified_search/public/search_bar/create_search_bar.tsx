@@ -23,7 +23,7 @@ import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
 import type { UnifiedSearchPublicPluginStart } from '../types';
 
-interface StatefulSearchBarDeps {
+export interface StatefulSearchBarDeps {
   core: CoreStart;
   data: DataPublicPluginStart;
   storage: IStorageWrapper;
@@ -56,13 +56,22 @@ const defaultFiltersUpdated = (
 };
 
 // Respond to user changing the refresh settings
-const defaultOnRefreshChange = (queryService: QueryStart) => {
+const defaultOnRefreshChange = (
+  queryService: QueryStart,
+  onRefreshChange?: (payload: { isPaused: boolean; refreshInterval: number }) => void
+) => {
   const { timefilter } = queryService.timefilter;
   return (options: { isPaused: boolean; refreshInterval: number }) => {
     timefilter.setRefreshInterval({
       value: options.refreshInterval,
       pause: options.isPaused,
     });
+    if (onRefreshChange) {
+      onRefreshChange({
+        refreshInterval: options.refreshInterval,
+        isPaused: options.isPaused,
+      });
+    }
   };
 };
 
@@ -218,15 +227,21 @@ export function createSearchBar({
             filters={filters}
             query={query}
             onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
-            onRefreshChange={defaultOnRefreshChange(data.query)}
+            onRefreshChange={
+              !props.isAutoRefreshDisabled
+                ? defaultOnRefreshChange(data.query, props.onRefreshChange)
+                : undefined
+            }
             savedQuery={savedQuery}
             onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
+            onRefresh={props.onRefresh}
             onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
             onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
             onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
             iconType={props.iconType}
             nonKqlMode={props.nonKqlMode}
             customSubmitButton={props.customSubmitButton}
+            dataViewPickerOverride={props.dataViewPickerOverride}
             isClearable={props.isClearable}
             placeholder={props.placeholder}
             {...overrideDefaultBehaviors(props)}
@@ -237,6 +252,7 @@ export function createSearchBar({
             isScreenshotMode={isScreenshotMode}
             dataTestSubj={props.dataTestSubj}
             filtersForSuggestions={props.filtersForSuggestions}
+            prependFilterBar={props.prependFilterBar}
           />
         </core.i18n.Context>
       </KibanaContextProvider>

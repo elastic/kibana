@@ -11,7 +11,7 @@ import {
   getEsQueryFromSavedSearch,
 } from './saved_search_utils';
 import type { SavedSearchSavedObject } from '../../../../common/types';
-import type { SavedSearch } from '@kbn/discover-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { type Filter, FilterStateStore } from '@kbn/es-query';
 import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { DataView } from '@kbn/data-views-plugin/public';

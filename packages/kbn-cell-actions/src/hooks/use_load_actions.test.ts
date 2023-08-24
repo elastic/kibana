@@ -199,5 +199,24 @@ describe('loadActions hooks', () => {
       expect(result.current.value).toHaveLength(0);
       expect(result.current.loading).toBe(false);
     });
+
+    it('should return the same array after re-render when contexts is undefined', async () => {
+      const { result, rerender, waitFor } = renderHook(useBulkLoadActions, {
+        initialProps: undefined,
+      });
+
+      await waitFor(() => expect(result.current.value).toEqual([]));
+      expect(result.current.loading).toBe(false);
+      expect(mockGetActions).not.toHaveBeenCalled();
+
+      const initialResultValue = result.current.value;
+
+      rerender(undefined);
+
+      await waitFor(() => expect(result.current.value).toEqual([]));
+      expect(result.current.value).toBe(initialResultValue);
+      expect(result.current.loading).toBe(false);
+      expect(mockGetActions).not.toHaveBeenCalled();
+    });
   });
 });

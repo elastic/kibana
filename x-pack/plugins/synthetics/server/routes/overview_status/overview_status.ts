@@ -7,6 +7,7 @@
 import { intersection } from 'lodash';
 import datemath, { Unit } from '@kbn/datemath';
 import moment from 'moment';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { ConfigKey } from '../../../common/runtime_types';
 import {
   getAllMonitors,
@@ -14,8 +15,6 @@ import {
 } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { queryMonitorStatus } from '../../queries/query_monitor_status';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { UMServerLibs } from '../../legacy_uptime/uptime_server';
-import { RouteContext, SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { getMonitorFilters, OverviewStatusSchema, OverviewStatusQuery } from '../common';
 
 /**
@@ -124,7 +123,7 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
   };
 }
 
-export const createGetCurrentStatusRoute: SyntheticsRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const createGetCurrentStatusRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.OVERVIEW_STATUS,
   validate: {

@@ -19,7 +19,10 @@ import type {
   HttpResponse,
   HttpFetchOptionsWithPath,
 } from '@kbn/core-http-browser';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptController } from './http_intercept_controller';
 import { interceptRequest, interceptResponse } from './intercept';
@@ -28,6 +31,7 @@ import { HttpInterceptHaltError } from './http_intercept_halt_error';
 interface Params {
   basePath: IBasePath;
   kibanaVersion: string;
+  buildNumber: number;
   executionContext: ExecutionContextSetup;
 }
 
@@ -87,6 +91,7 @@ export class Fetch {
           controller
         );
         const initialResponse = this.fetchResponse(interceptedOptions);
+
         const interceptedResponse = await interceptResponse(
           interceptedOptions,
           initialResponse,
@@ -112,6 +117,7 @@ export class Fetch {
   private createRequest(options: HttpFetchOptionsWithPath): Request {
     const context = this.params.executionContext.withGlobalContext(options.context);
     const { version } = options;
+
     // Merge and destructure options out that are not applicable to the Fetch API.
     const {
       query,
@@ -130,7 +136,9 @@ export class Fetch {
         'Content-Type': 'application/json',
         ...options.headers,
         'kbn-version': this.params.kibanaVersion,
+        'kbn-build-number': this.params.buildNumber,
         [ELASTIC_HTTP_VERSION_HEADER]: version,
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana',
         ...(!isEmpty(context) ? new ExecutionContextContainer(context).toHeader() : {}),
       }),
     };
@@ -164,7 +172,9 @@ export class Fetch {
     const contentType = response.headers.get('Content-Type') || '';
 
     try {
-      if (NDJSON_CONTENT.test(contentType) || ZIP_CONTENT.test(contentType)) {
+      if (fetchOptions.rawResponse) {
+        body = null;
+      } else if (NDJSON_CONTENT.test(contentType) || ZIP_CONTENT.test(contentType)) {
         body = await response.blob();
       } else if (JSON_CONTENT.test(contentType)) {
         body = await response.json();
@@ -223,12 +233,29 @@ const validateFetchArguments = (
     );
   }
 
-  const invalidHeaders = Object.keys(fullOptions.headers ?? {}).filter((headerName) =>
+  if (fullOptions.rawResponse && !fullOptions.asResponse) {
+    throw new Error(
+      'Invalid fetch arguments, rawResponse = true is only supported when asResponse = true'
+    );
+  }
+
+  const invalidKbnHeaders = Object.keys(fullOptions.headers ?? {}).filter((headerName) =>
     headerName.startsWith('kbn-')
   );
-  if (invalidHeaders.length) {
+  const invalidInternalOriginProducHeader = Object.keys(fullOptions.headers ?? {}).filter(
+    (headerName) => headerName.includes(X_ELASTIC_INTERNAL_ORIGIN_REQUEST)
+  );
+
+  if (invalidKbnHeaders.length) {
     throw new Error(
-      `Invalid fetch headers, headers beginning with "kbn-" are not allowed: [${invalidHeaders.join(
+      `Invalid fetch headers, headers beginning with "kbn-" are not allowed: [${invalidKbnHeaders.join(
+        ','
+      )}]`
+    );
+  }
+  if (invalidInternalOriginProducHeader.length) {
+    throw new Error(
+      `Invalid fetch headers, headers beginning with "x-elastic-internal-" are not allowed: [${invalidInternalOriginProducHeader.join(
         ','
       )}]`
     );

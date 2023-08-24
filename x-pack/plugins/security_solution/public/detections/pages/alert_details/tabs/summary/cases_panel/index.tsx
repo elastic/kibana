@@ -14,7 +14,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import type { Ecs } from '@kbn/cases-plugin/common';
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import styled from 'styled-components';
 import type { TimelineEventsDetailsItem } from '../../../../../../../common/search_strategy';
@@ -76,7 +76,7 @@ export const CasesPanel = React.memo<CasesPanelProps>(
             {
               alertId: eventId,
               index: dataAsNestedObject._index ?? '',
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               rule: casesUi.helpers.getRuleIdFromEvent({
                 ecs: dataAsNestedObject,
                 data: detailsData,

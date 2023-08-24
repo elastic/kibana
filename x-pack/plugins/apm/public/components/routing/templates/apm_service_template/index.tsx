@@ -46,6 +46,8 @@ import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
 import { ServerlessType } from '../../../../../common/serverless';
+import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
+import { ApmFeatureFlagName } from '../../../../../common/apm_feature_flags';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -191,12 +193,17 @@ export function isMetricsTabHidden({
 export function isInfraTabHidden({
   agentName,
   serverlessType,
+  isInfraTabAvailable,
 }: {
   agentName?: string;
   serverlessType?: ServerlessType;
+  isInfraTabAvailable: boolean;
 }) {
   return (
-    !agentName || isRumAgentName(agentName) || isServerlessAgent(serverlessType)
+    !agentName ||
+    isRumAgentName(agentName) ||
+    isServerlessAgent(serverlessType) ||
+    !isInfraTabAvailable
   );
 }
 
@@ -210,6 +217,9 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   );
 
   const router = useApmRouter();
+  const isInfraTabAvailable = useApmFeatureFlag(
+    ApmFeatureFlagName.InfrastructureTabAvailable
+  );
 
   const isAwsLambdaEnabled = core.uiSettings.get<boolean>(
     enableAwsLambdaMetrics,
@@ -323,7 +333,11 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),
-      hidden: isInfraTabHidden({ agentName, serverlessType }),
+      hidden: isInfraTabHidden({
+        agentName,
+        serverlessType,
+        isInfraTabAvailable,
+      }),
     },
     {
       key: 'service-map',
@@ -387,5 +401,6 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       prepend,
       append,
       isSelected: key === selectedTab,
+      'data-test-subj': `${key}Tab`,
     }));
 }

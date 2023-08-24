@@ -268,6 +268,16 @@ export class InspectorService extends FtrService {
   }
 
   /**
+   * Opens request by name. Use when inspector has multiple requests and you want to view a specific request
+   */
+  public async openRequestByName(requestName: string): Promise<void> {
+    await this.openInspectorRequestsView();
+    this.log.debug(`Open Inspector request ${requestName}`);
+    await this.testSubjects.click('inspectorRequestChooser');
+    await this.testSubjects.click(`inspectorRequestChooser${requestName.replace(/\s+/, '_')}`);
+  }
+
+  /**
    * Returns request name as the comma-separated string from combobox
    */
   public async getRequestNames(): Promise<string> {

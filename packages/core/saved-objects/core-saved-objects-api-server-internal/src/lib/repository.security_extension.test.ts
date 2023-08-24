@@ -65,9 +65,6 @@ import {
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 import { arrayMapsAreEqual } from '@kbn/core-saved-objects-utils-server';
 
-// BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
-// so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
-
 describe('SavedObjectsRepository Security Extension', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let repository: SavedObjectsRepository;
@@ -745,6 +742,9 @@ describe('SavedObjectsRepository Security Extension', () => {
           attributes: doc._source![doc._source!.type],
           references: [],
           namespaces: doc._source!.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : [namespace],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: expect.any(String),
+          managed: expect.any(Boolean),
         });
       });
     });
@@ -798,6 +798,9 @@ describe('SavedObjectsRepository Security Extension', () => {
           attributes: doc._source![doc._source!.type],
           references: [],
           namespaces: doc._source!.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : [namespace],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: expect.any(String),
+          managed: expect.any(Boolean),
         });
       });
     });
@@ -852,6 +855,9 @@ describe('SavedObjectsRepository Security Extension', () => {
           attributes: doc._source![doc._source!.type],
           references: [],
           namespaces: doc._source!.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : [namespace],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: expect.any(String),
+          managed: expect.any(Boolean),
         });
       });
     });

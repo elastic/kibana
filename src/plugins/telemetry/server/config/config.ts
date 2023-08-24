@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf, Type } from '@kbn/config-schema';
+import { schema, TypeOf, Type, offeringBasedSchema } from '@kbn/config-schema';
 import { getConfigPath } from '@kbn/utils';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 import { labelsSchema } from './telemetry_labels';
@@ -33,6 +33,11 @@ const configSchema = schema.object({
   sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')], {
     defaultValue: 'server',
   }),
+  appendServerlessChannelsSuffix: offeringBasedSchema({
+    serverless: schema.literal(true),
+    traditional: schema.literal(false),
+    options: { defaultValue: schema.contextRef('serverless') },
+  }),
   // Used for extra enrichment of telemetry
   labels: labelsSchema,
 });
@@ -44,6 +49,7 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
   exposeToBrowser: {
     banner: true,
     allowChangingOptInStatus: true,
+    appendServerlessChannelsSuffix: true,
     optIn: true,
     sendUsageFrom: true,
     sendUsageTo: true,

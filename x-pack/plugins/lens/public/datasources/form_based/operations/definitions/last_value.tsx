@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
@@ -28,6 +27,8 @@ import {
   getInvalidFieldMessage,
   getSafeName,
   getFilter,
+  getExistsFilter,
+  comparePreviousColumnFilter,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { isRuntimeField, isScriptedField } from './terms/helpers';
@@ -144,13 +145,6 @@ export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColum
   };
 }
 
-function getExistsFilter(field: string) {
-  return {
-    query: `${field}: *`,
-    language: 'kuery',
-  };
-}
-
 function getScale(type: string) {
   return type === 'string' ||
     type === 'ip' ||
@@ -194,7 +188,7 @@ export const lastValueOperation: OperationDefinition<
       params: newParams,
       scale: getScale(field.type),
       filter:
-        oldColumn.filter && isEqual(oldColumn.filter, getExistsFilter(oldColumn.sourceField))
+        oldColumn.filter && comparePreviousColumnFilter(oldColumn.filter, oldColumn.sourceField)
           ? getExistsFilter(field.name)
           : oldColumn.filter,
     };

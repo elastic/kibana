@@ -8,18 +8,25 @@ import expect from '@kbn/expect';
 import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { waitForActiveAlert } from '../../common/utils/wait_for_active_alert';
-import { createApmRule } from '../alerts/alerting_api_helper';
+import {
+  createApmRule,
+  deleteApmAlerts,
+  runRuleSoon,
+  deleteRuleById,
+  ApmAlertFields,
+} from '../alerts/helpers/alerting_api_helper';
+import { waitForRuleStatus } from '../alerts/helpers/wait_for_rule_status';
+import { waitForAlertsForRule } from '../alerts/helpers/wait_for_alerts_for_rule';
 
 export default function ServiceAlerts({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const supertest = getService('supertest');
   const synthtraceEsClient = getService('synthtraceEsClient');
-  const esClient = getService('es');
-  const log = getService('log');
-  const start = Date.now() - 24 * 60 * 60 * 1000;
-  const end = Date.now();
+  const es = getService('es');
+  const dayInMs = 24 * 60 * 60 * 1000;
+  const start = Date.now() - dayInMs;
+  const end = Date.now() + dayInMs;
   const goService = 'synth-go';
 
   async function getServiceAlerts({
@@ -35,7 +42,7 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
         path: { serviceName },
         query: {
           start: new Date(start).toISOString(),
-          end: new Date(end + 5 * 60 * 1000).toISOString(),
+          end: new Date(end).toISOString(),
           environment,
         },
       },
@@ -49,11 +56,12 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
       params: {
         serviceName: goService,
         transactionType: undefined,
-        windowSize: 99,
-        windowUnit: 'y',
+        windowSize: 5,
+        windowUnit: 'h',
         threshold: 100,
         aggregationType: AggregationType.Avg,
         environment: 'testing',
+        groupBy: ['service.name', 'service.environment', 'transaction.type', 'transaction.name'],
       },
       ruleTypeId: ApmRuleType.TransactionDuration,
     });
@@ -113,15 +121,38 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
 
     describe('with alerts', () => {
       let ruleId: string;
+      let alerts: ApmAlertFields[];
+
       before(async () => {
         const createdRule = await createRule();
         ruleId = createdRule.id;
-        await waitForActiveAlert({ ruleId, esClient, log });
+        alerts = await waitForAlertsForRule({ es, ruleId });
       });
 
       after(async () => {
-        await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
-        await esClient.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
+        await deleteRuleById({ supertest, ruleId });
+        await deleteApmAlerts(es);
+      });
+
+      it('checks if rule is active', async () => {
+        const ruleStatus = await waitForRuleStatus({
+          ruleId,
+          expectedStatus: 'active',
+          supertest,
+        });
+        expect(ruleStatus).to.be('active');
+      });
+
+      it('should successfully run the rule', async () => {
+        const response = await runRuleSoon({
+          ruleId,
+          supertest,
+        });
+        expect(response.status).to.be(204);
+      });
+
+      it('produces 1 alert', async () => {
+        expect(alerts.length).to.be(1);
       });
 
       it('returns the correct number of alerts', async () => {

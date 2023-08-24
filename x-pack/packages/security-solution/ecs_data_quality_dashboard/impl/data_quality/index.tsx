@@ -11,16 +11,18 @@ import type {
   FlameElementEvent,
   HeatmapElementEvent,
   MetricElementEvent,
+  PartialTheme,
   PartitionElementEvent,
   Theme,
   WordCloudElementEvent,
   XYChartElementEvent,
 } from '@elastic/charts';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { Body } from './data_quality_panel/body';
 import { DataQualityProvider } from './data_quality_panel/data_quality_context';
 import { EMPTY_STAT } from './helpers';
+import { ReportDataQualityCheckAllCompleted, ReportDataQualityIndexChecked } from './types';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
@@ -42,6 +44,7 @@ interface Props {
   };
   httpFetch: HttpHandler;
   ilmPhases: string[];
+  isAssistantEnabled: boolean;
   lastChecked: string;
   openCreateCaseFlyout: ({
     comments,
@@ -51,22 +54,29 @@ interface Props {
     headerContent?: React.ReactNode;
   }) => void;
   patterns: string[];
+  reportDataQualityIndexChecked?: ReportDataQualityIndexChecked;
+  reportDataQualityCheckAllCompleted?: ReportDataQualityCheckAllCompleted;
   setLastChecked: (lastChecked: string) => void;
-  theme: Theme;
+  theme?: PartialTheme;
+  baseTheme: Theme;
 }
 
 /** Renders the `Data Quality` dashboard content */
 const DataQualityPanelComponent: React.FC<Props> = ({
   addSuccessToast,
+  baseTheme,
   canUserCreateAndReadCases,
   defaultBytesFormat,
   defaultNumberFormat,
   getGroupByFieldsOnClick,
   httpFetch,
   ilmPhases,
+  isAssistantEnabled,
   lastChecked,
   openCreateCaseFlyout,
   patterns,
+  reportDataQualityIndexChecked,
+  reportDataQualityCheckAllCompleted,
   setLastChecked,
   theme,
 }) => {
@@ -82,8 +92,13 @@ const DataQualityPanelComponent: React.FC<Props> = ({
     [defaultNumberFormat]
   );
 
+  const telemetryEvents = useMemo(
+    () => ({ reportDataQualityCheckAllCompleted, reportDataQualityIndexChecked }),
+    [reportDataQualityCheckAllCompleted, reportDataQualityIndexChecked]
+  );
+
   return (
-    <DataQualityProvider httpFetch={httpFetch}>
+    <DataQualityProvider httpFetch={httpFetch} telemetryEvents={telemetryEvents}>
       <Body
         addSuccessToast={addSuccessToast}
         canUserCreateAndReadCases={canUserCreateAndReadCases}
@@ -91,11 +106,13 @@ const DataQualityPanelComponent: React.FC<Props> = ({
         formatNumber={formatNumber}
         getGroupByFieldsOnClick={getGroupByFieldsOnClick}
         ilmPhases={ilmPhases}
+        isAssistantEnabled={isAssistantEnabled}
         lastChecked={lastChecked}
         openCreateCaseFlyout={openCreateCaseFlyout}
         patterns={patterns}
         setLastChecked={setLastChecked}
         theme={theme}
+        baseTheme={baseTheme}
       />
     </DataQualityProvider>
   );

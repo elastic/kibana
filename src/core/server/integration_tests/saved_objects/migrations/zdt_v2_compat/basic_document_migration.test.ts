@@ -80,26 +80,24 @@ describe('ZDT with v2 compat - basic document migration', () => {
     typeA.modelVersions = {
       ...typeA.modelVersions,
       '2': {
-        modelChange: {
-          type: 'expansion',
-          transformation: {
-            up: (doc) => {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: (doc) => {
               return {
-                document: {
-                  ...doc,
-                  attributes: {
-                    ...doc.attributes,
-                    someAddedField: `${doc.attributes.keyword}-mig`,
-                  },
+                attributes: {
+                  someAddedField: `${doc.attributes.keyword}-mig`,
                 },
               };
             },
-            down: jest.fn(),
           },
-          addedMappings: {
-            someAddedField: { type: 'keyword' },
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              someAddedField: { type: 'keyword' },
+            },
           },
-        },
+        ],
       },
     };
 

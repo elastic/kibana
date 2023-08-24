@@ -6,15 +6,19 @@
  */
 
 import React, { createContext } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
-import { Privileges } from '../../../../../common/types/privileges';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 
-import { useRequest } from '../../../hooks';
+import type { Privileges } from '../../../../../common/types/privileges';
 
 import {
-  TransformCapabilities,
+  type PrivilegesAndCapabilities,
+  type TransformCapabilities,
   INITIAL_CAPABILITIES,
 } from '../../../../../common/privilege/has_privilege_factory';
+
+import { useAppDependencies } from '../../../app_dependencies';
 
 interface Authorization {
   isLoading: boolean;
@@ -36,25 +40,41 @@ const initialValue: Authorization = {
 export const AuthorizationContext = createContext<Authorization>({ ...initialValue });
 
 interface Props {
-  privilegesEndpoint: string;
+  privilegesEndpoint: { path: string; version: string };
   children: React.ReactNode;
 }
 
 export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) => {
+  const { http } = useAppDependencies();
+
+  const { path, version } = privilegesEndpoint;
+
   const {
     isLoading,
     error,
     data: privilegesData,
-  } = useRequest({
-    path: privilegesEndpoint,
-    method: 'get',
-  });
+  } = useQuery<PrivilegesAndCapabilities, IHttpFetchError>(
+    ['transform-privileges-and-capabilities'],
+    async ({ signal }) => {
+      return await http.fetch<PrivilegesAndCapabilities>(path, {
+        version,
+        method: 'GET',
+        signal,
+      });
+    }
+  );
 
   const value = {
     isLoading,
-    privileges: isLoading ? { ...initialValue.privileges } : privilegesData.privileges,
-    capabilities: isLoading ? { ...INITIAL_CAPABILITIES } : privilegesData.capabilities,
-    apiError: error ? (error as Error) : null,
+    privileges:
+      isLoading || privilegesData === undefined
+        ? { ...initialValue.privileges }
+        : privilegesData.privileges,
+    capabilities:
+      isLoading || privilegesData === undefined
+        ? { ...INITIAL_CAPABILITIES }
+        : privilegesData.capabilities,
+    apiError: error ? error : null,
   };
 
   return (

@@ -29,7 +29,7 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { useChartTheme } from '@kbn/observability-plugin/public';
+import { useChartTheme } from '@kbn/observability-shared-plugin/public';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
@@ -73,13 +73,6 @@ const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
     strokeWidth: 1,
     stroke: color,
     opacity: 0.8,
-  },
-  details: {
-    fontSize: 8,
-    fontFamily: 'Arial',
-    fontStyle: 'normal',
-    fill: color,
-    padding: 0,
   },
 });
 

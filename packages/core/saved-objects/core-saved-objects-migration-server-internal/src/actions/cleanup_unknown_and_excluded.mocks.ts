@@ -99,6 +99,11 @@ export const initialExcludeOnUpgradeQueryMock = {
       },
       {
         term: {
+          type: 'osquery-manager-usage-metric',
+        },
+      },
+      {
+        term: {
           type: 'osquery-usage-metric',
         },
       },

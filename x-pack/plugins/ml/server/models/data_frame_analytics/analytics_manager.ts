@@ -9,17 +9,19 @@ import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core/server';
 import {
+  getAnalysisType,
   INDEX_CREATED_BY,
   JOB_MAP_NODE_TYPES,
-  JobMapNodeTypes,
-} from '../../../common/constants/data_frame_analytics';
-import {
-  AnalyticsMapEdgeElement,
-  AnalyticsMapReturnType,
-  AnalyticsMapNodeElement,
-  MapElements,
-} from '../../../common/types/data_frame_analytics';
-import { getAnalysisType } from '../../../common/util/analytics_utils';
+  type JobMapNodeTypes,
+  type AnalyticsMapEdgeElement,
+  type AnalyticsMapReturnType,
+  type AnalyticsMapNodeElement,
+  type MapElements,
+} from '@kbn/ml-data-frame-analytics-utils';
+import type { TransformGetTransformTransformSummary } from '@elastic/elasticsearch/lib/api/types';
+import { flatten } from 'lodash';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { modelsProvider } from '../model_management';
 import {
   ExtendAnalyticsMapArgs,
   GetAnalyticsMapArgs,
@@ -31,22 +33,50 @@ import {
   isJobDataLinkReturnType,
   isTransformLinkReturnType,
   NextLinkReturnType,
+  GetAnalyticsJobIdArg,
+  GetAnalyticsModelIdArg,
 } from './types';
 import type { MlClient } from '../../lib/ml_client';
+import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../routes/trained_models';
 
 export class AnalyticsManager {
   private _trainedModels: estypes.MlTrainedModelConfig[] = [];
   private _jobs: estypes.MlDataframeAnalyticsSummary[] = [];
+  private _transforms?: TransformGetTransformTransformSummary[];
 
   constructor(private _mlClient: MlClient, private _client: IScopedClusterClient) {}
 
   private async initData() {
     const [models, jobs] = await Promise.all([
-      this._mlClient.getTrainedModels(),
+      this._mlClient.getTrainedModels({ size: DEFAULT_TRAINED_MODELS_PAGE_SIZE }),
       this._mlClient.getDataFrameAnalytics({ size: 1000 }),
     ]);
     this._trainedModels = models.trained_model_configs;
     this._jobs = jobs.data_frame_analytics;
+  }
+
+  private async initTransformData() {
+    if (!this._transforms) {
+      try {
+        const body = await this._client.asCurrentUser.transform.getTransform({
+          size: 1000,
+        });
+        this._transforms = body.transforms;
+        return body.transforms;
+      } catch (e) {
+        if (e.meta?.statusCode !== 403) {
+          // eslint-disable-next-line no-console
+          console.error(e);
+        }
+      }
+    }
+  }
+
+  private getNodeId(
+    elementOriginalId: string,
+    nodeType: typeof JOB_MAP_NODE_TYPES[keyof typeof JOB_MAP_NODE_TYPES]
+  ): string {
+    return `${elementOriginalId}-${nodeType}`;
   }
 
   private isDuplicateElement(analyticsId: string, elements: MapElements[]): boolean {
@@ -312,7 +342,7 @@ export class AnalyticsManager {
    * @param jobId (optional)
    * @param modelId (optional)
    */
-  public async getAnalyticsMap({
+  private async getAnalyticsMap({
     analyticsId,
     modelId,
   }: GetAnalyticsMapArgs): Promise<AnalyticsMapReturnType> {
@@ -527,6 +557,240 @@ export class AnalyticsManager {
       result.error = error.message || 'An error occurred fetching map';
       return result;
     }
+  }
+
+  /**
+   * Expanded wrapper of getAnalyticsMap, which also handles generic models that are not tied to an analytics job
+   * Retrieves info about model and ingest pipeline, index, and transforms associated with the model
+   * @param analyticsId
+   * @param modelId
+   */
+  public async extendModelsMap({
+    analyticsId,
+    modelId,
+  }: {
+    analyticsId?: string;
+    modelId?: string;
+  }): Promise<AnalyticsMapReturnType> {
+    const result: AnalyticsMapReturnType = {
+      elements: [],
+      details: {},
+      error: null,
+    };
+    try {
+      if (analyticsId && !modelId) {
+        return this.getAnalyticsMap({
+          analyticsId,
+          modelId,
+        } as GetAnalyticsJobIdArg);
+      }
+
+      await this.initData();
+
+      const modelNodeId = `${modelId}-${JOB_MAP_NODE_TYPES.TRAINED_MODEL}`;
+      const model = modelId ? this.findTrainedModel(modelId) : undefined;
+
+      const isDFAModel = isPopulatedObject(model?.metadata, ['analytics_config']);
+      if (isDFAModel) {
+        return this.getAnalyticsMap({
+          analyticsId,
+          modelId,
+        } as GetAnalyticsModelIdArg);
+      }
+
+      if (modelId && model) {
+        // First, find information about the trained model
+        result.elements.push({
+          data: {
+            id: modelNodeId,
+            label: modelId,
+            type: JOB_MAP_NODE_TYPES.TRAINED_MODEL,
+            isRoot: true,
+          },
+        });
+        result.details[modelNodeId] = model;
+
+        let pipelinesResponse;
+        let indicesSettings;
+        try {
+          // Then, find the pipelines that have the trained model set as index.default_pipelines
+          pipelinesResponse = await modelsProvider(this._client).getModelsPipelines([modelId]);
+        } catch (e) {
+          // Possible that the user doesn't have permissions to view ingest pipelines
+          // If so, gracefully exit
+          if (e.meta?.statusCode !== 403) {
+            // eslint-disable-next-line no-console
+            console.error(e);
+          }
+
+          return result;
+        }
+
+        const pipelines = pipelinesResponse?.get(modelId);
+
+        if (pipelines) {
+          const pipelineIds = new Set(Object.keys(pipelines));
+          for (const pipelineId of pipelineIds) {
+            const pipelineNodeId = `${pipelineId}-${JOB_MAP_NODE_TYPES.INGEST_PIPELINE}`;
+            result.details[pipelineNodeId] = pipelines[pipelineId];
+
+            result.elements.push({
+              data: {
+                id: pipelineNodeId,
+                label: pipelineId,
+                type: JOB_MAP_NODE_TYPES.INGEST_PIPELINE,
+              },
+            });
+
+            result.elements.push({
+              data: {
+                id: `${modelNodeId}~${pipelineNodeId}`,
+                source: modelNodeId,
+                target: pipelineNodeId,
+              },
+            });
+          }
+          const pipelineIdsToDestinationIndices: Record<string, string[]> = {};
+
+          let indicesPermissions;
+          try {
+            indicesSettings = await this._client.asInternalUser.indices.getSettings();
+            const hasPrivilegesResponse = await this._client.asCurrentUser.security.hasPrivileges({
+              index: [
+                {
+                  names: Object.keys(indicesSettings),
+                  privileges: ['read'],
+                },
+              ],
+            });
+            indicesPermissions = hasPrivilegesResponse.index;
+          } catch (e) {
+            // Possible that the user doesn't have permissions to view
+            // If so, gracefully exit
+            if (e.meta?.statusCode !== 403) {
+              // eslint-disable-next-line no-console
+              console.error(e);
+            }
+            return result;
+          }
+
+          for (const [indexName, { settings }] of Object.entries(indicesSettings)) {
+            if (
+              settings?.index?.default_pipeline &&
+              pipelineIds.has(settings.index.default_pipeline) &&
+              indicesPermissions[indexName]?.read === true
+            ) {
+              if (Array.isArray(pipelineIdsToDestinationIndices[settings.index.default_pipeline])) {
+                pipelineIdsToDestinationIndices[settings.index.default_pipeline].push(indexName);
+              } else {
+                pipelineIdsToDestinationIndices[settings.index.default_pipeline] = [indexName];
+              }
+            }
+          }
+
+          for (const [pipelineId, indexIds] of Object.entries(pipelineIdsToDestinationIndices)) {
+            const pipelineNodeId = this.getNodeId(pipelineId, JOB_MAP_NODE_TYPES.INGEST_PIPELINE);
+
+            for (const destinationIndexId of indexIds) {
+              const destinationIndexNodeId = this.getNodeId(
+                destinationIndexId,
+                JOB_MAP_NODE_TYPES.INDEX
+              );
+
+              const destinationIndexDetails = await this.getIndexData(destinationIndexId);
+              result.details[destinationIndexNodeId] = {
+                ...destinationIndexDetails,
+                ml_inference_models: [modelId],
+              };
+
+              result.elements.push({
+                data: {
+                  id: destinationIndexNodeId,
+                  label: destinationIndexId,
+                  type: JOB_MAP_NODE_TYPES.INDEX,
+                },
+              });
+
+              result.elements.push({
+                data: {
+                  id: `${pipelineNodeId}~${destinationIndexNodeId}`,
+                  source: pipelineNodeId,
+                  target: destinationIndexNodeId,
+                },
+              });
+            }
+          }
+
+          const destinationIndices = flatten(Object.values(pipelineIdsToDestinationIndices));
+
+          // From these destination indices, see if there's any transforms that have the indexId as the source destination index
+          if (destinationIndices.length > 0) {
+            const transforms = await this.initTransformData();
+
+            if (!transforms) return result;
+
+            for (const destinationIndex of destinationIndices) {
+              const destinationIndexNodeId = `${destinationIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
+
+              const foundTransform = transforms?.find((t) => {
+                const transformSourceIndex = Array.isArray(t.source.index)
+                  ? t.source.index[0]
+                  : t.source.index;
+                return transformSourceIndex === destinationIndex;
+              });
+              if (foundTransform) {
+                const transformDestIndex = foundTransform.dest.index;
+                const transformNodeId = `${foundTransform.id}-${JOB_MAP_NODE_TYPES.TRANSFORM}`;
+                const transformDestIndexNodeId = `${transformDestIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
+
+                const destIndex = await this.getIndexData(transformDestIndex);
+                result.details[transformNodeId] = foundTransform;
+                result.details[transformDestIndexNodeId] = destIndex;
+
+                result.elements.push(
+                  {
+                    data: {
+                      id: transformNodeId,
+                      label: foundTransform.id,
+                      type: JOB_MAP_NODE_TYPES.TRANSFORM,
+                    },
+                  },
+                  {
+                    data: {
+                      id: transformDestIndexNodeId,
+                      label: transformDestIndex,
+                      type: JOB_MAP_NODE_TYPES.INDEX,
+                    },
+                  }
+                );
+
+                result.elements.push(
+                  {
+                    data: {
+                      id: `${destinationIndexNodeId}~${transformNodeId}`,
+                      source: destinationIndexNodeId,
+                      target: transformNodeId,
+                    },
+                  },
+                  {
+                    data: {
+                      id: `${transformNodeId}~${transformDestIndexNodeId}`,
+                      source: transformNodeId,
+                      target: transformDestIndexNodeId,
+                    },
+                  }
+                );
+              }
+            }
+          }
+        }
+      }
+    } catch (error) {
+      result.error = error.message || 'An error occurred fetching map';
+      return result;
+    }
+
+    return result;
   }
 
   public async extendAnalyticsMapForAnalyticsJob({

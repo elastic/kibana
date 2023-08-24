@@ -9,15 +9,21 @@
 import { PluginState } from '../../common';
 
 // regex matches everything between an opening and a closing curly braces
-// without matching the braces themselves
-const paramsBetweenCurlyBraces = /(?<=\{)[^\{\}]+(?=\})/g;
+// and the braces themselves
+const paramsWithBraces = /\{(.*?)\}/g;
+// regex matches both curly braces
+const curlyBraces = /[\{\}]/g;
 export const getStepLocationPath = (path: string, pluginState: PluginState): string | undefined => {
   if (pluginState.activeGuide?.params) {
     let dynamicPath = path;
-    const matchedParams = path.match(paramsBetweenCurlyBraces);
+    const matchedParams = path.match(paramsWithBraces);
     if (matchedParams) {
       for (const param of matchedParams) {
-        dynamicPath = dynamicPath.replace(`{${param}}`, pluginState.activeGuide?.params[param]);
+        const paramWithoutBraces = param.replace(curlyBraces, '');
+        dynamicPath = dynamicPath.replace(
+          `${param}`,
+          pluginState.activeGuide?.params[paramWithoutBraces]
+        );
       }
       return dynamicPath;
     }

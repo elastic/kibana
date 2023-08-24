@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`APM API tests basic apm_8.0.0 Top traces when data is loaded returns the correct buckets 1`] = `
+exports[`APM API tests traces/top_traces.spec.ts basic apm_8.0.0 Top traces when data is loaded returns the correct buckets 1`] = `
 Array [
   Object {
     "agentName": "java",

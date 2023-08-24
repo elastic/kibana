@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { EventAction, EventKind } from '../../common/types/process_tree';
 import { searchProcessWithIOEvents } from './io_events_route';
 
 const TEST_PROCESS_INDEX = 'logs-endpoint.events.process*';
@@ -60,8 +59,8 @@ describe('io_events_route.ts', () => {
       expect(body.length).toBe(1);
 
       body.forEach((event) => {
-        expect(event._source?.event?.action).toBe(EventAction.text_output);
-        expect(event._source?.event?.kind).toBe(EventKind.event);
+        expect(event._source?.event?.action).toBe('text_output');
+        expect(event._source?.event?.kind).toBe('event');
         expect(event._source?.process?.entity_id).toBe('mockId');
       });
     });

@@ -14,14 +14,14 @@ import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import {
   DragDropIdentifier,
   DropIdentifier,
-  DragContext,
-  DragContextState,
   nextValidDropTarget,
   ReorderContext,
-  ReorderState,
   DropHandler,
-  announce,
   Ghost,
+  RegisteredDropTargets,
+  DragDropAction,
+  DragContextState,
+  useDragDropContext,
 } from './providers';
 import { DropType } from './types';
 import { REORDER_ITEM_MARGIN } from './constants';
@@ -62,11 +62,6 @@ interface BaseProps {
    * The value associated with this item.
    */
   value: DragDropIdentifier;
-
-  /**
-   * Optional comparison function to check whether a value is the dragged one
-   */
-  isValueEqual?: (value1: unknown, value2: unknown) => boolean;
 
   /**
    * The React element which will be passed the draggable handlers
@@ -125,17 +120,13 @@ interface BaseProps {
  * The props for a draggable instance of that component.
  */
 interface DragInnerProps extends BaseProps {
-  setKeyboardMode: DragContextState['setKeyboardMode'];
-  setDragging: DragContextState['setDragging'];
-  setActiveDropTarget: DragContextState['setActiveDropTarget'];
-  setA11yMessage: DragContextState['setA11yMessage'];
+  dndDispatch: React.Dispatch<DragDropAction>;
+  dataTestSubjPrefix?: string;
   activeDraggingProps?: {
-    keyboardMode: DragContextState['keyboardMode'];
-    activeDropTarget: DragContextState['activeDropTarget'];
-    dropTargetsByOrder: DragContextState['dropTargetsByOrder'];
+    keyboardMode: boolean;
+    activeDropTarget?: DropIdentifier;
+    dropTargetsByOrder: RegisteredDropTargets;
   };
-  dataTestSubjPrefix: DragContextState['dataTestSubjPrefix'];
-  onTrackUICounterEvent: DragContextState['onTrackUICounterEvent'] | undefined;
   extraKeyboardHandler?: (e: KeyboardEvent<HTMLButtonElement>) => void;
   ariaDescribedBy?: string;
 }
@@ -144,16 +135,8 @@ interface DragInnerProps extends BaseProps {
  * The props for a non-draggable instance of that component.
  */
 interface DropsInnerProps extends BaseProps {
-  dragging: DragContextState['dragging'];
-  keyboardMode: DragContextState['keyboardMode'];
-  setKeyboardMode: DragContextState['setKeyboardMode'];
-  setDragging: DragContextState['setDragging'];
-  setActiveDropTarget: DragContextState['setActiveDropTarget'];
-  setA11yMessage: DragContextState['setA11yMessage'];
-  registerDropTarget: DragContextState['registerDropTarget'];
-  activeDropTarget: DragContextState['activeDropTarget'];
-  dataTestSubjPrefix: DragContextState['dataTestSubjPrefix'];
-  onTrackUICounterEvent: DragContextState['onTrackUICounterEvent'] | undefined;
+  dndState: DragContextState;
+  dndDispatch: React.Dispatch<DragDropAction>;
   isNotDroppable: boolean;
 }
 
@@ -165,19 +148,9 @@ const REORDER_OFFSET = REORDER_ITEM_MARGIN / 2;
  * @constructor
  */
 export const DragDrop = (props: BaseProps) => {
-  const {
-    dragging,
-    setDragging,
-    keyboardMode,
-    registerDropTarget,
-    dropTargetsByOrder,
-    setKeyboardMode,
-    activeDropTarget,
-    setActiveDropTarget,
-    setA11yMessage,
-    dataTestSubjPrefix,
-    onTrackUICounterEvent,
-  } = useContext(DragContext);
+  const [dndState, dndDispatch] = useDragDropContext();
+
+  const { dragging, dropTargetsByOrder } = dndState;
 
   if (props.isDisabled) {
     return props.children;
@@ -188,8 +161,8 @@ export const DragDrop = (props: BaseProps) => {
 
   const activeDraggingProps = isDragging
     ? {
-        keyboardMode,
-        activeDropTarget,
+        keyboardMode: dndState.keyboardMode,
+        activeDropTarget: dndState.activeDropTarget,
         dropTargetsByOrder,
       }
     : undefined;
@@ -198,12 +171,8 @@ export const DragDrop = (props: BaseProps) => {
     const dragProps = {
       ...props,
       activeDraggingProps,
-      setKeyboardMode,
-      setDragging,
-      setActiveDropTarget,
-      setA11yMessage,
-      dataTestSubjPrefix,
-      onTrackUICounterEvent,
+      dataTestSubjPrefix: dndState.dataTestSubjPrefix,
+      dndDispatch,
     };
     if (reorderableGroup && reorderableGroup.length > 1) {
       return <ReorderableDrag {...dragProps} reorderableGroup={reorderableGroup} />;
@@ -214,16 +183,8 @@ export const DragDrop = (props: BaseProps) => {
 
   const dropProps = {
     ...props,
-    keyboardMode,
-    setKeyboardMode,
-    dragging,
-    setDragging,
-    activeDropTarget,
-    setActiveDropTarget,
-    registerDropTarget,
-    setA11yMessage,
-    dataTestSubjPrefix,
-    onTrackUICounterEvent,
+    dndState,
+    dndDispatch,
     isNotDroppable:
       // If the configuration has provided a droppable flag, but this particular item is not
       // droppable, then it should be less prominent. Ignores items that are both
@@ -253,39 +214,35 @@ const DragInner = memo(function DragInner({
   className,
   value,
   children,
-  setDragging,
-  setKeyboardMode,
-  setActiveDropTarget,
+  dndDispatch,
   order,
   activeDraggingProps,
+  dataTestSubjPrefix,
   dragType,
   onDragStart,
   onDragEnd,
   extraKeyboardHandler,
   ariaDescribedBy,
-  setA11yMessage,
-  dataTestSubjPrefix,
-  onTrackUICounterEvent,
 }: DragInnerProps) {
-  const keyboardMode = activeDraggingProps?.keyboardMode;
-  const activeDropTarget = activeDraggingProps?.activeDropTarget;
-  const dropTargetsByOrder = activeDraggingProps?.dropTargetsByOrder;
+  const { keyboardMode, activeDropTarget, dropTargetsByOrder } = activeDraggingProps || {};
 
   const setTarget = useCallback(
-    (target?: DropIdentifier, announceModifierKeys = false) => {
-      setActiveDropTarget(target);
-      setA11yMessage(
-        target
-          ? announce.selectedTarget(
-              value.humanData,
-              target?.humanData,
-              target?.dropType,
-              announceModifierKeys
-            )
-          : announce.noTarget()
-      );
+    (target?: DropIdentifier) => {
+      if (!target) {
+        dndDispatch({
+          type: 'leaveDropTarget',
+        });
+      } else {
+        dndDispatch({
+          type: 'selectDropTarget',
+          payload: {
+            dropTarget: target,
+            dragging: value,
+          },
+        });
+      }
     },
-    [setActiveDropTarget, setA11yMessage, value.humanData]
+    [dndDispatch, value]
   );
 
   const setTargetOfIndex = useCallback(
@@ -293,11 +250,7 @@ const DragInner = memo(function DragInner({
       const dropTargetsForActiveId =
         dropTargetsByOrder &&
         Object.values(dropTargetsByOrder).filter((dropTarget) => dropTarget?.id === id);
-      if (index > 0 && dropTargetsForActiveId?.[index]) {
-        setTarget(dropTargetsForActiveId[index]);
-      } else {
-        setTarget(dropTargetsForActiveId?.[0], true);
-      }
+      setTarget(dropTargetsForActiveId?.[index]);
     },
     [dropTargetsByOrder, setTarget]
   );
@@ -339,58 +292,64 @@ const DragInner = memo(function DragInner({
     return { onKeyDown, onKeyUp };
   }, [activeDropTarget, setTargetOfIndex]);
 
-  const dragStart = (
-    e: DroppableEvent | KeyboardEvent<HTMLButtonElement>,
-    keyboardModeOn?: boolean
-  ) => {
-    // Setting stopPropgagation causes Chrome failures, so
-    // we are manually checking if we've already handled this
-    // in a nested child, and doing nothing if so...
-    if (e && 'dataTransfer' in e && e.dataTransfer.getData('text')) {
-      return;
-    }
+  const dragStart = useCallback(
+    (e: DroppableEvent | KeyboardEvent<HTMLButtonElement>, keyboardModeOn?: boolean) => {
+      // Setting stopPropgagation causes Chrome failures, so
+      // we are manually checking if we've already handled this
+      // in a nested child, and doing nothing if so...
+      if (e && 'dataTransfer' in e && e.dataTransfer.getData('text')) {
+        return;
+      }
 
-    // We only can reach the dragStart method if the element is draggable,
-    // so we know we have DraggableProps if we reach this code.
-    if (e && 'dataTransfer' in e) {
-      e.dataTransfer.setData('text', value.humanData.label);
-    }
+      // We only can reach the dragStart method if the element is draggable,
+      // so we know we have DraggableProps if we reach this code.
+      if (e && 'dataTransfer' in e) {
+        e.dataTransfer.setData('text', value.humanData.label);
+      }
 
-    // Chrome causes issues if you try to render from within a
-    // dragStart event, so we drop a setTimeout to avoid that.
+      // Chrome causes issues if you try to render from within a
+      // dragStart event, so we drop a setTimeout to avoid that.
 
-    const currentTarget = e?.currentTarget;
+      const currentTarget = e?.currentTarget;
 
-    setTimeout(() => {
-      setDragging({
-        ...value,
-        ghost: keyboardModeOn
-          ? {
-              children,
-              style: { width: currentTarget.offsetWidth, minHeight: currentTarget?.offsetHeight },
-            }
-          : undefined,
+      setTimeout(() => {
+        dndDispatch({
+          type: 'startDragging',
+          payload: {
+            ...(keyboardModeOn ? { keyboardMode: true } : {}),
+            dragging: {
+              ...value,
+              ghost: keyboardModeOn
+                ? {
+                    children,
+                    style: {
+                      width: currentTarget.offsetWidth,
+                      minHeight: currentTarget?.offsetHeight,
+                    },
+                  }
+                : undefined,
+            },
+          },
+        });
+        onDragStart?.(currentTarget);
       });
-      setA11yMessage(announce.lifted(value.humanData));
-      if (keyboardModeOn) {
-        setKeyboardMode(true);
-      }
-      if (onDragStart) {
-        onDragStart(currentTarget);
-      }
-    });
-  };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dndDispatch, value, onDragStart]
+  );
 
-  const dragEnd = (e?: DroppableEvent) => {
-    e?.stopPropagation();
-    setDragging(undefined);
-    setActiveDropTarget(undefined);
-    setKeyboardMode(false);
-    setA11yMessage(announce.cancelled(value.humanData));
-    if (onDragEnd) {
-      onDragEnd();
-    }
-  };
+  const dragEnd = useCallback(
+    (e?: DroppableEvent) => {
+      e?.stopPropagation();
+
+      dndDispatch({
+        type: 'endDragging',
+        payload: { dragging: value },
+      });
+      onDragEnd?.();
+    },
+    [dndDispatch, value, onDragEnd]
+  );
 
   const setNextTarget = (e: KeyboardEvent<HTMLButtonElement>, reversed = false) => {
     const nextTarget = nextValidDropTarget(
@@ -408,16 +367,23 @@ const DragInner = memo(function DragInner({
     } else if (e.ctrlKey && nextTarget?.id) {
       setTargetOfIndex(nextTarget.id, 3);
     } else {
-      setTarget(nextTarget, true);
+      setTarget(nextTarget);
     }
   };
 
   const dropToActiveDropTarget = () => {
     if (activeDropTarget) {
-      onTrackUICounterEvent?.('drop_total');
-      const { dropType, humanData, onDrop: onTargetDrop } = activeDropTarget;
-      setTimeout(() => setA11yMessage(announce.dropped(value.humanData, humanData, dropType)));
-      onTargetDrop(value, dropType);
+      const { dropType, onDrop } = activeDropTarget;
+      setTimeout(() => {
+        dndDispatch({
+          type: 'dropToTarget',
+          payload: {
+            dragging: value,
+            dropTarget: activeDropTarget,
+          },
+        });
+      });
+      onDrop(value, dropType);
     }
   };
 
@@ -501,38 +467,35 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
     value,
     children,
     draggable,
-    dragging,
+    dndState,
+    dndDispatch,
     isNotDroppable,
     dropTypes,
     order,
     getAdditionalClassesOnEnter,
     getAdditionalClassesOnDroppable,
-    activeDropTarget,
-    registerDropTarget,
-    setActiveDropTarget,
-    keyboardMode,
-    setKeyboardMode,
-    setDragging,
-    setA11yMessage,
     getCustomDropTarget,
-    dataTestSubjPrefix,
   } = props;
+
+  const { dragging, activeDropTarget, dataTestSubjPrefix, keyboardMode } = dndState;
 
   const [isInZone, setIsInZone] = useState(false);
   const mainTargetRef = useRef<HTMLDivElement>(null);
 
   useShallowCompareEffect(() => {
     if (dropTypes && dropTypes?.[0] && onDrop && keyboardMode) {
-      dropTypes.forEach((dropType, index) => {
-        registerDropTarget([...order, index], { ...value, onDrop, dropType });
+      dndDispatch({
+        type: 'registerDropTargets',
+        payload: dropTypes.reduce(
+          (acc, dropType, index) => ({
+            ...acc,
+            [[...props.order, index].join(',')]: { ...value, onDrop, dropType },
+          }),
+          {}
+        ),
       });
-      return () => {
-        dropTypes.forEach((_, index) => {
-          registerDropTarget([...order, index], undefined);
-        });
-      };
     }
-  }, [order, registerDropTarget, dropTypes, keyboardMode]);
+  }, [order, dndDispatch, dropTypes, keyboardMode]);
 
   useEffect(() => {
     let isMounted = true;
@@ -586,15 +549,18 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
     );
     // An optimization to prevent a bunch of React churn.
     if (!isActiveDropTarget) {
-      setActiveDropTarget({ ...value, dropType: modifiedDropType, onDrop });
-      setA11yMessage(
-        announce.selectedTarget(dragging.humanData, value.humanData, modifiedDropType)
-      );
+      dndDispatch({
+        type: 'selectDropTarget',
+        payload: {
+          dropTarget: { ...value, dropType: modifiedDropType, onDrop },
+          dragging,
+        },
+      });
     }
   };
 
   const dragLeave = () => {
-    setActiveDropTarget(undefined);
+    dndDispatch({ type: 'leaveDropTarget' });
   };
 
   const drop = (e: DroppableEvent, dropType: DropType) => {
@@ -604,14 +570,17 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
     if (onDrop && dragging) {
       const modifiedDropType = getModifiedDropType(e, dropType);
       onDrop(dragging, modifiedDropType);
-      setTimeout(() =>
-        setA11yMessage(announce.dropped(dragging.humanData, value.humanData, modifiedDropType))
-      );
+      setTimeout(() => {
+        dndDispatch({
+          type: 'dropToTarget',
+          payload: {
+            dragging,
+            dropTarget: { ...value, dropType: modifiedDropType, onDrop },
+          },
+        });
+      });
     }
-
-    setDragging(undefined);
-    setActiveDropTarget(undefined);
-    setKeyboardMode(false);
+    dndDispatch({ type: 'resetState' });
   };
 
   const getProps = (dropType?: DropType, dropChildren?: ReactElement) => {
@@ -659,21 +628,6 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
 
   const mainTargetProps = getProps(dropTypes && dropTypes[0]);
 
-  const extraDropStyles = useMemo(() => {
-    const extraDrops = dropTypes && dropTypes.length && dropTypes.slice(1);
-    if (!extraDrops || !extraDrops.length) {
-      return;
-    }
-
-    const height = extraDrops.length * 40;
-    const minHeight = height - (mainTargetRef.current?.clientHeight || 40);
-    const clipPath = `polygon(100% 0px, 100% ${height - minHeight}px, 0 100%, 0 0)`;
-    return {
-      clipPath,
-      height,
-    };
-  }, [dropTypes]);
-
   return (
     <div
       data-test-subj={`${dataTestSubjPrefix}Container`}
@@ -689,32 +643,25 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
         children={children}
       />
       {dropTypes && dropTypes.length > 1 && (
-        <>
-          <div
-            className="domDragDrop__diamondPath"
-            style={extraDropStyles}
-            onDragEnter={dragEnter}
-          />
-          <EuiFlexGroup
-            gutterSize="none"
-            direction="column"
-            data-test-subj={`${dataTestSubjPrefix}ExtraDrops`}
-            className={classNames('domDragDrop__extraDrops', {
-              'domDragDrop__extraDrops-visible': isInZone || activeDropTarget?.id === value.id,
-            })}
-          >
-            {dropTypes.slice(1).map((dropType) => {
-              const dropChildren = getCustomDropTarget?.(dropType);
-              return dropChildren ? (
-                <EuiFlexItem key={dropType} className="domDragDrop__extraDropWrapper">
-                  <SingleDropInner {...getProps(dropType, dropChildren)}>
-                    {dropChildren}
-                  </SingleDropInner>
-                </EuiFlexItem>
-              ) : null;
-            })}
-          </EuiFlexGroup>
-        </>
+        <EuiFlexGroup
+          gutterSize="none"
+          direction="column"
+          data-test-subj={`${dataTestSubjPrefix}ExtraDrops`}
+          className={classNames('domDragDrop__extraDrops', {
+            'domDragDrop__extraDrops-visible': isInZone || activeDropTarget?.id === value.id,
+          })}
+        >
+          {dropTypes.slice(1).map((dropType) => {
+            const dropChildren = getCustomDropTarget?.(dropType);
+            return dropChildren ? (
+              <EuiFlexItem key={dropType} className="domDragDrop__extraDropWrapper">
+                <SingleDropInner {...getProps(dropType, dropChildren)}>
+                  {dropChildren}
+                </SingleDropInner>
+              </EuiFlexItem>
+            ) : null;
+          })}
+        </EuiFlexGroup>
       )}
     </div>
   );
@@ -746,23 +693,11 @@ const SingleDropInner = ({
 const ReorderableDrag = memo(function ReorderableDrag(
   props: DragInnerProps & { reorderableGroup: Array<{ id: string }>; dragging?: DragDropIdentifier }
 ) {
-  const {
-    reorderState: { isReorderOn, reorderedItems, direction },
-    setReorderState,
-  } = useContext(ReorderContext);
+  const [{ isReorderOn, reorderedItems, direction }, reorderDispatch] = useContext(ReorderContext);
 
-  const {
-    value,
-    setActiveDropTarget,
-    activeDraggingProps,
-    reorderableGroup,
-    setA11yMessage,
-    dataTestSubjPrefix,
-  } = props;
+  const { value, activeDraggingProps, reorderableGroup, dndDispatch, dataTestSubjPrefix } = props;
 
-  const keyboardMode = activeDraggingProps?.keyboardMode;
-  const activeDropTarget = activeDraggingProps?.activeDropTarget;
-  const dropTargetsByOrder = activeDraggingProps?.dropTargetsByOrder;
+  const { keyboardMode, activeDropTarget, dropTargetsByOrder } = activeDraggingProps || {};
   const isDragging = !!activeDraggingProps;
 
   const isFocusInGroup = keyboardMode
@@ -771,11 +706,11 @@ const ReorderableDrag = memo(function ReorderableDrag(
     : isDragging;
 
   useEffect(() => {
-    setReorderState((s: ReorderState) => ({
-      ...s,
-      isReorderOn: isFocusInGroup,
-    }));
-  }, [setReorderState, isFocusInGroup]);
+    reorderDispatch({
+      type: 'setIsReorderOn',
+      payload: isFocusInGroup,
+    });
+  }, [reorderDispatch, isFocusInGroup]);
 
   const onReorderableDragStart = (
     currentTarget?:
@@ -783,23 +718,18 @@ const ReorderableDrag = memo(function ReorderableDrag(
       | KeyboardEvent<HTMLButtonElement>['currentTarget']
   ) => {
     if (currentTarget) {
-      const height = currentTarget.offsetHeight + REORDER_OFFSET;
-      setReorderState((s: ReorderState) => ({
-        ...s,
-        draggingHeight: height,
-      }));
+      setTimeout(() => {
+        reorderDispatch({
+          type: 'registerDraggingItemHeight',
+          payload: currentTarget.offsetHeight + REORDER_OFFSET,
+        });
+      });
     }
   };
 
   const onReorderableDragEnd = () => {
-    resetReorderState();
+    reorderDispatch({ type: 'reset' });
   };
-
-  const resetReorderState = () =>
-    setReorderState((s: ReorderState) => ({
-      ...s,
-      reorderedItems: [],
-    }));
 
   const extraKeyboardHandler = (e: KeyboardEvent<HTMLButtonElement>) => {
     if (isReorderOn && keyboardMode) {
@@ -811,8 +741,7 @@ const ReorderableDrag = memo(function ReorderableDrag(
         if (index !== -1) activeDropTargetIndex = index;
       }
       if (e.key === keys.ARROW_LEFT || e.key === keys.ARROW_RIGHT) {
-        resetReorderState();
-        setActiveDropTarget(undefined);
+        reorderDispatch({ type: 'reset' });
       } else if (keys.ARROW_DOWN === e.key) {
         if (activeDropTargetIndex < reorderableGroup.length - 1) {
           const nextTarget = nextValidDropTarget(
@@ -840,12 +769,8 @@ const ReorderableDrag = memo(function ReorderableDrag(
 
   const onReorderableDragOver = (target?: DropIdentifier) => {
     if (!target) {
-      setReorderState((s: ReorderState) => ({
-        ...s,
-        reorderedItems: [],
-      }));
-      setA11yMessage(announce.selectedTarget(value.humanData, value.humanData, 'reorder'));
-      setActiveDropTarget(target);
+      reorderDispatch({ type: 'reset' });
+      dndDispatch({ type: 'leaveDropTarget' });
       return;
     }
     const droppingIndex = reorderableGroup.findIndex((i) => i.id === target.id);
@@ -853,40 +778,34 @@ const ReorderableDrag = memo(function ReorderableDrag(
     if (draggingIndex === -1) {
       return;
     }
-    setActiveDropTarget(target);
 
-    setA11yMessage(announce.selectedTarget(value.humanData, target.humanData, 'reorder'));
-
-    setReorderState((s: ReorderState) =>
-      draggingIndex < droppingIndex
-        ? {
-            ...s,
-            reorderedItems: reorderableGroup.slice(draggingIndex + 1, droppingIndex + 1),
-            direction: '-',
-          }
-        : {
-            ...s,
-            reorderedItems: reorderableGroup.slice(droppingIndex, draggingIndex),
-            direction: '+',
-          }
-    );
+    dndDispatch({
+      type: 'selectDropTarget',
+      payload: {
+        dropTarget: target,
+        dragging: value,
+      },
+    });
+    reorderDispatch({
+      type: 'setReorderedItems',
+      payload: { draggingIndex, droppingIndex, items: reorderableGroup },
+    });
   };
 
-  const areItemsReordered = isDragging && keyboardMode && reorderedItems.length;
+  const areItemsReordered = keyboardMode && isDragging && reorderedItems.length;
 
   return (
     <div
       data-test-subj={`${dataTestSubjPrefix}-reorderableDrag`}
-      className={
-        isDragging
-          ? 'domDragDrop-reorderable domDragDrop-translatableDrag'
-          : 'domDragDrop-reorderable'
-      }
+      className={classNames('domDragDrop-reorderable', {
+        ['domDragDrop-translatableDrag']: isDragging,
+        ['domDragDrop-isKeyboardReorderInProgress']: keyboardMode && isDragging,
+      })}
       style={
         areItemsReordered
           ? {
               transform: `translateY(${direction === '+' ? '-' : '+'}${reorderedItems.reduce(
-                (acc, cur) => acc + Number(cur.height || 0) + REORDER_OFFSET,
+                (acc, el) => acc + (el.height ?? 0) + REORDER_OFFSET,
                 0
               )}px)`,
             }
@@ -907,26 +826,13 @@ const ReorderableDrag = memo(function ReorderableDrag(
 const ReorderableDrop = memo(function ReorderableDrop(
   props: DropsInnerProps & { reorderableGroup: Array<{ id: string }> }
 ) {
-  const {
-    onDrop,
-    value,
-    dragging,
-    setDragging,
-    setKeyboardMode,
-    activeDropTarget,
-    setActiveDropTarget,
-    reorderableGroup,
-    setA11yMessage,
-    dataTestSubjPrefix,
-    onTrackUICounterEvent,
-  } = props;
+  const { onDrop, value, dndState, dndDispatch, reorderableGroup } = props;
 
+  const { dragging, dataTestSubjPrefix, activeDropTarget } = dndState;
   const currentIndex = reorderableGroup.findIndex((i) => i.id === value.id);
 
-  const {
-    reorderState: { isReorderOn, reorderedItems, draggingHeight, direction },
-    setReorderState,
-  } = useContext(ReorderContext);
+  const [{ isReorderOn, reorderedItems, draggingHeight, direction }, reorderDispatch] =
+    useContext(ReorderContext);
 
   const heightRef = useRef<HTMLDivElement>(null);
 
@@ -935,52 +841,38 @@ const ReorderableDrop = memo(function ReorderableDrop(
 
   useEffect(() => {
     if (isReordered && heightRef.current?.clientHeight) {
-      setReorderState((s) => ({
-        ...s,
-        reorderedItems: s.reorderedItems.map((el) =>
-          el.id === value.id
-            ? {
-                ...el,
-                height: heightRef.current?.clientHeight,
-              }
-            : el
-        ),
-      }));
+      reorderDispatch({
+        type: 'registerReorderedItemHeight',
+        payload: { id: value.id, height: heightRef.current.clientHeight },
+      });
     }
-  }, [isReordered, setReorderState, value.id]);
+  }, [isReordered, reorderDispatch, value.id]);
 
   const onReorderableDragOver = (e: DroppableEvent) => {
     e.preventDefault();
     // An optimization to prevent a bunch of React churn.
     if (activeDropTarget?.id !== value?.id && onDrop) {
-      setActiveDropTarget({ ...value, dropType: 'reorder', onDrop });
-
       const draggingIndex = reorderableGroup.findIndex((i) => i.id === dragging?.id);
-
       if (!dragging || draggingIndex === -1) {
         return;
       }
+
       const droppingIndex = currentIndex;
       if (draggingIndex === droppingIndex) {
-        setReorderState((s: ReorderState) => ({
-          ...s,
-          reorderedItems: [],
-        }));
+        reorderDispatch({ type: 'reset' });
       }
 
-      setReorderState((s: ReorderState) =>
-        draggingIndex < droppingIndex
-          ? {
-              ...s,
-              reorderedItems: reorderableGroup.slice(draggingIndex + 1, droppingIndex + 1),
-              direction: '-',
-            }
-          : {
-              ...s,
-              reorderedItems: reorderableGroup.slice(droppingIndex, draggingIndex),
-              direction: '+',
-            }
-      );
+      reorderDispatch({
+        type: 'setReorderedItems',
+        payload: { draggingIndex, droppingIndex, items: reorderableGroup },
+      });
+      dndDispatch({
+        type: 'selectDropTarget',
+        payload: {
+          dropTarget: { ...value, dropType: 'reorder', onDrop },
+          dragging,
+        },
+      });
     }
   };
 
@@ -988,18 +880,20 @@ const ReorderableDrop = memo(function ReorderableDrop(
     e.preventDefault();
     e.stopPropagation();
 
-    setActiveDropTarget(undefined);
-    setDragging(undefined);
-    setKeyboardMode(false);
-
     if (onDrop && dragging) {
-      onTrackUICounterEvent?.('drop_total');
       onDrop(dragging, 'reorder');
       // setTimeout ensures it will run after dragEnd messaging
-      setTimeout(() =>
-        setA11yMessage(announce.dropped(dragging.humanData, value.humanData, 'reorder'))
-      );
+      setTimeout(() => {
+        dndDispatch({
+          type: 'dropToTarget',
+          payload: {
+            dragging,
+            dropTarget: { ...value, dropType: 'reorder', onDrop },
+          },
+        });
+      });
     }
+    dndDispatch({ type: 'resetState' });
   };
 
   return (
@@ -1027,11 +921,8 @@ const ReorderableDrop = memo(function ReorderableDrop(
         onDrop={onReorderableDrop}
         onDragOver={onReorderableDragOver}
         onDragLeave={() => {
-          setActiveDropTarget(undefined);
-          setReorderState((s: ReorderState) => ({
-            ...s,
-            reorderedItems: [],
-          }));
+          dndDispatch({ type: 'leaveDropTarget' });
+          reorderDispatch({ type: 'reset' });
         }}
       />
     </div>

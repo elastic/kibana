@@ -9,6 +9,7 @@ import { createEsContext } from './context';
 import { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createReadySignal } from '../lib/ready_signal';
+import { GetDataStreamsResponse } from './cluster_client_adapter.test';
 
 jest.mock('../../../../package.json', () => ({ version: '1.2.3' }));
 jest.mock('./init');
@@ -55,16 +56,13 @@ describe('createEsContext', () => {
     const esNames = context.esNames;
     expect(esNames).toStrictEqual({
       base: 'test-index',
-      alias: 'test-index-event-log-1.2.3',
-      ilmPolicy: 'test-index-event-log-policy',
+      dataStream: 'test-index-event-log-1.2.3',
       indexPattern: 'test-index-event-log-*',
-      indexPatternWithVersion: 'test-index-event-log-1.2.3-*',
       indexTemplate: 'test-index-event-log-1.2.3-template',
-      initialIndex: 'test-index-event-log-1.2.3-000001',
     });
   });
 
-  test('should return exist false for esAdapter ilm policy, index template and alias before initialize', async () => {
+  test('should return exist false for esAdapter index template and data stream before initialize', async () => {
     const context = createEsContext({
       logger,
       indexNameRoot: 'test1',
@@ -75,7 +73,8 @@ describe('createEsContext', () => {
     elasticsearchClient.indices.existsTemplate.mockResponse(false);
     elasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
     elasticsearchClient.indices.existsAlias.mockResponse(false);
-    const doesAliasExist = await context.esAdapter.doesAliasExist(context.esNames.alias);
+    elasticsearchClient.indices.getDataStream.mockResponse({ data_streams: [] });
+    const doesAliasExist = await context.esAdapter.doesDataStreamExist(context.esNames.dataStream);
     expect(doesAliasExist).toBeFalsy();
 
     const doesIndexTemplateExist = await context.esAdapter.doesIndexTemplateExist(
@@ -84,7 +83,7 @@ describe('createEsContext', () => {
     expect(doesIndexTemplateExist).toBeFalsy();
   });
 
-  test('should return exist true for esAdapter ilm policy, index template and alias after initialize', async () => {
+  test('should return exist true for esAdapter index template and data stream after initialize', async () => {
     const context = createEsContext({
       logger,
       indexNameRoot: 'test2',
@@ -94,13 +93,11 @@ describe('createEsContext', () => {
     elasticsearchClient.indices.existsTemplate.mockResponse(true);
     context.initialize();
 
-    const doesIlmPolicyExist = await context.esAdapter.doesIlmPolicyExist(
-      context.esNames.ilmPolicy
+    elasticsearchClient.indices.getDataStream.mockResolvedValue(GetDataStreamsResponse);
+    const doesDataStreamExist = await context.esAdapter.doesDataStreamExist(
+      context.esNames.dataStream
     );
-    expect(doesIlmPolicyExist).toBeTruthy();
-
-    const doesAliasExist = await context.esAdapter.doesAliasExist(context.esNames.alias);
-    expect(doesAliasExist).toBeTruthy();
+    expect(doesDataStreamExist).toBeTruthy();
 
     const doesIndexTemplateExist = await context.esAdapter.doesIndexTemplateExist(
       context.esNames.indexTemplate

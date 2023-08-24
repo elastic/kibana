@@ -11,11 +11,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
-import {
-  MlModelDeploymentStatus,
-  MlModelDeploymentState,
-  MlTrainedModelConfigWithDefined,
-} from '../../../common/types/ml';
+import { MlModelDeploymentStatus, MlModelDeploymentState } from '../../../common/types/ml';
 
 import { isNotFoundExceptionError } from './ml_model_deployment_common';
 
@@ -27,10 +23,7 @@ export const getMlModelDeploymentStatus = async (
     throw new Error('Machine Learning is not enabled');
   }
 
-  // TODO: the ts-expect-error below should be removed once the correct typings are
-  // available in Kibana
   const modelDetailsRequest: MlGetTrainedModelsRequest = {
-    // @ts-expect-error @elastic-elasticsearch getTrainedModels types incorrect
     include: 'definition_status',
     model_id: modelName,
   };
@@ -43,11 +36,9 @@ export const getMlModelDeploymentStatus = async (
       return getDefaultStatusReturn(MlModelDeploymentState.NotDeployed, modelName);
     }
 
-    // TODO - we can remove this cast to the extension once the new types are available
-    // in kibana that includes the fully_defined field
     const firstTrainedModelConfig = modelDetailsResponse.trained_model_configs
-      ? (modelDetailsResponse.trained_model_configs[0] as MlTrainedModelConfigWithDefined)
-      : (undefined as unknown as MlTrainedModelConfigWithDefined);
+      ? modelDetailsResponse.trained_model_configs[0]
+      : undefined;
 
     // are we downloaded?
     if (!firstTrainedModelConfig || !firstTrainedModelConfig.fully_defined) {
@@ -84,6 +75,7 @@ export const getMlModelDeploymentStatus = async (
     nodeAllocationCount: modelDeployment?.allocation_status.allocation_count || 0,
     startTime: modelDeployment?.start_time || 0,
     targetAllocationCount: modelDeployment?.allocation_status.target_allocation_count || 0,
+    threadsPerAllocation: modelDeployment?.threads_per_allocation || 0,
   };
 };
 
@@ -97,6 +89,7 @@ function getDefaultStatusReturn(
     nodeAllocationCount: 0,
     startTime: 0,
     targetAllocationCount: 0,
+    threadsPerAllocation: 0,
   };
 }
 

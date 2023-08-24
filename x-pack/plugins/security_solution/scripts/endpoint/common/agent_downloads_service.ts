@@ -85,9 +85,16 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
 
     try {
       const outputStream = fs.createWriteStream(newDownloadInfo.fullFilePath);
-      const { body } = await nodeFetch(agentDownloadUrl);
 
-      await finished(body.pipe(outputStream));
+      await handleProcessInterruptions(
+        async () => {
+          const { body } = await nodeFetch(agentDownloadUrl);
+          await finished(body.pipe(outputStream));
+        },
+        () => {
+          fs.unlinkSync(newDownloadInfo.fullFilePath);
+        }
+      );
     } catch (e) {
       // Try to clean up download case it failed halfway through
       await unlink(newDownloadInfo.fullFilePath);
@@ -133,6 +140,42 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
     return response;
   }
 }
+
+const handleProcessInterruptions = async <T>(
+  runFn: (() => T) | (() => Promise<T>),
+  /** The synchronous cleanup callback */
+  cleanup: () => void
+): Promise<T> => {
+  const eventNames = ['SIGINT', 'exit', 'uncaughtException', 'unhandledRejection'];
+  const stopListeners = () => {
+    for (const eventName of eventNames) {
+      process.off(eventName, cleanup);
+    }
+  };
+
+  for (const eventName of eventNames) {
+    process.on(eventName, cleanup);
+  }
+
+  let runnerResponse: T | Promise<T>;
+
+  try {
+    runnerResponse = runFn();
+  } catch (e) {
+    stopListeners();
+    throw e;
+  }
+
+  if ('finally' in runnerResponse) {
+    (runnerResponse as Promise<T>).finally(() => {
+      stopListeners();
+    });
+  } else {
+    stopListeners();
+  }
+
+  return runnerResponse;
+};
 
 const agentDownloadsClient = new AgentDownloadStorage();
 

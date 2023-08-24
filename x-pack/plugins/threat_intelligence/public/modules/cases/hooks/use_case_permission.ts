@@ -6,8 +6,8 @@
  */
 
 import { CasesPermissions } from '@kbn/cases-plugin/common';
-import { EMPTY_VALUE } from '../../../common/constants';
-import { useKibana } from '../../../hooks';
+import { EMPTY_VALUE } from '../../../constants/common';
+import { useKibana } from '../../../hooks/use_kibana';
 
 /**
  * Decides if we enable or disable the add to existing and add to new case features.

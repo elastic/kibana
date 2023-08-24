@@ -13,7 +13,6 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { get, has } from 'lodash';
-import { createSHA256Hash } from '@kbn/crypto';
 import type { LogMeta } from '@kbn/logging';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -84,10 +83,10 @@ export class CloudExperimentsPlugin
       }));
     }
 
-    if (deps.cloud.isCloudEnabled && deps.cloud.cloudId) {
+    if (deps.cloud.isCloudEnabled && deps.cloud.deploymentId) {
       this.metadataService.setup({
-        // We use the Cloud ID as the userId in the Cloud Experiments
-        userId: createSHA256Hash(deps.cloud.cloudId),
+        // We use the Cloud Deployment ID as the userId in the Cloud Experiments
+        userId: deps.cloud.deploymentId,
         kibanaVersion: this.initializerContext.env.packageInfo.version,
         trialEndDate: deps.cloud.trialEndDate?.toISOString(),
         isElasticStaff: deps.cloud.isElasticStaffOwned,

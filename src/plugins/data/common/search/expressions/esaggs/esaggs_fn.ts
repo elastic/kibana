@@ -34,6 +34,7 @@ interface Arguments {
   timeFields?: string[];
   probability?: number;
   samplerSeed?: number;
+  ignoreGlobalFilters?: boolean;
 }
 
 export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -109,6 +110,12 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
       help: i18n.translate('data.search.functions.esaggs.samplerSeed.help', {
         defaultMessage:
           'The seed to generate the random sampling of documents. Uses random sampler.',
+      }),
+    },
+    ignoreGlobalFilters: {
+      types: ['boolean'],
+      help: i18n.translate('data.search.functions.esaggs.ignoreGlobalFilters.help', {
+        defaultMessage: 'Whether to ignore or use global query and filters',
       }),
     },
   },

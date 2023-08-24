@@ -18,8 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/157017
-  describe.skip('Interactive Setup Functional Tests (Manual configuration)', function () {
+  describe('Interactive Setup Functional Tests (Manual configuration)', function () {
     this.tags('skipCloud');
 
     let verificationCode: string;

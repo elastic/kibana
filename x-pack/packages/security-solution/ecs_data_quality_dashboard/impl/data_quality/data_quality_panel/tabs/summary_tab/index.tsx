@@ -11,6 +11,7 @@ import type {
   FlameElementEvent,
   HeatmapElementEvent,
   MetricElementEvent,
+  PartialTheme,
   PartitionElementEvent,
   Theme,
   WordCloudElementEvent,
@@ -42,13 +43,15 @@ interface Props {
   };
   ilmPhase: IlmPhase | undefined;
   indexName: string;
+  isAssistantEnabled: boolean;
   onAddToNewCase: (markdownComments: string[]) => void;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   pattern: string;
   patternDocsCount: number;
   setSelectedTabId: (tabId: string) => void;
   sizeInBytes: number | undefined;
-  theme: Theme;
+  theme?: PartialTheme;
+  baseTheme: Theme;
 }
 
 const SummaryTabComponent: React.FC<Props> = ({
@@ -60,6 +63,7 @@ const SummaryTabComponent: React.FC<Props> = ({
   getGroupByFieldsOnClick,
   ilmPhase,
   indexName,
+  isAssistantEnabled,
   onAddToNewCase,
   partitionedFieldMetadata,
   pattern,
@@ -67,6 +71,7 @@ const SummaryTabComponent: React.FC<Props> = ({
   setSelectedTabId,
   sizeInBytes,
   theme,
+  baseTheme,
 }) => (
   <>
     <CalloutSummary
@@ -77,6 +82,7 @@ const SummaryTabComponent: React.FC<Props> = ({
       docsCount={docsCount}
       ilmPhase={ilmPhase}
       indexName={indexName}
+      isAssistantEnabled={isAssistantEnabled}
       onAddToNewCase={onAddToNewCase}
       partitionedFieldMetadata={partitionedFieldMetadata}
       pattern={pattern}
@@ -90,6 +96,7 @@ const SummaryTabComponent: React.FC<Props> = ({
       partitionedFieldMetadata={partitionedFieldMetadata}
       setSelectedTabId={setSelectedTabId}
       theme={theme}
+      baseTheme={baseTheme}
     />
   </>
 );

@@ -14,6 +14,7 @@ import {
   type FleetAuthzRouter,
   getRouteRequiredAuthz,
 } from '../../services/security';
+import type { FleetAuthzRouteConfig } from '../../services/security/types';
 
 import type {
   DeletePackageResponse,
@@ -27,9 +28,11 @@ import { splitPkgKey } from '../../services/epm/registry';
 import {
   GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
+  GetInstalledPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
   GetInfoRequestSchemaDeprecated,
+  GetBulkAssetsRequestSchema,
   InstallPackageFromRegistryRequestSchema,
   InstallPackageFromRegistryRequestSchemaDeprecated,
   InstallPackageByUploadRequestSchema,
@@ -40,14 +43,18 @@ import {
   UpdatePackageRequestSchema,
   UpdatePackageRequestSchemaDeprecated,
   ReauthorizeTransformRequestSchema,
+  GetDataStreamsRequestSchema,
+  CreateCustomIntegrationRequestSchema,
 } from '../../types';
 
 import {
   getCategoriesHandler,
   getListHandler,
+  getInstalledListHandler,
   getLimitedListHandler,
   getFileHandler,
   getInfoHandler,
+  getBulkAssetsHandler,
   installPackageFromRegistryHandler,
   installPackageByUploadHandler,
   deletePackageHandler,
@@ -56,18 +63,26 @@ import {
   updatePackageHandler,
   getVerificationKeyIdHandler,
   reauthorizeTransformsHandler,
+  getDataStreamsHandler,
+  createCustomIntegrationHandler,
 } from './handlers';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
+
+export const INSTALL_PACKAGES_AUTHZ: FleetAuthzRouteConfig['fleetAuthz'] = {
+  integrations: { installPackages: true },
+};
+
+export const READ_PACKAGE_INFO_AUTHZ: FleetAuthzRouteConfig['fleetAuthz'] = {
+  integrations: { readPackageInfo: true },
+};
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
   router.get(
     {
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
       validate: GetCategoriesRequestSchema,
-      fleetAuthz: {
-        integrations: { readPackageInfo: true },
-      },
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
     },
     getCategoriesHandler
   );
@@ -76,20 +91,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: EPM_API_ROUTES.LIST_PATTERN,
       validate: GetPackagesRequestSchema,
-      fleetAuthz: {
-        integrations: { readPackageInfo: true },
-      },
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
     },
     getListHandler
   );
 
   router.get(
     {
+      path: EPM_API_ROUTES.INSTALLED_LIST_PATTERN,
+      validate: GetInstalledPackagesRequestSchema,
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+    },
+    getInstalledListHandler
+  );
+
+  router.get(
+    {
       path: EPM_API_ROUTES.LIMITED_LIST_PATTERN,
       validate: false,
-      fleetAuthz: {
-        integrations: { readPackageInfo: true },
-      },
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
     },
     getLimitedListHandler
   );
@@ -98,9 +118,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: EPM_API_ROUTES.STATS_PATTERN,
       validate: GetStatsRequestSchema,
-      fleetAuthz: {
-        integrations: { readPackageInfo: true },
-      },
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
     },
     getStatsHandler
   );
@@ -109,9 +127,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: EPM_API_ROUTES.FILEPATH_PATTERN,
       validate: GetFileRequestSchema,
-      fleetAuthz: {
-        integrations: { readPackageInfo: true },
-      },
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
     },
     getFileHandler
   );
@@ -142,9 +158,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN,
       validate: InstallPackageFromRegistryRequestSchema,
-      fleetAuthz: {
-        integrations: { installPackages: true },
-      },
+      fleetAuthz: INSTALL_PACKAGES_AUTHZ,
     },
     installPackageFromRegistryHandler
   );
@@ -179,6 +193,15 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     installPackageByUploadHandler
   );
 
+  router.post(
+    {
+      path: EPM_API_ROUTES.CUSTOM_INTEGRATIONS_PATTERN,
+      validate: CreateCustomIntegrationRequestSchema,
+      fleetAuthz: INSTALL_PACKAGES_AUTHZ,
+    },
+    createCustomIntegrationHandler
+  );
+
   router.delete(
     {
       path: EPM_API_ROUTES.DELETE_PATTERN,
@@ -194,11 +217,27 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: EPM_API_ROUTES.VERIFICATION_KEY_ID,
       validate: false,
-      fleetAuthz: {
-        integrations: { readPackageInfo: true },
-      },
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
     },
     getVerificationKeyIdHandler
+  );
+
+  router.get(
+    {
+      path: EPM_API_ROUTES.DATA_STREAMS_PATTERN,
+      validate: GetDataStreamsRequestSchema,
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+    },
+    getDataStreamsHandler
+  );
+
+  router.post(
+    {
+      path: EPM_API_ROUTES.BULK_ASSETS_PATTERN,
+      validate: GetBulkAssetsRequestSchema,
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+    },
+    getBulkAssetsHandler
   );
 
   // deprecated since 8.0
@@ -253,9 +292,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN_DEPRECATED,
       validate: InstallPackageFromRegistryRequestSchemaDeprecated,
-      fleetAuthz: {
-        integrations: { installPackages: true },
-      },
+      fleetAuthz: INSTALL_PACKAGES_AUTHZ,
     },
     async (context, request, response) => {
       const newRequest = {
@@ -304,7 +341,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: EPM_API_ROUTES.REAUTHORIZE_TRANSFORMS,
       validate: ReauthorizeTransformRequestSchema,
       fleetAuthz: {
-        integrations: { installPackages: true },
+        ...INSTALL_PACKAGES_AUTHZ,
         packagePrivileges: {
           transform: {
             actions: {

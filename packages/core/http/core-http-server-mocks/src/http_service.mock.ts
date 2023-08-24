@@ -153,7 +153,6 @@ const createInternalSetupContractMock = () => {
     auth: createAuthMock(),
     authRequestHeaders: createAuthHeaderStorageMock(),
     getServerInfo: jest.fn(),
-    registerPrebootRoutes: jest.fn(),
     registerRouterAfterListening: jest.fn(),
     getRegisteredRouters: jest.fn(),
   };

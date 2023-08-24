@@ -65,6 +65,7 @@ export const TimeFilter = ({ filter, commit, dateFormat, commonlyUsedRanges = []
   return (
     <div className="canvasTimeFilter">
       <EuiSuperDatePicker
+        width="full"
         start={start}
         end={end}
         isPaused={false}

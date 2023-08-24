@@ -88,6 +88,15 @@ export async function createOrUpdatePreconfiguredOutputs(
       }
 
       const isCreate = !existingOutput;
+
+      // field in allow edit are not updated through preconfiguration
+      if (!isCreate && output.allow_edit) {
+        for (const key of output.allow_edit) {
+          // @ts-expect-error
+          data[key] = existingOutput[key];
+        }
+      }
+
       const isUpdateWithNewData =
         existingOutput && isPreconfiguredOutputDifferentFromCurrent(existingOutput, data);
 
@@ -159,6 +168,34 @@ function isPreconfiguredOutputDifferentFromCurrent(
   existingOutput: Output,
   preconfiguredOutput: Partial<Output>
 ): boolean {
+  const kafkaFieldsAreDifferent = (): boolean => {
+    if (existingOutput.type !== 'kafka' || preconfiguredOutput.type !== 'kafka') {
+      return false;
+    }
+
+    return (
+      isDifferent(existingOutput.client_id, preconfiguredOutput.client_id) ||
+      isDifferent(existingOutput.version, preconfiguredOutput.version) ||
+      isDifferent(existingOutput.key, preconfiguredOutput.key) ||
+      isDifferent(existingOutput.compression, preconfiguredOutput.compression) ||
+      isDifferent(existingOutput.compression_level, preconfiguredOutput.compression_level) ||
+      isDifferent(existingOutput.auth_type, preconfiguredOutput.auth_type) ||
+      isDifferent(existingOutput.connection_type, preconfiguredOutput.connection_type) ||
+      isDifferent(existingOutput.username, preconfiguredOutput.username) ||
+      isDifferent(existingOutput.password, preconfiguredOutput.password) ||
+      isDifferent(existingOutput.sasl, preconfiguredOutput.sasl) ||
+      isDifferent(existingOutput.partition, preconfiguredOutput.partition) ||
+      isDifferent(existingOutput.random, preconfiguredOutput.random) ||
+      isDifferent(existingOutput.round_robin, preconfiguredOutput.round_robin) ||
+      isDifferent(existingOutput.hash, preconfiguredOutput.hash) ||
+      isDifferent(existingOutput.topics, preconfiguredOutput.topics) ||
+      isDifferent(existingOutput.headers, preconfiguredOutput.headers) ||
+      isDifferent(existingOutput.timeout, preconfiguredOutput.timeout) ||
+      isDifferent(existingOutput.broker_timeout, preconfiguredOutput.broker_timeout) ||
+      isDifferent(existingOutput.required_acks, preconfiguredOutput.required_acks)
+    );
+  };
+
   return (
     !existingOutput.is_preconfigured ||
     isDifferent(existingOutput.is_default, preconfiguredOutput.is_default) ||
@@ -181,6 +218,8 @@ function isPreconfiguredOutputDifferentFromCurrent(
       preconfiguredOutput.ca_trusted_fingerprint
     ) ||
     isDifferent(existingOutput.config_yaml, preconfiguredOutput.config_yaml) ||
-    isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id)
+    isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id) ||
+    isDifferent(existingOutput.allow_edit ?? [], preconfiguredOutput.allow_edit ?? []) ||
+    kafkaFieldsAreDifferent()
   );
 }

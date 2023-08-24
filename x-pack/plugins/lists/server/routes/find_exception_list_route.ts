@@ -7,14 +7,14 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  FindExceptionListSchemaDecoded,
-  findExceptionListSchema,
-  foundExceptionListSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
+import {
+  FindExceptionListRequestQueryDecoded,
+  findExceptionListRequestQuery,
+  findExceptionListResponse,
+} from '../../common/api';
 
 import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 
@@ -26,9 +26,10 @@ export const findExceptionListRoute = (router: ListsPluginRouter): void => {
       },
       path: `${EXCEPTION_LIST_URL}/_find`,
       validate: {
-        query: buildRouteValidation<typeof findExceptionListSchema, FindExceptionListSchemaDecoded>(
-          findExceptionListSchema
-        ),
+        query: buildRouteValidation<
+          typeof findExceptionListRequestQuery,
+          FindExceptionListRequestQueryDecoded
+        >(findExceptionListRequestQuery),
       },
     },
     async (context, request, response) => {
@@ -53,7 +54,7 @@ export const findExceptionListRoute = (router: ListsPluginRouter): void => {
           sortField,
           sortOrder,
         });
-        const [validated, errors] = validate(exceptionListItems, foundExceptionListSchema);
+        const [validated, errors] = validate(exceptionListItems, findExceptionListResponse);
         if (errors != null) {
           return siemResponse.error({ body: errors, statusCode: 500 });
         } else {

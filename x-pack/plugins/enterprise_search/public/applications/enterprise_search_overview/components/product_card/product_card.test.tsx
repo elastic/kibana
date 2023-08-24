@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { snakeCase } from 'lodash';
 
-import { EuiListGroup, EuiPanel } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 
 import { EuiButtonTo, EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
 
@@ -22,20 +22,10 @@ import { ProductCard, ProductCardProps } from './product_card';
 const MOCK_VALUES: ProductCardProps = {
   cta: 'Click me',
   description: 'Mock description',
-  features: ['first feature', 'second feature'],
   icon: 'logoElasticsearch',
   name: 'Mock product',
   productId: 'mockProduct',
-  resourceLinks: [
-    {
-      label: 'Link one',
-      to: 'https://www.elastic.co/guide/one',
-    },
-    {
-      label: 'Link twwo',
-      to: 'https://www.elastic.co/guide/two',
-    },
-  ],
+  rightPanelItems: [<div />, <div />],
   url: '/app/mock_app',
 };
 
@@ -49,11 +39,29 @@ describe('ProductCard', () => {
     const card = wrapper.find(EuiPanel);
 
     expect(card.find('h3').text()).toEqual(MOCK_VALUES.name);
-    expect(card.find(EuiListGroup).children()).toHaveLength(MOCK_VALUES.features.length);
-    expect(card.find('[data-test-subj="productCard-resources"]').text()).toEqual('Resources');
-    expect(card.find('[data-test-subj="productCard-resourceLinks"]').children()).toHaveLength(
-      MOCK_VALUES.resourceLinks.length
+    expect(card.find('[data-test-subj="productCard-rightPanelItems"]').children()).toHaveLength(
+      MOCK_VALUES.rightPanelItems?.length ?? -1
     );
+
+    const button = card.find(EuiButtonEmptyTo);
+
+    expect(button).toHaveLength(1);
+    expect(button.prop('to')).toEqual(MOCK_VALUES.url);
+    expect(card.find(EuiButtonTo)).toHaveLength(0);
+
+    button.simulate('click');
+
+    expect(mockTelemetryActions.sendEnterpriseSearchTelemetry).toHaveBeenCalledWith({
+      action: 'clicked',
+      metric: snakeCase(MOCK_VALUES.productId),
+    });
+  });
+
+  it('renders a product card without panel', () => {
+    const wrapper = shallow(<ProductCard {...MOCK_VALUES} rightPanelItems={undefined} />);
+    const card = wrapper.find(EuiPanel);
+
+    expect(card.find('[data-test-subj="productCard-rightPanelItems"]')).toHaveLength(0);
 
     const button = card.find(EuiButtonEmptyTo);
 

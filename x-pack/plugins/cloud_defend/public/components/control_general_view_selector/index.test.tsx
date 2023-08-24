@@ -5,12 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { act, render, waitFor } from '@testing-library/react';
+import { act, render, waitFor, fireEvent } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
 import { ControlGeneralViewSelector } from '.';
-import { Selector } from '../../types';
+import { Selector } from '../../../common';
 import { getSelectorConditions } from '../../common/utils';
 import * as i18n from '../control_general_view/translations';
 
@@ -22,20 +22,32 @@ describe('<ControlGeneralViewSelector />', () => {
   // defining this here to avoid a warning in testprovider with params.history changing on rerender.
   const params = coreMock.createAppMountParameters();
 
-  const mockSelector: Selector = {
+  const mockFileSelector: Selector = {
     type: 'file',
-    name: 'mock',
+    name: 'mockFile',
     operation: ['createExecutable'],
   };
 
-  const mockSelector2: Selector = {
+  const mockFileSelector2: Selector = {
     type: 'file',
-    name: 'mock2',
+    name: 'mockFile2',
     operation: ['createExecutable', 'modifyExecutable'],
   };
 
+  const mockProcessSelector: Selector = {
+    type: 'process',
+    name: 'mockProcess',
+    operation: ['exec'],
+  };
+
+  const mockProcessSelector2: Selector = {
+    type: 'process',
+    name: 'mockProcess2',
+    operation: [],
+  };
+
   const WrappedComponent = ({
-    selector = { ...mockSelector },
+    selector = { ...mockFileSelector },
     selectors,
   }: {
     selector?: Selector;
@@ -44,7 +56,7 @@ describe('<ControlGeneralViewSelector />', () => {
     return (
       <TestProvider params={params}>
         <ControlGeneralViewSelector
-          selectors={selectors || [selector, mockSelector2]}
+          selectors={selectors || [selector, { ...mockFileSelector2 }]}
           selector={selector}
           index={0}
           onChange={onChange}
@@ -69,13 +81,26 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(getByTestId('cloud-defend-selectorcondition-operation')).toBeTruthy();
   });
 
+  it('allows the user to change a selector name', () => {
+    const { getByTestId } = render(<WrappedComponent />);
+
+    const input = getByTestId('cloud-defend-selectorcondition-name');
+    input.focus();
+
+    fireEvent.change(input, { target: { value: 'newName' } });
+
+    const updatedSelector: Selector = onChange.mock.calls[0][0];
+
+    expect(updatedSelector.name).toEqual('newName');
+  });
+
   it('renders a badge to show that the selector is unused', () => {
     const { getByText } = render(<WrappedComponent />);
 
     expect(getByText(i18n.unusedSelector)).toBeTruthy();
   });
 
-  it('allows the user to add a limited set of operations', () => {
+  it('allows the user to add a limited set of file operations', () => {
     const { getByTestId, rerender } = render(<WrappedComponent />);
 
     getByTestId('cloud-defend-selectorcondition-operation').click();
@@ -105,6 +130,36 @@ describe('<ControlGeneralViewSelector />', () => {
       'comboBoxOptionsList cloud-defend-selectorcondition-operation-optionsList'
     ).querySelectorAll('.euiComboBoxOption__content');
     expect(updatedOptions).toHaveLength(3);
+  });
+
+  it('allows the user to add a limited set of process operations', () => {
+    const { getByTestId, rerender } = render(<WrappedComponent selector={mockProcessSelector2} />);
+
+    getByTestId('cloud-defend-selectorcondition-operation').click();
+    getByTestId('comboBoxSearchInput').focus();
+
+    const options = getByTestId(
+      'comboBoxOptionsList cloud-defend-selectorcondition-operation-optionsList'
+    ).querySelectorAll('.euiComboBoxOption__content');
+    expect(options).toHaveLength(2);
+    expect(options[0].textContent).toBe('fork');
+    expect(options[1].textContent).toBe('exec');
+
+    act(() => {
+      userEvent.click(options[1]); // select exec
+    });
+
+    const updatedSelector: Selector = onChange.mock.calls[0][0];
+
+    rerender(<WrappedComponent selector={updatedSelector} />);
+
+    expect(updatedSelector.operation).toContain('exec');
+
+    // test that only 1 option is remaining
+    const updatedOptions = getByTestId(
+      'comboBoxOptionsList cloud-defend-selectorcondition-operation-optionsList'
+    ).querySelectorAll('.euiComboBoxOption__content');
+    expect(updatedOptions).toHaveLength(1);
   });
 
   it('allows the user add additional conditions', async () => {
@@ -222,6 +277,216 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(getByText('"targetFilePath" values cannot exceed 255 bytes')).toBeTruthy();
   });
 
+  it('validates targetFilePath conditions values', async () => {
+    const { findByText, getByText, getByTestId, rerender } = render(<WrappedComponent />);
+
+    const addConditionBtn = getByTestId('cloud-defend-btnaddselectorcondition');
+    addConditionBtn.click();
+
+    await waitFor(() => getByText('Target file path').click());
+
+    let updatedSelector: Selector = onChange.mock.calls[0][0];
+
+    rerender(<WrappedComponent selector={updatedSelector} />);
+
+    const el = getByTestId('cloud-defend-selectorcondition-targetFilePath').querySelector('input');
+
+    const errorStr = i18n.errorInvalidTargetFilePath;
+
+    if (el) {
+      userEvent.type(el, '/usr/bin/**{enter}');
+    } else {
+      throw new Error("Can't find input");
+    }
+
+    updatedSelector = onChange.mock.calls[1][0];
+    expect(updatedSelector.hasErrors).toBeFalsy();
+    rerender(<WrappedComponent selector={updatedSelector} />);
+    expect(findByText(errorStr)).toMatchObject({});
+
+    userEvent.type(el, '/*{enter}');
+    updatedSelector = onChange.mock.calls[2][0];
+    expect(updatedSelector.hasErrors).toBeFalsy();
+    rerender(<WrappedComponent selector={updatedSelector} />);
+    expect(findByText(errorStr)).toMatchObject({});
+
+    userEvent.type(el, 'badpath{enter}');
+    updatedSelector = onChange.mock.calls[3][0];
+    expect(updatedSelector.hasErrors).toBeTruthy();
+    rerender(<WrappedComponent selector={updatedSelector} />);
+    expect(getByText(errorStr)).toBeTruthy();
+
+    userEvent.type(el, ' {enter}');
+    updatedSelector = onChange.mock.calls[4][0];
+    expect(updatedSelector.hasErrors).toBeTruthy();
+    rerender(<WrappedComponent selector={updatedSelector} />);
+    expect(getByText('"targetFilePath" values cannot be empty')).toBeTruthy();
+  });
+
+  it('validates processExecutable conditions values', async () => {
+    const { findByText, getByText, getByTestId, rerender } = render(
+      <WrappedComponent selector={mockProcessSelector} />
+    );
+
+    const addConditionBtn = getByTestId('cloud-defend-btnaddselectorcondition');
+    addConditionBtn.click();
+
+    await waitFor(() => getByText('Process executable').click());
+
+    let updatedSelector: Selector = onChange.mock.calls[0][0];
+
+    rerender(<WrappedComponent selector={updatedSelector} />);
+
+    const el = getByTestId('cloud-defend-selectorcondition-processExecutable').querySelector(
+      'input'
+    );
+
+    const regexError = i18n.errorInvalidProcessExecutable;
+
+    if (el) {
+      userEvent.type(el, '/usr/bin/**{enter}');
+    } else {
+      throw new Error("Can't find input");
+    }
+
+    updatedSelector = onChange.mock.calls[1][0];
+    expect(updatedSelector.hasErrors).toBeFalsy();
+    rerender(<WrappedComponent selector={updatedSelector} />);
+    expect(findByText(regexError)).toMatchObject({});
+
+    userEvent.type(el, '/*{enter}');
+    updatedSelector = onChange.mock.calls[2][0];
+    expect(updatedSelector.hasErrors).toBeFalsy();
+    rerender(<WrappedComponent selector={updatedSelector} />);
+    expect(findByText(regexError)).toMatchObject({});
+
+    userEvent.type(el, '/usr/bin/ls{enter}');
+    updatedSelector = onChange.mock.calls[3][0];
+    expect(updatedSelector.hasErrors).toBeFalsy();
+    rerender(<WrappedComponent selector={updatedSelector} />);
+    expect(findByText(regexError)).toMatchObject({});
+
+    userEvent.type(el, 'badpath{enter}');
+    updatedSelector = onChange.mock.calls[4][0];
+    expect(updatedSelector.hasErrors).toBeTruthy();
+    rerender(<WrappedComponent selector={updatedSelector} />);
+    expect(getByText(regexError)).toBeTruthy();
+
+    userEvent.type(el, ' {enter}');
+    updatedSelector = onChange.mock.calls[4][0];
+    expect(updatedSelector.hasErrors).toBeTruthy();
+    rerender(<WrappedComponent selector={updatedSelector} />);
+    expect(getByText('"processExecutable" values cannot be empty')).toBeTruthy();
+  });
+
+  it('validates containerImageFullName conditions values', async () => {
+    const { findByText, getByText, getByTestId, rerender } = render(<WrappedComponent />);
+
+    const addConditionBtn = getByTestId('cloud-defend-btnaddselectorcondition');
+    addConditionBtn.click();
+
+    await waitFor(() => getByText('Container image full name').click());
+
+    let updatedSelector: Selector = onChange.mock.calls[0][0];
+
+    rerender(<WrappedComponent selector={updatedSelector} />);
+
+    const el = getByTestId('cloud-defend-selectorcondition-containerImageFullName').querySelector(
+      'input'
+    );
+
+    const regexError = i18n.errorInvalidFullContainerImageName;
+
+    if (el) {
+      userEvent.type(el, 'docker.io/nginx{enter}');
+      userEvent.type(el, 'docker.io/nginx-dev{enter}');
+      userEvent.type(el, 'docker.io/nginx.dev{enter}');
+      userEvent.type(el, '127.0.0.1:8080/nginx_dev{enter}');
+    } else {
+      throw new Error("Can't find input");
+    }
+
+    updatedSelector = onChange.mock.calls[1][0];
+    rerender(<WrappedComponent selector={updatedSelector} />);
+
+    expect(findByText(regexError)).toMatchObject({});
+
+    userEvent.type(el, 'nginx{enter}');
+    updatedSelector = onChange.mock.calls[5][0];
+    rerender(<WrappedComponent selector={updatedSelector} />);
+
+    expect(getByText(regexError)).toBeTruthy();
+  });
+
+  it('validates kubernetesPodLabel conditions values', async () => {
+    const { findByText, getByText, getByTestId, rerender } = render(<WrappedComponent />);
+
+    const addConditionBtn = getByTestId('cloud-defend-btnaddselectorcondition');
+    addConditionBtn.click();
+
+    await waitFor(() => getByText('Kubernetes pod label').click());
+
+    let updatedSelector: Selector = onChange.mock.calls[0][0];
+
+    rerender(<WrappedComponent selector={updatedSelector} />);
+
+    const el = getByTestId('cloud-defend-selectorcondition-kubernetesPodLabel').querySelector(
+      'input'
+    );
+
+    const errorStr = i18n.errorInvalidPodLabel;
+
+    if (el) {
+      userEvent.type(el, 'key1:value1{enter}');
+    } else {
+      throw new Error("Can't find input");
+    }
+
+    updatedSelector = onChange.mock.calls[1][0];
+    rerender(<WrappedComponent selector={updatedSelector} />);
+
+    expect(findByText(errorStr)).toMatchObject({});
+
+    userEvent.type(el, 'key1:value*{enter}');
+    updatedSelector = onChange.mock.calls[2][0];
+    rerender(<WrappedComponent selector={updatedSelector} />);
+
+    userEvent.type(el, 'key1*:value{enter}');
+    updatedSelector = onChange.mock.calls[3][0];
+    rerender(<WrappedComponent selector={updatedSelector} />);
+
+    userEvent.type(el, '{backspace}key1{enter}');
+    updatedSelector = onChange.mock.calls[5][0];
+    rerender(<WrappedComponent selector={updatedSelector} />);
+
+    expect(getByText(errorStr)).toBeTruthy();
+  });
+
+  it('prevents processName conditions from having values that exceed 15 bytes', async () => {
+    const { getByText, getByTestId, rerender } = render(
+      <WrappedComponent selector={mockProcessSelector} />
+    );
+
+    const addConditionBtn = getByTestId('cloud-defend-btnaddselectorcondition');
+    addConditionBtn.click();
+
+    await waitFor(() => getByText('Process name').click());
+
+    const updatedSelector: Selector = onChange.mock.calls[0][0];
+
+    rerender(<WrappedComponent selector={updatedSelector} />);
+
+    const el = getByTestId('cloud-defend-selectorcondition-processName').querySelector('input');
+
+    if (el) {
+      userEvent.type(el, new Array(17).join('a') + '{enter}');
+    } else {
+      throw new Error("Can't find input");
+    }
+
+    expect(getByText('"processName" values cannot exceed 15 bytes')).toBeTruthy();
+  });
+
   it('shows an error if condition values fail their pattern regex', async () => {
     const { getByText, getByTestId, rerender } = render(<WrappedComponent />);
 
@@ -244,7 +509,8 @@ describe('<ControlGeneralViewSelector />', () => {
       throw new Error("Can't find input");
     }
 
-    const expectedError = '"containerImageName" values must match the pattern: /^[a-z0-9]+$/';
+    const expectedError =
+      '"containerImageName" values must match the pattern: /^([a-z0-9]+(?:[._-][a-z0-9]+)*)$/';
 
     expect(getByText(expectedError)).toBeTruthy();
   });
@@ -276,7 +542,7 @@ describe('<ControlGeneralViewSelector />', () => {
 
     onRemove.mockClear();
 
-    rerender(<WrappedComponent selector={mockSelector} selectors={[mockSelector]} />);
+    rerender(<WrappedComponent selector={mockFileSelector} selectors={[mockFileSelector]} />);
 
     // try and delete again, and ensure the last selector can't be deleted.
     btnSelectorPopover.click();
@@ -284,14 +550,25 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(onRemove.mock.calls).toHaveLength(0);
   });
 
-  it('allows the user to duplicate the selector', async () => {
-    const { getByTestId } = render(<WrappedComponent />);
-    const btnSelectorPopover = getByTestId('cloud-defend-btnselectorpopover');
-    btnSelectorPopover.click();
+  it('allows the user to expand/collapse selector', async () => {
+    const { getByText, getByTestId, findByTestId } = render(<WrappedComponent />);
+    const title = getByText(mockFileSelector.name);
+    const selector = getByTestId('cloud-defend-selector');
 
-    await waitFor(() => getByTestId('cloud-defend-btnduplicateselector').click());
+    // should start as closed.
+    // there are two mock selectors, and the last one will auto open
+    expect(selector.querySelector('.euiAccordion-isOpen')).toBeFalsy();
 
-    expect(onDuplicate.mock.calls).toHaveLength(1);
-    expect(onDuplicate.mock.calls[0][0]).toEqual(mockSelector);
+    const count = getByTestId('cloud-defend-conditions-count');
+    expect(count).toBeTruthy();
+    expect(count).toHaveTextContent('1');
+    expect(count.title).toEqual('operation');
+
+    act(() => title.click());
+
+    waitFor(() => expect(selector.querySelector('.euiAccordion-isOpen')).toBeTruthy());
+
+    const noCount = findByTestId('cloud-defend-conditions-count');
+    expect(noCount).toMatchObject({});
   });
 });

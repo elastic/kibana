@@ -52,10 +52,7 @@ export function composeValidators(
 ): (value: any) => { [key: string]: any } | null {
   return (value) => {
     const validationResult = validators.reduce((acc, validator) => {
-      return {
-        ...acc,
-        ...(validator(value) || {}),
-      };
+      return Object.assign(acc, validator(value) || {});
     }, {});
     return Object.keys(validationResult).length > 0 ? validationResult : null;
   };

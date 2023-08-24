@@ -6,15 +6,15 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  DuplicateExceptionListQuerySchemaDecoded,
-  duplicateExceptionListQuerySchema,
-  exceptionListSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
+import {
+  DuplicateExceptionListRequestQueryDecoded,
+  duplicateExceptionListRequestQuery,
+  duplicateExceptionListResponse,
+} from '../../common/api';
 
 import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 
@@ -27,9 +27,9 @@ export const duplicateExceptionsRoute = (router: ListsPluginRouter): void => {
       path: `${EXCEPTION_LIST_URL}/_duplicate`,
       validate: {
         query: buildRouteValidation<
-          typeof duplicateExceptionListQuerySchema,
-          DuplicateExceptionListQuerySchemaDecoded
-        >(duplicateExceptionListQuerySchema),
+          typeof duplicateExceptionListRequestQuery,
+          DuplicateExceptionListRequestQueryDecoded
+        >(duplicateExceptionListRequestQuery),
       },
     },
     async (context, request, response) => {
@@ -76,7 +76,7 @@ export const duplicateExceptionsRoute = (router: ListsPluginRouter): void => {
           });
         }
 
-        const [validated, errors] = validate(duplicatedList, exceptionListSchema);
+        const [validated, errors] = validate(duplicatedList, duplicateExceptionListResponse);
         if (errors != null) {
           return siemResponse.error({ body: errors, statusCode: 500 });
         } else {
