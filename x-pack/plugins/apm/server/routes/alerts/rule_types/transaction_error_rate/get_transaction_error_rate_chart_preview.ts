@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import {
+  getParsedFilterQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import { ApmRuleType } from '../../../../../common/rules/apm_rule_types';
 import {
   SERVICE_NAME,
@@ -29,7 +33,6 @@ import {
   BarSeriesDataMap,
   getFilteredBarSeries,
 } from '../utils/get_filtered_series_for_preview_chart';
-import { getParsedFilterQuery } from '../utils/get_parsed_filtered_query';
 
 export async function getTransactionErrorRateChartPreview({
   config,
@@ -89,7 +92,9 @@ export async function getTransactionErrorRateChartPreview({
         bool: {
           filter: [
             ...termFilterQuery,
-            ...getParsedFilterQuery(searchConfiguration),
+            ...getParsedFilterQuery(
+              searchConfiguration?.query?.query as string
+            ),
             ...rangeQuery(start, end),
             ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions
