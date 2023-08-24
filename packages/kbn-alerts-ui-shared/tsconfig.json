@@ -21,6 +21,6 @@
     "@kbn/core",
     "@kbn/i18n-react",
     "@kbn/alerting-plugin",
-    "@kbn/rrule",
+    "@kbn/rrule"
   ]
 }
