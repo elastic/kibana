@@ -140,6 +140,17 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'postgresql',
   },
   {
+    iconPath: 'salesforce.svg',
+    isBeta: true,
+    isNative: false,
+    isTechPreview: false,
+    keywords: ['salesforce', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.salesforce.name', {
+      defaultMessage: 'Salesforce',
+    }),
+    serviceType: 'salesforce',
+  },
+  {
     iconPath: 'servicenow.svg',
     isBeta: true,
     isNative: true,

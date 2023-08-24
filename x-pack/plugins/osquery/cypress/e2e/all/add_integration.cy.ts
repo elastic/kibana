@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import {
   cleanupPack,
   cleanupAgentPolicy,
@@ -28,11 +29,9 @@ import {
   interceptAgentPolicyId,
   policyContainsIntegration,
 } from '../../tasks/integrations';
-
-import { login } from '../../tasks/login';
 import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
 
-describe('ALL - Add Integration', () => {
+describe('ALL - Add Integration', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   let savedQueryId: string;
 
   before(() => {
@@ -42,7 +41,7 @@ describe('ALL - Add Integration', () => {
   });
 
   beforeEach(() => {
-    login();
+    cy.login('elastic');
   });
 
   after(() => {
@@ -63,7 +62,7 @@ describe('ALL - Add Integration', () => {
     cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGER}"]`).should('exist').click();
   });
 
-  describe('Add and upgrade integration', () => {
+  describe('Add and upgrade integration', { tags: [tag.ESS] }, () => {
     const oldVersion = '0.7.4';
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
@@ -78,7 +77,7 @@ describe('ALL - Add Integration', () => {
       cleanupAgentPolicy(policyId);
     });
 
-    it('should add the old integration and be able to upgrade it', () => {
+    it('should add the old integration and be able to upgrade it', { tags: tag.ESS }, () => {
       cy.visit(createOldOsqueryPath(oldVersion));
       addCustomIntegration(integrationName, policyName);
       policyContainsIntegration(integrationName, policyName);
