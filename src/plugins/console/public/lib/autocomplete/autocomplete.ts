@@ -42,7 +42,8 @@ function isUrlParamsToken(token: { type: string } | null) {
   }
 }
 
-const tracer = (...args) => {
+const tracer = (...args: any[]) => {
+  // @ts-expect-error ts upgrade v4.7.4
   if (window.autocomplete_trace) {
     // eslint-disable-next-line no-console
     console.log.call(
