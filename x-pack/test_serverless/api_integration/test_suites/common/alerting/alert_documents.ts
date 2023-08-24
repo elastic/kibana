@@ -67,6 +67,18 @@ export default function ({ getService }: FtrProviderContext) {
 
       const hits1 = alResp1.hits.hits[0]._source as Record<string, any>;
 
+      expect(new Date(hits1['@timestamp'])).to.be.a(Date);
+      expect(hits1.kibana.alert.flapping_history).to.be.an(Array);
+      expect(hits1.kibana.alert.maintenance_window_ids).to.be.an(Array);
+      expect(typeof hits1.kibana.alert.reason).to.be('string');
+      expect(typeof hits1.kibana.alert.rule.execution.uuid).to.be('string');
+      expect(typeof hits1.kibana.alert.duration).to.be('object');
+      expect(new Date(hits1.kibana.alert.start)).to.be.a(Date);
+      expect(typeof hits1.kibana.alert.time_range).to.be('object');
+      expect(typeof hits1.kibana.alert.uuid).to.be('string');
+      expect(typeof hits1.kibana.alert.url).to.be('string');
+      expect(typeof hits1.kibana.version).to.be('string');
+
       // remove fields we aren't going to compare
       const fields = [
         '@timestamp',
@@ -78,6 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.start',
         'kibana.alert.time_range',
         'kibana.alert.uuid',
+        'kibana.alert.url',
         'kibana.version',
       ];
 
@@ -94,7 +107,6 @@ export default function ({ getService }: FtrProviderContext) {
         kibana: {
           space_ids: ['default'],
           alert: {
-            url: `https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`,
             title: "rule 'always fire' matched query",
             evaluation: {
               conditions: 'Number of matching documents is greater than -1',
