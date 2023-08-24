@@ -36,15 +36,17 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import pRetry from 'p-retry';
 import { renderSummaryTable } from './print_run';
 import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
-import { parseTestFileConfig } from './utils';
+import { isSkipped, parseTestFileConfig } from './utils';
 
 /**
  * Retrieve test files using a glob pattern.
  * If process.env.RUN_ALL_TESTS is true, returns all matching files, otherwise, return files that should be run by this job based on process.env.BUILDKITE_PARALLEL_JOB_COUNT and process.env.BUILDKITE_PARALLEL_JOB
  */
 const retrieveIntegrations = (integrationsPaths: string[]) => {
+  const nonSkippedSpecs = integrationsPaths.filter((filePath) => !isSkipped(filePath));
+
   if (process.env.RUN_ALL_TESTS === 'true') {
-    return integrationsPaths;
+    return nonSkippedSpecs;
   } else {
     // The number of instances of this job were created
     const chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
@@ -55,13 +57,13 @@ const retrieveIntegrations = (integrationsPaths: string[]) => {
       ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
       : 0;
 
-    const integrationsPathsForChunk: string[] = [];
+    const nonSkippedSpecsForChunk: string[] = [];
 
-    for (let i = chunkIndex; i < integrationsPaths.length; i += chunksTotal) {
-      integrationsPathsForChunk.push(integrationsPaths[i]);
+    for (let i = chunkIndex; i < nonSkippedSpecs.length; i += chunksTotal) {
+      nonSkippedSpecsForChunk.push(nonSkippedSpecs[i]);
     }
 
-    return integrationsPathsForChunk;
+    return nonSkippedSpecsForChunk;
   }
 };
 
