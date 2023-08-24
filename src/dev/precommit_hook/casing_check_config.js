@@ -50,6 +50,9 @@ export const IGNORE_FILE_GLOBS = [
   // Required to match the name in the docs.elastic.dev repo.
   'nav-kibana-dev.docnav.json',
 
+  // Match elastic wide naming convention for catalog-info.yaml
+  'catalog-info.yaml',
+
   // filename must match language code which requires capital letters
   '**/translations/*.json',
 

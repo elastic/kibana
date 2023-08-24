@@ -85,6 +85,7 @@ export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionPro
       );
     }
 
+    // @ts-expect-error ts upgrade v4.7.4
     if (isMounted() && OsqueryForm) {
       return (
         <UseField

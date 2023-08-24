@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 
 import { SimplifiedSelectable } from '../../../../../shared/simplified_selectable/simplified_selectable';
 
+import { CrawlCustomSettingsFlyoutDomainConfigLogic } from './crawl_custom_settings_flyout_domain_logic';
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 
 interface CrawlCustomSettingsFlyoutDomainsPanelProps {
@@ -33,7 +34,8 @@ interface CrawlCustomSettingsFlyoutDomainsPanelProps {
 }
 
 export const CrawlCustomSettingsFlyoutDomainsPanelWithLogicProps: React.FC = () => {
-  const { domainUrls, selectedDomainUrls } = useValues(CrawlCustomSettingsFlyoutLogic);
+  const { selectedDomainUrls } = useValues(CrawlCustomSettingsFlyoutLogic);
+  const { domainUrls } = useValues(CrawlCustomSettingsFlyoutDomainConfigLogic);
   const { onSelectDomainUrls } = useActions(CrawlCustomSettingsFlyoutLogic);
 
   return (
