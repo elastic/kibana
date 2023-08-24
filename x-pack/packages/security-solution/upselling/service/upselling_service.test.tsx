@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
-import { SecurityPageName } from '../../../../common';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { UpsellingService } from './upselling_service';
 
 const TestComponent = () => <div>{'TEST component'}</div>;

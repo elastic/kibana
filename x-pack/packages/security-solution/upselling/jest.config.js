@@ -4,5 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { UpsellingService } from './upselling_service';
-export type { PageUpsellings, SectionUpsellings, UpsellingSectionId } from './types';
+
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/security-solution/upselling'],
+};
