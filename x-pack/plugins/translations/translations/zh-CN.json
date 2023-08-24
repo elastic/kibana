@@ -10477,7 +10477,6 @@
     "xpack.cases.caseTable.caseDetailsLinkAria": "单击以访问标题为 {detailName} 的案例",
     "xpack.cases.caseTable.pushLinkAria": "单击可在 {thirdPartyName} 上查看该事件。",
     "xpack.cases.caseTable.selectedCasesTitle": "已选定 {totalRules} 个{totalRules, plural, =1 {案例} other {案例}}",
-    "xpack.cases.caseTable.showingCasesTitle": "正在显示 {totalRules} 个 {totalRules, plural, =1 {案例} other {案例}}",
     "xpack.cases.caseTable.unit": "{totalCount, plural, =1 {案例} other {案例}}",
     "xpack.cases.caseView.actionLabel.selectedThirdParty": "已选择 {thirdParty} 作为事件管理系统",
     "xpack.cases.caseView.actionLabel.viewIncident": "查看 {incidentNumber}",
