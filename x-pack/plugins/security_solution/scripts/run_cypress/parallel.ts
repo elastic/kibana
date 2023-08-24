@@ -117,7 +117,7 @@ export const cli = () => {
 
         // to avoid running too many tests, we limit the number of files to 3
         // we may extend this in the future
-        files = files.slice(0, 5);
+        files = files.slice(0, 3);
       }
 
       if (!files?.length) {
