@@ -126,6 +126,13 @@ export const FALSE_POSITIVES_FIELD_LABEL = i18n.translate(
   }
 );
 
+export const INVESTIGATION_FIELDS_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.investigationFieldsFieldLabel',
+  {
+    defaultMessage: 'Custom highlighted fields',
+  }
+);
+
 export const LICENSE_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.licenseFieldLabel',
   {

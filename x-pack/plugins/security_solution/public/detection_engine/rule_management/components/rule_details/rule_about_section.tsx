@@ -164,6 +164,14 @@ const FalsePositives = ({ falsePositives }: { falsePositives: string[] }) => (
   </EuiText>
 );
 
+interface InvestigationFieldsProps {
+  investigationFields: string[];
+}
+
+const InvestigationFields = ({ investigationFields }: InvestigationFieldsProps) => (
+  <BadgeList badges={investigationFields} />
+);
+
 interface LicenseProps {
   license: string;
 }
@@ -279,6 +287,13 @@ const prepareAboutSectionListItems = (
     aboutSectionListItems.push({
       title: i18n.FALSE_POSITIVES_FIELD_LABEL,
       description: <FalsePositives falsePositives={rule.false_positives} />,
+    });
+  }
+
+  if (rule.investigation_fields && rule.investigation_fields.length > 0) {
+    aboutSectionListItems.push({
+      title: i18n.INVESTIGATION_FIELDS_FIELD_LABEL,
+      description: <InvestigationFields investigationFields={rule.investigation_fields} />,
     });
   }
 
