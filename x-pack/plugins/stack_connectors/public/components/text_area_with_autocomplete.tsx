@@ -120,7 +120,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
         ? { top, left, width, height }
         : old
     );
-  }, [setPopupPosition]);
+  }, [setPopupPosition, textAreaRef]);
 
   useEffect(() => {
     if (!isListOpen) return;
@@ -301,6 +301,14 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
               }
             }, [editAction, index, inputTargetValue, isListOpen, paramsProperty])}
             onClick={useCallback(() => setListOpen(false), [])}
+            onScroll={useCallback(() => {
+              if (
+                textAreaRef.current?.getBoundingClientRect() &&
+                textAreaRef.current.getBoundingClientRect().top > popupPosition.top
+              ) {
+                setListOpen(false);
+              }
+            }, [popupPosition.top])}
           />
         </EuiOutsideClickDetector>
         {matches.length > 0 && isListOpen && (
