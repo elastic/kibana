@@ -22,6 +22,7 @@ describe('getIsExperimentalFeatureEnabled', () => {
         ruleTagFilter: true,
         ruleStatusFilter: true,
         ruleUseExecutionStatus: false,
+        // @ts-expect-error ts upgrade v4.7.4
         ruleKqlBar: true,
       },
     });
