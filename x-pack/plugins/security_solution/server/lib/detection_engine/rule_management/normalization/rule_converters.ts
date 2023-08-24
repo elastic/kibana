@@ -705,6 +705,8 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
     setup: '',
     references: [],
     threat: [],
+    tags: [],
+    author: [],
   };
 
   const ruleResponseSpecificFields = {
