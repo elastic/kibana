@@ -652,6 +652,61 @@ describe('Execution Handler', () => {
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
   });
 
+  test('Stops triggering actions when the number of total queued actions is reached the number of max queued actions', async () => {
+    actionsClient.hasReachedTheQueuedActionsLimit
+      .mockImplementationOnce(() => Promise.resolve(false))
+      .mockImplementationOnce(() => Promise.resolve(false))
+      .mockImplementationOnce(() => Promise.resolve(true));
+    const actions = [
+      {
+        id: '1',
+        group: 'default',
+        actionTypeId: 'test2',
+        params: {
+          foo: true,
+          contextVal: 'My other {{context.value}} goes here',
+          stateVal: 'My other {{state.value}} goes here',
+        },
+      },
+      {
+        id: '2',
+        group: 'default',
+        actionTypeId: 'test2',
+        params: {
+          foo: true,
+          contextVal: 'My other {{context.value}} goes here',
+          stateVal: 'My other {{state.value}} goes here',
+        },
+      },
+      {
+        id: '3',
+        group: 'default',
+        actionTypeId: 'test3',
+        params: {
+          foo: true,
+          contextVal: '{{context.value}} goes here',
+          stateVal: '{{state.value}} goes here',
+        },
+      },
+    ];
+    const executionHandler = new ExecutionHandler(
+      generateExecutionParams({
+        ...defaultExecutionParams,
+        rule: {
+          ...defaultExecutionParams.rule,
+          actions,
+        },
+      })
+    );
+    await executionHandler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
+
+    expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(2);
+    expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(3);
+    expect(ruleRunMetricsStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.PARTIAL);
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(1);
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+  });
+
   test('schedules alerts with recovered actions', async () => {
     const actions = [
       {

@@ -92,6 +92,9 @@ export class RuleRunMetricsStore {
   public getHasReachedAlertLimit = () => {
     return this.state.hasReachedAlertLimit;
   };
+  public getHasReachedQueuedActionsLimit = () => {
+    return this.state.hasReachedQueuedActionsLimit;
+  };
 
   // Setters
   public setSearchMetrics = (searchMetrics: SearchMetrics[]) => {

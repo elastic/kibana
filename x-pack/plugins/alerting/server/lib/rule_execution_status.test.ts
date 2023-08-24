@@ -33,6 +33,7 @@ const executionMetrics = {
   numberOfRecoveredAlerts: 13,
   hasReachedAlertLimit: false,
   triggeredActionsStatus: ActionsCompletion.COMPLETE,
+  hasReachedQueuedActionsLimit: false,
 };
 
 describe('RuleExecutionStatus', () => {
@@ -51,6 +52,7 @@ describe('RuleExecutionStatus', () => {
     expect(received.numberOfNewAlerts).toEqual(expected.numberOfNewAlerts);
     expect(received.hasReachedAlertLimit).toEqual(expected.hasReachedAlertLimit);
     expect(received.triggeredActionsStatus).toEqual(expected.triggeredActionsStatus);
+    expect(received.hasReachedQueuedActionsLimit).toEqual(expected.hasReachedQueuedActionsLimit);
   }
 
   describe('executionStatusFromState()', () => {
@@ -107,6 +109,30 @@ describe('RuleExecutionStatus', () => {
       testExpectedMetrics(metrics!, {
         ...executionMetrics,
         triggeredActionsStatus: ActionsCompletion.PARTIAL,
+      });
+    });
+
+    test('task state with max queued actions warning', () => {
+      const { status, metrics } = executionStatusFromState({
+        alertInstances: { a: {} },
+        metrics: {
+          ...executionMetrics,
+          triggeredActionsStatus: ActionsCompletion.PARTIAL,
+          hasReachedQueuedActionsLimit: true,
+        },
+      });
+      checkDateIsNearNow(status.lastExecutionDate);
+      expect(status.warning).toEqual({
+        message: translations.taskRunner.warning.maxQueuedActions,
+        reason: RuleExecutionStatusWarningReasons.MAX_QUEUED_ACTIONS,
+      });
+      expect(status.status).toBe('warning');
+      expect(status.error).toBe(undefined);
+
+      testExpectedMetrics(metrics!, {
+        ...executionMetrics,
+        triggeredActionsStatus: ActionsCompletion.PARTIAL,
+        hasReachedQueuedActionsLimit: true,
       });
     });
 

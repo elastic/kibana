@@ -3784,3 +3784,12 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
     expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalled();
   });
 });
+
+describe('hasReachedTheQueuedActionsLimit()', () => {
+  test('calls the reachedQueuedActionsLimit function', async () => {
+    await expect(actionsClient.hasReachedTheQueuedActionsLimit()).resolves.toMatchInlineSnapshot(
+      `undefined`
+    );
+    expect(reachedQueuedActionsLimit).toHaveBeenCalled();
+  });
+});
