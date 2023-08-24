@@ -57,12 +57,13 @@ describe('createEsContext', () => {
     expect(esNames).toStrictEqual({
       base: 'test-index',
       dataStream: 'test-index-event-log-1.2.3',
+      ilmPolicy: 'test-index-event-log-policy',
       indexPattern: 'test-index-event-log-*',
       indexTemplate: 'test-index-event-log-1.2.3-template',
     });
   });
 
-  test('should return exist false for esAdapter index template and data stream before initialize', async () => {
+  test('should return exist false for esAdapter ilm policy, index template and data stream before initialize', async () => {
     const context = createEsContext({
       logger,
       indexNameRoot: 'test1',
@@ -83,7 +84,7 @@ describe('createEsContext', () => {
     expect(doesIndexTemplateExist).toBeFalsy();
   });
 
-  test('should return exist true for esAdapter index template and data stream after initialize', async () => {
+  test('should return exist true for esAdapter ilm policy, index template and data stream after initialize', async () => {
     const context = createEsContext({
       logger,
       indexNameRoot: 'test2',
@@ -92,6 +93,11 @@ describe('createEsContext', () => {
     });
     elasticsearchClient.indices.existsTemplate.mockResponse(true);
     context.initialize();
+
+    const doesIlmPolicyExist = await context.esAdapter.doesIlmPolicyExist(
+      context.esNames.ilmPolicy
+    );
+    expect(doesIlmPolicyExist).toBeTruthy();
 
     elasticsearchClient.indices.getDataStream.mockResolvedValue(GetDataStreamsResponse);
     const doesDataStreamExist = await context.esAdapter.doesDataStreamExist(
