@@ -17,7 +17,7 @@ describe('Duration Format', () => {
     fixtures: [
       {
         input: 0,
-        output: '0.00 seconds',
+        output: '0 seconds',
       },
       {
         input: -60,
