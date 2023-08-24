@@ -132,7 +132,7 @@ export const updateRuleRoute = (
         // Lazily provide validation to the endpoint
         validate: () => ({
           request: {
-            body: z.object({ data: z.string().describe('this is a placeholder!') }),
+            body: z.object({ data: z.string().describe('I arrived lazily') }),
             params: z.object({ id: z.string() }),
           },
         }),
