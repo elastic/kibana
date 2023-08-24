@@ -95,7 +95,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
         if (
           (t === 'anomaly-detector' && isADEnabled === false) ||
           (t === 'data-frame-analytics' && isDFAEnabled === false) ||
-          (t === 'trained-model' && isNLPEnabled === false)
+          (t === 'trained-model' && isNLPEnabled === false && isDFAEnabled === false)
         ) {
           return false;
         }

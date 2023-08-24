@@ -116,7 +116,7 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
         }
       }
 
-      if (isNLPEnabled && entityTypes?.trained_models) {
+      if ((isDFAEnabled || isNLPEnabled) && entityTypes?.trained_models) {
         const models = await trainedModels.getTrainedModels();
         if (models.length > 0) {
           newOptions.push({

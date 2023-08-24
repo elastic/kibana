@@ -237,14 +237,16 @@ export const NotificationsList: FC = () => {
           defaultMessage: 'Anomaly Detection',
         }),
       });
-    } else if (isDFAEnabled === true) {
+    }
+    if (isDFAEnabled === true) {
       jobTypeOptions.push({
         value: 'data_frame_analytics',
         name: i18n.translate('xpack.ml.notifications.filters.type.dfa', {
           defaultMessage: 'Data Frame Analytics',
         }),
       });
-    } else if (isNLPEnabled === true) {
+    }
+    if (isNLPEnabled === true || isDFAEnabled === true) {
       jobTypeOptions.push({
         value: 'inference',
         name: i18n.translate('xpack.ml.notifications.filters.type.inference', {

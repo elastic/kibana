@@ -180,25 +180,25 @@ export const NODES_DESC = i18n.translate(
 export const FILE_UPLOAD_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.fileUpload.title',
   {
-    defaultMessage: 'File',
+    defaultMessage: 'File data visualizer',
   }
 );
 export const FILE_UPLOAD_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.fileUpload.desc',
   {
-    defaultMessage: 'File page',
+    defaultMessage: 'File data visualizer page',
   }
 );
 export const INDEX_DATA_VISUALIZER_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.indexDataVisualizer.title',
   {
-    defaultMessage: 'Data view',
+    defaultMessage: 'Data view data visualizer',
   }
 );
 export const INDEX_DATA_VISUALIZER_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.indexDataVisualizer.desc',
   {
-    defaultMessage: 'Data view page',
+    defaultMessage: 'Data view data visualizer page',
   }
 );
 export const LOG_RATE_ANALYSIS_TITLE = i18n.translate(

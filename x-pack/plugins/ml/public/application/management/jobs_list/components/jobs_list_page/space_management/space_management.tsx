@@ -218,7 +218,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
         content: getTable(),
       });
     }
-    if (isNLPEnabled === true) {
+    if (isNLPEnabled === true || isDFAEnabled === true) {
       tempTabs.push({
         'data-test-subj': 'mlStackManagementTrainedModelsTab',
         id: 'trained-model',
