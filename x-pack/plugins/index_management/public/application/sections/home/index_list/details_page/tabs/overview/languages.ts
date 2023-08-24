@@ -120,7 +120,7 @@ client.bulk(operations=documents)
 };
 
 export const phpDefinition: LanguageDefinition = {
-  id: Languages.CURL,
+  id: Languages.PHP,
   name: i18n.translate('xpack.idxMgmt.indexDetails.languages.php', {
     defaultMessage: 'PHP',
   }),

@@ -187,13 +187,11 @@ export const OverviewTab: React.FunctionComponent<Props> = ({ indexDetails }) =>
         <EuiFlexItem>
           <CodeBox
             languages={languageDefinitions}
-            // TODO update
             codeSnippet={getCodeSnippet(selectedLanguage, 'ingestDataIndex', codeSnippetArguments)}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
             http={core.http}
-            // TODO fix
-            pluginId={'serverlessSearch'}
+            pluginId={'indexManagement'}
             sharePlugin={plugins.share}
             application={core.application}
             // This feature does not appear to work as expected
