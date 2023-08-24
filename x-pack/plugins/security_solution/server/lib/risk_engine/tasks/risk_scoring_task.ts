@@ -29,7 +29,7 @@ import {
   type LatestTaskStateSchema as RiskScoringTaskState,
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
-import { buildScopedInternalSavedObjectsClient, convertRangeToISO } from './helpers';
+import { buildScopedInternalSavedObjectsClientUnsafe, convertRangeToISO } from './helpers';
 import { RiskScoreEntity } from '../../../../common/risk_engine/types';
 
 const logFactory =
@@ -62,7 +62,7 @@ export const registerRiskScoringTask = ({
   const getRiskScoreService: GetRiskScoreService = (namespace) =>
     getStartServices().then(([coreStart, _]) => {
       const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const soClient = buildScopedInternalSavedObjectsClient({ coreStart, namespace });
+      const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
       const riskEngineDataClient = new RiskEngineDataClient({
         logger,
         kibanaVersion,

@@ -51,7 +51,15 @@ const buildFakeScopedRequest = ({
   return request;
 };
 
-export const buildScopedInternalSavedObjectsClient = ({
+/**
+ *  Builds a SavedObjectsClient scoped to the given namespace. This should be used with caution, and only in cases where a real kibana request is not available to build a proper scoped client (e.g. a task manager task).
+ *
+ __Note__: Because the kibana system user cannot access SavedObjects itself, this client does not have the security extension enabled, which has (negative) implications both for logging and for security.
+ * @param coreStart CoreStart plugin context
+ * @param namespace the namespace to which the client should be scoped
+ * @returns a SavedObjectsClient scoped to the given namespace
+ */
+export const buildScopedInternalSavedObjectsClientUnsafe = ({
   coreStart,
   namespace,
 }: {
