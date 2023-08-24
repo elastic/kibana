@@ -16,8 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/164753
-  describe.skip('conflicts', () => {
+  describe('conflicts', () => {
     before(() =>
       esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/conflicts')
     );
