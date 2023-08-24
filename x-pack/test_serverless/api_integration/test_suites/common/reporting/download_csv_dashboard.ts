@@ -7,10 +7,11 @@
 
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
+import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants';
 import { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource_immediate/types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-const TEST_USERNAME = 'test_user';
+const TEST_USERNAME = 'elastic';
 const TEST_USER_PASSWORD = 'changeme';
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
@@ -24,30 +25,35 @@ const getMockJobParams = (obj: object) => {
 export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const supertestSvc = getService('supertest');
-  const reportingAPI = getService('svlReportingAPI');
+  const esArchiver = getService('esArchiver');
 
-  const generateAPI = {
-    getCSVFromSearchSource: async (job: JobParamsDownloadCSV) => {
-      return await supertestSvc
-        .post(`/internal/reporting/generate/immediate/csv_searchsource?elasticInternalOrigin=true`)
-        .auth(TEST_USERNAME, TEST_USER_PASSWORD)
-        .set(...API_HEADER)
-        .set(...INTERNAL_HEADER)
-        .send(job);
-    },
-  };
+  async function getCSVFromSearchSource(job: JobParamsDownloadCSV) {
+    return await supertestSvc
+      .post(INTERNAL_ROUTES.DOWNLOAD_CSV + `?elasticInternalOrigin=true`)
+      .auth(TEST_USERNAME, TEST_USER_PASSWORD)
+      .set(...API_HEADER)
+      .set(...INTERNAL_HEADER)
+      .send(job);
+  }
 
   const fromTime = '2019-06-20T00:00:00.000Z';
   const toTime = '2019-06-25T00:00:00.000Z';
 
   describe('CSV Generation from SearchSource', () => {
+    const logsSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs';
+    const logsDataPath = 'x-pack/test/functional/es_archives/logstash_functional';
+
     before(async () => {
-      await reportingAPI.initEcommerce();
-      await reportingAPI.initLogs();
+      await esArchiver.load(logsDataPath);
+      await kibanaServer.importExport.load(logsSOPath);
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': true,
         'dateFormat:tz': 'UTC',
       });
+    });
+
+    after(async () => {
+      await esArchiver.unload(logsDataPath);
     });
 
     describe('unquoted values', () => {
@@ -64,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
           status: resStatus,
           text: resText,
           type: resType,
-        } = await generateAPI.getCSVFromSearchSource(
+        } = await getCSVFromSearchSource(
           getMockJobParams({
             searchSource: {
               query: { query: '', language: 'kuery' },

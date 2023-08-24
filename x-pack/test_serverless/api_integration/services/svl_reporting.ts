@@ -10,7 +10,6 @@ import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants';
 import expect from '@kbn/expect';
 import type { ReportingJobResponse } from '@kbn/reporting-plugin/server/types';
 import rison from '@kbn/rison';
-import { JobParamsCSV } from '@kbn/reporting-plugin/common/types/export_types/csv_searchsource';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
@@ -32,8 +31,6 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
   const supertest = getService('supertestWithoutAuth');
   const retry = getService('retry');
   const config = getService('config');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
 
   return {
     DATA_ANALYST_PASSWORD,
@@ -135,41 +132,16 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
 
       expect(status).to.be(200);
 
-      return (body as ReportingJobResponse).job.id;
+      return {
+        job: (body as ReportingJobResponse).job,
+        path: (body as ReportingJobResponse).path,
+      };
     },
-    async initEcommerce() {
-      const ecommerceSOPath =
-        'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await kibanaServer.importExport.load(ecommerceSOPath);
-    },
-    async generateCsv(
-      job: JobParamsCSV,
-      username: string = 'test_user',
-      password: string = 'changeme'
-    ) {
-      const jobParams = rison.encode(job);
-      return await supertest
-        .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/csv_searchsource?elasticInternalOrigin=true`)
-        .auth(username, password)
-        .set(...API_HEADER)
-        .set(...INTERNAL_HEADER)
-        .send({ jobParams });
-    },
-    async getCompletedJobOutput(
-      downloadReportPath: string,
-      username: string = 'test_user',
-      password: string = 'changeme'
-    ) {
-      const response = await supertest
-        .get(`${downloadReportPath}?elasticInternalOrigin=true`)
-        .auth(username, password);
-      return response.text as unknown;
-    },
+
     async waitForJobToFinish(
       downloadReportPath: string,
-      username: string = 'test_user',
-      password: string = 'changeme',
+      username: string,
+      password: string,
       options?: { timeout?: number }
     ) {
       await retry.waitForWithTimeout(
@@ -199,10 +171,12 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
         }
       );
     },
-    async initLogs() {
-      const logsSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs';
-      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
-      await kibanaServer.importExport.load(logsSOPath);
+
+    async getCompletedJobOutput(downloadReportPath: string, username: string, password: string) {
+      const response = await supertest
+        .get(`${downloadReportPath}?elasticInternalOrigin=true`)
+        .auth(username, password);
+      return response.text as unknown;
     },
   };
 }

@@ -7,7 +7,6 @@
 
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import expect from '@kbn/expect';
-import { ReportApiJSON } from '@kbn/reporting-plugin/common/types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 // the archived data holds a report created by test_user
@@ -27,86 +26,26 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      // archived reports has canvas workpad
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/es_archives/reporting/ecommerce_search'
+      );
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/es_archives/reporting/ecommerce_search'
+      );
     });
 
     it(`exported CSV file matches snapshot`, async () => {
-      await reportingAPI.initEcommerce();
       const fromTime = '2019-06-20T00:00:00.000Z';
       const toTime = '2019-06-24T00:00:00.000Z';
 
-      const { text: reportApiJson, status } = await reportingAPI.generateCsv({
-        title: 'CSV Report',
-        browserTimezone: 'UTC',
-        objectType: 'search',
-        version: '7.15.0',
-        searchSource: {
-          version: true,
-          query: { query: '', language: 'kuery' },
-          index: '5193f870-d861-11e9-a311-0fa548c5f953',
-          sort: [{ order_date: 'desc' }],
-          fields: ['*'],
-          filter: [],
-          parent: {
-            query: { language: 'kuery', query: '' },
-            filter: [],
-            parent: {
-              filter: [
-                {
-                  meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
-                  range: {
-                    order_date: {
-                      gte: fromTime,
-                      lte: toTime,
-                      format: 'strict_date_optional_time',
-                    },
-                  },
-                },
-              ],
-            },
-          },
-        } as unknown as SerializedSearchSourceFields,
-      });
-      expect(status).to.be(200);
-
-      const { job: report, path: downloadPath } = JSON.parse(reportApiJson) as {
-        job: ReportApiJSON;
-        path: string;
-      };
-      expect(report.created_by).to.be('test_user');
-      expect(report.jobtype).to.be('csv_searchsource');
-
-      // wait for the the pending job to complete
-      await reportingAPI.waitForJobToFinish(downloadPath);
-
-      const csvFile = await reportingAPI.getCompletedJobOutput(downloadPath);
-      expectSnapshot(csvFile).toMatch();
-    });
-
-    describe('with unmapped fields', () => {
-      before(async () => {
-        await esArchiver.loadIfNeeded(
-          'x-pack/test/functional/es_archives/reporting/unmapped_fields'
-        );
-        await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/reporting/unmapped_fields.json'
-        );
-      });
-
-      after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/unmapped_fields');
-        await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/reporting/unmapped_fields.json'
-        );
-      });
-
-      async function generateCsvReport(fields: string[]) {
-        const { text } = await reportingAPI.generateCsv({
+      const { job, path } = await reportingAPI.createReportJobInternal(
+        'csv_searchsource',
+        {
           title: 'CSV Report',
           browserTimezone: 'UTC',
           objectType: 'search',
@@ -114,17 +53,82 @@ export default ({ getService }: FtrProviderContext) => {
           searchSource: {
             version: true,
             query: { query: '', language: 'kuery' },
-            index: '5c620ea0-dc4f-11ec-972a-bf98ce1eebd7',
+            index: '5193f870-d861-11e9-a311-0fa548c5f953',
             sort: [{ order_date: 'desc' }],
-            fields: fields.map((field) => ({ field, include_unmapped: 'true' })),
+            fields: ['*'],
             filter: [],
-          } as SerializedSearchSourceFields,
-        });
+            parent: {
+              query: { language: 'kuery', query: '' },
+              filter: [],
+              parent: {
+                filter: [
+                  {
+                    meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
+                    range: {
+                      order_date: {
+                        gte: fromTime,
+                        lte: toTime,
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+        'elastic',
+        'changeme'
+      );
 
-        const { path } = JSON.parse(text) as { path: string };
-        await reportingAPI.waitForJobToFinish(path);
+      expect(job.created_by).to.be('test_user');
+      expect(job.jobtype).to.be('csv_searchsource');
 
-        return reportingAPI.getCompletedJobOutput(path);
+      // wait for the the pending job to complete
+      await reportingAPI.waitForJobToFinish(path, 'elastic', 'changeme');
+
+      const csvFile = await reportingAPI.getCompletedJobOutput(path, 'elastic', 'changeme');
+      expectSnapshot(csvFile).toMatch();
+    });
+
+    describe('with unmapped fields', () => {
+      const dataArchive = 'x-pack/test/functional/es_archives/reporting/unmapped_fields';
+      const savedObjectsArchive =
+        'x-pack/test/functional/fixtures/kbn_archiver/reporting/unmapped_fields.json';
+
+      before(async () => {
+        await esArchiver.loadIfNeeded(dataArchive);
+        await kibanaServer.importExport.load(savedObjectsArchive);
+      });
+
+      after(async () => {
+        await esArchiver.unload(dataArchive);
+        await kibanaServer.importExport.unload(savedObjectsArchive);
+      });
+
+      async function generateCsvReport(fields: string[]) {
+        const { path } = await reportingAPI.createReportJobInternal(
+          'csv_searchsource',
+          {
+            title: 'CSV Report',
+            browserTimezone: 'UTC',
+            objectType: 'search',
+            version: '7.15.0',
+            searchSource: {
+              version: true,
+              query: { query: '', language: 'kuery' },
+              index: '5c620ea0-dc4f-11ec-972a-bf98ce1eebd7',
+              sort: [{ order_date: 'desc' }],
+              fields: fields.map((field) => ({ field, include_unmapped: 'true' })),
+              filter: [],
+            } as SerializedSearchSourceFields,
+          },
+          'elastic',
+          'changeme'
+        );
+
+        await reportingAPI.waitForJobToFinish(path, 'elastic', 'changeme');
+        return reportingAPI.getCompletedJobOutput(path, 'elastic', 'changeme');
       }
 
       it('includes an unmapped field to the report', async () => {
