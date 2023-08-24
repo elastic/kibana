@@ -46,7 +46,8 @@ export default async () => {
         'xpack.security.authc.realms.jwt.jwt1.order=-98',
         `xpack.security.authc.realms.jwt.jwt1.token_type=access_token`,
         'xpack.security.authc.realms.jwt.jwt1.client_authentication.type=shared_secret',
-        `xpack.security.authc.realms.jwt.jwt1.client_authentication.shared_secret=my_super_secret`,
+        // We need a side loaded Elasticsearch keystore for this secret
+        // `xpack.security.authc.realms.jwt.jwt1.client_authentication.shared_secret=my_super_secret`,
         `xpack.security.authc.realms.jwt.jwt1.allowed_issuer=https://kibana.elastic.co/jwt/`,
         `xpack.security.authc.realms.jwt.jwt1.allowed_subjects=elastic-agent`,
         'xpack.security.authc.realms.jwt.jwt1.allowed_audiences=elasticsearch',
