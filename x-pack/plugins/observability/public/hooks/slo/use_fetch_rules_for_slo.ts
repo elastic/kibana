@@ -21,8 +21,10 @@ interface Params {
   sloIds?: SloId[];
 }
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type SloRule = { sloId: string; name: string };
+export interface SloRule extends Record<string, unknown> {
+  sloId: string;
+  name: string;
+}
 
 interface RuleApiResponse {
   page: number;

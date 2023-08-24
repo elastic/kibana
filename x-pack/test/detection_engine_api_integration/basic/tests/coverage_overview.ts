@@ -37,6 +37,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
           .send({})
           .expect(200);
 
@@ -56,6 +57,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
           .send({})
           .expect(200);
 
@@ -81,6 +83,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
           .send({})
           .expect(200);
 
@@ -112,6 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               filter: {
                 search_term: 'TA002',
@@ -148,6 +152,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               filter: {
                 search_term: 'T002',
@@ -184,6 +189,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               filter: {
                 search_term: 'T002.002',
@@ -217,6 +223,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               filter: {
                 search_term: 'rule-2',
@@ -249,6 +256,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               filter: {
                 search_term: 'index-pattern-2',
@@ -283,6 +291,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               filter: {
                 activity: ['disabled'],
@@ -319,6 +328,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               filter: {
                 activity: ['enabled'],
@@ -357,6 +367,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               filter: {
                 activity: ['enabled', 'disabled'],
@@ -406,6 +417,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               filter: {
                 source: ['custom'],
