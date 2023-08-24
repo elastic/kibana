@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
    */
   describe('Network Policy', () => {
     before(async () => {
-      await reportingAPI.initCanvasLogs(); // includes a canvas worksheet with an offending image URL
+      await reportingAPI.initLogs(); // includes a canvas worksheet with an offending image URL
     });
 
     after(async () => {

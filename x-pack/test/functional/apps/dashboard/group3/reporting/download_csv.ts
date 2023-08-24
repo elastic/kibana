@@ -176,8 +176,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const dashboardWithScriptedFieldsSearch = 'names dashboard';
 
       before(async () => {
-        // includes a canvas workpad in the logs
-        await reporting.initCanvasLogs();
+        await reporting.initLogs();
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata');
 
         await navigateToDashboardApp();
