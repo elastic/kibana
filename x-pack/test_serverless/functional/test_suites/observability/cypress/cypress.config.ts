@@ -6,6 +6,14 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
+import { kbnTestConfig } from '@kbn/test';
+import Url from 'url';
+
+const kibanaUrlWithoutAuth = Url.format({
+  protocol: kbnTestConfig.getUrlParts().protocol,
+  hostname: kbnTestConfig.getUrlParts().hostname,
+  port: kbnTestConfig.getUrlParts().port,
+});
 
 export default defineCypressConfig({
   fileServerFolder: './cypress',
@@ -27,8 +35,13 @@ export default defineCypressConfig({
   },
   e2e: {
     experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
-    baseUrl: 'http://localhost:5620',
+    baseUrl: kibanaUrlWithoutAuth,
     supportFile: './support/e2e.ts',
     specPattern: './e2e/**/*.cy.ts',
+  },
+  env: {
+    KIBANA_URL: kibanaUrlWithoutAuth,
+    KIBANA_USERNAME: kbnTestConfig.getUrlParts().username,
+    KIBANA_PASSWORD: kbnTestConfig.getUrlParts().password,
   },
 });
