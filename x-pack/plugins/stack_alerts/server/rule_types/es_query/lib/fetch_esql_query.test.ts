@@ -58,7 +58,7 @@ describe('fetchEsqlQuery', () => {
 
     it('should generate the correct query', async () => {
       const params = defaultParams;
-      const { query, dateStart, dateEnd } = getEsqlQuery(dataViewMock, params);
+      const { query, dateStart, dateEnd } = getEsqlQuery(dataViewMock, params, undefined);
 
       expect(query).toMatchInlineSnapshot(`
         Object {
@@ -69,7 +69,7 @@ describe('fetchEsqlQuery', () => {
                   "range": Object {
                     "time": Object {
                       "format": "strict_date_optional_time",
-                      "gte": "2020-02-09T23:10:41.941Z",
+                      "gt": "2020-02-09T23:10:41.941Z",
                       "lte": "2020-02-09T23:15:41.941Z",
                     },
                   },
@@ -97,7 +97,7 @@ describe('fetchEsqlQuery', () => {
                   "range": Object {
                     "time": Object {
                       "format": "strict_date_optional_time",
-                      "gte": "2020-02-09T23:10:41.941Z",
+                      "gt": "2020-02-09T23:10:41.941Z",
                       "lte": "2020-02-09T23:15:41.941Z",
                     },
                   },

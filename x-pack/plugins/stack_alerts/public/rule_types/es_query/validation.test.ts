@@ -304,4 +304,37 @@ describe('expression params validation', () => {
     expect(validateExpression(initialParams).errors.timeField.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.timeField[0]).toBe('Time field is required.');
   });
+
+  test('if esqlQuery thresholdComparator property is not gt should return proper error message', () => {
+    const initialParams = {
+      size: 100,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      esqlQuery: { esql: 'test' },
+      searchType: SearchType.esqlQuery,
+      thresholdComparator: '<',
+      timeField: '@timestamp',
+    } as EsQueryRuleParams<SearchType.esqlQuery>;
+    expect(validateExpression(initialParams).errors.thresholdComparator.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.thresholdComparator[0]).toBe(
+      'Threshold comparator is required to be greater than.'
+    );
+  });
+
+  test('if esqlQuery threshold property is not 0 should return proper error message', () => {
+    const initialParams = {
+      size: 100,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [8],
+      esqlQuery: { esql: 'test' },
+      searchType: SearchType.esqlQuery,
+      timeField: '@timestamp',
+    } as EsQueryRuleParams<SearchType.esqlQuery>;
+    expect(validateExpression(initialParams).errors.threshold0.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.threshold0[0]).toBe(
+      'Threshold is required to be 0.'
+    );
+  });
 });

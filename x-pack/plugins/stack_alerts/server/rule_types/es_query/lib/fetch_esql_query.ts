@@ -54,7 +54,7 @@ export async function fetchEsqlQuery({
 
   return {
     link,
-    numMatches: Number(2),
+    numMatches: Number(response.values.length),
     parsedResults: parseAggregationResults({
       isCountAgg: true,
       isGroupAgg: false,
@@ -74,21 +74,21 @@ export async function fetchEsqlQuery({
 export const getEsqlQuery = (
   dataView: DataView,
   params: OnlyEsqlQueryRuleParams,
-  alertLimit?: number
+  alertLimit: number | undefined
 ) => {
   const timeRange = {
     from: `now-${params.timeWindowSize}${params.timeWindowUnit}`,
     to: 'now',
   };
   const timerangeFilter = getTime(dataView, timeRange);
-  const dateStart = timerangeFilter?.query.range[params.timeField].gte;
+  const dateStart = timerangeFilter?.query.range[params.timeField].gt;
   const dateEnd = timerangeFilter?.query.range[params.timeField].lte;
   const rangeFilter: unknown[] = [
     {
       range: {
         [params.timeField]: {
           lte: dateEnd,
-          gte: dateStart,
+          gt: dateStart,
           format: 'strict_date_optional_time',
         },
       },

@@ -51,6 +51,8 @@ export const ONLY_ES_QUERY_EXPRESSION_ERRORS = {
 export const ONLY_ESQL_QUERY_EXPRESSION_ERRORS = {
   esqlQuery: new Array<string>(),
   timeField: new Array<string>(),
+  thresholdComparator: new Array<string>(),
+  threshold0: new Array<string>(),
 };
 
 const ALL_EXPRESSION_ERROR_ENTRIES = {

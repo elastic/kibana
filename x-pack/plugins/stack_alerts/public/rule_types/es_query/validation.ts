@@ -12,6 +12,7 @@ import {
   builtInComparators,
   builtInAggregationTypes,
   builtInGroupByTypes,
+  COMPARATORS,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EsQueryRuleParams, SearchType } from './types';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
@@ -238,6 +239,23 @@ const validateEsqlQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esqlQu
     errors.timeField.push(
       i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredTimeFieldText', {
         defaultMessage: 'Time field is required.',
+      })
+    );
+  }
+  if (ruleParams.thresholdComparator !== COMPARATORS.GREATER_THAN) {
+    errors.thresholdComparator.push(
+      i18n.translate(
+        'xpack.stackAlerts.esqlQuery.ui.validation.error.requiredThresholdComparatorText',
+        {
+          defaultMessage: 'Threshold comparator is required to be greater than.',
+        }
+      )
+    );
+  }
+  if (ruleParams.threshold !== [0]) {
+    errors.threshold0.push(
+      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredThreshold0Text', {
+        defaultMessage: 'Threshold is required to be 0.',
       })
     );
   }

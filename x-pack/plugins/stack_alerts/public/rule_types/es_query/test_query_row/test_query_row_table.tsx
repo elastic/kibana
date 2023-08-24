@@ -16,7 +16,7 @@ import {
   EuiBadge,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 const styles = {
   grid: css`
@@ -39,7 +39,9 @@ export const TestQueryRowTable: React.FC<TestQueryRowTableProps> = ({ rawResults
     <EuiPanel style={{ overflow: 'hidden' }} hasShadow={false} hasBorder={true}>
       <EuiDataGrid
         css={styles.grid}
-        aria-label="Test query grid"
+        aria-label={i18n.translate('xpack.stackAlerts.esQuery.ui.testQueryTableAriaLabel', {
+          defaultMessage: 'Test query grid',
+        })}
         data-test-subj="test-query-row-datagrid"
         columns={rawResults.cols}
         columnVisibility={{
@@ -66,10 +68,9 @@ export const TestQueryRowTable: React.FC<TestQueryRowTableProps> = ({ rawResults
           <EuiFlexItem grow={false}>
             <EuiText>
               <h5>
-                <FormattedMessage
-                  id="xpack.stackAlerts.esQuery.ui.testQueryAlerts"
-                  defaultMessage="Alerts generated"
-                />
+                {i18n.translate('xpack.stackAlerts.esQuery.ui.testQueryAlerts', {
+                  defaultMessage: 'Alerts generated',
+                })}
               </h5>
             </EuiText>
           </EuiFlexItem>
