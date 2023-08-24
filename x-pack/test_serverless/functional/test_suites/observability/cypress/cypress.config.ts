@@ -10,7 +10,7 @@ import { kbnTestConfig } from '@kbn/test';
 
 import Url from 'url';
 
-const kibanaUrl = Url.format({
+const kibanaUrlWithoutAuth = Url.format({
   protocol: kbnTestConfig.getUrlParts().protocol,
   hostname: kbnTestConfig.getUrlParts().hostname,
   port: kbnTestConfig.getUrlParts().port,
@@ -42,6 +42,6 @@ export default defineCypressConfig({
   env: {
     username: kbnTestConfig.getUrlParts().username,
     password: kbnTestConfig.getUrlParts().password,
-    kibanaUrl,
+    kibanaUrlWithoutAuth,
   },
 });

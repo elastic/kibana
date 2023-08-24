@@ -11,17 +11,17 @@ import URL from 'url';
 Cypress.Commands.add('loginAsElasticUser', () => {
   const username = Cypress.env('username');
   const password = Cypress.env('password');
-  const kibanaUrl = Cypress.env('kibanaUrl');
-  cy.log(`Logging in as ${username} on ${kibanaUrl}`);
+  const kibanaUrlWithoutAuth = Cypress.env('kibanaUrlWithoutAuth');
+  cy.log(`Logging in as ${username} on ${kibanaUrlWithoutAuth}`);
   cy.visit('/');
   cy.request({
     log: true,
     method: 'POST',
-    url: `${kibanaUrl}/internal/security/login`,
+    url: `${kibanaUrlWithoutAuth}/internal/security/login`,
     body: {
       providerType: 'basic',
       providerName: 'basic',
-      currentURL: `${kibanaUrl}/login`,
+      currentURL: `${kibanaUrlWithoutAuth}/login`,
       params: { username, password },
     },
     headers: {
