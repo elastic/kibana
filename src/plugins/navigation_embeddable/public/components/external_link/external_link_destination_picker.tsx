@@ -46,9 +46,10 @@ export const ExternalLinkDestinationPicker = ({
           setCurrentUrl(e.target.value);
           try {
             const url = coreServices.http.externalUrl.validateUrl(e.target.value);
-            /** We only allow URLs that (a) can be parsed via the validator and (b) are not internal */
-            if (url === null || coreServices.http.externalUrl.isInternalUrl(url.href)) {
-              throw new Error('Invalid URL'); // This doesn't need to be translated because it will be caught below
+            if (url === null) {
+              /* This error doesn't need to be translated because it will never be exposed to
+               * the user - it will always be caught and handled in the `catch` below */
+              throw new Error('Invalid URL');
             } else {
               setValidUrl(true);
               onDestinationPicked(e.target.value);

@@ -9,20 +9,8 @@
 import classNames from 'classnames';
 import useAsync from 'react-use/lib/useAsync';
 import useObservable from 'react-use/lib/useObservable';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
-import {
-  cleanEmptyKeys,
-  DashboardAppLocatorParams,
-  getEmbeddableParams,
-} from '@kbn/dashboard-plugin/public';
-import {
-  DashboardDrilldownOptions,
-  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-} from '@kbn/presentation-util-plugin/public';
-import { isFilterPinned } from '@kbn/es-query';
-import { KibanaLocation } from '@kbn/share-plugin/public';
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import { EuiButtonEmpty, EuiListGroupItem, EuiToolTip } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
@@ -31,10 +19,9 @@ import {
   NavigationLayoutType,
   NavigationEmbeddableLink,
 } from '../../../common/content_management';
-import { fetchDashboard } from './dashboard_link_tools';
 import { DashboardLinkStrings } from './dashboard_link_strings';
+import { fetchDashboard, navigateToDashboard } from './dashboard_link_tools';
 import { useNavigationEmbeddable } from '../../embeddable/navigation_embeddable';
-import { coreServices, dashboardServices } from '../../services/kibana_services';
 
 export const DashboardLinkComponent = ({
   link,
@@ -98,52 +85,6 @@ export const DashboardLinkComponent = ({
     };
   }, [error, dashboardTitle, dashboardDescription]);
 
-  /** `onClick` action for navigating to the destination dashboard */
-  const navigateToDashboard = useCallback(
-    async (modifiedClick: boolean) => {
-      const options: DashboardDrilldownOptions = {
-        ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-        ...link.options,
-      };
-      const params: DashboardAppLocatorParams = {
-        dashboardId: link.destination,
-        ...getEmbeddableParams(navEmbeddable, options),
-      };
-
-      const locator = dashboardServices.locator; // TODO: Make this a generic locator that is coming from the dashboard container through some sort of getter
-      if (locator) {
-        const { app, path, state }: KibanaLocation<DashboardAppLocatorParams> =
-          await locator.getLocation(params);
-
-        /**
-         * the app state should be sent via URL if either (a) the `openInNewTab` setting is `true`
-         * or if (b) the ctrl/shift/meta (command on Mac) key is pressed on click.
-         */
-        if (options.openInNewTab || modifiedClick) {
-          const url = coreServices.application.getUrlForApp(app, {
-            path: setStateToKbnUrl(
-              '_a',
-              cleanEmptyKeys({
-                query: state.query,
-                filters: state.filters?.filter((f) => !isFilterPinned(f)),
-              }),
-              { useHash: false, storeInHashQuery: true },
-              path
-            ),
-            absolute: true,
-          });
-          window.open(url, '_blank');
-        } else {
-          await coreServices.application.navigateToApp(app, {
-            path,
-            state,
-          });
-        }
-      }
-    },
-    [link, navEmbeddable]
-  );
-
   return loadingDestinationDashboard ? (
     <li id={`dashboardLink--${link.id}--loading`}>
       <EuiButtonEmpty size="s" isLoading={true}>
@@ -167,7 +108,11 @@ export const DashboardLinkComponent = ({
         link.destination === parentDashboardId
           ? undefined // no `onClick` event should exist if the link points to the current dashboard
           : (event) => {
-              navigateToDashboard(event.ctrlKey || event.metaKey || event.shiftKey);
+              navigateToDashboard({
+                link,
+                navEmbeddable,
+                modifiedClick: event.ctrlKey || event.metaKey || event.shiftKey,
+              });
             }
       }
       label={

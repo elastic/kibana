@@ -7,9 +7,24 @@
  */
 
 import { isEmpty, filter } from 'lodash';
-import { DashboardItem } from '../../embeddable/types';
 
-import { dashboardServices } from '../../services/kibana_services';
+import {
+  cleanEmptyKeys,
+  getEmbeddableParams,
+  DashboardAppLocatorParams,
+} from '@kbn/dashboard-plugin/public';
+import {
+  DashboardDrilldownOptions,
+  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+} from '@kbn/presentation-util-plugin/public';
+import { isFilterPinned } from '@kbn/es-query';
+import { KibanaLocation } from '@kbn/share-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+
+import { DashboardItem } from '../../embeddable/types';
+import { NavigationEmbeddable } from '../../embeddable';
+import { NavigationEmbeddableLink } from '../../../common/content_management';
+import { coreServices, dashboardServices } from '../../services/kibana_services';
 
 /**
  * ----------------------------------
@@ -83,4 +98,62 @@ export const fetchDashboards = async ({
   });
 
   return simplifiedDashboardList;
+};
+
+/**
+ * ----------------------------------
+ * Navigate from one dashboard to another
+ * ----------------------------------
+ */
+
+interface NavigateToDashboardProps {
+  link: NavigationEmbeddableLink;
+  navEmbeddable: NavigationEmbeddable;
+  modifiedClick: boolean; // true if either shift, ctrl, or meta (command on Mac) is pressed on click
+}
+
+export const navigateToDashboard = async ({
+  link,
+  navEmbeddable,
+  modifiedClick,
+}: NavigateToDashboardProps) => {
+  const options: DashboardDrilldownOptions = {
+    ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+    ...link.options,
+  };
+  const params: DashboardAppLocatorParams = {
+    dashboardId: link.destination,
+    ...getEmbeddableParams(navEmbeddable, options),
+  };
+
+  const locator = dashboardServices.locator; // TODO: Make this generic as part of https://github.com/elastic/kibana/issues/164748
+  if (locator) {
+    const { app, path, state }: KibanaLocation<DashboardAppLocatorParams> =
+      await locator.getLocation(params);
+
+    /**
+     * the app state should be sent via URL if either (a) the `openInNewTab` setting is `true`
+     * or if (b) the click is modified (i.e. ctrl/shift/meta key was pressed on click)
+     */
+    if (options.openInNewTab || modifiedClick) {
+      const url = coreServices.application.getUrlForApp(app, {
+        path: setStateToKbnUrl(
+          '_a',
+          cleanEmptyKeys({
+            query: state.query,
+            filters: state.filters?.filter((f) => !isFilterPinned(f)),
+          }),
+          { useHash: false, storeInHashQuery: true },
+          path
+        ),
+        absolute: true,
+      });
+      window.open(url, '_blank');
+    } else {
+      await coreServices.application.navigateToApp(app, {
+        path,
+        state,
+      });
+    }
+  }
 };
