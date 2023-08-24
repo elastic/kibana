@@ -15,6 +15,7 @@ import type {
   ThreeWayDiff,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { invariant } from '../../../../../../common/utils/invariant';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import type { CalculateRuleDiffResult } from '../../logic/diff/calculate_rule_diff';
@@ -96,12 +97,17 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
     invariant(installedCurrentVersion != null, 'installedCurrentVersion not found');
     invariant(targetVersion != null, 'targetVersion not found');
 
+    const targetRule: RuleResponse = {
+      ...convertPrebuiltRuleAssetToRuleResponse(targetVersion),
+      id: installedCurrentVersion.id,
+    };
+
     return {
       id: installedCurrentVersion.id,
       rule_id: installedCurrentVersion.rule_id,
       revision: installedCurrentVersion.revision,
       current_rule: installedCurrentVersion,
-      target_rule: convertPrebuiltRuleAssetToRuleResponse(targetVersion),
+      target_rule: targetRule,
       diff: {
         fields: pickBy<ThreeWayDiff<unknown>>(
           ruleDiff.fields,

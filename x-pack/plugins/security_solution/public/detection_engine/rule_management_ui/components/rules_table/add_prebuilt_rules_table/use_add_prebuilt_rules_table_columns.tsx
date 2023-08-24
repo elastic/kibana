@@ -34,13 +34,13 @@ interface RuleNameProps {
 
 const RuleName = ({ name, ruleId }: RuleNameProps) => {
   const {
-    actions: { openFlyoutForRuleId },
+    actions: { openRulePreview },
   } = useAddPrebuiltRulesTableContext();
 
   return (
     <EuiLink
       onClick={() => {
-        openFlyoutForRuleId(ruleId);
+        openRulePreview(ruleId);
       }}
     >
       {name}
@@ -52,7 +52,7 @@ export const RULE_NAME_COLUMN: TableColumn = {
   field: 'name',
   name: i18n.COLUMN_RULE,
   render: (value: RuleResponse['name'], rule: RuleResponse) => (
-    <RuleName name={value} ruleId={rule.rule_id} />
+    <RuleName name={value} ruleId={rule.id} />
   ),
   sortable: true,
   truncateText: true,

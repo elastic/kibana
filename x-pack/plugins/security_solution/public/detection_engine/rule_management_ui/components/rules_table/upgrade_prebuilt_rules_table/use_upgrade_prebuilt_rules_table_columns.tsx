@@ -32,13 +32,13 @@ interface RuleNameProps {
 
 const RuleName = ({ name, ruleId }: RuleNameProps) => {
   const {
-    actions: { openFlyoutForRuleId },
+    actions: { openRulePreview },
   } = useUpgradePrebuiltRulesTableContext();
 
   return (
     <EuiLink
       onClick={() => {
-        openFlyoutForRuleId(ruleId);
+        openRulePreview(ruleId);
       }}
     >
       {name}
@@ -52,7 +52,7 @@ const RULE_NAME_COLUMN: TableColumn = {
   render: (
     value: RuleUpgradeInfoForReview['current_rule']['name'],
     rule: RuleUpgradeInfoForReview
-  ) => <RuleName name={value} ruleId={rule.rule_id} />,
+  ) => <RuleName name={value} ruleId={rule.id} />,
   sortable: true,
   truncateText: true,
   width: '60%',

@@ -689,12 +689,10 @@ export const internalRuleToAPIResponse = (
 export const convertPrebuiltRuleAssetToRuleResponse = (
   prebuiltRuleAsset: PrebuiltRuleAsset
 ): RuleResponse => {
-  const ruleResponseRequiredFields = {
-    id: uuidv4(),
+  const prebuiltRuleAssetDefaults = {
     enabled: false,
     risk_score_mapping: [],
     severity_mapping: [],
-    immutable: true,
     interval: DEFAULT_INTERVAL,
     to: DEFAULT_TO,
     from: DEFAULT_FROM,
@@ -702,11 +700,6 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
     false_positives: [],
     max_signals: DEFAULT_MAX_SIGNALS,
     actions: [],
-    updated_at: new Date(0).toISOString(),
-    updated_by: '',
-    created_at: new Date(0).toISOString(),
-    created_by: '',
-    revision: 1,
     related_integrations: [],
     required_fields: [],
     setup: '',
@@ -714,8 +707,18 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
     threat: [],
   };
 
+  const ruleResponseSpecificFields = {
+    id: uuidv4(),
+    updated_at: new Date(0).toISOString(),
+    updated_by: '',
+    created_at: new Date(0).toISOString(),
+    created_by: '',
+    immutable: true,
+    revision: 1,
+  };
+
   const [rule, error] = validate(
-    { ...ruleResponseRequiredFields, ...prebuiltRuleAsset },
+    { ...prebuiltRuleAssetDefaults, ...prebuiltRuleAsset, ...ruleResponseSpecificFields },
     RuleResponse
   );
 

@@ -8,24 +8,98 @@
 import React from 'react';
 import { isEmpty } from 'lodash/fp';
 import styled from 'styled-components';
-import { EuiDescriptionList, EuiText, EuiFlexGrid, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiDescriptionList,
+  EuiText,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiLoadingSpinner,
+  EuiBadge,
+} from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import type {
   Type,
   ThreatMapping as ThreatMappingType,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Filter } from '@kbn/es-query';
+import type { SavedQuery } from '@kbn/data-plugin/public';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { FieldIcon } from '@kbn/react-field';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
 import type { Threshold as ThresholdType } from '../../../../../common/api/detection_engine/model/rule_schema/specific_attributes/threshold_attributes';
 import type { RequiredFieldArray } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as descriptionStepI18n from '../../../../detections/components/rules/description_step/translations';
-import { MlJobsDescription } from '../../../../detections/components/rules/ml_jobs_description/ml_jobs_description';
 import { RelatedIntegrationsDescription } from '../../../../detections/components/rules/related_integrations/integrations_description';
+import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import * as threatMatchI18n from '../../../../common/components/threat_match/translations';
+import * as timelinesI18n from '../../../../timelines/components/timeline/translations';
+import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
+import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
+import { convertHistoryStartToSize } from '../../../../detections/pages/detection_engine/rules/helpers';
+import { MlJobLink } from '../../../../detections/components/rules/ml_job_link/ml_job_link';
+import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { BadgeList } from './badge_list';
 import * as i18n from './translations';
+
+interface SavedQueryNameProps {
+  savedQueryName: string;
+}
+
+const SavedQueryName = ({ savedQueryName }: SavedQueryNameProps) => (
+  <EuiText size="s">{savedQueryName}</EuiText>
+);
+
+const EuiBadgeWrap = styled(EuiBadge)`
+  .euiBadge__text {
+    white-space: pre-wrap !important;
+  }
+` as unknown as typeof EuiBadge;
+
+interface FiltersProps {
+  filters: Filter[];
+  dataViewId?: string;
+  index?: string[];
+}
+
+const Filters = ({ filters, dataViewId, index }: FiltersProps) => {
+  const { indexPattern } = useRuleIndexPattern({
+    dataSourceType: dataViewId ? DataSourceType.DataView : DataSourceType.IndexPatterns,
+    index: index ?? [],
+    dataViewId,
+  });
+
+  const flattenedFilters = mapAndFlattenFilters(filters);
+
+  return (
+    <EuiFlexGroup wrap responsive={false} gutterSize="xs">
+      {flattenedFilters.map((filter, idx) => (
+        <EuiFlexItem grow={false} key={`filter-${idx}`} css={{ width: '100%' }}>
+          <EuiBadgeWrap color="hollow">
+            {indexPattern != null ? (
+              <FilterBadgeGroup filters={[filter]} dataViews={[indexPattern]} />
+            ) : (
+              <EuiLoadingSpinner size="m" />
+            )}
+          </EuiBadgeWrap>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+};
+
+const QueryContent = styled.div`
+  white-space: pre-wrap;
+`;
+
+interface QueryProps {
+  query: string;
+}
+
+const Query = ({ query }: QueryProps) => <QueryContent>{query}</QueryContent>;
 
 interface IndexProps {
   index: string[];
@@ -52,6 +126,32 @@ const Threshold = ({ threshold }: ThresholdProps) => (
         } >= ${threshold.value}`}
   </>
 );
+
+interface AnomalyThresholdProps {
+  anomalyThreshold: number;
+}
+
+const AnomalyThreshold = ({ anomalyThreshold }: AnomalyThresholdProps) => (
+  <EuiText size="s">{anomalyThreshold}</EuiText>
+);
+
+interface MachineLearningJobListProps {
+  jobIds: string[];
+}
+
+const MachineLearningJobList = ({ jobIds }: MachineLearningJobListProps) => {
+  const { jobs } = useSecurityJobs();
+
+  const relevantJobs = jobs.filter((job) => jobIds.includes(job.id));
+
+  return (
+    <>
+      {relevantJobs.map((job) => (
+        <MlJobLink jobId={job.id} jobName={job.customSettings?.security_app_display_name} />
+      ))}
+    </>
+  );
+};
 
 const getRuleTypeDescription = (ruleType: Type) => {
   switch (ruleType) {
@@ -162,8 +262,28 @@ const ThreatMapping = ({ threatMapping }: ThreatMappingProps) => {
   return <EuiText size="s">{description}</EuiText>;
 };
 
+interface NewTermsFieldsProps {
+  newTermsFields: string[];
+}
+
+const NewTermsFields = ({ newTermsFields }: NewTermsFieldsProps) => (
+  <BadgeList badges={newTermsFields} />
+);
+
+interface HistoryWindowSizeProps {
+  historyWindowStart?: string;
+}
+
+const HistoryWindowSize = ({ historyWindowStart }: HistoryWindowSizeProps) => {
+  const size = historyWindowStart ? convertHistoryStartToSize(historyWindowStart) : '7d';
+
+  return <EuiText size="s">{size}</EuiText>;
+};
+
+// eslint-disable-next-line complexity
 const prepareDefinitionSectionListItems = (
-  rule: Partial<RuleResponse>
+  rule: Partial<RuleResponse>,
+  savedQuery?: SavedQuery
 ): EuiDescriptionListProps['listItems'] => {
   const definitionSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
@@ -181,6 +301,42 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
+  if (savedQuery) {
+    definitionSectionListItems.push({
+      title: descriptionStepI18n.SAVED_QUERY_NAME_LABEL,
+      description: <SavedQueryName savedQueryName={savedQuery.attributes.title} />,
+    });
+
+    if (savedQuery.attributes.filters) {
+      definitionSectionListItems.push({
+        title: descriptionStepI18n.SAVED_QUERY_FILTERS_LABEL,
+        description: <Filters filters={savedQuery.attributes.filters as Filter[]} />,
+      });
+    }
+  }
+
+  if ('filters' in rule && rule.filters && rule.filters.length > 0) {
+    definitionSectionListItems.push({
+      title: savedQuery
+        ? descriptionStepI18n.SAVED_QUERY_FILTERS_LABEL
+        : descriptionStepI18n.FILTERS_LABEL,
+      description: (
+        <Filters
+          filters={rule.filters as Filter[]}
+          dataViewId={rule.data_view_id}
+          index={rule.index}
+        />
+      ),
+    });
+  }
+
+  if ('query' in rule && rule.query) {
+    definitionSectionListItems.push({
+      title: savedQuery ? descriptionStepI18n.SAVED_QUERY_LABEL : descriptionStepI18n.QUERY_LABEL,
+      description: <Query query={rule.query} />,
+    });
+  }
+
   if (rule.type) {
     definitionSectionListItems.push({
       title: i18n.RULE_TYPE_FIELD_LABEL,
@@ -188,10 +344,17 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
+  if ('anomaly_threshold' in rule && rule.anomaly_threshold) {
+    definitionSectionListItems.push({
+      title: i18n.ANOMALY_THRESHOLD_FIELD_LABEL,
+      description: <AnomalyThreshold anomalyThreshold={rule.anomaly_threshold} />,
+    });
+  }
+
   if ('machine_learning_job_id' in rule) {
     definitionSectionListItems.push({
       title: i18n.MACHINE_LEARNING_JOB_ID_FIELD_LABEL,
-      description: <MlJobsDescription jobIds={rule.machine_learning_job_id as string[]} />,
+      description: <MachineLearningJobList jobIds={rule.machine_learning_job_id as string[]} />,
     });
   }
 
@@ -211,12 +374,12 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
-  if (rule.timeline_title) {
-    definitionSectionListItems.push({
-      title: i18n.TIMELINE_TITLE_FIELD_LABEL,
-      description: <TimelineTitle timelineTitle={rule.timeline_title} />,
-    });
-  }
+  definitionSectionListItems.push({
+    title: i18n.TIMELINE_TITLE_FIELD_LABEL,
+    description: (
+      <TimelineTitle timelineTitle={rule.timeline_title || timelinesI18n.DEFAULT_TIMELINE_TITLE} />
+    ),
+  });
 
   if ('threshold' in rule && rule.threshold) {
     definitionSectionListItems.push({
@@ -239,6 +402,44 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
+  if ('threat_filters' in rule && rule.threat_filters && rule.threat_filters.length > 0) {
+    definitionSectionListItems.push({
+      title: savedQuery
+        ? descriptionStepI18n.SAVED_QUERY_FILTERS_LABEL
+        : descriptionStepI18n.FILTERS_LABEL,
+      description: (
+        <Filters
+          filters={rule.threat_filters as Filter[]}
+          dataViewId={rule.data_view_id}
+          index={rule.index}
+        />
+      ),
+    });
+  }
+
+  if ('threat_query' in rule && rule.threat_query) {
+    definitionSectionListItems.push({
+      title: savedQuery
+        ? descriptionStepI18n.SAVED_QUERY_LABEL
+        : descriptionStepI18n.THREAT_QUERY_LABEL,
+      description: <Query query={rule.threat_query} />,
+    });
+  }
+
+  if ('new_terms_fields' in rule && rule.new_terms_fields && rule.new_terms_fields.length > 0) {
+    definitionSectionListItems.push({
+      title: i18n.NEW_TERMS_FIELDS_FIELD_LABEL,
+      description: <NewTermsFields newTermsFields={rule.new_terms_fields} />,
+    });
+  }
+
+  if (rule.type === 'new_terms' || 'history_window_start' in rule) {
+    definitionSectionListItems.push({
+      title: i18n.HISTORY_WINDOW_SIZE_FIELD_LABEL,
+      description: <HistoryWindowSize historyWindowStart={rule.history_window_start} />,
+    });
+  }
+
   return definitionSectionListItems;
 };
 
@@ -247,7 +448,12 @@ export interface RuleDefinitionSectionProps {
 }
 
 export const RuleDefinitionSection = ({ rule }: RuleDefinitionSectionProps) => {
-  const definitionSectionListItems = prepareDefinitionSectionListItems(rule);
+  const { savedQuery } = useGetSavedQuery({
+    savedQueryId: rule.type === 'saved_query' ? rule.saved_id : '',
+    ruleType: rule.type,
+  });
+
+  const definitionSectionListItems = prepareDefinitionSectionListItems(rule, savedQuery);
 
   return (
     <div>

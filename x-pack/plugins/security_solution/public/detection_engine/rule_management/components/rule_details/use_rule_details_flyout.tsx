@@ -7,41 +7,41 @@
 
 import React, { useCallback } from 'react';
 import { invariant } from '../../../../../common/utils/invariant';
-import type { RuleSignatureId } from '../../../../../common/api/detection_engine';
+import type { RuleObjectId } from '../../../../../common/api/detection_engine';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 export interface RuleDetailsFlyoutState {
-  flyoutRule: RuleResponse | null;
+  previewedRule: RuleResponse | null;
 }
 
 export interface RuleDetailsFlyoutActions {
-  openFlyoutForRuleId: (ruleId: RuleSignatureId) => void;
-  closeFlyout: () => void;
+  openRulePreview: (ruleId: RuleObjectId) => void;
+  closeRulePreview: () => void;
 }
 
 export const useRuleDetailsFlyout = (
   rules: RuleResponse[]
 ): RuleDetailsFlyoutState & RuleDetailsFlyoutActions => {
-  const [flyoutRule, setFlyoutRule] = React.useState<RuleResponse | null>(null);
+  const [previewedRule, setRuleForPreview] = React.useState<RuleResponse | null>(null);
 
-  const openFlyoutForRuleId = useCallback(
-    (ruleId: RuleSignatureId) => {
-      const ruleToShowInFlyout = rules.find((rule) => rule.rule_id === ruleId);
+  const openRulePreview = useCallback(
+    (ruleId: RuleObjectId) => {
+      const ruleToShowInFlyout = rules.find((rule) => {
+        return rule.id === ruleId;
+      });
       invariant(ruleToShowInFlyout, `Rule with id ${ruleId} not found`);
-      if (ruleToShowInFlyout) {
-        setFlyoutRule(ruleToShowInFlyout);
-      }
+      setRuleForPreview(ruleToShowInFlyout);
     },
-    [rules, setFlyoutRule]
+    [rules, setRuleForPreview]
   );
 
-  const closeFlyout = useCallback(() => {
-    setFlyoutRule(null);
+  const closeRulePreview = useCallback(() => {
+    setRuleForPreview(null);
   }, []);
 
   return {
-    openFlyoutForRuleId,
-    closeFlyout,
-    flyoutRule,
+    openRulePreview,
+    closeRulePreview,
+    previewedRule,
   };
 };

@@ -214,7 +214,7 @@ const prepareAboutSectionListItems = (
 ): EuiDescriptionListProps['listItems'] => {
   const aboutSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
-  if (rule.author) {
+  if (rule.author && rule.author.length > 0) {
     aboutSectionListItems.push({
       title: i18n.AUTHOR_FIELD_LABEL,
       description: <Author author={rule.author} />,

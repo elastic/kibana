@@ -7,6 +7,8 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { css } from '@emotion/css';
+import { euiThemeVars } from '@kbn/ui-theme';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,7 +22,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import type { EuiTabbedContentTab } from '@elastic/eui';
+import type { EuiTabbedContentTab, EuiTabbedContentProps } from '@elastic/eui';
 
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
 import { RuleOverviewTab, useOverviewTabSections } from './rule_overview_tab';
@@ -37,7 +39,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
     .euiFlyoutBody__overflowContent {
       flex: 1;
       overflow: hidden;
-      padding: ${({ theme }) => `0 ${theme.eui.euiSizeL} ${theme.eui.euiSizeM}`};
+      padding: ${({ theme }) => `0 ${theme.eui.euiSizeL} 0`};
     }
   }
 `;
@@ -79,6 +81,25 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
   }
 `;
 
+/*
+ * Fixes tabs to the top and allows the content to scroll.
+ */
+const ScrollableFlyoutTabbedContent = (props: EuiTabbedContentProps) => (
+  <StyledFlexGroup direction="column" gutterSize="none">
+    <StyledEuiFlexItem grow={true}>
+      <StyledEuiTabbedContent {...props} />
+    </StyledEuiFlexItem>
+  </StyledFlexGroup>
+);
+
+const tabPaddingClassName = css`
+  padding: 0 ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeXL} ${euiThemeVars.euiSizeM};
+`;
+
+const TabContentPadding: React.FC = ({ children }) => (
+  <div className={tabPaddingClassName}>{children}</div>
+);
+
 interface RuleDetailsFlyoutProps {
   rule: Partial<RuleResponse>;
   actionButtonLabel: string;
@@ -101,11 +122,13 @@ export const RuleDetailsFlyout = ({
       id: 'overview',
       name: i18n.OVERVIEW_TAB_LABEL,
       content: (
-        <RuleOverviewTab
-          rule={rule}
-          expandedOverviewSections={expandedOverviewSections}
-          toggleOverviewSection={toggleOverviewSection}
-        />
+        <TabContentPadding>
+          <RuleOverviewTab
+            rule={rule}
+            expandedOverviewSections={expandedOverviewSections}
+            toggleOverviewSection={toggleOverviewSection}
+          />
+        </TabContentPadding>
       ),
     }),
     [rule, expandedOverviewSections, toggleOverviewSection]
@@ -115,7 +138,11 @@ export const RuleDetailsFlyout = ({
     () => ({
       id: 'investigationGuide',
       name: i18n.INVESTIGATION_GUIDE_TAB_LABEL,
-      content: <RuleInvestigationGuideTab note={rule.note ?? ''} />,
+      content: (
+        <TabContentPadding>
+          <RuleInvestigationGuideTab note={rule.note ?? ''} />
+        </TabContentPadding>
+      ),
     }),
     [rule.note]
   );
@@ -151,17 +178,17 @@ export const RuleDetailsFlyout = ({
       paddingSize="l"
     >
       <EuiFlyoutHeader>
-        <EuiTitle size="m" data-test-subj="rulesBulkEditFormTitle">
+        <EuiTitle size="m">
           <h2>{rule.name}</h2>
         </EuiTitle>
         <EuiSpacer size="l" />
       </EuiFlyoutHeader>
       <StyledEuiFlyoutBody>
-        <StyledFlexGroup direction="column" gutterSize="none">
-          <StyledEuiFlexItem grow={true}>
-            <StyledEuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
-          </StyledEuiFlexItem>
-        </StyledFlexGroup>
+        <ScrollableFlyoutTabbedContent
+          tabs={tabs}
+          selectedTab={selectedTab}
+          onTabClick={onTabClick}
+        />
       </StyledEuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
