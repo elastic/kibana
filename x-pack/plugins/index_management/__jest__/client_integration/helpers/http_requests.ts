@@ -157,7 +157,6 @@ const registerHttpRequestMockHelpers = (
     error?: ResponseError
   ) => mockResponse('GET', `${INTERNAL_API_BASE_PATH}/indices/${indexName}`, response, error);
 
-
   return {
     setLoadTemplatesResponse,
     setLoadIndicesResponse,
