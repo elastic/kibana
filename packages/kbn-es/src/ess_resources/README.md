@@ -1,7 +1,9 @@
 # Elasticsearch Serverless Resources
 The resources in this directory are used for seeding Elasticsearch Serverless (ESS) images with users, roles and tokens for SSL and authentication. ESS requires file realm authentication, so we will bind mount them into the containers at `/usr/share/elasticsearch/config/`.
 
-## Default User
+## Users
+
+### Default user
 
 The default superuser authentication to login to Kibana is:
 
@@ -9,6 +11,13 @@ The default superuser authentication to login to Kibana is:
 username: kibana_serverless_superuser
 password: changeme
 ```
+
+### Adding users
+
+1. Add the user:encrypted_password to `users` file. The encrypted password for `kibana_serverless_superuser` is `changeme` if you want to reuse the value.
+1. Set the new user's roles in `users_roles` file.
+1. Add the username to `operator_users.yml` in the array for file realm users.
+
 
 ## Service Account and Tokens
 
