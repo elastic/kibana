@@ -32,6 +32,7 @@ export const createRule = async (
   const response = await supertest
     .post(DETECTION_ENGINE_RULES_URL)
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31')
     .send(rule);
   if (response.status === 409) {
     if (rule.rule_id != null) {
@@ -44,6 +45,7 @@ export const createRule = async (
       const secondResponseTry = await supertest
         .post(DETECTION_ENGINE_RULES_URL)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send(rule);
       if (secondResponseTry.status !== 200) {
         throw new Error(
