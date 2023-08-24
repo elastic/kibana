@@ -11,27 +11,23 @@ describe('[Observability onboarding] Landing page', () => {
   });
 
   describe('Entry point', () => {
-    it('from setup guides', () => {
-      cy.get('[data-test-subj="guideButtonRedirect"]').click();
-      cy.get('[data-test-subj="onboarding--observability--logs"]').click();
+    it('when clicking on the logs card the user is navigated to the observability onboarding page', () => {
+      cy.getByTestSubj('guideButtonRedirect').click();
+      cy.getByTestSubj('onboarding--observability--logs').click();
 
       cy.url().should('include', '/app/observabilityOnboarding');
     });
 
-    it('from observability overview', () => {
+    it('when clicking on observability overview callout the user is navigated to the observability onboarding page', () => {
       cy.visitKibana('/app/observability');
-      cy.get('[data-test-subj="observability-onboarding-callout"]').should(
-        'exist'
-      );
-      cy.get(
-        '[data-test-subj="o11yObservabilityOnboardingGetStartedButton"]'
-      ).click();
+      cy.getByTestSubj('observability-onboarding-callout').should('exist');
+      cy.getByTestSubj('o11yObservabilityOnboardingGetStartedButton').click();
 
       cy.url().should('include', '/app/observabilityOnboarding');
     });
   });
 
-  it('shows landing page', () => {
+  it('when user navigates to observability onboarding landing page is showed', () => {
     cy.visitKibana('/app/observabilityOnboarding');
     cy.contains('Get started with Observability');
   });
