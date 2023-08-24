@@ -100,7 +100,7 @@ describe('Differential Functions page', () => {
         }
       });
     });
-    // Flaky test, skipping it for now
+
     it('show lost performance when comparison data has more samples than baseline', () => {
       cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions/differential', {
@@ -154,6 +154,66 @@ describe('Differential Functions page', () => {
       ].forEach((item) => {
         cy.get(`[data-test-subj="${item.id}_value"]`).contains(item.value);
         cy.get(`[data-test-subj="${item.id}_comparison_value"]`).should('not.exist');
+      });
+    });
+
+    it('adds kql filter', () => {
+      cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
+      cy.visitKibana('/app/profiling/functions/differential', {
+        rangeFrom: comparisonRangeFrom,
+        rangeTo: comparisonRangeTo,
+        comparisonRangeFrom: rangeFrom,
+        comparisonRangeTo: rangeTo,
+      });
+      cy.wait('@getTopNFunctions');
+      cy.wait('@getTopNFunctions');
+      cy.get('[data-test-subj="topNFunctionsGrid"] .euiDataGridRow').should('have.length.gt', 1);
+      cy.get('[data-test-subj="TopNFunctionsComparisonGrid"] .euiDataGridRow').should(
+        'have.length.gt',
+        1
+      );
+      cy.addKqlFilter({
+        key: 'process.thread.name',
+        value: '108795321966692',
+      });
+      cy.addKqlFilter({
+        key: 'Stacktrace.id',
+        value: '-7DvnP1mizQYw8mIIpgbMg',
+        dataTestSubj: 'profilingComparisonUnifiedSearchBar',
+      });
+      cy.wait('@getTopNFunctions');
+      cy.wait('@getTopNFunctions');
+      cy.get('[data-test-subj="topNFunctionsGrid"] .euiDataGridRow').should('have.length', 2);
+      cy.get('[data-test-subj="TopNFunctionsComparisonGrid"] .euiDataGridRow').should(
+        'have.length',
+        1
+      );
+      [
+        { id: 'overallPerformance', value: '50.00%', icon: 'sortUp_success' },
+        {
+          id: 'annualizedCo2',
+          value: '1.07 lbs / 0.49 kg',
+          comparisonValue: '0.54 lbs / 0.24 kg (50.00%)',
+          icon: 'comparison_sortUp_success',
+        },
+        {
+          id: 'annualizedCost',
+          value: '$1.24',
+          comparisonValue: '$0.62 (50.00%)',
+          icon: 'comparison_sortUp_success',
+        },
+        {
+          id: 'totalNumberOfSamples',
+          value: '2',
+          comparisonValue: '1 (50.00%)',
+          icon: 'comparison_sortUp_success',
+        },
+      ].forEach((item) => {
+        cy.get(`[data-test-subj="${item.id}_value"]`).contains(item.value);
+        cy.get(`[data-test-subj="${item.id}_${item.icon}"]`).should('exist');
+        if (item.comparisonValue) {
+          cy.get(`[data-test-subj="${item.id}_comparison_value"]`).contains(item.comparisonValue);
+        }
       });
     });
   });

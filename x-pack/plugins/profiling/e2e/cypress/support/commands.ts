@@ -54,3 +54,15 @@ Cypress.Commands.add('visitKibana', (url, query) => {
     timeout: 50000,
   });
 });
+
+Cypress.Commands.add(
+  'addKqlFilter',
+  ({ key, value, dataTestSubj = 'profilingUnifiedSearchBar' }) => {
+    cy.getByTestSubj(dataTestSubj).type(key);
+    cy.contains(key);
+    cy.getByTestSubj(`autocompleteSuggestion-field-${key}-`).click();
+    cy.getByTestSubj(dataTestSubj).type(':');
+    cy.getByTestSubj(Cypress.$.escapeSelector(`autocompleteSuggestion-value-"${value}"-`)).click();
+    cy.getByTestSubj(dataTestSubj).type('{enter}');
+  }
+);

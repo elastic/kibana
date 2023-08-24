@@ -21,5 +21,10 @@ declare namespace Cypress {
         [key: string]: string | undefined;
       }
     ): void;
+    addKqlFilter(params: {
+      key: string;
+      value: string;
+      dataTestSubj?: 'profilingUnifiedSearchBar' | 'profilingComparisonUnifiedSearchBar';
+    }): void;
   }
 }
