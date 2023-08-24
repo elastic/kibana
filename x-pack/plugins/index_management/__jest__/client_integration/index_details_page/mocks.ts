@@ -21,6 +21,7 @@ export const testIndexMock: Index = {
   isFrozen: false,
   aliases: 'none',
   hidden: false,
+  // @ts-expect-error ts upgrade v4.7.4
   isRollupIndex: false,
   ilm: {
     index: 'test_index',

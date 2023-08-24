@@ -141,7 +141,7 @@ export class CoreKibanaRequest<
   public readonly rewrittenUrl?: URL;
 
   /** @internal */
-  protected readonly [requestSymbol]: Request;
+  protected readonly [requestSymbol]!: Request;
 
   constructor(
     request: RawRequest,
