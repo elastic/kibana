@@ -39,7 +39,7 @@ describe('EntityAnalyticsUpselling', () => {
     );
 
     expect(getByTestId('paywallCardDescription')).toHaveTextContent(
-      'Entity Analytics is available with TEST PRODUCT subscriptions'
+      'Entity risk scoring capability is available in our TEST PRODUCT license tier'
     );
   });
 
