@@ -131,8 +131,7 @@ export const executeUpdate = async <T>(
     await preflightHelper.preflightCheckForUpsertAliasConflict(type, id, namespace);
   }
 
-  // MIGRATE EXISTING DOC IF THERE IS ONE START.
-  // For implementations, see https://github.com/elastic/kibana/pull/158251/files#diff-d95c8ca5c3f61caa523ceed8ae8665eb34d0fcd198e85870286d0c8c2ddbcef4R242
+  // migrate the existing doc to the current version
   let migrated: SavedObject<T>;
   if (preflightDocResult.checkDocFound === 'found') {
     const document = getSavedObjectFromSource<T>(

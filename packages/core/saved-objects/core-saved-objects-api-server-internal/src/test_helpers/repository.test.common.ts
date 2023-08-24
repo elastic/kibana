@@ -489,39 +489,6 @@ expect.extend({
     }
   },
 });
-// Todo: SOR update no longer calls esClient.update, it calls esClient.index/create
-export const mockUpdateResponse = (
-  client: ElasticsearchClientMock,
-  type: string,
-  id: string,
-  options?: SavedObjectsUpdateOptions,
-  namespaces?: string[],
-  originId?: string
-) => {
-  // @Tina added
-  const migrationVersionCompatibility = options?.migrationVersionCompatibility || 'raw';
-  // needs to change to create/index, see SOR create unit tests
-  client.update.mockResponseOnce(
-    {
-      _id: `${type}:${id}`,
-      ...mockVersionProps,
-      result: 'updated',
-      // don't need the rest of the source for test purposes, just the namespace and namespaces attributes
-      get: {
-        _source: {
-          namespaces: namespaces ?? [options?.namespace ?? 'default'],
-          namespace: options?.namespace,
-
-          // If the existing saved object contains an originId attribute, the operation will return it in the result.
-          // The originId parameter is just used for test purposes to modify the mock cluster call response.
-          ...(!!originId && { originId }),
-          migrationVersionCompatibility,
-        },
-      },
-    } as estypes.UpdateResponse,
-    { statusCode: 200 }
-  );
-};
 
 export const updateSuccess = async <T extends Partial<unknown>>(
   client: ElasticsearchClientMock,
@@ -539,10 +506,9 @@ export const updateSuccess = async <T extends Partial<unknown>>(
 ) => {
   const { mockGetResponseAsNotFound, originId } = internalOptions;
   const mockGetResponse =
-    mockGetResponseAsNotFound ?? // ATM, only using this as { found: 'false' } nock out a not found response from getting the doc
+    mockGetResponseAsNotFound ??
     getMockGetResponse(registry, { type, id, originId }, objNamespaces ?? options?.namespace);
   client.get.mockResponseOnce(mockGetResponse, { statusCode: 200 });
-  // mockUpdateResponse(client, type, id, options, objNamespaces, originId); // mocks client.update response
   if (!mockGetResponseAsNotFound) {
     // index doc from existing doc
     client.index.mockResponseImplementation((params) => {
