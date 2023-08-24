@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
@@ -54,10 +55,13 @@ export const useAuthorization = (): Authorization => {
     { initialData }
   );
 
-  return {
-    isLoading,
-    privileges: privilegesData.privileges,
-    capabilities: privilegesData.capabilities,
-    error,
-  };
+  return useMemo(
+    () => ({
+      isLoading,
+      privileges: privilegesData.privileges,
+      capabilities: privilegesData.capabilities,
+      error,
+    }),
+    [isLoading, privilegesData.privileges, privilegesData.capabilities, error]
+  );
 };

@@ -16,6 +16,8 @@ import { ScopedHistory } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
+import { REACT_QUERY_STALE_TIME } from '../../common/constants';
+
 import { SectionError } from './components';
 import { SECTION_SLUG } from './common/constants';
 import { AppDependencies } from './app_dependencies';
@@ -59,7 +61,18 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
 
 export const renderApp = (element: HTMLElement, appDependencies: AppDependencies) => {
   const I18nContext = appDependencies.i18n.Context;
-  const queryClient = new QueryClient();
+
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        // This combo of options makes sure that we cache actual queries for
+        // the specified stale time, but treat provided default values as
+        // outdated immediately to trigger an initial fetch.
+        initialDataUpdatedAt: 0,
+        staleTime: REACT_QUERY_STALE_TIME,
+      },
+    },
+  });
 
   render(
     <EuiErrorBoundary>
