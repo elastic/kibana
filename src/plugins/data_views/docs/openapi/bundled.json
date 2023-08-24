@@ -84,6 +84,16 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
           }
         }
       },
@@ -304,6 +314,9 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/view_id"
           }
         ],
         "requestBody": {
@@ -312,11 +325,13 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "fields"
+                ],
                 "properties": {
                   "fields": {
                     "description": "The field object.",
-                    "type": "object",
-                    "required": true
+                    "type": "object"
                   }
                 }
               },
@@ -378,6 +393,9 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/view_id"
           }
         ],
         "requestBody": {
@@ -386,16 +404,18 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "name",
+                  "runtimeField"
+                ],
                 "properties": {
-                  "data_view_id": {
-                    "description": "The ID of the data view.",
+                  "name": {
                     "type": "string",
-                    "required": true
+                    "description": "The name for a runtime field.\n"
                   },
-                  "space_id": {
-                    "description": "An identifier for the space. If space_id is not provided in the URL, the default space is used.",
-                    "type": "string",
-                    "required": false
+                  "runtimeField": {
+                    "type": "object",
+                    "description": "The runtime field definition object.\n"
                   }
                 }
               },
@@ -410,7 +430,7 @@
       },
       "put": {
         "summary": "Create or update an existing runtime field.",
-        "operationId": "updateRuntimeField",
+        "operationId": "createUpdateRuntimeField",
         "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
@@ -418,6 +438,15 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "name": "viewId",
+            "in": "path",
+            "description": "The ID of the data view fields you want to update.\n",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -426,16 +455,18 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "name",
+                  "runtimeField"
+                ],
                 "properties": {
-                  "data_view_id": {
-                    "description": "The ID of the data view.",
+                  "name": {
                     "type": "string",
-                    "required": true
+                    "description": "The name for a runtime field.\n"
                   },
-                  "space_id": {
-                    "description": "An identifier for the space. If space_id is not provided in the URL, the default space is used.",
-                    "type": "string",
-                    "required": false
+                  "runtimeField": {
+                    "type": "object",
+                    "description": "The runtime field definition object.\n"
                   }
                 }
               },
@@ -453,7 +484,20 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/create_runtime_field_response"
+                  "type": "object",
+                  "properties": {
+                    "data_view": {
+                      "type": "object"
+                    },
+                    "fields": {
+                      "type": "array"
+                    }
+                  }
+                },
+                "examples": {
+                  "createRuntimeFieldResponse": {
+                    "$ref": "#/components/examples/create_runtime_field_response"
+                  }
                 }
               }
             }
@@ -588,15 +632,13 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "runtimeField"
+                ],
                 "properties": {
-                  "data_view": {
-                    "type": "object"
-                  },
-                  "fields": {
-                    "type": "array",
-                    "items": {
-                      "type": "object"
-                    }
+                  "runtimeField": {
+                    "type": "object",
+                    "description": "The runtime field definition object.\n\nYou can update following fields:\n\n- `type`\n- `script`\n"
                   }
                 }
               },
@@ -663,6 +705,16 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
           }
         }
       },
@@ -722,6 +774,16 @@
                       "type": "boolean"
                     }
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
                 }
               }
             }
@@ -1993,6 +2055,17 @@
           }
         }
       },
+      "create_runtime_field_response": {
+        "summary": "The API returns created runtime field object array and updated data view object.",
+        "value": {
+          "data_view": {
+            "...": null
+          },
+          "fields": [
+            "..."
+          ]
+        }
+      },
       "get_runtime_field_response": {
         "summary": "The get runtime field API returns a JSON object that contains information about the runtime field (`hour_of_day`) and the data view (`d3d7af60-4c81-11e8-b3d7-01146121b73d`).",
         "value": {
@@ -2635,38 +2708,29 @@
         }
       }
     },
-    "parameters": {
-      "kbn_xsrf": {
-        "schema": {
-          "type": "string"
-        },
-        "in": "header",
-        "name": "kbn-xsrf",
-        "description": "Cross-site request forgery protection",
-        "required": true
-      },
-      "view_id": {
-        "in": "path",
-        "name": "viewId",
-        "description": "An identifier for the data view.",
-        "required": true,
-        "schema": {
-          "type": "string",
-          "example": "ff959d40-b880-11e8-a6d9-e546fe2bba5f"
-        }
-      },
-      "field_name": {
-        "in": "path",
-        "name": "fieldName",
-        "description": "The name of the runtime field.",
-        "required": true,
-        "schema": {
-          "type": "string",
-          "example": "hour_of_day"
-        }
-      }
-    },
     "schemas": {
+      "400_response": {
+        "title": "Bad request",
+        "type": "object",
+        "required": [
+          "statusCode",
+          "error",
+          "message"
+        ],
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 400
+          },
+          "error": {
+            "type": "string",
+            "example": "Bad Request"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
       "allownoindex": {
         "type": "boolean",
         "description": "Allows the data view saved object to exist before the data is available."
@@ -2830,28 +2894,6 @@
           }
         }
       },
-      "400_response": {
-        "title": "Bad request",
-        "type": "object",
-        "required": [
-          "statusCode",
-          "error",
-          "message"
-        ],
-        "properties": {
-          "statusCode": {
-            "type": "number",
-            "example": 400
-          },
-          "error": {
-            "type": "string",
-            "example": "Bad Request"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      },
       "404_response": {
         "type": "object",
         "properties": {
@@ -2924,16 +2966,36 @@
             "default": false
           }
         }
+      }
+    },
+    "parameters": {
+      "kbn_xsrf": {
+        "schema": {
+          "type": "string"
+        },
+        "in": "header",
+        "name": "kbn-xsrf",
+        "description": "Cross-site request forgery protection",
+        "required": true
       },
-      "create_runtime_field_response": {
-        "summary": "The API returns created runtime field object array and updated data view object.",
-        "value": {
-          "data_view": {
-            "...": null
-          },
-          "fields": [
-            "..."
-          ]
+      "view_id": {
+        "in": "path",
+        "name": "viewId",
+        "description": "An identifier for the data view.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "ff959d40-b880-11e8-a6d9-e546fe2bba5f"
+        }
+      },
+      "field_name": {
+        "in": "path",
+        "name": "fieldName",
+        "description": "The name of the runtime field.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "hour_of_day"
         }
       }
     }

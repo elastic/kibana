@@ -54,6 +54,12 @@ paths:
               examples:
                 getAllDataViewsResponse:
                   $ref: '#/components/examples/get_data_views_response'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
     servers:
       - url: https://localhost:5601
   /api/data_views/data_view:
@@ -184,17 +190,19 @@ paths:
         - data views
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/view_id'
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - fields
               properties:
                 fields:
                   description: The field object.
                   type: object
-                  required: true
             examples:
               updateFieldsMetadataRequest:
                 $ref: '#/components/examples/update_field_metadata_request'
@@ -228,48 +236,62 @@ paths:
         - data views
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/view_id'
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - name
+                - runtimeField
               properties:
-                data_view_id:
-                  description: The ID of the data view.
+                name:
                   type: string
-                  required: true
-                space_id:
-                  description: An identifier for the space. If space_id is not provided in the URL, the default space is used.
-                  type: string
-                  required: false
+                  description: |
+                    The name for a runtime field.
+                runtimeField:
+                  type: object
+                  description: |
+                    The runtime field definition object.
             examples:
               createRuntimeFieldRequest:
                 $ref: '#/components/examples/create_runtime_field_request'
     put:
       summary: Create or update an existing runtime field.
-      operationId: updateRuntimeField
+      operationId: createUpdateRuntimeField
       description: |
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       tags:
         - data views
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - name: viewId
+          in: path
+          description: |
+            The ID of the data view fields you want to update.
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - name
+                - runtimeField
               properties:
-                data_view_id:
-                  description: The ID of the data view.
+                name:
                   type: string
-                  required: true
-                space_id:
-                  description: An identifier for the space. If space_id is not provided in the URL, the default space is used.
-                  type: string
-                  required: false
+                  description: |
+                    The name for a runtime field.
+                runtimeField:
+                  type: object
+                  description: |
+                    The runtime field definition object.
             examples:
               updateRuntimeFieldRequest:
                 $ref: '#/components/examples/create_runtime_field_request'
@@ -279,7 +301,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/create_runtime_field_response'
+                type: object
+                properties:
+                  data_view:
+                    type: object
+                  fields:
+                    type: array
+              examples:
+                createRuntimeFieldResponse:
+                  $ref: '#/components/examples/create_runtime_field_response'
         '400':
           description: Bad request
           content:
@@ -359,13 +389,18 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - runtimeField
               properties:
-                data_view:
+                runtimeField:
                   type: object
-                fields:
-                  type: array
-                  items:
-                    type: object
+                  description: |
+                    The runtime field definition object.
+
+                    You can update following fields:
+
+                    - `type`
+                    - `script`
             examples:
               updateRuntimeFieldRequest:
                 $ref: '#/components/examples/update_runtime_field_request'
@@ -403,6 +438,12 @@ paths:
               examples:
                 getDefaultDataViewResponse:
                   $ref: '#/components/examples/get_default_data_view_response'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
     post:
       summary: Sets the default data view identifier.
       operationId: setDefaultDatailView
@@ -444,6 +485,12 @@ paths:
                 properties:
                   acknowledged:
                     type: boolean
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -1439,6 +1486,13 @@ components:
           type: long
           script:
             source: emit(doc["foo"].value)
+    create_runtime_field_response:
+      summary: The API returns created runtime field object array and updated data view object.
+      value:
+        data_view:
+          ...: null
+        fields:
+          - ...
     get_runtime_field_response:
       summary: The get runtime field API returns a JSON object that contains information about the runtime field (`hour_of_day`) and the data view (`d3d7af60-4c81-11e8-b3d7-01146121b73d`).
       value:
@@ -1953,31 +2007,23 @@ components:
       value:
         data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
         force: true
-  parameters:
-    kbn_xsrf:
-      schema:
-        type: string
-      in: header
-      name: kbn-xsrf
-      description: Cross-site request forgery protection
-      required: true
-    view_id:
-      in: path
-      name: viewId
-      description: An identifier for the data view.
-      required: true
-      schema:
-        type: string
-        example: ff959d40-b880-11e8-a6d9-e546fe2bba5f
-    field_name:
-      in: path
-      name: fieldName
-      description: The name of the runtime field.
-      required: true
-      schema:
-        type: string
-        example: hour_of_day
   schemas:
+    400_response:
+      title: Bad request
+      type: object
+      required:
+        - statusCode
+        - error
+        - message
+      properties:
+        statusCode:
+          type: number
+          example: 400
+        error:
+          type: string
+          example: Bad Request
+        message:
+          type: string
     allownoindex:
       type: boolean
       description: Allows the data view saved object to exist before the data is available.
@@ -2092,22 +2138,6 @@ components:
             version:
               type: string
               example: WzQ2LDJd
-    400_response:
-      title: Bad request
-      type: object
-      required:
-        - statusCode
-        - error
-        - message
-      properties:
-        statusCode:
-          type: number
-          example: 400
-        error:
-          type: string
-          example: Bad Request
-        message:
-          type: string
     404_response:
       type: object
       properties:
@@ -2159,10 +2189,27 @@ components:
           type: boolean
           description: Reloads the data view fields after the data view is updated.
           default: false
-    create_runtime_field_response:
-      summary: The API returns created runtime field object array and updated data view object.
-      value:
-        data_view:
-          ...: null
-        fields:
-          - ...
+  parameters:
+    kbn_xsrf:
+      schema:
+        type: string
+      in: header
+      name: kbn-xsrf
+      description: Cross-site request forgery protection
+      required: true
+    view_id:
+      in: path
+      name: viewId
+      description: An identifier for the data view.
+      required: true
+      schema:
+        type: string
+        example: ff959d40-b880-11e8-a6d9-e546fe2bba5f
+    field_name:
+      in: path
+      name: fieldName
+      description: The name of the runtime field.
+      required: true
+      schema:
+        type: string
+        example: hour_of_day
