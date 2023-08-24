@@ -5,23 +5,35 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useCallback, useState } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { EuiButtonProps } from '@elastic/eui/src/components/button/button';
 import { EuiPopoverProps } from '@elastic/eui/src/components/popover/popover';
+import { i18n } from '@kbn/i18n';
 import { Index } from '../../../../../../common';
-import { reloadIndices } from '../../../../services';
+import {
+  reloadIndices,
+  closeIndices as closeIndicesRequest,
+  openIndices as openIndicesRequest,
+  flushIndices as flushIndicesRequest,
+  refreshIndices as refreshIndicesRequest,
+  clearCacheIndices as clearCacheIndicesRequest,
+  unfreezeIndices as unfreezeIndicesRequest,
+  forcemergeIndices as forcemergeIndicesRequest,
+  deleteIndices as deleteIndicesRequest,
+} from '../../../../services';
+import { notificationService } from '../../../../services/notification';
 // @ts-ignore this component needs to be refactored into TS
 import { IndexActionsContextMenu } from './index_actions_context_menu';
 
 export interface ReduxProps {
-  closeIndices: ({}: { indexNames: string[] }) => Promise<void>;
-  openIndices: ({}: { indexNames: string[] }) => Promise<void>;
-  flushIndices: ({}: { indexNames: string[] }) => Promise<void>;
-  refreshIndices: ({}: { indexNames: string[] }) => Promise<void>;
-  clearCacheIndices: ({}: { indexNames: string[] }) => Promise<void>;
-  unfreezeIndices: ({}: { indexNames: string[] }) => Promise<void>;
-  forcemergeIndices: ({}: { indexNames: string[]; maxNumSegments: number }) => Promise<void>;
+  closeIndices: () => Promise<void>;
+  openIndices: () => Promise<void>;
+  flushIndices: () => Promise<void>;
+  refreshIndices: () => Promise<void>;
+  clearCacheIndices: () => Promise<void>;
+  unfreezeIndices: () => Promise<void>;
+  forcemergeIndices: (maxNumSegments: string) => Promise<void>;
   deleteIndices: ({}: { indexNames: string[] }) => Promise<void>;
 
   // following 4 actions are only added when on the list view and only 1 index is selected
@@ -63,6 +75,12 @@ interface Props {
 
   // instead of getting indices data from the redux store, pass it as a prop
   indices: Index[];
+
+  // a function to reload index details
+  reloadIndexDetails?: () => void;
+
+  // a function to navigate back to all indices (after index deletion)
+  navigateToAllIndices?: () => void;
 }
 
 const getIndexStatusByName = (
@@ -80,17 +98,170 @@ const getIndexStatusByName = (
 export const IndexActionsContextMenuWithoutRedux: FunctionComponent<Props> = ({
   indexNames,
   indices,
+  reloadIndexDetails,
+  navigateToAllIndices,
   ...rest
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const closeIndices = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      await closeIndicesRequest(indexNames);
+      setIsLoading(false);
+      notificationService.showSuccessToast(
+        i18n.translate('xpack.idxMgmt.closeIndicesAction.successfullyClosedIndicesMessage', {
+          defaultMessage: 'Successfully closed: [{indexNames}]',
+          values: { indexNames: indexNames.join(', ') },
+        })
+      );
+      reloadIndexDetails?.();
+    } catch (error) {
+      setIsLoading(false);
+      notificationService.showDangerToast(error.body.message);
+    }
+  }, [reloadIndexDetails, indexNames]);
+
+  const openIndices = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      await openIndicesRequest(indexNames);
+      setIsLoading(false);
+      notificationService.showSuccessToast(
+        i18n.translate('xpack.idxMgmt.openIndicesAction.successfullyOpenedIndicesMessage', {
+          defaultMessage: 'Successfully opened: [{indexNames}]',
+          values: { indexNames: indexNames.join(', ') },
+        })
+      );
+      reloadIndexDetails?.();
+    } catch (error) {
+      setIsLoading(false);
+      notificationService.showDangerToast(error.body.message);
+    }
+  }, [reloadIndexDetails, indexNames]);
+
+  const flushIndices = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      await flushIndicesRequest(indexNames);
+      setIsLoading(false);
+      notificationService.showSuccessToast(
+        i18n.translate('xpack.idxMgmt.flushIndicesAction.successfullyFlushedIndicesMessage', {
+          defaultMessage: 'Successfully flushed: [{indexNames}]',
+          values: { indexNames: indexNames.join(', ') },
+        })
+      );
+      reloadIndexDetails?.();
+    } catch (error) {
+      setIsLoading(false);
+      notificationService.showDangerToast(error.body.message);
+    }
+  }, [reloadIndexDetails, indexNames]);
+
+  const refreshIndices = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      await refreshIndicesRequest(indexNames);
+      setIsLoading(false);
+      notificationService.showSuccessToast(
+        i18n.translate('xpack.idxMgmt.refreshIndicesAction.successfullyRefreshedIndicesMessage', {
+          defaultMessage: 'Successfully refreshed: [{indexNames}]',
+          values: { indexNames: indexNames.join(', ') },
+        })
+      );
+      reloadIndexDetails?.();
+    } catch (error) {
+      setIsLoading(false);
+      notificationService.showDangerToast(error.body.message);
+    }
+  }, [reloadIndexDetails, indexNames]);
+
+  const clearCacheIndices = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      await clearCacheIndicesRequest(indexNames);
+      setIsLoading(false);
+      notificationService.showSuccessToast(
+        i18n.translate('xpack.idxMgmt.clearCacheIndicesAction.successMessage', {
+          defaultMessage: 'Successfully cleared cache: [{indexNames}]',
+          values: { indexNames: indexNames.join(', ') },
+        })
+      );
+      reloadIndexDetails?.();
+    } catch (error) {
+      setIsLoading(false);
+      notificationService.showDangerToast(error.body.message);
+    }
+  }, [reloadIndexDetails, indexNames]);
+
+  const unfreezeIndices = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      await unfreezeIndicesRequest(indexNames);
+      setIsLoading(false);
+      notificationService.showSuccessToast(
+        i18n.translate('xpack.idxMgmt.unfreezeIndicesAction.successfullyUnfrozeIndicesMessage', {
+          defaultMessage: 'Successfully unfroze: [{indexNames}]',
+          values: { indexNames: indexNames.join(', ') },
+        })
+      );
+      reloadIndexDetails?.();
+    } catch (error) {
+      setIsLoading(false);
+      notificationService.showDangerToast(error.body.message);
+    }
+  }, [reloadIndexDetails, indexNames]);
+
+  const forcemergeIndices = useCallback(
+    async (maxNumSegments: string) => {
+      setIsLoading(true);
+      try {
+        await forcemergeIndicesRequest(indexNames, maxNumSegments);
+        setIsLoading(false);
+        notificationService.showSuccessToast(
+          i18n.translate(
+            'xpack.idxMgmt.forceMergeIndicesAction.successfullyForceMergedIndicesMessage',
+            {
+              defaultMessage: 'Successfully force merged: [{indexNames}]',
+              values: { indexNames: indexNames.join(', ') },
+            }
+          )
+        );
+        reloadIndexDetails?.();
+      } catch (error) {
+        setIsLoading(false);
+        notificationService.showDangerToast(error.body.message);
+      }
+    },
+    [reloadIndexDetails, indexNames]
+  );
+
+  const deleteIndices = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      await deleteIndicesRequest(indexNames);
+      setIsLoading(false);
+      notificationService.showSuccessToast(
+        i18n.translate('xpack.idxMgmt.deleteIndicesAction.successfullyDeletedIndicesMessage', {
+          defaultMessage: 'Successfully deleted: [{indexNames}]',
+          values: { indexNames: indexNames.join(', ') },
+        })
+      );
+      navigateToAllIndices?.();
+    } catch (error) {
+      setIsLoading(false);
+      notificationService.showDangerToast(error.body.message);
+    }
+  }, [navigateToAllIndices, indexNames]);
+
   const props: ReduxProps = {
-    closeIndices: async () => {},
-    openIndices: async () => {},
-    flushIndices: async () => {},
-    refreshIndices: async () => {},
-    clearCacheIndices: async () => {},
-    unfreezeIndices: async () => {},
-    forcemergeIndices: async () => {},
-    deleteIndices: async () => {},
+    closeIndices,
+    openIndices,
+    flushIndices,
+    refreshIndices,
+    clearCacheIndices,
+    unfreezeIndices,
+    forcemergeIndices,
+    deleteIndices,
 
     // there actions are not displayed on the index details page
     showSettings: () => {},
@@ -103,5 +274,14 @@ export const IndexActionsContextMenuWithoutRedux: FunctionComponent<Props> = ({
 
     performExtensionAction: async () => {},
   };
-  return <IndexActionsContextMenu indexNames={indexNames} indices={indices} {...props} {...rest} />;
+
+  return (
+    <IndexActionsContextMenu
+      indexNames={indexNames}
+      indices={indices}
+      isLoading={isLoading}
+      {...props}
+      {...rest}
+    />
+  );
 };

@@ -76,6 +76,10 @@ export const DetailsPage: React.FunctionComponent<
     [history, indexName]
   );
 
+  const navigateToAllIndices = useCallback(() => {
+    history.push(`/${Section.Indices}`);
+  }, [history]);
+
   const headerTabs = useMemo<EuiPageHeaderProps['tabs']>(() => {
     return tabs.map((tab) => ({
       onClick: () => onSectionChange(tab.id),
@@ -87,7 +91,7 @@ export const DetailsPage: React.FunctionComponent<
   }, [indexDetailsSection, onSectionChange]);
 
   const { isLoading, error, resendRequest, data } = useLoadIndex(indexName);
-  if (isLoading) {
+  if (isLoading && !data) {
     return (
       <SectionLoading>
         <FormattedMessage
@@ -108,9 +112,7 @@ export const DetailsPage: React.FunctionComponent<
           data-test-subj="indexDetailsBackToIndicesButton"
           color="text"
           iconType="arrowLeft"
-          onClick={() => {
-            return history.push(`/${Section.Indices}`);
-          }}
+          onClick={navigateToAllIndices}
         >
           <FormattedMessage
             id="xpack.idxMgmt.indexDetails.backToIndicesButtonLabel"
@@ -123,7 +125,19 @@ export const DetailsPage: React.FunctionComponent<
 
       <EuiPageHeader
         data-test-subj="indexDetailsHeader"
-        pageTitle={indexName}
+        pageTitle={
+          <>
+            {indexName}
+            {isLoading && (
+              <SectionLoading inline={true}>
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexDetails.reloadingDescription"
+                  defaultMessage="Re-loading index details…"
+                />
+              </SectionLoading>
+            )}
+          </>
+        }
         bottomBorder
         rightSideItems={[
           <DiscoverLink indexName={indexName} asButton={true} />,
@@ -131,6 +145,8 @@ export const DetailsPage: React.FunctionComponent<
             indexNames={[indexName]}
             indices={[data]}
             fill={false}
+            reloadIndexDetails={resendRequest}
+            navigateToAllIndices={navigateToAllIndices}
           />,
         ]}
         tabs={headerTabs}

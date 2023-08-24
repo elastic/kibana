@@ -464,6 +464,7 @@ export class IndexActionsContextMenu extends Component {
             }),
             iconType = 'arrowDown',
             fill = true,
+            isLoading = false,
           } = this.props;
 
           const panels = this.panels(appDependencies);
@@ -480,6 +481,7 @@ export class IndexActionsContextMenu extends Component {
               onClick={this.onButtonClick}
               iconType={iconType}
               fill={fill}
+              isLoading={isLoading}
             >
               {label}
             </EuiButton>
