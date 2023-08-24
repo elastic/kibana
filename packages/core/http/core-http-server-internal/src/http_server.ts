@@ -581,17 +581,17 @@ export class HttpServer {
       path: '/api/oas',
       method: 'GET',
       handler: (req, h) => {
-        const oasDoc = this.oasCache
-          ? this.oasCache
-          : generateOpenApiDocument(
-              this.getRegisteredRouters().map((r) => r.versioned as CoreVersionedRouter),
-              {
-                baseUrl: 'todo',
-                title: 'todo',
-                version: '0.0.0',
-              }
-            );
-        return h.response(oasDoc);
+        if (!this.oasCache) {
+          this.oasCache = generateOpenApiDocument(
+            this.getRegisteredRouters().map((r) => r.versioned as CoreVersionedRouter),
+            {
+              baseUrl: 'todo',
+              title: 'todo',
+              version: '0.0.0',
+            }
+          );
+        }
+        return h.response(this.oasCache);
       },
       options: {
         app: { access: 'public' },
