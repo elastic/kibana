@@ -134,13 +134,13 @@ const bulkEnableRulesWithOCC = async (
     { name: 'Get rules, collect them and their attributes', type: 'rules' },
     async () => {
       for await (const response of rulesFinder.find()) {
-        rulesFinderRules.concat(response.saved_objects);
+        rulesFinderRules.push(...response.saved_objects);
       }
       await rulesFinder.close();
 
       const updatedInterval = rulesFinderRules
-        .map((rule) => rule.attributes.schedule?.interval)
-        .filter((interval): interval is string => interval !== undefined);
+        .filter((rule) => !rule.attributes.enabled)
+        .map((rule) => rule.attributes.schedule?.interval);
 
       try {
         await validateScheduleLimit({
