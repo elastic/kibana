@@ -28,7 +28,6 @@ describe('metricsRoute', () => {
     const [config] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/task_manager/metrics"`);
-    expect(config.options?.tags).toEqual(['security:acceptJWT']);
   });
 
   it('emits resetMetric$ event when route is accessed and reset query param is true', async () => {

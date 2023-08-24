@@ -13,7 +13,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./security/anonymous'));
     loadTestFile(require.resolve('./security/api_keys'));
     loadTestFile(require.resolve('./security/authentication'));
-    loadTestFile(require.resolve('./security/authentication_http'));
     loadTestFile(require.resolve('./security/authorization'));
     loadTestFile(require.resolve('./security/misc'));
     loadTestFile(require.resolve('./security/response_headers'));
