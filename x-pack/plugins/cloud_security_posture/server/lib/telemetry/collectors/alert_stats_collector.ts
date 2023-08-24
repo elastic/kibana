@@ -9,51 +9,26 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CloudSecurityAlertsStats } from './types';
 import { DETECTION_ENGINE_ALERTS_INDEX_DEFAULT } from '../../../../common/constants';
 
-interface AlertsStats {
-  aggregations: {
-    cspm: {
-      rules_count: {
-        value: number;
-      };
-      alerts_open: {
-        doc_count: number;
-      };
-      alerts_acknowledged: {
-        doc_count: number;
-      };
-      alerts_closed: {
-        doc_count: number;
-      };
-    };
-    kspm: {
-      rules_count: {
-        value: number;
-      };
-      alerts_open: {
-        doc_count: number;
-      };
-      alerts_acknowledged: {
-        doc_count: number;
-      };
-      alerts_closed: {
-        doc_count: number;
-      };
-    };
-    vuln_mgmt: {
-      rules_count: {
-        value: number;
-      };
-      alerts_open: {
-        doc_count: number;
-      };
-      alerts_acknowledged: {
-        doc_count: number;
-      };
-      alerts_closed: {
-        doc_count: number;
-      };
-    };
+interface AlertStat {
+  doc_count: number;
+  rules_count: {
+    value: number;
   };
+  alerts_open: {
+    doc_count: number;
+  };
+  alerts_acknowledged: {
+    doc_count: number;
+  };
+  alerts_closed: {
+    doc_count: number;
+  };
+}
+
+interface AlertsStats {
+  cspm: AlertStat;
+  kspm: AlertStat;
+  vuln_mgmt: AlertStat;
 }
 
 const getAlertsStatsQuery = (index: string) => ({
@@ -187,20 +162,23 @@ export const getAlertsStats = async (
 
     if (isIndexExists) {
       const alertsStats = await esClient.search<unknown, AlertsStats>(getAlertsStatsQuery(index));
-
       const postureTypes = ['cspm', 'kspm', 'vuln_mgmt'] as const;
 
-      return postureTypes.map((postureType) => ({
-        posture_type: postureType,
-        rules_count: alertsStats.aggregations?.aggregations[postureType].rules_count.value,
-        alerts_count: alertsStats.aggregations?.aggregations[postureType].alerts_open.doc_count,
-        alerts_open_count:
-          alertsStats.aggregations?.aggregations[postureType].alerts_open.doc_count,
-        alerts_acknowledged_count:
-          alertsStats.aggregations?.aggregations[postureType].alerts_acknowledged.doc_count,
-        alerts_closed_count:
-          alertsStats.aggregations?.aggregations[postureType].alerts_closed.doc_count,
-      })) as CloudSecurityAlertsStats[];
+      return postureTypes
+        .filter(
+          (postureType) =>
+            alertsStats?.aggregations?.[postureType]?.doc_count &&
+            alertsStats.aggregations[postureType].doc_count > 0
+        )
+        .map((postureType) => ({
+          posture_type: postureType,
+          rules_count: alertsStats?.aggregations?.[postureType]?.rules_count?.value,
+          alerts_count: alertsStats?.aggregations?.[postureType]?.doc_count,
+          alerts_open_count: alertsStats?.aggregations?.[postureType]?.alerts_open?.doc_count,
+          alerts_acknowledged_count:
+            alertsStats?.aggregations?.[postureType]?.alerts_acknowledged?.doc_count,
+          alerts_closed_count: alertsStats?.aggregations?.[postureType]?.alerts_closed?.doc_count,
+        })) as CloudSecurityAlertsStats[];
     }
     return [];
   } catch (e) {
