@@ -108,6 +108,7 @@ export const EVENT_LOG_ACTIONS = {
   recoveredInstance: 'recovered-instance',
   activeInstance: 'active-instance',
   executeTimeout: 'execute-timeout',
+  untrackedInstance: 'untracked-instance',
 };
 export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',

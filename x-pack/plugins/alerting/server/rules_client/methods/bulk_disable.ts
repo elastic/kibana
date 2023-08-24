@@ -22,7 +22,7 @@ import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
   getAlertFromRaw,
-  recoverRuleAlerts,
+  untrackRuleAlerts,
   updateMeta,
   migrateLegacyActions,
 } from '../lib';
@@ -113,7 +113,7 @@ const bulkDisableRulesWithOCC = async (
       for await (const response of rulesFinder.find()) {
         await pMap(response.saved_objects, async (rule) => {
           try {
-            await recoverRuleAlerts(context, rule.id, rule.attributes);
+            await untrackRuleAlerts(context, rule.id, rule.attributes);
 
             if (rule.attributes.name) {
               ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;

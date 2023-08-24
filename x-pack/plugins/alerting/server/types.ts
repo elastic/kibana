@@ -149,7 +149,7 @@ export type ExecutorType<
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never,
   AlertData extends RuleAlertData = never
-> = (
+> = ((
   options: RuleExecutorOptions<
     Params,
     State,
@@ -158,7 +158,7 @@ export type ExecutorType<
     ActionGroupIds,
     AlertData
   >
-) => Promise<{ state: State }>;
+) => Promise<{ state: State }>) & { untrackLifecycleAlerts?: () => void };
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: Partial<Params>) => Params;

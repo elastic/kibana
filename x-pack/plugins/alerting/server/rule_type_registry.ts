@@ -302,6 +302,31 @@ export class RuleTypeRegistry {
         indirectParamsSchema: rawRuleSchema,
       },
     });
+
+    this.taskManager.registerTaskDefinitions({
+      [`untrack_alerting:${ruleType.id}`]: {
+        title: `Untrack ${ruleType.name}`,
+        timeout: ruleType.ruleTaskTimeout,
+        createTaskRunner: (context: RunContext) =>
+          this.taskRunnerFactory.create<
+            Params,
+            ExtractedParams,
+            State,
+            InstanceState,
+            InstanceContext,
+            ActionGroupIds,
+            RecoveryActionGroupId | RecoveredActionGroupId,
+            AlertData
+          >(normalizedRuleType, context, this.inMemoryMetrics, true),
+        paramsSchema: schema.object({
+          alertId: schema.string(),
+          spaceId: schema.string(),
+          consumer: schema.maybe(schema.string()),
+        }),
+        indirectParamsSchema: rawRuleSchema,
+      },
+    });
+
     if (this.alertsService && ruleType.alerts) {
       this.alertsService.register(ruleType.alerts as IRuleTypeAlerts);
     }

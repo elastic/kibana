@@ -11,7 +11,7 @@ import { WriteOperations, AlertingAuthorizationEntity } from '../../authorizatio
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
-import { recoverRuleAlerts, updateMeta, migrateLegacyActions } from '../lib';
+import { untrackRuleAlerts, updateMeta, migrateLegacyActions } from '../lib';
 
 export async function disable(context: RulesClientContext, { id }: { id: string }): Promise<void> {
   return await retryIfConflicts(
@@ -43,7 +43,7 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
     references = alert.references;
   }
 
-  await recoverRuleAlerts(context, id, attributes);
+  await untrackRuleAlerts(context, id, attributes);
 
   try {
     await context.authorization.ensureAuthorized({

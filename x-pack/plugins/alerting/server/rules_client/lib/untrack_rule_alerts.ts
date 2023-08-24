@@ -15,30 +15,36 @@ import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { createAlertEventLogRecordObject } from '../../lib/create_alert_event_log_record_object';
 import { RulesClientContext } from '../types';
 
-export const recoverRuleAlerts = async (
+export const untrackRuleAlerts = async (
   context: RulesClientContext,
   id: string,
   attributes: RawRule
 ) => {
-  return withSpan({ name: 'recoverRuleAlerts', type: 'rules' }, async () => {
+  return withSpan({ name: 'untrackRuleAlerts', type: 'rules' }, async () => {
     if (!context.eventLogger || !attributes.scheduledTaskId) return;
     try {
-      const { state } = taskInstanceToAlertTaskInstance(
+      const taskInstance = taskInstanceToAlertTaskInstance(
         await context.taskManager.get(attributes.scheduledTaskId),
         attributes as unknown as SanitizedRule
       );
 
-      const recoveredAlerts = mapValues<Record<string, RawAlert>, Alert>(
+      const { state } = taskInstance;
+
+      const untrackedAlerts = mapValues<Record<string, RawAlert>, Alert>(
         state.alertInstances ?? {},
         (rawAlertInstance, alertId) => new Alert(alertId, rawAlertInstance)
       );
-      const recoveredAlertIds = Object.keys(recoveredAlerts);
+      const untrackedAlertIds = Object.keys(untrackedAlerts);
 
-      for (const alertId of recoveredAlertIds) {
-        const { group: actionGroup } = recoveredAlerts[alertId].getLastScheduledActions() ?? {};
-        const instanceState = recoveredAlerts[alertId].getState();
-        const message = `instance '${alertId}' has recovered due to the rule was disabled`;
-        const alertUuid = recoveredAlerts[alertId].getUuid();
+      const { isLifecycleAlert } = taskInstance.state?.alertTypeState ?? {
+        isLifecycleAlert: false,
+      };
+
+      for (const alertId of untrackedAlertIds) {
+        const { group: actionGroup } = untrackedAlerts[alertId].getLastScheduledActions() ?? {};
+        const instanceState = untrackedAlerts[alertId].getState();
+        const message = `instance '${alertId}' has untracked because the rule was disabled`;
+        const alertUuid = untrackedAlerts[alertId].getUuid();
 
         const event = createAlertEventLogRecordObject({
           ruleId: id,
@@ -48,7 +54,7 @@ export const recoverRuleAlerts = async (
           consumer: attributes.consumer,
           instanceId: alertId,
           alertUuid,
-          action: EVENT_LOG_ACTIONS.recoveredInstance,
+          action: EVENT_LOG_ACTIONS.untrackedInstance,
           message,
           state: instanceState,
           group: actionGroup,
@@ -65,10 +71,28 @@ export const recoverRuleAlerts = async (
         });
         context.eventLogger.logEvent(event);
       }
+
+      if (isLifecycleAlert) {
+        const { taskType } = taskInstance;
+        const untrackTaskType = `untrack_${taskType}`;
+        const untrackTaskInstance = {
+          id: `untrack-${id}`,
+          taskType: untrackTaskType,
+          params: {
+            alertId: id,
+            spaceId: context.spaceId,
+            consumer: attributes.consumer,
+          },
+          scope: ['alerting'],
+          state: {},
+          enabled: true,
+        };
+        await context.taskManager.schedule(untrackTaskInstance);
+      }
     } catch (error) {
       // this should not block the rest of the disable process
       context.logger.warn(
-        `rulesClient.disable('${id}') - Could not write recovery events - ${error.message}`
+        `rulesClient.disable('${id}') - Could not write untrack events - ${error.message}`
       );
     }
   });
