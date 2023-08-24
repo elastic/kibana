@@ -262,6 +262,7 @@ const useFetchAlerts = ({
                 }
               },
               error: (msg) => {
+                console.log('error thrown', msg);
                 dispatch({ type: 'loading', loading: false });
                 data.search.showError(msg);
                 searchSubscription$.current.unsubscribe();
