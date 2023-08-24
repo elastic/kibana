@@ -47,7 +47,7 @@ export type ArchiveAsset = Pick<
   SavedObject,
   | 'id'
   | 'attributes'
-  | 'migrationVersion'
+  | 'migrationVersion' // deprecated
   | 'references'
   | 'coreMigrationVersion'
   | 'typeMigrationVersion'
@@ -93,8 +93,9 @@ export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectTo
     references: asset.references || [],
   };
 
-  if (asset.migrationVersion) {
-    so.migrationVersion = asset.migrationVersion;
+  // migrating deprecated migrationVersion to typeMigrationVersion
+  if (asset.migrationVersion && asset.migrationVersion[asset.type]) {
+    so.typeMigrationVersion = asset.migrationVersion[asset.type];
   }
   if (asset.coreMigrationVersion) {
     so.coreMigrationVersion = asset.coreMigrationVersion;
