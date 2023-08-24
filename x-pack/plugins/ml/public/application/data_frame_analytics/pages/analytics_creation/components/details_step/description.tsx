@@ -42,7 +42,7 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.dataframe.analytics.create.detailsStep.additionalSection.customUrlsSelection.description"
-          defaultMessage="Provide links from analytics job results to Kibana dashboards, the Discovery page, or other web pages. {learnMoreLink}"
+          defaultMessage="Provide links from analytics job results to Kibana dashboards, Discover, or other web pages. {learnMoreLink}"
           values={{
             learnMoreLink: (
               <EuiLink href={docsUrl} target="_blank">

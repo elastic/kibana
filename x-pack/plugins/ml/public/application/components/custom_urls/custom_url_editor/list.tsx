@@ -126,16 +126,21 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
 
     if (
       index < customUrls.length &&
-      isDataFrameAnalyticsConfigs(job) &&
+      (isDataFrameAnalyticsConfigs(job) || isPartialDFAJob) &&
       customUrl.time_range !== undefined &&
       customUrl.time_range !== TIME_RANGE_TYPE.AUTO
     ) {
+      // Ensure cast as dfaJob if it's just a partial from the wizard
+      const dfaJob = job as DataFrameAnalyticsConfig;
       let dataViewId;
-      // DFA job url - need the timefield to test the URL. Get it from the job config.
+      // DFA job url - need the timefield to test the URL. Get it from the job config. Use source index when partial job since dest index does not exist yet.
       if (customUrl.url_value.includes('dashboards')) {
+        const sourceIndex = Array.isArray(dfaJob.source.index)
+          ? dfaJob.source.index.join()
+          : dfaJob.source.index;
         // need to get the dataview from the dashboard to get timefield
-        const indexName = job.dest.index;
-        const backupIndexName = job.source.index[0];
+        const indexName = isPartialDFAJob ? sourceIndex : dfaJob.dest.index;
+        const backupIndexName = sourceIndex;
         dataViewId = dataViewListItems?.find((item) => item.title === indexName)?.id;
         if (!dataViewId) {
           dataViewId = dataViewListItems?.find((item) => item.title === backupIndexName)?.id;
