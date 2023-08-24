@@ -333,6 +333,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
               ]
             : []),
           '--notifications.connectors.default.email=notification-email',
+          '--xpack.task_manager.requeue_invalid_tasks.enabled=true',
         ],
       },
     };
