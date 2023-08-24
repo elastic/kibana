@@ -21,23 +21,24 @@ import { useAppDependencies } from '../app_dependencies';
 export const useAuthorization = () => {
   const { http } = useAppDependencies();
 
-  const { error, isLoading, data } = useQuery<PrivilegesAndCapabilities, IHttpFetchError>(
+  const {
+    error,
+    isLoading,
+    data = {
+      privileges: {
+        hasAllPrivileges: false,
+        missingPrivileges: {},
+      },
+      capabilities: INITIAL_CAPABILITIES,
+    },
+  } = useQuery<PrivilegesAndCapabilities, IHttpFetchError>(
     [TRANSFORM_REACT_QUERY_KEYS.GET_PRIVILEGES],
     ({ signal }) =>
       http.fetch<PrivilegesAndCapabilities>(addInternalBasePath(`privileges`), {
         version: '1',
         method: 'GET',
         signal,
-      }),
-    {
-      initialData: {
-        privileges: {
-          hasAllPrivileges: false,
-          missingPrivileges: {},
-        },
-        capabilities: INITIAL_CAPABILITIES,
-      },
-    }
+      })
   );
 
   return useMemo(

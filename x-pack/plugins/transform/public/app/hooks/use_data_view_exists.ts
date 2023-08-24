@@ -12,21 +12,27 @@ import type { ErrorType } from '@kbn/ml-error-utils';
 import { TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
 
 import { useAppDependencies } from '../app_dependencies';
+import type { TransformListRow } from '../common';
 
-export const useDataViewExists = (indexName?: string, enabled?: boolean, initialData?: boolean) => {
+export const useDataViewExists = (items: TransformListRow[]) => {
   const {
     data: { dataViews: dataViewsContract },
   } = useAppDependencies();
 
   return useQuery<boolean, ErrorType>(
-    [TRANSFORM_REACT_QUERY_KEYS.DATA_VIEW_EXISTS, indexName],
+    [TRANSFORM_REACT_QUERY_KEYS.DATA_VIEW_EXISTS, items],
     async () => {
+      if (items.length !== 1) {
+        return false;
+      }
+      const config = items[0].config;
+      const indexName = Array.isArray(config.dest.index) ? config.dest.index[0] : config.dest.index;
+
       if (indexName === undefined) {
         return false;
       }
 
       return (await dataViewsContract.find(indexName)).some(({ title }) => title === indexName);
-    },
-    { enabled, initialData }
+    }
   );
 };

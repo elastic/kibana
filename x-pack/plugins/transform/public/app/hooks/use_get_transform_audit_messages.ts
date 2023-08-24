@@ -34,7 +34,6 @@ export const useGetTransformAuditMessages = (
           version: '1',
           signal,
         }
-      ),
-    { initialData: { messages: [], total: 0 } }
+      )
   );
 };

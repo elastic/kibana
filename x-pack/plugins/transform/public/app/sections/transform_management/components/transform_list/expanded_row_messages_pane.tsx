@@ -45,11 +45,11 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
     },
   });
 
-  const { isLoading, error, data } = useGetTransformAuditMessages(
-    transformId,
-    sorting.sort.field,
-    sorting.sort.direction
-  );
+  const {
+    isLoading,
+    error,
+    data = { messages: [], total: 0 },
+  } = useGetTransformAuditMessages(transformId, sorting.sort.field, sorting.sort.direction);
   const { messages, total } = data;
   const errorMessage =
     error !== null

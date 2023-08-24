@@ -65,10 +65,6 @@ export const renderApp = (element: HTMLElement, appDependencies: AppDependencies
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        // This combo of options makes sure that we cache actual queries for
-        // the specified stale time, but treat provided default values as
-        // outdated immediately to trigger an initial fetch.
-        initialDataUpdatedAt: 0,
         staleTime: REACT_QUERY_STALE_TIME,
       },
     },

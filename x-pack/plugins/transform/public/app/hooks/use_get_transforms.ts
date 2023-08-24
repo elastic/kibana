@@ -43,7 +43,7 @@ const getInitialData = (): UseGetTransformsResponse => ({
 export const useGetTransforms = () => {
   const { http } = useAppDependencies();
 
-  return useQuery<UseGetTransformsResponse, IHttpFetchError>(
+  const { data = getInitialData(), ...rest } = useQuery<UseGetTransformsResponse, IHttpFetchError>(
     [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORMS],
     async ({ signal }) => {
       const update = getInitialData();
@@ -116,8 +116,9 @@ export const useGetTransforms = () => {
       return update;
     },
     {
-      initialData: getInitialData(),
       refetchInterval: DEFAULT_REFRESH_INTERVAL_MS,
     }
   );
+
+  return { data, ...rest };
 };

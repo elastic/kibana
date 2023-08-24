@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
@@ -65,22 +65,14 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
     [deleteDataView]
   );
 
-  const indexName = useMemo<string | undefined>(() => {
-    // if user only deleting one transform
-    if (items.length === 1) {
-      const config = items[0].config;
-      return Array.isArray(config.dest.index) ? config.dest.index[0] : config.dest.index;
-    }
-  }, [items]);
-
-  const { error: dataViewExistsError, data: dataViewExists } = useDataViewExists(
-    indexName,
-    items.length === 1,
-    items.length !== 1
-  );
+  const { error: dataViewExistsError, data: dataViewExists = items.length !== 1 } =
+    useDataViewExists(items);
 
   useEffect(() => {
-    if (dataViewExistsError !== null) {
+    if (dataViewExistsError !== null && items.length === 1) {
+      const config = items[0].config;
+      const indexName = Array.isArray(config.dest.index) ? config.dest.index[0] : config.dest.index;
+
       toastNotifications.addDanger(
         i18n.translate(
           'xpack.transform.deleteTransform.errorWithCheckingIfDataViewExistsNotificationErrorMessage',
