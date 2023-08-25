@@ -49,41 +49,41 @@ export const PolicyArtifactsEmptyUnassigned = memo<CommonProps>(
       [navigateCallback]
     );
     return (
-        <EuiEmptyPrompt
-          iconType="plusInCircle"
-          data-test-subj="policy-artifacts-empty-unassigned"
-          color="subdued"
-          title={<h2>{labels.emptyUnassignedTitle}</h2>}
-          body={
-            canWriteArtifact
-              ? labels.emptyUnassignedMessage(policyName)
-              : labels.emptyUnassignedNoPrivilegesMessage(policyName)
-          }
-          actions={[
-            ...(canCreateArtifactsByPolicy && canWriteArtifact
-              ? [
-                  <EuiButton
-                    color="primary"
-                    fill
-                    onClick={onClickPrimaryButtonHandler}
-                    data-test-subj="unassigned-assign-artifacts-button"
-                  >
-                    {labels.emptyUnassignedPrimaryActionButtonTitle}
-                  </EuiButton>,
-                ]
-              : []),
-            canWriteArtifact ? (
-              // eslint-disable-next-line @elastic/eui/href-or-on-click
-              <EuiLink
-                onClick={onClickHandler}
-                href={toRouteUrl}
-                data-test-subj="unassigned-manage-artifacts-button"
-              >
-                {labels.emptyUnassignedSecondaryActionButtonTitle}
-              </EuiLink>
-            ) : null,
-          ]}
-        />
+      <EuiEmptyPrompt
+        iconType="plusInCircle"
+        data-test-subj="policy-artifacts-empty-unassigned"
+        color="subdued"
+        title={<h2>{labels.emptyUnassignedTitle}</h2>}
+        body={
+          canWriteArtifact
+            ? labels.emptyUnassignedMessage(policyName)
+            : labels.emptyUnassignedNoPrivilegesMessage(policyName)
+        }
+        actions={[
+          ...(canCreateArtifactsByPolicy && canWriteArtifact
+            ? [
+                <EuiButton
+                  color="primary"
+                  fill
+                  onClick={onClickPrimaryButtonHandler}
+                  data-test-subj="unassigned-assign-artifacts-button"
+                >
+                  {labels.emptyUnassignedPrimaryActionButtonTitle}
+                </EuiButton>,
+              ]
+            : []),
+          canWriteArtifact ? (
+            // eslint-disable-next-line @elastic/eui/href-or-on-click
+            <EuiLink
+              onClick={onClickHandler}
+              href={toRouteUrl}
+              data-test-subj="unassigned-manage-artifacts-button"
+            >
+              {labels.emptyUnassignedSecondaryActionButtonTitle}
+            </EuiLink>
+          ) : null,
+        ]}
+      />
     );
   }
 );

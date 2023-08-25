@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
-import { EuiCallOut, EuiLoadingSpinner, EuiEmptyPrompt, EuiPageTemplate, EuiPageSection } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner, EuiPageSection } from '@elastic/eui';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import { policyDetails, agentStatusSummary, apiError } from '../store/policy_details/selectors';
 import { AgentsSummary } from './components/agents_summary';
