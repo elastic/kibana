@@ -54,7 +54,7 @@ describe('Home page with empty state', () => {
       }).as('getEsResources');
       cy.visitKibana('/app/profiling');
       cy.wait('@getEsResources');
-      cy.contains('Delete existing profiling indices');
+      cy.contains('Delete existing profiling data');
     });
 
     it('shows Delete page when data pre 8.9.1 is still available and data is not found', () => {
@@ -67,7 +67,7 @@ describe('Home page with empty state', () => {
       }).as('getEsResources');
       cy.visitKibana('/app/profiling');
       cy.wait('@getEsResources');
-      cy.contains('Delete existing profiling indices');
+      cy.contains('Delete existing profiling data');
     });
   });
 });
