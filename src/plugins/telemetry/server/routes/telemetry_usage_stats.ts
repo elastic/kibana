@@ -92,6 +92,7 @@ export function registerTelemetryUsageStatsRoutes(
     .post({
       access: 'internal',
       path: FetchSnapshotTelemetry,
+      enableQueryVersion: true, // Allow specifying the version through querystring so that we can use it in Dev Console
     })
     // Just because it used to be /v2/, we are creating identical v1 and v2.
     .addVersion({ version: '1', validate: v2Validations }, v2Handler)

@@ -28,6 +28,7 @@ import {
   LanguageClientPanel,
   InstallClientPanel,
   getLanguageDefinitionCodeSnippet,
+  getConsoleRequest,
 } from '@kbn/search-api-panels';
 
 import React, { useMemo, useState } from 'react';
@@ -35,6 +36,8 @@ import type {
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
+import { useQuery } from '@tanstack/react-query';
+import { Connector } from '@kbn/enterprise-search-plugin/common/types/connectors';
 import { docLinks } from '../../../common/doc_links';
 import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
@@ -43,7 +46,6 @@ import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
 import './overview.scss';
 import { ApiKeyPanel } from './api_key/api_key';
-import { showTryInConsole } from './languages/utils';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] =
@@ -60,6 +62,12 @@ export const ElasticsearchOverview = () => {
     url: elasticsearchURL,
     apiKey: clientApiKey,
   };
+
+  const { data } = useQuery({
+    queryKey: ['fetchConnectors'],
+    queryFn: () =>
+      http.fetch<{ connectors: Connector[] }>('/internal/serverless_search/connectors'),
+  });
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
@@ -91,7 +99,7 @@ export const ElasticsearchOverview = () => {
             'installClient',
             codeSnippetArguments
           )}
-          showTryInConsole={showTryInConsole('installClient')}
+          consoleRequest={getConsoleRequest('installClient')}
           languages={languageDefinitions}
           language={selectedLanguage}
           setSelectedLanguage={setSelectedLanguage}
@@ -134,7 +142,7 @@ export const ElasticsearchOverview = () => {
                 'configureClient',
                 codeSnippetArguments
               )}
-              showTryInConsole={showTryInConsole('configureClient')}
+              consoleRequest={getConsoleRequest('configureClient')}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
               http={http}
@@ -177,7 +185,7 @@ export const ElasticsearchOverview = () => {
                 'testConnection',
                 codeSnippetArguments
               )}
-              showTryInConsole={showTryInConsole('testConnection')}
+              consoleRequest={getConsoleRequest('testConnection')}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
               http={http}
@@ -199,7 +207,7 @@ export const ElasticsearchOverview = () => {
             'ingestData',
             codeSnippetArguments
           )}
-          showTryInConsole={showTryInConsole('ingestData')}
+          showTryInConsole={getConsoleRequest('ingestData')}
           languages={languageDefinitions}
           selectedLanguage={selectedLanguage}
           setSelectedLanguage={setSelectedLanguage}
@@ -224,7 +232,7 @@ export const ElasticsearchOverview = () => {
                 'buildSearchQuery',
                 codeSnippetArguments
               )}
-              showTryInConsole={showTryInConsole('buildSearchQuery')}
+              consoleRequest={getConsoleRequest('buildSearchQuery')}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
               http={http}
