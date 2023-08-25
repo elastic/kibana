@@ -910,6 +910,9 @@ export const buildRuleExceptionWithConditions = ({
  Generate exception conditions based on the highlighted fields of the alert that 
  have corresponding values in the alert data.
  For the initial implementation the nested conditions are not considered
+ Converting a singular value to a string or an array of strings
+ is necessary because the "Match" or "Match any" operators
+ are designed to operate with string value(s).
  */
 export const buildExceptionEntriesFromAlertFields = ({
   highlightedFields,
@@ -920,18 +923,24 @@ export const buildExceptionEntriesFromAlertFields = ({
 }): EntriesArray => {
   return Object.values(highlightedFields).reduce((acc: EntriesArray, field) => {
     const fieldKey = field.id;
-    const fieldValue = get(alertData, fieldKey) || get(alertData, getKibanaAlertIdField(fieldKey));
+    const fieldValue = get(alertData, fieldKey) ?? get(alertData, getKibanaAlertIdField(fieldKey));
 
-    if (fieldValue) {
+    if (fieldValue !== null && fieldValue !== undefined) {
+      const listOperatorType = Array.isArray(fieldValue)
+        ? ListOperatorTypeEnum.MATCH_ANY
+        : ListOperatorTypeEnum.MATCH;
+
+      const fieldValueAsString = Array.isArray(fieldValue)
+        ? fieldValue.map(String)
+        : fieldValue.toString();
       acc.push({
         field: fieldKey,
         operator: ListOperatorEnum.INCLUDED,
-        type: Array.isArray(fieldValue)
-          ? ListOperatorTypeEnum.MATCH_ANY
-          : ListOperatorTypeEnum.MATCH,
-        value: fieldValue,
+        type: listOperatorType,
+        value: fieldValueAsString,
       });
     }
+
     return acc;
   }, []);
 };
@@ -951,7 +960,10 @@ export const getPrepopulatedRuleExceptionWithHighlightFields = ({
   const highlightedFields = getAlertHighlightedFields(alertData);
   if (!highlightedFields.length) return null;
 
-  const exceptionEntries = buildExceptionEntriesFromAlertFields({ highlightedFields, alertData });
+  const exceptionEntries = buildExceptionEntriesFromAlertFields({
+    highlightedFields,
+    alertData,
+  });
   if (!exceptionEntries.length) return null;
 
   return buildRuleExceptionWithConditions({
