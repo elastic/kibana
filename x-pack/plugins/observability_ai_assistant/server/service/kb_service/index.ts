@@ -6,7 +6,7 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import type { QueryDslTextExpansionQuery } from '@elastic/elasticsearch/lib/api/types';
-import { serverUnavailable } from '@hapi/boom';
+import { serverUnavailable, gatewayTimeout } from '@hapi/boom';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -23,6 +23,14 @@ interface Dependencies {
   resources: ObservabilityAIAssistantResourceNames;
   logger: Logger;
   taskManagerStart: TaskManagerStartContract;
+}
+
+function isAlreadyExistsError(error: Error) {
+  return (
+    error instanceof errors.ResponseError &&
+    (error.body.error.type === 'resource_not_found_exception' ||
+      error.body.error.type === 'status_exception')
+  );
 }
 
 const ELSER_MODEL_ID = '.elser_model_1';
@@ -202,13 +210,11 @@ export class KnowledgeBaseService {
         },
       });
 
-      return { entries: response.hits.hits.map((hit) => ({ ...hit._source!, score: hit._score })) };
+      return {
+        entries: response.hits.hits.map((hit) => ({ ...hit._source!, score: hit._score })),
+      };
     } catch (error) {
-      if (
-        (error instanceof errors.ResponseError &&
-          error.body.error.type === 'resource_not_found_exception') ||
-        error.body.error.type === 'status_exception'
-      ) {
+      if (isAlreadyExistsError(error)) {
         throwKnowledgeBaseNotReady(error.body);
       }
       throw error;
@@ -267,7 +273,7 @@ export class KnowledgeBaseService {
   };
 
   setup = async () => {
-    // if this fails, it's fine to propagate the error to the user
+    const retryOptions = { factor: 1, minTimeout: 10000, retries: 12 };
 
     const installModel = async () => {
       this.dependencies.logger.info('Installing ELSER model');
@@ -285,26 +291,36 @@ export class KnowledgeBaseService {
       this.dependencies.logger.info('Finished installing ELSER model');
     };
 
-    try {
+    const getIsModelInstalled = async () => {
       const getResponse = await this.dependencies.esClient.ml.getTrainedModels({
         model_id: ELSER_MODEL_ID,
         include: 'definition_status',
       });
 
-      if (!getResponse.trained_model_configs[0]?.fully_defined) {
-        this.dependencies.logger.info('Model is not fully defined');
-        await installModel();
+      this.dependencies.logger.debug(
+        'Model definition status:\n' + JSON.stringify(getResponse.trained_model_configs[0])
+      );
+
+      return Boolean(getResponse.trained_model_configs[0]?.fully_defined);
+    };
+
+    await pRetry(async () => {
+      let isModelInstalled: boolean = false;
+      try {
+        isModelInstalled = await getIsModelInstalled();
+      } catch (error) {
+        if (isAlreadyExistsError(error)) {
+          await installModel();
+          isModelInstalled = await getIsModelInstalled();
+        }
       }
-    } catch (error) {
-      if (
-        error instanceof errors.ResponseError &&
-        error.body.error.type === 'resource_not_found_exception'
-      ) {
-        await installModel();
-      } else {
-        throw error;
+
+      if (!isModelInstalled) {
+        throwKnowledgeBaseNotReady({
+          message: 'Model is not fully defined',
+        });
       }
-    }
+    }, retryOptions);
 
     try {
       await this.dependencies.esClient.ml.startTrainedModelDeployment({
@@ -314,36 +330,28 @@ export class KnowledgeBaseService {
     } catch (error) {
       this.dependencies.logger.debug('Error starting model deployment');
       this.dependencies.logger.debug(error);
-      if (
-        !(
-          (error instanceof errors.ResponseError && error.body.error.type === 'status_exception') ||
-          error.body.error.type === 'resource_not_found_exception'
-        )
-      ) {
+      if (!isAlreadyExistsError(error)) {
         throw error;
       }
     }
 
-    await pRetry(
-      async () => {
-        const response = await this.dependencies.esClient.ml.getTrainedModelsStats({
-          model_id: ELSER_MODEL_ID,
-        });
+    await pRetry(async () => {
+      const response = await this.dependencies.esClient.ml.getTrainedModelsStats({
+        model_id: ELSER_MODEL_ID,
+      });
 
-        if (
-          response.trained_model_stats[0]?.deployment_stats?.allocation_status.state ===
-          'fully_allocated'
-        ) {
-          return Promise.resolve();
-        }
+      if (
+        response.trained_model_stats[0]?.deployment_stats?.allocation_status.state ===
+        'fully_allocated'
+      ) {
+        return Promise.resolve();
+      }
 
-        this.dependencies.logger.debug('Model is not allocated yet');
-        this.dependencies.logger.debug(JSON.stringify(response));
+      this.dependencies.logger.debug('Model is not allocated yet');
+      this.dependencies.logger.debug(JSON.stringify(response));
 
-        return Promise.reject(new Error('Not Ready'));
-      },
-      { factor: 1, minTimeout: 10000, retries: 12 }
-    );
+      throw gatewayTimeout();
+    }, retryOptions);
 
     this.dependencies.logger.info('Model is ready');
     this.ensureTaskScheduled();
