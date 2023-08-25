@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../../tags';
 
 import { openPrevalenceTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_prevalence_tab';
 import { openInsightsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel';
@@ -44,7 +43,7 @@ describe('Alert details expandable flyout left panel prevalence', () => {
     openPrevalenceTab();
   });
 
-  it('should display prevalence tab', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+  it('should display prevalence tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
     cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB).should('be.visible').and('have.text', 'Insights');
 
     cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP).should('be.visible');
