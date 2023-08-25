@@ -146,7 +146,7 @@ all clusters having a name starting with `cluster_`:
 To exclude a cluster having a name starting with `cluster_`:
 
 ```ts
-`cluster_*:logstash-*,cluster_one:-*`
+`cluster_*:logstash-*,-cluster_one:*`
 ```
 
 Once you configure a {data-source} to use the {ccs} syntax, all searches and
