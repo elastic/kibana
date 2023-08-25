@@ -32,6 +32,10 @@ export interface LanguageDefinition {
   basicConfig?: string;
   configureClient: CodeSnippet;
   docLink: string;
+  github?: {
+    link: string;
+    label: string;
+  };
   iconType: string;
   id: Languages;
   ingestData: CodeSnippet;

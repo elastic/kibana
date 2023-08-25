@@ -27,6 +27,7 @@ export const links: LinkItem = {
   path: RULES_LANDING_PATH,
   hideTimeline: true,
   skipUrlState: true,
+  globalNavPosition: 8,
   capabilities: [`${SERVER_APP_ID}.showRules`],
   links: [
     {

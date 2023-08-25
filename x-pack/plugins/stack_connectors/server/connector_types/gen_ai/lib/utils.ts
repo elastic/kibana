@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AxiosRequestHeaders, AxiosResponse, ResponseType } from 'axios';
+import { AxiosResponse, ResponseType } from 'axios';
 import { IncomingMessage } from 'http';
 import { OpenAiProviderType } from '../../../../common/gen_ai/constants';
 import {
@@ -77,7 +77,7 @@ export const getAxiosOptions = (
   provider: string,
   apiKey: string,
   stream: boolean
-): { headers: AxiosRequestHeaders; responseType?: ResponseType } => {
+): { headers: Record<string, string>; responseType?: ResponseType } => {
   const responseType = stream ? { responseType: 'stream' as ResponseType } : {};
   switch (provider) {
     case OpenAiProviderType.OpenAi:

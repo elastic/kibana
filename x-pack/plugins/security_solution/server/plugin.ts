@@ -97,6 +97,7 @@ import {
 } from '../common/endpoint/constants';
 
 import { AppFeaturesService } from './lib/app_features_service/app_features_service';
+import { registerRiskScoringTask } from './lib/risk_engine/tasks/risk_scoring_task';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -128,7 +129,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.config = serverConfig;
     this.logger = context.logger.get();
     this.appClientFactory = new AppClientFactory();
-    this.appFeatures = new AppFeaturesService(this.logger, this.config.experimentalFeatures);
+    this.appFeaturesService = new AppFeaturesService(this.logger, this.config.experimentalFeatures);
 
     this.ruleMonitoringService = createRuleMonitoringService(this.config, this.logger);
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
@@ -160,6 +161,15 @@ export class Plugin implements ISecuritySolutionPlugin {
     appFeatures.init(plugins.features);
 
     this.ruleMonitoringService.setup(core, plugins);
+
+    if (experimentalFeatures.riskScoringPersistence) {
+      registerRiskScoringTask({
+        getStartServices: core.getStartServices,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+        logger: this.logger,
+        taskManager: plugins.taskManager,
+      });
+    }
 
     const requestContextFactory = new RequestContextFactory({
       config,
@@ -393,8 +403,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.guidedOnboarding.registerGuideConfig(siemGuideId, siemGuideConfig);
 
     return {
-      setAppFeaturesConfigurator: this.appFeatures.setAppFeaturesConfigurator.bind(
-        this.appFeatures
+      setAppFeaturesConfigurator: appFeaturesService.setAppFeaturesConfigurator.bind(
+        appFeaturesService
       ),
     };
   }
@@ -403,7 +413,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
-    const { config, logger } = this;
+    const { config, logger, appFeaturesService } = this;
 
     this.ruleMonitoringService.start(core, plugins);
 
@@ -459,6 +469,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         experimentalFeatures: config.experimentalFeatures,
         packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
         esClient: core.elasticsearch.client.asInternalUser,
+        appFeaturesService,
       });
 
       // Migrate artifacts to fleet and then start the manifest task after that is done
@@ -475,7 +486,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         turnOffPolicyProtectionsIfNotSupported(
           core.elasticsearch.client.asInternalUser,
           endpointFleetServicesFactory.asInternalUser(),
-          this.appFeatures,
+          appFeaturesService,
           logger
         );
       });
@@ -522,7 +533,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       ),
       createFleetActionsClient,
       esClient: core.elasticsearch.client.asInternalUser,
-      appFeatures: this.appFeatures,
+      appFeaturesService,
     });
 
     this.telemetryReceiver.start(
