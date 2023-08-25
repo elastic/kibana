@@ -118,7 +118,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.setSeriesType(1, 'histogram');
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
@@ -145,7 +145,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.setSeriesType(1, 'histogram');
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
@@ -167,7 +167,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectAggregation('Date histogram');
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
@@ -185,7 +185,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -209,7 +209,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(line?.length).to.be(1);
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(2);
@@ -232,7 +232,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
@@ -252,7 +252,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
@@ -271,7 +271,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
@@ -296,7 +296,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -324,7 +324,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       const expectedData = await visChart.getLegendEntriesXYCharts('xyVisChart');
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       const data = await lens.getCurrentChartDebugState('xyVisChart');
       await retry.try(async () => {
@@ -346,7 +346,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
       const expectedData = await visChart.getLegendEntriesXYCharts('xyVisChart');
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       const data = await lens.getCurrentChartDebugState('xyVisChart');
       await retry.try(async () => {

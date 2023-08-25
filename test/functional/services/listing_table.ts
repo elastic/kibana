@@ -84,7 +84,6 @@ export class ListingTableService extends FtrService {
       } else {
         throw new Error('Waiting');
       }
-      await this.header.waitUntilLoadingHasFinished();
     });
   }
 

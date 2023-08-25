@@ -335,13 +335,25 @@ export class DashboardPanelActionsService extends FtrService {
     throw new Error(`No action matching text "${text}"`);
   }
 
-  async convertToLens(parent?: WebElementWrapper) {
-    this.log.debug('convertToLens');
+  async canConvertToLens(parent?: WebElementWrapper) {
+    this.log.debug('canConvertToLens');
     await this.openContextMenu(parent);
     const isActionVisible = await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ);
     if (!isActionVisible) await this.clickContextMenuMoreItem();
     const isPanelActionVisible = await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ);
     if (!isPanelActionVisible) await this.clickContextMenuMoreItem();
-    await this.testSubjects.click(CONVERT_TO_LENS_TEST_SUBJ);
+    return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ, { timeout: 500 });
+  }
+
+  async convertToLens(parent?: WebElementWrapper) {
+    this.log.debug('convertToLens');
+
+    await this.retry.try(async () => {
+      if (!(await this.canConvertToLens(parent))) {
+        throw new Error('Convert to Lens option not found')
+      }
+
+      await this.testSubjects.click(CONVERT_TO_LENS_TEST_SUBJ);
+    });
   }
 }
