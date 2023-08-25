@@ -44,7 +44,7 @@ export function SavedSearchEmbeddableComponent({
       loadingState={searchProps.isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
       showFullScreenButton={false}
       query={query}
-      className="udtDataTable"
+      className="unifiedDataTable"
     />
   );
 }

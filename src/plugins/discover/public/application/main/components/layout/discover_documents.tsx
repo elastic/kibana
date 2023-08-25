@@ -270,7 +270,7 @@ function DiscoverDocumentsComponent({
               <DocumentExplorerUpdateCallout />
             </DiscoverTourProvider>
           )}
-          <div className="udtDataTable">
+          <div className="unifiedDataTable">
             <CellActionsProvider
               getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
             >

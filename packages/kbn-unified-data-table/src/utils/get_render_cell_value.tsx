@@ -31,7 +31,7 @@ import { UnifiedDataTableContext } from '../table_context';
 import { JsonCodeEditor } from '../components/json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from '../constants';
 
-const CELL_CLASS = 'udtDataTable__cellValue';
+const CELL_CLASS = 'unifiedDataTable__cellValue';
 
 export const getRenderCellValueFn =
   (
@@ -133,13 +133,13 @@ export const getRenderCellValueFn =
         <EuiDescriptionList
           type="inline"
           compressed
-          className={classnames('udtDataTable__descriptionList', CELL_CLASS)}
+          className={classnames('unifiedDataTable__descriptionList', CELL_CLASS)}
         >
           {pairs.map(([key, value]) => (
             <Fragment key={key}>
               <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
               <EuiDescriptionListDescription
-                className="udtDataTable__descriptionListDescription"
+                className="unifiedDataTable__descriptionListDescription"
                 dangerouslySetInnerHTML={{ __html: value }}
               />
             </Fragment>
@@ -217,7 +217,7 @@ function renderPopoverContent({
         gutterSize="none"
         direction="column"
         justifyContent="flexEnd"
-        className="udtDataTable__cellPopover"
+        className="unifiedDataTable__cellPopover"
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
@@ -239,7 +239,7 @@ function renderPopoverContent({
     <EuiFlexGroup gutterSize="none" direction="row" responsive={false}>
       <EuiFlexItem>
         <span
-          className="udtDataTable__cellPopoverValue eui-textBreakWord"
+          className="unifiedDataTable__cellPopoverValue eui-textBreakWord"
           // formatFieldValue guarantees sanitized values
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{

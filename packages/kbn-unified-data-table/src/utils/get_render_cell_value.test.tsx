@@ -126,7 +126,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<span class=\\"udtDataTable__cellValue\\">100</span>"`
+      `"<span class=\\"unifiedDataTable__cellValue\\">100</span>"`
     );
   });
 
@@ -152,7 +152,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"udtDataTable__cellPopoverValue eui-textBreakWord\\">100</span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-9sj1hz-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord\\">100</span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-9sj1hz-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
   });
 
@@ -179,7 +179,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"udtDataTable__cellPopoverValue eui-textBreakWord\\">100</span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-9sj1hz-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord\\">100</span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-9sj1hz-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
     findTestSubject(component, 'docTableClosePopover').simulate('click');
     expect(closePopoverMockFn).toHaveBeenCalledTimes(1);
@@ -208,7 +208,7 @@ describe('Unified data table cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiDescriptionList
-        className="udtDataTable__descriptionList udtDataTable__cellValue"
+        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
         compressed={true}
         type="inline"
       >
@@ -216,7 +216,7 @@ describe('Unified data table cell rendering', function () {
           extension
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="udtDataTable__descriptionListDescription"
+          className="unifiedDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": ".gz",
@@ -227,7 +227,7 @@ describe('Unified data table cell rendering', function () {
           bytesDisplayName
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="udtDataTable__descriptionListDescription"
+          className="unifiedDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": 100,
@@ -238,7 +238,7 @@ describe('Unified data table cell rendering', function () {
           _index
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="udtDataTable__descriptionListDescription"
+          className="unifiedDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": "test",
@@ -249,7 +249,7 @@ describe('Unified data table cell rendering', function () {
           _score
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="udtDataTable__descriptionListDescription"
+          className="unifiedDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": 1,
@@ -283,7 +283,7 @@ describe('Unified data table cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiFlexGroup
-        className="udtDataTable__cellPopover"
+        className="unifiedDataTable__cellPopover"
         direction="column"
         gutterSize="none"
         justifyContent="flexEnd"
@@ -359,7 +359,7 @@ describe('Unified data table cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiDescriptionList
-        className="udtDataTable__descriptionList udtDataTable__cellValue"
+        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
         compressed={true}
         type="inline"
       >
@@ -367,7 +367,7 @@ describe('Unified data table cell rendering', function () {
           extension
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="udtDataTable__descriptionListDescription"
+          className="unifiedDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": Array [
@@ -380,7 +380,7 @@ describe('Unified data table cell rendering', function () {
           bytesDisplayName
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="udtDataTable__descriptionListDescription"
+          className="unifiedDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": Array [
@@ -393,7 +393,7 @@ describe('Unified data table cell rendering', function () {
           _index
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="udtDataTable__descriptionListDescription"
+          className="unifiedDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": "test",
@@ -404,7 +404,7 @@ describe('Unified data table cell rendering', function () {
           _score
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="udtDataTable__descriptionListDescription"
+          className="unifiedDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": 1,
@@ -439,7 +439,7 @@ describe('Unified data table cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiDescriptionList
-        className="udtDataTable__descriptionList udtDataTable__cellValue"
+        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
         compressed={true}
         type="inline"
       >
@@ -447,7 +447,7 @@ describe('Unified data table cell rendering', function () {
           extension
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="udtDataTable__descriptionListDescription"
+          className="unifiedDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": Array [
@@ -460,7 +460,7 @@ describe('Unified data table cell rendering', function () {
           bytesDisplayName
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="udtDataTable__descriptionListDescription"
+          className="unifiedDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": Array [
@@ -473,7 +473,7 @@ describe('Unified data table cell rendering', function () {
           _index
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="udtDataTable__descriptionListDescription"
+          className="unifiedDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": "test",
@@ -484,7 +484,7 @@ describe('Unified data table cell rendering', function () {
           _score
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="udtDataTable__descriptionListDescription"
+          className="unifiedDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": 1,
@@ -518,7 +518,7 @@ describe('Unified data table cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiFlexGroup
-        className="udtDataTable__cellPopover"
+        className="unifiedDataTable__cellPopover"
         direction="column"
         gutterSize="none"
         justifyContent="flexEnd"
@@ -599,7 +599,7 @@ describe('Unified data table cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiDescriptionList
-        className="udtDataTable__descriptionList udtDataTable__cellValue"
+        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
         compressed={true}
         type="inline"
       >
@@ -607,7 +607,7 @@ describe('Unified data table cell rendering', function () {
           object.value
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="udtDataTable__descriptionListDescription"
+          className="unifiedDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": "100",
@@ -642,7 +642,7 @@ describe('Unified data table cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiDescriptionList
-        className="udtDataTable__descriptionList udtDataTable__cellValue"
+        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
         compressed={true}
         type="inline"
       >
@@ -650,7 +650,7 @@ describe('Unified data table cell rendering', function () {
           object.value
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
-          className="udtDataTable__descriptionListDescription"
+          className="unifiedDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
               "__html": "100",
@@ -685,7 +685,7 @@ describe('Unified data table cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiFlexGroup
-        className="udtDataTable__cellPopover"
+        className="unifiedDataTable__cellPopover"
         direction="column"
         gutterSize="none"
         justifyContent="flexEnd"
@@ -782,7 +782,7 @@ describe('Unified data table cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <span
-        className="udtDataTable__cellValue"
+        className="unifiedDataTable__cellValue"
         dangerouslySetInnerHTML={
           Object {
             "__html": Array [
@@ -816,7 +816,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<span class=\\"udtDataTable__cellValue\\">-</span>"`
+      `"<span class=\\"unifiedDataTable__cellValue\\">-</span>"`
     );
   });
 
@@ -842,7 +842,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<span class=\\"udtDataTable__cellValue\\">-</span>"`
+      `"<span class=\\"unifiedDataTable__cellValue\\">-</span>"`
     );
   });
 
@@ -882,7 +882,7 @@ describe('Unified data table cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <span
-        className="udtDataTable__cellValue"
+        className="unifiedDataTable__cellValue"
         dangerouslySetInnerHTML={
           Object {
             "__html": Array [
@@ -912,7 +912,7 @@ describe('Unified data table cell rendering', function () {
       >
         <EuiFlexItem>
           <span
-            className="udtDataTable__cellPopoverValue eui-textBreakWord"
+            className="unifiedDataTable__cellPopoverValue eui-textBreakWord"
             dangerouslySetInnerHTML={
               Object {
                 "__html": Array [

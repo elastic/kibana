@@ -119,7 +119,7 @@ export function DiscoverGridFlyout({
         <EuiFlyoutHeader hasBorder>
           <EuiTitle
             size="s"
-            className="udtTable__flyoutHeader"
+            className="unifiedDataTable__flyoutHeader"
             data-test-subj="docTableRowDetailsTitle"
           >
             <h2>
@@ -215,7 +215,7 @@ export function DiscoverGridFlyout({
                   pageCount={pageCount}
                   activePage={activePage}
                   onPageClick={setPage}
-                  className="udtTable__flyoutDocumentNavigation"
+                  className="unifiedDataTable__flyoutDocumentNavigation"
                   compressed
                   data-test-subj="dscDocNavigation"
                 />

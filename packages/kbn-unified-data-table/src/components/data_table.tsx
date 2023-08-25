@@ -753,7 +753,7 @@ export const UnifiedDataTable = ({
 
   return (
     <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
-      <span className="udtDataTable__inner">
+      <span className="unifiedDataTable__inner">
         <div
           data-test-subj="discoverDocTable"
           data-render-complete={isRenderComplete}
@@ -761,7 +761,7 @@ export const UnifiedDataTable = ({
           data-title={searchTitle}
           data-description={searchDescription}
           data-document-number={displayedRows.length}
-          className={classnames(className, 'udtDataTable__table')}
+          className={classnames(className, 'unifiedDataTable__table')}
         >
           <EuiDataGridMemoized
             aria-describedby={randomId}
