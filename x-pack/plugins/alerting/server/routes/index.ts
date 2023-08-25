@@ -12,7 +12,7 @@ import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
 import { Observable } from 'rxjs';
 import { GetAlertIndicesAlias, ILicenseState } from '../lib';
 import { defineLegacyRoutes } from './legacy';
-import { AlertingRequestHandlerContext } from '../types';
+import { AlertingRequestHandlerContext, RuleTypeRegistry } from '../types';
 import { createRuleRoute } from './rule/apis/create';
 import { getRuleRoute, getInternalRuleRoute } from './get_rule';
 import { updateRuleRoute } from './update_rule';
@@ -68,6 +68,7 @@ export interface RouteOptions {
   getAlertIndicesAlias?: GetAlertIndicesAlias;
   usageCounter?: UsageCounter;
   config$?: Observable<ConfigSchema>;
+  ruleTypeRegistry: RuleTypeRegistry;
 }
 
 export function defineRoutes(opts: RouteOptions) {
@@ -78,6 +79,7 @@ export function defineRoutes(opts: RouteOptions) {
     usageCounter,
     config$,
     getAlertIndicesAlias,
+    ruleTypeRegistry,
   } = opts;
 
   defineLegacyRoutes(opts);
@@ -85,7 +87,7 @@ export function defineRoutes(opts: RouteOptions) {
   getRuleRoute(router, licenseState);
   getInternalRuleRoute(router, licenseState);
   resolveRuleRoute(router, licenseState);
-  updateRuleRoute(router, licenseState);
+  updateRuleRoute(router, licenseState, ruleTypeRegistry);
   deleteRuleRoute(router, licenseState);
   aggregateRulesRoute(router, licenseState);
   disableRuleRoute(router, licenseState);

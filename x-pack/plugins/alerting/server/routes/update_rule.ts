@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { instanceofZodType, z } from '@kbn/zod';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError, validateDurationSchema } from '../lib';
 import { UpdateOptions } from '../rules_client';
@@ -16,8 +16,8 @@ import {
   handleDisabledApiKeysError,
   rewriteActionsReq,
   rewriteActionsRes,
-  actionsSchema,
   rewriteRuleLastRun,
+  actionsSchema,
 } from './lib';
 import {
   RuleTypeParams,
@@ -25,33 +25,52 @@ import {
   BASE_ALERTING_API_PATH,
   validateNotifyWhenType,
   PartialRule,
+  RuleTypeRegistry,
 } from '../types';
+import { RegistryRuleType } from '../rule_type_registry';
 
-const paramSchema = schema.object({
-  id: schema.string(),
+const paramSchema = z.object({
+  id: z.string(),
 });
 
-const bodySchema = schema.object({
-  name: schema.string(),
-  tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  schedule: schema.object({
-    interval: schema.string({ validate: validateDurationSchema }),
-  }),
-  throttle: schema.nullable(schema.maybe(schema.string({ validate: validateDurationSchema }))),
-  params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-  actions: actionsSchema,
-  notify_when: schema.maybe(
-    schema.nullable(
-      schema.oneOf(
-        [
-          schema.literal('onActionGroupChange'),
-          schema.literal('onActiveAlert'),
-          schema.literal('onThrottleInterval'),
-        ],
-        { validate: validateNotifyWhenType }
+export const bodySchema = z
+  .object({
+    name: z.string({ description: 'The name of the rule.' }),
+    tags: z.array(z.string()),
+    schedule: z.object({
+      interval: z.string().superRefine(validateDurationSchema),
+    }),
+    throttle: z.nullable(z.optional(z.string().superRefine(validateDurationSchema))),
+    params: z.record(z.string(), z.any()),
+    actions: actionsSchema,
+    notify_when: z.optional(
+      z.nullable(
+        z
+          .enum(['onActionGroupChange', 'onActiveAlert', 'onThrottleInterval'])
+          .refine(validateNotifyWhenType)
       )
-    )
-  ),
+    ),
+  })
+  .describe('Update rule request');
+
+export const successResponseSchema = z.object({
+  connector_type_id: z
+    .string()
+    .describe(
+      'The type of connector. This property appears in responses but cannot be set in requests.'
+    ),
+  group: z
+    .string()
+    .describe(
+      `The group name for the actions. If you don't need to group actions, set to \`default\`.`
+    ),
+  id: z.string().describe('The identifier for the connector saved object.'),
+  uuid: z.string().describe('A universally unique identifier (UUID) for the action.'),
+  params: z
+    .record(z.string(), z.any())
+    .describe(
+      'The parameters for the action, which are sent to the connector. The `params` are handled as Mustache templates and passed a default set of context.'
+    ),
 });
 
 const rewriteBodyReq: RewriteRequestCase<UpdateOptions<RuleTypeParams>> = (result) => {
@@ -119,35 +138,72 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
 
 export const updateRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  ruleTypeRegistry: RuleTypeRegistry
 ) => {
-  router.put(
-    {
+  router.versioned
+    .put({
       path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
-      validate: {
-        body: bodySchema,
-        params: paramSchema,
+      access: 'public',
+      description: 'Update a rule',
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        // Lazily provide validation to the endpoint
+        validate: () => {
+          const ruleTypeParams: Array<[string, z.ZodTypeAny]> = Array.from(
+            ruleTypeRegistry.list({ addParamsValidationSchemas: true }).values()
+          )
+            .map((ruleType: RegistryRuleType) => {
+              if (ruleType.validate && instanceofZodType(ruleType.validate.params)) {
+                return [ruleType.id, ruleType.validate.params];
+              }
+            })
+            .filter(Boolean) as unknown as Array<[string, z.ZodTypeAny]>;
+
+          const paramSchemas = ruleTypeParams.map(([, paramsSchema]) => paramsSchema) as [
+            z.ZodTypeAny,
+            z.ZodTypeAny,
+            ...z.ZodTypeAny[]
+          ];
+
+          const bodySchemaWithParams = bodySchema.merge(
+            z.object({ params: z.union(paramSchemas) })
+          );
+
+          return {
+            request: {
+              body: bodySchemaWithParams,
+              params: paramSchema,
+            },
+            response: {
+              200: {
+                body: successResponseSchema,
+              },
+            },
+          };
+        },
       },
-    },
-    handleDisabledApiKeysError(
-      router.handleLegacyErrors(
-        verifyAccessAndContext(licenseState, async function (context, req, res) {
-          const rulesClient = (await context.alerting).getRulesClient();
-          const { id } = req.params;
-          const rule = req.body;
-          try {
-            const alertRes = await rulesClient.update(rewriteBodyReq({ id, data: rule }));
-            return res.ok({
-              body: rewriteBodyRes(alertRes),
-            });
-          } catch (e) {
-            if (e instanceof RuleTypeDisabledError) {
-              return e.sendResponse(res);
+      handleDisabledApiKeysError(
+        router.handleLegacyErrors(
+          verifyAccessAndContext(licenseState, async function (context, req, res) {
+            const rulesClient = (await context.alerting).getRulesClient();
+            const { id } = req.params;
+            const rule = req.body;
+            try {
+              const alertRes = await rulesClient.update(rewriteBodyReq({ id, data: rule }));
+              return res.ok({
+                body: rewriteBodyRes(alertRes),
+              });
+            } catch (e) {
+              if (e instanceof RuleTypeDisabledError) {
+                return e.sendResponse(res);
+              }
+              throw e;
             }
-            throw e;
-          }
-        })
+          })
+        )
       )
-    )
-  );
+    );
 };
