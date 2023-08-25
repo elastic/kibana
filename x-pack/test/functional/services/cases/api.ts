@@ -20,6 +20,7 @@ import {
   suggestUserProfiles,
 } from '../../../cases_api_integration/common/lib/api/user_profiles';
 import { User } from '../../../cases_api_integration/common/lib/authentication/types';
+import { superUser } from '../../../cases_api_integration/common/lib/authentication/users';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateRandomCaseWithoutConnector } from './helpers';
