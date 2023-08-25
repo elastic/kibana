@@ -6,15 +6,19 @@
  * Side Public License, v 1.
  */
 import { defaultsDeep } from 'lodash';
+import pRetry from 'p-retry';
 import { Cluster } from '@kbn/es';
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import { CliArgs } from '@kbn/config';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { createRoot, type TestElasticsearchUtils, type TestKibanaUtils } from './create_root';
 
-export type TestServerlessESUtils = Pick<TestElasticsearchUtils, 'stop' | 'es'>;
+export interface TestServerlessESUtils extends Pick<TestElasticsearchUtils, 'stop'> {
+  es: { getClient: () => Client };
+}
 export type TestServerlessKibanaUtils = TestKibanaUtils;
 export interface TestServerlessUtils {
   startES: () => Promise<TestServerlessESUtils>;
@@ -38,8 +42,13 @@ export function createTestServerlessInstances({
   return {
     startES: async () => {
       const { stop } = await esUtils.start();
+      const client = new Client({ node: 'http://localhost:9200', Connection: HttpConnection });
+      await pRetry(() => client.ping(), { retries: 10 });
+      const es = {
+        getClient: () => client,
+      };
       return {
-        es: esUtils.es,
+        es,
         stop,
       };
     },
