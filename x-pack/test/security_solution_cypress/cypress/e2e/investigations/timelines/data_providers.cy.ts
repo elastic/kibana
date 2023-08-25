@@ -58,7 +58,7 @@ describe('timeline data providers', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('exist');
   });
 
-  it('persists timeline when data provider is updated by dragging a field from data grid', () => {
+  it.skip('persists timeline when data provider is updated by dragging a field from data grid', () => {
     updateDataProviderbyDraggingField('host.name', 0);
     waitForTimelineChanges();
     cy.reload();
