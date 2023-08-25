@@ -23,6 +23,7 @@ import { ModelSelector } from '../../../connectorland/models/model_selector/mode
 import { UseAssistantContext } from '../../../assistant_context';
 import { ConversationSelectorSettings } from '../conversation_selector_settings';
 import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
+import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
 
 export interface ConversationSettingsProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -62,6 +63,8 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     const selectedSystemPrompt = useMemo(() => {
       return getDefaultSystemPrompt({ allSystemPrompts, conversation: selectedConversation });
     }, [allSystemPrompts, selectedConversation]);
+
+    const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({ http });
 
     // Conversation callbacks
     // When top level conversation selection changes
@@ -131,10 +134,13 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
       [selectedConversation, setUpdatedConversationSettings]
     );
 
-    const selectedConnectorId = useMemo(
-      () => selectedConversation?.apiConfig.connectorId,
-      [selectedConversation?.apiConfig.connectorId]
-    );
+    const selectedConnector = useMemo(() => {
+      const selectedConnectorId = selectedConversation?.apiConfig.connectorId;
+      if (areConnectorsFetched) {
+        return connectors?.find((c) => c.id === selectedConnectorId);
+      }
+      return undefined;
+    }, [areConnectorsFetched, connectors, selectedConversation?.apiConfig.connectorId]);
 
     const selectedProvider = useMemo(
       () => selectedConversation?.apiConfig.provider,
@@ -244,23 +250,24 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             isDisabled={selectedConversation == null}
             onConnectorModalVisibilityChange={() => {}}
             onConnectorSelectionChange={handleOnConnectorSelectionChange}
-            selectedConnectorId={selectedConnectorId}
+            selectedConnectorId={selectedConnector?.id}
           />
         </EuiFormRow>
 
-        {selectedProvider === OpenAiProviderType.OpenAi && (
-          <EuiFormRow
-            data-test-subj="model-field"
-            display="rowCompressed"
-            label={i18nModel.MODEL_TITLE}
-            helpText={i18nModel.HELP_LABEL}
-          >
-            <ModelSelector
-              onModelSelectionChange={handleOnModelSelectionChange}
-              selectedModel={selectedModel}
-            />
-          </EuiFormRow>
-        )}
+        {selectedConnector?.isPreconfigured === false &&
+          selectedProvider === OpenAiProviderType.OpenAi && (
+            <EuiFormRow
+              data-test-subj="model-field"
+              display="rowCompressed"
+              label={i18nModel.MODEL_TITLE}
+              helpText={i18nModel.HELP_LABEL}
+            >
+              <ModelSelector
+                onModelSelectionChange={handleOnModelSelectionChange}
+                selectedModel={selectedModel}
+              />
+            </EuiFormRow>
+          )}
       </>
     );
   }

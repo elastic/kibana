@@ -98,15 +98,18 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           const apiProvider: string | undefined = (
             connector as ActionConnectorProps<Config, unknown>
           )?.config?.apiProvider;
+          const connectorDetails = connector.isPreconfigured
+            ? i18n.PRECONFIGURED_CONNECTOR
+            : apiProvider;
           return {
             value: connector.id,
             inputDisplay: connector.name,
             dropdownDisplay: (
               <React.Fragment key={connector.id}>
                 <strong>{connector.name}</strong>
-                {apiProvider && (
-                  <EuiText size="s" color="subdued">
-                    <p>{apiProvider}</p>
+                {connectorDetails && (
+                  <EuiText size="xs" color="subdued">
+                    <p>{connectorDetails}</p>
                   </EuiText>
                 )}
               </React.Fragment>
