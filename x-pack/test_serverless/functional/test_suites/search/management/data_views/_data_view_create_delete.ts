@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
   const es = getService('es');
 
-  describe.only('creating and deleting default data view', function describeIndexTests() {
+  describe('creating and deleting default data view', function describeIndexTests() {
     before(async function () {
       // TODO: emptyKibanaIndex fails in Serverless with
       // "index_not_found_exception: no such index [.kibana_ingest]"
