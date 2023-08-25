@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { omit, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiLink, EuiSpacer } from '@elastic/eui';
@@ -84,10 +85,22 @@ export const configurationFormSchema: FormSchema = {
   },
 
   query: {
-    type: FIELD_TYPES.TEXT,
+    type: FIELD_TYPES.JSON,
     label: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.configurationStep.queryLabel', {
       defaultMessage: 'Query (optional)',
     }),
+    serializer: (jsonString: string) => {
+      let parsedJSON: any;
+      try {
+        parsedJSON = JSON.parse(jsonString);
+      } catch {
+        parsedJSON = {};
+      }
+
+      return parsedJSON;
+    },
+    deserializer: (json: any) =>
+      json && typeof json === 'object' ? JSON.stringify(json, null, 2) : '{\n\n}',
     helpText: (
       <FormattedMessage
         id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.queryHelpText"
@@ -142,7 +155,7 @@ export const ConfigurationStep = ({ onNext }: Props) => {
     // Update draft state with the data of the form
     updateDraft((prevDraft: DraftPolicy) => ({
       ...prevDraft,
-      ...data,
+      ...(isEmpty(data.query) ? omit(data, 'query') : data),
     }));
 
     // And then navigate to the next step

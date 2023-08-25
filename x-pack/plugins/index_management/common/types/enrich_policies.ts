@@ -13,7 +13,7 @@ export interface SerializedEnrichPolicy {
   sourceIndices: string[];
   matchField: string;
   enrichFields: string[];
-  query?: string;
+  query?: Record<string, any>;
 }
 
 export interface FieldItem {

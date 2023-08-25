@@ -26,7 +26,8 @@ import { serializeAsESPolicy, getESPolicyCreationApiCall } from '../../../../../
 const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
   // Beyond a certain point, highlighting the syntax will bog down performance to unacceptable
   // levels. This way we prevent that happening for very large requests.
-  const language = policy.query && policy?.query.length < 60000 ? 'json' : undefined;
+  const queryAsString = policy.query ? JSON.stringify(policy.query, null, 2) : '';
+  const language = queryAsString.length < 60000 ? 'json' : undefined;
 
   return (
     <>
@@ -129,7 +130,7 @@ const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
               <EuiCodeBlock language={language} isCopyable>
-                {policy.query}
+                {queryAsString}
               </EuiCodeBlock>
             </EuiDescriptionListDescription>
           </>
