@@ -11,17 +11,18 @@ import { formatValues, filterObjects } from './format_values';
 import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
 import { EditAlertRule } from '../../../../../alerting/ml_alerting_flyout';
-// import { isServerless } from '../../../../capabilities/serverless';
-// import { removeNodeInfo } from '../../../../../../common/util/job_utils';
+import { isServerless } from '../../../../capabilities/serverless';
+import { removeNodeInfo } from '../../../../../../common/util/job_utils';
+
+// temporary flag to easily show/hide node info
+const HIDE_NODE_INFO = true;
 
 export function extractJobDetails(originalJob, basePath, refreshJobList) {
   if (Object.keys(originalJob).length === 0) {
     return {};
   }
 
-  // temporarily commented out as we test kibana behavior in serverless
-  // const job = isServerless() ? removeNodeInfo(originalJob) : originalJob;
-  const job = originalJob;
+  const job = HIDE_NODE_INFO && isServerless() ? removeNodeInfo(originalJob) : originalJob;
 
   const general = {
     id: 'general',
