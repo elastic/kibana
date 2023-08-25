@@ -33,7 +33,7 @@ import {
   useDataGridColumnsCellActions,
   type UseDataGridColumnsCellActionsProps,
 } from '@kbn/cell-actions';
-import type { ToastsStart, IUiSettingsClient, HttpStart } from '@kbn/core/public';
+import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord, DocViewFilterFn } from '@kbn/discover-utils/types';
 import { getShouldShowFieldHandler, DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
@@ -200,7 +200,6 @@ export interface UnifiedDataTableProps {
   services: {
     theme: ThemeServiceStart;
     fieldFormats: FieldFormatsStart;
-    addBasePath: HttpStart['basePath']['prepend'];
     uiSettings: IUiSettingsClient;
     dataViewFieldEditor: DataViewFieldEditorStart;
     toastNotifications: ToastsStart;

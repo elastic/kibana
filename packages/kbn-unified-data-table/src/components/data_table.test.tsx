@@ -61,7 +61,6 @@ function getProps(): UnifiedDataTableProps {
     useNewFieldsApi: true,
     services: {
       fieldFormats: services.fieldFormats,
-      addBasePath: jest.fn(),
       uiSettings: services.uiSettings,
       dataViewFieldEditor: services.dataViewFieldEditor,
       toastNotifications: services.toastNotifications,
