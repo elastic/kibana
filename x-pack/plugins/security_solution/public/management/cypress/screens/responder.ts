@@ -25,10 +25,8 @@ export const closeResponder = (): void => {
 
 export const openResponderActionLogFlyout = (): void => {
   ensureOnResponder();
-  cy.getByTestSubj('responderShowActionLogButton')
-    .click()
-    .getByTestSubj(TEST_SUBJ.actionLogFlyout)
-    .should('exist');
+  cy.getByTestSubj('responderShowActionLogButton').click();
+  cy.getByTestSubj(TEST_SUBJ.actionLogFlyout).should('exist');
 };
 
 export const closeResponderActionLogFlyout = (): void => {

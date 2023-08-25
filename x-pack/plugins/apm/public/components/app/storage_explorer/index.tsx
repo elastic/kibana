@@ -19,18 +19,26 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isEmpty } from 'lodash';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
 import { ServicesTable } from './services_table';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { StorageChart } from './storage_chart';
 import { PermissionDenied } from './prompts/permission_denied';
-import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
+import {
+  useFetcher,
+  FETCH_STATUS,
+  isPending,
+} from '../../../hooks/use_fetcher';
 import { SummaryStats } from './summary_stats';
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { TipsAndResources } from './resources/tips_and_resources';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { getKibanaAdvancedSettingsHref } from './get_storage_explorer_links';
+import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../hooks/use_time_range';
 
 type CalloutType = 'crossClusterSearch' | 'optimizePerformance';
 
@@ -48,6 +56,11 @@ const dismissButtonText = i18n.translate(
 
 export function StorageExplorer() {
   const { core } = useApmPluginContext();
+  const {
+    query: { rangeFrom, rangeTo, environment, kuery, indexLifecyclePhase },
+  } = useApmParams('/storage-explorer');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const [calloutDismissed, setCalloutDismissed] = useLocalStorage(
     'apm.storageExplorer.calloutDismissed',
@@ -71,6 +84,28 @@ export function StorageExplorer() {
     },
     [calloutDismissed]
   );
+
+  const { data: summaryStatsData, status: summaryStatsStatus } =
+    useProgressiveFetcher(
+      (callApmApi) => {
+        return callApmApi('GET /internal/apm/storage_explorer_summary_stats', {
+          params: {
+            query: {
+              indexLifecyclePhase,
+              environment,
+              kuery,
+              start,
+              end,
+            },
+          },
+        });
+      },
+      [indexLifecyclePhase, environment, kuery, start, end]
+    );
+
+  const loadingSummaryStats = isPending(summaryStatsStatus);
+
+  const hasSummaryStatsData = !isEmpty(summaryStatsData);
 
   const loading = hasPrivilegesStatus === FETCH_STATUS.LOADING;
 
@@ -190,12 +225,19 @@ export function StorageExplorer() {
         )}
 
       <EuiSpacer />
-      <SummaryStats />
+      <SummaryStats
+        data={summaryStatsData}
+        loading={loadingSummaryStats}
+        hasData={hasSummaryStatsData}
+      />
       <EuiSpacer />
       <EuiPanel hasShadow={false} hasBorder={true}>
         <StorageChart />
         <EuiSpacer />
-        <ServicesTable />
+        <ServicesTable
+          summaryStatsData={summaryStatsData}
+          loadingSummaryStats={loadingSummaryStats}
+        />
       </EuiPanel>
       <EuiSpacer />
       <TipsAndResources />

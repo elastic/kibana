@@ -21,7 +21,6 @@ export interface EvaluatedRuleParams {
   criteria: MetricExpressionParams[];
   groupBy: string | undefined | string[];
   filterQuery?: string;
-  filterQueryText?: string;
 }
 
 export type Evaluation = Omit<MetricExpressionParams, 'metric'> & {

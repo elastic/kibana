@@ -9,13 +9,14 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { RISK_SCORE_DELETE_STORED_SCRIPT } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
-import { deleteStoredScriptBodySchema, deleteStoredScript } from './lib/delete_script';
+import { deleteStoredScript } from './lib/delete_script';
+import { deleteStoredScriptRequestBody } from '../../../../common/api/risk_score';
 
 export const deleteStoredScriptRoute = (router: SecuritySolutionPluginRouter) => {
   router.delete(
     {
       path: RISK_SCORE_DELETE_STORED_SCRIPT,
-      validate: { body: deleteStoredScriptBodySchema },
+      validate: { body: deleteStoredScriptRequestBody },
       options: {
         tags: ['access:securitySolution'],
       },

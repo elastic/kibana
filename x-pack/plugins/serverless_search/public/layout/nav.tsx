@@ -72,6 +72,12 @@ const navigationTree: NavigationTreeDefinition = {
                 defaultMessage: 'Alerts',
               }),
             },
+            {
+              link: 'serverlessConnectors',
+              title: i18n.translate('xpack.serverlessSearch.nav.connectors', {
+                defaultMessage: 'Connectors',
+              }),
+            },
           ],
         },
         {
@@ -132,6 +138,13 @@ const navigationTree: NavigationTreeDefinition = {
               link: 'management',
               title: i18n.translate('xpack.serverlessSearch.nav.mngt', {
                 defaultMessage: 'Management',
+              }),
+            },
+            {
+              id: 'cloudLinkDeployment',
+              cloudLink: 'deployment',
+              title: i18n.translate('xpack.serverlessSearch.nav.performance', {
+                defaultMessage: 'Performance',
               }),
             },
             {

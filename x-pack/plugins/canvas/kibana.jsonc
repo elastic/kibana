@@ -30,7 +30,7 @@
       "visualizations",
       "uiActions",
       "share",
-      "savedObjectsManagement",
+      "contentManagement",
       "savedObjectsFinder"
     ],
     "optionalPlugins": [

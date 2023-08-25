@@ -9,11 +9,15 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
+import { getSystemLogsDataStreams } from '../../../../common/elastic_agent_logs';
+import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
@@ -32,22 +36,35 @@ import {
   StepPanelFooter,
 } from '../../shared/step_panel';
 import { ApiKeyBanner } from '../custom_logs/wizard/api_key_banner';
+import { getDiscoverNavigationParams } from '../utils';
+import { WindowsInstallStep } from '../../shared/windows_install_step';
+import { SystemIntegrationBanner } from './system_integration_banner';
+import { TroubleshootingLink } from '../../shared/troubleshooting_link';
 
 export function InstallElasticAgent() {
+  const {
+    services: {
+      discover: { locator },
+    },
+  } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
+
   const { navigateToKibanaUrl } = useKibanaNavigation();
   const { getState, setState } = useWizard();
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
 
-  const datasetName = 'elastic-agent';
-  const namespace = 'default';
+  const datasetName = 'system-logs';
 
   function onBack() {
     navigateToKibanaUrl('/app/observabilityOnboarding');
   }
-  function onContinue() {
-    navigateToKibanaUrl('/app/logs/stream');
+  async function onContinue() {
+    const dataStreams = getSystemLogsDataStreams();
+    const dataSets = dataStreams.map(
+      (dataSream) => dataSream.data_stream.dataset
+    );
+    await locator?.navigate(getDiscoverNavigationParams(dataSets));
   }
 
   function onAutoDownloadConfig() {
@@ -60,7 +77,7 @@ export function InstallElasticAgent() {
   const { data: monitoringRole, status: monitoringRoleStatus } = useFetcher(
     (callApi) => {
       return callApi(
-        'GET /internal/observability_onboarding/custom_logs/privileges'
+        'GET /internal/observability_onboarding/logs/setup/privileges'
       );
     },
     []
@@ -68,7 +85,7 @@ export function InstallElasticAgent() {
 
   const { data: setup } = useFetcher((callApi) => {
     return callApi(
-      'GET /internal/observability_onboarding/custom_logs/install_shipper_setup'
+      'GET /internal/observability_onboarding/logs/setup/environment'
     );
   }, []);
 
@@ -79,44 +96,18 @@ export function InstallElasticAgent() {
   } = useFetcher(
     (callApi) => {
       if (monitoringRole?.hasPrivileges) {
-        return callApi(
-          'POST /internal/observability_onboarding/custom_logs/save',
-          {
-            params: {
-              body: {
-                name: datasetName,
-                state: {
-                  datasetName,
-                  namespace,
-                },
-              },
+        return callApi('POST /internal/observability_onboarding/logs/flow', {
+          params: {
+            body: {
+              name: datasetName,
+              type: 'systemLogs',
             },
-          }
-        );
+          },
+        });
       }
     },
     [monitoringRole?.hasPrivileges]
   );
-
-  const { status: saveOnboardingStateDataStatus } = useFetcher((callApi) => {
-    const { onboardingId } = getState();
-    if (onboardingId) {
-      return callApi(
-        'PUT /internal/observability_onboarding/custom_logs/{onboardingId}/save',
-        {
-          params: {
-            path: { onboardingId },
-            body: {
-              state: {
-                datasetName,
-                namespace,
-              },
-            },
-          },
-        }
-      );
-    }
-  }, []);
 
   const { apiKeyEncoded, onboardingId } = installShipperSetup ?? getState();
 
@@ -135,7 +126,7 @@ export function InstallElasticAgent() {
     [
       apiKeyEncoded,
       onboardingId,
-      saveOnboardingStateDataStatus === FETCH_STATUS.SUCCESS,
+      installShipperSetupStatus === FETCH_STATUS.SUCCESS,
     ]
   );
 
@@ -152,7 +143,7 @@ export function InstallElasticAgent() {
     (callApi) => {
       if (onboardingId) {
         return callApi(
-          'GET /internal/observability_onboarding/custom_logs/{onboardingId}/progress',
+          'GET /internal/observability_onboarding/flow/{onboardingId}/progress',
           { params: { path: { onboardingId } } }
         );
       }
@@ -237,6 +228,8 @@ export function InstallElasticAgent() {
           </p>
         </EuiText>
         <EuiSpacer size="m" />
+        <SystemIntegrationBanner />
+        <EuiSpacer size="m" />
         {apiKeyEncoded && onboardingId ? (
           <ApiKeyBanner
             payload={{ apiKeyEncoded, onboardingId }}
@@ -257,9 +250,31 @@ export function InstallElasticAgent() {
         <EuiSpacer size="m" />
         <InstallElasticAgentSteps
           installAgentPlatformOptions={[
-            { label: 'Linux', id: 'linux-tar', isDisabled: false },
-            { label: 'MacOS', id: 'macos', isDisabled: false },
-            { label: 'Windows', id: 'windows', isDisabled: true },
+            {
+              label: i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.linux',
+                { defaultMessage: 'Linux' }
+              ),
+              id: 'linux-tar',
+            },
+            {
+              label: i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.macOS',
+                { defaultMessage: 'MacOS' }
+              ),
+              id: 'macos',
+            },
+            {
+              label: i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.windows',
+                { defaultMessage: 'Windows' }
+              ),
+              id: 'windows',
+              disableSteps: true,
+              children: (
+                <WindowsInstallStep docsLink="https://www.elastic.co/guide/en/welcome-to-elastic/current/getting-started-observability.html" />
+              ),
+            },
           ]}
           onSelectPlatform={(id) => setElasticAgentPlatform(id)}
           selectedPlatform={elasticAgentPlatform}
@@ -299,6 +314,8 @@ export function InstallElasticAgent() {
           appendedSteps={[getCheckLogsStep()]}
         />
       </StepPanelContent>
+      <EuiHorizontalRule />
+      <TroubleshootingLink />
     </StepPanel>
   );
 }

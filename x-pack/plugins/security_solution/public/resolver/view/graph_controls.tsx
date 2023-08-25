@@ -137,7 +137,7 @@ export const GraphControls = React.memo(
   }) => {
     const dispatch = useDispatch();
     const scalingFactor = useSelector((state: State) =>
-      selectors.scalingFactor(state.analyzer.analyzerById[id])
+      selectors.scalingFactor(state.analyzer[id])
     );
     const { timestamp } = useContext(SideEffectContext);
     const [activePopover, setPopover] = useState<null | 'schemaInfo' | 'nodeLegend'>(null);
@@ -328,7 +328,7 @@ const SchemaInformation = ({
 }) => {
   const colorMap = useColors();
   const sourceAndSchema = useSelector((state: State) =>
-    selectors.resolverTreeSourceAndSchema(state.analyzer.analyzerById[id])
+    selectors.resolverTreeSourceAndSchema(state.analyzer[id])
   );
   const setAsActivePopover = useCallback(() => setActivePopover('schemaInfo'), [setActivePopover]);
 

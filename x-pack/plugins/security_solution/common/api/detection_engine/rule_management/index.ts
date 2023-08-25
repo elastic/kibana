@@ -31,4 +31,4 @@ export * from './import_rules/rule_to_import';
 export * from './model/query_rule_by_ids_validation';
 export * from './model/query_rule_by_ids';
 export * from './urls';
-export * from './tags/read_tags/read_tags_route';
+export * from './read_tags/read_tags_route';

@@ -37,5 +37,16 @@
     "@kbn/default-nav-analytics",
     "@kbn/default-nav-management",
     "@kbn/default-nav-devtools",
+    "@kbn/security-plugin",
+    "@kbn/security-solution-plugin",
+    "@kbn/security-solution-plugin/public/management/cypress",
+    "@kbn/tooling-log",
+    "@kbn/fleet-plugin",
+    "@kbn/cases-plugin",
+    "@kbn/test-subj-selector",
+    "@kbn/core-http-common",
+    "@kbn/data-views-plugin",
+    "@kbn/core-saved-objects-server",
+    "@kbn/security-api-integration-helpers",
   ]
 }

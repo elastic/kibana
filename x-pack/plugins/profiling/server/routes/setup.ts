@@ -7,7 +7,13 @@
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { RouteRegisterParameters } from '.';
-import { getClient } from './compat';
+import { getRoutePaths } from '../../common';
+import {
+  areResourcesSetupForAdmin,
+  areResourcesSetupForViewer,
+  createDefaultSetupState,
+  mergePartialSetupStates,
+} from '../../common/setup';
 import {
   enableResourceManagement,
   setMaximumBuckets,
@@ -17,7 +23,9 @@ import {
 import {
   createCollectorPackagePolicy,
   createSymbolizerPackagePolicy,
+  removeProfilingFromApmPackagePolicy,
   validateCollectorPackagePolicy,
+  validateProfilingInApmPackagePolicy,
   validateSymbolizerPackagePolicy,
 } from '../lib/setup/fleet_policies';
 import { getSetupInstructions } from '../lib/setup/get_setup_instructions';
@@ -25,12 +33,7 @@ import { hasProfilingData } from '../lib/setup/has_profiling_data';
 import { setSecurityRole, validateSecurityRole } from '../lib/setup/security_role';
 import { ProfilingSetupOptions } from '../lib/setup/types';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
-import { getRoutePaths } from '../../common';
-import {
-  areResourcesSetup,
-  createDefaultSetupState,
-  mergePartialSetupStates,
-} from '../../common/setup';
+import { getClient } from './compat';
 
 export function registerSetupRoute({
   router,
@@ -39,7 +42,7 @@ export function registerSetupRoute({
   dependencies,
 }: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  // Check if Elasticsearch and Fleet are setup for Universal Profiling
+  // Check if Elasticsearch and Fleet are set up for Universal Profiling
   router.get(
     {
       path: paths.HasSetupESResources,
@@ -86,32 +89,53 @@ export function registerSetupRoute({
           });
         }
 
-        state.data.available = await hasProfilingData({
-          ...setupOptions,
-          client: clientWithProfilingAuth,
-        });
-        if (state.data.available) {
+        const verifyFunctionsForViewer = [
+          validateCollectorPackagePolicy,
+          validateSymbolizerPackagePolicy,
+          validateProfilingInApmPackagePolicy,
+        ];
+
+        const partialStatesForViewer = await Promise.all([
+          ...verifyFunctionsForViewer.map((fn) => fn(setupOptions)),
+          hasProfilingData({
+            ...setupOptions,
+            client: clientWithProfilingAuth,
+          }),
+        ]);
+
+        const mergedStateForViewer = mergePartialSetupStates(state, partialStatesForViewer);
+
+        /*
+         * We need to split the verification steps
+         * because of users with viewer privileges
+         * cannot get the cluster settings
+         */
+        if (areResourcesSetupForViewer(mergedStateForViewer)) {
           return response.ok({
             body: {
               has_setup: true,
-              has_data: state.data.available,
+              has_data: mergedStateForViewer.data.available,
             },
           });
         }
 
-        const verifyFunctions = [
-          validateCollectorPackagePolicy,
+        /**
+         * Performe advanced verification in case the first step failed.
+         */
+        const verifyFunctionsForAdmin = [
           validateMaximumBuckets,
           validateResourceManagement,
           validateSecurityRole,
-          validateSymbolizerPackagePolicy,
         ];
-        const partialStates = await Promise.all(verifyFunctions.map((fn) => fn(setupOptions)));
-        const mergedState = mergePartialSetupStates(state, partialStates);
+
+        const partialStatesForAdmin = await Promise.all(
+          verifyFunctionsForAdmin.map((fn) => fn(setupOptions))
+        );
+        const mergedState = mergePartialSetupStates(mergedStateForViewer, partialStatesForAdmin);
 
         return response.ok({
           body: {
-            has_setup: areResourcesSetup(mergedState),
+            has_setup: areResourcesSetupForAdmin(mergedState),
             has_data: mergedState.data.available,
           },
         });
@@ -173,6 +197,7 @@ export function registerSetupRoute({
             validateResourceManagement,
             validateSecurityRole,
             validateSymbolizerPackagePolicy,
+            validateProfilingInApmPackagePolicy,
           ].map((fn) => fn(setupOptions))
         );
         const mergedState = mergePartialSetupStates(state, partialStates);
@@ -180,6 +205,9 @@ export function registerSetupRoute({
         const executeFunctions = [
           ...(mergedState.policies.collector.installed ? [] : [createCollectorPackagePolicy]),
           ...(mergedState.policies.symbolizer.installed ? [] : [createSymbolizerPackagePolicy]),
+          ...(mergedState.policies.apm.profilingEnabled
+            ? [removeProfilingFromApmPackagePolicy]
+            : []),
           ...(mergedState.resource_management.enabled ? [] : [enableResourceManagement]),
           ...(mergedState.permissions.configured ? [] : [setSecurityRole]),
           ...(mergedState.settings.configured ? [] : [setMaximumBuckets]),
@@ -218,7 +246,7 @@ export function registerSetupRoute({
       }
     }
   );
-  // Show users the instructions on how to setup Universal Profiling agents
+  // Show users the instructions on how to set up Universal Profiling agents
   router.get(
     {
       path: paths.SetupDataCollectionInstructions,
@@ -228,10 +256,12 @@ export function registerSetupRoute({
     async (context, request, response) => {
       try {
         const apmServerHost = dependencies.setup.cloud?.apm?.url;
+        const stackVersion = dependencies.stackVersion;
         const setupInstructions = await getSetupInstructions({
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
           soClient: (await context.core).savedObjects.client,
           apmServerHost,
+          stackVersion,
         });
 
         return response.ok({ body: setupInstructions });

@@ -96,9 +96,6 @@ describe('Security Plugin', () => {
             "areAPIKeysEnabled": [Function],
             "getCurrentUser": [Function],
           },
-          "hooks": Object {
-            "useUpdateUserProfile": [Function],
-          },
           "navControlService": Object {
             "addUserMenuLinks": [Function],
             "getUserMenuLinks$": [Function],

@@ -73,13 +73,14 @@ export class AssetDetailsEmbeddable extends Embeddable<AssetDetailsEmbeddableInp
             <LazyAssetDetailsWrapper
               activeTabId={this.input.activeTabId}
               dateRange={this.input.dateRange}
-              node={this.input.node}
-              nodeType={this.input.nodeType}
+              asset={this.input.asset}
+              assetType={this.input.assetType}
               overrides={this.input.overrides}
               renderMode={this.input.renderMode}
               tabs={this.input.tabs}
               onTabsStateChange={this.input.onTabsStateChange}
               links={this.input.links}
+              metricAlias={this.input.metricAlias}
             />
           </div>
         </EuiThemeProvider>

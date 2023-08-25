@@ -13,7 +13,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core/public';
 import { EuiFormRow } from '@elastic/eui';
-import type { ExpressionsStart, DatatableColumnType } from '@kbn/expressions-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -41,7 +41,7 @@ import type {
   TextBasedField,
 } from './types';
 import { FieldSelect } from './field_select';
-import type { Datasource, IndexPatternMap } from '../../types';
+import type { Datasource } from '../../types';
 import { LayerPanel } from './layerpanel';
 import { getUniqueLabelGenerator, nonNullable } from '../../utils';
 import { onDrop, getDropProps } from './dnd';
@@ -105,30 +105,19 @@ export function getTextBasedDatasource({
   const getSuggestionsForVisualizeField = (
     state: TextBasedPrivateState,
     indexPatternId: string,
-    fieldName: string,
-    indexPatterns: IndexPatternMap
+    fieldName: string
   ) => {
     const context = state.initialContext;
     // on text based mode we offer suggestions for the query and not for a specific field
     if (fieldName) return [];
     if (context && 'dataViewSpec' in context && context.dataViewSpec.title && context.query) {
       const newLayerId = generateId();
-      const indexPattern = indexPatterns[indexPatternId];
-
-      const contextualFields = context.contextualFields;
-      const newColumns = contextualFields?.map((c) => {
-        let field = indexPattern?.getFieldByName(c);
-        if (!field) {
-          field = indexPattern?.fields.find((f) => f.name.includes(c));
-        }
-        const newId = generateId();
-        const type = field?.type ?? 'number';
+      const textBasedQueryColumns = context.textBasedColumns ?? [];
+      const newColumns = textBasedQueryColumns.map((c) => {
         return {
-          columnId: newId,
-          fieldName: c,
-          meta: {
-            type: type as DatatableColumnType,
-          },
+          columnId: c.id,
+          fieldName: c.name,
+          meta: c.meta,
         };
       });
 
@@ -136,14 +125,7 @@ export function getTextBasedDatasource({
       const query = context.query;
       const updatedState = {
         ...state,
-        fieldList:
-          newColumns?.map((c) => {
-            return {
-              id: c.columnId,
-              name: c.fieldName,
-              meta: c.meta,
-            };
-          }) ?? [],
+        fieldList: textBasedQueryColumns,
         layers: {
           ...state.layers,
           [newLayerId]: {

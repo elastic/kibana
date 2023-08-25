@@ -43,7 +43,6 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
-  getSummarizedAlerts: jest.fn(),
   validate: {
     params: { validate: (params) => params },
   },

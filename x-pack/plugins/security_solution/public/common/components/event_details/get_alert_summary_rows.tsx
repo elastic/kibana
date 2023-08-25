@@ -216,6 +216,15 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
 }
 
 /**
+ * Gets the fields to display based on custom rules and configuration
+ * @param customs The list of custom-defined fields to display
+ * @returns The list of custom-defined fields to display
+ */
+function getHighlightedFieldsOverride(customs: string[]): EventSummaryField[] {
+  return customs.map((field) => ({ id: field }));
+}
+
+/**
   This function is exported because it is used in the Exception Component to
   populate the conditions with the Highlighted Fields. Additionally, the new
   Alert Summary Flyout also requires access to these fields.
@@ -229,12 +238,15 @@ export function getEventFieldsToDisplay({
   eventCategories,
   eventCode,
   eventRuleType,
+  highlightedFieldsOverride,
 }: {
   eventCategories: EventCategories;
   eventCode?: string;
   eventRuleType?: string;
+  highlightedFieldsOverride: string[];
 }): EventSummaryField[] {
   const fields = [
+    ...getHighlightedFieldsOverride(highlightedFieldsOverride),
     ...alwaysDisplayedFields,
     ...getFieldsByCategory(eventCategories),
     ...getFieldsByEventCode(eventCode, eventCategories),
@@ -281,11 +293,13 @@ export const getSummaryRows = ({
   eventId,
   isDraggable = false,
   isReadOnly = false,
+  investigationFields,
 }: {
   data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
   scopeId: string;
   eventId: string;
+  investigationFields?: string[];
   isDraggable?: boolean;
   isReadOnly?: boolean;
 }) => {
@@ -306,6 +320,7 @@ export const getSummaryRows = ({
     eventCategories,
     eventCode,
     eventRuleType,
+    highlightedFieldsOverride: investigationFields ?? [],
   });
 
   return data != null

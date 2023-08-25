@@ -13,5 +13,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./landing_page'));
     loadTestFile(require.resolve('./navigation'));
     loadDiscoverLogExplorerSuite(loadTestFile);
+    loadTestFile(require.resolve('./cases/attachment_framework'));
+    loadTestFile(require.resolve('./cases/list_view'));
   });
 }

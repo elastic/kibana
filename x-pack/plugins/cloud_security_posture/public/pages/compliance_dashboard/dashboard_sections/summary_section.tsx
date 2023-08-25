@@ -31,6 +31,7 @@ import {
   KSPM_POLICY_TEMPLATE,
   RULE_FAILED,
 } from '../../../../common/constants';
+import { AccountsEvaluatedWidget } from '../../../components/accounts_evaluated_widget';
 
 export const dashboardColumnsGrow: Record<string, EuiFlexItemProps['grow']> = {
   first: 3,
@@ -86,7 +87,12 @@ export const SummarySection = ({
                 'xpack.csp.dashboard.summarySection.counterCard.accountsEvaluatedDescription',
                 { defaultMessage: 'Accounts Evaluated' }
               ),
-        title: <CompactFormattedNumber number={complianceData.clusters.length} />,
+        title:
+          dashboardType === KSPM_POLICY_TEMPLATE ? (
+            <CompactFormattedNumber number={complianceData.clusters.length} />
+          ) : (
+            <AccountsEvaluatedWidget clusters={complianceData.clusters} />
+          ),
       },
       {
         id: DASHBOARD_COUNTER_CARDS.RESOURCES_EVALUATED,
@@ -116,7 +122,7 @@ export const SummarySection = ({
       },
     ],
     [
-      complianceData.clusters.length,
+      complianceData.clusters,
       complianceData.stats.resourcesEvaluated,
       complianceData.stats.totalFailed,
       dashboardType,

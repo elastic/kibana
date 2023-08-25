@@ -84,7 +84,7 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
 
   const { timefilter } = useData(
     dataView,
-    'explain_log_rage_spikes',
+    'log_rate_analysis',
     searchQuery,
     setGlobalState,
     currentSelectedSignificantTerm,

@@ -5,56 +5,39 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TimeRange } from '@kbn/es-query';
-import type { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { findInventoryModel } from '../../../../../common/inventory_models';
-import { useMetadata } from '../../hooks/use_metadata';
-import { useSourceContext } from '../../../../containers/metrics_source';
 import { Table } from './table';
 import { getAllFields } from './utils';
-import { toTimestampRange } from '../../utils';
+import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
+import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 
 export interface MetadataSearchUrlState {
   metadataSearchUrlState: string;
   setMetadataSearchUrlState: (metadataSearch: { metadataSearch?: string }) => void;
 }
 
-export interface MetadataProps {
-  dateRange: TimeRange;
-  nodeName: string;
-  nodeType: InventoryItemType;
-  showActionsColumn?: boolean;
-  search?: string;
-  onSearchChange?: (query: string) => void;
-}
-
-export const Metadata = ({
-  nodeName,
-  dateRange,
-  nodeType,
-  search,
-  showActionsColumn = false,
-  onSearchChange,
-}: MetadataProps) => {
-  const inventoryModel = findInventoryModel(nodeType);
-  const { sourceId } = useSourceContext();
+export const Metadata = () => {
+  const { overrides, onTabsStateChange } = useAssetDetailsStateContext();
   const {
+    metadata,
     loading: metadataLoading,
     error: fetchMetadataError,
-    metadata,
-  } = useMetadata(
-    nodeName,
-    nodeType,
-    inventoryModel.requiredMetrics,
-    sourceId,
-    toTimestampRange(dateRange)
-  );
+  } = useMetadataStateProviderContext();
+  const { query, showActionsColumn = false } = overrides?.metadata ?? {};
 
   const fields = useMemo(() => getAllFields(metadata), [metadata]);
+
+  const onSearchChange = useCallback(
+    (newQuery: string) => {
+      if (onTabsStateChange) {
+        onTabsStateChange({ metadata: { query: newQuery } });
+      }
+    },
+    [onTabsStateChange]
+  );
 
   if (fetchMetadataError) {
     return (
@@ -64,7 +47,7 @@ export const Metadata = ({
         })}
         color="danger"
         iconType="error"
-        data-test-subj="infraMetadataErrorCallout"
+        data-test-subj="infraAssetDetailsMetadataErrorCallout"
       >
         <FormattedMessage
           id="xpack.infra.metadataEmbeddable.errorMessage"
@@ -88,7 +71,7 @@ export const Metadata = ({
 
   return (
     <Table
-      search={search}
+      search={query}
       onSearchChange={onSearchChange}
       showActionsColumn={showActionsColumn}
       rows={fields}

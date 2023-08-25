@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless search UI', function () {
     loadTestFile(require.resolve('./landing_page'));
     loadTestFile(require.resolve('./navigation'));
+    loadTestFile(require.resolve('./cases/attachment_framework'));
   });
 }

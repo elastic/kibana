@@ -20,13 +20,7 @@ import { createBucketSelector } from './create_bucket_selector';
 import { createPercentileAggregation } from './create_percentile_aggregation';
 import { createRateAggsBuckets, createRateAggsBucketScript } from './create_rate_aggregation';
 import { wrapInCurrentPeriod } from './wrap_in_period';
-
-const getParsedFilterQuery: (filterQuery: string | undefined) => Array<Record<string, any>> = (
-  filterQuery
-) => {
-  if (!filterQuery) return [];
-  return [JSON.parse(filterQuery)];
-};
+import { getParsedFilterQuery } from '../../../../utils/get_parsed_filtered_query';
 
 export const calculateCurrentTimeframe = (
   metricParams: MetricExpressionParams,

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { fetchFindLatestPackageOrThrow } from '@kbn/fleet-plugin/server/services/epm/registry';
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import { ProfilingSetupOptions } from './types';
-import { PartialSetupState } from '../../../common/setup';
+import { fetchFindLatestPackageOrThrow } from '@kbn/fleet-plugin/server/services/epm/registry';
+import { omit } from 'lodash';
 import { PackageInputType } from '../..';
+import { PartialSetupState } from '../../../common/setup';
+import { ELASTIC_CLOUD_APM_POLICY, getApmPolicy } from './get_apm_policy';
+import { ProfilingSetupOptions } from './types';
 
 const CLOUD_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
 const COLLECTOR_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-collector';
@@ -181,4 +183,36 @@ export async function createSymbolizerPackagePolicy({
   await packagePolicyClient.create(soClient, esClient, packagePolicy, {
     force: true,
   });
+}
+
+export async function validateProfilingInApmPackagePolicy({
+  soClient,
+  packagePolicyClient,
+}: ProfilingSetupOptions): Promise<PartialSetupState> {
+  const apmPolicy = await getApmPolicy({ packagePolicyClient, soClient });
+
+  return {
+    policies: {
+      apm: {
+        profilingEnabled: !!(
+          apmPolicy && apmPolicy?.inputs[0].config?.['apm-server'].value?.profiling
+        ),
+      },
+    },
+  };
+}
+
+export async function removeProfilingFromApmPackagePolicy({
+  client,
+  soClient,
+  packagePolicyClient,
+}: ProfilingSetupOptions) {
+  const apmPackagePolicy = await getApmPolicy({ packagePolicyClient, soClient });
+  if (!apmPackagePolicy) {
+    throw new Error(`Could not find APM package policy`);
+  }
+  const esClient = client.getEsClient();
+  // remove profiling from apm-server config
+  const newPackagePolicy = omit(apmPackagePolicy, "inputs[0].config['apm-server'].value.profiling");
+  await packagePolicyClient.update(soClient, esClient, ELASTIC_CLOUD_APM_POLICY, newPackagePolicy);
 }

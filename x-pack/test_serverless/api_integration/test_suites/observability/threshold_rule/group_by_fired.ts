@@ -11,6 +11,7 @@
  * 2.0.
  */
 
+import { kbnTestConfig } from '@kbn/test';
 import moment from 'moment';
 import { cleanup, generate } from '@kbn/infra-forge';
 import { Aggregators, Comparator } from '@kbn/observability-plugin/common/threshold_rule/types';
@@ -18,19 +19,14 @@ import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/thr
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/observability-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
-import { createDataView, deleteDataView } from '../helpers/data_view';
-import {
-  waitForAlertInIndex,
-  waitForDocumentInIndex,
-  waitForRuleStatus,
-} from '../helpers/alerting_wait_for_helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const supertest = getService('supertest');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const logger = getService('log');
+  const alertingApi = getService('alertingApi');
+  const dataViewApi = getService('dataViewApi');
   let alertId: string;
   let startedAt: string;
 
@@ -44,8 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
-      await createDataView({
-        supertest,
+      await dataViewApi.create({
         name: 'metrics-fake_hosts',
         id: DATA_VIEW_ID,
         title: 'metrics-fake_hosts',
@@ -69,8 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
         index: '.kibana-event-log-*',
         query: { term: { 'kibana.alert.rule.consumer': 'alerts' } },
       });
-      await deleteDataView({
-        supertest,
+      await dataViewApi.delete({
         id: DATA_VIEW_ID,
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX, infraDataIndex]);
@@ -79,14 +73,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('Rule creation', () => {
       it('creates rule successfully', async () => {
-        actionId = await createIndexConnector({
-          supertest,
+        actionId = await alertingApi.createIndexConnector({
           name: 'Index Connector: Threshold API test',
           indexName: ALERT_ACTION_INDEX,
         });
 
-        const createdRule = await createRule({
-          supertest,
+        const createdRule = await alertingApi.createRule({
           tags: ['observability'],
           consumer: 'alerts',
           name: 'Threshold rule',
@@ -143,17 +135,15 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should be active', async () => {
-        const executionStatus = await waitForRuleStatus({
-          id: ruleId,
+        const executionStatus = await alertingApi.waitForRuleStatus({
+          ruleId,
           expectedStatus: 'active',
-          supertest,
         });
-        expect(executionStatus.status).to.be('active');
+        expect(executionStatus).to.be('active');
       });
 
       it('should set correct information in the alert document', async () => {
-        const resp = await waitForAlertInIndex({
-          esClient,
+        const resp = await alertingApi.waitForAlertInIndex({
           indexName: THRESHOLD_RULE_ALERT_INDEX,
           ruleId,
         });
@@ -214,20 +204,20 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should set correct action variables', async () => {
         const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
-        const resp = await waitForDocumentInIndex<{
+        const resp = await alertingApi.waitForDocumentInIndex<{
           ruleType: string;
           alertDetailsUrl: string;
           reason: string;
           value: string;
           host: string;
         }>({
-          esClient,
           indexName: ALERT_ACTION_INDEX,
         });
+        const { protocol, hostname, port } = kbnTestConfig.getUrlParts();
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
-          `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
+          `${protocol}://${hostname}:${port}/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
           'Custom equation is 0.8 in the last 1 min for host-0. Alert when >= 0.2.'

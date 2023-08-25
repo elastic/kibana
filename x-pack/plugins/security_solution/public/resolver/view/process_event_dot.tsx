@@ -178,16 +178,12 @@ const UnstyledProcessEventDot = React.memo(
 
     // Node (html id=) IDs
     const ariaActiveDescendant = useSelector((state: State) =>
-      selectors.ariaActiveDescendant(state.analyzer.analyzerById[id])
+      selectors.ariaActiveDescendant(state.analyzer[id])
     );
-    const selectedNode = useSelector((state: State) =>
-      selectors.selectedNode(state.analyzer.analyzerById[id])
-    );
-    const originID = useSelector((state: State) =>
-      selectors.originID(state.analyzer.analyzerById[id])
-    );
+    const selectedNode = useSelector((state: State) => selectors.selectedNode(state.analyzer[id]));
+    const originID = useSelector((state: State) => selectors.originID(state.analyzer[id]));
     const nodeStats = useSelector((state: State) =>
-      selectors.nodeStats(state.analyzer.analyzerById[id])(nodeID)
+      selectors.nodeStats(state.analyzer[id])(nodeID)
     );
 
     // define a standard way of giving HTML IDs to nodes based on their entity_id/nodeID.
@@ -198,12 +194,12 @@ const UnstyledProcessEventDot = React.memo(
     );
 
     const ariaLevel: number | null = useSelector((state: State) =>
-      selectors.ariaLevel(state.analyzer.analyzerById[id])(nodeID)
+      selectors.ariaLevel(state.analyzer[id])(nodeID)
     );
 
     // the node ID to 'flowto'
     const ariaFlowtoNodeID: string | null = useSelector((state: State) =>
-      selectors.ariaFlowtoNodeID(state.analyzer.analyzerById[id])(timeAtRender)(nodeID)
+      selectors.ariaFlowtoNodeID(state.analyzer[id])(timeAtRender)(nodeID)
     );
 
     const isShowingEventActions = xScale > 0.8;
@@ -277,7 +273,7 @@ const UnstyledProcessEventDot = React.memo(
     const colorMap = useColors();
 
     const nodeState = useSelector((state: State) =>
-      selectors.nodeDataStatus(state.analyzer.analyzerById[id])(nodeID)
+      selectors.nodeDataStatus(state.analyzer[id])(nodeID)
     );
     const isNodeLoading = nodeState === 'loading';
     const {
@@ -341,13 +337,11 @@ const UnstyledProcessEventDot = React.memo(
     );
 
     const grandTotal: number | null = useSelector((state: State) =>
-      selectors.statsTotalForNode(state.analyzer.analyzerById[id])(node)
+      selectors.statsTotalForNode(state.analyzer[id])(node)
     );
     const nodeName = nodeModel.nodeName(node);
     const processEvent = useSelector((state: State) =>
-      nodeDataModel.firstEvent(
-        selectors.nodeDataForID(state.analyzer.analyzerById[id])(String(node.id))
-      )
+      nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(String(node.id)))
     );
     const processName = useMemo(() => {
       if (processEvent !== undefined) {

@@ -15,6 +15,7 @@ const baseConfig = {
   deployment_url: '/abc123',
   profile_url: '/user/settings/',
   organization_url: '/account/',
+  projects_url: '/projects/',
 };
 
 describe('Cloud Plugin', () => {
@@ -58,6 +59,11 @@ describe('Cloud Plugin', () => {
       it('exposes deploymentUrl', () => {
         const { setup } = setupPlugin();
         expect(setup.deploymentUrl).toBe('https://cloud.elastic.co/abc123');
+      });
+
+      it('exposes projectsUrl', () => {
+        const { setup } = setupPlugin();
+        expect(setup.projectsUrl).toBe('https://cloud.elastic.co/projects/');
       });
 
       it('exposes snapshotsUrl', () => {

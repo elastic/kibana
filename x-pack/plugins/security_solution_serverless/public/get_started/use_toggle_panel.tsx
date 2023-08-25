@@ -10,12 +10,12 @@ import { ProductLine } from '../../common/product';
 import type { SecurityProductTypes } from '../../common/config';
 import { getStartedStorage } from './storage';
 import {
-  getActiveCardsInitialStates,
   getActiveSectionsInitialStates,
+  getActiveProductsInitialStates,
   getFinishedStepsInitialStates,
   reducer,
 } from './reducer';
-import type { CardId, SectionId, StepId, Switch } from './types';
+import type { OnCardClicked, OnStepButtonClicked, OnStepClicked, Switch } from './types';
 import { GetStartedPageActions } from './types';
 
 export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProductTypes }) => {
@@ -24,6 +24,10 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
     getActiveProductsFromStorage,
     toggleActiveProductsInStorage,
     addFinishedStepToStorage,
+    removeFinishedStepFromStorage,
+    addExpandedCardStepToStorage,
+    removeExpandedCardStepFromStorage,
+    getAllExpandedCardStepsFromStorage,
   } = getStartedStorage;
 
   const finishedStepsInitialStates = useMemo(
@@ -31,8 +35,8 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
     [getAllFinishedStepsFromStorage]
   );
 
-  const activeSectionsInitialStates = useMemo(() => {
-    const activeProductsFromStorage = getActiveSectionsInitialStates({
+  const activeProductsInitialStates = useMemo(() => {
+    const activeProductsFromStorage = getActiveProductsInitialStates({
       activeProducts: getActiveProductsFromStorage(),
     });
     return activeProductsFromStorage.size > 0
@@ -41,30 +45,83 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
           new Set([ProductLine.security, ProductLine.endpoint, ProductLine.cloud]);
   }, [getActiveProductsFromStorage, productTypes]);
 
-  const activeCardsInitialStates = useMemo(
+  const {
+    activeSections: activeSectionsInitialStates,
+    totalActiveSteps: totalActiveStepsInitialStates,
+    totalStepsLeft: totalStepsLeftInitialStates,
+  } = useMemo(
     () =>
-      getActiveCardsInitialStates({
-        activeProducts: activeSectionsInitialStates,
+      getActiveSectionsInitialStates({
+        activeProducts: activeProductsInitialStates,
         finishedSteps: finishedStepsInitialStates,
       }),
-    [activeSectionsInitialStates, finishedStepsInitialStates]
+    [activeProductsInitialStates, finishedStepsInitialStates]
+  );
+
+  const expandedCardsInitialStates = useMemo(
+    () => getAllExpandedCardStepsFromStorage(),
+    [getAllExpandedCardStepsFromStorage]
   );
 
   const [state, dispatch] = useReducer(reducer, {
-    activeProducts: activeSectionsInitialStates,
+    activeProducts: activeProductsInitialStates,
+    activeSections: activeSectionsInitialStates,
+    expandedCardSteps: expandedCardsInitialStates,
     finishedSteps: finishedStepsInitialStates,
-    activeCards: activeCardsInitialStates,
+    totalActiveSteps: totalActiveStepsInitialStates,
+    totalStepsLeft: totalStepsLeftInitialStates,
   });
 
-  const onStepClicked = useCallback(
-    ({ stepId, cardId, sectionId }: { stepId: StepId; cardId: CardId; sectionId: SectionId }) => {
+  const onStepClicked: OnStepClicked = useCallback(
+    ({ stepId, cardId, sectionId, isExpanded }) => {
       dispatch({
-        type: GetStartedPageActions.AddFinishedStep,
+        type: GetStartedPageActions.ToggleExpandedCardStep,
+        payload: { stepId, cardId, isStepExpanded: isExpanded },
+      });
+      if (isExpanded) {
+        dispatch({
+          type: GetStartedPageActions.AddFinishedStep,
+          payload: { stepId, cardId, sectionId },
+        });
+        addFinishedStepToStorage(cardId, stepId);
+        addExpandedCardStepToStorage(cardId, stepId);
+      } else {
+        removeExpandedCardStepFromStorage(cardId, stepId);
+      }
+    },
+    [addExpandedCardStepToStorage, addFinishedStepToStorage, removeExpandedCardStepFromStorage]
+  );
+
+  const onCardClicked: OnCardClicked = useCallback(
+    ({ cardId, isExpanded }) => {
+      dispatch({
+        type: GetStartedPageActions.ToggleExpandedCardStep,
+        payload: { cardId, isCardExpanded: isExpanded },
+      });
+      if (isExpanded) {
+        addExpandedCardStepToStorage(cardId);
+      } else {
+        removeExpandedCardStepFromStorage(cardId);
+      }
+    },
+    [addExpandedCardStepToStorage, removeExpandedCardStepFromStorage]
+  );
+
+  const onStepButtonClicked: OnStepButtonClicked = useCallback(
+    ({ stepId, cardId, sectionId, undo }) => {
+      dispatch({
+        type: undo
+          ? GetStartedPageActions.RemoveFinishedStep
+          : GetStartedPageActions.AddFinishedStep,
         payload: { stepId, cardId, sectionId },
       });
-      addFinishedStepToStorage(cardId, stepId);
+      if (undo) {
+        removeFinishedStepFromStorage(cardId, stepId);
+      } else {
+        addFinishedStepToStorage(cardId, stepId);
+      }
     },
-    [addFinishedStepToStorage]
+    [addFinishedStepToStorage, removeFinishedStepFromStorage]
   );
 
   const onProductSwitchChanged = useCallback(
@@ -75,5 +132,5 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
     [toggleActiveProductsInStorage]
   );
 
-  return { state, onStepClicked, onProductSwitchChanged };
+  return { state, onCardClicked, onStepClicked, onStepButtonClicked, onProductSwitchChanged };
 };

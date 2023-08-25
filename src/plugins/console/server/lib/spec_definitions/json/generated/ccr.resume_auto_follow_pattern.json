@@ -1,11 +1,21 @@
 {
   "ccr.resume_auto_follow_pattern": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "POST"
     ],
     "patterns": [
       "_ccr/auto_follow/{name}/resume"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-resume-auto-follow-pattern.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/ccr-resume-auto-follow-pattern.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

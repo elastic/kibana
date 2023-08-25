@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { memoize } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export interface NumberValidationResult {
@@ -29,7 +30,7 @@ export function numberValidator(conditions?: {
     throw new Error('Invalid validator conditions');
   }
 
-  return (value: number): NumberValidationResult | null => {
+  return memoize((value: number): NumberValidationResult | null => {
     const result = {} as NumberValidationResult;
     if (conditions?.min !== undefined && value < conditions.min) {
       result.min = true;
@@ -44,5 +45,5 @@ export function numberValidator(conditions?: {
       return result;
     }
     return null;
-  };
+  });
 }

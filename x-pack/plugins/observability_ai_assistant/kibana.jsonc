@@ -1,23 +1,14 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-ai-assistant-plugin",
-  "owner": "@elastic/apm-ui",
+  "owner": "@elastic/obs-ai-assistant",
   "plugin": {
     "id": "observabilityAIAssistant",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "observabilityAIAssistant"
-    ],
-    "requiredPlugins": [
-      "triggersActionsUi",
-      "actions",
-      "security"
-    ],
-    "requiredBundles": [
-      "kibanaReact"
-    ],
+    "configPath": ["xpack", "observabilityAIAssistant"],
+    "requiredPlugins": ["triggersActionsUi", "actions", "security", "features", "observabilityShared", "taskManager", "lens", "dataViews"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils", "fieldFormats"],
     "optionalPlugins": [],
     "extraPublicDirs": []
   }

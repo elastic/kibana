@@ -11,6 +11,7 @@ import { storage } from '../common/lib/storage';
 
 export const ACTIVE_PRODUCTS_STORAGE_KEY = 'ACTIVE_PRODUCTS';
 export const FINISHED_STEPS_STORAGE_KEY = 'FINISHED_STEPS';
+export const EXPANDED_CARDS_STORAGE_KEY = 'EXPANDED_CARDS';
 
 export const getStartedStorage = {
   getActiveProductsFromStorage: () => {
@@ -54,5 +55,38 @@ export const getStartedStorage = {
       steps.splice(index, 1);
     }
     storage.set(FINISHED_STEPS_STORAGE_KEY, { ...finishedSteps, [cardId]: steps });
+  },
+  getAllExpandedCardStepsFromStorage: () => storage.get(EXPANDED_CARDS_STORAGE_KEY) ?? {},
+  addExpandedCardStepToStorage: (cardId: CardId, stepId?: StepId) => {
+    const activeCards: Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }> =
+      storage.get(EXPANDED_CARDS_STORAGE_KEY) ?? {};
+    const card = activeCards[cardId]
+      ? { ...activeCards[cardId], isExpanded: true }
+      : {
+          isExpanded: true,
+          expandedSteps: [],
+        };
+
+    if (stepId && card && card.expandedSteps.indexOf(stepId) < 0) {
+      card.expandedSteps.push(stepId);
+    }
+    storage.set(EXPANDED_CARDS_STORAGE_KEY, { ...activeCards, [cardId]: card });
+  },
+  removeExpandedCardStepFromStorage: (cardId: CardId, stepId?: StepId) => {
+    const activeCards: Record<
+      CardId,
+      { isExpanded: boolean; expandedSteps: StepId[] } | undefined
+    > = storage.get(EXPANDED_CARDS_STORAGE_KEY) ?? {};
+    const card = activeCards[cardId];
+    if (card && !stepId) {
+      card.isExpanded = false;
+    }
+    if (card && stepId) {
+      const index = card.expandedSteps.indexOf(stepId);
+      if (index >= 0) {
+        card.expandedSteps.splice(index, 1);
+      }
+    }
+    storage.set(EXPANDED_CARDS_STORAGE_KEY, { ...activeCards, [cardId]: card });
   },
 };

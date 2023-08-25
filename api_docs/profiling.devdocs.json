@@ -226,7 +226,7 @@
         "label": "getRoutePaths",
         "description": [],
         "signature": [
-          "() => { TopN: string; TopNContainers: string; TopNDeployments: string; TopNFunctions: string; TopNHosts: string; TopNThreads: string; TopNTraces: string; Flamechart: string; HasSetupESResources: string; SetupDataCollectionInstructions: string; }"
+          "() => { TopN: string; TopNContainers: string; TopNDeployments: string; TopNFunctions: string; TopNHosts: string; TopNThreads: string; TopNTraces: string; Flamechart: string; HasSetupESResources: string; SetupDataCollectionInstructions: string; StorageExplorerSummary: string; StorageExplorerHostStorageDetails: string; StorageExplorerIndicesStorageDetails: string; }"
         ],
         "path": "x-pack/plugins/profiling/common/index.ts",
         "deprecated": false,
@@ -335,13 +335,10 @@
       {
         "parentPluginId": "profiling",
         "id": "def-common.NOT_AVAILABLE_LABEL",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "NOT_AVAILABLE_LABEL",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "x-pack/plugins/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

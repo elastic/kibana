@@ -23,7 +23,7 @@ export interface DescriptionSectionProps {
 /**
  * Most top section of the overview tab. It contains the description, reason and mitre attack information (for a document of type alert).
  */
-export const InvestigationSection: VFC<DescriptionSectionProps> = ({ expanded = false }) => {
+export const InvestigationSection: VFC<DescriptionSectionProps> = ({ expanded = true }) => {
   return (
     <ExpandableSection
       expanded={expanded}

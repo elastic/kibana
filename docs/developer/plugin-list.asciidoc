@@ -215,7 +215,7 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 
 
 |{kib-repo}blob/{branch}/src/plugins/interactive_setup/README.md[interactiveSetup]
-|The plugin provides UI and APIs for the interactive setup mode.
+|This plugin provides UI and APIs for interactive setup mode a.k.a "enrollment flow".
 
 
 |{kib-repo}blob/{branch}/src/plugins/kibana_overview/README.md[kibanaOverview]
@@ -432,6 +432,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/apm/readme.md[apm]
 |This plugin provides access to App Monitoring features provided by Elastic. It allows you to monitor your software services and applications in real-time; visualize detailed performance information on your services, identify and analyze errors, and monitor host-level and APM agent-specific metrics like JVM and Go runtime metrics.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/apm_data_access[apmDataAccess]
+|WARNING: Missing README.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/asset_manager/README.md[assetManager]
@@ -654,7 +658,7 @@ Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_ai_assistant/README.md[observabilityAIAssistant]
-|This plugin provides the Observability AI Assistant service and UI components.
+|This document gives an overview of the features of the Observability AI Assistant at the time of writing, and how to use them. At a high level, the Observability AI Assistant offers contextual insights, and a chat functionality that we enrich with function calling, allowing the LLM to hook into the user's data. We also allow the LLM to store things it considers new information as embeddings into Elasticsearch, and query this knowledge base when it decides it needs more information, using ELSER.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_onboarding/README.md[observabilityOnboarding]
@@ -683,10 +687,6 @@ Elastic.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/reporting/README.md[reporting]
 |An awesome Kibana reporting plugin
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/reporting_export_types/README.md[reportingExportTypes]
-|This plugin is intended to be a central point for the export types of reporting to convene before hitting the reporting plugin.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/rollup/README.md[rollup]

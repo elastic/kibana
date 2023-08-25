@@ -21,6 +21,98 @@
     "functions": [
       {
         "parentPluginId": "@kbn/aiops-utils",
+        "id": "def-common.getLogRateAnalysisType",
+        "type": "Function",
+        "tags": [],
+        "label": "getLogRateAnalysisType",
+        "description": [
+          "\nIdentify the log rate analysis type based on the baseline/deviation\ntime ranges on a given log rate histogram.\n"
+        ],
+        "signature": [
+          "(logRateHistogram: ",
+          {
+            "pluginId": "@kbn/aiops-utils",
+            "scope": "common",
+            "docId": "kibKbnAiopsUtilsPluginApi",
+            "section": "def-common.LogRateHistogramItem",
+            "text": "LogRateHistogramItem"
+          },
+          "[], windowParameters: ",
+          {
+            "pluginId": "@kbn/aiops-utils",
+            "scope": "common",
+            "docId": "kibKbnAiopsUtilsPluginApi",
+            "section": "def-common.WindowParameters",
+            "text": "WindowParameters"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/aiops-utils",
+            "scope": "common",
+            "docId": "kibKbnAiopsUtilsPluginApi",
+            "section": "def-common.LogRateAnalysisType",
+            "text": "LogRateAnalysisType"
+          }
+        ],
+        "path": "x-pack/packages/ml/aiops_utils/get_log_rate_analysis_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.getLogRateAnalysisType.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "logRateHistogram",
+            "description": [
+              "The log rate histogram."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/aiops-utils",
+                "scope": "common",
+                "docId": "kibKbnAiopsUtilsPluginApi",
+                "section": "def-common.LogRateHistogramItem",
+                "text": "LogRateHistogramItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/get_log_rate_analysis_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.getLogRateAnalysisType.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "windowParameters",
+            "description": [
+              "The window parameters with baseline and deviation time range."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/aiops-utils",
+                "scope": "common",
+                "docId": "kibKbnAiopsUtilsPluginApi",
+                "section": "def-common.WindowParameters",
+                "text": "WindowParameters"
+              }
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/get_log_rate_analysis_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The log rate analysis type."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-utils",
         "id": "def-common.getSnappedWindowParameters",
         "type": "Function",
         "tags": [],
@@ -46,7 +138,7 @@
             "text": "WindowParameters"
           }
         ],
-        "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+        "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,7 +149,7 @@
             "tags": [],
             "label": "windowParameters",
             "description": [
-              "time range definition for baseline and deviation to be used by spike log analysis"
+              "time range definition for baseline and deviation to be used by log rate analysis"
             ],
             "signature": [
               {
@@ -68,7 +160,7 @@
                 "text": "WindowParameters"
               }
             ],
-            "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -85,7 +177,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -103,7 +195,7 @@
         "tags": [],
         "label": "getWindowParameters",
         "description": [
-          "\nGiven a point in time (e.g. where a user clicks), use simple heuristics to compute:\n\n1. The time window around the click to evaluate for changes\n2. The historical time window prior to the click to use as a baseline.\n\nThe philosophy here is that charts are displayed with different granularities according to their\noverall time window. We select the log spike and historical time windows inline with the\noverall time window.\n\nThe algorithm for doing this is based on the typical granularities that exist in machine data.\n"
+          "\nGiven a point in time (e.g. where a user clicks), use simple heuristics to compute:\n\n1. The time window around the click to evaluate for changes\n2. The historical time window prior to the click to use as a baseline.\n\nThe philosophy here is that charts are displayed with different granularities according to their\noverall time window. We select the log deviation and historical time windows inline with the\noverall time window.\n\nThe algorithm for doing this is based on the typical granularities that exist in machine data.\n"
         ],
         "signature": [
           "(clickTime: number, minTime: number, maxTime: number) => ",
@@ -115,7 +207,7 @@
             "text": "WindowParameters"
           }
         ],
-        "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+        "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -126,12 +218,12 @@
             "tags": [],
             "label": "clickTime",
             "description": [
-              "timestamp of the clicked log rate spike."
+              "timestamp of the clicked log rate deviation."
             ],
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -148,7 +240,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -165,7 +257,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -180,6 +272,51 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/aiops-utils",
+        "id": "def-common.LogRateHistogramItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogRateHistogramItem",
+        "description": [
+          "\nLog rate histogram item"
+        ],
+        "path": "x-pack/packages/ml/aiops_utils/log_rate_histogram_item.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.LogRateHistogramItem.time",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "time",
+            "description": [
+              "\nTime of bucket"
+            ],
+            "signature": [
+              "string | number"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/log_rate_histogram_item.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.LogRateHistogramItem.value",
+            "type": "number",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "\nNumber of doc count for that time bucket"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/log_rate_histogram_item.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-utils",
         "id": "def-common.WindowParameters",
         "type": "Interface",
         "tags": [
@@ -189,9 +326,9 @@
         ],
         "label": "WindowParameters",
         "description": [
-          "\nTime range definition for baseline and deviation to be used by spike log analysis.\n"
+          "\nTime range definition for baseline and deviation to be used by log rate analysis.\n"
         ],
-        "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+        "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -206,7 +343,7 @@
             "description": [
               "\nBaseline minimum value"
             ],
-            "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -221,7 +358,7 @@
             "description": [
               "\nBaseline maximum value"
             ],
-            "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -236,7 +373,7 @@
             "description": [
               "\nDeviation minimum value"
             ],
-            "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -251,7 +388,7 @@
             "description": [
               "\nDeviation maximum value"
             ],
-            "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
+            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -260,7 +397,43 @@
       }
     ],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "@kbn/aiops-utils",
+        "id": "def-common.LogRateAnalysisType",
+        "type": "Type",
+        "tags": [],
+        "label": "LogRateAnalysisType",
+        "description": [
+          "\nUnion type of log rate analysis types."
+        ],
+        "signature": [
+          "\"spike\" | \"dip\""
+        ],
+        "path": "x-pack/packages/ml/aiops_utils/log_rate_analysis_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/aiops-utils",
+        "id": "def-common.LOG_RATE_ANALYSIS_TYPE",
+        "type": "Object",
+        "tags": [],
+        "label": "LOG_RATE_ANALYSIS_TYPE",
+        "description": [
+          "\nThe type of log rate analysis (spike or dip) will affect how parameters are\npassed to the analysis API endpoint."
+        ],
+        "signature": [
+          "{ readonly SPIKE: \"spike\"; readonly DIP: \"dip\"; }"
+        ],
+        "path": "x-pack/packages/ml/aiops_utils/log_rate_analysis_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }
