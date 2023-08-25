@@ -10,22 +10,25 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { isNestedFieldParent } from './nested_fields';
 describe('isNestedFieldParent', () => {
   it('correctly identifies nested parent fields', () => {
+    const nestedField = {
+      name: 'nested.field',
+      type: 'keyword',
+      subType: {
+        nested: {
+          path: 'nested.field.path',
+        },
+      },
+    };
+    const unnestedField = {
+      name: 'otherField',
+      type: 'keyword',
+    };
+    const list = [nestedField, unnestedField];
+
     const dataView = {
       fields: {
-        getByName: jest.fn((fieldName) => fieldName === 'nested.field'),
-        getAll: jest.fn(() => [
-          {
-            name: 'nested.field',
-            subType: {
-              nested: {
-                path: 'nested.field.path',
-              },
-            },
-          },
-          {
-            name: 'otherField',
-          },
-        ]),
+        getByName: jest.fn((fieldName) => list.find((field) => field.name === fieldName)),
+        getAll: jest.fn(() => list),
       },
     } as unknown as DataView;
 
