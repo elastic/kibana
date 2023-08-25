@@ -7,7 +7,7 @@
 
 import type { FleetAuthzRouter } from '../../services/security';
 
-import { OLDEST_PUBLIC_VERSION } from '../../../common/constants';
+import { OLDEST_INTERNAL_VERSION } from '../../../common/constants';
 
 import { PRECONFIGURATION_API_ROUTES } from '../../constants';
 import { PostResetOnePreconfiguredAgentPoliciesSchema } from '../../types';
@@ -25,7 +25,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: OLDEST_INTERNAL_VERSION,
         validate: false,
       },
 
@@ -41,7 +41,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: OLDEST_INTERNAL_VERSION,
         validate: { request: PostResetOnePreconfiguredAgentPoliciesSchema },
       },
       resetOnePreconfigurationHandler

@@ -130,80 +130,105 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
   const fleetAuthzRouter: FleetAuthzRouter<TContext> = {
     versioned: {
       get: ({ fleetAuthz, ...options }) => {
-        const { addVersion: originalAddVersion } = router.versioned.get(
-          withDefaultPublicAccess(options)
-        );
+        const res = router.versioned.get(withDefaultPublicAccess(options));
+        const originalAddVersion = res.addVersion.bind(res);
 
         function addVersion<P, Q, B>(
-          { fleetAuthz: hasRequiredAuthz, ...opts }: FleetAddVersionOpts<P, Q, B>,
+          { fleetAuthz: versionAuthz, ...opts }: FleetAddVersionOpts<P, Q, B>,
           handler: FleetHandler<P, Q, B, TContext>
         ) {
           originalAddVersion({ ...opts }, (context, request, response) =>
-            fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+            fleetHandlerWrapper({
+              context,
+              request,
+              response,
+              handler,
+              hasRequiredAuthz: versionAuthz || fleetAuthz,
+            })
           );
           return { addVersion };
         }
-        return { addVersion: addVersion.bind(router.versioned) };
+        return { addVersion };
       },
       delete: ({ fleetAuthz, ...options }) => {
-        const { addVersion: originalAddVersion } = router.versioned.delete(
-          withDefaultPublicAccess(options)
-        );
+        const res = router.versioned.delete(withDefaultPublicAccess(options));
+        const originalAddVersion = res.addVersion.bind(res);
 
         function addVersion<P, Q, B>(
-          { fleetAuthz: hasRequiredAuthz, ...opts }: FleetAddVersionOpts<P, Q, B>,
+          { fleetAuthz: versionAuthz, ...opts }: FleetAddVersionOpts<P, Q, B>,
           handler: FleetHandler<P, Q, B, TContext>
         ) {
           originalAddVersion({ ...opts }, (context, request, response) =>
-            fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+            fleetHandlerWrapper({
+              context,
+              request,
+              response,
+              handler,
+              hasRequiredAuthz: versionAuthz || fleetAuthz,
+            })
           );
           return { addVersion };
         }
         return { addVersion };
       },
       put: ({ fleetAuthz, ...options }) => {
-        const { addVersion: originalAddVersion } = router.versioned.put(
-          withDefaultPublicAccess(options)
-        );
+        const res = router.versioned.put(withDefaultPublicAccess(options));
+        const originalAddVersion = res.addVersion.bind(res);
 
         function addVersion<P, Q, B>(
-          { fleetAuthz: hasRequiredAuthz, ...opts }: FleetAddVersionOpts<P, Q, B>,
+          { fleetAuthz: versionAuthz, ...opts }: FleetAddVersionOpts<P, Q, B>,
           handler: FleetHandler<P, Q, B, TContext>
         ) {
           originalAddVersion({ ...opts }, (context, request, response) =>
-            fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+            fleetHandlerWrapper({
+              context,
+              request,
+              response,
+              handler,
+              hasRequiredAuthz: versionAuthz || fleetAuthz,
+            })
           );
           return { addVersion };
         }
         return { addVersion };
       },
       post: ({ fleetAuthz, ...options }) => {
-        const { addVersion: originalAddVersion } = router.versioned.post(
-          withDefaultPublicAccess(options)
-        );
+        const res = router.versioned.post(withDefaultPublicAccess(options));
+        const originalAddVersion = res.addVersion.bind(res);
 
         function addVersion<P, Q, B>(
-          { fleetAuthz: hasRequiredAuthz, ...opts }: FleetAddVersionOpts<P, Q, B>,
+          { fleetAuthz: versionAuthz, ...opts }: FleetAddVersionOpts<P, Q, B>,
           handler: FleetHandler<P, Q, B, TContext>
         ) {
           originalAddVersion({ ...opts }, (context, request, response) =>
-            fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+            fleetHandlerWrapper({
+              context,
+              request,
+              response,
+              handler,
+              hasRequiredAuthz: versionAuthz || fleetAuthz,
+            })
           );
           return { addVersion };
         }
         return { addVersion };
       },
       patch: ({ fleetAuthz, ...options }) => {
-        const { addVersion: originalAddVersion } = router.versioned.patch(
-          withDefaultPublicAccess(options)
-        );
+        const res = router.versioned.patch(withDefaultPublicAccess(options));
+        const originalAddVersion = res.addVersion.bind(res);
 
         function addVersion<P, Q, B>(
-          { fleetAuthz: hasRequiredAuthz, ...opts }: FleetAddVersionOpts<P, Q, B>,
+          { fleetAuthz: versionAuthz, ...opts }: FleetAddVersionOpts<P, Q, B>,
           handler: FleetHandler<P, Q, B, TContext>
         ) {
           originalAddVersion({ ...opts }, (context, request, response) =>
-            fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+            fleetHandlerWrapper({
+              context,
+              request,
+              response,
+              handler,
+              hasRequiredAuthz: versionAuthz || fleetAuthz,
+            })
           );
           return { addVersion };
         }

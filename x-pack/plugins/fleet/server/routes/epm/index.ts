@@ -7,7 +7,11 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 
-import { OLDEST_PUBLIC_VERSION, INTERNAL_API_ACCESS } from '../../../common/constants';
+import {
+  OLDEST_PUBLIC_VERSION,
+  OLDEST_INTERNAL_VERSION,
+  INTERNAL_API_ACCESS,
+} from '../../../common/constants';
 
 import type { FleetAuthz } from '../../../common';
 
@@ -320,7 +324,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: OLDEST_INTERNAL_VERSION,
         validate: { request: GetInfoRequestSchemaDeprecated },
       },
       async (context, request, response) => {
@@ -349,7 +353,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: OLDEST_INTERNAL_VERSION,
         validate: { request: UpdatePackageRequestSchemaDeprecated },
       },
       async (context, request, response) => {
@@ -374,7 +378,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: OLDEST_INTERNAL_VERSION,
         validate: { request: InstallPackageFromRegistryRequestSchemaDeprecated },
       },
       async (context, request, response) => {
@@ -403,7 +407,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: OLDEST_PUBLIC_VERSION,
+        version: OLDEST_INTERNAL_VERSION,
         validate: { request: DeletePackageRequestSchemaDeprecated },
       },
       async (context, request, response) => {
