@@ -649,7 +649,13 @@ export class Authenticator {
       throw new Error(`Provider name "${options.name}" is reserved.`);
     }
 
-    this.providers.set(options.name, new HTTPAuthenticationProvider(options, { supportedSchemes }));
+    this.providers.set(
+      options.name,
+      new HTTPAuthenticationProvider(options, {
+        supportedSchemes,
+        jwt: this.options.config.authc.http.jwt,
+      })
+    );
   }
 
   /**
