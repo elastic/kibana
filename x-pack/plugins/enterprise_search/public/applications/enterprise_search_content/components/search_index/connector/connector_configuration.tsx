@@ -45,7 +45,7 @@ import { SearchIndexTabId } from '../search_index';
 import { ApiKeyConfig } from './api_key_configuration';
 import { ConnectorConfigurationConfig } from './connector_configuration_config';
 import { ConnectorNameAndDescription } from './connector_name_and_description/connector_name_and_description';
-import { BETA_CONNECTORS, CONNECTORS } from './constants';
+import { BETA_CONNECTORS, CONNECTORS, getConnectorTemplate } from './constants';
 import { NativeConnectorConfiguration } from './native_connector_configuration/native_connector_configuration';
 
 export const ConnectorConfiguration: React.FC = () => {
@@ -151,15 +151,13 @@ export const ConnectorConfiguration: React.FC = () => {
                       </EuiText>
                       <EuiSpacer />
                       <EuiCodeBlock fontSize="m" paddingSize="m" color="dark" isCopyable>
-                        {`connectors:
-  -
-    connector_id: "${index.connector.id}"
-    service_type: "${index.connector.service_type || 'changeme'}"${
-                          apiKeyData?.encoded
-                            ? `
-    api_key: "${apiKeyData?.encoded}"`
-                            : ''
-                        }`}
+                        {getConnectorTemplate({
+                          apiKeyData,
+                          connectorData: {
+                            id: index.connector.id,
+                            service_type: index.connector.service_type,
+                          },
+                        })}
                       </EuiCodeBlock>
                       <EuiSpacer />
                       <EuiText size="s">
