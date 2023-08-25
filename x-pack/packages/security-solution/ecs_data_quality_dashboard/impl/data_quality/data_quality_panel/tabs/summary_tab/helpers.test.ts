@@ -146,6 +146,7 @@ describe('helpers', () => {
     const defaultNumberFormat = '0,0.[000]';
     const formatNumber = (value: number | undefined) =>
       value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT;
+    const isILMAvailable = true;
 
     test('it returns the expected comment when the index has incompatible fields ', () => {
       expect(
@@ -155,6 +156,7 @@ describe('helpers', () => {
           formatNumber,
           ilmPhase: 'unmanaged',
           indexName: 'auditbeat-custom-index-1',
+          isILMAvailable,
           partitionedFieldMetadata: mockPartitionedFieldMetadata,
           pattern: 'auditbeat-*',
           patternDocsCount: 57410,
@@ -182,6 +184,7 @@ describe('helpers', () => {
           formatNumber,
           ilmPhase: 'unmanaged',
           indexName: 'auditbeat-custom-index-1',
+          isILMAvailable,
           partitionedFieldMetadata: noIncompatible,
           pattern: 'auditbeat-*',
           patternDocsCount: 57410,
@@ -217,6 +220,7 @@ describe('helpers', () => {
           formatNumber,
           ilmPhase: 'unmanaged',
           indexName: 'auditbeat-custom-empty-index-1',
+          isILMAvailable,
           partitionedFieldMetadata: emptyIndex,
           pattern: 'auditbeat-*',
           patternDocsCount: 57410,

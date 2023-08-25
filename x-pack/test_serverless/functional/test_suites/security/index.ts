@@ -13,6 +13,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./ftr/navigation'));
     loadTestFile(require.resolve('./ftr/management'));
     loadTestFile(require.resolve('./ftr/cases/attachment_framework'));
+    loadTestFile(require.resolve('./ftr/cases/list_view'));
     loadTestFile(require.resolve('./ftr/cases/configure'));
   });
 }

@@ -5,33 +5,38 @@
  * 2.0.
  */
 
+import type { TimeRange } from '@kbn/es-query';
 import createContainer from 'constate';
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { parseDateRange } from '../../../utils/datemath';
-import type { AssetDetailsProps } from '../types';
+
 import { toTimestampRange } from '../utils';
 
-const DEFAULT_DATE_RANGE = {
+const DEFAULT_DATE_RANGE: TimeRange = {
   from: 'now-15m',
   to: 'now',
 };
 
-export type UseAssetDetailsStateProps = Pick<AssetDetailsProps, 'dateRange'>;
+export interface UseAssetDetailsStateProps {
+  initialDateRange: TimeRange;
+}
 
-export function useDateRangeProvider({ dateRange: rawDateRange }: UseAssetDetailsStateProps) {
-  const dateRange = useMemo(() => {
+export function useDateRangeProvider({ initialDateRange }: UseAssetDetailsStateProps) {
+  const [dateRange, setDateRange] = useState(initialDateRange);
+
+  const parsedDateRange = useMemo(() => {
     const { from = DEFAULT_DATE_RANGE.from, to = DEFAULT_DATE_RANGE.to } =
-      parseDateRange(rawDateRange);
+      parseDateRange(dateRange);
 
     return { from, to };
-  }, [rawDateRange]);
+  }, [dateRange]);
 
-  const dateRangeTs = toTimestampRange(dateRange);
+  const getDateRangeInTimestamp = useCallback(
+    () => toTimestampRange(parsedDateRange),
+    [parsedDateRange]
+  );
 
-  return {
-    dateRange,
-    dateRangeTs,
-  };
+  return { dateRange, setDateRange, getDateRangeInTimestamp };
 }
 
 export const [DateRangeProvider, useDateRangeProviderContext] =
