@@ -137,6 +137,27 @@ describe('autocomplete_listener', () => {
     testSuggestions('from a | stats a=min(b), b=max(', ['FieldIdentifier']);
   });
 
+  describe('enrich', () => {
+    testSuggestions('from a | enrich', ['PolicyIdentifier']);
+    testSuggestions('from a | enrich policy ', ['|', 'on', 'with']);
+    testSuggestions('from a | enrich policy on ', ['PolicyMatchingFieldIdentifier']);
+    testSuggestions('from a | enrich policy on b ', ['|', 'with']);
+    testSuggestions('from a | enrich policy on b with ', ['var0', 'PolicyFieldIdentifier']);
+    testSuggestions('from a | enrich policy on b with var0 ', ['=', '|']);
+    testSuggestions('from a | enrich policy on b with var0 = ', ['PolicyFieldIdentifier']);
+    testSuggestions('from a | enrich policy on b with var0 = c ', ['|']);
+    testSuggestions('from a | enrich policy on b with var0 = c, ', [
+      'var1',
+      'PolicyFieldIdentifier',
+    ]);
+    testSuggestions('from a | enrich policy on b with var0 = c, var1 ', ['=', '|']);
+    testSuggestions('from a | enrich policy on b with var0 = c, var1 = ', [
+      'PolicyFieldIdentifier',
+    ]);
+    testSuggestions('from a | enrich policy with ', ['var0', 'PolicyFieldIdentifier']);
+    testSuggestions('from a | enrich policy with c', ['=', '|']);
+  });
+
   describe('eval', () => {
     testSuggestions('from a | eval ', ['var0']);
     testSuggestions('from a | eval a ', ['=']);
