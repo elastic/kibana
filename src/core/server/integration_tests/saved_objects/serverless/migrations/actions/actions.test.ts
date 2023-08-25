@@ -19,6 +19,10 @@ const TEST_INDEX_A_ALIAS = '.some_index';
 const TEST_INDEX_B = '.some_other_index_1';
 const TEST_INDICES = [TEST_INDEX_A, TEST_INDEX_B];
 
+/**
+ * The intention with this set of tests is to ensure that we are able to run all ZDT actions against serverless ES. Do
+ * not add tests here to ensure that sequences of actions work as expected. These should be added elsewhere.
+ */
 describe.skip('ZDT migration actions', () => {
   let serverlessES: TestServerlessESUtils;
   let client: Client;
