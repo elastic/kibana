@@ -10,47 +10,75 @@ import {
   EuiIcon,
   type EuiPageHeaderProps,
   type EuiBreadcrumbsProps,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import React, { useCallback, useMemo } from 'react';
 import { capitalize } from 'lodash';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { APM_HOST_FILTER_FIELD } from '../constants';
 import { LinkToAlertsRule, LinkToApmServices, LinkToNodeDetails } from '../links';
-import { FlyoutTabIds, type LinkOptions, type Tab, type TabIds } from '../types';
+import { FlyoutTabIds, type RouteState, type LinkOptions, type Tab, type TabIds } from '../types';
 import { useAssetDetailsStateContext } from './use_asset_details_state';
 import { useDateRangeProviderContext } from './use_date_range';
 import { useTabSwitcherContext } from './use_tab_switcher';
 
 type TabItem = NonNullable<Pick<EuiPageHeaderProps, 'tabs'>['tabs']>[number];
 
-export const usePageHeader = (tabs: Tab[], links?: LinkOptions[]) => {
+export const usePageHeader = (tabs: Tab[] = [], links: LinkOptions[] = []) => {
   const { rightSideItems } = useRightSideItems(links);
   const { tabEntries } = useTabs(tabs);
-  const { goBack, length: historyLength } = useHistory();
+  const { breadcrumbs } = useBreadcrumbs();
+
+  return { rightSideItems, tabEntries, breadcrumbs };
+};
+
+const useBreadcrumbs = () => {
+  const history = useHistory();
+  const location = useLocation<RouteState>();
+
+  const onClick = (e: React.MouseEvent) => {
+    if (location.state) {
+      history.push({
+        pathname: location.state.originPathname,
+        search: location.state.data,
+      });
+    } else {
+      history.goBack();
+    }
+    e.preventDefault();
+  };
 
   const breadcrumbs: EuiBreadcrumbsProps['breadcrumbs'] =
-    historyLength <= 1
-      ? []
-      : [
+    location.state || history.length > 1
+      ? [
           {
             text: (
-              <>
-                <EuiIcon size="s" type="arrowLeft" /> Return
-              </>
+              <EuiFlexGroup gutterSize="xs" alignItems="center">
+                <EuiFlexItem>
+                  <EuiIcon size="s" type="arrowLeft" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <FormattedMessage
+                    id="xpack.infra.assetDetails.header.return"
+                    defaultMessage="Return"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             ),
             color: 'primary',
             'aria-current': false,
+            'data-test-subj': 'infraAssetDetailsReturnButton',
             href: '#',
-            onClick: (e) => {
-              goBack();
-              e.preventDefault();
-            },
+            onClick,
           },
-        ];
+        ]
+      : [];
 
-  return { rightSideItems, tabEntries, breadcrumbs };
+  return { breadcrumbs };
 };
 
 const useRightSideItems = (links?: LinkOptions[]) => {

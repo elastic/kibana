@@ -8,7 +8,6 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { capitalize } from 'lodash/fp';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
 import { AssetDetailPage } from './asset_detail_page';
@@ -23,9 +22,6 @@ export const MetricDetail = () => {
   const PageContent = () => (nodeType === 'host' ? <AssetDetailPage /> : <MetricDetailPage />);
 
   useMetricsBreadcrumbs([
-    {
-      text: capitalize(nodeType),
-    },
     {
       text: nodeName,
     },

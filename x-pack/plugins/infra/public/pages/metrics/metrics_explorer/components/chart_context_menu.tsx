@@ -17,6 +17,7 @@ import {
 import DateMath from '@kbn/datemath';
 import { Capabilities } from '@kbn/core/public';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { useLocation } from 'react-router-dom';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
@@ -62,20 +63,6 @@ const dateMathExpressionToEpoch = (dateMathExpression: string, roundUp = false):
   return dateObj.valueOf();
 };
 
-export const createNodeDetailLink = (
-  nodeType: InventoryItemType,
-  nodeId: string,
-  from: string,
-  to: string
-) => {
-  return getNodeDetailUrl({
-    nodeType,
-    nodeId,
-    from: dateMathExpressionToEpoch(from),
-    to: dateMathExpressionToEpoch(to, true),
-  });
-};
-
 export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   onFilter,
   options,
@@ -85,6 +72,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   uiCapabilities,
   chartOptions,
 }: Props) => {
+  const location = useLocation();
   const [isPopoverOpen, setPopoverState] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const supportFiltering = options.groupBy != null && onFilter != null;
@@ -120,7 +108,20 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   const nodeType = source && options.groupBy && fieldToNodeType(source, options.groupBy);
   const nodeDetailLinkProps = useLinkProps({
     app: 'metrics',
-    ...(nodeType ? createNodeDetailLink(nodeType, series.id, timeRange.from, timeRange.to) : {}),
+    ...(nodeType
+      ? getNodeDetailUrl({
+          nodeType,
+          nodeId: series.id,
+          search: {
+            from: dateMathExpressionToEpoch(timeRange.from),
+            to: dateMathExpressionToEpoch(timeRange.to, true),
+            state: {
+              originPathname: location.pathname,
+              data: location.search,
+            },
+          },
+        })
+      : {}),
   });
   const tsvbLinkProps = useLinkProps({
     ...createTSVBLink(source, options, series, timeRange, chartOptions),

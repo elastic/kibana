@@ -6,24 +6,33 @@
  */
 
 import React from 'react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { Redirect, useLocation, useRouteMatch } from 'react-router-dom';
 
 import { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
 import { replaceMetricTimeInQueryString } from '../metrics/metric_detail/hooks/use_metrics_time';
-import { getFromFromLocation, getToFromLocation, getNodeNameFromLocation } from './query_params';
+import {
+  getFromFromLocation,
+  getToFromLocation,
+  getNodeNameFromLocation,
+  getStateFromLocation,
+} from './query_params';
 import { InventoryItemType } from '../../../common/inventory_models/types';
+import type { RouteState } from '../../components/asset_details/types';
 
-type RedirectToNodeDetailProps = RouteComponentProps<{
-  nodeId: string;
-  nodeType: InventoryItemType;
-}>;
+interface QueryParams {
+  from?: number;
+  to?: number;
+  assetName?: string;
+  state?: RouteState;
+}
 
-export const RedirectToNodeDetail = ({
-  match: {
-    params: { nodeId, nodeType },
-  },
-  location,
-}: RedirectToNodeDetailProps) => {
+export const RedirectToNodeDetail = () => {
+  const {
+    params: { nodeType, nodeId },
+  } = useRouteMatch<{ nodeType: InventoryItemType; nodeId: string }>();
+
+  const location = useLocation();
+
   const searchString = replaceMetricTimeInQueryString(
     getFromFromLocation(location),
     getToFromLocation(location)
@@ -38,27 +47,34 @@ export const RedirectToNodeDetail = ({
     }
   }
 
-  return <Redirect to={`/detail/${nodeType}/${nodeId}?${queryParams.toString()}`} />;
+  const state = getStateFromLocation(location);
+  return (
+    <Redirect
+      to={{
+        pathname: `/detail/${nodeType}/${nodeId}`,
+        search: queryParams.toString(),
+        state: state ? JSON.parse(state) : undefined,
+      }}
+    />
+  );
 };
 
 export const getNodeDetailUrl = ({
   nodeType,
   nodeId,
-  to,
-  from,
-  assetName,
+  search,
 }: {
   nodeType: InventoryItemType;
   nodeId: string;
-  to?: number;
-  from?: number;
-  assetName?: string;
+  search: QueryParams;
 }): LinkDescriptor => {
+  const { to, from, state, ...rest } = search;
   return {
     app: 'metrics',
     pathname: `link-to/${nodeType}-detail/${nodeId}`,
     search: {
-      ...(assetName ? { assetName } : undefined),
+      ...rest,
+      ...(state ? { state: JSON.stringify(state) } : undefined),
       ...(to && from
         ? {
             to: `${to}`,

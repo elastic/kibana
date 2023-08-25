@@ -14,6 +14,7 @@ import { EuiIcon, EuiButtonIcon } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { useLocation } from 'react-router-dom';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { MetricsTab } from './tabs/metrics/metrics';
@@ -51,6 +52,7 @@ export const NodeContextPopover = ({
   const inventoryModel = findInventoryModel(nodeType);
   const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
   const { application, share } = useKibana<InfraClientCoreStart & InfraClientStartDeps>().services;
+  const location = useLocation();
   const uiCapabilities = application?.capabilities;
   const canCreateAlerts = useMemo(
     () => Boolean(uiCapabilities?.infrastructure?.save),
@@ -81,9 +83,15 @@ export const NodeContextPopover = ({
     ...getNodeDetailUrl({
       nodeType,
       nodeId: node.id,
-      from: nodeDetailFrom,
-      to: currentTime,
-      assetName: node.name,
+      search: {
+        from: nodeDetailFrom,
+        to: currentTime,
+        assetName: node.name,
+        state: {
+          originPathname: location.pathname,
+          data: location.search,
+        },
+      },
     }),
   });
   const apmField = nodeType === 'host' ? 'host.hostname' : inventoryModel.fields.id;

@@ -8,8 +8,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { usePageHeader } from '../../../../components/asset_details/hooks/use_page_header';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { InventoryMetric, InventoryItemType } from '../../../../../common/inventory_models/types';
 import { useNodeDetails } from '../hooks/use_node_details';
@@ -55,7 +55,7 @@ const parseRange = (range: MetricsTimeInput) => {
 
 export const NodeDetailsPage = (props: Props) => {
   const { metricIndicesExist } = useSourceContext();
-  const { goBack, length: historyLength } = useHistory();
+  const { breadcrumbs } = usePageHeader();
   const [parsedTimeRange, setParsedTimeRange] = useState(parseRange(props.timeRange));
   const { metrics, loading, makeRequest, error } = useNodeDetails(
     props.requiredMetrics,
@@ -98,25 +98,7 @@ export const NodeDetailsPage = (props: Props) => {
             onRefresh={refetch}
           />,
         ],
-        breadcrumbs:
-          historyLength <= 1
-            ? []
-            : [
-                {
-                  text: (
-                    <>
-                      <EuiIcon size="s" type="arrowLeft" /> Return
-                    </>
-                  ),
-                  color: 'primary',
-                  'aria-current': false,
-                  href: '#',
-                  onClick: (e) => {
-                    goBack();
-                    e.preventDefault();
-                  },
-                },
-              ],
+        breadcrumbs,
       }}
     >
       <EuiFlexGroup>

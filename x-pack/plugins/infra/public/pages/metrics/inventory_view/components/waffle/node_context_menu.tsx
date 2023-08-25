@@ -79,8 +79,10 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
       ...getNodeDetailUrl({
         nodeType,
         nodeId: node.id,
-        from: nodeDetailFrom,
-        to: currentTime,
+        search: {
+          from: nodeDetailFrom,
+          to: currentTime,
+        },
       }),
     });
     const apmTracesMenuItemLinkProps = useLinkProps({
