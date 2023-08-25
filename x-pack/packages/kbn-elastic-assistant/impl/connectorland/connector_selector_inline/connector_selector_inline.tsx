@@ -27,14 +27,19 @@ import { useConversation } from '../../assistant/use_conversation';
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 interface Props {
   isDisabled?: boolean;
-  onConnectorSelectionChange: (connectorId: string, provider: OpenAiProviderType) => void;
+  onConnectorSelectionChange: (
+    connectorId: string,
+    provider?: OpenAiProviderType,
+    model?: string
+  ) => void;
   selectedConnectorId?: string;
   selectedConversation?: Conversation;
   onConnectorModalVisibilityChange?: (isVisible: boolean) => void;
 }
 
 interface Config {
-  apiProvider: string;
+  apiProvider?: string;
+  defaultModel?: string;
 }
 
 const inputContainerClassName = css`
@@ -185,7 +190,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     const handleOnBlur = useCallback(() => setIsOpen(false), []);
 
     const onChange = useCallback(
-      (connectorId: string, apiProvider?: OpenAiProviderType) => {
+      (connectorId: string, apiProvider?: OpenAiProviderType, model?: string) => {
         setIsOpen(false);
 
         if (connectorId === ADD_NEW_CONNECTOR) {
@@ -206,6 +211,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
               ...selectedConversation.apiConfig,
               connectorId,
               provider,
+              model: model ?? selectedConversation.apiConfig.model,
             },
           });
         }
@@ -282,8 +288,9 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
               postSaveEventHandler={(savedAction: ActionConnector) => {
                 const provider = (savedAction as ActionConnectorProps<Config, unknown>)?.config
                   .apiProvider as OpenAiProviderType;
-                onChange(savedAction.id, provider);
-                onConnectorSelectionChange(savedAction.id, provider);
+                const model = (savedAction as ActionConnectorProps<Config, unknown>)?.config.model;
+                onChange(savedAction.id, provider, model);
+                onConnectorSelectionChange(savedAction.id, provider, model);
                 refetchConnectors?.();
                 cleanupAndCloseModal();
               }}

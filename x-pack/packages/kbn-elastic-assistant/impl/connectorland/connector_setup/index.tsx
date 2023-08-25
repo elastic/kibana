@@ -40,6 +40,7 @@ const SkipEuiText = styled(EuiText)`
 
 interface Config {
   apiProvider: string;
+  defaultModel?: string;
 }
 
 export interface ConnectorSetupProps {
@@ -239,6 +240,8 @@ export const useConnectorSetup = ({
                     connectorId: savedAction.id,
                     provider: (savedAction as ActionConnectorProps<Config, unknown>)?.config
                       .apiProvider as OpenAiProviderType,
+                    model: (savedAction as ActionConnectorProps<Config, unknown>)?.config
+                      .defaultModel,
                   },
                 });
               });

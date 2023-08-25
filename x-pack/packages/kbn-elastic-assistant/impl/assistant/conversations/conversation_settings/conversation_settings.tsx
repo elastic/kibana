@@ -13,6 +13,7 @@ import { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import { noop } from 'lodash/fp';
+import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { Conversation, Prompt } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
@@ -24,6 +25,10 @@ import { UseAssistantContext } from '../../../assistant_context';
 import { ConversationSelectorSettings } from '../conversation_selector_settings';
 import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
+
+interface Config {
+  defaultModel?: string;
+}
 
 export interface ConversationSettingsProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -148,7 +153,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     );
 
     const handleOnConnectorSelectionChange = useCallback(
-      (connectorId: string, provider: OpenAiProviderType) => {
+      (connectorId: string, provider?: OpenAiProviderType, model?: string) => {
         if (selectedConversation != null) {
           setUpdatedConversationSettings((prev) => ({
             ...prev,
@@ -158,6 +163,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
                 ...selectedConversation.apiConfig,
                 connectorId,
                 provider,
+                model: model ?? selectedConversation.apiConfig.model,
               },
             },
           }));
@@ -166,10 +172,12 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
       [selectedConversation, setUpdatedConversationSettings]
     );
 
-    const selectedModel = useMemo(
-      () => selectedConversation?.apiConfig.model,
-      [selectedConversation?.apiConfig.model]
-    );
+    const selectedModel = useMemo(() => {
+      const connectorModel: string | undefined = (
+        selectedConnector as ActionConnectorProps<Config, unknown>
+      )?.config?.defaultModel;
+      return selectedConversation?.apiConfig.model ?? connectorModel;
+    }, [selectedConnector, selectedConversation?.apiConfig.model]);
 
     const handleOnModelSelectionChange = useCallback(
       (model?: string) => {

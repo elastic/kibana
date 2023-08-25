@@ -30,13 +30,18 @@ interface Props {
   actionTypeRegistry: ActionTypeRegistryContract;
   http: HttpSetup;
   isDisabled?: boolean;
-  onConnectorSelectionChange: (connectorId: string, provider: OpenAiProviderType) => void;
+  onConnectorSelectionChange: (
+    connectorId: string,
+    provider?: OpenAiProviderType,
+    model?: string
+  ) => void;
   selectedConnectorId?: string;
   onConnectorModalVisibilityChange?: (isVisible: boolean) => void;
 }
 
 interface Config {
-  apiProvider: string;
+  apiProvider?: string;
+  defaultModel?: string;
 }
 
 export const ConnectorSelector: React.FC<Props> = React.memo(
@@ -143,7 +148,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
 
         const apiProvider = (
           connectors?.find((c) => c.id === connectorId) as ActionConnectorProps<Config, unknown>
-        )?.config.apiProvider as OpenAiProviderType;
+        )?.config?.apiProvider as OpenAiProviderType;
         onConnectorSelectionChange(connectorId, apiProvider);
       },
       [connectors, onConnectorSelectionChange, onConnectorModalVisibilityChange]
@@ -166,10 +171,11 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
             actionType={actionType}
             onClose={cleanupAndCloseModal}
             postSaveEventHandler={(savedAction: ActionConnector) => {
+              const config = (savedAction as ActionConnectorProps<Config, unknown>)?.config;
               onConnectorSelectionChange(
                 savedAction.id,
-                (savedAction as ActionConnectorProps<Config, unknown>)?.config
-                  .apiProvider as OpenAiProviderType
+                config.apiProvider as OpenAiProviderType,
+                config.defaultModel
               );
               refetchConnectors?.();
               cleanupAndCloseModal();
