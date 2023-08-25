@@ -23,6 +23,6 @@
     "@kbn/cases-plugin",
     "@kbn/security-solution-navigation",
     "@kbn/licensing-plugin",
-    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/security-solution-upselling",
   ]
 }

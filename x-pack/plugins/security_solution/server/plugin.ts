@@ -97,6 +97,7 @@ import {
 } from '../common/endpoint/constants';
 
 import { AppFeaturesService } from './lib/app_features_service/app_features_service';
+import { registerRiskScoringTask } from './lib/risk_engine/tasks/risk_scoring_task';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -160,6 +161,15 @@ export class Plugin implements ISecuritySolutionPlugin {
     appFeaturesService.init(plugins.features);
 
     this.ruleMonitoringService.setup(core, plugins);
+
+    if (experimentalFeatures.riskScoringPersistence) {
+      registerRiskScoringTask({
+        getStartServices: core.getStartServices,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+        logger: this.logger,
+        taskManager: plugins.taskManager,
+      });
+    }
 
     const requestContextFactory = new RequestContextFactory({
       config,

@@ -19,7 +19,7 @@ import { RelatedCases } from './related_cases';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
 import { INSIGHTS_CORRELATIONS_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
-import { CORRELATIONS_TITLE } from './translations';
+import { CORRELATIONS_ERROR, CORRELATIONS_TITLE } from './translations';
 import { LeftPanelKey, LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 
@@ -69,6 +69,9 @@ export const CorrelationsOverview: React.FC = () => {
   const { show: showAlertsBySession, entityId } = useShowRelatedAlertsBySession({ getFieldsData });
   const showCases = useShowRelatedCases();
 
+  const canShowAtLeastOneInsight =
+    showAlertsByAncestry || showSameSourceAlerts || showAlertsBySession || showCases;
+
   return (
     <ExpandablePanel
       header={{
@@ -78,18 +81,22 @@ export const CorrelationsOverview: React.FC = () => {
       }}
       data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID}
     >
-      <EuiFlexGroup direction="column" gutterSize="none">
-        {showAlertsByAncestry && documentId && indices && (
-          <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
-        )}
-        {showSameSourceAlerts && originalEventId && (
-          <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
-        )}
-        {showAlertsBySession && entityId && (
-          <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
-        )}
-        {showCases && <RelatedCases eventId={eventId} />}
-      </EuiFlexGroup>
+      {canShowAtLeastOneInsight ? (
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {showAlertsByAncestry && documentId && indices && (
+            <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
+          )}
+          {showSameSourceAlerts && originalEventId && (
+            <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
+          )}
+          {showAlertsBySession && entityId && (
+            <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
+          )}
+          {showCases && <RelatedCases eventId={eventId} />}
+        </EuiFlexGroup>
+      ) : (
+        <div data-test-subj={`${INSIGHTS_CORRELATIONS_TEST_ID}Error`}>{CORRELATIONS_ERROR}</div>
+      )}
     </ExpandablePanel>
   );
 };

@@ -316,7 +316,7 @@ export class GetPreviewData {
   }
 }
 
-function getElastichsearchQueryOrThrow(kuery: string) {
+function getElastichsearchQueryOrThrow(kuery: string | undefined = '') {
   try {
     return toElasticsearchQuery(fromKueryExpression(kuery));
   } catch (err) {
