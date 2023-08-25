@@ -13,11 +13,12 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLoadingSpinner,
+  EuiPanel,
   EuiSpacer,
   EuiSuperDatePicker,
 } from '@elastic/eui';
-import { usePrevalenceHighlightedFields } from '../../shared/hooks/use_prevalence_highlighted_fields';
-import { usePrevalence } from '../hooks/use_prevalence';
+import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
+import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { ERROR_MESSAGE, ERROR_TITLE } from '../../shared/translations';
 import {
   HOST_TITLE,
@@ -41,6 +42,8 @@ import {
   PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID,
+  PREVALENCE_DETAILS_DATE_PICKER_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_TEST_ID,
 } from './test_ids';
 import { useLeftPanelContext } from '../context';
 
@@ -48,21 +51,11 @@ export const PREVALENCE_TAB_ID = 'prevalence-details';
 const DEFAULT_FROM = 'now-30d';
 const DEFAULT_TO = 'now';
 
-export interface PrevalenceDetailsTableRow {
-  field: string;
-  value: string;
-  alertCount: number;
-  docCount: number;
-  hostPrevalence: number;
-  userPrevalence: number;
-}
-
-const columns: Array<EuiBasicTableColumn<PrevalenceDetailsTableRow>> = [
+const columns: Array<EuiBasicTableColumn<PrevalenceData>> = [
   {
     field: 'field',
     name: PREVALENCE_TABLE_FIELD_COLUMN_TITLE,
     'data-test-subj': PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
-    width: '200px',
   },
   {
     field: 'value',
@@ -78,7 +71,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsTableRow>> = [
       </EuiFlexGroup>
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
-    width: '80px',
+    width: '10%',
   },
   {
     field: 'docCount',
@@ -89,7 +82,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsTableRow>> = [
       </EuiFlexGroup>
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
-    width: '80px',
+    width: '10%',
   },
   {
     field: 'hostPrevalence',
@@ -106,7 +99,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsTableRow>> = [
         {'%'}
       </>
     ),
-    width: '80px',
+    width: '10%',
   },
   {
     field: 'userPrevalence',
@@ -123,7 +116,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsTableRow>> = [
         {'%'}
       </>
     ),
-    width: '80px',
+    width: '10%',
   },
 ];
 
@@ -131,7 +124,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsTableRow>> = [
  * Prevalence table displayed in the document details expandable flyout left section under the Insights tab
  */
 export const PrevalenceDetails: React.FC = () => {
-  const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId, investigationFields } =
+  const { browserFields, dataFormattedForFieldBrowser, eventId, investigationFields } =
     useLeftPanelContext();
 
   const [start, setStart] = useState(DEFAULT_FROM);
@@ -142,16 +135,9 @@ export const PrevalenceDetails: React.FC = () => {
     setEnd(e);
   };
 
-  const highlightedFields = usePrevalenceHighlightedFields({
-    eventId,
-    scopeId,
-    browserFields,
+  const { loading, error, data } = usePrevalence({
     dataFormattedForFieldBrowser,
     investigationFields,
-  });
-
-  const { loading, error, data } = usePrevalence({
-    highlightedFields,
     interval: {
       from: start,
       to: end,
@@ -185,15 +171,27 @@ export const PrevalenceDetails: React.FC = () => {
 
   return (
     <>
-      <EuiSuperDatePicker start={start} end={end} onTimeChange={onTimeChange} />
-      <EuiSpacer size="m" />
-      {data.length > 0 ? (
-        <EuiInMemoryTable items={data} columns={columns} />
-      ) : (
-        <div data-test-subj={`${PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID}Error`}>
-          {PREVALENCE_NO_DATA_MESSAGE}
-        </div>
-      )}
+      <EuiPanel>
+        <EuiSuperDatePicker
+          start={start}
+          end={end}
+          onTimeChange={onTimeChange}
+          data-test-subj={PREVALENCE_DETAILS_DATE_PICKER_TEST_ID}
+        />
+        <EuiSpacer size="m" />
+        {data.length > 0 ? (
+          <EuiInMemoryTable
+            items={data}
+            columns={columns}
+            data-test-subj={PREVALENCE_DETAILS_TABLE_TEST_ID}
+            tableLayout="auto"
+          />
+        ) : (
+          <div data-test-subj={`${PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID}Error`}>
+            {PREVALENCE_NO_DATA_MESSAGE}
+          </div>
+        )}
+      </EuiPanel>
     </>
   );
 };

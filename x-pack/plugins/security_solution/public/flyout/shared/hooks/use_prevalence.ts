@@ -5,28 +5,44 @@
  * 2.0.
  */
 
-import { useFetchPrevalence } from '../../shared/hooks/use_fetch_prevalence';
-import type { AggregationValue } from '../../shared/utils/fetch_data';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { isArray } from 'lodash/fp';
+import { useMemo } from 'react';
+import { useHighlightedFields } from './use_highlighted_fields';
+import { convertHighlightedFieldsToPrevalenceFilters } from '../utils/highlighted_fields_helpers';
+import type { AggregationValue } from './use_fetch_prevalence';
 import {
   EVENT_KIND_AGG_KEY,
   FIELD_NAMES_AGG_KEY,
   HOST_NAME_AGG_KEY,
   HOSTS_AGG_KEY,
+  useFetchPrevalence,
   USER_NAME_AGG_KEY,
   USERS_AGG_KEY,
-} from '../../shared/utils/fetch_data';
-import { EventKind } from '../../shared/constants/event_kinds';
-import type { PrevalenceDetailsTableRow } from '../components/prevalence_details';
+} from './use_fetch_prevalence';
+import { EventKind } from '../constants/event_kinds';
 
+export interface PrevalenceData {
+  field: string;
+  value: string;
+  alertCount: number;
+  docCount: number;
+  hostPrevalence: number;
+  userPrevalence: number;
+}
 export interface UsePrevalenceParams {
-  /**
-   * The highlighted field name and values, already formatted for the query
-   * */
-  highlightedFields: { [key: string]: { match: { [key: string]: string } } };
   /**
    * The from and to values for the query
    */
   interval: { from: string; to: string };
+  /**
+   * An array of field objects with category and value
+   */
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  /**
+   * User defined fields to highlight (defined on the rule)
+   */
+  investigationFields?: string[];
 }
 
 export interface UsePrevalenceResult {
@@ -41,7 +57,7 @@ export interface UsePrevalenceResult {
   /**
    * Returns the prevalence data formatted for the EuiInMemoryTable component
    */
-  data: PrevalenceDetailsTableRow[];
+  data: PrevalenceData[];
 }
 
 /**
@@ -49,24 +65,33 @@ export interface UsePrevalenceResult {
  * in the PrevalenceDetails component
  */
 export const usePrevalence = ({
-  highlightedFields,
   interval,
+  dataFormattedForFieldBrowser,
+  investigationFields,
 }: UsePrevalenceParams): UsePrevalenceResult => {
-  const { data, loading, error } = useFetchPrevalence({ highlightedFields, interval });
+  const highlightedFields = useHighlightedFields({
+    dataFormattedForFieldBrowser,
+    investigationFields,
+  });
+  const highlightedFieldsFilters = useMemo(
+    () => convertHighlightedFieldsToPrevalenceFilters(highlightedFields),
+    [highlightedFields]
+  );
+  const { data, loading, error } = useFetchPrevalence({ highlightedFieldsFilters, interval });
 
-  const items: PrevalenceDetailsTableRow[] = [];
+  const items: PrevalenceData[] = [];
 
   if (data) {
     // total number of unique hosts in the environment
-    const uniqueHostsInEnvironment = data.aggregations[HOSTS_AGG_KEY].buckets.length;
+    const uniqueHostsInEnvironment = data.aggregations[HOSTS_AGG_KEY].value;
 
     // total number of unique users in the environment
-    const uniqueUsersInEnvironment = data.aggregations[USERS_AGG_KEY].buckets.length;
+    const uniqueUsersInEnvironment = data.aggregations[USERS_AGG_KEY].value;
 
     const fieldNames = Object.keys(data.aggregations[FIELD_NAMES_AGG_KEY].buckets);
 
     fieldNames.forEach((fieldName: string) => {
-      const fieldValue = highlightedFields[fieldName].match[fieldName];
+      const fieldValue = highlightedFields[fieldName].values;
 
       // retrieves the number of signals for the current field/value pair
       const alertCount =
@@ -88,11 +113,11 @@ export const usePrevalence = ({
 
       // number of unique hosts in which the current field/value pair is present
       const uniqueHostsForCurrentFieldValuePair =
-        data.aggregations[FIELD_NAMES_AGG_KEY].buckets[fieldName][HOST_NAME_AGG_KEY].buckets.length;
+        data.aggregations[FIELD_NAMES_AGG_KEY].buckets[fieldName][HOST_NAME_AGG_KEY].value;
 
       // number of unique users in which the current field/value pair is present
       const uniqueUsersForCurrentFieldValuePair =
-        data.aggregations[FIELD_NAMES_AGG_KEY].buckets[fieldName][USER_NAME_AGG_KEY].buckets.length;
+        data.aggregations[FIELD_NAMES_AGG_KEY].buckets[fieldName][USER_NAME_AGG_KEY].value;
 
       // calculate host prevalence
       const hostPrevalence = uniqueHostsInEnvironment
@@ -106,7 +131,7 @@ export const usePrevalence = ({
 
       items.push({
         field: fieldName,
-        value: fieldValue,
+        value: isArray(fieldValue) ? fieldValue[0] : fieldValue,
         alertCount,
         docCount,
         hostPrevalence,

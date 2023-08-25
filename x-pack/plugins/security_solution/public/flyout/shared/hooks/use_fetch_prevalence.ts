@@ -9,25 +9,51 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { IEsSearchRequest } from '@kbn/data-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { RawAggregatedDataResponse } from '../utils/fetch_data';
-import {
-  FIELD_NAMES_AGG_KEY,
-  createFetchData,
-  HOSTS_AGG_KEY,
-  USERS_AGG_KEY,
-  USER_NAME_AGG_KEY,
-  HOST_NAME_AGG_KEY,
-  EVENT_KIND_AGG_KEY,
-} from '../utils/fetch_data';
+import { createFetchData } from '../utils/fetch_data';
 import { useKibana } from '../../../common/lib/kibana';
 
 const QUERY_KEY = 'useFetchFieldValuePairWithAggregation';
+
+export const FIELD_NAMES_AGG_KEY = 'fieldNames';
+export const EVENT_KIND_AGG_KEY = 'eventKind';
+export const HOST_NAME_AGG_KEY = 'hostName';
+export const USER_NAME_AGG_KEY = 'userName';
+export const HOSTS_AGG_KEY = 'hosts';
+export const USERS_AGG_KEY = 'users';
+
+export interface AggregationValue {
+  doc_count: number;
+  key: string;
+}
+
+/**
+ * Interface for a specific aggregation schema with nested aggregations, used in the prevalence components
+ */
+export interface RawAggregatedDataResponse {
+  aggregations: {
+    [FIELD_NAMES_AGG_KEY]: {
+      buckets: {
+        [key: string]: {
+          eventKind: { buckets: AggregationValue[] };
+          hostName: { value: number };
+          userName: { value: number };
+        };
+      };
+    };
+    [HOSTS_AGG_KEY]: {
+      value: number;
+    };
+    [USERS_AGG_KEY]: {
+      value: number;
+    };
+  };
+}
 
 export interface UseFetchPrevalenceParams {
   /**
    * The highlighted field name and values, already formatted for the query
    * */
-  highlightedFields: Record<string, QueryDslQueryContainer>;
+  highlightedFieldsFilters: Record<string, QueryDslQueryContainer>;
   /**
    * The from and to values for the query
    */
@@ -64,7 +90,7 @@ export interface UseFetchPrevalenceResult {
  * All of these values are then used to calculate the alert count, document count, host and user prevalence values.
  */
 export const useFetchPrevalence = ({
-  highlightedFields,
+  highlightedFieldsFilters,
   interval: { from, to },
 }: UseFetchPrevalenceParams): UseFetchPrevalenceResult => {
   const {
@@ -73,10 +99,11 @@ export const useFetchPrevalence = ({
     },
   } = useKibana();
 
-  const searchRequest = buildSearchRequest(highlightedFields, from, to);
+  const searchRequest = buildSearchRequest(highlightedFieldsFilters, from, to);
 
-  const { data, isLoading, isError } = useQuery([QUERY_KEY, highlightedFields, from, to], () =>
-    createFetchData<RawAggregatedDataResponse>(searchService, searchRequest)
+  const { data, isLoading, isError } = useQuery(
+    [QUERY_KEY, highlightedFieldsFilters, from, to],
+    () => createFetchData<RawAggregatedDataResponse>(searchService, searchRequest)
   );
 
   return {
@@ -91,7 +118,7 @@ export const useFetchPrevalence = ({
  * The request contains aggregation by aggregationField.
  */
 const buildSearchRequest = (
-  highlightedFields: Record<string, QueryDslQueryContainer>,
+  highlightedFieldsFilters: Record<string, QueryDslQueryContainer>,
   from: string,
   to: string
 ): IEsSearchRequest => {
@@ -119,12 +146,12 @@ const buildSearchRequest = (
     ]
   );
 
-  return buildAggregationSearchRequest(query, highlightedFields);
+  return buildAggregationSearchRequest(query, highlightedFieldsFilters);
 };
 
 const buildAggregationSearchRequest = (
   query: QueryDslQueryContainer,
-  aggregationFilters: Record<string, QueryDslQueryContainer>
+  highlightedFieldsFilters: Record<string, QueryDslQueryContainer>
 ): IEsSearchRequest => ({
   params: {
     body: {
@@ -133,24 +160,22 @@ const buildAggregationSearchRequest = (
         // with this aggregation, we can in a single call retrieve all the values for each field/value pairs
         [FIELD_NAMES_AGG_KEY]: {
           filters: {
-            filters: aggregationFilters,
+            filters: highlightedFieldsFilters,
           },
           aggs: {
             // this sub aggregation allows us to retrieve all the hosts which have the field/value pair
             [HOST_NAME_AGG_KEY]: {
-              terms: {
+              cardinality: {
                 field: 'host.name',
-                size: 10000, // there could be a lot of hosts which have the field/value pair
               },
             },
             // this sub aggregation allows us to retrieve all the users which have the field/value pair
             [USER_NAME_AGG_KEY]: {
-              terms: {
+              cardinality: {
                 field: 'user.name',
-                size: 10000, // there could be a lot of users which have the field/value pair
               },
             },
-            // we use this sub aggregation to differenciate between alerts (event.kind === 'signal') and documents (event.kind !== 'signal')
+            // we use this sub aggregation to differentiate between alerts (event.kind === 'signal') and documents (event.kind !== 'signal')
             [EVENT_KIND_AGG_KEY]: {
               terms: {
                 field: 'event.kind',
@@ -161,16 +186,14 @@ const buildAggregationSearchRequest = (
         },
         // retrieve all the unique hosts in the environment
         [HOSTS_AGG_KEY]: {
-          terms: {
+          cardinality: {
             field: 'host.name',
-            size: 10000, // there could be a lot of hosts in the environment
           },
         },
         // retrieve all the unique users in the environment
         [USERS_AGG_KEY]: {
-          terms: {
+          cardinality: {
             field: 'user.name',
-            size: 10000, // there could be a lot of hosts in the environment
           },
         },
       },

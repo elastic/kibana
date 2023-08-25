@@ -17,6 +17,8 @@ export const SESSION_VIEW_ERROR_TEST_ID = `${PREFIX}SessionViewError` as const;
 
 /* Prevalence */
 
+export const PREVALENCE_DETAILS_DATE_PICKER_TEST_ID =
+  `${PREFIX}PrevalenceDetailsDatePicker` as const;
 export const PREVALENCE_DETAILS_TABLE_TEST_ID = `${PREFIX}PrevalenceDetailsTable` as const;
 export const PREVALENCE_DETAILS_LOADING_TEST_ID = `${PREFIX}PrevalenceDetailsLoading` as const;
 export const PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID =

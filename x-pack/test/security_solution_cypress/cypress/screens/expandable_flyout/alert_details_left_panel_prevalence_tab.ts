@@ -13,6 +13,7 @@ import {
   PREVALENCE_DETAILS_TABLE_TEST_ID,
   PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
+  PREVALENCE_DETAILS_DATE_PICKER_TEST_ID,
 } from '@kbn/security-solution-plugin/public/flyout/left/components/test_ids';
 import { INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/left/tabs/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
@@ -20,6 +21,8 @@ import { getDataTestSubjectSelector } from '../../helpers/common';
 export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON = getDataTestSubjectSelector(
   INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID
 );
+export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_DATE_PICKER =
+  getDataTestSubjectSelector(PREVALENCE_DETAILS_DATE_PICKER_TEST_ID);
 export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE = getDataTestSubjectSelector(
   PREVALENCE_DETAILS_TABLE_TEST_ID
 );
