@@ -105,8 +105,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(url).to.contain(`/enrich_policies`);
 
         // Verify content
-        const componentTemplateList = await testSubjects.exists('enrichPoliciesList');
-        expect(componentTemplateList).to.be(true);
+        const enrichPoliciesList = await testSubjects.exists('sectionEmpty');
+        expect(enrichPoliciesList).to.be(true);
       });
     });
   });

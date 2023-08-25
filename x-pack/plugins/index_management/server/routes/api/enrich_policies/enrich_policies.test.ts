@@ -139,7 +139,7 @@ describe('Enrich policies API', () => {
     it('correctly creates a policy', async () => {
       const mockRequest: RequestMock = {
         method: 'post',
-        path: addBasePath('/enrich_policies'),
+        path: addInternalBasePath('/enrich_policies'),
         body: {
           name: 'my-policy',
           type: 'match',
@@ -161,7 +161,7 @@ describe('Enrich policies API', () => {
     it('should return an error if it fails', async () => {
       const mockRequest: RequestMock = {
         method: 'post',
-        path: addBasePath('/enrich_policies'),
+        path: addInternalBasePath('/enrich_policies'),
         body: {
           name: 'my-policy',
           type: 'match',
