@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiCode, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiLink, EuiSpacer } from '@elastic/eui';
 import {
   useForm,
   Form,
@@ -22,6 +22,7 @@ import {
 } from '../../../../shared_imports';
 
 import { IndicesSelector } from './fields/indices_selector';
+import { documentationService } from '../../../services/documentation';
 import { useCreatePolicyContext, DraftPolicy } from '../create_policy_context';
 
 interface Props {
@@ -90,9 +91,20 @@ export const configurationFormSchema: FormSchema = {
     helpText: (
       <FormattedMessage
         id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.queryHelpText"
-        defaultMessage="Defaults to: {code}"
+        defaultMessage="Defaults to: {code} query."
         values={{
-          code: <EuiCode>{JSON.stringify({ match_all: {} })}</EuiCode>,
+          code: (
+            <EuiLink
+              external
+              target="_blank"
+              href={documentationService.getMatchAllQueryLink()}
+            >
+              <FormattedMessage
+                id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.matchAllLink"
+                defaultMessage="match_all"
+              />
+            </EuiLink>
+          )
         }}
       />
     ),
