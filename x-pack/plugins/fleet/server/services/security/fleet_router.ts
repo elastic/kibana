@@ -16,8 +16,6 @@ import type {
 } from '@kbn/core/server';
 import type { VersionedRouteConfig } from '@kbn/core-http-server';
 
-import { routeValidationObject } from '@kbn/server-route-repository';
-
 import { PUBLIC_API_ACCESS } from '../../../common/constants';
 
 import type { FleetRequestHandlerContext } from '../..';
@@ -137,17 +135,15 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
         );
 
         function addVersion<P, Q, B>(
-          { fleetAuthz: hasRequiredAuthz, version }: FleetAddVersionOpts<P, Q, B>,
+          { fleetAuthz: hasRequiredAuthz, ...opts }: FleetAddVersionOpts<P, Q, B>,
           handler: FleetHandler<P, Q, B, TContext>
         ) {
-          originalAddVersion(
-            { version, validate: { request: routeValidationObject } },
-            (context, request, response) =>
-              fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+          originalAddVersion({ ...opts }, (context, request, response) =>
+            fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
           );
           return { addVersion };
         }
-        return { addVersion };
+        return { addVersion: addVersion.bind(router.versioned) };
       },
       delete: ({ fleetAuthz, ...options }) => {
         const { addVersion: originalAddVersion } = router.versioned.delete(
@@ -155,13 +151,11 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
         );
 
         function addVersion<P, Q, B>(
-          { fleetAuthz: hasRequiredAuthz, version }: FleetAddVersionOpts<P, Q, B>,
+          { fleetAuthz: hasRequiredAuthz, ...opts }: FleetAddVersionOpts<P, Q, B>,
           handler: FleetHandler<P, Q, B, TContext>
         ) {
-          originalAddVersion(
-            { version, validate: { request: routeValidationObject } },
-            (context, request, response) =>
-              fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+          originalAddVersion({ ...opts }, (context, request, response) =>
+            fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
           );
           return { addVersion };
         }
@@ -173,13 +167,11 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
         );
 
         function addVersion<P, Q, B>(
-          { fleetAuthz: hasRequiredAuthz, version }: FleetAddVersionOpts<P, Q, B>,
+          { fleetAuthz: hasRequiredAuthz, ...opts }: FleetAddVersionOpts<P, Q, B>,
           handler: FleetHandler<P, Q, B, TContext>
         ) {
-          originalAddVersion(
-            { version, validate: { request: routeValidationObject } },
-            (context, request, response) =>
-              fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+          originalAddVersion({ ...opts }, (context, request, response) =>
+            fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
           );
           return { addVersion };
         }
@@ -191,13 +183,11 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
         );
 
         function addVersion<P, Q, B>(
-          { fleetAuthz: hasRequiredAuthz, version }: FleetAddVersionOpts<P, Q, B>,
+          { fleetAuthz: hasRequiredAuthz, ...opts }: FleetAddVersionOpts<P, Q, B>,
           handler: FleetHandler<P, Q, B, TContext>
         ) {
-          originalAddVersion(
-            { version, validate: { request: routeValidationObject } },
-            (context, request, response) =>
-              fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+          originalAddVersion({ ...opts }, (context, request, response) =>
+            fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
           );
           return { addVersion };
         }
@@ -209,13 +199,11 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
         );
 
         function addVersion<P, Q, B>(
-          { fleetAuthz: hasRequiredAuthz, version }: FleetAddVersionOpts<P, Q, B>,
+          { fleetAuthz: hasRequiredAuthz, ...opts }: FleetAddVersionOpts<P, Q, B>,
           handler: FleetHandler<P, Q, B, TContext>
         ) {
-          originalAddVersion(
-            { version, validate: { request: routeValidationObject } },
-            (context, request, response) =>
-              fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+          originalAddVersion({ ...opts }, (context, request, response) =>
+            fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
           );
           return { addVersion };
         }
