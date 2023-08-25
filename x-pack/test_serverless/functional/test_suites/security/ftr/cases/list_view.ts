@@ -46,7 +46,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       describe('delete', () => {
         createNCasesBeforeDeleteAllAfter(8, getPageObject, getService);
 
-
         it('bulk delete cases from the list', async () => {
           await cases.casesTable.selectAndDeleteAllCases();
           await cases.casesTable.waitForTableToFinishLoading();
