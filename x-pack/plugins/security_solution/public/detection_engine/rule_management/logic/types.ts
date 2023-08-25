@@ -290,7 +290,7 @@ export interface ImportDataProps {
   overwrite?: boolean;
   overwriteExceptions?: boolean;
   overwriteActionConnectors?: boolean;
-  signal: AbortSignal;
+  signal?: AbortSignal;
 }
 
 export interface ImportRulesResponseError {
