@@ -28,6 +28,7 @@ import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { getScopeFromPath, showSourcererByPath } from '../../../common/containers/sourcerer';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
 import { AssistantHeaderLink } from './assistant_header_link';
+import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add integrations',
@@ -52,6 +53,8 @@ export const GlobalHeader = React.memo(
     const showSourcerer = showSourcererByPath(pathname);
 
     const { href, onClick } = useAddIntegrationsUrl();
+
+    const { hasAssistantPrivilege } = useAssistantAvailability();
 
     useEffect(() => {
       setHeaderActionMenu((element) => {
@@ -88,7 +91,7 @@ export const GlobalHeader = React.memo(
               {showSourcerer && !showTimeline && (
                 <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />
               )}
-              <AssistantHeaderLink />
+              {hasAssistantPrivilege && <AssistantHeaderLink />}
             </EuiHeaderLinks>
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
