@@ -38,6 +38,8 @@ const navigationNodeToEuiItem = (
     [`nav-item-isActive`]: isSelected,
   });
 
+  // @ts-expect-error getRenderItem is not used.
+  // Existed on EuiSideNavItemProps, doesn't exist on EuiCollapsibleNavSubItemProps.
   const getRenderItem = (): RenderItem | undefined => {
     if (!isExternal || item.renderItem) {
       return item.renderItem;
