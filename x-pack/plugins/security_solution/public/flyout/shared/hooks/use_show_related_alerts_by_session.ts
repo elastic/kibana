@@ -5,27 +5,37 @@
  * 2.0.
  */
 
-import { find } from 'lodash/fp';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { hasData } from '../../../common/components/event_details/insights/helpers';
+import { ENTRY_LEADER_ENTITY_ID } from '../constants/field_names';
+import type { GetFieldsData } from '../../../common/hooks/use_get_fields_data';
+import { getField } from '../utils';
 
 export interface UseShowRelatedAlertsBySessionParams {
   /**
-   * An array of field objects with category and value
+   * Retrieves searchHit values for the provided field
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  getFieldsData: GetFieldsData;
+}
+
+export interface UseShowRelatedAlertsBySessionResult {
+  /**
+   * Returns true if the document has process.entry_leader.entity_id field with values
+   */
+  show: boolean;
+  /**
+   * Value of the process.entry_leader.entity_id field
+   */
+  entityId?: string;
 }
 
 /**
  * Returns true if document has process.entry_leader.entity_id field with values
  */
 export const useShowRelatedAlertsBySession = ({
-  dataFormattedForFieldBrowser,
-}: UseShowRelatedAlertsBySessionParams): boolean => {
-  const processSessionField = find(
-    { category: 'process', field: 'process.entry_leader.entity_id' },
-    dataFormattedForFieldBrowser
-  );
-
-  return hasData(processSessionField);
+  getFieldsData,
+}: UseShowRelatedAlertsBySessionParams): UseShowRelatedAlertsBySessionResult => {
+  const entityId = getField(getFieldsData(ENTRY_LEADER_ENTITY_ID));
+  return {
+    show: entityId != null,
+    ...(entityId && { entityId }),
+  };
 };

@@ -10,6 +10,7 @@ import { EuiFlexGrid, EuiFlexItem, EuiTitle, EuiSpacer, EuiFlexGroup } from '@el
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import {
   assetDetailsDashboards,
   XY_MISSING_VALUE_DOTTED_LINE_CONFIG,
@@ -18,8 +19,10 @@ import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { LensChart, HostMetricsExplanationContent } from '../../../../lens';
 import { METRIC_CHART_HEIGHT } from '../../../constants';
 import { Popover } from '../../common/popover';
+import { useDateRangeProviderContext } from '../../../hooks/use_date_range';
 
 type DataViewOrigin = 'logs' | 'metrics';
+type BrushEndArgs = Parameters<NonNullable<LensEmbeddableInput['onBrushEnd']>>[0];
 
 interface Props {
   nodeName: string;
@@ -30,6 +33,7 @@ interface Props {
 
 export const MetricsGrid = React.memo(
   ({ nodeName, metricsDataView, logsDataView, timeRange }: Props) => {
+    const { setDateRange } = useDateRangeProviderContext();
     const getDataView = useCallback(
       (dataViewOrigin: DataViewOrigin) => {
         return dataViewOrigin === 'metrics' ? metricsDataView : logsDataView;
@@ -48,6 +52,18 @@ export const MetricsGrid = React.memo(
         ];
       },
       [getDataView, nodeName]
+    );
+
+    const handleBrushEnd = useCallback(
+      ({ range, preventDefault }: BrushEndArgs) => {
+        setDateRange({
+          from: new Date(range[0]).toISOString(),
+          to: new Date(range[1]).toISOString(),
+        });
+
+        preventDefault();
+      },
+      [setDateRange]
     );
 
     return (
@@ -77,7 +93,7 @@ export const MetricsGrid = React.memo(
                     title={title}
                     overrides={overrides}
                     visualizationType="lnsXY"
-                    disableTriggers
+                    onBrushEnd={handleBrushEnd}
                   />
                 </EuiFlexItem>
               )
@@ -94,12 +110,12 @@ const MetricsSectionTitle = () => {
     <EuiFlexGroup gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiTitle size="xxs">
-          <h5>
+          <span>
             <FormattedMessage
               id="xpack.infra.assetDetails.overview.metricsSectionTitle"
               defaultMessage="Metrics"
             />
-          </h5>
+          </span>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../../tags';
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
 import { getEndpointRule } from '../../../../objects/rule';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -42,7 +41,7 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 // See https://github.com/elastic/kibana/issues/163967
 describe.skip(
   'Auto populate exception with Alert data',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     const ITEM_NAME = 'Sample Exception Item';
     const ITEM_NAME_EDIT = 'Sample Exception Item Edit';

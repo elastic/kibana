@@ -31,7 +31,7 @@ export const CrawlCustomSettingsFlyoutMultipleCrawlTabs: React.FC = () => {
   );
 
   const crawlerTabData = crawlerConfigurations.map((_, index) => ({
-    key: `crawl_${index}`,
+    key: `crawler_${index}`,
     index,
     label: `${CRAWLER_TAB_PREFIX} ${index + 1}`,
   }));

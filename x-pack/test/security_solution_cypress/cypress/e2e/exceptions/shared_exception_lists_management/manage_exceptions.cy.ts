@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { getNewRule } from '../../../objects/rule';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
@@ -39,7 +38,7 @@ import {
   waitForExceptionsTableToBeLoaded,
 } from '../../../tasks/exceptions_table';
 
-describe('Add, edit and delete exception', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Add, edit and delete exception', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverResetKibana');
     cy.task('esArchiverLoad', 'exceptions');
