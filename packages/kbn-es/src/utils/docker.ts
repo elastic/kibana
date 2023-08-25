@@ -418,10 +418,7 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 
   log.indent(-4);
 
-  const baseCmd = [
-    '--volume',
-    `${basePath}:/objectstore:z`
-  ];
+  const baseCmd = ['--volume', `${basePath}:/objectstore:z`];
 
   if (ssl) {
     const essResources = ESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
@@ -432,14 +429,10 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
       return acc;
     }, []);
 
-    return baseCmd.concat(
-      getESp12Volume(),
-      essResources,
-      [
-        '--volume',
-        `${ESS_SECRETS_PATH}:${ESS_CONFIG_PATH}secrets/secrets.json:z`,
-      ]
-    );
+    return baseCmd.concat(getESp12Volume(), essResources, [
+      '--volume',
+      `${ESS_SECRETS_PATH}:${ESS_CONFIG_PATH}secrets/secrets.json:z`,
+    ]);
   }
 
   return baseCmd;
