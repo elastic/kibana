@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { find } from 'lodash';
+import { find, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
@@ -25,6 +25,10 @@ import {
   ALERT_HISTORY_PREFIX,
   buildAlertHistoryDocument,
 } from '@kbn/actions-plugin/common';
+import {
+  BulkOperationType,
+  BulkResponseItem,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export type ESIndexConnectorType = ConnectorType<
   ConnectorTypeConfigType,
@@ -123,6 +127,31 @@ async function executor(
 
   try {
     const result = await services.scopedClusterClient.bulk(bulkParams);
+
+    if (result.errors) {
+      const errReason: string[] = [];
+      const errCausedBy: string[] = [];
+      // extract error reason and caused by
+      (result.items ?? []).forEach((item: Partial<Record<BulkOperationType, BulkResponseItem>>) => {
+        for (const [_, responseItem] of Object.entries(item)) {
+          const reason = get(responseItem, 'error.reason');
+          const causedBy = get(responseItem, 'error.caused_by.reason');
+          if (reason) {
+            errReason.push(reason);
+          }
+          if (causedBy) {
+            errCausedBy.push(causedBy);
+          }
+        }
+      });
+
+      const errMessage =
+        errReason.length > 0
+          ? `${errReason.join(';')}${errCausedBy.length > 0 ? ` (${errCausedBy.join(';')})` : ''}`
+          : `Indexing error but no reason returned.`;
+
+      return wrapErr(errMessage, actionId, logger);
+    }
 
     const err = find(result.items, 'index.error.reason');
     if (err) {
