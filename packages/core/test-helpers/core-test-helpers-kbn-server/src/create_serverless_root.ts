@@ -37,7 +37,7 @@ export function createTestServerlessInstances({
   adjustTimeout: (timeout: number) => void;
 }): TestServerlessUtils {
   const esUtils = createServerlessES();
-  const kbUtils = createServerlessKibana();
+  const kbUtils = createServerlessKibana({});
   adjustTimeout?.(120_000);
   return {
     startES: async () => {
@@ -99,9 +99,31 @@ const defaults = {
   },
   migrations: {
     algorithm: 'zdt',
+    zdt: {
+      runOnRoles: ['ui'],
+    },
   },
   elasticsearch: {
     serviceAccountToken: 'BEEF',
+  },
+  // Log ES deprecations to surface these in CI
+  logging: {
+    loggers: [
+      {
+        name: 'root',
+        level: 'error',
+        appenders: ['console'],
+      },
+      {
+        name: 'elasticsearch.deprecation',
+        level: 'all',
+        appenders: ['deprecation'],
+      },
+    ],
+    appenders: {
+      deprecation: { type: 'console', layout: { type: 'json' } },
+      console: { type: 'console', layout: { type: 'pattern' } },
+    },
   },
 };
 function createServerlessKibana(settings = {}, cliArgs: Partial<CliArgs> = {}) {

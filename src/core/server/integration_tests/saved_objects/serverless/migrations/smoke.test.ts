@@ -20,7 +20,7 @@ describe.skip('smoke', () => {
   let serverlessES: TestServerlessESUtils;
   let serverlessKibana: TestServerlessKibanaUtils;
   let root: TestServerlessKibanaUtils['root'];
-  beforeEach(async () => {
+  beforeAll(async () => {
     const { startES, startKibana } = createTestServerlessInstances({
       adjustTimeout: jest.setTimeout,
     });
@@ -28,7 +28,11 @@ describe.skip('smoke', () => {
     serverlessKibana = await startKibana();
     root = serverlessKibana.root;
   });
-  afterEach(async () => {
+  afterAll(async () => {
+    await serverlessES.es.getClient().indices.delete({
+      index: ['.kibana', '.kibana_task_manager', '.kibana_1', '.kibana_2'],
+      ignore_unavailable: true,
+    });
     await serverlessES?.stop();
     await serverlessKibana?.stop();
   });

@@ -33,7 +33,7 @@ describe('ZDT migration actions', () => {
   afterAll(async () => {
     await serverlessES?.stop();
   });
-  beforeEach(async () => {
+  afterEach(async () => {
     await client.indices.delete({
       index: TEST_INDICES,
       ignore_unavailable: true,
