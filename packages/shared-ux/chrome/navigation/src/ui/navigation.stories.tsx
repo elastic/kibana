@@ -289,24 +289,22 @@ export const WithUIComponents = (args: NavigationServices) => {
             icon="logoObservability"
             defaultIsCollapsed={false}
           >
-            <Navigation.Group id="root">
-              <Navigation.Item<any> id="item1" link="item1" />
-              <Navigation.Item id="item2" title="Alerts">
-                {(navNode) => {
-                  return (
-                    <div className="euiSideNavItemButton">
-                      <EuiText size="s">{`Render prop: ${navNode.id} - ${navNode.title}`}</EuiText>
-                    </div>
-                  );
-                }}
-              </Navigation.Item>
-              <Navigation.Item id="item3" title="Title in ReactNode">
-                <div className="euiSideNavItemButton">
-                  <EuiLink>Title in ReactNode</EuiLink>
-                </div>
-              </Navigation.Item>
-              <Navigation.Item id="item4" title="External link" href="https://elastic.co" />
-            </Navigation.Group>
+            <Navigation.Item<any> id="item1" link="item1" />
+            <Navigation.Item id="item2" title="Alerts">
+              {(navNode) => {
+                return (
+                  <div className="euiSideNavItemButton">
+                    <EuiText size="s">{`Render prop: ${navNode.id} - ${navNode.title}`}</EuiText>
+                  </div>
+                );
+              }}
+            </Navigation.Item>
+            <Navigation.Item id="item3" title="Title in ReactNode">
+              <div className="euiSideNavItemButton">
+                <EuiLink>Title in ReactNode</EuiLink>
+              </div>
+            </Navigation.Item>
+            <Navigation.Item id="item4" title="External link" href="https://elastic.co" />
 
             <Navigation.Group id="group:settings" title="Settings">
               <Navigation.Item id="logs" title="Logs" />
@@ -326,12 +324,10 @@ export const WithUIComponents = (args: NavigationServices) => {
               breadcrumbStatus="hidden"
               icon="gear"
             >
-              <Navigation.Group id="settings">
-                <Navigation.Item link="management" title="Management" />
-                <Navigation.Item id="cloudLinkUserAndRoles" cloudLink="userAndRoles" />
-                <Navigation.Item id="cloudLinkPerformance" cloudLink="performance" />
-                <Navigation.Item id="cloudLinkBilling" cloudLink="billingAndSub" />
-              </Navigation.Group>
+              <Navigation.Item link="management" title="Management" />
+              <Navigation.Item id="cloudLinkUserAndRoles" cloudLink="userAndRoles" />
+              <Navigation.Item id="cloudLinkPerformance" cloudLink="performance" />
+              <Navigation.Item id="cloudLinkBilling" cloudLink="billingAndSub" />
             </Navigation.Group>
           </Navigation.Footer>
         </Navigation>
