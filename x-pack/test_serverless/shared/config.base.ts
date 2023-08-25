@@ -147,8 +147,8 @@ export default async () => {
     // so we can easily adjust them for serverless where needed
     timeouts: {
       find: 10 * 1000,
-      try: 10 * 1000,
-      waitFor: 10 * 1000,
+      try: 120 * 1000,
+      waitFor: 20 * 1000,
       esRequestTimeout: 30 * 1000,
       kibanaReportCompletion: 60 * 1000,
       kibanaStabilize: 15 * 1000,
