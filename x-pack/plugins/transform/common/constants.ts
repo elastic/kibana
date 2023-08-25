@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { TransformHealthTests } from './types/alerting';
 
-export const REACT_QUERY_STALE_TIME = 10000;
 export const DEFAULT_REFRESH_INTERVAL_MS = 30000;
 export const MINIMUM_REFRESH_INTERVAL_MS = 1000;
 export const PROGRESS_REFRESH_INTERVAL_MS = 2000;

@@ -15,8 +15,6 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import { REACT_QUERY_STALE_TIME } from '../../common/constants';
-
 import { SECTION_SLUG } from './common/constants';
 import { AppDependencies } from './app_dependencies';
 import { CloneTransformSection } from './sections/clone_transform';
@@ -45,7 +43,8 @@ export const renderApp = (element: HTMLElement, appDependencies: AppDependencies
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: REACT_QUERY_STALE_TIME,
+        staleTime: Infinity,
+        retry: false,
       },
     },
   });
