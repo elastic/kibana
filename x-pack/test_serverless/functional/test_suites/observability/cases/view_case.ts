@@ -10,13 +10,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
+import { OBSERVABILITY_OWNER } from '@kbn/cases-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createOneCaseBeforeDeleteAllAfter,
   createOneCaseBeforeEachDeleteAllAfterEach,
   createAndNavigateToCase,
 } from '../../../../shared/lib/cases/helpers';
-import { OBSERVABILITY_OWNER } from '@kbn/cases-plugin/common';
 
 const owner = OBSERVABILITY_OWNER;
 
