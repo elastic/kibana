@@ -19,7 +19,6 @@ import {
   EuiWindowEvent,
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { i18n as i18nTranslate } from '@kbn/i18n';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { noop, omit } from 'lodash/fp';
@@ -374,7 +373,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     }
   }, [maybeRule]);
 
-  useLegacyUrlRedirect({rule, spacesApi});
+  useLegacyUrlRedirect({ rule, spacesApi });
 
   const ruleExecutionSettings = useRuleExecutionSettings();
 
