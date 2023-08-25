@@ -42,7 +42,7 @@ describe('8.10.0 Endpoint Package Policy migration', () => {
             config: {
               policy: {
                 value: {
-                  manifest_version: manifestVersion,
+                  global_manifest_version: manifestVersion,
                 },
               },
             },

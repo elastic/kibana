@@ -85,7 +85,7 @@ export const setCustomProtectionUpdatesManifestVersion = (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const policy = updatedEndpointPolicy!.inputs[0]!.config!.policy.value;
 
-    policy.manifest_version = manifestVersion;
+    policy.global_manifest_version = manifestVersion;
 
     return request<UpdatePackagePolicyResponse>({
       method: 'PUT',
