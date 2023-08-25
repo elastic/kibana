@@ -42,7 +42,6 @@ import { DataSourceType } from '../../../../detections/pages/detection_engine/ru
 import { convertHistoryStartToSize } from '../../../../detections/pages/detection_engine/rules/helpers';
 import { MlJobLink } from '../../../../detections/components/rules/ml_job_link/ml_job_link';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { BadgeList } from './badge_list';
 import * as i18n from './translations';
 
@@ -287,7 +286,7 @@ const HistoryWindowSize = ({ historyWindowStart }: HistoryWindowSizeProps) => {
 
 // eslint-disable-next-line complexity
 const prepareDefinitionSectionListItems = (
-  rule: Partial<RuleResponse>,
+  rule: RuleResponse,
   savedQuery?: SavedQuery
 ): EuiDescriptionListProps['listItems'] => {
   const definitionSectionListItems: EuiDescriptionListProps['listItems'] = [];
@@ -342,12 +341,10 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
-  if (rule.type) {
-    definitionSectionListItems.push({
-      title: i18n.RULE_TYPE_FIELD_LABEL,
-      description: <RuleType type={rule.type} />,
-    });
-  }
+  definitionSectionListItems.push({
+    title: i18n.RULE_TYPE_FIELD_LABEL,
+    description: <RuleType type={rule.type} />,
+  });
 
   if ('anomaly_threshold' in rule && rule.anomaly_threshold) {
     definitionSectionListItems.push({
@@ -363,7 +360,7 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
-  if (rule.related_integrations && rule.related_integrations.length > 0) {
+  if (rule.related_integrations.length > 0) {
     definitionSectionListItems.push({
       title: i18n.RELATED_INTEGRATIONS_FIELD_LABEL,
       description: (
@@ -372,7 +369,7 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
-  if (rule.required_fields && rule.required_fields.length > 0) {
+  if (rule.required_fields.length > 0) {
     definitionSectionListItems.push({
       title: i18n.REQUIRED_FIELDS_FIELD_LABEL,
       description: <RequiredFields requiredFields={rule.required_fields} />,
@@ -449,7 +446,7 @@ const prepareDefinitionSectionListItems = (
 };
 
 export interface RuleDefinitionSectionProps {
-  rule: Partial<RuleResponse>;
+  rule: RuleResponse;
 }
 
 export const RuleDefinitionSection = ({ rule }: RuleDefinitionSectionProps) => {

@@ -101,7 +101,7 @@ const TabContentPadding: React.FC = ({ children }) => (
 );
 
 interface RuleDetailsFlyoutProps {
-  rule: Partial<RuleResponse>;
+  rule: RuleResponse;
   actionButtonLabel: string;
   isActionButtonDisabled: boolean;
   onActionButtonClick: (ruleId: string) => void;
