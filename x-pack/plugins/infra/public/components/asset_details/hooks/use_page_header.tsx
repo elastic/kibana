@@ -42,7 +42,7 @@ const useBreadcrumbs = () => {
 
   const onClick = (e: React.MouseEvent) => {
     if (location.state) {
-      history.push({
+      history.replace({
         pathname: location.state.originPathname,
         search: location.state.data,
       });
