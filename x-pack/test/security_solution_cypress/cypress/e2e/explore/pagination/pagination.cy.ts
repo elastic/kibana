@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import {
   PROCESS_NAME_FIELD,
@@ -21,7 +20,7 @@ import { ALL_HOSTS_TABLE } from '../../../screens/hosts/all_hosts';
 import { ALL_USERS_TABLE } from '../../../screens/users/all_users';
 import { goToTablePage, sortFirstTableColumn } from '../../../tasks/table_pagination';
 
-describe('Pagination', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
   describe('Host uncommon processes table)', () => {
     before(() => {
       cy.task('esArchiverLoad', 'host_uncommon_processes');

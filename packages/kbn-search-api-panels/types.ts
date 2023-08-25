@@ -40,5 +40,9 @@ export interface LanguageDefinition {
   advancedConfig?: string;
   apiReference?: string;
   basicConfig?: string;
+  github?: {
+    link: string;
+    label: string;
+  };
   languageStyling?: string;
 }

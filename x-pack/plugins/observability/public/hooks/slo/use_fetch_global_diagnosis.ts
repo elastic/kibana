@@ -13,7 +13,10 @@ import {
 } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import type { PublicLicenseJSON } from '@kbn/licensing-plugin/public';
-import type { SecurityGetUserPrivilegesResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  SecurityGetUserPrivilegesResponse,
+  TransformGetTransformStatsResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from '../../utils/kibana_react';
 import { convertErrorForUseInToast } from './helpers/convert_error_for_use_in_toast';
 import { sloKeys } from './query_key_factory';
@@ -24,6 +27,10 @@ interface SloGlobalDiagnosisResponse {
   sloResources: {
     [x: string]: 'OK' | 'NOT_OK';
   };
+  sloSummaryResources: {
+    [x: string]: 'OK' | 'NOT_OK';
+  };
+  sloSummaryTransformsStats: TransformGetTransformStatsResponse;
 }
 
 export interface UseFetchSloGlobalDiagnoseResponse {

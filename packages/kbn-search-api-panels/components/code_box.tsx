@@ -41,7 +41,7 @@ interface CodeBoxProps {
   pluginId: string;
   application?: ApplicationStart;
   sharePlugin: SharePluginStart;
-  showTryInConsole: boolean;
+  consoleRequest?: string;
 }
 
 export const CodeBox: React.FC<CodeBoxProps> = ({
@@ -54,7 +54,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
   selectedLanguage,
   setSelectedLanguage,
   sharePlugin,
-  showTryInConsole,
+  consoleRequest,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
@@ -119,10 +119,10 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
               )}
             </EuiCopy>
           </EuiFlexItem>
-          {showTryInConsole && (
+          {consoleRequest !== undefined && (
             <EuiFlexItem grow={false}>
               <TryInConsoleButton
-                request={codeSnippet}
+                request={consoleRequest}
                 application={application}
                 sharePlugin={sharePlugin}
               />

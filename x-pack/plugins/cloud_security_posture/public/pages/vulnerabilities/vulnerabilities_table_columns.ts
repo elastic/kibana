@@ -16,9 +16,9 @@ export const vulnerabilitiesColumns = {
   resourceName: 'resource.name',
   resourceId: 'resource.id',
   severity: 'vulnerability.severity',
-  package: 'vulnerability.package.name',
-  version: 'vulnerability.package.version',
-  fixedVersion: 'vulnerability.package.fixed_version',
+  package: 'package.name',
+  version: 'package.version',
+  fixedVersion: 'package.fixed_version',
 };
 
 const defaultColumnProps = () => ({
