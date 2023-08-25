@@ -12,6 +12,8 @@ import { createEsQueryRule } from './helpers/alerting_api_helper';
 import { waitForAlertInIndex, waitForNumRuleRuns } from './helpers/alerting_wait_for_helpers';
 import { ObjectRemover } from '../../../../shared/lib';
 
+const OPEN_OR_ACTIVE = new Set(['open', 'active']);
+
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
@@ -68,6 +70,8 @@ export default function ({ getService }: FtrProviderContext) {
       const hits1 = alResp1.hits.hits[0]._source as Record<string, any>;
 
       expect(new Date(hits1['@timestamp'])).to.be.a(Date);
+      // should be open, first time, but also seen sometimes active; timing?
+      expect(OPEN_OR_ACTIVE.has(hits1.event.action)).to.be(true);
       expect(hits1.kibana.alert.flapping_history).to.be.an(Array);
       expect(hits1.kibana.alert.maintenance_window_ids).to.be.an(Array);
       expect(typeof hits1.kibana.alert.reason).to.be('string');
@@ -79,9 +83,10 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof hits1.kibana.alert.url).to.be('string');
       expect(typeof hits1.kibana.version).to.be('string');
 
-      // remove fields we aren't going to compare
+      // remove fields we aren't going to compare directly
       const fields = [
         '@timestamp',
+        'event.action',
         'kibana.alert.flapping_history',
         'kibana.alert.maintenance_window_ids',
         'kibana.alert.reason',
@@ -100,7 +105,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       const expected = {
         event: {
-          action: 'open',
           kind: 'signal',
         },
         tags: [],
@@ -212,7 +216,7 @@ export default function ({ getService }: FtrProviderContext) {
       const hits2 = alResp2.hits.hits[0]._source as Record<string, any>;
 
       expect(hits2['@timestamp']).to.be.greaterThan(hits1['@timestamp']);
-      expect(hits1?.event?.action).to.be('open');
+      expect(OPEN_OR_ACTIVE.has(hits1?.event?.action)).to.be(true);
       expect(hits2?.event?.action).to.be('active');
       expect(hits1?.kibana?.alert?.duration?.us).to.be('0');
       expect(hits2?.kibana?.alert?.duration?.us).not.to.be('0');
