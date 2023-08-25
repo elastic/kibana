@@ -16,11 +16,15 @@ import {
   kibanaServerlessSuperuser,
   getDockerFileMountPath,
 } from '@kbn/test';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 
 export default async () => {
   const servers = {
-    kibana: kbnTestConfig.getUrlParts(kibanaServerlessSuperuser),
+    kibana: {
+      ...kbnTestConfig.getUrlParts(kibanaServerlessSuperuser),
+      protocol: 'https',
+    },
     elasticsearch: esTestConfig.getUrlParts(),
   };
 
@@ -36,7 +40,9 @@ export default async () => {
 
   return {
     servers,
-
+    browser: {
+      acceptInsecureCerts: true,
+    },
     esTestCluster: {
       from: 'serverless',
       files: [idpPath],
@@ -61,6 +67,10 @@ export default async () => {
       },
       sourceArgs: ['--no-base-path', '--env.name=development'],
       serverArgs: [
+        '--server.ssl.enabled=true',
+        `--server.ssl.key=${KBN_KEY_PATH}`,
+        `--server.ssl.certificate=${KBN_CERT_PATH}`,
+        `--server.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--server.restrictInternalApis=true`,
         `--server.port=${servers.kibana.port}`,
         '--status.allowAnonymous=true',
