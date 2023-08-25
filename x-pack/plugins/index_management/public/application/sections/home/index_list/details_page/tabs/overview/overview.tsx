@@ -21,21 +21,12 @@ import {
   CodeBox,
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,
+  getLanguageDefinitionCodeSnippet,
+  getConsoleRequest,
 } from '@kbn/search-api-panels';
 import type { Index } from '../../../../../../../../common';
 import { useAppContext } from '../../../../../../app_context';
 import { languageDefinitions, curlDefinition } from './languages';
-
-const getCodeSnippet = (
-  language: LanguageDefinition,
-  key: keyof LanguageDefinition,
-  args: LanguageDefinitionSnippetArguments
-): string => {
-  const snippetVal = language[key];
-  if (snippetVal === undefined) return '';
-  if (typeof snippetVal === 'string') return snippetVal;
-  return snippetVal(args);
-};
 
 const unknownLabel = i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.unknownLabel', {
   defaultMessage: 'Unknown',
@@ -187,16 +178,18 @@ export const OverviewTab: React.FunctionComponent<Props> = ({ indexDetails }) =>
         <EuiFlexItem>
           <CodeBox
             languages={languageDefinitions}
-            codeSnippet={getCodeSnippet(selectedLanguage, 'ingestDataIndex', codeSnippetArguments)}
+            codeSnippet={getLanguageDefinitionCodeSnippet(
+              selectedLanguage,
+              'ingestDataIndex',
+              codeSnippetArguments
+            )}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
             http={core.http}
             pluginId={'indexManagement'}
             sharePlugin={plugins.share}
             application={core.application}
-            // This feature does not appear to work as expected
-            // Fix in progress: https://github.com/elastic/kibana/pull/164766
-            showTryInConsole
+            consoleRequest={getConsoleRequest('ingestDataIndex', codeSnippetArguments)}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

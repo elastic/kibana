@@ -26,7 +26,27 @@ export const getLanguageDefinitionCodeSnippet = (
   }
 };
 
-export const getConsoleRequest = (code: keyof LanguageDefinition): string | undefined =>
-  code in consoleDefinition && typeof consoleDefinition[code] === 'string'
-    ? (consoleDefinition[code] as string)
-    : undefined;
+export const getConsoleRequest = (
+  code: keyof LanguageDefinition,
+  args?: LanguageDefinitionSnippetArguments
+): string | undefined => {
+  if (code in consoleDefinition) {
+    const codeType:
+      | string
+      | ((args: LanguageDefinitionSnippetArguments) => string)
+      | { link: string; label: string }
+      | undefined = consoleDefinition[code];
+
+    switch (typeof codeType) {
+      case 'string':
+        return codeType;
+      case 'function':
+        if (args) {
+          return codeType(args);
+        }
+        return undefined;
+      default:
+        return undefined;
+    }
+  }
+};

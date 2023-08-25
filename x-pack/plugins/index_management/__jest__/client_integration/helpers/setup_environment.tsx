@@ -64,7 +64,7 @@ const appDependencies = {
   },
   plugins: {
     usageCollection: usageCollectionPluginMock.createSetupContract(),
-    isFleetEnabled: true,
+    isFleetEnabled: false,
     share: sharePluginMock.createStartContract(),
   },
   // Default stateful configuration
