@@ -48,9 +48,7 @@ const NOTIFICATION_SETTINGS = [
   'notifications:lifetime:warning',
 ];
 
-const SEARCH_SETTINGS = ['courier:ignoreFilterIfFieldNotInIndex', 'search:timeout'];
-
-export const ALL_ALLOWLIST_SETTINGS = [
+export const ALL_COMMON_SETTINGS = [
   ...GENERAL_SETTINGS,
   ...PRESENTATION_LABS_SETTINGS,
   ...ACCESSIBILITY_SETTINGS,
@@ -58,5 +56,4 @@ export const ALL_ALLOWLIST_SETTINGS = [
   ...BANNER_SETTINGS,
   ...DISCOVER_SETTINGS,
   ...NOTIFICATION_SETTINGS,
-  ...SEARCH_SETTINGS,
 ];

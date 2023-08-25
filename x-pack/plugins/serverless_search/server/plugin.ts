@@ -24,6 +24,9 @@ import type {
   StartDependencies,
 } from './types';
 
+// This will be moved into a package
+const SEARCH_PROJECT_SETTINGS = ['courier:ignoreFilterIfFieldNotInIndex'];
+
 export interface RouteDependencies {
   logger: Logger;
   router: IRouter;
@@ -63,6 +66,7 @@ export class ServerlessSearchPlugin
     });
 
     pluginsSetup.ml.setFeaturesEnabled({ ad: false, dfa: false, nlp: false });
+    pluginsSetup.serverless.setupProjectSettings(SEARCH_PROJECT_SETTINGS);
     return {};
   }
 

@@ -154,11 +154,7 @@ export class UiSettingsService
   };
 
   private setAllowlist = (keys: string[]) => {
-    if (!this.allowlist) {
-      this.allowlist = keys;
-    } else {
-      this.allowlist = this.allowlist.concat(keys);
-    }
+    this.allowlist = keys;
   };
 
   private applyAllowlist(keys: string[]) {

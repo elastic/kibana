@@ -13,7 +13,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { getConfigDirectory } from '@kbn/utils';
 import { ProjectType } from '@kbn/serverless-types';
 
-import { ALL_ALLOWLIST_SETTINGS } from '@kbn/serverless-settings';
+import { ALL_COMMON_SETTINGS } from '@kbn/serverless-settings';
 import { ServerlessPluginSetup, ServerlessPluginStart } from './types';
 import { ServerlessConfig } from './config';
 import { API_SWITCH_PROJECT } from '../common';
@@ -36,6 +36,11 @@ const typeToIdMap: Record<ProjectType, string> = {
 
 export class ServerlessPlugin implements Plugin<ServerlessPluginSetup, ServerlessPluginStart> {
   private readonly config: ServerlessConfig;
+
+  private setupProjectSettings(core: CoreSetup, keys: string[] = []): void {
+    const settings = [...ALL_COMMON_SETTINGS].concat(keys);
+    core.uiSettings.setAllowlist(settings);
+  }
 
   constructor(private readonly context: PluginInitializerContext) {
     this.config = this.context.config.get<ServerlessConfig>();
@@ -76,9 +81,9 @@ export class ServerlessPlugin implements Plugin<ServerlessPluginSetup, Serverles
       );
     }
 
-    core.uiSettings.setAllowlist(ALL_ALLOWLIST_SETTINGS);
-
-    return {};
+    return {
+      setupProjectSettings: (keys: string[]) => this.setupProjectSettings(core, keys),
+    };
   }
 
   public start(_core: CoreStart) {
