@@ -98,11 +98,17 @@ const packages: IntegrationPackage[] = [
 const initialPackages = packages.slice(0, 3);
 const additionalPackages = packages.slice(3);
 
-export function ObservabilityLogExplorerPageObject({ getService }: FtrProviderContext) {
+export function ObservabilityLogExplorerPageObject({
+  getPageObjects,
+  getService,
+}: FtrProviderContext) {
+  const PageObjects = getPageObjects(['common']);
   const log = getService('log');
   const supertest = getService('supertest');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
+
+  type NavigateToAppOptions = Parameters<typeof PageObjects['common']['navigateToApp']>[1];
 
   return {
     uninstallPackage: ({ name, version }: IntegrationPackage) => {
@@ -163,6 +169,10 @@ export function ObservabilityLogExplorerPageObject({ getService }: FtrProviderCo
           additionalPackages.map((pkg: IntegrationPackage) => this.uninstallPackage(pkg))
         );
       };
+    },
+
+    async navigateTo(options?: NavigateToAppOptions) {
+      return await PageObjects.common.navigateToApp('observabilityLogExplorer');
     },
 
     getDatasetSelector() {

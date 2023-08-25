@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('without installed integrations or uncategorized data streams', () => {
       before(async () => {
-        await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
+        await PageObjects.observabilityLogExplorer.navigateTo();
       });
 
       beforeEach(async () => {
@@ -167,7 +167,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('when open on the first navigation level', () => {
         before(async () => {
-          await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
+          await PageObjects.observabilityLogExplorer.navigateTo();
         });
 
         beforeEach(async () => {
@@ -293,7 +293,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('when clicking on integration and moving into the second navigation level', () => {
         before(async () => {
-          await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
+          await PageObjects.observabilityLogExplorer.navigateTo();
         });
 
         beforeEach(async () => {
@@ -420,7 +420,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('when navigating into Uncategorized data streams', () => {
         before(async () => {
-          await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
+          await PageObjects.observabilityLogExplorer.navigateTo();
         });
 
         beforeEach(async () => {
@@ -544,7 +544,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('when open/close the selector', () => {
         before(async () => {
-          await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
+          await PageObjects.observabilityLogExplorer.navigateTo();
         });
 
         beforeEach(async () => {
@@ -602,7 +602,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('when switching between integration panels', () => {
         before(async () => {
-          await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
+          await PageObjects.observabilityLogExplorer.navigateTo();
         });
 
         it('should remember the latest search and restore its results for each integration', async () => {
