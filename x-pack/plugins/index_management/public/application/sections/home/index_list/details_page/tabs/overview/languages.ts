@@ -17,7 +17,6 @@ export const curlDefinition: LanguageDefinition = {
   }),
   iconType: 'curl.svg',
   languageStyling: 'shell',
-  docLink: '', // TODO revisit
   ingestDataIndex: ({ apiKey, indexName, url }) => `curl -X POST ${url}/_bulk?pretty \\
   -H "Authorization: ApiKey ${apiKey}" \\
   -H "Content-Type: application/json" \\
@@ -33,7 +32,6 @@ export const javascriptDefinition: LanguageDefinition = {
     defaultMessage: 'JavaScript',
   }),
   iconType: 'javascript.svg',
-  docLink: '', // TODO revisit
   ingestDataIndex: ({
     apiKey,
     url,
@@ -66,7 +64,6 @@ export const goDefinition: LanguageDefinition = {
     defaultMessage: 'Go',
   }),
   iconType: 'go.svg',
-  docLink: '', // TODO revisit
   ingestDataIndex: ({ apiKey, url, indexName }) => `import (
   "context"
   "fmt"
@@ -102,7 +99,6 @@ export const pythonDefinition: LanguageDefinition = {
     defaultMessage: 'Python',
   }),
   iconType: 'python.svg',
-  docLink: '', // TODO revisit
   ingestDataIndex: ({ apiKey, url, indexName }) => `from elasticsearch import Elasticsearch
 
 client = Elasticsearch(
@@ -125,7 +121,6 @@ export const phpDefinition: LanguageDefinition = {
     defaultMessage: 'PHP',
   }),
   iconType: 'php.svg',
-  docLink: '', // TODO revisit
   ingestDataIndex: ({ apiKey, url, indexName }) => `$client = ClientBuilder::create()
   ->setHosts(['${url}'])
   ->setApiKey('${apiKey}')
@@ -158,7 +153,6 @@ export const rubyDefinition: LanguageDefinition = {
     defaultMessage: 'Ruby',
   }),
   iconType: 'ruby.svg',
-  docLink: '', // TODO revisit
   ingestDataIndex: ({ apiKey, url, indexName }) => `client = ElasticsearchServerless::Client.new(
   api_key: '${apiKey}',
   url: '${url}'

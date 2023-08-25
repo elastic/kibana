@@ -102,15 +102,19 @@ export const InstallClientPanel: React.FC<InstallClientProps> = ({
         defaultMessage:
           'Elastic builds and maintains clients in several popular languages and our community has contributed many more. Install your favorite language client to get started.',
       })}
-      links={[
-        {
-          href: language.docLink,
-          label: i18n.translate('searchApiPanels.welcomeBanner.installClient.clientDocLink', {
-            defaultMessage: '{languageName} client documentation',
-            values: { languageName: language.name },
-          }),
-        },
-      ]}
+      links={
+        language.docLink
+          ? [
+              {
+                href: language.docLink,
+                label: i18n.translate('searchApiPanels.welcomeBanner.installClient.clientDocLink', {
+                  defaultMessage: '{languageName} client documentation',
+                  values: { languageName: language.name },
+                }),
+              },
+            ]
+          : []
+      }
       title={i18n.translate('searchApiPanels.welcomeBanner.installClient.title', {
         defaultMessage: 'Install a client',
       })}

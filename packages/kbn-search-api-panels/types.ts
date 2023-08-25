@@ -30,7 +30,7 @@ export interface LanguageDefinition {
   name: string;
   id: Languages;
   iconType: string;
-  docLink: string;
+  docLink?: string;
   configureClient?: CodeSnippet;
   ingestData?: CodeSnippet;
   ingestDataIndex?: CodeSnippet;
