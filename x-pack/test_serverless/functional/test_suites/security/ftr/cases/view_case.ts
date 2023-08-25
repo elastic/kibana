@@ -31,7 +31,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
 
-  describe.only('View case', () => {
+  describe('View case', () => {
     describe('page', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
@@ -945,7 +945,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('should set the cases title', async () => {
-        svlCommonNavigation.breadcrumbs.expectExists;
+        svlCommonNavigation.breadcrumbs.expectExists();
         svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: createdCase.title });
       });
     });
