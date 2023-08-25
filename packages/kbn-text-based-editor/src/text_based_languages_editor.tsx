@@ -412,7 +412,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [expressions]
   );
 
-  const getPoliciesIdentifiers: ESQLCustomAutocompleteCallbacks['getFieldsIdentifiers'] =
+  const getPoliciesIdentifiers: ESQLCustomAutocompleteCallbacks['getPoliciesIdentifiers'] =
     useCallback(
       async (ctx) => {
         const { data: policies, error } =
@@ -421,7 +421,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         if (error || !policies) {
           return [];
         }
-        return policies.map(({ name }) => name);
+        return policies.map(({ name, sourceIndices }) => ({ name, indices: sourceIndices }));
       },
       [indexManagementApiService]
     );

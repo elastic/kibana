@@ -12,16 +12,16 @@ import { monaco } from '../../../..';
 export interface ESQLCustomAutocompleteCallbacks {
   getSourceIdentifiers?: CallbackFn;
   getFieldsIdentifiers?: CallbackFn;
-  getPoliciesIdentifiers?: CallbackFn;
+  getPoliciesIdentifiers?: CallbackFn<{ name: string; indices: string[] }>;
   getPolicyFieldsIdentifiers?: CallbackFn;
   getPolicyMatchingFieldIdentifiers?: CallbackFn;
 }
 
 /** @internal **/
-type CallbackFn = (ctx: {
+type CallbackFn<T = string> = (ctx: {
   word: string;
   userDefinedVariables: UserDefinedVariables;
-}) => string[] | Promise<string[]>;
+}) => T[] | Promise<T[]>;
 
 /** @internal **/
 export interface UserDefinedVariables {

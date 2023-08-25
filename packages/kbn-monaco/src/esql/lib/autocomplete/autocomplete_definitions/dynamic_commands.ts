@@ -9,13 +9,19 @@
 import { i18n } from '@kbn/i18n';
 import type { AutocompleteCommandDefinition } from '../types';
 
-export const buildPoliciesDefinitions = (policies: string[]): AutocompleteCommandDefinition[] =>
-  policies.map((label) => ({
+export const buildPoliciesDefinitions = (
+  policies: Array<{ name: string; indices: string[] }>
+): AutocompleteCommandDefinition[] =>
+  policies.map(({ name: label, indices }) => ({
     label,
     insertText: label,
     kind: 5,
-    details: i18n.translate('monaco.esql.autocomplete.policyDefinition', {
-      defaultMessage: `Policy defined`,
+    detail: i18n.translate('monaco.esql.autocomplete.policyDefinition', {
+      defaultMessage: `Policy defined on {count, plural, one {index} other {indices}}: {indices}`,
+      values: {
+        count: indices.length,
+        indices: indices.join(', '),
+      },
     }),
     sortText: 'D',
   }));
