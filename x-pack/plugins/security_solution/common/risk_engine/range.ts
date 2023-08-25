@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-export const tag = {
-  SERVERLESS: '@serverless',
-  ESS: '@ess',
-  BROKEN_IN_SERVERLESS: '@brokenInServerless',
-};
+import * as t from 'io-ts';
+
+export const rangeSchema = t.type({
+  start: t.string,
+  end: t.string,
+});
+export type RangeSchema = t.TypeOf<typeof rangeSchema>;
+export type Range = RangeSchema;
