@@ -8,6 +8,7 @@
 import {
   EuiBetaBadge,
   EuiButton,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -20,6 +21,8 @@ import { useHistory } from 'react-router-dom';
 import { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
+import { useLocalStorage } from '../../hooks/use_local_storage';
+import { useProfilingSetupStatus } from '../contexts/profiling_setup_status/use_profiling_setup_status';
 
 export const PROFILING_FEEDBACK_LINK = 'https://ela.st/profiling-feedback';
 
@@ -45,6 +48,12 @@ export function ProfilingAppPageTemplate({
   const {
     start: { observabilityShared },
   } = useProfilingDependencies();
+
+  const [privilegesWarningDismissed, setPrivilegesWarningDismissed] = useLocalStorage(
+    'profiling.privilegesWarningDismissed',
+    false
+  );
+  const { profilingSetupStatus } = useProfilingSetupStatus();
 
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
 
@@ -109,6 +118,32 @@ export function ProfilingAppPageTemplate({
             </EuiPanel>
           </EuiFlexItem>
         )}
+        {profilingSetupStatus?.unauthorized === true && privilegesWarningDismissed !== true ? (
+          <EuiFlexItem grow={false}>
+            <EuiCallOut
+              iconType="warning"
+              title={i18n.translate('xpack.profiling.privilegesWarningTitle', {
+                defaultMessage: 'User privilege limitation',
+              })}
+            >
+              <p>
+                {i18n.translate('xpack.profiling.privilegesWarningDescription', {
+                  defaultMessage:
+                    'Due to privileges issues we could not check the Universal Profiling status. If you encounter any issues or if data fails to load, please contact your administrator for assistance.',
+                })}
+              </p>
+              <EuiButton
+                onClick={() => {
+                  setPrivilegesWarningDismissed(true);
+                }}
+              >
+                {i18n.translate('xpack.profiling.dismissPrivilegesCallout', {
+                  defaultMessage: 'Dismiss',
+                })}
+              </EuiButton>
+            </EuiCallOut>
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem>{children}</EuiFlexItem>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>

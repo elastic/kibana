@@ -26,12 +26,14 @@ import { useLicenseContext } from './contexts/license/use_license_context';
 import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
 import { LicensePrompt } from './license_prompt';
 import { ProfilingAppPageTemplate } from './profiling_app_page_template';
+import { useProfilingSetupStatus } from './contexts/profiling_setup_status/use_profiling_setup_status';
 
 export function CheckSetup({ children }: { children: React.ReactElement }) {
   const {
     start: { core },
     services: { fetchHasSetup, postSetupResources },
   } = useProfilingDependencies();
+  const { setProfilingSetupStatus } = useProfilingSetupStatus();
   const license = useLicenseContext();
   const router = useProfilingRouter();
   const history = useHistory();
@@ -46,6 +48,10 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     },
     [fetchHasSetup]
   );
+
+  if (status === AsyncStatus.Settled) {
+    setProfilingSetupStatus(data);
+  }
 
   const http = useAutoAbortedHttpClient([]);
 

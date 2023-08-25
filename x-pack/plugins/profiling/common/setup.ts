@@ -80,17 +80,11 @@ export function createDefaultSetupState(): SetupState {
   };
 }
 
-export function areResourcesSetupForViewer(state: SetupState): boolean {
+export function areResourcesSetup(state: SetupState): boolean {
   return (
     state.policies.collector.installed &&
     state.policies.symbolizer.installed &&
-    !state.policies.apm.profilingEnabled
-  );
-}
-
-export function areResourcesSetupForAdmin(state: SetupState): boolean {
-  return (
-    areResourcesSetupForViewer(state) &&
+    !state.policies.apm.profilingEnabled &&
     state.resource_management.enabled &&
     state.resources.created &&
     state.permissions.configured &&
