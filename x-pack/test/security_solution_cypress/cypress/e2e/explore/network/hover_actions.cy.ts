@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { TOP_N_CONTAINER } from '../../../screens/network/flows';
 import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../../../screens/search_bar';
@@ -26,7 +25,7 @@ import { openTimelineUsingToggle } from '../../../tasks/security_main';
 const testDomain = 'myTest';
 
 // tracked by https://github.com/elastic/kibana/issues/161874
-describe.skip('Hover actions', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe.skip('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
   const onBeforeLoadCallback = (win: Cypress.AUTWindow) => {
     // avoid cypress being held by windows prompt and timeout
     cy.stub(win, 'prompt').returns(true);

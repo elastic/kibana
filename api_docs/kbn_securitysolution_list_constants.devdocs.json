@@ -101,6 +101,10 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
           },
           {
@@ -321,6 +325,10 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
           },
           {
@@ -534,6 +542,10 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/host_isolation_exceptions_api_client.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
           },
           {
             "plugin": "securitySolution",
@@ -879,6 +891,10 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/service/api_client.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
           },
           {
             "plugin": "securitySolution",
