@@ -20,7 +20,7 @@ describe('isNestedFieldParent', () => {
       },
     };
     const unnestedField = {
-      name: 'otherField',
+      name: 'unnested.field',
       type: 'keyword',
     };
     const list = [nestedField, unnestedField];
