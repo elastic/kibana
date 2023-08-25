@@ -10,7 +10,10 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
@@ -31,11 +34,13 @@ export type CloneIndexResponse = AcknowledgeResponse;
 /** @internal */
 export interface CloneIndexParams {
   client: ElasticsearchClient;
+  esCapabilities: ElasticsearchCapabilities;
   source: string;
   target: string;
   /** only used for testing */
   timeout?: string;
 }
+
 /**
  * Makes a clone of the source index into the target.
  *
@@ -48,6 +53,7 @@ export interface CloneIndexParams {
  */
 export const cloneIndex = ({
   client,
+  esCapabilities,
   source,
   target,
   timeout = DEFAULT_TIMEOUT,
@@ -59,16 +65,18 @@ export const cloneIndex = ({
     RetryableEsClientError | IndexNotFound | ClusterShardLimitExceeded,
     AcknowledgeResponse
   > = () => {
-    return client.indices
-      .clone({
-        index: source,
-        target,
-        wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
-        settings: {
-          index: {
-            // The source we're cloning from will have a write block set, so
-            // we need to remove it to allow writes to our newly cloned index
-            'blocks.write': false,
+    const indexSettings = {
+      // The source we're cloning from will have a write block set, so
+      // we need to remove it to allow writes to our newly cloned index
+      'blocks.write': false,
+      // Increase the fields limit beyond the default of 1000
+      mapping: {
+        total_fields: { limit: 1500 },
+      },
+      // settings not being supported on stateless ES
+      ...(esCapabilities.stateless
+        ? {}
+        : {
             // The rest of the index settings should have already been applied
             // to the source index and will be copied to the clone target. But
             // we repeat it here for explicitness.
@@ -80,11 +88,16 @@ export const cloneIndex = ({
             refresh_interval: '1s',
             // Bump priority so that recovery happens before newer indices
             priority: 10,
-            // Increase the fields limit beyond the default of 1000
-            mapping: {
-              total_fields: { limit: 1500 },
-            },
-          },
+          }),
+    };
+
+    return client.indices
+      .clone({
+        index: source,
+        target,
+        wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
+        settings: {
+          index: indexSettings,
         },
         timeout,
       })

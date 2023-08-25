@@ -21,6 +21,7 @@ import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type {
   UnauthorizedErrorHandler,
   ElasticsearchClientConfig,
+  ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
 import { ClusterClient, AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
 
@@ -157,9 +158,14 @@ export class ElasticsearchService
       }
     }
 
+    const capabilities: ElasticsearchCapabilities = {
+      stateless: config.stateless,
+    };
+
     return {
       client: this.client!,
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
+      getCapabilities: () => capabilities,
     };
   }
 

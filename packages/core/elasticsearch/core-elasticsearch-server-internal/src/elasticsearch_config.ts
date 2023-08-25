@@ -58,6 +58,7 @@ export const configSchema = schema.object({
     })
   ),
   password: schema.maybe(schema.string()),
+  stateless: schema.boolean({ defaultValue: false }),
   serviceAccountToken: schema.maybe(
     schema.conditional(
       schema.siblingRef('username'),
@@ -304,6 +305,13 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
   public readonly healthCheckDelay: Duration;
 
   /**
+   * Indicates whether we're connecting to traditional or stateless ES.
+   * Required because some options aren't working for stateless and code
+   * needs to have the info to react accordingly.
+   */
+  public readonly stateless: boolean;
+
+  /**
    * Whether to allow kibana to connect to a non-compatible elasticsearch node.
    */
   public readonly ignoreVersionMismatch: boolean;
@@ -435,6 +443,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.healthCheckDelay = rawConfig.healthCheck.delay;
     this.username = rawConfig.username;
     this.password = rawConfig.password;
+    this.stateless = rawConfig.stateless;
     this.serviceAccountToken = rawConfig.serviceAccountToken;
     this.customHeaders = rawConfig.customHeaders;
     this.maxSockets = rawConfig.maxSockets;

@@ -10,6 +10,9 @@ xpack.fleet.internal.activeAgentsSoftLimit: 25000
 # Cloud links
 xpack.cloud.base_url: "https://cloud.elastic.co"
 
+# Inform that we're connecting to a stateless version of ES
+elasticsearch.stateless: true
+
 # Enable ZDT migration algorithm
 migrations.algorithm: zdt
 
