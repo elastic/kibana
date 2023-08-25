@@ -144,7 +144,7 @@ all clusters having a name starting with `cluster_`:
 ```
 
 To exclude a cluster having a name starting with `cluster_`. Excluding a cluster avoids sending any network calls to that cluster. For more information, see
-{ref}/modules-cross-cluster-search.html#exclude-problematic-clusters[Excluding clusters or indicies from cross -cluster search].
+{ref}/modules-cross-cluster-search.html#exclude-problematic-clusters[Excluding clusters or indicies from cross-cluster search].
 
 ```ts
 `cluster_*:logstash-*,-cluster_one:*`
