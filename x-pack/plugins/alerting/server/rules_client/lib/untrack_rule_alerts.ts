@@ -74,7 +74,7 @@ export const untrackRuleAlerts = async (
 
       if (isLifecycleAlert) {
         const { taskType } = taskInstance;
-        const untrackTaskType = `untrack_${taskType}`;
+        const untrackTaskType = taskType.replace('alerting:', 'alerting:untrack:');
         const untrackTaskInstance = {
           id: `untrack-${id}`,
           taskType: untrackTaskType,

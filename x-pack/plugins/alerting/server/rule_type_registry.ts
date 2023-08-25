@@ -304,7 +304,7 @@ export class RuleTypeRegistry {
     });
 
     this.taskManager.registerTaskDefinitions({
-      [`untrack_alerting:${ruleType.id}`]: {
+      [`alerting:untrack:${ruleType.id}`]: {
         title: `Untrack ${ruleType.name}`,
         timeout: ruleType.ruleTaskTimeout,
         createTaskRunner: (context: RunContext) =>
