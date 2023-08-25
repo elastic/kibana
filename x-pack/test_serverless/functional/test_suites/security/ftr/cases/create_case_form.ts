@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { navigateToCasesApp } from '../../../../../shared/lib/cases';
-import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 
 const owner = SECURITY_SOLUTION_OWNER;
 
