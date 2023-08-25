@@ -25,6 +25,9 @@ Object {
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "stateless": false,
+              },
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -250,6 +253,9 @@ Object {
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "stateless": false,
+              },
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -479,6 +485,9 @@ Object {
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "stateless": false,
+              },
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -712,6 +721,9 @@ Object {
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "stateless": false,
+              },
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -981,6 +993,9 @@ Object {
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "stateless": false,
+              },
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -1217,6 +1232,9 @@ Object {
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "stateless": false,
+              },
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
