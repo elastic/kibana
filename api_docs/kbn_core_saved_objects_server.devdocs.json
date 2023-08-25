@@ -5836,6 +5836,10 @@
                 "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/server/sample_data/logs.ts"
               },
@@ -5978,6 +5982,10 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/epm/packages/get.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.test.ts"
               }
             ]
           },

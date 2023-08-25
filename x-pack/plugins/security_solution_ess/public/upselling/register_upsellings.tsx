@@ -13,14 +13,15 @@ import type {
   SectionUpsellings,
   UpsellingMessageId,
   UpsellingSectionId,
-} from '@kbn/security-solution-plugin/public/common/lib/upsellings/types';
+} from '@kbn/security-solution-upselling/service/types';
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
-import { lazy } from 'react';
-import type React from 'react';
-import { UPGRADE_INVESTIGATION_GUIDE } from './messages/investigation_guide_upselling';
+import React, { lazy } from 'react';
+import { UPGRADE_INVESTIGATION_GUIDE } from '@kbn/security-solution-upselling/messages';
 import type { Services } from '../common/services';
 import { withServicesProvider } from '../common/services';
-const EntityAnalyticsUpsellingLazy = lazy(() => import('./pages/entity_analytics_upselling'));
+const EntityAnalyticsUpsellingLazy = lazy(
+  () => import('@kbn/security-solution-upselling/pages/entity_analytics')
+);
 
 interface UpsellingsConfig {
   minimumLicenseRequired: LicenseType;
@@ -42,7 +43,7 @@ export const registerUpsellings = (
   license: ILicense,
   services: Services
 ) => {
-  const upsellingPagesToRegister = upsellingPages.reduce<PageUpsellings>(
+  const upsellingPagesToRegister = upsellingPages(services).reduce<PageUpsellings>(
     (pageUpsellings, { pageName, minimumLicenseRequired, component }) => {
       if (!license.hasAtLeast(minimumLicenseRequired)) {
         pageUpsellings[pageName] = withServicesProvider(component, services);
@@ -78,12 +79,19 @@ export const registerUpsellings = (
 };
 
 // Upsellings for entire pages, linked to a SecurityPageName
-export const upsellingPages: UpsellingPages = [
+export const upsellingPages: (services: Services) => UpsellingPages = (services) => [
   // It is highly advisable to make use of lazy loaded components to minimize bundle size.
   {
     pageName: SecurityPageName.entityAnalytics,
     minimumLicenseRequired: 'platinum',
-    component: EntityAnalyticsUpsellingLazy,
+    component: () => (
+      <EntityAnalyticsUpsellingLazy
+        requiredLicense="Platinum"
+        subscriptionUrl={services.application.getUrlForApp('management', {
+          path: 'stack/license_management',
+        })}
+      />
+    ),
   },
 ];
 
@@ -97,6 +105,6 @@ export const upsellingMessages: UpsellingMessages = [
   {
     id: 'investigation_guide',
     minimumLicenseRequired: 'platinum',
-    message: UPGRADE_INVESTIGATION_GUIDE('platinum'),
+    message: UPGRADE_INVESTIGATION_GUIDE('Platinum'),
   },
 ];

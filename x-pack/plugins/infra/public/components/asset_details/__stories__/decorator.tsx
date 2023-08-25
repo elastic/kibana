@@ -164,6 +164,7 @@ export const DecorateWithAssetDetailsStateContext: DecoratorFn = (story) => {
         dateRange: {
           from: '2023-04-09T11:07:49Z',
           to: '2023-04-09T11:23:49Z',
+          mode: 'absolute',
         },
       }}
     >

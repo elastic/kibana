@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../tags';
-
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import {
   COLLAPSED_ACTION_BTN,
@@ -50,7 +48,7 @@ const rules = Array.from(Array(5)).map((_, i) => {
   });
 });
 
-describe('Prebuilt rules', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Prebuilt rules', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });

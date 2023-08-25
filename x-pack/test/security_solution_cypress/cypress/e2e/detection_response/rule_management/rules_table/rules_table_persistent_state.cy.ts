@@ -6,7 +6,6 @@
  */
 
 import { encode } from '@kbn/rison';
-import { tag } from '../../../../tags';
 
 import { cleanKibana, resetRulesTableState } from '../../../../tasks/common';
 import { login, visit } from '../../../../tasks/login';
@@ -100,7 +99,7 @@ function expectDefaultRulesTableState(): void {
   expectTablePage(1);
 }
 
-describe('Rules table: persistent state', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Rules table: persistent state', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     createTestRules();
