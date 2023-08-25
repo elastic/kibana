@@ -229,3 +229,4 @@ export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
 };
 
 export const CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX = '.search-acl-filter-';
+export const PLUGIN_ID = 'enterpriseSearch';

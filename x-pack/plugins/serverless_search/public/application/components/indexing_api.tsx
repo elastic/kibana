@@ -28,6 +28,7 @@ import {
   LanguageClientPanel,
   CodeBox,
   getLanguageDefinitionCodeSnippet,
+  getConsoleRequest,
 } from '@kbn/search-api-panels';
 import type {
   LanguageDefinition,
@@ -42,7 +43,6 @@ import { API_KEY_PLACEHOLDER, ELASTICSEARCH_URL_PLACEHOLDER } from '../constants
 import { useKibanaServices } from '../hooks/use_kibana';
 import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
-import { showTryInConsole } from './languages/utils';
 
 const NoIndicesContent = () => (
   <>
@@ -140,6 +140,7 @@ export const ElasticsearchIndexingApi = () => {
       return result;
     },
   });
+  const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/`);
 
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchURL,
@@ -213,8 +214,7 @@ export const ElasticsearchIndexingApi = () => {
                       language={language}
                       setSelectedLanguage={setSelectedLanguage}
                       isSelectedLanguage={selectedLanguage === language}
-                      http={http}
-                      pluginId={PLUGIN_ID}
+                      assetBasePath={assetBasePath}
                     />
                   </EuiFlexItem>
                 ))}
@@ -229,10 +229,9 @@ export const ElasticsearchIndexingApi = () => {
                 )}
                 selectedLanguage={selectedLanguage}
                 setSelectedLanguage={setSelectedLanguage}
-                http={http}
-                pluginId={PLUGIN_ID}
+                assetBasePath={assetBasePath}
                 sharePlugin={share}
-                showTryInConsole={showTryInConsole('ingestDataIndex')}
+                consoleRequest={getConsoleRequest('ingestDataIndex')}
               />
             </>
           }

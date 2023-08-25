@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 
 import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { HttpStart } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { CodeBox } from './code_box';
@@ -23,12 +22,11 @@ interface IngestDataProps {
   selectedLanguage: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
   docLinks: any;
-  http: HttpStart;
-  pluginId: string;
+  assetBasePath: string;
   application?: ApplicationStart;
   sharePlugin: SharePluginStart;
   languages: LanguageDefinition[];
-  showTryInConsole: boolean;
+  consoleRequest?: string;
 }
 
 export const IngestData: React.FC<IngestDataProps> = ({
@@ -36,12 +34,11 @@ export const IngestData: React.FC<IngestDataProps> = ({
   selectedLanguage,
   setSelectedLanguage,
   docLinks,
-  http,
-  pluginId,
+  assetBasePath,
   application,
   sharePlugin,
   languages,
-  showTryInConsole,
+  consoleRequest,
 }) => {
   const [selectedIngestMethod, setSelectedIngestMethod] = useState<
     'ingestViaApi' | 'ingestViaIntegration'
@@ -55,18 +52,17 @@ export const IngestData: React.FC<IngestDataProps> = ({
       leftPanelContent={
         selectedIngestMethod === 'ingestViaApi' ? (
           <CodeBox
-            showTryInConsole={showTryInConsole}
+            consoleRequest={consoleRequest}
             codeSnippet={codeSnippet}
             languages={languages}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
-            http={http}
-            pluginId={pluginId}
+            assetBasePath={assetBasePath}
             application={application}
             sharePlugin={sharePlugin}
           />
         ) : (
-          <IntegrationsPanel docLinks={docLinks} http={http} pluginId={pluginId} />
+          <IntegrationsPanel docLinks={docLinks} assetBasePath={assetBasePath} />
         )
       }
       links={[
