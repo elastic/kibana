@@ -16,7 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'timePicker',
     'visEditor',
     'visChart',
-    'dashboard'
+    'dashboard',
   ]);
 
   const testSubjects = getService('testSubjects');
@@ -25,20 +25,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Gauge', function describeIndexTests() {
-    const fixture = 'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/gauge.json';
+    const fixture =
+      'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/gauge.json';
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
-    })
+    });
 
     after(async () => {
       await kibanaServer.importExport.unload(fixture);
-    })
+    });
 
     beforeEach(async () => {
       await common.navigateToApp('dashboards'); // required for svl until dashboard PO navigation is fixed
-      await dashboard.gotoDashboardEditMode('Convert to Lens - Gauge')
-      await timePicker.setDefaultAbsoluteRange()
+      await dashboard.gotoDashboardEditMode('Convert to Lens - Gauge');
+      await timePicker.setDefaultAbsoluteRange();
     });
 
     it('should show the "Convert to Lens" menu item', async () => {
@@ -48,7 +49,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert aggregation with params', async () => {
       const visPanel = await panelActions.getPanelHeading('Gauge - Agg with params');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('gaugeChart');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -75,7 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert color ranges', async () => {
       const visPanel = await panelActions.getPanelHeading('Gauge - Color ranges');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('gaugeChart');
 
       expect(await lens.getLayerCount()).to.be(1);

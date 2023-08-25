@@ -9,16 +9,17 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { common, visualize, visEditor, lens, timePicker, header, visChart, dashboard } = getPageObjects([
-    'common',
-    'visualize',
-    'lens',
-    'visEditor',
-    'timePicker',
-    'header',
-    'visChart',
-    'dashboard',
-  ]);
+  const { common, visualize, visEditor, lens, timePicker, header, visChart, dashboard } =
+    getPageObjects([
+      'common',
+      'visualize',
+      'lens',
+      'visEditor',
+      'timePicker',
+      'header',
+      'visChart',
+      'dashboard',
+    ]);
 
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -26,20 +27,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('XY', function describeIndexTests() {
-    const fixture = 'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/xy.json';
+    const fixture =
+      'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/xy.json';
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
-    })
+    });
 
     after(async () => {
       await kibanaServer.importExport.unload(fixture);
-    })
+    });
 
     beforeEach(async () => {
       await common.navigateToApp('dashboards'); // required for svl until dashboard PO navigation is fixed
-      await dashboard.gotoDashboardEditMode('Convert to Lens - XY')
-      await timePicker.setDefaultAbsoluteRange()
+      await dashboard.gotoDashboardEditMode('Convert to Lens - XY');
+      await timePicker.setDefaultAbsoluteRange();
     });
 
     it('should not allow converting if dot size aggregation is defined', async () => {
@@ -74,7 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert in different layers if metrics have different chart types', async () => {
       const visPanel = await panelActions.getPanelHeading('XY - Differing Layers');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
@@ -92,7 +94,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert in one layer if metrics have the same chart type', async () => {
       const visPanel = await panelActions.getPanelHeading('XY - Similar Layers');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
@@ -109,7 +111,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert parent pipeline aggregation', async () => {
       const visPanel = await panelActions.getPanelHeading('XY - Parent pipeline agg');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
@@ -123,7 +125,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert sibling pipeline aggregation', async () => {
       const visPanel = await panelActions.getPanelHeading('XY - Sibling pipeline agg');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('xyVisChart');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -141,7 +143,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should draw a reference line', async () => {
       const visPanel = await panelActions.getPanelHeading('XY - Reference line');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
@@ -159,7 +161,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert line stacked to area stacked chart', async () => {
       const visPanel = await panelActions.getPanelHeading('XY - Stacked lines');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
@@ -172,7 +174,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert percentage charts', async () => {
       const visPanel = await panelActions.getPanelHeading('XY - Percentage chart');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
@@ -185,7 +187,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert horizontal bar', async () => {
       const visPanel = await panelActions.getPanelHeading('XY - Horizontal Bar');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
@@ -198,7 +200,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert y-axis positions', async () => {
       const visPanel = await panelActions.getPanelHeading('XY - Axis positions');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('xyVisChart');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -220,10 +222,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert split series', async () => {
       const visPanel = await panelActions.getPanelHeading('XY - Split Series');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('xyVisChart');
 
-      const expectedData = ['win 8','win xp','win 7','ios','osx'];
+      const expectedData = ['win 8', 'win xp', 'win 7', 'ios', 'osx'];
       await lens.enableDebugState();
       const data = await lens.getCurrentChartDebugState('xyVisChart');
       await retry.try(async () => {
@@ -240,7 +242,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert x-axis', async () => {
       const visPanel = await panelActions.getPanelHeading('XY - X Axis');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('xyVisChart');
 
       const expectedData = ['Count'];

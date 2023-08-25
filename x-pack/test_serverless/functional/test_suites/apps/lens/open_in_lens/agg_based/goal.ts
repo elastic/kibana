@@ -13,7 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'common',
     'lens',
     'timePicker',
-    'dashboard'
+    'dashboard',
   ]);
 
   const testSubjects = getService('testSubjects');
@@ -21,20 +21,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Goal', function describeIndexTests() {
-    const fixture = 'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/goal.json';
+    const fixture =
+      'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/goal.json';
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
-    })
+    });
 
     after(async () => {
       await kibanaServer.importExport.unload(fixture);
-    })
+    });
 
     beforeEach(async () => {
       await common.navigateToApp('dashboards'); // required for svl until dashboard PO navigation is fixed
-      await dashboard.gotoDashboardEditMode('Convert to Lens - Goal')
-      await timePicker.setDefaultAbsoluteRange()
+      await dashboard.gotoDashboardEditMode('Convert to Lens - Goal');
+      await timePicker.setDefaultAbsoluteRange();
     });
 
     it('should show the "Convert to Lens" menu item', async () => {
@@ -198,7 +199,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         { stop: '13000000000', color: 'rgba(183, 224, 117, 1)' },
         { stop: '13100000000', color: 'rgba(253, 191, 111, 1)' },
         { stop: '13200000000', color: 'rgba(165, 0, 38, 1)' },
-        { stop: '13300000000', color: undefined }
+        { stop: '13300000000', color: undefined },
       ]);
     });
   });

@@ -22,20 +22,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Pie', function describeIndexTests() {
-    const fixture = 'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/pie.json';
+    const fixture =
+      'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/pie.json';
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
-    })
+    });
 
     after(async () => {
       await kibanaServer.importExport.unload(fixture);
-    })
+    });
 
     beforeEach(async () => {
       await common.navigateToApp('dashboards'); // required for svl until dashboard PO navigation is fixed
-      await dashboard.gotoDashboardEditMode('Convert to Lens - Pie')
-      await timePicker.setDefaultAbsoluteRange()
+      await dashboard.gotoDashboardEditMode('Convert to Lens - Pie');
+      await timePicker.setDefaultAbsoluteRange();
     });
 
     it('should hide the "Convert to Lens" menu item if no split slices were defined', async () => {
@@ -55,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert aggregation with params', async () => {
       const visPanel = await panelActions.getPanelHeading('Pie - Agg with params');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('partitionVisChart');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -73,7 +74,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const expectedTableData = ['ios', 'osx', 'win 7', 'win 8', 'win xp'];
 
       const visPanel = await panelActions.getPanelHeading('Pie - Basic count');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('partitionVisChart');
       await lens.enableDebugState();
 
@@ -90,7 +91,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert Donut type correctly', async () => {
       const visPanel = await panelActions.getPanelHeading('Pie - Basic count');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('partitionVisChart');
 
       const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
@@ -100,7 +101,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert Pie types correctly', async () => {
       const visPanel = await panelActions.getPanelHeading('Pie - Non Donut');
-      await panelActions.convertToLens(visPanel)
+      await panelActions.convertToLens(visPanel);
       await lens.waitForVisualization('partitionVisChart');
 
       const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
