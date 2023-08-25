@@ -6,69 +6,50 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useCallback, useState } from 'react';
-import { of } from 'rxjs';
-import { ComponentMeta } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
+import { action } from '@storybook/addon-actions';
+import { ComponentMeta } from '@storybook/react';
+import React, { FC, PropsWithChildren } from 'react';
+import { of } from 'rxjs';
 
 import {
   EuiButton,
-  EuiButtonIcon,
-  EuiCollapsibleNav,
+  EuiCollapsibleNavBeta,
+  EuiCollapsibleNavBetaProps,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHeader,
+  EuiHeaderSection,
   EuiLink,
+  EuiPageTemplate,
   EuiText,
-  EuiThemeProvider,
   EuiTitle,
 } from '@elastic/eui';
 import { NavigationStorybookMock, navLinksMock } from '../../mocks';
 import mdx from '../../README.mdx';
-import { NavigationProvider } from '../services';
-import { DefaultNavigation } from './default_navigation';
 import type { NavigationServices } from '../../types';
+import { NavigationProvider } from '../services';
 import { Navigation } from './components';
-import type { NonEmptyArray, ProjectNavigationDefinition } from './types';
+import { DefaultNavigation } from './default_navigation';
 import { getPresets } from './nav_tree_presets';
+import type { NonEmptyArray, ProjectNavigationDefinition } from './types';
 
 const storybookMock = new NavigationStorybookMock();
 
-const SIZE_OPEN = 248;
-const SIZE_CLOSED = 40;
-
-const NavigationWrapper: FC = ({ children }) => {
-  const [isOpen, setIsOpen] = useState(true);
-
-  const CollapseButton = () => {
-    return (
-      <EuiButtonIcon
-        iconType={isOpen ? 'menuLeft' : 'menuRight'}
-        color={isOpen ? 'ghost' : 'text'}
-        onClick={toggleOpen}
-        aria-label={isOpen ? 'Collapse navigation' : 'Expand navigation'}
-      />
-    );
-  };
-
-  const toggleOpen = useCallback(() => {
-    setIsOpen(!isOpen);
-  }, [isOpen, setIsOpen]);
-
+const NavigationWrapper: FC<PropsWithChildren<unknown> & Partial<EuiCollapsibleNavBetaProps>> = (
+  props
+) => {
   return (
-    <EuiThemeProvider>
-      <EuiCollapsibleNav
-        isOpen={true}
-        showButtonIfDocked={true}
-        onClose={toggleOpen}
-        isDocked={true}
-        size={isOpen ? SIZE_OPEN : SIZE_CLOSED}
-        hideCloseButton={false}
-        button={<CollapseButton />}
-      >
-        {isOpen && children}
-      </EuiCollapsibleNav>
-    </EuiThemeProvider>
+    <>
+      <EuiHeader position="fixed">
+        <EuiHeaderSection side={props?.side}>
+          <EuiCollapsibleNavBeta {...props} />
+        </EuiHeaderSection>
+      </EuiHeader>
+      <EuiPageTemplate>
+        <EuiPageTemplate.Section>Hello world</EuiPageTemplate.Section>
+      </EuiPageTemplate>
+    </>
   );
 };
 
