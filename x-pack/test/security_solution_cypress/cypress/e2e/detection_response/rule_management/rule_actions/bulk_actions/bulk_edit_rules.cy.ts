@@ -73,7 +73,6 @@ import {
 } from '../../../../../tasks/rules_bulk_actions';
 
 import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
-import { tag } from '../../../../../tags';
 import { hasIndexPatterns, getDetails } from '../../../../../tasks/rule_details';
 import { login, visitSecurityDetectionRulesPage } from '../../../../../tasks/login';
 import { createRule } from '../../../../../tasks/api_calls/rules';
@@ -96,6 +95,7 @@ import {
 import {
   createAndInstallMockedPrebuiltRules,
   getAvailablePrebuiltRulesCount,
+  preventPrebuiltRulesPackageInstallation,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { setRowsPerPageTo, sortByTableColumn } from '../../../../../tasks/table_pagination';
 
@@ -114,7 +114,7 @@ const defaultRuleData = {
   timeline_id: '495ad7a7-316e-4544-8a0f-9c098daee76e',
 };
 
-describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('Detection rules, bulk edit', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -123,6 +123,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();
+    preventPrebuiltRulesPackageInstallation(); // Make sure prebuilt rules aren't pulled from Fleet API
     cy.task('esArchiverResetKibana');
     createRule(getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1', enabled: false }));
     createRule(
@@ -233,9 +234,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
         clickAddTagsMenuItem();
         waitForMixedRulesBulkEditModal(rows.length);
 
-        getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
-          checkPrebuiltRulesCannotBeModified(availablePrebuiltRulesCount);
-        });
+        checkPrebuiltRulesCannotBeModified(PREBUILT_RULES.length);
 
         // user cancels action and modal disappears
         cancelConfirmationModal();

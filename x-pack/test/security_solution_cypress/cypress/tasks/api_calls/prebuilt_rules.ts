@@ -14,7 +14,11 @@ export const getPrebuiltRulesStatus = () => {
   return cy.request<PrePackagedRulesStatusResponse>({
     method: 'GET',
     url: 'api/detection_engine/rules/prepackaged/_status',
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+      'elastic-api-version': '2023-10-31',
+    },
   });
 };
 
@@ -34,7 +38,11 @@ export const installAllPrebuiltRulesRequest = () => {
   return cy.request({
     method: 'POST',
     url: 'internal/detection_engine/prebuilt_rules/installation/_perform',
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+      'elastic-api-version': '1',
+    },
     body: {
       mode: 'ALL_RULES',
     },
