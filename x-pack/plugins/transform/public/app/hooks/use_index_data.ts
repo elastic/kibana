@@ -97,11 +97,11 @@ export const useIndexData = (
     // (for example, as part of filebeat/metricbeat/ECS based indices)
     // to the data grid component which would significantly slow down the page.
     const fetchDataGridSampleDocuments = async function () {
-      let populatedDataViewFields =  populatedFields ? [...populatedFields] :[]
+      let populatedDataViewFields = populatedFields ? [...populatedFields] : [];
       let isMissingFields = populatedDataViewFields.length === 0;
 
       // If populatedFields are not provided, make own request to calculate
-      if (populatedFields === undefined){
+      if (populatedFields === undefined) {
         setErrorMessage('');
         setStatus(INDEX_STATUS.LOADING);
 
@@ -130,8 +130,7 @@ export const useIndexData = (
         const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
         isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
 
-        populatedDataViewFields = [...new Set(docs.map(Object.keys).flat(1))]
-
+        populatedDataViewFields = [...new Set(docs.map(Object.keys).flat(1))];
       }
       const isCrossClusterSearch = indexPattern.includes(':');
 

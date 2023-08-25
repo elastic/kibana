@@ -58,7 +58,7 @@ import {
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { useIndexData } from '../../../../hooks/use_index_data';
 import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
-import {useAppDependencies, useToastNotifications} from '../../../../app_dependencies';
+import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { SearchItems } from '../../../../hooks/use_search_items';
 import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 
@@ -122,12 +122,16 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
 
   const appDependencies = useAppDependencies();
   const {
-    ml: {  useFieldStatsFlyoutContext },
+    ml: { useFieldStatsFlyoutContext },
   } = appDependencies;
 
-  const fieldStatsContext = useFieldStatsFlyoutContext()
+  const fieldStatsContext = useFieldStatsFlyoutContext();
   const indexPreviewProps = {
-    ...useIndexData(dataView, transformConfigQuery, runtimeMappings, timeRangeMs,
+    ...useIndexData(
+      dataView,
+      transformConfigQuery,
+      runtimeMappings,
+      timeRangeMs,
       fieldStatsContext?.populatedFields ?? null
     ),
     dataTestSubj: 'transformIndexPreview',
