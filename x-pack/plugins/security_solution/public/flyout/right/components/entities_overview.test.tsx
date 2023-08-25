@@ -11,14 +11,22 @@ import { RightPanelContext } from '../context';
 import {
   ENTITIES_HOST_OVERVIEW_TEST_ID,
   ENTITIES_USER_OVERVIEW_TEST_ID,
-  INSIGHTS_ENTITIES_TOGGLE_ICON_TEST_ID,
-  INSIGHTS_ENTITIES_TITLE_LINK_TEST_ID,
-  INSIGHTS_ENTITIES_TITLE_ICON_TEST_ID,
-  INSIGHTS_ENTITIES_TITLE_TEXT_TEST_ID,
+  INSIGHTS_ENTITIES_TEST_ID,
 } from './test_ids';
 import { EntitiesOverview } from './entities_overview';
 import { TestProviders } from '../../../common/mock';
 import { mockGetFieldsData } from '../mocks/mock_context';
+import {
+  EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
+  EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
+  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
+  EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
+} from '../../shared/components/test_ids';
+
+const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
+const TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
+const TITLE_ICON_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
+const TITLE_TEXT_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
 
 describe('<EntitiesOverview />', () => {
   it('should render wrapper component', () => {
@@ -35,11 +43,11 @@ describe('<EntitiesOverview />', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId(INSIGHTS_ENTITIES_TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
-    expect(getByTestId(INSIGHTS_ENTITIES_TITLE_LINK_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(INSIGHTS_ENTITIES_TITLE_LINK_TEST_ID)).toHaveTextContent('Entities');
-    expect(getByTestId(INSIGHTS_ENTITIES_TITLE_ICON_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(INSIGHTS_ENTITIES_TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Entities');
+    expect(getByTestId(TITLE_ICON_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render user and host', () => {

@@ -25,6 +25,9 @@
     "optionalPlugins": [
       "securitySolutionEss"
     ],
-    "requiredBundles": ["kibanaUtils"]
+    "requiredBundles": [
+      "kibanaUtils",
+      "usageCollection"
+    ]
   }
 }

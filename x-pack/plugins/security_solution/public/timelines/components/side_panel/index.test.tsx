@@ -114,6 +114,8 @@ describe('Details Panel Component', () => {
   describe('DetailsPanel: rendering', () => {
     beforeEach(() => {
       (useAssistantAvailability as jest.Mock).mockReturnValue({
+        hasConnectorsAllPrivilege: true,
+        hasConnectorsReadPrivilege: true,
         hasAssistantPrivilege: false,
         isAssistantEnabled: true,
       });
