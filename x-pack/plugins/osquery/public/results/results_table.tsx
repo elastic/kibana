@@ -255,7 +255,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       return;
     }
 
-    const fields = ['agent.name', ...ecsMappingColumns.sort(), ...allResultsData?.columns];
+    const fields = ['agent.name', ...ecsMappingColumns.sort(), ...(allResultsData?.columns || [])];
 
     const newColumns = fields.reduce(
       (acc, fieldName) => {

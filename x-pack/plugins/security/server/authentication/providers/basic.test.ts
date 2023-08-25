@@ -10,12 +10,12 @@ import { errors } from '@elastic/elasticsearch';
 import type { ScopeableRequest } from '@kbn/core/server';
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
+import { mockAuthenticationProviderOptions } from './base.mock';
+import { BasicAuthenticationProvider } from './basic';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { mockAuthenticationProviderOptions } from './base.mock';
-import { BasicAuthenticationProvider } from './basic';
 
 function generateAuthorizationHeader(username: string, password: string) {
   return `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;

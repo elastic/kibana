@@ -22,9 +22,9 @@ export const OverviewTab: FC = memo(() => {
     <>
       <AboutSection />
       <EuiHorizontalRule margin="l" />
-      <VisualizationsSection />
-      <EuiHorizontalRule margin="l" />
       <InvestigationSection />
+      <EuiHorizontalRule margin="l" />
+      <VisualizationsSection />
       <EuiHorizontalRule margin="l" />
       <InsightsSection />
       <EuiHorizontalRule margin="l" />

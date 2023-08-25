@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import { navigateTo } from '../../tasks/navigation';
-import { ROLE, login } from '../../tasks/login';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Edit saved query', () => {
+describe('ALL - Edit saved query', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
 
@@ -21,7 +22,7 @@ describe('ALL - Edit saved query', () => {
   });
 
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    cy.login(ServerlessRoleName.SOC_MANAGER);
     navigateTo('/app/osquery/saved_queries');
   });
 

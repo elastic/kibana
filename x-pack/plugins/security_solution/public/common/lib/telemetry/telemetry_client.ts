@@ -17,6 +17,12 @@ import type {
   ReportMLJobUpdateParams,
   ReportCellActionClickedParams,
   ReportAnomaliesCountClickedParams,
+  ReportDataQualityIndexCheckedParams,
+  ReportDataQualityCheckAllCompletedParams,
+  ReportBreadcrumbClickedParams,
+  ReportAssistantInvokedParams,
+  ReportAssistantMessageSentParams,
+  ReportAssistantQuickPromptParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
 
@@ -27,41 +33,42 @@ import { TelemetryEventTypes } from './constants';
 export class TelemetryClient implements TelemetryClientStart {
   constructor(private analytics: AnalyticsServiceSetup) {}
 
-  public reportAlertsGroupingChanged = ({
-    tableId,
-    groupByField,
-  }: ReportAlertsGroupingChangedParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.AlertsGroupingChanged, {
-      tableId,
-      groupByField,
+  public reportAlertsGroupingChanged = (params: ReportAlertsGroupingChangedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AlertsGroupingChanged, params);
+  };
+
+  public reportAlertsGroupingToggled = (params: ReportAlertsGroupingToggledParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AlertsGroupingToggled, params);
+  };
+
+  public reportAlertsGroupingTakeAction = (params: ReportAlertsTakeActionParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AlertsGroupingTakeAction, params);
+  };
+
+  public reportAssistantInvoked = ({ conversationId, invokedBy }: ReportAssistantInvokedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssistantInvoked, {
+      conversationId,
+      invokedBy,
     });
   };
 
-  public reportAlertsGroupingToggled = ({
-    isOpen,
-    tableId,
-    groupNumber,
-    groupName,
-  }: ReportAlertsGroupingToggledParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.AlertsGroupingToggled, {
-      isOpen,
-      tableId,
-      groupNumber,
-      groupName,
+  public reportAssistantMessageSent = ({
+    conversationId,
+    role,
+  }: ReportAssistantMessageSentParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssistantMessageSent, {
+      conversationId,
+      role,
     });
   };
 
-  public reportAlertsGroupingTakeAction = ({
-    tableId,
-    groupNumber,
-    status,
-    groupByField,
-  }: ReportAlertsTakeActionParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.AlertsGroupingTakeAction, {
-      tableId,
-      groupNumber,
-      status,
-      groupByField,
+  public reportAssistantQuickPrompt = ({
+    conversationId,
+    promptTitle,
+  }: ReportAssistantQuickPromptParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssistantQuickPrompt, {
+      conversationId,
+      promptTitle,
     });
   };
 
@@ -97,5 +104,21 @@ export class TelemetryClient implements TelemetryClientStart {
 
   public reportAnomaliesCountClicked = (params: ReportAnomaliesCountClickedParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.AnomaliesCountClicked, params);
+  };
+
+  public reportDataQualityIndexChecked = (params: ReportDataQualityIndexCheckedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.DataQualityIndexChecked, params);
+  };
+
+  public reportDataQualityCheckAllCompleted = (
+    params: ReportDataQualityCheckAllCompletedParams
+  ) => {
+    this.analytics.reportEvent(TelemetryEventTypes.DataQualityCheckAllCompleted, params);
+  };
+
+  public reportBreadcrumbClicked = ({ title }: ReportBreadcrumbClickedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.BreadcrumbClicked, {
+      title,
+    });
   };
 }

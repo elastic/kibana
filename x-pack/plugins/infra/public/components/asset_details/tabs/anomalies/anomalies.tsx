@@ -8,10 +8,19 @@
 import React from 'react';
 import { AnomaliesTable } from '../../../../pages/metrics/inventory_view/components/ml/anomaly_detection/anomalies_table/anomalies_table';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
+import { useDateRangeProviderContext } from '../../hooks/use_date_range';
 
 export const Anomalies = () => {
-  const { node, overrides } = useAssetDetailsStateContext();
+  const { dateRange } = useDateRangeProviderContext();
+  const { asset, overrides } = useAssetDetailsStateContext();
   const { onClose = () => {} } = overrides?.anomalies ?? {};
 
-  return <AnomaliesTable closeFlyout={onClose} hostName={node.name} />;
+  return (
+    <AnomaliesTable
+      closeFlyout={onClose}
+      hostName={asset.name}
+      dateRange={dateRange}
+      hideDatePicker
+    />
+  );
 };

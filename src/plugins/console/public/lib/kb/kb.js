@@ -124,6 +124,8 @@ export function setActiveApi(api) {
       dataType: 'json', // disable automatic guessing
       headers: {
         'kbn-xsrf': 'kibana',
+        // workaround for serverless
+        'x-elastic-internal-origin': 'Kibana',
       },
     }).then(
       function (data) {

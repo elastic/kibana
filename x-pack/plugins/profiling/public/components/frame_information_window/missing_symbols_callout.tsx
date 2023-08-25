@@ -13,7 +13,7 @@ import { FrameType, getLanguageType } from '../../../common/profiling';
 import { PROFILING_FEEDBACK_LINK } from '../profiling_app_page_template';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
-import { NoDataTabs } from '../../views/no_data_view';
+import { AddDataTabs } from '../../views/add_data_view';
 
 interface Props {
   frameType: FrameType;
@@ -55,7 +55,7 @@ export function MissingSymbolsCallout({ frameType }: Props) {
         </p>
         <EuiButton
           href={router.link('/add-data-instructions', {
-            query: { selectedTab: NoDataTabs.Symbols },
+            query: { selectedTab: AddDataTabs.Symbols },
           })}
           color="warning"
         >

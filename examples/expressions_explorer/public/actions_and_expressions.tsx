@@ -11,13 +11,14 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageTemplate,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiPanel,
   EuiText,
   EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -55,8 +56,8 @@ export function ActionsExpressionsExample({ expressions, actions }: Props) {
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
-      <EuiPageContent data-test-subj="expressionsActionsTest">
-        <EuiPageContentBody>
+      <EuiPageTemplate.Section data-test-subj="expressionsActionsTest">
+        <EuiPageSection>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiText>
@@ -66,6 +67,8 @@ export function ActionsExpressionsExample({ expressions, actions }: Props) {
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
+
+          <EuiSpacer />
 
           <EuiFlexGroup gutterSize="l">
             <EuiFlexItem>
@@ -86,8 +89,8 @@ export function ActionsExpressionsExample({ expressions, actions }: Props) {
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPageContentBody>
-      </EuiPageContent>
+        </EuiPageSection>
+      </EuiPageTemplate.Section>
     </EuiPageBody>
   );
 }

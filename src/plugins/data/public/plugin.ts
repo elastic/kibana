@@ -138,6 +138,7 @@ export class DataPublicPlugin
       fieldFormats,
       indexPatterns: dataViews,
       screenshotMode,
+      scriptedFieldsEnabled: dataViews.scriptedFieldsEnabled,
     });
     setSearchService(search);
 
@@ -158,7 +159,7 @@ export class DataPublicPlugin
     uiActions.addTriggerAction(
       'MULTI_VALUE_CLICK_TRIGGER',
       createMultiValueClickActionDefinition(() => ({
-        filterManager: query.filterManager,
+        query,
       }))
     );
 

@@ -11,34 +11,27 @@ import { i18n } from '@kbn/i18n';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
-import type { AgentPolicy } from '../../../../common';
-
 import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/rest_spec/enrollment_api_key';
 
 import { CloudFormationInstructions } from '../cloud_formation_instructions';
-import { FLEET_CLOUD_SECURITY_POSTURE_PACKAGE } from '../../../../common';
+
+import type { CloudSecurityIntegration } from '../types';
 
 export const InstallCloudFormationManagedAgentStep = ({
   selectedApiKeyId,
   apiKeyData,
   enrollToken,
   isComplete,
-  cloudFormationTemplateUrl,
-  agentPolicy,
+  cloudSecurityIntegration,
 }: {
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
   enrollToken?: string;
   isComplete?: boolean;
-  cloudFormationTemplateUrl: string;
-  agentPolicy?: AgentPolicy;
+  cloudSecurityIntegration?: CloudSecurityIntegration | undefined;
 }): EuiContainedStepProps => {
   const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
   const status = isComplete ? 'complete' : nonCompleteStatus;
-
-  const cloudSecurityPackagePolicy = agentPolicy?.package_policies?.find(
-    (p) => p.package?.name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE
-  );
 
   return {
     status,
@@ -46,11 +39,10 @@ export const InstallCloudFormationManagedAgentStep = ({
       defaultMessage: 'Install Elastic Agent on your cloud',
     }),
     children:
-      selectedApiKeyId && apiKeyData ? (
+      selectedApiKeyId && apiKeyData && cloudSecurityIntegration ? (
         <CloudFormationInstructions
-          cloudFormationTemplateUrl={cloudFormationTemplateUrl}
+          cloudSecurityIntegration={cloudSecurityIntegration}
           enrollmentAPIKey={enrollToken}
-          packagePolicy={cloudSecurityPackagePolicy}
         />
       ) : (
         <React.Fragment />

@@ -109,12 +109,12 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "ml",
-              "path": "x-pack/plugins/ml/public/alerting/register_ml_alerts.ts"
-            },
-            {
               "plugin": "stackAlerts",
               "path": "x-pack/plugins/stack_alerts/public/rule_types/es_query/index.ts"
+            },
+            {
+              "plugin": "ml",
+              "path": "x-pack/plugins/ml/public/alerting/register_ml_alerts.ts"
             }
           ],
           "children": [
@@ -580,6 +580,69 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.AlertingAuthorization.getAuthorizedRuleTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getAuthorizedRuleTypes",
+            "description": [],
+            "signature": [
+              "(authorizationEntity: ",
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.AlertingAuthorizationEntity",
+                "text": "AlertingAuthorizationEntity"
+              },
+              ", featuresIds?: Set<string> | undefined) => Promise<",
+              "RegistryAlertTypeWithAuth",
+              "[]>"
+            ],
+            "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.AlertingAuthorization.getAuthorizedRuleTypes.$1",
+                "type": "Enum",
+                "tags": [],
+                "label": "authorizationEntity",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "alerting",
+                    "scope": "server",
+                    "docId": "kibAlertingPluginApi",
+                    "section": "def-server.AlertingAuthorizationEntity",
+                    "text": "AlertingAuthorizationEntity"
+                  }
+                ],
+                "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.AlertingAuthorization.getAuthorizedRuleTypes.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "featuresIds",
+                "description": [],
+                "signature": [
+                  "Set<string> | undefined"
+                ],
+                "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -2078,6 +2141,51 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.PluginStartContract.getAlertIndicesAlias",
+            "type": "Function",
+            "tags": [],
+            "label": "getAlertIndicesAlias",
+            "description": [],
+            "signature": [
+              "(rulesTypes: string[], spaceId?: string | undefined) => string[]"
+            ],
+            "path": "x-pack/plugins/alerting/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.PluginStartContract.getAlertIndicesAlias.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "rulesTypes",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/alerting/server/lib/create_get_alert_indices_alias.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.PluginStartContract.getAlertIndicesAlias.$2",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/alerting/server/lib/create_get_alert_indices_alias.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.PluginStartContract.getRulesClientWithRequest",
             "type": "Function",
             "tags": [],
@@ -3078,10 +3186,6 @@
                 "path": "x-pack/plugins/stack_alerts/server/rule_types/geo_containment/executor.ts"
               },
               {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/executor.ts"
-              },
-              {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/server/alert_rules/common.ts"
               },
@@ -3303,7 +3407,7 @@
                 "section": "def-common.FieldSpec",
                 "text": "FieldSpec"
               },
-              "[]>; getFieldsForIndexPattern: (indexPattern: ",
+              "[]>; getExistingIndices: (indices: string[]) => Promise<string[]>; getFieldsForIndexPattern: (indexPattern: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4588,7 +4692,7 @@
           "MuteOptions",
           ") => Promise<void>; unmuteInstance: (options: ",
           "MuteOptions",
-          ") => Promise<void>; runSoon: (options: { id: string; }) => Promise<any>; listRuleTypes: () => Promise<Set<",
+          ") => Promise<void>; runSoon: (options: { id: string; }) => Promise<string | undefined>; listRuleTypes: () => Promise<Set<",
           "RegistryAlertTypeWithAuth",
           ">>; getSpaceId: () => string | undefined; getAuthorization: () => ",
           {

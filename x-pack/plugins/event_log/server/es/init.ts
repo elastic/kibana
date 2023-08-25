@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { asyncForEach } from '@kbn/std';
 import { groupBy } from 'lodash';
 import pRetry, { FailedAttemptError } from 'p-retry';
-import { getIlmPolicy, getIndexTemplate } from './documents';
+import { getIndexTemplate } from './documents';
 import { EsContext } from './context';
 
 const MAX_RETRY_DELAY = 30000;
@@ -33,7 +33,6 @@ async function initializeEsResources(esContext: EsContext) {
 
   // today, setExistingAssetsToHidden() never throws, but just in case ...
   await retry(steps.setExistingAssetsToHidden);
-  await retry(steps.createIlmPolicyIfNotExists);
   await retry(steps.createIndexTemplateIfNotExists);
   await retry(steps.createDataStreamIfNotExists);
 
@@ -200,18 +199,6 @@ class EsInitializationSteps {
     await this.setExistingIndexTemplatesToHidden();
     await this.setExistingIndicesToHidden();
     await this.setExistingIndexAliasesToHidden();
-  }
-
-  async createIlmPolicyIfNotExists(): Promise<void> {
-    const exists = await this.esContext.esAdapter.doesIlmPolicyExist(
-      this.esContext.esNames.ilmPolicy
-    );
-    if (!exists) {
-      await this.esContext.esAdapter.createIlmPolicy(
-        this.esContext.esNames.ilmPolicy,
-        getIlmPolicy()
-      );
-    }
   }
 
   async createIndexTemplateIfNotExists(): Promise<void> {

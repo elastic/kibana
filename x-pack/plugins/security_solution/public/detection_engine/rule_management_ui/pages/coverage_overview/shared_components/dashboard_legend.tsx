@@ -45,6 +45,7 @@ export const CoverageOverviewLegend = () => {
               ? `\u003E${threshold}`
               : `${threshold}-${thresholdsMap[index - 1].threshold}`
           } ${i18n.CoverageOverviewLegendRulesLabel}`}
+          key={index}
           color={color}
         />
       )),
