@@ -57,7 +57,6 @@
     "@kbn/unified-search-plugin",
     "@kbn/core-http-server-mocks",
     "@kbn/core-http-router-server-mocks",
-    "@kbn/zod",
   ],
   "exclude": ["target/**/*"]
 }
