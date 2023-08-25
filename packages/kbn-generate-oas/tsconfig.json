@@ -14,10 +14,5 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core-http-router-server-internal",
-    "@kbn/dev-cli-runner",
-    "@kbn/safer-lodash-set",
-    "@kbn/core-test-helpers-kbn-server",
-    "@kbn/core-plugins-server-internal",
   ]
 }

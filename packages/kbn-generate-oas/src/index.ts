@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-require('../src/setup_node_env');
-require('@kbn/generate-oas-cli');
+export { generateOpenApiDocument } from './generate_oas';
