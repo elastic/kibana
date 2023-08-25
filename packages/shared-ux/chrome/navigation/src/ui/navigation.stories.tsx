@@ -89,30 +89,25 @@ const simpleNavigationDefinition: ProjectNavigationDefinition = {
       defaultIsCollapsed: false,
       children: [
         {
-          id: 'root',
-          children: [
-            {
-              id: 'item1',
-              title: 'Get started',
-            },
-            {
-              id: 'item2',
-              title: 'Alerts',
-            },
-            {
-              id: 'item3',
-              title: 'Dashboards',
-            },
-            {
-              id: 'item4',
-              title: 'External link',
-              href: 'https://elastic.co',
-            },
-            {
-              id: 'item5',
-              title: 'Another link',
-            },
-          ],
+          id: 'item1',
+          title: 'Get started',
+        },
+        {
+          id: 'item2',
+          title: 'Alerts',
+        },
+        {
+          id: 'item3',
+          title: 'Dashboards',
+        },
+        {
+          id: 'item4',
+          title: 'External link',
+          href: 'https://elastic.co',
+        },
+        {
+          id: 'item5',
+          title: 'Another link',
         },
         {
           id: 'group:settings',
@@ -171,21 +166,16 @@ const navigationDefinition: ProjectNavigationDefinition = {
         defaultIsCollapsed: false,
         children: [
           {
-            id: 'root',
-            children: [
-              {
-                id: 'item1',
-                title: 'Get started',
-              },
-              {
-                id: 'item2',
-                title: 'Alerts',
-              },
-              {
-                id: 'item3',
-                title: 'Some other node',
-              },
-            ],
+            id: 'item1',
+            title: 'Get started',
+          },
+          {
+            id: 'item2',
+            title: 'Alerts',
+          },
+          {
+            id: 'item3',
+            title: 'Some other node',
           },
           {
             id: 'group:settings',
