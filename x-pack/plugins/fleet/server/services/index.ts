@@ -39,6 +39,9 @@ export interface AgentPolicyServiceInterface {
 export { AgentServiceImpl } from './agents';
 export type { AgentClient, AgentService } from './agents';
 
+// Action services
+export { FleetActionsClient } from './actions';
+
 // Saved object services
 export { agentPolicyService } from './agent_policy';
 export { packagePolicyService } from './package_policy';
