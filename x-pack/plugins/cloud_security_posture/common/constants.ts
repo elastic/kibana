@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PostureTypes, VulnSeverity, AwsCredentialsTypeFieldMap } from './types';
+import { PostureTypes, VulnSeverity, AwsCredentialsTypeFieldMap, GcpCredentialsTypeFieldMap } from './types';
 
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
 export const STATUS_API_CURRENT_VERSION = '1';
@@ -143,3 +143,8 @@ export const SETUP_ACCESS_CLOUD_SHELL = 'google_cloud_shell';
 export const SETUP_ACCESS_MANUAL = 'manual';
 
 export const DETECTION_ENGINE_ALERTS_INDEX_DEFAULT = '.alerts-security.alerts-default';
+
+export const GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP: GcpCredentialsTypeFieldMap = {
+  'credentials-file': ['gcp.credentials.file'],
+  'credentials-json': ['gcp.credentials.json'],
+};

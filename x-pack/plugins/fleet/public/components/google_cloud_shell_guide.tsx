@@ -53,7 +53,7 @@ export const GoogleCloudShellGuide = (props: { commandText: string }) => {
                   defaultMessage="Copy the following command and replace <PROJECT_ID> with your project ID."
                 />
                 <EuiSpacer size="m" />
-                <EuiCodeBlock language="bash" isCopyable>
+                <EuiCodeBlock language="bash" isCopyable contentEditable="true">
                   {props.commandText}
                 </EuiCodeBlock>
               </>

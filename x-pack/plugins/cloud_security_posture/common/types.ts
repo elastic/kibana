@@ -222,3 +222,11 @@ export interface AggFieldBucket {
     doc_count?: string;
   }>;
 }
+
+export type GcpCredentialsType =
+  | 'credentials-file'
+  | 'credentials-json'
+
+export type GcpCredentialsTypeFieldMap = {
+  [key in GcpCredentialsType]: string[];
+};
