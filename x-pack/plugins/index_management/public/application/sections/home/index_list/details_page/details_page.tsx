@@ -154,10 +154,6 @@ export const DetailsPage: React.FunctionComponent<
       />
 
       <EuiSpacer size="l" />
-      <div>
-        <pre>{JSON.stringify(data, null, 2)}</pre>
-      </div>
-      <EuiSpacer size="l" />
 
       <div data-test-subj={`indexDetailsContent`}>
         <Routes>
@@ -186,6 +182,11 @@ export const DetailsPage: React.FunctionComponent<
             to={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Overview}`}
           />
         </Routes>
+      </div>
+
+      <EuiSpacer size="l" />
+      <div>
+        <pre>{JSON.stringify(data, null, 2)}</pre>
       </div>
     </>
   );

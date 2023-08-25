@@ -198,6 +198,7 @@ export class IndexActionsContextMenu extends Component {
       });
     }
     items.push({
+      'data-test-subj': 'deleteIndexMenuButton',
       name: i18n.translate('xpack.idxMgmt.indexActionsMenu.deleteIndexLabel', {
         defaultMessage: 'Delete {selectedIndexCount, plural, one {index} other {indices} }',
         values: { selectedIndexCount },
@@ -372,6 +373,7 @@ export class IndexActionsContextMenu extends Component {
             helpText={helpText}
           >
             <EuiFieldNumber
+              data-test-subj="indexActionsForcemergeNumSegments"
               onChange={(event) => {
                 this.setState({ forcemergeSegments: event.target.value });
               }}
