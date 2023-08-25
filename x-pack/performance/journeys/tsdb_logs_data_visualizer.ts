@@ -27,6 +27,6 @@ export const journey = new Journey({
     await page.click(subj('savedObjectTitlekibana_sample_data_logstsdb'));
     await page.click(subj('mlDatePickerButtonUseFullData'));
     await kibanaPage.waitForHeader();
-    await page.waitForSelector(subj('dataVisualizerTable loaded'), { timeout: 120000 });
+    await page.waitForSelector(subj('dataVisualizerTable-loaded'), { timeout: 120000 });
     await page.waitForSelector(subj('globalLoadingIndicator-hidden'), { timeout: 120000 });
   });

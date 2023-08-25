@@ -246,7 +246,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
             lensMetricField.fieldName,
             'legacyMtrVis'
           );
-          await ml.navigation.browserBackTo('dataVisualizerTable');
+          await ml.navigation.browserBackTo('dataVisualizerTableContainer');
         }
         const lensNonMetricField = testData.expected.nonMetricFields?.find(
           (f) => f.type === ML_JOB_FIELD_TYPES.KEYWORD
@@ -257,7 +257,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
             lensNonMetricField.fieldName,
             'legacyMtrVis'
           );
-          await ml.navigation.browserBackTo('dataVisualizerTable');
+          await ml.navigation.browserBackTo('dataVisualizerTableContainer');
         }
       });
     });

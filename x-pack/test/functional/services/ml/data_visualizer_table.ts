@@ -24,7 +24,7 @@ export function MachineLearningDataVisualizerTableProvider(
 
   return new (class DataVisualizerTable {
     public async parseDataVisualizerTable() {
-      const table = await testSubjects.find('~dataVisualizerTable');
+      const table = await testSubjects.find('~dataVisualizerTable-loaded');
       const $ = await table.parseDomContent();
       const rows = [];
 
@@ -74,7 +74,7 @@ export function MachineLearningDataVisualizerTableProvider(
     }
 
     public rowSelector(fieldName: string, subSelector?: string) {
-      const row = `~dataVisualizerTable > ~row-${fieldName}`;
+      const row = `~dataVisualizerTableContainer > ~row-${fieldName}`;
       return !subSelector ? row : `${row} > ${subSelector}`;
     }
 
@@ -102,7 +102,7 @@ export function MachineLearningDataVisualizerTableProvider(
     }
 
     public detailsSelector(fieldName: string, subSelector?: string) {
-      const row = `~dataVisualizerTable > ~dataVisualizerFieldExpandedRow-${fieldName}`;
+      const row = `~dataVisualizerTableContainer > ~dataVisualizerFieldExpandedRow-${fieldName}`;
       return !subSelector ? row : `${row} > ${subSelector}`;
     }
 
@@ -566,7 +566,7 @@ export function MachineLearningDataVisualizerTableProvider(
     }
 
     public async ensureNumRowsPerPage(n: 10 | 25 | 50) {
-      const paginationButton = 'dataVisualizerTable > tablePaginationPopoverButton';
+      const paginationButton = 'dataVisualizerTableContainer > tablePaginationPopoverButton';
       await retry.tryForTime(10000, async () => {
         await testSubjects.existOrFail(paginationButton);
         await testSubjects.click(paginationButton);
