@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
 export const getInitialTransformCapabilities = (initialSetting = false) => ({
   canCreateTransform: initialSetting,
   canCreateTransformAlerts: initialSetting,
@@ -18,6 +20,13 @@ export const getInitialTransformCapabilities = (initialSetting = false) => ({
   canStartStopTransform: initialSetting,
   canUseTransformAlerts: initialSetting,
 });
+
+export const isTransformCapabilities = (arg: unknown): arg is TransformCapabilities => {
+  return (
+    isPopulatedObject(arg, Object.keys(getInitialTransformCapabilities())) &&
+    Object.values(arg).every((d) => typeof d === 'boolean')
+  );
+};
 
 export type TransformCapabilities = ReturnType<typeof getInitialTransformCapabilities>;
 export type TransformCapability = keyof TransformCapabilities;

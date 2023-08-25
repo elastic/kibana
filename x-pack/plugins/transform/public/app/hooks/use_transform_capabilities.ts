@@ -5,12 +5,20 @@
  * 2.0.
  */
 
-import type { PrivilegesAndCapabilities } from '../../../common/types/capabilities';
+import {
+  getInitialTransformCapabilities,
+  isTransformCapabilities,
+  type TransformCapabilities,
+} from '../../../common/types/capabilities';
 
 import { useAppDependencies } from '../app_dependencies';
 
 export const useTransformCapabilities = () => {
   const { application } = useAppDependencies();
 
-  return application.capabilities.transform as PrivilegesAndCapabilities['capabilities'];
+  if (isTransformCapabilities(application?.capabilities?.transform)) {
+    return application.capabilities.transform as TransformCapabilities;
+  }
+
+  return getInitialTransformCapabilities();
 };

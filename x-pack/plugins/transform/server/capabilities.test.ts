@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { type TransformCapabilities } from '../common/types/capabilities';
+
 import { extractMissingPrivileges, getPrivilegesAndCapabilities } from './capabilities';
 
 describe('has_privilege_factory', () => {
@@ -65,9 +67,10 @@ describe('has_privilege_factory', () => {
 
   describe('getPrivilegesAndCapabilities', () => {
     it('returns full capabilities if provided both monitor and admin cluster privileges', () => {
-      const fullCapabilities = {
+      const fullCapabilities: TransformCapabilities = {
         canCreateTransform: true,
         canCreateTransformAlerts: true,
+        canDeleteIndex: true,
         canDeleteTransform: true,
         canGetTransform: true,
         canPreviewTransform: true,
@@ -91,9 +94,10 @@ describe('has_privilege_factory', () => {
       });
     });
     it('returns view only capabilities if provided only monitor cluster privileges', () => {
-      const viewOnlyCapabilities = {
+      const viewOnlyCapabilities: TransformCapabilities = {
         canCreateTransform: false,
         canCreateTransformAlerts: false,
+        canDeleteIndex: false,
         canDeleteTransform: false,
         canGetTransform: true,
         canPreviewTransform: false,
@@ -119,9 +123,10 @@ describe('has_privilege_factory', () => {
       });
     });
     it('returns no capabilities and all the missing privileges if no cluster privileges', () => {
-      const noCapabilities = {
+      const noCapabilities: TransformCapabilities = {
         canCreateTransform: false,
         canCreateTransformAlerts: false,
+        canDeleteIndex: false,
         canDeleteTransform: false,
         canGetTransform: false,
         canPreviewTransform: false,

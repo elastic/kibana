@@ -24,6 +24,6 @@ describe('Transform: <TransformManagementSection />', () => {
       </QueryClientProvider>
     );
 
-    expect(container.textContent).toBe('Checking privileges…');
+    expect(container.textContent).toContain('Missing permission');
   });
 });
