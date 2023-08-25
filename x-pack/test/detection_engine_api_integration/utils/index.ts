@@ -83,6 +83,7 @@ export * from './perform_search_query';
 export * from './preview_rule_with_exception_entries';
 export * from './preview_rule';
 export * from './refresh_index';
+export * from './route_with_namespace';
 export * from './remove_time_fields_from_telemetry_stats';
 export * from './remove_server_generated_properties';
 export * from './remove_server_generated_properties_including_rule_id';

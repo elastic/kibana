@@ -68,6 +68,8 @@ export interface RegistryRuleType
   > {
   id: string;
   enabledInLicense: boolean;
+  hasFieldsForAAD: boolean;
+  hasAlertsMappings: boolean;
 }
 
 /**
@@ -366,26 +368,28 @@ export class RuleTypeRegistry {
   }
 
   public list(): Set<RegistryRuleType> {
-    return new Set(
-      Array.from(this.ruleTypes).map(
-        ([
-          id,
-          {
-            name,
-            actionGroups,
-            recoveryActionGroup,
-            defaultActionGroupId,
-            actionVariables,
-            producer,
-            minimumLicenseRequired,
-            isExportable,
-            ruleTaskTimeout,
-            defaultScheduleInterval,
-            doesSetRecoveryContext,
-            alerts,
-            fieldsForAAD,
-          },
-        ]: [string, UntypedNormalizedRuleType]) => ({
+    const mapRuleTypes: Array<[string, UntypedNormalizedRuleType]> = Array.from(this.ruleTypes);
+    const tempRegistryRuleType = mapRuleTypes.map<RegistryRuleType>(
+      ([
+        id,
+        {
+          name,
+          actionGroups,
+          recoveryActionGroup,
+          defaultActionGroupId,
+          actionVariables,
+          producer,
+          minimumLicenseRequired,
+          isExportable,
+          ruleTaskTimeout,
+          defaultScheduleInterval,
+          doesSetRecoveryContext,
+          alerts,
+          fieldsForAAD,
+        },
+      ]) => {
+        // KEEP the type here to be safe if not the map is  ignoring it for some reason
+        const ruleType: RegistryRuleType = {
           id,
           name,
           actionGroups,
@@ -406,9 +410,11 @@ export class RuleTypeRegistry {
           hasFieldsForAAD: Boolean(fieldsForAAD),
           hasAlertsMappings: !!alerts,
           ...(alerts ? { alerts } : {}),
-        })
-      )
+        };
+        return ruleType;
+      }
     );
+    return new Set(tempRegistryRuleType);
   }
 
   public getAllTypes(): string[] {

@@ -98,9 +98,11 @@ export const getLegendItems = ({
 
 export const getFlattenedBuckets = ({
   ilmPhases,
+  isILMAvailable,
   patternRollups,
 }: {
   ilmPhases: string[];
+  isILMAvailable: boolean;
   patternRollups: Record<string, PatternRollup>;
 }): FlattenedBucket[] =>
   Object.values(patternRollups).reduce<FlattenedBucket[]>((acc, patternRollup) => {
@@ -111,13 +113,15 @@ export const getFlattenedBuckets = ({
     );
     const { ilmExplain, pattern, results, stats } = patternRollup;
 
-    if (ilmExplain != null && stats != null) {
+    if (((isILMAvailable && ilmExplain != null) || !isILMAvailable) && stats != null) {
       return [
         ...acc,
         ...Object.entries(stats).reduce<FlattenedBucket[]>(
           (validStats, [indexName, indexStats]) => {
-            const ilmPhase = getIlmPhase(ilmExplain[indexName]);
-            const isSelectedPhase = ilmPhase != null && ilmPhasesMap[ilmPhase] != null;
+            const ilmPhase = getIlmPhase(ilmExplain?.[indexName], isILMAvailable);
+            const isSelectedPhase =
+              (isILMAvailable && ilmPhase != null && ilmPhasesMap[ilmPhase] != null) ||
+              !isILMAvailable;
 
             if (isSelectedPhase) {
               const incompatible =

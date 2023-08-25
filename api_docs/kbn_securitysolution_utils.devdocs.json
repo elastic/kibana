@@ -520,13 +520,10 @@
       {
         "parentPluginId": "@kbn/securitysolution-utils",
         "id": "def-common.FILENAME_WILDCARD_WARNING",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "FILENAME_WILDCARD_WARNING",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -535,13 +532,10 @@
       {
         "parentPluginId": "@kbn/securitysolution-utils",
         "id": "def-common.FILEPATH_WARNING",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "FILEPATH_WARNING",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
         "trackAdoption": false,
