@@ -19,16 +19,18 @@ import { serializeAsESPolicy } from '../../../../common/lib';
 import type { SerializedEnrichPolicy } from '../../../../common';
 
 export const validationSchema = schema.object({
-  name: schema.string(),
-  type: schema.oneOf([
-    schema.literal('match'),
-    schema.literal('range'),
-    schema.literal('geo_match'),
-  ]),
-  matchField: schema.string(),
-  enrichFields: schema.arrayOf(schema.string()),
-  sourceIndices: schema.arrayOf(schema.string()),
-  query: schema.maybe(schema.any()),
+  policy: schema.object({
+    name: schema.string(),
+    type: schema.oneOf([
+      schema.literal('match'),
+      schema.literal('range'),
+      schema.literal('geo_match'),
+    ]),
+    matchField: schema.string(),
+    enrichFields: schema.arrayOf(schema.string()),
+    sourceIndices: schema.arrayOf(schema.string()),
+    query: schema.maybe(schema.any()),
+  }),
 });
 
 const getMatchingIndicesSchema = schema.object({ pattern: schema.string() }, { unknowns: 'allow' });
@@ -122,11 +124,11 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
     async (context, request, response) => {
       const client = (await context.core).elasticsearch.client as IScopedClusterClient;
 
-      const { name } = request.body;
-      const serializedPolicy = serializeAsESPolicy(request.body as SerializedEnrichPolicy);
+      const { policy } = request.body;
+      const serializedPolicy = serializeAsESPolicy(policy as SerializedEnrichPolicy);
 
       try {
-        const res = await enrichPoliciesActions.create(client, name, serializedPolicy);
+        const res = await enrichPoliciesActions.create(client, policy.name, serializedPolicy);
         return response.ok({ body: res });
       } catch (error) {
         return handleEsError({ error, response });

@@ -339,7 +339,18 @@ export async function executeEnrichPolicy(policyName: string) {
   return result;
 }
 
+export async function createEnrichPolicy(policy: SerializedEnrichPolicy) {
+  const result = sendRequest({
+    path: `${INTERNAL_API_BASE_PATH}/enrich_policies`,
+    method: 'post',
+    body: JSON.stringify({ policy }),
+  });
+
+  return result;
+}
+
 export async function getMatchingIndices(pattern: string) {
+  // TODO: should we move this to the backend?
   if (!pattern.startsWith('*')) {
     pattern = `*${pattern}`;
   }

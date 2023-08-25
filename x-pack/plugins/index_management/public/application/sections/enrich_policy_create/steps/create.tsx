@@ -171,9 +171,10 @@ const RequestTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
 
 interface Props {
   onSubmit: () => void;
+  isLoading: boolean;
 }
 
-export const CreateStep = ({ onSubmit }: Props) => {
+export const CreateStep = ({ onSubmit, isLoading }: Props) => {
   const { draft } = useCreatePolicyContext();
 
   const summaryTabs = [
@@ -199,7 +200,7 @@ export const CreateStep = ({ onSubmit }: Props) => {
 
       <EuiSpacer />
 
-      <EuiButton fill color="primary" onClick={onSubmit}>
+      <EuiButton fill color="primary" onClick={onSubmit} isLoading={isLoading}>
         <FormattedMessage
           id="xpack.idxMgmt.enrichPolicies.create.stepCreate.createButtonLabel"
           defaultMessage="Create policy"

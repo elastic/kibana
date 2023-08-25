@@ -7,18 +7,25 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSteps, EuiStepStatus } from '@elastic/eui';
+import { EuiSteps, EuiStepStatus, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
+import { useAppContext } from '../../app_context';
 import { ConfigurationStep, FieldSelectionStep, CreateStep } from './steps';
 import { useCreatePolicyContext } from './create_policy_context';
+import { createEnrichPolicy } from '../../services/api';
+import type { Error } from '../../../shared_imports';
+import type { SerializedEnrichPolicy } from '../../../../common';
 
 const CONFIGURATION = 1;
 const FIELD_SELECTION = 2;
 const CREATE = 3;
 
 export const CreatePolicyWizard = () => {
-  const { completionState } = useCreatePolicyContext();
+  const { history } = useAppContext();
+  const { draft, completionState } = useCreatePolicyContext();
   const [currentStep, setCurrentStep] = useState(CONFIGURATION);
+  const [isLoading, setIsLoading] = useState(false);
+  const [createError, setCreateError] = useState<Error | null>(null);
 
   const getStepStatus = useCallback(
     (forStep: number): EuiStepStatus => {
@@ -31,9 +38,27 @@ export const CreatePolicyWizard = () => {
     [currentStep]
   );
 
-  const onSubmit = useCallback(() => {
-    console.log('create policy');
-  }, []);
+  const onSubmit = useCallback(async () => {
+    setIsLoading(true);
+    const { error } = await createEnrichPolicy(draft as SerializedEnrichPolicy);
+    setIsLoading(false);
+
+    // If there was an error while creating the policy, navigate back to the first step and show the error there
+    if (error) {
+      setCreateError(error);
+      return;
+    }
+
+    history.push('/enrich_policies');
+  }, [draft, history, setIsLoading, setCreateError]);
+
+  const changeCurrentStepTo = useCallback(
+    (step: number) => {
+      setCurrentStep(step);
+      setCreateError(null);
+    },
+    [setCurrentStep, setCreateError]
+  );
 
   const stepDefinitions = useMemo(
     () => [
@@ -43,9 +68,9 @@ export const CreatePolicyWizard = () => {
           defaultMessage: 'Configuration',
         }),
         status: completionState.configurationStep ? 'complete' : getStepStatus(CONFIGURATION),
-        onClick: () => currentStep !== CONFIGURATION && setCurrentStep(CONFIGURATION),
+        onClick: () => currentStep !== CONFIGURATION && changeCurrentStepTo(CONFIGURATION),
         children: currentStep === CONFIGURATION && (
-          <ConfigurationStep onNext={() => setCurrentStep(FIELD_SELECTION)} />
+          <ConfigurationStep onNext={() => changeCurrentStepTo(FIELD_SELECTION)} />
         ),
       },
       {
@@ -56,11 +81,11 @@ export const CreatePolicyWizard = () => {
         status: completionState.fieldsSelectionStep ? 'complete' : getStepStatus(FIELD_SELECTION),
         onClick: () => {
           if (currentStep !== FIELD_SELECTION && completionState.configurationStep) {
-            setCurrentStep(FIELD_SELECTION);
+            changeCurrentStepTo(FIELD_SELECTION);
           }
         },
         children: currentStep === FIELD_SELECTION && (
-          <FieldSelectionStep onNext={() => setCurrentStep(CREATE)} />
+          <FieldSelectionStep onNext={() => changeCurrentStepTo(CREATE)} />
         ),
       },
       {
@@ -75,14 +100,34 @@ export const CreatePolicyWizard = () => {
             completionState.configurationStep &&
             completionState.fieldsSelectionStep
           ) {
-            setCurrentStep(CREATE);
+            changeCurrentStepTo(CREATE);
           }
         },
-        children: currentStep === CREATE && <CreateStep onSubmit={onSubmit} />,
+        children: currentStep === CREATE && (
+          <CreateStep onSubmit={onSubmit} isLoading={isLoading} />
+        ),
       },
     ],
-    [currentStep, setCurrentStep, completionState, getStepStatus]
+    [currentStep, changeCurrentStepTo, completionState, getStepStatus, isLoading, onSubmit]
   );
 
-  return <EuiSteps steps={stepDefinitions} />;
+  return (
+    <>
+      {createError && (
+        <>
+          <EuiCallOut
+            title={i18n.translate('xpack.idxMgmt.editSettingsJSON.saveJSONCalloutErrorTitle', {
+              defaultMessage: 'There was an error while trying to create your policy',
+            })}
+            color="danger"
+            iconType="error"
+          >
+            <p>{createError.message}</p>
+          </EuiCallOut>
+          <EuiSpacer size="xl" />
+        </>
+      )}
+      <EuiSteps steps={stepDefinitions} />
+    </>
+  );
 };
