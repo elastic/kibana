@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
 import { navigateTo } from '../../tasks/navigation';
 import {
   addToCase,
@@ -19,7 +18,7 @@ import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import { loadPack, cleanupPack, cleanupCase, loadCase } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Live Query Packs', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
+describe('ALL - Live Query Packs', { tags: ['@serverless', '@ess'] }, () => {
   let packName: string;
   let packId: string;
   let caseId: string;

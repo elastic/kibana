@@ -38,6 +38,7 @@ export const upgradePrebuiltRules = async (
   const response = await supertest
     .post(PERFORM_RULE_UPGRADE_URL)
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '1')
     .send(payload)
     .expect(200);
 

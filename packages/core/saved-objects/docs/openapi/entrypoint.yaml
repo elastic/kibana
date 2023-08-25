@@ -16,8 +16,8 @@ servers:
     description: local
 paths:
 # Paths in the default space
-#  '/api/encrypted_saved_objects/_rotate_key':
-#    $ref: 'paths/api@encrypted_saved_objects@_rotate_key.yaml'
+  '/api/encrypted_saved_objects/_rotate_key':
+    $ref: 'paths/api@encrypted_saved_objects@_rotate_key.yaml'
 #  '/api/saved_objects/_bulk_create':
 #    $ref: 'paths/api@saved_objects@_bulk_create.yaml'
 #  '/api/saved_objects/_bulk_delete':

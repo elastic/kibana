@@ -28,6 +28,7 @@ import {
   LanguageClientPanel,
   CodeBox,
   getLanguageDefinitionCodeSnippet,
+  getConsoleRequest,
 } from '@kbn/search-api-panels';
 import type {
   LanguageDefinition,
@@ -42,7 +43,6 @@ import { API_KEY_PLACEHOLDER, ELASTICSEARCH_URL_PLACEHOLDER } from '../constants
 import { useKibanaServices } from '../hooks/use_kibana';
 import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
-import { showTryInConsole } from './languages/utils';
 
 const NoIndicesContent = () => (
   <>
@@ -232,7 +232,7 @@ export const ElasticsearchIndexingApi = () => {
                 http={http}
                 pluginId={PLUGIN_ID}
                 sharePlugin={share}
-                showTryInConsole={showTryInConsole('ingestDataIndex')}
+                consoleRequest={getConsoleRequest('ingestDataIndex')}
               />
             </>
           }
