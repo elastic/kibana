@@ -215,7 +215,7 @@ export interface Connector {
   features: ConnectorFeatures;
   filtering: FilteringConfig[];
   id: string;
-  index_name: string;
+  index_name: string | null;
   is_native: boolean;
   language: string | null;
   last_access_control_sync_error: string | null;

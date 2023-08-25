@@ -317,7 +317,7 @@ export const ConnectorConfigurationLogic = kea<
               return prev;
             }, {}),
           connectorId: values.index.connector.id,
-          indexName: values.index.connector.index_name,
+          indexName: values.index.connector.index_name ?? '',
         });
       }
     },
