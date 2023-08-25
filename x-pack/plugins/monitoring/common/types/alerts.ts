@@ -79,7 +79,6 @@ export interface AlertInstanceState {
   [x: string]: unknown;
 }
 
-// Gets interesting for making this strict
 export interface AlertState {
   cluster: AlertCluster;
   ccs?: string;
@@ -87,7 +86,6 @@ export interface AlertState {
   [key: string]: unknown;
 }
 
-// Gets interesting for making this strict
 export interface AlertNodeState extends AlertState {
   nodeId: string;
   nodeName?: string;
