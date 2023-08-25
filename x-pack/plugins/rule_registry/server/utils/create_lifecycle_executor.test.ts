@@ -63,6 +63,7 @@ describe('createLifecycleExecutor', () => {
       },
       trackedAlerts: {},
       trackedAlertsRecovered: {},
+      isLifecycleAlert: true,
     });
   });
 
