@@ -57,6 +57,7 @@ export class SecuritySolutionServerlessPlugin
     registerUpsellings(securitySolution.getUpselling(), this.config.productTypes, services);
 
     securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services, productTypes));
+    securitySolution.setIsILMAvailable(false);
 
     configureNavigation(services, this.config);
     setRoutes(services);

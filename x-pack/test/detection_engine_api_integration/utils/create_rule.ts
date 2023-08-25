@@ -14,6 +14,7 @@ import type {
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { deleteRule } from './delete_rule';
+import { routeWithNamespace } from './route_with_namespace';
 
 /**
  * Helper to cut down on the noise in some of the tests. If this detects
@@ -27,10 +28,12 @@ import { deleteRule } from './delete_rule';
 export const createRule = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
-  rule: RuleCreateProps
+  rule: RuleCreateProps,
+  namespace?: string
 ): Promise<RuleResponse> => {
+  const route = routeWithNamespace(DETECTION_ENGINE_RULES_URL, namespace);
   const response = await supertest
-    .post(DETECTION_ENGINE_RULES_URL)
+    .post(route)
     .set('kbn-xsrf', 'true')
     .set('elastic-api-version', '2023-10-31')
     .send(rule);
