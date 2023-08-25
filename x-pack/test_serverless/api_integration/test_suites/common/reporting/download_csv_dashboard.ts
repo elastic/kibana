@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
   const fromTime = '2019-06-20T00:00:00.000Z';
   const toTime = '2019-06-25T00:00:00.000Z';
 
-  describe.skip('CSV Generation from SearchSource: Dashboard', () => {
+  describe('CSV Generation from SearchSource: Dashboard', () => {
     before(async () => {
       await esArchiver.load(archives.data);
       await kibanaServer.importExport.load(archives.savedObjects);
