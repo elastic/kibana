@@ -291,6 +291,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.alertDetails.observability.enabled (boolean)',
         'xpack.observability.unsafe.thresholdRule.enabled (boolean)',
         'xpack.observability_onboarding.ui.enabled (boolean)',
+        'xpack.observabilityLogExplorer.navigation.showAppLink (boolean)',
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's

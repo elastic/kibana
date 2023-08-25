@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ObservabilityLogExplorerConfig {}
+export interface ObservabilityLogExplorerConfig {
+  navigation: {
+    showAppLink: boolean;
+  };
+}

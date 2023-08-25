@@ -7,4 +7,6 @@
 
 import { ObservabilityLogExplorerServerPlugin } from './plugin';
 
+export { config } from './config';
+
 export const plugin = () => new ObservabilityLogExplorerServerPlugin();
