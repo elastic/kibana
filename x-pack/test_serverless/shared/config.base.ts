@@ -7,6 +7,7 @@
 
 import { resolve } from 'path';
 import { format as formatUrl } from 'url';
+import Fs from 'fs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
@@ -24,6 +25,7 @@ export default async () => {
     kibana: {
       ...kbnTestConfig.getUrlParts(kibanaServerlessSuperuser),
       protocol: 'https',
+      certificateAuthorities: [Fs.readFileSync(CA_CERT_PATH)],
     },
     elasticsearch: { ...esTestConfig.getUrlParts(), protocol: 'https' },
   };
