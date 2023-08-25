@@ -58,7 +58,7 @@ export const AssistantTitle: React.FC<{
   const content = useMemo(
     () => (
       <FormattedMessage
-        defaultMessage="The Elastic AI Assistant is currently in beta. For more information on the assistant feature and its usage, please reference the {documentationLink}."
+        defaultMessage="Responses from AI systems may not always be entirely accurate. For more information on the assistant feature and its usage, please reference the {documentationLink}."
         id="xpack.elasticAssistant.assistant.technicalPreview.tooltipContent"
         values={{
           documentationLink,
@@ -106,7 +106,6 @@ export const AssistantTitle: React.FC<{
                   anchorPosition="rightUp"
                 >
                   <EuiText data-test-subj="tooltipContent" grow={false} css={{ maxWidth: '400px' }}>
-                    <h4>{i18n.TOOLTIP_TITLE}</h4>
                     <EuiText size={'s'}>
                       <p>{content}</p>
                     </EuiText>
