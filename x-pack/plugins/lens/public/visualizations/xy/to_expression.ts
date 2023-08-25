@@ -7,7 +7,7 @@
 
 import { Ast } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
-import type { PaletteRegistry } from '@kbn/coloring';
+import { DEFAULT_COLOR_MAPPING_CONFIG, PaletteRegistry } from '@kbn/coloring';
 import {
   buildExpression,
   buildExpressionFunction,
@@ -511,6 +511,7 @@ const dataLayerToExpression = (
             name: 'default',
           }),
     ]).toAst(),
+    colorMapping: JSON.stringify(layer.colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG),
   });
 
   return {

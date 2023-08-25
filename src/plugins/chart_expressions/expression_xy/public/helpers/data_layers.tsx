@@ -16,13 +16,16 @@ import {
   SeriesName,
   StackMode,
   XYChartSeriesIdentifier,
+  SeriesColorAccessorFn,
 } from '@elastic/charts';
 import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
-import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
+import { ColorMapping, PaletteRegistry, SeriesLayer } from '@kbn/coloring';
+import { getPalette, availablePalettes, NeutralPalette } from '@kbn/coloring';
+import { SPECIAL_RULE_MATCHES } from '@kbn/coloring/src/shared_components/color_mapping/color/rule_matching';
 import { isDataLayer } from '../../common/utils/layer_types_guards';
 import { CommonXYDataLayerConfig, CommonXYLayerConfig, XScaleType } from '../../common';
 import { AxisModes, SeriesTypes } from '../../common/constants';
@@ -32,6 +35,8 @@ import { ColorAssignments } from './color_assignment';
 import { GroupsConfiguration } from './axes_configuration';
 import { LayerAccessorsTitles, LayerFieldFormats, LayersFieldFormats } from './layers';
 import { getFormat } from './format';
+import { getColorSeriesAccessorFn } from './color/color_mapping';
+import { getColorCategories } from './color/categories';
 
 type SeriesSpec = LineSeriesProps & BarSeriesProps & AreaSeriesProps;
 
@@ -57,6 +62,7 @@ type GetSeriesPropsFn = (config: {
   allYAccessors: Array<string | ExpressionValueVisDimension>;
   singleTable?: boolean;
   multipleLayersWithSplits: boolean;
+  isDarkMode: boolean;
 }) => SeriesSpec;
 
 type GetSeriesNameFn = (
@@ -399,6 +405,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   allYAccessors,
   singleTable,
   multipleLayersWithSplits,
+  isDarkMode,
 }): SeriesSpec => {
   const { table, isStacked, markSizeAccessor } = layer;
   const isPercentage = layer.isPercentage;
@@ -478,6 +485,43 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     );
   };
 
+  const splitCategories = getColorCategories(
+    table.rows,
+    splitColumnIds.length > 0 ? splitColumnIds[0] : undefined
+  );
+
+  const colorMappingModel: ColorMapping.Config = JSON.parse(layer.colorMapping);
+
+  // TODO: to be replaced by a check for new chart vs existing charts
+  const canUseColorMapping = true;
+  const colorFn: SeriesColorAccessorFn =
+    // for the MVP just apply color mapping if we have a breakdown by configured
+    canUseColorMapping && splitColumnIds.length > 0
+      ? getColorSeriesAccessorFn(
+          colorMappingModel,
+          getPalette(availablePalettes, NeutralPalette),
+          isDarkMode,
+          {
+            type: 'categories',
+            categories: splitCategories,
+            specialHandling: SPECIAL_RULE_MATCHES,
+          },
+          splitColumnIds[0]
+        )
+      : (series) =>
+          getColor(
+            series,
+            {
+              layer,
+              colorAssignments,
+              paletteService,
+              getSeriesNameFn,
+              syncColors,
+            },
+            uiState,
+            singleTable
+          );
+
   return {
     splitSeriesAccessors: splitColumnIds.length ? splitColumnIds : [],
     stackAccessors: isStacked ? [xColumnId || 'unifiedX'] : [],
@@ -497,19 +541,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
       formatter?.id === 'bytes' && scaleType === ScaleType.Linear
         ? ScaleType.LinearBinary
         : scaleType,
-    color: (series) =>
-      getColor(
-        series,
-        {
-          layer,
-          colorAssignments,
-          paletteService,
-          getSeriesNameFn,
-          syncColors,
-        },
-        uiState,
-        singleTable
-      ),
+    color: colorFn,
     groupId: yAxis?.groupId,
     enableHistogramMode,
     stackMode,

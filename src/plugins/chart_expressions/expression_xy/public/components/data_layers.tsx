@@ -57,6 +57,7 @@ interface Props {
   fieldFormats: LayersFieldFormats;
   uiState?: PersistedState;
   singleTable?: boolean;
+  isDarkMode: boolean;
 }
 
 export const DataLayers: FC<Props> = ({
@@ -80,6 +81,7 @@ export const DataLayers: FC<Props> = ({
   fieldFormats,
   uiState,
   singleTable,
+  isDarkMode,
 }) => {
   // for singleTable mode we should use y accessors from all layers for creating correct series name and getting color
   const allYAccessors = layers.flatMap((layer) => layer.accessors);
@@ -169,6 +171,7 @@ export const DataLayers: FC<Props> = ({
             allYAccessors,
             singleTable,
             multipleLayersWithSplits,
+            isDarkMode,
           });
 
           const index = `${layer.layerId}-${accessorIndex}`;

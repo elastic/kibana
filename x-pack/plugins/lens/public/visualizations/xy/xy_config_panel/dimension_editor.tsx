@@ -5,17 +5,40 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
-import type { PaletteRegistry } from '@kbn/coloring';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { ColorPicker } from '@kbn/visualization-ui-components';
+
+import {
+  EuiButtonEmpty,
+  EuiButtonGroup,
+  EuiColorPaletteDisplay,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  htmlIdGenerator,
+} from '@elastic/eui';
+import {
+  PaletteRegistry,
+  ColorMapping,
+  EUIPalette,
+  IKEAPalette,
+  NeutralPalette,
+  PastelPalette,
+  TableauPalette,
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  getPaletteColors,
+  CategoricalColorMapping,
+  SPECIAL_RULE_MATCHES,
+} from '@kbn/coloring';
+
+import { getColorCategories } from '@kbn/expression-xy-plugin/public';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import { State, XYState, XYDataLayerConfig, YConfig, YAxisMode } from '../types';
 import { FormatFactory } from '../../../../common/types';
 import { getSeriesColor, isHorizontalChart } from '../state_helpers';
-import { PalettePicker } from '../../../shared_components';
+import { PalettePanelContainer, PalettePicker } from '../../../shared_components';
 import { getDataLayers } from '../visualization_helpers';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { getSortedAccessors } from '../to_expression';
@@ -43,11 +66,14 @@ export function DataDimensionEditor(
   props: VisualizationDimensionEditorProps<State> & {
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
+    darkMode: boolean;
   }
 ) {
-  const { state, setState, layerId, accessor } = props;
+  const { state, layerId, accessor, darkMode } = props;
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index] as XYDataLayerConfig;
+
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
 
   const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
     value: props.state,
@@ -79,6 +105,13 @@ export function DataDimensionEditor(
     [accessor, index, localState, layer, setLocalState]
   );
 
+  const setColorMapping = useCallback(
+    (colorMapping: ColorMapping.Config) => {
+      setLocalState(updateLayer(localState, { ...layer, colorMapping }, index));
+    },
+    [index, localState, layer, setLocalState]
+  );
+
   const overwriteColor = getSeriesColor(layer, accessor);
   const assignedColor = useMemo(() => {
     const sortedAccessors: string[] = getSortedAccessors(
@@ -104,20 +137,87 @@ export function DataDimensionEditor(
     ).color;
   }, [props.frame, props.paletteService, state.layers, accessor, props.formatFactory, layer]);
 
+  // TODO: move the available palette elsewhere
+  const availablePalettes = new Map<string, ColorMapping.CategoricalPalette>([
+    [EUIPalette.id, EUIPalette],
+    [TableauPalette.id, TableauPalette],
+    [IKEAPalette.id, IKEAPalette],
+    [PastelPalette.id, PastelPalette],
+    [NeutralPalette.id, NeutralPalette],
+  ]);
+
   const localLayer: XYDataLayerConfig = layer;
-  if (props.groupId === 'breakdown') {
-    return (
-      <>
-        {!layer.collapseFn && (
-          <PalettePicker
-            palettes={props.paletteService}
-            activePalette={localLayer?.palette}
-            setPalette={(newPalette) => {
-              setState(updateLayer(localState, { ...localLayer, palette: newPalette }, index));
+
+  const colors = getPaletteColors(props.darkMode, layer.colorMapping);
+  const table = props.frame.activeData?.[layer.layerId];
+  const { splitAccessor } = layer;
+  const splitCategories = getColorCategories(table?.rows ?? [], splitAccessor);
+
+  const canUseColorMapping = true;
+  if (props.groupId === 'breakdown' && !layer.collapseFn) {
+    return canUseColorMapping ? (
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        className="lnsDynamicColoringClickable"
+      >
+        <EuiFlexItem>
+          <EuiColorPaletteDisplay
+            data-test-subj="lnsXY_dynamicColoring_palette"
+            palette={colors}
+            type={'fixed'}
+            onClick={() => {
+              setIsPaletteOpen(!isPaletteOpen);
             }}
           />
-        )}
-      </>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            data-test-subj="lnsXY_dynamicColoring_trigger"
+            aria-label={i18n.translate('xpack.lens.paletteXYGradient.customizeLong', {
+              defaultMessage: 'Edit palette',
+            })}
+            iconType="controlsHorizontal"
+            onClick={() => {
+              setIsPaletteOpen(!isPaletteOpen);
+            }}
+            size="xs"
+            flush="both"
+          >
+            {i18n.translate('xpack.lens.paletteXYGradient.customize', {
+              defaultMessage: 'Edit',
+            })}
+          </EuiButtonEmpty>
+          <PalettePanelContainer
+            siblingRef={props.panelRef}
+            isOpen={isPaletteOpen}
+            handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
+          >
+            <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded">
+              <CategoricalColorMapping
+                isDarkMode={darkMode}
+                model={layer.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
+                onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
+                palettes={availablePalettes}
+                data={{
+                  type: 'categories',
+                  categories: splitCategories,
+                  specialHandling: SPECIAL_RULE_MATCHES,
+                }}
+              />
+            </div>
+          </PalettePanelContainer>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ) : (
+      <PalettePicker
+        palettes={props.paletteService}
+        activePalette={localLayer?.palette}
+        setPalette={(newPalette) => {
+          props.setState(updateLayer(localState, { ...localLayer, palette: newPalette }, index));
+        }}
+      />
     );
   }
 

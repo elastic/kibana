@@ -9,7 +9,7 @@ import React from 'react';
 import { Position } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { PaletteRegistry } from '@kbn/coloring';
+import { PaletteRegistry } from '@kbn/coloring';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart, SavedObjectReference, ThemeServiceStart } from '@kbn/core/public';
@@ -25,6 +25,8 @@ import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { isEqual } from 'lodash';
 import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { getPaletteColors } from '@kbn/coloring/src/shared_components/color_mapping/config/default_color_mapping';
+import useObservable from 'react-use/lib/useObservable';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -416,6 +418,15 @@ export const getXyVisualization = ({
         }
       ).length < 2;
 
+    let colors: string[] = [];
+    kibanaTheme.theme$
+      .subscribe({
+        next(theme) {
+          colors = getPaletteColors(theme.darkMode, layer.colorMapping);
+        },
+      })
+      .unsubscribe();
+
     return {
       groups: [
         {
@@ -447,11 +458,7 @@ export const getXyVisualization = ({
                 {
                   columnId: dataLayer.splitAccessor,
                   triggerIconType: dataLayer.collapseFn ? 'aggregate' : 'colorBy',
-                  palette: dataLayer.collapseFn
-                    ? undefined
-                    : paletteService
-                        .get(dataLayer.palette?.name || 'default')
-                        .getCategoricalColors(10, dataLayer.palette?.params),
+                  palette: dataLayer.collapseFn ? undefined : colors,
                 },
               ]
             : [],
@@ -641,13 +648,14 @@ export const getXyVisualization = ({
       formatFactory: fieldFormats.deserialize,
       paletteService,
     };
+    const darkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (
       <ReferenceLinePanel {...allProps} />
     ) : isAnnotationsLayer(layer) ? (
       <AnnotationsPanel {...allProps} dataViewsService={dataViewsService} />
     ) : (
-      <DataDimensionEditor {...allProps} />
+      <DataDimensionEditor {...allProps} darkMode={darkMode} />
     );
 
     return dimensionEditor;
