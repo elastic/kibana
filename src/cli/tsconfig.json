@@ -17,6 +17,7 @@
     "@kbn/config",
     "@kbn/dev-utils",
     "@kbn/apm-config-loader",
+    "@kbn/test",
   ],
   "exclude": [
     "target/**/*",
