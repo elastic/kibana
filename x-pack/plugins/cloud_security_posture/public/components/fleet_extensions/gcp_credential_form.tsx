@@ -412,7 +412,7 @@ const GcpInputVarFields = ({
   const getFieldById = (id: keyof GcpInputFields['fields']) => {
     return fields.find((element) => element.id === id);
   };
-  const projectIdFields = getFieldById('gcp.project_id');
+  const projectIdFields = getFieldById('gcp.project_id') || '';
   const credentialsTypeFields = getFieldById('gcp.credentials.type');
   const credentialFilesFields = getFieldById('gcp.credentials.file');
   const credentialJSONFields = getFieldById('gcp.credentials.json');
