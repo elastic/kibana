@@ -10,13 +10,11 @@ import { filter } from 'rxjs/operators';
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isCompleteResponse } from '@kbn/data-plugin/common';
-import type {
-  CtiEventEnrichmentRequestOptions,
-  CtiEventEnrichmentStrategyResponse,
-} from '../../../../../common/search_strategy/security_solution/cti';
+import type { EventEnrichmentRequestOptionsInput } from '../../../../../common/api/search_strategy';
+import type { CtiEventEnrichmentStrategyResponse } from '../../../../../common/search_strategy/security_solution/cti';
 import { CtiQueries } from '../../../../../common/search_strategy/security_solution/cti';
 
-type GetEventEnrichmentProps = CtiEventEnrichmentRequestOptions & {
+type GetEventEnrichmentProps = EventEnrichmentRequestOptionsInput & {
   data: DataPublicPluginStart;
   signal: AbortSignal;
 };
@@ -29,7 +27,7 @@ export const getEventEnrichment = ({
   timerange,
   signal,
 }: GetEventEnrichmentProps): Observable<CtiEventEnrichmentStrategyResponse> =>
-  data.search.search<CtiEventEnrichmentRequestOptions, CtiEventEnrichmentStrategyResponse>(
+  data.search.search<EventEnrichmentRequestOptionsInput, CtiEventEnrichmentStrategyResponse>(
     {
       defaultIndex,
       eventFields,

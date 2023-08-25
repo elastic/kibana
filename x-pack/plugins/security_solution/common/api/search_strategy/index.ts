@@ -20,3 +20,5 @@ export * from './related_entities/related_entities';
 export * from './risk_score/risk_score';
 
 export * from './cti/cti';
+
+export * from './model/pagination';

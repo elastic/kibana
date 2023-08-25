@@ -25,6 +25,6 @@ export const networkDnsSchema = requestOptionsPaginatedSchema.extend({
   timerange,
 });
 
-export type NetworkDnsRequestOptionsInputInput = z.input<typeof networkDnsSchema>;
+export type NetworkDnsRequestOptionsInput = z.input<typeof networkDnsSchema>;
 
 export type NetworkDnsRequestOptions = z.infer<typeof networkDnsSchema>;

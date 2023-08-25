@@ -11,14 +11,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { isCompleteResponse } from '@kbn/data-plugin/common';
+import type { NetworkKpiTlsHandshakesRequestOptionsInput } from '../../../../../../common/api/search_strategy';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { inputsModel } from '../../../../../common/store';
 import { createFilter } from '../../../../../common/containers/helpers';
 import { useKibana } from '../../../../../common/lib/kibana';
-import type {
-  NetworkKpiTlsHandshakesRequestOptions,
-  NetworkKpiTlsHandshakesStrategyResponse,
-} from '../../../../../../common/search_strategy';
+import type { NetworkKpiTlsHandshakesStrategyResponse } from '../../../../../../common/search_strategy';
 import { NetworkKpiQueries } from '../../../../../../common/search_strategy';
 import type { ESTermQuery } from '../../../../../../common/typed_json';
 
@@ -57,7 +55,7 @@ export const useNetworkKpiTlsHandshakes = ({
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [networkKpiTlsHandshakesRequest, setNetworkKpiTlsHandshakesRequest] =
-    useState<NetworkKpiTlsHandshakesRequestOptions | null>(null);
+    useState<NetworkKpiTlsHandshakesRequestOptionsInput | null>(null);
 
   const [networkKpiTlsHandshakesResponse, setNetworkKpiTlsHandshakesResponse] =
     useState<NetworkKpiTlsHandshakesArgs>({
@@ -73,7 +71,7 @@ export const useNetworkKpiTlsHandshakes = ({
   const { addError } = useAppToasts();
 
   const networkKpiTlsHandshakesSearch = useCallback(
-    (request: NetworkKpiTlsHandshakesRequestOptions | null) => {
+    (request: NetworkKpiTlsHandshakesRequestOptionsInput | null) => {
       if (request == null || skip) {
         return;
       }
@@ -82,13 +80,13 @@ export const useNetworkKpiTlsHandshakes = ({
         setLoading(true);
 
         searchSubscription$.current = data.search
-          .search<NetworkKpiTlsHandshakesRequestOptions, NetworkKpiTlsHandshakesStrategyResponse>(
-            request,
-            {
-              strategy: 'securitySolutionSearchStrategy',
-              abortSignal: abortCtrl.current.signal,
-            }
-          )
+          .search<
+            NetworkKpiTlsHandshakesRequestOptionsInput,
+            NetworkKpiTlsHandshakesStrategyResponse
+          >(request, {
+            strategy: 'securitySolutionSearchStrategy',
+            abortSignal: abortCtrl.current.signal,
+          })
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {

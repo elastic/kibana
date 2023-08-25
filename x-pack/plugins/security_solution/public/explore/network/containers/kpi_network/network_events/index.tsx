@@ -11,14 +11,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { isCompleteResponse } from '@kbn/data-plugin/common';
+import type { NetworkKpiEventsRequestOptionsInput } from '../../../../../../common/api/search_strategy';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { inputsModel } from '../../../../../common/store';
 import { createFilter } from '../../../../../common/containers/helpers';
 import { useKibana } from '../../../../../common/lib/kibana';
-import type {
-  NetworkKpiNetworkEventsRequestOptions,
-  NetworkKpiNetworkEventsStrategyResponse,
-} from '../../../../../../common/search_strategy';
+import type { NetworkKpiNetworkEventsStrategyResponse } from '../../../../../../common/search_strategy';
 import { NetworkKpiQueries } from '../../../../../../common/search_strategy';
 import type { ESTermQuery } from '../../../../../../common/typed_json';
 
@@ -57,7 +55,7 @@ export const useNetworkKpiNetworkEvents = ({
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [networkKpiNetworkEventsRequest, setNetworkKpiNetworkEventsRequest] =
-    useState<NetworkKpiNetworkEventsRequestOptions | null>(null);
+    useState<NetworkKpiEventsRequestOptionsInput | null>(null);
 
   const [networkKpiNetworkEventsResponse, setNetworkKpiNetworkEventsResponse] =
     useState<NetworkKpiNetworkEventsArgs>({
@@ -73,7 +71,7 @@ export const useNetworkKpiNetworkEvents = ({
   const { addError } = useAppToasts();
 
   const networkKpiNetworkEventsSearch = useCallback(
-    (request: NetworkKpiNetworkEventsRequestOptions | null) => {
+    (request: NetworkKpiEventsRequestOptionsInput | null) => {
       if (request == null || skip) {
         return;
       }
@@ -83,7 +81,7 @@ export const useNetworkKpiNetworkEvents = ({
         setLoading(true);
 
         searchSubscription$.current = data.search
-          .search<NetworkKpiNetworkEventsRequestOptions, NetworkKpiNetworkEventsStrategyResponse>(
+          .search<NetworkKpiEventsRequestOptionsInput, NetworkKpiNetworkEventsStrategyResponse>(
             request,
             {
               strategy: 'securitySolutionSearchStrategy',

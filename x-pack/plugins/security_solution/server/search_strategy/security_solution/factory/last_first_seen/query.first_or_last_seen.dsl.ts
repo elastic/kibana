@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FirstLastSeenRequestOptions } from '../../../../../common/api/search_strategy/first_seen_last_seen/first_seen_last_seen';
+import type { FirstLastSeenRequestOptions } from '../../../../../common/api/search_strategy';
 
 import { createQueryFilterClauses } from '../../../../utils/build_query';
 import { parseOptions } from './parse_options';

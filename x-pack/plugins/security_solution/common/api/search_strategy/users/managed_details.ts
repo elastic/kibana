@@ -9,11 +9,9 @@ import { z } from 'zod';
 
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 
-export const managedUserDetailsSchema = requestBasicOptionsSchema
-  .pick({ factoryQueryType: true, defaultIndex: true })
-  .extend({
-    userName: z.string(),
-  });
+export const managedUserDetailsSchema = requestBasicOptionsSchema.extend({
+  userName: z.string(),
+});
 
 export type ManagedUserDetailsRequestOptionsInput = z.input<typeof managedUserDetailsSchema>;
 

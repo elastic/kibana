@@ -11,19 +11,16 @@ import { shimHitsTotal } from '@kbn/data-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import type {
-  FactoryQueryTypes,
-  StrategyRequestType,
-} from '../../../common/search_strategy/security_solution';
+import type { FactoryQueryTypes } from '../../../common/search_strategy/security_solution';
 import { securitySolutionFactory } from './factory';
 import type { EndpointAppContext } from '../../endpoint/types';
 
 function isObj(req: unknown): req is Record<string, unknown> {
   return typeof req === 'object' && req !== null;
 }
-function assertValidRequestType<T extends FactoryQueryTypes>(
+function assertValidRequestType(
   req: unknown
-): asserts req is StrategyRequestType<T> & { factoryQueryType: FactoryQueryTypes } {
+): asserts req is { factoryQueryType: FactoryQueryTypes } {
   if (!isObj(req) || req.factoryQueryType == null) {
     throw new Error('factoryQueryType is required');
   }

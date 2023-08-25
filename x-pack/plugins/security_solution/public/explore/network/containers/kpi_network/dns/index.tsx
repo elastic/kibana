@@ -11,14 +11,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { isCompleteResponse } from '@kbn/data-plugin/common';
+import type { NetworkKpiDnsRequestOptionsInput } from '../../../../../../common/api/search_strategy';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { inputsModel } from '../../../../../common/store';
 import { createFilter } from '../../../../../common/containers/helpers';
 import { useKibana } from '../../../../../common/lib/kibana';
-import type {
-  NetworkKpiDnsRequestOptions,
-  NetworkKpiDnsStrategyResponse,
-} from '../../../../../../common/search_strategy';
+import type { NetworkKpiDnsStrategyResponse } from '../../../../../../common/search_strategy';
 import { NetworkKpiQueries } from '../../../../../../common/search_strategy';
 import type { ESTermQuery } from '../../../../../../common/typed_json';
 
@@ -57,7 +55,7 @@ export const useNetworkKpiDns = ({
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [networkKpiDnsRequest, setNetworkKpiDnsRequest] =
-    useState<NetworkKpiDnsRequestOptions | null>(null);
+    useState<NetworkKpiDnsRequestOptionsInput | null>(null);
 
   const [networkKpiDnsResponse, setNetworkKpiDnsResponse] = useState<NetworkKpiDnsArgs>({
     dnsQueries: 0,
@@ -72,7 +70,7 @@ export const useNetworkKpiDns = ({
   const { addError } = useAppToasts();
 
   const networkKpiDnsSearch = useCallback(
-    (request: NetworkKpiDnsRequestOptions | null) => {
+    (request: NetworkKpiDnsRequestOptionsInput | null) => {
       if (request == null || skip) {
         return;
       }
@@ -82,7 +80,7 @@ export const useNetworkKpiDns = ({
         setLoading(true);
 
         searchSubscription$.current = data.search
-          .search<NetworkKpiDnsRequestOptions, NetworkKpiDnsStrategyResponse>(request, {
+          .search<NetworkKpiDnsRequestOptionsInput, NetworkKpiDnsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })

@@ -11,14 +11,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { isCompleteResponse } from '@kbn/data-plugin/common';
+import type { NetworkKpiUniqueFlowsRequestOptionsInput } from '../../../../../../common/api/search_strategy';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { inputsModel } from '../../../../../common/store';
 import { createFilter } from '../../../../../common/containers/helpers';
 import { useKibana } from '../../../../../common/lib/kibana';
-import type {
-  NetworkKpiUniqueFlowsRequestOptions,
-  NetworkKpiUniqueFlowsStrategyResponse,
-} from '../../../../../../common/search_strategy';
+import type { NetworkKpiUniqueFlowsStrategyResponse } from '../../../../../../common/search_strategy';
 import { NetworkKpiQueries } from '../../../../../../common/search_strategy';
 import type { ESTermQuery } from '../../../../../../common/typed_json';
 
@@ -57,7 +55,7 @@ export const useNetworkKpiUniqueFlows = ({
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [networkKpiUniqueFlowsRequest, setNetworkKpiUniqueFlowsRequest] =
-    useState<NetworkKpiUniqueFlowsRequestOptions | null>(null);
+    useState<NetworkKpiUniqueFlowsRequestOptionsInput | null>(null);
 
   const [networkKpiUniqueFlowsResponse, setNetworkKpiUniqueFlowsResponse] =
     useState<NetworkKpiUniqueFlowsArgs>({
@@ -73,7 +71,7 @@ export const useNetworkKpiUniqueFlows = ({
   const { addError } = useAppToasts();
 
   const networkKpiUniqueFlowsSearch = useCallback(
-    (request: NetworkKpiUniqueFlowsRequestOptions | null) => {
+    (request: NetworkKpiUniqueFlowsRequestOptionsInput | null) => {
       if (request == null || skip) {
         return;
       }
@@ -82,7 +80,7 @@ export const useNetworkKpiUniqueFlows = ({
         abortCtrl.current = new AbortController();
         setLoading(true);
         searchSubscription$.current = data.search
-          .search<NetworkKpiUniqueFlowsRequestOptions, NetworkKpiUniqueFlowsStrategyResponse>(
+          .search<NetworkKpiUniqueFlowsRequestOptionsInput, NetworkKpiUniqueFlowsStrategyResponse>(
             request,
             {
               strategy: 'securitySolutionSearchStrategy',

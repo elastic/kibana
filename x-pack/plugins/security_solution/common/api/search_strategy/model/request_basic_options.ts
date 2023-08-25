@@ -18,7 +18,7 @@ export const requestBasicOptionsSchema = z
     // This comes from the IKibanaSearchRequest
     // TODO: make it an enum of the available factory types
     factoryQueryType: z.any().optional(),
-    id: z.union([z.string(), z.undefined()]).optional(),
+    id: z.string().optional(),
     params: z.any().optional(),
   })
   .passthrough();

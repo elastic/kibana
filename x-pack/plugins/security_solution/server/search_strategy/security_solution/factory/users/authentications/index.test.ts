@@ -14,7 +14,7 @@ import {
   mockSearchStrategyResponse,
   formattedSearchStrategyResponse,
 } from './__mocks__';
-import type { UserAuthenticationsRequestOptions } from '../../../../../../common/search_strategy';
+import type { UserAuthenticationsRequestOptionsInput } from '../../../../../../common/api/search_strategy';
 
 describe('authentications search strategy', () => {
   const buildAuthenticationQuery = jest.spyOn(buildQuery, 'buildQuery');
@@ -36,7 +36,7 @@ describe('authentications search strategy', () => {
           ...mockOptions.pagination,
           querySize: DEFAULT_MAX_TABLE_QUERY_SIZE,
         },
-      } as UserAuthenticationsRequestOptions;
+      } as UserAuthenticationsRequestOptionsInput;
 
       expect(() => {
         authentications.buildDsl(overSizeOptions);
