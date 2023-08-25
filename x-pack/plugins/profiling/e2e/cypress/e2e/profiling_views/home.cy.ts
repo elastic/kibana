@@ -28,7 +28,7 @@ describe('Home page', () => {
         unauthorized: true,
       },
     }).as('getEsResources');
-    cy.visitKibana('/app/profiling', start, end);
+    cy.visitKibana('/app/profiling', { rangeFrom, rangeTo });
     cy.wait('@getEsResources');
     cy.contains('Top 53');
     cy.contains('User privilege limitation');
