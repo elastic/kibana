@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiSpacer,
@@ -50,14 +50,13 @@ export const OverviewTab: React.FunctionComponent<Props> = ({ indexDetails }) =>
 
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(curlDefinition);
 
-  // const elasticsearchURL = useMemo(() => {
-  //   return cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER;
-  // }, [cloud]);
+  const elasticsearchURL = useMemo(() => {
+    return plugins.cloud?.elasticsearchUrl ?? 'https://your_deployment_url';
+  }, [plugins.cloud]);
 
-  // TODO do no hardcode
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
-    url: 'https://your_deployment_url',
-    apiKey: 'yourApiKey',
+    url: elasticsearchURL,
+    apiKey: 'your_api_key',
     indexName: name,
   };
 

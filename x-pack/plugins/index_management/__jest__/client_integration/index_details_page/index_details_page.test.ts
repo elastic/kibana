@@ -66,7 +66,7 @@ describe('<IndexDetailsPage />', () => {
   });
 
   describe('Overview tab', () => {
-    it('renders index detail', () => {
+    it('renders index details', () => {
       expect(testBed.actions.indexDetailsContentExists()).toBe(true);
       expect(testBed.actions.indexStatsContentExists()).toBe(true);
       expect(testBed.actions.addDocCodeBlockExists()).toBe(true);

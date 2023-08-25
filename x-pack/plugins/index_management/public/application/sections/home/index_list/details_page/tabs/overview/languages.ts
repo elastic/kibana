@@ -39,25 +39,25 @@ export const javascriptDefinition: LanguageDefinition = {
     url,
     indexName,
   }) => `const { Client } = require('@elastic/elasticsearch');
-    const client = new Client({
-      node: '${url}',
-      auth: {
-          apiKey: '${apiKey}'
-      }
-    });
-    const dataset = [
-      {'name': 'foo', 'title': 'bar'},
-    ];
+const client = new Client({
+  node: '${url}',
+  auth: {
+      apiKey: '${apiKey}'
+  }
+});
+const dataset = [
+  {'name': 'foo', 'title': 'bar'},
+];
 
-    // Index with the bulk helper
-    const result = await client.helpers.bulk({
-      datasource: dataset,
-      onDocument (doc) {
-        return { index: { _index: '${indexName ?? 'index_name'}' }};
-      }
-    });
-    console.log(result);
-    `,
+// Index with the bulk helper
+const result = await client.helpers.bulk({
+  datasource: dataset,
+  onDocument (doc) {
+    return { index: { _index: '${indexName ?? 'index_name'}' }};
+  }
+});
+console.log(result);
+`,
 };
 
 export const goDefinition: LanguageDefinition = {
@@ -68,32 +68,32 @@ export const goDefinition: LanguageDefinition = {
   iconType: 'go.svg',
   docLink: '', // TODO revisit
   ingestDataIndex: ({ apiKey, url, indexName }) => `import (
-    "context"
-    "fmt"
-    "log"
-    "strings"
+  "context"
+  "fmt"
+  "log"
+  "strings"
+​
+  "github.com/elastic/elasticsearch-serverless-go"
+)
+​
+func main() {
+  cfg := elasticsearch.Config{
+    Address: "${url}",
+    APIKey: "${apiKey}",
+  }
+  es, err := elasticsearch.NewClient(cfg)
+  if err != nil {
+    log.Fatalf("Error creating the client: %s", err)
+  }
+  res, err := es.Bulk().
+    Index("${indexName}").
+    Raw(strings.NewReader(\`
+{ "index": { "_id": "1"}}
+{"name": "foo", "title": "bar"}\n\`)).
+    Do(context.Background())
   ​
-    "github.com/elastic/elasticsearch-serverless-go"
-  )
-  ​
-  func main() {
-    cfg := elasticsearch.Config{
-      Address: "${url}",
-      APIKey: "${apiKey}",
-    }
-    es, err := elasticsearch.NewClient(cfg)
-    if err != nil {
-      log.Fatalf("Error creating the client: %s", err)
-    }
-    res, err := es.Bulk().
-      Index("${indexName}").
-      Raw(strings.NewReader(\`
-  { "index": { "_id": "1"}}
-  {"name": "foo", "title": "bar"}\n\`)).
-      Do(context.Background())
-    ​
-    fmt.Println(res, err)
-  }`,
+  fmt.Println(res, err)
+}`,
 };
 
 export const pythonDefinition: LanguageDefinition = {

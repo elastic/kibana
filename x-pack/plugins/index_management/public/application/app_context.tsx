@@ -20,9 +20,10 @@ import {
   ExecutionContextStart,
   HttpSetup,
 } from '@kbn/core/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import { ExtensionsService } from '../services';
 import { UiMetricService, NotificationService, HttpService } from './services';
 
@@ -40,6 +41,7 @@ export interface AppDependencies {
     usageCollection: UsageCollectionSetup;
     isFleetEnabled: boolean;
     share: SharePluginStart;
+    cloud?: CloudSetup;
   };
   services: {
     uiMetricService: UiMetricService;
