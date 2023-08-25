@@ -183,10 +183,10 @@ export class DocumentMigrator implements VersionedTransformer {
     if (downgradeRequired(doc, typeMigrations?.latestVersion ?? {})) {
       const currentVersion = doc.typeMigrationVersion ?? doc.migrationVersion?.[doc.type];
       const latestVersion = this.migrations[doc.type].latestVersion[TransformType.Migrate];
-      const newerVersionModelError = createNewerModelVersionError(
-        `Document "${doc.id}" belongs to a more recent version of Kibana [${currentVersion}] when the last known version is [${latestVersion}].`
-      );
       if (!allowDowngrade) {
+        const newerVersionModelError = createNewerModelVersionError(
+          `Document "${doc.id}" belongs to a more recent version of Kibana [${currentVersion}] when the last known version is [${latestVersion}].`
+        );
         throw Boom.boomify(newerVersionModelError, { message: '[NewerModelVersionError]' });
       }
       return this.transformDown(doc, { targetTypeVersion: latestVersion! });
