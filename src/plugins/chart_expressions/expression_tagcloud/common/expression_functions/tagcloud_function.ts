@@ -51,6 +51,9 @@ const strings = {
     isPreview: i18n.translate('expressionTagcloud.functions.tagcloud.args.isPreviewHelpText', {
       defaultMessage: 'Set isPreview to true to avoid showing out of room warnings',
     }),
+    colorMapping: i18n.translate('expressionTagcloud.layer.colorMapping.help', {
+      defaultMessage: 'JSON key-value pairs of the color mapping model',
+    }),
   },
   dimension: {
     tags: i18n.translate('expressionTagcloud.functions.tagcloud.dimension.tags', {
@@ -146,6 +149,10 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
         default: false,
         required: false,
       },
+      colorMapping: {
+        types: ['string'],
+        help: argHelp.colorMapping,
+      },
     },
     fn(input, args, handlers) {
       validateAccessor(args.metric, input.columns);
@@ -167,6 +174,7 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
           (handlers.variables?.embeddableTitle as string) ??
           handlers.getExecutionContext?.()?.description,
         isPreview: Boolean(args.isPreview),
+        colorMapping: args.colorMapping,
       };
 
       if (handlers?.inspectorAdapters?.tables) {

@@ -27,6 +27,7 @@ interface TagCloudCommonParams {
   metric: ExpressionValueVisDimension | string;
   bucket?: ExpressionValueVisDimension | string;
   palette: PaletteOutput;
+  colorMapping: string; // JSON stringified object of the color mapping
 }
 
 export interface TagCloudVisConfig extends TagCloudCommonParams {
@@ -42,6 +43,7 @@ export interface TagcloudRendererConfig {
   visData: Datatable;
   visParams: TagCloudRendererParams;
   syncColors: boolean;
+  isDarkMode: boolean;
   overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
 }
 

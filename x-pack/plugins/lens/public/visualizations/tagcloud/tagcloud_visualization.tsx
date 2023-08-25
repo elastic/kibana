@@ -16,9 +16,10 @@ import {
   buildExpressionFunction,
   ExpressionFunctionTheme,
 } from '@kbn/expressions-plugin/common';
-import { PaletteRegistry } from '@kbn/coloring';
+import { PaletteRegistry, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import { IconChartTagcloud } from '@kbn/chart-icons';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
+import useObservable from 'react-use/lib/useObservable';
 import type { OperationMetadata, Visualization } from '../..';
 import type { TagcloudState } from './types';
 import { getSuggestions } from './suggestions';
@@ -31,10 +32,10 @@ const METRIC_GROUP_ID = 'metric';
 
 export const getTagcloudVisualization = ({
   paletteService,
-  theme,
+  kibanaTheme,
 }: {
   paletteService: PaletteRegistry;
-  theme: ThemeServiceStart;
+  kibanaTheme: ThemeServiceStart;
 }): Visualization<TagcloudState> => ({
   id: 'lnsTagcloud',
 
@@ -197,6 +198,7 @@ export const getTagcloudVisualization = ({
                 ),
           ]).toAst(),
           showLabel: state.showLabel,
+          colorMapping: JSON.stringify(state.colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG),
         }).toAst(),
       ],
     };
@@ -235,6 +237,7 @@ export const getTagcloudVisualization = ({
                 ),
           ]).toAst(),
           showLabel: false,
+          colorMapping: JSON.stringify(state.colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG),
         }).toAst(),
       ],
     };
@@ -266,12 +269,16 @@ export const getTagcloudVisualization = ({
   },
 
   DimensionEditorComponent(props) {
+    const isDarkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
     if (props.groupId === TAG_GROUP_ID) {
       return (
         <TagsDimensionEditor
+          isDarkMode={isDarkMode}
           paletteService={paletteService}
           state={props.state}
           setState={props.setState}
+          frame={props.frame}
+          panelRef={props.panelRef}
         />
       );
     }

@@ -13,11 +13,21 @@ import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
 import { IconChartTagcloud } from '@kbn/chart-icons';
 import { Chart, Settings, Wordcloud, RenderChangeListener } from '@elastic/charts';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import {
+  PaletteRegistry,
+  PaletteOutput,
+  ColorMapping,
+  getColorFactory,
+  SPECIAL_RULE_MATCHES,
+  getPalette,
+  availablePalettes,
+  NeutralPalette,
+} from '@kbn/coloring';
+import { IInterpreterRenderHandlers, DatatableRow } from '@kbn/expressions-plugin/public';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
 import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { isMultiFieldKey } from '@kbn/data-plugin/common';
 import { getFormatService } from '../format_service';
 import { TagcloudRendererConfig } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
@@ -84,9 +94,10 @@ export const TagCloudChart = ({
   renderComplete,
   syncColors,
   overrides,
+  isDarkMode,
 }: TagCloudChartProps) => {
   const [warning, setWarning] = useState(false);
-  const { bucket, metric, scale, palette, showLabel, orientation } = visParams;
+  const { bucket, metric, scale, palette, showLabel, orientation, colorMapping } = visParams;
 
   const bucketFormatter = useMemo(() => {
     return bucket
@@ -96,23 +107,39 @@ export const TagCloudChart = ({
 
   const tagCloudData = useMemo(() => {
     const bucketColumn = bucket ? getColumnByAccessor(bucket, visData.columns)! : null;
-    const tagColumn = bucket ? bucketColumn!.id : null;
+    const tagColumn = bucket ? bucketColumn!.id : undefined;
     const metricColumn = getColumnByAccessor(metric, visData.columns)!.id;
 
     const metrics = visData.rows.map((row) => row[metricColumn]);
-    const values = bucket && tagColumn !== null ? visData.rows.map((row) => row[tagColumn]) : [];
+    const values =
+      bucket && tagColumn !== undefined ? visData.rows.map((row) => row[tagColumn]) : [];
     const maxValue = Math.max(...metrics);
     const minValue = Math.min(...metrics);
 
+    const colorMappingModel: ColorMapping.Config = JSON.parse(colorMapping);
+    const splitCategories = getColorCategories(visData.rows, tagColumn);
+    const getColorFromMappings = getColorFactory(
+      colorMappingModel,
+      getPalette(availablePalettes, NeutralPalette),
+      isDarkMode,
+      { type: 'categories', categories: splitCategories, specialHandling: SPECIAL_RULE_MATCHES }
+    );
+    // TODO: configure this only for new
+    const canUseColorMapping = true;
+
     return visData.rows.map((row) => {
-      const tag = tagColumn === null ? 'all' : row[tagColumn];
+      const tag = tagColumn === undefined ? 'all' : row[tagColumn];
+
+      const category = isMultiFieldKey(tag) ? tag.keys : tag;
       return {
         text: bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag,
         weight:
           tag === 'all' || visData.rows.length <= 1
             ? 1
             : calculateWeight(row[metricColumn], minValue, maxValue, 0, 1) || 0,
-        color: getColor(palettesRegistry, palette, tag, values, syncColors) || 'rgba(0,0,0,0)',
+        color: canUseColorMapping
+          ? getColorFromMappings(category)
+          : getColor(palettesRegistry, palette, tag, values, syncColors) || 'rgba(0,0,0,0)',
       };
     });
   }, [
@@ -124,6 +151,8 @@ export const TagCloudChart = ({
     syncColors,
     visData.columns,
     visData.rows,
+    colorMapping,
+    isDarkMode,
   ]);
 
   useEffect(() => {
@@ -278,3 +307,26 @@ export const TagCloudChart = ({
 
 // eslint-disable-next-line import/no-default-export
 export { TagCloudChart as default };
+
+// TODO: export to a reusable function
+export const MULTI_FIELD_VALUES_SEPARATOR = ' › ';
+export function getColorCategories(rows: DatatableRow[], accessor?: string) {
+  return accessor
+    ? rows.reduce<{ keys: Set<string>; array: Array<string | string[]> }>(
+        (acc, r) => {
+          const value = r[accessor];
+          if (value === undefined) {
+            return acc;
+          }
+          const key = value.hasOwnProperty('keys') ? [...value.keys] : [value];
+          const stringifiedKeys = key.join(',');
+          if (!acc.keys.has(stringifiedKeys)) {
+            acc.keys.add(stringifiedKeys);
+            acc.array.push(key.length === 1 ? key[0] : key);
+          }
+          return acc;
+        },
+        { keys: new Set(), array: [] }
+      ).array
+    : [];
+}
