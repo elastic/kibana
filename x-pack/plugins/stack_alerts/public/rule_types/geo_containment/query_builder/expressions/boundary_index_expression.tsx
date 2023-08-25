@@ -69,25 +69,25 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
     return ref.current;
   };
 
-  const [newGeoFields, setNewGeoFields] = useState<DataViewField[]>([]);
-  const [newBoundaryNameFields, setNewBoundaryNameFields] = useState<DataViewField[]>([]);
+  const [geoFields, setGeoFields] = useState<DataViewField[]>([]);
+  const [boundaryNameFields, setBoundaryNameFields] = useState<DataViewField[]>([]);
   const oldIndexPattern = usePrevious(boundaryIndexPattern);
 
   useEffect(() => {
     const BOUNDARY_NAME_ENTITY_TYPES = ['string', 'number', 'ip'];
     if (oldIndexPattern !== boundaryIndexPattern) {
-      const geoFields = [
+      const newGeoFields = [
         ...(boundaryIndexPattern.fields ?? []).filter((field: DataViewField) =>
           ES_GEO_SHAPE_TYPES.includes(field.type)
         ),
       ];
-      setNewGeoFields(geoFields);
+      setGeoFields(newGeoFields);
 
-      if (geoFields.length) {
-        setBoundaryGeoField(geoFields[0].name);
+      if (newGeoFields.length) {
+        setBoundaryGeoField(newGeoFields[0].name);
       }
 
-      const boundaryNameFields = [
+      const newBoundaryNameFields = [
         ...(boundaryIndexPattern.fields ?? []).filter((field: DataViewField) => {
           return (
             BOUNDARY_NAME_ENTITY_TYPES.includes(field.type) &&
@@ -98,10 +98,10 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
         nothingSelected,
       ];
 
-      setNewBoundaryNameFields(boundaryNameFields);
+      setBoundaryNameFields(newBoundaryNameFields);
       if (oldIndexPattern !== boundaryIndexPattern) {
-        if (operation !== 'edit' && boundaryNameFields.length) {
-          setBoundaryNameField(boundaryNameFields[0].name);
+        if (operation !== 'edit' && newBoundaryNameFields.length) {
+          setBoundaryNameField(newBoundaryNameFields[0].name);
         }
       }
     }
@@ -144,7 +144,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
           })}
           value={boundaryGeoField}
           onChange={setBoundaryGeoField}
-          fields={newGeoFields}
+          fields={geoFields}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -162,7 +162,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
           onChange={(name) => {
             setBoundaryNameField(name === nothingSelected.name ? undefined : name);
           }}
-          fields={newBoundaryNameFields}
+          fields={boundaryNameFields}
         />
       </EuiFormRow>
     </Fragment>
