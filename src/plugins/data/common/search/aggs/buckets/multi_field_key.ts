@@ -38,3 +38,7 @@ export class MultiFieldKey {
     return this[id];
   }
 }
+
+export function isMultiFieldKey(field: unknown): field is MultiFieldKey {
+  return field instanceof MultiFieldKey;
+}
