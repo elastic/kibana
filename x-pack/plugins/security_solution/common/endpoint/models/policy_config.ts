@@ -28,7 +28,7 @@ export const policyFactory = (
       cloud,
       serverless,
     },
-    manifest_version: 'latest',
+    global_manifest_version: 'latest',
     windows: {
       events: {
         credential_access: true,

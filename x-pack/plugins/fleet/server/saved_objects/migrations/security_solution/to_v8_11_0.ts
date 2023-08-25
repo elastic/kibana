@@ -30,7 +30,7 @@ export const migratePackagePolicyToV8110: SavedObjectModelDataBackfillFn<
   if (input && input.config) {
     const policy = input.config.policy.value;
 
-    policy.manifest_version = 'latest';
+    policy.global_manifest_version = 'latest';
   }
 
   return {
@@ -52,7 +52,7 @@ export const migratePackagePolicyEvictionsFromV8110: SavedObjectModelVersionForw
     const input = updatedAttributes.inputs[0];
 
     if (input && input.config) {
-      input.config.policy.value = omit(input.config.policy.value, ['manifest_version']);
+      input.config.policy.value = omit(input.config.policy.value, ['global_manifest_version']);
     }
 
     return updatedAttributes;

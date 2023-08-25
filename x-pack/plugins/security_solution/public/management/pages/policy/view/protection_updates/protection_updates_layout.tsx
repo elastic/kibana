@@ -63,7 +63,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
     const paddingSize = useContext(ThemeContext).eui.euiPanelPaddingModifiers.paddingMedium;
 
     const policy = _policy as PolicyData;
-    const deployedVersion = policy.inputs[0].config.policy.value.manifest_version;
+    const deployedVersion = policy.inputs[0].config.policy.value.global_manifest_version;
     const [manifestVersion, setManifestVersion] = useState(deployedVersion);
 
     const today = moment();
@@ -88,7 +88,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
 
     const onSave = useCallback(() => {
       const update = cloneDeep(policy);
-      update.inputs[0].config.policy.value.manifest_version = manifestVersion;
+      update.inputs[0].config.policy.value.global_manifest_version = manifestVersion;
       sendPolicyUpdate({ policy: update })
         .then(({ item: policyItem }) => {
           toasts.addSuccess({

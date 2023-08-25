@@ -68,7 +68,7 @@ describe('Policy Details', () => {
         cy.intercept('PUT', `/api/fleet/package_policies/${policy.id}`).as('policy');
         cy.getByTestSubj('policyDetailsSaveButton').click();
         cy.wait('@policy').then(({ request, response }) => {
-          expect(request.body.inputs[0].config.policy.value.manifest_version).to.equal(
+          expect(request.body.inputs[0].config.policy.value.global_manifest_version).to.equal(
             today.format('YYYY-MM-DD')
           );
           expect(response?.statusCode).to.equal(200);
@@ -112,7 +112,9 @@ describe('Policy Details', () => {
 
         cy.getByTestSubj('protection-updates-manifest-switch').click();
         cy.wait('@policy_latest').then(({ request, response }) => {
-          expect(request.body.inputs[0].config.policy.value.manifest_version).to.equal('latest');
+          expect(request.body.inputs[0].config.policy.value.global_manifest_version).to.equal(
+            'latest'
+          );
           expect(response?.statusCode).to.equal(200);
         });
         cy.getByTestSubj('protectionUpdatesSuccessfulMessage');

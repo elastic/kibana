@@ -88,7 +88,7 @@ export const disableProtections = (policy: PolicyConfig): PolicyConfig => {
 const disableCommonProtections = (policy: PolicyConfig) => {
   return Object.keys(policy).reduce<PolicyConfig>((acc, item) => {
     const os = item as keyof PolicyConfig;
-    if (os === 'meta' || os === 'manifest_version') {
+    if (os === 'meta' || os === 'global_manifest_version') {
       return acc;
     }
     return {
@@ -107,7 +107,7 @@ const disableCommonProtections = (policy: PolicyConfig) => {
 
 const getDisabledCommonProtectionsForOS = (
   policy: PolicyConfig,
-  os: keyof Omit<PolicyConfig, 'meta' | 'manifest_version'>
+  os: keyof Omit<PolicyConfig, 'meta' | 'global_manifest_version'>
 ) => ({
   behavior_protection: {
     ...policy[os].behavior_protection,
@@ -126,7 +126,7 @@ const getDisabledCommonProtectionsForOS = (
 
 const getDisabledCommonPopupsForOS = (
   policy: PolicyConfig,
-  os: keyof Omit<PolicyConfig, 'meta' | 'manifest_version'>
+  os: keyof Omit<PolicyConfig, 'meta' | 'global_manifest_version'>
 ) => ({
   behavior_protection: {
     ...policy[os].popup.behavior_protection,
