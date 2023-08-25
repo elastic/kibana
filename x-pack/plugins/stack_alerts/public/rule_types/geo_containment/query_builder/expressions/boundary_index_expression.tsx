@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent, useEffect, useRef } from 'react';
+import React, { Fragment, FunctionComponent, useEffect, useRef, useState, useMemo } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -29,6 +29,7 @@ interface Props {
   setBoundaryNameField: (boundaryNameField?: string) => void;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  operation: string;
 }
 
 interface KibanaDeps {
@@ -45,17 +46,20 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
   setBoundaryNameField,
   data,
   unifiedSearch,
+  operation,
 }) => {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const BOUNDARY_NAME_ENTITY_TYPES = ['string', 'number', 'ip'];
   const { http } = useKibana<KibanaDeps>().services;
   const IndexPatternSelect = (unifiedSearch.ui && unifiedSearch.ui.IndexPatternSelect) || null;
   const { boundaryGeoField } = ruleParams;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const nothingSelected: DataViewField = {
-    name: '<nothing selected>',
-    type: 'string',
-  } as DataViewField;
+
+  const nothingSelected: DataViewField = useMemo(
+    () =>
+      ({
+        name: '<nothing selected>',
+        type: 'string',
+      } as DataViewField),
+    []
+  );
 
   const usePrevious = <T extends unknown>(value: T): T | undefined => {
     const ref = useRef<T>();
@@ -65,28 +69,25 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
     return ref.current;
   };
 
+  const [newGeoFields, setNewGeoFields] = useState<DataViewField[]>([]);
+  const [newBoundaryNameFields, setNewBoundaryNameFields] = useState<DataViewField[]>([]);
   const oldIndexPattern = usePrevious(boundaryIndexPattern);
-  const fields = useRef<{
-    geoFields: DataViewField[];
-    boundaryNameFields: DataViewField[];
-  }>({
-    geoFields: [],
-    boundaryNameFields: [],
-  });
+
   useEffect(() => {
+    const BOUNDARY_NAME_ENTITY_TYPES = ['string', 'number', 'ip'];
     if (oldIndexPattern !== boundaryIndexPattern) {
-      fields.current.geoFields =
-        (boundaryIndexPattern.fields &&
-          boundaryIndexPattern.fields.length &&
-          boundaryIndexPattern.fields.filter((field: DataViewField) =>
-            ES_GEO_SHAPE_TYPES.includes(field.type)
-          )) ||
-        [];
-      if (fields.current.geoFields.length) {
-        setBoundaryGeoField(fields.current.geoFields[0].name);
+      const geoFields = [
+        ...(boundaryIndexPattern.fields ?? []).filter((field: DataViewField) =>
+          ES_GEO_SHAPE_TYPES.includes(field.type)
+        ),
+      ];
+      setNewGeoFields(geoFields);
+
+      if (geoFields.length) {
+        setBoundaryGeoField(geoFields[0].name);
       }
 
-      fields.current.boundaryNameFields = [
+      const boundaryNameFields = [
         ...(boundaryIndexPattern.fields ?? []).filter((field: DataViewField) => {
           return (
             BOUNDARY_NAME_ENTITY_TYPES.includes(field.type) &&
@@ -96,15 +97,19 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
         }),
         nothingSelected,
       ];
-      if (fields.current.boundaryNameFields.length) {
-        setBoundaryNameField(fields.current.boundaryNameFields[0].name);
+
+      setNewBoundaryNameFields(boundaryNameFields);
+      if (oldIndexPattern !== boundaryIndexPattern) {
+        if (operation !== 'edit' && boundaryNameFields.length) {
+          setBoundaryNameField(boundaryNameFields[0].name);
+        }
       }
     }
   }, [
-    BOUNDARY_NAME_ENTITY_TYPES,
     boundaryIndexPattern,
     nothingSelected,
     oldIndexPattern,
+    operation,
     setBoundaryGeoField,
     setBoundaryNameField,
   ]);
@@ -139,7 +144,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
           })}
           value={boundaryGeoField}
           onChange={setBoundaryGeoField}
-          fields={fields.current.geoFields}
+          fields={newGeoFields}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -157,7 +162,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
           onChange={(name) => {
             setBoundaryNameField(name === nothingSelected.name ? undefined : name);
           }}
-          fields={fields.current.boundaryNameFields}
+          fields={newBoundaryNameFields}
         />
       </EuiFormRow>
     </Fragment>
