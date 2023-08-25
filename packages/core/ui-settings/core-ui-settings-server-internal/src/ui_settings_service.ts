@@ -160,12 +160,14 @@ export class UiSettingsService
   private applyAllowlist(keys: string[]) {
     for (const [key, definition] of this.uiSettingsDefaults) {
       if (!keys.includes(key)) {
-        definition.readonly = 'strict';
+        definition.readonly = true;
+        definition.readonlyMode = 'strict';
       }
     }
     for (const [key, definition] of this.uiSettingsGlobalDefaults) {
       if (!keys.includes(key)) {
-        definition.readonly = 'strict';
+        definition.readonly = true;
+        definition.readonlyMode = 'strict';
       }
     }
   }

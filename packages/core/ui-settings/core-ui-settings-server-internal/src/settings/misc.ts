@@ -12,7 +12,7 @@ import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 export const getMiscUiSettings = (): Record<string, UiSettingsParams> => {
   return {
     buildNum: {
-      readonly: 'ui',
+      readonly: true,
       schema: schema.maybe(schema.number()),
     },
   };

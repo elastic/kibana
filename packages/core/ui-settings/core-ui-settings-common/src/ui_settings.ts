@@ -55,12 +55,14 @@ export interface UiSettingsParams<T = unknown> {
   optionLabels?: Record<string, string>;
   /** a flag indicating whether new value applying requires page reloading */
   requiresPageReload?: boolean;
+  /** a flag indicating that value cannot be changed */
+  readonly?: boolean;
   /**
-   * a flag indicating that value cannot be changed
+   * a flag indicating the level of restriction of the readonly settings
    * 'strict' indicates that the value cannot be changed through API and is not displayed in the UI
    * 'ui' indicates that the value is just not displayed in the UI
    * */
-  readonly?: 'strict' | 'ui';
+  readonlyMode?: 'strict' | 'ui';
   /**
    * a flag indicating that value might contain user sensitive data.
    * used by telemetry to mask the value of the setting when sent.

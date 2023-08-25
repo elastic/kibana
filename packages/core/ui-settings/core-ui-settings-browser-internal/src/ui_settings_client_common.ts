@@ -117,7 +117,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
   }
 
   isStrictReadonly(key: string) {
-    return this.isDeclared(key) && Boolean(this.cache[key].readonly === 'strict');
+    return this.isDeclared(key) && Boolean(this.cache[key].readonlyMode === 'strict');
   }
 
   getUpdate$() {
