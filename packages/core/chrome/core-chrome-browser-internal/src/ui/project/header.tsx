@@ -285,7 +285,7 @@ export const ProjectHeader = ({
       </header>
 
       {headerActionMenuMounter.mount && (
-        <AppMenuBar isOpen={isOpen ?? false} headerActionMenuMounter={headerActionMenuMounter} />
+        <AppMenuBar headerActionMenuMounter={headerActionMenuMounter} />
       )}
     </>
   );
