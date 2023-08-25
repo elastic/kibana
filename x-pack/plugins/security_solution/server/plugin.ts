@@ -403,9 +403,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.guidedOnboarding.registerGuideConfig(siemGuideId, siemGuideConfig);
 
     return {
-      setAppFeaturesConfigurator: appFeaturesService.setAppFeaturesConfigurator.bind(
-        appFeaturesService
-      ),
+      setAppFeaturesConfigurator:
+        appFeaturesService.setAppFeaturesConfigurator.bind(appFeaturesService),
     };
   }
 
