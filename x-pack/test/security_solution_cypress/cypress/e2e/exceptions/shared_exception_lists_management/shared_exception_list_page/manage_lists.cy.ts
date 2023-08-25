@@ -6,7 +6,7 @@
  */
 import { tag } from '../../../../tags';
 
-import { getExceptionList, expectedExportedExceptionList } from '../../../../objects/exception';
+import { expectedExportedExceptionList, getExceptionList } from '../../../../objects/exception';
 import { getNewRule } from '../../../../objects/rule';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -14,13 +14,13 @@ import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../..
 
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 import {
+  assertNumberLinkedRules,
+  createSharedExceptionList,
   deleteExceptionListWithoutRuleReferenceByListId,
   deleteExceptionListWithRuleReferenceByListId,
   exportExceptionList,
-  waitForExceptionsTableToBeLoaded,
-  createSharedExceptionList,
   linkRulesToExceptionList,
-  assertNumberLinkedRules,
+  waitForExceptionsTableToBeLoaded,
 } from '../../../../tasks/exceptions_table';
 import {
   EXCEPTIONS_LIST_MANAGEMENT_NAME,
@@ -51,6 +51,7 @@ describe(
   () => {
     describe('Create/Export/Delete List', () => {
       before(() => {
+        cy.task('esArchiverResetKibana');
         createRule(getNewRule({ name: 'Another rule' }));
 
         // Create exception list associated with a rule
