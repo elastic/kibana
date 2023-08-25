@@ -202,6 +202,7 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
     setup: Record<PluginName, unknown>;
     start: Record<PluginName, unknown>;
   }
+
   const plugins = new Map([
     [
       createPlugin('order-4', { required: ['order-2'] }),
@@ -754,6 +755,8 @@ describe('stop', () => {
     jest.useRealTimers();
   });
 
+  const nextTick = () => new Promise((resolve) => setImmediate(resolve));
+
   it('waits for 30 sec to finish "stop" and move on to the next plugin.', async () => {
     const [plugin1, plugin2] = [createPlugin('timeout-stop-1'), createPlugin('timeout-stop-2')].map(
       (plugin, index) => {
@@ -774,8 +777,11 @@ describe('stop', () => {
     await pluginsSystem.setupPlugins(setupDeps);
     const stopPromise = pluginsSystem.stopPlugins();
 
+    await nextTick();
     jest.runAllTimers();
+
     await stopPromise;
+
     expect(stopSpy1).toHaveBeenCalledTimes(1);
     expect(stopSpy2).toHaveBeenCalledTimes(1);
 
