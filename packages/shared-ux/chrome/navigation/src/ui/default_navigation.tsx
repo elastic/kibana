@@ -72,23 +72,18 @@ const getDefaultNavigationTree = (
         breadcrumbStatus: 'hidden',
         children: [
           {
-            id: 'settings',
-            children: [
-              {
-                link: 'management',
-                title: i18n.translate('sharedUXPackages.chrome.sideNavigation.mngt', {
-                  defaultMessage: 'Management',
-                }),
-              },
-              {
-                id: 'cloudLinkUserAndRoles',
-                cloudLink: 'userAndRoles',
-              },
-              {
-                id: 'cloudLinkBilling',
-                cloudLink: 'billingAndSub',
-              },
-            ],
+            link: 'management',
+            title: i18n.translate('sharedUXPackages.chrome.sideNavigation.mngt', {
+              defaultMessage: 'Management',
+            }),
+          },
+          {
+            id: 'cloudLinkUserAndRoles',
+            cloudLink: 'userAndRoles',
+          },
+          {
+            id: 'cloudLinkBilling',
+            cloudLink: 'billingAndSub',
           },
         ],
       },
