@@ -89,11 +89,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
 
   return (
     <EuiThemeProvider colorMode="dark">
-      <EuiPanel
-        paddingSize="xs"
-        className="serverlessSearchCodeBlockControlsPanel"
-        data-test-subj="codeBox"
-      >
+      <EuiPanel paddingSize="xs" data-test-subj="codeBlockControlsPanel">
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
             <EuiThemeProvider colorMode="light">

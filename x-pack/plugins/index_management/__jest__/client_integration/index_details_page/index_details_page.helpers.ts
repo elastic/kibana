@@ -110,7 +110,7 @@ export const setup = async (
   };
 
   const addDocCodeBlockExists = () => {
-    return exists('codeBox');
+    return exists('codeBlockControlsPanel');
   };
 
   const contextMenu = {
