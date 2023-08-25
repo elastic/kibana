@@ -214,9 +214,23 @@ export const SHARE = i18n.translate('xpack.securitySolution.flyout.documentDetai
 });
 
 export const INVESTIGATION_GUIDE_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.investigationGuideText',
+  'xpack.securitySolution.flyout.documentDetails.investigationGuideTitle',
   {
     defaultMessage: 'Investigation guide',
+  }
+);
+
+export const INVESTIGATION_GUIDE_BUTTON = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.investigationGuideButton',
+  {
+    defaultMessage: 'Show investigation guide',
+  }
+);
+
+export const INVESTIGATION_GUIDE_NO_DATA = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.investigationGuideNoData',
+  {
+    defaultMessage: 'An investigation guide has not been created for this rule.',
   }
 );
 
