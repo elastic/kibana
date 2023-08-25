@@ -61,6 +61,7 @@ test('set correct defaults', () => {
         "keyPassphrase": undefined,
         "verificationMode": "full",
       },
+      "stateless": false,
       "username": undefined,
     }
   `);

@@ -8,8 +8,8 @@
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { cloneIndex } from './clone_index';
-import { setWriteBlock } from './set_write_block';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 
 jest.mock('./catch_retryable_es_client_errors');
@@ -36,11 +36,82 @@ describe('cloneIndex', () => {
     elasticsearchClientMock.createErrorTransportRequestPromise(nonRetryableError)
   );
 
+  it('calls client.indices.clone with the correct parameter for stateful ES', async () => {
+    const statefulCapabilities = elasticsearchServiceMock.createCapabilities({ stateless: false });
+    const task = cloneIndex({
+      client,
+      source: 'my_source_index',
+      target: 'my_target_index',
+      esCapabilities: statefulCapabilities,
+    });
+    try {
+      await task();
+    } catch (e) {
+      /** ignore */
+    }
+    expect(client.indices.clone.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "index": "my_source_index",
+        "settings": Object {
+          "index": Object {
+            "auto_expand_replicas": "0-1",
+            "blocks.write": false,
+            "mapping": Object {
+              "total_fields": Object {
+                "limit": 1500,
+              },
+            },
+            "number_of_shards": 1,
+            "priority": 10,
+            "refresh_interval": "1s",
+          },
+        },
+        "target": "my_target_index",
+        "timeout": "60s",
+        "wait_for_active_shards": "all",
+      }
+    `);
+  });
+
+  it('calls client.indices.clone with the correct parameter for stateless ES', async () => {
+    const statelessCapabilities = elasticsearchServiceMock.createCapabilities({ stateless: true });
+    const task = cloneIndex({
+      client,
+      source: 'my_source_index',
+      target: 'my_target_index',
+      esCapabilities: statelessCapabilities,
+    });
+    try {
+      await task();
+    } catch (e) {
+      /** ignore */
+    }
+    expect(client.indices.clone.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "index": "my_source_index",
+        "settings": Object {
+          "index": Object {
+            "blocks.write": false,
+            "mapping": Object {
+              "total_fields": Object {
+                "limit": 1500,
+              },
+            },
+          },
+        },
+        "target": "my_target_index",
+        "timeout": "60s",
+        "wait_for_active_shards": "all",
+      }
+    `);
+  });
+
   it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
     const task = cloneIndex({
       client,
       source: 'my_source_index',
       target: 'my_target_index',
+      esCapabilities: elasticsearchServiceMock.createCapabilities(),
     });
     try {
       await task();
@@ -51,11 +122,17 @@ describe('cloneIndex', () => {
   });
 
   it('re-throws non retry-able errors', async () => {
-    const task = setWriteBlock({
+    const task = cloneIndex({
       client: clientWithNonRetryableError,
-      index: 'my_index',
+      source: 'my_source_index',
+      target: 'my_target_index',
+      esCapabilities: elasticsearchServiceMock.createCapabilities(),
     });
-    await task();
+    try {
+      await task();
+    } catch (e) {
+      /** ignore */
+    }
     expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(nonRetryableError);
   });
 });

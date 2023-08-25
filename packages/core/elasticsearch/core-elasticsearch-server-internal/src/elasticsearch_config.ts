@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf, offeringBasedSchema } from '@kbn/config-schema';
 import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { i18n } from '@kbn/i18n';
 import { Duration } from 'moment';
@@ -58,7 +58,10 @@ export const configSchema = schema.object({
     })
   ),
   password: schema.maybe(schema.string()),
-  stateless: schema.boolean({ defaultValue: false }),
+  stateless: offeringBasedSchema({
+    traditional: schema.boolean({ defaultValue: false }),
+    serverless: schema.boolean({ defaultValue: true }),
+  }),
   serviceAccountToken: schema.maybe(
     schema.conditional(
       schema.siblingRef('username'),

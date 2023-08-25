@@ -134,7 +134,7 @@ export interface ElasticsearchServiceStart {
 }
 
 /**
- * Set of capabilities supported by the ES instance.
+ * Represent the capabilities supported by a given ES cluster.
  *
  * @public
  */
