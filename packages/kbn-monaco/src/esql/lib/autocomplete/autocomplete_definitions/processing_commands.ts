@@ -181,4 +181,16 @@ export const processingCommandsDefinitions: AutocompleteCommandDefinition[] = [
     },
     sortText: 'B',
   },
+  {
+    label: 'enrich',
+    insertText: 'enrich',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.mvExpandDoc', {
+      defaultMessage: 'Enrich table with another table',
+    }),
+    documentation: {
+      value: buildDocumentation('enrich policy', ['... | ENRICH a']),
+    },
+    sortText: 'B',
+  },
 ];

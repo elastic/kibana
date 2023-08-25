@@ -9,6 +9,17 @@
 import { i18n } from '@kbn/i18n';
 import type { AutocompleteCommandDefinition } from '../types';
 
+export const buildPoliciesDefinitions = (policies: string[]): AutocompleteCommandDefinition[] =>
+  policies.map((label) => ({
+    label,
+    insertText: label,
+    kind: 5,
+    details: i18n.translate('monaco.esql.autocomplete.policyDefinition', {
+      defaultMessage: `Policy defined`,
+    }),
+    sortText: 'D',
+  }));
+
 export const buildFieldsDefinitions = (fields: string[]): AutocompleteCommandDefinition[] =>
   fields.map((label) => ({
     label,
@@ -16,6 +27,37 @@ export const buildFieldsDefinitions = (fields: string[]): AutocompleteCommandDef
     kind: 4,
     detail: i18n.translate('monaco.esql.autocomplete.fieldDefinition', {
       defaultMessage: `Field specified by the input table`,
+    }),
+    sortText: 'D',
+  }));
+
+export const buildNoPoliciesAvailableDefinition = (): AutocompleteCommandDefinition[] => [
+  {
+    label: i18n.translate('monaco.esql.autocomplete.noPoliciesLabel', {
+      defaultMessage: 'No available policy',
+    }),
+    insertText: '',
+    kind: 26,
+    detail: i18n.translate('monaco.esql.autocomplete.noPoliciesLabelsFound', {
+      defaultMessage: 'No policies found',
+    }),
+    sortText: 'D',
+  },
+];
+
+export const buildMatchingFieldsDefinition = (
+  matchingField: string,
+  fields: string[]
+): AutocompleteCommandDefinition[] =>
+  fields.map((label) => ({
+    label,
+    insertText: label,
+    kind: 4,
+    detail: i18n.translate('monaco.esql.autocomplete.matchingFieldDefinition', {
+      defaultMessage: `Use to match on {matchingField} on the policy`,
+      values: {
+        matchingField,
+      },
     }),
     sortText: 'D',
   }));
