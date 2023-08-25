@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import {
   TIMELINE_EVENT,
@@ -24,7 +23,7 @@ import { populateTimeline } from '../../../tasks/timeline';
 import { HOSTS_URL } from '../../../urls/navigation';
 
 const defaultPageSize = 25;
-describe('Pagination', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'timeline');
@@ -49,7 +48,7 @@ describe('Pagination', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE).should('contain.text', defaultPageSize);
   });
 
-  it('should be able to go to next / previous page', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
+  it('should be able to go to next / previous page', { tags: '@brokenInServerless' }, () => {
     cy.get(`${TIMELINE_FLYOUT} ${TIMELINE_EVENTS_COUNT_NEXT_PAGE}`).first().click();
     cy.get(`${TIMELINE_FLYOUT} ${TIMELINE_EVENTS_COUNT_PREV_PAGE}`).first().click();
   });

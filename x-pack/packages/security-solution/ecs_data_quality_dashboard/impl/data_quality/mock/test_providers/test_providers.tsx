@@ -17,12 +17,13 @@ import { DataQualityProvider } from '../../data_quality_panel/data_quality_conte
 
 interface Props {
   children: React.ReactNode;
+  isILMAvailable?: boolean;
 }
 
 window.scrollTo = jest.fn();
 
 /** A utility for wrapping children in the providers required to run tests */
-export const TestProvidersComponent: React.FC<Props> = ({ children }) => {
+export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailable = true }) => {
   const http = httpServiceMock.createSetupContract({ basePath: '/test' });
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockGetInitialConversations = jest.fn(() => ({}));
@@ -61,7 +62,11 @@ export const TestProvidersComponent: React.FC<Props> = ({ children }) => {
           setDefaultAllowReplacement={jest.fn()}
           http={mockHttp}
         >
-          <DataQualityProvider httpFetch={http.fetch} telemetryEvents={mockTelemetryEvents}>
+          <DataQualityProvider
+            httpFetch={http.fetch}
+            isILMAvailable={isILMAvailable}
+            telemetryEvents={mockTelemetryEvents}
+          >
             {children}
           </DataQualityProvider>
         </AssistantProvider>
