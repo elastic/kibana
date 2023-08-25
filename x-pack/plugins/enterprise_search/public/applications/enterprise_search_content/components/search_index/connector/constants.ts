@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import dedent from 'dedent';
+
 import { CONNECTOR_DEFINITIONS } from '../../../../../../common/connectors/connectors';
 
 import { docLinks } from '../../../../shared/doc_links';
 import { CONNECTOR_ICONS } from '../../../../shared/icons/connector_icons';
+import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
 
 import { ConnectorClientSideDefinition } from './types';
 
@@ -163,3 +166,29 @@ export const CUSTOM_CONNECTORS = CONNECTORS.filter(({ isNative }) => !isNative);
 export const NATIVE_CONNECTORS = CONNECTORS.filter(({ isNative }) => isNative);
 
 export const BETA_CONNECTORS = CONNECTORS.filter(({ isBeta }) => isBeta);
+
+export const getConnectorTemplate = ({
+  apiKeyData,
+  connectorData,
+  host,
+}: {
+  apiKeyData: ApiKey | undefined;
+  connectorData: {
+    id: string;
+    service_type: string | null;
+  };
+  host?: string;
+}) => dedent`connectors:
+  -
+    connector_id: "${connectorData.id}"
+    service_type: "${connectorData.service_type || 'changeme'}"${
+  apiKeyData?.encoded
+    ? `
+    api_key: "${apiKeyData?.encoded}"`
+    : ''
+}
+
+  elasticsearch:
+    host: "${host || 'https://locahost:9200'}"
+    api_key: "${apiKeyData?.encoded || ''}"
+`;

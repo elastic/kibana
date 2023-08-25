@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import { LanguageDefinition } from '@kbn/search-api-panels';
-
-import { consoleDefinition } from './console';
-
-export const showTryInConsole = (code: keyof LanguageDefinition) => code in consoleDefinition;
+export * from './helpers';
