@@ -141,7 +141,7 @@ describe('Higher version doc conversion', () => {
     it('throws error for documents using higher version model than current', async () => {
       try {
         await repositoryV1.get('test-type', 'doc-1', {
-          versionModelMatch: 'strict',
+          downwardConversion: 'forbid',
         });
       } catch (err) {
         expect(err.message).toBe(
@@ -169,7 +169,7 @@ describe('Higher version doc conversion', () => {
     it('throws error for documents using higher version model than current', async () => {
       try {
         await repositoryV2.bulkGet([{ type: 'test-type', id: 'doc-1' }], {
-          versionModelMatch: 'strict',
+          downwardConversion: 'forbid',
         });
       } catch (err) {
         expect(err.message).toBe(
@@ -198,7 +198,7 @@ describe('Higher version doc conversion', () => {
     it('throws error for documents using higher version model than current', async () => {
       try {
         await repositoryV2.resolve('test-type', 'doc-1', {
-          versionModelMatch: 'strict',
+          downwardConversion: 'forbid',
         });
       } catch (err) {
         expect(err.message).toBe(
@@ -226,7 +226,7 @@ describe('Higher version doc conversion', () => {
     it('throws error for documents using higher version model than current', async () => {
       try {
         await repositoryV2.bulkResolve([{ type: 'test-type', id: 'doc-1' }], {
-          versionModelMatch: 'strict',
+          downwardConversion: 'forbid',
         });
       } catch (err) {
         expect(err.message).toBe(

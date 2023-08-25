@@ -92,7 +92,7 @@ export const performFind = async <T = unknown, A = unknown>(
     preference,
     aggs,
     migrationVersionCompatibility,
-    versionModelMatch,
+    downwardConversion,
   } = options;
 
   if (!type) {
@@ -246,7 +246,7 @@ export const performFind = async <T = unknown, A = unknown>(
           // can't migrate a document with partial attributes
           if (!fields) {
             savedObject = migrationHelper.migrateStorageDocument(savedObject, {
-              versionModelMatch,
+              downwardConversion,
             }) as SavedObject;
           }
           return {

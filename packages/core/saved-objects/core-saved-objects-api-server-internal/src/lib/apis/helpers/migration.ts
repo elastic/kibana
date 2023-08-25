@@ -36,15 +36,16 @@ export class MigrationHelper {
    * This function is meant to be used by read APIs (get, find) for documents fetched from the index.
    * It will therefore accept downgrading the document before returning it from the API.
    *
-   * Note: to opt out of downgrades, use the versionModelMatch: 'strict' API option in READ API operations (get, resolve, find, bulk_get, bulk_resolve)
+   * Note: to opt out of downgrades, use the downwardConversion: 'forbid' API option in READ API operations:
+   * get, resolve, find, bulk_get, bulk_resolve
    */
   migrateStorageDocument(
     document: SavedObjectUnsanitizedDoc,
-    options: { versionModelMatch?: 'strict' }
+    options: { downwardConversion?: 'allow' | 'forbid' }
   ): SavedObjectUnsanitizedDoc {
     return this.migrator.migrateDocument(document, {
       allowDowngrade:
-        options?.versionModelMatch && options.versionModelMatch === 'strict' ? false : true,
-    }); // allowDowngrade conditional on versionModelMatch
+        options?.downwardConversion && options.downwardConversion === 'forbid' ? false : true,
+    }); // allowDowngrade conditional on downwardConversion
   }
 }

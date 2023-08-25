@@ -51,7 +51,7 @@ export const performResolve = async <T>(
     encryptionExtension,
     securityExtension,
     objects: [{ type, id }],
-    options: { ...options, namespace }, // note: Includes versionModelMatch?: 'strict'
+    options: { ...options, namespace }, // note: Includes downwardConversion?: 'forbid'
   });
   const [result] = bulkResults;
   if (isBulkResolveError(result)) {
