@@ -335,13 +335,10 @@
       {
         "parentPluginId": "profiling",
         "id": "def-common.NOT_AVAILABLE_LABEL",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "NOT_AVAILABLE_LABEL",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "x-pack/plugins/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

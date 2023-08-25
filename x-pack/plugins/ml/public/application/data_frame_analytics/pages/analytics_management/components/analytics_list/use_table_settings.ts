@@ -32,7 +32,7 @@ export interface CriteriaWithPagination<T> extends Criteria<T> {
 
 interface UseTableSettingsReturnValue<T> {
   onTableChange: EuiBasicTableProps<T>['onChange'];
-  pagination: Pagination;
+  pagination: Required<Omit<Pagination, 'showPerPageOptions'>>;
   sorting: {
     sort: {
       field: keyof T;

@@ -151,6 +151,12 @@ const registerHttpRequestMockHelpers = (
   ) =>
     mockResponse('PUT', `${INTERNAL_API_BASE_PATH}/enrich_policies/${policyName}`, response, error);
 
+  const setLoadIndexDetailsResponse = (
+    indexName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('GET', `${INTERNAL_API_BASE_PATH}/indices/${indexName}`, response, error);
+
   return {
     setLoadTemplatesResponse,
     setLoadIndicesResponse,
@@ -172,6 +178,7 @@ const registerHttpRequestMockHelpers = (
     setLoadEnrichPoliciesResponse,
     setDeleteEnrichPolicyResponse,
     setExecuteEnrichPolicyResponse,
+    setLoadIndexDetailsResponse,
   };
 };
 

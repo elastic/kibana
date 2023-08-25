@@ -40,7 +40,6 @@ export class PluginContract {
   public getSetupContract(): PluginSetup {
     return {
       resolver: lazyResolver,
-      upselling: this.upsellingService,
       setAppLinksSwitcher: (appLinksSwitcher) => {
         this.appLinksSwitcher = appLinksSwitcher;
       },
@@ -57,6 +56,7 @@ export class PluginContract {
         this.getStartedComponent$.next(getStartedComponent);
       },
       getBreadcrumbsNav$: () => breadcrumbsNav$,
+      getUpselling: () => this.upsellingService,
     };
   }
 

@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EuiBasicTable } from '@elastic/eui';
-import { AlertsTable, columns } from './correlations_details_alerts_table';
+import { CorrelationsDetailsAlertsTable, columns } from './correlations_details_alerts_table';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 
 jest.mock('../hooks/use_paginated_alerts');
@@ -59,7 +59,7 @@ describe('AlertsTable', () => {
   });
 
   it('renders EuiBasicTable with correct props', () => {
-    render(<AlertsTable alertIds={alertIds} />);
+    render(<CorrelationsDetailsAlertsTable title={'title'} loading={false} alertIds={alertIds} />);
 
     expect(jest.mocked(usePaginatedAlerts)).toHaveBeenCalled();
 

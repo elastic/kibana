@@ -9,12 +9,7 @@ import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { RightPanelContext } from '../context';
-import {
-  INSIGHTS_PREVALENCE_TITLE_ICON_TEST_ID,
-  INSIGHTS_PREVALENCE_TITLE_LINK_TEST_ID,
-  INSIGHTS_PREVALENCE_TITLE_TEXT_TEST_ID,
-  INSIGHTS_PREVALENCE_TOGGLE_ICON_TEST_ID,
-} from './test_ids';
+import { INSIGHTS_PREVALENCE_TEST_ID } from './test_ids';
 import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import React from 'react';
 import { PrevalenceOverview } from './prevalence_overview';
@@ -24,10 +19,21 @@ import { useFetchFieldValuePairWithAggregation } from '../../shared/hooks/use_fe
 import { useFetchUniqueByField } from '../../shared/hooks/use_fetch_unique_by_field';
 import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import {
+  EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
+  EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
+  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
+  EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
+} from '../../shared/components/test_ids';
 
 jest.mock('../../shared/hooks/use_fetch_field_value_pair_with_aggregation');
 jest.mock('../../shared/hooks/use_fetch_unique_by_field');
 jest.mock('../hooks/use_prevalence');
+
+const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(INSIGHTS_PREVALENCE_TEST_ID);
+const TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(INSIGHTS_PREVALENCE_TEST_ID);
+const TITLE_ICON_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(INSIGHTS_PREVALENCE_TEST_ID);
+const TITLE_TEXT_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(INSIGHTS_PREVALENCE_TEST_ID);
 
 const highlightedField = {
   name: 'field',
@@ -71,10 +77,10 @@ describe('<PrevalenceOverview />', () => {
     const { getByTestId, queryByTestId } = render(
       renderPrevalenceOverview(panelContextValue('eventId', {}, []))
     );
-    expect(queryByTestId(INSIGHTS_PREVALENCE_TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
-    expect(getByTestId(INSIGHTS_PREVALENCE_TITLE_LINK_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(INSIGHTS_PREVALENCE_TITLE_ICON_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(INSIGHTS_PREVALENCE_TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(TITLE_ICON_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render component', () => {
@@ -94,7 +100,7 @@ describe('<PrevalenceOverview />', () => {
 
     const { getByTestId } = render(renderPrevalenceOverview(panelContextValue('eventId', {}, [])));
 
-    expect(getByTestId(INSIGHTS_PREVALENCE_TITLE_LINK_TEST_ID)).toHaveTextContent('Prevalence');
+    expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Prevalence');
 
     const iconDataTestSubj = 'testIcon';
     const valueDataTestSubj = 'testValue';
@@ -154,7 +160,7 @@ describe('<PrevalenceOverview />', () => {
       </TestProviders>
     );
 
-    getByTestId(INSIGHTS_PREVALENCE_TITLE_LINK_TEST_ID).click();
+    getByTestId(TITLE_LINK_TEST_ID).click();
     expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
       id: LeftPanelKey,
       path: { tab: LeftPanelInsightsTab, subTab: PREVALENCE_TAB_ID },
