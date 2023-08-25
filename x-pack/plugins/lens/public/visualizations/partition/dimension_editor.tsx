@@ -8,11 +8,26 @@
 import './toolbar.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { PaletteRegistry } from '@kbn/coloring';
+import {
+  CategoricalColorMapping,
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  PaletteRegistry,
+  getPaletteColors,
+  ColorMapping,
+  EUIPalette,
+  IKEAPalette,
+  NeutralPalette,
+  PastelPalette,
+  TableauPalette,
+  SPECIAL_RULE_MATCHES,
+} from '@kbn/coloring';
 import { ColorPicker, useDebouncedValue } from '@kbn/visualization-ui-components';
+import { EuiButtonEmpty, EuiColorPaletteDisplay, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useState, useCallback } from 'react';
+import { getColorCategories } from '@kbn/expression-xy-plugin/public';
 import { PieVisualizationState } from '../../../common/types';
 import { VisualizationDimensionEditorProps } from '../../types';
-import { PalettePicker } from '../../shared_components';
+import { PalettePanelContainer } from '../../shared_components';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import {
   getDefaultColorForMultiMetricDimension,
@@ -22,6 +37,7 @@ import {
 
 type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
   paletteService: PaletteRegistry;
+  isDarkMode: boolean;
 };
 
 export function DimensionEditor(props: DimensionEditorProps) {
@@ -30,6 +46,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       value: props.state,
       onChange: props.setState,
     });
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
 
   const currentLayer = localState.layers.find((layer) => layer.layerId === props.layerId);
 
@@ -61,6 +78,23 @@ export function DimensionEditor(props: DimensionEditorProps) {
     [currentLayer, localState, props.accessor, setLocalState]
   );
 
+  const setColorMapping = useCallback(
+    (updatedColorMap: ColorMapping.Config) => {
+      setLocalState({
+        ...localState,
+        layers: localState.layers.map((layer) =>
+          layer.layerId === currentLayer?.layerId
+            ? {
+                ...layer,
+                colorMapping: updatedColorMap,
+              }
+            : layer
+        ),
+      });
+    },
+    [localState, currentLayer, setLocalState]
+  );
+
   if (!currentLayer) {
     return null;
   }
@@ -84,16 +118,82 @@ export function DimensionEditor(props: DimensionEditorProps) {
         })
     : undefined;
 
+  // TODO: move the available palette elsewhere
+  const availablePalettes = new Map<string, ColorMapping.CategoricalPalette>([
+    [EUIPalette.id, EUIPalette],
+    [TableauPalette.id, TableauPalette],
+    [IKEAPalette.id, IKEAPalette],
+    [PastelPalette.id, PastelPalette],
+    [NeutralPalette.id, NeutralPalette],
+  ]);
+  const colors = getPaletteColors(false, currentLayer.colorMapping);
+  const table = props.frame.activeData?.[currentLayer.layerId];
+  const splitCategories = getColorCategories(table?.rows ?? [], props.accessor);
+
   return (
     <>
       {props.accessor === firstNonCollapsedColumnId && (
-        <PalettePicker
-          palettes={props.paletteService}
-          activePalette={props.state.palette}
-          setPalette={(newPalette) => {
-            setLocalState({ ...props.state, palette: newPalette });
-          }}
-        />
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
+          className="lnsDynamicColoringClickable"
+        >
+          <EuiFlexItem>
+            <EuiColorPaletteDisplay
+              data-test-subj="lnsXY_dynamicColoring_palette"
+              palette={colors}
+              type={'fixed'}
+              onClick={() => {
+                setIsPaletteOpen(!isPaletteOpen);
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj="lnsXY_dynamicColoring_trigger"
+              aria-label={i18n.translate('xpack.lens.paletteXYGradient.customizeLong', {
+                defaultMessage: 'Edit palette',
+              })}
+              iconType="controlsHorizontal"
+              onClick={() => {
+                setIsPaletteOpen(!isPaletteOpen);
+              }}
+              size="xs"
+              flush="both"
+            >
+              {i18n.translate('xpack.lens.paletteXYGradient.customize', {
+                defaultMessage: 'Edit',
+              })}
+            </EuiButtonEmpty>
+            <PalettePanelContainer
+              siblingRef={props.panelRef}
+              isOpen={isPaletteOpen}
+              handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
+            >
+              <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded">
+                <CategoricalColorMapping
+                  isDarkMode={props.isDarkMode}
+                  model={currentLayer.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
+                  onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
+                  palettes={availablePalettes}
+                  data={{
+                    type: 'categories',
+                    categories: splitCategories,
+                    specialHandling: SPECIAL_RULE_MATCHES,
+                  }}
+                />
+              </div>
+            </PalettePanelContainer>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        // <PalettePicker
+        //   palettes={props.paletteService}
+        //   activePalette={props.state.palette}
+        //   setPalette={(newPalette) => {
+        //     setLocalState({ ...props.state, palette: newPalette });
+        //   }}
+        // />
       )}
       {showColorPicker && (
         <ColorPicker

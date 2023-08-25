@@ -7,16 +7,49 @@
  */
 
 import { Datum, PartitionLayer } from '@elastic/charts';
-import type { PaletteRegistry } from '@kbn/coloring';
+import {
+  ColorMapping,
+  PaletteRegistry,
+  getColorFactory,
+  SPECIAL_RULE_MATCHES,
+  getPalette,
+  availablePalettes,
+  NeutralPalette,
+} from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/public';
+
 import { getDistinctSeries } from '..';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 import { sortPredicateByType, sortPredicateSaveSourceOrder } from './sort_predicate';
 import { byDataColorPaletteMap, getColor } from './get_color';
 import { getNodeLabel } from './get_node_labels';
+import { getPartitionFillColor } from './get_color_from_mappings';
+
+// TODO: export to a reusable function
+export const MULTI_FIELD_VALUES_SEPARATOR = ' › ';
+export function getColorCategories(rows: DatatableRow[], accessor?: string) {
+  return accessor
+    ? rows.reduce<{ keys: Set<string>; array: Array<string | string[]> }>(
+        (acc, r) => {
+          const value = r[accessor];
+          if (value === undefined) {
+            return acc;
+          }
+          const key = value.hasOwnProperty('keys') ? [...value.keys] : [value];
+          const stringifiedKeys = key.join(',');
+          if (!acc.keys.has(stringifiedKeys)) {
+            acc.keys.add(stringifiedKeys);
+            acc.array.push(key.length === 1 ? key[0] : key);
+          }
+          return acc;
+        },
+        { keys: new Set(), array: [] }
+      ).array
+    : [];
+}
 
 // This is particularly useful in case of a text based languages where
 // it's no possible to use a missingBucketLabel
@@ -62,6 +95,24 @@ export const getLayers = (
 
   const distinctSeries = getDistinctSeries(rows, columns);
 
+  // the mosaic configures the main categories in the second column, instead of the first
+  // as it happens in all the other partition types
+  const splitCategories =
+    chartType === ChartTypes.MOSAIC && columns.length === 2
+      ? getColorCategories(rows, columns[1]?.id as string)
+      : getColorCategories(rows, columns[0]?.id as string);
+
+  const colorMappingModel: ColorMapping.Config = JSON.parse(visParams.colorMapping);
+
+  const getColorFromMappings = getColorFactory(
+    colorMappingModel,
+    getPalette(availablePalettes, NeutralPalette),
+    isDarkMode,
+    { type: 'categories', categories: splitCategories, specialHandling: SPECIAL_RULE_MATCHES }
+  );
+
+  const canUseColorMappings = true;
+
   return columns.map((col, layerIndex) => {
     return {
       groupByRollup: (d: Datum) => (col.id ? d[col.id] ?? emptySliceLabel : col.name),
@@ -75,25 +126,27 @@ export const getLayers = (
         ? sortPredicateSaveSourceOrder()
         : sortPredicateForType,
       shape: {
-        fillColor: (key, sortIndex, node) =>
-          getColor(
-            chartType,
-            key,
-            node,
-            layerIndex,
-            isSplitChart,
-            overwriteColors,
-            distinctSeries,
-            { columnsLength: columns.length, rowsLength: rows.length },
-            visParams,
-            palettes,
-            byDataPalette,
-            syncColors,
-            isDarkMode,
-            formatter,
-            col,
-            formatters
-          ),
+        fillColor: canUseColorMappings
+          ? getPartitionFillColor(chartType, layerIndex, columns.length, getColorFromMappings)
+          : (key, sortIndex, node) =>
+              getColor(
+                chartType,
+                key,
+                node,
+                layerIndex,
+                isSplitChart,
+                overwriteColors,
+                distinctSeries,
+                { columnsLength: columns.length, rowsLength: rows.length },
+                visParams,
+                palettes,
+                byDataPalette,
+                syncColors,
+                isDarkMode,
+                formatter,
+                col,
+                formatters
+              ),
       },
     };
   });

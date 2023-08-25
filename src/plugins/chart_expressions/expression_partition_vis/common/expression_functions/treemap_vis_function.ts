@@ -115,6 +115,10 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
       help: strings.getAriaLabelHelp(),
       required: false,
     },
+    colorMapping: {
+      types: ['string'],
+      help: strings.getColorMappingHelp(),
+    },
   },
   fn(context, args, handlers) {
     const maxSupportedBuckets = 2;

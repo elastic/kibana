@@ -114,6 +114,10 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       help: strings.getAriaLabelHelp(),
       required: false,
     },
+    colorMapping: {
+      types: ['string'],
+      help: strings.getColorMappingHelp(),
+    },
   },
   fn(context, args, handlers) {
     if (args.splitColumn && args.splitRow) {
