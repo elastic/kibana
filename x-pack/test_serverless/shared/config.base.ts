@@ -68,7 +68,7 @@ export default async () => {
         `xpack.security.authc.realms.native.native1.enabled=true`,
         `xpack.security.authc.realms.native.native1.order=-97`,
         'xpack.security.authc.token.enabled=true',
-        'xpack.security.authc.realms.saml.cloud-saml-kibana.order=0',
+        'xpack.security.authc.realms.saml.cloud-saml-kibana.order=101',
         `xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=${getDockerFileMountPath(
           idpPath
         )}`,
