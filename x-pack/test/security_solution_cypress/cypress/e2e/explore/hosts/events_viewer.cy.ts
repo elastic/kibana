@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import {
   FIELDS_BROWSER_CHECKBOX,
@@ -46,7 +45,7 @@ const defaultHeadersInDefaultEcsCategory = [
   { id: 'destination.ip' },
 ];
 
-describe('Events Viewer', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('Events Viewer', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', 'auditbeat_big');
   });

@@ -19,6 +19,12 @@ client = Elasticsearch(
   api_key="${apiKey}"
 )`,
   docLink: docLinks.clientsPythonOverview,
+  github: {
+    label: i18n.translate('xpack.enterpriseSearch.languages.python.githubLink', {
+      defaultMessage: 'elasticsearch-py',
+    }),
+    link: 'https://github.com/elastic/elasticsearch-py',
+  },
   iconType: 'python.svg',
   id: Languages.PYTHON,
   ingestData: ({ indexName }) => `documents = [

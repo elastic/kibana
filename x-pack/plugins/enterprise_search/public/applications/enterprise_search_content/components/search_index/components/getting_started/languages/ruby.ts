@@ -18,6 +18,12 @@ export const rubyDefinition: LanguageDefinition = {
 )
 `,
   docLink: docLinks.clientsRubyOverview,
+  github: {
+    label: i18n.translate('xpack.enterpriseSearch.languages.ruby.githubLink', {
+      defaultMessage: 'elasticsearch-ruby',
+    }),
+    link: 'https://github.com/elastic/elasticsearch-ruby',
+  },
   iconType: 'ruby.svg',
   id: Languages.RUBY,
   ingestData: ({ indexName }) => `documents = [

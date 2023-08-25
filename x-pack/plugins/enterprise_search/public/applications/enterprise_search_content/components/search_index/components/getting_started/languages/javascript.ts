@@ -27,6 +27,12 @@ const client = new Client({
   }
 });`,
   docLink: docLinks.clientsJsIntro,
+  github: {
+    label: i18n.translate('xpack.enterpriseSearch.languages.javascript.githubLink', {
+      defaultMessage: 'elasticsearch',
+    }),
+    link: 'https://github.com/elastic/elasticsearch-js',
+  },
   iconType: 'javascript.svg',
   id: Languages.JAVASCRIPT,
   ingestData: ({ indexName }) => `// Sample flight data

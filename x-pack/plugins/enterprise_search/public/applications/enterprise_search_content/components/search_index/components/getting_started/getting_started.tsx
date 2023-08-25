@@ -33,6 +33,7 @@ import {
   InstallClientPanel,
   OverviewPanel,
   CodeBox,
+  getLanguageDefinitionCodeSnippet,
 } from '@kbn/search-api-panels';
 
 import { KibanaDeps } from '../../../../../../../common/types';
@@ -49,7 +50,6 @@ import { GenerateApiKeyModal } from '../generate_api_key_modal/modal';
 
 import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
-import { getCodeSnippet } from './languages/utils';
 
 const DEFAULT_URL = 'https://localhost:9200';
 
@@ -105,8 +105,8 @@ export const APIGettingStarted = () => {
         ))}
       </SelectClientPanel>
       <InstallClientPanel
-        codeSnippet={getCodeSnippet(selectedLanguage, 'installClient', codeArgs)}
         showTryInConsole={false}
+        codeSnippet={getLanguageDefinitionCodeSnippet(selectedLanguage, 'installClient', codeArgs)}
         languages={languageDefinitions}
         language={selectedLanguage}
         setSelectedLanguage={setSelectedLanguage}
@@ -276,8 +276,12 @@ export const APIGettingStarted = () => {
         rightPanelContent={
           <CodeBox
             languages={languageDefinitions}
-            codeSnippet={getCodeSnippet(selectedLanguage, 'configureClient', codeArgs)}
             showTryInConsole={false}
+            codeSnippet={getLanguageDefinitionCodeSnippet(
+              selectedLanguage,
+              'configureClient',
+              codeArgs
+            )}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
             http={http}
@@ -307,8 +311,12 @@ export const APIGettingStarted = () => {
         rightPanelContent={
           <CodeBox
             languages={languageDefinitions}
-            codeSnippet={getCodeSnippet(selectedLanguage, 'testConnection', codeArgs)}
             showTryInConsole={false}
+            codeSnippet={getLanguageDefinitionCodeSnippet(
+              selectedLanguage,
+              'testConnection',
+              codeArgs
+            )}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
             http={http}
@@ -336,8 +344,8 @@ export const APIGettingStarted = () => {
         rightPanelContent={
           <CodeBox
             languages={languageDefinitions}
-            codeSnippet={getCodeSnippet(selectedLanguage, 'ingestData', codeArgs)}
             showTryInConsole={false}
+            codeSnippet={getLanguageDefinitionCodeSnippet(selectedLanguage, 'ingestData', codeArgs)}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
             http={http}
@@ -364,8 +372,12 @@ export const APIGettingStarted = () => {
         rightPanelContent={
           <CodeBox
             languages={languageDefinitions}
-            codeSnippet={getCodeSnippet(selectedLanguage, 'buildSearchQuery', codeArgs)}
             showTryInConsole={false}
+            codeSnippet={getLanguageDefinitionCodeSnippet(
+              selectedLanguage,
+              'buildSearchQuery',
+              codeArgs
+            )}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
             http={http}

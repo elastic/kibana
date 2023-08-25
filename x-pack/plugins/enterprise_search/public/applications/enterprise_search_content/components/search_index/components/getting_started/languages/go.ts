@@ -25,6 +25,7 @@ fmt.Println(searchResp, err)`,
   "context"
   "fmt"
   "log"
+  "strings"
 
   "github.com/elastic/go-elasticsearch/v8"
 )
@@ -48,6 +49,12 @@ if err != nil {
 }
 `,
   docLink: docLinks.clientsGoIndex,
+  github: {
+    label: i18n.translate('xpack.enterpriseSearch.languages.go.githubLink', {
+      defaultMessage: 'go-elasticsearch',
+    }),
+    link: 'https://github.com/elastic/go-elasticsearch',
+  },
   iconType: 'go.svg',
   id: Languages.GO,
   ingestData: ({ indexName }) => `buf := bytes.NewBufferString(\`

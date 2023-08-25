@@ -8,14 +8,7 @@
 import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-export type PLATFORM_TYPE =
-  | 'linux'
-  | 'mac'
-  | 'windows'
-  | 'rpm'
-  | 'deb'
-  | 'kubernetes'
-  | 'googleCloudShell';
+export type PLATFORM_TYPE = 'linux' | 'mac' | 'windows' | 'rpm' | 'deb' | 'kubernetes';
 
 export const REDUCED_PLATFORM_OPTIONS: Array<{
   label: string;

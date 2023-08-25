@@ -21,8 +21,8 @@ import type {
   Direction,
 } from '../../../common/search_strategy';
 import { OsqueryQueries } from '../../../common/search_strategy';
-import { createFilter, generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { findLiveQueryRequestQuerySchema } from '../../../common/api';
+import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 
 export const findLiveQueryRoute = (router: IRouter<DataRequestHandlerContext>) => {
   router.versioned
@@ -52,7 +52,7 @@ export const findLiveQueryRoute = (router: IRouter<DataRequestHandlerContext>) =
             search.search<ActionsRequestOptions, ActionsStrategyResponse>(
               {
                 factoryQueryType: OsqueryQueries.actions,
-                filterQuery: createFilter(request.query.filterQuery),
+                kuery: request.query.kuery,
                 pagination: generateTablePaginationOptions(
                   request.query.page ?? 0,
                   request.query.pageSize ?? 100
