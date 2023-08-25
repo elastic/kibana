@@ -149,6 +149,15 @@ describe('Higher version doc conversion', () => {
         );
       }
     });
+    it("doesn't throw error for documents using current version model when 'downwardConversion' is 'forbid'", async () => {
+      try {
+        await repositoryV2.get('test-type', 'doc-1', {
+          downwardConversion: 'forbid',
+        });
+      } catch (err) {
+        expect(err).toBeUndefined();
+      }
+    });
   });
 
   describe('#bulkGet', () => {
@@ -177,6 +186,15 @@ describe('Higher version doc conversion', () => {
         );
       }
     });
+    it("doesn't throw error for documents using current version model when 'downwardConversion' is 'forbid'", async () => {
+      try {
+        await repositoryV2.get('test-type', 'doc-1', {
+          downwardConversion: 'forbid',
+        });
+      } catch (err) {
+        expect(err).toBeUndefined();
+      }
+    });
   });
 
   describe('#resolve', () => {
@@ -194,7 +212,6 @@ describe('Higher version doc conversion', () => {
         newField: 'someValue',
       });
     });
-
     it('throws error for documents using higher version model than current', async () => {
       try {
         await repositoryV2.resolve('test-type', 'doc-1', {
@@ -204,6 +221,15 @@ describe('Higher version doc conversion', () => {
         expect(err.message).toBe(
           '[NewerModelVersionError]: Document "doc-1" belongs to a more recent version of Kibana [10.2.0] when the last known version is [10.1.0].'
         );
+      }
+    });
+    it("doesn't throw error for documents using current version model when 'downwardConversion' is 'forbid'", async () => {
+      try {
+        await repositoryV2.get('test-type', 'doc-1', {
+          downwardConversion: 'forbid',
+        });
+      } catch (err) {
+        expect(err).toBeUndefined();
       }
     });
   });
@@ -232,6 +258,15 @@ describe('Higher version doc conversion', () => {
         expect(err.message).toBe(
           '[NewerModelVersionError]: Document "doc-1" belongs to a more recent version of Kibana [10.2.0] when the last known version is [10.1.0].'
         );
+      }
+    });
+    it("doesn't throw error for documents using current version model when 'downwardConversion' is 'forbid'", async () => {
+      try {
+        await repositoryV2.get('test-type', 'doc-1', {
+          downwardConversion: 'forbid',
+        });
+      } catch (err) {
+        expect(err).toBeUndefined();
       }
     });
   });
