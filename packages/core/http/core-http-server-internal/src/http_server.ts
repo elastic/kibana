@@ -8,6 +8,7 @@
 
 import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
+import { generateOpenApiDocument } from '@kbn/generate-oas';
 import url from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -25,7 +26,7 @@ import apm from 'elastic-apm-node';
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
-import { isSafeMethod } from '@kbn/core-http-router-server-internal';
+import { CoreVersionedRouter, isSafeMethod } from '@kbn/core-http-router-server-internal';
 import type {
   IRouter,
   RouteConfigOptions,
@@ -280,6 +281,8 @@ export class HttpServer {
         this.configureRoute(route);
       }
     }
+
+    this.registerOasEndpoint();
 
     await this.server.start();
     const serverPath =
@@ -569,6 +572,35 @@ export class HttpServer {
     this.registerOnPreResponse((request, preResponseInfo, t) => {
       const authResponseHeaders = this.authResponseHeaders.get(request);
       return t.next({ headers: authResponseHeaders });
+    });
+  }
+
+  private oasCache: undefined | object;
+  private registerOasEndpoint() {
+    this.server!.route({
+      path: '/api/oas',
+      method: 'GET',
+      handler: (req, h) => {
+        if (!this.oasCache) {
+          this.oasCache = generateOpenApiDocument(
+            this.getRegisteredRouters().map((r) => r.versioned as CoreVersionedRouter),
+            {
+              baseUrl: 'todo',
+              title: 'todo',
+              version: '0.0.0',
+            }
+          );
+        }
+        return h.response(this.oasCache);
+      },
+      options: {
+        app: { access: 'public' },
+        auth: false,
+        cache: {
+          privacy: 'public',
+          otherwise: 'must-revalidate',
+        },
+      },
     });
   }
 

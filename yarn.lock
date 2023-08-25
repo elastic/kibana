@@ -4526,7 +4526,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/generate-oas-cli@link:packages/kbn-generate-oas-cli":
+"@kbn/generate-oas@link:packages/kbn-generate-oas":
   version "0.0.0"
   uid ""
 
