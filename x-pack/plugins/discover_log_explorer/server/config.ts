@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, offeringBasedSchema } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 
 import { DiscoverLogExplorerConfig } from '../common/plugin_config';
 
 export const configSchema = schema.object({
   featureFlags: schema.object({
-    deepLinkVisible: schema.conditional(
-      schema.contextRef('serverless'),
-      true,
-      schema.boolean(),
-      schema.never(),
-      {
+    deepLinkVisible: offeringBasedSchema({
+      serverless: schema.boolean(),
+      options: {
         defaultValue: false,
-      }
-    ),
+      },
+    }),
   }),
 });
 
