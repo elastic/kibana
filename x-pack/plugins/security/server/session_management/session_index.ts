@@ -55,7 +55,9 @@ export function getSessionIndexTemplate(indexName: string) {
         dynamic: 'strict' as const,
         properties: {
           usernameHash: { type: 'keyword' as const },
-          provider: { properties: { name: { type: 'keyword' as const }, type: { type: 'keyword' as const } } },
+          provider: {
+            properties: { name: { type: 'keyword' as const }, type: { type: 'keyword' as const } },
+          },
           idleTimeoutExpiration: { type: 'date' as const },
           lifespanExpiration: { type: 'date' as const },
           accessAgreementAcknowledged: { type: 'boolean' as const },

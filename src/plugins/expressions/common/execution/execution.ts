@@ -345,7 +345,9 @@ export class Execution<
             tap((args) => this.execution.params.debug && Object.assign(link.debug ?? {}, { args })),
             switchMap((args) => this.invokeFunction(fn, currentInput, args)),
             switchMap((output) => (getType(output) === 'error' ? throwError(output) : of(output))),
-            tap((output) => this.execution.params.debug && Object.assign(link.debug ?? {}, { output })),
+            tap(
+              (output) => this.execution.params.debug && Object.assign(link.debug ?? {}, { output })
+            ),
             catchError((rawError) => {
               const error = createError(rawError);
               error.error.message = `[${fnName}] > ${error.error.message}`;
