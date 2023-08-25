@@ -27,85 +27,92 @@ import { getIdError } from '../../../utils/utils';
 import { transformValidate } from '../../../utils/validate';
 
 export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
-  router.patch(
-    {
+  router.versioned
+    .patch({
+      access: 'public',
       path: DETECTION_ENGINE_RULES_URL,
-      validate: {
-        // Use non-exact validation because everything is optional in patch - since everything is optional,
-        // io-ts can't find the right schema from the type specific union and the exact check breaks.
-        // We do type specific validation after fetching the existing rule so we know the rule type.
-        body: buildRouteValidationNonExact(PatchRuleRequestBody),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response): Promise<IKibanaResponse<PatchRuleResponse>> => {
-      const siemResponse = buildSiemResponse(response);
-      const validationErrors = validatePatchRuleRequestBody(request.body);
-      if (validationErrors.length) {
-        return siemResponse.error({ statusCode: 400, body: validationErrors });
-      }
-      try {
-        const params = request.body;
-        const rulesClient = (await context.alerting).getRulesClient();
-        const savedObjectsClient = (await context.core).savedObjects.client;
-
-        const mlAuthz = buildMlAuthz({
-          license: (await context.licensing).license,
-          ml,
-          request,
-          savedObjectsClient,
-        });
-        if (params.type) {
-          // reject an unauthorized "promotion" to ML
-          throwAuthzError(await mlAuthz.validateRuleType(params.type));
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            // Use non-exact validation because everything is optional in patch - since everything is optional,
+            // io-ts can't find the right schema from the type specific union and the exact check breaks.
+            // We do type specific validation after fetching the existing rule so we know the rule type.
+            body: buildRouteValidationNonExact(PatchRuleRequestBody),
+          },
+        },
+      },
+      async (context, request, response): Promise<IKibanaResponse<PatchRuleResponse>> => {
+        const siemResponse = buildSiemResponse(response);
+        const validationErrors = validatePatchRuleRequestBody(request.body);
+        if (validationErrors.length) {
+          return siemResponse.error({ statusCode: 400, body: validationErrors });
         }
+        try {
+          const params = request.body;
+          const rulesClient = (await context.alerting).getRulesClient();
+          const savedObjectsClient = (await context.core).savedObjects.client;
 
-        const existingRule = await readRules({
-          rulesClient,
-          ruleId: params.rule_id,
-          id: params.id,
-        });
-        if (existingRule?.params.type) {
-          // reject an unauthorized modification of an ML rule
-          throwAuthzError(await mlAuthz.validateRuleType(existingRule?.params.type));
-        }
-
-        checkDefaultRuleExceptionListReferences({ exceptionLists: params.exceptions_list });
-        await validateRuleDefaultExceptionList({
-          exceptionsList: params.exceptions_list,
-          rulesClient,
-          ruleRuleId: params.rule_id,
-          ruleId: params.id,
-        });
-
-        const rule = await patchRules({
-          rulesClient,
-          existingRule,
-          nextParams: params,
-        });
-        if (rule != null && rule.enabled != null && rule.name != null) {
-          const [validated, errors] = transformValidate(rule);
-          if (errors != null) {
-            return siemResponse.error({ statusCode: 500, body: errors });
-          } else {
-            return response.ok({ body: validated ?? {} });
+          const mlAuthz = buildMlAuthz({
+            license: (await context.licensing).license,
+            ml,
+            request,
+            savedObjectsClient,
+          });
+          if (params.type) {
+            // reject an unauthorized "promotion" to ML
+            throwAuthzError(await mlAuthz.validateRuleType(params.type));
           }
-        } else {
-          const error = getIdError({ id: params.id, ruleId: params.rule_id });
+
+          const existingRule = await readRules({
+            rulesClient,
+            ruleId: params.rule_id,
+            id: params.id,
+          });
+          if (existingRule?.params.type) {
+            // reject an unauthorized modification of an ML rule
+            throwAuthzError(await mlAuthz.validateRuleType(existingRule?.params.type));
+          }
+
+          checkDefaultRuleExceptionListReferences({ exceptionLists: params.exceptions_list });
+          await validateRuleDefaultExceptionList({
+            exceptionsList: params.exceptions_list,
+            rulesClient,
+            ruleRuleId: params.rule_id,
+            ruleId: params.id,
+          });
+
+          const rule = await patchRules({
+            rulesClient,
+            existingRule,
+            nextParams: params,
+          });
+          if (rule != null && rule.enabled != null && rule.name != null) {
+            const [validated, errors] = transformValidate(rule);
+            if (errors != null) {
+              return siemResponse.error({ statusCode: 500, body: errors });
+            } else {
+              return response.ok({ body: validated ?? {} });
+            }
+          } else {
+            const error = getIdError({ id: params.id, ruleId: params.rule_id });
+            return siemResponse.error({
+              body: error.message,
+              statusCode: error.statusCode,
+            });
+          }
+        } catch (err) {
+          const error = transformError(err);
           return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,
           });
         }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

@@ -22,6 +22,7 @@ export const getPrebuiltRulesStatus = async (
   const response = await supertest
     .get(GET_PREBUILT_RULES_STATUS_URL)
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '1')
     .send()
     .expect(200);
 
