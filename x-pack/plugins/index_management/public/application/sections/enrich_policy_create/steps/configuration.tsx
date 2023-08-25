@@ -94,17 +94,13 @@ export const configurationFormSchema: FormSchema = {
         defaultMessage="Defaults to: {code} query."
         values={{
           code: (
-            <EuiLink
-              external
-              target="_blank"
-              href={documentationService.getMatchAllQueryLink()}
-            >
+            <EuiLink external target="_blank" href={documentationService.getMatchAllQueryLink()}>
               <FormattedMessage
                 id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.matchAllLink"
                 defaultMessage="match_all"
               />
             </EuiLink>
-          )
+          ),
         }}
       />
     ),
