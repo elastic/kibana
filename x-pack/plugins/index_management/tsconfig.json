@@ -37,6 +37,7 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/core-http-browser",
     "@kbn/search-api-panels",
+    "@kbn/cloud-plugin",
   ],
   "exclude": [
     "target/**/*",
