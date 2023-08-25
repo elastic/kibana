@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
-import { EuiCallOut, EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner, EuiEmptyPrompt, EuiPageTemplate, EuiPageSection } from '@elastic/eui';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import { policyDetails, agentStatusSummary, apiError } from '../store/policy_details/selectors';
 import { AgentsSummary } from './components/agents_summary';
@@ -74,23 +74,23 @@ export const PolicyDetails = React.memo(() => {
   const pageBody: React.ReactNode = useMemo(() => {
     if (policyApiError) {
       return (
-        <EuiEmptyPrompt color="transparent">
+        <EuiPageSection grow={false} alignment="center">
           <EuiCallOut color="danger" title={policyApiError?.error}>
             <span data-test-subj="policyDetailsIdNotFoundMessage">{policyApiError?.message}</span>
           </EuiCallOut>
-        </EuiEmptyPrompt>
+        </EuiPageSection>
       );
     }
 
     if (!policyItem) {
       return (
-        <EuiEmptyPrompt color="transparent">
+        <EuiPageSection grow={false} alignment="center">
           <EuiLoadingSpinner
-            className="essentialAnimation"
-            size="xl"
-            data-test-subj="policyDetailsLoading"
-          />
-        </EuiEmptyPrompt>
+              className="essentialAnimation"
+              size="xl"
+              data-test-subj="policyDetailsLoading"
+            />
+          </EuiPageSection>
       );
     }
 

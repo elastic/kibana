@@ -140,7 +140,6 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
 
     const isEmptyState = useMemo(() => allAssigned && allAssigned.total === 0, [allAssigned]);
 
-    //TODO: Get this to work
     if (!policyItem || isGlobalLoading) {
       return <ManagementPageLoader data-test-subj="policy-artifacts-loading-spinner" />;
     }
