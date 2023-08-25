@@ -58,6 +58,7 @@ export const createList = async ({
 }: CreateListOptions): Promise<ListSchema> => {
   const createdAt = dateNow ?? new Date().toISOString();
   const body: IndexEsListSchema = {
+    '@timestamp': createdAt,
     created_at: createdAt,
     created_by: user,
     description,
@@ -72,12 +73,14 @@ export const createList = async ({
     updated_by: user,
     version,
   };
-  const response = await esClient.index({
+
+  const response = await esClient.create({
     body,
-    id,
+    id: id ?? uuidv4(),
     index: listIndex,
     refresh: 'wait_for',
   });
+
   return {
     _version: encodeHitVersion(response),
     id: response._id,
