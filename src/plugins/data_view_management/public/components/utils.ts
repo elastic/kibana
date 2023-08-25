@@ -78,12 +78,14 @@ export const getTags = (
     tags.push({
       key: 'default',
       name: defaultIndexPatternListName,
+      'data-test-subj': 'default-tag',
     });
   }
   if (isRollup(indexPattern.type) && rollupsEnabled) {
     tags.push({
       key: 'rollup',
       name: rollupIndexPatternListName,
+      'data-test-subj': 'rollup-tag',
     });
   }
   return tags;
