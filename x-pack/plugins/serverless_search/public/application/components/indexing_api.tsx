@@ -140,6 +140,7 @@ export const ElasticsearchIndexingApi = () => {
       return result;
     },
   });
+  const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/`);
 
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchURL,
@@ -213,8 +214,7 @@ export const ElasticsearchIndexingApi = () => {
                       language={language}
                       setSelectedLanguage={setSelectedLanguage}
                       isSelectedLanguage={selectedLanguage === language}
-                      http={http}
-                      pluginId={PLUGIN_ID}
+                      assetBasePath={assetBasePath}
                     />
                   </EuiFlexItem>
                 ))}
@@ -229,8 +229,7 @@ export const ElasticsearchIndexingApi = () => {
                 )}
                 selectedLanguage={selectedLanguage}
                 setSelectedLanguage={setSelectedLanguage}
-                http={http}
-                pluginId={PLUGIN_ID}
+                assetBasePath={assetBasePath}
                 sharePlugin={share}
                 consoleRequest={getConsoleRequest('ingestDataIndex')}
               />
