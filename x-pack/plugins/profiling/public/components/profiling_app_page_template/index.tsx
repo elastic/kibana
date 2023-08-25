@@ -67,6 +67,7 @@ export function ProfilingAppPageTemplate({
     <ObservabilityPageTemplate
       noDataConfig={noDataConfig}
       pageHeader={{
+        'data-test-subj': 'profilingPageTemplate',
         rightSideItems: [
           <EuiButton
             href={PROFILING_FEEDBACK_LINK}
