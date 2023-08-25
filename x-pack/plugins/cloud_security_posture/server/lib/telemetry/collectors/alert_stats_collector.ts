@@ -170,15 +170,17 @@ export const getAlertsStats = async (
             alertsStats?.aggregations?.[postureType]?.doc_count &&
             alertsStats.aggregations[postureType].doc_count > 0
         )
-        .map((postureType) => ({
-          posture_type: postureType,
-          rules_count: alertsStats?.aggregations?.[postureType]?.rules_count?.value,
-          alerts_count: alertsStats?.aggregations?.[postureType]?.doc_count,
-          alerts_open_count: alertsStats?.aggregations?.[postureType]?.alerts_open?.doc_count,
-          alerts_acknowledged_count:
-            alertsStats?.aggregations?.[postureType]?.alerts_acknowledged?.doc_count,
-          alerts_closed_count: alertsStats?.aggregations?.[postureType]?.alerts_closed?.doc_count,
-        })) as CloudSecurityAlertsStats[];
+        .map((postureType): CloudSecurityAlertsStats => {
+          const postureTypeData = alertsStats!.aggregations![postureType];
+          return {
+            posture_type: postureType,
+            rules_count: postureTypeData.rules_count?.value,
+            alerts_count: postureTypeData.doc_count,
+            alerts_open_count: postureTypeData.alerts_open?.doc_count,
+            alerts_acknowledged_count: postureTypeData.alerts_acknowledged?.doc_count,
+            alerts_closed_count: postureTypeData.alerts_closed?.doc_count,
+          };
+        });
     }
     return [];
   } catch (e) {
