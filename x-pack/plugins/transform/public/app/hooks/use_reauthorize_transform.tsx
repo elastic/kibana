@@ -10,7 +10,7 @@ import { useMutation } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { addInternalBasePath } from '../../../common/constants';
 import { getErrorMessage } from '../../../common/utils/errors';
@@ -24,7 +24,7 @@ import { useRefreshTransformList } from '../common';
 import { ToastNotificationText } from '../components';
 
 export const useReauthorizeTransforms = () => {
-  const { http, overlays, theme } = useAppDependencies();
+  const { http, i18n: i18nStart, theme } = useAppDependencies();
   const refreshTransformList = useRefreshTransformList();
   const toastNotifications = useToastNotifications();
 
@@ -45,10 +45,10 @@ export const useReauthorizeTransforms = () => {
             defaultMessage: 'An error occurred calling the reauthorize transforms request.',
           }
         ),
-        text: toMountPoint(
-          <ToastNotificationText overlays={overlays} theme={theme} text={getErrorMessage(error)} />,
-          { theme$: theme.theme$ }
-        ),
+        text: toMountPoint(<ToastNotificationText text={getErrorMessage(error)} />, {
+          theme,
+          i18n: i18nStart,
+        }),
       }),
     onSuccess: (results) => {
       for (const transformId in results) {

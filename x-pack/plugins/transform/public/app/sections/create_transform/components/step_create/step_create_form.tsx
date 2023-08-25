@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 
@@ -86,11 +86,10 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     );
     const [discoverLink, setDiscoverLink] = useState<string>();
 
-    const deps = useAppDependencies();
-    const { share } = deps;
-    const dataViews = deps.data.dataViews;
     const toastNotifications = useToastNotifications();
-    const isDiscoverAvailable = deps.application.capabilities.discover?.show ?? false;
+    const { application, data, i18n: i18nStart, share, theme } = useAppDependencies();
+    const dataViews = data.dataViews;
+    const isDiscoverAvailable = application.capabilities.discover?.show ?? false;
 
     useEffect(() => {
       let unmounted = false;
@@ -122,7 +121,6 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [created, started, dataViewId]);
 
-    const { overlays, theme } = useAppDependencies();
     const startTransforms = useStartTransforms();
     const createTransform = useCreateTransform(transformId, transformConfig);
 
@@ -194,10 +192,10 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
               defaultMessage: 'An error occurred creating the Kibana data view {dataViewName}:',
               values: { dataViewName },
             }),
-            text: toMountPoint(
-              <ToastNotificationText overlays={overlays} theme={theme} text={getErrorMessage(e)} />,
-              { theme$: theme.theme$ }
-            ),
+            text: toMountPoint(<ToastNotificationText text={getErrorMessage(e)} />, {
+              theme,
+              i18n: i18nStart,
+            }),
           });
           setLoading(false);
           return false;
@@ -253,17 +251,13 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
           title: i18n.translate('xpack.transform.stepCreateForm.progressErrorMessage', {
             defaultMessage: 'An error occurred getting the progress percentage:',
           }),
-          text: toMountPoint(
-            <ToastNotificationText
-              overlays={overlays}
-              theme={theme}
-              text={getErrorMessage(stats)}
-            />,
-            { theme$: theme.theme$ }
-          ),
+          text: toMountPoint(<ToastNotificationText text={getErrorMessage(stats)} />, {
+            theme,
+            i18n: i18nStart,
+          }),
         });
       }
-    }, [overlays, stats, theme, toastNotifications, transformConfig, transformId]);
+    }, [i18nStart, stats, theme, toastNotifications, transformConfig, transformId]);
 
     function getTransformConfigDevConsoleStatement() {
       return `PUT _transform/${transformId}\n${JSON.stringify(transformConfig, null, 2)}\n\n`;

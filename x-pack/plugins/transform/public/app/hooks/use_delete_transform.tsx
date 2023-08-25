@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { addInternalBasePath } from '../../../common/constants';
@@ -85,7 +85,7 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
 };
 
 export const useDeleteTransforms = () => {
-  const { http, overlays, theme } = useAppDependencies();
+  const { http, i18n: i18nStart, theme } = useAppDependencies();
   const refreshTransformList = useRefreshTransformList();
   const toastNotifications = useToastNotifications();
 
@@ -101,13 +101,8 @@ export const useDeleteTransforms = () => {
           defaultMessage: 'An error occurred calling the API endpoint to delete transforms.',
         }),
         text: toMountPoint(
-          <ToastNotificationText
-            previewTextLength={50}
-            overlays={overlays}
-            theme={theme}
-            text={getErrorMessage(error)}
-          />,
-          { theme$: theme.theme$ }
+          <ToastNotificationText previewTextLength={50} text={getErrorMessage(error)} />,
+          { theme, i18n: i18nStart }
         ),
       }),
     onSuccess: (results) => {
@@ -124,15 +119,10 @@ export const useDeleteTransforms = () => {
                 defaultMessage: 'An error occurred deleting the transform {transformId}',
                 values: { transformId },
               }),
-              text: toMountPoint(
-                <ToastNotificationText
-                  previewTextLength={50}
-                  overlays={overlays}
-                  theme={theme}
-                  text={error}
-                />,
-                { theme$: theme.theme$ }
-              ),
+              text: toMountPoint(<ToastNotificationText previewTextLength={50} text={error} />, {
+                theme,
+                i18n: i18nStart,
+              }),
             });
           }
 
@@ -146,15 +136,10 @@ export const useDeleteTransforms = () => {
                   values: { destinationIndex },
                 }
               ),
-              text: toMountPoint(
-                <ToastNotificationText
-                  previewTextLength={50}
-                  overlays={overlays}
-                  theme={theme}
-                  text={error}
-                />,
-                { theme$: theme.theme$ }
-              ),
+              text: toMountPoint(<ToastNotificationText previewTextLength={50} text={error} />, {
+                theme,
+                i18n: i18nStart,
+              }),
             });
           }
 
@@ -168,15 +153,10 @@ export const useDeleteTransforms = () => {
                   values: { destinationIndex },
                 }
               ),
-              text: toMountPoint(
-                <ToastNotificationText
-                  previewTextLength={50}
-                  overlays={overlays}
-                  theme={theme}
-                  text={error}
-                />,
-                { theme$: theme.theme$ }
-              ),
+              text: toMountPoint(<ToastNotificationText previewTextLength={50} text={error} />, {
+                theme,
+                i18n: i18nStart,
+              }),
             });
           }
         }

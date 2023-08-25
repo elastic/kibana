@@ -19,17 +19,13 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { CoreStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { useAppDependencies } from '../app_dependencies';
 
 const MAX_SIMPLE_MESSAGE_LENGTH = 140;
 
-// Because of the use of `toMountPoint`, `useKibanaContext` doesn't work via `useAppDependencies`.
-// That's why we need to pass in `overlays` as a prop cannot get it via context.
 interface ToastNotificationTextProps {
-  overlays: CoreStart['overlays'];
-  theme: CoreStart['theme'];
   text: any;
   previewTextLength?: number;
   inline?: boolean;
@@ -37,13 +33,13 @@ interface ToastNotificationTextProps {
 }
 
 export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
-  overlays,
   text,
-  theme,
   previewTextLength,
   inline = false,
   forceModal = false,
 }) => {
+  const { overlays, theme, i18n: i18nStart } = useAppDependencies();
+
   if (!forceModal && typeof text === 'string' && text.length <= MAX_SIMPLE_MESSAGE_LENGTH) {
     return text;
   }
@@ -89,7 +85,7 @@ export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
             </EuiButtonEmpty>
           </EuiModalFooter>
         </EuiModal>,
-        { theme$: theme.theme$ }
+        { theme, i18n: i18nStart }
       )
     );
   };

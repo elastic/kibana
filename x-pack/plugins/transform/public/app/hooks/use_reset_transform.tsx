@@ -9,7 +9,7 @@ import React from 'react';
 import { useMutation } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import type {
   ResetTransformsRequestSchema,
@@ -22,7 +22,7 @@ import { useRefreshTransformList } from '../common';
 import { ToastNotificationText } from '../components';
 
 export const useResetTransforms = () => {
-  const { http, overlays, theme } = useAppDependencies();
+  const { http, i18n: i18nStart, theme } = useAppDependencies();
   const refreshTransformList = useRefreshTransformList();
   const toastNotifications = useToastNotifications();
 
@@ -38,13 +38,11 @@ export const useResetTransforms = () => {
           defaultMessage: 'An error occurred calling the API endpoint to reset transforms.',
         }),
         text: toMountPoint(
-          <ToastNotificationText
-            previewTextLength={50}
-            overlays={overlays}
-            theme={theme}
-            text={getErrorMessage(error)}
-          />,
-          { theme$: theme.theme$ }
+          <ToastNotificationText previewTextLength={50} text={getErrorMessage(error)} />,
+          {
+            theme,
+            i18n: i18nStart,
+          }
         ),
       }),
     onSuccess: (results) => {
@@ -60,15 +58,10 @@ export const useResetTransforms = () => {
                 defaultMessage: 'An error occurred resetting the transform {transformId}',
                 values: { transformId },
               }),
-              text: toMountPoint(
-                <ToastNotificationText
-                  previewTextLength={50}
-                  overlays={overlays}
-                  theme={theme}
-                  text={error}
-                />,
-                { theme$: theme.theme$ }
-              ),
+              text: toMountPoint(<ToastNotificationText previewTextLength={50} text={error} />, {
+                theme,
+                i18n: i18nStart,
+              }),
             });
           }
         }
