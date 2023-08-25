@@ -1029,7 +1029,8 @@
     "xterm": "^5.1.0",
     "yauzl": "^2.10.0",
     "yazl": "^2.5.1",
-    "zod": "^3.21.4"
+    "zod": "^3.21.4",
+    "zod-to-json-schema": "3.20.4"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.0.3",
@@ -1567,7 +1568,6 @@
     "webpack-sources": "^1.4.1",
     "xml-crypto": "^3.0.1",
     "xmlbuilder": "13.0.2",
-    "yargs": "^15.4.1",
-    "zod-to-json-schema": "3.20.4"
+    "yargs": "^15.4.1"
   }
 }
