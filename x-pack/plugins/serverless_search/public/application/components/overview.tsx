@@ -76,8 +76,7 @@ export const ElasticsearchOverview = () => {
                 language={language}
                 setSelectedLanguage={setSelectedLanguage}
                 isSelectedLanguage={selectedLanguage === language}
-                http={http}
-                pluginId={PLUGIN_ID}
+                assetBasePath={assetBasePath}
               />
             </EuiFlexItem>
           ))}
@@ -95,8 +94,7 @@ export const ElasticsearchOverview = () => {
           languages={languageDefinitions}
           language={selectedLanguage}
           setSelectedLanguage={setSelectedLanguage}
-          http={http}
-          pluginId={PLUGIN_ID}
+          assetBasePath={assetBasePath}
           application={application}
           sharePlugin={share}
         />
@@ -137,8 +135,7 @@ export const ElasticsearchOverview = () => {
               consoleRequest={getConsoleRequest('configureClient')}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
-              http={http}
-              pluginId={PLUGIN_ID}
+              assetBasePath={assetBasePath}
               application={application}
               sharePlugin={share}
             />
@@ -180,8 +177,7 @@ export const ElasticsearchOverview = () => {
               consoleRequest={getConsoleRequest('testConnection')}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
-              http={http}
-              pluginId={PLUGIN_ID}
+              assetBasePath={assetBasePath}
               application={application}
               sharePlugin={share}
             />
@@ -203,9 +199,8 @@ export const ElasticsearchOverview = () => {
           languages={languageDefinitions}
           selectedLanguage={selectedLanguage}
           setSelectedLanguage={setSelectedLanguage}
-          http={http}
+          assetBasePath={assetBasePath}
           docLinks={docLinks}
-          pluginId={PLUGIN_ID}
           application={application}
           sharePlugin={share}
         />
@@ -227,8 +222,7 @@ export const ElasticsearchOverview = () => {
               consoleRequest={getConsoleRequest('buildSearchQuery')}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
-              http={http}
-              pluginId={PLUGIN_ID}
+              assetBasePath={assetBasePath}
               application={application}
               sharePlugin={share}
             />
