@@ -23,6 +23,7 @@ import {
   CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID,
   CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID,
+  CORRELATIONS_DETAILS_TEST_ID,
 } from './test_ids';
 import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
 import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
@@ -103,7 +104,7 @@ describe('CorrelationsDetails', () => {
     expect(getByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render no section if show values are false', () => {
+  it('should render no section and show error message if show values are false', () => {
     jest
       .mocked(useShowRelatedAlertsByAncestry)
       .mockReturnValue({ show: false, documentId: 'documentId', indices: ['index1'] });
@@ -115,12 +116,13 @@ describe('CorrelationsDetails', () => {
       .mockReturnValue({ show: false, entityId: 'entityId' });
     jest.mocked(useShowRelatedCases).mockReturnValue(false);
 
-    const { queryByTestId } = renderCorrelationDetails();
+    const { getByTestId, queryByTestId } = renderCorrelationDetails();
 
     expect(queryByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(`${CORRELATIONS_DETAILS_TEST_ID}Error`)).toBeInTheDocument();
   });
 
   it('should render no section if values are null', () => {
