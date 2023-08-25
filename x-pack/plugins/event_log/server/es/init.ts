@@ -32,7 +32,7 @@ async function initializeEsResources(esContext: EsContext) {
   const steps = new EsInitializationSteps(esContext);
 
   // Only set existing assets to hidden if we're not in serverless
-  if (!esContext.isServerless) {
+  if (esContext.shouldSetExistingAssetsToHidden) {
     // today, setExistingAssetsToHidden() never throws, but just in case ...
     await retry(steps.setExistingAssetsToHidden);
   }

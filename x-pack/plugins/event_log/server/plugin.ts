@@ -66,13 +66,13 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     this.systemLogger.debug('setting up plugin');
 
     this.esContext = createEsContext({
-      isServerless: !!plugins.serverless,
       logger: this.systemLogger,
       indexNameRoot: kibanaIndex,
       elasticsearchClientPromise: core
         .getStartServices()
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
       kibanaVersion: this.kibanaVersion,
+      shouldSetExistingAssetsToHidden: !plugins.serverless,
     });
 
     this.eventLogService = new EventLogService({
