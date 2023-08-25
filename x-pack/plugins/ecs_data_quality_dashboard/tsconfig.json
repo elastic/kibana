@@ -18,6 +18,8 @@
     "@kbn/core-http-request-handler-context-server",
     "@kbn/securitysolution-es-utils",
     "@kbn/securitysolution-io-ts-utils",
+    "@kbn/securitysolution-io-ts-types",
+    "@kbn/i18n",
   ],
   "exclude": [
     "target/**/*",
