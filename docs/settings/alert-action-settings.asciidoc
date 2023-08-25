@@ -142,12 +142,6 @@ A list of action types that are enabled. It defaults to `["*"]`, enabling all ty
 +
 Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
 
-`xpack.actions.preconfiguredAlertHistoryEsIndex` {ess-icon}::
-Enables a preconfigured alert history {es} <<index-action-type, Index>> connector. Default: `false`.
-
-`xpack.actions.preconfigured`::
-Specifies preconfigured connector IDs and configs. Default: {}.
-
 `xpack.actions.proxyUrl` {ess-icon}::
 Specifies the proxy URL to use, if using a proxy for actions. By default, no proxy is used.
 +
@@ -216,6 +210,34 @@ xpack.actions.run:
         - id: '.server-log'
           maxAttempts: 5
 --
+
+[float]
+[[preconfigured-connector-settings]]
+=== Preconfigured connector settings
+
+These settings vary depending on which type of <<pre-configured-connectors,preconfigured connector>> you're adding.
+For example:
+
+[source,yaml]
+----------------------------------------
+xpack.actions.preconfigured:
+  my-server-log:
+    name: preconfigured-server-log-connector-type
+    actionTypeId: .server-log
+----------------------------------------
+
+`xpack.actions.preconfiguredAlertHistoryEsIndex` {ess-icon}::
+Enables a preconfigured alert history {es} <<index-action-type, Index>> connector. Default: `false`.
+
+`xpack.actions.preconfigured`::
+Specifies configuration details that are specific to the type of preconfigured connector.
+
+`xpack.actions.preconfigured.<connector-id>.actionTypeId`::
+The type of preconfigured connector.
+For example: `.email`, `.index`, `.opsgenie`, `.server-log`, `.resilient`, `.slack`, and `.webhook`.
+
+`xpack.actions.preconfigured.<connector-id>.name`::
+The name of the preconfigured connector.
 
 [float]
 [[alert-settings]]
