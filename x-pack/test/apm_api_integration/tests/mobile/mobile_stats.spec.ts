@@ -219,7 +219,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns same crashes', () => {
         const { value, timeseries } = response.currentPeriod.crashRate;
         const timeseriesMean = meanBy(
-          timeseriesMean.filter((bucket) => bucket.y !== 0),
+          timeseries.filter((bucket) => bucket.y !== 0),
           'y'
         );
         expect(value).to.be(timeseriesMean);
@@ -244,7 +244,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.currentPeriod.requests.timeseries.every((item) => item.y === 0)).to.eql(
           true
         );
-        expect(response.currentPeriod.crashes.timeseries.every((item) => item.y === 0)).to.eql(
+        expect(response.currentPeriod.crashRate.timeseries.every((item) => item.y === 0)).to.eql(
           true
         );
       });
@@ -266,8 +266,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           serviceName: 'synth-android',
           kuery: `service.version:"1.2" and service.environment: "production"`,
         });
-        expect(response.currentPeriod.sessions.value).to.eql(1);
-        expect(response.currentPeriod.requests.value).to.eql(1);
+        expect(response.currentPeriod.sessions.value).to.eql(3);
+        expect(response.currentPeriod.requests.value).to.eql(3);
         expect(response.currentPeriod.crashRate.value).to.eql(1);
       });
     });
