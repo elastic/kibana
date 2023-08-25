@@ -341,6 +341,7 @@ describe('ingest_integration tests ', () => {
     it("doesn't remove policy from trusted app if feature flag is disabled", async () => {
       await invokeDeleteCallback({
         ...allowedExperimentalValues,
+        // @ts-expect-error ts upgrade v4.7.4
         trustedAppsByPolicyEnabled: false, // since it was changed to `true` by default
       });
 

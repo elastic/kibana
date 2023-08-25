@@ -181,6 +181,7 @@ export const TableRow = ({
         const isFilterable = Boolean(
           mapping(column)?.filterable &&
             typeof filter === 'function' &&
+            // @ts-expect-error ts upgrade v4.7.4
             !row.raw._ignored?.includes(column)
         );
         rowCells.push(
