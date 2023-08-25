@@ -7,7 +7,8 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { Subscription } from 'rxjs';
+import { Subscription, distinctUntilChanged, skip } from 'rxjs';
+import deepEqual from 'fast-deep-equal';
 
 import {
   AttributeService,
@@ -92,7 +93,9 @@ export class NavigationEmbeddable
     >({
       embeddable: this,
       reducers: navigationEmbeddableReducers,
-      initialComponentState: {},
+      initialComponentState: {
+        title: '',
+      },
     });
 
     this.select = reduxEmbeddableTools.select;
@@ -101,24 +104,31 @@ export class NavigationEmbeddable
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
 
-    this.initializeSavedLinks(initialInput)
+    this.initializeSavedLinks()
       .then(() => this.setInitializationFinished())
       .catch((e: Error) => this.onFatalError(e));
+
+    // By-value panels should update the componentState when input changes
+    this.subscriptions.add(
+      this.getInput$()
+        .pipe(distinctUntilChanged(deepEqual), skip(1))
+        .subscribe(async () => await this.initializeSavedLinks())
+    );
   }
 
-  private async initializeSavedLinks(input: NavigationEmbeddableInput) {
-    const { attributes } = await this.attributeService.unwrapAttributes(input);
+  private async initializeSavedLinks() {
+    const { attributes } = await this.attributeService.unwrapAttributes(this.getInput());
     if (this.isDestroyed) return;
 
     // TODO handle metaInfo
 
-    this.updateInput({ attributes });
+    this.dispatch.setAttributes(attributes);
 
     await this.initializeOutput();
   }
 
   private async initializeOutput() {
-    const { attributes } = this.getInput() as NavigationEmbeddableByValueInput;
+    const attributes = this.getState().componentState;
     const { title, description } = this.getInput();
     this.updateOutput({
       defaultTitle: attributes.title,
@@ -147,7 +157,8 @@ export class NavigationEmbeddable
 
   public async reload() {
     if (this.isDestroyed) return;
-    await this.initializeSavedLinks(this.getInput());
+    // By-reference embeddable panels are reloaded when changed, so update the componentState
+    this.initializeSavedLinks();
     this.render();
   }
 

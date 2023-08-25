@@ -7,10 +7,7 @@
  */
 
 import React, { useMemo } from 'react';
-
 import { EuiListGroup, EuiPanel } from '@elastic/eui';
-
-import { NavigationEmbeddableByValueInput } from '../embeddable/types';
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 import { ExternalLinkComponent } from './external_link/external_link_component';
 import { DashboardLinkComponent } from './dashboard_link/dashboard_link_component';
@@ -25,12 +22,8 @@ import './navigation_embeddable_component.scss';
 
 export const NavigationEmbeddableComponent = () => {
   const navEmbeddable = useNavigationEmbeddable();
-  const links = navEmbeddable.select(
-    (state) => (state.explicitInput as NavigationEmbeddableByValueInput).attributes?.links
-  );
-  const layout = navEmbeddable.select(
-    (state) => (state.explicitInput as NavigationEmbeddableByValueInput).attributes?.layout
-  );
+  const links = navEmbeddable.select((state) => state.componentState.links);
+  const layout = navEmbeddable.select((state) => state.componentState.layout);
 
   const orderedLinks = useMemo(() => {
     if (!links) return [];

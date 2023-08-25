@@ -11,6 +11,7 @@ import { WritableDraft } from 'immer/dist/types/types-external';
 import { PayloadAction } from '@reduxjs/toolkit';
 
 import { NavigationEmbeddableReduxState } from './types';
+import { NavigationEmbeddableAttributes } from '../../common/content_management';
 
 export const navigationEmbeddableReducers = {
   /**
@@ -23,5 +24,12 @@ export const navigationEmbeddableReducers = {
     action: PayloadAction<boolean>
   ) => {
     state.output.loading = action.payload;
+  },
+
+  setAttributes: (
+    state: WritableDraft<NavigationEmbeddableReduxState>,
+    action: PayloadAction<NavigationEmbeddableAttributes>
+  ) => {
+    state.componentState = { ...action.payload };
   },
 };
