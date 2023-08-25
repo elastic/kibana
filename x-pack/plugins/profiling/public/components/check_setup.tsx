@@ -193,19 +193,27 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     );
   }
 
-  const displayAddDataInstructions =
-    status === AsyncStatus.Settled && data?.has_setup === true && data?.has_data === false;
-
   const displayUi =
     // Display UI if there's data or if the user is opening the add data instruction page.
     // does not use profiling router because that breaks as at this point the route might not have all required params
-    data?.has_data === true || history.location.pathname === '/add-data-instructions';
+    (data?.has_data === true && data?.pre_8_9_1_data === false) ||
+    history.location.pathname === '/add-data-instructions' ||
+    history.location.pathname === '/delete_data_instructions';
 
   if (displayUi) {
     return children;
   }
 
-  if (displayAddDataInstructions) {
+  if (data?.pre_8_9_1_data === true) {
+    // If the cluster still has data pre 8.9.1 version, redirect to deleting instructions
+    router.push('/delete_data_instructions', {
+      path: {},
+      query: {},
+    });
+    return null;
+  }
+
+  if (status === AsyncStatus.Settled && data?.has_setup === true && data?.has_data === false) {
     // when there's no data redirect the user to the add data instructions page
     router.push('/add-data-instructions', {
       path: {},

@@ -114,6 +114,7 @@ export function registerSetupRoute({
           return response.ok({
             body: {
               has_setup: true,
+              pre_8_9_1_data: false,
               has_data: mergedStateForViewer.data.available,
             },
           });
@@ -137,6 +138,7 @@ export function registerSetupRoute({
           body: {
             has_setup: areResourcesSetupForAdmin(mergedState),
             has_data: mergedState.data.available,
+            pre_8_9_1_data: mergedState.resources.pre_8_9_1_data,
           },
         });
       } catch (error) {
@@ -192,32 +194,36 @@ export function registerSetupRoute({
 
         const partialStates = await Promise.all(
           [
-            validateCollectorPackagePolicy,
-            validateMaximumBuckets,
             validateResourceManagement,
             validateSecurityRole,
+            validateMaximumBuckets,
+            validateCollectorPackagePolicy,
             validateSymbolizerPackagePolicy,
             validateProfilingInApmPackagePolicy,
           ].map((fn) => fn(setupOptions))
         );
         const mergedState = mergePartialSetupStates(state, partialStates);
 
-        const executeFunctions = [
-          ...(mergedState.policies.collector.installed ? [] : [createCollectorPackagePolicy]),
-          ...(mergedState.policies.symbolizer.installed ? [] : [createSymbolizerPackagePolicy]),
-          ...(mergedState.policies.apm.profilingEnabled
-            ? [removeProfilingFromApmPackagePolicy]
-            : []),
+        const executeAdminFunctions = [
           ...(mergedState.resource_management.enabled ? [] : [enableResourceManagement]),
           ...(mergedState.permissions.configured ? [] : [setSecurityRole]),
           ...(mergedState.settings.configured ? [] : [setMaximumBuckets]),
         ];
 
-        if (!executeFunctions.length) {
+        const executeViewerFunctions = [
+          ...(mergedState.policies.collector.installed ? [] : [createCollectorPackagePolicy]),
+          ...(mergedState.policies.symbolizer.installed ? [] : [createSymbolizerPackagePolicy]),
+          ...(mergedState.policies.apm.profilingEnabled
+            ? [removeProfilingFromApmPackagePolicy]
+            : []),
+        ];
+
+        if (!executeAdminFunctions.length && !executeViewerFunctions.length) {
           return response.ok();
         }
 
-        await Promise.all(executeFunctions.map((fn) => fn(setupOptions)));
+        await Promise.all(executeAdminFunctions.map((fn) => fn(setupOptions)));
+        await Promise.all(executeViewerFunctions.map((fn) => fn(setupOptions)));
 
         if (dependencies.telemetryUsageCounter) {
           dependencies.telemetryUsageCounter.incrementCounter({

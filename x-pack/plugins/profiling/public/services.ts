@@ -18,6 +18,12 @@ import { TopNResponse } from '../common/topn';
 import type { SetupDataCollectionInstructions } from '../server/lib/setup/get_setup_instructions';
 import { AutoAbortedHttpService } from './hooks/use_auto_aborted_http_client';
 
+interface ClusterSetupDetails {
+  has_setup: boolean;
+  has_data: boolean;
+  pre_8_9_1_data: boolean;
+}
+
 export interface Services {
   fetchTopN: (params: {
     http: AutoAbortedHttpService;
@@ -40,9 +46,7 @@ export interface Services {
     timeTo: number;
     kuery: string;
   }) => Promise<ElasticFlameGraph>;
-  fetchHasSetup: (params: {
-    http: AutoAbortedHttpService;
-  }) => Promise<{ has_setup: boolean; has_data: boolean }>;
+  fetchHasSetup: (params: { http: AutoAbortedHttpService }) => Promise<ClusterSetupDetails>;
   postSetupResources: (params: { http: AutoAbortedHttpService }) => Promise<void>;
   setupDataCollectionInstructions: (params: {
     http: AutoAbortedHttpService;
@@ -101,10 +105,7 @@ export function getServices(): Services {
       return createFlameGraph(baseFlamegraph);
     },
     fetchHasSetup: async ({ http }) => {
-      const hasSetup = (await http.get(paths.HasSetupESResources, {})) as {
-        has_setup: boolean;
-        has_data: boolean;
-      };
+      const hasSetup = (await http.get(paths.HasSetupESResources, {})) as ClusterSetupDetails;
       return hasSetup;
     },
     postSetupResources: async ({ http }) => {

@@ -10,9 +10,13 @@ describe('Home page with empty state', () => {
     cy.loginAsElastic();
   });
 
-  it('shows the empty state when Profiling has not been set up', () => {
+  it('shows Set up page when Profiling has not been set up', () => {
     cy.intercept('GET', '/internal/profiling/setup/es_resources', {
-      fixture: 'es_resources_setup_false.json',
+      body: {
+        has_setup: false,
+        has_data: false,
+        pre_8_9_1_data: false,
+      },
     }).as('getEsResources');
     cy.visitKibana('/app/profiling');
     cy.wait('@getEsResources');
@@ -20,9 +24,13 @@ describe('Home page with empty state', () => {
     cy.contains('Set up Universal Profiling');
   });
 
-  it('shows the tutorial after Profiling has been set up', () => {
+  it('shows Add data page after Profiling has been set up', () => {
     cy.intercept('GET', '/internal/profiling/setup/es_resources', {
-      fixture: 'es_resources_data_false.json',
+      body: {
+        has_setup: true,
+        has_data: false,
+        pre_8_9_1_data: false,
+      },
     }).as('getEsResources');
     cy.visitKibana('/app/profiling');
     cy.wait('@getEsResources');
@@ -33,5 +41,33 @@ describe('Home page with empty state', () => {
     cy.contains('DEB Package');
     cy.contains('RPM Package');
     cy.contains('Upload Symbols');
+  });
+
+  describe('Delete Data View', () => {
+    it('shows Delete page when data pre 8.9.1 is still available and data is found', () => {
+      cy.intercept('GET', '/internal/profiling/setup/es_resources', {
+        body: {
+          has_setup: true,
+          has_data: true,
+          pre_8_9_1_data: true,
+        },
+      }).as('getEsResources');
+      cy.visitKibana('/app/profiling');
+      cy.wait('@getEsResources');
+      cy.contains('Delete existing profiling indices');
+    });
+
+    it('shows Delete page when data pre 8.9.1 is still available and data is not found', () => {
+      cy.intercept('GET', '/internal/profiling/setup/es_resources', {
+        body: {
+          has_setup: true,
+          has_data: false,
+          pre_8_9_1_data: true,
+        },
+      }).as('getEsResources');
+      cy.visitKibana('/app/profiling');
+      cy.wait('@getEsResources');
+      cy.contains('Delete existing profiling indices');
+    });
   });
 });

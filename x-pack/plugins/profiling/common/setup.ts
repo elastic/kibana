@@ -35,6 +35,7 @@ export interface SetupState {
   };
   resources: {
     created: boolean;
+    pre_8_9_1_data: boolean;
   };
   settings: {
     configured: boolean;
@@ -71,6 +72,7 @@ export function createDefaultSetupState(): SetupState {
     },
     resources: {
       created: false,
+      pre_8_9_1_data: false,
     },
     settings: {
       configured: false,
