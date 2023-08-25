@@ -38,7 +38,7 @@ import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import { UiMetricService } from './ui_metric';
-import type { SerializedEnrichPolicy } from '../../../common';
+import type { SerializedEnrichPolicy, FieldFromIndicesRequest } from '../../../common';
 
 interface ReloadIndicesOptions {
   asSystemRequest?: boolean;
@@ -357,7 +357,7 @@ export async function getMatchingIndices(pattern: string) {
 }
 
 export async function getFieldsFromIndices(indices: string[]) {
-  const result = sendRequest({
+  const result = sendRequest<FieldFromIndicesRequest>({
     path: `${INTERNAL_API_BASE_PATH}/enrich_policies/get_fields_from_indices`,
     method: 'post',
     body: JSON.stringify({ indices }),

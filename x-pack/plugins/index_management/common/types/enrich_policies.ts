@@ -15,3 +15,19 @@ export interface SerializedEnrichPolicy {
   enrichFields: string[];
   query?: string;
 }
+
+export interface FieldItem {
+  name: string;
+  type: string;
+  normalizedType: string;
+}
+
+export interface IndexWithFields {
+  index: string;
+  fields: FieldItem[];
+}
+
+export interface FieldFromIndicesRequest {
+  commonFields: FieldItem[];
+  indices: IndexWithFields[];
+}

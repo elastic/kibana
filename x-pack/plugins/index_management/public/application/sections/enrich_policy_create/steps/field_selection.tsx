@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiComboBoxOptionOption } from '@elastic/eui';
 import { FieldIcon as KbnFieldIcon } from '@kbn/react-field';
 import {
   useForm,
@@ -20,6 +20,7 @@ import {
   ComboBoxField,
 } from '../../../../shared_imports';
 
+import type { IndexWithFields, FieldItem } from '../../../../../common';
 import { getFieldsFromIndices } from '../../../services/api';
 import { useCreatePolicyContext, DraftPolicy } from '../create_policy_context';
 
@@ -71,16 +72,34 @@ export const fieldSelectionFormSchema: FormSchema = {
   },
 };
 
+const buildFieldOption = (field: FieldItem) => ({
+  label: field.name,
+  prepend: <KbnFieldIcon type={field.normalizedType} />,
+});
+
 export const FieldSelectionStep = ({ onNext }: Props) => {
-  const [fields, setFields] = useState([]);
+  const [fieldOptions, setFieldOptions] = useState<EuiComboBoxOptionOption[]>([]);
+  const [matchFieldOptions, setMatchFieldOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const { draft, updateDraft, updateCompletionState } = useCreatePolicyContext();
 
   useEffect(() => {
     const fetchFields = async () => {
       const { data } = await getFieldsFromIndices(draft.sourceIndices as string[]);
 
-      if (data?.length) {
-        setFields(data);
+      if (data?.commonFields?.length) {
+        setMatchFieldOptions(data.commonFields.map(buildFieldOption));
+        // If there is only one index, we can use the fields of that index as match field options
+      } else if (data?.indices?.length === 1) {
+        setMatchFieldOptions(data.indices[0].fields.map(buildFieldOption));
+      }
+
+      if (data?.indices?.length) {
+        setFieldOptions(
+          data.indices.map((index: IndexWithFields) => ({
+            label: index.index,
+            options: index.fields.map(buildFieldOption),
+          }))
+        );
       }
     };
 
@@ -132,10 +151,7 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
             placeholder: 'Select a field',
             noSuggestions: false,
             singleSelection: { asPlainText: true },
-            options: fields.map((field: any) => ({
-              label: field.name,
-              prepend: <KbnFieldIcon type={field.normalizedType} />,
-            })),
+            options: matchFieldOptions,
           },
         }}
       />
@@ -148,10 +164,7 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
           euiFieldProps: {
             placeholder: 'Select fields to enrich',
             noSuggestions: false,
-            options: fields.map((field: any) => ({
-              label: field.name,
-              prepend: <KbnFieldIcon type={field.normalizedType} />,
-            })),
+            options: fieldOptions,
           },
         }}
       />

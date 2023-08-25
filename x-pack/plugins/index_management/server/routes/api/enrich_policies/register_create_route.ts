@@ -8,7 +8,9 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { forEach, keys, sortBy } from 'lodash';
+import { flatMap, flow, groupBy, values as valuesFP, map, pickBy } from 'lodash/fp';
 
 import { RouteDependencies } from '../../../types';
 import { addInternalBasePath } from '..';
@@ -39,7 +41,9 @@ interface IndicesAggs extends estypes.AggregationsMultiBucketAggregateBase {
   buckets: Array<{ key: unknown }>;
 }
 
-const normalizedFieldTypes = {
+type FieldCapsList = FieldCapsResponse['fields'];
+
+const normalizedFieldTypes: { [key: string]: string } = {
   long: 'number',
   integer: 'number',
   short: 'number',
@@ -56,7 +60,7 @@ interface FieldItem {
   normalizedType: string;
 }
 
-function buildFieldList(fields) {
+function buildFieldList(fields: FieldCapsList) {
   const result: FieldItem[] = [];
 
   forEach(fields, (field, name) => {
@@ -65,7 +69,7 @@ function buildFieldList(fields) {
     const type = keys(field)[0];
 
     // Do not include fields that have a type that starts with an underscore.
-    if (type[0] === '_') {
+    if (type.startsWith('_')) {
       return;
     }
 
@@ -159,19 +163,50 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
       const client = (await context.core).elasticsearch.client as IScopedClusterClient;
 
       try {
-        const fieldsResponse = await client.asCurrentUser.fieldCaps(
-          {
-            index: indices,
-            fields: ['*'],
-            allow_no_indices: true,
-            ignore_unavailable: true,
-          },
-          { ignore: [404], meta: true }
+        const fieldsPerIndex = await Promise.all(
+          indices.map((index) =>
+            client.asCurrentUser.fieldCaps(
+              {
+                index,
+                fields: ['*'],
+                allow_no_indices: true,
+                ignore_unavailable: true,
+                filters: '-metadata',
+              },
+              { ignore: [404], meta: true }
+            )
+          )
         );
 
-        const json = fieldsResponse.statusCode === 404 ? { fields: [] } : fieldsResponse.body;
+        const serializedFieldsPerIndex = indices.map((indexName: string, mapIndex: number) => {
+          const fields = fieldsPerIndex[mapIndex];
+          const json = fields.statusCode === 404 ? { fields: [] } : fields.body;
 
-        return response.ok({ body: buildFieldList(json.fields) });
+          return {
+            index: indexName,
+            fields: buildFieldList(json.fields as FieldCapsList),
+          };
+        });
+
+        const commonFields = flow(
+          // Flatten the fields arrays
+          flatMap('fields'),
+          // Group fields by name
+          groupBy('name'),
+          // Keep groups with more than 1 field
+          pickBy((group) => group.length > 1),
+          // Convert the result object to an array of fields
+          valuesFP,
+          // Take the first item from each group (since we only want one)
+          map((group) => group[0])
+        )(serializedFieldsPerIndex);
+
+        return response.ok({
+          body: {
+            indices: serializedFieldsPerIndex,
+            commonFields,
+          },
+        });
       } catch (error) {
         return handleEsError({ error, response });
       }
