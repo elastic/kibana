@@ -342,7 +342,7 @@ export class KnowledgeBaseService {
 
         return Promise.reject(new Error('Not Ready'));
       },
-      { factor: 1, minTimeout: 10000, maxRetryTime: 20 * 60 * 1000 }
+      { factor: 1, minTimeout: 10000, retries: 12 }
     );
 
     this.dependencies.logger.info('Model is ready');
