@@ -13,12 +13,19 @@ import type { EcsRiskScore, RiskScore } from '@kbn/security-solution-plugin/comm
 import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/risk_engine/saved_object';
 import type { KbnClient } from '@kbn/test';
 import {
+  RISK_ENGINE_INIT_URL,
+  RISK_ENGINE_DISABLE_URL,
+  RISK_ENGINE_ENABLE_URL,
+  RISK_ENGINE_STATUS_URL,
+} from '@kbn/security-solution-plugin/common/constants';
+import {
   createRule,
   waitForSignalsToBePresent,
   waitForRuleSuccess,
   getRuleForSignalTesting,
   countDownTest,
   waitFor,
+  routeWithNamespace,
 } from '../../../utils';
 
 const sanitizeScore = (score: Partial<RiskScore>): Partial<RiskScore> => {
@@ -49,7 +56,15 @@ export const buildDocument = (body: object, id?: string) => {
 };
 
 export const createAndSyncRuleAndAlertsFactory =
-  ({ supertest, log }: { supertest: SuperTest.SuperTest<SuperTest.Test>; log: ToolingLog }) =>
+  ({
+    supertest,
+    log,
+    namespace,
+  }: {
+    supertest: SuperTest.SuperTest<SuperTest.Test>;
+    log: ToolingLog;
+    namespace?: string;
+  }) =>
   async ({
     alerts = 1,
     riskScore = 21,
@@ -64,21 +79,26 @@ export const createAndSyncRuleAndAlertsFactory =
     riskScoreOverride?: string;
   }): Promise<void> => {
     const rule = getRuleForSignalTesting(['ecs_compliant']);
-    const { id } = await createRule(supertest, log, {
-      ...rule,
-      risk_score: riskScore,
-      query,
-      max_signals: maxSignals,
-      ...(riskScoreOverride
-        ? {
-            risk_score_mapping: [
-              { field: riskScoreOverride, operator: 'equals', value: '', risk_score: undefined },
-            ],
-          }
-        : {}),
-    });
-    await waitForRuleSuccess({ supertest, log, id });
-    await waitForSignalsToBePresent(supertest, log, alerts, [id]);
+    const { id } = await createRule(
+      supertest,
+      log,
+      {
+        ...rule,
+        risk_score: riskScore,
+        query,
+        max_signals: maxSignals,
+        ...(riskScoreOverride
+          ? {
+              risk_score_mapping: [
+                { field: riskScoreOverride, operator: 'equals', value: '', risk_score: undefined },
+              ],
+            }
+          : {}),
+      },
+      namespace
+    );
+    await waitForRuleSuccess({ supertest, log, id, namespace });
+    await waitForSignalsToBePresent(supertest, log, alerts, [id], namespace);
   };
 
 /**
@@ -99,6 +119,7 @@ export const deleteAllRiskScores = async (
             match_all: {},
           },
         },
+        ignore_unavailable: true,
         refresh: true,
       });
       return {
@@ -110,27 +131,129 @@ export const deleteAllRiskScores = async (
   );
 };
 
+/**
+ * Function to read risk scores from ES. By default, it reads from the risk
+ * score datastream in the default space, but this can be overridden with the
+ * `index` parameter.
+ *
+ * @param {string[]} index - the index or indices to read risk scores from.
+ * @param {number} size - the size parameter of the query
+ */
 export const readRiskScores = async (
   es: Client,
-  index: string[] = ['risk-score.risk-score-default']
+  index: string[] = ['risk-score.risk-score-default'],
+  size: number = 1000
 ): Promise<EcsRiskScore[]> => {
   const results = await es.search({
-    index: 'risk-score.risk-score-default',
+    index,
+    size,
   });
   return results.hits.hits.map((hit) => hit._source as EcsRiskScore);
 };
 
-export const waitForRiskScoresToBePresent = async (
-  es: Client,
-  log: ToolingLog,
-  index: string[] = ['risk-score.risk-score-default']
-): Promise<void> => {
+/**
+ * Function to read risk scores from ES and wait for them to be
+ * present/readable. By default, it reads from the risk score datastream in the
+ * default space, but this can be overridden with the `index` parameter.
+ *
+ * @param {string[]} index - the index or indices to read risk scores from.
+ * @param {number} scoreCount - the number of risk scores to wait for. Defaults to 1.
+ */
+export const waitForRiskScoresToBePresent = async ({
+  es,
+  log,
+  index = ['risk-score.risk-score-default'],
+  scoreCount = 1,
+}: {
+  es: Client;
+  log: ToolingLog;
+  index?: string[];
+  scoreCount?: number;
+}): Promise<void> => {
   await waitFor(
     async () => {
-      const riskScores = await readRiskScores(es, index);
-      return riskScores.length > 0;
+      const riskScores = await readRiskScores(es, index, scoreCount + 10);
+      return riskScores.length >= scoreCount;
     },
     'waitForRiskScoresToBePresent',
+    log
+  );
+};
+
+export const getRiskEngineTasks = async ({
+  es,
+  index = ['.kibana_task_manager*'],
+}: {
+  es: Client;
+  index?: string[];
+}) => {
+  const result = await es.search({
+    index,
+    query: { match: { 'task.taskType': 'risk_engine:risk_scoring' } },
+  });
+
+  return result.hits.hits?.map((hit) => hit._source);
+};
+
+export const getRiskEngineTask = async ({
+  es,
+  index = ['.kibana_task_manager*'],
+}: {
+  es: Client;
+  index?: string[];
+}) => {
+  const result = await es.search({
+    index,
+    query: { match: { 'task.taskType': 'risk_engine:risk_scoring' } },
+  });
+
+  return result.hits.hits[0]?._source;
+};
+
+export const deleteRiskEngineTask = async ({
+  es,
+  log,
+  index = ['.kibana_task_manager*'],
+}: {
+  es: Client;
+  log: ToolingLog;
+  index?: string[];
+}) => {
+  await countDownTest(
+    async () => {
+      await es.deleteByQuery({
+        index,
+        query: {
+          match: {
+            'task.taskType': 'risk_engine:risk_scoring',
+          },
+        },
+        conflicts: 'proceed',
+      });
+      return {
+        passed: true,
+      };
+    },
+    'deleteRiskEngineTask',
+    log
+  );
+};
+
+export const waitForRiskEngineTaskToBeGone = async ({
+  es,
+  log,
+  index = ['.kibana_task_manager*'],
+}: {
+  es: Client;
+  log: ToolingLog;
+  index?: string[];
+}): Promise<void> => {
+  await waitFor(
+    async () => {
+      const task = await getRiskEngineTask({ es, index });
+      return task == null;
+    },
+    'waitForRiskEngineTaskToBeGone',
     log
   );
 };
@@ -154,6 +277,28 @@ export const cleanRiskEngineConfig = async ({
       type: riskEngineConfigurationTypeName,
       id: so.id,
     });
+  }
+};
+
+export const updateRiskEngineConfigSO = async ({
+  attributes,
+  kibanaServer,
+}: {
+  attributes: object;
+  kibanaServer: KbnClient;
+}) => {
+  const so = await getRiskEngineConfigSO({ kibanaServer });
+  if (so) {
+    await kibanaServer.savedObjects.update({
+      id: so.id,
+      type: riskEngineConfigurationTypeName,
+      attributes: {
+        ...so.attributes,
+        ...attributes,
+      },
+    });
+  } else {
+    throw Error('No risk engine config found');
   }
 };
 
@@ -201,7 +346,7 @@ export const clearLegacyTransforms = async ({
   }
 };
 
-export const createTransforms = async ({ es }: { es: Client }): Promise<void> => {
+export const createLegacyTransforms = async ({ es }: { es: Client }): Promise<void> => {
   const transforms = legacyTransformIds.map((transform) =>
     es.transform.putTransform({
       transform_id: transform,
@@ -233,3 +378,36 @@ export const createTransforms = async ({ es }: { es: Client }): Promise<void> =>
 
   await Promise.all(transforms);
 };
+
+export const riskEngineRouteHelpersFactory = (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  namespace?: string
+) => ({
+  init: async () =>
+    await supertest
+      .post(routeWithNamespace(RISK_ENGINE_INIT_URL, namespace))
+      .set('kbn-xsrf', 'true')
+      .send()
+      .expect(200),
+
+  getStatus: async () =>
+    await supertest
+      .get(routeWithNamespace(RISK_ENGINE_STATUS_URL, namespace))
+      .set('kbn-xsrf', 'true')
+      .send()
+      .expect(200),
+
+  enable: async () =>
+    await supertest
+      .post(routeWithNamespace(RISK_ENGINE_ENABLE_URL, namespace))
+      .set('kbn-xsrf', 'true')
+      .send()
+      .expect(200),
+
+  disable: async () =>
+    await supertest
+      .post(routeWithNamespace(RISK_ENGINE_DISABLE_URL, namespace))
+      .set('kbn-xsrf', 'true')
+      .send()
+      .expect(200),
+});

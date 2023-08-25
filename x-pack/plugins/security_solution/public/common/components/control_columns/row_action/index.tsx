@@ -9,7 +9,7 @@ import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { dataTableActions } from '@kbn/securitysolution-data-table';
+import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
 import { RightPanelKey } from '../../../../flyout/right';
@@ -97,7 +97,7 @@ const RowActionComponent = ({
       },
     };
 
-    if (isSecurityFlyoutEnabled) {
+    if (isSecurityFlyoutEnabled && tableId !== TableId.rulePreview) {
       openFlyout({
         right: {
           id: RightPanelKey,
