@@ -25,7 +25,6 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { needsReauthorization } from '../../common/reauthorization_utils';
 import { TRANSFORM_STATE } from '../../../../common/constants';
 
-import { useAppDependencies } from '../../app_dependencies';
 import { useDocumentationLinks } from '../../hooks';
 import { useDeleteTransforms, useTransformCapabilities, useGetTransforms } from '../../hooks';
 import { RedirectToCreateTransform } from '../../common/navigation';
@@ -45,9 +44,6 @@ import {
 const ErrorMessageCallout: FC<{ errorMessage: IHttpFetchError<unknown> | null }> = ({
   errorMessage,
 }) => {
-  const { overlays, theme } = useAppDependencies();
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
   return (
     <>
       <EuiSpacer size="s" />
@@ -60,28 +56,13 @@ const ErrorMessageCallout: FC<{ errorMessage: IHttpFetchError<unknown> | null }>
               defaultMessage="An error occurred getting the transform list."
             />{' '}
             {errorMessage !== null && (
-              <ToastNotificationText
-                inline={true}
-                forceModal={true}
-                text={errorMessage}
-                overlays={overlays}
-                theme={theme}
-              />
+              <ToastNotificationText inline={true} forceModal={true} text={errorMessage} />
             )}
           </>
         }
         color="danger"
         iconType="error"
       />
-      {isModalVisible && (
-        <EuiModal
-          onClose={() => setIsModalVisible(false)}
-          className="transformListErrorMessageModal"
-          data-test-subj="transformSelectSourceModal"
-        >
-          <pre>{JSON.stringify(errorMessage)}</pre>
-        </EuiModal>
-      )}
     </>
   );
 };
@@ -190,7 +171,12 @@ export const TransformManagement: FC = () => {
       />
 
       <EuiPageContentBody data-test-subj="transformPageTransformList">
-        {isInitialLoading && <EuiSkeletonText lines={2} />}
+        {isInitialLoading && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiSkeletonText lines={2} />
+          </>
+        )}
         {!isInitialLoading && (
           <>
             {unauthorizedTransformsWarning}
@@ -247,13 +233,15 @@ export const TransformManagement: FC = () => {
                   <EuiSpacer />
                 </>
               ) : null}
-              <TransformList
-                isLoading={transformsLoading}
-                onCreateTransform={onOpenModal}
-                transformNodes={transformNodes}
-                transforms={transforms}
-                transformsLoading={transformsLoading}
-              />
+              {(transformNodes > 0 || transforms.length > 0) && (
+                <TransformList
+                  isLoading={transformsLoading}
+                  onCreateTransform={onOpenModal}
+                  transformNodes={transformNodes}
+                  transforms={transforms}
+                  transformsLoading={transformsLoading}
+                />
+              )}
               <TransformAlertFlyoutWrapper />
             </AlertRulesManageContext.Provider>
           </>
