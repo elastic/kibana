@@ -172,7 +172,7 @@ export function ObservabilityLogExplorerPageObject({
     },
 
     async navigateTo(options?: NavigateToAppOptions) {
-      return await PageObjects.common.navigateToApp('observabilityLogExplorer');
+      return await PageObjects.common.navigateToApp('observabilityLogExplorer', options);
     },
 
     getDatasetSelector() {
