@@ -4,25 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../../tags';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import {
-  CORRELATIONS_ANCESTRY_SECTION,
-  CORRELATIONS_ANCESTRY_TABLE,
-  CORRELATIONS_CASES_SECTION,
-  CORRELATIONS_SESSION_SECTION,
-  CORRELATIONS_SOURCE_SECTION,
+  CORRELATIONS_ANCESTRY_SECTION_TABLE,
+  CORRELATIONS_ANCESTRY_SECTION_TITLE,
+  CORRELATIONS_CASES_SECTION_TABLE,
+  CORRELATIONS_CASES_SECTION_TITLE,
+  CORRELATIONS_SESSION_SECTION_TABLE,
+  CORRELATIONS_SESSION_SECTION_TITLE,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON,
 } from '../../../../screens/expandable_flyout/alert_details_left_panel_correlations_tab';
 import {
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP,
 } from '../../../../screens/expandable_flyout/alert_details_left_panel';
-import {
-  expandCorrelationsSection,
-  openCorrelationsTab,
-} from '../../../../tasks/expandable_flyout/alert_details_left_panel_correlations_tab';
+import { openCorrelationsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_correlations_tab';
 import { openInsightsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel';
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import {
@@ -36,7 +33,7 @@ import { ALERTS_URL } from '../../../../urls/navigation';
 
 describe(
   'Expandable flyout left panel correlations',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['@ess', '@brokenInServerless'] },
   () => {
     beforeEach(() => {
       cleanKibana();
@@ -71,23 +68,30 @@ describe(
 
       cy.log('should render all the correlations sections');
 
-      cy.get(CORRELATIONS_ANCESTRY_SECTION)
+      cy.get(CORRELATIONS_ANCESTRY_SECTION_TITLE).scrollIntoView();
+      cy.get(CORRELATIONS_ANCESTRY_SECTION_TITLE)
         .should('be.visible')
-        .and('have.text', '1 alert related by ancestry');
+        .and('contain.text', '1 alert related by ancestry');
+      cy.get(CORRELATIONS_ANCESTRY_SECTION_TABLE).should('be.visible');
 
-      cy.get(CORRELATIONS_SOURCE_SECTION)
+      // TODO get proper data to test this section
+      // cy.get(CORRELATIONS_SOURCE_SECTION).scrollIntoView();
+      // cy.get(CORRELATIONS_SOURCE_SECTION)
+      //   .should('be.visible')
+      //   .and('contain.text', '0 alerts related by source event');
+      // cy.get(CORRELATIONS_SOURCE_SECTION_TABLE).should('be.visible');
+
+      cy.get(CORRELATIONS_SESSION_SECTION_TITLE).scrollIntoView();
+      cy.get(CORRELATIONS_SESSION_SECTION_TITLE)
         .should('be.visible')
-        .and('have.text', '0 alerts related by source event');
+        .and('contain.text', '1 alert related by session');
+      cy.get(CORRELATIONS_SESSION_SECTION_TABLE).should('be.visible');
 
-      cy.get(CORRELATIONS_SESSION_SECTION)
+      cy.get(CORRELATIONS_CASES_SECTION_TITLE).scrollIntoView();
+      cy.get(CORRELATIONS_CASES_SECTION_TITLE)
         .should('be.visible')
-        .and('have.text', '1 alert related by session');
-
-      cy.get(CORRELATIONS_CASES_SECTION).should('be.visible').and('have.text', '1 related case');
-
-      expandCorrelationsSection(CORRELATIONS_ANCESTRY_SECTION);
-
-      cy.get(CORRELATIONS_ANCESTRY_TABLE).should('be.visible');
+        .and('contain.text', '1 related case');
+      cy.get(CORRELATIONS_CASES_SECTION_TABLE).should('be.visible');
     });
   }
 );

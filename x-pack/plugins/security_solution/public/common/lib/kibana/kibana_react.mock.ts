@@ -48,7 +48,7 @@ import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks
 import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { of } from 'rxjs';
-import { UpsellingService } from '../upsellings';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 
