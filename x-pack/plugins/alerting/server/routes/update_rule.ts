@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { z } from '@kbn/zod';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError, validateDurationSchema } from '../lib';
@@ -121,33 +121,41 @@ export const updateRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
-  router.put(
-    {
+  router.versioned
+    .put({
       path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
-      validate: {
-        body: bodySchema,
-        params: paramSchema,
+      access: 'public',
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        // Lazily provide validation to the endpoint
+        validate: () => ({
+          request: {
+            body: z.object({ data: z.string().describe('I arrived lazily') }),
+            params: z.object({ id: z.string() }),
+          },
+        }),
       },
-    },
-    handleDisabledApiKeysError(
-      router.handleLegacyErrors(
-        verifyAccessAndContext(licenseState, async function (context, req, res) {
-          const rulesClient = (await context.alerting).getRulesClient();
-          const { id } = req.params;
-          const rule = req.body;
-          try {
-            const alertRes = await rulesClient.update(rewriteBodyReq({ id, data: rule }));
-            return res.ok({
-              body: rewriteBodyRes(alertRes),
-            });
-          } catch (e) {
-            if (e instanceof RuleTypeDisabledError) {
-              return e.sendResponse(res);
+      handleDisabledApiKeysError(
+        router.handleLegacyErrors(
+          verifyAccessAndContext(licenseState, async function (context, req, res) {
+            const rulesClient = (await context.alerting).getRulesClient();
+            const { id } = req.params;
+            const rule = req.body as any;
+            try {
+              const alertRes = await rulesClient.update(rewriteBodyReq({ id, data: rule }));
+              return res.ok({
+                body: rewriteBodyRes(alertRes),
+              });
+            } catch (e) {
+              if (e instanceof RuleTypeDisabledError) {
+                return e.sendResponse(res);
+              }
+              throw e;
             }
-            throw e;
-          }
-        })
+          })
+        )
       )
-    )
-  );
+    );
 };
