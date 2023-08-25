@@ -34,7 +34,7 @@ describe('isNestedFieldParent', () => {
 
     expect(isNestedFieldParent('nested', dataView)).toBe(true);
     expect(isNestedFieldParent('nested.field', dataView)).toBe(false);
-    expect(isNestedFieldParent('otherField', dataView)).toBe(false);
+    expect(isNestedFieldParent('unnested.field', dataView)).toBe(false);
     expect(isNestedFieldParent('whateverField', dataView)).toBe(false);
   });
 });
