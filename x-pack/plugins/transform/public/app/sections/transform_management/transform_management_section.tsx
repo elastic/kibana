@@ -7,8 +7,6 @@
 
 import React, { FC, useEffect, useMemo, useState } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-
 import {
   EuiButtonEmpty,
   EuiSkeletonText,
@@ -19,14 +17,20 @@ import {
   EuiCallOut,
   EuiButton,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+
 import { needsReauthorization } from '../../common/reauthorization_utils';
 import { TRANSFORM_STATE } from '../../../../common/constants';
 
+import { useAppDependencies } from '../../app_dependencies';
 import { useDocumentationLinks } from '../../hooks';
 import { useDeleteTransforms, useTransformCapabilities, useGetTransforms } from '../../hooks';
 import { RedirectToCreateTransform } from '../../common/navigation';
 import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
+import { ToastNotificationText } from '../../components/toast_notification_text';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 
 import { SearchSelection } from './components/search_selection';
@@ -37,6 +41,50 @@ import {
   getAlertRuleManageContext,
   TransformAlertFlyoutWrapper,
 } from '../../../alerting/transform_alerting_flyout';
+
+const ErrorMessageCallout: FC<{ errorMessage: IHttpFetchError<unknown> | null }> = ({
+  errorMessage,
+}) => {
+  const { overlays, theme } = useAppDependencies();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  return (
+    <>
+      <EuiSpacer size="s" />
+      <EuiCallOut
+        size="s"
+        title={
+          <>
+            <FormattedMessage
+              id="xpack.transform.list.errorPromptTitle"
+              defaultMessage="An error occurred getting the transform list."
+            />{' '}
+            {errorMessage !== null && (
+              <ToastNotificationText
+                inline={true}
+                forceModal={true}
+                text={errorMessage}
+                overlays={overlays}
+                theme={theme}
+              />
+            )}
+          </>
+        }
+        color="danger"
+        iconType="error"
+      />
+      {isModalVisible && (
+        <EuiModal
+          onClose={() => setIsModalVisible(false)}
+          className="transformListErrorMessageModal"
+          data-test-subj="transformSelectSourceModal"
+        >
+          <pre>{JSON.stringify(errorMessage)}</pre>
+        </EuiModal>
+      )}
+    </>
+  );
+};
 
 export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
@@ -141,13 +189,14 @@ export const TransformManagement: FC = () => {
         bottomBorder
       />
 
-      <EuiSpacer size="l" />
-
       <EuiPageContentBody data-test-subj="transformPageTransformList">
         {isInitialLoading && <EuiSkeletonText lines={2} />}
         {!isInitialLoading && (
           <>
             {unauthorizedTransformsWarning}
+
+            {errorMessage !== null && <ErrorMessageCallout errorMessage={errorMessage} />}
+            <EuiSpacer size="s" />
 
             <TransformStatsBar transformNodes={transformNodes} transformsList={transforms} />
             <EuiSpacer size="s" />
@@ -199,7 +248,6 @@ export const TransformManagement: FC = () => {
                 </>
               ) : null}
               <TransformList
-                errorMessage={errorMessage}
                 isLoading={transformsLoading}
                 onCreateTransform={onOpenModal}
                 transformNodes={transformNodes}

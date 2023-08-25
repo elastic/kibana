@@ -32,6 +32,8 @@ interface ToastNotificationTextProps {
   theme: CoreStart['theme'];
   text: any;
   previewTextLength?: number;
+  inline?: boolean;
+  forceModal?: boolean;
 }
 
 export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
@@ -39,12 +41,15 @@ export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
   text,
   theme,
   previewTextLength,
+  inline = false,
+  forceModal = false,
 }) => {
-  if (typeof text === 'string' && text.length <= MAX_SIMPLE_MESSAGE_LENGTH) {
+  if (!forceModal && typeof text === 'string' && text.length <= MAX_SIMPLE_MESSAGE_LENGTH) {
     return text;
   }
 
   if (
+    !forceModal &&
     typeof text === 'object' &&
     typeof text.message === 'string' &&
     text.message.length <= MAX_SIMPLE_MESSAGE_LENGTH
@@ -52,8 +57,9 @@ export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
     return text.message;
   }
 
-  const unformattedText = text.message ? text.message : text;
-  const formattedText = typeof unformattedText === 'object' ? JSON.stringify(text, null, 2) : text;
+  const unformattedText = typeof text === 'object' && text.message ? text.message : text;
+  const formattedText =
+    typeof unformattedText === 'object' ? JSON.stringify(text, null, 2) : unformattedText;
   const textLength = previewTextLength ?? 140;
   const previewText = `${formattedText.substring(0, textLength)}${
     formattedText.length > textLength ? ' ...' : ''
@@ -90,8 +96,16 @@ export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
 
   return (
     <>
-      <pre>{previewText}</pre>
-      <EuiButtonEmpty onClick={openModal}>
+      {!inline && (
+        <>
+          <pre>{previewText}</pre>{' '}
+        </>
+      )}
+      <EuiButtonEmpty
+        onClick={openModal}
+        css={inline ? { blockSize: 0 } : {}}
+        size={inline ? 's' : undefined}
+      >
         {i18n.translate('xpack.transform.toastText.openModalButtonText', {
           defaultMessage: 'View details',
         })}

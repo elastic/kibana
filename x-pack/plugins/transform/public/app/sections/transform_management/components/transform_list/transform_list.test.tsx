@@ -34,7 +34,6 @@ describe('Transform: Transform List <TransformList />', () => {
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
           <TransformList
-            errorMessage={''}
             isLoading={false}
             onCreateTransform={jest.fn()}
             transformNodes={1}

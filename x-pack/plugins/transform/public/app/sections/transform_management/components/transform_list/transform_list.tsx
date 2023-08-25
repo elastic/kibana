@@ -8,13 +8,11 @@
 import React, { type MouseEventHandler, type FC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -76,29 +74,6 @@ import { useAlertRuleFlyout } from '../../../../../alerting/transform_alerting_f
 import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 import { StopActionModal } from '../action_stop/stop_action_modal';
 
-const ErrorMessage: FC<{ errorMessage: any }> = ({ errorMessage }) => (
-  <>
-    <EuiSpacer size="s" />
-    <EuiCallOut
-      title={
-        <FormattedMessage
-          id="xpack.transform.list.errorPromptTitle"
-          defaultMessage="An error occurred getting the transform list"
-        />
-      }
-      color="danger"
-      iconType="error"
-    >
-      <p>
-        <small>
-          <pre>{JSON.stringify(errorMessage)}</pre>
-        </small>
-      </p>
-    </EuiCallOut>
-    <EuiSpacer size="s" />
-  </>
-);
-
 type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 
 function getItemIdToExpandedRowMap(
@@ -116,7 +91,6 @@ function getItemIdToExpandedRowMap(
 }
 
 interface TransformListProps {
-  errorMessage: any;
   isLoading: boolean;
   onCreateTransform: MouseEventHandler<HTMLButtonElement>;
   transformNodes: number;
@@ -125,7 +99,6 @@ interface TransformListProps {
 }
 
 export const TransformList: FC<TransformListProps> = ({
-  errorMessage,
   isLoading,
   onCreateTransform,
   transformNodes,
@@ -170,10 +143,7 @@ export const TransformList: FC<TransformListProps> = ({
   const filteredTransforms =
     clauses.length > 0 ? filterTransforms(transforms, clauses) : transforms;
 
-  const errorMessageInsert =
-    errorMessage !== null ? <ErrorMessage errorMessage={errorMessage} /> : null;
-
-  if (transforms.length === 0 && errorMessage === null) {
+  if (transforms.length === 0) {
     return (
       <EuiFlexGroup justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
@@ -382,7 +352,6 @@ export const TransformList: FC<TransformListProps> = ({
       {/* Single Action Modals */}
       {singleActionModals}
 
-      {errorMessage !== null && errorMessageInsert}
       <EuiInMemoryTable
         allowNeutralSort={false}
         className="transform__TransformTable"
