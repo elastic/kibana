@@ -15,6 +15,8 @@ import {
   EuiPageHeaderProps,
   EuiPageSection,
   EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
@@ -110,36 +112,38 @@ export const DetailsPage: React.FunctionComponent<
   return (
     <>
       <EuiPageSection paddingSize="none">
-        <EuiButton
-          data-test-subj="indexDetailsBackToIndicesButton"
-          color="text"
-          iconType="arrowLeft"
-          onClick={navigateToAllIndices}
-        >
-          <FormattedMessage
-            id="xpack.idxMgmt.indexDetails.backToIndicesButtonLabel"
-            defaultMessage="Back to all indices"
-          />
-        </EuiButton>
-      </EuiPageSection>
-
-      <EuiSpacer size="l" />
-
-      <EuiPageHeader
-        data-test-subj="indexDetailsHeader"
-        pageTitle={
-          <>
-            {indexName}
-            {isLoading && (
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="indexDetailsBackToIndicesButton"
+              color="text"
+              iconType="arrowLeft"
+              onClick={navigateToAllIndices}
+            >
+              <FormattedMessage
+                id="xpack.idxMgmt.indexDetails.backToIndicesButtonLabel"
+                defaultMessage="Back to all indices"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          {isLoading && (
+            <EuiFlexItem>
               <SectionLoading inline={true}>
                 <FormattedMessage
                   id="xpack.idxMgmt.indexDetails.reloadingDescription"
                   defaultMessage="Re-loading index details…"
                 />
               </SectionLoading>
-            )}
-          </>
-        }
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiPageSection>
+
+      <EuiSpacer size="l" />
+
+      <EuiPageHeader
+        data-test-subj="indexDetailsHeader"
+        pageTitle={indexName}
         bottomBorder
         rightSideItems={[
           <DiscoverLink indexName={indexName} asButton={true} />,
