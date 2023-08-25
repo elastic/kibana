@@ -141,11 +141,13 @@ describe('Enrich policies API', () => {
         method: 'post',
         path: addInternalBasePath('/enrich_policies'),
         body: {
-          name: 'my-policy',
-          type: 'match',
-          matchField: 'my_field',
-          enrichFields: ['field_1', 'field_2'],
-          sourceIndex: ['index_1'],
+          policy: {
+            name: 'my-policy',
+            type: 'match',
+            matchField: 'my_field',
+            enrichFields: ['field_1', 'field_2'],
+            sourceIndex: ['index_1'],
+          }
         },
       };
 
@@ -163,11 +165,13 @@ describe('Enrich policies API', () => {
         method: 'post',
         path: addInternalBasePath('/enrich_policies'),
         body: {
-          name: 'my-policy',
-          type: 'match',
-          matchField: 'my_field',
-          enrichFields: ['field_1', 'field_2'],
-          sourceIndex: ['index_1'],
+          policy: {
+            name: 'my-policy',
+            type: 'match',
+            matchField: 'my_field',
+            enrichFields: ['field_1', 'field_2'],
+            sourceIndex: ['index_1'],
+          }
         },
       };
 
