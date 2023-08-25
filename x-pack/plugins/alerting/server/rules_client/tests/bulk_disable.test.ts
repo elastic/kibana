@@ -608,7 +608,7 @@ describe('bulkDisableRules', () => {
 
       expect(logger.warn).toHaveBeenCalledTimes(2);
       expect(logger.warn).toHaveBeenLastCalledWith(
-        "rulesClient.disable('id2') - Could not write recovery events - UPS"
+        "rulesClient.disable('id2') - Could not write untrack events - UPS"
       );
     });
   });
