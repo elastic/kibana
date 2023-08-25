@@ -922,6 +922,7 @@ describe('TaskManagerRunner', () => {
               persistence: TaskPersistence.Recurring,
               task: originalInstance,
               result: TaskRunResult.Failed,
+              isExpired: false,
             })
           )
         )
@@ -1254,6 +1255,7 @@ describe('TaskManagerRunner', () => {
                 task: instance,
                 persistence: TaskPersistence.NonRecurring,
                 result: TaskRunResult.Success,
+                isExpired: false,
               })
             )
           )
@@ -1292,6 +1294,7 @@ describe('TaskManagerRunner', () => {
                 task: instance,
                 persistence: TaskPersistence.Recurring,
                 result: TaskRunResult.Success,
+                isExpired: false,
               })
             )
           )
@@ -1330,6 +1333,7 @@ describe('TaskManagerRunner', () => {
                 task: instance,
                 persistence: TaskPersistence.Recurring,
                 result: TaskRunResult.Success,
+                isExpired: false,
                 error: new Error(`Alerting task failed to run.`),
               })
             )
@@ -1368,6 +1372,7 @@ describe('TaskManagerRunner', () => {
                 task: instance,
                 persistence: TaskPersistence.NonRecurring,
                 result: TaskRunResult.RetryScheduled,
+                isExpired: false,
               })
             )
           )
@@ -1409,6 +1414,7 @@ describe('TaskManagerRunner', () => {
                 task: instance,
                 persistence: TaskPersistence.Recurring,
                 result: TaskRunResult.RetryScheduled,
+                isExpired: false,
               })
             )
           )
@@ -1461,6 +1467,7 @@ describe('TaskManagerRunner', () => {
                 task: originalInstance,
                 persistence: TaskPersistence.NonRecurring,
                 result: TaskRunResult.Failed,
+                isExpired: false,
               })
             )
           )

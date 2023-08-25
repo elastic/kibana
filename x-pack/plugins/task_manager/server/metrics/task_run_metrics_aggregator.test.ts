@@ -33,6 +33,7 @@ export const getTaskRunSuccessEvent = (type: string) => {
       },
       persistence: TaskPersistence.Recurring,
       result: TaskRunResult.Success,
+      isExpired: false,
     }),
     {
       start: 1689698780490,
@@ -63,6 +64,7 @@ export const getTaskRunFailedEvent = (type: string) => {
       },
       persistence: TaskPersistence.Recurring,
       result: TaskRunResult.Failed,
+      isExpired: false,
     })
   );
 };
@@ -75,13 +77,13 @@ describe('TaskRunMetricsAggregator', () => {
 
   test('should correctly initialize', () => {
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 0, total: 0, delay: { counts: [], values: [] } },
+      overall: { success: 0, on_time: 0, total: 0, delay: { counts: [], values: [] } },
     });
   });
 
   test('should correctly return initialMetrics', () => {
     expect(taskRunMetricsAggregator.initialMetric()).toEqual({
-      overall: { success: 0, total: 0, delay: { counts: [], values: [] } },
+      overall: { success: 0, on_time: 0, total: 0, delay: { counts: [], values: [] } },
       by_type: {},
     });
   });
@@ -90,9 +92,9 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry'));
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 2, total: 2, delay: { counts: [], values: [] } },
+      overall: { success: 2, on_time: 2, total: 2, delay: { counts: [], values: [] } },
       by_type: {
-        telemetry: { success: 2, total: 2 },
+        telemetry: { success: 2, on_time: 2, total: 2 },
       },
     });
   });
@@ -101,9 +103,9 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 0, total: 2, delay: { counts: [], values: [] } },
+      overall: { success: 0, on_time: 2, total: 2, delay: { counts: [], values: [] } },
       by_type: {
-        telemetry: { success: 0, total: 2 },
+        telemetry: { success: 0, on_time: 2, total: 2 },
       },
     });
   });
@@ -114,10 +116,10 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 3, total: 4, delay: { counts: [], values: [] } },
+      overall: { success: 3, on_time: 4, total: 4, delay: { counts: [], values: [] } },
       by_type: {
-        report: { success: 2, total: 2 },
-        telemetry: { success: 1, total: 2 },
+        report: { success: 2, on_time: 2, total: 2 },
+        telemetry: { success: 1, on_time: 2, total: 2 },
       },
     });
   });
@@ -142,16 +144,16 @@ describe('TaskRunMetricsAggregator', () => {
       getTaskRunSuccessEvent('alerting:.index-threshold')
     );
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 11, total: 14, delay: { counts: [], values: [] } },
+      overall: { success: 11, on_time: 14, total: 14, delay: { counts: [], values: [] } },
       by_type: {
-        actions: { success: 3, total: 3 },
-        'actions:.email': { success: 1, total: 1 },
-        'actions:webhook': { success: 2, total: 2 },
-        alerting: { success: 5, total: 7 },
-        'alerting:example': { success: 3, total: 5 },
-        'alerting:.index-threshold': { success: 2, total: 2 },
-        report: { success: 2, total: 2 },
-        telemetry: { success: 1, total: 2 },
+        actions: { success: 3, on_time: 3, total: 3 },
+        'actions:__email': { success: 1, on_time: 1, total: 1 },
+        'actions:webhook': { success: 2, on_time: 2, total: 2 },
+        alerting: { success: 5, on_time: 7, total: 7 },
+        'alerting:example': { success: 3, on_time: 5, total: 5 },
+        'alerting:__index-threshold': { success: 2, on_time: 2, total: 2 },
+        report: { success: 2, on_time: 2, total: 2 },
+        telemetry: { success: 1, on_time: 2, total: 2 },
       },
     });
   });
@@ -176,31 +178,31 @@ describe('TaskRunMetricsAggregator', () => {
       getTaskRunSuccessEvent('alerting:.index-threshold')
     );
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 11, total: 14, delay: { counts: [], values: [] } },
+      overall: { success: 11, on_time: 14, total: 14, delay: { counts: [], values: [] } },
       by_type: {
-        actions: { success: 3, total: 3 },
-        'actions:.email': { success: 1, total: 1 },
-        'actions:webhook': { success: 2, total: 2 },
-        alerting: { success: 5, total: 7 },
-        'alerting:example': { success: 3, total: 5 },
-        'alerting:.index-threshold': { success: 2, total: 2 },
-        report: { success: 2, total: 2 },
-        telemetry: { success: 1, total: 2 },
+        actions: { success: 3, on_time: 3, total: 3 },
+        'actions:__email': { success: 1, on_time: 1, total: 1 },
+        'actions:webhook': { success: 2, on_time: 2, total: 2 },
+        alerting: { success: 5, on_time: 7, total: 7 },
+        'alerting:example': { success: 3, on_time: 5, total: 5 },
+        'alerting:__index-threshold': { success: 2, on_time: 2, total: 2 },
+        report: { success: 2, on_time: 2, total: 2 },
+        telemetry: { success: 1, on_time: 2, total: 2 },
       },
     });
 
     taskRunMetricsAggregator.reset();
     expect(taskRunMetricsAggregator.collect()).toEqual({
-      overall: { success: 0, total: 0 },
+      overall: { success: 0, on_time: 0, total: 0, delay: { counts: [], values: [] } },
       by_type: {
-        actions: { success: 0, total: 0 },
-        'actions:.email': { success: 0, total: 0 },
-        'actions:webhook': { success: 0, total: 0 },
-        alerting: { success: 0, total: 0 },
-        'alerting:example': { success: 0, total: 0 },
-        'alerting:.index-threshold': { success: 0, total: 0 },
-        report: { success: 0, total: 0 },
-        telemetry: { success: 0, total: 0 },
+        actions: { success: 0, on_time: 0, total: 0 },
+        'actions:__email': { success: 0, on_time: 0, total: 0 },
+        'actions:webhook': { success: 0, on_time: 0, total: 0 },
+        alerting: { success: 0, on_time: 0, total: 0 },
+        'alerting:example': { success: 0, on_time: 0, total: 0 },
+        'alerting:__index-threshold': { success: 0, on_time: 0, total: 0 },
+        report: { success: 0, on_time: 0, total: 0 },
+        telemetry: { success: 0, on_time: 0, total: 0 },
       },
     });
   });

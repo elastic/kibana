@@ -26,7 +26,6 @@ export enum TaskEventType {
   TASK_CLAIM = 'TASK_CLAIM',
   TASK_MARK_RUNNING = 'TASK_MARK_RUNNING',
   TASK_RUN = 'TASK_RUN',
-  TASK_EXPIRED = 'TASK_EXPIRED',
   TASK_RUN_REQUEST = 'TASK_RUN_REQUEST',
   TASK_POLLING_CYCLE = 'TASK_POLLING_CYCLE',
   TASK_MANAGER_STAT = 'TASK_MANAGER_STAT',
@@ -70,6 +69,7 @@ export interface TaskEvent<OkResult, ErrorResult, ID = string> {
 export interface RanTask {
   task: ConcreteTaskInstance;
   persistence: TaskPersistence;
+  isExpired: boolean;
   result: TaskRunResult;
 }
 export type ErroredTask = RanTask & {
@@ -79,7 +79,6 @@ export type ErroredTask = RanTask & {
 export type TaskMarkRunning = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskRun = TaskEvent<RanTask, ErroredTask>;
 export type TaskClaim = TaskEvent<ConcreteTaskInstance, Error>;
-export type TaskExpired = TaskEvent<boolean, never>;
 export type TaskRunRequest = TaskEvent<ConcreteTaskInstance, Error>;
 export type EphemeralTaskRejectedDueToCapacity = TaskEvent<EphemeralTaskInstanceRequest, Error>;
 export type TaskPollingCycle<T = string> = TaskEvent<ClaimAndFillPoolResult, PollingError<T>>;
@@ -123,14 +122,6 @@ export function asTaskRunEvent(
     type: TaskEventType.TASK_RUN,
     event,
     timing,
-  };
-}
-
-export function asTaskExpiredEvent(id: string, event: Result<boolean, never>): TaskExpired {
-  return {
-    id,
-    type: TaskEventType.TASK_EXPIRED,
-    event,
   };
 }
 
@@ -203,11 +194,6 @@ export function isTaskMarkRunningEvent(
 }
 export function isTaskRunEvent(taskEvent: TaskEvent<unknown, unknown>): taskEvent is TaskRun {
   return taskEvent.type === TaskEventType.TASK_RUN;
-}
-export function isTaskExpiredEvent(
-  taskEvent: TaskEvent<unknown, unknown>
-): taskEvent is TaskExpired {
-  return taskEvent.type === TaskEventType.TASK_EXPIRED;
 }
 export function isTaskClaimEvent(taskEvent: TaskEvent<unknown, unknown>): taskEvent is TaskClaim {
   return taskEvent.type === TaskEventType.TASK_CLAIM;

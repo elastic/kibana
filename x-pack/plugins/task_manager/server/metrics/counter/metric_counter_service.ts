@@ -22,8 +22,13 @@ export class MetricCounterService<T extends JsonObject> {
   private readonly counters = new Map<string, Counter>();
   private keys: string[];
 
-  constructor(keys: string[]) {
+  constructor(keys: string[], initialNamespace?: string) {
+    if (!keys || !keys.length) {
+      throw new Error('Metrics counter service must be initialized with at least one key');
+    }
+
     this.keys = keys;
+    this.initializeCountersForNamespace(initialNamespace);
   }
 
   public initialMetrics(): T {
@@ -38,18 +43,23 @@ export class MetricCounterService<T extends JsonObject> {
 
   public increment(key: string, namespace?: string) {
     this.initializeCountersForNamespace(namespace);
-    this.counters.get(key)?.increment();
+    this.counters.get(this.buildKey(key, namespace))?.increment();
   }
 
   public collect(): T {
     return this.toJson();
   }
 
-  private initializeCountersForNamespace(namespace?: string) {
+  private buildKey(key: string, namespace?: string) {
     const prefix = namespace ? `${namespace}.` : '';
+    return `${prefix}${key}`;
+  }
+
+  private initializeCountersForNamespace(namespace?: string) {
     for (const key of this.keys) {
-      if (!this.counters.get(`${prefix}${key}`)) {
-        this.counters.set(`${prefix}${key}`, new Counter());
+      const namespacedKey = this.buildKey(key, namespace);
+      if (!this.counters.get(namespacedKey)) {
+        this.counters.set(namespacedKey, new Counter());
       }
     }
   }

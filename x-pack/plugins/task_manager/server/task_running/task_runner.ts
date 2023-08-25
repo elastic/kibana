@@ -31,11 +31,9 @@ import {
   unwrap,
 } from '../lib/result_type';
 import {
-  asTaskExpiredEvent,
   asTaskMarkRunningEvent,
   asTaskRunEvent,
   startTaskTimerWithEventLoopMonitoring,
-  TaskExpired,
   TaskMarkRunning,
   TaskPersistence,
   TaskRun,
@@ -103,7 +101,7 @@ type Opts = {
   definitions: TaskTypeDictionary;
   instance: ConcreteTaskInstance;
   store: Updatable;
-  onTaskEvent?: (event: TaskRun | TaskExpired | TaskMarkRunning) => void;
+  onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
   defaultMaxAttempts: number;
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
@@ -151,7 +149,7 @@ export class TaskManagerRunner implements TaskRunner {
   private bufferedTaskStore: Updatable;
   private beforeRun: Middleware['beforeRun'];
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
-  private onTaskEvent: (event: TaskRun | TaskExpired | TaskMarkRunning) => void;
+  private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
   private defaultMaxAttempts: number;
   private uuid: string;
   private readonly executionContext: ExecutionContextStart;
@@ -736,8 +734,6 @@ export class TaskManagerRunner implements TaskRunner {
   ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
     const { task } = this.instance;
 
-    this.onTaskEvent(asTaskExpiredEvent(this.id, asOk(this.isExpired)));
-
     await eitherAsync(
       result,
       async ({ runAt, schedule, hasError }: SuccessfulRunResult) => {
@@ -758,11 +754,16 @@ export class TaskManagerRunner implements TaskRunner {
               this.id,
               asErr({
                 ...processedResult,
+                isExpired: this.isExpired,
                 error: new Error(`Alerting task failed to run.`),
               }),
               taskTiming
             )
-          : asTaskRunEvent(this.id, asOk(processedResult), taskTiming);
+          : asTaskRunEvent(
+              this.id,
+              asOk({ ...processedResult, isExpired: this.isExpired }),
+              taskTiming
+            );
         this.onTaskEvent(taskRunEvent);
       },
       async ({ error }: FailedRunResult) => {
@@ -773,6 +774,7 @@ export class TaskManagerRunner implements TaskRunner {
               task,
               persistence: task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring,
               result: await this.processResultForRecurringTask(result),
+              isExpired: this.isExpired,
               error,
             }),
             taskTiming
