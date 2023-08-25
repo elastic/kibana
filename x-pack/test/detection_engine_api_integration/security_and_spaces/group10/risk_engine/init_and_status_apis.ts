@@ -15,7 +15,7 @@ import {
   clearLegacyTransforms,
   riskEngineRouteHelpersFactory,
   clearTransforms,
-  installOldRiskScore,
+  installLegacyRiskScore,
   getLegacyRiskScoreDashboards,
   clearLegacyDashboards,
 } from './utils';
@@ -335,7 +335,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should remove legacy risk score transform if it exists', async () => {
-        await installOldRiskScore({ supertest });
+        await installLegacyRiskScore({ supertest });
 
         for (const transformId of legacyTransformIds) {
           const tr = await es.transform.getTransform({
@@ -345,11 +345,11 @@ export default ({ getService }: FtrProviderContext) => {
           expect(tr?.transforms?.[0]?.id).to.eql(transformId);
         }
 
-        const oldDashboards = await getLegacyRiskScoreDashboards({
+        const legacyDashboards = await getLegacyRiskScoreDashboards({
           kibanaServer,
         });
 
-        expect(oldDashboards.length).to.eql(4);
+        expect(legacyDashboards.length).to.eql(4);
 
         await riskEngineRoutes.init();
 
@@ -363,11 +363,11 @@ export default ({ getService }: FtrProviderContext) => {
           }
         }
 
-        const oldDashbordsAfterInit = await getLegacyRiskScoreDashboards({
+        const legacyDashboardsAfterInit = await getLegacyRiskScoreDashboards({
           kibanaServer,
         });
 
-        expect(oldDashbordsAfterInit.length).to.eql(0);
+        expect(legacyDashboardsAfterInit.length).to.eql(0);
       });
     });
 

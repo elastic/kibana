@@ -452,7 +452,7 @@ export const riskEngineRouteHelpersFactory = (
       .expect(200),
 });
 
-export const installOldRiskScore = async ({
+export const installLegacyRiskScore = async ({
   supertest,
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
