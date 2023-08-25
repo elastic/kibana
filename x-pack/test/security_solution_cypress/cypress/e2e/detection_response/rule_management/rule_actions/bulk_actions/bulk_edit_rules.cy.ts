@@ -123,7 +123,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@brokenInServerless'] }
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();
-    preventPrebuiltRulesPackageInstallation(); // Make prebuilt rules aren't pulled from Fleet API
+    preventPrebuiltRulesPackageInstallation(); // Make sure prebuilt rules aren't pulled from Fleet API
     cy.task('esArchiverResetKibana');
     createRule(getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1', enabled: false }));
     createRule(
