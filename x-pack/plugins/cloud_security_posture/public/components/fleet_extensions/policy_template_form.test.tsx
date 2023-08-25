@@ -1024,7 +1024,7 @@ describe('<CspPolicyTemplateForm />', () => {
     it(`project ID is required for Manual users`, () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
-        "gcp.project_id": { value: undefined },
+        'gcp.project_id': { value: undefined },
         setup_access: { value: 'manual' },
       });
 
@@ -1036,7 +1036,7 @@ describe('<CspPolicyTemplateForm />', () => {
         updatedPolicy: policy,
       });
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
-        "gcp.project_id": { value: '' },
+        'gcp.project_id': { value: '' },
         setup_access: { value: 'manual' },
       });
       rerender(<WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />);
@@ -1049,7 +1049,7 @@ describe('<CspPolicyTemplateForm />', () => {
     it(`renders ${CLOUDBEAT_GCP} Credentials File fields`, () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
-        "gcp.credentials.type": { value: 'credentials-file' },
+        'gcp.credentials.type': { value: 'credentials-file' },
         setup_access: { value: 'manual' },
       });
 
@@ -1067,8 +1067,8 @@ describe('<CspPolicyTemplateForm />', () => {
     it(`updates ${CLOUDBEAT_GCP} Credentials File fields`, () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
-        "gcp.project_id": { value: 'a' },
-        "gcp.credentials.type": { value: 'credentials-file' },
+        'gcp.project_id': { value: 'a' },
+        'gcp.credentials.type': { value: 'credentials-file' },
         setup_access: { value: 'manual' },
       });
 
@@ -1079,7 +1079,7 @@ describe('<CspPolicyTemplateForm />', () => {
       userEvent.type(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE), 'b');
 
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
-        "gcp.credentials.file": { value: 'b' },
+        'gcp.credentials.file': { value: 'b' },
       });
 
       expect(onChange).toHaveBeenCalledWith({
@@ -1092,7 +1092,7 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         setup_access: { value: 'manual' },
-        "gcp.credentials.type": { value: 'credentials-json' },
+        'gcp.credentials.type': { value: 'credentials-json' },
       });
 
       const { getByRole, getByLabelText } = render(
@@ -1109,8 +1109,8 @@ describe('<CspPolicyTemplateForm />', () => {
     it(`updates ${CLOUDBEAT_GCP} Credentials JSON fields`, () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
-        "gcp.project_id": { value: 'a' },
-        "gcp.credentials.type": { value: 'credentials-json' },
+        'gcp.project_id': { value: 'a' },
+        'gcp.credentials.type': { value: 'credentials-json' },
         setup_access: { value: 'manual' },
       });
 
@@ -1121,7 +1121,7 @@ describe('<CspPolicyTemplateForm />', () => {
       userEvent.type(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON), 'b');
 
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
-        "gcp.credentials.json": { value: 'b' },
+        'gcp.credentials.json': { value: 'b' },
       });
 
       expect(onChange).toHaveBeenCalledWith({

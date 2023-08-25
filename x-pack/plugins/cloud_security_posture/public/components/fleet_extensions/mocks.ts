@@ -133,7 +133,7 @@ const getPolicyMock = (
     'gcp.project_id': { type: 'text' },
     'gcp.credentials.file': { type: 'text' },
     'gcp.credentials.json': { type: 'text' },
-    'gcp.credentials.type': { type: 'text'},
+    'gcp.credentials.type': { type: 'text' },
   };
 
   const dataStream = { type: 'logs', dataset: 'cloud_security_posture.findings' };
