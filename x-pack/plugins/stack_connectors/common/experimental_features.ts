@@ -8,7 +8,7 @@
 export type ExperimentalFeatures = typeof allowedExperimentalValues;
 
 /**
- * A list of allowed values that can be used in `xpack.trigger_actions_ui.enableExperimental`.
+ * A list of allowed values that can be used in `xpack.stack_connectors.enableExperimental`.
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
