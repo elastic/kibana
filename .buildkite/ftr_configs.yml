@@ -94,6 +94,7 @@ disabled:
   - x-pack/test_serverless/functional/test_suites/search/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/security/config.ts
   - x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts
+  - x-pack/test_serverless/functional/test_suites/apps/lens/group1/config.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:
