@@ -28,7 +28,7 @@ interface IngestDataProps {
   application?: ApplicationStart;
   sharePlugin: SharePluginStart;
   languages: LanguageDefinition[];
-  showTryInConsole: boolean;
+  consoleRequest?: string;
 }
 
 export const IngestData: React.FC<IngestDataProps> = ({
@@ -41,7 +41,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
   application,
   sharePlugin,
   languages,
-  showTryInConsole,
+  consoleRequest,
 }) => {
   const [selectedIngestMethod, setSelectedIngestMethod] = useState<
     'ingestViaApi' | 'ingestViaIntegration'
@@ -55,7 +55,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
       leftPanelContent={
         selectedIngestMethod === 'ingestViaApi' ? (
           <CodeBox
-            showTryInConsole={showTryInConsole}
+            consoleRequest={consoleRequest}
             codeSnippet={codeSnippet}
             languages={languages}
             selectedLanguage={selectedLanguage}
